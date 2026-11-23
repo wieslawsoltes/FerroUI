@@ -107,7 +107,7 @@ vulkan = ["skia-safe/vulkan", "skia-safe/ganesh"]
 # counted as the last resort until their executors land. Off by default, so an application without 3D
 # links none of it; the facade's `media3d` turns it on. Without it a scene draws nothing and is
 # counted (`rendering::scene3d::scenes_not_drawn`).
-media3d = ["dep:ferroui-render3d", "ferroui-metal/scene3d", "ferroui-opengl/scene3d"]
+media3d = ["dep:ferroui-render3d", "ferroui-metal/scene3d", "ferroui-opengl/scene3d", "ferroui-vulkan/scene3d"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

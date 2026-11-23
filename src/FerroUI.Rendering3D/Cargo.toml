@@ -42,9 +42,13 @@ msl = ["dep:naga"]
 # (feature `scene3d`) that the Skia backend draws with on Ganesh GL. naga runs in the build script
 # only: nothing of it is linked.
 glsl = ["dep:naga"]
+# The shader in SPIR-V (`shader::spirv`, step D9), for the Vulkan executor of `ferroui-vulkan`
+# (feature `scene3d`) that the Skia backend draws with on Ganesh Vulkan. naga runs in the build
+# script only: nothing of it is linked.
+spirv = ["dep:naga"]
 
 [build-dependencies]
-naga = { workspace = true, features = ["wgsl-in", "msl-out", "glsl-out"], optional = true }
+naga = { workspace = true, features = ["wgsl-in", "msl-out", "glsl-out", "spv-out"], optional = true }
 
 [dev-dependencies]
 # The validation of `shaders/scene3d.wgsl` and its translation to GLSL ES 3.00 for WebGL2.

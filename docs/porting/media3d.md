@@ -342,7 +342,7 @@ draws the CPU reference, counted and recorded in gpu-rendering.md; never silentl
 | Skia Ganesh GLES: Android | GL executor | SwiftShader (the emulator) | as above |
 | Skia Ganesh GL: CGL on macOS | GL executor | none | as above |
 | Skia Ganesh WebGL2 (browser) | GL executor | the browser's SwiftShader or software ANGLE | as above |
-| Skia Ganesh Vulkan | Vulkan executor (D9) | lavapipe (already in CI) | until D9: the CPU reference, recorded as a gap |
+| Skia Ganesh Vulkan | Vulkan executor (D9, section 3.21) | lavapipe (already in CI) | the CPU reference, reported once, when the device cannot draw it |
 | Skia raster, headless | none | none | the CPU reference: the surface has no GPU, so this is the defined path |
 | Vello hybrid and GPU (wgpu on Metal, Vulkan, DX12, GLES) | wgpu executor | `DeviceType::Cpu` adapters (WARP, lavapipe, llvmpipe) only under `FERROUI_VELLO_ALLOW_SOFTWARE_ADAPTER` | the CPU reference |
 | Vello CPU | none | none | the CPU reference (the mode is the reference) |
@@ -1236,6 +1236,38 @@ before the flush takes another output. A video frame in a `SharedFrameTexture` i
 frame stored from its bottom row is sampled upside down. A CGL rectangle texture is not sampled: its
 material is drawn with its colour and counted.
 
+### 3.21 The Vulkan executor as built (D9)
+
+`ferroui_vulkan::scene3d` (feature `scene3d`) draws the one shader on the device and main queue of a
+Vulkan context of version 1.1 or later.
+
+- **One shader source.** `scene3d.wgsl` is translated by naga to SPIR-V 1.0 at build time (feature
+  `spirv` of `ferroui-render3d`, `shader::spirv`), one module per entry point. Descriptor sets are the
+  WGSL groups and bindings. Nothing of naga is linked.
+- **The clip space** stays the shader's. A render draws with a viewport of negative height, so the
+  first row of an output is the top of the scene and a front face is counterclockwise, as on wgpu.
+- **Compiled once, uniforms per frame.** Pipelines are made once per device and key, on first demand.
+  Meshes are uploaded once per `(id, version)`, brush textures once per key. Uniforms live in three
+  slots per viewport, used in turn and written only in the records whose bytes differ.
+- **Targets.** A multisampled colour and a depth, pooled by size and sample count, resolved in the
+  render pass. A scene with additive layers goes through the resolved colour and `fs_resolve`
+  (decision N), as on the other executors.
+- **Order.** A render is one command buffer submitted to the main queue with the device locked. Its
+  passes leave the output in `SHADER_READ_ONLY_OPTIMAL`, with a dependency on what is submitted after
+  it. A failed render still submits what it recorded, because the textures it registered are written
+  by those uploads.
+- **Lifetimes.** A mesh or texture that is replaced or gone is destroyed once the submissions that may
+  read it are done, without waiting for the GPU. An output is destroyed after the queue is idle,
+  because Skia's submissions may sample it.
+- **Frames.** `Scene3DVkDeviceTextures` lets a renderer hand the executor an image of the device, as
+  on Metal and GL. No renderer does yet.
+
+**On Skia (Ganesh Vulkan).** The output is borrowed once as a Ganesh image with a top left origin and
+drawn like any image. As on GL, an output drawn since the last flush is read by a recording not yet
+submitted, so a scene drawn again before the flush takes another output. The outputs and the executor
+are released after the context's last flush. **Recorded gap:** a frame of a video or camera has no
+image on this route, so its material is drawn with its colour and counted (#575).
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -1253,7 +1285,7 @@ this page.
 | D6 | Materials from brushes (section 3.18): gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | additions (the module `brush`, `cpu::brush_textures_read`, `lighting::shade_color`) | medium | in review, in three parts: the description and the CPU reference (part 1); the shader and the wgpu executor (part 2: `brush_uniforms_stride`, `texture_counters`, `Scene3DTextureCounters`, `Scene3DWgpuExecutor::texture_count`, the entry points of `shader`); visual and drawing brushes (part 3: the model side and the CPU reference's hook, `Scene3DBrushContent`, `SharedBrush::from_scene_content` and `scene_content`, `ISceneBrush::subscribe_content_changed`, `cpu::ContentRenderer`, `set_content_renderer`; the backends' offscreen renders left, section 3.18) |
 | D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | in review, parts 1 to 4 (frames sampled from the device on Vello and Graphite, `VideoBrush`, one acquisition per frame, the visual-brush fast path, the sample); the GL route planned |
 | D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | in review, parts 1 and 2 (the GLSL at build time, the executor and the Skia glue with video, section 3.20); the comparison scenes on ANGLE, EGL, Android and WebGL2 to validate |
-| D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | none new | medium | planned |
+| D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | `ferroui_vulkan::scene3d` (feature `scene3d`) | medium | in review, the Vulkan executor and the Skia glue (section 3.21); Vello on Vulkan, DX12 and GLES and the virtual machines to validate |
 | D10 | Hit testing (section 3.16, `src/FerroUI.Media3D/hit_testing/`): the ray from the camera with the fitted planes of the snapshot, the hierarchy per mesh by `(id, version)`, Moller-Trumbore with weights and distance, WPF's front and back material rules, the transforms of the tree, `RayMeshGeometry3DHitTestResult` and its base types, `VisualTreeHelper::hit_test`, `hit_test_point` and `hit_test_ray` with the filter and result callbacks. Tests: hits on known triangles with weights and distance, the front and back material rules, nested transforms, the order of the hits, misses, degenerate triangles, the filters, the cameras, picks that match the rendered pixels of the CPU reference, a 100k-triangle mesh | additions (`VisualTreeHelper`, `RayHitTestParameters`, the result types and behaviours, `Viewport3DHitTestTarget`) | medium | in review |
 | D11 | Interactive 3D (section 3.17): `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` with their pointer events (entered, exited, moved, pressed, released, capture lost) routed from a `Viewport3D` through the D10 hit test, pointer over and capture; the 2D hit test of `Viewport3D` over its models. Left for after D6: `Viewport2DVisual3D` rendering (the D6 path) and input routing (pointer events reaching a `Button` on a rotated `Viewport2DVisual3D` plane), and focus | additions (the three classes, `Pointer3DEventArgs`) | high: a transformed hit-test path in the input system (for `Viewport2DVisual3D`) | in review (the model part); `Viewport2DVisual3D` planned after D6 |
 | D12 | Catalog pages, one per control, in a "3D" section (a `Viewport3D` page with cameras, lights, materials, transforms and an animated `RotateTransform3D`; a `Viewport2DVisual3D` page) and a "video material" page in the Media section (docs/media/CONTROL-CATALOG.md); a `samples/Media3D` application with procedural meshes, run on device and simulator | none (samples) | low | planned |

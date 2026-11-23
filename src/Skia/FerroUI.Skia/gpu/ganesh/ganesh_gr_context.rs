@@ -86,6 +86,9 @@ impl GaneshGrContext {
             // cannot prove that any earlier read completed.
             self.frame_completion.borrow().mark_indeterminate();
         }
+        // After the flush: what the context recorded may sample the outputs of the 3D scenes.
+        #[cfg(all(feature = "media3d", ferro_skia_vulkan))]
+        crate::scene3d::release_vulkan_context(self.frame_context_id, release_resources);
         if let Some(mut context) = self.context.borrow_mut().take() {
             if release_resources {
                 context.release_resources_and_abandon();
