@@ -2928,6 +2928,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-svg"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-vello",
+ "roxmltree 0.20.0",
+]
+
+[[package]]
 name = "ferroui-system"
 version = "0.6.0-preview.1"
 dependencies = [
