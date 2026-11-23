@@ -339,7 +339,7 @@ XSHD, with the same replacement and cache invalidation behavior.
 ### Named syntax highlighting in markup
 
 The `TextEditor.SyntaxHighlighting` styled property accepts a case-sensitive
-XSHD name in markup. For example, `<edit:TextEditor SyntaxHighlighting="C#"/>`
+XSHD name in markup. For example, `<TextEditor SyntaxHighlighting="C#"/>`
 selects the bundled C# definition. The current `FerroLocator` scope can supply
 a `dyn HighlightingDefinitionResolver` for custom names and aliases. The
 bundled catalog supplies names absent from the host resolver. An unregistered
