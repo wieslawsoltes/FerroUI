@@ -1271,8 +1271,10 @@ Vulkan context of version 1.1 or later.
 **On Skia (Ganesh Vulkan).** The output is borrowed once as a Ganesh image with a top left origin and
 drawn like any image. As on GL, an output drawn since the last flush is read by a recording not yet
 submitted, so a scene drawn again before the flush takes another output. The outputs and the executor
-are released after the context's last flush. **Recorded gap:** a frame of a video or camera has no
-image on this route, so its material is drawn with its colour and counted (#575).
+are released after the context's last flush. A frame of a video or camera arrives as a DMA-BUF
+(`ferroui_vulkan::dma_buf`, off by default behind `FERROUI_VULKAN_DMA_BUF=1`): Ganesh draws it, NV12 through its
+YUVA pipeline, into an image of the device, which the executor samples on a mesh. With the route off a
+frame has no image here and its material is drawn with its colour.
 
 ## 4. Steps
 

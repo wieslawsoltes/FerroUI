@@ -29,7 +29,17 @@ pub struct VulkanSkiaExternalObjectsFeature {
     gr_context: Rc<GaneshGrContext>,
     context: Rc<dyn IVulkanPlatformGraphicsContext>,
     feature: Rc<dyn IVulkanContextExternalObjectsFeature>,
+    /// The import of the DMA-BUF frames of producers, when it is turned on (#575, `dma_buf_frames.rs`).
+    #[cfg(target_os = "linux")]
+    dma_buf: Option<Rc<ferroui_vulkan::dma_buf::VulkanDmaBufImporter>>,
+    /// A frame made for another device of the process is refused.
+    #[cfg(target_os = "linux")]
+    generation: u64,
 }
+
+/// The generations of the feature.
+#[cfg(target_os = "linux")]
+static NEXT_GENERATION: std::sync::atomic::AtomicU64 = std::sync::atomic::AtomicU64::new(1);
 
 impl VulkanSkiaExternalObjectsFeature {
     pub fn new(
@@ -37,7 +47,32 @@ impl VulkanSkiaExternalObjectsFeature {
         context: Rc<dyn IVulkanPlatformGraphicsContext>,
         feature: Rc<dyn IVulkanContextExternalObjectsFeature>,
     ) -> Self {
-        Self { gr_context, context, feature }
+        #[cfg(target_os = "linux")]
+        let dma_buf = ferroui_vulkan::dma_buf::VulkanDmaBufImporter::new(context.clone()).map(Rc::new);
+        Self {
+            gr_context,
+            context,
+            feature,
+            #[cfg(target_os = "linux")]
+            dma_buf,
+            #[cfg(target_os = "linux")]
+            generation: NEXT_GENERATION.fetch_add(1, std::sync::atomic::Ordering::Relaxed),
+        }
+    }
+
+    /// Releases what the import of frames holds on the device: `lost` when the device is lost.
+    /// After the Ganesh context, whose work on the queue may read the frames.
+    pub(crate) fn release_frames(&self, lost: bool) {
+        #[cfg(target_os = "linux")]
+        if let Some(importer) = &self.dma_buf {
+            if lost {
+                importer.abandon();
+            } else {
+                importer.release_all();
+            }
+        }
+        #[cfg(not(target_os = "linux"))]
+        let _ = lost;
     }
 }
 
@@ -47,6 +82,20 @@ impl IExternalObjectsRenderInterfaceContextFeature for VulkanSkiaExternalObjects
         handle: Rc<dyn IPlatformHandle>,
         properties: PlatformGraphicsExternalImageProperties,
     ) -> Rc<dyn IPlatformRenderInterfaceImportedImage> {
+        #[cfg(target_os = "linux")]
+        if handle.handle_descriptor()
+            == Some(ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes::DMA_BUF_FILE_DESCRIPTOR)
+        {
+            if let Some(importer) = &self.dma_buf {
+                return Rc::new(super::dma_buf_frames::DmaBufImage::new(
+                    self.gr_context.clone(),
+                    importer.clone(),
+                    self.generation,
+                    handle.handle() as i32,
+                    properties,
+                ));
+            }
+        }
         Rc::new(Image {
             gr_context: self.gr_context.clone(),
             context: self.context.clone(),
@@ -85,7 +134,24 @@ impl IExternalObjectsRenderInterfaceContextFeature for VulkanSkiaExternalObjects
     }
 
     fn supported_image_handle_types(&self) -> Vec<String> {
-        self.feature.supported_image_handle_types()
+        #[allow(unused_mut)]
+        let mut types = self.feature.supported_image_handle_types();
+        #[cfg(target_os = "linux")]
+        if self.dma_buf.is_some() {
+            use ferroui_base::platform::KnownPlatformGraphicsExternalImageHandleTypes as Handles;
+            types.push(Handles::DMA_BUF_FILE_DESCRIPTOR.into());
+        }
+        types
+    }
+
+    #[cfg(target_os = "linux")]
+    fn shared_context_generation(&self) -> u64 {
+        self.generation
+    }
+
+    #[cfg(target_os = "linux")]
+    fn supported_dma_buf_formats(&self) -> Option<Vec<ferroui_base::platform::PlatformGraphicsDrmFormat>> {
+        self.dma_buf.as_ref().map(|importer| importer.formats().to_vec())
     }
 
     fn supported_semaphore_types(&self) -> Vec<String> {
