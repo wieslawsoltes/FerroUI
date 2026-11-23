@@ -127,11 +127,6 @@ impl VisualRenderer {
         }
     }
 
-    #[cfg(test)]
-    pub(crate) fn color(&self, name: &str) -> Option<Color> {
-        self.colors.get(name).copied()
-    }
-
     /// How many geometries were built so far: a frame that changes no path builds none.
     pub fn geometries_built(&self) -> u64 {
         self.built

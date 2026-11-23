@@ -132,7 +132,7 @@ fn the_foreground_of_an_icon_reaches_its_renderer() {
     let _window = attach(icon.clone().upcast());
     assert!(icon.presenter.borrow().visual.is_some());
     icon.set_foreground(Some(Rc::new(ImmutableSolidColorBrush::new(Color::from_rgb(200, 10, 20)))));
-    assert_eq!(icon.presenter.borrow().renderer.color("Foreground"), Some(Color::from_rgb(200, 10, 20)));
+    assert_eq!(icon.presenter.borrow().colors, vec![("Foreground".to_owned(), Color::from_rgb(200, 10, 20))]);
     icon.set_foreground(None);
 }
 

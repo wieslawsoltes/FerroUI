@@ -11,6 +11,7 @@ mod path;
 mod playback;
 mod player;
 mod register_types;
+#[cfg(test)]
 mod render;
 mod scene;
 mod source;
@@ -28,7 +29,8 @@ pub use path::{PathCommand, PathData};
 pub use playback::AnimatedIconAnimationQueueBehavior;
 pub use player::{AnimatedIcon, AnimatedVisualPlayer, PlayCompletion};
 pub use register_types::{register_types, ASSEMBLY};
-pub use render::VisualRenderer;
+#[cfg(test)]
+pub(crate) use render::VisualRenderer;
 pub use scene::CompositionScene;
 pub use source::{
     AnimatedVisualSource, IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader,

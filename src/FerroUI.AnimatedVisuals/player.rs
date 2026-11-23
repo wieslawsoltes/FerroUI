@@ -2,36 +2,54 @@
 //! evaluated and drawn through the drawing context, on the GPU of the backend.
 
 use crate::playback::{AnimatedIconAnimationQueueBehavior, IconMove, IconStates, PlayerClock};
-use crate::{AnimatedVisual, AnimatedVisualError, AnimatedVisualSource, FrameCommands, IAnimatedVisualSource, VisualRenderer};
+use crate::{AnimatedVisual, AnimatedVisualError, AnimatedVisualSource, CompositionScene, IAnimatedVisualSource};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::media::{Color, DrawingContext, FlowDirection, ISolidColorBrush, MediaExtensions, Stretch, StretchDirection};
+use ferroui_base::interactivity::RoutedEventArgs;
+use ferroui_base::media::{Color, FlowDirection, ISolidColorBrush, MediaExtensions, Stretch, StretchDirection};
+use ferroui_base::rendering::composition::{CompositionVisual, ElementComposition};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_properties, instantiate, AttachedProperty, FerroObject, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, Rect, Ref, Size, StyledElementImpl,
-    StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
+    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Rect, Ref, Size, StyledElementImpl,
+    StyledProperty, StyledPropertyOptions, Vector, Vector3D, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use ferroui_controls::automation::peers::{AutomationPeer, ImageAutomationPeer};
 use ferroui_controls::primitives::{TemplatedControl, TemplatedControlImpl, ToggleButton};
-use ferroui_controls::{Button, ComboBox, Control, ControlImpl, IconElement, IconSource, NavigationViewItem};
+use ferroui_controls::{Button, ComboBox, Control, ControlImpl, ControlImplExt, IconElement, IconSource, NavigationViewItem};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 use std::task::{Context, Poll, Waker};
 use std::time::Duration;
 
 /// A segment shorter than this is not animated (`AnimatedIcon::PlaySegment`).
 const SHORTEST_SEGMENT_SECONDS: f64 = 0.020;
 
-/// What a player and an icon keep to draw their visual.
+ferroui_base::ferro_thread_local! {
+    /// The scenes whose first commit is on its way to the compositor.
+    static PENDING_REFRESH: RefCell<Vec<Weak<RefCell<CompositionScene>>>> = RefCell::new(Vec::new());
+}
+
+/// Sends the progress of the scenes now on the compositor.
+fn refresh_pending() {
+    let scenes = PENDING_REFRESH.with(|pending| std::mem::take(&mut *pending.borrow_mut()));
+    for scene in scenes.iter().filter_map(Weak::upgrade) {
+        scene.borrow().refresh();
+    }
+}
+
+/// What a player and an icon keep to show their visual: the composition scene, built once when
+/// the control is on screen, in a holder of the size of the control.
 #[derive(Default)]
 struct Presenter {
     visual: Option<Rc<AnimatedVisual>>,
-    renderer: VisualRenderer,
-    commands: FrameCommands,
+    scene: Option<Rc<RefCell<CompositionScene>>>,
+    holder: Option<Rc<CompositionVisual>>,
+    colors: Vec<(String, Color)>,
+    progress: f64,
 }
 
 impl Presenter {
@@ -55,33 +73,93 @@ impl Presenter {
             _ => false,
         };
         self.visual = visual;
+        if !same {
+            self.scene = None;
+        }
         for (name, color) in source.map_or_else(Vec::new, |source| source.color_properties()) {
-            self.renderer.set_color(&name, Some(color));
+            self.set_color(&name, Some(color));
         }
         !same
     }
 
-    fn render(&mut self, progress: f64, stretch: Stretch, mirrored: bool, bounds: Size, context: &mut DrawingContext<'_>) {
+    fn set_color(&mut self, name: &str, color: Option<Color>) {
+        self.colors.retain(|(existing, _)| existing != name);
+        if let Some(color) = color {
+            self.colors.push((name.to_owned(), color));
+        }
+        if let Some(scene) = &self.scene {
+            scene.borrow_mut().set_color(name, color);
+        }
+    }
+
+    fn set_progress(&mut self, progress: f64) {
+        self.progress = progress;
+        if let Some(scene) = &self.scene {
+            scene.borrow_mut().set_progress(progress);
+        }
+    }
+
+    /// Builds the scene of the visual if the element is in a composition, and shows it.
+    fn show(&mut self, element: &Visual) {
         let Some(visual) = self.visual.clone() else {
+            self.hide(element);
             return;
         };
+        if self.scene.is_some() {
+            return;
+        }
+        let Some(own) = ElementComposition::get_element_visual(element) else {
+            return;
+        };
+        let compositor = own.compositor().clone();
+        let mut scene = CompositionScene::build(&compositor, &visual);
+        for (name, color) in &self.colors {
+            scene.set_color(name, Some(*color));
+        }
+        scene.set_progress(self.progress);
+        let holder = compositor.create_container_visual();
+        holder.children().insert_at_top(scene.root().clone());
+        ElementComposition::set_element_child_visual(element, Some(holder.clone()));
+        let scene = Rc::new(RefCell::new(scene));
+        // A paused animation takes the progress once it runs on the compositor.
+        let weak = Rc::downgrade(&scene);
+        PENDING_REFRESH.with(|pending| pending.borrow_mut().push(weak));
+        compositor.request_commit_async().processed().on_completed(|| {
+            Dispatcher::ui_thread().post(refresh_pending, DispatcherPriority::RENDER);
+        });
+        self.scene = Some(scene);
+        self.holder = Some(holder);
+    }
+
+    fn hide(&mut self, element: &Visual) {
+        if self.holder.take().is_some() {
+            ElementComposition::set_element_child_visual(element, None);
+        }
+        self.scene = None;
+    }
+
+    /// Fits the scene into `bounds`.
+    fn arrange(&self, stretch: Stretch, mirrored: bool, bounds: Size) {
+        let (Some(visual), Some(scene), Some(holder)) = (&self.visual, &self.scene, &self.holder) else {
+            return;
+        };
+        holder.set_size(Vector::new(bounds.width, bounds.height));
         if bounds.width <= 0.0 || bounds.height <= 0.0 || visual.width <= 0.0 || visual.height <= 0.0 {
             return;
         }
         let source = Size::new(visual.width, visual.height);
         let scale = MediaExtensions::calculate_scaling(stretch, bounds, source, StretchDirection::Both);
         let (width, height) = (source.width * scale.x, source.height * scale.y);
-        let mut matrix = Matrix::create_scale(scale.x, scale.y)
-            * Matrix::create_translation((bounds.width - width) * 0.5, (bounds.height - height) * 0.5);
+        let (x, y) = ((bounds.width - width) * 0.5, (bounds.height - height) * 0.5);
+        let scene = scene.borrow();
+        let root = scene.root();
         if mirrored {
-            matrix = matrix * Matrix::new(-1.0, 0.0, 0.0, 1.0, bounds.width, 0.0);
+            root.set_scale(Vector3D::new(-scale.x, scale.y, 1.0));
+            root.set_offset(Vector3D::new(bounds.width - x, y, 0.0));
+        } else {
+            root.set_scale(Vector3D::new(scale.x, scale.y, 1.0));
+            root.set_offset(Vector3D::new(x, y, 0.0));
         }
-        visual.evaluate(visual.frame_at(progress), &mut self.commands);
-        let clip = context.push_clip(Rect::from_size(bounds));
-        let transform = context.push_transform(matrix);
-        self.renderer.render(&self.commands, visual.width, visual.height, context);
-        context.pop(transform);
-        context.pop(clip);
     }
 }
 
@@ -148,6 +226,7 @@ pub struct AnimatedVisualPlayer {
     load_error: RefCell<Option<AnimatedVisualError>>,
     fallback: RefCell<Option<Ref<Control>>>,
     attached: Cell<bool>,
+    loaded: Cell<bool>,
 }
 
 ferro_class!(AnimatedVisualPlayer: Control);
@@ -190,7 +269,7 @@ impl FerroObjectImpl for AnimatedVisualPlayer {
             this.change_fallback(this.get_value(Self::fallback_content_property()));
         } else if property == Self::stretch_property().as_property() {
             this.invalidate_measure();
-            this.invalidate_visual();
+            this.invalidate_arrange();
         } else if property == Self::auto_play_property().as_property()
             && this.auto_play()
             && this.is_animated_visual_loaded()
@@ -214,16 +293,12 @@ impl LayoutableImpl for AnimatedVisualPlayer {
         if let Some(fallback) = this.shown_fallback() {
             fallback.arrange(Rect::from_size(final_size));
         }
+        this.presenter.borrow().arrange(this.stretch(), false, final_size);
         final_size
     }
 }
 
 impl VisualImpl for AnimatedVisualPlayer {
-    fn render(this: &Self, context: &mut DrawingContext<'_>) {
-        let progress = this.clock.borrow().progress;
-        this.presenter.borrow_mut().render(progress, this.stretch(), false, this.bounds().size(), context);
-    }
-
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.attached.set(true);
@@ -241,6 +316,18 @@ impl ControlImpl for AnimatedVisualPlayer {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         ImageAutomationPeer::new(this).upcast()
     }
+
+    fn on_loaded(this: &Self, e: &RoutedEventArgs) {
+        Self::parent_on_loaded(this, e);
+        this.loaded.set(true);
+        this.present();
+    }
+
+    fn on_unloaded(this: &Self, e: &RoutedEventArgs) {
+        this.loaded.set(false);
+        this.presenter.borrow_mut().hide(this);
+        Self::parent_on_unloaded(this, e);
+    }
 }
 
 impl AnimatedVisualPlayer {
@@ -255,7 +342,19 @@ impl AnimatedVisualPlayer {
             load_error: RefCell::new(None),
             fallback: RefCell::new(None),
             attached: Cell::new(false),
+            loaded: Cell::new(false),
         })
+    }
+
+    /// Shows the progress in the scene, built when the player is on screen.
+    fn present(&self) {
+        let progress = self.clock.borrow().progress;
+        let mut presenter = self.presenter.borrow_mut();
+        presenter.set_progress(progress);
+        if self.loaded.get() && presenter.scene.is_none() {
+            presenter.show(self);
+            presenter.arrange(self.stretch(), false, self.bounds().size());
+        }
     }
 
     pub fn playback_rate(&self) -> f64 {
@@ -389,7 +488,7 @@ impl AnimatedVisualPlayer {
         };
         let has_visual = visual.is_some();
         let changed = self.presenter.borrow_mut().take(visual, source.as_ref());
-        self.invalidate_visual();
+        self.present();
         if !changed {
             // The same visual, with new colours: the play goes on.
             return;
@@ -417,7 +516,7 @@ impl AnimatedVisualPlayer {
         if self.is_animated_visual_loaded() {
             self.start_timer();
         }
-        self.invalidate_visual();
+        self.present();
         PlayCompletion { state }
     }
 
@@ -438,7 +537,7 @@ impl AnimatedVisualPlayer {
         self.clock.borrow_mut().set_progress(progress);
         self.complete_play();
         self.stop_timer();
-        self.invalidate_visual();
+        self.present();
     }
 
     /// Ends the play, back at where it began.
@@ -447,7 +546,7 @@ impl AnimatedVisualPlayer {
             self.clock.borrow_mut().stop();
             self.complete_play();
             self.stop_timer();
-            self.invalidate_visual();
+            self.present();
         }
     }
 
@@ -483,7 +582,7 @@ impl AnimatedVisualPlayer {
         let duration = self.presenter.borrow().visual.as_ref().map_or(0.0, |visual| visual.duration_seconds());
         let rate = self.playback_rate();
         let finished = self.clock.borrow_mut().advance(now, duration, rate);
-        self.invalidate_visual();
+        self.present();
         if finished {
             self.stop_timer();
             self.complete_play();
@@ -525,6 +624,7 @@ pub struct AnimatedIcon {
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
     fallback: RefCell<Option<Ref<Control>>>,
     attached: Cell<bool>,
+    loaded: Cell<bool>,
 }
 
 ferro_class!(AnimatedIcon: IconElement);
@@ -577,7 +677,7 @@ impl FerroObjectImpl for AnimatedIcon {
         } else if property == Self::mirrored_when_right_to_left_property().as_property()
             || property == Visual::flow_direction_property().as_property()
         {
-            this.invalidate_visual();
+            this.invalidate_arrange();
         }
     }
 }
@@ -599,17 +699,12 @@ impl LayoutableImpl for AnimatedIcon {
         if this.pending_state.replace(false) {
             this.take_state();
         }
+        this.presenter.borrow().arrange(Stretch::Uniform, this.is_mirrored(), final_size);
         final_size
     }
 }
 
 impl VisualImpl for AnimatedIcon {
-    fn render(this: &Self, context: &mut DrawingContext<'_>) {
-        let progress = this.progress.get();
-        let mirrored = this.mirrored_when_right_to_left() && this.flow_direction() == FlowDirection::RightToLeft;
-        this.presenter.borrow_mut().render(progress, Stretch::Uniform, mirrored, this.bounds().size(), context);
-    }
-
     /// An icon turns only when `MirroredWhenRightToLeft` says so.
     fn bypass_flow_direction_policies(_this: &Self) -> bool {
         true
@@ -634,6 +729,18 @@ impl VisualImpl for AnimatedIcon {
 impl ControlImpl for AnimatedIcon {
     fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
         ImageAutomationPeer::new(this).upcast()
+    }
+
+    fn on_loaded(this: &Self, e: &RoutedEventArgs) {
+        Self::parent_on_loaded(this, e);
+        this.loaded.set(true);
+        this.present();
+    }
+
+    fn on_unloaded(this: &Self, e: &RoutedEventArgs) {
+        this.loaded.set(false);
+        this.presenter.borrow_mut().hide(this);
+        Self::parent_on_unloaded(this, e);
     }
 }
 
@@ -674,7 +781,22 @@ impl AnimatedIcon {
             timer: RefCell::new(None),
             fallback: RefCell::new(None),
             attached: Cell::new(false),
+            loaded: Cell::new(false),
         })
+    }
+
+    fn is_mirrored(&self) -> bool {
+        self.mirrored_when_right_to_left() && self.flow_direction() == FlowDirection::RightToLeft
+    }
+
+    /// Shows the progress in the scene, built when the icon is on screen.
+    fn present(&self) {
+        let mut presenter = self.presenter.borrow_mut();
+        presenter.set_progress(self.progress.get());
+        if self.loaded.get() && presenter.scene.is_none() {
+            presenter.show(self);
+            presenter.arrange(Stretch::Uniform, self.is_mirrored(), self.bounds().size());
+        }
     }
 
     /// The state set on `element` (`AnimatedIcon.GetState`).
@@ -713,8 +835,8 @@ impl AnimatedIcon {
     fn apply_foreground(&self) {
         let color: Option<Color> =
             self.foreground().and_then(|brush| brush.as_solid_color_brush().map(ISolidColorBrush::color));
-        self.presenter.borrow_mut().renderer.set_color("Foreground", color);
-        self.invalidate_visual();
+        self.presenter.borrow_mut().set_color("Foreground", color);
+        self.present();
     }
 
     /// Follows a source whose visual can change. An earlier source stops counting.
@@ -840,7 +962,7 @@ impl AnimatedIcon {
             self.apply_foreground();
         }
         self.update_fallback();
-        self.invalidate_visual();
+        self.present();
     }
 
     /// In a tree a state is taken after the next layout; outside one, at once.
@@ -868,7 +990,7 @@ impl AnimatedIcon {
         match step {
             IconMove::Cut(progress) => {
                 self.progress.set(progress);
-                self.invalidate_visual();
+                self.present();
             }
             IconMove::Play { from, to, multiplier } => self.play_segment(from, to, multiplier),
         }
@@ -882,7 +1004,7 @@ impl AnimatedIcon {
         let seconds = visual_seconds * length / multiplier;
         if seconds < SHORTEST_SEGMENT_SECONDS || !self.attached.get() {
             self.progress.set(to);
-            self.invalidate_visual();
+            self.present();
             self.segment_finished();
             return;
         }
@@ -911,7 +1033,7 @@ impl AnimatedIcon {
         let now = Dispatcher::ui_thread().now() as f64;
         let t = ((now - segment.start_ms) / segment.duration_ms).clamp(0.0, 1.0);
         self.progress.set(segment.from + (segment.to - segment.from) * t);
-        self.invalidate_visual();
+        self.present();
         if t >= 1.0 {
             self.segment.set(None);
             self.stop_timer();

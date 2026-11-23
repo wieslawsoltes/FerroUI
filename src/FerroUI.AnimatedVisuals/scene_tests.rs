@@ -92,6 +92,14 @@ impl Host {
         self.render_loop.tick();
     }
 
+    /// Layout, the loaded event and the first commits.
+    fn settle(&self) {
+        for _ in 0..3 {
+            self._window.layout_manager().execute_layout_pass();
+            self.tick();
+        }
+    }
+
     fn pixels(&self) -> Vec<u8> {
         let framebuffer = self.bitmap.lock();
         let row = framebuffer.row_bytes() as usize;
@@ -256,5 +264,41 @@ fn each_kind_of_matte_matches_its_reference() {
             {"ty": 4, "ind": 2, "tt": kind, "ip": 0, "op": 30, "ks": {}, "shapes": square(24.0, 24.0, 48.0, [0.0, 0.0, 1.0])}
         ]));
         assert_frames(&format!("matte {kind}"), &visual, &[0.0]);
+    }
+}
+
+fn red_center(pixels: &[u8]) -> Option<(f64, f64)> {
+    let size = SIZE as usize;
+    let red: Vec<(usize, usize)> = (0..size)
+        .flat_map(|y| (0..size).map(move |x| (x, y)))
+        .filter(|(x, y)| pixels[(y * size + x) * 4] > 200 && pixels[(y * size + x) * 4 + 1] < 60)
+        .collect();
+    (!red.is_empty()).then(|| {
+        let count = red.len() as f64;
+        (red.iter().map(|p| p.0 as f64 + 0.5).sum::<f64>() / count, red.iter().map(|p| p.1 as f64 + 0.5).sum::<f64>() / count)
+    })
+}
+
+#[test]
+fn a_player_on_screen_shows_its_visual_through_the_scene_at_each_progress() {
+    let _app = start();
+    let json = json!({"fr": 30, "ip": 0, "op": 30, "w": SIZE, "h": SIZE, "layers": [{"ty": 4, "ind": 1, "ip": 0, "op": 30,
+        "ks": {"p": {"k": [{"t": 0, "s": [10, 20], "e": [30, 20]}, {"t": 30}]}},
+        "shapes": square(0.0, 0.0, 10.0, [1.0, 0.0, 0.0])}]}).to_string();
+    let host = Host::new();
+    let player = crate::AnimatedVisualPlayer::new();
+    player.set_auto_play(false);
+    player.set_source(Some(crate::LottieVisualSource::create_from_string(&json).upcast()));
+    host.element.set_child(Some(player.clone().upcast()));
+    host.settle();
+    assert!(player.is_animated_visual_loaded());
+    let at = |progress: f64| {
+        player.set_progress(progress);
+        host.tick();
+        red_center(&host.pixels()).expect("the square is on screen")
+    };
+    for (progress, x) in [(0.0, 10.0), (0.5, 20.0), (1.0, 30.0)] {
+        let center = at(progress);
+        assert!((center.0 - x).abs() < 0.6 && (center.1 - 20.0).abs() < 0.6, "at {progress}: {center:?}");
     }
 }
