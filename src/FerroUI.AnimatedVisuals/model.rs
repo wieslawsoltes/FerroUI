@@ -1,7 +1,7 @@
 //! The model of a Lottie document, read once: layers, shapes, transforms and markers.
 
 use crate::content::{text_documents, DocumentFonts, ImageAsset, TextDocument};
-use crate::path::{BezierShape, PathData};
+use crate::path::{BezierShape, MergeMode, PathData};
 use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{keyframes, parse_eases, Animated, Components, Ease};
 use ferroui_base::Matrix;
@@ -350,7 +350,7 @@ pub(crate) enum ShapeItem {
     GradientStroke { gradient: GradientModel, opacity: Animated, stroke: StrokeModel },
     Trim { start: Animated, end: Animated, offset: Animated },
     Repeater { copies: Animated, offset: Animated, above: bool, transform: Transform, start_opacity: Animated, end_opacity: Animated },
-    Merge,
+    Merge(MergeMode),
 }
 
 impl GradientModel {
@@ -471,7 +471,13 @@ fn shape_item(item: &Value) -> Option<ShapeItem> {
                 end_opacity: transform.map_or_else(|| Animated::constant(FULL), |t| Animated::of(t, "eo", FULL)),
             }
         }
-        "mm" => ShapeItem::Merge,
+        "mm" => ShapeItem::Merge(match item.get("mm").and_then(Value::as_u64) {
+            Some(2) => MergeMode::Add,
+            Some(3) => MergeMode::Subtract,
+            Some(4) => MergeMode::Intersect,
+            Some(5) => MergeMode::Exclude,
+            _ => MergeMode::Merge,
+        }),
         _ => return None,
     })
 }

@@ -302,3 +302,31 @@ fn a_player_on_screen_shows_its_visual_through_the_scene_at_each_progress() {
         assert!((center.0 - x).abs() < 0.6 && (center.1 - 20.0).abs() < 0.6, "at {progress}: {center:?}");
     }
 }
+
+#[test]
+fn each_merge_mode_keeps_its_part_of_two_shapes() {
+    let _app = start();
+    let rectangle = |x: f64| json!({"ty": "rc", "p": {"k": [x, 24]}, "s": {"k": [20, 20]}, "r": {"k": 0}});
+    // What each mode keeps of: the first shape alone, the overlap, the second shape alone.
+    for (mode, first, both, second) in
+        [(1, true, true, true), (2, true, true, true), (3, true, false, false), (4, false, true, false), (5, true, false, true)]
+    {
+        let visual = document(json!([{"ty": 4, "ind": 1, "ip": 0, "op": 30, "ks": {}, "shapes": [{"ty": "gr", "it": [
+            rectangle(18.0),
+            rectangle(28.0),
+            {"ty": "mm", "mm": mode},
+            {"ty": "fl", "c": {"k": [1, 0, 0, 1]}, "o": {"k": 100}},
+            {"ty": "tr"}
+        ]}]}]));
+        assert_frames(&format!("merge {mode}"), &visual, &[0.0]);
+        let host = Host::new();
+        let scene = CompositionScene::build(&host.compositor, &visual);
+        host.show(&scene);
+        let pixels = host.pixels();
+        let red = |x: usize| {
+            let at = (24 * SIZE as usize + x) * 4;
+            pixels[at] > 200 && pixels[at + 1] < 60
+        };
+        assert_eq!((red(12), red(23), red(34)), (first, both, second), "merge mode {mode}");
+    }
+}

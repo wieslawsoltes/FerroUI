@@ -2,10 +2,10 @@
 
 use crate::content::{document_at, lines_of, Glyph, ImageAsset, TextDocument};
 use crate::model::{AnimatedVisual, GradientModel, Layer, LayerKind, MatteMode, ShapeItem, StrokeModel};
-use crate::path::{PathData, Polystar};
+use crate::path::{CombinedPath, MergeMode, PathData, Polystar};
 use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{Animated, Components};
-use ferroui_base::media::Color;
+use ferroui_base::media::{Color, GeometryCombineMode};
 use ferroui_base::{Matrix, Point};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -330,9 +330,19 @@ pub(crate) fn evaluate_items(
                     }
                 }
             }
-            ShapeItem::Merge => {
-                let path = merged(geometry);
-                geometry.clear();
+            ShapeItem::Merge(mode) => {
+                let parts = std::mem::take(geometry);
+                let mut path = merged(&parts);
+                let combine = match mode {
+                    MergeMode::Merge => None,
+                    MergeMode::Add => Some(GeometryCombineMode::Union),
+                    MergeMode::Subtract => Some(GeometryCombineMode::Exclude),
+                    MergeMode::Intersect => Some(GeometryCombineMode::Intersect),
+                    MergeMode::Exclude => Some(GeometryCombineMode::Xor),
+                };
+                if let (Some(mode), true) = (combine, parts.len() > 1) {
+                    path.combined = Some(Rc::new(CombinedPath { mode, parts }));
+                }
                 geometry.push(path);
             }
         }
