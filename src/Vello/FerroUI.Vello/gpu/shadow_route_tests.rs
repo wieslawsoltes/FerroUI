@@ -6,11 +6,11 @@
 
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::gpu::VelloWgpuDevice;
-use crate::scene::{cpu_scenes_made, IVelloSceneSink};
+use crate::scene::{cpu_scenes_made, IVelloSceneSink, VelloCpuSceneSink};
 use crate::vello_options::VelloRenderingMode;
 use ferroui_base::media::{BoxShadow, BoxShadows, Color};
 use ferroui_base::platform::IDrawingContextImpl;
-use ferroui_base::{Rect, RoundedRect, Vector};
+use ferroui_base::{Point, Rect, RoundedRect, Vector};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -54,6 +54,15 @@ fn shapes() -> Vec<(&'static str, RoundedRect, BoxShadows)> {
 fn draw(device: &Arc<VelloWgpuDevice>, mode: VelloRenderingMode, shape: RoundedRect, shadows: &BoxShadows) -> Vec<u8> {
     let sink: Box<dyn IVelloSceneSink> =
         crate::gpu::create_window_scene_sink(device, &[mode], SIZE, SIZE, wgpu::TextureFormat::Rgba8Unorm);
+    draw_into(sink, mode, shape, shadows)
+}
+
+fn draw_into(
+    sink: Box<dyn IVelloSceneSink>,
+    mode: VelloRenderingMode,
+    shape: RoundedRect,
+    shadows: &BoxShadows,
+) -> Vec<u8> {
     let pixels = Rc::new(RefCell::new(vec![0u8; usize::from(SIZE) * usize::from(SIZE) * 4]));
     let target = pixels.clone();
     let mut drawing = DrawingContextImpl::new(
@@ -89,4 +98,53 @@ fn no_shadow_reaches_a_scene_of_the_cpu_renderer_in_the_device_modes() {
             assert!(pixels.chunks_exact(4).any(|pixel| pixel[3] > 0), "{mode:?}, {name}: nothing was drawn");
         }
     }
+}
+
+/// The closed form of the compute mode against the CPU reference, away from the edge of the box,
+/// where the two renderers anti-alias the clip that keeps the shadow out of it differently.
+#[test]
+fn the_closed_form_of_the_compute_mode_agrees_with_the_cpu_reference() {
+    let device = match VelloWgpuDevice::headless() {
+        Ok(device) => device,
+        Err(error) => {
+            println!("skipped: no adapter: {error}");
+            return;
+        }
+    };
+    if !device.supports_compute() {
+        println!("skipped: no compute");
+        return;
+    }
+    let (_, shape, shadows) = shapes().swap_remove(0);
+    let sink = crate::gpu::create_window_scene_sink(
+        &device,
+        &[VelloRenderingMode::Gpu],
+        SIZE,
+        SIZE,
+        wgpu::TextureFormat::Rgba8Unorm,
+    );
+    assert!(sink.filter_capabilities().blurred_rounded_rects, "the compute mode has the closed form");
+    let compute = draw_into(sink, VelloRenderingMode::Gpu, shape, &shadows);
+    let reference = draw_into(
+        Box::new(VelloCpuSceneSink::single_threaded(SIZE, SIZE)),
+        VelloRenderingMode::Cpu,
+        shape,
+        &shadows,
+    );
+    let edge = shape.rect.inflate(2.0);
+    let inner = shape.rect.inflate(-2.0);
+    let mut largest = 0;
+    for y in 0..usize::from(SIZE) {
+        for x in 0..usize::from(SIZE) {
+            let at = Point::new(x as f64 + 0.5, y as f64 + 0.5);
+            if edge.contains(at) && !inner.contains(at) {
+                continue;
+            }
+            let index = (y * usize::from(SIZE) + x) * 4;
+            for channel in 0..4 {
+                largest = largest.max(compute[index + channel].abs_diff(reference[index + channel]));
+            }
+        }
+    }
+    assert!(largest <= 1, "{largest} of 255");
 }
