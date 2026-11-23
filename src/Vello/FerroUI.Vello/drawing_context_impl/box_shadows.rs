@@ -185,7 +185,13 @@ impl DrawingContextImpl {
 
         if let Some(shape) = shape {
             self.with_box_shadow_offset(shadow, |context| {
-                context.draw_shadow_shape(&rounded_rect_path(shape), Fill::NonZero, Some(&shape), std_deviation, color);
+                context.draw_shadow_shape(
+                    &rounded_rect_path(shape),
+                    Fill::NonZero,
+                    ShadowShape::Box(shape),
+                    std_deviation,
+                    color,
+                );
             });
         }
 
@@ -213,7 +219,13 @@ impl DrawingContextImpl {
         self.sink().push_clip(&rounded_rect_path(*rect), Fill::NonZero, transform, true);
 
         self.with_box_shadow_offset(shadow, |context| {
-            context.draw_shadow_shape(&shape, Fill::EvenOdd, None, std_deviation, color);
+            context.draw_shadow_shape(
+                &shape,
+                Fill::EvenOdd,
+                ShadowShape::Around { outer: outer_rect, hole },
+                std_deviation,
+                color,
+            );
         });
 
         self.sink().pop_clip();
@@ -235,7 +247,7 @@ impl DrawingContextImpl {
         &mut self,
         path: &BezPath,
         fill_rule: Fill,
-        rounded: Option<&RoundedRect>,
+        shape: ShadowShape,
         std_deviation: f64,
         color: AlphaColor<Srgb>,
     ) {
@@ -249,11 +261,15 @@ impl DrawingContextImpl {
         }
 
         if self.sink().filter_capabilities().blurred_rounded_rects {
-            if let Some((shape, radius)) =
-                rounded.and_then(|shape| Some((shape, closed_form_radius(shape, std_deviation)?)))
+            let rounded = match &shape {
+                ShadowShape::Box(rounded) => Some(rounded),
+                ShadowShape::Around { .. } => None,
+            };
+            if let Some((rounded, radius)) =
+                rounded.and_then(|rounded| Some((rounded, closed_form_radius(rounded, std_deviation)?)))
             {
                 self.sink().fill_blurred_rounded_rect(
-                    to_kurbo_rect(shape.rect),
+                    to_kurbo_rect(rounded.rect),
                     radius,
                     std_deviation,
                     false,
@@ -264,7 +280,7 @@ impl DrawingContextImpl {
             }
         }
 
-        self.draw_blurred_path(path, fill_rule, std_deviation, color);
+        self.draw_blurred_path(path, fill_rule, &shape, std_deviation, color);
     }
 
     /// Draws the fill of a path blurred by a Gaussian of `std_deviation`
@@ -279,9 +295,12 @@ impl DrawingContextImpl {
         &mut self,
         path: &BezPath,
         fill_rule: Fill,
+        shape: &ShadowShape,
         std_deviation: f64,
         color: AlphaColor<Srgb>,
     ) {
+        #[cfg(not(feature = "hybrid-webgl"))]
+        let _ = shape;
         let transform = self.device_transform();
         let reach = (BLUR_REACH * std_deviation * largest_scale(transform)).ceil() + 1.0;
 
@@ -302,10 +321,22 @@ impl DrawingContextImpl {
             return;
         }
 
+        #[cfg(feature = "hybrid-webgl")]
+        if self.draw_blurred_shape_on_web_gl(path, fill_rule, shape, scene_transform, std_deviation, color, bounds) {
+            return;
+        }
+
+        // Nothing but the CPU mode should get here without a scene of the device: counted, so a
+        // run shows what is left of this route in a GPU mode (#1139).
+        let on_device = self.filter_scene_on_device();
+        if !on_device && self.scene().rendering_mode() != crate::VelloRenderingMode::Cpu {
+            crate::perf::count(crate::perf::Phase::ShadowOnCpu, u64::from(width) * u64::from(height) * 4);
+        }
+
         // A picture the CPU renderer makes is kept: the same shadow at
         // another place on whole pixels, or in the next frame, is the same
         // picture.
-        let key = (!self.filter_scene_on_device())
+        let key = (!on_device)
             .then(|| ShadowKey::new(path, fill_rule, scene_transform, std_deviation, color, width, height));
         if let Some(image) = key.as_ref().and_then(ShadowPictures::get) {
             self.draw_image_at_pixels(image, bounds.x0, bounds.y0);
@@ -399,12 +430,92 @@ impl DrawingContextImpl {
     }
 }
 
+/// What casts a shadow: a box, or for an inset shadow what lies around its hole.
+#[derive(Clone, Copy, Debug)]
+pub(crate) enum ShadowShape {
+    Box(RoundedRect),
+    Around { outer: Rect, hole: Option<RoundedRect> },
+}
+
+#[cfg(feature = "hybrid-webgl")]
+impl DrawingContextImpl {
+    /// On the canvas of a WebGL2 context: the passes of `web_gl/shadow_programs.rs` over the
+    /// bounds of the shadow, composed under the clips of the context. A failure of the context
+    /// draws no shadow rather than a picture of the CPU renderer. `false` in any other scene,
+    /// which is the gap #1139 keeps open.
+    #[allow(clippy::too_many_arguments)]
+    fn draw_blurred_shape_on_web_gl(
+        &mut self,
+        path: &BezPath,
+        fill_rule: Fill,
+        shape: &ShadowShape,
+        to_area: Affine,
+        std_deviation: f64,
+        color: AlphaColor<Srgb>,
+        bounds: kurbo::Rect,
+    ) -> bool {
+        let Some(gpu) = self.scene().web_gl_gpu() else {
+            return false;
+        };
+        if self.sink_origin != kurbo::Vec2::ZERO {
+            return false;
+        }
+        // A lost context shows nothing, and what it kept is gone with it.
+        if gpu.is_context_lost() {
+            return true;
+        }
+        let (width, height) = (bounds.width() as u16, bounds.height() as u16);
+        let key = ShadowKey::new(path, fill_rule, to_area, std_deviation, color, width, height);
+        let kept = gpu.kept_shadow(&key);
+        let shadow = match kept {
+            Some(shadow) => shadow,
+            None => {
+                crate::perf::count(crate::perf::Phase::ShadowAsImage, u64::from(width) * u64::from(height) * 4);
+                let [red, green, blue, alpha] = color.components;
+                let premultiplied = [red * alpha, green * alpha, blue * alpha, alpha];
+                let made = crate::web_gl::shadow_programs::blurred_shadow(
+                    &gpu,
+                    shape,
+                    to_area,
+                    std_deviation,
+                    premultiplied,
+                    u32::from(width),
+                    u32::from(height),
+                );
+                let shadow = match made {
+                    Ok(Some(shadow)) => shadow,
+                    Ok(None) => return true,
+                    Err(error) => {
+                        crate::web_gl::log_render_failure(&error);
+                        return true;
+                    }
+                };
+                gpu.keep_shadow(key, shadow.clone());
+                shadow
+            }
+        };
+        let area = rect_path(Rect::new(bounds.x0, bounds.y0, f64::from(width), f64::from(height)));
+        let place = Affine::translate((bounds.x0 - shadow.offset, bounds.y0 - shadow.offset));
+        self.sink().fill_with_web_gl_texture(
+            &area,
+            Affine::IDENTITY,
+            &shadow.texture,
+            shadow.size,
+            place,
+            1.0,
+            BlendMode::default(),
+            ImageQuality::Low,
+        );
+        true
+    }
+}
+
 /// What makes the picture of a blurred shape: the shape in the pixels of
 /// its scene, how it is filled, the blur, the color and the size of the
 /// scene. The numbers are kept as their bits: a picture is reused for the
 /// very same shape only.
 #[derive(Clone, PartialEq, Eq, Hash)]
-struct ShadowKey {
+pub(crate) struct ShadowKey {
     path: Vec<u64>,
     fill_rule: u8,
     std_deviation: u64,
