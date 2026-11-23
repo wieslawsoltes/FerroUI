@@ -15,8 +15,8 @@ use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, ferro_property, instantiate, DirectProperty,
-    FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
+    ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property,
+    instantiate, DirectProperty, FerroLocator, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, LocatorExtensions, Ref, StyledElementImpl, StyledProperty,
     VisualImpl, WeakRef,
 };
@@ -81,7 +81,7 @@ ferro_impl_classes!(
     ControlImpl
 );
 
-impl WebView2 {
+ferro_properties! { impl WebView2 {
     ferro_property!(
         /// Defines the `Source` property.
         pub fn source_property() -> StyledProperty<Option<String>> {
@@ -112,7 +112,9 @@ impl WebView2 {
             )
         }
     );
+}}
 
+impl WebView2 {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {
