@@ -310,11 +310,14 @@ as well, which the cached layers of today do not.
 - The dirty rectangles of the compositor become `DAMAGE_RECT` with `PRESERVE_TARGET` on the frame;
   spans whose bounds lie outside the damage are left out of the draws of the frame.
 
-Until the delta call exists the same fragments work against the whole-stream call: the builder
-keeps the bytes of a span and writes them into the stream again without the backend encoding
-them (a call of the builder C ABI in the bindings). That removes the backend's share of an
-unchanged visual and is the differential reference afterwards: a frame built from kept spans and
-the same frame built from commands must be the same stream.
+Until the delta call exists the same fragments work against the whole-stream call. As built
+(step R2), a fragment keeps what the context worked out for its draws (brushes, primitives,
+flattened outlines, the raster of each glyph run) and reissues the same builder calls, with the
+transform moved by whole device pixels and under the clips in force. Keeping the bytes of a span
+in the builder instead would need the brush, state and resource indices inside the payloads
+remapped per kind of command. A fragment holds no images, clears or clips that are masks:
+`end_fragment` returns `None` for those. The engine still receives a whole stream each frame;
+R4 and R5 are what remove that.
 
 #### 2.3.7 Order of the work, and what each part is checked against
 
@@ -342,7 +345,7 @@ second before any of this; section 6.2 has the numbers after each part):
 | R4 | Spans compiled once, chunked buffers, the placement table | engine (family page compilers, shaders, bundle recording) | read-back equality of moved spans against whole streams for every family, with clips and masks; upload bytes of a frame with one changed span (the metrics of the engine report them) |
 | R5 | The delta call | engine C ABI, bindings, backend | the same frames through deltas and through whole streams; validation errors of a bad span leave the scene as it was |
 | R6 | The other resources by identifier (paths, images), damage, cached groups | engine, backend | partial redraw scenarios of section 4 |
-| R2 | Fragments in the backend against the whole-stream call | backend; builder span calls in the bindings | stream equality with and without kept spans; the backend suite |
+| R2 | Fragments in the backend against the whole-stream call: built, by reissuing the builder calls (section 2.3.6) | backend | the pixels of a fragment against those of its commands, in place, moved by whole pixels and under other clips; the backend suite |
 
 Half of the content of a gauntlet frame is new (section 2.3.2), so after step 1 the cost of a
 changed visual is the likely next item: the seven passes of `update_scene` over the whole stream
@@ -737,14 +740,28 @@ the engine (decided by the owner, 2026-11-05):
 Bitmaps decode with ProGPU's native image module: PNG today, and **JPEG (baseline and
 progressive), GIF and BMP decoders** added beside it, bounded and allocation-checked like the PNG
 decoder, with a C ABI (decided by the owner, 2026-11-05). The backend links no other decoder.
-Done: PNG files and streams, through the image C ABI of the bindings
-(`progpu_native_sys::image`: the size of an image, then its pixels as straight RGBA8 into a
-buffer of the caller), decoded at their size, to a width or to a height, and resized. Open: the
-other three decoders (a file of another format is refused as unsupported) and encoding (the image
-module has no encoder, so `save` of a bitmap is unsupported). The
-scene holds a bitmap as an image resource by stable id; a `WriteableBitmap` updates its resource in
+Done: PNG, JPEG (baseline, extended sequential and progressive), GIF (the first frame) and BMP
+files and streams, through the image C ABI of the bindings (`progpu_native_sys::image`: the format
+and size of an image, then its pixels as straight RGBA8 into a buffer of the caller), decoded at
+their size, to a width or to a height, and resized; a file of another format is refused as
+unsupported. The Exif orientation of a JPEG is not applied. `save` of a bitmap or a layer writes
+PNG (with the compression level of its options) or JPEG (with its quality) through the writers
+of the same module. The scene holds a bitmap as an image resource by stable id; a `WriteableBitmap` updates its resource in
 place (`update_rgba8_image`, same id, a new generation), so a changed bitmap uploads its pixels and
 nothing else.
+
+#### 2.5.1 Effects, masks and blends
+
+- Blur and drop shadow are group effects on a layer. Sigma and offset follow the current
+  transform, and a sigma above the engine's limit (128/3 device pixels) is drawn at that limit.
+- An opacity mask of a gradient is a brush mask of the layer; a solid colour is a plain opacity.
+  Masks of image and visual brushes are not applied yet, with a note.
+- A compositing layer takes any of the 27 blend modes. Its bounds are a hint, so it is not cut
+  to them.
+- An inset shadow is a frame around the shape with a hole at the shadow's offset, blurred and
+  seen through the shape, drawn over the fill. The shadow of a rectangle with uneven corners is
+  its shape blurred in a layer. In both the clips in force are the mask of the layer, applied
+  after the blur, because a clip of the draws inside would cut the source of the blur.
 
 ### 2.6 Browser
 
@@ -1025,8 +1042,8 @@ The tables go into section 6 and the pull request as each step lands.
 | P2 | Drawing: rectangles, rounded rectangles, ellipses, lines, paths (fills and strokes, dashes), solid and gradient brushes, transforms, clips, opacity, layers and blend modes, through the C++ shim over the builder; the render tests of the drawing contracts against the CPU references | the drawing contract tests of the other backends pass | done for shapes, paths, brushes, clips, opacity, layers and analytic shadows, through the C ABI over the scene builder in the bindings; blend modes and masks move to P5 |
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
-| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG files and streams decode through the image module (section 2.5); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: JPEG, GIF and BMP, encoding, effects |
-| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2 |
+| P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG, JPEG, GIF (first frame) and BMP decode, and PNG and JPEG encode, through the image module (section 2.5); blur, drop shadow, gradient and solid opacity masks, every blend mode of a compositing layer, inset shadows and the shadows of uneven corners are drawn (section 2.5.1); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: custom effects of #455, opacity masks of image and visual brushes, acrylic |
+| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R1, R3, R4, R5 and R6 are open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
