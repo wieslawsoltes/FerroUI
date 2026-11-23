@@ -67,3 +67,23 @@ fn progress_bar_indeterminate_updates_template_settings() {
     assert_eq!(-100.0, settings.indeterminate_starting_offset());
     assert_eq!(100.0, settings.indeterminate_ending_offset());
 }
+
+#[test]
+fn show_error_goes_before_show_paused_in_the_state_classes() {
+    let _scope = test_scope();
+    let target = progress_bar();
+    let has = |class: &str| target.classes().contains(class);
+    assert!(!has(":paused") && !has(":error"));
+
+    target.set_show_paused(true);
+    assert!(has(":paused") && !has(":error"));
+
+    target.set_show_error(true);
+    assert!(!has(":paused") && has(":error"));
+
+    target.set_show_error(false);
+    assert!(has(":paused") && !has(":error"));
+
+    target.set_show_paused(false);
+    assert!(!has(":paused") && !has(":error"));
+}

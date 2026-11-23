@@ -786,6 +786,8 @@ FerroUI.Controls.ProgressBar overrides FerroUI.Controls.Primitives.RangeBase.Val
 FerroUI.Controls.ProgressBar.IsIndeterminate: bool = False; OneWay
 FerroUI.Controls.ProgressBar.Orientation: Orientation = Horizontal; OneWay
 FerroUI.Controls.ProgressBar.ProgressTextFormat: String = "{1:0}%"; OneWay
+FerroUI.Controls.ProgressBar.ShowError: bool = False; OneWay
+FerroUI.Controls.ProgressBar.ShowPaused: bool = False; OneWay
 FerroUI.Controls.ProgressBar.ShowProgressText: bool = False; OneWay
 FerroUI.Controls.ProgressRing.IsActive: bool = True; OneWay
 FerroUI.Controls.ProgressRing.IsIndeterminate: bool = True; OneWay

@@ -7026,6 +7026,16 @@ pub trait ProgressBarProps: ElementBuilder {
         self.prop(<ferroui_controls::ProgressBar>::show_progress_text_property(), value)
     }
 
+    /// Sets [`ProgressBar::show_paused_property`](ferroui_controls::ProgressBar::show_paused_property).
+    fn show_paused<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressBar>::show_paused_property(), value)
+    }
+
+    /// Sets [`ProgressBar::show_error_property`](ferroui_controls::ProgressBar::show_error_property).
+    fn show_error<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressBar>::show_error_property(), value)
+    }
+
     /// Sets [`ProgressBar::progress_text_format_property`](ferroui_controls::ProgressBar::progress_text_format_property).
     fn progress_text_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBar>::progress_text_format_property(), value)

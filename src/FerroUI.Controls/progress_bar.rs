@@ -16,6 +16,8 @@ use std::cell::{Cell, RefCell};
 const PC_VERTICAL: &str = ":vertical";
 const PC_HORIZONTAL: &str = ":horizontal";
 const PC_INDETERMINATE: &str = ":indeterminate";
+const PC_PAUSED: &str = ":paused";
+const PC_ERROR: &str = ":error";
 
 /// Provides calculated values for use with the [`ProgressBar`]'s control
 /// theme or template.
@@ -280,7 +282,7 @@ ferroui_base::ferro_class_info!(ProgressBar {
         ],
         attributes: [
             TemplatePart("PART_Indicator", type(Ref<Border>), IsRequired = true),
-            PseudoClasses(":vertical", ":horizontal", ":indeterminate"),
+            PseudoClasses(":vertical", ":horizontal", ":indeterminate", ":paused", ":error"),
         ],
     },
 });
@@ -296,6 +298,7 @@ impl FerroObjectImpl for ProgressBar {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes(Some(this.is_indeterminate()), Some(this.orientation()));
+        this.update_state_classes();
     }
 
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
@@ -316,6 +319,10 @@ impl FerroObjectImpl for ProgressBar {
             this.update_pseudo_classes(Some(change.get_new_value::<bool>()), None);
         } else if property == Self::orientation_property().as_property() {
             this.update_pseudo_classes(None, Some(change.get_new_value::<Orientation>()));
+        } else if property == Self::show_paused_property().as_property()
+            || property == Self::show_error_property().as_property()
+        {
+            this.update_state_classes();
         }
     }
 }
@@ -362,7 +369,7 @@ impl ProgressBar {
 
     /// The pseudoclasses set by the class.
     pub const PSEUDO_CLASSES: PseudoClassesAttribute =
-        PseudoClassesAttribute::new(&[PC_VERTICAL, PC_HORIZONTAL, PC_INDETERMINATE]);
+        PseudoClassesAttribute::new(&[PC_VERTICAL, PC_HORIZONTAL, PC_INDETERMINATE, PC_PAUSED, PC_ERROR]);
 }
 
 ferroui_base::ferro_properties! { impl ProgressBar {
@@ -377,6 +384,20 @@ ferroui_base::ferro_properties! { impl ProgressBar {
         /// Defines the `ShowProgressText` property.
         pub fn show_progress_text_property() -> StyledProperty<bool> {
             FerroProperty::register::<ProgressBar, _>("ShowProgressText", false)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `ShowPaused` property.
+        pub fn show_paused_property() -> StyledProperty<bool> {
+            FerroProperty::register::<ProgressBar, _>("ShowPaused", false)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `ShowError` property.
+        pub fn show_error_property() -> StyledProperty<bool> {
+            FerroProperty::register::<ProgressBar, _>("ShowError", false)
         }
     );
 
@@ -460,6 +481,26 @@ impl ProgressBar {
         self.set_value(Self::show_progress_text_property(), value)
     }
 
+    /// Whether the bar shows that the operation is paused (WinUI's `ShowPaused`). The `:paused`
+    /// pseudoclass is set while this is true and [`show_error`](Self::show_error) is not.
+    pub fn show_paused(&self) -> bool {
+        self.get_value(Self::show_paused_property())
+    }
+
+    pub fn set_show_paused(&self, value: bool) {
+        self.set_value(Self::show_paused_property(), value)
+    }
+
+    /// Whether the bar shows that the operation failed (WinUI's `ShowError`), which takes
+    /// precedence over [`show_paused`](Self::show_paused). Sets the `:error` pseudoclass.
+    pub fn show_error(&self) -> bool {
+        self.get_value(Self::show_error_property())
+    }
+
+    pub fn set_show_error(&self, value: bool) {
+        self.set_value(Self::show_error_property(), value)
+    }
+
     /// The format string applied to the internally calculated progress text
     /// before it is shown.
     pub fn progress_text_format(&self) -> String {
@@ -530,6 +571,13 @@ impl ProgressBar {
 
             self.set_percentage(percent * 100.0);
         }
+    }
+
+    /// The state of WinUI's `UpdateStates`: an error goes before a pause.
+    fn update_state_classes(&self) {
+        let error = self.show_error();
+        self.pseudo_classes().set(PC_ERROR, error);
+        self.pseudo_classes().set(PC_PAUSED, !error && self.show_paused());
     }
 
     fn update_pseudo_classes(&self, is_indeterminate: Option<bool>, o: Option<Orientation>) {

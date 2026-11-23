@@ -25,11 +25,16 @@
     hides the track (its setters) and runs the storyboard of the source as keyframe animations
     of the translation of each indicator (2 s, forever, spline 0.4,0,0.6,1, the key times of the
     source) in the nested style of :indeterminate; PART_Indicator is hidden, which WinUI does by
-    setting its width to 0 in code. FerroUI's ProgressBar has no ShowError and no ShowPaused:
-    Error, Paused, UpdatingError, IndeterminateError and IndeterminatePaused have no
-    counterpart. Updating and the visual transitions (RepositionThemeAnimation of the indicator
-    when the value changes, FadeInThemeAnimation when an indeterminate bar becomes determinate,
-    the colour animations from Error and Paused) are not ported.
+    setting its width to 0 in code.
+  - Error and Paused are the pseudoclasses :error and :paused of the control (ShowError goes
+    before ShowPaused, as in WinUI's UpdateStates): the determinate indicator takes the colour of
+    ProgressBarErrorForegroundColor or ProgressBarPausedForegroundColor through a brush of that
+    colour. IndeterminateError and IndeterminatePaused stop the repeating storyboard, hide the
+    first indicator and bring the second to ContainerAnimationMidPosition (0, the start of the
+    bar) in 0.75 s with the spline of the source, in the state's colour. UpdatingError, Updating
+    and the visual transitions (RepositionThemeAnimation of the indicator when the value changes,
+    FadeInThemeAnimation when an indeterminate bar becomes determinate, the 0.167 s colour
+    animations into and out of Error and Paused) are not ported.
   - FerroUI's ProgressBar has an Orientation, WinUI's has none: the vertical bar is the
     horizontal one turned, with the track and the indicators along the height, PART_Indicator at
     the bottom, and the minimum width of ProgressBarMinHeight.
@@ -52,6 +57,10 @@
           <ProgressBar Value="100" />
           <ProgressBar IsIndeterminate="True" />
           <ProgressBar ShowProgressText="True" Value="40" />
+          <ProgressBar ShowPaused="True" Value="40" />
+          <ProgressBar ShowError="True" Value="40" />
+          <ProgressBar IsIndeterminate="True" ShowPaused="True" />
+          <ProgressBar IsIndeterminate="True" ShowError="True" />
         </StackPanel>
         <ProgressBar Orientation="Vertical" Value="40" Height="200" />
         <ProgressBar Orientation="Vertical" IsIndeterminate="True" Height="200" />
@@ -194,7 +203,7 @@
          ContainerAnimationEndPosition in 1.5 s, held to 2 s, and of
          IndeterminateProgressBarIndicator2 held at Container2AnimationStartPosition to 0.75 s,
          then to Container2AnimationEndPosition at 2 s. -->
-    <Style Selector="^:horizontal:indeterminate /template/ Border#IndeterminateProgressBarIndicator">
+    <Style Selector="^:horizontal:indeterminate:not(:error):not(:paused) /template/ Border#IndeterminateProgressBarIndicator">
       <Style.Animations>
         <Animation IterationCount="Infinite" Duration="0:0:2">
           <KeyFrame KeyTime="0:0:0">
@@ -209,7 +218,7 @@
         </Animation>
       </Style.Animations>
     </Style>
-    <Style Selector="^:horizontal:indeterminate /template/ Border#IndeterminateProgressBarIndicator2">
+    <Style Selector="^:horizontal:indeterminate:not(:error):not(:paused) /template/ Border#IndeterminateProgressBarIndicator2">
       <Style.Animations>
         <Animation IterationCount="Infinite" Duration="0:0:2">
           <KeyFrame KeyTime="0:0:0">
@@ -224,7 +233,7 @@
         </Animation>
       </Style.Animations>
     </Style>
-    <Style Selector="^:vertical:indeterminate /template/ Border#IndeterminateProgressBarIndicator">
+    <Style Selector="^:vertical:indeterminate:not(:error):not(:paused) /template/ Border#IndeterminateProgressBarIndicator">
       <Style.Animations>
         <Animation IterationCount="Infinite" Duration="0:0:2">
           <KeyFrame KeyTime="0:0:0">
@@ -239,7 +248,7 @@
         </Animation>
       </Style.Animations>
     </Style>
-    <Style Selector="^:vertical:indeterminate /template/ Border#IndeterminateProgressBarIndicator2">
+    <Style Selector="^:vertical:indeterminate:not(:error):not(:paused) /template/ Border#IndeterminateProgressBarIndicator2">
       <Style.Animations>
         <Animation IterationCount="Infinite" Duration="0:0:2">
           <KeyFrame KeyTime="0:0:0">
@@ -250,6 +259,50 @@
           </KeyFrame>
           <KeyFrame KeySpline="0.4,0,0.6,1" KeyTime="0:0:2">
             <Setter Property="TranslateTransform.Y" Value="{Binding $parent[ProgressBar].TemplateSettings.Container2AnimationEndPosition}" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+
+    <!-- Paused and Error: the colour of the indicator. -->
+    <Style Selector="^:paused /template/ Border#PART_Indicator">
+      <Setter Property="Background" Value="{DynamicResource ProgressBarPausedForegroundBrush}" />
+    </Style>
+    <Style Selector="^:error /template/ Border#PART_Indicator">
+      <Setter Property="Background" Value="{DynamicResource ProgressBarErrorForegroundBrush}" />
+    </Style>
+
+    <!-- IndeterminatePaused and IndeterminateError: the second indicator alone, in the colour of
+         the state, brought to the start of the bar. -->
+    <Style Selector="^:indeterminate:paused /template/ Border#IndeterminateProgressBarIndicator, ^:indeterminate:error /template/ Border#IndeterminateProgressBarIndicator">
+      <Setter Property="Opacity" Value="0" />
+    </Style>
+    <Style Selector="^:indeterminate:paused /template/ Border#IndeterminateProgressBarIndicator2">
+      <Setter Property="Background" Value="{DynamicResource ProgressBarPausedForegroundBrush}" />
+    </Style>
+    <Style Selector="^:indeterminate:error /template/ Border#IndeterminateProgressBarIndicator2">
+      <Setter Property="Background" Value="{DynamicResource ProgressBarErrorForegroundBrush}" />
+    </Style>
+    <Style Selector="^:horizontal:indeterminate:paused /template/ Border#IndeterminateProgressBarIndicator2, ^:horizontal:indeterminate:error /template/ Border#IndeterminateProgressBarIndicator2">
+      <Style.Animations>
+        <Animation FillMode="Forward" Duration="0:0:0.75">
+          <KeyFrame KeyTime="0:0:0">
+            <Setter Property="TranslateTransform.X" Value="{Binding $parent[ProgressBar].TemplateSettings.Container2AnimationStartPosition}" />
+          </KeyFrame>
+          <KeyFrame KeySpline="0,0,0,1" KeyTime="0:0:0.75">
+            <Setter Property="TranslateTransform.X" Value="0" />
+          </KeyFrame>
+        </Animation>
+      </Style.Animations>
+    </Style>
+    <Style Selector="^:vertical:indeterminate:paused /template/ Border#IndeterminateProgressBarIndicator2, ^:vertical:indeterminate:error /template/ Border#IndeterminateProgressBarIndicator2">
+      <Style.Animations>
+        <Animation FillMode="Forward" Duration="0:0:0.75">
+          <KeyFrame KeyTime="0:0:0">
+            <Setter Property="TranslateTransform.Y" Value="{Binding $parent[ProgressBar].TemplateSettings.Container2AnimationStartPosition}" />
+          </KeyFrame>
+          <KeyFrame KeySpline="0,0,0,1" KeyTime="0:0:0.75">
+            <Setter Property="TranslateTransform.Y" Value="0" />
           </KeyFrame>
         </Animation>
       </Style.Animations>

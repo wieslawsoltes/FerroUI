@@ -17709,6 +17709,26 @@
         ],
         "attached": false
       },
+      "ShowPaused": {
+        "name": "ShowPaused",
+        "type_name": "bool",
+        "documentation": "ProgressBar.ShowPaused: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ShowError": {
+        "name": "ShowError",
+        "type_name": "bool",
+        "documentation": "ProgressBar.ShowError: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "ProgressTextFormat": {
         "name": "ProgressTextFormat",
         "type_name": "String",

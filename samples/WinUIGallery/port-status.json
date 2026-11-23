@@ -1128,7 +1128,7 @@
       "examples": []
     },
     "ProgressBar": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ProgressBar.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1142,9 +1142,13 @@
         {
           "path": "samples/WinUIGallery/status_samples_tests.rs",
           "name": "progress_value_sets_the_determinate_bar_and_an_empty_box_goes_back_to_zero"
+        },
+        {
+          "path": "samples/WinUIGallery/status_samples_tests.rs",
+          "name": "progress_state_options_show_the_paused_and_the_error_state"
         }
       ],
-      "notes": "Both source examples use native ProgressBar: the indeterminate bar, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0). FerroUI's ProgressBar has no ShowPaused or ShowError, so the indeterminate bar's Progress state options (Running, Paused, Error) and the source's x:Bind of IsChecked.Value are not ported and the page is partial.",
+      "notes": "Both source examples use native ProgressBar: the indeterminate bar with its Progress state options (Running, Paused, Error), whose ShowPaused and ShowError are bound to the radio buttons as the source's x:Bind of IsChecked.Value is, and the determinate bar set by the NumberBox with ProgressValue_ValueChanged of ProgressBarPage.xaml.cs in Rust (an empty box goes back to 0).",
       "examples": []
     },
     "PullToRefresh": {
