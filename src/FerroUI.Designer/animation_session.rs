@@ -937,6 +937,11 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
+        if let Some(patch) = ferroui_designer_animation::registered_key_value_patch(&self.document, program, timeline)
+            .map_err(|error| error.to_string())?
+        {
+            return Ok(vec![Edit::Text { span: patch.span, replacement: patch.replacement }]);
+        }
         let generated = self
             .animation
             .codecs

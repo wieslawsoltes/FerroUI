@@ -7,7 +7,7 @@ use ferroui_base::media::CustomEffectRegistry;
 use ferroui_base::{Ref, StyledElement};
 use ferroui_designer_animation::native::{native_keyframe_options_for_target, NativeProgramIndex};
 use ferroui_designer_animation::{
-    animation_fragment, compose_animation_edit, AnimationError, AnimationProgram, AnimationValue,
+    animation_fragment, compose_animation_edit, registered_key_value_patch, AnimationError, AnimationProgram, AnimationValue,
     CurveChannel, ImportOptions, KeyframeComponentEdit, KeyframeEdit, KeyframeLocation,
     TrackCurveChannel, ValueKind,
 };
@@ -198,8 +198,15 @@ impl HostedKeyframes {
                 )
             })
             .map_err(|error| error.to_string())?;
+        let literal = registered_key_value_patch(&self.document, program, &draft)
+            .map_err(|error| error.to_string())?;
         let (source, accepted) = with_codecs(|codecs| {
-            let source = if sampled.is_some() {
+            let source = if let Some(patch) = &literal {
+                let mut candidate = self.document.as_ref().clone();
+                candidate.apply_text_patches(candidate.revision(), "Stage a registered effect key", vec![patch.clone()])
+                    .map_err(|error| AnimationError(error.to_string()))?;
+                animation_fragment(&candidate, program.id)?
+            } else if sampled.is_some() {
                 codecs.encode_keyframes_for_document(&self.document, program, &draft)?
             } else {
                 codecs.encode_for_document(&self.document, program, &draft)?
@@ -233,7 +240,10 @@ impl HostedKeyframes {
         let preview = accepted_timeline
             .inspect_keyframe(target, property, location.time)
             .map_err(|error| error.to_string())?;
-        let patch = self.source_patch(program.id, &source)?;
+        let patch = match literal {
+            Some(patch) => Some(DesignAnimationSourcePatch::from_utf8(self.document.source(), patch.span.range(), patch.replacement)?),
+            None => self.source_patch(program.id, &source)?,
+        };
         let resolved_key = round_trip.filter(|_| component_value.is_some()).map(|key| DesignAnimationKeyframe {
             time: key.time, value: key.value.to_xaml(), easing: key.easing.to_xaml(),
             value_kind: format!("{:?}", key.value.kind()), curve_values: None,

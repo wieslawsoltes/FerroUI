@@ -24,6 +24,7 @@ mod program_edit;
 mod program_locator;
 mod programs;
 mod property_transitions;
+mod registered_key_patch;
 mod states;
 mod timeline;
 #[cfg(feature = "native-values")]
@@ -51,6 +52,7 @@ pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDestination, KeyframePaste};
 pub use keyframe_selection::{KeyframeSelection, KeyframeSelectionPlan};
 pub use preview_range::PreviewRange;
+pub use registered_key_patch::registered_key_value_patch;
 pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
 pub use preview_markers::{PreviewMarker, PreviewMarkerEdit, PreviewMarkers};

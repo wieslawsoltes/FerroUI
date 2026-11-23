@@ -303,23 +303,7 @@ impl Timeline {
                     format!("Unsupported KeyFrame attribute {}", attr.name()),
                 )?;
             }
-            require(
-                !(node.attribute("Cue").is_some() && node.attribute("KeyTime").is_some()),
-                "KeyFrame cannot specify both Cue and KeyTime",
-            )?;
-            let time = if let Some(cue) = node.attribute("Cue") {
-                let cue = cue.trim();
-                let fraction = if let Some(percent) = cue.strip_suffix('%') {
-                    parse_number(percent)? / 100.0
-                } else {
-                    parse_number(cue)?
-                };
-                fraction * timeline.duration
-            } else if let Some(time) = node.attribute("KeyTime") {
-                parse_time(time)?
-            } else {
-                return Err(AnimationError("KeyFrame requires Cue or KeyTime".into()));
-            };
+            let time = key_time(node.attribute("Cue"), node.attribute("KeyTime"), timeline.duration)?;
             let easing = if let Some(spline) = node.attribute("KeySpline") {
                 Easing::parse(spline)?
             } else {
@@ -437,6 +421,23 @@ fn read_key_value(setter: roxmltree::Node<'_, '_>, property: &str, options: &Imp
         return resolve(source).map(AnimationValue::Effect);
     }
     AnimationValue::parse(source, kind)
+}
+
+pub(crate) fn key_time(cue: Option<&str>, time: Option<&str>, duration: f64) -> Result<f64> {
+    match (cue, time) {
+        (Some(_), Some(_)) => Err(AnimationError("KeyFrame cannot specify both Cue and KeyTime".into())),
+        (Some(cue), None) => {
+            let cue = cue.trim();
+            let fraction = if let Some(percent) = cue.strip_suffix('%') {
+                parse_number(percent)? / 100.0
+            } else {
+                parse_number(cue)?
+            };
+            Ok(fraction * duration)
+        }
+        (None, Some(time)) => parse_time(time),
+        (None, None) => Err(AnimationError("KeyFrame requires Cue or KeyTime".into())),
+    }
 }
 
 fn parse_number(source: &str) -> Result<f64> {

@@ -47,7 +47,7 @@ impl AnimationProgramIdentity {
 #[derive(Clone, Debug, Serialize, Deserialize)]
 pub struct AnimationProgram {
     pub id: NodeId,
-    /// Persisted UUID for source/collaboration identity; legacy source is stamped on first edit.
+    /// Persisted UUID for source/collaboration identity. Structural edits stamp legacy programs.
     #[serde(default)]
     pub source_key: Option<String>,
     pub name: String,
