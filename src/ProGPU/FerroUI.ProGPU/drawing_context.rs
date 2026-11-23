@@ -32,6 +32,7 @@ use progpu_native_sys::progpu::*;
 use std::any::{Any, TypeId};
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::Arc;
 
 /// The coverage sampling of path fills and clips: a 4x4 grid per pixel (the engine accepts 1, 4
 /// or 8).
@@ -237,6 +238,8 @@ pub struct ProGpuDrawingContext {
     damage: Option<Rect>,
     /// The scene has a layer or a state with a mask: the engine cannot replay it in part.
     needs_whole_replay: bool,
+    /// The geometries drawn in this frame, by address, with the resource of their first draw.
+    path_resources: HashMap<*const PathData, (Arc<PathData>, u32)>,
 }
 
 impl ProGpuDrawingContext {
@@ -277,6 +280,7 @@ impl ProGpuDrawingContext {
             fragment: None,
             damage: None,
             needs_whole_replay: false,
+            path_resources: HashMap::new(),
         }
     }
 
@@ -643,20 +647,46 @@ impl ProGpuDrawingContext {
         }
     }
 
+    /// Fills a geometry that may be drawn several times in a frame (the same icon in every row):
+    /// after its first draw the stream names the resource of that draw. The map holds the
+    /// geometry, so that its address names it for the whole frame. Inside a fragment the commands
+    /// are kept to be sent again in another frame, where the resource is not there.
+    fn fill_shared_path(&mut self, data: &Arc<PathData>, brush: &dyn IBrush) {
+        if self.fragment.is_some() {
+            self.fill_path(data, brush);
+            return;
+        }
+        let key = Arc::as_ptr(data);
+        if let Some(resource) = self.path_resources.get(&key).map(|(_, resource)| *resource) {
+            let bounds = data.bounds();
+            let Some(brush_index) = self.brush(brush, bounds) else { return };
+            let Some(state) = self.state() else { return };
+            let result = self.scene().draw_path_resource(resource, &[brush_index], image_rect(bounds), state);
+            self.record(result);
+            return;
+        }
+        // Only a call that added a draw: an empty geometry adds none.
+        if self.fill_path(data, brush) {
+            if let Some(resource) = self.scene.as_ref().and_then(SceneBuilder::last_path_resource) {
+                self.path_resources.insert(key, (data.clone(), resource));
+            }
+        }
+    }
+
     /// Fills the canonical segments of `data` (its filled figures) with a brush.
-    fn fill_path(&mut self, data: &PathData, brush: &dyn IBrush) {
+    fn fill_path(&mut self, data: &PathData, brush: &dyn IBrush) -> bool {
         let segments = data.filled_segments();
         if segments.is_empty() {
-            return;
+            return false;
         }
         let bounds = data.bounds();
         if !has_area(bounds) {
             // Figures without an area (a line, a point) cover nothing, and the engine refuses
             // a path without bounds.
-            return;
+            return false;
         }
-        let Some(brush_index) = self.brush(brush, bounds) else { return };
-        let Some(state) = self.state() else { return };
+        let Some(brush_index) = self.brush(brush, bounds) else { return false };
+        let Some(state) = self.state() else { return false };
         let path = progpu_native_scene_path_fill {
             segment_offset: 0,
             segment_count: segments.len() as u64,
@@ -675,10 +705,12 @@ impl ProGpuDrawingContext {
             sample_grid: PATH_SAMPLE_GRID,
         };
         let result = self.scene().draw_paths(&[path], &segments, &[brush_index], image_rect(bounds), state);
+        let drawn = result.is_ok();
         self.record(result);
         if let Some(fragment) = &mut self.fragment {
             fragment.path(path, segments, bounds, self.current.transform);
         }
+        drawn
     }
 
     fn primitive(kind: u32, rect: Rect, radius: f64, stroke: f64) -> progpu_native_analytic_primitive {
@@ -954,7 +986,9 @@ impl ProGpuDrawingContext {
         let hole = Self::spread_rect(rect, -shadow.spread, shadow.offset_x, shadow.offset_y);
         let frame = Self::frame_path(rect.rect.inflate(reach), &hole);
         let brush = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(shadow.color);
-        self.draw_blurred(sigma, mask, |context| context.fill_path(&frame, &brush));
+        self.draw_blurred(sigma, mask, |context| {
+            context.fill_path(&frame, &brush);
+        });
     }
 
     /// The path of `outer` with `hole` cut out of it.
@@ -1022,7 +1056,9 @@ impl ProGpuDrawingContext {
             self.pop_scene_layer();
             return;
         };
-        self.draw_blurred(sigma, mask, |context| context.fill_path(&path, &brush));
+        self.draw_blurred(sigma, mask, |context| {
+            context.fill_path(&path, &brush);
+        });
     }
 
     /// The effect chain of one effect, its sigma and offset in the coordinates of the drawing
@@ -1434,7 +1470,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     fn draw_geometry(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, geometry: &dyn IGeometryImpl) {
         let Some(data) = path_data_of(geometry) else { return };
         if let Some(brush) = brush {
-            self.fill_path(&data, brush);
+            self.fill_shared_path(&data, brush);
         }
         if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0) {
             if let Some(stroke_brush) = pen.brush() {

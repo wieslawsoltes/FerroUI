@@ -313,6 +313,68 @@ fn layers_are_drawn_into_and_sampled() {
     target.dispose();
 }
 
+/// What a cached visual does with its layer (`ServerCompositionVisualCache`): drawn once, shown in
+/// later frames without being drawn again, and redrawn in part under a clip.
+#[test]
+fn a_layer_is_kept_across_frames_and_redrawn_in_part() {
+    let Some(context) = context() else { return };
+    let layer = context.create_offscreen_render_target(PixelSize::new(32, 32), Vector::new(1.0, 1.0), false);
+    {
+        let mut drawing = layer.create_drawing_context();
+        drawing.clear(Color::from_argb(0, 0, 0, 0));
+        fill(&mut *drawing, &solid(0, 0, 255), Rect::new(0.0, 0.0, 32.0, 32.0));
+        drawing.dispose();
+    }
+    let surface = MemorySurface::new(32, 32);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let show = |target: &Rc<dyn IRenderTarget>| {
+        let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+        frame.clear(Color::from_rgb(255, 255, 255));
+        frame.draw_bitmap(&*layer, 1.0, Rect::new(0.0, 0.0, 32.0, 32.0), Rect::new(0.0, 0.0, 32.0, 32.0));
+        frame.dispose();
+    };
+    show(&target);
+    assert_eq!(BLUE, surface.rgba(24, 24));
+    // A frame that does not draw into the layer shows the same content.
+    show(&target);
+    assert_eq!(BLUE, surface.rgba(24, 24));
+    {
+        let mut drawing = layer.create_drawing_context();
+        drawing.push_clip(Rect::new(0.0, 0.0, 16.0, 32.0));
+        drawing.clear(Color::from_argb(0, 0, 0, 0));
+        fill(&mut *drawing, &solid(255, 0, 0), Rect::new(0.0, 0.0, 32.0, 32.0));
+        drawing.pop_clip();
+        drawing.dispose();
+    }
+    show(&target);
+    assert_eq!(RED, surface.rgba(8, 8), "the part drawn again");
+    assert_eq!(BLUE, surface.rgba(24, 24), "the part kept");
+    target.dispose();
+}
+
+/// One geometry drawn with two brushes: the second draw names the resource of the first.
+#[test]
+fn a_geometry_drawn_twice_in_a_frame_keeps_each_brush() {
+    let Some(context) = context() else { return };
+    let interface = crate::ProGpuPlatformRenderInterface::new();
+    let geometry = interface.create_rectangle_geometry(Rect::new(2.0, 2.0, 12.0, 12.0));
+    let surface = MemorySurface::new(48, 16);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    frame.draw_geometry(Some(&solid(255, 0, 0)), None, &*geometry);
+    frame.set_transform(Matrix::create_translation(16.0, 0.0));
+    frame.draw_geometry(Some(&solid(0, 0, 255)), None, &*geometry);
+    frame.set_transform(Matrix::create_translation(32.0, 0.0));
+    frame.draw_geometry(Some(&solid(255, 0, 0)), None, &*geometry);
+    frame.dispose();
+    assert_eq!(RED, surface.rgba(8, 8));
+    assert_eq!(BLUE, surface.rgba(24, 8));
+    assert_eq!(RED, surface.rgba(40, 8));
+    assert_eq!(WHITE, surface.rgba(16, 8), "between the draws");
+    target.dispose();
+}
+
 #[test]
 fn bitmaps_of_pixels_are_drawn() {
     let Some(context) = context() else { return };

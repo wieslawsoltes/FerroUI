@@ -295,9 +295,11 @@ rendered before the root pass begins.
 The stream and the C ABI do not change for this part; the pixels must not change either (the tests
 of the layers and of section 2.7 read back the same bytes before and after).
 
-A cached group (a visual with a cache mode) is then a group whose rectangle is kept from frame to
-frame: its span generations are its content revision, so a hit skips the CPU work for its content
-as well, which the cached layers of today do not.
+A cached group (a visual with a cache mode) needs no page of its own in the engine. The
+compositor already keeps it (`ServerCompositionVisualCache`): a layer of the backend, a texture of
+the device, drawn when its content changes, in part under the dirty rectangles, and sampled by
+every other frame. A frame that does not change the visual records one image draw for it and
+does no CPU work for its content.
 
 #### 2.3.6 The backend
 
@@ -355,7 +357,7 @@ second before any of this; section 6.2 has the numbers after each part):
 | R3 | Scenes per target | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
 | R4 | Pages that upload only the ranges that changed (written, one family at a time). Chunked buffers and the placement table: **not adopted** (section 2.3.12) | engine (family page compilers, uploads) | read-back equality against whole uploads for every family; upload bytes of a frame with one changed span (the metrics of the engine report them); the counter of shifted uploads |
 | R5 | The delta call | engine C ABI, bindings, backend | the same frames through deltas and through whole streams; validation errors of a bad span leave the scene as it was |
-| R6 | The other resources by identifier (paths, images), damage, cached groups | engine, backend | partial redraw scenarios of section 4 |
+| R6 | Images by content identity (a table beside the ascending resource ids), damage, geometries drawn again by resource within a frame; cached groups are the compositor's layers (section 2.3.5). A registry of paths across frames is not built (section 2.3.12) | engine, backend | partial redraw scenarios of section 4; a path drawn again reads back like the path sent twice; a layer kept across frames and redrawn in part |
 | R2 | Fragments in the backend against the whole-stream call: built, by reissuing the builder calls (section 2.3.6) | backend | the pixels of a fragment against those of its commands, in place, moved by whole pixels and under other clips; the backend suite |
 
 Half of the content of a gauntlet frame is new (section 2.3.2), so after step 1 the cost of a
@@ -592,6 +594,11 @@ variant, no second strike) or document the exact difference in section 2.4.1.
 
 #### 2.3.12 What this design does not settle
 
+- **Paths across frames.** A geometry drawn several times in a frame is in the stream once. A
+  registry of paths across frames, as glyph outlines have (section 2.3.8), is not built: path
+  segments are read at about ten places of the render execution, and no profile shows them as a
+  cost, while the outlines it was built for were most of the render thread. It is reconsidered
+  if the gauntlet profile of the quiet window shows the hash or copy of path segments.
 - **Chunked buffers and the placement table: not adopted.** Pages stay contiguous and upload the
   ranges that changed (R4). Two concrete reasons:
   - *The shared shaders.* A placement slot on every vertex changes the vertex formats of
@@ -1101,7 +1108,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P3 | Windows: the wgpu-native surface on macOS (`CAMetalLayer`), cooperative resize; `use_progpu()`; the ControlCatalog runs | catalog screenshots | done on macOS: offscreen, framebuffer and Metal window targets, `use_progpu()`, a window example with shapes (section 2.7); the ControlCatalog needs text (P4) |
 | P4 | Text: font manager, shaper, glyph runs, system fonts and fallback | the text tests of the backends; the text pages of the catalog | done on macOS: the font manager on the catalog of the engine, typefaces, the shaper of the engine checked against HarfBuzz, glyph runs with bounds and outline geometry (section 2.4), glyphs drawn from the persistent atlas at the measured weight of the platform text (section 2.4.1, numbers in section 6); open: the sample grid of the rasterizer, LCD text, `get_intersections` |
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG, JPEG, GIF (first frame) and BMP decode, and PNG and JPEG encode, through the image module (section 2.5); blur, drop shadow, gradient and solid opacity masks, every blend mode of a compositing layer, inset shadows and the shadows of uneven corners are drawn (section 2.5.1); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: custom effects of #455, opacity masks of image and visual brushes, acrylic |
-| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R1, R3, R4, R5 and R6 are open |
+| P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R4 (range uploads), R5 (off by default) and R6 are written (section 2.3.7); R1 and R3 are open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | written (section 2.2), first compiled in CI; the catalog runs and the proof of cooperative resize in the VMs are open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | written (section 2.6), first compiled in CI; no browser run yet |
