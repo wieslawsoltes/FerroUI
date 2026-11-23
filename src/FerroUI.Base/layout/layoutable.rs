@@ -43,21 +43,27 @@ pub enum VerticalAlignment {
 #[repr(C)]
 pub struct Layoutable {
     base: Visual,
+    #[cfg(not(feature = "layout-columns"))]
     desired_size: Cell<Size>,
     /// The kept values of the size and margin properties, read many times a layout pass
     /// (desktop-performance.md, section 9.9).
     hot_sizes: HotSizes,
+    #[cfg(not(feature = "layout-columns"))]
     is_measure_valid: Cell<bool>,
     /// Whether the measure of this element and of every layoutable element below it is invalid
     /// (`LayoutHelper::invalidate_self_and_children_measure`): set by that walk, cleared when
     /// this element or one below it is measured. An addition (FerroUI deviation,
     /// desktop-performance.md section 9.21).
+    #[cfg(not(feature = "layout-columns"))]
     pub(crate) subtree_measure_invalid: Cell<bool>,
+    #[cfg(not(feature = "layout-columns"))]
     is_arrange_valid: Cell<bool>,
+    #[cfg(not(feature = "layout-columns"))]
     measuring: Cell<bool>,
     /// Set for the arrange of an element that was arranged, is still valid and is given the
     /// size it had at another place: its arrangement inside is what it was (`arrange`). An
     /// addition (FerroUI deviation, desktop-performance.md section 9.74).
+    #[cfg(not(feature = "layout-columns"))]
     arrange_moved_only: Cell<bool>,
     previous_measure: Cell<Option<Size>>,
     /// The available sizes over which the last measure holds (section 9.15).
@@ -411,7 +417,7 @@ impl LayoutableImpl for Layoutable {
         // or the element would not be valid: the size it took then is the size it takes now, and
         // its children are where they were. A scroll moves a content of a thousand rows without
         // a visit to one of them (section 9.74).
-        size = if this.arrange_moved_only.get() {
+        size = if this.arrange_moved_only_flag() {
             this.bounds().size()
         } else {
             this.arrange_override(size).constrain(size)
@@ -607,12 +613,18 @@ impl Layoutable {
     pub fn construct() -> Self {
         Self {
             base: Visual::construct(),
+            #[cfg(not(feature = "layout-columns"))]
             desired_size: Cell::new(Size::default()),
             hot_sizes: HotSizes::default(),
+            #[cfg(not(feature = "layout-columns"))]
             is_measure_valid: Cell::new(false),
+            #[cfg(not(feature = "layout-columns"))]
             subtree_measure_invalid: Cell::new(false),
+            #[cfg(not(feature = "layout-columns"))]
             is_arrange_valid: Cell::new(false),
+            #[cfg(not(feature = "layout-columns"))]
             arrange_moved_only: Cell::new(false),
+            #[cfg(not(feature = "layout-columns"))]
             measuring: Cell::new(false),
             previous_measure: Cell::new(None),
             measure_hold: Cell::new(None),
@@ -804,44 +816,63 @@ impl Layoutable {
 
     /// The size that this element computed during the measure pass of the
     /// layout process.
+    #[cfg(not(feature = "layout-columns"))]
     #[inline]
     pub fn desired_size(&self) -> Size {
         self.desired_size.get()
     }
 
+    /// The size that this element computed during the measure pass of the
+    /// layout process.
+    #[cfg(feature = "layout-columns")]
+    #[inline]
+    pub fn desired_size(&self) -> Size {
+        self.layout_slot.desired_size()
+    }
+
     fn set_desired_size(&self, value: Size) {
         // A layout pass sets this for every child, mostly to what it is: an unchanged size does
         // not read the property, whose accessor may be a call (it depends on the inlining).
-        if self.desired_size.get() == value {
+        let old = self.desired_size();
+        if old == value {
             return;
         }
-        self.set_and_raise_cell(Self::desired_size_property(), &self.desired_size, value);
+        #[cfg(not(feature = "layout-columns"))]
+        {
+            let _ = old;
+            self.set_and_raise_cell(Self::desired_size_property(), &self.desired_size, value);
+        }
+        #[cfg(feature = "layout-columns")]
+        {
+            self.layout_slot.set_desired_size(value);
+            self.raise_direct_changed(Self::desired_size_property(), old, value);
+        }
     }
 
     /// Whether the control's layout measure is valid.
     #[inline]
     pub fn is_measure_valid(&self) -> bool {
-        self.is_measure_valid.get()
+        self.measure_valid_flag()
     }
 
     /// Whether the control's layout arrange is valid.
     #[inline]
     pub fn is_arrange_valid(&self) -> bool {
-        self.is_arrange_valid.get()
+        self.arrange_valid_flag()
     }
 
     /// The private setter of `IsMeasureValid`, which nothing of the
     /// framework calls; the benchmarks reach it (`layout::testing`).
     #[cfg(any(test, feature = "testing"))]
     pub(crate) fn set_is_measure_valid(&self, value: bool) {
-        self.is_measure_valid.set(value);
+        self.set_measure_valid_flag(value);
     }
 
     /// The private setter of `IsArrangeValid` (see
     /// [`set_is_measure_valid`](Self::set_is_measure_valid)).
     #[cfg(any(test, feature = "testing"))]
     pub(crate) fn set_is_arrange_valid(&self, value: bool) {
-        self.is_arrange_valid.set(value);
+        self.set_arrange_valid_flag(value);
     }
 
     /// Whether the control's layout should be snapped to pixel boundaries.
@@ -894,7 +925,7 @@ impl Layoutable {
     /// a caller gets is said here and not left to where a build puts its code (section 9.80).
     #[inline]
     pub fn measure(&self, available_size: Size) {
-        if self.is_measure_valid.get() {
+        if self.measure_valid_flag() {
             // The size it was measured at: nothing to do, and nothing to ask a hold.
             let previous = self.previous_measure.get();
             if previous == Some(available_size) {
@@ -921,11 +952,11 @@ impl Layoutable {
         self.measure_hold.set(None);
         crate::perf_count!(MeasuresExecuted);
 
-        self.is_measure_valid.set(true);
+        self.set_measure_valid_flag(true);
         self.clear_subtree_measure_invalid();
 
-        self.measuring.set(true);
-        let guard = MeasuringGuard(&self.measuring);
+        self.set_measuring_flag(true);
+        let guard = MeasuringGuard(self);
         let desired_size = self.measure_core(available_size);
         drop(guard);
 
@@ -949,7 +980,7 @@ impl Layoutable {
     /// 9.15 of desktop-performance.md): a panel whose children's constraints follow its own reads
     /// its children's holds to compute its own.
     pub fn measure_hold(&self) -> Option<crate::layout::MeasureHold> {
-        if self.is_measure_valid.get() { self.measure_hold.get() } else { None }
+        if self.measure_valid_flag() { self.measure_hold.get() } else { None }
     }
 
     /// Arranges the control and its children.
@@ -960,7 +991,7 @@ impl Layoutable {
     /// element was arranged at, so it is told there.
     #[inline]
     pub fn arrange(&self, rect: Rect) {
-        if self.is_measure_valid.get() && self.is_arrange_valid.get() && self.previous_arrange.get() == Some(rect) {
+        if self.measure_valid_flag() && self.arrange_valid_flag() && self.previous_arrange.get() == Some(rect) {
             return;
         }
         self.arrange_at(rect);
@@ -974,17 +1005,17 @@ impl Layoutable {
             panic!("Invalid Arrange rectangle.");
         }
 
-        if !self.is_measure_valid.get() {
+        if !self.measure_valid_flag() {
             self.measure(self.previous_measure.get().unwrap_or(rect.size()));
         }
 
         // Measured again, and still where it was.
-        if self.is_arrange_valid.get() && self.previous_arrange.get() == Some(rect) {
+        if self.arrange_valid_flag() && self.previous_arrange.get() == Some(rect) {
             return;
         }
 
-        let valid = self.is_arrange_valid.get();
-        self.is_arrange_valid.set(true);
+        let valid = self.arrange_valid_flag();
+        self.set_arrange_valid_flag(true);
         crate::perf_count!(ArrangesExecuted);
         // See `arrange_moved_only`. An element that is not in a tree has no layout manager that
         // arranges what is invalid below it: the arrangement of its inside is the visit that
@@ -994,9 +1025,9 @@ impl Layoutable {
             && self.previous_arrange.get().is_some_and(|previous| previous.size() == rect.size())
             && self.is_attached_to_visual_tree()
         {
-            self.arrange_moved_only.set(true);
+            self.set_arrange_moved_only_flag(true);
             self.arrange_core(rect);
-            self.arrange_moved_only.set(false);
+            self.set_arrange_moved_only_flag(false);
         } else {
             self.arrange_core(rect);
         }
@@ -1008,11 +1039,13 @@ impl Layoutable {
     /// descendants of a flagged element are flagged), so the first ancestor without it ends the
     /// walk; in a layout pass that is the parent, measured first.
     fn clear_subtree_measure_invalid(&self) {
-        self.subtree_measure_invalid.set(false);
+        self.set_subtree_measure_invalid_flag(false);
         let mut parent = self.get_visual_parent();
         while let Some(visual) = parent {
             if let Some(layoutable) = visual.downcast_ref::<Layoutable>() {
-                if !layoutable.subtree_measure_invalid.replace(false) {
+                let flagged = layoutable.subtree_measure_invalid_flag();
+                layoutable.set_subtree_measure_invalid_flag(false);
+                if !flagged {
                     break;
                 }
             }
@@ -1023,9 +1056,9 @@ impl Layoutable {
     /// Invalidates the measurement of the control and queues a new layout
     /// pass.
     pub fn invalidate_measure(&self) {
-        if self.is_measure_valid.get() {
-            self.is_measure_valid.set(false);
-            self.is_arrange_valid.set(false);
+        if self.measure_valid_flag() {
+            self.set_measure_valid_flag(false);
+            self.set_arrange_valid_flag(false);
 
             if self.is_attached_to_visual_tree() {
                 if let Some(manager) = self.get_layout_manager() {
@@ -1040,8 +1073,8 @@ impl Layoutable {
     /// Invalidates the arrangement of the control and queues a new layout
     /// pass.
     pub fn invalidate_arrange(&self) {
-        if self.is_arrange_valid.get() {
-            self.is_arrange_valid.set(false);
+        if self.arrange_valid_flag() {
+            self.set_arrange_valid_flag(false);
             if let Some(manager) = self.get_layout_manager() {
                 manager.invalidate_arrange(self);
             }
@@ -1051,7 +1084,7 @@ impl Layoutable {
 
     /// Called by a child when its desired size changes.
     pub(crate) fn child_desired_size_changed(&self, _control: &Layoutable) {
-        if !self.measuring.get() {
+        if !self.measuring_flag() {
             self.invalidate_measure();
         }
     }
@@ -1091,10 +1124,10 @@ impl Layoutable {
             return;
         }
 
-        if !self.is_measure_valid.get() {
+        if !self.measure_valid_flag() {
             layout_manager.invalidate_measure(self);
             self.invalidate_visual();
-        } else if !self.is_arrange_valid.get() {
+        } else if !self.arrange_valid_flag() {
             layout_manager.invalidate_arrange(self);
             self.invalidate_visual();
         }
@@ -1121,12 +1154,51 @@ impl Layoutable {
 }
 
 /// Resets the "measuring" flag even if `measure_core` unwinds.
-struct MeasuringGuard<'a>(&'a Cell<bool>);
+struct MeasuringGuard<'a>(&'a Layoutable);
 
 impl Drop for MeasuringGuard<'_> {
     fn drop(&mut self) {
-        self.0.set(false);
+        self.0.set_measuring_flag(false);
     }
+}
+
+/// The layout flags of an element: fields, or bits of its row in the columns of the window with
+/// the feature `layout-columns` (#1038).
+macro_rules! layout_flags {
+    ($($get:ident $set:ident $field:ident $bit:ident;)*) => {
+        impl Layoutable {
+            $(
+                #[cfg(not(feature = "layout-columns"))]
+                #[inline(always)]
+                pub(crate) fn $get(&self) -> bool {
+                    self.$field.get()
+                }
+                #[cfg(not(feature = "layout-columns"))]
+                #[inline(always)]
+                pub(crate) fn $set(&self, value: bool) {
+                    self.$field.set(value);
+                }
+                #[cfg(feature = "layout-columns")]
+                #[inline]
+                pub(crate) fn $get(&self) -> bool {
+                    self.layout_slot.flag(super::layout_columns::$bit)
+                }
+                #[cfg(feature = "layout-columns")]
+                #[inline]
+                pub(crate) fn $set(&self, value: bool) {
+                    self.layout_slot.set_flag(super::layout_columns::$bit, value);
+                }
+            )*
+        }
+    };
+}
+
+layout_flags! {
+    measure_valid_flag set_measure_valid_flag is_measure_valid MEASURE_VALID;
+    subtree_measure_invalid_flag set_subtree_measure_invalid_flag subtree_measure_invalid SUBTREE_MEASURE_INVALID;
+    arrange_valid_flag set_arrange_valid_flag is_arrange_valid ARRANGE_VALID;
+    measuring_flag set_measuring_flag measuring MEASURING;
+    arrange_moved_only_flag set_arrange_moved_only_flag arrange_moved_only ARRANGE_MOVED_ONLY;
 }
 
 /// The kept values of the properties of a layoutable its measure and arrange read: the sizes,

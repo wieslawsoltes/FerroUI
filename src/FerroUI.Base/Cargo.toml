@@ -26,6 +26,9 @@ autotests = false
 path = "lib.rs"
 
 [features]
+# The prototype of #1038: geometry and layout flags in flat columns per window, behind the same
+# methods. Off by default, and not for release until it has its own PR and gate.
+layout-columns = []
 # Development-only tracking of explicit writes to reload-owned root properties.
 hot-reload = []
 # Exposes the render test doubles in `rendering::testing` to other crates.

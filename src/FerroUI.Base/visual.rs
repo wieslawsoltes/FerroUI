@@ -54,7 +54,11 @@ const ELIDED_MOVE_NODES: u32 = 32;
 #[repr(C)]
 pub struct Visual {
     base: StyledElement,
+    #[cfg(not(feature = "layout-columns"))]
     bounds: Cell<Rect>,
+    /// The row of the geometry and layout flags in the columns of the window (#1038).
+    #[cfg(feature = "layout-columns")]
+    pub(crate) layout_slot: crate::layout::layout_columns::LayoutSlot,
     // Not upstream (docs/porting/desktop-performance.md, section 9.67): the two are read by
     // cloning and written whole, so they are cells without a borrow flag.
     presentation_source: OptionCell<Rc<dyn IPresentationSource>>,
@@ -425,6 +429,8 @@ impl VisualImpl for Visual {
 
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.presentation_source.set(Some(e.presentation_source().clone()));
+        #[cfg(feature = "layout-columns")]
+        this.layout_slot.move_to_window(Rc::as_ptr(e.presentation_source()) as *const () as usize);
         bump_composition_holder_version();
         ROOTED_VISUAL_CHILDREN_COUNT.with(|count| count.set(count.get() + 1));
 
@@ -505,6 +511,8 @@ impl VisualImpl for Visual {
         this.update_is_effectively_visible(true);
         this.on_detached_from_visual_tree(e);
         this.detach_from_compositor();
+        #[cfg(feature = "layout-columns")]
+        this.layout_slot.move_to_detached();
         if let Some(events) = this.rare_events.get().filter(|events| !events.detached_from_visual_tree.is_empty()) {
             for (_, handler) in events.detached_from_visual_tree.snapshot().iter() {
                 handler(e);
@@ -1193,7 +1201,10 @@ impl Visual {
     pub fn construct() -> Self {
         Self {
             base: StyledElement::construct(),
+            #[cfg(not(feature = "layout-columns"))]
             bounds: Cell::new(Rect::default()),
+            #[cfg(feature = "layout-columns")]
+            layout_slot: crate::layout::layout_columns::LayoutSlot::new(),
             presentation_source: OptionCell::new(),
             visual_parent: OptionCell::new(),
             has_mirror_transform: Cell::new(false),
@@ -1272,20 +1283,38 @@ impl Visual {
     // --- properties -------------------------------------------------------
 
     /// The bounds of the control relative to its parent.
+    #[cfg(not(feature = "layout-columns"))]
     #[inline]
     pub fn bounds(&self) -> Rect {
         self.bounds.get()
+    }
+
+    /// The bounds of the control relative to its parent.
+    #[cfg(feature = "layout-columns")]
+    #[inline]
+    pub fn bounds(&self) -> Rect {
+        self.layout_slot.bounds()
     }
 
     /// Sets the bounds of the control. Called by the layout system.
     pub fn set_bounds(&self, value: Rect) {
         // A layout pass sets this for every child, mostly to what it is: unchanged bounds do not
         // read the property, whose accessor may be a call (it depends on the inlining).
-        if self.bounds.get() == value {
+        let old = self.bounds();
+        if old == value {
             return;
         }
         bump_geometry_version();
-        self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
+        #[cfg(not(feature = "layout-columns"))]
+        {
+            let _ = old;
+            self.set_and_raise_cell(Self::bounds_property(), &self.bounds, value);
+        }
+        #[cfg(feature = "layout-columns")]
+        {
+            self.layout_slot.set_bounds(value);
+            self.raise_direct_changed(Self::bounds_property(), old, value);
+        }
     }
 
     /// The answer of a class that overrides `render` and not `resize_changes_drawing`: a
@@ -1684,7 +1713,7 @@ impl Visual {
     /// [`composition_item_placement`](Self::composition_item_placement) keeps for the visuals
     /// below it: both give the same number, to the last bit.
     pub(crate) fn composition_offset(&self, mark: bool) -> crate::Vector3D {
-        let bounds = self.bounds.get();
+        let bounds = self.bounds();
         let (x, y) = self.visual_parent().map_or((0.0, 0.0), |parent| parent.elided_origin(mark));
         crate::Vector3D::new(x + bounds.x, y + bounds.y, 0.0)
     }
@@ -1699,7 +1728,7 @@ impl Visual {
         if mark {
             self.elided_state.set(self.elided_state.get() | ELIDED_OFFSET_THROUGH);
         }
-        let position = self.bounds.get();
+        let position = self.bounds();
         (x + position.x, y + position.y)
     }
 
@@ -1714,7 +1743,7 @@ impl Visual {
     ) -> Option<(Ref<Visual>, (f64, f64))> {
         placements.validate();
         let (holder, x, y) = Self::placement_below(&self.visual_parent()?, placements)?;
-        let bounds = self.bounds.get();
+        let bounds = self.bounds();
         let offset = (x + bounds.x, y + bounds.y);
         debug_assert!(
             self.nearest_composition_ancestor().is_some_and(|ancestor| ancestor.ptr_eq(&holder))
@@ -1746,7 +1775,7 @@ impl Visual {
         // the mark does: the mark is taken away where the entries are dropped (the visual gets a
         // composition visual, or leaves its tree).
         visual.elided_state.set(visual.elided_state.get() | ELIDED_OFFSET_THROUGH);
-        let position = visual.bounds.get();
+        let position = visual.bounds();
         let (x, y) = (x + position.x, y + position.y);
         placements.below.insert(key, (holder.clone(), x, y));
         Some((holder, x, y))
@@ -1759,7 +1788,7 @@ impl Visual {
     /// composition visual ([`elided_origin`](Self::elided_origin)): the walk down the visuals
     /// that moved carries it, so no visual walks up for it (section 9.47).
     fn synchronize_composition_offset(&self, origin: (f64, f64)) {
-        let bounds = self.bounds.get();
+        let bounds = self.bounds();
         let offset = (origin.0 + bounds.x, origin.1 + bounds.y);
         debug_assert!(
             self.composition_offset(false) == crate::Vector3D::new(offset.0, offset.1, 0.0),
@@ -1806,7 +1835,7 @@ impl Visual {
             if !has_composition_visual && child.elided_state.get() & ELIDED_OFFSET_THROUGH != 0 {
                 // As `elided_origin` adds them: nothing for a visual out of the tree.
                 let below = if child.is_attached_to_visual_tree() {
-                    let position = child.bounds.get();
+                    let position = child.bounds();
                     (origin.0 + position.x, origin.1 + position.y)
                 } else {
                     (0.0, 0.0)
@@ -1985,7 +2014,7 @@ impl Visual {
     /// The size the drawing of the visual is clipped to as an item.
     pub(crate) fn composition_item_clip(&self) -> Option<(f64, f64)> {
         self.clip_to_bounds().then(|| {
-            let bounds = self.bounds.get();
+            let bounds = self.bounds();
             (bounds.width, bounds.height)
         })
     }

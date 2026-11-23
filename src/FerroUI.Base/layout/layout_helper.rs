@@ -131,7 +131,7 @@ impl LayoutHelper {
         fn inner(target: &Visual) {
             let layoutable = target.downcast_ref::<Layoutable>();
             if let Some(layoutable) = layoutable {
-                if layoutable.subtree_measure_invalid.get() {
+                if layoutable.subtree_measure_invalid_flag() {
                     return;
                 }
                 layoutable.invalidate_measure();
@@ -142,7 +142,7 @@ impl LayoutHelper {
                 }
             }
             if let Some(layoutable) = layoutable {
-                layoutable.subtree_measure_invalid.set(!layoutable.is_measure_valid());
+                layoutable.set_subtree_measure_invalid_flag(!layoutable.is_measure_valid());
             }
         }
         inner(control);

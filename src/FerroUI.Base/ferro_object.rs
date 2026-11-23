@@ -877,6 +877,17 @@ impl FerroObject {
         true
     }
 
+    /// Raises the change of a direct property whose value is kept outside the object (#1038).
+    #[cfg(feature = "layout-columns")]
+    pub(crate) fn raise_direct_changed<T: PropertyValue>(
+        &self,
+        property: &'static DirectPropertyBase<T>,
+        old: T,
+        value: T,
+    ) {
+        self.raise_property_changed(property, Some(&old), &value, BindingPriority::LocalValue, true)
+    }
+
     // --- untyped access ---------------------------------------------------
 
     /// Gets a property value as an untyped value.
