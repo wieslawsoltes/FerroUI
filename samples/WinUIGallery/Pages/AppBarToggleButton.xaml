@@ -2,9 +2,9 @@
      AppBarButton_Click of AppBarToggleButtonPage.xaml.cs (command_samples.rs); see ../NOTICE.md.
      WinUI's AppBarToggleButton is FerroUI's CommandBarToggleButton. Icon="Shuffle" is a
      SymbolIcon; the source's AppBarToggleButton.Content of the path icon is the Icon (the template
-     presents the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's
-     Slices2.png, set by the code behind, which is not drawn in the foreground's single color as a
-     BitmapIcon is. The glyph of the symbol icon needs the symbol font of the platform. -->
+     presents the Icon). BitmapIcon
+     is the control of ferroui-controls-icons, with the source's Slices2.png loaded by the code
+     behind. The glyph of the symbol icon needs the symbol font of the platform. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="AppBarToggleButtonExample1" Spacing="8">
@@ -21,7 +21,7 @@
     <TextBlock Text="An AppBarToggleButton with a bitmap icon." FontSize="18" />
     <StackPanel Orientation="Horizontal">
       <CommandBarToggleButton x:Name="Button2" Label="BitmapIcon">
-        <CommandBarToggleButton.Icon><Image x:Name="Button2Icon" /></CommandBarToggleButton.Icon>
+        <CommandBarToggleButton.Icon><BitmapIcon x:Name="Button2Icon" /></CommandBarToggleButton.Icon>
       </CommandBarToggleButton>
       <TextBlock x:Name="Control2Output" Margin="8,0,0,0" VerticalAlignment="Center" />
     </StackPanel>

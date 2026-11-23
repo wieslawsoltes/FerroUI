@@ -4,17 +4,16 @@
 //! theme images of the Spacing and Typography pages.
 //!
 //! FerroUI's RadialGradientBrush has no `MappingMode`: each point and radius has a unit, Relative
-//! for RelativeToBoundingBox and Absolute for Absolute. FerroUI has no BitmapIcon: the bitmap icon
-//! is an Image of the source's bitmap, and its `ShowAsMonochrome` a rectangle of the foreground
-//! brush masked by the bitmap (the icon drawn in one color, as WinUI's monochrome bitmap icon).
+//! for RelativeToBoundingBox and Absolute for Absolute. The bitmap and image icons are
+//! the controls of `ferroui-controls-icons`.
 
 use ferroui_base::media::imaging::Bitmap;
-use ferroui_base::media::{GradientSpreadMethod, IImage, IImageBrushSource, ImageBrush, RadialGradientBrush, Stretch};
+use ferroui_base::media::{GradientSpreadMethod, IImage, RadialGradientBrush};
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Ref, RelativePoint, RelativeScalar, RelativeUnit};
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
-use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{ComboBox, Control, Image, Slider};
+use ferroui_controls::{ComboBox, Control, Slider};
+use ferroui_controls_icons::{BitmapIcon, ImageIcon};
 use std::rc::Rc;
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
@@ -136,43 +135,23 @@ fn wire_radial_gradient_brush(root: &Ref<Control>) {
 
 const SLICES: &str = "ferres://WinUIGallery/Assets/SampleMedia/Slices.png";
 
-/// `MonochromeButton_CheckedChanged`: `ShowAsMonochrome` of the bitmap icon, which shows the
-/// bitmap again.
-fn show_as_monochrome(root: &Ref<Control>, monochrome: bool) {
-    let bitmap = load_bitmap(SLICES);
-    let image = root.get_control::<Image>("SlicesImage");
-    image.set_source(bitmap.clone().map(|bitmap| bitmap as Rc<dyn IImage>));
-    // The image keeps the icon's size; the monochrome icon is drawn over it.
-    image.set_opacity(if monochrome { 0.0 } else { 1.0 });
-    let mask = root.get_control::<Rectangle>("SlicesMonochrome");
-    let brush = ImageBrush::new();
-    brush.set_stretch(Stretch::Uniform);
-    brush.set_source(bitmap.map(|bitmap| bitmap as Rc<dyn IImageBrushSource>));
-    mask.set_opacity_mask(Some(brush.into()));
-    mask.set_is_visible(monochrome);
-}
-
-/// Whether the bitmap icon of the IconElement page is drawn in one color.
-pub(crate) fn is_monochrome(root: &Ref<Control>) -> bool {
-    root.get_control::<Rectangle>("SlicesMonochrome").is_visible()
-}
-
 fn wire_icon_element(root: &Ref<Control>) {
-    // The markup's ShowAsMonochrome="False".
-    show_as_monochrome(root, false);
+    let icon = root.get_control::<BitmapIcon>("SlicesIcon");
+    icon.set_source(load_bitmap(SLICES));
+    // `MonochromeButton_CheckedChanged`: `ShowAsMonochrome` of the bitmap icon.
     let check = root.get_control::<ToggleButton>("MonochromeButton");
     let weak_check = check.downgrade();
-    let weak_root = root.downgrade();
+    let weak_icon = icon.downgrade();
     check.property_changed(move |change| {
         if change.property() != ToggleButton::is_checked_property().as_property() {
             return;
         }
-        if let (Some(check), Some(root)) = (weak_check.upgrade(), weak_root.upgrade()) {
-            show_as_monochrome(&root, check.is_checked() == Some(true));
+        if let (Some(check), Some(icon)) = (weak_check.upgrade(), weak_icon.upgrade()) {
+            icon.set_show_as_monochrome(check.is_checked() == Some(true));
         }
     });
     // The ImageIcon with the source's PNG.
-    root.get_control::<Image>("ImageExample1Icon")
+    root.get_control::<ImageIcon>("ImageExample1Icon")
         .set_source(load_bitmap(SLICES).map(|bitmap| bitmap as Rc<dyn IImage>));
 }
 

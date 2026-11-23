@@ -7,6 +7,7 @@
 
 use ferroui_base::input::{Key, KeyGesture, KeyModifiers};
 use ferroui_base::{BoxedValue, Ref};
+use ferroui_controls_icons::BitmapIcon;
 use ferroui_controls::{
     Button, CommandBar, CommandBarButton, CommandBarSeparator, CommandBarToggleButton, Control,
     Image, Symbol, SymbolIcon, TextBlock,
@@ -25,11 +26,12 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
     }
 }
 
-/// The source's `BitmapIcon` of `Button2`: an Image of Slices2.png (FerroUI has no BitmapIcon).
+/// The source's `BitmapIcon` of `Button2`, with its `UriSource` Slices2.png, in the foreground's
+/// single color (the default of `ShowAsMonochrome`).
 fn load_bitmap_icon(root: &Ref<Control>) {
-    let image = root.get_control::<Image>("Button2Icon");
+    let icon = root.get_control::<BitmapIcon>("Button2Icon");
     match crate::assets::load_bitmap(SLICES2) {
-        Ok(bitmap) => image.set_source(Some(Rc::new(bitmap))),
+        Ok(bitmap) => icon.set_source(Some(Rc::new(bitmap))),
         Err(error) => {
             let diagnostic = root.get_control::<TextBlock>("Button2IconError");
             diagnostic.set_text(Some(&format!("Slices2.png: {error}")));

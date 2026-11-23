@@ -1,14 +1,14 @@
 //! The RadialGradientBrush, IconElement, Spacing and Typography pages: the source's examples with
 //! their code behind (`brush_samples.rs`).
 
-use crate::brush_samples::{design_image_uri, is_monochrome, radial_brush, TYPE_RAMP};
+use crate::brush_samples::{design_image_uri, radial_brush, TYPE_RAMP};
 use crate::{examples, tests::start};
 use ferroui_base::media::GradientSpreadMethod;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Point, Ref, RelativeUnit};
 use ferroui_controls::primitives::ToggleButton;
-use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{Border, ComboBox, Control, Image, Slider, TextBlock};
+use ferroui_controls_icons::{BitmapIcon, ImageIcon};
 
 fn near(actual: Point, x: f64, y: f64) -> bool {
     (actual.x - x).abs() < 1e-9 && (actual.y - y).abs() < 1e-9
@@ -51,18 +51,15 @@ fn radial_gradient_brush_sliders_and_boxes_set_the_brush() {
 fn icon_element_monochrome_option_draws_the_bitmap_icon_in_one_color() {
     let _application = start();
     let root = page("IconElement");
-    assert!(!is_monochrome(&root), "the markup's ShowAsMonochrome is False");
-    assert_eq!(root.get_control::<Image>("SlicesImage").opacity(), 1.0);
+    let icon = root.get_control::<BitmapIcon>("SlicesIcon");
+    assert!(!icon.show_as_monochrome(), "the markup's ShowAsMonochrome is False");
+    assert!(icon.source().is_some(), "the source's Slices.png");
+    assert!(root.get_control::<ImageIcon>("ImageExample1Icon").source().is_some());
     let check = root.get_control::<ToggleButton>("MonochromeButton");
     check.set_is_checked(Some(true));
-    assert!(is_monochrome(&root));
-    assert_eq!(root.get_control::<Image>("SlicesImage").opacity(), 0.0);
-    assert!(root
-        .get_control::<Rectangle>("SlicesMonochrome")
-        .opacity_mask()
-        .is_some());
+    assert!(icon.show_as_monochrome());
     check.set_is_checked(Some(false));
-    assert!(!is_monochrome(&root));
+    assert!(!icon.show_as_monochrome());
     assert!(root.get_control::<TextBlock>("SvgUnavailable").text().is_some());
 }
 

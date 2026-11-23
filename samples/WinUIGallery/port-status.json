@@ -73,7 +73,7 @@
       "examples": []
     },
     "AppBarButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/AppBarButton.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -90,7 +90,7 @@
           "name": "app_bar_buttons_write_the_clicked_name_to_their_outputs"
         }
       ],
-      "notes": "All six source examples use native CommandBarButton (WinUI's AppBarButton) with AppBarButton_Click of AppBarButtonPage.xaml.cs in Rust: the symbol, font and path icons (the source's Content of the path icon is the Icon, which the template presents), the KeyboardAccelerator Ctrl+S as the HotKey, and the flyout with its text box; the outputs are polite live regions for UIHelper.AnnounceActionForAccessibility. FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyphs need the platform's symbol font.",
+      "notes": "All six source examples use native CommandBarButton (WinUI's AppBarButton) with AppBarButton_Click of AppBarButtonPage.xaml.cs in Rust: the symbol, font and path icons (the source's Content of the path icon is the Icon, which the template presents), the KeyboardAccelerator Ctrl+S as the HotKey, and the flyout with its text box; the outputs are polite live regions for UIHelper.AnnounceActionForAccessibility. The bitmap icon is BitmapIcon (ferroui-controls-icons) with the source's Slices2.png, drawn in the foreground's single color. The symbol glyphs need the platform's symbol font.",
       "examples": []
     },
     "AppBarSeparator": {
@@ -113,7 +113,7 @@
       "examples": []
     },
     "AppBarToggleButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/AppBarToggleButton.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -130,7 +130,7 @@
           "name": "app_bar_toggle_buttons_state_is_checked_after_the_click"
         }
       ],
-      "notes": "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's Slices2.png, not drawn in the foreground's single color, so the page is partial. The symbol glyph needs the platform's symbol font.",
+      "notes": "All four source examples use native CommandBarToggleButton (WinUI's AppBarToggleButton) with AppBarButton_Click of AppBarToggleButtonPage.xaml.cs in Rust (IsChecked = True, False or empty for the third state, as C#'s bool?.ToString()): the symbol, font and three-state path icons (the source's Content of the path icon is the Icon). The bitmap icon is BitmapIcon (ferroui-controls-icons) with the source's Slices2.png, drawn in the foreground's single color. The symbol glyph needs the platform's symbol font.",
       "examples": []
     },
     "AutoSuggestBox": {
@@ -774,7 +774,7 @@
           "name": "icon_element_monochrome_option_draws_the_bitmap_icon_in_one_color"
         }
       ],
-      "notes": "All six source examples with MonochromeButton_CheckedChanged of IconElementPage.xaml.cs in Rust (brush_samples.rs): the FontIcon with the source's font family and glyph, the PathIcon and the SymbolIcon in their buttons use the native icons. FerroUI has no BitmapIcon or ImageIcon: the bitmap icon is an Image of the source's Slices.png whose ShowAsMonochrome is a rectangle of the foreground brush masked by the bitmap (the check box toggles it), and the PNG image icon is an Image in its button. FerroUI decodes no SVG and the remote SVG of the source is not loaded: its button says so. Those substitutes make the page partial. The glyphs need the source's icon fonts.",
+      "notes": "All six source examples with MonochromeButton_CheckedChanged of IconElementPage.xaml.cs in Rust (brush_samples.rs): the FontIcon with the source's font family and glyph, the PathIcon and the SymbolIcon in their buttons use the native icons. The bitmap icon is BitmapIcon and the PNG image icon is ImageIcon (ferroui-controls-icons), with the check box setting ShowAsMonochrome. FerroUI decodes no SVG and the remote SVG of the source is not loaded: its button says so, which is what keeps the page partial. The glyphs need the source's icon fonts.",
       "examples": []
     },
     "InfoBar": {

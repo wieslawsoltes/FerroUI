@@ -1,7 +1,6 @@
 <!-- Ported from the six pinned IconElement examples of WinUI Gallery (14061eea) and the code behind
-     of IconElementPage.xaml.cs (brush_samples.rs); see ../NOTICE.md. FerroUI has no BitmapIcon or
-     ImageIcon: the bitmap icon is an Image of the source's Slices.png with, for ShowAsMonochrome, a
-     rectangle of the foreground brush masked by the bitmap over it; the PNG image icon is an Image.
+     of IconElementPage.xaml.cs (brush_samples.rs); see ../NOTICE.md. BitmapIcon and ImageIcon are the
+     controls of ferroui-controls-icons, whose bitmaps the code behind loads.
      FerroUI decodes no SVG and the remote SVG of the source is not loaded: that button says so.
      BodyTextBlockStyle is the default text. The glyphs need the source's icon fonts. -->
 <StackPanel xmlns="https://github.com/ferroui"
@@ -12,11 +11,7 @@
       <StackPanel>
         <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
                    Text="The ShowAsMonochrome property (true by default) will result in a solid block of the foreground color if the property is set to true and the icon is more than one color. This behavior can be ignored by setting the ShowAsMonochrome property to false." />
-        <Grid x:Name="SlicesIcon" Width="50" HorizontalAlignment="Left">
-          <Image x:Name="SlicesImage" Stretch="Uniform" />
-          <Rectangle x:Name="SlicesMonochrome" IsVisible="False"
-                     Fill="{DynamicResource TextFillColorPrimaryBrush}" />
-        </Grid>
+        <BitmapIcon x:Name="SlicesIcon" Width="50" HorizontalAlignment="Left" ShowAsMonochrome="False" />
       </StackPanel>
       <CheckBox x:Name="MonochromeButton" Grid.Column="1" Content="Monochrome" />
     </Grid>
@@ -36,7 +31,7 @@
     <TextBlock Margin="0,0,0,12" TextWrapping="Wrap"
                Text="To use an ImageIcon as the icon for a control, you can set image that has a file format supported by the Image class. The two examples here show a PNG and SVG image as the icon." />
     <Button x:Name="ImageExample1" Width="100" AutomationProperties.Name="ImageExample1">
-      <Image x:Name="ImageExample1Icon" Stretch="Uniform" />
+      <ImageIcon x:Name="ImageExample1Icon" />
     </Button>
   </StackPanel>
 
