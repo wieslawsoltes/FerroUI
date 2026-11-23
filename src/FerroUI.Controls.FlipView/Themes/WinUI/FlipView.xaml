@@ -1,0 +1,120 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/CommonStyles/FlipView_themeresources.xaml (DefaultFlipViewStyle)
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes:
+  - The resources are those of the WinUI theme (Resources/FlipView_themeresources.xaml).
+  - The Grid of the template (background, border, corner radius) is a Border around a Panel.
+  - ScrollingHost is PART_ScrollViewer, which Carousel requires. The items panel is the panel of
+    Carousel, not the VirtualizingStackPanel of the source.
+  - The four template-local button templates are one control theme of Button, whose arrow is a
+    Path: the glyphs EDD9 to EDDC of the source need the symbol font. The direction is the
+    Tag of the button.
+  - The control shows and hides the buttons in code, as WinUI does.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <StreamGeometry x:Key="FlipViewArrowLeft">M4,0 L0,4 L4,8</StreamGeometry>
+  <StreamGeometry x:Key="FlipViewArrowRight">M0,0 L4,4 L0,8</StreamGeometry>
+  <StreamGeometry x:Key="FlipViewArrowUp">M0,4 L4,0 L8,4</StreamGeometry>
+  <StreamGeometry x:Key="FlipViewArrowDown">M0,0 L4,4 L8,0</StreamGeometry>
+
+  <ControlTheme x:Key="FlipViewNavigationButtonTheme" TargetType="Button">
+    <Setter Property="Background" Value="{DynamicResource FlipViewNextPreviousButtonBackground}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource FlipViewNextPreviousButtonBorderBrush}" />
+    <Setter Property="BorderThickness" Value="{DynamicResource FlipViewButtonBorderThemeThickness}" />
+    <Setter Property="Foreground" Value="{DynamicResource FlipViewNextPreviousArrowForeground}" />
+    <Setter Property="Padding" Value="0" />
+    <Setter Property="Margin" Value="1" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Button">
+        <Border x:Name="Root"
+                Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Path x:Name="Arrow"
+                HorizontalAlignment="Center"
+                VerticalAlignment="Center"
+                Data="{TemplateBinding Content}"
+                Stroke="{TemplateBinding Foreground}"
+                StrokeThickness="1.5" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource FlipViewNextPreviousButtonBackgroundPointerOver}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FlipViewNextPreviousButtonBorderBrushPointerOver}" />
+      <Setter Property="Foreground" Value="{DynamicResource FlipViewNextPreviousArrowForegroundPointerOver}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource FlipViewNextPreviousButtonBackgroundPressed}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource FlipViewNextPreviousButtonBorderBrushPressed}" />
+      <Setter Property="Foreground" Value="{DynamicResource FlipViewNextPreviousArrowForegroundPressed}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type FlipView}" TargetType="FlipView">
+    <Setter Property="Background" Value="{DynamicResource FlipViewBackground}" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="KeyboardNavigation.TabNavigation" Value="Once" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Hidden" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="ItemContainerTheme" Value="{DynamicResource DefaultFlipViewItemStyle}" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="FlipView">
+        <Border Background="{TemplateBinding Background}"
+                BorderBrush="{TemplateBinding BorderBrush}"
+                BackgroundSizing="InnerBorderEdge"
+                BorderThickness="{TemplateBinding BorderThickness}"
+                CornerRadius="{TemplateBinding CornerRadius}">
+          <Panel>
+            <ScrollViewer x:Name="PART_ScrollViewer"
+                          HorizontalScrollBarVisibility="{TemplateBinding (ScrollViewer.HorizontalScrollBarVisibility)}"
+                          VerticalScrollBarVisibility="{TemplateBinding (ScrollViewer.VerticalScrollBarVisibility)}"
+                          BringIntoViewOnFocusChange="False"
+                          IsTabStop="False">
+              <ItemsPresenter x:Name="PART_ItemsPresenter"
+                              ItemsPanel="{TemplateBinding ItemsPanel}"
+                              Margin="{TemplateBinding Padding}" />
+            </ScrollViewer>
+            <Button x:Name="PreviousButtonHorizontal"
+                    Theme="{StaticResource FlipViewNavigationButtonTheme}"
+                    Content="{StaticResource FlipViewArrowLeft}"
+                    Width="16" Height="38"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    HorizontalAlignment="Left" VerticalAlignment="Center"
+                    IsVisible="False" />
+            <Button x:Name="NextButtonHorizontal"
+                    Theme="{StaticResource FlipViewNavigationButtonTheme}"
+                    Content="{StaticResource FlipViewArrowRight}"
+                    Width="16" Height="38"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    HorizontalAlignment="Right" VerticalAlignment="Center"
+                    IsVisible="False" />
+            <Button x:Name="PreviousButtonVertical"
+                    Theme="{StaticResource FlipViewNavigationButtonTheme}"
+                    Content="{StaticResource FlipViewArrowUp}"
+                    Width="38" Height="16"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    HorizontalAlignment="Center" VerticalAlignment="Top"
+                    IsVisible="False" />
+            <Button x:Name="NextButtonVertical"
+                    Theme="{StaticResource FlipViewNavigationButtonTheme}"
+                    Content="{StaticResource FlipViewArrowDown}"
+                    Width="38" Height="16"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    HorizontalAlignment="Center" VerticalAlignment="Bottom"
+                    IsVisible="False" />
+          </Panel>
+        </Border>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>

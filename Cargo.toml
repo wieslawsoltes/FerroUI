@@ -115,6 +115,7 @@ members = [
     "src/FerroUI.Controls.LiveCharts",
     "src/FerroUI.Controls.Repeater",
     "src/FerroUI.Controls.Inking",
+    "src/FerroUI.Controls.FlipView",
     "src/FerroUI.Controls.Icons",
     "src/TreeDataGrid/FerroUI.TreeDataGrid.Core",
     "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid",
@@ -371,6 +372,7 @@ ferroui-livecharts = { version = "=0.6.0-preview.1", path = "src/FerroUI.LiveCha
 ferroui-controls-livecharts = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.LiveCharts" }
 ferroui-controls-repeater = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Repeater" }
 ferroui-controls-inking = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Inking" }
+ferroui-controls-flip-view = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.FlipView" }
 ferroui-controls-icons = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Icons" }
 ferroui-treedatagrid-core = { version = "=0.6.0-preview.1", path = "src/TreeDataGrid/FerroUI.TreeDataGrid.Core" }
 ferroui-controls-treedatagrid = { version = "=0.6.0-preview.1", path = "src/TreeDataGrid/FerroUI.Controls.TreeDataGrid" }

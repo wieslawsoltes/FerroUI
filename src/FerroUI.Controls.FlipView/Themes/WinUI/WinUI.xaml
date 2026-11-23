@@ -1,0 +1,13 @@
+<!-- The control theme of FlipView for an application with the WinUI theme, whose FlipView
+     resources it uses. An application that uses the control includes this document; one that
+     does not links none of it. -->
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <MergeResourceInclude Source="ferres://FerroUI.Controls.FlipView/Themes/WinUI/FlipView.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+</Styles>
