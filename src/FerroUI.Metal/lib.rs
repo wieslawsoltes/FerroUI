@@ -13,6 +13,9 @@
 //! through Graphite, Vello through `wgpu`) reads them. Handles to Metal
 //! objects are passed as raw pointers, exactly as the platform hands them
 //! out.
+//!
+//! With the feature `scene3d`, on Apple targets: the Metal executor of 3D scenes
+//! ([`scene3d`], #608), the renderer of `Viewport3D` for the Skia backend on Graphite.
 
 mod i_metal_device;
 mod i_metal_external_objects_feature;
@@ -27,3 +30,6 @@ pub use i_metal_external_objects_feature::{
 
 #[cfg(all(target_os = "macos", feature = "offscreen"))]
 pub mod offscreen;
+
+#[cfg(all(target_vendor = "apple", feature = "scene3d"))]
+pub mod scene3d;
