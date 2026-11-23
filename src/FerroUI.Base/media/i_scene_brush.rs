@@ -21,6 +21,11 @@ pub trait ISceneBrush: ITileBrush {
         let _ = handler;
         None
     }
+
+    /// The visual a `VisualBrush` paints with. `None` for any other scene brush.
+    fn scene_visual(&self) -> Option<crate::Ref<crate::Visual>> {
+        None
+    }
 }
 
 /// The scene brush classes ([`VisualBrush`], [`DrawingBrush`]) behind a
@@ -36,6 +41,10 @@ impl<T: ObjectType + Upcast<Brush>> ISceneBrush for RefAdapter<T> {
     fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Option<Subscription> {
         let drawing = self.object().downcast_ref::<DrawingBrush>()?.drawing()?;
         Some(drawing.invalidated(move || handler()))
+    }
+
+    fn scene_visual(&self) -> Option<crate::Ref<crate::Visual>> {
+        self.object().downcast_ref::<VisualBrush>()?.visual()
     }
 }
 
