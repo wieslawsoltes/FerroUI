@@ -331,6 +331,8 @@ impl WindowState {
                     }
                 }
                 Acquired::Failed => {
+                    // A configuration that failed reports here: the next frame configures again.
+                    swap_chain.configuration = None;
                     notes::failure("the swap chain of the window gave no texture");
                     return None;
                 }
