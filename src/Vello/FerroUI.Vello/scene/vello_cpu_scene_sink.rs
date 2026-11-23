@@ -136,6 +136,19 @@ enum FirstClip {
     Rect { rect: kurbo::Rect, transform: Affine, anti_alias: bool },
 }
 
+#[cfg(test)]
+ferroui_base::ferro_thread_local! {
+    /// The scenes of the CPU renderer this thread made: what the tests of the GPU modes count to
+    /// show that a route stayed on the device.
+    static CPU_SCENES_MADE: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
+/// The scenes of the CPU renderer this thread has made so far.
+#[cfg(test)]
+pub(crate) fn cpu_scenes_made() -> usize {
+    CPU_SCENES_MADE.with(std::cell::Cell::get)
+}
+
 impl VelloCpuSceneSink {
     /// Creates the scene of a target of the given size: a large one is
     /// rendered by the thread pool of the renderer ([`render_threads`]),
@@ -152,6 +165,8 @@ impl VelloCpuSceneSink {
     }
 
     fn with_threads(width: u16, height: u16, threads: u16) -> Self {
+        #[cfg(test)]
+        CPU_SCENES_MADE.with(|made| made.set(made.get() + 1));
         let (context, resources) = RendererPool::take(width, height, threads);
 
         Self {
