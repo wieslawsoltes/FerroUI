@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (84 done, 29 planned) | 113 |
+| `port` (85 done, 28 planned) | 113 |
 | `already` | 17 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -354,7 +354,7 @@ left out only with a recorded performance or better-code reason.
 | `7007223002` | #22871 | 2026-11-18 | controls | `port` (done) | controls | FlexPanel relative basis is a fraction. Parsed percentages were divided by 100 twice; code passing `50` must pass `0.5`. |
 | `192e7a0ba5` | #22880 | 2026-11-18 | platform-macos | `port` (done) | macos | Leaf nodes are not reported as expandable. |
 | `2d34086103` | #22883 | 2026-11-19 | build | `not-applicable` |  | Upstream contribution guide. |
-| `ea6f0daf9b` | #22888 | 2026-11-19 | platform-android | `port` | android | Start-up does not wait for the Choreographer thread. |
+| `ea6f0daf9b` | #22888 | 2026-11-19 | platform-android | `port` (done) | platforms2 | The Choreographer timer no longer blocks start-up: the looper thread posts the first callback once it has the choreographer. |
 | `5032926e38` | #22865 | 2026-11-19 | build | `not-applicable` |  | Upstream readme. |
 | `3f984fa0d9` | #22870 | 2026-11-19 | text | `port` (done) | text | `ParagraphIndent` and first-line `Indent` honoured by the formatter, beside the paragraph styles of `TextLayout`. |
 | `debc815ba9` | #22914 | 2026-11-21 | build | `not-applicable` |  | Upstream build services package. |
