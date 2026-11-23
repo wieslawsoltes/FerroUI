@@ -83,6 +83,7 @@ impl std::error::Error for SvgError {}
 pub struct SvgDocument {
     pub(crate) size: Size,
     pub(crate) root: Group,
+    pub(crate) unsupported: Vec<String>,
 }
 
 impl SvgDocument {
@@ -99,6 +100,13 @@ impl SvgDocument {
     /// The size of the image, in device independent pixels.
     pub fn size(&self) -> Size {
         self.size
+    }
+
+    /// What the document asks for that is not drawn, each named once, so that a picture that
+    /// differs from its document is never silent. Each is also logged as a warning of the area
+    /// `Visual`, once in the life of the process.
+    pub fn unsupported_features(&self) -> &[String] {
+        &self.unsupported
     }
 
     /// The image, as a drawing of geometry that each backend draws as vectors. Needs the render

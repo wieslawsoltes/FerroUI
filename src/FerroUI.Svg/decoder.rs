@@ -9,8 +9,10 @@ use ferroui_base::media::immutable::ImmutableGradientStop;
 use ferroui_base::media::{Color, Colors, FillRule, GradientSpreadMethod, PathCommand, PenLineCap, PenLineJoin};
 use ferroui_base::{Matrix, Point, Rect, Size};
 use roxmltree::{Document, Node, NodeId, ParsingOptions};
-use std::collections::HashMap;
+use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
+use std::collections::{BTreeSet, HashMap};
 use std::rc::Rc;
+use std::sync::Mutex;
 
 const SVG_NAMESPACE: &str = "http://www.w3.org/2000/svg";
 const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
@@ -23,6 +25,45 @@ const MOST_GRADIENT_LINKS: usize = 16;
 
 /// The most stops of a gradient.
 const MOST_GRADIENT_STOPS: usize = 256;
+
+/// The most unsupported features one document lists.
+const MOST_UNSUPPORTED: usize = 64;
+
+/// The most features this process remembers having reported.
+const MOST_REPORTED: usize = 256;
+
+/// The elements the decoder reads, and those that draw nothing by their nature.
+const KNOWN_ELEMENTS: &[&str] = &[
+    "svg", "g", "a", "switch", "use", "symbol", "defs", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
+    "linearGradient", "radialGradient", "stop", "clipPath", "title", "desc", "metadata",
+];
+
+/// The properties the decoder reads in a `style` attribute.
+const KNOWN_PROPERTIES: &[&str] = &[
+    "color", "fill", "fill-opacity", "fill-rule", "clip-rule", "clip-path", "stroke", "stroke-opacity", "stroke-width",
+    "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-dasharray", "stroke-dashoffset", "visibility",
+    "display", "opacity", "stop-color", "stop-opacity",
+];
+
+/// The presentation attributes that change the picture and that the decoder does not apply, with
+/// the value of each that changes nothing.
+const UNSUPPORTED_ATTRIBUTES: &[(&str, &str)] = &[
+    ("mask", "none"),
+    ("filter", "none"),
+    ("marker", "none"),
+    ("marker-start", "none"),
+    ("marker-mid", "none"),
+    ("marker-end", "none"),
+    ("mix-blend-mode", "normal"),
+    ("isolation", "auto"),
+    ("paint-order", "normal"),
+    ("vector-effect", "none"),
+    ("transform-origin", "0 0"),
+    ("transform-box", "view-box"),
+    ("overflow", "hidden"),
+    ("color-interpolation", "sRGB"),
+    ("shape-rendering", "auto"),
+];
 
 pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, SvgError> {
     if bytes.len() > limits.max_bytes {
@@ -54,6 +95,7 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
             ids.entry(id).or_insert(node);
         }
     }
+    let mut unsupported = unsupported_features(&document);
     let mut decoder = Decoder {
         ids,
         limits,
@@ -61,6 +103,7 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
         segments: limits.max_path_segments,
         use_stack: Vec::new(),
         gradients: HashMap::new(),
+        unsupported: &mut unsupported,
         viewport: view_box.map_or(Size::new(width, height), |view_box| Size::new(view_box.width, view_box.height)),
     };
 
@@ -76,7 +119,67 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
     if let Some(value) = property(root, "opacity").and_then(opacity) {
         group.opacity = value;
     }
-    Ok(SvgDocument { size: Size::new(width, height), root: group })
+    let unsupported: Vec<String> = unsupported.into_iter().collect();
+    report_once(&unsupported);
+    Ok(SvgDocument { size: Size::new(width, height), root: group, unsupported })
+}
+
+/// What `document` asks for that is not drawn, each named once: elements of SVG the decoder does
+/// not read, properties it does not apply and references it does not follow.
+fn unsupported_features(document: &Document<'_>) -> BTreeSet<String> {
+    let mut found = BTreeSet::new();
+    for node in document.descendants().filter(|node| node.is_element() && is_svg(*node)) {
+        if found.len() >= MOST_UNSUPPORTED {
+            break;
+        }
+        let name = node.tag_name().name();
+        if !KNOWN_ELEMENTS.contains(&name) {
+            found.insert(format!("element <{name}>"));
+        }
+        for (attribute, neutral) in UNSUPPORTED_ATTRIBUTES {
+            if property(node, attribute).is_some_and(|value| value != *neutral) {
+                found.insert(format!("property {attribute}"));
+            }
+        }
+        for declaration in node.attribute("style").unwrap_or("").split(';') {
+            if let Some((key, _)) = declaration.split_once(':') {
+                let key = key.trim().to_ascii_lowercase();
+                if !key.is_empty() && !KNOWN_PROPERTIES.contains(&key.as_str()) {
+                    found.insert(format!("property {}", key.chars().take(64).collect::<String>()));
+                }
+            }
+        }
+        let reference = node.attribute((XLINK_NAMESPACE, "href")).or_else(|| node.attribute("href"));
+        if reference.is_some_and(|reference| !reference.trim_start().starts_with('#')) {
+            found.insert("external reference".to_owned());
+        }
+    }
+    found
+}
+
+/// The features of `features` this process has not reported yet, which are now reported.
+pub(crate) fn newly_reported(features: &[String]) -> Vec<&String> {
+    static REPORTED: Mutex<BTreeSet<String>> = Mutex::new(BTreeSet::new());
+    let mut reported = REPORTED.lock().unwrap_or_else(std::sync::PoisonError::into_inner);
+    let mut new = Vec::new();
+    for feature in features {
+        if !reported.contains(feature) {
+            if reported.len() < MOST_REPORTED {
+                reported.insert(feature.clone());
+            }
+            new.push(feature);
+        }
+    }
+    new
+}
+
+/// Logs each feature that is not drawn, once in the life of the process.
+fn report_once(features: &[String]) {
+    for feature in newly_reported(features) {
+        if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::VISUAL) {
+            logger.log(None, &format!("SVG: the {feature} is not drawn; the picture differs from the document."));
+        }
+    }
 }
 
 fn is_svg(node: Node<'_, '_>) -> bool {
@@ -272,6 +375,7 @@ struct Decoder<'a, 'input> {
     segments: usize,
     use_stack: Vec<NodeId>,
     gradients: HashMap<NodeId, Option<Rc<Gradient>>>,
+    unsupported: &'a mut BTreeSet<String>,
     viewport: Size,
 }
 
@@ -649,6 +753,7 @@ impl<'a, 'input> Decoder<'a, 'input> {
             return Ok(None);
         };
         let mut commands = Vec::new();
+        let mut first_rule = None;
         for child in clip.children().filter(Node::is_element) {
             self.count(1)?;
             let (shape, transform) = if child.tag_name().name() == "use" {
@@ -664,6 +769,9 @@ impl<'a, 'input> Decoder<'a, 'input> {
                 continue;
             }
             let rule = property(shape, "clip-rule").and_then(parse_fill_rule).unwrap_or(FillRule::NonZero);
+            if *first_rule.get_or_insert(rule) != rule {
+                self.unsupported.insert("property clip-rule (mixed in one clipPath)".to_owned());
+            }
             let Some(mut part) = self.shape_commands(shape, rule)? else { continue };
             path::transform_commands(&mut part, transform);
             // The rule of the first shape is the rule of the geometry.

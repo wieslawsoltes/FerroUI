@@ -199,10 +199,53 @@ fn a_clip_path_without_content_hides_the_element_and_a_missing_one_does_not() {
 }
 
 #[test]
+fn what_is_not_drawn_is_reported_once_and_what_changes_nothing_is_not() {
+    let body = r##"<style>.a { fill: red }</style><defs><mask id="m"/><pattern id="p"/><filter id="f"/></defs>
+        <title>t</title><desc>d</desc><metadata/><text>one</text><text>two</text><image href="https://example.invalid/a.png"/>
+        <rect width="1" height="1" mask="url(#m)" filter="none" style="mix-blend-mode: multiply; fill: red; opacity: 1"/>
+        <rect width="1" height="1" mask="url(#m)" paint-order="normal"/>
+        <foreign:thing xmlns:foreign="urn:a"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    let features = document.unsupported_features();
+    for expected in [
+        "element <style>", "element <mask>", "element <pattern>", "element <filter>", "element <text>", "element <image>",
+        "property mask", "property mix-blend-mode", "external reference",
+    ] {
+        assert_eq!(features.iter().filter(|feature| *feature == expected).count(), 1, "{expected} in {features:?}");
+    }
+    for silent in ["property filter", "property paint-order", "element <title>", "element <desc>", "element <metadata>", "element <thing>", "property fill"] {
+        assert!(!features.iter().any(|feature| feature == silent), "{silent} in {features:?}");
+    }
+    assert!(SvgDocument::parse(&svg(r#"<rect width="1" height="1" fill="red"/>"#)).unwrap().unsupported_features().is_empty());
+}
+
+#[test]
+fn a_clip_path_of_mixed_rules_is_reported() {
+    let body = r##"<defs><clipPath id="c"><rect width="1" height="1" clip-rule="evenodd"/><rect width="2" height="2"/></clipPath></defs>
+        <rect width="9" height="9" clip-path="url(#c)"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    assert!(document.unsupported_features().iter().any(|feature| feature.contains("clip-rule")));
+}
+
+#[test]
+fn a_feature_is_logged_once_in_the_life_of_the_process() {
+    let features = vec!["element <only-in-this-test>".to_owned()];
+    assert_eq!(crate::decoder::newly_reported(&features).len(), 1);
+    assert!(crate::decoder::newly_reported(&features).is_empty());
+}
+
+#[test]
+fn a_document_cannot_grow_the_list_of_what_is_not_drawn_without_bound() {
+    let body: String = (0..1000).map(|index| format!("<unknown{index}/>")).collect();
+    assert!(SvgDocument::parse(&svg(&body)).unwrap().unsupported_features().len() <= 80);
+}
+
+#[test]
 fn the_sample_of_the_gallery_decodes_completely() {
     let bytes = include_bytes!("../../samples/WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg");
     let document = SvgDocument::parse(bytes).unwrap();
     assert_eq!((document.size().width, document.size().height), (328.0, 164.0));
     // The 106 paths and the rectangle of the clip, which is not drawn.
     assert_eq!(shapes(&document.root.children), 106);
+    assert_eq!(document.unsupported_features(), &[] as &[String]);
 }

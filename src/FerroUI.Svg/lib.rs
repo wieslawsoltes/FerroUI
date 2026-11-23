@@ -20,7 +20,8 @@
 //! Drawn: `svg`, `g`, `a`, `switch`, `use`, `symbol`, `path`, `rect`, `circle`, `ellipse`, `line`,
 //! `polyline`, `polygon`, linear and radial gradients, `clipPath`, and the presentation attributes
 //! of those, as attributes or in a `style` attribute. Not drawn: text, embedded images, masks,
-//! filters, patterns and markers.
+//! filters, patterns and markers. What a document asks for and is not drawn is listed by
+//! [`SvgDocument::unsupported_features`] and logged once.
 
 mod color;
 mod decoder;
