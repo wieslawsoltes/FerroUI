@@ -234,6 +234,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/PlatformSettingsPage.xaml", "Platform Settings", Icons::TUNE, "Platform-specific system settings");
             s.add_page(|| crate::pages::ScreenPage::new().upcast(), "Screens", Icons::MONITOR, "Enumerate displays and their bounds");
             s.add("/Pages/ThemePage.xaml", "Theme Variants", Icons::THEME, "Switch between light and dark variants");
+            // Not from upstream: MapControl of WinUI (#556).
+            s.add("/Pages/MapControlPage.xaml", "MapControl", Icons::LAYOUT, "A map of raster tiles with icons, lines and areas");
             s.add("/Pages/WindowCustomizationsPage.xaml", "Window Customizations", Icons::WINDOW, "Custom chrome, decorations and sizing");
         }),
     ];

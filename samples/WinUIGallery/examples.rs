@@ -133,6 +133,7 @@ pub static ADAPTATIONS: &[PageAdaptation] = &[
     page!("ItemsRepeater", "All six source examples, and the nested repeaters of the source page, use the native ItemsRepeater of ferroui-controls-repeater: observable sources, the stack, uniform grid and flow layouts, ItemsRepeaterScrollHost, native IDataTemplateSelector selectors and the Gallery ActivityFeedLayout and VariedImageSizeLayout ported to Rust VirtualizingLayouts. x:Bind becomes {Binding} over markup types; the composition scale animation becomes a scale set after each layout pass. The accessibility announcements and the key-index mapping of the recipe source remain pending."),
     page!(ported "LayoutPanel", "The source example uses the native LayoutPanel with the FeaturedTileLayout of the source ported to a Rust NonVirtualizingLayout; the options switch to a vertical StackLayout and set the spacing, as the C# handlers do."),
     page!(ported "InkCanvas", "All three source examples use the native InkCanvas, InkPresenter and InkToolbar with the handlers of InkCanvasPage.xaml.cs in Rust: input devices, ink colour, stroke width, inking enabled and clear; the toolbar's available tools, active tool in both directions, flyout placement and clear; save, clear and restore with the source's messages. Header is composed, TargetInkCanvas is set in Rust and the saved strokes are the bytes of InkStrokeContainer::save in memory. Routed window input and rendering acceptance remain pending."),
+    page!("MapControl", "The source example uses the native MapControl of ferroui-controls-maps with the source's center, zoom level and pin. FerroUI has no built-in tile provider, so the sample shows an offline grid and not map data; the page stays partial until the rendering is validated in Skia and Vello on each backend (#556)."),
     page!("Chart", "The seven source examples map onto the native CartesianChart with the data and option handlers of ChartPage.xaml.cs in Rust: category labels, legend, bar orientation and category sort, grid lines and axis visibility, series visibility, dash style, thickness, markers and data labels, a day axis for the DateTimeAxis with its intervals and label formats, and the live series. LegendTitle, tick marks, axis brushes, marker shapes and per-point overrides are not available; rendering parity remains pending."),
 ];
 
@@ -156,6 +157,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     ferroui_controls_repeater::register_types();
     ferroui_controls_inking::register_types();
     ferroui_controls_livecharts::register_types();
+    ferroui_controls_maps::register_types();
     ferroui_media_video_controls::register_types();
     ferroui_media_camera_controls::register_types();
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;
@@ -180,6 +182,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::layout_samples::wire(sample.page_id, &root);
     crate::text_input_samples::wire(sample.page_id, &root);
     crate::status_samples::wire(sample.page_id, &root);
+    crate::map_samples::wire(sample.page_id, &root);
     crate::command_samples::wire(sample.page_id, &root);
     crate::menu_samples::wire(sample.page_id, &root);
     crate::date_samples::wire(sample.page_id, &root);

@@ -4160,6 +4160,42 @@
       ],
       "notes": "The seven two-dimensional UI sound actions play application-owned PCM cues through the native portable MediaPlayer. The toggle and volume operate that player. SpatialAudioMode is explicitly not applicable: it is a Windows UI service without a portable provider contract.",
       "examples": []
+    },
+    "MapControl": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/MapControl.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/map_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "map_control_example_shows_the_source_pin_on_the_offline_grid"
+        }
+      ],
+      "notes": "The source example uses the native MapControl of ferroui-controls-maps with the source's center, zoom level and pin. FerroUI has no built-in tile provider, so the sample shows an offline grid and not map data; the page stays partial until the rendering is validated in Skia and Vello on each backend (#556).",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/MapControl/MapControlShowingPinMap.txt",
+          "status": "partial",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "map_control_example_shows_the_source_pin_on_the_offline_grid"
+            }
+          ],
+          "notes": "The source's center, zoom level and pin on the native control, over an offline grid instead of map data."
+        }
+      ]
     }
   }
 }

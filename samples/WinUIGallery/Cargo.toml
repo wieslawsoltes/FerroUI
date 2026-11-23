@@ -43,6 +43,7 @@ ferroui-controls = { workspace = true }
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }
 ferroui-controls-inking = { workspace = true, features = ["document-assets"] }
 ferroui-controls-livecharts = { workspace = true }
+ferroui-controls-maps = { workspace = true }
 ferroui-controls-repeater = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }

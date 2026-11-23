@@ -15,6 +15,7 @@ mod button_samples;
 mod cat_data;
 mod chart_samples;
 mod color_picker_samples;
+mod map_samples;
 mod command_samples;
 mod connected_animation_samples;
 pub mod catalog;

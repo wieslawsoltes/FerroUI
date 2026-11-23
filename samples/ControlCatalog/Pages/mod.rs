@@ -73,6 +73,7 @@ mod labels_page;
 mod layout_transform_control_page;
 mod list_box_page;
 mod menu_page;
+mod map_control_page;
 mod native_embed_page;
 pub(crate) mod navigation_demo_helper;
 pub(crate) mod navigation_performance_monitor_helper;
@@ -238,6 +239,7 @@ pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
 pub use menu_page::MenuPage;
+pub use map_control_page::MapControlPage;
 pub use native_embed_page::{EmbedSample, INativeDemoControl, NativeEmbedPage};
 pub use navigation_demo_page::NavigationDemoPage;
 pub use numeric_up_down_page::{FormatObject, FormatObjectList, NumbersPageViewModel, NumericUpDownPage};
@@ -409,6 +411,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     LayoutTransformControlPage::TYPE,
     ListBoxPage::TYPE,
     MenuPage::TYPE,
+    MapControlPage::TYPE,
     NativeEmbedPage::TYPE,
     NavigationDemoPage::TYPE,
     NumericUpDownPage::TYPE,
@@ -520,6 +523,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &LayoutTransformControlPage::XAML_CLASS,
     &ListBoxPage::XAML_CLASS,
     &MenuPage::XAML_CLASS,
+    &MapControlPage::XAML_CLASS,
     &NativeEmbedPage::XAML_CLASS,
     &NavigationDemoPage::XAML_CLASS,
     &NumericUpDownPage::XAML_CLASS,
