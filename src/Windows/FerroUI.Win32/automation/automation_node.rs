@@ -40,7 +40,7 @@ use super::interop_automation_node::InteropAutomationNode;
 use super::marshalling::{ComVariant, ComVariantMarshaller, SafeArrayMarshaller, SafeArrayRef, VariantArray, VariantValue};
 use super::root_automation_node::RootAutomationNode;
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::threading::Dispatcher;
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::{current_locale, CultureInfo};
 use ferroui_base::{Rect, Ref, WeakRef};
 use ferroui_controls::automation::peers::{
@@ -440,6 +440,11 @@ impl AutomationNode {
             UiaPropertyId::FrameworkId => return Ok(Some(VariantValue::Bstr("FerroUI".to_owned()))),
             UiaPropertyId::ProcessId => return Ok(Some(VariantValue::I4(Self::get_process_id()))),
             UiaPropertyId::RuntimeId => return Ok(Some(VariantValue::Array(VariantArray::I4(self.runtime_id.to_vec())))),
+            UiaPropertyId::LabeledBy => {
+                let labeled_by =
+                    self.invoke_sync(|peer| Self::get_or_create(peer.get_labeled_by().as_ref()).map(SendProvider))?;
+                return Ok(labeled_by.and_then(|node| node.into_inner().cast::<IUnknown>().ok()).map(VariantValue::Unknown));
+            }
             _ => {}
         }
         // An enumeration is its number (`Convert.ToInt32`).
@@ -881,6 +886,27 @@ impl IRawElementProviderFragmentRootImpl for AutomationNode {
 
 impl IInvokeProviderImpl for AutomationNode {
     fn invoke(&self) -> Result<(), HResult> {
-        self.invoke_sync_provider(|x: &Rc<dyn aap::IInvokeProvider>| Self::enabled(x.invoke()))
+        let enabled =
+            self.invoke_sync(|peer| peer.get_provider::<dyn aap::IInvokeProvider>().map(|_| peer.is_enabled()))?;
+        match enabled {
+            None => return Err(NOT_SUPPORTED),
+            Some(false) => return Err(ELEMENT_NOT_ENABLED),
+            Some(true) => {}
+        }
+
+        // `IInvokeProvider::Invoke` must return immediately: a control that opens a modal dialog
+        // would keep the client that called it blocked until the dialog closes.
+        let id = self.id;
+        self.dispatcher.post(
+            move || {
+                let provider = Self::peer_of(id).and_then(|peer| peer.get_provider::<dyn aap::IInvokeProvider>());
+                if let Some(provider) = provider {
+                    // The state can have changed since the call: a refusal has no one to go to.
+                    let _ = provider.invoke();
+                }
+            },
+            DispatcherPriority::INPUT,
+        );
+        Ok(())
     }
 }

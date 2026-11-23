@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (71 done, 42 planned) | 113 |
+| `port` (83 done, 30 planned) | 113 |
 | `already` | 17 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -192,7 +192,7 @@ left out only with a recorded performance or better-code reason.
 | `b6ed89b8d9` | #22457 | 2026-10-19 | controls | `port` (done) | controls | `Popup`: the Y scale read M11/M12. |
 | `b13194be25` | #22453 | 2026-10-19 | platform-x11 | `port` (done) | x11b | The X11 run loop implements explicit background processing, with the restructured wait of upstream. |
 | `f547369621` | #22496 | 2026-10-19 | threading | `already` |  | `Dispatcher::replace_implementation` already moves the due times of the queue and of every timer by the difference of the two clocks. |
-| `ee85f0604a` | #22504 | 2026-10-19 | rendering | `port` | rendering | Skia geometry: path bounds computed before sharing; stroke cache kept valid on failure. |
+| `ee85f0604a` | #22504 | 2026-10-19 | rendering | `port` (done) | rendering | Skia geometry: path bounds computed before sharing; stroke cache kept valid on failure. |
 | `9b3e9c881b` | #22499 | 2026-10-19 | rendering | `port` | rendering | Compositor output rotation through `RenderTargetProperties`. |
 | `be0c42891f` | #22522 | 2026-10-19 | build | `not-applicable` |  | Upstream repository workflow. |
 | `b515c3ae17` | #22523 | 2026-10-20 | controls | `port` (done) | controls2 | Per-area log verbosity for `log_to_trace` and `log_to_delegate`. |
@@ -217,7 +217,7 @@ left out only with a recorded performance or better-code reason.
 | `72ebf9aad9` | #22438 | 2026-10-21 | platform-android | `port` | android | Cursors on Android (`cursor_factory.rs` is a stub). |
 | `0d6c2aaa81` | #22433 | 2026-10-21 | text | `already` |  | `TextLayout::hit_test_point` already passes a point relative to the line origin and subtracts `start`; upstream's cases are added as tests in `text_layout_tests.rs`. |
 | `26b4ed5b35` | #22491 | 2026-10-21 | layout | `port` (done) | controls | Layout pass tolerates a control moved to another top level. |
-| `9135170769` | #22557 | 2026-10-21 | rendering | `port` | rendering | `ICustomHitTest` documentation: local coordinates. |
+| `9135170769` | #22557 | 2026-10-21 | rendering | `port` (done) | rendering | `ICustomHitTest` documentation: local coordinates. |
 | `74c62ffd26` | #22552 | 2026-10-22 | input | `port` (done) | input | Gesture unit tests that replace the removed integration tests. |
 | `78316701f3` | #22451 | 2026-10-22 | platform-android | `deferred` |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
 | `103cf72903` | #22520 | 2026-10-22 | platform-win32 | `port` (done) | win32 | Alt+Space opens the system menu unless handled. |
@@ -228,7 +228,7 @@ left out only with a recorded performance or better-code reason.
 | `e4452b5bdb` | #22429 | 2026-10-22 | input | `port` (done) | input | Double tap needs the same button for both clicks. |
 | `bd835340fb` | #21771 | 2026-10-22 | themes | `deferred` |  | Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class. |
 | `136efefc7d` | #22378 | 2026-10-22 | automation | `port` (done) | automation | ContentControl name no longer falls back to a type name. |
-| `7fda9c36a5` | #22562 | 2026-10-23 | automation | `port` | win32 | UI Automation Invoke returns immediately. |
+| `7fda9c36a5` | #22562 | 2026-10-23 | automation | `port` (done) | platforms2 | UI Automation `Invoke` checks the provider and the enabled state, then posts the click, so a modal dialog no longer blocks the client. |
 | `74b4e97962` | #22400 | 2026-10-23 | samples | `deferred` |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
 | `6a25cf4d9b` | #22399 | 2026-10-23 | controls | `port` (done) | controls2 | A delayed submenu action no longer closes a reopened menu. |
 | `c1e4fab24c` | #22577 | 2026-10-23 | collections | `not-applicable` |  | `FerroList::contains` and `index_of` take `&T`; an invalid item cannot be passed. |
@@ -293,13 +293,13 @@ left out only with a recorded performance or better-code reason.
 | `48132c0500` | #22716 | 2026-11-09 | controls | `port` (done) | controls | `IsActive` set before `Activated` is raised. |
 | `69be03931f` | #22736 | 2026-11-09 | platform | `port` (done) | controls | Documentation of glob patterns. |
 | `c9b5ae7b21` | #22746 | 2026-11-09 | controls | `already` |  | `Span::on_property_changed` compares the property, so `on_inlines_changed` runs. |
-| `ae5ae6124e` | #22757 | 2026-11-09 | rendering | `port` | rendering | Native memory and resource checks (bitmap copies and others); each checked against the Rust code. |
+| `ae5ae6124e` | #22757 | 2026-11-09 | rendering | `port` | rendering | Bitmap copy guards and destination stride, pixel writer reset, EDID length are ported (`rendering`). Win32 icon mask and GDI handle lifetimes in OLE are still to port. |
 | `dc061bc3ef` | #22698 | 2026-11-09 | rendering | `already` |  | `sk_round_rect_cache.rs` passes the radii without a heap array. |
 | `1b53d56525` | #22688 | 2026-11-09 | platform-android | `port` | android | Storage cursors closed. |
 | `5bbaa8e331` | #22743 | 2026-11-09 | rendering | `already` |  | `LockGuard` in `vulkan_khr_surface_render_target.rs` releases the lock on every exit. |
 | `9186fcf61f` | #22756 | 2026-11-09 | themes | `deferred` |  | Fluent 2 calendar; follows the Fluent 2 decision. |
-| `66f1f2a9dd` | #22763 | 2026-11-09 | rendering | `port` | rendering | `ImmutableRadialGradientBrush` copied `radius_x` into `radius_y`. |
-| `c93b0d6c52` | #22764 | 2026-11-09 | rendering | `port` | rendering | Visual cache layer: the vertical scale was the horizontal one. |
+| `66f1f2a9dd` | #22763 | 2026-11-09 | rendering | `port` (done) | rendering | `ImmutableRadialGradientBrush` copied `radius_x` into `radius_y`. |
+| `c93b0d6c52` | #22764 | 2026-11-09 | rendering | `port` (done) | rendering | Visual cache layer: the vertical scale was the horizontal one. |
 | `45ddd45380` | #22659 | 2026-11-09 | rendering | `not-applicable` |  | Finalizer race of the .NET Skia binding. Rust ownership keeps the stream alive. |
 | `b6a5fbc191` | #22740 | 2026-11-09 | rendering | `not-applicable` |  | `GC.KeepAlive`. Rust borrows keep the bitmap alive. |
 | `b490bc6733` | #22748 | 2026-11-10 | platform-x11 | `port` (done) | x11 | Two-finger scrolling with the synaptics driver. |
@@ -314,13 +314,13 @@ left out only with a recorded performance or better-code reason.
 | `dc2253658c` | #22674 | 2026-11-12 | markup | `port` | markup | Compact IL names do not apply; the enum whitespace fix in its XamlX update does. |
 | `27b1179321` | #22558 | 2026-11-12 | platform-linux | `port` (done) | linux | StatusNotifierItem tooltip text. |
 | `22e9912b75` | #22725 | 2026-11-12 | markup | `not-applicable` |  | Exact signature lookups in the IL compiler. |
-| `050d3fb941` | #22798 | 2026-11-12 | rendering | `port` | rendering | Skia: one layer less for each opacity mask. Performance gain. |
+| `050d3fb941` | #22798 | 2026-11-12 | rendering | `port` (done) | rendering | Skia: one layer less for each opacity mask. Performance gain. |
 | `ee79f65f26` | #22685 | 2026-11-12 | platform-android | `port` (done) | android | Input type no longer forced to a password variation. |
 | `84f262c218` | #22676 | 2026-11-12 | markup | `not-applicable` |  | Function-pointer factories for IL-compiled property info. FerroUI generates Rust. |
 | `24b6c7b410` | #22610 | 2026-11-12 | platform-macos | `port` | macos | `updateLayer` flushes the render pass synchronously. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering | `deferred` |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
-| `ca61365d75` | #22538 | 2026-11-12 | rendering | `port` | rendering | Animated value written even when an expression has read it. |
-| `61c3aaa876` | #22810 | 2026-11-13 | rendering | `port` | rendering | Remove `CompositorDrawingContextProxy`: on main only its own tests construct it. |
+| `ca61365d75` | #22538 | 2026-11-12 | rendering | `port` (done) | rendering | Animated value written even when an expression has read it. |
+| `61c3aaa876` | #22810 | 2026-11-13 | rendering | `port` (done) | rendering | Remove `CompositorDrawingContextProxy`: on main only its own tests construct it. |
 | `6350ac83e6` | #22774 | 2026-11-13 | text | `port` (done) | text | `TextLineImpl::collapse` gives the collapsed line its own references and keeps the source line valid after a split; the layout releases the replaced line. |
 | `a4f832f5d6` | #22795 | 2026-11-13 | input | `port` (done) | input | Tab navigation skips disabled elements. |
 | `e73a976afd` | #22796 | 2026-11-13 | platform-macos | `already` |  | `trayicon.mm` already tests the text for null. |
@@ -330,19 +330,19 @@ left out only with a recorded performance or better-code reason.
 | `5ea0586b32` | #22699 | 2026-11-13 | themes | `port` | themes | Fluent ButtonSpinner outer corner. |
 | `a05d9d0046` | #22812 | 2026-11-13 | themes | `port` | themes | Simple ComboBox and Slider show validation errors. |
 | `d0a3041701` | #22475 | 2026-11-13 | controls | `port` (done) | controls | RelativePanel chain with infinite available size. |
-| `ad90a07d03` | #22671 | 2026-11-13 | automation | `port` | win32 | `LabeledBy` in Windows UI Automation. |
-| `10a2fb0ac5` | #22682 | 2026-11-13 | platform-win32 | `port` | win32 | Clipboard read retried while another process holds it. |
+| `ad90a07d03` | #22671 | 2026-11-13 | automation | `port` (done) | platforms2 | `LabeledBy` in Windows UI Automation. |
+| `10a2fb0ac5` | #22682 | 2026-11-13 | platform-win32 | `port` (done) | platforms2 | OLE `GetData` retried for 100 ms while another process holds the clipboard, then a timeout error instead of no data. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering | `deferred` |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
 | `80659c4c3e` | #22773 | 2026-11-13 | text | `deferred` |  | Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack. |
 | `02d7bc35e3` | #22662 | 2026-11-13 | text | `port` (done) | text | Runs of different scripts shaped in separate buffers. |
-| `9d6cb1ea62` | #22015 | 2026-11-13 | rendering | `port` | rendering | ContentPresenter and acrylic clip to rounded bounds. |
+| `9d6cb1ea62` | #22015 | 2026-11-13 | rendering | `port` (done) | rendering | `ContentPresenter` and acrylic clip to rounded bounds. A presenter pays for a border visual only when it clips with a corner radius. |
 | `d379b92b87` | #22694 | 2026-11-13 | platform-macos | `port` (done) | macos | `automation.mm`: tab button subrole. |
 | `500e78afef` | #22679 | 2026-11-13 | data | `port` (done) | data | TwoWay binding does not write a just-published value back. |
 | `8035f14fd3` | #22690 | 2026-11-13 | platform-macos | `port` (done) | macos | `FrnWindow.mm`: only the view tracking area resets the cursor. |
 | `4ae41027c0` | #22820 | 2026-11-16 | platform-win32 | `port` (done) | win32 | `dcomp.idl`: `BOOL`, not `bool`, for `CreateTargetForHwnd`. |
 | `7011f50c27` | #22305 | 2026-11-16 | controls | `port` (done) | controls2 | `AutoCompleteBox.UseFloatingPlaceholder`. |
 | `9f6a652216` | #22846 | 2026-11-16 | platform-browser | `already` |  | `webapp/modules/ferroui/timer.ts` already passes the timestamp. |
-| `16d8678a44` | #22835 | 2026-11-16 | rendering | `port` | rendering | Skia: multiply opacity applied once below an opacity mask. |
+| `16d8678a44` | #22835 | 2026-11-16 | rendering | `port` (done) | rendering | Skia: multiply opacity applied once below an opacity mask. |
 | `ab578c3ea0` | #22793 | 2026-11-17 | platform | `port` (done) | controls2 | Assembly resolved by exact name. |
 | `75497e3634` | #22857 | 2026-11-17 | themes | `port` | themes | Simple theme: missing resources. |
 | `a49cbefe8b` | #22864 | 2026-11-17 | automation | `port` (done) | automation | Peer parent kept after a move. |
