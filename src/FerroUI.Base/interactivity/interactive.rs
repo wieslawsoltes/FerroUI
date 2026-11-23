@@ -175,21 +175,14 @@ impl Interactive {
         routes: RoutingStrategies,
         handled_events_too: bool,
     ) -> RoutedEventHandlerToken {
-        assert!(
-            routed_event.event_args_is::<THandlerArgs>(),
-            "A handler taking {} cannot be attached to {}, whose args are {}.",
-            std::any::type_name::<THandlerArgs>(),
-            routed_event,
-            routed_event.event_args_type_name()
-        );
+        if !routed_event.event_args_is::<THandlerArgs>() {
+            handler_cannot_be_attached(std::any::type_name::<THandlerArgs>(), routed_event.as_routed_event());
+        }
 
         let adapter: RouteHandler = Rc::new(move |sender: &Interactive, args: &dyn IRoutedEventArgs| {
             match args.downcast_ref::<THandlerArgs>() {
                 Some(typed_args) => handler(sender, typed_args),
-                None => panic!(
-                    "Event args of the wrong type were raised: expected {}.",
-                    std::any::type_name::<THandlerArgs>()
-                ),
+                None => wrong_args_raised(std::any::type_name::<THandlerArgs>()),
             }
         });
 
@@ -212,19 +205,40 @@ impl Interactive {
         routes: RoutingStrategies,
         handled_events_too: bool,
     ) -> RoutedEventHandlerToken {
+        self.add_markup_handler(routed_event.as_routed_event(), handler, routes, handled_events_too)
+    }
+
+    fn add_markup_handler(
+        &self,
+        routed_event: RoutedEvent,
+        handler: MarkupDelegate,
+        routes: RoutingStrategies,
+        handled_events_too: bool,
+    ) -> RoutedEventHandlerToken {
         let adapter: RouteHandler = Rc::new(move |sender: &Interactive, args: &dyn IRoutedEventArgs| {
             let sender: BoxedValue = Rc::new(sender.to_ref());
             let args: BoxedValue = Rc::new(args.share());
             handler.invoke(&[Some(sender), Some(args)]);
         });
 
-        self.add_route_handler(routed_event, adapter, routes, handled_events_too)
+        self.add_erased_handler(routed_event, adapter, routes, handled_events_too)
     }
 
     /// Adds an already adapted handler for a routed event.
+    #[inline]
     pub fn add_route_handler<TEventArgs: ?Sized>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
+        handler: RouteHandler,
+        routes: RoutingStrategies,
+        handled_events_too: bool,
+    ) -> RoutedEventHandlerToken {
+        self.add_erased_handler(routed_event.as_routed_event(), handler, routes, handled_events_too)
+    }
+
+    fn add_erased_handler(
+        &self,
+        routed_event: RoutedEvent,
         handler: RouteHandler,
         routes: RoutingStrategies,
         handled_events_too: bool,
@@ -233,18 +247,22 @@ impl Interactive {
         NEXT_TOKEN.set(token.0 + 1);
 
         let subscription = EventSubscription { token, handler, routes, handled_events_too };
-        self.add_event_subscription(routed_event.as_routed_event(), subscription);
+        self.add_event_subscription(routed_event, subscription);
         token
     }
 
     /// Removes a handler for a routed event. Returns whether the handler was
     /// attached.
+    #[inline]
     pub fn remove_handler<TEventArgs: ?Sized>(
         &self,
         routed_event: &RoutedEvent<TEventArgs>,
         handler: RoutedEventHandlerToken,
     ) -> bool {
-        let routed_event = routed_event.as_routed_event();
+        self.remove_erased_handler(routed_event.as_routed_event(), handler)
+    }
+
+    fn remove_erased_handler(&self, routed_event: RoutedEvent, handler: RoutedEventHandlerToken) -> bool {
         // The removed subscription is dropped after the borrow is released:
         // dropping a handler can run arbitrary code.
         let removed = {
@@ -276,8 +294,12 @@ impl Interactive {
 
     /// Builds an event route for a routed event: the handlers the event
     /// would visit if raised on this object, in bubbling order.
+    #[inline]
     pub fn build_event_route<TEventArgs: ?Sized>(&self, e: &RoutedEvent<TEventArgs>) -> EventRoute {
-        let e = e.as_routed_event();
+        self.build_erased_route(e.as_routed_event())
+    }
+
+    fn build_erased_route(&self, e: RoutedEvent) -> EventRoute {
         let mut result = EventRoute::new(&e);
         let has_class_handlers = e.has_raised_subscriptions();
 
@@ -339,4 +361,24 @@ impl Interactive {
             }
         }
     }
+}
+
+/// The panic of a handler whose args type the event does not have, compiled once for every
+/// handler type.
+#[cold]
+#[inline(never)]
+fn handler_cannot_be_attached(handler_args: &'static str, routed_event: RoutedEvent) -> ! {
+    panic!(
+        "A handler taking {} cannot be attached to {}, whose args are {}.",
+        handler_args,
+        routed_event,
+        routed_event.event_args_type_name()
+    )
+}
+
+/// The panic of args of another type on a route, compiled once for every handler type.
+#[cold]
+#[inline(never)]
+fn wrong_args_raised(expected: &'static str) -> ! {
+    panic!("Event args of the wrong type were raised: expected {expected}.")
 }

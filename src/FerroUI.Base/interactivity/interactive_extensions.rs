@@ -1,6 +1,6 @@
 //! Extension methods for [`Interactive`].
 
-use super::{IRoutedEventArgs, Interactive, RoutedEvent, RoutingStrategies};
+use super::{IRoutedEventArgs, Interactive, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use crate::reactive::{Disposable, IObservable, Observable, Subscription};
 use crate::Ref;
 use std::rc::Rc;
@@ -29,13 +29,16 @@ impl Interactive {
         handled_events_too: bool,
     ) -> Subscription {
         let token = self.add_handler_with(routed_event, handler, routes, handled_events_too);
+        self.handler_guard(routed_event.as_routed_event(), token)
+    }
+
+    fn handler_guard(&self, routed_event: RoutedEvent, token: RoutedEventHandlerToken) -> Subscription {
         // Deviation (DEVIATIONS.md, Routed events): the managed original
         // captures the object. An element that keeps the
         // disposable of a handler it added to itself (a templated control and
         // the handler of its own pointer events) would keep itself alive that
         // way; the handlers of an object that is gone are gone with it.
         let instance = self.to_ref().downgrade();
-        let routed_event = routed_event.as_routed_event();
 
         Subscription::new(Disposable::create(move || {
             if let Some(instance) = instance.upgrade() {

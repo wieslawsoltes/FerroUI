@@ -27,11 +27,36 @@ bitflags! {
 type RaisedHandler = dyn Fn(&Interactive, &dyn IRoutedEventArgs);
 type RouteFinishedHandler = dyn Fn(&dyn IRoutedEventArgs);
 
+/// What a class handler runs for: the elements of a class, on some routes, and
+/// handled events or not. Compiled once, for every class handler.
+#[derive(Clone, Copy)]
+struct ClassFilter {
+    target_type: &'static TypeInfo,
+    routes: RoutingStrategies,
+    handled_events_too: bool,
+}
+
+impl ClassFilter {
+    #[inline]
+    fn accepts(&self, sender: &Interactive, e: &dyn IRoutedEventArgs) -> bool {
+        self.target_type.is_assignable_from(sender.get_type())
+            && (e.route() == RoutingStrategies::DIRECT || e.route().intersects(self.routes))
+            && (!e.handled() || self.handled_events_too)
+    }
+}
+
+/// A subscriber of the notifications. A class handler keeps its filter here,
+/// so an element it does not run for costs no indirect call.
+struct RaisedEntry {
+    filter: Option<ClassFilter>,
+    handler: Box<RaisedHandler>,
+}
+
 /// The stream of `(sender, args)` notifications of a routed event: one for
 /// every element on the route of every raise. This is what class handlers
 /// are built on.
 pub struct RoutedEventObservable {
-    handlers: HandlerList<RaisedHandler>,
+    handlers: HandlerList<RaisedEntry>,
 }
 
 impl RoutedEventObservable {
@@ -42,7 +67,11 @@ impl RoutedEventObservable {
         &'static self,
         handler: impl Fn(&Interactive, &dyn IRoutedEventArgs) + 'static,
     ) -> Subscription {
-        let token = self.handlers.add(Rc::new(handler));
+        self.add_entry(RaisedEntry { filter: None, handler: Box::new(handler) })
+    }
+
+    fn add_entry(&'static self, entry: RaisedEntry) -> Subscription {
+        let token = self.handlers.add(Rc::new(entry));
         Subscription::new(Disposable::create(move || {
             self.handlers.remove(token);
         }))
@@ -59,8 +88,10 @@ impl RoutedEventObservable {
         if self.handlers.is_empty() {
             return;
         }
-        for (_, handler) in self.handlers.snapshot().iter() {
-            handler(sender, e);
+        for (_, entry) in self.handlers.snapshot().iter() {
+            if entry.filter.as_ref().is_none_or(|filter| filter.accepts(sender, e)) {
+                (entry.handler)(sender, e);
+            }
         }
     }
 }
@@ -76,7 +107,11 @@ impl RouteFinishedObservable {
     /// unsubscribes; [`Subscription::detach`] keeps the subscription for the
     /// life of the event.
     pub fn subscribe(&'static self, handler: impl Fn(&dyn IRoutedEventArgs) + 'static) -> Subscription {
-        let token = self.handlers.add(Rc::new(handler));
+        self.add_handler(Rc::new(handler))
+    }
+
+    fn add_handler(&'static self, handler: Rc<RouteFinishedHandler>) -> Subscription {
+        let token = self.handlers.add(handler);
         Subscription::new(Disposable::create(move || {
             self.handlers.remove(token);
         }))
@@ -315,13 +350,9 @@ impl<TEventArgs: ?Sized> RoutedEvent<TEventArgs> {
         routes: RoutingStrategies,
         handled_events_too: bool,
     ) -> Subscription {
-        self.inner.raised.subscribe(move |sender, e| {
-            if target_type.is_assignable_from(sender.get_type())
-                && (e.route() == RoutingStrategies::DIRECT || e.route().intersects(routes))
-                && (!e.handled() || handled_events_too)
-            {
-                handler(sender, e);
-            }
+        self.inner.raised.add_entry(RaisedEntry {
+            filter: Some(ClassFilter { target_type, routes, handled_events_too }),
+            handler: Box::new(handler),
         })
     }
 
