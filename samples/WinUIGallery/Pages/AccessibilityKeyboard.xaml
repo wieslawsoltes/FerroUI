@@ -172,20 +172,20 @@
     <TextBlock Text="Access Keys" FontSize="18" />
     <StackPanel>
       <Menu x:Name="AccessKeyMenu">
-        <MenuItem Header="_File" AutomationProperties.AccessKey="F">
-          <MenuItem Header="_New" AutomationProperties.AccessKey="N" />
-          <MenuItem Header="_Open..." AutomationProperties.AccessKey="O" />
-          <MenuItem Header="_Save" AutomationProperties.AccessKey="S" />
-          <MenuItem Header="_Exit" AutomationProperties.AccessKey="E" />
+        <MenuItem Header="File" AccessKeyManager.AccessKey="F">
+          <MenuItem Header="New" AccessKeyManager.AccessKey="N" />
+          <MenuItem Header="Open..." AccessKeyManager.AccessKey="O" />
+          <MenuItem Header="Save" AccessKeyManager.AccessKey="S" />
+          <MenuItem Header="Exit" AccessKeyManager.AccessKey="E" />
         </MenuItem>
-        <MenuItem Header="_Edit" AutomationProperties.AccessKey="E">
-          <MenuItem Header="_Undo" AutomationProperties.AccessKey="U" />
-          <MenuItem Header="Cut" AutomationProperties.AccessKey="X" />
-          <MenuItem Header="_Copy" AutomationProperties.AccessKey="C" />
-          <MenuItem Header="Paste" AutomationProperties.AccessKey="V" />
+        <MenuItem Header="Edit" AccessKeyManager.AccessKey="E">
+          <MenuItem Header="Undo" AccessKeyManager.AccessKey="U" />
+          <MenuItem Header="Cut" AccessKeyManager.AccessKey="X" />
+          <MenuItem Header="Copy" AccessKeyManager.AccessKey="C" />
+          <MenuItem Header="Paste" AccessKeyManager.AccessKey="V" />
         </MenuItem>
-        <MenuItem Header="_Help" AutomationProperties.AccessKey="H">
-          <MenuItem Header="_About" AutomationProperties.AccessKey="A" />
+        <MenuItem Header="Help" AccessKeyManager.AccessKey="H">
+          <MenuItem Header="About" AccessKeyManager.AccessKey="A" />
         </MenuItem>
       </Menu>
       <TextBlock Theme="{DynamicResource CaptionTextBlockStyle}"

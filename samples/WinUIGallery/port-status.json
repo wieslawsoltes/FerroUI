@@ -47,9 +47,13 @@
         {
           "path": "samples/WinUIGallery/accessibility_samples_tests.rs",
           "name": "accessibility_keyboard_arrow_keys_accelerators_and_access_keys_keep_the_source"
+        },
+        {
+          "path": "samples/WinUIGallery/accessibility_samples_tests.rs",
+          "name": "accessibility_keyboard_key_tips_open_the_menu_and_show_its_items"
         }
       ],
-      "notes": "All six source examples, with the page's texts and the handlers of AccessibilityKeyboardPage.xaml.cs in Rust (accessibility_samples.rs): the automatic tab order (the XAML order without the text and the disabled button), the manual tab order with TabIndex 1 to 3 and the button that is not a tab stop, the list whose arrow keys move within it (WinUI's ListView is FerroUI's ListBox), the potato buttons with XYFocusKeyboardNavigation Enabled (XYFocus.NavigationModes Enabled), the accelerators Ctrl+R, Ctrl+B and Ctrl+G with their AcceleratorKeys and MakeRedButton_Click, MakeBlueButton_Click and MakeChartreuseButton_Click (a KeyboardAccelerator is the button's HotKey), and the menu with its access keys (WinUI's MenuBar is FerroUI's Menu). The headings are the theme's text styles with their heading levels. FerroUI has no Key Tips: an access key is the underlined letter of the header, so Cut (X) and Paste (V), whose keys are not letters of their text, have no access key (AutomationProperties.AccessKey keeps every source key for assistive technology), and FerroUI does not add a button's accelerator to its tooltip as WinUI does: the page is partial.",
+      "notes": "All six source examples, with the page's texts and the handlers of AccessibilityKeyboardPage.xaml.cs in Rust (accessibility_samples.rs): the automatic tab order (the XAML order without the text and the disabled button), the manual tab order with TabIndex 1 to 3 and the button that is not a tab stop, the list whose arrow keys move within it (WinUI's ListView is FerroUI's ListBox), the potato buttons with XYFocusKeyboardNavigation Enabled (XYFocus.NavigationModes Enabled), the accelerators Ctrl+R, Ctrl+B and Ctrl+G with their AcceleratorKeys and MakeRedButton_Click, MakeBlueButton_Click and MakeChartreuseButton_Click (a KeyboardAccelerator is the button's HotKey), and the menu with its access keys (WinUI's MenuBar is FerroUI's Menu). The headings are the theme's text styles with their heading levels. Alt shows the Key Tips of the menu (AccessKeyManager of ferroui-controls-keytips), a key opens its menu and shows the keys of its items, including Cut (X) and Paste (V), and the same keys reach assistive technology. FerroUI does not add a button's accelerator to its tooltip as WinUI does: the page is partial.",
       "examples": []
     },
     "AccessibilityScreenReader": {

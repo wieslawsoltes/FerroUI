@@ -1,0 +1,22 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="Key Tips"
+             x:Class="ControlCatalog.Pages.KeyTipsPage">
+  <StackPanel Spacing="12">
+    <TextBlock TextWrapping="Wrap"
+               Text="Press Alt to show the Key Tips, then type a key. G enters the group, whose keys show next; Escape goes back out." />
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button Content="Save" AccessKeyManager.AccessKey="S" />
+      <Button Content="Open" AccessKeyManager.AccessKey="O" AccessKeyManager.KeyTipPlacementMode="Top" />
+      <CheckBox Content="Wrap" AccessKeyManager.AccessKey="W" />
+    </StackPanel>
+    <Border Padding="8" BorderThickness="1" BorderBrush="Gray"
+            AccessKeyManager.AccessKey="G" AccessKeyManager.IsAccessKeyScope="True">
+      <StackPanel Orientation="Horizontal" Spacing="8">
+        <Button Content="First" AccessKeyManager.AccessKey="1" />
+        <Button Content="Second" AccessKeyManager.AccessKey="2" />
+      </StackPanel>
+    </Border>
+    <TextBlock x:Name="Output" Text="No button invoked yet." />
+  </StackPanel>
+</ContentPage>

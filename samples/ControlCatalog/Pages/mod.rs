@@ -70,6 +70,7 @@ mod pager_control_page;
 mod rating_control_page;
 mod items_repeater_page;
 mod labels_page;
+mod key_tips_page;
 mod layout_transform_control_page;
 mod list_box_page;
 mod menu_page;
@@ -237,6 +238,7 @@ pub use items_repeater_page::ItemsRepeaterPage;
 pub use labels_page::LabelsPage;
 pub use layout_transform_control_page::LayoutTransformControlPage;
 pub use list_box_page::ListBoxPage;
+pub use key_tips_page::KeyTipsPage;
 pub use menu_page::MenuPage;
 pub use native_embed_page::{EmbedSample, INativeDemoControl, NativeEmbedPage};
 pub use navigation_demo_page::NavigationDemoPage;
@@ -408,6 +410,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     LabelsPage::TYPE,
     LayoutTransformControlPage::TYPE,
     ListBoxPage::TYPE,
+    KeyTipsPage::TYPE,
     MenuPage::TYPE,
     NativeEmbedPage::TYPE,
     NavigationDemoPage::TYPE,
@@ -519,6 +522,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &LabelsPage::XAML_CLASS,
     &LayoutTransformControlPage::XAML_CLASS,
     &ListBoxPage::XAML_CLASS,
+    &KeyTipsPage::XAML_CLASS,
     &MenuPage::XAML_CLASS,
     &NativeEmbedPage::XAML_CLASS,
     &NavigationDemoPage::XAML_CLASS,
