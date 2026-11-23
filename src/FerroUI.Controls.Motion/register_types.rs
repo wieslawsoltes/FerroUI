@@ -1,7 +1,7 @@
 //! The type table of this crate: its namespace, its classes and what it states about itself for
 //! markup.
 
-use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition, FERRO_XML_NAMESPACE};
+use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::{StaticType, TypeInfo};
 
 const NAMESPACES: &[(&str, &str)] = &[("ferroui_controls_motion", "FerroUI.Controls")];
@@ -30,6 +30,7 @@ pub fn register_types() {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_table(TYPES);
+        MarkupType::register_table(&[crate::ParallaxSourceOffsetKind::MARKUP]);
         register_rust_paths();
         MarkupAssembly::register_table(&ASSEMBLY);
     });
