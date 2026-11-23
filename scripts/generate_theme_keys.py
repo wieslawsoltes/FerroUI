@@ -13,12 +13,19 @@ of what it names. A key whose definitions have different types, or whose element
 is a `ThemeResourceKey<BoxedValue>`: the key is checked, its value is not.
 
 Left out: keys that are not Rust identifiers, the keys of theme variants (`Dark`, `Light`), keys in
-the resources of a style, template or control, and type keys (`{x:Type Button}`).
+the resources of a style, template or control, type keys (`{x:Type Button}`), and a keyed
+`ResourceInclude` (`CompactStyles`), which the constructor of a theme takes out of its dictionary:
+it is a document, not a resource. The keys of `DensityStyles/Compact.xaml` are kept, and resolve
+when the theme has the compact density.
 
 How to run (from the repository root; Python 3, standard library only):
 
     python3 scripts/generate_theme_keys.py            # writes the files
     python3 scripts/generate_theme_keys.py --check    # exit 1 if stale
+    python3 scripts/generate_theme_keys.py --report   # the key-only keys of each theme, and why
+
+The test `typed_keys_tests` of each theme crate resolves every generated key against the loaded
+theme, in each variant, and checks the declared type.
 """
 
 import argparse
@@ -74,7 +81,7 @@ def read_entries(element, is_root, entries):
             name = local_name(child.tag)
             if name == "StaticResource" and child.get("ResourceKey"):
                 entries.setdefault(key, set()).add("=" + child.get("ResourceKey"))
-            else:
+            elif name != "ResourceInclude":
                 entries.setdefault(key, set()).add(name)
         if is_container(child, is_root):
             read_entries(child, False, entries)
@@ -95,8 +102,8 @@ def value_type(key, entries, seen=()):
     return types.pop() if len(types) == 1 else UNTYPED
 
 
-def generate(theme):
-    """The text of `keys.rs` of the theme."""
+def read_theme(theme):
+    """The keyed entries of the documents of the theme."""
     directory = os.path.join(ROOT, "src", f"FerroUI.Themes.{theme}")
     entries = {}
     for root, _, files in os.walk(directory):
@@ -104,6 +111,52 @@ def generate(theme):
             if name.endswith(".xaml"):
                 document = ElementTree.parse(os.path.join(root, name)).getroot()
                 read_entries(document, True, entries)
+    return entries
+
+
+def key_only_reason(key, entries, seen=()):
+    """Why `key` has no single value type."""
+    if key in seen:
+        return "an alias that names itself"
+    if key not in entries:
+        return "an alias of a key outside of the theme's dictionaries"
+    reasons = set()
+    types = set()
+    for definition in entries[key]:
+        if definition.startswith("="):
+            target = definition[1:]
+            value = value_type(target, entries, (*seen, key))
+            types.add(value)
+            if value == UNTYPED:
+                reasons.add(key_only_reason(target, entries, (*seen, key)))
+        elif definition.endswith("Brush"):
+            types.add(BRUSH)
+        elif definition in VALUE_TYPES:
+            types.add(VALUE_TYPES[definition])
+        else:
+            types.add(UNTYPED)
+            reasons.add(f"element type without a mapped value type: {definition}")
+    if len(types) > 1:
+        return "definitions of different types"
+    return sorted(reasons)[0] if reasons else "no single type"
+
+
+def report(theme):
+    """The key-only keys of the theme, by reason."""
+    entries = read_theme(theme)
+    keys = [key for key in entries if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) and key not in RUST_KEYWORDS]
+    by_reason = {}
+    for key in sorted(keys):
+        if value_type(key, entries) == UNTYPED:
+            by_reason.setdefault(key_only_reason(key, entries), []).append(key)
+    print(f"{theme}: {sum(map(len, by_reason.values()))} key-only of {len(keys)}")
+    for reason in sorted(by_reason):
+        print(f"  {reason} ({len(by_reason[reason])}): {', '.join(by_reason[reason])}")
+
+
+def generate(theme):
+    """The text of `keys.rs` of the theme."""
+    entries = read_theme(theme)
     groups = {}
     for key in sorted(entries):
         if re.fullmatch(r"[A-Za-z_][A-Za-z0-9_]*", key) and key not in RUST_KEYWORDS:
@@ -129,7 +182,12 @@ def generate(theme):
 def main():
     parser = argparse.ArgumentParser(description=__doc__.split("\n")[0])
     parser.add_argument("--check", action="store_true")
+    parser.add_argument("--report", action="store_true")
     options = parser.parse_args()
+    if options.report:
+        for theme in THEMES:
+            report(theme)
+        return
     stale = False
     for theme in THEMES:
         path = os.path.join(ROOT, "src", f"FerroUI.Themes.{theme}", "keys.rs")

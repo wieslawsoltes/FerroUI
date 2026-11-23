@@ -12,3 +12,4 @@ mod split_view_pane_tests;
 mod tab_control_layout_tests;
 mod theme_class_tests;
 mod winui_theme_tests;
+mod typed_keys_tests;
