@@ -598,6 +598,52 @@ border()
 - **Trimming.** A typed key is a root the trimmer reads exactly: what follows `keys::` in a path, a `use` item or a macro. An identifier that merely equals a key is no root. `use keys::*` or `keys as k` hides which keys are named, so every upper-case name of the crate may then root a key.
 - Text keys keep working in all of these, and are the form for a key that comes from data or a custom dictionary. A string literal that equals a key roots it, whatever the code does with it.
 
+#### Control themes and resource dictionaries
+
+A custom control's theme and template can be written in Rust, with no XAML. The builders make the runtime objects compiled XAML makes.
+
+```rust
+let chip = control_theme::<ToggleButton>()
+    .set(TemplatedControl::padding_property(), (12.0, 4.0))
+    .dynamic_resource(TemplatedControl::background_property(), keys::SystemControlBackgroundAltHighBrush)
+    .template(|| {
+        border()
+            .name("PART_Border")
+            .template_bind(Border::background_property(), TemplatedControl::background_property())
+            .child(
+                content_presenter()
+                    .name("PART_ContentPresenter")
+                    .template_bind(ContentPresenter::content_property(), ContentControl::content_property()),
+            )
+            .into_element()
+    })
+    .nested(
+        style(nesting().checked().template().of::<Border>())
+            .dynamic_resource(Border::background_property(), keys::SystemControlHighlightAccentBrush),
+    )
+    .build();
+
+toggle_button().theme(chip)
+```
+
+| XAML | Builder |
+|---|---|
+| `<ControlTheme TargetType="X">` | `control_theme::<X>()` |
+| `BasedOn="{StaticResource Y}"` | `.based_on(y)` |
+| `<Setter Property="P" Value="V"/>` | `.set(P, v)` |
+| `<Setter Property="P" Value="{DynamicResource K}"/>` | `.dynamic_resource(P, keys::K)` |
+| `<ControlTemplate>` | `.template(\|\| element)`, or `control_template_with(..)` to capture |
+| `{TemplateBinding P}` | `.template_bind(Target, P)` on an element |
+| `Name="PART_X"` in a template | `.name("PART_X")`, registered in the name scope of the template |
+| `<Style Selector="^:checked /template/ Border">` | `.nested(style(nesting().checked().template().of::<Border>())...)` |
+| `<ResourceDictionary>` | `resource_dictionary()` with `.value`, `.typed`, `.deferred`, `.merged` |
+| `<ResourceDictionary.ThemeDictionaries>` | `.theme_variant(ThemeVariant::dark(), resource_dictionary()...)` |
+| A theme under `{x:Type X}` | `.control_theme(theme)` of a dictionary |
+
+- A template body and a deferred resource are plain `fn`s: a closure that captures nothing coerces, so a theme adds no generic copy per closure. A template that must capture uses `control_template_with`, which only boxes the closure.
+- Values an element of a template gives are at the priority of a template, as in XAML, so a style with a condition overrides them. A reactive value (a signal, a closure) on an element of a template stays a local value, which such a style does not override.
+- XAML stays the better form for a theme designers edit, or one that is hot reloaded.
+
 ### 10.4 Transitions and animations
 
 | Function | Gives |

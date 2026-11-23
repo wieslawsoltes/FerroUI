@@ -17,11 +17,14 @@
 
 use crate::builder::IntoValue;
 use crate::conversions::brush_of;
-use ferroui_base::controls::{ResourceKey, ThemeResourceKey};
+use ferroui_base::controls::{ResourceConverter, ResourceHostRef, ResourceKey, ThemeResourceKey};
+use ferroui_base::data::core::UntypedObservableBindingExpression;
+use ferroui_base::data::{BindingBase, BindingExpressionBase, BindingPriority};
 use ferroui_base::media::{Color, IBrush};
 use ferroui_base::metadata::from_markup_value;
-use ferroui_base::{BoxedValue, StyledValue};
-use std::any::TypeId;
+use ferroui_base::reactive::{IObservable, ObservableExt};
+use ferroui_base::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, StyledValue, UnsetValueType};
+use std::any::{Any, TypeId};
 use std::rc::Rc;
 
 /// The value of a property from the value of a resource; `None` when it is not one.
@@ -87,5 +90,53 @@ impl<T: StyledValue> ResourceKeyFor<T> for &str {
 
     fn converter() -> ResourceValueConverter {
         text_value::<T>
+    }
+}
+
+fn is_unset(value: &Option<BoxedValue>) -> bool {
+    value.as_ref().is_some_and(|value| value.is::<UnsetValueType>())
+}
+
+/// A resource as a binding: of an element of the builders, or of a setter of a theme.
+pub(crate) struct ResourceBinding {
+    key: ResourceKey,
+    dynamic: bool,
+    convert: ResourceValueConverter,
+}
+
+impl ResourceBinding {
+    pub(crate) fn new(key: ResourceKey, dynamic: bool, convert: ResourceValueConverter) -> Self {
+        Self { key, dynamic, convert }
+    }
+}
+
+/// The binding of `key` for a property with a value of type `T`.
+pub(crate) fn resource_binding<T, K: ResourceKeyFor<T>>(key: K, dynamic: bool) -> ResourceBinding {
+    ResourceBinding::new(key.resource_key(), dynamic, K::converter())
+}
+
+impl BindingBase for ResourceBinding {
+    fn as_any(&self) -> Option<&dyn Any> {
+        Some(self)
+    }
+
+    fn create_instance(
+        &self,
+        target: &FerroObject,
+        _target_property: Option<&'static FerroProperty>,
+        _anchor: Option<&Ref<FerroObject>>,
+    ) -> Rc<dyn BindingExpressionBase> {
+        let convert = self.convert;
+        let converter: ResourceConverter = Rc::new(move |value: Option<BoxedValue>| {
+            if is_unset(&value) {
+                return value;
+            }
+            convert(&value).or_else(|| Some(FerroProperty::unset_value()))
+        });
+        let element = target.to_ref().cast::<StyledElement>().expect("a resource is bound on a styled element");
+        let observable = ResourceHostRef::from(&element).resource_observable(self.key.clone(), Some(converter));
+        let observable: Rc<dyn IObservable<Option<BoxedValue>>> =
+            if self.dynamic { observable } else { observable.where_(|value| !is_unset(value)).take(1) };
+        UntypedObservableBindingExpression::new(observable, BindingPriority::LocalValue)
     }
 }

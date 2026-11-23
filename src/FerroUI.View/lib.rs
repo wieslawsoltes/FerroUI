@@ -67,6 +67,7 @@ pub mod router;
 mod rust_paths;
 mod style;
 mod template;
+mod theme;
 mod values;
 pub mod xaml;
 
@@ -119,6 +120,10 @@ pub use model_binding::{BindableTo, ModelBinding, ModelProperty, ReadOnlyModelPr
 pub use mount::{view_stats, ViewStats};
 pub use path_data::{path_data, PathBuilder, PathData};
 pub use template::template;
+pub use theme::{
+    control_template, control_template_with, control_theme, control_theme_of, resource_dictionary, ControlThemeBuilder,
+    ResourceDictionaryBuilder,
+};
 pub use ferroui_base::input::Key as KeyCode;
 pub use values::{
     alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
@@ -187,6 +192,10 @@ pub mod prelude {
     pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty, ViewModel};
     pub use crate::{typed_route, Route, RouteParamError, TypedRoute};
     pub use crate::{use_theme_resource, ResourceKeyFor, ThemeResourceKey};
+    pub use crate::{
+        control_template, control_template_with, control_theme, control_theme_of, resource_dictionary,
+        ControlThemeBuilder, ResourceDictionaryBuilder,
+    };
     pub use crate::{
         alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
         BoxShadowOptions, KeyCode, KeyGestureModifiers, LinearGradient, Transforms,

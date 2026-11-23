@@ -22,8 +22,10 @@
 
 use crate::builder::{IntoValue, TypedProperty};
 use crate::generated::pseudo_classes::PseudoClassSelectors;
+use crate::resources::{resource_binding, ResourceKeyFor};
+use ferroui_base::data::BindingBase;
 use ferroui_base::styling::{Selector, Selectors, Setter, Style};
-use ferroui_base::{FerroProperty, ObjectType, Ref, StyledElement, TypeInfo, Upcast};
+use ferroui_base::{ObjectType, Ref, StyledElement, TypeInfo, Upcast};
 use std::rc::Rc;
 
 /// A style being built: a selector, setters and nested styles. Turns into a
@@ -38,7 +40,7 @@ use std::rc::Rc;
 /// ```
 pub struct StyleBuilder {
     selector: Selector,
-    setters: Vec<(&'static FerroProperty, ferroui_base::BoxedValue)>,
+    setters: Vec<Rc<Setter>>,
     nested: Vec<StyleBuilder>,
 }
 
@@ -214,7 +216,19 @@ impl StyleBuilder {
     /// Sets `property` to `value` (what converts to its value: `"Red"` for a
     /// brush, `8.0` for a thickness).
     pub fn set<P: TypedProperty + ?Sized>(mut self, property: &'static P, value: impl IntoValue<P::Value>) -> Self {
-        self.setters.push((property.untyped(), Rc::new(value.into_value())));
+        self.setters.push(Setter::new_untyped(property.untyped(), Rc::new(value.into_value())));
+        self
+    }
+
+    /// Makes `property` follow a resource while the style applies (`{DynamicResource}` in a
+    /// setter): a typed key of a theme, or text.
+    pub fn dynamic_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: ResourceKeyFor<P::Value>,
+    {
+        let binding: Rc<dyn BindingBase> = Rc::new(resource_binding::<P::Value, K>(key, true));
+        self.setters.push(Setter::new_binding_base(property.untyped(), binding));
         self
     }
 
@@ -227,8 +241,7 @@ impl StyleBuilder {
 
     /// The style.
     pub fn build(self) -> Ref<Style> {
-        let setters = self.setters.into_iter().map(|(property, value)| Setter::new_untyped(property, value));
-        let style = Style::with_setters(self.selector, setters);
+        let style = Style::with_setters(self.selector, self.setters);
         for nested in self.nested {
             style.children().add(nested.build());
         }

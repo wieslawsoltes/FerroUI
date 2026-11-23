@@ -520,7 +520,12 @@ impl<T> El<T> {
         P: TypedProperty + ?Sized,
         K: crate::resources::ResourceKeyFor<P::Value>,
     {
-        let value = PropValue::Resource { key: key.resource_key(), dynamic: true, convert: K::converter() };
+        let value = PropValue::Resource {
+            key: key.resource_key(),
+            dynamic: true,
+            convert: K::converter(),
+            priority: ferroui_base::data::BindingPriority::LocalValue,
+        };
         set_prop(&mut self.element, property.untyped(), value);
         self
     }
@@ -533,8 +538,25 @@ impl<T> El<T> {
         P: TypedProperty + ?Sized,
         K: crate::resources::ResourceKeyFor<P::Value>,
     {
-        let value = PropValue::Resource { key: key.resource_key(), dynamic: false, convert: K::converter() };
+        let value = PropValue::Resource {
+            key: key.resource_key(),
+            dynamic: false,
+            convert: K::converter(),
+            priority: ferroui_base::data::BindingPriority::LocalValue,
+        };
         set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
+    /// Binds a property of an element of a control template to a property of the control the
+    /// template is applied to (`{TemplateBinding}`). The two have the same value type.
+    pub fn template_bind<P, Q>(mut self, property: &'static P, source: &'static Q) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        Q: TypedProperty<Value = P::Value> + ?Sized,
+    {
+        let binding = ferroui_base::data::TemplateBinding::new(source.untyped());
+        set_prop(&mut self.element, property.untyped(), PropValue::Binding(binding));
         self
     }
 

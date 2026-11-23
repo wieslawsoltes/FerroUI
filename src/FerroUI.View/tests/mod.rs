@@ -2,6 +2,7 @@
 //! mounting, children that follow state, and the macros.
 
 mod builder_tests;
+mod control_theme_tests;
 mod dynamic_tests;
 mod macro_tests;
 mod model_binding_tests;

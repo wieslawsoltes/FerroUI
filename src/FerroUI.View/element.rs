@@ -10,7 +10,7 @@
 //! it returns with the one before and patches the controls.
 
 use crate::reactive::Owner;
-use ferroui_base::data::BindingBase;
+use ferroui_base::data::{BindingBase, BindingPriority};
 use ferroui_base::{BoxedValue, FerroProperty, Ref};
 use ferroui_controls::Control;
 use std::any::{Any, TypeId};
@@ -109,7 +109,15 @@ pub enum PropValue {
         dynamic: bool,
         /// The value of the property from the value of the resource.
         convert: crate::resources::ResourceValueConverter,
+        /// The priority of the value: local, or that of a template for an element of a control
+        /// template.
+        priority: BindingPriority,
     },
+    /// A value of an element of a control template, set at the priority of a template: a style
+    /// with a condition overrides it, as it does a value of a XAML template.
+    TemplateValue(BoxedValue),
+    /// A binding of an element of a control template, at the priority of a template.
+    TemplateBinding(Rc<dyn BindingBase>),
     /// An element, mounted with its parent, for a property that holds a
     /// control of a class (`context_menu`): `wrap` makes the value of the
     /// property from the control.
@@ -128,6 +136,7 @@ impl PartialEq for PropValue {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (PropValue::Value(a), PropValue::Value(b)) => a == b,
+            (PropValue::TemplateValue(a), PropValue::TemplateValue(b)) => a == b,
             (
                 PropValue::Resource { key: a, dynamic: dynamic_a, .. },
                 PropValue::Resource { key: b, dynamic: dynamic_b, .. },
@@ -149,6 +158,8 @@ impl fmt::Debug for PropValue {
             PropValue::Element(_) => f.write_str("Element"),
             PropValue::Binding(_) => f.write_str("Binding"),
             PropValue::Resource { key, dynamic, .. } => write!(f, "Resource({key:?}, dynamic: {dynamic})"),
+            PropValue::TemplateValue(_) => f.write_str("TemplateValue"),
+            PropValue::TemplateBinding(_) => f.write_str("TemplateBinding"),
             PropValue::TypedElement { .. } => f.write_str("TypedElement"),
         }
     }

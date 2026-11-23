@@ -6,6 +6,7 @@
 //!   `dynamic_resource`, [`use_theme_resource`]);
 //! - a transition of a width ([`transition`]);
 //! - a context menu given as an element;
+//! - a templated control whose whole theme is written in Rust (`chip_theme`);
 //! - a view model bound with typed property paths (`#[derive(ViewModel)]`);
 //! - a colour view of `ferroui-controls-color-picker` and a TreeDataGrid of
 //!   `ferroui-controls-treedatagrid`, written with their generated builders.
@@ -14,10 +15,11 @@
 
 use ferroui_base::data::model::Event;
 use ferroui_base::layout::{Layoutable, Orientation, VerticalAlignment};
-use ferroui_base::styling::ThemeVariant;
-use ferroui_base::{BoxedValue, Visual};
-use ferroui_controls::primitives::TemplatedControl;
-use ferroui_controls::GridLength;
+use ferroui_base::styling::{ControlTheme, ThemeVariant};
+use ferroui_base::{BoxedValue, Ref, Visual};
+use ferroui_controls::presenters::ContentPresenter;
+use ferroui_controls::primitives::{TemplatedControl, ToggleButton};
+use ferroui_controls::{ContentControl, GridLength};
 use ferroui_controls_treedatagrid::models::TextColumn;
 use ferroui_controls_treedatagrid::TreeDataGridSourceRef;
 use ferroui_treedatagrid_core::models::ColumnRef;
@@ -91,6 +93,44 @@ impl Greeting {
     }
 }
 
+/// A toggle button drawn as a chip: its whole control theme is Rust, with its template, its
+/// named parts and the styles of its states, and it follows the resources of the theme variant.
+fn chip_theme() -> Ref<ControlTheme> {
+    control_theme::<ToggleButton>()
+        .set(TemplatedControl::padding_property(), (12.0, 4.0))
+        .set(TemplatedControl::corner_radius_property(), 12.0)
+        .set(TemplatedControl::border_thickness_property(), 1.0)
+        .dynamic_resource(TemplatedControl::background_property(), keys::SystemControlBackgroundAltHighBrush)
+        .dynamic_resource(TemplatedControl::border_brush_property(), keys::SystemControlHighlightAccentBrush)
+        .template(|| {
+            border()
+                .name("PART_Border")
+                .template_bind(ferroui_controls::Border::background_property(), TemplatedControl::background_property())
+                .template_bind(ferroui_controls::Border::border_brush_property(), TemplatedControl::border_brush_property())
+                .template_bind(
+                    ferroui_controls::Border::border_thickness_property(),
+                    TemplatedControl::border_thickness_property(),
+                )
+                .template_bind(ferroui_controls::Border::corner_radius_property(), TemplatedControl::corner_radius_property())
+                .child(
+                    content_presenter()
+                        .name("PART_ContentPresenter")
+                        .template_bind(ContentPresenter::content_property(), ContentControl::content_property())
+                        .template_bind(ContentPresenter::padding_property(), TemplatedControl::padding_property()),
+                )
+                .into_element()
+        })
+        .nested(
+            style(nesting().pointer_over().template().of::<ferroui_controls::Border>())
+                .set(Visual::opacity_property(), 0.85),
+        )
+        .nested(
+            style(nesting().checked().template().of::<ferroui_controls::Border>())
+                .dynamic_resource(ferroui_controls::Border::background_property(), keys::SystemControlHighlightAccentBrush),
+        )
+        .build()
+}
+
 /// The gallery: the theme variant it shows is a hook of its own.
 #[component(rerender)]
 pub fn Gallery(#[prop(default)] start_dark: bool) -> Element {
@@ -117,6 +157,7 @@ fn Page(dark: Signal<bool>) -> Element {
     let bar_transitions = use_hook(|| transitions([transition(Layoutable::width_property(), ms(400))]));
     let source = use_hook(languages);
     let greeting = use_hook(Greeting::new);
+    let chip = use_hook(chip_theme);
     let is_dark = variant.as_ref() == Some(&ThemeVariant::dark());
 
     rsx! {
@@ -138,6 +179,10 @@ fn Page(dark: Signal<bool>) -> Element {
                     Button { name: "Grow", on_click: move |_| wide.update(|wide| *wide = !*wide),
                         context_menu: rsx! { ContextMenu { MenuItem { header: "Copy" } MenuItem { header: "Paste" } } },
                         "Animate the bar (right-click: a context menu)" }
+                }
+                StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
+                    ToggleButton { name: "ChipRust", theme: chip.clone(), "A theme in Rust" }
+                    ToggleButton { name: "ChipOther", theme: chip.clone(), is_checked: true, "Checked" }
                 }
                 StackPanel { orientation: Orientation::Horizontal, spacing: 8.0,
                     data_context: greeting.clone() as BoxedValue,
