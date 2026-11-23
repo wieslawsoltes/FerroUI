@@ -1,7 +1,7 @@
 //! The GPU objects the parts of a backend context share: the device, the engine of the offscreen
 //! targets, the textures and the rendering of a recorded scene.
 
-use crate::device::{ExternalImage, ProGpuDevice, ProGpuEngine, TargetFormat};
+use crate::device::{ExternalImage, ProGpuDevice, ProGpuDeviceError, ProGpuEngine, TargetFormat};
 use crate::image_textures::ImageTextures;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder};
@@ -73,8 +73,15 @@ impl GpuTexture {
     }
 
     /// The content, read back: premultiplied `RGBA`, row by row without padding.
-    pub(crate) fn read(&self) -> Vec<u8> {
-        self.device.read_rgba8(self.texture, self.width, self.height)
+    pub(crate) fn read(&self) -> Result<Vec<u8>, ProGpuDeviceError> {
+        self.device.try_read_rgba8(self.texture, self.width, self.height)
+    }
+
+    /// The content, read back through the mapping of a buffer: `done` runs from the event loop
+    /// of the page.
+    #[cfg(target_os = "emscripten")]
+    pub(crate) fn read_async(&self, done: crate::device::ReadBackDone) {
+        self.device.read_rgba8_async(self.texture, self.width, self.height, done);
     }
 }
 

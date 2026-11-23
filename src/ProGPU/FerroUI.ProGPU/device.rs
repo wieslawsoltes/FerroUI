@@ -22,6 +22,11 @@ pub enum ProGpuDeviceError {
     NoDevice,
     /// The engine refused the device.
     Engine(progpu_native_status),
+    /// The WebGPU implementation could not map the buffer of a read-back.
+    ReadBackFailed,
+    /// A page cannot block on the GPU: pixels arrive through the mapping of a buffer, once the
+    /// page has returned to its event loop.
+    ReadBackNeedsEventLoop,
 }
 
 impl fmt::Display for ProGpuDeviceError {
@@ -31,6 +36,10 @@ impl fmt::Display for ProGpuDeviceError {
             ProGpuDeviceError::NoAdapter => write!(f, "the WebGPU implementation has no adapter"),
             ProGpuDeviceError::NoDevice => write!(f, "the WebGPU implementation created no device"),
             ProGpuDeviceError::Engine(status) => write!(f, "the ProGPU engine refused the device (status {status})"),
+            ProGpuDeviceError::ReadBackFailed => write!(f, "the pixels could not be read back from the GPU"),
+            ProGpuDeviceError::ReadBackNeedsEventLoop => {
+                write!(f, "in the browser pixels are read from the GPU asynchronously and are not available yet")
+            }
         }
     }
 }
@@ -539,23 +548,13 @@ impl ProGpuDevice {
         }
     }
 
-    /// Reads a texture of `RGBA8Unorm` back. A page cannot wait for the GPU, so in the browser
-    /// the pixels are transparent, and the first read says so in the log.
-    #[cfg(target_os = "emscripten")]
-    pub fn read_rgba8(&self, _texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
-        notes::note_once("no-read-back", "pixels are not read back from the GPU in the browser");
-        vec![0; width as usize * height as usize * 4]
-    }
-
-    /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
-    #[cfg(not(target_os = "emscripten"))]
-    pub fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
+    /// Copies a texture of `RGBA8Unorm` into a new buffer that can be mapped, on the queue.
+    fn begin_read_back(&self, texture: WGPUTexture, width: u32, height: u32) -> ReadBack {
         self.enter();
         // Rows of a copy are aligned to 256 bytes.
         let bytes_per_row = (width * 4).div_ceil(256) * 256;
         let size = u64::from(bytes_per_row) * u64::from(height);
-        // SAFETY: the calls of the WebGPU C ABI with the handles they return; the mapped range is
-        // read while the buffer is mapped.
+        // SAFETY: the calls of the WebGPU C ABI with the handles they return.
         unsafe {
             let buffer = wgpuDeviceCreateBuffer(
                 self.device,
@@ -581,12 +580,23 @@ impl ProGpuDevice {
             wgpuQueueSubmit(self.queue, 1, &commands);
             wgpuCommandBufferRelease(commands);
             wgpuCommandEncoderRelease(encoder);
-            let mut mapped = 0i32;
+            ReadBack { buffer, width, height, bytes_per_row, size: size as usize }
+        }
+    }
+
+    /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
+    #[cfg(not(target_os = "emscripten"))]
+    pub fn try_read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Result<Vec<u8>, ProGpuDeviceError> {
+        let back = self.begin_read_back(texture, width, height);
+        let mut mapped = 0i32;
+        // SAFETY: the buffer is alive; the flag outlives the wait below, which ends when the
+        // callback has written it.
+        unsafe {
             wgpuBufferMapAsync(
-                buffer,
+                back.buffer,
                 WGPUMapMode_Read,
                 0,
-                size as usize,
+                back.size,
                 WGPUBufferMapCallbackInfo {
                     nextInChain: ptr::null_mut(),
                     mode: WGPUCallbackMode_AllowSpontaneous,
@@ -598,19 +608,97 @@ impl ProGpuDevice {
             while mapped == 0 {
                 wgpuDevicePoll(self.device, 1, ptr::null());
             }
-            let mut pixels = Vec::with_capacity((width * height * 4) as usize);
-            if mapped == 1 {
-                let data = std::slice::from_raw_parts(wgpuBufferGetConstMappedRange(buffer, 0, size as usize) as *const u8, size as usize);
-                for row in 0..height as usize {
-                    let start = row * bytes_per_row as usize;
-                    pixels.extend_from_slice(&data[start..start + (width * 4) as usize]);
-                }
-                wgpuBufferUnmap(buffer);
-            }
-            wgpuBufferRelease(buffer);
-            pixels
+        }
+        back.finish(mapped == 1)
+    }
+
+    /// A page cannot wait for the GPU: [`read_rgba8_async`](Self::read_rgba8_async) is the read.
+    #[cfg(target_os = "emscripten")]
+    pub fn try_read_rgba8(&self, _texture: WGPUTexture, _width: u32, _height: u32) -> Result<Vec<u8>, ProGpuDeviceError> {
+        Err(ProGpuDeviceError::ReadBackNeedsEventLoop)
+    }
+
+    /// Reads a texture of `RGBA8Unorm` back through the mapping of a buffer: `done` is called from
+    /// the event loop of the page with `width * height * 4` bytes, row by row. The copy is on the
+    /// queue when this returns, so the texture may change or go away afterwards.
+    #[cfg(target_os = "emscripten")]
+    pub fn read_rgba8_async(&self, texture: WGPUTexture, width: u32, height: u32, done: ReadBackDone) {
+        let back = self.begin_read_back(texture, width, height);
+        let (buffer, size) = (back.buffer, back.size);
+        let pending = Box::into_raw(Box::new(PendingReadBack { back, done }));
+        // SAFETY: the buffer is alive; `on_read_back_mapped` takes the box back exactly once.
+        unsafe {
+            wgpuBufferMapAsync(
+                buffer,
+                WGPUMapMode_Read,
+                0,
+                size,
+                WGPUBufferMapCallbackInfo {
+                    nextInChain: ptr::null_mut(),
+                    mode: WGPUCallbackMode_AllowSpontaneous,
+                    callback: Some(on_read_back_mapped),
+                    userdata1: pending as *mut c_void,
+                    userdata2: ptr::null_mut(),
+                },
+            );
         }
     }
+
+    /// The pixels of a texture, for the tests.
+    #[cfg(test)]
+    pub(crate) fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
+        self.try_read_rgba8(texture, width, height).expect("the pixels of the texture")
+    }
+}
+
+/// A buffer holding the copy of a texture, until it is mapped and read.
+struct ReadBack {
+    buffer: WGPUBuffer,
+    width: u32,
+    height: u32,
+    bytes_per_row: u32,
+    size: usize,
+}
+
+impl ReadBack {
+    /// The pixels of a buffer that was mapped (`mapped`), and the release of the buffer.
+    fn finish(self, mapped: bool) -> Result<Vec<u8>, ProGpuDeviceError> {
+        // SAFETY: the buffer is owned here; the range is read while the buffer is mapped.
+        unsafe {
+            let result = if mapped {
+                let data = std::slice::from_raw_parts(wgpuBufferGetConstMappedRange(self.buffer, 0, self.size) as *const u8, self.size);
+                let row_bytes = self.width as usize * 4;
+                let mut pixels = Vec::with_capacity(row_bytes * self.height as usize);
+                for row in 0..self.height as usize {
+                    let start = row * self.bytes_per_row as usize;
+                    pixels.extend_from_slice(&data[start..start + row_bytes]);
+                }
+                wgpuBufferUnmap(self.buffer);
+                Ok(pixels)
+            } else {
+                Err(ProGpuDeviceError::ReadBackFailed)
+            };
+            wgpuBufferRelease(self.buffer);
+            result
+        }
+    }
+}
+
+/// What receives the pixels of an asynchronous read-back.
+#[cfg(target_os = "emscripten")]
+pub type ReadBackDone = Box<dyn FnOnce(Result<Vec<u8>, ProGpuDeviceError>)>;
+
+#[cfg(target_os = "emscripten")]
+struct PendingReadBack {
+    back: ReadBack,
+    done: ReadBackDone,
+}
+
+#[cfg(target_os = "emscripten")]
+unsafe extern "C" fn on_read_back_mapped(status: WGPUMapAsyncStatus, _: WGPUStringView, pending: *mut c_void, _: *mut c_void) {
+    // SAFETY: the box `read_rgba8_async` gave up, and the callback runs once.
+    let PendingReadBack { back, done } = *unsafe { Box::from_raw(pending as *mut PendingReadBack) };
+    done(back.finish(status == WGPUMapAsyncStatus_Success));
 }
 
 impl Drop for ProGpuDevice {

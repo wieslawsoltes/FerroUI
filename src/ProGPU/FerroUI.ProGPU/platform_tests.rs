@@ -373,6 +373,21 @@ fn a_geometry_drawn_twice_in_a_frame_keeps_each_brush() {
     assert_eq!(RED, surface.rgba(40, 8));
     assert_eq!(WHITE, surface.rgba(16, 8), "between the draws");
     target.dispose();
+
+/// A bitmap whose pixels did not come back from the GPU refuses to be read or saved: it does not
+/// pass for an empty image.
+#[test]
+fn a_bitmap_without_its_pixels_says_so() {
+    let bitmap = crate::ProGpuBitmap::new(PixelSize::new(2, 2), Vector::new(96.0, 96.0), PixelFormat::RGBA8888, AlphaFormat::Premul);
+    assert!(bitmap.pixels_ready());
+    assert!(bitmap.as_readable_bitmap().is_some());
+    bitmap.fail_read();
+    assert!(!bitmap.pixels_ready());
+    assert!(bitmap.as_readable_bitmap().is_none());
+    let mut out = Vec::new();
+    let error = bitmap.save(&mut out, &ferroui_base::media::imaging::PngBitmapEncoderOptions::default().into()).expect_err("no file of pixels that are not there");
+    assert_eq!(std::io::ErrorKind::WouldBlock, error.kind());
+    assert!(out.is_empty());
 }
 
 #[test]
