@@ -1081,7 +1081,7 @@
           "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "Both source examples use native PipsPager with the code behind of PipsPagerPage.xaml.cs in Rust: the pager of the source's eight Pictures, whose SelectedPageIndex keeps the source's TwoWay x:Bind of the gallery's SelectedIndex, and the pager whose TestPipsPager2_SelectedIndexChanged announces the page (a polite live region) with the orientation and button options. FerroUI has no FlipView: the gallery is a Carousel, as on the FlipView page (partial). FerroUI's PipsPager has IsPreviousButtonVisible and IsNextButtonVisible instead of PreviousButtonVisibility and NextButtonVisibility (no VisibleOnPointerOver) and no WrapMode, so those options are left out and the page is partial.",
+      "notes": "Both source examples use native PipsPager with the code behind of PipsPagerPage.xaml.cs in Rust: the pager of the source's eight Pictures, whose SelectedPageIndex keeps the source's TwoWay x:Bind of the gallery's SelectedIndex, and the pager whose TestPipsPager2_SelectedIndexChanged announces the page (a polite live region) with the orientation, button visibility and wrap mode options. FerroUI has no FlipView: the gallery is a Carousel, as on the FlipView page (partial). The page is partial because of the Carousel.",
       "examples": []
     },
     "Pivot": {
