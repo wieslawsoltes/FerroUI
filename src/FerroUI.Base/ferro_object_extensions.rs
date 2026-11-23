@@ -73,7 +73,7 @@ pub trait TypedProperty: 'static {
     ) -> Rc<dyn IDisposable>;
 }
 
-impl<T: PropertyValue> TypedProperty for StyledProperty<T> {
+impl<T: crate::StyledValue> TypedProperty for StyledProperty<T> {
     type Value = T;
 
     fn untyped(&'static self) -> &'static FerroProperty {
@@ -107,7 +107,7 @@ impl<T: PropertyValue> TypedProperty for StyledProperty<T> {
     }
 }
 
-impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
+impl<T: crate::StyledValue> TypedProperty for AttachedProperty<T> {
     type Value = T;
 
     fn untyped(&'static self) -> &'static FerroProperty {

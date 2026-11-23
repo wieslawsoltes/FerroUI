@@ -1,4 +1,250 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Display" FontSize="68" FontWeight="SemiBold"/><TextBlock Text="Title large" FontSize="40" FontWeight="SemiBold"/><TextBlock Text="Title" FontSize="28" FontWeight="SemiBold"/><TextBlock Text="Subtitle" FontSize="20" FontWeight="SemiBold"/><TextBlock Text="Body large" FontSize="18"/><TextBlock Text="Body" FontSize="14"/><TextBlock Text="Caption" FontSize="12"/>
+<!-- Ported from the pinned Typography example of WinUI Gallery (14061eea), the code behind of
+     TypographyPage.xaml.cs and the gallery's TypographyControl (brush_samples.rs); see
+     ../NOTICE.md. The header image is the source's Typography.dark.png or Typography.light.png of
+     the page's theme, set by brush_samples.rs (the ThemeDictionaries of HeaderImage). FerroUI has
+     no TeachingTip: each tip is the Flyout of its button with the tip's title, which the button's
+     click opens and closes as ShowTypographyButtonClick toggles IsOpen, so the page is partial.
+     Each TypographyControl is a row of the table: the example in the theme's style of its
+     resource name (a ControlTheme, DynamicResource as the source's StaticResource of the theme),
+     its variable font, size and line height, and the resource name with the copy button of
+     CopyToClipboardButton_Click (the gallery's CopyButton is a Button with its glyph, its feedback
+     a polite live region). ThemeResource becomes DynamicResource and ControlCornerRadius is 4;
+     FerroUI's TextBlock has no IsTextSelectionEnabled: the resource names are
+     SelectableTextBlocks. HorizontalScrollMode is the bar's visibility. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <RichTextBlock Margin="0,4,0,0" TextWrapping="Wrap">
+    <Paragraph><Run Text="Typography helps provide structure and hierarchy to UI. The default font for Windows is " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/downloads/#fonts"><Run Text="Segoe UI Variable" /></Hyperlink><Run Text=" . Best practice is to use Regular weight for most text, use Semibold for titles. The minimum values should be 12px Regular, 14px Semibold." /></Paragraph>
+  </RichTextBlock>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Type ramp" FontSize="18" />
+    <ScrollViewer Height="450" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+      <Canvas Width="750" Height="450" HorizontalAlignment="Left">
+        <Image x:Name="HeaderImage" Height="450" ZIndex="0" />
+        <Button x:Name="ShowTypographyButton1" Canvas.Left="650" Canvas.Top="60" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show typography" ToolTip.Tip="Caption">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <TextBlock FontWeight="SemiBold" Text="Caption" />
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button x:Name="ShowTypographyButton2" Canvas.Left="190" Canvas.Top="280" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show typography" ToolTip.Tip="Body">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <TextBlock FontWeight="SemiBold" Text="Body" />
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button x:Name="ShowTypographyButton3" Canvas.Left="83" Canvas.Top="245" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show typography" ToolTip.Tip="Body Strong">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <TextBlock FontWeight="SemiBold" Text="Body Strong" />
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button x:Name="ShowTypographyButton4" Canvas.Left="320" Canvas.Top="20" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show typography" ToolTip.Tip="Title">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <TextBlock FontWeight="SemiBold" Text="Title" />
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+        <Button x:Name="ShowTypographyButton5" Canvas.Left="160" Canvas.Top="110" Padding="4" ZIndex="1"
+                AutomationProperties.Name="Show typography">
+          <FontIcon FontSize="16" Glyph="&#xE946;" />
+          <Button.Flyout>
+            <Flyout>
+              <TextBlock FontWeight="SemiBold" Text="Display" />
+            </Flyout>
+          </Button.Flyout>
+        </Button>
+      </Canvas>
+    </ScrollViewer>
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+      <StackPanel>
+        <Grid Margin="0,48,0,24" HorizontalAlignment="Stretch" ColumnDefinitions="272,136,112,164">
+          <TextBlock Margin="16,0,0,0" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Theme="{DynamicResource CaptionTextBlockStyle}" Text="Example" />
+          <TextBlock Grid.Column="1" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Theme="{DynamicResource CaptionTextBlockStyle}" Text="Variable Font" />
+          <TextBlock Grid.Column="2" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Theme="{DynamicResource CaptionTextBlockStyle}" Text="Size/Line height" />
+          <TextBlock Grid.Column="3" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Theme="{DynamicResource CaptionTextBlockStyle}" Text="Style" />
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="CaptionTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Caption" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Small, Regular" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="12/16 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="CaptionTextBlockStyle" />
+              <Button x:Name="CopyCaptionTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="BodyTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource BodyTextBlockStyle}" Text="Body" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Text, Regular" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="14/20 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="BodyTextBlockStyle" />
+              <Button x:Name="CopyBodyTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="BodyStrongTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Body Strong" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Text, SemiBold" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="14/20 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="BodyStrongTextBlockStyle" />
+              <Button x:Name="CopyBodyStrongTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="BodyLargeTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource BodyLargeTextBlockStyle}" Text="Body Large" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Text, Regular" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="18/24 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="BodyLargeTextBlockStyle" />
+              <Button x:Name="CopyBodyLargeTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="BodyLargeStrongTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource BodyLargeStrongTextBlockStyle}" Text="Body Large Strong" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Text, SemiBold" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="18/24 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="BodyLargeStrongTextBlockStyle" />
+              <Button x:Name="CopyBodyLargeStrongTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="SubtitleTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource SubtitleTextBlockStyle}" Text="Subtitle" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Display, SemiBold" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="20/28 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="SubtitleTextBlockStyle" />
+              <Button x:Name="CopySubtitleTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="TitleTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource TitleTextBlockStyle}" Text="Title" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Display, SemiBold" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="28/36 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="TitleTextBlockStyle" />
+              <Button x:Name="CopyTitleTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="TitleLargeTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource TitleLargeTextBlockStyle}" Text="Title Large" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Display, SemiBold" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="40/52 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="TitleLargeTextBlockStyle" />
+              <Button x:Name="CopyTitleLargeTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <Grid MinHeight="68">
+          <Border Padding="0,12" CornerRadius="4" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}">
+            <Grid ColumnDefinitions="272,136,112,194,Auto">
+              <TextBlock x:Name="DisplayTextBlockStyleExample" Margin="16,0,0,0" VerticalAlignment="Center"
+                         Theme="{DynamicResource DisplayTextBlockStyle}" Text="Display" />
+              <TextBlock Grid.Column="1" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="Display, SemiBold" />
+              <TextBlock Grid.Column="2" VerticalAlignment="Center"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="68/92 epx" />
+              <SelectableTextBlock Grid.Column="3" VerticalAlignment="Center" FontFamily="Consolas"
+                                   FontSize="12" Text="DisplayTextBlockStyle" />
+              <Button x:Name="CopyDisplayTextBlockStyle" Grid.Column="4" Margin="4,2,8,0"
+                      ToolTip.Tip="Copy to clipboard" AutomationProperties.Name="Copy to clipboard">
+                <FontIcon FontSize="14" Glyph="&#xE8C8;" />
+              </Button>
+            </Grid>
+          </Border>
+        </Grid>
+        <TextBlock x:Name="CopyOutput" Margin="16,8,0,0" FontSize="12" AutomationProperties.LiveSetting="Polite" />
+      </StackPanel>
+    </ScrollViewer>
+  </StackPanel>
 </StackPanel>

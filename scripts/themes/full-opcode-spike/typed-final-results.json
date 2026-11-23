@@ -1,0 +1,1811 @@
+{
+  "host": "macOS arm64, rustc 1.99.1. Fat LTO, 1 codegen unit, theme opt-level z, dist profile, Apple strip and ad-hoc signing.",
+  "snapshot": {
+    "base": "933fd46325772fd1cdec81add9d4912dda2fe931",
+    "directories": [
+      "src/FerroUI.Build.Scan",
+      "src/FerroUI.Build.Tasks",
+      "src/Markup/FerroUI.Markup",
+      "src/Markup/FerroUI.Markup.Xaml",
+      "src/Markup/FerroUI.Markup.Xaml.Loader"
+    ],
+    "sha256": "90c8d10584ba72b83b861b2d5dccd4f2cd637b27db52ae5eca0c05a4fdc03d9d",
+    "patch_sha256": "62a3563a16a14c8d2dbd98aaa66d87d0b2631a1d945a1723a1196f9d3cd02924"
+  },
+  "notes": [
+    "Independent native and bytecode compilation using the same frozen compiler, build and runtime source, manifests and features. Backend is selected through FERROUI_XAML_BACKEND. Both links wrote a diagnostic map for unit and payload reachability.",
+    "This snapshot contains ObjectDocumentProgram, ordered TypedSetterChoice, proven default TemplateBinding, separate construction operation/string pools and grouped held-result ranges. It precedes the literal true/false guard in the emitter.",
+    "Alternating eleven pairs per case, each a fresh process building the real Button template 128 times. Other work was running on the same machine during the measurements.",
+    "Native and typed runtime verification includes per-theme key/type/setter inventories and live template binding checks. The Button-only probes also check whether Calendar is present, as predicted by their selected units.",
+    "Image-byte matches are diagnostic only. Small, shared and overlapping constants may be present independently. Symbol-based resource counts are lower bounds."
+  ],
+  "sample_order_ns": [
+    "theme_construction",
+    "first_Button_theme_lookup",
+    "first_Button_template_build",
+    "mean_of_128_Button_builds"
+  ],
+  "cases": {
+    "winui": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "selector_programs": 0,
+        "selector_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 277,
+        "native_control_theme_constructors": 3,
+        "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "style_members": {
+          "TargetType": 277,
+          "Setter": 3423,
+          "Style": 1525,
+          "BasedOn": 126
+        },
+        "setter_values": {
+          "Computed": 177,
+          "Dynamic": 1922,
+          "Expression": 440,
+          "Template": 175,
+          "Absent": 2,
+          "Null": 15,
+          "Thickness": 98,
+          "Bool": 229,
+          "Double": 191,
+          "Static": 123,
+          "CornerRadius": 5,
+          "Int": 39,
+          "Text": 7
+        },
+        "selector_steps": {
+          "Nesting": 651,
+          "Class": 575,
+          "Template": 553,
+          "OfType": 607,
+          "Name": 576,
+          "PropertyEquals": 69,
+          "Not": 24,
+          "Child": 9,
+          "NthLastChild": 2,
+          "Descendant": 30,
+          "Or": 57
+        },
+        "packed_reachability": {},
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 16252928,
+          "__DATA_CONST": 2015232,
+          "__DATA": 98304,
+          "__LINKEDIT": 229376
+        },
+        "linked_style_factories": 277,
+        "linked_style_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "bytes": 18578256,
+        "sha256": "3c19352c1f91b749d1c826d9bff204dcc98f6b918c2a28ce3514dc04a5e4a3e2",
+        "samples_ns": [
+          [
+            3844292,
+            105291,
+            49167,
+            2705
+          ],
+          [
+            3757000,
+            115458,
+            50583,
+            2737
+          ],
+          [
+            4007125,
+            110375,
+            48709,
+            2876
+          ],
+          [
+            7136417,
+            104916,
+            48625,
+            2698
+          ],
+          [
+            5756667,
+            103834,
+            48375,
+            2716
+          ],
+          [
+            6016041,
+            107458,
+            47958,
+            5254
+          ],
+          [
+            3700166,
+            102750,
+            46250,
+            2697
+          ],
+          [
+            3763250,
+            121917,
+            50375,
+            2681
+          ],
+          [
+            3636500,
+            102666,
+            47291,
+            2695
+          ],
+          [
+            3641167,
+            108541,
+            47458,
+            2710
+          ],
+          [
+            3564542,
+            103417,
+            44542,
+            2649
+          ]
+        ],
+        "median_ns": [
+          3763250,
+          105291,
+          48375,
+          2705
+        ]
+      },
+      "bytecode": {
+        "packed_module_bytes": 191711,
+        "resource_programs": 897,
+        "resource_instruction_bytes": 53315,
+        "style_programs": 277,
+        "style_instruction_bytes": 36956,
+        "selector_programs": 34,
+        "selector_instruction_bytes": 270,
+        "resources": {
+          "alias": 3634,
+          "literal_brush": 738,
+          "dynamic_brush": 714,
+          "static_brush": 338,
+          "double": 502,
+          "thickness": 568,
+          "corner_radius": 34,
+          "color": 470,
+          "text": 72
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "packed_reachability": {
+          "image_bytes": 191711,
+          "image_sha256": "6bded3c7aeaef160eba1a8c89033b6872bdb8ee2710b25ab818592ff4a5e646c",
+          "contiguous_full_image_in_executable": false,
+          "logical_program_count": 2612,
+          "unique_program_count": 2130,
+          "bytes_outside_referenced_runs": 15547,
+          "logical_bytes": 181274,
+          "named": {
+            "resource": {
+              "total_named_statics": 897,
+              "linked_named_statics": 78,
+              "linked_logical_bytes": 3903,
+              "linked_distinct_bytes": 3724
+            },
+            "style": {
+              "total_named_statics": 277,
+              "linked_named_statics": 277,
+              "linked_logical_bytes": 36956,
+              "linked_distinct_bytes": 36946
+            },
+            "selector": {
+              "total_named_statics": 34,
+              "linked_named_statics": 34,
+              "linked_logical_bytes": 270,
+              "linked_distinct_bytes": 69
+            }
+          },
+          "construction_programs": 1179,
+          "construction_logical_bytes": 89810,
+          "binding_path_programs": 194,
+          "binding_path_logical_bytes": 799,
+          "setter_choice_programs": 31,
+          "setter_choice_logical_bytes": 124,
+          "object_document_programs": 0,
+          "distinct_programs_at_least_32_bytes": 1029,
+          "distinct_programs_at_least_32_bytes_found_in_executable": 1029,
+          "distinct_bytes_at_least_32_before_link": 160243,
+          "distinct_bytes_at_least_32_found_in_executable": 160243
+        },
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 16121856,
+          "__DATA_CONST": 1622016,
+          "__DATA": 212992,
+          "__LINKEDIT": 196608
+        },
+        "linked_style_factories": 277,
+        "linked_style_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "bytes": 18121696,
+        "sha256": "7f874e1b5dd9659f652da635b7cf80d02cf897f09ae74195caf8c81631cd57e6",
+        "samples_ns": [
+          [
+            5137291,
+            112667,
+            45667,
+            2850
+          ],
+          [
+            4147958,
+            119792,
+            50041,
+            2855
+          ],
+          [
+            5977166,
+            118708,
+            50334,
+            2823
+          ],
+          [
+            4192500,
+            114167,
+            50042,
+            2892
+          ],
+          [
+            6095500,
+            112291,
+            114500,
+            4027
+          ],
+          [
+            4377583,
+            113291,
+            48167,
+            3007
+          ],
+          [
+            3935917,
+            112375,
+            46459,
+            2871
+          ],
+          [
+            3897875,
+            109458,
+            46416,
+            2895
+          ],
+          [
+            3786708,
+            109958,
+            45459,
+            2827
+          ],
+          [
+            6057583,
+            107250,
+            44666,
+            2843
+          ],
+          [
+            3971084,
+            109875,
+            46042,
+            2826
+          ]
+        ],
+        "median_ns": [
+          4192500,
+          112375,
+          46459,
+          2855
+        ]
+      },
+      "available_units": 166,
+      "linked_units": [
+        "ambient",
+        "Resources/SystemResources.xaml",
+        "Resources/Generic.xaml",
+        "Resources/Common_themeresources.xaml",
+        "Resources/Common_themeresources_any.xaml",
+        "Resources/Deprecated_themeresources_any.xaml",
+        "Resources/RichEditBox_themeresources.xaml",
+        "Resources/PasswordBox_themeresources.xaml",
+        "Resources/TextBox_themeresources.xaml",
+        "Resources/MenuFlyout_themeresources.xaml",
+        "Resources/AcrylicBrush_themeresources.xaml",
+        "Resources/RevealBrush_themeresources.xaml",
+        "Resources/Deprecated_themeresources.xaml",
+        "Resources/Hyperlink_themeresources.xaml",
+        "Resources/HyperlinkButton_themeresources.xaml",
+        "Resources/RadioButton_themeresources.xaml",
+        "Resources/AppBarButton_themeresources.xaml",
+        "Resources/AppBarSeparator_themeresources.xaml",
+        "Resources/AppBarToggleButton_themeresources.xaml",
+        "Resources/ListBox_themeresources.xaml",
+        "Resources/ToggleSwitch_themeresources.xaml",
+        "Resources/CommandBar_themeresources.xaml",
+        "Resources/ListViewItem_themeresources.xaml",
+        "Resources/TextBlock_themeresources.xaml",
+        "Resources/TextBlock_themeresources_v2.5.xaml",
+        "Resources/FlyoutPresenter_themeresources.xaml",
+        "Resources/Button_themeresources.xaml",
+        "Resources/ToggleButton_themeresources.xaml",
+        "Resources/CornerRadius_themeresources.xaml",
+        "Resources/RepeatButton_themeresources.xaml",
+        "Resources/CalendarDatePicker_themeresources.xaml",
+        "Resources/CalendarView_themeresources.xaml",
+        "Resources/CheckBox_themeresources.xaml",
+        "Resources/ContentDialog_themeresources.xaml",
+        "Resources/DatePicker_themeresources.xaml",
+        "Resources/DateTimePickerFlyout_themeresources.xaml",
+        "Resources/FlipView_themeresources.xaml",
+        "Resources/FlipViewItem_themeresources.xaml",
+        "Resources/ScrollBar_themeresources.xaml",
+        "Resources/ScrollViewer_themeresources.xaml",
+        "Resources/Slider_themeresources.xaml",
+        "Resources/TimePicker_themeresources.xaml",
+        "Resources/ToolTip_themeresources.xaml",
+        "Resources/RatingControl_themeresources.xaml",
+        "Resources/InfoBadge_themeresources.xaml",
+        "Resources/NavigationView_themeresources.xaml",
+        "Resources/NavigationBackButton_themeresources.xaml",
+        "Resources/PersonPicture_themeresources.xaml",
+        "Resources/RefreshContainer_themeresources.xaml",
+        "Resources/RefreshVisualizer_themeresources.xaml",
+        "Resources/MenuBar_themeresources.xaml",
+        "Resources/TreeView_themeresources.xaml",
+        "Resources/SplitButton_themeresources.xaml",
+        "Resources/DropDownButton_themeresources.xaml",
+        "Resources/RadioButtons_themeresources.xaml",
+        "Resources/TabView_themeresources.xaml",
+        "Resources/AutoSuggestBox_themeresources.xaml",
+        "Resources/ComboBox_themeresources.xaml",
+        "Resources/SplitView_themeresources.xaml",
+        "Resources/ProgressBar_themeresources.xaml",
+        "Resources/ProgressRing_themeresources.xaml",
+        "Resources/NumberBox_themeresources.xaml",
+        "Resources/Expander_themeresources.xaml",
+        "Resources/PagerControl_themeresources.xaml",
+        "Resources/InfoBar_themeresources.xaml",
+        "Resources/PipsPager_themeresources.xaml",
+        "Resources/SelectorBar_themeresources.xaml",
+        "Resources/TitleBar_themeresources.xaml",
+        "Resources/TabularSurfaces_themeresources.xaml",
+        "Resources/TableView_themeresources.xaml",
+        "Resources/ResizeGripper_themeresources.xaml",
+        "Resources/ThemeShadows.xaml",
+        "Resources/Glyphs.xaml",
+        "Strings/InvariantResources.xaml",
+        "Controls/TextBlock.xaml",
+        "Controls/Button.xaml",
+        "Controls/RepeatButton.xaml",
+        "Controls/ToggleButton.xaml",
+        "Controls/RevealStyles.xaml",
+        "Controls/HyperlinkButton.xaml",
+        "Controls/CheckBox.xaml",
+        "Controls/RadioButton.xaml",
+        "Controls/Thumb.xaml",
+        "Controls/ScrollBar.xaml",
+        "Controls/ScrollViewer.xaml",
+        "Controls/TextBox.xaml",
+        "Controls/ToolTip.xaml",
+        "Controls/ProgressBar.xaml",
+        "Controls/Separator.xaml",
+        "Controls/PathIcon.xaml",
+        "Controls/FontIcon.xaml",
+        "Controls/SymbolIcon.xaml",
+        "Controls/Label.xaml",
+        "Controls/ItemsControl.xaml",
+        "Controls/HeaderedContentControl.xaml",
+        "Controls/GroupBox.xaml",
+        "Controls/SelectableTextBlock.xaml",
+        "Controls/TransitioningContentControl.xaml",
+        "Controls/TextSelectionHandle.xaml",
+        "Controls/DataValidationErrors.xaml",
+        "Controls/GridSplitter.xaml",
+        "Controls/DateTimePickerShared.xaml",
+        "Controls/CalendarDayButton.xaml",
+        "Controls/CalendarButton.xaml",
+        "Controls/CalendarItem.xaml",
+        "Controls/Calendar.xaml",
+        "Controls/CalendarDatePicker.xaml",
+        "Controls/DatePicker.xaml",
+        "Controls/TimePicker.xaml",
+        "Controls/NotificationCard.xaml",
+        "Controls/InfoBar.xaml",
+        "Controls/InfoBadge.xaml",
+        "Controls/TitleBar.xaml",
+        "Controls/ProgressRing.xaml",
+        "Controls/WindowNotificationManager.xaml",
+        "Controls/TableView.xaml",
+        "Controls/TableViewCell.xaml",
+        "Controls/TableViewColumnHeader.xaml",
+        "Controls/TableViewRow.xaml",
+        "Controls/ManagedFileChooser.xaml",
+        "Controls/TabStrip.xaml",
+        "Controls/TabStripItem.xaml",
+        "Controls/TabControl.xaml",
+        "Controls/TabItem.xaml",
+        "Controls/SplitView.xaml",
+        "Controls/ContentPage.xaml",
+        "Controls/TabbedPage.xaml",
+        "Controls/NavigationPage.xaml",
+        "Controls/DrawerPage.xaml",
+        "Controls/Frame.xaml",
+        "Controls/NavigationView.xaml",
+        "Controls/Carousel.xaml",
+        "Controls/CarouselPage.xaml",
+        "Controls/CommandBar.xaml",
+        "Controls/DropDownButton.xaml",
+        "Controls/SplitButton.xaml",
+        "Controls/ToggleSwitch.xaml",
+        "Controls/Slider.xaml",
+        "Controls/MediaTransportControls.xaml",
+        "Controls/CameraCaptureUI.xaml",
+        "Controls/NumericUpDown.xaml",
+        "Controls/NumberBox.xaml",
+        "Controls/ButtonSpinner.xaml",
+        "Controls/Expander.xaml",
+        "Controls/PipsPager.xaml",
+        "Controls/RatingControl.xaml",
+        "Controls/PersonPicture.xaml",
+        "Controls/PagerControl.xaml",
+        "Controls/RefreshContainer.xaml",
+        "Controls/RefreshVisualizer.xaml",
+        "Controls/FlyoutPresenter.xaml",
+        "Controls/MenuScrollViewer.xaml",
+        "Controls/MenuFlyoutPresenter.xaml",
+        "Controls/ContextMenu.xaml",
+        "Controls/MenuItem.xaml",
+        "Controls/Menu.xaml",
+        "Controls/ListBoxItem.xaml",
+        "Controls/ListBox.xaml",
+        "Controls/ComboBoxItem.xaml",
+        "Controls/ComboBox.xaml",
+        "Controls/TreeViewItem.xaml",
+        "Controls/TreeView.xaml",
+        "Controls/AutoCompleteBox.xaml",
+        "Controls/AutoSuggestBox.xaml",
+        "Controls/RadioButtons.xaml",
+        "Controls/RichEditBox.xaml"
+      ],
+      "inventory_sha256": "98ea312d67134d745601d581923778739b5eae140b94ba2db69b0bdac126be8c",
+      "verified_inventory": "104 type keys and 2984 distinct string keys"
+    },
+    "winui-button": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "selector_programs": 0,
+        "selector_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 277,
+        "native_control_theme_constructors": 3,
+        "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "style_members": {
+          "TargetType": 277,
+          "Setter": 3423,
+          "Style": 1525,
+          "BasedOn": 126
+        },
+        "setter_values": {
+          "Computed": 177,
+          "Dynamic": 1922,
+          "Expression": 440,
+          "Template": 175,
+          "Absent": 2,
+          "Null": 15,
+          "Thickness": 98,
+          "Bool": 229,
+          "Double": 191,
+          "Static": 123,
+          "CornerRadius": 5,
+          "Int": 39,
+          "Text": 7
+        },
+        "selector_steps": {
+          "Nesting": 651,
+          "Class": 575,
+          "Template": 553,
+          "OfType": 607,
+          "Name": 576,
+          "PropertyEquals": 69,
+          "Not": 24,
+          "Child": 9,
+          "NthLastChild": 2,
+          "Descendant": 30,
+          "Or": 57
+        },
+        "packed_reachability": {},
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 9338880,
+          "__DATA_CONST": 786432,
+          "__DATA": 49152,
+          "__LINKEDIT": 114688
+        },
+        "linked_style_factories": 32,
+        "linked_style_names_sha256": "7ad53c912d82eb1bd04d8d85385cb30153cba4b772ee4bc0ba6818c608d889f7",
+        "bytes": 10278144,
+        "sha256": "f0fd3060c6aa7530eb4a58e2940a314e6ed5ef69f1c9a9d7fb40205cceef8394",
+        "samples_ns": [
+          [
+            1393042,
+            109167,
+            40750,
+            2682
+          ],
+          [
+            2590042,
+            192750,
+            63708,
+            7008
+          ],
+          [
+            1347375,
+            102750,
+            38000,
+            2560
+          ],
+          [
+            2599333,
+            185833,
+            60625,
+            7014
+          ],
+          [
+            2692542,
+            173500,
+            57125,
+            6594
+          ],
+          [
+            1437750,
+            104916,
+            39875,
+            2620
+          ],
+          [
+            1418291,
+            106166,
+            39208,
+            2668
+          ],
+          [
+            1391625,
+            106291,
+            41833,
+            2622
+          ],
+          [
+            1449708,
+            124125,
+            53041,
+            2847
+          ],
+          [
+            1424125,
+            111375,
+            40917,
+            2626
+          ],
+          [
+            2584458,
+            128208,
+            45583,
+            2902
+          ]
+        ],
+        "median_ns": [
+          1437750,
+          111375,
+          41833,
+          2682
+        ]
+      },
+      "bytecode": {
+        "packed_module_bytes": 191711,
+        "resource_programs": 897,
+        "resource_instruction_bytes": 53315,
+        "style_programs": 277,
+        "style_instruction_bytes": 36956,
+        "selector_programs": 34,
+        "selector_instruction_bytes": 270,
+        "resources": {
+          "alias": 3634,
+          "literal_brush": 738,
+          "dynamic_brush": 714,
+          "static_brush": 338,
+          "double": 502,
+          "thickness": 568,
+          "corner_radius": 34,
+          "color": 470,
+          "text": 72
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "8f2c9b4d76d2cf9d5d87b5a2b6b735588d4f0e05ac3f0b8a0bde0622af4560de",
+        "packed_reachability": {
+          "image_bytes": 191711,
+          "image_sha256": "6bded3c7aeaef160eba1a8c89033b6872bdb8ee2710b25ab818592ff4a5e646c",
+          "contiguous_full_image_in_executable": false,
+          "logical_program_count": 2612,
+          "unique_program_count": 2130,
+          "bytes_outside_referenced_runs": 15547,
+          "logical_bytes": 181274,
+          "named": {
+            "resource": {
+              "total_named_statics": 897,
+              "linked_named_statics": 14,
+              "linked_logical_bytes": 740,
+              "linked_distinct_bytes": 740
+            },
+            "style": {
+              "total_named_statics": 277,
+              "linked_named_statics": 32,
+              "linked_logical_bytes": 1981,
+              "linked_distinct_bytes": 1981
+            },
+            "selector": {
+              "total_named_statics": 34,
+              "linked_named_statics": 1,
+              "linked_logical_bytes": 7,
+              "linked_distinct_bytes": 7
+            }
+          },
+          "construction_programs": 1179,
+          "construction_logical_bytes": 89810,
+          "binding_path_programs": 194,
+          "binding_path_logical_bytes": 799,
+          "setter_choice_programs": 31,
+          "setter_choice_logical_bytes": 124,
+          "object_document_programs": 0,
+          "distinct_programs_at_least_32_bytes": 1029,
+          "distinct_programs_at_least_32_bytes_found_in_executable": 131,
+          "distinct_bytes_at_least_32_before_link": 160243,
+          "distinct_bytes_at_least_32_found_in_executable": 17314
+        },
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 9388032,
+          "__DATA_CONST": 704512,
+          "__DATA": 81920,
+          "__LINKEDIT": 98304
+        },
+        "linked_style_factories": 32,
+        "linked_style_names_sha256": "7ad53c912d82eb1bd04d8d85385cb30153cba4b772ee4bc0ba6818c608d889f7",
+        "bytes": 10271792,
+        "sha256": "902b1fd35ae2b996a5df919fbbbfae8ede99733e4a019044b2d3744a04b54049",
+        "samples_ns": [
+          [
+            2651833,
+            176958,
+            60333,
+            6934
+          ],
+          [
+            1397458,
+            106583,
+            41333,
+            2786
+          ],
+          [
+            1396375,
+            104291,
+            38083,
+            2796
+          ],
+          [
+            1458250,
+            106667,
+            40333,
+            2801
+          ],
+          [
+            1439042,
+            111000,
+            40875,
+            2788
+          ],
+          [
+            1425542,
+            104042,
+            39917,
+            2764
+          ],
+          [
+            1403333,
+            108792,
+            41917,
+            3273
+          ],
+          [
+            2713417,
+            174167,
+            58750,
+            7608
+          ],
+          [
+            2758333,
+            174583,
+            59791,
+            6902
+          ],
+          [
+            2700750,
+            189417,
+            60125,
+            6793
+          ],
+          [
+            2845833,
+            179250,
+            61041,
+            6805
+          ]
+        ],
+        "median_ns": [
+          1458250,
+          111000,
+          41917,
+          3273
+        ]
+      },
+      "available_units": 166,
+      "linked_units": [
+        "ambient",
+        "Resources/SystemResources.xaml",
+        "Resources/Generic.xaml",
+        "Resources/Common_themeresources.xaml",
+        "Resources/Common_themeresources_any.xaml",
+        "Resources/Deprecated_themeresources.xaml",
+        "Resources/HyperlinkButton_themeresources.xaml",
+        "Resources/TextBlock_themeresources.xaml",
+        "Resources/TextBlock_themeresources_v2.5.xaml",
+        "Resources/Button_themeresources.xaml",
+        "Resources/CornerRadius_themeresources.xaml",
+        "Resources/TitleBar_themeresources.xaml",
+        "Resources/Glyphs.xaml",
+        "Controls/TextBlock.xaml",
+        "Controls/Button.xaml",
+        "Controls/PathIcon.xaml"
+      ]
+    },
+    "fluent": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "selector_programs": 0,
+        "selector_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 117,
+        "native_control_theme_constructors": 5,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "style_members": {
+          "TargetType": 117,
+          "Setter": 1592,
+          "Style": 625,
+          "BasedOn": 12
+        },
+        "setter_values": {
+          "Dynamic": 897,
+          "Expression": 196,
+          "Computed": 109,
+          "Template": 107,
+          "Bool": 97,
+          "Thickness": 32,
+          "Absent": 2,
+          "Null": 4,
+          "Static": 15,
+          "Double": 58,
+          "Int": 70,
+          "Text": 5
+        },
+        "selector_steps": {
+          "Nesting": 337,
+          "Template": 287,
+          "OfType": 317,
+          "Name": 275,
+          "Class": 273,
+          "Child": 14,
+          "PropertyEquals": 69,
+          "Descendant": 13,
+          "Or": 8,
+          "Not": 14
+        },
+        "packed_reachability": {},
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 14008320,
+          "__DATA_CONST": 1327104,
+          "__DATA": 81920,
+          "__LINKEDIT": 180224
+        },
+        "linked_style_factories": 117,
+        "linked_style_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "bytes": 15567920,
+        "sha256": "31925c4470e51f837a3f822a0f6b9d6beef77a3a3a815c489d9067f41f713086",
+        "samples_ns": [
+          [
+            1295208,
+            292708,
+            38958,
+            1979
+          ],
+          [
+            1303708,
+            253083,
+            20167,
+            2024
+          ],
+          [
+            1380584,
+            246542,
+            21125,
+            1871
+          ],
+          [
+            1202500,
+            250500,
+            20917,
+            1782
+          ],
+          [
+            1246959,
+            258666,
+            22250,
+            1797
+          ],
+          [
+            1199500,
+            248125,
+            22291,
+            2004
+          ],
+          [
+            2323500,
+            424959,
+            35208,
+            4504
+          ],
+          [
+            2446167,
+            443708,
+            31833,
+            4252
+          ],
+          [
+            1192458,
+            240334,
+            20125,
+            1824
+          ],
+          [
+            2316334,
+            399333,
+            29959,
+            4255
+          ],
+          [
+            1212292,
+            248333,
+            20875,
+            1860
+          ]
+        ],
+        "median_ns": [
+          1295208,
+          253083,
+          22250,
+          1979
+        ]
+      },
+      "bytecode": {
+        "packed_module_bytes": 80445,
+        "resource_programs": 372,
+        "resource_instruction_bytes": 13906,
+        "style_programs": 117,
+        "style_instruction_bytes": 15670,
+        "selector_programs": 68,
+        "selector_instruction_bytes": 667,
+        "resources": {
+          "alias": 1023,
+          "literal_brush": 147,
+          "dynamic_brush": 77,
+          "static_brush": 170,
+          "double": 149,
+          "thickness": 158,
+          "corner_radius": 6,
+          "color": 60,
+          "text": 34
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "packed_reachability": {
+          "image_bytes": 80445,
+          "image_sha256": "8d25c8faf912dabe28bd576b4e8d2eab6ba159f2e4ceff7cf03067173ca70e61",
+          "contiguous_full_image_in_executable": false,
+          "logical_program_count": 1340,
+          "unique_program_count": 1076,
+          "bytes_outside_referenced_runs": 3792,
+          "logical_bytes": 78442,
+          "named": {
+            "resource": {
+              "total_named_statics": 372,
+              "linked_named_statics": 25,
+              "linked_logical_bytes": 1045,
+              "linked_distinct_bytes": 1045
+            },
+            "style": {
+              "total_named_statics": 117,
+              "linked_named_statics": 117,
+              "linked_logical_bytes": 15670,
+              "linked_distinct_bytes": 15638
+            },
+            "selector": {
+              "total_named_statics": 68,
+              "linked_named_statics": 68,
+              "linked_logical_bytes": 667,
+              "linked_distinct_bytes": 216
+            }
+          },
+          "construction_programs": 593,
+          "construction_logical_bytes": 47338,
+          "binding_path_programs": 139,
+          "binding_path_logical_bytes": 561,
+          "setter_choice_programs": 51,
+          "setter_choice_logical_bytes": 300,
+          "object_document_programs": 0,
+          "distinct_programs_at_least_32_bytes": 479,
+          "distinct_programs_at_least_32_bytes_found_in_executable": 479,
+          "distinct_bytes_at_least_32_before_link": 67643,
+          "distinct_bytes_at_least_32_found_in_executable": 67643
+        },
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 13991936,
+          "__DATA_CONST": 1228800,
+          "__DATA": 131072,
+          "__LINKEDIT": 163840
+        },
+        "linked_style_factories": 117,
+        "linked_style_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "bytes": 15505952,
+        "sha256": "77f997b9b43f00fad5cd2eceab692dd0c94a874eef0eb8f43e63868a8ce18e4a",
+        "samples_ns": [
+          [
+            1430042,
+            307417,
+            24416,
+            2190
+          ],
+          [
+            1237209,
+            252334,
+            19083,
+            1804
+          ],
+          [
+            1365959,
+            291709,
+            19125,
+            2079
+          ],
+          [
+            1480875,
+            423333,
+            21334,
+            1822
+          ],
+          [
+            1238708,
+            253208,
+            20584,
+            1826
+          ],
+          [
+            1464250,
+            275250,
+            19042,
+            1817
+          ],
+          [
+            2444292,
+            438459,
+            28000,
+            4341
+          ],
+          [
+            2404000,
+            415667,
+            29458,
+            4224
+          ],
+          [
+            2220750,
+            253250,
+            19583,
+            1749
+          ],
+          [
+            2409542,
+            416583,
+            30167,
+            4323
+          ],
+          [
+            1255541,
+            248541,
+            18875,
+            1795
+          ]
+        ],
+        "median_ns": [
+          1464250,
+          291709,
+          20584,
+          1826
+        ]
+      },
+      "available_units": 75,
+      "linked_units": [
+        "ambient",
+        "Accents/BaseResources.xaml",
+        "Accents/FluentControlResources.xaml",
+        "Strings/InvariantResources.xaml",
+        "Controls/Button.xaml",
+        "Controls/CommandBar.xaml",
+        "Controls/CarouselPage.xaml",
+        "Controls/ContentPage.xaml",
+        "Controls/DrawerPage.xaml",
+        "Controls/NavigationPage.xaml",
+        "Controls/TabbedPage.xaml",
+        "Controls/RadioButton.xaml",
+        "Controls/Expander.xaml",
+        "Controls/ProgressBar.xaml",
+        "Controls/AutoCompleteBox.xaml",
+        "Controls/ButtonSpinner.xaml",
+        "Controls/Calendar.xaml",
+        "Controls/CalendarButton.xaml",
+        "Controls/CalendarDatePicker.xaml",
+        "Controls/CalendarDayButton.xaml",
+        "Controls/CalendarItem.xaml",
+        "Controls/Carousel.xaml",
+        "Controls/CheckBox.xaml",
+        "Controls/FlyoutPresenter.xaml",
+        "Controls/GroupBox.xaml",
+        "Controls/GridSplitter.xaml",
+        "Controls/HyperlinkButton.xaml",
+        "Controls/ItemsControl.xaml",
+        "Controls/Label.xaml",
+        "Controls/ListBox.xaml",
+        "Controls/ListBoxItem.xaml",
+        "Controls/MenuScrollViewer.xaml",
+        "Controls/Menu.xaml",
+        "Controls/MenuItem.xaml",
+        "Controls/MenuFlyoutPresenter.xaml",
+        "Controls/NotificationCard.xaml",
+        "Controls/NumericUpDown.xaml",
+        "Controls/PathIcon.xaml",
+        "Controls/PipsPager.xaml",
+        "Controls/RepeatButton.xaml",
+        "Controls/ScrollBar.xaml",
+        "Controls/ScrollViewer.xaml",
+        "Controls/Separator.xaml",
+        "Controls/SplitButton.xaml",
+        "Controls/SplitView.xaml",
+        "Controls/TabControl.xaml",
+        "Controls/TabItem.xaml",
+        "Controls/TableView.xaml",
+        "Controls/TableViewCell.xaml",
+        "Controls/TableViewColumnHeader.xaml",
+        "Controls/TableViewRow.xaml",
+        "Controls/TabStrip.xaml",
+        "Controls/TabStripItem.xaml",
+        "Controls/TextBox.xaml",
+        "Controls/ToggleButton.xaml",
+        "Controls/ToggleSwitch.xaml",
+        "Controls/ToolTip.xaml",
+        "Controls/TransitioningContentControl.xaml",
+        "Controls/TreeView.xaml",
+        "Controls/TreeViewItem.xaml",
+        "Controls/WindowNotificationManager.xaml",
+        "Controls/ComboBox.xaml",
+        "Controls/ComboBoxItem.xaml",
+        "Controls/ContextMenu.xaml",
+        "Controls/DataValidationErrors.xaml",
+        "Controls/DateTimePickerShared.xaml",
+        "Controls/DatePicker.xaml",
+        "Controls/TimePicker.xaml",
+        "Controls/DropDownButton.xaml",
+        "Controls/Slider.xaml",
+        "Controls/ManagedFileChooser.xaml",
+        "Controls/SelectableTextBlock.xaml",
+        "Controls/RefreshContainer.xaml",
+        "Controls/HeaderedContentControl.xaml",
+        "Controls/TextSelectionHandle.xaml"
+      ],
+      "inventory_sha256": "bac8b3c907e11141f884c7551181df96a25f740bc45fa0029ef550c577c67ea3",
+      "verified_inventory": "83 type keys and 1111 distinct string keys"
+    },
+    "fluent-button": {
+      "native": {
+        "resource_programs": 0,
+        "resource_instruction_bytes": 0,
+        "style_programs": 0,
+        "style_instruction_bytes": 0,
+        "selector_programs": 0,
+        "selector_instruction_bytes": 0,
+        "resources": {},
+        "native_style_tables": 117,
+        "native_control_theme_constructors": 5,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "style_members": {
+          "TargetType": 117,
+          "Setter": 1592,
+          "Style": 625,
+          "BasedOn": 12
+        },
+        "setter_values": {
+          "Dynamic": 897,
+          "Expression": 196,
+          "Computed": 109,
+          "Template": 107,
+          "Bool": 97,
+          "Thickness": 32,
+          "Absent": 2,
+          "Null": 4,
+          "Static": 15,
+          "Double": 58,
+          "Int": 70,
+          "Text": 5
+        },
+        "selector_steps": {
+          "Nesting": 337,
+          "Template": 287,
+          "OfType": 317,
+          "Name": 275,
+          "Class": 273,
+          "Child": 14,
+          "PropertyEquals": 69,
+          "Descendant": 13,
+          "Or": 8,
+          "Not": 14
+        },
+        "packed_reachability": {},
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 9158656,
+          "__DATA_CONST": 671744,
+          "__DATA": 49152,
+          "__LINKEDIT": 98304
+        },
+        "linked_style_factories": 10,
+        "linked_style_names_sha256": "9fbba2de9a6ee37d4f849551c10c12ab5d1ceae1b9298c0ea8a4c20e28802ba0",
+        "bytes": 9973904,
+        "sha256": "552376e1df722d064733dc99e4748a881d43ba666efdf2ce46be11886790c086",
+        "samples_ns": [
+          [
+            329792,
+            235792,
+            20250,
+            1846
+          ],
+          [
+            555917,
+            429417,
+            32500,
+            4076
+          ],
+          [
+            332333,
+            236542,
+            18333,
+            1802
+          ],
+          [
+            386666,
+            345000,
+            20417,
+            2208
+          ],
+          [
+            321709,
+            232042,
+            20042,
+            1817
+          ],
+          [
+            330166,
+            242167,
+            20541,
+            1836
+          ],
+          [
+            390208,
+            264792,
+            20166,
+            1803
+          ],
+          [
+            329167,
+            231083,
+            17750,
+            1825
+          ],
+          [
+            306958,
+            232375,
+            18666,
+            1870
+          ],
+          [
+            330125,
+            237416,
+            19334,
+            1826
+          ],
+          [
+            309875,
+            224625,
+            18000,
+            1812
+          ]
+        ],
+        "median_ns": [
+          330125,
+          236542,
+          20042,
+          1826
+        ]
+      },
+      "bytecode": {
+        "packed_module_bytes": 80445,
+        "resource_programs": 372,
+        "resource_instruction_bytes": 13906,
+        "style_programs": 117,
+        "style_instruction_bytes": 15670,
+        "selector_programs": 68,
+        "selector_instruction_bytes": 667,
+        "resources": {
+          "alias": 1023,
+          "literal_brush": 147,
+          "dynamic_brush": 77,
+          "static_brush": 170,
+          "double": 149,
+          "thickness": 158,
+          "corner_radius": 6,
+          "color": 60,
+          "text": 34
+        },
+        "native_style_tables": 0,
+        "native_control_theme_constructors": 0,
+        "style_factory_names_sha256": "d1502e0e7043d800732e9f91cfe4b13b8d780ab9bdba55ae36aa652b8451cc3f",
+        "packed_reachability": {
+          "image_bytes": 80445,
+          "image_sha256": "8d25c8faf912dabe28bd576b4e8d2eab6ba159f2e4ceff7cf03067173ca70e61",
+          "contiguous_full_image_in_executable": false,
+          "logical_program_count": 1340,
+          "unique_program_count": 1076,
+          "bytes_outside_referenced_runs": 3792,
+          "logical_bytes": 78442,
+          "named": {
+            "resource": {
+              "total_named_statics": 372,
+              "linked_named_statics": 1,
+              "linked_logical_bytes": 24,
+              "linked_distinct_bytes": 24
+            },
+            "style": {
+              "total_named_statics": 117,
+              "linked_named_statics": 10,
+              "linked_logical_bytes": 925,
+              "linked_distinct_bytes": 925
+            },
+            "selector": {
+              "total_named_statics": 68,
+              "linked_named_statics": 0,
+              "linked_logical_bytes": 0,
+              "linked_distinct_bytes": 0
+            }
+          },
+          "construction_programs": 593,
+          "construction_logical_bytes": 47338,
+          "binding_path_programs": 139,
+          "binding_path_logical_bytes": 561,
+          "setter_choice_programs": 51,
+          "setter_choice_logical_bytes": 300,
+          "object_document_programs": 0,
+          "distinct_programs_at_least_32_bytes": 479,
+          "distinct_programs_at_least_32_bytes_found_in_executable": 27,
+          "distinct_bytes_at_least_32_before_link": 67643,
+          "distinct_bytes_at_least_32_found_in_executable": 3261
+        },
+        "mach_o_segment_bytes": {
+          "__PAGEZERO": 4294967296,
+          "__TEXT": 9207808,
+          "__DATA_CONST": 671744,
+          "__DATA": 65536,
+          "__LINKEDIT": 98304
+        },
+        "linked_style_factories": 10,
+        "linked_style_names_sha256": "9fbba2de9a6ee37d4f849551c10c12ab5d1ceae1b9298c0ea8a4c20e28802ba0",
+        "bytes": 10022992,
+        "sha256": "29dadfb374cff5ed5cc9530cb51915509e6bfe1d490e912c2f4fe98092c6d27a",
+        "samples_ns": [
+          [
+            339375,
+            474208,
+            21667,
+            1819
+          ],
+          [
+            344542,
+            247666,
+            17916,
+            1839
+          ],
+          [
+            341000,
+            255083,
+            18625,
+            1862
+          ],
+          [
+            320000,
+            237250,
+            55417,
+            2422
+          ],
+          [
+            536917,
+            325625,
+            31917,
+            2125
+          ],
+          [
+            339292,
+            253375,
+            19625,
+            1913
+          ],
+          [
+            322584,
+            233292,
+            18375,
+            1795
+          ],
+          [
+            542292,
+            386583,
+            25667,
+            4266
+          ],
+          [
+            326208,
+            232291,
+            17583,
+            1814
+          ],
+          [
+            325958,
+            234875,
+            18625,
+            1863
+          ],
+          [
+            339708,
+            245875,
+            18000,
+            1813
+          ]
+        ],
+        "median_ns": [
+          339375,
+          247666,
+          18625,
+          1862
+        ]
+      },
+      "available_units": 75,
+      "linked_units": [
+        "ambient",
+        "Controls/Button.xaml"
+      ]
+    }
+  },
+  "generated_code": {
+    "winui": {
+      "rust_sha256": "29bd66a3ee54245410edba328bf2f578424251a5f24f12e77b3ae961a49f90b0",
+      "fxc_sha256": "6bded3c7aeaef160eba1a8c89033b6872bdb8ee2710b25ab818592ff4a5e646c",
+      "rust_bytes": 5821075,
+      "fxc_bytes": 191711,
+      "split_import_pools": 481,
+      "pool_operation_entries": 10769,
+      "held_register_groups": 730,
+      "registers_in_held_groups": 2623,
+      "object_document_programs": 0,
+      "ordered_setter_choice_programs": 31,
+      "button_factory": "build_controls_winuicontrols_xaml_deferred_90",
+      "button_construction_regions": 2,
+      "ordinary_build_functions": 1455,
+      "build_functions_with_direct_markup_bridge_outside_construction_imports": 375,
+      "direct_provide_value_sites_outside_construction_imports": 254
+    },
+    "fluent": {
+      "rust_sha256": "af373f8deae9c45cccfc680b6987c4678e131356546f8fbbc5f025ab31d26338",
+      "fxc_sha256": "8d25c8faf912dabe28bd576b4e8d2eab6ba159f2e4ceff7cf03067173ca70e61",
+      "rust_bytes": 3009769,
+      "fxc_bytes": 80445,
+      "split_import_pools": 219,
+      "pool_operation_entries": 5546,
+      "held_register_groups": 434,
+      "registers_in_held_groups": 1471,
+      "object_document_programs": 0,
+      "ordered_setter_choice_programs": 51,
+      "button_factory": "build_controls_fluentcontrols_xaml_deferred_1",
+      "button_construction_regions": 1,
+      "ordinary_build_functions": 854,
+      "build_functions_with_direct_markup_bridge_outside_construction_imports": 245,
+      "direct_provide_value_sites_outside_construction_imports": 216
+    }
+  },
+  "boolean_literal_guard": {
+    "result": "Independent post-guard regeneration in empty directories matched pre-guard standalone theme outputs byte-for-byte.",
+    "sha256": {
+      "winui": {
+        "rs": {
+          "guarded": "29bd66a3ee54245410edba328bf2f578424251a5f24f12e77b3ae961a49f90b0",
+          "cached": "29bd66a3ee54245410edba328bf2f578424251a5f24f12e77b3ae961a49f90b0"
+        },
+        "fxc": {
+          "guarded": "6bded3c7aeaef160eba1a8c89033b6872bdb8ee2710b25ab818592ff4a5e646c",
+          "cached": "6bded3c7aeaef160eba1a8c89033b6872bdb8ee2710b25ab818592ff4a5e646c"
+        }
+      },
+      "fluent": {
+        "rs": {
+          "guarded": "af373f8deae9c45cccfc680b6987c4678e131356546f8fbbc5f025ab31d26338",
+          "cached": "af373f8deae9c45cccfc680b6987c4678e131356546f8fbbc5f025ab31d26338"
+        },
+        "fxc": {
+          "guarded": "8d25c8faf912dabe28bd576b4e8d2eab6ba159f2e4ceff7cf03067173ca70e61",
+          "cached": "8d25c8faf912dabe28bd576b4e8d2eab6ba159f2e4ceff7cf03067173ca70e61"
+        }
+      }
+    }
+  },
+  "supplemental_template_comparison": {
+    "method": "32 more paired fresh processes per case. Rotate case order and alternate mode first each block, using the identical signed executables; measure each process's 128-build average. Bootstrapped paired median, 10,000 resamples and fixed seed. Other application builds were still active.",
+    "cases": {
+      "winui": {
+        "native": [
+          2844,
+          2755,
+          2694,
+          3271,
+          2711,
+          2773,
+          2715,
+          2680,
+          2753,
+          2713,
+          2662,
+          2679,
+          2687,
+          2711,
+          2649,
+          2682,
+          3328,
+          2668,
+          2767,
+          2731,
+          2676,
+          2699,
+          2728,
+          2651,
+          2650,
+          2670,
+          2651,
+          2781,
+          2805,
+          2689,
+          2678,
+          2675
+        ],
+        "bytecode": [
+          2849,
+          2882,
+          2850,
+          2876,
+          2861,
+          2847,
+          2853,
+          2823,
+          2826,
+          3657,
+          2797,
+          2823,
+          3137,
+          2830,
+          2832,
+          2835,
+          2791,
+          2865,
+          2853,
+          2861,
+          2843,
+          5112,
+          2865,
+          2884,
+          2840,
+          2868,
+          2896,
+          2874,
+          2850,
+          2792,
+          4037,
+          2888
+        ],
+        "medians_ns": [
+          2696.5,
+          2853.0
+        ],
+        "paired_difference_ns_median_and_bootstrap_95pct": [
+          143.5,
+          127.0,
+          182.5
+        ]
+      },
+      "winui-button": {
+        "native": [
+          2599,
+          2569,
+          2655,
+          2690,
+          2637,
+          2618,
+          2617,
+          2610,
+          2569,
+          2616,
+          2818,
+          2626,
+          2625,
+          2595,
+          2593,
+          2599,
+          2532,
+          2664,
+          2575,
+          2895,
+          2630,
+          2656,
+          2559,
+          2678,
+          2718,
+          2588,
+          2756,
+          2649,
+          2638,
+          2617,
+          2650,
+          2586
+        ],
+        "bytecode": [
+          2847,
+          6775,
+          2802,
+          2762,
+          2764,
+          2777,
+          2800,
+          3811,
+          6139,
+          2848,
+          2807,
+          2901,
+          2800,
+          2793,
+          2791,
+          2839,
+          2784,
+          2814,
+          2882,
+          2839,
+          2868,
+          2835,
+          2893,
+          2843,
+          2829,
+          2788,
+          2766,
+          2909,
+          2899,
+          2768,
+          2781,
+          2897
+        ],
+        "medians_ns": [
+          2621.5,
+          2832.0
+        ],
+        "paired_difference_ns_median_and_bootstrap_95pct": [
+          198.0,
+          159.0,
+          245.0
+        ]
+      },
+      "fluent": {
+        "native": [
+          1788,
+          1827,
+          2158,
+          1948,
+          1787,
+          1797,
+          4522,
+          1790,
+          1761,
+          1798,
+          1804,
+          1837,
+          1808,
+          1793,
+          1824,
+          1875,
+          1833,
+          1858,
+          1834,
+          1792,
+          1847,
+          1786,
+          1848,
+          1822,
+          2011,
+          1988,
+          1799,
+          1838,
+          1859,
+          1840,
+          1803,
+          1923
+        ],
+        "bytecode": [
+          1775,
+          1986,
+          1794,
+          1807,
+          1881,
+          1767,
+          1814,
+          1819,
+          1884,
+          2419,
+          1832,
+          1849,
+          1852,
+          4242,
+          1829,
+          1831,
+          2047,
+          1833,
+          1803,
+          2026,
+          1760,
+          2043,
+          1859,
+          1842,
+          1846,
+          1806,
+          1796,
+          1802,
+          1791,
+          1815,
+          1820,
+          1948
+        ],
+        "medians_ns": [
+          1830.0,
+          1831.5
+        ],
+        "paired_difference_ns_median_and_bootstrap_95pct": [
+          8.0,
+          -28.0,
+          28.0
+        ]
+      },
+      "fluent-button": {
+        "native": [
+          1762,
+          1850,
+          1868,
+          1835,
+          1806,
+          1807,
+          1812,
+          1783,
+          1833,
+          1806,
+          1870,
+          1844,
+          1862,
+          1849,
+          1847,
+          1879,
+          1847,
+          1760,
+          1876,
+          1831,
+          1774,
+          1806,
+          1902,
+          1946,
+          1771,
+          1856,
+          1887,
+          1850,
+          1856,
+          1790,
+          1808,
+          1809
+        ],
+        "bytecode": [
+          1848,
+          2183,
+          1890,
+          1856,
+          1815,
+          1813,
+          1871,
+          1837,
+          1887,
+          1824,
+          1827,
+          1819,
+          1881,
+          1837,
+          1831,
+          1870,
+          1846,
+          1826,
+          1904,
+          1847,
+          1857,
+          1928,
+          1855,
+          1806,
+          1847,
+          1955,
+          1852,
+          1842,
+          1879,
+          1887,
+          1850,
+          1795
+        ],
+        "medians_ns": [
+          1839.5,
+          1849.0
+        ],
+        "paired_difference_ns_median_and_bootstrap_95pct": [
+          20.0,
+          -1.0,
+          48.0
+        ]
+      }
+    }
+  }
+}

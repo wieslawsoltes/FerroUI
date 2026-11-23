@@ -1,4 +1,68 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <UserControl><StackPanel Spacing="12"><TextBlock Text="A reusable counter control"/><Button x:Name="Primary" Content="Increment"/><TextBlock x:Name="Output" Text="Clicked 0 times"/></StackPanel></UserControl>
+<!-- Ported from the three pinned CustomUserControls examples of WinUI Gallery (14061eea) with the
+     custom controls of the page in Rust (custom_controls.rs, which creates them in their hosts);
+     see ../NOTICE.md. The control theme below is the default style of
+     CounterControl.xaml (DefaultStyleKey); the template of ValidatedPasswordBox.xaml is built in
+     Rust, because a TextBox in a ControlTemplate of run-time loaded markup does not get its
+     template part. FerroUI has no PasswordBox, so the template's password box is a TextBox with a
+     PasswordChar, and its Header is the template's HeaderText. ThemeResource is DynamicResource and the headings are the
+     theme's SubtitleTextBlockStyle with heading level 2. The Submit button's x:Bind of IsValid is
+     the code behind in Rust. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <StackPanel.Resources>
+    <ControlTheme x:Key="CounterControlTheme" TargetType="TemplatedControl">
+      <Setter Property="IsTabStop" Value="False" />
+      <Setter Property="Template">
+        <ControlTemplate>
+          <StackPanel HorizontalAlignment="Left" Spacing="8">
+            <TextBlock x:Name="CountText" FontSize="20" Text="0" HorizontalAlignment="Center"
+                       AutomationProperties.LiveSetting="Polite" AutomationProperties.Name="Counter value" />
+            <Button x:Name="ActionButton" Content="Increase" HorizontalAlignment="Center" MinWidth="100" />
+          </StackPanel>
+        </ControlTemplate>
+      </Setter>
+    </ControlTheme>
+  </StackPanel.Resources>
+
+  <TextBlock Margin="0,8" AutomationProperties.HeadingLevel="2" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             Text="Custom (templated) control" />
+  <StackPanel Spacing="8">
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="A custom control is a reusable component that derives from the " /><Run FontFamily="Consolas" Text="Control" /><Run Text=" class. It provides flexibility through " /><Run FontWeight="SemiBold" Text="ControlTemplates" /><Run Text=" and supports " /><Run FontWeight="SemiBold" Text="styling and theming." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph><Run Text="• Encapsulation: custom controls encapsulate behavior and UI logic, making them reusable across different projects." /></Paragraph>
+      <Paragraph><Run Text="• Theming: they support light and dark themes through theme resources." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock TextWrapping="Wrap">
+      <Paragraph FontWeight="SemiBold"><Run Text="Key points" /></Paragraph>
+      <Paragraph><Run Text="• Use " /><Run FontFamily="Consolas" Text="Generic.xaml" /><Run Text=" file or a new " /><Run FontFamily="Consolas" Text="ResourceDictionary" /><Run Text=" to define the default style of a custom control." /></Paragraph>
+      <Paragraph><Run Text="• Override " /><Run FontFamily="Consolas" Text="OnApplyTemplate()" /><Run Text=" to interact with template parts." /></Paragraph>
+      <Paragraph><Run Text="• Use " /><Run FontFamily="Consolas" Text="DependencyProperty" /><Run Text=" for properties that support data binding." /></Paragraph>
+    </RichTextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Counter Control with Increment/Decrement Mode" FontSize="18" />
+    <StackPanel x:Name="CounterHost" Orientation="Horizontal" Spacing="8" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Basic Custom Password Box with Validation" FontSize="18" />
+    <StackPanel x:Name="PasswordHost" Spacing="8">
+      <Button x:Name="SubmitButton" Width="240" HorizontalAlignment="Left" Content="Submit" IsEnabled="False"
+              Theme="{DynamicResource AccentButtonStyle}" />
+    </StackPanel>
+  </StackPanel>
+
+  <TextBlock Margin="0,24,0,8" AutomationProperties.HeadingLevel="2" Theme="{DynamicResource SubtitleTextBlockStyle}"
+             Text="UserControl" />
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="A UserControl is a reusable component that combines existing controls and logic into a cohesive unit. It allows for encapsulation of functionality and a consistent design across multiple instances." /></Paragraph>
+  </RichTextBlock>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Temperature Converter UserControl example" FontSize="18" />
+    <ContentControl x:Name="TemperatureHost" />
+  </StackPanel>
 </StackPanel>

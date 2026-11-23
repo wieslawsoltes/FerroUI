@@ -8,7 +8,6 @@ use std::rc::Rc;
 
 /// Converts a depth (a number of levels, or a thickness) to a margin by
 /// multiplying it with an indent on the chosen sides.
-#[derive(Default)]
 pub struct MarginMultiplierConverter {
     indent: Cell<f64>,
     left: Cell<bool>,
@@ -17,9 +16,22 @@ pub struct MarginMultiplierConverter {
     bottom: Cell<bool>,
 }
 
+impl Default for MarginMultiplierConverter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl MarginMultiplierConverter {
     pub fn new() -> Self {
-        Self::default()
+        register_casts!(Self);
+        Self {
+            indent: Cell::new(0.0),
+            left: Cell::new(false),
+            top: Cell::new(false),
+            right: Cell::new(false),
+            bottom: Cell::new(false),
+        }
     }
 
     /// The indent per level.

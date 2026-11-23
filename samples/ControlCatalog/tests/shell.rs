@@ -801,6 +801,32 @@ fn the_pane_toggles_and_the_back_button_follows_the_journal() {
     assert!(!navigation.is_back_enabled(), "nothing before the home page");
 }
 
+/// Not from upstream (#560): in the high contrast variant of the WinUI theme a card takes the
+/// system colours of `CustomThemes.xaml` (its border the window text colour on the window colour),
+/// not the dark card the variant inherited before.
+#[test]
+fn a_card_takes_the_system_colours_in_high_contrast() {
+    use ferroui_base::media::{Color, IBrush};
+
+    let shell = Shell::start(1400.0, 900.0);
+    shell.window.set_requested_theme_variant(Some(ferroui_themes_winui::WinUITheme::high_contrast()));
+    shell.settle();
+    let page = shell.page();
+    let section_control = descendants::<SectionControl>(&page).into_iter().next().expect("the first section");
+    let card = cards(&section_control).into_iter().next().expect("the first card");
+    let presenter = card.presenter().expect("the content presenter of the template of the card");
+    let colour = |brush: Option<Rc<dyn IBrush>>| -> Option<Color> {
+        brush.and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
+    };
+    let border = colour(presenter.border_brush()).expect("a solid border");
+    let background = colour(card.background()).expect("a solid background");
+    for (name, catalog) in [("light", "#E5E5EA"), ("dark", "#3A3A45")] {
+        assert_ne!(Color::parse(catalog).ok(), Some(border), "not the border of the {name} catalog");
+    }
+    assert_ne!(Color::parse("#2B2B33").ok(), Some(background), "not the dark card");
+    assert_ne!(border, background, "the border stands out from the card (text colour on window colour)");
+}
+
 /// A card under the pointer has the border of the hovered card, and a pressed one is dimmed.
 #[test]
 fn a_card_shows_that_it_is_hovered_and_pressed() {

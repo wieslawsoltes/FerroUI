@@ -1,10 +1,12 @@
 //! The output of the CPU reference kept for the next frame (`docs/porting/media3d.md`, section
-//! 3.7, step 1): a viewport whose snapshot, size, scale and options are unchanged draws the image
-//! it drew before, without rasterizing again.
+//! 3.7, step 1): a viewport whose snapshot, size, scale, options and brush textures (the
+//! identities and versions of the bitmaps of its image brushes) are unchanged draws the image it
+//! drew before, without rasterizing again.
 //!
 //! A backend keeps one cache on its render thread, with the form of the image it draws (a Skia
 //! image, a Vello image), so that the image is also uploaded to a GPU once rather than every frame.
 
+use crate::brush::scene_texture_inputs;
 use crate::cpu::{CpuRasterizer, CpuRenderOptions, Scene3DImage};
 use ferroui_base::rendering::scene3d::Scene3DSnapshot;
 use ferroui_base::PixelSize;
@@ -17,6 +19,8 @@ struct OutputKey {
     size: (i32, i32),
     scale_bits: u64,
     options: CpuRenderOptions,
+    /// The textures of its image brushes (new pixels of a bitmap change no generation).
+    inputs: u64,
 }
 
 struct OutputEntry<T> {
@@ -59,7 +63,8 @@ impl<T: Clone> Scene3DOutputCache<T> {
     }
 
     /// The output of `scene` at `size` pixels, `scale` and `options`: the kept one when the
-    /// snapshot, its generations, the size, the scale and the options are those it was made for;
+    /// snapshot, its generations, the size, the scale, the options and the versions of the bitmaps
+    /// of its image brushes are those it was made for;
     /// otherwise the scene is rasterized and `make` turns the image into the backend's form
     /// (`None` when it cannot, which keeps nothing). A new output of a scene replaces the older
     /// one of the same scene, and the least recently used output makes room for a new one.
@@ -77,6 +82,7 @@ impl<T: Clone> Scene3DOutputCache<T> {
             size: (size.width, size.height),
             scale_bits: scale.to_bits(),
             options,
+            inputs: scene_texture_inputs(scene),
         };
         // Outputs of snapshots nobody holds any more are dropped.
         self.entries.retain(|entry| entry.scene.strong_count() > 0);
@@ -97,6 +103,12 @@ impl<T: Clone> Scene3DOutputCache<T> {
         }
         self.entries.push(OutputEntry { scene: Arc::downgrade(scene), key, value: value.clone(), last_used: self.clock });
         Some(value)
+    }
+
+    /// Sets what renders the contents of visual and drawing brushes for the CPU reference
+    /// ([`CpuRasterizer::set_content_renderer`]).
+    pub fn set_content_renderer(&mut self, renderer: Option<crate::cpu::ContentRenderer>) {
+        self.rasterizer.set_content_renderer(renderer);
     }
 
     /// The number of outputs kept.

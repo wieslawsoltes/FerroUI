@@ -55,6 +55,8 @@ pub struct Matrix3D {
     pub m44: f64,
 }
 
+ferroui_base::styled_value!(Matrix3D);
+
 impl Matrix3D {
     /// The identity transformation (WPF's `Matrix3D.Identity`).
     pub const IDENTITY: Matrix3D = Matrix3D::new(

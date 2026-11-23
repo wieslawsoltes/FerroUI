@@ -20,7 +20,7 @@ use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, BoxedValue, DirectProperty,
     FerroLocator, FerroObject, FerroObjectExtensions, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, LocatorExtensions, Nullable, PixelPoint, PixelRect, PixelSize, PropertyValue, Ref,
+    FerroPropertyChangedEventArgs, LocatorExtensions, Nullable, PixelPoint, PixelRect, PixelSize, Ref,
     Size, StaticType, StyledElementImpl, StyledProperty, StyledPropertyOptions, Thickness, TypeInfo, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
@@ -730,7 +730,7 @@ impl Window {
 
     /// Forwards the value of `property` to the platform implementation, now
     /// and whenever it changes.
-    fn bind_impl<T: PropertyValue>(
+    fn bind_impl<T: ferroui_base::StyledValue>(
         &self,
         property: &'static StyledProperty<T>,
         on_value: impl Fn(&Window, &Rc<dyn IWindowImpl>, T) + 'static,

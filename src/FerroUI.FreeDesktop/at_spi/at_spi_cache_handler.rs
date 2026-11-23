@@ -5,7 +5,7 @@ use super::at_spi_constants::CACHE_VERSION;
 use super::dbus::descriptions::CACHE;
 use super::dbus::interface::{reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use super::dbus::types::AtSpiAccessibleCacheItem;
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiCacheHandler;
 
@@ -31,7 +31,7 @@ impl DBusInterface for AtSpiCacheHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(self.version()))
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
+        (name == "version").then(|| Variant::from(self.version()))
     }
 }

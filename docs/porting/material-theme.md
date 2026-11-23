@@ -72,7 +72,13 @@ host's normal requested-theme policy to follow its light/dark preference.
 
 Roboto is embedded under OFL 1.1. The regular (400), medium (500) and bold (700)
 faces are static instances of the pinned Google Fonts variable font, retaining
-its family name and licensing. The static faces let every renderer's font manager
+its family name and licensing. `with_material_fonts` adds the embedded family to the font
+manager and links the three files. `register_types` also registers them as assets of the theme
+assembly, for documents that load them by URI, with the feature `embedded-font-assets` (on by
+default, #856); an application that turns the default features off links the files only through
+`with_material_fonts`, and without it the theme's family `fonts:MaterialRoboto#Roboto, Roboto,
+$Default` falls back to `Roboto` of the system, else the default font (the metrics then differ:
+compare the gallery pictures). The static faces let every renderer's font manager
 resolve the intended weight without depending on variable-axis support. Exact
 font provenance, hashes and instancing axes are in
 `scripts/material-theme/font-provenance.json`.
@@ -118,6 +124,16 @@ state brushes and compatibility resources. Existing `DynamicResource` bindings
 are notified without reconstructing controls. The old resource names remain
 available for inherited templates and application styles; their explicit role
 mapping lives in `scripts/material-theme/compatibility-map.json`.
+
+The installer of these 1,923 resources is generated from the map
+(`scripts/material-theme/generate.py`, `install_compatibility` in `color_scheme.rs`): one call
+for each entry. A packed form is an experiment of #856 (`PACKED_INSTALLER` in the generator,
+off): the keys concatenated in the order of the map, the nine opacities, and three bytes for
+each entry (the length of the key, the role or status colour, brush or colour and the index of
+the opacity), read by `compatibility_rows.rs`. The generator fails when a width overflows and
+checks that the records decode to the map; with the packed form the calls stay as the oracle of
+a test of the crate that compares both installers, key for key, for the light, the dark and an
+arbitrary palette. The entries are added in the same order with the same values.
 
 Status colors (a deviation from Material 3, which has error roles but no success
 or warning roles): the theme adds `MaterialSuccess`, `MaterialOnSuccess`,

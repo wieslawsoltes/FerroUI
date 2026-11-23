@@ -10,7 +10,8 @@ use ferroui_base::{
 use ferroui_base::{FerroObjectImplExt, FerroPropertyChangedEventArgs, Point};
 use ferroui_livecharts::kernel::Coordinate;
 use ferroui_livecharts::{
-    BrushSpace, PolarLabelsPosition, RadialAlignment, Series as SeriesSnapshot, SeriesKind,
+    BrushSpace, ChartPointFormatter, PolarLabelsPosition, RadialAlignment,
+    Series as SeriesSnapshot, SeriesKind,
 };
 use std::{cell::RefCell, rc::Rc};
 
@@ -398,6 +399,15 @@ ferro_properties! { impl ChartSeries {
     pub fn geometry_stroke_property() -> StyledProperty<Option<Color>> {
         FerroProperty::register::<ChartSeries, _>("GeometryStroke", None)
     }
+    pub fn data_labels_max_width_property() -> StyledProperty<f64> {
+        FerroProperty::register::<ChartSeries, _>("DataLabelsMaxWidth", 170.0)
+    }
+    pub fn x_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
+        FerroProperty::register::<ChartSeries, _>("XToolTipLabelFormatter", None)
+    }
+    pub fn y_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
+        FerroProperty::register::<ChartSeries, _>("YToolTipLabelFormatter", None)
+    }
 } }
 impl ChartSeries {
     pub fn kind(&self) -> SeriesKind {
@@ -723,5 +733,23 @@ impl ChartSeries {
     }
     pub fn set_geometry_stroke(&self, value: Option<Color>) {
         self.set_value(Self::geometry_stroke_property(), value);
+    }
+    pub fn data_labels_max_width(&self) -> f64 {
+        self.get_value(Self::data_labels_max_width_property())
+    }
+    pub fn set_data_labels_max_width(&self, value: f64) {
+        self.set_value(Self::data_labels_max_width_property(), value);
+    }
+    pub fn x_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
+        self.get_value(Self::x_tool_tip_label_formatter_property())
+    }
+    pub fn set_x_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
+        self.set_value(Self::x_tool_tip_label_formatter_property(), value);
+    }
+    pub fn y_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
+        self.get_value(Self::y_tool_tip_label_formatter_property())
+    }
+    pub fn set_y_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
+        self.set_value(Self::y_tool_tip_label_formatter_property(), value);
     }
 }
