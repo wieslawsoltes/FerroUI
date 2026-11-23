@@ -375,7 +375,7 @@ Other explicit adaptations and boundaries:
   nonempty authority and percent escapes. Exhaustive URI normalization and
   canonicalization equivalence is not claimed.
 * The editor options expose spaces, tabs, EOL visibility, indentation, control
-  boxes, web/mail links and the control-modifier click policy. Custom generator
+  boxes, web/mail links and the command-modifier click policy. Custom generator
   fields retain their glyph, brush and matching settings. Built-in composition
   has first priority, followed by folding, application generators, tabs, special
   characters and optional web/mail generators.

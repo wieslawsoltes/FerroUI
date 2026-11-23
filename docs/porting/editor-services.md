@@ -537,6 +537,30 @@ grammars, Light+/Dark+ themes, explicit region folding, toolbar commands and a
 status line. Its region provider demonstrates application-supplied fold ranges;
 it is not a Rust or C# parser.
 
+### Gestures by keymap
+
+The Apple keymaps are those of macOS and of a browser on an Apple platform. Every other platform,
+iOS included, uses the Control keymap. The last column names what checks the gesture on an Apple
+keymap; "none" is a gesture only the code path shared with the Control keymap covers.
+
+| Gesture | Control keymap | Apple keymap | Checked on an Apple keymap by |
+|---|---|---|---|
+| Copy, cut, paste, select all, undo | Control | Command | Apple check of `editor_demo.test.mjs`, macOS clipboard check |
+| Find | Control+F | Command+F | Apple check of `editor_demo.test.mjs` |
+| Replace | Control+H | Command+Option+F | `replace_gesture_follows_the_platform_in_the_editor_and_search_popup` |
+| Delete Line | Control+D | Control+D | Apple check of `editor_demo.test.mjs`, `line_commands_stay_on_control_with_the_apple_keymap` |
+| Reindent | Control+I | Control+I | none |
+| Move or select by word | Control+arrow | Option+arrow | none |
+| Delete a word | Control+Backspace or Delete | Control or Option with Backspace or Delete | none |
+| Rectangle from the keyboard | Alt+Shift+arrow | Control+Shift+arrow | Apple check of `editor_demo.test.mjs`, macOS clipboard check |
+| Rectangle with the pointer | Alt+drag | Option+drag | `apple_keymap_gives_box_word_and_copy_gestures_their_own_modifiers` |
+| Select a word with a click | Control+click | Command+click | the same test |
+| Open a link | Control+click | Command+click | `a_link_takes_the_command_modifier_of_the_apple_keymap` |
+| Copy with a text drag | Control at the drop | Option at the drop | the modifier in the same test; no drop on an Apple keymap |
+| Indent, outdent | Tab, Shift+Tab | Tab, Shift+Tab | none |
+
+Inside a selection, a press with Option starts a text drag; outside it, a rectangle.
+
 ## Tests
 
 Run `cargo test -p ferroui-edit-core --lib`. Service regressions cover:
