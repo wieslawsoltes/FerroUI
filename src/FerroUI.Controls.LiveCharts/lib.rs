@@ -25,6 +25,7 @@ mod register_types;
 pub mod renderer;
 pub mod scene_transition;
 mod series_classes;
+mod tooltip_motion;
 mod visual_elements;
 
 pub use axis::{Axis, DateTimeAxis, TimeSpanAxis};

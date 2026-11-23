@@ -2,6 +2,7 @@
 
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
+use crate::tooltip_motion::{TooltipKey, TooltipMotion, TooltipPose, TOOLTIP_ANIMATION_MS};
 use crate::{
     Axes, Axis, ChartKind, ChartLegend, ChartSeries, ChartSeriesCollection, ChartVisualElement,
     ChartVisualElements, GeoMarkers, HeatSeries, LegendPosition, MapInteractionMode,
@@ -126,6 +127,11 @@ pub struct Chart {
     section_start: Cell<Option<Point>>,
     section_end: Cell<Option<Point>>,
     hover: RefCell<Option<ChartPointerEventArgs>>,
+    /// Counts the changes of `hover`, which the compiled tooltip depends on.
+    hover_revision: Cell<u64>,
+    /// The compiled tooltip and its show and hide animation.
+    tooltip_motion: RefCell<Option<TooltipMotion>>,
+    tooltip_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     hover_changed: HandlerList<dyn Fn(&ChartPointerEventArgs)>,
     data_pointer_down: HandlerList<dyn Fn(&ChartPointerEventArgs)>,
     update_finished: HandlerList<dyn Fn()>,
@@ -300,25 +306,7 @@ impl VisualImpl for Chart {
             );
             NativeScene::compile(&overlay).render(context);
         }
-        let hovered = this.hover.borrow().clone();
-        if let Some(hovered) = hovered {
-            if this.tooltip_position() != TooltipPosition::Hidden && !hovered.points.is_empty() {
-                let layout = crate::decorations::tooltip_layout(
-                    &hovered,
-                    &presentation.legend,
-                    this.chart_kind(),
-                );
-                let (origin, placement) = this.default_tooltip_location(&hovered, &layout, size);
-                let tooltip = crate::decorations::tooltip_scene(
-                    size,
-                    &layout,
-                    origin,
-                    placement,
-                    this.text_color(),
-                );
-                NativeScene::compile(&tooltip).render(context);
-            }
-        }
+        this.render_tooltip(context, size, &presentation.legend);
         context.pop(clip);
     }
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -336,6 +324,7 @@ impl VisualImpl for Chart {
         this.cancel_pointer_gesture();
         this.clear_source_subscriptions();
         this.hover.borrow_mut().take();
+        this.stop_tooltip_motion();
         this.native_scene.borrow_mut().take();
         Self::parent_on_detached_from_visual_tree(this, e);
     }
@@ -540,6 +529,9 @@ impl Chart {
             section_start: Cell::new(None),
             section_end: Cell::new(None),
             hover: RefCell::new(None),
+            hover_revision: Cell::new(0),
+            tooltip_motion: RefCell::new(None),
+            tooltip_timer: RefCell::new(None),
             hover_changed: HandlerList::new(),
             data_pointer_down: HandlerList::new(),
             update_finished: HandlerList::new(),
@@ -1116,6 +1108,156 @@ impl Chart {
         Ok(scene)
     }
 
+    /// Draws the tooltip in its pose of this frame. The compiled tooltip is reused until what it
+    /// depends on changes, so a frame of its animation only pushes a transform and an opacity.
+    fn render_tooltip(
+        &self,
+        context: &mut DrawingContext<'_>,
+        size: Size,
+        legend: &[ferroui_livecharts::LegendItem],
+    ) {
+        let now = Dispatcher::ui_thread().now() as f64;
+        self.update_tooltip(size, legend, now);
+        let (frame, matrix, opacity, completed) = {
+            let motion = self.tooltip_motion.borrow();
+            let Some(motion) = motion.as_ref() else {
+                return;
+            };
+            let pose = motion.pose(now);
+            (
+                motion.frame.clone(),
+                pose.matrix(motion.size),
+                pose.opacity,
+                motion.is_completed(now),
+            )
+        };
+        if opacity > 0.0 {
+            let transform = context.push_transform(matrix);
+            let layer = (opacity < 1.0).then(|| context.push_opacity(opacity));
+            frame.render(context);
+            if let Some(layer) = layer {
+                context.pop(layer);
+            }
+            context.pop(transform);
+        }
+        if completed {
+            self.finish_tooltip_motion();
+        }
+    }
+
+    /// Brings the tooltip up to the hover: a found point shows it, compiled at the origin, and
+    /// no point hides it where it is. `TooltipPosition::Hidden` removes it at once.
+    fn update_tooltip(&self, size: Size, legend: &[ferroui_livecharts::LegendItem], now: f64) {
+        let position = self.tooltip_position();
+        let key = TooltipKey {
+            hover: self.hover_revision.get(),
+            measurement: self.measurement.borrow().as_ref().map(|m| m.revision),
+            control: size,
+            text: self.text_color(),
+            position,
+        };
+        if self
+            .tooltip_motion
+            .borrow()
+            .as_ref()
+            .is_some_and(|motion| motion.key == key)
+        {
+            return;
+        }
+        if position == TooltipPosition::Hidden {
+            self.stop_tooltip_motion();
+            return;
+        }
+        let speed = self.animations_speed();
+        let duration = if self.attached.get() && speed.is_finite() && speed > 0.0 {
+            TOOLTIP_ANIMATION_MS
+        } else {
+            0.0
+        };
+        let hovered = self
+            .hover
+            .borrow()
+            .as_ref()
+            .filter(|hovered| !hovered.points.is_empty())
+            .cloned();
+        let Some(hovered) = hovered else {
+            if let Some(motion) = self.tooltip_motion.borrow_mut().as_mut() {
+                motion.key = key;
+                motion.retarget(TooltipPose::hidden(motion.to.origin), now, duration);
+            } else {
+                return;
+            }
+            self.start_tooltip_timer(duration);
+            return;
+        };
+        let layout = crate::decorations::tooltip_layout(&hovered, legend, self.chart_kind());
+        let (origin, placement) = self.default_tooltip_location(&hovered, &layout, size);
+        let tooltip = layout.size(placement, size);
+        let scene = crate::decorations::tooltip_scene(
+            size,
+            &layout,
+            Point::new(0.0, 0.0),
+            placement,
+            self.text_color(),
+        );
+        let frame = Rc::new(NativeScene::compile(&scene));
+        {
+            let mut motion = self.tooltip_motion.borrow_mut();
+            match motion.as_mut() {
+                Some(motion) => motion.show(key, frame, tooltip, origin, now, duration),
+                None => {
+                    *motion = Some(TooltipMotion::appear(
+                        key, frame, tooltip, origin, now, duration,
+                    ));
+                }
+            }
+        }
+        self.start_tooltip_timer(duration);
+    }
+
+    fn start_tooltip_timer(&self, duration: f64) {
+        if duration <= 0.0 {
+            return;
+        }
+        let timer = self.tooltip_timer.borrow().clone();
+        if let Some(timer) = timer {
+            timer.start();
+            return;
+        }
+        let weak = self.to_ref().downgrade();
+        let timer = DispatcherTimer::with_callback(
+            Duration::from_millis(16),
+            DispatcherPriority::RENDER,
+            move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_visual();
+                }
+            },
+        );
+        timer.start();
+        *self.tooltip_timer.borrow_mut() = Some(timer);
+    }
+
+    /// The end of a motion: the timer stops, and a tooltip that was hiding is gone.
+    fn finish_tooltip_motion(&self) {
+        let timer = self.tooltip_timer.borrow().clone();
+        if let Some(timer) = timer {
+            timer.stop();
+        }
+        let mut motion = self.tooltip_motion.borrow_mut();
+        if motion.as_ref().is_some_and(TooltipMotion::is_hiding) {
+            *motion = None;
+        }
+    }
+
+    fn stop_tooltip_motion(&self) {
+        let timer = self.tooltip_timer.borrow().clone();
+        if let Some(timer) = timer {
+            timer.stop();
+        }
+        self.tooltip_motion.borrow_mut().take();
+    }
+
     /// Where the default tooltip goes and the side its wedge is at (`SKDefaultTooltip.Show`). The
     /// wedge changes the size of the tooltip, so a placement other than the first is measured
     /// and located again, and keeps its wedge.
@@ -1209,6 +1351,7 @@ impl Chart {
         let changed = self.hover.borrow().as_ref() != Some(&next);
         if changed {
             *self.hover.borrow_mut() = Some(next.clone());
+            self.hover_revision.set(self.hover_revision.get().wrapping_add(1));
             self.invalidate_visual();
             for (_, handler) in self.hover_changed.snapshot().iter() {
                 handler(&next);
@@ -1218,6 +1361,7 @@ impl Chart {
     pub fn clear_hover(&self) {
         let old = self.hover.borrow_mut().take();
         if let Some(old) = old {
+            self.hover_revision.set(self.hover_revision.get().wrapping_add(1));
             self.invalidate_visual();
             let event = ChartPointerEventArgs {
                 position: old.position,
@@ -2039,6 +2183,9 @@ impl Drop for Chart {
             timer.stop();
         }
         if let Some(timer) = self.needle_timer.get_mut().take() {
+            timer.stop();
+        }
+        if let Some(timer) = self.tooltip_timer.get_mut().take() {
             timer.stop();
         }
     }
