@@ -2,8 +2,10 @@
 #![forbid(unsafe_code)]
 mod renderer_host;
 mod texture_presenter;
+mod video_brush;
 pub use renderer_host::RendererHost;
 pub use texture_presenter::*;
+pub use video_brush::VideoBrush;
 // Shared by runtime registration and the build-time XAML metadata scanner.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_media", "FerroUI.Media"),
