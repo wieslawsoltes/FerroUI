@@ -35,7 +35,9 @@ interface TransitionList {
 }
 
 function readTransitions(context: StudioContext, targetType?: string): Promise<TransitionList> {
-    if (!context.writable || context.node === undefined) throw new Error('Select a control in the current XAML design.');
+    if ((!context.writable && !context.panel.supportsRustPropertyTransitions) || context.node === undefined) {
+        throw new Error('Select an authored control in the current design.');
+    }
     return context.read<TransitionList>(PROPERTY_TRANSITIONS, {
         owner: context.node, ...(targetType === undefined ? {} : { target_type: targetType }),
     });
@@ -62,7 +64,8 @@ async function chooseProperty(
 
 function entryActions(context: StudioContext, list: TransitionList, entry: TransitionEntry, index: number): StudioItem[] {
     const id = `transition:${entry.id}`;
-    const actions = [action(`${id}:source`, 'Reveal transition in source', () => context.revealRange(entry.range), 'go-to-file')];
+    const actions = [action(`${id}:source`, 'Reveal transition in source', () =>
+        context.panel.language === 'rust' ? context.revealRustRange(entry.range) : context.revealRange(entry.range), 'go-to-file')];
     if (!list.canEdit) return actions;
     const update = (timing: object) => context.edit(EDIT_TRANSITION, {
         action: 'timing', owner: list.owner, transition: entry.id, timing,
@@ -125,7 +128,8 @@ export async function propertyTransitionItems(context: StudioContext): Promise<S
     }
     if (!items.length) {
         const range = list.range;
-        return range ? [action('transitions:source', 'Reveal transition collection', () => context.revealRange(range), 'go-to-file')]
+        return range ? [action('transitions:source', 'Reveal transition collection', () =>
+            context.panel.language === 'rust' ? context.revealRustRange(range) : context.revealRange(range), 'go-to-file')]
             : [{ id: 'transitions:empty', label: 'No authored transitions on this control' }];
     }
     return items;

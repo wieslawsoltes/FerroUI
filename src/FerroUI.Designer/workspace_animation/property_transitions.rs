@@ -137,7 +137,8 @@ fn property_actions(
     let index = entry
         .and_then(|entry| {
             choices.iter().position(|choice| {
-                entry.property.as_deref() == Some(choice.property.as_str())
+                (entry.property.as_deref() == Some(choice.property.as_str())
+                    || entry.property.as_deref() == Some(choice.label.as_str()))
                     && choice.type_name == entry.type_name
             })
         })

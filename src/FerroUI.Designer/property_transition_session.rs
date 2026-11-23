@@ -46,7 +46,7 @@ impl DesignerSession {
     /// Read the transition collection authored at the given control, style, or resource.
     pub fn property_transitions(&self, owner: NodeId) -> Result<PropertyTransitionList, String> {
         if self.uses_rust_source() {
-            return Err("Choose an authored XAML transition collection".into());
+            return self.rust_property_transition_list(owner);
         }
         PropertyTransitionList::read(self.document(), owner).map_err(|error| error.to_string())
     }
@@ -73,6 +73,13 @@ impl DesignerSession {
         owner: NodeId,
         resource_target: Option<&str>,
     ) -> Result<PropertyTransitionEditor, String> {
+        if self.uses_rust_source() {
+            if resource_target.is_some() {
+                return Err("The mapped Rust control supplies this transition target".into());
+            }
+            let rust = self.rust.as_ref().ok_or("Open a Rust designer session")?;
+            return self.rust_property_transition_editor(owner, &rust.projection()?);
+        }
         let list = self.property_transitions(owner)?;
         let can_edit = self.can_manipulate();
         let requires_target = list.target_owner.is_none();
@@ -100,10 +107,14 @@ impl DesignerSession {
         resource_target: Option<&str>,
         command: PropertyTransitionCommand,
     ) -> Result<(), String> {
-        if self.uses_rust_source() || !self.can_manipulate() {
-            return Err(
-                "Wait for the current authored XAML preview before editing a transition".into(),
-            );
+        if !self.can_manipulate() {
+            return Err("Wait for the current authored preview before editing a transition".into());
+        }
+        if self.uses_rust_source() {
+            if resource_target.is_some() {
+                return Err("The mapped Rust control supplies this transition target".into());
+            }
+            return self.edit_rust_property_transition(owner, command);
         }
         let document = self.document();
         let list = self.property_transitions(owner)?;

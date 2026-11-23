@@ -60,6 +60,7 @@ interface Frame {
     rsxStateAuthoring: boolean;
     rsxStateStructure: boolean;
     rsxStateTriggers: boolean;
+    rsxPropertyTransitions: boolean;
 }
 
 type PropertyEdit = Extract<NodeOperation, { type: 'setProperty' | 'resetProperty' }>;
@@ -349,6 +350,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsRustStates(): boolean { return Boolean(this.language === 'rust' && this.frame?.rsxStateAuthoring); }
     get supportsRustStateStructure(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateStructure); }
     get supportsRustStateTriggers(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateTriggers); }
+    get supportsRustPropertyTransitions(): boolean { return this.language === 'rust' && Boolean(this.frame?.rsxPropertyTransitions); }
     get animationRecordingTime(): number | undefined { return this.animationRecording && !this.timelinePose?.playback ? this.timelinePose?.time : undefined; }
     get isDisposed(): boolean { return this.disposed; }
     get canvasReady(): boolean { return !this.disposed && this.ready && this.panel.visible; }
@@ -651,7 +653,8 @@ export class DesignerPanel implements vscode.Disposable {
             const { name } = tool as { name: string };
             if (name === 'designer_rsx_styles') return this.language === 'rust' && this.supportsRustStyles;
             if (name === 'designer_rsx_commands') return this.language === 'rust';
-            return this.language === 'xaml' || (name !== 'designer_behaviors' && name !== 'designer_property_transitions');
+            if (name === 'designer_property_transitions') return this.language === 'xaml' || this.supportsRustPropertyTransitions;
+            return this.language === 'xaml' || name !== 'designer_behaviors';
         });
         return { tools: queries, presentations: availablePresentations ?? [], edits };
     }
@@ -659,6 +662,7 @@ export class DesignerPanel implements vscode.Disposable {
     private mappedStudioEdit(name: string): boolean {
         return mappedStudioEdits.has(name) || (name === 'designer_columns_edit' && this.supportsColumnAuthoring)
             || (name === 'designer_rsx_style_edit' && this.supportsRustStyles)
+            || (name === 'designer_property_transition_edit' && this.supportsRustPropertyTransitions)
             || name === 'designer_rsx_command_edit';
     }
 
@@ -1059,6 +1063,7 @@ export class DesignerPanel implements vscode.Disposable {
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),
                 rsxStateTriggers: Boolean(client.capabilities.rsxStateTriggers),
+                rsxPropertyTransitions: Boolean(client.capabilities.rsxPropertyTransitions),
                 canvas: { ...snapshot, nodes, highContrastTheme, interactive: Boolean(client.capabilities.canvasInteraction && snapshot.image),
                     focusOrderAvailable: Boolean(client.capabilities.canvasFocusOrder && snapshot.image),
                     spacingAvailable: Boolean(client.capabilities.spacingHelpers && snapshot.image),

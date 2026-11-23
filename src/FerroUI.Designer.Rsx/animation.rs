@@ -88,15 +88,15 @@ impl KeySource {
 }
 
 #[derive(Clone, Copy, Debug)]
-struct FloatSource {
-    value: f64,
+pub(crate) struct FloatSource {
+    pub(crate) value: f64,
     literal: SourceSpan,
     minus: Option<SourceSpan>,
     explicit_type: bool,
 }
 
 impl FloatSource {
-    fn plan(self, value: f64, patches: &mut Vec<TextPatch>) {
+    pub(crate) fn plan(self, value: f64, patches: &mut Vec<TextPatch>) {
         if self.value == value {
             return;
         }

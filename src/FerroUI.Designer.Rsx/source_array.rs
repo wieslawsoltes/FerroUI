@@ -3,6 +3,7 @@ use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::{spanned::Spanned, Expr, ExprArray};
 
 /// Anchors for adding a member to an authored RSX inline array.
+#[derive(Debug)]
 pub(crate) enum ArraySlot {
     Missing,
     Array {

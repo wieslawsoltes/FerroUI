@@ -21,9 +21,9 @@ To edit a shared transition, select its `Transitions` declaration in the Outline
 
 [Studio collection editor](../images/studio-property-transition-collection.png) · [VS Code timing editor](../images/vscode-property-transitions.png) · [Property transitions through MCP](reference.md#edit-property-transitions-with-mcp)
 
-### Preview property transitions in Rust
+### Preview and edit property transitions in Rust
 
-Open an RSX view with **FerroUI: Open Designer** and choose the invocation that declares the transitions. An inline array passed to `ferroui_view::transitions` supplies the native transitions in the isolated canvas. The designer recognizes qualified builder paths and explicit Rust imports. Durations can use literal `ferroui_view::ms`, `Duration::from_millis`, or `Duration::from_secs` calls. For `transition_eased`, use a supported native easing constructor or a literal native `Easing::parse(...).unwrap()` call.
+Open an RSX view with **FerroUI: Open Designer** and choose the invocation that declares the transitions. An inline array passed to `ferroui_view::transitions` supplies the native transitions in the isolated canvas. The designer recognizes qualified builder paths and explicit Rust imports. Durations can use literal `ferroui_view::ms`, `Duration::from_millis`, or `Duration::from_secs` calls. For `transition_eased`, use a supported native easing constructor, a literal native `Easing::parse(...).unwrap()` call, or `SpringEasing::with_values` with four literal parameters.
 
 ```rust
 rsx! {
@@ -39,7 +39,16 @@ rsx! {
 }
 ```
 
-Use **Interact** to see the transition when a setter changes its property. Inspect the projected XAML in the design tab and edit the collection in the original Rust buffer. Run the app to evaluate computed transition collections. The isolated preview reports those expressions in its partial-preview status.
+1. Select the mapped control and open **Property Transitions** from **Studio**, the Command Palette, or the clock icon in Designer Studio.
+2. Add, retarget, reorder, or remove an entry. The property picker offers registered Rust getters compatible with the control. Retargeting can change the transition class and keeps the duration and easing. Each action updates the active `rsx!` invocation in one Undo step.
+3. Edit **Duration** in seconds using millisecond increments. Change **Easing** to a native name, four Bézier coordinates, or `Spring(mass,stiffness,damping,velocity)`. These Rust builders expose duration and easing. The XAML collection editor also exposes start delay.
+4. Use **Reveal transition in source** to open the Rust declaration. Switch to **Interact** to see the native transition when a setter changes its property.
+
+Use **Reveal transition collection** and the Rust editor for computed expressions. Run the app to evaluate those collections. The isolated preview reports the expressions in its partial-preview status.
+
+![The VS Code Retarget transition picker offers Background for the active Rust invocation.](../images/vscode-rsx-property-transitions.png)
+
+[Studio’s Rust transition editor](../images/studio-rsx-property-transitions.png) · [Rust transition fixture](../../../editors/vscode/test/fixtures/RsxPropertyTransitionsWorkbench.rs)
 
 ## Edit an animation
 

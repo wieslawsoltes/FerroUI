@@ -3,7 +3,10 @@ use crate::edits::{editor_edits, module_edits, rust_name_edit};
 use crate::protocol::{EditResult, Source};
 use crate::renderer::{Presentation, Renderer, Stage};
 use crate::rsx_animation;
-use ferroui_designer::mcp::{DesignerMcp, LIBRARY_SCOPES, RSX_COMMAND_EDIT, RSX_COMMANDS, RSX_STYLES, RSX_STYLE_EDIT};
+use ferroui_designer::mcp::{
+    DesignerMcp, LIBRARY_SCOPES, PROPERTY_TRANSITION_EDIT, PROPERTY_TRANSITIONS,
+    RSX_COMMAND_EDIT, RSX_COMMANDS, RSX_STYLES, RSX_STYLE_EDIT,
+};
 use ferroui_designer_core::{NodeId, TextPatch};
 use ferroui_mcp::{Permissions, UiToolProvider};
 use serde::Deserialize;
@@ -161,8 +164,12 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if query.name == "designer_behaviors" && stage.authored_rsx.is_some() {
         return Err("Behavior collections use authored XAML".into());
     }
-    if query.name == "designer_property_transitions" && stage.authored_rsx.is_some() {
-        return Err("Property transition timing uses an authored XAML collection".into());
+    if let Some(rust) = stage.authored_rsx.as_ref().filter(|_| query.name == PROPERTY_TRANSITIONS) {
+        stage.studio.validate(&query.name, &query.arguments)?;
+        let projection = rust.projection()?;
+        return stage.sources.run(|| ferroui_designer::mcp::rust_property_transition_report(
+            &stage.session.borrow(), rust.source(), &projection, &query.arguments,
+        ));
     }
     if query.name == RSX_STYLES {
         stage.studio.validate(&query.name, &query.arguments)?;
@@ -252,6 +259,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     let rust_columns = design.rsx.is_some() && query.name == "designer_columns_edit";
     let rust_style = design.rsx.is_some() && query.name == RSX_STYLE_EDIT;
     let rust_command = design.rsx.is_some() && query.name == RSX_COMMAND_EDIT;
+    let rust_transitions = design.rsx.is_some() && query.name == PROPERTY_TRANSITION_EDIT;
     let rust_template = design.rsx.is_some() && rust_template_edit(&query.name, action);
     let rust_property = design.rsx.is_some() && query.name == "designer_property";
     let spacing = query.name == "designer_spacing_edit";
@@ -265,6 +273,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
         && !rust_columns
         && !rust_style
         && !rust_command
+        && !rust_transitions
         && !rust_template
         && !spacing
         && !wrapping
@@ -303,7 +312,7 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
     if spacing {
         return crate::spacing::source_edit(stage, &design, &arguments);
     }
-    if rust_columns || rust_template || rust_style || rust_command {
+    if rust_columns || rust_template || rust_style || rust_command || rust_transitions {
         let projection = design.rsx.as_ref().ok_or("Open the current RSX invocation")?;
         let (patches, selection) = {
             let session = stage.session.borrow();
@@ -318,6 +327,11 @@ pub(crate) fn edit(renderer: &mut Renderer, request: Edit, projects: &crate::pro
                 let patches = ferroui_designer::mcp::rust_command_source_plan(
                     &session, design.source, projection, &arguments,
                 )?;
+                (patches, None)
+            } else if rust_transitions {
+                let patches = stage.sources.run(|| ferroui_designer::mcp::rust_property_transition_source_plan(
+                    &session, projection, &arguments,
+                ))?;
                 (patches, None)
             } else {
                 let plan = stage.sources.run(|| ferroui_designer::mcp::rust_template_declaration_plan(
@@ -500,7 +514,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_behavior" => matches!(action, Some(
             "upsert" | "remove" | "source" | "set_trigger" | "append_action" | "set_action" | "move_action" | "remove_action"
         )),
-        "designer_property_transition_edit" => matches!(action, Some("timing" | "add" | "retarget" | "move" | "remove")),
+        PROPERTY_TRANSITION_EDIT => matches!(action, Some("timing" | "add" | "retarget" | "move" | "remove")),
         "designer_design_data_edit" => {
             matches!(action, Some("set_value" | "set_object" | "sample_items"))
         }

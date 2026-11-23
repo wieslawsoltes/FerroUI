@@ -49,6 +49,10 @@ mod property_trace;
 pub use property_trace::property_trace_report;
 #[path = "mcp_property_transitions.rs"]
 mod property_transitions;
+pub use property_transitions::{
+    rust_property_transition_report, rust_property_transition_source_plan,
+    PROPERTY_TRANSITIONS, PROPERTY_TRANSITION_EDIT,
+};
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;

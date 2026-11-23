@@ -16,7 +16,7 @@ use crate::states::{self, ProjectedStates};
 use crate::styles::{RsxStyle, RsxStyleIssue, projected_styles};
 use crate::tree::{Element, MAX_DEPTH, replacement};
 use crate::xaml::XamlTree;
-use ferroui_designer_core::{Document, NodeKind, SourceSpan, TextPatch};
+use ferroui_designer_core::{Document, NodeId, NodeKind, SourceSpan, TextPatch};
 use ferroui_designer_project::RustModuleSources;
 use ferroui_designer_tools::TableKind;
 use ferroui_view_syntax::{Attribute, Node};
@@ -176,6 +176,12 @@ impl RsxProjection<'_> {
 
     pub fn property_transitions(&self, owner: usize) -> Option<&RsxPropertyTransitions> {
         self.nodes.get(owner)?.property_transitions.as_ref()
+    }
+
+    /// Resolve an authored control ID from this projection's accepted XAML document.
+    pub fn control_index(&self, document: &Document, node: NodeId) -> Option<usize> {
+        let owner = document.ast().node(node)?;
+        self.preview_markup().controls.binary_search(&owner.span.start).ok()
     }
 
     fn has_property_transitions(&self) -> bool {

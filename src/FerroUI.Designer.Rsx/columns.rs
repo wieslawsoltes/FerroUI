@@ -418,14 +418,6 @@ impl RsxProjection<'_> {
         }
     }
 
-    pub(crate) fn control_index(&self, document: &Document, node: NodeId) -> Option<usize> {
-        let owner = document.ast().node(node)?;
-        self.preview_markup()
-            .controls
-            .binary_search(&owner.span.start)
-            .ok()
-    }
-
     pub(crate) fn template_column(
         &self,
         document: &Document,

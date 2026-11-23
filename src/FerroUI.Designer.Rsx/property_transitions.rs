@@ -1,11 +1,15 @@
 //! Static property-transition collections declared on authored Rust controls.
+mod edit;
 mod syntax;
 #[cfg(test)]
 mod tests;
 
+pub use edit::{RsxPropertyTransitionChoice, RsxPropertyTransitionEdit};
+
 use crate::animation::syntax::span;
 use crate::local_rust::LocalRust;
 use crate::registered::Class;
+use crate::source_array::ArraySlot;
 use crate::RsxCatalog;
 use ferroui_designer_animation::Easing;
 use ferroui_designer_core::SourceSpan;
@@ -15,6 +19,7 @@ use syn::Expr;
 pub struct RsxPropertyTransitions {
     pub source: SourceSpan,
     pub entries: Vec<RsxPropertyTransition>,
+    array: ArraySlot,
 }
 
 #[derive(Debug)]
@@ -24,6 +29,9 @@ pub struct RsxPropertyTransition {
     pub type_name: &'static str,
     pub duration: f64,
     pub easing: Option<Easing>,
+    getter: String,
+    comma: Option<SourceSpan>,
+    operands: syntax::Operands,
     markup: String,
 }
 
@@ -42,12 +50,21 @@ impl RsxPropertyTransitions {
         }
         let entries = array
             .elems
-            .iter()
-            .map(|entry| syntax::entry(entry, class, catalog, bindings))
+            .pairs()
+            .map(|entry| {
+                syntax::entry(
+                    entry.value(),
+                    entry.punct().map(span),
+                    class,
+                    catalog,
+                    bindings,
+                )
+            })
             .collect::<Option<_>>()?;
         Some(Self {
             source: span(value),
             entries,
+            array: ArraySlot::at(array),
         })
     }
 

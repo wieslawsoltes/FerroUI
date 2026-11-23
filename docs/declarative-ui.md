@@ -566,7 +566,7 @@ A `ThemeVariantScope` element (`requested_theme_variant: variant`) switches the 
 
 In a component that runs again, keep `transitions([..])` in `use_hook`, as the template and the items of section 9.2: a new value on each run is set again.
 
-FerroUI's designer previews inline transition arrays on mapped RSX controls. Use a qualified builder path or an explicit import with a literal duration. [Preview Rust property transitions](designer/vscode/motion.md#preview-property-transitions-in-rust)
+FerroUI's designer previews and edits inline transition arrays on mapped RSX controls. Use a qualified builder path or an explicit import with a literal duration. [Preview and edit Rust property transitions](designer/vscode/motion.md#preview-and-edit-property-transitions-in-rust)
 
 ### 10.5 Popups and context menus
 

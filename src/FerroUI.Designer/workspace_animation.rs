@@ -366,7 +366,7 @@ impl DesignerWorkspace {
         ] {
             self.root.get_control::<Button>(name).set_is_visible(!rust && !clips);
         }
-        for name in ["BehaviorsMode", "PropertyTransitionsMode", "SetAnimationSelector"] {
+        for name in ["BehaviorsMode", "SetAnimationSelector"] {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
         }
         self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
@@ -381,6 +381,8 @@ impl DesignerWorkspace {
         let active = session.animation_programs().iter()
             .find(|program| Some(program.id) == session.active_animation_program());
         let owner = session.selection().first().copied().unwrap_or(session.document().ast().root());
+        self.root.get_control::<Button>("PropertyTransitionsMode")
+            .set_is_visible(!rust || session.authored_span(owner).is_some());
         self.root.get_control::<Button>("StatesMode").set_is_visible(
             !rust || session.can_create_rust_state_group(owner) || !session.state_groups().is_empty(),
         );
@@ -451,7 +453,7 @@ impl DesignerWorkspace {
         panel.children().clear();
         panel.set_spacing(8.0);
         let mut authoring = self.authoring.borrow_mut();
-        if self.session.borrow().uses_rust_source() && matches!(authoring.mode, 2 | 4) {
+        if self.session.borrow().uses_rust_source() && authoring.mode == 2 {
             authoring.mode = 0;
         }
         let mode = authoring.mode;

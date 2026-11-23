@@ -40,7 +40,9 @@ pub use layout_edits::{is_child_list_edit, RsxChildEdit};
 pub use markup::{RsxPreviewMarkup, RsxSourceMap};
 pub use programs::{RsxAnimationEdit, RsxAnimationPlan};
 pub use project::{RsxNode, RsxProjection, project_rust};
-pub use property_transitions::{RsxPropertyTransition, RsxPropertyTransitions};
+pub use property_transitions::{
+    RsxPropertyTransition, RsxPropertyTransitionChoice, RsxPropertyTransitionEdit, RsxPropertyTransitions,
+};
 pub use registered::RsxCatalog;
 pub use source_edits::{RsxEvent, event_setter};
 pub use source_plan::{RsxSourceEdit, RsxSourceLocation};

@@ -211,7 +211,7 @@ fn easing(expr: &Expr) -> Option<Easing> {
     Easing::parse(&value.value()).ok()
 }
 
-pub(super) fn float(expr: &Expr) -> Option<FloatSource> {
+pub(crate) fn float(expr: &Expr) -> Option<FloatSource> {
     let (expr, minus) = match expr {
         Expr::Unary(unary) if matches!(unary.op, UnOp::Neg(_)) => {
             (unary.expr.as_ref(), Some(span(&unary.op)))

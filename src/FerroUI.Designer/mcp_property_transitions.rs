@@ -1,15 +1,17 @@
-use super::{decode, node_id, schema as s, state, text};
-use crate::property_transition_session::PropertyTransitionCommand;
+use super::{decode, ensure_revision, node_id, schema as s, state, text};
+use crate::property_transition_session::{PropertyTransitionCommand, PropertyTransitionEditor};
 use crate::DesignerSession;
 use ferroui_designer_animation::PropertyTransitionTiming;
+use ferroui_designer_core::TextPatch;
 use ferroui_designer_language::LineIndex;
+use ferroui_designer_rsx::RsxProjection;
 use serde_json::{json, Value};
 
-const QUERY: &str = "designer_property_transitions";
-const EDIT: &str = "designer_property_transition_edit";
+pub const PROPERTY_TRANSITIONS: &str = "designer_property_transitions";
+pub const PROPERTY_TRANSITION_EDIT: &str = "designer_property_transition_edit";
 
 pub(super) fn handles(name: &str) -> bool {
-    matches!(name, QUERY | EDIT)
+    matches!(name, PROPERTY_TRANSITIONS | PROPERTY_TRANSITION_EDIT)
 }
 
 pub(super) fn tools() -> [Value; 2] {
@@ -19,14 +21,14 @@ pub(super) fn tools() -> [Value; 2] {
     );
     [
         s::tool(
-            QUERY,
-            "Read an authored XAML transition collection, editable timing, and compatible native properties. Supply target_type for a standalone resource.",
+            PROPERTY_TRANSITIONS,
+            "Read an authored XAML or mapped Rust transition collection, editable timing, and compatible native properties. Supply target_type for a standalone XAML resource.",
             s::object(json!({"owner":s::id(),"target_type":s::string()}), &["owner"]),
             false,
         ),
         s::actions(
-            EDIT,
-            "Edit the accepted XAML transition collection. Choose a property and optional type_name from designer_property_transitions. Move uses the final zero-based collection position. Times are in seconds.",
+            PROPERTY_TRANSITION_EDIT,
+            "Edit the accepted XAML or mapped Rust transition collection. Choose a property and optional type_name from designer_property_transitions. Move uses the final zero-based collection position. Times are in seconds.",
             vec![
                 s::action("timing", json!({"owner":s::id(),"transition":s::id(),"timing":timing}),
                     &["owner","transition","timing"], true),
@@ -53,13 +55,53 @@ pub(super) fn call(
 ) -> Result<Value, String> {
     let owner = node_id(args, "owner")?;
     let resource_target = args["target_type"].as_str();
-    if name == EDIT {
+    if name == PROPERTY_TRANSITION_EDIT {
+        ensure_revision(session, args)?;
         session.edit_property_transition(owner, resource_target, command(args)?)?;
         return Ok(json!({"document":state(session)}));
     }
     let editor = session.property_transition_editor(owner, resource_target)?;
+    let source = if session.uses_rust_source() {
+        session.authored_source()
+    } else {
+        session.document().valid_source()
+    };
+    Ok(report(editor, source))
+}
+
+pub fn rust_property_transition_report(
+    session: &DesignerSession,
+    source: &str,
+    projection: &RsxProjection<'_>,
+    args: &Value,
+) -> Result<Value, String> {
+    require_rust_owner(args)?;
+    let editor = session.rust_property_transition_editor(node_id(args, "owner")?, projection)?;
+    Ok(report(editor, source))
+}
+
+pub fn rust_property_transition_source_plan(
+    session: &DesignerSession,
+    projection: &RsxProjection<'_>,
+    args: &Value,
+) -> Result<Vec<TextPatch>, String> {
+    require_rust_owner(args)?;
+    ensure_revision(session, args)?;
+    session
+        .rust_property_transition_plan(node_id(args, "owner")?, projection, command(args)?)
+        .map(|(_, patches)| patches)
+}
+
+fn require_rust_owner(args: &Value) -> Result<(), String> {
+    if args["target_type"].is_string() {
+        return Err("The mapped Rust control supplies this transition target".into());
+    }
+    Ok(())
+}
+
+fn report(editor: PropertyTransitionEditor, source: &str) -> Value {
     let model = editor.list;
-    let source = LineIndex::new(session.document().valid_source());
+    let source = LineIndex::new(source);
     let entries = model
         .entries
         .iter()
@@ -73,14 +115,14 @@ pub(super) fn call(
             })
         })
         .collect::<Vec<_>>();
-    Ok(json!({
-        "owner":owner, "collection":model.collection, "canEdit":editor.can_edit,
+    json!({
+        "owner":model.owner, "collection":model.collection, "canEdit":editor.can_edit,
         "canEditCollection":editor.can_edit && model.collection.is_some(),
         "canAdd":editor.can_edit && model.can_add() && !editor.choices.is_empty(),
         "requiresTarget":editor.requires_target,
         "properties":editor.choices,
         "range":model.source.and_then(|span| source.range(span).ok()), "entries":entries
-    }))
+    })
 }
 
 fn command(args: &Value) -> Result<PropertyTransitionCommand, String> {

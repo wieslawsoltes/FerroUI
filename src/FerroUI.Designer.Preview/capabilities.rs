@@ -66,6 +66,7 @@ pub(crate) fn initialize() -> Value {
         "rsxStateAuthoring",
         "rsxStateStructure",
         "rsxStateTriggers",
+        "rsxPropertyTransitions",
     ]
     .into_iter()
     .map(|name| (name.to_owned(), Value::Bool(true)))
