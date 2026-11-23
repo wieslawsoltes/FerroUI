@@ -8,8 +8,8 @@
 
 use super::tile_brush::{address_modes, positive_start};
 use super::*;
-use crate::effect_passes::{LayerProgram, ShaderArea};
-use crate::effect_uniforms::{self as blocks, LightingOutput};
+use crate::effect_passes::{LayerPass, ShaderArea, NOISE_TILE_SIDE};
+use crate::effect_records::{self as records, LightOutput};
 use ferroui_base::media::effects::ImmutableCustomEffect;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{
@@ -77,70 +77,20 @@ fn pixel_size(area: Rect) -> (u32, u32) {
     (area.width as u32, area.height as u32)
 }
 
-/// One colour composed source-over another, unpremultiplied.
-fn over(source: Color, destination: Color) -> Color {
-    let (source_alpha, destination_alpha) = (f32::from(source.a) / 255.0, f32::from(destination.a) / 255.0);
-    let alpha = source_alpha + destination_alpha * (1.0 - source_alpha);
+/// The straight colour of `top` over `bottom`, through their premultiplied values.
+fn composed(top: Color, bottom: Color) -> Color {
+    let stored = |color: Color| {
+        let alpha = f32::from(color.a) / 255.0;
+        [f32::from(color.r) * alpha, f32::from(color.g) * alpha, f32::from(color.b) * alpha, alpha]
+    };
+    let (upper, lower) = (stored(top), stored(bottom));
+    let through = 1.0 - upper[3];
+    let alpha = upper[3] + lower[3] * through;
     if alpha <= 0.0 {
         return Color::from_argb(0, 0, 0, 0);
     }
-    let channel = |source: u8, destination: u8| {
-        let under = f32::from(destination) * destination_alpha * (1.0 - source_alpha);
-        let value = f32::from(source) * source_alpha + under;
-        (value / alpha).round() as u8
-    };
-    Color::from_argb(
-        (alpha * 255.0).round() as u8,
-        channel(source.r, destination.r),
-        channel(source.g, destination.g),
-        channel(source.b, destination.b),
-    )
-}
-
-/// The opacity of the noise of an acrylic material.
-const NOISE_OPACITY: f64 = 0.0225;
-/// The side of the noise tile.
-const NOISE_SIDE: f64 = 256.0;
-
-ferroui_base::ferro_thread_local! {
-    static ACRYLIC_NOISE: std::cell::OnceCell<Option<Rc<ProGpuBitmap>>> = const { std::cell::OnceCell::new() };
-}
-
-/// The noise tile of acrylic materials (the asset of the other backends) with its alpha scaled to
-/// the opacity of the noise, premultiplied.
-fn acrylic_noise() -> Option<Rc<ProGpuBitmap>> {
-    static NOISE_ASSET: &[u8] = include_bytes!("assets/noise_asset_256x256_png.png");
-    ACRYLIC_NOISE.with(|noise| {
-        noise
-            .get_or_init(|| {
-                let decoded = ProGpuBitmap::decode(NOISE_ASSET).ok()?;
-                let size = decoded.pixel_size();
-                let row_bytes = decoded.row_bytes();
-                let row = size.width as usize * 4;
-                let mut faded = Vec::with_capacity(row * size.height as usize);
-                decoded.with_pixels(|pixels| {
-                    for line in pixels.chunks_exact(row_bytes).take(size.height as usize) {
-                        for pixel in line[..row].chunks_exact(4) {
-                            let alpha = (f64::from(pixel[3]) * NOISE_OPACITY) as u32;
-                            for channel in &pixel[..3] {
-                                faded.push(((u32::from(*channel) * alpha + 127) / 255) as u8);
-                            }
-                            faded.push(alpha as u8);
-                        }
-                    }
-                });
-                ProGpuBitmap::from_pixels(
-                    PixelFormat::RGBA8888,
-                    AlphaFormat::Premul,
-                    &faded,
-                    size,
-                    Vector::new(96.0, 96.0),
-                    row as i32,
-                )
-                .map(Rc::new)
-            })
-            .clone()
-    })
+    let channel = |index: usize| ((upper[index] + lower[index] * through) / alpha).round() as u8;
+    Color::from_argb((alpha * 255.0).round() as u8, channel(0), channel(1), channel(2))
 }
 
 impl ProGpuDrawingContext {
@@ -286,7 +236,7 @@ impl ProGpuDrawingContext {
 
     /// The luminance of the content as its alpha, over `bounds`.
     pub(super) fn push_luminance_layer(&mut self, bounds: Option<Rect>) -> bool {
-        let matrix = blocks::luminance_mask_matrix();
+        let matrix = records::luminance_mask();
         self.push_operation(bounds, Operation::Matrix { matrix, alpha_mode: ColorMatrixAlphaMode::Straight })
     }
 
@@ -328,8 +278,8 @@ impl ProGpuDrawingContext {
         to_local: Matrix,
     ) -> Rc<GpuTexture> {
         let Some(first) = first else { return next };
-        blocks::pixel_operation(operation, size, to_local)
-            .and_then(|block| gpu.passes().run(gpu, LayerProgram::PixelOperation, &block, &[&first, &next], size))
+        records::composite(operation, &to_local)
+            .and_then(|record| gpu.passes().run(gpu, &LayerPass::Composite(record), &[&first, &next], size))
             .unwrap_or(next)
     }
 
@@ -344,18 +294,17 @@ impl ProGpuDrawingContext {
         let passes = gpu.passes();
         let result = match &operation {
             Operation::Matrix { matrix, alpha_mode } => {
-                let block = blocks::color_matrix(matrix, *alpha_mode, size);
-                passes.run(&gpu, LayerProgram::ColorMatrix, &block, &[&content], size)
+                let pass = LayerPass::ColorMatrix(records::color_matrix(matrix, *alpha_mode));
+                passes.run(&gpu, &pass, &[&content], size)
             }
             Operation::Factors { factors, bounds } => passes.factor_texture(&gpu, factors).and_then(|texture| {
-                let block = blocks::factor_multiply(factors.scale, *bounds, size, to_local);
-                passes.run(&gpu, LayerProgram::FactorMultiply, &block, &[&content, &texture], size)
+                let pass = LayerPass::FactorMultiply(records::factor_multiply(factors.scale, *bounds, &to_local));
+                passes.run(&gpu, &pass, &[&content, &texture], size)
             }),
-            Operation::Lights(lighting) => blocks::light_multiply(lighting, size, to_local)
-                .and_then(|block| passes.run(&gpu, LayerProgram::LightMultiply, &block, &[&content], size)),
+            Operation::Lights(lighting) => records::lighting(lighting, LightOutput::Multiply, (0, 0), &to_local)
+                .and_then(|record| passes.run(&gpu, &LayerPass::Lighting(record), &[&content], size)),
             Operation::Convolve(convolution) => {
-                let block = blocks::convolution(convolution, size);
-                passes.run(&gpu, LayerProgram::Convolution, &block, &[&content], size)
+                passes.run(&gpu, &LayerPass::Convolution(records::convolution(convolution)), &[&content], size)
             }
             Operation::Pixel { operation, result } => {
                 Some(Self::combine(&gpu, operation, result.clone(), content.clone(), size, to_local))
@@ -428,9 +377,9 @@ impl IDrawingContextImplWithLayerEffects for ProGpuDrawingContext {
         }
         let Some(to_local) = self.current.transform.try_invert() else { return true };
         let origin = (visible.x as u32, visible.y as u32);
-        let block = blocks::lighting(lighting, LightingOutput::Light, origin, to_local);
+        let Some(record) = records::lighting(lighting, LightOutput::Fill, origin, &to_local) else { return false };
         let size = pixel_size(visible);
-        let Some(result) = gpu.passes().run(&gpu, LayerProgram::Lighting, &block, &[], size) else {
+        let Some(result) = gpu.passes().run(&gpu, &LayerPass::Lighting(record), &[], size) else {
             return false;
         };
         self.push_clip(rect);
@@ -524,15 +473,15 @@ impl IDrawingContextImplWithScene3D for ProGpuDrawingContext {
 }
 
 impl IDrawingContextWithAcrylicLikeSupport for ProGpuDrawingContext {
-    /// The tint over the colour of the material, then the noise tile repeated over both, as the
-    /// other backends compose it. A material that digs through to what is behind the window
-    /// replaces what is under it.
+    /// The tint over the colour of the material, then the tile of the engine's material noise
+    /// repeated over both. A material that digs through to what is behind the window replaces
+    /// what is under it.
     fn draw_rectangle_with_material(&mut self, material: &dyn IExperimentalAcrylicMaterial, rect: RoundedRect) {
         if rect.rect.width <= 0.0 || rect.rect.height <= 0.0 {
             return;
         }
         self.refuse_fragment();
-        let tint = over(material.tint_color(), material.material_color());
+        let tint = composed(material.tint_color(), material.material_color());
         if material.background_source() == AcrylicBackgroundSource::Digger {
             self.push_clip_rounded(rect);
             self.clear(tint);
@@ -541,12 +490,14 @@ impl IDrawingContextWithAcrylicLikeSupport for ProGpuDrawingContext {
             let brush = ImmutableSolidColorBrush::new(tint);
             self.draw_rectangle(Some(&brush), None, rect, &BoxShadows::default());
         }
-        let Some(noise) = acrylic_noise() else { return };
+        let Some(gpu) = self.pass_device() else { return };
+        let Some(noise) = gpu.passes().noise_tile(&gpu) else { return };
         self.push_clip_rounded(rect);
-        if let Some(image) = self.image(&*noise) {
+        if let Some(image) = self.sampled_texture(&noise, false) {
             let (address_u, address_v) = address_modes(TileMode::Tile);
             let area = rect.rect;
-            let (start_x, start_y) = (positive_start(area.x, NOISE_SIDE), positive_start(area.y, NOISE_SIDE));
+            let side = f64::from(NOISE_TILE_SIDE);
+            let (start_x, start_y) = (positive_start(area.x, side), positive_start(area.y, side));
             let source = Rect::new(start_x, start_y, area.width, area.height);
             let draw = progpu_native_scene_image_draw {
                 struct_size: std::mem::size_of::<progpu_native_scene_image_draw>() as u32,
