@@ -6,7 +6,7 @@
 //! with the pips pager theme of `testing::test_theme_pips_pager`, which
 //! mirrors the reference simple theme.
 
-use super::{PipsPager, PipsPagerTemplateSettings};
+use super::{PipsPager, PipsPagerButtonVisibility, PipsPagerTemplateSettings, PipsPagerWrapMode};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
 use crate::test_support::{test_scope, TestRoot, TestScope};
 use crate::testing::{
@@ -689,4 +689,77 @@ fn additional_navigation_buttons_get_their_automation_names() {
     let next_button = find_button(&target, "PART_NextButton").unwrap();
     assert_eq!(Some("Previous page".to_string()), crate::automation::AutomationProperties::get_name(&previous_button));
     assert_eq!(Some("Next page".to_string()), crate::automation::AutomationProperties::get_name(&next_button));
+}
+
+fn pager_with_buttons(pages: i32) -> (Ref<PipsPager>, Ref<TestRoot>, Ref<Button>, Ref<Button>) {
+    let target = PipsPager::new();
+    target.set_template(Some(get_template()));
+    target.set_number_of_pages(pages);
+    let root = TestRoot::with_child(target.clone());
+    root.execute_initial_layout_pass();
+    let previous = find_button(&target, "PART_PreviousButton").unwrap();
+    let next = find_button(&target, "PART_NextButton").unwrap();
+    (target, root, previous, next)
+}
+
+#[test]
+fn wrap_mode_should_go_round_at_the_first_and_last_page() {
+    let _scope = scoped();
+    let (target, _root, previous, next) = pager_with_buttons(3);
+    assert!(!previous.is_enabled());
+
+    target.set_wrap_mode(PipsPagerWrapMode::Wrap);
+    assert!(previous.is_enabled());
+    assert!(!target.classes().contains(":first-page"));
+
+    click(&previous);
+    assert_eq!(2, target.selected_page_index());
+    assert!(next.is_enabled());
+    assert!(!target.classes().contains(":last-page"));
+
+    click(&next);
+    assert_eq!(0, target.selected_page_index());
+}
+
+#[test]
+fn wrap_mode_should_not_go_round_with_one_page() {
+    let _scope = scoped();
+    let (target, _root, previous, next) = pager_with_buttons(1);
+    target.set_wrap_mode(PipsPagerWrapMode::Wrap);
+
+    assert!(!previous.is_enabled());
+    assert!(!next.is_enabled());
+    assert!(target.classes().contains(":first-page"));
+    assert!(target.classes().contains(":last-page"));
+}
+
+#[test]
+fn collapsed_button_visibility_should_hide_the_button_until_it_is_visible_again() {
+    let _scope = scoped();
+    let target = PipsPager::new();
+    assert!(target.is_previous_button_visible() && target.is_next_button_visible());
+
+    target.set_previous_button_visibility(PipsPagerButtonVisibility::Collapsed);
+    assert!(!target.is_previous_button_visible());
+    assert!(target.is_next_button_visible());
+
+    target.set_previous_button_visibility(PipsPagerButtonVisibility::Visible);
+    assert!(target.is_previous_button_visible());
+
+    target.set_is_next_button_visible(false);
+    target.set_next_button_visibility(PipsPagerButtonVisibility::VisibleOnPointerOver);
+    assert!(!target.is_next_button_visible());
+}
+
+#[test]
+fn visible_on_pointer_over_should_hide_the_button_without_the_pointer() {
+    let _scope = scoped();
+    let (target, _root, previous, next) = pager_with_buttons(3);
+
+    target.set_previous_button_visibility(PipsPagerButtonVisibility::VisibleOnPointerOver);
+    assert_eq!(0.0, previous.opacity());
+    assert_eq!(1.0, next.opacity());
+
+    target.set_previous_button_visibility(PipsPagerButtonVisibility::Visible);
+    assert_eq!(1.0, previous.opacity());
 }

@@ -16583,6 +16583,38 @@
         ],
         "attached": false
       },
+      "PreviousButtonVisibility": {
+        "name": "PreviousButtonVisibility",
+        "type_name": "PipsPagerButtonVisibility",
+        "documentation": "PipsPager.PreviousButtonVisibility: PipsPagerButtonVisibility",
+        "values": [
+          "Visible",
+          "VisibleOnPointerOver",
+          "Collapsed"
+        ],
+        "attached": false
+      },
+      "NextButtonVisibility": {
+        "name": "NextButtonVisibility",
+        "type_name": "PipsPagerButtonVisibility",
+        "documentation": "PipsPager.NextButtonVisibility: PipsPagerButtonVisibility",
+        "values": [
+          "Visible",
+          "VisibleOnPointerOver",
+          "Collapsed"
+        ],
+        "attached": false
+      },
+      "WrapMode": {
+        "name": "WrapMode",
+        "type_name": "PipsPagerWrapMode",
+        "documentation": "PipsPager.WrapMode: PipsPagerWrapMode",
+        "values": [
+          "None",
+          "Wrap"
+        ],
+        "attached": false
+      },
       "SelectedPageIndex": {
         "name": "SelectedPageIndex",
         "type_name": "i32",

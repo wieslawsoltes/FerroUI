@@ -2075,8 +2075,11 @@ fn navigationPageIsBackButtonEnabled(value) = AttrBool { attrBoolProperty: 573, 
 // newLine(value: string) -> Attr<M>: sets NewLine (TextBox).
 fn newLine(value) = AttrText { attrTextProperty: 575, attrTextValue: value }
 // nextButtonVisibility(value: PagerControlButtonVisibility) -> Attr<M>: sets
-// NextButtonVisibility (PagerControl).
+// NextButtonVisibility (PagerControl, PipsPager).
 fn nextButtonVisibility(value) = AttrText { attrTextProperty: 579, attrTextValue: pagerControlButtonVisibilityName(value: value) }
+// nextButtonVisibilityPipsPagerButtonVisibility(value: PipsPagerButtonVisibility) -> Attr<M>:
+// sets NextButtonVisibility (PagerControl, PipsPager).
+fn nextButtonVisibilityPipsPagerButtonVisibility(value) = AttrText { attrTextProperty: 579, attrTextValue: pipsPagerButtonVisibilityName(value: value) }
 // notificationCardCloseOnClick(value: bool) -> Attr<M>: sets NotificationCard.CloseOnClick
 // (NotificationCard).
 fn notificationCardCloseOnClick(value) = AttrBool { attrBoolProperty: 580, attrBoolValue: value }
@@ -2239,8 +2242,11 @@ fn preferSmallImage(value) = AttrBool { attrBoolProperty: 660, attrBoolValue: va
 // prefixText(value: string) -> Attr<M>: sets PrefixText (PagerControl).
 fn prefixText(value) = AttrText { attrTextProperty: 661, attrTextValue: value }
 // previousButtonVisibility(value: PagerControlButtonVisibility) -> Attr<M>: sets
-// PreviousButtonVisibility (PagerControl).
+// PreviousButtonVisibility (PagerControl, PipsPager).
 fn previousButtonVisibility(value) = AttrText { attrTextProperty: 666, attrTextValue: pagerControlButtonVisibilityName(value: value) }
+// previousButtonVisibilityPipsPagerButtonVisibility(value: PipsPagerButtonVisibility) ->
+// Attr<M>: sets PreviousButtonVisibility (PagerControl, PipsPager).
+fn previousButtonVisibilityPipsPagerButtonVisibility(value) = AttrText { attrTextProperty: 666, attrTextValue: pipsPagerButtonVisibilityName(value: value) }
 // primaryCommands(value: string) -> Attr<M>: sets PrimaryCommands (CommandBar).
 fn primaryCommands(value) = AttrText { attrTextProperty: 667, attrTextValue: value }
 // progress(value: float) -> Attr<M>: sets Progress (ConnectedAnimationProxy).
@@ -3035,30 +3041,32 @@ fn windowStartupLocation(value) = AttrText { attrTextProperty: 1027, attrTextVal
 fn windowState(value) = AttrText { attrTextProperty: 1028, attrTextValue: windowStateName(value: value) }
 // wrap(value: FlexWrap) -> Attr<M>: sets Wrap (FlexPanel).
 fn wrap(value) = AttrText { attrTextProperty: 1029, attrTextValue: flexWrapName(value: value) }
+// wrapMode(value: PipsPagerWrapMode) -> Attr<M>: sets WrapMode (PipsPager).
+fn wrapMode(value) = AttrText { attrTextProperty: 1030, attrTextValue: pipsPagerWrapModeName(value: value) }
 // wrapSelection(value: bool) -> Attr<M>: sets WrapSelection (SelectingItemsControl).
-fn wrapSelection(value) = AttrBool { attrBoolProperty: 1030, attrBoolValue: value }
+fn wrapSelection(value) = AttrBool { attrBoolProperty: 1031, attrBoolValue: value }
 // x(value: float) -> Attr<M>: sets X (TranslateTransform).
-fn x(value) = AttrNumber { attrNumberProperty: 1031, attrNumberValue: value }
+fn x(value) = AttrNumber { attrNumberProperty: 1032, attrNumberValue: value }
 // x11PropertiesNetWmWindowType(value: X11NetWmWindowType) -> Attr<M>: sets
 // X11Properties.NetWmWindowType (X11Properties).
-fn x11PropertiesNetWmWindowType(value) = AttrText { attrTextProperty: 1032, attrTextValue: x11NetWmWindowTypeName(value: value) }
+fn x11PropertiesNetWmWindowType(value) = AttrText { attrTextProperty: 1033, attrTextValue: x11NetWmWindowTypeName(value: value) }
 // x11PropertiesWmClass(value: string) -> Attr<M>: sets X11Properties.WmClass (X11Properties).
-fn x11PropertiesWmClass(value) = AttrText { attrTextProperty: 1033, attrTextValue: value }
+fn x11PropertiesWmClass(value) = AttrText { attrTextProperty: 1034, attrTextValue: value }
 // xyFocusNavigationModes(value: string) -> Attr<M>: sets XYFocus.NavigationModes (XYFocus).
-fn xyFocusNavigationModes(value) = AttrText { attrTextProperty: 1034, attrTextValue: value }
+fn xyFocusNavigationModes(value) = AttrText { attrTextProperty: 1035, attrTextValue: value }
 // xamlAmbientLightIsTarget(value: bool) -> Attr<M>: sets XamlAmbientLight.IsTarget
 // (XamlAmbientLight).
-fn xamlAmbientLightIsTarget(value) = AttrBool { attrBoolProperty: 1035, attrBoolValue: value }
+fn xamlAmbientLightIsTarget(value) = AttrBool { attrBoolProperty: 1036, attrBoolValue: value }
 // y(value: float) -> Attr<M>: sets Y (TranslateTransform).
-fn y(value) = AttrNumber { attrNumberProperty: 1037, attrNumberValue: value }
+fn y(value) = AttrNumber { attrNumberProperty: 1038, attrNumberValue: value }
 // yearFormat(value: string) -> Attr<M>: sets YearFormat (DatePicker, DatePickerPresenter).
-fn yearFormat(value) = AttrText { attrTextProperty: 1038, attrTextValue: value }
+fn yearFormat(value) = AttrText { attrTextProperty: 1039, attrTextValue: value }
 // yearVisible(value: bool) -> Attr<M>: sets YearVisible (DatePicker, DatePickerPresenter).
-fn yearVisible(value) = AttrBool { attrBoolProperty: 1039, attrBoolValue: value }
+fn yearVisible(value) = AttrBool { attrBoolProperty: 1040, attrBoolValue: value }
 // zIndex(value: int) -> Attr<M>: sets ZIndex (Visual).
-fn zIndex(value) = AttrInteger { attrIntegerProperty: 1040, attrIntegerValue: value }
+fn zIndex(value) = AttrInteger { attrIntegerProperty: 1041, attrIntegerValue: value }
 // zoomMode(value: ZoomMode) -> Attr<M>: sets ZoomMode (ScrollViewer).
-fn zoomMode(value) = AttrText { attrTextProperty: 1042, attrTextValue: zoomModeName(value: value) }
+fn zoomMode(value) = AttrText { attrTextProperty: 1043, attrTextValue: zoomModeName(value: value) }
 
 // ---- attributes of events ------------------------------------------------------------------
 

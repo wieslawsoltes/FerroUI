@@ -6,8 +6,8 @@ use crate::{examples, tests::start};
 use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::Ref;
 use ferroui_controls::{
-    Carousel, ComboBox, Control, ExpandDirection, Expander, NumberBox, PipsPager, ProgressBar,
-    TextBlock,
+    Carousel, ComboBox, Control, ExpandDirection, Expander, NumberBox, PipsPager,
+    PipsPagerButtonVisibility, PipsPagerWrapMode, ProgressBar, TextBlock,
 };
 
 fn page(id: &str) -> Ref<Control> {
@@ -101,13 +101,23 @@ fn options_pager_announces_the_page_and_follows_the_options() {
     assert_eq!(pager.orientation(), Orientation::Horizontal);
     root.get_control::<ComboBox>("PrevButtonComboBox")
         .set_selected_index(1);
+    assert_eq!(
+        pager.previous_button_visibility(),
+        PipsPagerButtonVisibility::VisibleOnPointerOver
+    );
+    assert!(pager.is_previous_button_visible());
+    root.get_control::<ComboBox>("PrevButtonComboBox")
+        .set_selected_index(2);
     assert!(!pager.is_previous_button_visible());
     root.get_control::<ComboBox>("NextButtonComboBox")
-        .set_selected_index(1);
+        .set_selected_index(2);
     assert!(!pager.is_next_button_visible());
     root.get_control::<ComboBox>("NextButtonComboBox")
         .set_selected_index(0);
     assert!(pager.is_next_button_visible());
+    root.get_control::<ComboBox>("WrapModeComboBox")
+        .set_selected_index(1);
+    assert_eq!(pager.wrap_mode(), PipsPagerWrapMode::Wrap);
 }
 
 #[test]
