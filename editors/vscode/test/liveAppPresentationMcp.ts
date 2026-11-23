@@ -37,7 +37,8 @@ export async function verifyLiveAppPresentation(mcp: McpFixture, left: AppRuntim
     const stale = await control(original, { action: 'hierarchy', hierarchy: 'logical' });
     assert.match(stale.content[0]?.text ?? '', /Live App editor changed/);
     assert.equal(filtered.treeFilter, 'Heading');
-    const selected = await change(filtered, { action: 'select', node: heading, frame: filtered.frame!, view: 'properties' });
+    const currentHeading = await read();
+    const selected = await change(currentHeading, { action: 'select', node: heading, frame: currentHeading.frame!, view: 'properties' });
     assert.deepEqual(selected.selection, { node: heading, view: 'properties' });
     const inspecting = await change(selected, { action: 'filter', field: 'propertyFilter', query: 'Text' });
     assert.equal(inspecting.propertyFilter, 'Text');

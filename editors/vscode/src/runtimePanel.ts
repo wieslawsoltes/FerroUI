@@ -218,9 +218,10 @@ export class RuntimePanel implements vscode.Disposable {
             case 'select': {
                 const client = this.client;
                 const frame = this.frame;
-                if (!client || frame?.token !== change.frame || !findNode(frame, change.node)
-                    || !await this.inspect(client, frame.token, { node: change.node, view: change.view }, signal)) {
-                    throw new Error('The Live App frame changed or the node is outside the current hierarchy. Read the current view.');
+                if (!client || frame?.token !== change.frame) throw new Error('The Live App frame changed. Read the current view.');
+                if (!findNode(frame, change.node)) throw new Error('Choose a node in the current Live App hierarchy.');
+                if (!await this.inspect(client, frame.token, { node: change.node, view: change.view }, signal)) {
+                    throw new Error('The Live App selection changed. Read the current view.');
                 }
                 return;
             }
@@ -344,14 +345,17 @@ export class RuntimePanel implements vscode.Disposable {
 
     private async inspect(client: RuntimeClient, token: number, selection: RuntimeSelection, signal?: AbortSignal): Promise<boolean> {
         if (!this.target || client !== this.client || this.frame?.token !== token) return false;
+        const epoch = this.epoch;
         const request = ++this.inspectionRequest;
         this.touch();
         const inspection = await readRuntimeInspection(client, this.authoredSource, this.target, selection, signal);
         signal?.throwIfAborted();
-        if (this.frame?.token !== token || request !== this.inspectionRequest) return false;
+        const frame = this.frame;
+        if (!frame || epoch !== this.epoch || request !== this.inspectionRequest
+            || frame.token !== token && !findNode(frame, selection.node)) return false;
         this.inspection = { ...inspection, revision: request };
         this.present({ inspection: inspection.view });
-        this.postInspection(token);
+        this.postInspection(frame.token);
         return true;
     }
 
