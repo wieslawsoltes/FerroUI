@@ -327,7 +327,7 @@ impl DrawingContextImpl {
         }
 
         #[cfg(feature = "hybrid-webgl")]
-        if self.draw_blurred_shape_on_web_gl(path, fill_rule, shape, scene_transform, std_deviation, color, bounds) {
+        if self.draw_blurred_shape_on_web_gl(path, fill_rule, shape, transform, scene_transform, std_deviation, color, bounds) {
             return;
         }
 
@@ -504,11 +504,13 @@ impl DrawingContextImpl {
         path: &BezPath,
         fill_rule: Fill,
         shape: &ShadowShape,
+        transform: Affine,
         to_area: Affine,
         std_deviation: f64,
         color: AlphaColor<Srgb>,
         bounds: kurbo::Rect,
     ) -> bool {
+        use crate::web_gl::shadow_programs::{blurred_shadow, kept_shadow};
         let Some(gpu) = self.scene().web_gl_gpu() else {
             return false;
         };
@@ -520,23 +522,40 @@ impl DrawingContextImpl {
             return true;
         }
         let (width, height) = (bounds.width() as u16, bounds.height() as u16);
-        let key = ShadowKey::new(path, fill_rule, to_area, std_deviation, color, width, height);
-        let kept = gpu.kept_shadow(&key);
-        let shadow = match kept {
+        // One picture in the space of the shape serves every scale and rotation; a shape it cannot
+        // stand for is blurred for the pixels of this transform.
+        let raster = crate::shadow_gaussian::shadow_raster(path.bounding_box(), std_deviation, transform);
+        let key = match &raster {
+            Some(raster) => {
+                let (x, y) = (raster.size.0 as u16, raster.size.1 as u16);
+                ShadowKey::new(path, fill_rule, raster.to_texels, std_deviation, color, x, y)
+            }
+            None => ShadowKey::new(path, fill_rule, to_area, std_deviation, color, width, height),
+        };
+        let shadow = match gpu.kept_shadow(&key) {
             Some(shadow) => shadow,
             None => {
-                crate::perf::count(crate::perf::Phase::ShadowAsImage, u64::from(width) * u64::from(height) * 4);
                 let [red, green, blue, alpha] = color.components;
                 let premultiplied = [red * alpha, green * alpha, blue * alpha, alpha];
-                let made = crate::web_gl::shadow_programs::blurred_shadow(
-                    &gpu,
-                    shape,
-                    to_area,
-                    std_deviation,
-                    premultiplied,
-                    u32::from(width),
-                    u32::from(height),
-                );
+                let (made, bytes) = match &raster {
+                    Some(raster) => (
+                        kept_shadow(&gpu, shape, raster, premultiplied),
+                        u64::from(raster.size.0) * u64::from(raster.size.1) * 4,
+                    ),
+                    None => (
+                        blurred_shadow(
+                            &gpu,
+                            shape,
+                            to_area,
+                            std_deviation,
+                            premultiplied,
+                            u32::from(width),
+                            u32::from(height),
+                        ),
+                        u64::from(width) * u64::from(height) * 4,
+                    ),
+                };
+                crate::perf::count(crate::perf::Phase::ShadowAsImage, bytes);
                 let shadow = match made {
                     Ok(Some(shadow)) => shadow,
                     Ok(None) => return true,
@@ -550,7 +569,14 @@ impl DrawingContextImpl {
             }
         };
         let area = rect_path(Rect::new(bounds.x0, bounds.y0, f64::from(width), f64::from(height)));
-        let place = Affine::translate((bounds.x0 - shadow.offset, bounds.y0 - shadow.offset));
+        // A kept picture is resampled through the transform; the other lies one texel per pixel.
+        let (place, quality) = match &raster {
+            Some(raster) => (transform * raster.to_texels.inverse(), ImageQuality::Medium),
+            None => (
+                Affine::translate((bounds.x0 - shadow.offset, bounds.y0 - shadow.offset)),
+                ImageQuality::Low,
+            ),
+        };
         self.sink().fill_with_web_gl_texture(
             &area,
             Affine::IDENTITY,
@@ -559,7 +585,7 @@ impl DrawingContextImpl {
             place,
             1.0,
             BlendMode::default(),
-            ImageQuality::Low,
+            quality,
         );
         true
     }

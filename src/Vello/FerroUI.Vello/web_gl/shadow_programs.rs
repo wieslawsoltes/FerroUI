@@ -7,7 +7,7 @@
 use super::layer_programs::LayerProgram;
 use super::{VelloWebGlGpu, VelloWebGlTexture};
 use crate::drawing_context_impl::box_shadows::{ShadowKey, ShadowShape};
-use crate::shadow_gaussian::{gaussian_weights, reduction_for, REACH, WEIGHTS};
+use crate::shadow_gaussian::{gaussian_weights, reduction_for, ShadowRaster, REACH, WEIGHTS};
 use kurbo::Affine;
 use std::rc::Rc;
 
@@ -228,6 +228,44 @@ fn gaussian_uniforms(direction: (f32, f32), deviation: f64, color: [f32; 4]) -> 
     floats
 }
 
+/// The coverage of `shape` in an area of texels that `to_texels` maps it to, blurred by the
+/// deviations (in texels) and given the premultiplied `color`.
+fn blur_passes(
+    gpu: &VelloWebGlGpu,
+    shape: &ShadowShape,
+    to_texels: Affine,
+    (deviation_x, deviation_y): (f64, f64),
+    color: [f32; 4],
+    area: (u32, u32),
+) -> Result<Option<Rc<VelloWebGlTexture>>, String> {
+    let determinant = to_texels.determinant();
+    if !determinant.is_finite() || determinant == 0.0 {
+        return Ok(None);
+    }
+    let coverage = coverage_uniforms(shape, to_texels.inverse(), 1.0 / determinant.abs().sqrt());
+    let Some(content) = gpu.layer_texture(LayerProgram::ShadowCoverage, &[], area, &coverage)? else {
+        return Ok(None);
+    };
+    let across = gaussian_uniforms((1.0, 0.0), deviation_x, [1.0; 4]);
+    let Some(across) = gpu.layer_texture(LayerProgram::ShadowGaussian, &[(&content, false)], area, &across)? else {
+        return Ok(None);
+    };
+    let down = gaussian_uniforms((0.0, 1.0), deviation_y, color);
+    gpu.layer_texture(LayerProgram::ShadowGaussian, &[(&across, false)], area, &down)
+}
+
+/// The picture of `shape` for `raster`, which serves every transform (`shadow_raster`).
+pub(crate) fn kept_shadow(
+    gpu: &VelloWebGlGpu,
+    shape: &ShadowShape,
+    raster: &ShadowRaster,
+    color: [f32; 4],
+) -> Result<Option<WebGlBlurredShape>, String> {
+    let deviations = (raster.deviation, raster.deviation);
+    let blurred = blur_passes(gpu, shape, raster.to_texels, deviations, color, raster.size)?;
+    Ok(blurred.map(|texture| WebGlBlurredShape { texture, size: raster.size, offset: 0.0 }))
+}
+
 /// `shape` blurred by a Gaussian of `std_deviation` (in the units of the shape) in the
 /// premultiplied `color`, for an area of `width` by `height` pixels that `to_area` maps the shape
 /// to. Only the bounds of the shadow and the reach of the blur around them are drawn. `Ok(None)`
@@ -250,20 +288,8 @@ pub(crate) fn blurred_shadow(
     let area = (texels(width), texels(height));
 
     let to_texels = Affine::translate((margin, margin)) * Affine::scale(1.0 / reduction) * to_area;
-    let determinant = to_texels.determinant();
-    if !determinant.is_finite() || determinant == 0.0 {
-        return Ok(None);
-    }
-    let coverage = coverage_uniforms(shape, to_texels.inverse(), 1.0 / determinant.abs().sqrt());
-    let Some(content) = gpu.layer_texture(LayerProgram::ShadowCoverage, &[], area, &coverage)? else {
-        return Ok(None);
-    };
-    let across = gaussian_uniforms((1.0, 0.0), deviation_x / reduction, [1.0; 4]);
-    let Some(across) = gpu.layer_texture(LayerProgram::ShadowGaussian, &[(&content, false)], area, &across)? else {
-        return Ok(None);
-    };
-    let down = gaussian_uniforms((0.0, 1.0), deviation_y / reduction, color);
-    let Some(blurred) = gpu.layer_texture(LayerProgram::ShadowGaussian, &[(&across, false)], area, &down)? else {
+    let deviations = (deviation_x / reduction, deviation_y / reduction);
+    let Some(blurred) = blur_passes(gpu, shape, to_texels, deviations, color, area)? else {
         return Ok(None);
     };
     if reduction <= 1.0 {
