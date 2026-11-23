@@ -1,0 +1,39 @@
+[package]
+name = "ferroui-controls-markdown"
+description = "The Markdown control of FerroUI: CommonMark with tables, task lists and strikethrough, shown with the rich text elements"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+# The build script exports the type model of the crate; Cargo hands its path to the build
+# scripts of the crates that depend on this one (docs/porting/xaml.md, 9.5.13 and 9.6.3).
+links = "ferroui_controls_markdown_xaml"
+# Unit tests live next to the code, not as integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+# The parser. Without its default features: no HTML writer and no command-line options.
+pulldown-cmark = { version = "0.13.6", default-features = false }
+
+[build-dependencies]
+ferroui-build-scan = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
