@@ -9,6 +9,7 @@ export class CanvasSurface {
     public targetId: number;
     private sizeParams: [number, number, number];
     private readonly container: HTMLElement;
+    private readonly stopObservingSize: () => void;
 
     constructor(public canvas: HTMLCanvasElement, container: HTMLElement, modes: BrowserRenderingMode[], topLevelId: number, threadId: number) {
         this.container = container;
@@ -28,7 +29,7 @@ export class CanvasSurface {
         // first ResizeObserver delivery. Start with the CSS content size and the real scale, so
         // initial layout and composition do not use a 1x1 surface at scale 1 on a Retina display.
         this.sizeParams = ResizeHandler.getInitialSize(canvas);
-        ResizeHandler.observeSize(canvas, (width, height, dpr) => {
+        this.stopObservingSize = ResizeHandler.observeSize(canvas, (width, height, dpr) => {
             const changed = this.sizeParams[0] !== width || this.sizeParams[1] !== height;
             this.sizeParams = [width, height, dpr];
             if (changed) { presenter?.resized(width, height); }
@@ -53,6 +54,7 @@ export class CanvasSurface {
     }
 
     public destroy(): void {
+        this.stopObservingSize();
         clearViewCanvas(this.container, this);
     }
 
