@@ -65,6 +65,12 @@ pub(super) fn release_retired() {
     });
 }
 
+/// Whether the bitmap numbered `id` still holds its texture, on the render thread.
+#[cfg(feature = "media3d")]
+pub(super) fn is_held(id: u64) -> bool {
+    TEXTURES.try_with(|textures| textures.borrow().contains_key(&id)).unwrap_or(false)
+}
+
 /// A frame of a producer as a bitmap of the WebGL2 route: a texture of the pool of the context,
 /// which only the render thread reads. Drawn elsewhere it draws nothing: there is no path through
 /// memory.
@@ -87,6 +93,25 @@ impl VelloWebGlFrameBitmap {
         if self.gpu != gpu.identity() {
             return None;
         }
+        let texture = TEXTURES.try_with(|textures| textures.borrow().get(&self.id).cloned()).ok()??;
+        Some((texture, (self.pixel_size.width as u32, self.pixel_size.height as u32)))
+    }
+
+    /// What names the bitmap among those of the process.
+    #[cfg(feature = "media3d")]
+    pub(super) fn number(&self) -> u64 {
+        self.id
+    }
+
+    /// The GPU whose pool holds its texture ([`VelloWebGlGpu::identity`]).
+    #[cfg(feature = "media3d")]
+    pub(super) fn gpu_identity(&self) -> u64 {
+        self.gpu
+    }
+
+    /// Its texture of the pool and the size of the frame in it, on the render thread.
+    #[cfg(feature = "media3d")]
+    pub(super) fn pool_texture(&self) -> Option<(Rc<VelloWebGlTexture>, (u32, u32))> {
         let texture = TEXTURES.try_with(|textures| textures.borrow().get(&self.id).cloned()).ok()??;
         Some((texture, (self.pixel_size.width as u32, self.pixel_size.height as u32)))
     }

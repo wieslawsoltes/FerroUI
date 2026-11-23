@@ -406,7 +406,8 @@ impl VelloWebGlGpu {
         let mut state = self.state.borrow_mut();
         let WebGlState { scenes, textures, .. } = state.as_mut()?;
         let limit = self.max_texture_size;
-        scenes.scene_texture(&self.gl, &self.gl_context, textures, limit, scene, size, scale, antialiased, origin)
+        let gpu = self.identity;
+        scenes.scene_texture(&self.gl, &self.gl_context, textures, limit, gpu, scene, size, scale, antialiased, origin)
     }
 
     /// What names this GPU: the frame bitmaps of its pool carry it.
