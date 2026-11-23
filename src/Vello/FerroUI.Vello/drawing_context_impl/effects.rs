@@ -1205,6 +1205,51 @@ impl DrawingContextImpl {
         }
     }
 
+    /// The lights of `lighting` evaluated per pixel on the WebGL2 context into a texture of the
+    /// pool, which the scene paints the area with, one texel per pixel, with the opacity and the
+    /// bitmap blending mode in effect. `false` leaves it to the compositor's light map: a scene
+    /// that is not the canvas's, more lights than the program holds, or a program that did not
+    /// compile.
+    fn draw_lighting_on_web_gl(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        use crate::effect_uniforms::{self as blocks, LightingOutput};
+        use crate::web_gl::LayerProgram;
+        let Some(gpu) = self.scene().web_gl_gpu() else {
+            return false;
+        };
+        if self.sink_origin != Vec2::ZERO
+            || lighting.lights.len() > ferroui_base::platform::LightingParameters::MAX_LIGHTS
+            || !gpu.prepare(LayerProgram::LightFill)
+        {
+            return false;
+        }
+        let transform = self.device_transform();
+        let m = transform.as_coeffs();
+        let matrix = ferroui_base::Matrix::new(m[0], m[1], m[2], m[3], m[4], m[5]);
+        let viewport = PixelSize::new(self.scene().width() as i32, self.scene().height() as i32);
+        let Some(region) = ferroui_base::platform::EffectRasterRegion::new(rect, matrix, viewport) else {
+            return true;
+        };
+        let (x0, y0) = (region.origin.x as f64, region.origin.y as f64);
+        let size = (region.size.width as u32, region.size.height as u32);
+        let uniforms = blocks::lighting(lighting, LightingOutput::Light, (x0 as u32, y0 as u32), transform.inverse());
+        let texture = match gpu.layer_texture(LayerProgram::LightFill, &[], size, &uniforms) {
+            Ok(Some(texture)) => texture,
+            Ok(None) => return false,
+            Err(error) => {
+                crate::web_gl::log_render_failure(&error);
+                return false;
+            }
+        };
+        // As a bitmap of the light map would be drawn: with the opacity and the blending mode in
+        // effect, one texel per device pixel.
+        let alpha = ((255.0 * self.current_opacity) as u8) as f32 / 255.0;
+        let blend = crate::vello_extensions::to_blend_mode(self.render_options.bitmap_blending_mode);
+        let place = transform.inverse() * Affine::translate((x0, y0));
+        let (path, quality) = (rect_path(rect), peniko::ImageQuality::Low);
+        self.sink().fill_with_web_gl_texture(&path, transform, &texture, size, place, alpha, blend, quality);
+        true
+    }
+
     /// Draws the frame of a producer from its texture of the context of the scene, as an image
     /// is drawn: the source rectangle onto the destination with the opacity, the sampling and the
     /// blending mode in effect. On a scene of another context or of the CPU it draws nothing:
@@ -1691,13 +1736,23 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         }
     }
 
+    /// On the WebGL2 context of the canvas, by the lighting fill program.
+    #[cfg(all(feature = "hybrid-webgl", not(any(feature = "hybrid", feature = "gpu"))))]
+    fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        self.draw_lighting_on_web_gl(rect, lighting)
+    }
+
     /// In a GPU mode, the lights are evaluated per pixel by a render pass of
     /// the device into a texture the scene paints the area with
-    /// (`gpu/effect_passes.rs`); the CPU mode, WebGL2 and a scene of the CPU
-    /// renderer (inside a layer drawn on the processor) leave it to the
+    /// (`gpu/effect_passes.rs`); on WebGL2 by the same program on the context; the CPU mode and a
+    /// scene of the CPU renderer (inside a layer drawn on the processor) leave it to the
     /// compositor's light map.
     #[cfg(any(feature = "hybrid", feature = "gpu"))]
     fn draw_lighting(&mut self, rect: Rect, lighting: &ferroui_base::platform::LightingParameters) -> bool {
+        #[cfg(feature = "hybrid-webgl")]
+        if self.scene().web_gl_gpu().is_some() {
+            return self.draw_lighting_on_web_gl(rect, lighting);
+        }
         use crate::scene::{VelloSceneBrush, VelloScenePaint, VelloSceneTexture};
         let device = {
             let scene = self.scene();

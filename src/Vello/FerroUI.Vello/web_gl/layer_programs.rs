@@ -99,10 +99,10 @@ void main() {
 }
 "#;
 
-/// The multiply layer of lit visuals (`LIGHT_COMMON_WGSL` and `LIGHT_MULTIPLY_FRAGMENT_WGSL`):
-/// each colour channel of the content times the light at its pixel, clamped to 0..`scale`, the
-/// result clamped to the alpha, the alpha kept.
-const LIGHT_MULTIPLY: &str = r#"
+/// The lights at a pixel (`LIGHT_COMMON_WGSL`), which the two lighting programs start with.
+macro_rules! light_common {
+    () => {
+        r#"
 // 0: the constant light; 1: the ambient, diffuse, specular amounts and the shine; 2: x 1 for
 // factors, y the scale of the factors, z the number of lights; 3: x, y the pixel of the top left
 // of the target; 4, 5: the rows of the transform from the pixels of the area to the drawing; then
@@ -203,7 +203,16 @@ vec3 light_at(vec2 fragment) {
     }
     return light;
 }
+"#
+    };
+}
 
+/// The multiply layer of lit visuals (`LIGHT_MULTIPLY_FRAGMENT_WGSL`): each colour channel of the
+/// content times the light at its pixel, clamped to 0..`scale`, the result clamped to the alpha,
+/// the alpha kept.
+const LIGHT_MULTIPLY: &str = concat!(
+    light_common!(),
+    r#"
 void main() {
     ivec2 pixel = ivec2(floor(gl_FragCoord.xy));
     if (outside(pixel)) {
@@ -214,7 +223,30 @@ void main() {
     vec3 factors = clamp(light_at(gl_FragCoord.xy), vec3(0.0), vec3(u_params[2].y));
     o_color = vec4(min(c.rgb * factors, vec3(c.a)), c.a);
 }
-"#;
+"#
+);
+
+/// The lighting fill of a scene lighting effect (`LIGHTING_FRAGMENT_WGSL`): the light at each
+/// pixel, opaque. It reads no texture.
+const LIGHT_FILL: &str = concat!(
+    light_common!(),
+    r#"
+void main() {
+    ivec2 pixel = ivec2(floor(gl_FragCoord.xy));
+    if (outside(pixel)) {
+        o_color = vec4(0.0);
+        return;
+    }
+    vec3 light = light_at(gl_FragCoord.xy);
+    if (u_params[2].x > 0.5) {
+        float scale = u_params[2].y;
+        o_color = vec4(clamp(light, vec3(0.0), vec3(scale)) / scale, 1.0);
+        return;
+    }
+    o_color = vec4(clamp(light, vec3(0.0), vec3(1.0)), 1.0);
+}
+"#
+);
 
 /// The pixel operations of two sources (`PIXEL_OPERATION_WGSL`): the next source (`u_next`)
 /// combined into what the sources before it made (`u_content`).
@@ -461,14 +493,17 @@ pub(crate) enum LayerProgram {
     PixelOperation,
     /// The matrix convolution layers.
     Convolution,
+    /// The lighting fill of a scene lighting effect.
+    LightFill,
 }
 
 impl LayerProgram {
-    const ALL: [LayerProgram; 4] = [
+    const ALL: [LayerProgram; 5] = [
         LayerProgram::ColorMatrix,
         LayerProgram::LightMultiply,
         LayerProgram::PixelOperation,
         LayerProgram::Convolution,
+        LayerProgram::LightFill,
     ];
 
     fn index(self) -> usize {
@@ -482,6 +517,7 @@ impl LayerProgram {
             LayerProgram::LightMultiply => "light multiply",
             LayerProgram::PixelOperation => "pixel operation",
             LayerProgram::Convolution => "convolution",
+            LayerProgram::LightFill => "lighting fill",
         }
     }
 
@@ -492,6 +528,7 @@ impl LayerProgram {
             LayerProgram::LightMultiply => LIGHT_MULTIPLY,
             LayerProgram::PixelOperation => PIXEL_OPERATION,
             LayerProgram::Convolution => CONVOLUTION,
+            LayerProgram::LightFill => LIGHT_FILL,
         }
     }
 
@@ -499,6 +536,7 @@ impl LayerProgram {
     fn inputs(self) -> usize {
         match self {
             LayerProgram::PixelOperation => 2,
+            LayerProgram::LightFill => 0,
             _ => 1,
         }
     }
@@ -507,7 +545,7 @@ impl LayerProgram {
     fn uniform_floats(self) -> usize {
         match self {
             LayerProgram::ColorMatrix => blocks::COLOR_MATRIX_FLOATS,
-            LayerProgram::LightMultiply => blocks::LIGHTING_FLOATS,
+            LayerProgram::LightMultiply | LayerProgram::LightFill => blocks::LIGHTING_FLOATS,
             LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
             LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
         }
@@ -688,6 +726,6 @@ mod tests {
             assert_eq!(program.uniform_floats() % 4, 0);
         }
         let indices: Vec<usize> = LayerProgram::ALL.iter().map(|program| program.index()).collect();
-        assert_eq!(indices, vec![0, 1, 2, 3]);
+        assert_eq!(indices, vec![0, 1, 2, 3, 4]);
     }
 }
