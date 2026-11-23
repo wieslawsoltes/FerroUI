@@ -93,6 +93,20 @@ impl NativeFont {
         self.handle.0
     }
 }
+/// A native font that reads `data` and keeps a reference to it, with no copy.
+///
+/// # Safety
+/// The result is a font the caller owns, or null.
+unsafe fn shared_native_font(data: &Arc<[u8]>) -> ffi::Ptr {
+    extern "C" fn release(context: *mut std::ffi::c_void, _: *const std::ffi::c_void, _: usize) {
+        // SAFETY: `context` is the box made below, and it is released once.
+        drop(unsafe { Box::from_raw(context.cast::<Arc<[u8]>>()) });
+    }
+    let context = Box::into_raw(Box::new(data.clone())).cast::<std::ffi::c_void>();
+    // SAFETY: the bytes stay alive until `release`, as `context` holds a reference to them.
+    unsafe { ffi::q_font_data(data.as_ptr(), data.len(), context, release) }
+}
+
 pub struct Typeface {
     pub font: Arc<NativeFont>,
     weight: FontWeight,
@@ -182,33 +196,6 @@ fn style_cost(desired: FontStyle, actual: FontStyle) -> i32 {
         _ => 1, // Italic and oblique stand in for each other.
     }
 }
-/// A typeface over a decoded font, sharing `data` with Core Graphics with no copy. Only web fonts
-/// reach this, so an application without them does not link it.
-pub fn create_typeface_from_font_data(
-    data: Arc<[u8]>,
-    simulations: FontSimulations,
-) -> Option<Rc<dyn IPlatformTypeface>> {
-    extern "C" fn release(context: *mut std::ffi::c_void, _: *const std::ffi::c_void, _: usize) {
-        // SAFETY: `context` is the box made below, and the provider calls this once.
-        drop(unsafe { Box::from_raw(context.cast::<Arc<[u8]>>()) });
-    }
-    let context = Box::into_raw(Box::new(data.clone())).cast::<std::ffi::c_void>();
-    // SAFETY: the bytes stay alive until `release`, as `context` holds a reference to them.
-    let raw = unsafe { ffi::q_font_data_shared(data.as_ptr(), data.len(), context, release) };
-    if raw.is_null() {
-        return None;
-    }
-    // SAFETY: `raw` is a font this call owns.
-    let mut font = unsafe { NativeFont::from_raw(raw) };
-    if let Some(native) = Arc::get_mut(&mut font) {
-        native.data = Some(data.clone());
-    }
-    let mut face = Typeface::new(font, FontWeight::Normal, FontStyle::Normal, FontStretch::Normal);
-    face.simulations = simulations;
-    face.data = Some(data);
-    Some(Rc::new(face))
-}
-
 #[derive(Default)]
 pub struct FontManager {
     embedded: RefCell<Vec<Arc<NativeFont>>>,
@@ -224,10 +211,12 @@ impl FontManager {
     ) -> Option<Rc<dyn IPlatformTypeface>> {
         let mut data = Vec::new();
         stream.read_to_end(&mut data).ok()?;
+        // The one long-lived copy of the bytes: Core Graphics reads this buffer.
+        let data: Arc<[u8]> = data.into();
         let tags: Vec<_> = variations.iter().map(|(t, _)| t.value()).collect();
         let values: Vec<_> = variations.iter().map(|(_, v)| *v).collect();
         unsafe {
-            let raw = ffi::q_font_data(data.as_ptr(), data.len());
+            let raw = shared_native_font(&data);
             if raw.is_null() {
                 return None;
             }
@@ -238,7 +227,6 @@ impl FontManager {
                 return None;
             }
             let mut font = NativeFont::from_raw(raw);
-            let data: Arc<[u8]> = data.into();
             if let Some(native) = Arc::get_mut(&mut font) {
                 native.data = Some(data.clone());
                 if let Some((_, weight)) = variations
@@ -510,22 +498,41 @@ impl ITextShaperImpl for TextShaper {
 mod font_data_tests {
     use super::*;
 
-    #[test]
-    fn the_typeface_shares_the_decoded_buffer() {
-        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf");
-        let data: Arc<[u8]> = Arc::from(&bytes[..]);
-        let weak = Arc::downgrade(&data);
-        let typeface = create_typeface_from_font_data(data, FontSimulations::None).expect("a typeface");
-        assert!(weak.upgrade().is_some(), "the typeface reads the same bytes");
-        assert!(typeface.family_name().contains("Inter"));
-        drop(typeface);
+    /// Hands its buffer over instead of copying it, as a decoded web font is passed in.
+    struct MovingReader(Vec<u8>);
+
+    impl Read for MovingReader {
+        fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
+            panic!("the stream path reads a font with read_to_end");
+        }
+
+        fn read_to_end(&mut self, buffer: &mut Vec<u8>) -> std::io::Result<usize> {
+            assert!(buffer.is_empty());
+            std::mem::swap(buffer, &mut self.0);
+            Ok(buffer.len())
+        }
     }
 
     #[test]
-    fn bytes_that_are_not_a_font_give_no_typeface_and_release_them() {
+    fn the_stream_path_shares_one_buffer_with_core_graphics() {
+        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf").to_vec();
+        let mut reader = MovingReader(bytes);
+        let typeface = FontManager::default()
+            .try_create_glyph_typeface_from_stream(&mut reader, FontSimulations::None)
+            .expect("a typeface");
+        assert_eq!(reader.0.capacity(), 0);
+        let face = typeface.as_any().downcast_ref::<Typeface>().expect("a Quartz typeface");
+        let data = face.data.as_ref().expect("the bytes");
+        // The typeface, its native font and the data provider of Core Graphics.
+        assert_eq!(Arc::strong_count(data), 3, "they all hold the same buffer");
+    }
+
+    #[test]
+    fn bytes_that_are_not_a_font_are_released() {
         let data: Arc<[u8]> = Arc::from(&b"not a font"[..]);
-        let weak = Arc::downgrade(&data);
-        assert!(create_typeface_from_font_data(data, FontSimulations::None).is_none());
-        assert!(weak.upgrade().is_none());
+        // SAFETY: the call owns nothing but the reference it was given.
+        let raw = unsafe { shared_native_font(&data) };
+        assert!(raw.is_null());
+        assert_eq!(Arc::strong_count(&data), 1);
     }
 }

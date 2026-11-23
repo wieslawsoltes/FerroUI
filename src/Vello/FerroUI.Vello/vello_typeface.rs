@@ -514,3 +514,38 @@ impl IPlatformTypeface for VelloTypeface {
         self
     }
 }
+
+#[cfg(test)]
+mod font_data_tests {
+    use super::*;
+    use crate::FontManagerImpl;
+    use ferroui_base::platform::IFontManagerImpl;
+
+    /// Hands its buffer over instead of copying it, as a decoded web font is passed in.
+    struct MovingReader(Vec<u8>);
+
+    impl Read for MovingReader {
+        fn read(&mut self, _: &mut [u8]) -> std::io::Result<usize> {
+            panic!("the stream path reads a font with read_to_end");
+        }
+
+        fn read_to_end(&mut self, buffer: &mut Vec<u8>) -> std::io::Result<usize> {
+            assert!(buffer.is_empty());
+            std::mem::swap(buffer, &mut self.0);
+            Ok(buffer.len())
+        }
+    }
+
+    #[test]
+    fn the_stream_path_keeps_the_decoded_buffer_itself() {
+        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf").to_vec();
+        let address = bytes.as_ptr();
+        let mut reader = MovingReader(bytes);
+        let typeface = FontManagerImpl::new()
+            .try_create_glyph_typeface_from_stream(&mut reader, FontSimulations::None)
+            .expect("a typeface");
+        assert_eq!(reader.0.capacity(), 0);
+        let typeface = typeface.as_any().downcast_ref::<VelloTypeface>().expect("a Vello typeface");
+        assert_eq!(typeface.face.data.data.data().as_ptr(), address, "no copy was made");
+    }
+}

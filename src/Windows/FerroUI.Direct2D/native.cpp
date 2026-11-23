@@ -416,7 +416,6 @@ struct ShapeScratchLease {
 struct Font : Object {
     ComPtr<IDWriteFontFace> face;
     ComPtr<IDWriteFontFile> file;
-    std::shared_ptr<std::vector<uint8_t>> bytes;
     std::wstring family;
     // Font faces (including each variation instance) are immutable. Keep a
     // bounded design-unit cache, shared by runs at every requested em size.
@@ -520,23 +519,14 @@ struct PositionedGlyphRun : Object {
     DWRITE_GLYPH_RUN run() const {return {face.Get(),size,(UINT32)ids.size(),ids.data(),advances.data(),offsets.data(),FALSE,0};}
     bool bounds(Frame& frame,const D2D1_MATRIX_3X2_F& matrix,const D2D1_MATRIX_3X2_F& current,double shift,int alias,D2D1_RECT_F& result) const;
 };
-class FontBytes final : public IUnknown {
-    std::atomic<ULONG> refs{1};
-public:
-    std::shared_ptr<std::vector<uint8_t>> bytes;
-    explicit FontBytes(std::shared_ptr<std::vector<uint8_t>> b):bytes(std::move(b)) {}
-    IFACEMETHOD(QueryInterface)(REFIID iid,void** out) override { *out=nullptr;if(iid!=__uuidof(IUnknown))return E_NOINTERFACE;*out=this;AddRef();return S_OK; }
-    IFACEMETHOD_(ULONG,AddRef)() override { return ++refs; }
-    IFACEMETHOD_(ULONG,Release)() override { auto count=--refs;if(!count)delete this;return count; }
-};
 // Holds font bytes owned by the caller: DirectWrite keeps this object while it reads them.
-class ExternalFontBytes final : public IUnknown {
+class FontBytes final : public IUnknown {
     std::atomic<ULONG> refs{1};
     void* context;
     void (*release)(void*);
 public:
-    ExternalFontBytes(void* c,void (*r)(void*)):context(c),release(r) {}
-    ~ExternalFontBytes() { release(context); }
+    FontBytes(void* c,void (*r)(void*)):context(c),release(r) {}
+    ~FontBytes() { release(context); }
     IFACEMETHOD(QueryInterface)(REFIID iid,void** out) override { *out=nullptr;if(iid!=__uuidof(IUnknown))return E_NOINTERFACE;*out=this;AddRef();return S_OK; }
     IFACEMETHOD_(ULONG,AddRef)() override { return ++refs; }
     IFACEMETHOD_(ULONG,Release)() override { auto count=--refs;if(!count)delete this;return count; }
@@ -634,8 +624,12 @@ API Ptr d2_font_family_faces(const char* family) try { std::lock_guard<std::recu
         result+=std::to_string(f->GetWeight())+","+std::to_string(style)+","+std::to_string(f->GetStretch())+"\n";
     } return new Data(result);
 } CATCH_PTR
-static Ptr finish_font_data(std::unique_ptr<Font> result,const uint8_t* bytes,UINT32 n,IUnknown* owner) {
-    check(engine().loader->CreateInMemoryFontFileReference(engine().fonts.Get(),bytes,n,owner,&result->file));
+API Ptr d2_font_data(const uint8_t* bytes,size_t n,void* context,void (*release)(void*)) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    // The owner calls `release` when DirectWrite is done with the bytes, or at once on failure.
+    ComPtr<IUnknown> owner;owner.Attach(new FontBytes(context,release));
+    if(!bytes||!n||n>UINT32_MAX) return nullptr;
+    auto result=std::make_unique<Font>();
+    check(engine().loader->CreateInMemoryFontFileReference(engine().fonts.Get(),bytes,(UINT32)n,owner.Get(),&result->file));
     BOOL supported=FALSE; DWRITE_FONT_FILE_TYPE type; DWRITE_FONT_FACE_TYPE faceType; UINT32 faces=0;
     check(result->file->Analyze(&supported,&type,&faceType,&faces)); if(!supported||!faces) return nullptr;
     auto file=result->file.Get();
@@ -643,24 +637,10 @@ static Ptr finish_font_data(std::unique_ptr<Font> result,const uint8_t* bytes,UI
     ComPtr<IDWriteFontFace3> face3; check(result->face.As(&face3));
     ComPtr<IDWriteLocalizedStrings> names; check(face3->GetFamilyNames(&names)); result->family=name(names.Get());
     return result.release();
-}
-API Ptr d2_font_data(const uint8_t* bytes,size_t n) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    if(n>UINT32_MAX) return nullptr;
-    auto result=std::make_unique<Font>();
-    result->bytes=std::make_shared<std::vector<uint8_t>>(bytes,bytes+n);
-    ComPtr<IUnknown> owner;owner.Attach(new FontBytes(result->bytes));
-    auto data=result->bytes->data();
-    return finish_font_data(std::move(result),data,(UINT32)n,owner.Get());
-} CATCH_PTR
-API Ptr d2_font_data_shared(const uint8_t* bytes,size_t n,void* context,void (*release)(void*)) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
-    // The owner calls `release` when DirectWrite is done with the bytes, or at once on failure.
-    ComPtr<IUnknown> owner;owner.Attach(new ExternalFontBytes(context,release));
-    if(!bytes||!n||n>UINT32_MAX) return nullptr;
-    return finish_font_data(std::make_unique<Font>(),bytes,(UINT32)n,owner.Get());
 } CATCH_PTR
 API Ptr d2_font_variations(Ptr p,const uint32_t* tags,const double* values,size_t n) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto original=static_cast<Font*>(p); auto result=std::make_unique<Font>();
-    result->face=original->face; result->bytes=original->bytes; result->file=original->file; result->family=original->family;
+    result->face=original->face; result->file=original->file; result->family=original->family;
     if(n) {
         ComPtr<IDWriteFontFace5> face5; check(original->face.As(&face5));
         ComPtr<IDWriteFontResource> resource; check(face5->GetFontResource(&resource));

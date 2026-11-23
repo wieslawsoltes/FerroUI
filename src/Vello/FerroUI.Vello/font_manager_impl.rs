@@ -12,7 +12,7 @@ use std::cell::RefCell;
 use std::collections::HashMap;
 use std::io::Read;
 use std::rc::Rc;
-use std::sync::{Arc, Mutex};
+use std::sync::Mutex;
 
 /// The fonts of the system as they were last enumerated, for every font
 /// manager of the process: enumerating them reads every font file of the
@@ -153,17 +153,6 @@ fn from_width(width: fontique::FontWidth) -> FontStretch {
     }
 
     FontStretch::from_i32(nearest as i32 + 1).unwrap_or(FontStretch::Normal)
-}
-
-/// A typeface over a decoded font, sharing `data` with no copy: the shaper, the glyph runs and
-/// the scenes all read the same bytes, which are released with the last of them. Only web fonts
-/// reach this, so an application without them does not link it.
-pub fn create_typeface_from_font_data(
-    data: Arc<[u8]>,
-    font_simulations: FontSimulations,
-) -> Option<Rc<dyn IPlatformTypeface>> {
-    let blob = fontique::Blob::new(Arc::new(data));
-    Some(VelloTypeface::new(blob, 0, font_simulations, &[])? as Rc<dyn IPlatformTypeface>)
 }
 
 /// The Vello font manager: the installed fonts of the system through
@@ -484,27 +473,5 @@ impl IFontManagerImpl for FontManagerImpl {
                 })
                 .collect(),
         )
-    }
-}
-
-#[cfg(test)]
-mod font_data_tests {
-    use super::*;
-
-    #[test]
-    fn the_typeface_shares_the_decoded_buffer() {
-        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf");
-        let data: Arc<[u8]> = Arc::from(&bytes[..]);
-        let weak = Arc::downgrade(&data);
-        let typeface = create_typeface_from_font_data(data, FontSimulations::None).expect("a typeface");
-        assert!(weak.upgrade().is_some(), "the typeface reads the same bytes");
-        assert!(typeface.family_name().contains("Inter"));
-        drop(typeface);
-        assert!(weak.upgrade().is_none(), "the bytes go with the last user");
-    }
-
-    #[test]
-    fn bytes_that_are_not_a_font_give_no_typeface() {
-        assert!(create_typeface_from_font_data(Arc::from(&b"not a font"[..]), FontSimulations::None).is_none());
     }
 }

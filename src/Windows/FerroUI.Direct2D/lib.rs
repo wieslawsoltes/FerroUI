@@ -15,7 +15,6 @@ mod drawing;
 mod ffi;
 mod fonts;
 mod presentation;
-pub use fonts::create_typeface_from_font_data;
 pub use fonts::FontManager as Direct2DFontManager;
 pub use fonts::TextShaper as DirectWriteTextShaper;
 /// [surface allocations, path draws, image draws, presents, explicit readbacks,

@@ -151,37 +151,15 @@ void *q_font(const char *name, int weight, int italic, int stretch) {
     return NULL;
   }
 }
-void *q_font_data(const uint8_t *bytes, size_t n) {
-  @try {
-    if (!bytes || !n)
-      return NULL;
-    CFDataRef data = CFDataCreate(NULL, bytes, n);
-    if (!data)
-      return NULL;
-    CGDataProviderRef provider = CGDataProviderCreateWithCFData(data);
-    CGFontRef cg = provider ? CGFontCreateWithDataProvider(provider) : NULL;
-    CTFontRef font =
-        cg ? CTFontCreateWithGraphicsFont(cg, 12, NULL, NULL) : NULL;
-    if (cg)
-      CGFontRelease(cg);
-    CGDataProviderRelease(provider);
-    CFRelease(data);
-    return (void *)font;
-
-  } @catch (NSException *error) {
-    NSLog(@"Quartz native operation failed: %@", error);
-    return NULL;
-  }
-}
-void *q_font_data_shared(const uint8_t *bytes, size_t n, void *context,
-                         void (*release)(void *, const void *, size_t)) {
+void *q_font_data(const uint8_t *bytes, size_t n, void *context,
+                  void (*release)(void *, const void *, size_t)) {
   @try {
     if (!bytes || !n) {
       release(context, bytes, n);
       return NULL;
     }
-    // The provider owns `context` from here: it calls `release` when the last font using the
-    // bytes is gone.
+    // The provider owns `context` from here and calls `release` when the last font using the
+    // bytes is gone, so the bytes are not copied.
     CGDataProviderRef provider =
         CGDataProviderCreateWithData(context, bytes, n, release);
     if (!provider) {

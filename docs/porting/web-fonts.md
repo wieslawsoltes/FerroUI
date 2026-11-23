@@ -201,23 +201,16 @@ Four rules follow from the requirements.
 
 ### 4.2 The seam to the backends
 
-A method on `IFontManagerImpl` would put an entry in the vtable of every backend, and with it
-code in every application, whether or not it uses web fonts. So the trait does not change:
+`IFontManagerImpl` does not change. A new method would put a vtable entry, and with it code, in
+every application, whether or not it uses web fonts.
 
-- Every backend already builds a typeface from a stream, through
-  `IFontManagerImpl::try_create_glyph_typeface_from_stream`. That is the default path, and the
-  one a new backend (ProGPU) gets without doing anything. It copies the bytes.
-- Each backend also has a free function that nothing in the framework calls, so the linker drops
-  it from an application without web fonts:
-
-```rust
-pub fn create_typeface_from_font_data(
-    data: Arc<[u8]>,
-    font_simulations: FontSimulations,
-) -> Option<Rc<dyn IPlatformTypeface>>;
-```
-
-An application that uses web fonts passes its backend's function to `ferroui-fonts-web`.
+The crate reaches the active backend through what every backend already has:
+`FontManager::current().platform_impl()` and `try_create_glyph_typeface_from_stream`. It passes a
+small `Read` type that owns the decoded `Vec<u8>` and overrides `read_to_end`: into an empty
+vector, it hands its buffer over instead of copying it. Every backend reads a font with
+`read_to_end` into an empty vector, so the buffer moves in. A backend that reads another way
+still works, through plain `read`, with a copy. An application never names its backend, and a
+new backend (ProGPU) works with nothing added.
 
 ## 5. Platforms and backends
 
@@ -252,21 +245,21 @@ application has enabled that API.
 
 | Backend | Typeface from data | Shaping | GPU glyph path |
 | --- | --- | --- | --- |
-| Skia | `create_typeface_from_font_data`: one `SkData` | HarfBuzz over the table access | Unchanged |
-| Vello, CPU | The same function: a `Blob` over the `Arc`, no copy | Same | CPU mode stays what it is |
+| Skia | The stream path: one `SkData`, the moved buffer dropped | HarfBuzz over the table access | Unchanged |
+| Vello, CPU | The stream path: a `Blob` over the moved buffer, no copy | Same | CPU mode stays what it is |
 | Vello, hybrid and GPU | Same | Same | Unchanged: `glifo` outlines |
 | Vello, WebGL2 | Same | Same | Unchanged |
-| Quartz | The same function: a data provider over the `Arc`, no copy | Core Text | Unchanged |
-| Direct2D | The same function: an in-memory file over the `Arc`, no copy | DirectWrite | Unchanged |
-| ProGPU | Seam only: the stream path, until it has the function | | Implemented with #369 |
+| Quartz | The stream path: a data provider over one shared buffer | Core Text | Unchanged |
+| Direct2D | The stream path: an in-memory file over one shared buffer | DirectWrite | Unchanged |
+| ProGPU | Seam only: the stream path, with nothing added | | Implemented with #369 |
 
 No backend gets a new rasterizer. A face that a backend cannot draw on the GPU today is treated
 as it is today.
 
 There is exactly one long-lived copy of a decoded font. Skia's safe API has no release callback
-for external memory, so the decoded bytes are copied once into `SkData` and our buffer is
-released as soon as Skia owns its copy; the two overlap only during creation, and a test shows
-the buffer is gone afterwards. Vello, Quartz and Direct2D share the `Arc` directly.
+for external memory, so the moved buffer is copied once into `SkData` and dropped when the call
+returns. Vello keeps the moved buffer itself. Quartz and Direct2D turn it into one `Arc<[u8]>`,
+a short overlap, and hand the native font a reference to that buffer with a release callback.
 
 ### 5.3 Color formats
 
@@ -393,7 +386,7 @@ Each step is one draft pull request, stacked on the one below.
 5. WOFF2 decoder (the Brotli step waits for approval, behind an internal seam).
 6. Font matching and composite faces.
 7. `FontFace`, `FontFaceSet` and the display timeline, as state machines.
-8. The shared font data entry point of Skia, Vello, Quartz and Direct2D.
+8. One long-lived copy of a font in the stream path of every backend.
 9. `ferroui-fonts-web`: `WebFontCollection`, the scheduler and the swap.
 10. Fetchers: `data:`, `file:`, assets, the worker thread, and `https:` behind `http`.
 11. The browser: `fetch()`, CORS, and time-sliced decoding.

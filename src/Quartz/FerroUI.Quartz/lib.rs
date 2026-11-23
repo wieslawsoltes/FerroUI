@@ -17,7 +17,7 @@ pub use metal::submission_count as metal_submission_count;
 mod drawing;
 mod ffi;
 mod fonts;
-pub use fonts::{create_typeface_from_font_data, FontManager as QuartzFontManager, TextShaper as QuartzTextShaper};
+pub use fonts::{FontManager as QuartzFontManager, TextShaper as QuartzTextShaper};
 mod geometry;
 mod path_measure;
 mod png_compression;
