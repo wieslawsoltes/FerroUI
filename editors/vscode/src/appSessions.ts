@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import type { RuntimePanels } from './runtimePanels';
+import { RuntimeMcpActions } from './runtimeMcpActions';
 import type { AppRuntime } from './runtimeTargets';
 
 class AppItem extends vscode.TreeItem {
@@ -11,9 +12,11 @@ class AppItem extends vscode.TreeItem {
 export class AppSessions implements vscode.Disposable {
     private readonly changed = new vscode.EventEmitter<void>();
     private readonly subscriptions: vscode.Disposable[];
+    readonly mcp: RuntimeMcpActions;
 
     constructor(private readonly reload: HotReload, private readonly connections: RuntimeConnections,
         private readonly panels: RuntimePanels) {
+        this.mcp = new RuntimeMcpActions(connections);
         const view = vscode.window.createTreeView<AppItem>('ferroui.appSessions', { treeDataProvider: {
             onDidChangeTreeData: this.changed.event,
             getChildren: item => item ? [] : this.connections.targets().map(session => this.item(session)),

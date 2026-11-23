@@ -7,6 +7,19 @@ interface Content {
     data?: string;
 }
 
+export interface RuntimeToolDefinition {
+    name: string;
+    description?: string;
+    inputSchema: object;
+    annotations?: { readOnlyHint?: boolean };
+}
+
+interface RuntimeToolResult {
+    content: Content[];
+    structuredContent?: unknown;
+    isError?: boolean;
+}
+
 const protocol = '2025-11-25';
 const responseLimit = 24 * 1024 * 1024;
 
@@ -15,7 +28,7 @@ export class RuntimeClient {
     private session?: string;
     private version = protocol;
     private initialize?: Promise<void>;
-    private catalog?: Promise<Set<string>>;
+    private catalog?: Promise<RuntimeToolDefinition[]>;
     private next = 0;
 
     constructor(readonly endpoint: RuntimeMcpEndpoint) {
@@ -25,21 +38,29 @@ export class RuntimeClient {
     }
 
     async call<T>(name: string, args: object = {}, signal?: AbortSignal): Promise<T> {
-        await this.ensureConnected();
-        const result = await this.request<{ content: Content[]; isError?: boolean }>('tools/call', { name, arguments: args }, signal);
-        const content = result.content?.[0];
-        if (!content || result.isError) throw new Error(content?.text ?? `The runtime could not run ${name}.`);
+        const { content: [content] } = await this.invoke(name, args, signal);
         if (content.type === 'image' && content.mimeType === 'image/png' && typeof content.data === 'string') return content.data as T;
         if (content.type !== 'text' || typeof content.text !== 'string') throw new Error('Unexpected runtime content.');
         return JSON.parse(content.text) as T;
     }
 
-    async supports(name: string): Promise<boolean> {
+    async invoke(name: string, args: object, signal?: AbortSignal): Promise<RuntimeToolResult> {
         await this.ensureConnected();
-        this.catalog ??= this.request<{ tools: Array<{ name: string }> }>('tools/list', {})
-            .then(result => new Set(result.tools.map(tool => tool.name)))
+        const result = await this.request<RuntimeToolResult>('tools/call', { name, arguments: args }, signal);
+        const content = result.content?.[0];
+        if (!content || result.isError) throw new Error(content?.text ?? `The runtime could not run ${name}.`);
+        return result;
+    }
+
+    async supports(name: string): Promise<boolean> {
+        return (await this.tools()).some(tool => tool.name === name);
+    }
+
+    async tools(signal?: AbortSignal): Promise<RuntimeToolDefinition[]> {
+        await this.ensureConnected();
+        return this.catalog ??= this.request<{ tools: RuntimeToolDefinition[] }>('tools/list', {}, signal)
+            .then(result => result.tools)
             .catch(error => { this.catalog = undefined; throw error; });
-        return (await this.catalog).has(name);
     }
 
     private ensureConnected(): Promise<void> {

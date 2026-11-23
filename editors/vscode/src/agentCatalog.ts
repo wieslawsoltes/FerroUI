@@ -10,6 +10,7 @@ import { hostedTemplateCatalog } from './hostedTemplateCatalog';
 import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog } from './workspaceCatalog';
 import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageInputCatalog';
 import { runtimeProfileCatalog } from './runtimeProfileCatalog';
+import { runtimeMcpCatalog } from './runtimeMcpCatalog';
 import { projectSetupCatalog } from './projectSetupCatalog';
 import { collaborationCatalog } from './collaborationAgents';
 import { runtimeArgument } from './runtimeTargets';
@@ -425,6 +426,7 @@ export const agentCatalog = {
     ferroui_reload_history: tool('Read managed save outcomes, application acknowledgements, and native compositor frame receipts by process generation.',
         { limit: integer(1, 200), app_session: { type: 'string', maxLength: 36 } }),
     ...runtimeProfileCatalog,
+    ...runtimeMcpCatalog,
     ...projectSetupCatalog,
     ferroui_runtime_source: tool('Resolve a node from the managed or attached runtime inspector to a workspace location. Returns the connection generation and editor buffer version.',
         { node, runtime: runtimeArgument }, ['node']),

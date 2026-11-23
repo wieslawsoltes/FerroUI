@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import { RuntimeClient } from '../src/runtimeClient';
 import type { RuntimeNode } from '../src/runtimeProtocol';
 import type { RuntimeSummary } from '../src/runtimeConnections';
+import { verifyRuntimeMcpAccess } from './runtimeMcpAccess';
 import { withManagedAppFixture } from './managedAppFixture';
 import { verifyHostedInputMcp } from './hostedInputMcp';
 import type { McpFixture } from './mcp';
@@ -67,6 +68,7 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             const [leftClient, rightClient] = clients;
             const headings = await Promise.all(clients.map(client => client.call<RuntimeNode[]>('find_elements', { name: 'Heading' })));
             assert.deepEqual(headings.map(nodes => nodes[0].text), expected);
+            await verifyRuntimeMcpAccess({ invoke, content }, left.runtime);
             const sources = await Promise.all(runs.map((run, index) => tools<{ runtime: string; generation: number; source: { uri: string; version: number } }>(
                 'ferroui_runtime_source', { runtime: run.runtime, node: headings[index][0].node_id })));
             assert.notEqual(sources[0].generation, sources[1].generation);
@@ -111,6 +113,10 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             await until(async () => { const current = await status(left); return Boolean(current.mcpAvailable && current.pid !== first.pid); });
             const [rebuilt] = (await list()).runtimes.filter(target => target.runtime === left.runtime);
             assert.notEqual(rebuilt.generation, sources[0].generation);
+            const retired = await invoke('ferroui_runtime_query', {
+                runtime: left.runtime, expected_generation: sources[0].generation, tool: 'list_windows',
+            });
+            assert.match(retired.content[0]?.text ?? '', /application connection changed/);
             assert.equal((await status(right)).pid, second.pid);
             assert.ok((await rightClient.call<{ matched: boolean }>('wait_for', { name: 'Result', text: 'Retain this filter' })).matched);
             const update = await clientFor(labels[0]);

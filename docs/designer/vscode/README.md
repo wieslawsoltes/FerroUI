@@ -15,6 +15,16 @@ Use FerroUI Designer to edit a view alongside a native preview of its unsaved so
 
 For a package built from this checkout, see the [extension build and packaging instructions](../../../editors/vscode/README.md#install-or-develop-from-the-repository).
 
+## Open a remote workspace
+
+1. Connect to the workspace from desktop VS Code with **Remote–SSH**. Open the project folder on the remote machine and install FerroUI from VSIX in that window. Choose the remote machine’s platform and architecture, such as `linux-arm64` for an ARM64 Linux host. The Extensions view lists FerroUI under the SSH host. [VS Code Remote–SSH](https://code.visualstudio.com/docs/remote/ssh)
+2. Open an XAML or Rust view and run **FerroUI: Open Designer**. The language server and native preview helper run on the workspace host. The desktop window shows the source, diagnostics, and rendered frames.
+3. If you supply your own helpers or Cargo, use **Preferences: Open Remote Settings (JSON)**. Set `ferroui.languageServer.path`, `ferroui.preview.path`, or `ferroui.hotReload.cargoPath` to absolute executable paths on the workspace host.
+
+Build and run Cargo targets from the connected window. Install your Rust debug adapter on the SSH host when you want to debug there. Live App and the editor's MCP server connect to application inspectors on that same host. [Run and inspect a view](runtime.md) · [Run app tools through the editor MCP server](reference.md#run-app-tools-through-the-editor-mcp-server)
+
+![Rust source and its native FerroUI design preview in a VS Code Remote–SSH window](../images/vscode-remote-rsx.png)
+
 ## Choose the tools for your task
 
 | Task | Where to work |

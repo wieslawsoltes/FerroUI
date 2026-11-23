@@ -233,6 +233,8 @@ Use **Collaboration** to host or join the same XAML rooms as Designer Studio. Re
 
 In a trusted workspace, start **FerroUI Designer in VS Code** from the MCP servers list and select its tools in your agent. Set `ferroui.mcp.allowWrites` in user settings to authorize source edits, designer controls, and managed Cargo actions. `ferroui.mcp.enableDesigner` controls the editor server. [VS Code MCP integration](https://code.visualstudio.com/api/extension-guides/ai/mcp)
 
+In a Remote–SSH workspace, install the VSIX for the workspace host and set helper paths and MCP permissions in **Remote Settings**. The editor MCP server can list and run tools from a managed or attached app through its authenticated workspace-host connection. [Open a remote workspace](../../docs/designer/vscode/README.md#open-a-remote-workspace) · [Run app tools through the editor MCP server](../../docs/designer/vscode/reference.md#run-app-tools-through-the-editor-mcp-server)
+
 | Workflow | Tools |
 | --- | --- |
 | Work with project source | Use `ferroui_workspace_files` and `ferroui_workspace_read` to discover files and read unsaved buffers. Query the active VS Code language providers with `ferroui_workspace_language`. Create files with `ferroui_workspace_create`, apply an atomic text transaction with `ferroui_workspace_edit`, and open, save, format, undo, redo, rename, or delete with `ferroui_workspace_file`. |

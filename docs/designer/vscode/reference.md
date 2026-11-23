@@ -6,7 +6,7 @@ description: "Connect the editor, Studio, and application MCP servers, and look 
 ## Start the right MCP server
 
 1. Open a trusted workspace in desktop VS Code. Run **MCP: List Servers** and start **FerroUI Designer in VS Code**. Choose its tools in your VS Code agent.
-2. Ask the agent to read the active unsaved document or open a design and describe its accepted native frame. To permit source edits, designer actions, or managed Cargo commands, enable `ferroui.mcp.allowWrites` in VS Code user settings. Editor write access is off by default.
+2. Ask the agent to read the active unsaved document or open a design and describe its accepted native frame. To permit source edits, designer actions, or managed Cargo commands, enable `ferroui.mcp.allowWrites` in VS Code user settings. In a Remote–SSH window, set it in **Remote Settings**. Editor write access is off by default.
 3. For Studio or an independently running application, use **FerroUI: Connect to Running MCP Server** and supply the authenticated loopback endpoint. **Disconnect Running MCP Server** removes that connection. Configure `ferroui.mcp.stdioServers` for a known executable using its native stdio transport.
 4. Start a configured app through **Run with Hot Reload** to discover its named FerroUI MCP server when the app advertises one. Its runtime inspection and input permissions come from the app. An in-place update keeps the connection. A replacement process advertises its own server after startup.
 
@@ -17,6 +17,16 @@ description: "Connect the editor, Studio, and application MCP servers, and look 
 | Named managed or attached app | Actual native windows, properties, binding and layout diagnostics, accessibility, screenshots, and permitted input. |
 
 Editor and Studio authoring reuse the same native planning and validation. The editor applies source changes through VS Code’s undo history. Studio applies them through its document history. Use the server owning the unsaved buffer you intend to edit. [VS Code MCP setup](https://code.visualstudio.com/docs/copilot/customization/mcp-servers) · [Designer Studio MCP](../README.md#mcp-integration) · [Application MCP](../../mcp.md)
+
+In a remote window, **FerroUI Designer in VS Code** starts its native MCP helper on the workspace host. A loopback endpoint passed to **Connect to Running MCP Server** refers to that same machine. The editor discovers authenticated managed-app endpoints on the host where Cargo runs. [Open a remote workspace](README.md#open-a-remote-workspace)
+
+### Run app tools through the editor MCP server
+
+Use **FerroUI Designer in VS Code** to reach a managed app, attached runtime, or Studio session. This also works when your agent’s server list has yet to load a newly launched app.
+
+1. Call `ferroui_app_sessions` and take the exact `runtime` ID of the available session. Call `ferroui_runtime_tools` with that ID to read the app’s tool names, schemas, and `generation`.
+2. For a tool with `readOnlyHint: true`, call `ferroui_runtime_query`. Pass the same `runtime`, the generation as `expected_generation`, the tool name in `tool`, and its own `arguments`. For example, use `list_windows` to get window IDs and `screenshot` to return a native PNG.
+3. Use `ferroui_runtime_call` for input, edits, or other operations that change app state. Enable `ferroui.mcp.allowWrites` in the workspace host’s user settings. The application’s MCP permissions still apply. Read the catalog again if the app reconnects or is replaced.
 
 ## Drive an editor workflow
 
