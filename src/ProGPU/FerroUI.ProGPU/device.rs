@@ -160,6 +160,19 @@ fn scene_deltas_enabled() -> bool {
     *ENABLED.get_or_init(|| std::env::var_os("FERROUI_PROGPU_SCENE_DELTA").is_some_and(|value| value == "1"))
 }
 
+/// The flags of the engines: `FERROUI_PROGPU_GROUP_PAGES=1` renders groups before the root pass.
+/// Off by default until the frames of the gauntlet have been compared with it.
+fn engine_flags() -> u64 {
+    static FLAGS: std::sync::OnceLock<u64> = std::sync::OnceLock::new();
+    *FLAGS.get_or_init(|| {
+        if std::env::var_os("FERROUI_PROGPU_GROUP_PAGES").is_some_and(|value| value == "1") {
+            PROGPU_NATIVE_ENGINE_GROUPS_BEFORE_ROOT_PASS as u64
+        } else {
+            0
+        }
+    })
+}
+
 /// The bytes of the streams an engine keeps for the targets it is not rendering, while scene deltas
 /// are on (the same bound here and in the engine). Without deltas it keeps one scene.
 const KEPT_SCENES_BUDGET: u64 = 64 * 1024 * 1024;
@@ -792,6 +805,7 @@ impl ProGpuEngine {
             target_format: format.engine_format(),
             device: device.device as usize,
             queue: device.queue as usize,
+            flags: engine_flags(),
             ..Default::default()
         };
         // SAFETY: the options are borrowed for the call; the slot is the caller's.
@@ -813,7 +827,7 @@ impl ProGpuEngine {
             instance: device.instance as usize,
             device: device.device as usize,
             queue: device.queue as usize,
-            flags: 0,
+            flags: engine_flags(),
         };
         // SAFETY: the options are borrowed for the call; the slot is the caller's.
         unsafe { progpu_native_dawn_engine_create(&options, engine) }
