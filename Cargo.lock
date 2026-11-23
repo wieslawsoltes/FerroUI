@@ -1650,6 +1650,17 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-keytips"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-markup-xaml-loader",
+ "ferroui-system",
+]
+
+[[package]]
 name = "ferroui-controls-livecharts"
 version = "0.6.0-preview.1"
 dependencies = [
