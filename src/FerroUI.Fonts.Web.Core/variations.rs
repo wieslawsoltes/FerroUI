@@ -56,8 +56,8 @@ fn table<'a>(font: &'a [u8], tag: &Tag) -> Option<&'a [u8]> {
     })
 }
 
-/// Every name a `name` table gives for an id.
-fn names_of(name: &[u8], id: u16) -> Vec<String> {
+/// Every name a `name` table gives for an id, in any language.
+pub fn names_of(name: &[u8], id: u16) -> Vec<String> {
     let mut names = Vec::new();
     let mut read = || -> Option<()> {
         let (count, strings) = (name.u16_at(2)? as usize, name.u16_at(4)? as usize);

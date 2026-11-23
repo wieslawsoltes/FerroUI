@@ -22,12 +22,15 @@ use ferroui_fonts_web_core::loading::{
     FontFaceSetError, FontFaceSetEvent, FontFaceSetLoadStatus, FontFaceSetState, FontFaceView,
 };
 use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
-use ferroui_fonts_web_core::sfnt::{apply_metric_overrides, make_invisible_font, SanitizeOptions};
-use ferroui_fonts_web_core::variations::{read_font_axes, resolve_font_variations, FontAxes};
+use ferroui_fonts_web_core::sfnt::{
+    apply_metric_overrides, has_metric_overrides, make_invisible_font, SanitizeOptions,
+};
+use ferroui_fonts_web_core::variations::{names_of, read_font_axes, resolve_font_variations, FontAxes};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
+use std::io::Read;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::time::{Duration, Instant};
@@ -149,6 +152,14 @@ fn match_request(style: FontStyle, weight: FontWeight, stretch: FontStretch) -> 
         FontStyle::Oblique => FontStyleRequest::Oblique(14.0),
     };
     FontMatchRequest { weight: weight.0.clamp(1, 1000) as f32, width: stretch_percent(stretch), style }
+}
+
+/// Whether a font has this full name (name id 4) or PostScript name (name id 6).
+fn has_local_name(typeface: &GlyphTypeface, name: &str) -> bool {
+    let Some(table) = typeface.platform_typeface().try_get_table(OpenTypeTag::new(u32::from_be_bytes(*b"name"))) else {
+        return false;
+    };
+    [4, 6].iter().any(|id| names_of(table.span(), *id).iter().any(|known| known.eq_ignore_ascii_case(name)))
 }
 
 /// The simulations a request needs from a face, as `font-synthesis: auto` allows them: a bold
@@ -273,9 +284,14 @@ impl Shared {
             if !source.is_supported(SUPPORTED_TECHS) {
                 continue;
             }
-            // `local()` is resolved in a later part: for now it is an entry that was not found.
-            let FontSource::Url { url, .. } = source else {
-                continue;
+            let url = match source {
+                FontSource::Url { url, .. } => url,
+                FontSource::Local { name } => {
+                    if Self::install_local(this, id, &name) {
+                        return;
+                    }
+                    continue;
+                }
             };
             let Some(fetcher) = this.fetcher.borrow().clone() else {
                 continue;
@@ -303,6 +319,72 @@ impl Shared {
             );
             return;
         }
+    }
+
+    /// Uses an installed font for `local()`. False when there is none of that name.
+    fn install_local(this: &Rc<Self>, id: FontFaceId, name: &str) -> bool {
+        let Some(mut typeface) = this.find_local(name) else {
+            return false;
+        };
+        let descriptors = this.with_slot(id, |slot| slot.descriptors.clone());
+        let mut axes = None;
+        let mut size = 0;
+        // The usual reason to name a local font: overriding its metrics to match a web font. That
+        // takes a private copy of the font, and only then.
+        if let Some(descriptors) = descriptors.filter(has_metric_overrides) {
+            let mut bytes = Vec::new();
+            let read = typeface.platform_typeface().try_get_stream().map(|mut stream| stream.read_to_end(&mut bytes));
+            if matches!(read, Some(Ok(_))) && apply_metric_overrides(&mut bytes, &descriptors).is_ok() {
+                axes = read_font_axes(&bytes).map(Rc::new);
+                size = bytes.len();
+                let mut stream = FontDataStream::new(bytes);
+                let adjusted = this
+                    .platform
+                    .try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)
+                    .and_then(|typeface| GlyphTypeface::try_create(typeface, FontSimulations::None));
+                if let Some(adjusted) = adjusted {
+                    typeface = adjusted;
+                }
+            }
+        }
+        let tick = this.next_tick();
+        this.with_slot(id, |slot| {
+            slot.usable = true;
+            slot.glyph_typeface = Some(typeface.clone());
+            slot.axes = axes;
+            slot.size = size;
+            slot.last_used = tick;
+        });
+        this.register_features(id, &typeface);
+        this.set_status(id, FontFaceLoadStatus::Loaded);
+        this.fonts_changed();
+        true
+    }
+
+    /// The installed font whose full name or PostScript name is `name`. The platform finds fonts
+    /// by family, so the family is looked for among the leading words of the name, and the name
+    /// of each of its faces is then compared: no other font is ever substituted.
+    fn find_local(&self, name: &str) -> Option<Rc<GlyphTypeface>> {
+        let words: Vec<&str> = name.split_whitespace().collect();
+        let mut families: Vec<String> = (1..=words.len()).rev().map(|count| words[..count].join(" ")).collect();
+        if let Some((family, _)) = name.split_once('-') {
+            families.push(family.to_owned());
+        }
+        for family in families {
+            let Some(typefaces) = self.platform.try_get_family_typefaces(&family) else {
+                continue;
+            };
+            for candidate in typefaces {
+                let found = self
+                    .platform
+                    .try_create_glyph_typeface(&family, candidate.style(), candidate.weight(), candidate.stretch())
+                    .and_then(|typeface| GlyphTypeface::try_create(typeface, FontSimulations::None));
+                if let Some(found) = found.filter(|found| has_local_name(found, name)) {
+                    return Some(found);
+                }
+            }
+        }
+        None
     }
 
     /// A URL of `src`, against the base URI when it is relative.
@@ -585,7 +667,7 @@ impl Shared {
                 FontStretch::Normal,
             )?;
             let mut bytes = Vec::new();
-            std::io::Read::read_to_end(&mut default.try_get_stream()?, &mut bytes).ok()?;
+            default.try_get_stream()?.read_to_end(&mut bytes).ok()?;
             let font = make_invisible_font(&bytes, &self.options.limits).ok()?;
             let mut stream = FontDataStream::new(font);
             let typeface = self.platform.try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)?;
@@ -1269,6 +1351,73 @@ mod tests {
         let held = harness.lookup("A").unwrap();
         harness.collection.set_memory_budget(0);
         assert!(Rc::ptr_eq(&held, &harness.lookup("A").unwrap()));
+    }
+
+    /// The full name of a font installed on this machine, if it has any.
+    fn an_installed_font() -> Option<(String, String)> {
+        let platform = FontManagerImpl::new();
+        for family in platform.get_installed_font_family_names(false) {
+            let Some(typefaces) = platform.try_get_family_typefaces(&family) else {
+                continue;
+            };
+            for candidate in typefaces {
+                let Some(found) = platform
+                    .try_create_glyph_typeface(&family, candidate.style(), candidate.weight(), candidate.stretch())
+                    .and_then(|typeface| GlyphTypeface::try_create(typeface, FontSimulations::None))
+                else {
+                    continue;
+                };
+                let tag = OpenTypeTag::new(u32::from_be_bytes(*b"name"));
+                let Some(table) = found.platform_typeface().try_get_table(tag) else {
+                    continue;
+                };
+                // A name that starts with the family, as the search by leading words expects.
+                if let Some(full) = names_of(table.span(), 4).into_iter().find(|name| name.starts_with(&family)) {
+                    return Some((family, full));
+                }
+            }
+        }
+        None
+    }
+
+    #[test]
+    fn local_finds_an_installed_font_by_its_full_name() {
+        let Some((_, full)) = an_installed_font() else {
+            return;
+        };
+        let harness = Harness::new();
+        let ids = harness
+            .collection
+            .add_style_sheet(&format!("@font-face {{ font-family: A; src: local(\"{full}\"), url(a.ttf) }}"));
+        let found = harness.lookup("A").expect("the installed font");
+        assert!(has_local_name(&found, &full));
+        assert!(harness.urls().is_empty(), "nothing is fetched");
+        assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded));
+    }
+
+    #[test]
+    fn a_local_font_that_is_not_installed_falls_through() {
+        let harness = Harness::new();
+        harness
+            .collection
+            .add_style_sheet("@font-face { font-family: A; src: local(\"No Such Font Anywhere\"), url(a.ttf) }");
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["a.ttf"]);
+    }
+
+    #[test]
+    fn a_family_name_alone_does_not_match_another_face() {
+        let Some((family, full)) = an_installed_font() else {
+            return;
+        };
+        let harness = Harness::new();
+        let wrong = format!("{family} No Such Style");
+        assert_ne!(wrong, full);
+        harness
+            .collection
+            .add_style_sheet(&format!("@font-face {{ font-family: A; src: local(\"{wrong}\"), url(a.ttf) }}"));
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["a.ttf"], "no other face of the family is substituted");
     }
 
     #[test]
