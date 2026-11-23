@@ -93,8 +93,18 @@ content, then the composite on its parent), so a frame of the gauntlet with 20 g
 offscreen Metal device (`ferroui_metal::offscreen`) create their queues with 4096, which is also
 the number of open command buffers wgpu allows a device: about 1000 groups in one frame. The
 retained path (section 2.3) is to render the contents of the groups before one pass over the
-target, which removes the composite passes. Windows (D3D12) and Linux (Vulkan) get interop
-functions of the same shape in the fork (step P8).
+target, which removes the composite passes.
+
+On **Windows (Direct3D 12) and Linux (Vulkan)** the device is the backend's own and the window is
+a surface of the WebGPU implementation, made from the handle the platform hands out
+(`INativePlatformHandleSurface`: an `HWND`, or an `XID` with a connection to the X server of the
+backend's own), as the Vello backend does (`window_surface.rs`). No native-object interop is
+needed for this, so the fork gets none. Its one change (`FerroUI/wgpu-native`, PR 2) is that a
+surface that fails reports a status instead of a panic, which would end a process built with
+`panic=abort`. A frame is drawn for the size of the window when it starts and is not presented if
+the window has another size by the time it is done: a swap chain of the old size would be
+stretched. While the sizes differ the target is not ready and the platform renders the new size
+when it resizes. That this holds during a real resize is checked in the VMs (step P8).
 
 **Dawn instead of wgpu.** The same engine archive runs on Dawn: the two `webgpu.h` revisions differ
 only by three enum values the engine does not use, and the engine resolves its procedures at run
@@ -814,6 +824,7 @@ engine on the thread that enters next (`progpu_native_engine_adopt_owner_thread`
 | Target | How a frame is drawn |
 |---|---|
 | Metal surface of a window | The platform owns and presents the drawables. A frame begins a session of the surface, wraps the texture of the drawable (`wgpuDeviceCreateTextureFromMetal`), the engine renders the scene into it, the wrapper is released and ending the session presents. The texture is the size of the surface at that moment, so a resized window is drawn at its new size in the frame that presents it: no stretched and no stale frame. A drawable holds nothing of the frame before, so every frame draws the whole scene. |
+| Window handle (Linux, Windows) | A surface of the WebGPU implementation over the handle. A frame takes the texture of the swap chain when it is done recording, the engine renders the scene into it and the surface presents it. A swap chain texture holds nothing of the frame before, so every frame draws the whole scene. |
 | Framebuffer of a surface | The frame is kept in a texture of the device and drawn over (`PRESERVE_TARGET`); the pixels are read back into the locked framebuffer (RGBA8888 and BGRA8888). |
 | Render target bitmap, layer | A texture of the device; a drawing context draws over what the bitmap holds; reading pixels reads the texture back. A layer drawn into another target is an external image of the scene, without a copy. |
 | Context without a device | Never ready; what is drawn is drawn as nothing. |
@@ -1069,7 +1080,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P5 | Images and bitmaps, render target bitmaps, writeable bitmaps, effects (blur, drop shadow, the custom effects of #455 where the engine has them), acrylic | the effect and image tests | in progress: PNG, JPEG, GIF (first frame) and BMP decode, and PNG and JPEG encode, through the image module (section 2.5); blur, drop shadow, gradient and solid opacity masks, every blend mode of a compositing layer, inset shadows and the shadows of uneven corners are drawn (section 2.5.1); render target bitmaps, layers and writeable pixel bitmaps are in P3; open: custom effects of #455, opacity masks of image and visual brushes, acrylic |
 | P6 | Retained mode: fragments as spans of a retained scene, placements, scenes per target, groups before the root pass, damage | stable frames submit without re-encoding; catalog measurements | in progress, in the order of section 2.3.7: glyph outlines by identifier and the word-wise content hash are built (section 2.3.8), then spans as command lists with bundles kept by content (section 2.3.10); numbers in section 6.2. R2 is built against the whole-stream call (section 2.3.6); R1, R3, R4, R5 and R6 are open |
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
-| P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | open |
+| P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | written (section 2.2), first compiled in CI; the catalog runs and the proof of cooperative resize in the VMs are open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | open |
 | P10 | Measurements and size (section 4), the documentation, the NOTICE files | the tables of section 6 | open |
 
