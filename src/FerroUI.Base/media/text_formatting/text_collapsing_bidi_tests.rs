@@ -133,7 +133,7 @@ fn end_of_paragraph_does_not_change_hit_testing() {
 
                     assert_eq!(expected.len(), actual.len(), "{text} {start} {run_length}");
                     for (expected, actual) in expected.iter().zip(&actual) {
-                        assert!((expected.rectangle().left() - actual.rectangle().left()).abs() < 1e-5);
+                        assert!((expected.rectangle().x - actual.rectangle().x).abs() < 1e-5);
                         assert!((expected.rectangle().right() - actual.rectangle().right()).abs() < 1e-5);
                         assert_eq!(expected.flow_direction(), actual.flow_direction());
                     }
