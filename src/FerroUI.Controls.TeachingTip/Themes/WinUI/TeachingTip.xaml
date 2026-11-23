@@ -1,0 +1,175 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/TeachingTip/TeachingTip.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes:
+  - WinUI moves the root of the template into a Popup in code. Here the Popup PART_Popup is in the
+    template, so the element takes no space where it is declared.
+  - The visual state groups of the buttons and of the content are the visibilities of the
+    template; the placement states are the pseudoclasses :tail-top, :tail-bottom, :tail-left and
+    :tail-right, named for the edge of the tip that faces the target. The tail is a Polygon.
+  - The icon, the enter and exit animations and the tail's alignment along an edge are not ported.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ControlTheme x:Key="TeachingTipCornerCloseButtonTheme" TargetType="Button">
+    <Setter Property="Background" Value="Transparent" />
+    <Setter Property="BorderThickness" Value="0" />
+    <Setter Property="Padding" Value="6" />
+    <Setter Property="HorizontalAlignment" Value="Right" />
+    <Setter Property="VerticalAlignment" Value="Top" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="Button">
+        <Border x:Name="Root"
+                Background="{TemplateBinding Background}"
+                CornerRadius="{TemplateBinding CornerRadius}"
+                Padding="{TemplateBinding Padding}">
+          <Path Data="M0,0 L10,10 M10,0 L0,10"
+                Stroke="{TemplateBinding Foreground}"
+                StrokeThickness="1" />
+        </Border>
+      </ControlTemplate>
+    </Setter>
+    <Style Selector="^:pointerover">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorSecondaryBrush}" />
+    </Style>
+    <Style Selector="^:pressed">
+      <Setter Property="Background" Value="{DynamicResource SubtleFillColorTertiaryBrush}" />
+    </Style>
+  </ControlTheme>
+
+  <ControlTheme x:Key="{x:Type TeachingTip}" TargetType="TeachingTip">
+    <Setter Property="Background" Value="{DynamicResource TeachingTipBackgroundBrush}" />
+    <Setter Property="Foreground" Value="{DynamicResource TeachingTipForegroundBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource TeachingTipBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="{DynamicResource OverlayCornerRadius}" />
+    <Setter Property="IsTabStop" Value="False" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="TeachingTip">
+        <Popup x:Name="PART_Popup">
+          <Panel x:Name="Container">
+            <Border x:Name="ContentRoot"
+                    MinHeight="{DynamicResource TeachingTipMinHeight}"
+                    MaxHeight="{DynamicResource TeachingTipMaxHeight}"
+                    MinWidth="{DynamicResource TeachingTipMinWidth}"
+                    MaxWidth="{DynamicResource TeachingTipMaxWidth}"
+                    Background="{TemplateBinding Background}"
+                    BorderBrush="{TemplateBinding BorderBrush}"
+                    BorderThickness="{TemplateBinding BorderThickness}"
+                    CornerRadius="{TemplateBinding CornerRadius}"
+                    ClipToBounds="True">
+              <DockPanel>
+                <ContentControl x:Name="HeroContent"
+                                DockPanel.Dock="Top"
+                                Content="{TemplateBinding HeroContent}"
+                                IsVisible="{TemplateBinding HeroContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                <Panel>
+                  <ScrollViewer VerticalScrollBarVisibility="Auto">
+                    <StackPanel Margin="{DynamicResource TeachingTipContentMargin}">
+                      <StackPanel x:Name="TitlesStackPanel" Margin="0,0,28,0">
+                        <TextBlock x:Name="TitleTextBlock"
+                                   Text="{TemplateBinding Title}"
+                                   TextWrapping="Wrap"
+                                   FontWeight="SemiBold"
+                                   Foreground="{DynamicResource TeachingTipTitleForegroundBrush}"
+                                   IsVisible="{TemplateBinding Title, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <TextBlock x:Name="SubtitleTextBlock"
+                                   Text="{TemplateBinding Subtitle}"
+                                   TextWrapping="Wrap"
+                                   Foreground="{DynamicResource TeachingTipSubtitleForegroundBrush}"
+                                   IsVisible="{TemplateBinding Subtitle, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                      </StackPanel>
+                      <ContentPresenter x:Name="PART_ContentPresenter"
+                                        Margin="0,12,0,0"
+                                        Content="{TemplateBinding Content}"
+                                        ContentTemplate="{TemplateBinding ContentTemplate}"
+                                        IsVisible="{TemplateBinding Content, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                      <Grid ColumnDefinitions="*,*" ColumnSpacing="8">
+                        <Button x:Name="ActionButton"
+                                Margin="0,12,0,0"
+                                HorizontalAlignment="Stretch"
+                                Content="{TemplateBinding ActionButtonContent}"
+                                IsVisible="{TemplateBinding ActionButtonContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                        <Button x:Name="CloseButton"
+                                Grid.Column="1"
+                                Margin="0,12,0,0"
+                                HorizontalAlignment="Stretch"
+                                Content="{TemplateBinding CloseButtonContent}"
+                                IsVisible="{TemplateBinding CloseButtonContent, Converter={x:Static ObjectConverters.IsNotNull}}" />
+                      </Grid>
+                    </StackPanel>
+                  </ScrollViewer>
+                  <Button x:Name="AlternateCloseButton"
+                          Theme="{StaticResource TeachingTipCornerCloseButtonTheme}"
+                          Margin="4"
+                          AutomationProperties.Name="Close" />
+                </Panel>
+              </DockPanel>
+            </Border>
+            <Polygon x:Name="TailPolygon"
+                     Fill="{TemplateBinding Background}"
+                     Stroke="{TemplateBinding BorderBrush}"
+                     StrokeThickness="1"
+                     IsVisible="False" />
+          </Panel>
+        </Popup>
+      </ControlTemplate>
+    </Setter>
+
+    <Style Selector="^:footer-close /template/ Button#AlternateCloseButton">
+      <Setter Property="IsVisible" Value="False" />
+    </Style>
+    <Style Selector="^:footer-close /template/ StackPanel#TitlesStackPanel">
+      <Setter Property="Margin" Value="0" />
+    </Style>
+    <Style Selector="^:light-dismiss /template/ Border#ContentRoot">
+      <Setter Property="Background" Value="{DynamicResource TeachingTipTransientBackground}" />
+    </Style>
+    <Style Selector="^:light-dismiss /template/ Polygon#TailPolygon">
+      <Setter Property="Fill" Value="{DynamicResource TeachingTipTransientBackground}" />
+    </Style>
+
+    <!-- The tail, on the edge of the tip that faces the target. -->
+    <Style Selector="^:tail-bottom /template/ Border#ContentRoot">
+      <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+    <Style Selector="^:tail-bottom /template/ Polygon#TailPolygon">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Points" Value="0,0 16,0 8,8" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Bottom" />
+    </Style>
+    <Style Selector="^:tail-top /template/ Border#ContentRoot">
+      <Setter Property="Margin" Value="0,8,0,0" />
+    </Style>
+    <Style Selector="^:tail-top /template/ Polygon#TailPolygon">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Points" Value="8,0 16,8 0,8" />
+      <Setter Property="HorizontalAlignment" Value="Center" />
+      <Setter Property="VerticalAlignment" Value="Top" />
+    </Style>
+    <Style Selector="^:tail-right /template/ Border#ContentRoot">
+      <Setter Property="Margin" Value="0,0,8,0" />
+    </Style>
+    <Style Selector="^:tail-right /template/ Polygon#TailPolygon">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Points" Value="0,0 8,8 0,16" />
+      <Setter Property="HorizontalAlignment" Value="Right" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="^:tail-left /template/ Border#ContentRoot">
+      <Setter Property="Margin" Value="8,0,0,0" />
+    </Style>
+    <Style Selector="^:tail-left /template/ Polygon#TailPolygon">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Points" Value="8,0 8,16 0,8" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+  </ControlTheme>
+</ResourceDictionary>
