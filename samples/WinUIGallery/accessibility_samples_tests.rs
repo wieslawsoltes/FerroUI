@@ -154,3 +154,51 @@ fn accessibility_screen_reader_examples_keep_the_source_automation_properties() 
         .collect();
     assert_eq!(levels, [1, 2, 2, 3, 3, 2]);
 }
+
+/// The Key Tips of the source's menu, on the real theme: its popup holds the items of a scope.
+#[cfg(feature = "theme")]
+#[test]
+fn accessibility_keyboard_key_tips_open_the_menu_and_show_its_items() {
+    use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
+    use ferroui_base::threading::Dispatcher;
+    use ferroui_controls::MenuItem;
+    use ferroui_controls_keytips::AccessKeyManager;
+
+    let _application = crate::tests::start_winui();
+    let root = page("AccessibilityKeyboard");
+    let menu = root.get_control::<ferroui_controls::Menu>("AccessKeyMenu");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root)));
+    window.show();
+    window.update_layout();
+    let key = |event: &'static ferroui_base::interactivity::RoutedEvent<KeyEventArgs>,
+               key: Key,
+               symbol: Option<&str>| {
+        let mut args = KeyEventArgs::new();
+        args.set_routed_event(Some(event));
+        args.key = key;
+        args.key_symbol = symbol.map(str::to_owned);
+        menu.raise_event(&args);
+    };
+    key(InputElement::key_down_event(), Key::LeftAlt, None);
+    key(InputElement::key_up_event(), Key::LeftAlt, None);
+    assert_eq!(AccessKeyManager::visible_key_tips(), ["E", "F", "H"]);
+
+    key(InputElement::key_down_event(), Key::E, Some("e"));
+    Dispatcher::ui_thread().run_jobs(None);
+    window.update_layout();
+    let edit = menu
+        .get_logical_children()
+        .iter()
+        .filter_map(|item| item.cast::<MenuItem>())
+        .find(|item| AccessKeyManager::get_access_key(item).as_deref() == Some("E"))
+        .expect("the Edit menu");
+    assert!(edit.is_submenu_open());
+    assert_eq!(AccessKeyManager::visible_key_tips(), ["C", "U", "V", "X"], "Cut and Paste have keys");
+
+    key(InputElement::key_down_event(), Key::Escape, None);
+    assert!(!edit.is_submenu_open());
+    assert_eq!(AccessKeyManager::visible_key_tips(), ["E", "F", "H"]);
+    AccessKeyManager::exit_display_mode();
+    let _ = KeyModifiers::NONE;
+}

@@ -84,6 +84,7 @@ pub fn register_types() {
         ferroui_themes_material::register_types();
         ferroboard_controls::register_types();
         ferroui_controls_color_picker::register_types();
+        ferroui_controls_keytips::register_types();
         ferroui_controls_inking::register_types();
         ferroui_controls_repeater::register_types();
         ferroui_controls_livecharts::register_types();

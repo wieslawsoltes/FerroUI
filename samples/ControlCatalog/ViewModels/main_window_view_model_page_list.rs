@@ -234,6 +234,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/PlatformSettingsPage.xaml", "Platform Settings", Icons::TUNE, "Platform-specific system settings");
             s.add_page(|| crate::pages::ScreenPage::new().upcast(), "Screens", Icons::MONITOR, "Enumerate displays and their bounds");
             s.add("/Pages/ThemePage.xaml", "Theme Variants", Icons::THEME, "Switch between light and dark variants");
+            // Not from upstream: the access keys of WinUI (#1262).
+            s.add("/Pages/KeyTipsPage.xaml", "Key Tips", Icons::WINDOW, "Alt shows the access keys of the window");
             s.add("/Pages/WindowCustomizationsPage.xaml", "Window Customizations", Icons::WINDOW, "Custom chrome, decorations and sizing");
         }),
     ];
