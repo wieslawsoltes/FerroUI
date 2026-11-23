@@ -615,6 +615,7 @@ jobs:
         if: matrix.tree == 'measured' || inputs.baseline != ''
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ matrix.tree == 'measured' && inputs.ref || inputs.baseline }}
           path: tree
       - uses: dtolnay/rust-toolchain@stable
@@ -682,6 +683,7 @@ jobs:
       - name: Check out the ref
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ inputs.ref }}
           path: tree
       - uses: dtolnay/rust-toolchain@stable
@@ -736,6 +738,7 @@ jobs:
       - name: Check out the ref
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ inputs.ref }}
       - name: Check out the link report
         uses: actions/checkout@v4
@@ -776,6 +779,7 @@ jobs:
       - name: Check out the ref
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ inputs.ref }}
       - uses: ./.github/actions/browser-toolchain
         with:
@@ -845,6 +849,7 @@ jobs:
       - name: Check out the ref
         uses: actions/checkout@v4
         with:
+          submodules: true
           ref: ${{ inputs.ref }}
           path: tree
       - uses: dtolnay/rust-toolchain@stable
