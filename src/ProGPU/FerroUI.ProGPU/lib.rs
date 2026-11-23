@@ -24,6 +24,7 @@ mod perf;
 mod platform;
 mod region;
 mod scene;
+mod scene3d;
 mod targets;
 mod text_shaper;
 mod typeface;

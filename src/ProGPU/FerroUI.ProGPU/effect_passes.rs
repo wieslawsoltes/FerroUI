@@ -118,6 +118,46 @@ unsafe extern "C" fn on_program_checked(
     check.done.set(true);
 }
 
+pub(crate) fn text(value: &str) -> WGPUStringView {
+    WGPUStringView { data: value.as_ptr() as *const c_char, length: value.len() }
+}
+
+/// Runs `f` under a validation error scope, with what the scope says. On a page the answer comes
+/// later from the event loop.
+fn checked<R>(device: &ProGpuDevice, f: impl FnOnce() -> R) -> (R, Rc<ProgramCheck>) {
+    let raw = device.device();
+    let check = Rc::new(ProgramCheck::default());
+    // SAFETY: the device is alive.
+    unsafe { wgpuDevicePushErrorScope(raw, WGPUErrorFilter_Validation) };
+    let result = f();
+    // SAFETY: the callback takes the reference back exactly once.
+    unsafe {
+        wgpuDevicePopErrorScope(
+            raw,
+            WGPUPopErrorScopeCallbackInfo {
+                nextInChain: ptr::null_mut(),
+                mode: WGPUCallbackMode_AllowSpontaneous,
+                callback: Some(on_program_checked),
+                userdata1: Rc::into_raw(check.clone()) as *mut c_void,
+                userdata2: ptr::null_mut(),
+            },
+        );
+        #[cfg(not(target_os = "emscripten"))]
+        if !check.done.get() {
+            wgpuDevicePoll(raw, 1, ptr::null());
+        }
+    }
+    (result, check)
+}
+
+/// Runs `f` under a validation error scope and returns what the scope caught. On a page the answer
+/// comes later from the event loop, so an error reaches the handler of the device instead.
+pub(crate) fn with_error_scope<R>(device: &ProGpuDevice, f: impl FnOnce() -> R) -> (R, Option<String>) {
+    let (result, check) = checked(device, f);
+    let error = check.error.borrow().clone();
+    (result, error)
+}
+
 /// The compiled program of a custom effect, on the engine.
 struct HostProgram {
     raw: *mut progpu_native_layer_effect_program,
@@ -135,37 +175,18 @@ impl HostProgram {
         uniform_size: u32,
         images: u32,
     ) -> Option<Self> {
-        let raw_device = device.device();
-        let check = Rc::new(ProgramCheck::default());
         let mut raw = ptr::null_mut();
-        // SAFETY: the calls of the C ABIs with live objects; the source and the slot outlive the
-        // call, and the callback takes the reference given up here.
-        let status = unsafe {
-            wgpuDevicePushErrorScope(raw_device, WGPUErrorFilter_Validation);
-            let status = progpu_native_layer_effects_create_program(
+        // SAFETY: the effects are alive and entered; the source and the slot outlive the call.
+        let (status, check) = checked(device, || unsafe {
+            progpu_native_layer_effects_create_program(
                 effects.enter(),
                 source.as_ptr() as *const c_char,
                 source.len(),
                 uniform_size,
                 images,
                 &mut raw,
-            );
-            wgpuDevicePopErrorScope(
-                raw_device,
-                WGPUPopErrorScopeCallbackInfo {
-                    nextInChain: ptr::null_mut(),
-                    mode: WGPUCallbackMode_AllowSpontaneous,
-                    callback: Some(on_program_checked),
-                    userdata1: Rc::into_raw(check.clone()) as *mut c_void,
-                    userdata2: ptr::null_mut(),
-                },
-            );
-            #[cfg(not(target_os = "emscripten"))]
-            if !check.done.get() {
-                wgpuDevicePoll(raw_device, 1, ptr::null());
-            }
-            status
-        };
+            )
+        });
         let program = (!raw.is_null()).then(|| HostProgram { raw, check, engine: effects.engine.clone() });
         match program {
             Some(program) if status == PROGPU_NATIVE_STATUS_SUCCESS && !program.refused() => Some(program),

@@ -160,6 +160,8 @@ const BLUE: [u8; 4] = [0, 0, 255, 255];
 
 #[path = "effect_tests.rs"]
 mod effect_tests;
+#[path = "scene3d_tests.rs"]
+mod scene3d_tests;
 
 fn near(expected: [u8; 4], actual: [u8; 4]) -> bool {
     expected.iter().zip(actual.iter()).all(|(a, b)| a.abs_diff(*b) <= 2)

@@ -2620,6 +2620,7 @@ dependencies = [
  "ferroui-harfbuzz",
  "ferroui-metal",
  "ferroui-native",
+ "ferroui-render3d",
  "ferroui-skia",
  "objc2",
  "objc2-metal",
