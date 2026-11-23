@@ -2,6 +2,7 @@
 //! targets, the textures and the rendering of a recorded scene.
 
 use crate::device::{ExternalImage, ProGpuDevice, ProGpuEngine, TargetFormat};
+use crate::image_textures::ImageTextures;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder};
 use progpu_native_sys::webgpu::*;
@@ -29,6 +30,25 @@ impl GpuTexture {
 
     pub(crate) fn device(&self) -> &Rc<ProGpuDevice> {
         &self.device
+    }
+
+    /// A texture that is written from the CPU and sampled: the texture of a bitmap.
+    pub(crate) fn new_image(device: &Rc<ProGpuDevice>, width: u32, height: u32) -> Rc<Self> {
+        let (width, height) = (width.max(1), height.max(1));
+        let (texture, view) = device.create_image_texture(width, height);
+        Rc::new(Self { device: device.clone(), texture, view, width, height, version: Cell::new(0) })
+    }
+
+    /// The pixels of a texture of [`new_image`](Self::new_image), read back (for the tests).
+    #[cfg(test)]
+    pub(crate) fn read_image(&self) -> Vec<u8> {
+        self.device.read_rgba8(self.texture, self.width, self.height)
+    }
+
+    /// Replaces the pixels of a texture of [`new_image`](Self::new_image).
+    pub(crate) fn write(&self, pixels: &[u8]) {
+        self.device.write_rgba8(self.texture, self.width, self.height, pixels);
+        self.changed();
     }
 
     pub(crate) fn view(&self) -> WGPUTextureView {
@@ -130,11 +150,17 @@ impl Recording {
 pub(crate) struct Gpu {
     device: Rc<ProGpuDevice>,
     offscreen: OnceCell<Option<Rc<ProGpuEngine>>>,
+    /// The textures of the bitmaps this device draws.
+    images: ImageTextures,
 }
 
 impl Gpu {
     pub(crate) fn new(device: ProGpuDevice) -> Rc<Self> {
-        Rc::new(Self { device: Rc::new(device), offscreen: OnceCell::new() })
+        Rc::new(Self { device: Rc::new(device), offscreen: OnceCell::new(), images: ImageTextures::default() })
+    }
+
+    pub(crate) fn images(&self) -> &ImageTextures {
+        &self.images
     }
 
     pub(crate) fn device(&self) -> &Rc<ProGpuDevice> {

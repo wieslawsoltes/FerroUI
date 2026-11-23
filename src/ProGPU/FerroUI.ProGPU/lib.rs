@@ -12,6 +12,7 @@ mod fragment;
 mod geometry;
 mod glyph_run;
 mod gpu;
+mod image_textures;
 mod layer;
 mod notes;
 mod outline_log;

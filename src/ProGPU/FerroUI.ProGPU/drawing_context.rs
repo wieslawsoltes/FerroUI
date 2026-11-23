@@ -254,6 +254,9 @@ impl ProGpuDrawingContext {
     /// `complete` receives what was recorded at `dispose`.
     pub(crate) fn with_gpu(mut scene: SceneBuilder, gpu: Option<Rc<Gpu>>, complete: Option<Box<dyn FnOnce(Recording)>>) -> Self {
         let error = scene.begin_generation().err();
+        if let Some(gpu) = &gpu {
+            gpu.images().begin_frame();
+        }
         ProGpuDrawingContext {
             scene: Some(scene),
             gpu,
@@ -1153,6 +1156,25 @@ impl ProGpuDrawingContext {
             let size = bitmap.pixel_size();
             if size.width <= 0 || size.height <= 0 {
                 return None;
+            }
+            // On a device a bitmap is one texture from frame to frame, named by the scene.
+            if let Some(gpu) = self.gpu.clone() {
+                if let Some(texture) = gpu.images().texture_of(gpu.device(), bitmap) {
+                    let (width, height) = (texture.width(), texture.height());
+                    let result = self.scene().add_external_image(width, height);
+                    let (index, resource_id, generation) = self.record(result)?;
+                    let image = SceneImage {
+                        index,
+                        width,
+                        height,
+                        row_bytes: width * 4,
+                        premultiplied: true,
+                        opaque: bitmap.pixel_alpha_format() == AlphaFormat::Opaque,
+                    };
+                    self.textures.push((SampledTexture { texture, resource_id, generation }, image));
+                    self.bitmaps.insert(key, image);
+                    return Some(image);
+                }
             }
             let (width, height, row_bytes) = (size.width as u32, size.height as u32, bitmap.row_bytes() as u32);
             let bgra = bitmap.pixel_format() == PixelFormat::BGRA8888;

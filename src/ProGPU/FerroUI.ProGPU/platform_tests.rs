@@ -1018,3 +1018,38 @@ mod metal {
         context.dispose();
     }
 }
+
+/// A bitmap on a device is one texture from frame to frame: a new version writes it again, and
+/// the texture of a bitmap that is gone leaves the table.
+#[test]
+fn a_bitmap_is_one_texture_across_frames_and_versions() {
+    let Ok(device) = crate::ProGpuDevice::new() else { return };
+    let gpu = crate::gpu::Gpu::new(device);
+    let images = gpu.images();
+    let pixels = [10u8, 20, 30, 255, 40, 50, 60, 128];
+    let bitmap = crate::ProGpuBitmap::from_pixels(
+        ferroui_base::platform::PixelFormat::RGBA8888,
+        ferroui_base::platform::AlphaFormat::Unpremul,
+        &pixels,
+        PixelSize::new(2, 1),
+        ferroui_base::Vector::new(96.0, 96.0),
+        8,
+    )
+    .expect("a bitmap");
+    images.begin_frame();
+    let first = images.texture_of(gpu.device(), &bitmap).expect("a texture");
+    assert_eq!([10, 20, 30, 255, 20, 25, 30, 128], first.read_image()[..8], "premultiplied in the texture");
+    images.begin_frame();
+    let again = images.texture_of(gpu.device(), &bitmap).expect("a texture");
+    assert!(Rc::ptr_eq(&first, &again), "the same texture in the next frame");
+    assert_eq!(1, images.len());
+
+    bitmap.set_pixels(&[1, 2, 3, 255, 4, 5, 6, 255]);
+    let written = images.texture_of(gpu.device(), &bitmap).expect("a texture");
+    assert!(Rc::ptr_eq(&first, &written), "a new version writes the same texture");
+    assert_eq!([1, 2, 3, 255, 4, 5, 6, 255], written.read_image()[..8]);
+
+    drop(bitmap);
+    images.begin_frame();
+    assert_eq!(0, images.len(), "the texture of a dropped bitmap leaves the table");
+}
