@@ -231,6 +231,10 @@ jobs:
       # README is current. Nothing is compiled and nothing is published: about two minutes, most of it
       # the toolchain and the index.
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      # Every built-in type is usable from the default XML namespace (ground rule 7 of
+      # docs/porting/PORTING-GUIDE.md): what is still open is listed in scripts/conventions.
+      - name: Built-in types are in the default XML namespace
+        run: cargo run --quiet --locked -p ferroui-build-scan --example xml_namespaces -- --check
       - name: Package the published crates without building
         run: scripts/release/publish.sh --dry-run --no-verify
 
