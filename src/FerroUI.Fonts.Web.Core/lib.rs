@@ -16,6 +16,7 @@ pub mod css;
 mod decoder;
 mod error;
 mod limits;
+pub mod language;
 pub mod loading;
 pub mod matching;
 pub mod sfnt;

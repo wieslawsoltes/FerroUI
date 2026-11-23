@@ -91,7 +91,7 @@ core (phases B and C). Section 12 lists what is deliberately left out.
 | `font-feature-settings` | Applied at the descriptor step of CSS Fonts 4, 7.2 | B |
 | `font-variation-settings` | Applied at the descriptor step | B |
 | `font-named-instance` | Resolved from `fvar` and `name` | B |
-| `font-language-override` | Parsed and passed to the shaper; at risk in the standard | B |
+| `font-language-override` | Applied as the culture of the run, from a table of registered tags (section 3.6); at risk in the standard | B |
 | `ascent-override`, `descent-override`, `line-gap-override` | Full | B |
 | `size-adjust` | Full | B |
 | Level 5 `font-size` range | Parsed and **not applied**: the lookup of the font manager has no size. A face limited to a size is used only when the family has no face for any size, and then the range nearest 16 px. Size-aware lookup is #1292 (0.7.0) | C |
@@ -150,6 +150,26 @@ only if its effective character map has the character.
 | `@font-palette-values`, `font-palette` | Implemented where a backend takes a palette | C |
 | Incremental Font Transfer | Glyph-keyed patches, implemented last (section 9) | C |
 | Local Font Access API | Browser only, on request, behind a permission | C |
+
+### 3.6 `font-language-override` per backend
+
+The shapers take a culture and no OpenType tag, and the contract of the shaper does not change.
+So a face that declares the descriptor has its runs shaped with the culture of the tag, from a
+table of registered OpenType tags in `ferroui_fonts_web_core::language`.
+
+| Shaper | What it receives | Status |
+| --- | --- | --- |
+| HarfBuzz | Only the primary language subtag, through `hb_buffer_set_language`. The private-use `x-hbot` form cannot reach it on this path | Tested on a real font; every table entry is compared with the tags HarfBuzz derives |
+| Core Text (Quartz) | The whole tag, as `kCTLanguageAttributeName` | Read from the code, not run |
+| DirectWrite (Direct2D) | The whole tag, as the locale of the analysis | Read from the code, not run |
+
+- A tag that is not in the table is ignored, is reported once per tag as a warning of the
+  `Fonts` area, and leaves the culture of the text as it was.
+- `ZHT` and `ZHH` are not in the table. HarfBuzz is given `zh`, which selects `ZHS`, so mapping
+  them would set the text with the Simplified forms of a font. They are added with #1299 (0.7.0),
+  which gives HarfBuzz the whole language of the culture.
+- A language is not an exact stand-in for a tag: where a registered tag shares its language with
+  another, the shaper picks the language system it derives from that language.
 
 ## 4. Architecture
 

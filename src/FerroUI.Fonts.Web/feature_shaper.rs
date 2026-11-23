@@ -1,15 +1,17 @@
-//! The `font-feature-settings` descriptor of a face.
+//! The `font-feature-settings` and `font-language-override` descriptors of a face.
 //!
 //! Features are given to the shaper with each text run, by the properties of the text. What a
 //! face declares is added here, in front of them, by a shaper that wraps the active one: it is
-//! installed only when a face declares features, so nothing else pays for it.
+//! installed only when a face declares one of the two, so nothing else pays for it. A language
+//! override replaces the culture of the run, which every shaper already reads.
 
 use ferroui_base::media::text_formatting::{ShapedBuffer, TextShaper, TextShaperOptions};
 use ferroui_base::media::{FontFeature, GlyphTypeface, ITextShaperTypeface};
 use ferroui_base::platform::ITextShaperImpl;
-use ferroui_base::utilities::ReadOnlyMemory;
+use ferroui_base::utilities::{Locale, ReadOnlyMemory};
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use ferroui_fonts_web_core::css::FontFeatureSetting;
+use ferroui_fonts_web_core::css::{FontFaceDescriptors, FontFeatureSetting};
+use ferroui_fonts_web_core::language::opentype_language_to_bcp47;
 use std::cell::RefCell;
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -39,13 +41,30 @@ pub(crate) fn merged_features(face: &[FontFeature], text: Option<&Rc<Vec<FontFea
     Rc::new(merged)
 }
 
-type FaceFeatures = (Rc<GlyphTypeface>, Rc<Vec<FontFeature>>);
+/// The culture of a `font-language-override` tag, when the tag is one the table knows.
+pub(crate) fn language_of(tag: &str) -> Option<Locale> {
+    opentype_language_to_bcp47(tag)?.parse().ok()
+}
 
-/// A shaper that adds the features of a face to the runs set in it.
+/// Whether a face has something for the shaper to add to its runs.
+pub(crate) fn needs_shaper(face: &FontFaceDescriptors) -> bool {
+    !face.feature_settings.is_empty()
+        || face.language_override.as_deref().is_some_and(|tag| opentype_language_to_bcp47(tag).is_some())
+}
+
+/// What a face adds to its runs. The typeface is held so that the address used as the key stays
+/// that of this face.
+struct FaceShaping {
+    _typeface: Rc<GlyphTypeface>,
+    features: Rc<Vec<FontFeature>>,
+    language: Option<Locale>,
+}
+
+/// A shaper that adds the features and the language of a face to the runs set in it.
 pub(crate) struct FontFeatureShaper {
     inner: Rc<dyn ITextShaperImpl>,
     /// By the address of the typeface, which the entry keeps alive.
-    faces: RefCell<HashMap<*const GlyphTypeface, FaceFeatures>>,
+    faces: RefCell<HashMap<*const GlyphTypeface, FaceShaping>>,
 }
 
 impl FontFeatureShaper {
@@ -60,8 +79,14 @@ impl FontFeatureShaper {
         Some(shaper)
     }
 
-    pub(crate) fn set_features(&self, typeface: &Rc<GlyphTypeface>, features: Rc<Vec<FontFeature>>) {
-        self.faces.borrow_mut().insert(Rc::as_ptr(typeface), (typeface.clone(), features));
+    pub(crate) fn set_face(
+        &self,
+        typeface: &Rc<GlyphTypeface>,
+        features: Rc<Vec<FontFeature>>,
+        language: Option<Locale>,
+    ) {
+        let shaping = FaceShaping { _typeface: typeface.clone(), features, language };
+        self.faces.borrow_mut().insert(Rc::as_ptr(typeface), shaping);
     }
 
     pub(crate) fn remove(&self, typeface: &Rc<GlyphTypeface>) {
@@ -71,18 +96,27 @@ impl FontFeatureShaper {
 
 impl ITextShaperImpl for FontFeatureShaper {
     fn shape_text(&self, text: &ReadOnlyMemory<u16>, options: &TextShaperOptions) -> Rc<ShapedBuffer> {
-        let face = self.faces.borrow().get(&Rc::as_ptr(options.glyph_typeface())).map(|entry| entry.1.clone());
-        let Some(face) = face else {
+        let face = self
+            .faces
+            .borrow()
+            .get(&Rc::as_ptr(options.glyph_typeface()))
+            .map(|entry| (entry.features.clone(), entry.language.clone()));
+        let Some((features, language)) = face else {
             return self.inner.shape_text(text, options);
+        };
+        let features = if features.is_empty() {
+            options.font_features().cloned()
+        } else {
+            Some(merged_features(&features, options.font_features()))
         };
         let merged = TextShaperOptions::with_all(
             options.glyph_typeface().clone(),
             options.font_rendering_em_size(),
             options.bidi_level(),
-            options.culture().cloned(),
+            language.or_else(|| options.culture().cloned()),
             options.incremental_tab_width(),
             options.letter_spacing(),
-            Some(merged_features(&face, options.font_features())),
+            features,
         )
         .with_concat_flags(options.produce_concat_flags());
         self.inner.shape_text(text, &merged)

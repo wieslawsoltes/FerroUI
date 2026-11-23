@@ -48,6 +48,9 @@ ferroui-markup-xaml.workspace = true
 # A real backend for the tests. A path and no version: a development dependency without a version
 # is left out of the published package (docs/release.md, "Dependency order").
 ferroui-vello = { path = "../Vello/FerroUI.Vello" }
+# The real shaper and its language tags, for the tests of `font-language-override`.
+ferroui-harfbuzz = { path = "../HarfBuzz/FerroUI.HarfBuzz" }
+harfbuzz-sys.workspace = true
 
 [build-dependencies]
 ferroui-build-scan.workspace = true
