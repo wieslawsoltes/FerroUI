@@ -341,6 +341,8 @@ struct SubscribedEvent {
     declaring: Rc<dyn IXamlType>,
     name: String,
     is_static: bool,
+    /// The event declares a remover, which finds a handler by its method and target.
+    paired: bool,
 }
 
 /// The event a direct call property setter subscribes to, when its method is the
@@ -353,7 +355,8 @@ fn subscribed_event(setter: &Rc<dyn IXamlPropertySetter>) -> Option<SubscribedEv
         .events()
         .into_iter()
         .find(|event| event.add().is_some_and(|add| node_address(&add) == node_address(method)))?;
-    Some(SubscribedEvent { declaring, name: event.name(), is_static: method.is_static() })
+    let paired = event.remove().is_some();
+    Some(SubscribedEvent { declaring, name: event.name(), is_static: method.is_static(), paired })
 }
 
 /// The call `call` of a member; a `fallible` member's error is the load
@@ -3052,7 +3055,13 @@ impl<'a> Emitter<'a> {
             }
         }};
         self.marker(node, &property_name);
-        let value = self.value(&value_node)?;
+        // Only a handler of an event with a remover needs the descriptor of its method: the
+        // remover compares it with a delegate of the same method and target. Every other
+        // handler keeps the direct typed call.
+        let value = match value_node.cast::<XamlLoadMethodDelegateNode>().filter(|_| event.paired) {
+            Some(delegate) => self.removable_method_delegate(&value_node, &delegate)?,
+            None => self.value(&value_node)?,
+        };
         let handler = self
             .coerce(&value, self.types.known(Known::Delegate))
             .ok_or_else(|| unsupported(&value_node, format!("{property_name}: the handler is not the delegate of a method")))?;
@@ -3063,6 +3072,32 @@ impl<'a> Emitter<'a> {
             node.position()
         ));
         Ok(())
+    }
+
+    /// The delegate of a named handler of an event with a remover: it carries the descriptor
+    /// of the declared method, so that the remover finds it, and keeps a failure of the method
+    /// for the invocation that raises the event.
+    fn removable_method_delegate(
+        &mut self,
+        node: &Rc<dyn IXamlAstNode>,
+        delegate: &Rc<XamlLoadMethodDelegateNode>,
+    ) -> EmitResult<Typed<'a>> {
+        let name = delegate.method.name();
+        if !delegate.base.value().as_node().is::<XamlRootObjectNode>() {
+            return Err(unsupported(node, format!("{name}: a delegate over another object than the root object")));
+        }
+        if delegate.method.is_generic_method() { return Err(unsupported(node, "a generic named handler")); }
+        let returns = self.types.method(&*delegate.method).and_then(|method| method.declared().and_then(|d| d.returns));
+        if returns.is_some_and(|returned| returned == self.types.known(Known::Class) || returned == self.types.known(Known::OptionClass)) {
+            return Err(unsupported(node, format!("{name}: a method that returns a type")));
+        }
+        let declaring = delegate.method.declaring_type();
+        let ordinal = declaring.methods().into_iter().filter(|m| m.name() == name)
+            .position(|m| m.equals(&*delegate.method)).ok_or_else(|| unsupported(node, "the named handler's declared overload is absent"))?;
+        let markup = self.markup_expr(node, &declaring)?;
+        self.uses_context = true;
+        let expr = format!("rt::declared_method_handler(&context, {markup}, {}, {ordinal}, ({}, {}))?", rust_string_literal(&name), node.line(), node.position());
+        Ok(self.exact(Known::Delegate, expr))
     }
 
     /// `Type.Member`, as the loader names a member in an argument error.
