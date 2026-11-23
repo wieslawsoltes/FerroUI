@@ -86,7 +86,8 @@ fn spacing_page_shows_the_spacing_table_and_the_theme_images() {
 #[test]
 fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
     use ferroui_base::interactivity::RoutedEventArgs;
-    use ferroui_controls::{Button, Flyout, SelectableTextBlock};
+    use ferroui_controls::{Button, SelectableTextBlock};
+    use ferroui_controls_teaching_tip::TeachingTip;
     let _application = start();
     let root = page("Typography");
     assert!(design_image_uri("Typography", Some(&ThemeVariant::light())).ends_with("Typography.light.png"));
@@ -94,19 +95,12 @@ fn typography_page_shows_the_type_ramp_the_theme_image_and_the_tips() {
     // The theme's image where the platform decodes it (the test platform may not).
     let decoded = crate::assets::load_bitmap(&design_image_uri("Typography", None)).is_ok();
     assert_eq!(root.get_control::<Image>("HeaderImage").source().is_some(), decoded);
-    // The five tips of ShowTypographyButtonClick1 to 5, the Flyouts of their buttons.
+    // The five tips of ShowTypographyButtonClick1 to 5.
     for (index, title) in ["Caption", "Body", "Body Strong", "Title", "Display"].into_iter().enumerate() {
-        let button = format!("ShowTypographyButton{}", index + 1);
-        let flyout = root
-            .get_control::<Button>(&button)
-            .flyout()
-            .and_then(|flyout| flyout.cast::<Flyout>())
-            .unwrap_or_else(|| panic!("{button} has the tip"));
-        let content = flyout.content().expect("the tip's content");
-        let text = Control::from_boxed(&content)
-            .and_then(|control| control.cast::<TextBlock>())
-            .expect("the tip's title");
-        assert_eq!(text.text().as_deref(), Some(title));
+        let button = root.get_control::<Button>(&format!("ShowTypographyButton{}", index + 1));
+        let tip = root.get_control::<TeachingTip>(&format!("ShowTypographyInfoTooltip{}", index + 1));
+        assert_eq!(tip.title().as_deref(), Some(title));
+        assert!(tip.target() == Some(button.upcast::<Control>()));
     }
     // The nine rows of the type ramp: the example and its resource name.
     for (example, resource, _, _) in TYPE_RAMP {

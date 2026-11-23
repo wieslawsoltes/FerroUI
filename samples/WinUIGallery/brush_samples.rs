@@ -226,8 +226,7 @@ fn update_typography_image(root: &Ref<Control>) {
 }
 
 /// The code behind of `TypographyPage.xaml.cs`: the header image of the theme, and the copy
-/// buttons of the rows. The ShowTypographyButtonClick handlers toggle the tips, which are the
-/// Flyouts of their buttons (FerroUI has no TeachingTip): the button's click opens and closes it.
+/// buttons of the rows. The ShowTypographyButtonClick handlers toggle the TeachingTips.
 fn wire_typography(root: &Ref<Control>) {
     update_typography_image(root);
     let weak_root = root.downgrade();
@@ -237,5 +236,6 @@ fn wire_typography(root: &Ref<Control>) {
         }
     })
     .detach();
+    crate::shape_samples::wire_teaching_tips(root, "ShowTypographyButton", "ShowTypographyInfoTooltip", 5);
     crate::shape_samples::wire_copy_buttons(root, &TYPE_RAMP_COPY_BUTTONS);
 }
