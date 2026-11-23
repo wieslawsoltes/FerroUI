@@ -113,6 +113,10 @@ impl TypeReferenceResolver {
 
         let configuration = context.configuration();
         let mut found: Option<Rc<dyn IXamlType>> = None;
+        let must_be_unique = xmlns.is_some_and(|xmlns| {
+            configuration.type_mappings.unambiguous_xml_namespaces.iter().any(|unique| unique == xmlns)
+        });
+        let ambiguous: RefCell<Option<(Rc<dyn IXamlType>, Rc<dyn IXamlType>)>> = RefCell::new(None);
 
         // Try to resolve from system
         if xmlns == Some(XamlNamespaces::XAML2006) {
@@ -126,6 +130,7 @@ impl TypeReferenceResolver {
             if let Some(resolved_namespaces) = resolved_namespaces.filter(|r| !r.is_empty()) {
                 found = attempt(
                     &|formed_name: &str| {
+                        let mut first: Option<Rc<dyn IXamlType>> = None;
                         for resolved_ns in &resolved_namespaces {
                             let rname = format!("{}.{}", resolved_ns.clr_namespace, formed_name);
                             let mut sub_res: Option<Rc<dyn IXamlType>> = None;
@@ -144,16 +149,42 @@ impl TypeReferenceResolver {
                                 }
                             }
 
-                            if sub_res.is_some() {
-                                return sub_res;
+                            let Some(candidate) = sub_res else { continue };
+                            if !must_be_unique {
+                                return Some(candidate);
+                            }
+                            match &first {
+                                None => first = Some(candidate),
+                                Some(kept) if !kept.equals(&*candidate) => {
+                                    *ambiguous.borrow_mut() = Some((kept.clone(), candidate));
+                                    return first;
+                                }
+                                Some(_) => {}
                             }
                         }
 
-                        None
+                        first
                     },
                     name,
                 );
             }
+        }
+
+        if let Some((one, other)) = ambiguous.into_inner() {
+            let described = |type_: &Rc<dyn IXamlType>| {
+                let assembly = type_.assembly().map_or_else(String::new, |assembly| assembly.name());
+                format!("{} (assembly {assembly})", type_.full_name())
+            };
+            return Err(XamlError::transform_exception(
+                format!(
+                    "The name {name} is ambiguous in the XML namespace {}: it is both {} and {}. \
+                     Use a prefix for the namespace of the one you mean",
+                    xmlns.unwrap_or(""),
+                    described(&one),
+                    described(&other)
+                ),
+                Some(line_info),
+            ));
         }
 
         if !type_arguments.is_empty() {

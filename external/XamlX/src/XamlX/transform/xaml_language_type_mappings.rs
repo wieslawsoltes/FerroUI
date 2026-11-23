@@ -41,6 +41,9 @@ pub struct XamlLanguageTypeMappings {
     pub deferred_content_executor_customization_type_parameter_deferred_content_attribute_property_names:
         Vec<String>,
     pub root_object_provider_intermediate_root_property_name: Option<String>,
+    /// The XML namespaces where a name must be one type: a name that two of their mapped
+    /// namespaces hold is an error instead of the type of the first assembly.
+    pub unambiguous_xml_namespaces: Vec<String>,
 }
 
 impl XamlLanguageTypeMappings {
