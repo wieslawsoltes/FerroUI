@@ -113,10 +113,9 @@ export class InputHelper {
 
             // Differs from the original, which resolves with the items of the event: they are read
             // after the event, when the browser no longer gives their values (getAsString never
-            // calls back), so the read never completed. The string values are read now; a file
-            // stays an item of the event.
+            // calls back), so the read never completed. The string values are read now, and the
+            // file items move to a copy that stays readable after the event.
             const clipboardData = args.clipboardData;
-            // A file item of the event is no longer readable after it, so it moves to a copy.
             const files = clipboardData == null ? null : this.copyFileItems(clipboardData);
             const strings: ReadableDataItem[] = this.getDataTransferItems(clipboardData)
                 .filter((item) => item.kind === "string" && clipboardData != null)
