@@ -636,6 +636,9 @@ class HostedSession {
             const program = this.animations.program(frame, draft.program);
             const tracks = program.authoring?.tracks;
             if (!tracks) throw new Error('Choose an editable animation in the current application preview.');
+            if ('components' in draft && program.authoring?.componentBatch !== true) {
+                throw new Error('Rebuild the application to edit keyframe components together.');
+            }
             if ('sample' in draft) {
                 if (!tracks.some(track => track.canSample && track.target === draft.target && track.property === draft.property)) {
                     throw new Error('Choose a track with native keyframe sampling in the current application preview.');
@@ -825,6 +828,7 @@ class HostedSession {
         this.post({ type: 'openKeyframe', key: {
             frame: current, version: this.editor.document.version, program: program.id, targetName,
             target: choice.target, property: choice.label, duration: program.duration, keyframe: choice.keyframe,
+            componentBatch: program.authoring?.componentBatch === true,
         } });
     }
 

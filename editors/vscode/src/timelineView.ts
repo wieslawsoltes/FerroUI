@@ -205,6 +205,7 @@ export class TimelineView implements vscode.Disposable {
         this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
             programs, message, names, selectedTargets, markers, sharedMarkers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
+            canEditComponentBatch: panel?.supportsTimelineKeyframeComponentBatch,
             canTransferKeys: panel?.supportsTimelineKeyframeTransfer,
             canAuthorRustKeys: panel?.supportsRustKeyframeStructure,
             canCreateRustProgram: Boolean(panel?.rustAnimationOwners.length),

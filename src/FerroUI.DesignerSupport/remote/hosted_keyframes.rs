@@ -23,6 +23,7 @@ use std::rc::Rc;
 pub(super) struct HostedKeyframes {
     document: Rc<Document>,
     programs: BTreeMap<i64, (AnimationProgram, ImportOptions)>,
+    component_batch: bool,
 }
 
 pub(super) struct HostedKeyframeCapabilities {
@@ -138,11 +139,12 @@ impl HostedKeyframes {
                 entry.authoring = Some(DesignAnimationAuthoring {
                     codec: program.codec.clone().unwrap_or_default(),
                     tracks,
+                    component_batch: capabilities.components.then_some(true),
                 });
                 programs.insert(entry.id, (program, options));
             }
         }
-        Self { document, programs }
+        Self { document, programs, component_batch: capabilities.components }
     }
 
     pub(super) fn sample_in_authored_form(
@@ -166,16 +168,23 @@ impl HostedKeyframes {
         let target =
             NodeId::try_from(request.target).map_err(|_| "Choose an authored animation track")?;
         let property = &request.property;
-        let component_value = request.component.as_ref().map(|component| {
-            if sampled.is_some() || !request.value.is_empty() {
-                return Err("Supply a component or a complete keyframe value".into());
+        let components = match (&request.component, &request.components) {
+            (Some(component), None) => Some(std::slice::from_ref(component)),
+            (None, Some(components)) if self.component_batch => Some(components.as_slice()),
+            (None, Some(_)) => return Err("This application preview does not support batch keyframe components".into()),
+            (None, None) => None,
+            (Some(_), Some(_)) => return Err("Supply one component or a components array".into()),
+        };
+        let component_value = components.map(|components| {
+            if request.sample == Some(true) || sampled.is_some() || !request.value.is_empty() {
+                return Err("Supply a sampled key, a complete keyframe value, or component values".into());
             }
             let previous = request.previous.ok_or("Choose an existing authored keyframe")?;
-            let edit = KeyframeComponentEdit {
-                channel: component.channel.parse().map_err(|error: AnimationError| error.to_string())?,
+            let edits = components.iter().map(|component| Ok(KeyframeComponentEdit {
+                channel: component.channel.parse::<TrackCurveChannel>().map_err(|error| error.to_string())?,
                 value: component.value,
-            };
-            program.keyframe_component(target, property, previous, &edit)
+            })).collect::<Result<Vec<_>, String>>()?;
+            program.keyframe_components(target, property, previous, &edits)
                 .map(|value| value.to_xaml()).map_err(|error| error.to_string())
         }).transpose()?;
         let (time, value, easing) = sampled.as_ref().map_or(

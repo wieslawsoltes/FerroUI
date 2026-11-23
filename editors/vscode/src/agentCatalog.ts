@@ -55,6 +55,8 @@ const previewRange = { type: 'object', additionalProperties: false, required: ['
 const markerAction = { type: 'object', additionalProperties: false, required: ['action', 'name'],
     properties: { action: choice('set', 'remove', 'seek'), name: { type: 'string', minLength: 1, maxLength: 48 }, time } };
 const hostedKeyframeLocation = { program: node, target: node, property: text, time };
+const keyframeComponent = { type: 'object', additionalProperties: false, required: ['channel', 'value'],
+    properties: { channel: text, value: { type: 'number' } } };
 const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { oneOf: [
         { type: 'object', additionalProperties: false,
@@ -62,9 +64,11 @@ const hostedKeyframe = { ...frame, expected_generation: integer(1), expected_seq
             properties: { ...hostedKeyframeLocation, previous: time, value: text, easing: text } },
         { type: 'object', additionalProperties: false,
             required: [...Object.keys(hostedKeyframeLocation), 'previous', 'component', 'easing'],
+            properties: { ...hostedKeyframeLocation, previous: time, easing: text, component: keyframeComponent } },
+        { type: 'object', additionalProperties: false,
+            required: [...Object.keys(hostedKeyframeLocation), 'previous', 'components', 'easing'],
             properties: { ...hostedKeyframeLocation, previous: time, easing: text,
-                component: { type: 'object', additionalProperties: false, required: ['channel', 'value'],
-                    properties: { channel: text, value: { type: 'number' } } } } },
+                components: { type: 'array', minItems: 1, maxItems: 4096, items: keyframeComponent } } },
         { type: 'object', additionalProperties: false,
             required: [...Object.keys(hostedKeyframeLocation), 'sample'],
             properties: { ...hostedKeyframeLocation, sample: truth, previewTarget: node } },
@@ -210,7 +214,7 @@ export const agentCatalog = {
                 type: 'object', additionalProperties: false, required: ['start', 'end'], properties: { start: time, end: time },
             } },
         } }, hostedFrameRequired),
-    designer_hosted_keyframe_draft: tool('Validate an app-hosted keyframe and return a checked source patch. Supply value and easing, or previous, component and easing for an existing handle from curve_values. Use sample: true to capture a native value on a track with canSample.',
+    designer_hosted_keyframe_draft: tool('Validate an app-hosted keyframe and return a checked source patch. Supply value and easing, or previous, component or components from curve_values, and easing. A batch requires componentBatch on the app catalog. Use sample: true to capture a native value on a track with canSample.',
         hostedKeyframe, hostedFrameRequired),
     designer_hosted_keyframe: tool('Apply a validated keyframe to XAML or mapped Rust as one undoable edit. Omit previous to insert an explicit key. Use sample: true with an authored time on a track with canSample to insert the native value.',
         hostedKeyframe, hostedFrameRequired, true),

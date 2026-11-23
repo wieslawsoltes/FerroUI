@@ -10,6 +10,9 @@ export async function authorTimelineKeyframe(context: StudioContext, message: Ti
     const { draft } = message;
     try {
         if (!panel.supportsTimelineKeyframeDrafts) throw new Error('Open a mapped keyframe in the current Timeline.');
+        if (draft.components && !panel.supportsTimelineKeyframeComponentBatch) {
+            throw new Error('Update the native preview helper to edit keyframe components together.');
+        }
         if (!message.apply) return { ...result, preview: await context.read<KeyframeDraftPreview>('designer_keyframe_draft', draft) };
 
         const original = (await programs()).find(program => program.id === draft.program);

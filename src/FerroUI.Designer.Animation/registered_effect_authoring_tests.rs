@@ -1,4 +1,4 @@
-use crate::{AnimationEffect, AnimationValue, CurveStep, TrackCurveChannel};
+use crate::{AnimationEffect, AnimationValue, CurveStep, KeyframeComponentEdit, TrackCurveChannel};
 use ferroui_base::media::{CustomEffect, CustomEffectRegistry, EffectParameterValue};
 use ferroui_base::{Point, Rect, Size, Vector};
 
@@ -109,4 +109,22 @@ fn rejects_wrong_types_effects_ranges_and_linked_parameter_changes() {
     let changed = green.replace_key_component(&color, 0.8).unwrap();
     assert_eq!(changed.to_xaml().to_ascii_lowercase(), "spotlight ( color = #8021cc6c; strength = 0.5 )");
     assert_eq!(green.authored_key_value(&changed), Some(0.8));
+}
+
+#[test]
+fn validates_related_parameters_as_one_literal_and_keeps_unedited_arguments() {
+    let original = key("Editing_Test ( Tap-Count = 4; label='Keep 🧪, text'; area=10,20,30,40; limit = 0.5 )");
+    let edits = [
+        ("limit/value", 2.0),
+        ("tap-count/value", 10.0),
+        ("area/width", 36.0),
+        ("area/height", 44.0),
+        ("is-ready/value", 1.0),
+    ].map(|(field, value)| KeyframeComponentEdit { channel: channel(field), value });
+    assert!(TrackCurveChannel::replace_key_components(&original, &edits[..1]).is_err());
+    let updated = TrackCurveChannel::replace_key_components(&original, &edits).unwrap();
+    assert_eq!(updated.to_xaml(), "Editing_Test ( Tap-Count = 10; label='Keep 🧪, text'; area=10,20,36,44; limit = 2, is-ready=true )");
+    for edit in edits {
+        assert_eq!(edit.channel.authored_key_value(&updated), Some(edit.value));
+    }
 }

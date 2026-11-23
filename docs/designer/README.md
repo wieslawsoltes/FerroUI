@@ -260,7 +260,11 @@ Choose **Value curves** from the **Animation graph** icon to graph properties on
 ruler and playhead. Each track scales to its visible values, including overshoot. Drag an
 authored key to change its time and the selected component in one Undo step. Use Alt+Up or
 Alt+Down on a selected graph key to change its component by one percent of the visible range.
-Select the key to edit its complete value in the inspector. [Component workflows](vscode/motion.md#edit-a-curve-component)
+Select the key to edit its typed fields in the inspector. The value group picker switches between
+brush geometry, gradient stops, shadow layers, transform operations, or registered effect parameters
+where the key supplies them. The code icon opens the complete value as text. Use the checkmark
+or Enter to apply the active draft, including time and easing, in one Undo step.
+[Compound keyframe workflow](vscode/motion.md#edit-compound-keyframe-values)
 
 Choose **Velocity curves** to graph signed property units per authored second. Drag a marker beneath
 the trace to retime its key. Change its incoming easing in the inspector to shape the velocity.

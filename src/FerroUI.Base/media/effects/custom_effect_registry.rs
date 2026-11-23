@@ -141,26 +141,47 @@ impl CustomEffectRegistry {
         parameter: &str,
         edit: impl FnOnce(EffectParameterValue) -> Result<EffectParameterValue, FormatError>,
     ) -> Result<String, FormatError> {
+        Self::edit_literal_parameters(source, |effect| {
+            let key = normalize_identifier(parameter);
+            let (declared, original) = effect.parameters().into_iter()
+                .find(|(name, _)| normalize_identifier(name) == key)
+                .ok_or_else(|| FormatError::from_string(format!("The effect has no parameter '{parameter}'")))?;
+            Ok(vec![(declared.to_owned(), edit(original)?)])
+        })
+    }
+
+    /// Edit a set of declared parameters against the same original effect.
+    /// Validate the finished literal so related parameters can change together.
+    pub fn edit_literal_parameters(
+        source: &str,
+        edit: impl FnOnce(&ImmutableCustomEffect) -> Result<Vec<(String, EffectParameterValue)>, FormatError>,
+    ) -> Result<String, FormatError> {
         let invalid = || FormatError::new("Use a literal for a registered effect");
-        let invocation = Invocation::parse(source).ok_or_else(invalid)?;
-        let before = Self::parse_invocation(source, &invocation).ok_or_else(invalid)??;
-        let name = normalize_identifier(parameter);
-        let parameters = before.parameters();
-        let (declared, original) = parameters.iter()
-            .find(|(candidate, _)| normalize_identifier(candidate) == name)
-            .ok_or_else(|| FormatError::from_string(format!("The effect has no parameter '{parameter}'")))?;
-        let value = edit(original.clone())?;
-        if std::mem::discriminant(original) != std::mem::discriminant(&value) {
-            return Err(FormatError::new("Keep the registered parameter type"));
+        let before = Self::parse(source).ok_or_else(invalid)??;
+        let mut parameters = before.parameters();
+        let mut seen = std::collections::HashSet::new();
+        let mut updated = source.to_owned();
+        for (name, value) in edit(&before)? {
+            let (_, original) = parameters.iter_mut().find(|(candidate, _)| *candidate == name.as_str())
+                .ok_or_else(|| FormatError::from_string(format!("The effect has no parameter '{name}'")))?;
+            if !seen.insert(name.clone()) {
+                return Err(FormatError::new("Edit each effect parameter only once"));
+            }
+            if std::mem::discriminant(original) != std::mem::discriminant(&value) {
+                return Err(FormatError::new("Keep the registered parameter type"));
+            }
+            if *original != value {
+                updated = Invocation::parse(&updated).ok_or_else(invalid)?
+                    .replace_argument(&updated, &name, &value.to_string());
+                *original = value;
+            }
         }
-        if *original == value {
-            return Ok(source.to_owned());
+        if updated == source {
+            return Ok(updated);
         }
-        let updated = invocation.replace_argument(source, declared, &value.to_string());
         let after = Self::parse(&updated).ok_or_else(invalid)??;
         let following = after.parameters();
-        if parameters.len() != following.len() || parameters.iter().any(|(name, previous)| {
-            let expected = if name == declared { &value } else { previous };
+        if parameters.len() != following.len() || parameters.iter().any(|(name, expected)| {
             !following.iter().any(|(candidate, value)| candidate == name && value == expected)
         }) {
             return Err(FormatError::new(

@@ -317,6 +317,9 @@ fn studio_rust_keyframe_editor_preserves_authored_history_and_the_native_preview
         .scrub_animation_program(program, 1.0)
         .unwrap();
     let inspector = keyframe_editor(&workspace);
+    let text_mode = inspector.get_visual_descendants().filter_map(|control| control.cast::<Button>())
+        .find(|button| button.name().as_deref() == Some("KeyframeTextMode")).unwrap();
+    click(&text_mode);
     keyframe_input(&inspector, "KeyframeTime").set_text(Some("1.6"));
     keyframe_input(&inspector, "KeyframeValue").set_text(Some("48, 48, 48, 48"));
     apply_keyframe(&inspector);

@@ -122,6 +122,7 @@ export class HostedCurves {
                 const open = (found: HostedAnimationFrame): HostedKeyframeSelection => ({
                     frame: found, version: this.version, program: program.id, target: track.target,
                     targetName: choice.target.label, property: track.property, duration: program.duration, keyframe: key,
+                    componentBatch: program.authoring?.componentBatch === true,
                 });
                 if (choice.editable) {
                     button.onclick = () => {

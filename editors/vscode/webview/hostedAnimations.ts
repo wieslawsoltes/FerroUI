@@ -185,6 +185,7 @@ export class HostedAnimationView {
             frame, version: this.documentVersion, program: program.id, duration: program.duration,
             target: track.target, property: track.property, keyframe,
             targetName: this.state.targets.find(target => target.id === track.target)?.label ?? `Target ${track.target}`,
+            componentBatch: program.authoring?.componentBatch === true,
         });
     }
 

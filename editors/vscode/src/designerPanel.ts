@@ -48,6 +48,7 @@ interface Frame {
     timelineRecording: boolean;
     timelineGeometryRecording: boolean;
     timelineKeyframeDrafts: boolean;
+    timelineKeyframeComponentBatch: boolean;
     timelineKeyframeScale: boolean;
     timelineKeyframeTransfer: boolean;
     rsxKeyframeStructure: boolean;
@@ -330,6 +331,10 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineGeometryRecording(): boolean { return Boolean(this.supportsTimelineRecording && this.frame?.timelineGeometryRecording); }
     get supportsTimelineKeyframeDrafts(): boolean {
         return Boolean(this.frame?.timelineKeyframeDrafts && (this.language === 'xaml' || this.frame.snapshot.mappedRustAnimations));
+    }
+
+    get supportsTimelineKeyframeComponentBatch(): boolean {
+        return Boolean(this.frame?.timelineKeyframeComponentBatch && this.supportsTimelineKeyframeDrafts);
     }
     get supportsTimelineKeyframeScale(): boolean { return Boolean(this.frame?.timelineKeyframeScale); }
     get supportsTimelineKeyframeTransfer(): boolean { return Boolean(this.frame?.timelineKeyframeTransfer); }
@@ -1051,6 +1056,7 @@ export class DesignerPanel implements vscode.Disposable {
                 rustStyleComposition: Boolean(client.capabilities.rustStyleComposition),
                 timelineGeometryRecording: Boolean(client.capabilities.timelineGeometryRecording),
                 timelineKeyframeDrafts: Boolean(client.capabilities.timelineKeyframeDrafts),
+                timelineKeyframeComponentBatch: Boolean(client.capabilities.timelineKeyframeComponentBatch),
                 timelineKeyframeScale: Boolean(client.capabilities.timelineKeyframeScale),
                 timelineKeyframeTransfer: Boolean(client.capabilities.timelineKeyframeTransfer),
                 rsxKeyframeStructure: Boolean(client.capabilities.rsxKeyframeStructure),

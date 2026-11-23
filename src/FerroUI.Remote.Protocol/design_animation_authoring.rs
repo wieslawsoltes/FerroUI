@@ -12,11 +12,13 @@ pub const DESIGN_KEYFRAME_COMPONENTS_QUERY: &str = "ferroui-design-keyframe-comp
 pub struct DesignAnimationAuthoring {
     pub codec: String,
     pub tracks: Vec<DesignAnimationTrack>,
+    pub component_batch: Option<bool>,
 }
 
 bson_class!(DesignAnimationAuthoring as "DesignAnimationAuthoring" {
     "Codec" => codec: String,
     "Tracks" => tracks: Vec<DesignAnimationTrack>,
+    "ComponentBatch" => component_batch: Option<bool>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -83,6 +85,7 @@ pub struct DesignAnimationAuthoringRequest {
     pub sample: Option<bool>,
     pub sample_target: Option<i64>,
     pub component: Option<DesignKeyframeComponent>,
+    pub components: Option<Vec<DesignKeyframeComponent>>,
 }
 
 ferro_remote_message_guid!(
@@ -102,6 +105,7 @@ bson_class!(DesignAnimationAuthoringRequest as "DesignAnimationAuthoringRequest"
     "Sample" => sample: Option<bool>,
     "SampleTarget" => sample_target: Option<i64>,
     "Component" => component: Option<DesignKeyframeComponent>,
+    "Components" => components: Option<Vec<DesignKeyframeComponent>>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

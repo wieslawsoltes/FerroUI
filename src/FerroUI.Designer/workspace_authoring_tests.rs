@@ -32,20 +32,16 @@ fn keyframe_editor(workspace: &DesignerWorkspace) -> Ref<StackPanel> {
 }
 fn keyframe_input(editor: &StackPanel, name: &str) -> Ref<TextBox> {
     editor
-        .children()
-        .to_vec()
-        .iter()
+        .get_visual_descendants()
         .filter_map(|control| control.cast::<TextBox>())
         .find(|input| input.name().as_deref() == Some(name))
         .unwrap()
 }
 fn apply_keyframe(editor: &StackPanel) {
     let apply = editor
-        .children()
-        .to_vec()
-        .iter()
+        .get_visual_descendants()
         .filter_map(|control| control.cast::<Button>())
-        .find(|button| caption(button).as_deref() == Some("Apply keyframe"))
+        .find(|button| button.name().as_deref() == Some("ApplyKeyframe"))
         .unwrap();
     click(&apply);
 }
@@ -423,7 +419,7 @@ fn native_timeline_controls_record_scrubbed_values_rescale_keys_and_author_curve
     let apply = children
         .iter()
         .filter_map(|control| control.cast::<Button>())
-        .rfind(|button| caption(button).as_deref() == Some("Apply keyframe"))
+        .rfind(|button| button.name().as_deref() == Some("ApplyKeyframe"))
         .unwrap();
     click(&apply);
     assert_eq!(

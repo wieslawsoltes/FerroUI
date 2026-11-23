@@ -1,7 +1,25 @@
-use crate::{AnimationValue, RelativeUnit, TrackCurveChannel};
+use crate::{AnimationValue, KeyframeComponentEdit, RelativeUnit, TrackCurveChannel};
 
 fn channel(name: &str) -> TrackCurveChannel {
     name.parse().unwrap()
+}
+
+#[test]
+fn component_batch_requires_distinct_writable_fields() {
+    let original = AnimationValue::RelativePoint { x: 0.25, y: 0.6, unit: RelativeUnit::Relative };
+    let mut edits = [
+        KeyframeComponentEdit { channel: channel("percent_x"), value: 45.0 },
+        KeyframeComponentEdit { channel: channel("percent_y"), value: 35.0 },
+    ];
+    assert_eq!(
+        TrackCurveChannel::replace_key_components(&original, &edits).unwrap(),
+        AnimationValue::RelativePoint { x: 0.45, y: 0.35, unit: RelativeUnit::Relative },
+    );
+    edits[1].channel = channel("percent_x");
+    assert!(TrackCurveChannel::replace_key_components(&original, &edits).unwrap_err().0.contains("only once"));
+    edits[1].channel = channel("absolute_y");
+    assert!(TrackCurveChannel::replace_key_components(&original, &edits).is_err());
+    assert!(TrackCurveChannel::replace_key_components(&original, &[]).is_err());
 }
 
 #[test]

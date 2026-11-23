@@ -14,7 +14,7 @@ const COEFFICIENTS: &[CurveChannel] = &[
 ];
 
 /// One operation slot or a coefficient of the combined affine transform.
-#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+#[derive(Clone, Copy, Debug, Eq, Hash, PartialEq)]
 pub enum TransformCurveChannel {
     Operation {
         index: NonZeroUsize,

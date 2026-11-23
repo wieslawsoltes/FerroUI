@@ -1,4 +1,4 @@
-//! Edit one authored component without replacing the other fields of a key.
+//! Draft authored components without replacing the other fields of a key.
 #[cfg(feature = "native-values")]
 mod native;
 #[cfg(test)]
@@ -10,6 +10,7 @@ use crate::{
     EffectForm, RelativeUnit, Result, TrackCurveChannel,
 };
 use serde::{Deserialize, Serialize};
+use std::collections::HashSet;
 
 #[cfg(feature = "native-values")]
 use crate::value::registered_effect;
@@ -62,6 +63,16 @@ impl AnimationProgram {
         previous: f64,
         edit: &KeyframeComponentEdit,
     ) -> Result<AnimationValue> {
+        self.keyframe_components(target, property, previous, std::slice::from_ref(edit))
+    }
+
+    pub fn keyframe_components(
+        &self,
+        target: u64,
+        property: &str,
+        previous: f64,
+        edits: &[KeyframeComponentEdit],
+    ) -> Result<AnimationValue> {
         let key = self
             .timeline
             .as_ref()
@@ -70,7 +81,7 @@ impl AnimationProgram {
             .ok_or_else(|| {
                 AnimationError("Choose an existing authored keyframe for this component".into())
             })?;
-        edit.channel.replace_key_component(&key.value, edit.value)
+        TrackCurveChannel::replace_key_components(&key.value, edits)
     }
 }
 
@@ -141,19 +152,35 @@ impl TrackCurveChannel {
         value: &AnimationValue,
         next: f64,
     ) -> Result<AnimationValue> {
-        require(next.is_finite(), "Enter a finite curve value")?;
+        Self::replace_key_components(value, &[KeyframeComponentEdit {
+            channel: self.clone(),
+            value: next,
+        }])
+    }
+
+    pub fn replace_key_components(value: &AnimationValue, edits: &[KeyframeComponentEdit]) -> Result<AnimationValue> {
+        require((1..=4096).contains(&edits.len()), "Choose between 1 and 4096 keyframe components")?;
+        let mut channels = HashSet::new();
+        for edit in edits {
+            require(edit.value.is_finite(), "Enter a finite curve value")?;
+            require(channels.insert(&edit.channel), "Edit each keyframe component only once")?;
+        }
         #[cfg(feature = "native-values")]
-        if matches!(self, Self::EffectParameter { .. }) {
-            return registered_effect::replace_component(value, self, next);
+        if matches!(value, AnimationValue::Effect(AnimationEffect::Registered { .. })) {
+            return registered_effect::replace_components(value, edits);
         }
         let mut edited = value.clone();
-        let component = slot(self, &mut edited).ok_or_else(|| {
-            AnimationError("This channel has no editable component on the authored keyframe".into())
-        })?;
-        if component.get() == next {
-            return Ok(value.clone());
+        for edit in edits {
+            let component = slot(&edit.channel, &mut edited).ok_or_else(|| {
+                AnimationError("This channel has no editable component on the authored keyframe".into())
+            })?;
+            if component.get() != edit.value {
+                component.set(edit.value)?;
+            }
         }
-        component.set(next)?;
+        if edited == *value {
+            return Ok(edited);
+        }
         #[cfg(feature = "native-values")]
         native::keep_writable_form(&mut edited);
         edited.validate()?;

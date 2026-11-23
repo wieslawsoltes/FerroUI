@@ -3,6 +3,8 @@
 mod clipboard;
 #[path = "workspace_timeline/clips.rs"]
 mod clips;
+#[path = "workspace_timeline/component_fields.rs"]
+mod component_fields;
 #[path = "workspace_timeline/curves.rs"]
 mod curves;
 #[path = "workspace_timeline/easing.rs"]
@@ -44,6 +46,7 @@ pub(super) struct TimelineUi {
     clip_duration: f64,
     ranges: range::WorkAreas,
     marker_editor: Option<markers::MarkerEditor>,
+    keyframe_view: Option<(SelectedKey, component_fields::ViewState)>,
 }
 #[derive(Clone)]
 struct TimelineContext {
@@ -100,7 +103,7 @@ impl DesignerWorkspace {
         let inspector_focus = self
             .timeline_inspector()
             .into_iter()
-            .flat_map(|row| row.children().to_vec())
+            .flat_map(|row| row.get_visual_descendants().filter_map(|child| child.cast::<Control>()))
             .find(|control| control.is_focused())
             .and_then(|control| {
                 let name = control.name()?;
@@ -134,6 +137,7 @@ impl DesignerWorkspace {
             ui.program = session.active_animation_program();
             ui.selected = None;
             ui.selection.clear();
+            ui.keyframe_view = None;
             ui.selection_explicit = false;
             ui.view = None;
         }
@@ -519,14 +523,10 @@ impl DesignerWorkspace {
         if selection_keys.len() > 1 {
             self.build_selection_inspector(context);
         } else if let Some(selected) = selected {
-            if let Some(key) = tracks
-                .iter()
-                .find(|track| {
-                    track.target == selected.target && track.property == selected.property
-                })
-                .and_then(|track| track.keyframes.iter().find(|key| key.time == selected.time))
-            {
-                self.build_keyframe_inspector(&selected, key, context);
+            if let Some(track) = tracks.iter().find(|track| track.target == selected.target && track.property == selected.property) {
+                if let Some(key) = track.keyframes.iter().find(|key| key.time == selected.time) {
+                    self.build_keyframe_inspector(&selected, track, key, context);
+                }
             }
         }
         if tracks.is_empty() {
@@ -536,7 +536,7 @@ impl DesignerWorkspace {
             if let Some(control) = self
                 .timeline_inspector()
                 .into_iter()
-                .flat_map(|row| row.children().to_vec())
+                .flat_map(|row| row.get_visual_descendants().filter_map(|child| child.cast::<Control>()))
                 .find(|control| control.name().as_deref() == Some(name.as_str()))
             {
                 control.focus();
@@ -1012,9 +1012,16 @@ impl DesignerWorkspace {
     fn build_keyframe_inspector(
         self: &Rc<Self>,
         selected: &SelectedKey,
+        track: &Track,
         key: &Keyframe,
         context: TimelineContext,
     ) {
+        let session = self.session.borrow();
+        let writable = !session.is_read_only();
+        let view = self.timeline_ui.borrow().keyframe_view.as_ref()
+            .filter(|(key, _)| key == selected).map(|(_, view)| view.clone()).unwrap_or_default();
+        let fields = component_fields::ComponentDraft::new(track, key, session.timeline().duration, session.timeline().fill, view);
+        drop(session);
         let row = StackPanel::new();
         row.set_orientation(Orientation::Horizontal);
         row.set_spacing(6.0);
@@ -1022,15 +1029,28 @@ impl DesignerWorkspace {
         row.set_margin(Thickness::new(4.0, 6.0, 0.0, 6.0));
         row.children()
             .add(key_caption(&format!("{} keyframe", selected.property)).upcast::<Control>());
-        let time = key_field(&row, "Time", "KeyframeTime", &key.time.to_string(), 65.0);
-        let value = key_field(&row, "Value", "KeyframeValue", &key.value.to_xaml(), 104.0);
-        let (curve, preview) = easing::easing_fields(&row, &key.easing, !self.session.borrow().is_read_only());
+        let time = key_field(&row, "Time (s)", "KeyframeTime", &key.time.to_string(), 65.0);
+        let value_row = if fields.is_some() {
+            let value_row = StackPanel::new();
+            value_row.set_orientation(Orientation::Horizontal);
+            value_row.set_spacing(4.0);
+            row.children().add(value_row.clone().upcast::<Control>());
+            value_row
+        } else {
+            row.clone()
+        };
+        let original_value = key.value.to_xaml();
+        let value = key_field(&value_row, "Value", "KeyframeValue", &original_value, 104.0);
+        let (curve, preview) = easing::easing_fields(&row, &key.easing, writable);
         let apply = button("Apply keyframe");
         apply.classes().add("designer-motion");
         apply.set_name(Some("ApplyKeyframe".into()));
         apply.set_font_size(11.0);
+        apply.set_width(28.0);
         apply.set_min_height(26.0);
-        apply.set_padding(Thickness::symmetric(8.0, 3.0));
+        apply.set_content(Some(Control::boxed(timeline_icon("F1 M2,7 L6,11 14,3 15,4.5 6,13.5 1,8.5 Z", 0xfff2f4ff))));
+        AutomationProperties::set_name(&apply, Some("Apply keyframe"));
+        ToolTip::set_tip(&apply, Some(Rc::new("Apply keyframe · Enter".to_owned())));
         let weak = Rc::downgrade(self);
         let selected = selected.clone();
         let editing = selected.clone();
@@ -1038,6 +1058,7 @@ impl DesignerWorkspace {
         let weak_value = value.downgrade();
         let weak_curve = curve.downgrade();
         let commit_context = context.clone();
+        let draft = fields.clone();
         let commit: Rc<dyn Fn()> = Rc::new(move || {
             if let (Some(this), Some(time), Some(value), Some(curve)) = (
                 weak.upgrade(),
@@ -1046,43 +1067,69 @@ impl DesignerWorkspace {
                 weak_curve.upgrade(),
             ) {
                 let result = (|| {
+                    commit_context.check(&this)?;
                     let time: f64 = time
                         .text()
                         .unwrap_or_default()
                         .parse()
                         .map_err(|_| "Invalid keyframe time")?;
+                    let value = if let Some(draft) = draft.as_ref().filter(|draft| !draft.view.borrow().as_text) {
+                        let edits = draft.edits()?;
+                        if edits.is_empty() {
+                            original_value.clone()
+                        } else {
+                            let session = this.session.borrow();
+                            if !session.can_manipulate() {
+                                return Err("Wait for the current editable animation preview".into());
+                            }
+                            session.program_keyframe_components(
+                                commit_context.program.ok_or("Choose an animation")?, editing.target, &editing.property, editing.time, &edits,
+                            )?
+                        }
+                    } else {
+                        value.text().unwrap_or_default().to_string()
+                    };
                     this.apply_timeline_keyframe(
                         &commit_context,
                         &editing,
                         time,
-                        &value.text().unwrap_or_default(),
+                        &value,
                         &curve.text().unwrap_or_default(),
                     )
-                    .map(|_| ())
                 })();
                 // Keep invalid input available for correction. Accepted changes
                 // rebuild the editor from the single committed source transaction.
-                if result.is_ok() {
+                if let Ok(time) = &result {
+                    if let Some(draft) = &draft {
+                        this.timeline_ui.borrow_mut().keyframe_view =
+                            Some((SelectedKey { time: *time, ..editing.clone() }, draft.view.borrow().clone()));
+                    }
                     this.refresh(true);
                 }
-                this.report(result);
+                this.report(result.map(|_| ()));
             }
         });
         let click = commit.clone();
         apply.click(move |_, _| click());
         for input in [time.upcast::<Control>(), value.upcast(), curve.upcast(), preview.upcast()] {
-            let commit = commit.clone();
-            input.add_handler(InputElement::key_down_event(), move |_, event| {
-                if event.key == Key::Enter {
-                    event.set_handled(true);
-                    commit();
-                }
-            });
+            component_fields::commit_on_enter(&input, &commit);
+        }
+        let inspector = if let Some(fields) = &fields {
+            let shelf = fields.mount(&row, &value_row, writable, &commit);
+            let inspector = StackPanel::new();
+            inspector.children().add(row.clone().upcast::<Control>());
+            inspector.children().add(shelf.upcast::<Control>());
+            inspector
+        } else {
+            row.clone()
+        };
+        if !writable {
+            inspector.set_is_enabled(false);
         }
         row.children().add(apply.upcast::<Control>());
         self.root
             .get_control::<ContentControl>("TimelineInspectorHost")
-            .set_content(Some(Control::boxed(&row)));
+            .set_content(Some(Control::boxed(&inspector)));
         let remove = button("Remove");
         remove.classes().add("nav");
         remove.classes().add("designer-timeline-tool");

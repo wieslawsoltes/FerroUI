@@ -1,9 +1,9 @@
 use crate::track_curve_channel::parameter_identifier;
-use crate::{AnimationEffect, AnimationError, AnimationValue, CurveChannel, CurveStep, Result, Track, TrackCurveChannel};
+use crate::{AnimationEffect, AnimationError, AnimationValue, CurveChannel, CurveStep, KeyframeComponentEdit, Result, Track, TrackCurveChannel};
 use ferroui_base::media::{Color, CustomEffectRegistry, EffectParameterValue, ImmutableCustomEffect};
 use ferroui_base::utilities::FormatError;
 use ferroui_base::{Point, Rect, Size, Vector};
-use std::mem::discriminant;
+use std::{collections::BTreeMap, mem::discriminant};
 
 #[cfg(test)]
 #[path = "registered_effect_authoring_tests.rs"]
@@ -92,35 +92,36 @@ pub(crate) fn authored_component(
     Some((component.project(&numeric_value(parameter)?)?, step))
 }
 
-pub(crate) fn replace_component(
-    value: &AnimationValue,
-    channel: &TrackCurveChannel,
-    next: f64,
-) -> Result<AnimationValue> {
-    let unsupported = || AnimationError("This key has no writable literal for the registered effect parameter".into());
-    let TrackCurveChannel::EffectParameter { parameter, component, .. } = channel else {
-        return Err(unsupported());
-    };
+pub(crate) fn replace_components(value: &AnimationValue, edits: &[KeyframeComponentEdit]) -> Result<AnimationValue> {
+    let invalid = || FormatError::new("This key has no writable literal for the registered effect parameter");
     let AnimationValue::Effect(AnimationEffect::Registered { source }) = value else {
-        return Err(unsupported());
+        return Err(AnimationError(invalid().to_string()));
     };
-    let effect = parse_literal(value).ok_or_else(unsupported)?;
-    let (previous, step) = authored_component(&effect, channel).ok_or_else(unsupported)?;
-    if previous == next {
-        return Ok(value.clone());
-    }
-    if let Some(step) = step {
-        crate::require(step.snap(next) == next, match step {
-            CurveStep::Boolean => "Enter 0 or 1 for a Boolean effect parameter",
-            CurveStep::Integer => "Enter a signed 32-bit integer for this effect parameter",
-        })?;
-    }
-    let source = CustomEffectRegistry::edit_literal_parameter(source, parameter, |original| {
-        let invalid = || FormatError::new("This effect parameter has no writable curve value");
-        let numeric = numeric_value(original.clone()).ok_or_else(invalid)?;
-        let updated = TrackCurveChannel::Property(*component).replace_key_component(&numeric, next)
-            .map_err(|error| FormatError::from_string(error.0))?;
-        parameter_value(original, updated).ok_or_else(invalid)
+    let source = CustomEffectRegistry::edit_literal_parameters(source, |effect| {
+        let mut parameters: BTreeMap<&str, Vec<KeyframeComponentEdit>> = BTreeMap::new();
+        for edit in edits {
+            let TrackCurveChannel::EffectParameter { parameter, component, .. } = &edit.channel else {
+                return Err(invalid());
+            };
+            if let (_, Some(step)) = authored_component(effect, &edit.channel).ok_or_else(invalid)? {
+                if step.snap(edit.value) != edit.value {
+                    return Err(FormatError::new(match step {
+                        CurveStep::Boolean => "Enter 0 or 1 for a Boolean effect parameter",
+                        CurveStep::Integer => "Enter a signed 32-bit integer for this effect parameter",
+                    }));
+                }
+            }
+            parameters.entry(parameter).or_default().push(KeyframeComponentEdit {
+                channel: (*component).into(), value: edit.value,
+            });
+        }
+        parameters.into_iter().map(|(name, edits)| {
+            let original = effect.parameter(name).ok_or_else(invalid)?;
+            let numeric = numeric_value(original.clone()).ok_or_else(invalid)?;
+            let updated = TrackCurveChannel::replace_key_components(&numeric, &edits)
+                .map_err(|error| FormatError::from_string(error.0))?;
+            Ok((name.to_owned(), parameter_value(original, updated).ok_or_else(invalid)?))
+        }).collect()
     }).map_err(|error| AnimationError(error.to_string()))?;
     let updated = AnimationValue::Effect(AnimationEffect::Registered { source });
     updated.validate()?;

@@ -53,6 +53,7 @@ pub(crate) fn initialize() -> Value {
         "timelineRecording",
         "timelineGeometryRecording",
         "timelineKeyframeDrafts",
+        "timelineKeyframeComponentBatch",
         "timelineKeyframeScale",
         "timelineKeyframeTransfer",
         "rsxKeyframeStructure",

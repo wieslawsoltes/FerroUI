@@ -63,10 +63,14 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
             const { program, track } = await tracks();
             const key = track.keyframes[0];
             assert.equal(key.curve_values?.find(value => value.channel === 'top_right')?.value, 8);
-            const draft = { program, target: track.target, property: track.property, previous: key.time, time: key.time,
-                easing: key.easing_text, component: { channel: 'top_right', value: 30 } };
+            const location = { program, target: track.target, property: track.property, previous: key.time, time: key.time, easing: key.easing_text };
+            const component = { channel: 'top_right', value: 30 };
+            const draft = { ...location, components: [component, { channel: 'bottom_left', value: 42 }] };
+            assert.equal(content<{ valueKind: string }>(await query('designer_keyframe_draft', { ...location, component })).valueKind, 'CornerRadius');
             assert.ok((await query('designer_keyframe_draft', { ...draft, value: '8' })).isError);
-            assert.ok((await query('designer_keyframe_draft', { ...draft, component: { channel: 'height', value: 30 } })).isError);
+            assert.ok((await query('designer_keyframe_draft', { ...draft, component })).isError);
+            assert.ok((await query('designer_keyframe_draft', { ...draft, components: [component, component] })).isError);
+            assert.ok((await query('designer_keyframe_draft', { ...draft, components: [component, { channel: 'height', value: 30 }] })).isError);
             assert.equal(content<{ valueKind: string }>(await query('designer_keyframe_draft', draft)).valueKind, 'CornerRadius');
             assert.equal(document.getText(), original);
             const commit = (revision: number) => invoke('designer_studio_edit', { session, expected_revision: revision,
@@ -75,12 +79,12 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
             await frame();
             const edited = (await tracks()).track;
             const next = edited.keyframes[0].curve_values;
-            assert.deepEqual(next?.map(value => value.value), path.endsWith('.rs') ? [8, 30, 24, 24] : [4, 30, 16, 24]);
+            assert.deepEqual(next?.map(value => value.value), path.endsWith('.rs') ? [8, 30, 24, 42] : [4, 30, 16, 42]);
             assert.deepEqual(edited.keyframes[1].curve_values, track.keyframes[1].curve_values);
             assert.doesNotMatch(document.getText(), /(?<!\r)\n/);
             if (path.endsWith('.rs')) assert.equal(document.getText(), original.replace(
                 'Radius::top_bottom(/* retain 🧭 */ 8.0f64, 24.0)',
-                'Radius::new(/* retain 🧭 */ 8.0f64, 30.0, 24.0, 24.0)',
+                'Radius::new(/* retain 🧭 */ 8.0f64, 30.0, 24.0, 42.0)',
             ));
             else assert.match(document.getText(), /keep the corner review 🧭/u);
             assert.ok((await commit(revision)).isError);
@@ -93,5 +97,5 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
             await vscode.workspace.fs.delete(uri);
         }
     }
-    console.log('MCP edited one XAML and mapped Rust curve component, preserved sibling fields, and restored the exact source with Undo');
+    console.log('MCP edited two components in one XAML and mapped Rust key, rejected invalid and stale batches, and restored the exact source with Undo');
 }

@@ -3,6 +3,7 @@ import type { AppliedKeyframe, KeyframeComponent, KeyframeDraft, KeyframeDraftLo
 import easingPresets from '../../../src/FerroUI.Designer.Animation/keyframe-easing-presets.json';
 import { element } from './dom';
 import { EasingHandles } from './easingHandles';
+import { KeyframeComponentFields } from './keyframeComponentFields';
 
 interface SelectedKeyframe {
     version: number;
@@ -11,6 +12,7 @@ interface SelectedKeyframe {
     target: number;
     property: string;
     keyframe: TimelineKeyframe;
+    componentBatch: boolean;
 }
 
 export class TimelineKeyframeEditor {
@@ -19,6 +21,7 @@ export class TimelineKeyframeEditor {
     private readonly fields = element<HTMLFieldSetElement>('keyframe-fields');
     private readonly time = element<HTMLInputElement>('keyframe-time');
     private readonly value = element<HTMLInputElement>('keyframe-value');
+    private readonly components = new KeyframeComponentFields(this.value, () => this.inspect());
     private readonly easing = element<HTMLInputElement>('keyframe-easing');
     private readonly preset = element<HTMLSelectElement>('keyframe-easing-preset');
     private readonly curve = new EasingHandles(easing => {
@@ -33,7 +36,7 @@ export class TimelineKeyframeEditor {
     private frame?: FrameTarget;
     private pending?: TimelineKeyframeRequest;
     private validated?: KeyframeDraft;
-    private applyFocus?: HTMLInputElement;
+    private applyFocus?: string;
     private timer?: number;
     private request = 0;
 
@@ -53,7 +56,8 @@ export class TimelineKeyframeEditor {
         element('timeline-keyframe-form').addEventListener('submit', event => {
             event.preventDefault();
             if (this.apply.disabled || !this.frame || !this.validated) return;
-            this.applyFocus = [this.time, this.value, this.easing].find(field => field === document.activeElement) ?? this.time;
+            const active = document.activeElement;
+            this.applyFocus = active instanceof HTMLElement && this.fields.contains(active) && active.id ? active.id : this.time.id;
             this.submit(this.validated, this.frame, true);
             this.enable();
         });
@@ -68,7 +72,7 @@ export class TimelineKeyframeEditor {
     }
 
     open(frame: FrameTarget, version: number, program: number, target: number, property: string, keyframe: TimelineKeyframe,
-        targetName: string, duration: number, focus: boolean): void {
+        targetName: string, duration: number, focus: boolean, componentBatch = false): void {
         if (this.pending?.apply) return;
         const current = this.selected;
         if (current?.session === frame.session && current.version === version && current.program === program
@@ -77,11 +81,11 @@ export class TimelineKeyframeEditor {
             return;
         }
         this.clearRequest();
-        this.selected = { version, session: frame.session, program, target, property, keyframe };
+        this.selected = { version, session: frame.session, program, target, property, keyframe, componentBatch };
         this.frame = frame;
         this.name.textContent = this.name.title = `${property} · ${targetName}`;
         this.time.max = String(duration);
-        this.fill(keyframe);
+        this.fill(keyframe, componentBatch, false);
         this.section.hidden = false;
         this.inspect();
         if (focus) this.time.focus({ preventScroll: true });
@@ -112,7 +116,7 @@ export class TimelineKeyframeEditor {
             const { frame, version, program, target, keyframe } = response.applied;
             this.selected = { ...key, version, program, target, keyframe };
             this.frame = frame;
-            this.fill(keyframe);
+            this.fill(keyframe, key.componentBatch, true);
             this.applied?.(response.applied, key.property);
             this.inspect();
         } else if (response.applied === null) {
@@ -125,7 +129,9 @@ export class TimelineKeyframeEditor {
             this.enable();
         }
         if (request.apply) {
-            if (document.activeElement === document.body) this.applyFocus?.focus({ preventScroll: true });
+            if (this.applyFocus && document.activeElement === document.body) {
+                (document.getElementById(this.applyFocus) ?? this.time).focus({ preventScroll: true });
+            }
             this.applyFocus = undefined;
         }
     }
@@ -151,18 +157,19 @@ export class TimelineKeyframeEditor {
         if (typeof value !== 'object') this.value.value = String(value);
         this.easing.value = key.keyframe.easing_text;
         this.syncPreset();
-        this.applyFocus = this.value;
+        this.applyFocus = this.time.id;
         const location = this.location(key, time);
         this.submit(typeof value === 'object' ? { ...location, component: value }
             : { ...location, value: this.value.value }, frame, true);
         this.enable();
     }
 
-    private fill(keyframe: TimelineKeyframe): void {
+    private fill(keyframe: TimelineKeyframe, componentBatch: boolean, preserveMode: boolean): void {
         this.time.value = String(keyframe.time);
         this.value.type = keyframe.value_kind === 'Number' ? 'number' : 'text';
         this.value.step = 'any';
         this.value.value = keyframe.value_text;
+        this.components.fill(componentBatch ? keyframe.curve_values : undefined, preserveMode);
         this.easing.value = keyframe.easing_text;
         this.syncPreset();
     }
@@ -184,12 +191,12 @@ export class TimelineKeyframeEditor {
             this.showError(`Enter a time from 0 to ${this.time.max} seconds.`);
             return;
         }
-        const draft = this.draft(key, time);
-        this.timer = window.setTimeout(() => this.submit(draft, frame, false), 140);
-    }
-
-    private draft(key: SelectedKeyframe, time: number): KeyframeDraft {
-        return { ...this.location(key, time), value: this.value.value };
+        try {
+            const draft = { ...this.location(key, time), ...this.components.draft(key.keyframe.value_text) };
+            this.timer = window.setTimeout(() => this.submit(draft, frame, false), 140);
+        } catch (error) {
+            this.showError(error instanceof Error ? error.message : String(error));
+        }
     }
 
     private location(key: SelectedKeyframe, time: number): KeyframeDraftLocation {
@@ -215,6 +222,7 @@ export class TimelineKeyframeEditor {
     private enable(): void {
         const disabled = !this.frame || Boolean(this.pending?.apply);
         this.fields.disabled = this.seekButton.disabled = disabled;
+        this.components.enable(!disabled);
         if (disabled) this.curve.cancel();
         const original = this.selected?.keyframe;
         const edit = this.validated;

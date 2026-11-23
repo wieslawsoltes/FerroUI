@@ -199,6 +199,7 @@ fn entities() -> Vec<Message> {
                 custom_animator: true,
                 authoring: Some(DesignAnimationAuthoring {
                     codec: "project.review".into(),
+                    component_batch: Some(true),
                     tracks: vec![DesignAnimationTrack {
                         target: 12,
                         property: "CornerRadius".into(),
@@ -243,8 +244,11 @@ fn entities() -> Vec<Message> {
         }),
         Arc::new(DesignAnimationAuthoringRequest {
             revision: 40, request: 32, program: 6, target: 12, property: "CornerRadius".into(),
-            previous: Some(1.25), time: 1.25, easing: "Linear".into(), sample: Some(true), sample_target: Some(14),
-            component: Some(DesignKeyframeComponent { channel: "top_left".into(), value: 18.0, step: None }),
+            previous: Some(1.25), time: 1.25, easing: "Linear".into(),
+            components: Some(vec![
+                DesignKeyframeComponent { channel: "top_left".into(), value: 18.0, step: None },
+                DesignKeyframeComponent { channel: "bottom_left".into(), value: 12.0, step: None },
+            ]),
             ..Default::default()
         }),
         Arc::new(DesignAnimationAuthoringResult {

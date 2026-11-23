@@ -23,7 +23,7 @@ export class HostedKeyframeEditor {
     open(key: HostedKeyframeSelection, focus = true) {
         this.frame = key.frame;
         this.editor.open(editorFrame(key.frame), key.version, key.program, key.target, key.property,
-            key.keyframe, key.targetName, key.duration, focus);
+            key.keyframe, key.targetName, key.duration, focus, key.componentBatch);
     }
 
     drag(key: HostedKeyframeSelection, time: number, value: number | string | KeyframeComponent) {

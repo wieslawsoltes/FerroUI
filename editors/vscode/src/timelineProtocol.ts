@@ -114,6 +114,7 @@ export interface TimelineState {
     canRecord?: boolean;
     canRecordGeometry?: boolean;
     canEditKeyframes?: boolean;
+    canEditComponentBatch?: boolean;
     canTransferKeys?: boolean;
     canAuthorRustKeys?: boolean;
     canCreateRustProgram?: boolean;
@@ -168,7 +169,10 @@ export interface KeyframeDraftLocation {
     time: number;
     easing: string;
 }
-export type KeyframeValueDraft = { value: string; component?: never } | { value?: never; component: KeyframeComponent };
+export type KeyframeValueDraft =
+    | { value: string; component?: never; components?: never }
+    | { value?: never; component: KeyframeComponent; components?: never }
+    | { value?: never; component?: never; components: KeyframeComponent[] };
 export type KeyframeDraft = KeyframeDraftLocation & KeyframeValueDraft;
 
 export interface TimelineKeyframeRequest {

@@ -25,11 +25,11 @@ const channelLabels: Partial<Record<CurveChannel, string>> = {
     stop_offset: 'Offset',
 };
 
-function channelComponent(channel: CurveChannel): CurveChannel {
+export function channelComponent(channel: CurveChannel): CurveChannel {
     return channel.split('/').at(-1) as CurveChannel;
 }
 
-function channelLabel(channel: CurveChannel): string {
+export function channelLabel(channel: CurveChannel): string {
     const component = channelComponent(channel);
     const label = channelLabels[component] ?? component[0].toUpperCase() + component.slice(1).replaceAll('_', ' ');
     if (component === channel) return label;
@@ -51,6 +51,13 @@ function channelLabel(channel: CurveChannel): string {
         .replace(/(^|\s)(\p{L})/gu, (_, space: string, letter: string) => space + letter.toUpperCase());
     return component === 'value' ? parameter : `${parameter} ${label}`;
 }
+
+export function normalizedChannel(channel: CurveChannel): boolean {
+    return isColorChannel(channel) || channel === 'shadow_opacity'
+        || channel === 'gradient/opacity/value';
+}
+
+export function isColorChannel(channel: CurveChannel): boolean { return colorChannels.has(channelComponent(channel)); }
 
 export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
     return track.curve_channels ?? (track.keyframes[0]?.value_kind === 'Number' ? ['value'] : []);
@@ -113,7 +120,7 @@ export class TimelineCurvePlot {
     handle(keyframe: TimelineKeyframe, current: string | undefined): CurveHandle | undefined {
         const value = this.value(keyframe);
         if (value === undefined || !this.scale || this.painted?.metric !== 'value' || !current || !this.has(current)) return;
-        return { value, scale: this.scale, channel: this.channel, normalized: this.normalized(),
+        return { value, scale: this.scale, channel: this.channel, normalized: normalizedChannel(this.channel),
             step: this.component(keyframe)?.step,
             keyRow: this.channel === 'value' ? 0 : 20 };
     }
@@ -128,10 +135,6 @@ export class TimelineCurvePlot {
         return value !== undefined && Number.isFinite(value) ? value : undefined;
     }
 
-    private normalized(): boolean {
-        return colorChannels.has(channelComponent(this.channel)) || this.channel === 'shadow_opacity'
-            || this.channel === 'gradient/opacity/value';
-    }
 
     receive(key: string, metric: CurveMetric, channel: CurveChannel, message: Pick<TimelineCurveResponse, 'points' | 'error' | 'stale'>): void {
         if (message.points?.length && message.points.every(point => Number.isFinite(point.time) && Number.isFinite(point.value))) {
@@ -172,7 +175,7 @@ export class TimelineCurvePlot {
         const isVelocity = metric === 'velocity';
         const handles = this.keys.map(({ keyframe }) => isVelocity ? undefined : this.value(keyframe));
         const units = this.keys[0] && this.component(this.keys[0].keyframe)?.step;
-        const keyValues = isVelocity ? [0] : this.normalized() || units === 'boolean' ? [0, 1]
+        const keyValues = isVelocity ? [0] : normalizedChannel(channel) || units === 'boolean' ? [0, 1]
             : handles.flatMap((value, index) => {
                 if (value === undefined || !visibleTime(view, this.keys[index].rendered.key.time)) return [];
                 return units === 'integer' ? [snapCurveInteger(value - 1), snapCurveInteger(value + 1)] : [value];

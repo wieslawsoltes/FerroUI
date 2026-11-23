@@ -70,6 +70,7 @@ pub(crate) struct KeyframeDraft {
     pub(crate) value: Option<String>,
     pub(crate) easing: Option<String>,
     pub(crate) component: Option<KeyframeComponentEdit>,
+    pub(crate) components: Option<Vec<KeyframeComponentEdit>>,
     pub(crate) sample: Option<bool>,
     #[serde(rename = "previewTarget")]
     pub(crate) preview_target: Option<i64>,
@@ -186,6 +187,7 @@ pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
                 "curveTracks": program.curve_tracks.map(tracks),
                 "authoring": program.authoring.map(|authoring| json!({
                     "codec": authoring.codec,
+                    "componentBatch": authoring.component_batch,
                     "tracks": tracks(authoring.tracks),
                 })),
             })

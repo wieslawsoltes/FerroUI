@@ -19,7 +19,7 @@ pub(crate) const BOX_SHADOW_CHANNELS: &[CurveChannel] = &[
 ];
 
 /// A numeric component on a track, including parameters supplied by a native effect.
-#[derive(Clone, Debug, Eq, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub enum TrackCurveChannel {
     Property(CurveChannel),
     EffectParameter {

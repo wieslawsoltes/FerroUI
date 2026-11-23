@@ -37,9 +37,20 @@ impl DesignerSession {
         previous: f64,
         edit: &KeyframeComponentEdit,
     ) -> Result<String, String> {
+        self.program_keyframe_components(program, target, property, previous, std::slice::from_ref(edit))
+    }
+
+    pub fn program_keyframe_components(
+        &self,
+        program: NodeId,
+        target: NodeId,
+        property: &str,
+        previous: f64,
+        edits: &[KeyframeComponentEdit],
+    ) -> Result<String, String> {
         self.animation_programs().iter().find(|candidate| candidate.id == program)
             .ok_or("Unknown animation program")?
-            .keyframe_component(target, property, previous, edit)
+            .keyframe_components(target, property, previous, edits)
             .map(|value| value.to_xaml())
             .map_err(|error| error.to_string())
     }

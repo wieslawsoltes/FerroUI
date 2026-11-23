@@ -142,6 +142,57 @@ fn studio_easing_keyboard_edits_the_draft_before_one_source_commit() {
 }
 
 #[test]
+fn studio_compound_fields_and_time_apply_in_one_source_transaction() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let (workspace, target) = workspace();
+    {
+        let mut session = workspace.session.borrow_mut();
+        session.seek(1.0).unwrap();
+        session.record_keyframe(target, "Margin", AnimationValue::Thickness {
+            left: 4.0, top: 6.0, right: 8.0, bottom: 10.0,
+        }).unwrap();
+    }
+    let window = Window::new();
+    window.set_width(1280.0);
+    window.set_height(800.0);
+    window.set_content(Some(Control::boxed(&workspace.root)));
+    window.show();
+    workspace.set_timeline_visible(true);
+    workspace.select_keyframes(&[(target, "Margin".into(), 1.0)]).unwrap();
+    window.update_layout();
+    Dispatcher::ui_thread().run_jobs(None);
+    let inspector = workspace.timeline_inspector().unwrap();
+    let field = |name: &str| inspector.get_visual_descendants().filter_map(|child| child.cast::<TextBox>())
+        .find(|field| field.name().as_deref() == Some(name)).unwrap();
+    let left = field("KeyframeComponent0");
+    let right = field("KeyframeComponent2");
+    assert_eq!(left.text().as_deref(), Some("4"));
+    assert_eq!(right.text().as_deref(), Some("8"));
+    let original = workspace.session.borrow().authored_source().to_owned();
+    let revision = workspace.session.borrow().document().revision();
+    let apply = inspector.get_visual_descendants().filter_map(|child| child.cast::<Button>())
+        .find(|button| button.name().as_deref() == Some("ApplyKeyframe")).unwrap();
+    left.set_text(Some("draft"));
+    right.set_text(Some("18"));
+    field("KeyframeTime").set_text(Some("1.25"));
+    let commit = || apply.raise_event(&ferroui_base::interactivity::RoutedEventArgs::with_event(Button::click_event()));
+    commit();
+    assert_eq!(workspace.session.borrow().authored_source(), original);
+    left.set_text(Some("12"));
+    commit();
+    let mut session = workspace.session.borrow_mut();
+    let track = session.timeline().track(target, "Margin").unwrap();
+    assert!(track.keyframes.iter().all(|key| key.time != 1.0));
+    let key = track.keyframes.iter().find(|key| key.time == 1.25).unwrap();
+    assert_eq!(key.value, AnimationValue::Thickness {
+        left: 12.0, top: 6.0, right: 18.0, bottom: 10.0,
+    });
+    assert_eq!(session.document().revision(), revision + 1);
+    session.undo().unwrap();
+    assert_eq!(session.authored_source(), original);
+}
+
+#[test]
 fn studio_lane_copies_typed_keys_and_reverse_pastes_with_one_undo() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let (workspace, target) = workspace();

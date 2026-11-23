@@ -91,17 +91,29 @@ VS Code and Designer Studio agents can pass `metric: "velocity"` to `designer_an
 
 In **Value curves** or **Velocity curves**, choose a component beside a supported geometry track. Points and vectors offer X and Y. Size and rectangle tracks offer their dimensions. Thickness offers its four sides and corner radius offers its four corners. A rectangle also offers X and Y.
 
-Choose **Value curves** and drag the authored key on the trace to edit the selected component. Select the marker and edit **Value** to change the complete geometry value. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
+Choose **Value curves** and drag the authored key on the trace to edit the selected component. Select the marker to edit the corners, sides, axes, or dimensions together. Agents can read the track’s `curve_channels` from `designer_programs` and pass a channel such as `"top_left"` to `designer_animation_curve`.
 
 ### Edit a curve component
 
 1. Choose **Value curves** in the VS Code Timeline, Designer Studio, or App Preview. Select a track and a channel, such as **Top right** for CornerRadius or **Radius Y · Percent** for a radial gradient.
 2. Drag an authored key on the graph. Vertical movement changes the selected component. Horizontal movement retimes the same key. To make a small value change from the keyboard, focus the key in VS Code or select it in Studio and use Alt+Up or Alt+Down. A continuous value changes by one percent of the visible range. Integer and Boolean keys move by one step.
-3. Use Undo to reverse one drag or keyboard edit. The other components and incoming easing remain on the key. Open the key inspector to enter the full value or easing.
+3. Use Undo to reverse one drag or keyboard edit. Open the key inspector to [edit several fields together](#edit-compound-keyframe-values).
 
 Handles cover literal geometry, color, built-in effects, [registered shader parameters](#animate-registered-shader-parameters), gradient stops and fields, shadow layers, and individual transform operations. Combined transform matrices and velocity curves use the retiming row. Keys with a missing component or a different coordinate unit stay in that row. [MCP component editing](reference.md#edit-one-keyframe-component-with-mcp)
 
 ![The VS Code Timeline shows the selected Top right radius at 1.2 seconds, its complete key in the inspector, and the resulting native corner](../images/vscode-timeline-curve-components.png)
+
+### Edit compound keyframe values
+
+1. Select an authored key on a track in Timeline or Designer Studio. In App Preview, open **Keyframe lanes** or choose **Edit application keyframe**.
+2. Change the fields you need. For a gradient, choose **Brush** or a numbered **Stop** in the value group picker. Shadow layers and transform operations also have numbered groups. Registered shader parameters use numeric fields and checkboxes according to their types. Field labels use the Value graph’s units, including percentages, degrees, and a 0 to 1 scale for color channels.
+3. Set the key’s time or incoming easing if needed, then choose the **Apply keyframe** checkmark or press Enter in a field. The editor validates the draft against the current XAML or mapped Rust source. One Undo restores the key before the edit.
+
+Switch groups to edit another part of the same value. Use the **Edit keyframe value as text** code icon to enter a complete value, for example to add a gradient stop or include a shader’s text argument. Each mode keeps its own draft while that key stays open. Apply uses the active mode. Rebuild the selected Cargo target if App Preview only offers the text field for a compound key.
+
+The XAML codec can regenerate the edited animation block when applying the draft. Undo restores its original formatting.
+
+[Draft and apply a batch with MCP](reference.md#edit-one-keyframe-component-with-mcp)
 
 ### Animate a render transform
 

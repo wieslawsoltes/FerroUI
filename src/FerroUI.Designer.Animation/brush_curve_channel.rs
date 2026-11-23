@@ -11,7 +11,7 @@ const STOP_CHANNELS: &[CurveChannel] = &[
     CurveChannel::Alpha,
 ];
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BrushCurveChannel {
     Stop {
         index: NonZeroUsize,
@@ -23,7 +23,7 @@ pub enum BrushCurveChannel {
     },
 }
 
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub enum BrushField {
     Start,
     End,

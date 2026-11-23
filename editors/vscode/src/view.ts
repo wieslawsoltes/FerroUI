@@ -498,6 +498,7 @@ function keyframeEditorHtml(seek = true): string {
     <header>
         <strong id="keyframe-name"></strong>
         <div class="tool-group" role="group" aria-label="Selected keyframe">
+            ${tool('keyframe-text-mode', 'code', 'Edit keyframe value as text', 'aria-pressed="false" hidden')}
             ${tool('keyframe-seek', 'debug-step-over', 'Seek to selected keyframe', seek ? '' : 'hidden')}
             ${tool('keyframe-close', 'close', 'Close keyframe editor')}
         </div>
@@ -506,7 +507,9 @@ function keyframeEditorHtml(seek = true): string {
         <fieldset id="keyframe-fields" aria-label="Keyframe values">
             <div class="keyframe-fields">
                 <label>Time (s) <input id="keyframe-time" type="number" min="0" step="any" required></label>
-                <label>Value <input id="keyframe-value" autocomplete="off" spellcheck="false" required></label>
+                <label id="keyframe-value-field">Value <input id="keyframe-value" autocomplete="off" spellcheck="false" required></label>
+                <label id="keyframe-component-group-field" hidden>Value group <select id="keyframe-component-group"></select></label>
+                <div id="keyframe-component-fields" class="keyframe-component-fields" role="group" aria-label="Value components" hidden></div>
                 <div class="keyframe-easing">
                     <label for="keyframe-easing">Incoming easing</label>
                     <div class="keyframe-easing-controls">

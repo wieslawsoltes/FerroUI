@@ -24,7 +24,7 @@ export interface HostedAnimationProgram {
     sourceKey?: string;
     markerKey?: string;
     customAnimator: boolean;
-    authoring?: { codec: string; tracks: HostedAnimationTrack[] } | null;
+    authoring?: { codec: string; tracks: HostedAnimationTrack[]; componentBatch?: boolean | null } | null;
     curveTracks?: TimelineTrack[] | null;
     clip?: TimelineClipTiming | null;
     stateRoute?: HostedStateRoute;
@@ -164,6 +164,7 @@ export interface HostedKeyframeSelection {
     property: string;
     duration: number;
     keyframe: TimelineKeyframe;
+    componentBatch: boolean;
 }
 
 export function hostedKeyframeTarget(authoredTarget: number, previewTargets: readonly number[]): number | undefined {

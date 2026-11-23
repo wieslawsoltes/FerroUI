@@ -400,7 +400,11 @@ In Designer Studio, `designer_preview_checks` reads the current canvas. `designe
 2. Pass the program ID, track `target` and `property`, existing key time as `previous`, and the desired `time` and `easing` to `designer_keyframe_draft`. Supply `component: { "channel": "top_right", "value": 24 }`. Copy the reported `easing_text` and keep `time` equal to `previous` to change just the value component.
 3. Use the same draft with `action: "upsert_keyframe"` on `designer_program`. Use the current frame revision with VS Code’s `designer_studio_edit` or the current document revision in Studio. Each accepted edit takes one Undo.
 
+For several fields on the same key, pass `components: [{"channel": "top_right", "value": 24}, {"channel": "bottom_left", "value": 12}]`. Supply one value representation per request. Use distinct channels from the original key. A batch can also change the key’s time and easing. The planner validates the whole draft before the edit.
+
 For App Preview, read the authored key from `designer_hosted_animations`. Use its generation and accepted revision and sequence for `designer_hosted_keyframe_draft` and `designer_hosted_keyframe`. The draft returns a UTF-16 source patch and the complete `resolvedKey` from the running app’s codec. Units match the Value graph. Use logical pixels for absolute distances, percentage points for relative coordinates, degrees for rotation, and values from 0 to 1 for color channels. [Curve graph workflow](motion.md#edit-a-curve-component)
+
+Use `components` in App Preview when the program’s `authoring.componentBatch` is true. [Compound keyframe workflow](motion.md#edit-compound-keyframe-values)
 
 For a registered shader, copy the exact channel from the key’s `curve_values`, for example `effect_parameter/spotlight/strength/value`. A Boolean handle reports `step: "boolean"` and accepts 0 or 1. An integer handle reports `step: "integer"` and accepts a signed 32-bit integer. App Preview resolves project-registered effects against the loaded application. [Registered shader workflow](motion.md#animate-registered-shader-parameters)
 

@@ -45,9 +45,12 @@ pub(super) fn tools() -> Vec<Value> {
         schema
     };
     let property_value = || json!({"anyOf":[s::string(),s::number(),{"type":"boolean"},s::animation_value()]});
+    let component = s::object(json!({"channel":s::string(),"value":s::number()}), &["channel","value"]);
+    let mut components = s::array(component.clone(), 4096);
+    components["minItems"] = json!(1);
     let keyframe_draft = || json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),
         "time":s::time(),"value":s::string(),"easing":s::string(),
-        "component":s::object(json!({"channel":s::string(),"value":s::number()}), &["channel","value"])});
+        "component":component,"components":components});
     let draft_required = &["program","target","property","time","easing"];
     vec![
         s::tool("designer_rsx_views", "List the Rust file's rsx! invocations and the active source range.",
@@ -61,7 +64,7 @@ pub(super) fn tools() -> Vec<Value> {
                 "channel":s::string(),
                 "window":s::object(json!({"start":s::time(),"end":s::time()}), &["start","end"])}),
                 &["program","target","property","window"]), false),
-        s::tool("designer_keyframe_draft", "Validate a keyframe's time, value and easing against the current source codec. Supply value text or a component with channel and numeric value from an existing keyframe. Component edits require previous. Returns the sampled easing preview.",
+        s::tool("designer_keyframe_draft", "Validate a keyframe's time, value and easing against the current source codec. Supply value text, one component, or a components array from curve_values. Component edits require previous. Returns the sampled easing preview.",
             s::object(keyframe_draft(), draft_required), false),
         s::tool("designer_keyframe_clipboard", "Copy selected typed keys and relative times for paste into compatible tracks. Returns portable clipboard data.",
             s::object(json!({"program":s::id(),"keyframes":keys(),"expected_revision":s::revision()}), &["program","keyframes"]), false),
@@ -531,19 +534,18 @@ pub fn keyframe_value<'a>(
     session: &DesignerSession,
     args: &'a Value,
 ) -> Result<std::borrow::Cow<'a, str>, String> {
-    if args["component"].is_null() {
-        return args["value"].as_str().map(std::borrow::Cow::Borrowed)
-            .ok_or_else(|| "Supply a typed keyframe value".into());
-    }
-    if !args["value"].is_null() {
-        return Err("Choose a complete keyframe value or a component".into());
-    }
-    session.program_keyframe_component(
+    let edits = match (&args["value"], &args["component"], &args["components"]) {
+        (Value::String(value), Value::Null, Value::Null) => return Ok(std::borrow::Cow::Borrowed(value)),
+        (Value::Null, component, Value::Null) if !component.is_null() => vec![decode(args, "component")?],
+        (Value::Null, Value::Null, components) if components.is_array() => decode(args, "components")?,
+        _ => return Err("Choose keyframe value text, one component, or a components array".into()),
+    };
+    session.program_keyframe_components(
         node_id(args, "program")?,
         node_id(args, "target")?,
         &text(args, "property")?,
         number(args, "previous")?,
-        &decode(args, "component")?,
+        &edits,
     ).map(std::borrow::Cow::Owned)
 }
 

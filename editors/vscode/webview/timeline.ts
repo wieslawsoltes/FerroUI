@@ -340,7 +340,7 @@ function showTracks(): void {
     workArea.follow(canPreviewRange(selected) ? timeline.duration : 0, newProgram);
     const changedViewport = viewport.follow(timeline.duration, newProgram);
     const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names,
-        model.writable, model.canEditKeyframes, model.canAuthorRustKeys]);
+        model.writable, model.canEditKeyframes, model.canEditComponentBatch, model.canAuthorRustKeys]);
     if (lastContent !== content) {
         lastContent = content;
         const restoreFocus = renderedKeys.some(item => item.button === document.activeElement);
@@ -384,7 +384,7 @@ function showTracks(): void {
                 const open = (frame: FrameTarget, focus: boolean) => {
                     if (!model.canEditKeyframes || !(model.writable || selected.sourceRange) || model.documentVersion === undefined) return false;
                     keyframeEditor.open(frame, model.documentVersion, selected.id, track.target, track.property, key,
-                        target, timeline.duration, focus);
+                        target, timeline.duration, focus, model.canEditComponentBatch);
                     return true;
                 };
                 const editableCurve = plot && model.canEditKeyframes && (model.writable || selected.sourceRange);
