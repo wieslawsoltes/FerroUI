@@ -56,10 +56,13 @@ export class AppSessions implements vscode.Disposable {
             new DeviceAppCommands(simulators, android, runtime => this.open(runtime)),
             new BrowserAppCommands(browser, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
-            managed('select'), managed('debug'),
+            managed('select'),
+            command('debug', session => session.browser && session.generation !== null
+                ? this.browser.debug(session.runtime, session.generation)
+                : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session)),
             command('rebuild', session => session.browser?.development ? this.browser.rebuild(session.runtime)
                 : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session)),
-            command('showOutput', session => session.browser?.development ? this.browser.showOutput()
+            command('showOutput', session => session.browser?.development || session.browser?.debuggable ? this.browser.showOutput()
                 : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session)),
             command('stop', session => this.stop(session)),
         ];
@@ -94,8 +97,13 @@ export class AppSessions implements vscode.Disposable {
         const problem = (run && 'problem' in run && run.problem) || (session.browser?.development && session.status.endsWith('failed'));
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : selected ? 'play-circle'
             : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
-        item.contextValue = session.browser?.development ? 'app-session-browser-development'
-            : run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
+        if (session.browser) {
+            const development = session.browser.development ? '-development' : '';
+            const debug = session.browser.debuggable && session.available ? '-debug' : '';
+            item.contextValue = `app-session-browser${development}${debug}`;
+        } else {
+            item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
+        }
         item.command = { command: 'ferroui.appSessions.preview', title: 'Open Live App', arguments: [session.runtime] };
         return item;
     }

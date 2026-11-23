@@ -300,6 +300,17 @@ For a separate app repository, set `build.toolchain` to the FerroUI checkout tha
 
 ![Live App after a managed Chromium replacement, showing two retained dispatched orders, the matching Rust source, and the selected heading's Text property](../images/vscode-browser-reload.png)
 
+### Debug browser host scripts
+
+1. Set a breakpoint in a script in your app's `wwwroot`, then choose **Open Browser App → Run and Debug Browser App**. Select the managed development profile. FerroUI starts a separate Chromium profile with a loopback debug listener and connects VS Code's built-in JavaScript Debug adapter after the app presents its first frame.
+2. Trigger the code in **Live App → Interact**. Use the Debug toolbar, Call Stack, and Variables in VS Code to inspect the browser code. **Continue** resumes browser input and presentation.
+3. Save a source change. The current debugger remains attached while Cargo builds and Chromium starts the candidate. When the replacement presents its first frame, FerroUI attaches the debugger to that exact page and maps its `wwwroot` URLs back to the workspace. Existing breakpoints follow the source.
+4. Use **Stop Debugging** to end the debugger connection and keep Live App running. Choose **Attach Debugger to This App** from the session's context menu to attach again. **Stop or Disconnect This App** closes the managed browser and its debug listener.
+
+The same Run and Debug command can launch a served profile. It uses the workspace folder as the JavaScript source root. For an independently started Chromium profile, use VS Code's standard Chrome attach configuration. Rust source breakpoints require a Wasm build with DWARF and the WebAssembly DWARF Debugging extension. [VS Code browser debugging](https://code.visualstudio.com/docs/nodejs/browser-debugging) · [Emscripten debug symbols](https://emscripten.org/docs/porting/Debugging.html) · [Browser debugger MCP tools](reference.md#debug-a-browser-app-with-mcp)
+
+![VS Code paused at a JavaScript breakpoint in the workspace while Live App shows the accepted Chromium replacement and its visual tree](../images/vscode-browser-debugger.png)
+
 ## Inspect the actual window in Live App
 
 1. Start a managed desktop target, open a mobile or browser app from App Sessions, or choose **FerroUI: Connect to Running MCP Server** for an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.

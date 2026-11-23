@@ -260,13 +260,16 @@ export class AgentTools {
         }
         if (tool === 'ferroui_browser_targets') return this.appSessions.browser.targets((input as { folder?: string }).folder);
         if (tool === 'ferroui_browser_run' || tool === 'ferroui_browser_attach') {
-            return this.appSessions.browser.open(input as BrowserRequest, tool === 'ferroui_browser_run' ? 'run' : 'attach', signal);
+            const request = input as BrowserRequest & { debug?: boolean };
+            const mode = tool === 'ferroui_browser_attach' ? 'attach' : request.debug ? 'debug' : 'run';
+            return this.appSessions.browser.open(request, mode, signal);
         }
         if (tool === 'ferroui_browser_stop') {
             await this.appSessions.browser.stop(args.runtime as AppRuntime);
             return { closed: true };
         }
         if (tool === 'ferroui_browser_rebuild') return this.appSessions.browser.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_browser_debug') return this.appSessions.browser.debug(args.runtime as AppRuntime, args.expected_generation);
         if (tool === 'ferroui_browser_output') return this.appSessions.browser.recentOutput(args.runtime as AppRuntime, args.lines ?? 60);
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
         if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }

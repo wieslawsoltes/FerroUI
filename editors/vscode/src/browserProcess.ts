@@ -1,8 +1,9 @@
 import { spawn } from 'node:child_process';
-import { mkdtemp, rm } from 'node:fs/promises';
+import { mkdtemp, readFile, rm } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import type { Readable, Writable } from 'node:stream';
+import { setTimeout as delay } from 'node:timers/promises';
 import type { BrowserCdp } from './browserCdp';
 import { browserPipe, browserSocket } from './browserCdpTransport';
 import { browserExecutable } from './browserExecutable';
@@ -17,7 +18,8 @@ export class BrowserPage {
     private readonly removeListener: () => void;
     private readonly disconnected = () => { void this.close(); };
 
-    constructor(readonly cdp: BrowserCdp, readonly sessionId: string | undefined, private readonly disconnect: () => Promise<void>) {
+    constructor(readonly cdp: BrowserCdp, readonly sessionId: string | undefined, private readonly disconnect: () => Promise<void>,
+        readonly debugPort?: number) {
         this.closed = new Promise(resolve => this.signal.addEventListener('abort', () => resolve(), { once: true }));
         this.removeListener = cdp.onEvent(event => {
             const detached = this.sessionId !== undefined && event.method === 'Target.detachedFromTarget'
@@ -41,23 +43,40 @@ export class BrowserPage {
 }
 
 export class ManagedBrowser {
-    private constructor(readonly cdp: BrowserCdp, private readonly process: OwnedProcess) {}
+    private constructor(readonly cdp: BrowserCdp, private readonly process: OwnedProcess, readonly debugPort?: number) {}
 
     get pid(): number | undefined { return this.process.pid; }
 
-    static async launch(signal: AbortSignal): Promise<ManagedBrowser> {
+    static async launch(signal: AbortSignal, debug = false): Promise<ManagedBrowser> {
         const executable = await browserExecutable();
         signal.throwIfAborted();
         const profile = await mkdtemp(path.join(tmpdir(), 'ferroui-chromium-'));
         const cleanup = () => rm(profile, { recursive: true, force: true, maxRetries: 5 });
         try { signal.throwIfAborted(); } catch (error) { await cleanup(); throw error; }
-        const child = spawn(executable, ['--headless', '--remote-debugging-pipe', `--user-data-dir=${profile}`,
+        const transport = debug ? ['--remote-debugging-address=127.0.0.1', '--remote-debugging-port=0'] : ['--remote-debugging-pipe'];
+        const child = spawn(executable, ['--headless', ...transport, `--user-data-dir=${profile}`,
             '--no-first-run', '--no-default-browser-check', '--disable-background-networking', 'about:blank'],
-        { detached: true, windowsHide: true, stdio: ['ignore', 'ignore', 'ignore', 'pipe', 'pipe'] });
+        { detached: true, windowsHide: true, stdio: debug ? 'ignore' : ['ignore', 'ignore', 'ignore', 'pipe', 'pipe'] });
         const process = new OwnedProcess(child, cleanup);
+        if (debug) return this.connectDebugger(process, profile, signal);
         const cdp = browserPipe(child.stdio[3] as Writable, child.stdio[4] as Readable);
         void process.closed.then(() => cdp.close(), () => cdp.close());
         return new ManagedBrowser(cdp, process);
+    }
+
+    private static async connectDebugger(process: OwnedProcess, profile: string, signal: AbortSignal): Promise<ManagedBrowser> {
+        const closed = new AbortController();
+        void process.closed.then(() => closed.abort(new Error('Chromium stopped before its debugger was ready.')), error => closed.abort(error));
+        try {
+            const active = AbortSignal.any([signal, closed.signal, AbortSignal.timeout(12_000)]);
+            const { port, route } = await browserDebugEndpoint(profile, active);
+            const cdp = await browserSocket(`ws://127.0.0.1:${port}${route}`, active);
+            void process.closed.then(() => cdp.close(), () => cdp.close());
+            return new ManagedBrowser(cdp, process, port);
+        } catch (error) {
+            await process.stop().catch(() => {});
+            throw error;
+        }
     }
 
     async openPage(url: string, viewport: Pick<BrowserApp, 'width' | 'height'>, signal: AbortSignal, ownsBrowser = false): Promise<BrowserPage> {
@@ -72,7 +91,7 @@ export class ManagedBrowser {
         let page: BrowserPage | undefined;
         try {
             const { sessionId } = await cdp.request<{ sessionId: string }>('Target.attachToTarget', { targetId, flatten: true }, signal);
-            page = new BrowserPage(cdp, sessionId, disconnect);
+            page = new BrowserPage(cdp, sessionId, disconnect, this.debugPort);
             const active = AbortSignal.any([signal, page.signal]);
             await cdp.request('Page.enable', {}, active, sessionId);
             await cdp.request('Emulation.setDeviceMetricsOverride', {
@@ -99,8 +118,23 @@ export class ManagedBrowser {
     }
 }
 
-export async function launchBrowser(app: ServedBrowserApp, signal: AbortSignal): Promise<BrowserPage> {
-    const browser = await ManagedBrowser.launch(signal);
+async function browserDebugEndpoint(profile: string, signal: AbortSignal): Promise<{ port: number; route: string }> {
+    const file = path.join(profile, 'DevToolsActivePort');
+    for (;;) {
+        signal.throwIfAborted();
+        const contents = await readFile(file, 'utf8').catch((error: NodeJS.ErrnoException) => {
+            if (error.code === 'ENOENT') return '';
+            throw error;
+        });
+        const [port, route] = contents.trim().split(/\r?\n/);
+        if (/^\d{1,5}$/.test(port) && Number(port) > 0 && Number(port) < 65536
+            && /^\/devtools\/browser\/[A-Za-z0-9-]+$/.test(route ?? '')) return { port: Number(port), route };
+        await delay(50, undefined, { signal });
+    }
+}
+
+export async function launchBrowser(app: ServedBrowserApp, signal: AbortSignal, debug = false): Promise<BrowserPage> {
+    const browser = await ManagedBrowser.launch(signal, debug);
     try {
         return await browser.openPage(app.url, app, signal, true);
     } catch (error) {

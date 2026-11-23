@@ -37,7 +37,7 @@ export interface BrowserRequest {
     folder?: string;
 }
 
-export type BrowserMode = 'run' | 'attach';
+export type BrowserMode = 'run' | 'debug' | 'attach';
 
 export function hasBrowserProfiles(): boolean {
     return workspaceFolders().some(folder => settings(folder).length > 0);

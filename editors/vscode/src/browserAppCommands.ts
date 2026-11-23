@@ -6,6 +6,7 @@ import type { AppRuntime } from './runtimeTargets';
 
 const actions = [
     { label: 'Run Browser App', mode: 'run', iconPath: new vscode.ThemeIcon('play') },
+    { label: 'Run and Debug Browser App', mode: 'debug', iconPath: new vscode.ThemeIcon('debug-alt') },
     { label: 'Attach to Browser App', mode: 'attach', iconPath: new vscode.ThemeIcon('debug-disconnect') },
 ] as const;
 
@@ -23,7 +24,7 @@ export class BrowserAppCommands implements vscode.Disposable {
                 if (action) await vscode.commands.executeCommand(`ferroui.browser.${action.mode}`);
             }),
             ...actions.map(({ label, mode }) => vscode.commands.registerCommand(`ferroui.browser.${mode}`, (selection?: BrowserRequest) =>
-                connectApp(mode === 'run' ? 'Starting the browser app' : 'Connecting to the browser app', () => selection ?? this.chooseApp(mode, label),
+                connectApp(mode === 'attach' ? 'Connecting to the browser app' : 'Starting the browser app', () => selection ?? this.chooseApp(mode, label),
                     (request, signal) => this.sessions.open(request, mode, signal), open))),
         ];
     }
@@ -31,7 +32,7 @@ export class BrowserAppCommands implements vscode.Disposable {
     private async chooseApp(mode: BrowserMode, title: string): Promise<BrowserRequest | undefined> {
         const { apps } = this.sessions.targets();
         if (!apps.length) throw new Error('Add a profile to ferroui.browser.apps in Workspace Settings.');
-        const available = apps.filter(app => mode === 'run' || app.debugPort !== undefined);
+        const available = apps.filter(app => mode !== 'attach' || app.debugPort !== undefined);
         if (!available.length) throw new Error('Add a local Chromium debug port to the browser app profile.');
         const pick = await vscode.window.showQuickPick(available.map(app => ({ label: app.label, description: app.build?.application ?? app.url,
             detail: vscode.Uri.parse(app.folder).fsPath, app })), { title, placeHolder: 'Choose the configured app', matchOnDescription: true, matchOnDetail: true });

@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 
 export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
 
-interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; pid?: number }
+interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; target?: number }
 
 export class ReloadDebugger implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
@@ -13,10 +13,12 @@ export class ReloadDebugger implements vscode.Disposable {
     private readonly instance = randomUUID();
     private closing?: Promise<void>;
 
-    constructor(private readonly output: vscode.OutputChannel) {
+    constructor(private readonly output: Pick<vscode.OutputChannel, 'appendLine'>,
+        private readonly attachError = 'The configured Rust debugger did not attach.') {
         this.subscriptions = [
             vscode.debug.onDidStartDebugSession(session => {
                 if (session.configuration.ferrouiManagedInstance !== this.instance) return;
+                if (session.parentSession?.configuration.ferrouiManagedInstance === this.instance) return;
                 if (session.configuration.ferrouiManagedSession === this.attachment?.id) this.active = session;
                 else void this.stop(session);
             }),
@@ -29,9 +31,9 @@ export class ReloadDebugger implements vscode.Disposable {
         ];
     }
 
-    async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, pid: number): Promise<void> {
+    async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, target: number): Promise<void> {
         this.prepare(folder, configuration);
-        await this.activate(pid);
+        await this.activate(target);
     }
 
     prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
@@ -39,31 +41,33 @@ export class ReloadDebugger implements vscode.Disposable {
         this.attachment = { id: randomUUID(), folder, configuration };
     }
 
-    activated(pid: number): void {
-        void this.activate(pid).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
+    follows(target: number): boolean { return this.attachment?.target === target; }
+
+    activated(target: number, configuration?: vscode.DebugConfiguration): void {
+        void this.activate(target, configuration).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
     }
 
-    private async activate(pid: number): Promise<void> {
+    private async activate(target: number, configuration?: vscode.DebugConfiguration): Promise<void> {
         const attached = this.attachment;
-        if (!attached || attached.pid === pid) return;
+        if (!attached || this.follows(target)) return;
         const old = this.active;
         this.active = undefined;
-        const replacement = { ...attached, id: randomUUID(), pid };
+        const replacement = { ...attached, id: randomUUID(), target, configuration: configuration ?? attached.configuration };
         this.attachment = replacement;
         const step = this.transition.then(async () => {
             if (old) await this.stop(old);
-            if (this.attachment === replacement) await this.start(replacement, pid);
+            if (this.attachment === replacement) await this.start(replacement, target);
         });
         this.transition = step.catch(() => undefined);
         await step;
     }
 
-    private async start(attachment: Attachment, pid: number): Promise<void> {
-        const config = JSON.parse(JSON.stringify(attachment.configuration).replaceAll(managedProcessVariable, String(pid))) as vscode.DebugConfiguration;
+    private async start(attachment: Attachment, target: number): Promise<void> {
+        const config = JSON.parse(JSON.stringify(attachment.configuration).replaceAll(managedProcessVariable, String(target))) as vscode.DebugConfiguration;
         config.ferrouiManagedInstance = this.instance;
         config.ferrouiManagedSession = attachment.id;
         try {
-            if (!await vscode.debug.startDebugging(attachment.folder, config)) throw new Error('The configured Rust debugger did not attach.');
+            if (!await vscode.debug.startDebugging(attachment.folder, config)) throw new Error(this.attachError);
         } catch (error) {
             if (this.attachment === attachment) this.attachment = undefined;
             throw error;

@@ -168,6 +168,12 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.browser.debug",
+        "title": "Run and Debug Browser App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
         "command": "ferroui.browser.attach",
         "title": "Attach to Browser App",
         "category": "FerroUI"
@@ -887,6 +893,10 @@
           "when": "isWorkspaceTrusted"
         },
         {
+          "command": "ferroui.browser.debug",
+          "when": "isWorkspaceTrusted"
+        },
+        {
           "command": "ferroui.browser.attach",
           "when": "isWorkspaceTrusted"
         },
@@ -1380,17 +1390,17 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser|browser-development)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser(-development)?(-debug)?)$/",
           "group": "inline@1"
         },
         {
           "command": "ferroui.appSessions.rebuild",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|browser-development)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|browser-development(-debug)?)$/",
           "group": "inline@2"
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser|browser-development)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser(-development)?(-debug)?)$/",
           "group": "inline@3"
         },
         {
@@ -1400,12 +1410,12 @@
         },
         {
           "command": "ferroui.appSessions.debug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|browser(-development)?-debug)$/",
           "group": "1_apps@2"
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|browser-development)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|browser-development(-debug)?|browser-debug)$/",
           "group": "1_apps@3"
         },
         {

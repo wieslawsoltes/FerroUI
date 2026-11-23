@@ -290,6 +290,12 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 3. Read `ferroui_reload_history` with the browser runtime ID as `app_session` for save outcomes and accepted frame receipts. A successful build keeps its runtime ID and advances its inspection generation. Use the new generation for inspector, view, and source operations. A failed build or startup leaves the accepted generation available.
 4. Call `ferroui_browser_stop` with the runtime ID to release the compiler, browser, and temporary sites. [Managed browser build setup](runtime.md#build-and-reload-a-browser-app-in-vs-code)
 
+### Debug a browser app with MCP
+
+1. Call `ferroui_browser_run` with the profile and `debug: true`. The managed Chromium session reports `browser.debuggable`. VS Code attaches its JavaScript Debug adapter after the first accepted frame.
+2. Read `ferroui_app_sessions` before attaching again. Call `ferroui_browser_debug` with the same `runtime` and the accepted `generation` as `expected_generation`. The tool uses the profile's owned Chromium instance and selects the current page.
+3. For development profiles, keep the debugger active through a save or call `ferroui_browser_rebuild`. FerroUI reattaches after a successful replacement frame. Start or stop the app using the exact browser session ID. [Debug browser host scripts](runtime.md#debug-browser-host-scripts)
+
 ### Control the Live App editor with MCP
 
 1. Open a session from **App Sessions**, or call `ferroui_runtime_open` with an exact `runtime` from `ferroui_app_sessions`.

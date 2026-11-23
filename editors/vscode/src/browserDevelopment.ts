@@ -2,6 +2,7 @@ import { readFile, stat } from 'node:fs/promises';
 import * as path from 'node:path';
 import { Uri } from 'vscode';
 import { buildBrowserSite, resolveBrowserBuild, type BrowserBuildTarget, type BuiltBrowserSite } from './browserBuild';
+import type { BrowserDebugger } from './browserDebug';
 import { BrowserInspection } from './browserInspection';
 import { ManagedBrowser, type BrowserPage } from './browserProcess';
 import { BrowserSites, type PublishedBrowserSite } from './browserSites';
@@ -46,9 +47,11 @@ export class BrowserDevelopment {
     private live?: ActivePage;
 
     constructor(readonly app: DevelopmentBrowserApp, private readonly connections: RuntimeConnections, private readonly history: ReloadHistory,
-        private readonly output: ReloadLog, private readonly publishMetadata: (metadata: ProjectMetadata) => void) {
+        private readonly output: ReloadLog, private readonly publishMetadata: (metadata: ProjectMetadata) => void,
+        readonly appDebugger?: BrowserDebugger) {
         this.discoveryManifest = fileKey(path.resolve(Uri.parse(app.folder, true).fsPath, app.build.manifestPath));
-        this.runtime = connections.beginBrowser({ folder: app.folder, profile: app.id, launched: true, development: true }, app.label).runtime;
+        this.runtime = connections.beginBrowser({ folder: app.folder, profile: app.id, launched: true, development: true,
+            ...(appDebugger ? { debuggable: true } : {}) }, app.label).runtime;
     }
 
     rebuild(delay = 0): void {
@@ -141,6 +144,11 @@ export class BrowserDevelopment {
             activated = true;
             this.connections.updateBrowser(this.runtime, previous ? 'Browser reloaded' : 'Watching browser saves',
                 { url: published.url, pid: browser.pid, endpoint: { channel } });
+            const acceptedGeneration = this.connections.revision(this.runtime);
+            if (browser.debugPort && acceptedGeneration !== undefined) {
+                this.appDebugger?.accepted({ generation: acceptedGeneration, port: browser.debugPort,
+                    url: published.url, hostPage: this.target.hostPage });
+            }
             this.history.observeFrame(generation, { frame: 1, batch: 1, status: 'rendered', unixMs: presented, afterAcknowledgementMs: 0 });
             for (const record of this.changes.values()) {
                 this.history.finish(record, 'rebuilt', browser.pid, undefined, { generation, frame: 1, acknowledgedAt: presented });
@@ -175,7 +183,7 @@ export class BrowserDevelopment {
             await this.browser.close();
             this.browser = undefined;
         }
-        return this.browser ??= await ManagedBrowser.launch(signal);
+        return this.browser ??= await ManagedBrowser.launch(signal, Boolean(this.appDebugger));
     }
 
     private obsolete(): boolean { return this.lifetime.signal.aborted || this.started !== this.requested; }
@@ -195,6 +203,7 @@ export class BrowserDevelopment {
     private async pageEnded(active: ActivePage): Promise<void> {
         if (this.live !== active || this.lifetime.signal.aborted) return;
         this.live = undefined;
+        this.appDebugger?.retire();
         this.connections.updateBrowser(this.runtime, 'Browser page closed', null);
         this.history.endGeneration(active.generation);
         await active.dispose();
@@ -211,6 +220,7 @@ export class BrowserDevelopment {
 
     private async finish(): Promise<void> {
         await this.running;
+        await this.appDebugger?.close();
         for (const record of this.changes.values()) this.history.finish(record, 'stopped');
         if (this.live) {
             this.history.endGeneration(this.live.generation);

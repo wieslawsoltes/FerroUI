@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { BrowserDebugger } from './browserDebug';
 import { BrowserDevelopment } from './browserDevelopment';
 import { BrowserInspection } from './browserInspection';
 import { attachBrowser, launchBrowser, type BrowserPage } from './browserProcess';
@@ -16,6 +17,7 @@ interface Session {
     page: Promise<BrowserPage>;
     stop: AbortController;
     runtime?: AppRuntime;
+    appDebugger?: BrowserDebugger;
     closing?: Promise<void>;
 }
 
@@ -59,29 +61,34 @@ export class BrowserSessions implements vscode.Disposable {
         if (apps.length !== 1) throw new Error('Choose an unambiguous browser app profile.');
         const [app] = apps;
         if (app.build && mode === 'attach') throw new Error('Run this managed browser profile from App Sessions.');
+        if (mode === 'debug' && app.url?.includes('*')) throw new Error('Run and Debug needs an app URL without wildcard characters.');
         const key = mode === 'attach' ? `page:${app.debugPort}:${app.url}` : `run:${app.folder}:${app.id}`;
         const current = this.sessions.get(key) ?? this.development.get(key);
         if (current) {
             const ready = current.runtime && this.connections.describe(current.runtime);
-            if (ready && sameProfile(current.app, app)) return ready;
+            if (ready && sameProfile(current.app, app)) {
+                if (mode === 'debug' && !ready.browser?.debuggable) throw new Error('Stop this browser session before choosing Run and Debug Browser App.');
+                if (mode === 'debug' && ready.generation !== null) return this.debug(ready.runtime, ready.generation);
+                return ready;
+            }
             throw new Error('Close the current browser session before opening this profile.');
         }
+        const appDebugger = mode === 'debug' ? new BrowserDebugger(app, this.outputChannel()) : undefined;
         if (app.build) {
-            this.output ??= vscode.window.createOutputChannel('FerroUI Browser Reload');
-            const session = new BrowserDevelopment(app, this.connections, this.history, new ReloadLog(this.output), this.publish);
+            const session = new BrowserDevelopment(app, this.connections, this.history, new ReloadLog(this.outputChannel()), this.publish, appDebugger);
             this.development.set(key, session);
             session.rebuild();
             return this.connections.describe(session.runtime)!;
         }
-        return this.openServed(app, key, mode, signal);
+        return this.openServed(app, key, mode, signal, appDebugger);
     }
 
-    private async openServed(app: ServedBrowserApp, key: string, mode: BrowserMode, signal: AbortSignal): Promise<RuntimeSummary> {
+    private async openServed(app: ServedBrowserApp, key: string, mode: BrowserMode, signal: AbortSignal, appDebugger?: BrowserDebugger): Promise<RuntimeSummary> {
         const stop = new AbortController();
         const timeout = AbortSignal.timeout(30_000);
         const active = AbortSignal.any([signal, this.lifetime.signal, stop.signal, timeout]);
-        const page = mode === 'run' ? launchBrowser(app, active) : attachBrowser(app, active);
-        const session: Session = { app, page, stop };
+        const page = mode === 'attach' ? attachBrowser(app, active) : launchBrowser(app, active, Boolean(appDebugger));
+        const session: Session = { app, page, stop, appDebugger };
         this.sessions.set(key, session);
         try {
             const browser = await page;
@@ -90,15 +97,32 @@ export class BrowserSessions implements vscode.Disposable {
             await verifyRuntime({ channel }, active);
             active.throwIfAborted();
             const runtime = this.connections.addPlatform({ kind: 'browser', browser: {
-                folder: app.folder, profile: app.id, url: app.url, launched: mode === 'run',
+                folder: app.folder, profile: app.id, url: app.url, launched: mode !== 'attach',
+                ...(appDebugger ? { debuggable: true } : {}),
             } }, app.label, { channel });
             session.runtime = runtime.runtime;
+            if (browser.debugPort && runtime.generation !== null) appDebugger?.accepted({
+                port: browser.debugPort, url: app.url, generation: runtime.generation,
+            });
             return runtime;
         } catch (error) {
             await this.close(key, session).catch(problem => console.warn(problem));
             if (timeout.aborted && !signal.aborted && !this.lifetime.signal.aborted) throw new Error('Timed out connecting the browser app.');
             throw error;
         }
+    }
+
+    async debug(runtime: AppRuntime, generation: number): Promise<RuntimeSummary> {
+        this.requireWorkspace();
+        const session = this.connections.describe(runtime);
+        if (session?.kind !== 'browser' || session.generation !== generation) throw new Error('Use the current accepted browser generation.');
+        const appDebugger = this.developmentFor(runtime)?.[1].appDebugger
+            ?? [...this.sessions.values()].find(item => item.runtime === runtime)?.appDebugger;
+        if (!appDebugger) throw new Error('Start this profile with Run and Debug Browser App.');
+        await appDebugger.attach(generation);
+        const current = this.connections.describe(runtime);
+        if (!current) throw new Error('The browser session closed while attaching the debugger.');
+        return current;
     }
 
     async stop(runtime: AppRuntime): Promise<void> {
@@ -124,6 +148,10 @@ export class BrowserSessions implements vscode.Disposable {
 
     showOutput(): void { this.output?.show(true); }
 
+    private outputChannel(): vscode.OutputChannel {
+        return this.output ??= vscode.window.createOutputChannel('FerroUI Browser Reload');
+    }
+
     private developmentFor(runtime: AppRuntime) {
         return [...this.development].find(([, session]) => session.runtime === runtime);
     }
@@ -148,7 +176,10 @@ export class BrowserSessions implements vscode.Disposable {
         if (session.closing) return session.closing;
         session.stop.abort(new Error('The browser app session has closed.'));
         if (session.runtime) this.connections.removePlatform(session.runtime);
-        session.closing = session.page.catch(() => undefined).then(page => page?.close()).finally(() => {
+        session.closing = (async () => {
+            try { await session.appDebugger?.close(); }
+            finally { await (await session.page.catch(() => undefined))?.close(); }
+        })().finally(() => {
             if (this.sessions.get(key) === session) this.sessions.delete(key);
         });
         return session.closing;

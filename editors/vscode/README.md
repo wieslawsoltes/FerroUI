@@ -94,6 +94,8 @@ For Browser Live App, build and serve the Dispatch Desk debug example. Run `npm 
 
 Run `npm test` with `FERROUI_TEST_BROWSER_BUILD=1` and the browser toolchain active to check managed builds. The test creates an independent Cargo project and saves XAML and Rust from VS Code. It checks compiler and startup failures, superseded pages, state, source reveal, and cleanup in Chromium. Set `CARGO_TARGET_DIR` to reuse a browser build cache. Set `FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS` if the acceptance run uses a shared build queue or a slower workspace host. [Managed browser workflow](../../docs/designer/vscode/runtime.md#build-and-reload-a-browser-app-in-vs-code)
 
+Set `FERROUI_TEST_BROWSER_DEBUG_SITE` to the compiled Dispatch Desk site to check JavaScript debugging with `npm test`. The test stages the compiled Wasm app with an authored browser script and uses VS Code JavaScript Debug to verify real breakpoints, a failed replacement, debugger handoff, stale-generation rejection, and cleanup. [Debug browser host scripts](../../docs/designer/vscode/runtime.md#debug-browser-host-scripts)
+
 Build a platform VSIX from the repository root, then install it using **Extensions: Install from VSIX**. Pass the native output directory of your own toolchain when using a custom Cargo target directory.
 
 ```sh

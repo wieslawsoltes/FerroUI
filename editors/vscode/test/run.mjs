@@ -5,6 +5,7 @@ import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { testVSCodeExecutable } from './vscodeDownload.mjs';
 import { browserBuildWorkspace } from './browserBuildWorkspace.mjs';
+import { browserDebugWorkspace } from './browserDebugWorkspace.mjs';
 
 const extension = fileURLToPath(new URL('../', import.meta.url));
 const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-vscode-'));
@@ -16,11 +17,12 @@ const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const browser = process.env.FERROUI_TEST_BROWSER_URL;
 const browserBuild = process.env.FERROUI_TEST_BROWSER_BUILD;
+const browserDebugSite = process.env.FERROUI_TEST_BROWSER_DEBUG_SITE;
 try {
     let target = workspace;
     let targetSettings = {};
     let targetEnv;
-    if ([simulator, android, browser, browserBuild].filter(Boolean).length > 1) throw new Error('Choose one platform acceptance fixture per run.');
+    if ([simulator, android, browser, browserBuild, browserDebugSite].filter(Boolean).length > 1) throw new Error('Choose one platform acceptance fixture per run.');
     if (simulator) {
         const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
         if (process.platform !== 'darwin' || !appPath) {
@@ -45,7 +47,7 @@ try {
             }],
         };
         targetEnv = { FERROUI_TEST_ANDROID_DEVICE: android };
-    } else if (browser || browserBuild) {
+    } else if (browser || browserBuild || browserDebugSite) {
         const chrome = process.env.FERROUI_TEST_BROWSER_EXECUTABLE;
         const toolkit = resolve(process.env.FERROUI_TEST_BROWSER_SOURCE ?? join(extension, '../..'));
         targetSettings = { ...(chrome ? { 'ferroui.browser.executablePath': resolve(chrome) } : {}) };
@@ -56,6 +58,11 @@ try {
             targetEnv = { FERROUI_TEST_BROWSER_BUILD: browserBuild, CARGO_TARGET_DIR: process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo') };
             const buildTimeout = process.env.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS;
             if (buildTimeout) targetEnv.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS = buildTimeout;
+        } else if (browserDebugSite) {
+            const debugToolkit = await browserDebugWorkspace(workspace, sandbox, resolve(browserDebugSite));
+            targetSettings['ferroui.browser.apps'] = [{ id: 'debug-dispatch', label: 'Dispatch Desk',
+                build: { application: 'live_inspector', toolchain: debugToolkit } }];
+            targetEnv = { FERROUI_TEST_BROWSER_DEBUG: '1', CARGO_TARGET_DIR: join(sandbox, 'cargo') };
         } else {
             target = toolkit;
             targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-desk', label: 'Dispatch Desk', url: browser }];
