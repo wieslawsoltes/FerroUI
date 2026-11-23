@@ -1014,7 +1014,10 @@ impl ProGpuDrawingContext {
         }
         // Under a clip with a texture: the shadow is drawn in a layer that clip masks.
         if !self.analytic.is_empty() {
-            notes::note_once("inset-shadow-mask", "an inset shadow under more nested rounded clips than one chain holds is not drawn by the ProGPU backend");
+            notes::note_once(
+                "inset-shadow-mask",
+                "an inset shadow under more nested rounded clips than one chain holds is not drawn",
+            );
             return;
         }
         let saved = self.current;
@@ -1031,7 +1034,13 @@ impl ProGpuDrawingContext {
     }
 
     /// The frame around the shape, blurred and seen through `mask`.
-    fn draw_inset_shadow(&mut self, rect: &RoundedRect, shadow: &ferroui_base::media::BoxShadow, sigma: f32, mask: u32) {
+    fn draw_inset_shadow(
+        &mut self,
+        rect: &RoundedRect,
+        shadow: &ferroui_base::media::BoxShadow,
+        sigma: f32,
+        mask: u32,
+    ) {
         let reach = 3.0 * f64::from(sigma) + shadow.offset_x.abs().max(shadow.offset_y.abs()) + shadow.spread.abs() + 1.0;
         let hole = Self::spread_rect(rect, -shadow.spread, shadow.offset_x, shadow.offset_y);
         let frame = Self::frame_path(rect.rect.inflate(reach), &hole);
@@ -1181,7 +1190,10 @@ impl ProGpuDrawingContext {
             return;
         }
         let Some((brush, stops)) = Self::gradient_record(mask, bounds) else {
-            notes::note_once("opacity-mask", "an opacity mask of a brush of an unknown kind is not applied by the ProGPU backend");
+            notes::note_once(
+                "opacity-mask",
+                "an opacity mask of a brush of an unknown kind is not applied by the ProGPU backend",
+            );
             self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
             return;
         };

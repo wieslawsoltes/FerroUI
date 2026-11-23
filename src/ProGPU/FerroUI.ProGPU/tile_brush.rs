@@ -188,7 +188,13 @@ impl ProGpuDrawingContext {
     }
 
     /// The tile of an image: the image placed in one tile by the stretch and alignment.
-    fn image_tile(&mut self, brush: &dyn ITileBrush, image: &dyn IBitmapImpl, target: Rect, opacity: f32) -> Option<TilePaint> {
+    fn image_tile(
+        &mut self,
+        brush: &dyn ITileBrush,
+        image: &dyn IBitmapImpl,
+        target: Rect,
+        opacity: f32,
+    ) -> Option<TilePaint> {
         let (scale_x, scale_y) = self.tile_scale();
         let dpi = Vector::new(96.0 * scale_x, 96.0 * scale_y);
         let image_size = image.pixel_size();
@@ -273,7 +279,8 @@ impl ProGpuDrawingContext {
             return None;
         }
         if source.size() != tile {
-            let scale = MediaExtensions::calculate_scaling(brush.stretch(), tile, source.size(), StretchDirection::Both);
+            let scale =
+                MediaExtensions::calculate_scaling(brush.stretch(), tile, source.size(), StretchDirection::Both);
             let alignment = TileBrushCalculator::calculate_translate_sizes(
                 brush.alignment_x(),
                 brush.alignment_y(),
