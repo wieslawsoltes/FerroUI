@@ -78,7 +78,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             startup.throwIfAborted();
             workspaceFolders(app.folder);
             if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
-            const runtime = this.connections.addDevice({ kind: 'simulator', simulator: { device: device.id, name: device.name,
+            const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: { device: device.id, name: device.name,
                 system: device.system, profile: app.id, bundleId: app.bundleId } }, `${app.label} · ${device.name}`, endpoint);
             launch.runtime = runtime.runtime;
             return runtime;
@@ -99,7 +99,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
 
     private async stopLaunch(key: string, launch: Launch): Promise<void> {
         launch.cancellation.abort(new Error('The simulator launch stopped.'));
-        if (launch.runtime) this.connections.removeDevice(launch.runtime);
+        if (launch.runtime) this.connections.removePlatform(launch.runtime);
         await launch.process?.stop();
         this.removeLaunch(key, launch);
     }
@@ -107,7 +107,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
     private removeLaunch(key: string, launch: Launch): void {
         if (this.launches.get(key) !== launch) return;
         this.launches.delete(key);
-        if (launch.runtime) this.connections.removeDevice(launch.runtime);
+        if (launch.runtime) this.connections.removePlatform(launch.runtime);
     }
 
     private requireWorkspace(): void {

@@ -232,15 +232,15 @@ Limits: 1 MiB incoming messages, 16 transport workers, 64 HTTP sessions, 10,000 
 levels, 60-second condition waits, and 16-megapixel screenshots at scales 0.1–4. These limits and
 argument schemas are checked before mutation. Prefer a scoped node ID for large trees.
 
-## Browser bridge assessment
+## Browser Live App
 
-The browser page must not host a TCP/stdin server. `ferroui-mcp` is a native-host dependency and
-is not added to `ControlCatalog.Browser`. The transport-independent inspector can be called on
-the browser's UI thread by a future Emscripten/page adapter: send a JSON tool request through the
-page, execute it with the same permissions and weak IDs, and return JSON or a PNG payload. A host
-MCP/CDP bridge can then own authentication, session management, timeouts and polling. This avoids
-introducing a second native inspection protocol. Implementing that page/CDP bridge belongs to
-the separate CDP work; this change evaluates the boundary and provides the shared core.
+Debug WebAssembly apps can enable `ferroui-browser`’s `live-inspector` feature and register the app
+host element with `live_inspector::install`. This connects the browser’s UI thread to
+`ferroui-inspect` with the app’s chosen input and property permissions. The workspace extension
+host uses Chromium’s DevTools connection to read the page’s inspector and capture the rendered app
+frame. It publishes the browser session through the VS Code editor MCP server. Use the session’s
+runtime ID and generation with `ferroui_runtime_tools`, `ferroui_runtime_query`, and
+`ferroui_runtime_call`. [Browser setup](designer/vscode/runtime.md#run-or-attach-a-browser-app) · [Browser app MCP tools](designer/vscode/reference.md#run-or-attach-a-browser-app-with-mcp)
 
 ## Verification
 

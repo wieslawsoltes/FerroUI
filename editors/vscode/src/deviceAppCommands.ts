@@ -1,17 +1,16 @@
 import * as vscode from 'vscode';
 import type { AndroidSessions } from './androidSessions';
 import { hasAndroidProfiles, type AndroidMode, type AndroidRequest } from './androidTargets';
+import { connectApp } from './connectApp';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
 import type { IosSimulatorRun } from './iosSimulatorTargets';
-import { errorMessage } from './protocol';
-import type { RuntimeSummary } from './runtimeConnections';
 import type { AppRuntime } from './runtimeTargets';
 
 export class DeviceAppCommands implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
 
     constructor(private readonly ios: IosSimulatorSessions, private readonly android: AndroidSessions,
-        private readonly open: (runtime: AppRuntime) => void) {
+        open: (runtime: AppRuntime) => void) {
         const context = () => {
             void vscode.commands.executeCommand('setContext', 'ferroui.mobileAppProfiles', this.ios.supported || hasAndroidProfiles());
         };
@@ -22,9 +21,9 @@ export class DeviceAppCommands implements vscode.Disposable {
             vscode.workspace.onDidChangeConfiguration(event => { if (event.affectsConfiguration('ferroui.android.apps')) context(); }),
             vscode.commands.registerCommand('ferroui.appSessions.mobile', () => this.chooseAction()),
             vscode.commands.registerCommand('ferroui.iosSimulator.run', (selection?: IosSimulatorRun) =>
-                this.connect('Connecting to the iOS simulator app', () => selection ?? this.chooseIosApp(), (request, signal) => this.ios.start(request, signal))),
+                connectApp('Connecting to the iOS simulator app', () => selection ?? this.chooseIosApp(), (request, signal) => this.ios.start(request, signal), open)),
             ...(['run', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
-                this.connect('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode), (request, signal) => this.android.open(request, mode, signal)))),
+                connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode), (request, signal) => this.android.open(request, mode, signal), open))),
         ];
     }
 
@@ -38,24 +37,6 @@ export class DeviceAppCommands implements vscode.Disposable {
         const action = actions.length === 1 ? actions[0]
             : await vscode.window.showQuickPick(actions, { title: 'Open Mobile App', placeHolder: 'Choose a device workflow' });
         if (action) await vscode.commands.executeCommand(action.command);
-    }
-
-    private async connect<T>(title: string, choose: () => T | Promise<T | undefined>,
-        launch: (request: T, signal: AbortSignal) => Promise<RuntimeSummary>): Promise<void> {
-        try {
-            const request = await choose();
-            if (!request) return;
-            const runtime = await vscode.window.withProgress({ title, location: vscode.ProgressLocation.Notification, cancellable: true },
-                async (_, token) => {
-                    const controller = new AbortController();
-                    const subscription = token.onCancellationRequested(() => controller.abort());
-                    if (token.isCancellationRequested) controller.abort();
-                    try { return await launch(request, controller.signal); }
-                    catch (error) { if (!controller.signal.aborted) throw error; }
-                    finally { subscription.dispose(); }
-                });
-            if (runtime) this.open(runtime.runtime);
-        } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
     }
 
     private async chooseIosApp(): Promise<IosSimulatorRun | undefined> {

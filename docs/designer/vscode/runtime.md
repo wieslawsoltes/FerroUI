@@ -232,9 +232,49 @@ For your own app, enable the `live-inspector` feature of `ferroui-android` and i
 
 ![Service Review running on the Android 16 emulator, beside its Rust source and native visual tree in VS Code](../images/vscode-android-live-app.png)
 
+### Run or attach a browser app
+
+Install Chrome or Chromium and the FerroUI browser toolchain on the workspace host. Open a trusted workspace. To try Dispatch Desk from the FerroUI repository root, build its debug site and serve it on loopback:
+
+```sh
+scripts/build-browser.sh live_inspector --debug --features inspector-example
+node scripts/browser/serve.mjs target/browser-inspector-example/live_inspector --port 8080
+```
+
+Add a profile in the owning workspace folder’s settings. Use the full URL that Chromium displays after the page loads. The optional `width` and `height` set the managed viewport in CSS pixels and default to 960 × 620.
+
+```json
+{
+  "ferroui.browser.apps": [
+    {
+      "id": "dispatch-desk",
+      "label": "Dispatch Desk",
+      "url": "http://127.0.0.1:8080/"
+    }
+  ]
+}
+```
+
+1. In **App Sessions**, choose the globe icon for **Open Browser App**, then **Run Browser App**. Pick the profile. VS Code starts a disposable Chromium instance on the workspace host and opens the Live App editor after the first frame is ready. Set `ferroui.browser.executablePath` in user settings if Chromium is installed at a custom location.
+2. Use **Inspect** to browse the visual, logical, or accessibility tree, then select a control to view its properties. Use **Interact** to click **Mark dispatched** and see the count and browser frame update. Use **Reveal Source** or **Apply to Source** when the browser build carries matching authored locations. To pick up changes to the compiled app, stop the session, rebuild the site, and run the profile again.
+3. To inspect a tab you already opened, start Chrome or Chromium with a dedicated `--user-data-dir` and a loopback `--remote-debugging-port`. Add that port as `debugPort` in the app profile and open one tab at its exact URL. Choose **Attach to Browser App**. Use **Stop or Disconnect This App** to close the managed Chromium instance or leave an attached tab running. Reloading or leaving the attached page ends its Live App session. Attach again to inspect the new page.
+
+For example, with `chromium` on `PATH`, open a dedicated debug profile like this:
+
+```sh
+chromium --user-data-dir=/tmp/ferroui-debug-profile --remote-debugging-address=127.0.0.1 \
+  --remote-debugging-port=9222 http://127.0.0.1:8080/
+```
+
+Use `"debugPort": 9222` in the matching VS Code profile. Keep this profile for local development. [Chromium debugging profiles](https://developer.chrome.com/blog/remote-debugging-port)
+
+The app opts in through the `live-inspector` feature of `ferroui-browser`. On the UI thread after platform setup, call `ferroui_browser::live_inspector::install` with the element ID passed to `start_browser_app` and the app permissions. Keep the returned handle alive while the view is available. For RSX source reveal and mapped edits, call `ferroui_view::hot::enable_editor_source_locations()` before mounting the controls. [Browser toolchain](../../porting/browser-platform.md) · [Browser app MCP tools](reference.md#run-or-attach-a-browser-app-with-mcp)
+
+![Dispatch Desk running in Chromium after a click in VS Code Live App, with Rust source, the visual tree, and the selected heading's Text property](../images/vscode-browser-live-app.png)
+
 ## Inspect the actual window in Live App
 
-1. Start a managed desktop target, open a mobile app from App Sessions, or choose **FerroUI: Connect to Running MCP Server** for an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.
+1. Start a managed desktop target, open a mobile or browser app from App Sessions, or choose **FerroUI: Connect to Running MCP Server** for an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.
 2. In **Inspect**, select a control in the native frame or browse the visual, logical, and accessibility trees. Alt+click chooses among overlapping native hits. Read properties, their effective style values, resources, accessible names, roles, and native diagnostics. Switch to **Interact** for clicks, scroll, text, or keys when the app permits input.
 3. Try a property override in the inspector. Just the running session receives the override. Use **Reveal Source** to locate the authored value. When the current revision and source mapping match, use **Apply to Source** to write the supported RSX literal or XAML value into the editor. Review it, then save if you want hot reload to apply the source change.
 

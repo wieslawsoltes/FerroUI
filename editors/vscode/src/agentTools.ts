@@ -26,6 +26,7 @@ import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorRun } from './iosSimulatorTargets';
 import type { AndroidRequest } from './androidTargets';
+import type { BrowserRequest } from './browserTargets';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
@@ -254,6 +255,14 @@ export class AgentTools {
         }
         if (tool === 'ferroui_android_stop') {
             await this.appSessions.android.stop(args.runtime as AppRuntime);
+            return { closed: true };
+        }
+        if (tool === 'ferroui_browser_targets') return this.appSessions.browser.targets((input as { folder?: string }).folder);
+        if (tool === 'ferroui_browser_run' || tool === 'ferroui_browser_attach') {
+            return this.appSessions.browser.open(input as BrowserRequest, tool === 'ferroui_browser_run' ? 'run' : 'attach', signal);
+        }
+        if (tool === 'ferroui_browser_stop') {
+            await this.appSessions.browser.stop(args.runtime as AppRuntime);
             return { closed: true };
         }
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);

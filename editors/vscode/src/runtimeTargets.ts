@@ -1,4 +1,4 @@
-export type RuntimeKind = 'managed' | 'attached' | 'simulator' | 'android';
+export type RuntimeKind = 'managed' | 'attached' | 'simulator' | 'android' | 'browser';
 export type AppRuntime = `${RuntimeKind}:${string}`;
 export type RuntimeTarget = 'managed' | 'attached' | AppRuntime;
 
@@ -20,11 +20,20 @@ export interface AndroidRuntimeTarget {
     pid: number;
 }
 
-export type DeviceRuntime = { kind: 'simulator'; simulator: IosRuntimeTarget } | { kind: 'android'; android: AndroidRuntimeTarget };
+export interface BrowserRuntimeTarget {
+    folder: string;
+    profile: string;
+    url: string;
+    launched: boolean;
+}
+
+export type PlatformRuntime = { kind: 'simulator'; simulator: IosRuntimeTarget }
+    | { kind: 'android'; android: AndroidRuntimeTarget } | { kind: 'browser'; browser: BrowserRuntimeTarget };
 
 export function runtimeKind(target: RuntimeTarget): RuntimeKind {
     if (target === 'managed' || target.startsWith('managed:')) return 'managed';
     if (target.startsWith('android:')) return 'android';
+    if (target.startsWith('browser:')) return 'browser';
     return target.startsWith('simulator:') ? 'simulator' : 'attached';
 }
 

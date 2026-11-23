@@ -1,9 +1,9 @@
 import { randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
-import { RuntimeClient } from './runtimeClient';
+import { RuntimeClient, type RuntimeEndpoint } from './runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
-import type { AndroidRuntimeTarget, AppRuntime, DeviceRuntime, IosRuntimeTarget, RuntimeKind, RuntimeTarget } from './runtimeTargets';
+import type { AndroidRuntimeTarget, AppRuntime, BrowserRuntimeTarget, IosRuntimeTarget, PlatformRuntime, RuntimeKind, RuntimeTarget } from './runtimeTargets';
 
 export type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 
@@ -18,10 +18,11 @@ export interface RuntimeSummary {
     app_session?: string;
     simulator?: IosRuntimeTarget;
     android?: AndroidRuntimeTarget;
+    browser?: BrowserRuntimeTarget;
 }
 
-interface Connection { endpoint: RuntimeMcpEndpoint; generation: number }
-type ExternalKind = DeviceRuntime | { kind: 'attached' };
+interface Connection { endpoint: RuntimeEndpoint; generation: number }
+type ExternalKind = PlatformRuntime | { kind: 'attached' };
 interface Attachment extends Connection { runtime: AppRuntime; label: string; target: ExternalKind }
 
 /** Credentials stay in the workspace extension host. Public summaries use stable session IDs. */
@@ -51,8 +52,7 @@ export class RuntimeConnections implements vscode.Disposable {
         }));
         return managed.concat([...this.external.values()].map(({ runtime, label, generation, target }): RuntimeSummary => ({
             ...target, runtime, label, generation, available: true,
-            status: target.kind === 'simulator' ? target.simulator.system : target.kind === 'android'
-                ? (target.android.emulator ? 'Android emulator' : 'Android device') : 'Attached application',
+            status: externalStatus(target),
             ...(target.kind === 'android' ? { pid: target.android.pid } : {}),
         })));
     }
@@ -69,15 +69,15 @@ export class RuntimeConnections implements vscode.Disposable {
         return this.targets().find(summary => summary.runtime === runtime);
     }
 
-    endpoints(): { target: RuntimeSummary; endpoint: RuntimeMcpEndpoint }[] {
+    httpEndpoints(): { target: RuntimeSummary; endpoint: RuntimeMcpEndpoint }[] {
         return this.targets().flatMap(target => {
             const endpoint = this.get(target.runtime);
-            return endpoint ? [{ target, endpoint }] : [];
+            return endpoint && 'url' in endpoint ? [{ target, endpoint }] : [];
         });
     }
 
     revision(target: RuntimeTarget): number | undefined { return this.connection(target)?.generation; }
-    get(target: RuntimeTarget): RuntimeMcpEndpoint | undefined { return this.connection(target)?.endpoint; }
+    get(target: RuntimeTarget): RuntimeEndpoint | undefined { return this.connection(target)?.endpoint; }
 
     session(target: RuntimeTarget) {
         const runtime = this.resolve(target);
@@ -111,7 +111,7 @@ export class RuntimeConnections implements vscode.Disposable {
         }
         cancellation.throwIfAborted();
         if (!this.trusted()) throw new Error('The trusted workspace closed while connecting.');
-        const existing = this.attachments().find(item => item.endpoint.url === endpoint);
+        const existing = this.attachments().find(item => 'url' in item.endpoint && item.endpoint.url === endpoint);
         const runtime: AppRuntime = existing?.runtime ?? `attached:${randomUUID()}`;
         const label = name?.trim() || existing?.label || `Attached · ${new URL(endpoint).host}`;
         this.external.set(runtime, { runtime, label, endpoint: { url: endpoint, token }, generation: ++this.nextGeneration, target: { kind: 'attached' } });
@@ -125,20 +125,21 @@ export class RuntimeConnections implements vscode.Disposable {
         if (!attachment) throw new Error('Select an attached app session.');
         if (attachment.target.kind === 'simulator') throw new Error('Stop this iOS simulator app from App Sessions or with ferroui_ios_simulator_stop.');
         if (attachment.target.kind === 'android') throw new Error('Close this Android session from App Sessions or with ferroui_android_stop.');
+        if (attachment.target.kind === 'browser') throw new Error('Close this browser session from App Sessions or with ferroui_browser_stop.');
         this.external.delete(runtime);
         if (this.activeAttachment === runtime) this.activeAttachment = this.attachments().at(-1)?.runtime;
         this.changed.fire();
     }
 
-    addDevice(target: DeviceRuntime, label: string, endpoint: RuntimeMcpEndpoint): RuntimeSummary {
-        if (!this.trusted()) throw new Error('Open a trusted workspace before connecting a device.');
+    addPlatform(target: PlatformRuntime, label: string, endpoint: RuntimeEndpoint): RuntimeSummary {
+        if (!this.trusted()) throw new Error('Open a trusted workspace before connecting an app.');
         const runtime: AppRuntime = `${target.kind}:${randomUUID()}`;
         this.external.set(runtime, { runtime, label, endpoint, target, generation: ++this.nextGeneration });
         this.changed.fire();
         return this.describe(runtime)!;
     }
 
-    removeDevice(runtime: AppRuntime): void {
+    removePlatform(runtime: AppRuntime): void {
         const connection = this.external.get(runtime);
         if (connection && connection.target.kind !== 'attached' && this.external.delete(runtime)) this.changed.fire();
     }
@@ -209,5 +210,14 @@ export class RuntimeConnections implements vscode.Disposable {
         this.managed.clear();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.changed.dispose();
+    }
+}
+
+function externalStatus(target: ExternalKind): string {
+    switch (target.kind) {
+        case 'attached': return 'Attached application';
+        case 'simulator': return target.simulator.system;
+        case 'android': return target.android.emulator ? 'Android emulator' : 'Android device';
+        case 'browser': return target.browser.launched ? 'Managed Chromium' : 'Attached Chromium tab';
     }
 }

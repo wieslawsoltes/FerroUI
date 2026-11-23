@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { RuntimeSource } from './runtimeProtocol';
 import { resolveWorkspaceFile, workspaceSourceUri } from './workspacePaths';
 
-/** Resolve compiler paths on the workspace host when the app runs on a device. */
+/** Resolve compiler paths on the workspace host when the app cannot access the host filesystem. */
 export async function runtimeSourceUri(source: RuntimeSource): Promise<vscode.Uri | undefined> {
     if (typeof source.uri === 'string') {
         try { return await workspaceSourceUri(vscode.Uri.parse(source.uri, true)); }

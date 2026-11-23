@@ -1,5 +1,7 @@
 import * as vscode from 'vscode';
 import type { AndroidSessions } from './androidSessions';
+import { BrowserAppCommands } from './browserAppCommands';
+import type { BrowserSessions } from './browserSessions';
 import { DeviceAppCommands } from './deviceAppCommands';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
@@ -18,7 +20,8 @@ export class AppSessions implements vscode.Disposable {
     readonly mcp: RuntimeMcpActions;
 
     constructor(private readonly reload: HotReload, private readonly connections: RuntimeConnections,
-        private readonly panels: RuntimePanels, readonly simulators: IosSimulatorSessions, readonly android: AndroidSessions) {
+        private readonly panels: RuntimePanels, readonly simulators: IosSimulatorSessions, readonly android: AndroidSessions,
+        readonly browser: BrowserSessions) {
         this.mcp = new RuntimeMcpActions(connections);
         const view = vscode.window.createTreeView<AppItem>('ferroui.appSessions', { treeDataProvider: {
             onDidChangeTreeData: this.changed.event,
@@ -50,6 +53,7 @@ export class AppSessions implements vscode.Disposable {
             reload.onDidChangeRuns(refresh), connections.onDidChange(refresh),
             vscode.commands.registerCommand('ferroui.showAppSessions', () => vscode.commands.executeCommand('ferroui.appSessions.focus')),
             new DeviceAppCommands(simulators, android, runtime => this.open(runtime)),
+            new BrowserAppCommands(browser, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
             managed('select'), managed('rebuild'), managed('debug'), managed('showOutput'),
             command('stop', session => this.stop(session)),
@@ -66,6 +70,7 @@ export class AppSessions implements vscode.Disposable {
         if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.stop', session.app_session);
         if (session.kind === 'simulator') return this.simulators.stop(session.runtime);
         if (session.kind === 'android') return this.android.stop(session.runtime);
+        if (session.kind === 'browser') return this.browser.stop(session.runtime);
         return vscode.commands.executeCommand('ferroui.mcp.detach', session.runtime);
     }
 
@@ -79,7 +84,7 @@ export class AppSessions implements vscode.Disposable {
         item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
         const problem = run && 'problem' in run && run.problem;
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : selected ? 'play-circle'
-            : session.kind === 'attached' ? 'plug' : session.kind === 'simulator' || session.kind === 'android' ? 'device-mobile' : 'run');
+            : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
         item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         item.command = { command: 'ferroui.appSessions.preview', title: 'Open Live App', arguments: [session.runtime] };
         return item;

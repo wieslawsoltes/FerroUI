@@ -118,7 +118,7 @@ export class AndroidSessions implements vscode.Disposable {
         workspaceFolders(app.folder);
         signal.throwIfAborted();
         const { device } = bridge;
-        const runtime = this.connections.addDevice({ kind: 'android', android: { device: device.id, name: device.name,
+        const runtime = this.connections.addPlatform({ kind: 'android', android: { device: device.id, name: device.name,
             emulator: device.emulator, profile: app.id, packageId, launched: mode === 'run', pid: receipt.pid } },
         `${app.label} · ${device.name}`, session.forward.endpoint);
         session.runtime = runtime.runtime;
@@ -162,7 +162,7 @@ export class AndroidSessions implements vscode.Disposable {
     private close(key: string, session: Session, terminate: boolean): Promise<void> {
         if (session.closing) return session.closing;
         session.stop.abort(new Error('The Android app session closed.'));
-        if (session.runtime) this.connections.removeDevice(session.runtime);
+        if (session.runtime) this.connections.removePlatform(session.runtime);
         return session.closing = (async () => {
             await session.ready?.catch(() => {});
             try {

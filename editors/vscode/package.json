@@ -157,6 +157,22 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.appSessions.browser",
+        "title": "Open Browser App",
+        "category": "FerroUI",
+        "icon": "$(globe)"
+      },
+      {
+        "command": "ferroui.browser.run",
+        "title": "Run Browser App",
+        "category": "FerroUI"
+      },
+      {
+        "command": "ferroui.browser.attach",
+        "title": "Attach to Browser App",
+        "category": "FerroUI"
+      },
+      {
         "command": "ferroui.collaboration.host",
         "title": "Host XAML Room…",
         "category": "FerroUI",
@@ -863,6 +879,18 @@
           "when": "isWorkspaceTrusted"
         },
         {
+          "command": "ferroui.appSessions.browser",
+          "when": "isWorkspaceTrusted && ferroui.browserAppProfiles"
+        },
+        {
+          "command": "ferroui.browser.run",
+          "when": "isWorkspaceTrusted"
+        },
+        {
+          "command": "ferroui.browser.attach",
+          "when": "isWorkspaceTrusted"
+        },
+        {
           "command": "ferroui.collaboration.incoming.apply",
           "when": "ferroui.roomApplyReview"
         },
@@ -1229,6 +1257,11 @@
           "group": "navigation@3"
         },
         {
+          "command": "ferroui.appSessions.browser",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted && ferroui.browserAppProfiles",
+          "group": "navigation@4"
+        },
+        {
           "command": "ferroui.hotReload.stopAll",
           "when": "view == ferroui.appSessions && ferroui.hasManagedApps",
           "group": "1_apps"
@@ -1347,7 +1380,7 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser)$/",
           "group": "inline@1"
         },
         {
@@ -1357,7 +1390,7 @@
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser)$/",
           "group": "inline@3"
         },
         {
@@ -1569,6 +1602,31 @@
           "default": false,
           "scope": "resource",
           "description": "Keep existing blank lines between XAML elements."
+        },
+        "ferroui.browser.executablePath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute path to Chrome or Chromium on the workspace host. Leave empty to discover an installed browser."
+        },
+        "ferroui.browser.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Live App profiles for debug builds of FerroUI browser apps served from the workspace host loopback address.",
+          "items": {
+            "type": "object",
+            "required": ["id", "url"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "description": "Unique profile ID in this workspace folder." },
+              "url": { "type": "string", "description": "Exact HTTP or HTTPS app URL on the workspace host loopback address." },
+              "label": { "type": "string", "description": "App name shown in the picker and App Sessions." },
+              "width": { "type": "integer", "default": 960, "minimum": 240, "maximum": 2560, "description": "Managed browser viewport width in CSS pixels." },
+              "height": { "type": "integer", "default": 620, "minimum": 240, "maximum": 1600, "description": "Managed browser viewport height in CSS pixels." },
+              "debugPort": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Loopback Chromium debugging port for an independently started browser profile." }
+            }
+          }
         },
         "ferroui.android.adbPath": {
           "type": "string",

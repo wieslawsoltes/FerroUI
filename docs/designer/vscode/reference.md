@@ -275,6 +275,12 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_android_run` or `ferroui_android_attach`. Pass the device ID as `device`, profile ID as `profile`, and the profile’s `folder`. The tool authenticates the opted-in app and returns its exact `runtime` and `generation` after the first native frame.
 3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s permissions still apply to input and live property writes. Use `ferroui_android_stop` to close that session. Apps started by the run tool stop, and independently started apps remain running. [Configure and run an Android app](runtime.md#run-or-attach-an-android-app)
 
+### Run or attach a browser app with MCP
+
+1. Call `ferroui_browser_targets` to read the workspace browser profiles. Use `folder` when the same profile ID is present in several workspace folders.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_browser_run` with `profile` and its `folder`, or call `ferroui_browser_attach` for a profile with an independently started Chromium tab and debug port. Either action returns the exact `runtime` and `generation` after the first browser frame.
+3. Use `ferroui_runtime_open` to show the session in Live App. Use `ferroui_runtime_tools`, `ferroui_runtime_query`, and `ferroui_runtime_call` to read the shared FerroUI inspector, capture a PNG, and send input where the app permits it. The browser uses the workspace’s editor MCP server. Use `ferroui_browser_stop` with that exact runtime to release the connection. A newly attached document has a new runtime and generation. [Configure a browser app](runtime.md#run-or-attach-a-browser-app)
+
 [App Sessions in the workbench](runtime.md#run-several-app-sessions)
 
 ### Inspect Live App templates with MCP
@@ -512,6 +518,8 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.iosSimulator.apps` | `[]` | Set launch profiles for iOS simulator bundles with an opted-in app inspector. A profile can install the built app before launch. |
 | `ferroui.android.adbPath` | Empty | Select the Android Debug Bridge executable on the workspace host. |
 | `ferroui.android.apps` | `[]` | Set profiles for debuggable Android apps with an opted-in Live App inspector. A profile can install its APK before launching. |
+| `ferroui.browser.executablePath` | Empty | Select a custom Chrome or Chromium executable on the workspace host. |
+| `ferroui.browser.apps` | `[]` | Set browser profiles with an exact loopback `url`, optional managed viewport, and a `debugPort` for attach. |
 | `ferroui.hotReload.cargoPath` | Empty | Choose a specific Cargo executable on the workspace host. |
 | `ferroui.hotReload.registeredSupervisor` | `scripts/hot-reload/supervisor.py` | Choose a workspace-relative script for registered Rust patching and state handoff. |
 | `ferroui.hotReload.pythonPath` | Empty | Select the Python executable for that supervisor. |

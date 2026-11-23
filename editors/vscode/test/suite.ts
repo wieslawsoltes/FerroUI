@@ -16,6 +16,7 @@ import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
 import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
 import { verifyAndroidMcp } from './androidMcp';
+import { verifyBrowserMcp } from './browserMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
@@ -38,6 +39,10 @@ export async function run(): Promise<void> {
     }
     if (process.env.FERROUI_TEST_ANDROID_DEVICE) {
         await verifyAndroidMcp(process.env.FERROUI_TEST_ANDROID_DEVICE);
+        return;
+    }
+    if (process.env.FERROUI_TEST_BROWSER_URL) {
+        await verifyBrowserMcp(process.env.FERROUI_TEST_BROWSER_URL);
         return;
     }
     await verifyRsxRecovery(workspace);

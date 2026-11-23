@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { AndroidSessions } from './androidSessions';
 import { AppSessions } from './appSessions';
 import { AssetMoves } from './assetMoves';
+import { BrowserSessions } from './browserSessions';
 import { CommandBindings } from './commandBindings';
 import { AgentTools } from './agentTools';
 import { FileMoves } from './fileMoves';
@@ -83,13 +84,14 @@ export function activate(context: vscode.ExtensionContext) {
     const runtimes = new RuntimeConnections(reload);
     const simulatorSessions = new IosSimulatorSessions(runtimes);
     const androidSessions = new AndroidSessions(runtimes);
+    const browserSessions = new BrowserSessions(runtimes);
     stopProcesses = async () => {
-        await Promise.all([reload.stop(), simulatorSessions.shutdown(), androidSessions.shutdown(),
+        await Promise.all([reload.stop(), simulatorSessions.shutdown(), androidSessions.shutdown(), browserSessions.shutdown(),
             hosted.dispose(), schemaBuild.dispose(), scenarios.shutdown(), collaboration.shutdown()]);
     };
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanels(context, runtimes, reload, runtimeSource);
-    const appSessions = new AppSessions(reload, runtimes, liveApp, simulatorSessions, androidSessions);
+    const appSessions = new AppSessions(reload, runtimes, liveApp, simulatorSessions, androidSessions, browserSessions);
     const runtimeProfiles = new RuntimeProfiles(runtimes, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer, runtimeProfiles);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
@@ -102,7 +104,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         designHandoff,
         projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, scenarioReviews, scenarios, designer, collaboration, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, appSessions, reload, runtimes, mcp, languageOutput, previewOutput,
-        simulatorSessions, androidSessions, reload.onDidBuild(publish),
+        simulatorSessions, androidSessions, browserSessions, reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))

@@ -13,11 +13,12 @@ const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../t
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
+const browser = process.env.FERROUI_TEST_BROWSER_URL;
 try {
     let target = workspace;
     let targetSettings = {};
     let targetEnv;
-    if (simulator && android) throw new Error('Choose one device acceptance fixture per run.');
+    if ([simulator, android, browser].filter(Boolean).length > 1) throw new Error('Choose one platform acceptance fixture per run.');
     if (simulator) {
         const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
         if (process.platform !== 'darwin' || !appPath) {
@@ -42,6 +43,13 @@ try {
             }],
         };
         targetEnv = { FERROUI_TEST_ANDROID_DEVICE: android };
+    } else if (browser) {
+        const chrome = process.env.FERROUI_TEST_BROWSER_EXECUTABLE;
+        target = resolve(process.env.FERROUI_TEST_BROWSER_SOURCE ?? join(extension, '../..'));
+        targetSettings = { ...(chrome ? { 'ferroui.browser.executablePath': resolve(chrome) } : {}),
+            'ferroui.browser.apps': [{ id: 'dispatch-desk', label: 'Dispatch Desk', url: browser }],
+        };
+        targetEnv = { FERROUI_TEST_BROWSER_URL: browser };
     } else {
         await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
         const animation = join(workspace, 'animation_view.rs');

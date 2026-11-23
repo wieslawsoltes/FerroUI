@@ -1,10 +1,9 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import { RuntimeClient } from './runtimeClient';
-import type { RuntimeMcpEndpoint } from './runtimeMcp';
+import { RuntimeClient, type RuntimeEndpoint } from './runtimeClient';
 import type { RuntimeNode } from './runtimeProtocol';
 
 /** Authenticate and accept a native frame before publishing a device session. */
-export async function verifyRuntime(endpoint: RuntimeMcpEndpoint, signal: AbortSignal): Promise<void> {
+export async function verifyRuntime(endpoint: RuntimeEndpoint, signal: AbortSignal): Promise<void> {
     const deadline = AbortSignal.any([signal, AbortSignal.timeout(10_000)]);
     const client = new RuntimeClient(endpoint);
     const abort = () => client.dispose();
