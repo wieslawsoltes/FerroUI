@@ -1949,6 +1949,9 @@ dependencies = [
 [[package]]
 name = "ferroui-fonts-web-core"
 version = "0.6.0-preview.1"
+dependencies = [
+ "flate2",
+]
 
 [[package]]
 name = "ferroui-frame-benchmarks"

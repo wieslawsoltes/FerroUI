@@ -56,8 +56,8 @@ struct GlyphWalk {
 
 /// A sanitizer that runs in steps, so that a thread that must stay responsive can give it a
 /// budget at a time.
-pub struct Sanitizer<'a> {
-    data: &'a [u8],
+pub struct Sanitizer<D> {
+    data: D,
     options: SanitizeOptions,
     version: u32,
     records: Vec<TableRecord>,
@@ -68,15 +68,17 @@ pub struct Sanitizer<'a> {
     stage: Stage,
 }
 
-impl<'a> Sanitizer<'a> {
-    /// Reads the directory and the tables everything else depends on.
-    pub fn new(data: &'a [u8], options: SanitizeOptions) -> Result<Self, FontDecodeError> {
-        if data.len() > options.limits.max_decoded_size {
+impl<D: AsRef<[u8]>> Sanitizer<D> {
+    /// Reads the directory and the tables everything else depends on. `data` is the font, owned
+    /// or borrowed.
+    pub fn new(data: D, options: SanitizeOptions) -> Result<Self, FontDecodeError> {
+        let bytes = data.as_ref();
+        if bytes.len() > options.limits.max_decoded_size {
             return Err(FontDecodeError::LimitExceeded("decoded size"));
         }
-        let (version, records) = read_directory(data, options.face_index, &options.limits)?;
+        let (version, records) = read_directory(bytes, options.face_index, &options.limits)?;
         let table = |tag: &Tag| {
-            records.iter().find(|record| record.tag == *tag).map(|record| &data[record.offset..][..record.length])
+            records.iter().find(|record| record.tag == *tag).map(|record| &bytes[record.offset..][..record.length])
         };
         let required = |tag: &'static Tag| table(tag).ok_or(FontDecodeError::MissingTable(*tag));
         let head = parse_head(required(b"head")?).ok_or(FontDecodeError::Malformed("head"))?;
@@ -135,14 +137,14 @@ impl<'a> Sanitizer<'a> {
         })
     }
 
-    fn table_bytes(&self, tag: &Tag) -> Option<&'a [u8]> {
-        let data = self.data;
+    fn table_bytes(&self, tag: &Tag) -> Option<&[u8]> {
+        let data = self.data.as_ref();
         self.records.iter().find(|record| record.tag == *tag).map(|record| &data[record.offset..][..record.length])
     }
 
     /// Decides what happens to one table.
     fn check_table(&self, record: &TableRecord) -> Result<Output, FontDecodeError> {
-        let table = &self.data[record.offset..][..record.length];
+        let table = &self.data.as_ref()[record.offset..][..record.length];
         let tag = &record.tag;
         if !KEPT_TABLES.contains(&tag) {
             return Ok(Output::Drop);
@@ -214,7 +216,7 @@ impl<'a> Sanitizer<'a> {
     }
 
     fn loca_entry(&self, walk: &GlyphWalk, index: usize) -> Option<usize> {
-        let loca = &self.data[walk.loca.offset..][..walk.loca.length];
+        let loca = &self.data.as_ref()[walk.loca.offset..][..walk.loca.length];
         if walk.long_loca {
             loca.u32_at(index * 4).map(|value| value as usize)
         } else {
@@ -228,7 +230,7 @@ impl<'a> Sanitizer<'a> {
             return Ok(Stage::Finish);
         };
         let glyph_count = self.glyph_count as usize;
-        let glyf = &self.data[walk.glyf.offset..][..walk.glyf.length];
+        let glyf = &self.data.as_ref()[walk.glyf.offset..][..walk.glyf.length];
         const MALFORMED: FontDecodeError = FontDecodeError::Malformed("loca");
         while (next as usize) < glyph_count {
             if *budget == 0 {
@@ -273,7 +275,7 @@ impl<'a> Sanitizer<'a> {
     }
 
     fn finish(&mut self) -> Result<Vec<u8>, FontDecodeError> {
-        let data = self.data;
+        let data = self.data.as_ref();
         let mut tables: Vec<(Tag, &[u8])> = Vec::with_capacity(self.records.len());
         for (record, output) in self.records.iter().zip(self.outputs.iter()) {
             match output {
