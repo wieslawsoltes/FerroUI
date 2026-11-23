@@ -421,6 +421,12 @@ does: its visible region, turned and mirrored by `FrameMetadata::orient`. A fram
 mirrored is drawn as one tile (the tile modes are not applied to it). A frame that is not on the
 device of the renderer is never read back: the material is drawn with its colour and counted.
 
+**On Vello (WebGL2).** The same executor draws on the context of the canvas (`web_gl/scene3d.rs` of
+`ferroui-vello`). The renderer of Vello names its objects through `web-sys` and the executor through
+the OpenGL contracts, so an output is read through a framebuffer of the contracts and copied with
+`copyTexSubImage2D` into a texture of the pool, which the scene paints with. Each render takes a new
+texture of the pool, so a scene of the same frame that already paints the old copy keeps it.
+
 The render thread acquires a frame once while something shows it, by `FrameIdentity`, device
 generation and context, so a frame shown flat and on a mesh shares one bitmap, which is disposed
 when the last holder lets it go.

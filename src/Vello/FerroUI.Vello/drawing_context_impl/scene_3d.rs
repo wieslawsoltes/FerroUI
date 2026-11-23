@@ -52,6 +52,10 @@ impl IDrawingContextImplWithScene3D for DrawingContextImpl {
         if self.draw_scene_3d_on_device(frame, transform, size, scale, options.antialiased) {
             return true;
         }
+        #[cfg(feature = "hybrid-webgl")]
+        if self.draw_scene_3d_on_web_gl(frame, transform, size, scale, options.antialiased) {
+            return true;
+        }
 
         let image = OUTPUTS.with(|outputs| {
             outputs.borrow_mut().get_or_render(&frame.scene, size, scale, options, |image| {
@@ -80,6 +84,40 @@ impl IDrawingContextImplWithScene3D for DrawingContextImpl {
         };
         let anti_alias = self.anti_alias();
         self.sink().fill(&rect_path(bounds), Fill::NonZero, transform, &paint, BlendMode::default(), anti_alias);
+        true
+    }
+}
+
+#[cfg(feature = "hybrid-webgl")]
+impl DrawingContextImpl {
+    /// Draws the scene of `frame` on the WebGL2 context of the scene of the context
+    /// (`web_gl/scene3d.rs`): its texture, `size` device pixels at its top left, painted over the
+    /// bounds of the frame. `false` when the scene belongs to no context (a scene of the CPU
+    /// renderer inside a layer) or the context cannot draw it: the CPU reference draws it then.
+    fn draw_scene_3d_on_web_gl(
+        &mut self,
+        frame: &Scene3DFrame,
+        transform: Affine,
+        size: PixelSize,
+        scale: f64,
+        antialiased: bool,
+    ) -> bool {
+        let Some(gpu) = self.scene().web_gl_gpu() else {
+            return false;
+        };
+        let bounds = frame.bounds;
+        let corner = transform * kurbo::Point::new(bounds.x, bounds.y);
+        let origin = (corner.x.round() as i32, corner.y.round() as i32);
+        let pixels = (size.width.max(1) as u32, size.height.max(1) as u32);
+        let Some((texture, (width, height))) = gpu.scene_texture(&frame.scene, pixels, scale, antialiased, origin)
+        else {
+            return false;
+        };
+        let texture_transform = Affine::translate((bounds.x, bounds.y))
+            * Affine::scale_non_uniform(bounds.width / f64::from(width), bounds.height / f64::from(height));
+        let alpha = ((255.0 * self.current_opacity.clamp(0.0, 1.0)) as u8) as f32 / 255.0;
+        let (path, blend, size) = (rect_path(bounds), BlendMode::default(), (width, height));
+        self.sink().fill_with_web_gl_texture(&path, transform, &texture, size, texture_transform, alpha, blend);
         true
     }
 }

@@ -29,6 +29,8 @@
 
 mod frame_textures;
 mod layer_programs;
+#[cfg(feature = "media3d")]
+mod scene3d;
 mod shader_programs;
 
 pub use frame_textures::VelloWebGlTexture;
@@ -100,6 +102,9 @@ struct WebGlState {
     programs: LayerPrograms,
     /// The programs of the shader effects, compiled when first needed.
     shaders: ShaderPrograms,
+    /// The GL executor of 3D scenes and its kept outputs, made when a scene is first drawn.
+    #[cfg(feature = "media3d")]
+    scenes: scene3d::WebGlScenes,
 }
 
 /// The WebGL2 context of a canvas as the Vello backend draws with it: what
@@ -161,6 +166,8 @@ impl VelloWebGlGpu {
                 textures: TexturePool::default(),
                 programs: LayerPrograms::default(),
                 shaders: ShaderPrograms::default(),
+                #[cfg(feature = "media3d")]
+                scenes: scene3d::WebGlScenes::default(),
             })),
         })))
     }
@@ -220,6 +227,8 @@ impl VelloWebGlGpu {
             state.textures.dispose(&self.gl);
             state.programs.dispose(&self.gl);
             state.shaders.dispose(&self.gl);
+            #[cfg(feature = "media3d")]
+            state.scenes.dispose(&self.gl_context);
         }
     }
 
@@ -358,6 +367,26 @@ impl VelloWebGlGpu {
         let target = state.textures.acquire(&self.gl, width, height)?;
         let drawn = state.programs.pass(&self.gl, program, inputs, &target, area, uniforms);
         Ok(drawn.then_some(target))
+    }
+
+    /// The texture of a 3D scene drawn at `size` pixels on the context, with the scene at its top
+    /// left (`scene3d.rs`). `None` when the context cannot draw it: the CPU reference draws it.
+    #[cfg(feature = "media3d")]
+    pub(crate) fn scene_texture(
+        &self,
+        scene: &Arc<ferroui_base::rendering::scene3d::Scene3DSnapshot>,
+        size: (u32, u32),
+        scale: f64,
+        antialiased: bool,
+        origin: (i32, i32),
+    ) -> Option<(Rc<VelloWebGlTexture>, (u32, u32))> {
+        if self.is_context_lost() {
+            return None;
+        }
+        let mut state = self.state.borrow_mut();
+        let WebGlState { scenes, textures, .. } = state.as_mut()?;
+        let limit = self.max_texture_size;
+        scenes.scene_texture(&self.gl, &self.gl_context, textures, limit, scene, size, scale, antialiased, origin)
     }
 
     /// Whether the shader effect `effect` is drawn on the context: it is one of the library's and
