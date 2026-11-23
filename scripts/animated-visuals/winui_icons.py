@@ -274,7 +274,7 @@ def transform(source, body, kind, name):
         if values:
             matrix = (values[0], values[1], values[4], values[5], values[12], values[13])
     else:
-        sprite = re.search(r"CreateSpriteShape\(\w+, \{(.*?)\}", body)
+        sprite = re.search(r"CreateSpriteShape\([\w()]+, \{(.*?)\}", body)
         values = floats(sprite.group(1)) if sprite else one(r"result\.TransformMatrix\(\{(.*?)\}\)", body)
         if values:
             matrix = tuple(values[:6])
@@ -402,7 +402,7 @@ def sprite(source, name):
         created = re.search(r"const auto geometry = (\w+\(\)|_\w+);", body).group(1)
     items = geometry_items(source, created)
     stroke = "StrokeBrush(" in body
-    fill = "FillBrush(" in body or re.search(r"CreateSpriteShape\(\w+, \{.*?\}, (?!nullptr)", body) is not None
+    fill = "FillBrush(" in body or re.search(r"CreateSpriteShape\([\w()]+, \{.*?\}, (?!nullptr)", body) is not None
     animated = source.animated(body)
     if stroke:
         thickness = (one(r"StrokeThickness\((.*?)\)", body) or [1.0])[0]

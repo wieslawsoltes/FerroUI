@@ -326,6 +326,14 @@ impl CompositionScene {
         }
     }
 
+    /// A container that does not clip: a visual of this API clips to its size unless told not to.
+    fn container(&self, size: Vector) -> Rc<CompositionVisual> {
+        let visual = self.compositor.create_container_visual();
+        visual.set_size(size);
+        visual.set_clip_to_bounds(false);
+        visual
+    }
+
     // --- layers ---------------------------------------------------------------------------
 
     fn add_layers(
@@ -378,8 +386,7 @@ impl CompositionScene {
         if matches!(layer.kind, LayerKind::Null | LayerKind::NotDrawn) {
             return None;
         }
-        let outer = self.compositor.create_container_visual();
-        outer.set_size(size);
+        let outer = self.container(size);
         self.bind_visibility(&outer, layer, clock);
 
         let local = layer_clock(layer, clock);
@@ -466,8 +473,7 @@ impl CompositionScene {
         let (mut outermost, mut holder) = (None::<Rc<CompositionVisual>>, None::<Rc<CompositionVisual>>);
         // One visual for each transform, the parent of the parent first.
         for owner in transform_owners(layers, layer) {
-            let next = self.compositor.create_container_visual();
-            next.set_size(size);
+            let next = self.container(size);
             self.bind_visual_transform(&next, &owner.transform, &layer_clock(owner, clock));
             let next: Rc<CompositionVisual> = next.clone();
             match &holder {
@@ -487,11 +493,8 @@ impl CompositionScene {
             None => local,
         };
         let inner_size = if width > 0.0 && height > 0.0 { Vector::new(width, height) } else { size };
-        let group = self.compositor.create_container_visual();
-        group.set_size(inner_size);
-        if width > 0.0 && height > 0.0 {
-            group.set_clip_to_bounds(true);
-        }
+        let group = self.container(inner_size);
+        group.set_clip_to_bounds(width > 0.0 && height > 0.0);
         self.add_layers(inner_layers, &inner_clock, &group.children_visual(), inner_size, depth + 1);
         holder.children().insert_at_top(group.clone());
         outermost
@@ -514,8 +517,7 @@ impl CompositionScene {
         sprite.set_brush(Some((*brush).clone()));
         let (mut outermost, mut holder) = (None::<Rc<CompositionVisual>>, None::<Rc<CompositionVisual>>);
         for owner in transform_owners(layers, layer) {
-            let next = self.compositor.create_container_visual();
-            next.set_size(Vector::new(self.visual.width, self.visual.height));
+            let next = self.container(Vector::new(self.visual.width, self.visual.height));
             self.bind_visual_transform(&next, &owner.transform, &layer_clock(owner, clock));
             let next: Rc<CompositionVisual> = next.clone();
             match &holder {
@@ -537,15 +539,13 @@ impl CompositionScene {
         mode: MatteMode,
         size: Vector,
     ) -> Rc<CompositionVisual> {
-        let holder = self.compositor.create_container_visual();
-        holder.set_size(size);
+        let holder = self.container(size);
         let layer = self.compositor.create_layer_visual();
         layer.set_size(size);
+        layer.set_clip_to_bounds(false);
         layer.children().insert_at_top(content);
         let matte_visual = source.unwrap_or_else(|| {
-            let empty = self.compositor.create_container_visual();
-            empty.set_size(size);
-            empty.clone()
+            self.container(size)
         });
         matte_visual.set_visible(false);
         holder.children().insert_at_top(matte_visual.clone());
@@ -583,6 +583,7 @@ impl CompositionScene {
         };
         let layer = self.compositor.create_layer_visual();
         layer.set_size(size);
+        layer.set_clip_to_bounds(false);
         layer.children().insert_at_top(content);
         let factory = self.compositor.create_effect_factory(BlendEffect {
             name: "Blend".into(),
@@ -615,8 +616,7 @@ impl CompositionScene {
     }
 
     fn clip_visual(&mut self, shape: ClipShape, local: &Clock, world: &Rc<dyn Fn(f64) -> Matrix>, size: Vector) -> Rc<CompositionVisual> {
-        let visual = self.compositor.create_container_visual();
-        visual.set_size(size);
+        let visual = self.container(size);
         let (masks, even_odd) = match &shape {
             ClipShape::Added(masks) => (masks.clone(), false),
             ClipShape::One(mask) => (vec![mask.clone()], (mask.mode == b's') != mask.inverted),
@@ -717,7 +717,7 @@ impl CompositionScene {
             self.vector(&***shape, "Scale", &parts.scale);
         }
         if !is_constant(&parts.rotation) {
-            self.scalar(&***shape, "RotationAngleInDegrees", &parts.rotation);
+            self.scalar(&***shape, "RotationAngle", &in_radians(&parts.rotation));
         }
     }
 
@@ -747,7 +747,7 @@ impl CompositionScene {
             self.vector3(&*target, "Scale", &parts.scale, 1.0);
         }
         if !is_constant(&parts.rotation) {
-            self.scalar(&*target, "RotationAngleInDegrees", &parts.rotation);
+            self.scalar(&*target, "RotationAngle", &in_radians(&parts.rotation));
         }
     }
 
@@ -1110,6 +1110,10 @@ impl TransformFit {
             rotation: fit(frames, 0.02, &|progress| [parts(progress).rotation]),
         }
     }
+}
+
+fn in_radians(keys: &[(f64, [f64; 1])]) -> Vec<(f64, [f64; 1])> {
+    keys.iter().map(|(progress, value)| (*progress, [value[0].to_radians()])).collect()
 }
 
 fn point_of(value: [f64; 2]) -> Vector {
