@@ -569,10 +569,10 @@
           "name": "Controls/ManagedFileChooser.xaml",
           "index": 60,
           "documents": ["Controls/ManagedFileChooser.xaml"],
-          "keys": ["Icons", "LevelUp", "Refresh"],
+          "keys": ["Icons", "LevelUp", "ManagedStorageFallback", "Refresh"],
           "type_keys": ["ManagedFileChooser", "ManagedFileChooserOverwritePrompt"],
           "references": ["Icons", "LevelUp", "Refresh", "StringManagedFileChooserCancelText", "StringManagedFileChooserDateModifiedColumn", "StringManagedFileChooserFileNamePlaceholder", "StringManagedFileChooserNameColumn", "StringManagedFileChooserOkText", "StringManagedFileChooserOverwritePromptCancelText", "StringManagedFileChooserOverwritePromptConfirmText", "StringManagedFileChooserOverwritePromptFileAlreadyExistsText", "StringManagedFileChooserShowHiddenFilesText", "StringManagedFileChooserSizeColumn", "StringManagedFileChooserTypeColumn", "ThemeBackgroundBrush", "ThemeControlMidBrush"],
-          "types": ["Binding", "Border", "Button", "CheckBox", "ChildFitter", "ColumnDefinition", "ComboBox", "ControlTemplate", "ControlTheme", "DataTemplate", "DockPanel", "DrawingGroup", "DrawingImage", "DynamicResource", "FileSizeStringConverter", "GeometryDrawing", "Grid", "GridSplitter", "Image", "KeyBinding", "ListBox", "ManagedFileChooser", "ManagedFileChooserOverwritePrompt", "MultiBinding", "Rectangle", "ResourceDictionary", "ResourceSelectorConverter", "Setter", "StackPanel", "StringFormatConverter", "Style", "TextBlock", "TextBox"]
+          "types": ["Binding", "Border", "Button", "CheckBox", "ChildFitter", "ColumnDefinition", "ComboBox", "ControlTemplate", "ControlTheme", "DataTemplate", "DockPanel", "DrawingGroup", "DrawingImage", "DynamicResource", "FileSizeStringConverter", "GeometryDrawing", "Grid", "GridSplitter", "Image", "KeyBinding", "ListBox", "ManagedFileChooser", "ManagedFileChooserOverwritePrompt", "ManagedStorageFallback", "MultiBinding", "Rectangle", "ResourceDictionary", "ResourceSelectorConverter", "Setter", "StackPanel", "StringFormatConverter", "Style", "TextBlock", "TextBox"]
         },
         {
           "name": "Controls/SplitButton.xaml",
