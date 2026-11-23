@@ -3,10 +3,8 @@
      native Frame navigates between the source's SamplePage1 and SamplePage2 with
      ForwardButton1_Click (the page type follows BackStackDepth) and BackwardButton1_Click.
      TransitionRadioButton_Checked keeps the selected NavigationTransitionInfo and its code (the
-     source's TransitionParameter substitution). FerroUI's Frame has no navigation transitions
-     (ContentTransitions with a NavigationThemeTransition, the NavigationTransitionInfo of
-     Navigate): the navigation is not animated and the mode changes nothing, so the page is
-     partial. The RadioButtons' Header is the control's. -->
+     source's TransitionParameter substitution), which the next navigation plays. The
+     RadioButtons' Header is the control's. -->
 <Grid xmlns="https://github.com/ferroui"
       xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" ColumnDefinitions="*,Auto" ColumnSpacing="24">
   <StackPanel x:Name="Example1" Spacing="8">

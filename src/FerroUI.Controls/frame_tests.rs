@@ -2,6 +2,7 @@
 //! section 10.4), adapted from #286.
 
 use crate::navigation::{
+    NavigationTransitionInfo,
     FrameNavigationOptions, NavigatingCancelEventArgs, NavigationCacheMode, NavigationError, NavigationEventArgs,
     NavigationMode, PageStackEntry,
 };
@@ -660,4 +661,49 @@ fn a_runtime_type_without_a_default_constructor_is_a_missing_constructor() {
     assert!(frame.current_page().is_none());
     assert_eq!(frame.back_stack_depth(), 0);
     assert_eq!(page_type.create().err(), Some(error));
+}
+
+#[test]
+fn a_transition_is_recorded_with_its_entry_and_back_plays_the_reverse() {
+    let frame = frame();
+    assert!(frame
+        .navigate_with_transition(FirstPage::TYPE, None, NavigationTransitionInfo::Entrance)
+        .unwrap());
+    assert_eq!(frame.last_transition(), Some(NavigationTransitionInfo::Entrance));
+    assert!(frame
+        .navigate_with_transition(SecondPage::TYPE, None, NavigationTransitionInfo::SlideFromRight)
+        .unwrap());
+    assert_eq!(
+        frame.last_transition(),
+        Some(NavigationTransitionInfo::SlideFromRight)
+    );
+
+    frame.go_back().unwrap();
+    assert_eq!(
+        frame.last_transition(),
+        Some(NavigationTransitionInfo::SlideFromLeft)
+    );
+}
+
+#[test]
+fn a_plain_navigation_and_suppress_play_nothing() {
+    let frame = frame();
+    frame.navigate(FirstPage::TYPE, None).unwrap();
+    assert_eq!(frame.last_transition(), None);
+    frame
+        .navigate_with_transition(SecondPage::TYPE, None, NavigationTransitionInfo::Suppress)
+        .unwrap();
+    assert_eq!(frame.last_transition(), None);
+    let page = frame.content().and_then(|content| content.cast::<ferroui_base::Visual>());
+    assert_eq!(page.map(|page| page.opacity()), Some(1.0));
+}
+
+#[test]
+fn the_reverse_of_each_transition_is_its_mirror() {
+    use NavigationTransitionInfo::*;
+    assert_eq!(SlideFromRight.reversed(), SlideFromLeft);
+    assert_eq!(SlideFromLeft.reversed(), SlideFromRight);
+    for same in [Entrance, DrillIn, Suppress, SlideFromBottom] {
+        assert_eq!(same.reversed(), same);
+    }
 }

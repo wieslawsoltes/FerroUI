@@ -3,6 +3,7 @@
 //! MIT, Copyright (c) Microsoft Corporation, see NOTICE.md).
 
 use crate::navigation::{
+    NavigationTransitionInfo,
     FrameNavigationOptions, NavigatingCancelEventArgs, NavigationCacheMode, NavigationError, NavigationEventArgs,
     NavigationFailedEventArgs, NavigationMode, NavigationStack, PageStackEntry,
 };
@@ -16,10 +17,11 @@ use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, Subscription};
+use ferroui_base::threading::CancellationToken;
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StyledElementImpl, StyledProperty, VisualImpl,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StyledElementImpl, StyledProperty, Visual, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{HashMap, VecDeque};
@@ -45,9 +47,10 @@ const INITIAL_TRANSIENT_CACHE_SIZE: i32 = 10;
 /// docs/porting/winui-controls.md, section 7, compares them.
 ///
 /// The WinUI theme has the template (WinUI's `Frame` style of `generic.xaml`); the Fluent and Simple
-/// themes have none. Missing (docs/porting/winui-controls.md, section 10.4): the navigation
-/// transitions (`ContentTransitions`, the `NavigationTransitionInfo` of `Navigate`),
-/// `GetNavigationState` and `SetNavigationState`.
+/// themes have none. A navigation plays a [`NavigationTransitionInfo`] when it is asked for
+/// ([`navigate_with_transition`](Self::navigate_with_transition)). Missing
+/// (docs/porting/winui-controls.md, section 10.4): `ContentTransitions`, `GetNavigationState`
+/// and `SetNavigationState`.
 #[repr(C)]
 pub struct Frame {
     base: ContentControl,
@@ -69,6 +72,10 @@ pub struct Frame {
     navigated: HandlerList<dyn Fn(&NavigationEventArgs)>,
     navigation_stopped: HandlerList<dyn Fn(&NavigationEventArgs)>,
     navigation_failed: HandlerList<dyn Fn(&NavigationFailedEventArgs)>,
+    /// Stops the transition that is playing when the next navigation starts.
+    transition_cancellation: RefCell<Option<CancellationToken>>,
+    /// The transition the last navigation played (the tests read it).
+    last_transition: Cell<Option<NavigationTransitionInfo>>,
 }
 
 ferro_class!(Frame: ContentControl);
@@ -197,6 +204,8 @@ impl Frame {
             current: RefCell::new(None),
             pending: RefCell::new(None),
             in_navigate: Cell::new(false),
+            transition_cancellation: RefCell::new(None),
+            last_transition: Cell::new(None),
             committing: Cell::new(false),
             can_go_back: Cell::new(false),
             can_go_forward: Cell::new(false),
@@ -372,6 +381,59 @@ impl Frame {
         self.perform_navigation(entry, NavigationMode::New, options.is_navigation_stack_enabled())
     }
 
+    /// Navigates to a page of `source_page_type` and brings it in with `transition` (WinUI's
+    /// `Navigate(Type, Object, NavigationTransitionInfo)`); returns as
+    /// [`navigate`](Self::navigate). Going back from the page plays the transition reversed.
+    pub fn navigate_with_transition(
+        &self,
+        source_page_type: impl Into<PageType>,
+        parameter: Option<BoxedValue>,
+        transition: NavigationTransitionInfo,
+    ) -> Result<bool, NavigationError> {
+        let source_page_type = source_page_type.into();
+        if self.in_navigate.replace(true) {
+            return Ok(false);
+        }
+        let _guard = NavigationGuard(self);
+        let entry = PageStackEntry::new(source_page_type, parameter);
+        entry.set_frame(Some(&self.to_ref()));
+        entry.set_navigation_transition_info(Some(transition));
+        self.perform_navigation(entry, NavigationMode::New, true)
+    }
+
+    /// The transition of a navigation to `entry`: its own, or the reverse of the one of the
+    /// entry that is left when going back.
+    fn transition_of(&self, entry: &Ref<PageStackEntry>, mode: NavigationMode) -> Option<NavigationTransitionInfo> {
+        match mode {
+            NavigationMode::Back => self
+                .current
+                .borrow()
+                .as_ref()
+                .and_then(|current| current.navigation_transition_info())
+                .map(NavigationTransitionInfo::reversed),
+            _ => entry.navigation_transition_info(),
+        }
+    }
+
+    /// Stops the transition that is playing and plays `transition` on `page`.
+    fn play_transition(&self, page: &Ref<FramePage>, transition: Option<NavigationTransitionInfo>) {
+        if let Some(previous) = self.transition_cancellation.borrow_mut().take() {
+            previous.cancel();
+        }
+        let transition = transition.filter(|info| *info != NavigationTransitionInfo::Suppress);
+        self.last_transition.set(transition);
+        if let Some(transition) = transition {
+            let cancellation = CancellationToken::new();
+            *self.transition_cancellation.borrow_mut() = Some(cancellation.clone());
+            transition.run(&page.clone().upcast::<Visual>(), cancellation);
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn last_transition(&self) -> Option<NavigationTransitionInfo> {
+        self.last_transition.get()
+    }
+
     /// Navigates to the newest entry of the back stack (WinUI's `GoBack`).
     pub fn go_back(&self) -> Result<(), NavigationError> {
         if self.in_navigate.replace(true) {
@@ -439,8 +501,10 @@ impl Frame {
                 return if args.handled() { Ok(false) } else { Err(error) };
             }
         };
+        let transition = self.transition_of(&entry, mode);
         page.prepare(&self.to_ref(), entry.source_page_type());
         self.set_content(Some(Control::boxed(page.clone())));
+        self.play_transition(&page, transition);
         if self.is_navigation_stack_enabled() && stack_enabled {
             self.commit(&entry, mode);
         }

@@ -2,24 +2,23 @@
 //! commit `7e4b0c2096be402f51cc8f7d203ebf67cff183d0`; MIT, Copyright (c) Microsoft Corporation, see
 //! ../NOTICE.md).
 
+use crate::navigation::NavigationTransitionInfo;
 use crate::{Frame, PageType};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, BoxedValue, FerroObject, FerroObjectImpl, Ref,
     WeakRef,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 
 /// An entry of the journal of a [`Frame`]: the type of a page and the parameter of its navigation.
 /// The parameter is kept as it is (by identity), as in WinUI.
-///
-/// Missing (docs/porting/winui-controls.md, section 10.4): `NavigationTransitionInfo`, FerroUI's
-/// frame has no navigation transitions.
 #[repr(C)]
 pub struct PageStackEntry {
     base: FerroObject,
     source_page_type: PageType,
     parameter: Option<BoxedValue>,
     frame: RefCell<Option<WeakRef<Frame>>>,
+    transition_info: Cell<Option<NavigationTransitionInfo>>,
 }
 
 ferro_class!(PageStackEntry: FerroObject);
@@ -40,12 +39,27 @@ ferro_class_info!(PageStackEntry {
 impl PageStackEntry {
     /// Creates an entry of the page type `source_page_type` with the parameter of its navigation.
     pub fn new(source_page_type: PageType, parameter: Option<BoxedValue>) -> Ref<Self> {
-        instantiate(Self { base: FerroObject::construct(), source_page_type, parameter, frame: RefCell::new(None) })
+        instantiate(Self {
+            base: FerroObject::construct(),
+            source_page_type,
+            parameter, frame: RefCell::new(None),
+            transition_info: Cell::new(None),
+        })
     }
 
     /// Gets the type of the page of the entry.
     pub fn source_page_type(&self) -> PageType {
         self.source_page_type
+    }
+
+    /// The transition the entry was navigated to with (WinUI's `NavigationTransitionInfo` of
+    /// the entry), which a navigation back plays reversed.
+    pub fn navigation_transition_info(&self) -> Option<NavigationTransitionInfo> {
+        self.transition_info.get()
+    }
+
+    pub(crate) fn set_navigation_transition_info(&self, value: Option<NavigationTransitionInfo>) {
+        self.transition_info.set(value);
     }
 
     /// Gets the parameter of the navigation.

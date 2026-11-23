@@ -1,6 +1,6 @@
 //! The PageTransition page's native Frame navigation and source sample-page layouts, with the code
-//! behind of `PageTransitionPage.xaml.cs`. FerroUI's Frame has no navigation transitions: the
-//! transition modes are kept and shown, and not substituted with unrelated animations.
+//! behind of `PageTransitionPage.xaml.cs`. The transition modes are the
+//! `NavigationTransitionInfo` of the navigations.
 
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -9,7 +9,7 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, instantiate, FerroObjectImpl, Ref,
     StyledElementImpl, VisualImpl,
 };
-use ferroui_controls::navigation::NavigationError;
+use ferroui_controls::navigation::{NavigationError, NavigationTransitionInfo};
 use ferroui_controls::primitives::{SelectingItemsControl, TemplatedControlImpl};
 use ferroui_controls::{
     Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl, RadioButtons,
@@ -17,6 +17,7 @@ use ferroui_controls::{
 };
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+use std::cell::Cell;
 use std::rc::Rc;
 
 macro_rules! sample_page {
@@ -76,7 +77,9 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
             )));
         }
     }).detach();
+    let transition = Rc::new(Cell::new(None));
     for name in ["NavigationNext", "NavigationBack"] {
+        let transition = transition.clone();
         let weak_frame = frame.downgrade();
         let weak_status = status.downgrade();
         root.get_control::<Button>(name).click(move |_, _| {
@@ -92,7 +95,11 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
                         } else {
                             SecondSamplePage::PAGE_TYPE
                         };
-                        frame.navigate(next, None).map(|_| ())
+                        // ForwardButton1_Click: the kept transition, or the default navigation.
+                        match transition.get() {
+                            Some(info) => frame.navigate_with_transition(next, None, info).map(|_| ()),
+                            None => frame.navigate(next, None).map(|_| ()),
+                        }
                     }
                 };
                 if let Err(error) = result {
@@ -101,7 +108,7 @@ pub(crate) fn wire(root: &Ref<Control>) -> Result<(), XamlLoadError> {
             }
         });
     }
-    wire_transition_modes(root);
+    wire_transition_modes(root, transition);
     frame
         .navigate(FirstSamplePage::PAGE_TYPE, None)
         .map_err(load_error)?;
@@ -123,9 +130,21 @@ pub(crate) fn transition_parameter(content: &str) -> String {
     }
 }
 
-/// `TransitionRadioButton_Checked`: the checked mode's NavigationTransitionInfo. FerroUI's Frame
-/// has no navigation transitions, so the mode is shown and not played.
-fn wire_transition_modes(root: &Ref<Control>) {
+/// The NavigationTransitionInfo of the mode of `content`; `None` for Default.
+pub(crate) fn transition_info(content: &str) -> Option<NavigationTransitionInfo> {
+    match content {
+        "Entrance" => Some(NavigationTransitionInfo::Entrance),
+        "DrillIn" => Some(NavigationTransitionInfo::DrillIn),
+        "Suppress" => Some(NavigationTransitionInfo::Suppress),
+        "Slide from Right" => Some(NavigationTransitionInfo::SlideFromRight),
+        "Slide from Left" => Some(NavigationTransitionInfo::SlideFromLeft),
+        _ => None,
+    }
+}
+
+/// `TransitionRadioButton_Checked`: the checked mode's NavigationTransitionInfo, which the next
+/// navigation plays.
+fn wire_transition_modes(root: &Ref<Control>, transition: Rc<Cell<Option<NavigationTransitionInfo>>>) {
     let modes = root.get_control::<RadioButtons>("TransitionModes");
     let weak_modes = modes.downgrade();
     let weak_value = root.get_control::<TextBlock>("TransitionValue").downgrade();
@@ -144,6 +163,7 @@ fn wire_transition_modes(root: &Ref<Control>) {
             .and_then(|content| content.downcast_ref::<String>().cloned())
             .unwrap_or_default();
         value.set_text(Some(&transition_parameter(&content)));
+        transition.set(transition_info(&content));
     });
 }
 

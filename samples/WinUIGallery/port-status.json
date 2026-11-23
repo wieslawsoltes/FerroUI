@@ -955,7 +955,7 @@
       "examples": []
     },
     "PageTransition": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/PageTransition.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -973,7 +973,7 @@
           "name": "page_transition_sample_uses_winui_frame_journal_and_source_page_types"
         }
       ],
-      "notes": "The source example with the code behind of PageTransitionPage.xaml.cs in Rust (frame_sample.rs): the native Frame with the source's SamplePage1 and SamplePage2 (FramePage types created by their page factories), ForwardButton1_Click (the page type follows BackStackDepth), BackwardButton1_Click (only with a back stack), and TransitionRadioButton_Checked over the eight transition modes, whose NavigationTransitionInfo code (the source's TransitionParameter substitution) is shown. FerroUI's Frame has no navigation transitions (ContentTransitions with a NavigationThemeTransition, the NavigationTransitionInfo of Navigate): the navigation is not animated and the mode changes nothing, so the page is partial.",
+      "notes": "The source example with the code behind of PageTransitionPage.xaml.cs in Rust (frame_sample.rs): the native Frame with the source's SamplePage1 and SamplePage2 (FramePage types created by their page factories), ForwardButton1_Click (the page type follows BackStackDepth), BackwardButton1_Click (only with a back stack), and TransitionRadioButton_Checked over the eight transition modes, whose NavigationTransitionInfo code (the source's TransitionParameter substitution) is shown. The Frame plays the selected NavigationTransitionInfo on the new page, and its reverse going back; DrillIn fades without WinUI's scale.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/PageTransition/PageTransitions.txt",
