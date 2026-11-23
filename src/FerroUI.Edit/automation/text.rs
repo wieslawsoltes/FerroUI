@@ -9,6 +9,7 @@ use ferroui_base::interactivity::{RoutedEvent, RoutedEventArgs};
 use ferroui_base::reactive::{Disposable, IDisposable};
 use ferroui_base::{Point, Rect, Ref, WeakRef};
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
+use ferroui_controls::automation::provider::{text_span_ops, TextSpanOps};
 use ferroui_controls::automation::provider::{
     ITextProvider, ITextProvider2, ITextRangeProvider, ProviderError, SupportedTextSelection,
     TextAttributeRun, TextAttributeSet, TextCaretRange, TextEditDelta, TextProviderError, ViewGeometry,
@@ -86,6 +87,10 @@ fn clipboard_result<T: PartialEq>(
 }
 
 impl ITextProvider for EditorProvider {
+    fn text_span_ops(&self) -> Option<&'static dyn TextSpanOps> {
+        Some(text_span_ops())
+    }
+
     fn is_multiline(&self) -> bool {
         true
     }
