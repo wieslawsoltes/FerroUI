@@ -106,9 +106,9 @@ crates they are built on meets them:
 | `android.yml` | Linux | `src/Android`, `samples/*.Android`, `scripts/android` | nightly |
 | `wayland.yml` | Linux | `src/FerroUI.Wayland`, `scripts/wayland` | nightly |
 | `linuxfb.yml` | Linux | `src/Linux`, `src/FerroUI.Mcp`, `scripts/linuxfb`, `scripts/test-mcp.py` | nightly |
-| `designer.yml` | Linux, macOS, Windows | the designer crates, `samples/DesignerStudio`, `docs/designer/samples`, the root manifest and the lock file | nightly |
-| `pretext.yml` | Linux | `src/Pretext`, `scripts/pretext`, `docs/porting/pretext.md`, the root manifest and the lock file | push to main (also for the text services of ferroui-base, the facade crate and the headless platform) |
-| `protranslate.yml` | Linux, macOS, Windows | `src/ProTranslate`, `samples/ProTranslateDemo`, the root manifest and the lock file | push to main (also for the binding sources of ferroui-base it uses) |
+| `designer.yml` | Linux, macOS, Windows | the designer crates, `samples/DesignerStudio`, `docs/designer/samples` | nightly |
+| `pretext.yml` | Linux | `src/Pretext`, `scripts/pretext`, `docs/porting/pretext.md` | push to main (also for the text services of ferroui-base, the facade crate and the headless platform) |
+| `protranslate.yml` | Linux, macOS, Windows | `src/ProTranslate`, `samples/ProTranslateDemo` | push to main (also for the binding sources of ferroui-base it uses) |
 | `macos-theme.yml` | Linux, macOS 26 | `src/FerroUI.Themes.MacOS`, `scripts/macos-theme`, `scripts/themes` | nightly |
 | `material-theme.yml` | Linux | `src/FerroUI.Themes.Material`, the animation and gesture sources it uses, `samples/MaterialThemeGallery`, its scripts | nightly |
 | `build-performance.yml` | Linux | the build tooling (scanner, build tasks, XAML loader, `samples/SampleBuild`, `scripts/build-perf`, the browser build scripts, `.cargo/*.toml`) | by hand |
@@ -127,6 +127,11 @@ controls, the markup, Vello, the native platform). Those crates are tested by th
 on every pull request that changes them, the Linux job builds and tests the crates of these
 workflows with them, and the nightly run (or the run of the push to main) runs the workflows
 themselves.
+
+A change of the root manifest or the lock file does not start `designer.yml`, `pretext.yml`,
+`protranslate.yml` or `capi.yml` on a pull request either: nearly every new crate changes those
+two files. The CI workflow tests the change on the pull request, and these workflows meet it in
+the nightly run or the run of the push to main.
 
 `nightly.yml` (Windows on ARM64, Wayland under sway), `perf.yml`, `pages.yml` (a push to main),
 `release.yml`, `hot-reload.yml`, `skia-vulkan-windows.yml` and the reusable `app.yml` do not

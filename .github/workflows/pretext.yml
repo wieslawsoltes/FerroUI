@@ -10,8 +10,6 @@ on:
       - 'src/Pretext/**'
       - 'docs/porting/pretext.md'
       - 'scripts/pretext/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/pretext.yml'
   push:
     branches: [main]

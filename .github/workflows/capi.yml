@@ -11,8 +11,6 @@ on:
       - 'samples/CApi/**'
       - 'bindings/**'
       - 'docs/c-abi.md'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/capi.yml'
   push:
     branches: [main]
