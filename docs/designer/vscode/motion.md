@@ -93,6 +93,10 @@ VS Code and Designer Studio agents can pass `metric: "velocity"` to `designer_an
 
 The regular Timeline remembers its graph choice in the VS Code workspace. Each App Preview keeps its own choice. The graph controls leave authored content, playback and Undo history intact. While comparing clips, switch back to tracks to see the selected graph. [MCP permissions and tool reference](reference.md#drive-an-editor-workflow)
 
+![The docked Timeline shows its checked Velocity curves mode and the signed Opacity graph beside the XAML design.](../images/vscode-timeline-mcp-graph.png)
+
+![App Preview shows the checked Velocity curves mode above the running app’s native artboard.](../images/vscode-hosted-mcp-graph.png)
+
 ### Inspect one part of a geometry value
 
 ![The Bottom left radius curve beneath the XAML source and its native artboard at the selected key](../images/vscode-geometry-channels.png)
