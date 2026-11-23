@@ -1748,6 +1748,8 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-designer-core",
+ "ferroui-designer-tools",
+ "ferroui-markup",
  "ferroui-markup-xaml",
  "roxmltree 0.20.0",
  "serde",

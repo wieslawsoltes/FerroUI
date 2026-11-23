@@ -1,8 +1,10 @@
 use super::{decode, ensure_revision, node_id, schema as s, state, text};
-use crate::property_transition_session::{PropertyTransitionCommand, PropertyTransitionEditor};
+use crate::property_transition_session::PropertyTransitionEditor;
+use crate::property_transition_rsx::{plan_rust_property_transition, rust_property_transition_editor};
 use crate::DesignerSession;
-use ferroui_designer_animation::PropertyTransitionTiming;
-use ferroui_designer_core::TextPatch;
+use ferroui_designer_animation::native::TransitionPropertyChoice;
+use ferroui_designer_animation::{PropertyTransitionCommand, PropertyTransitionTiming};
+use ferroui_designer_core::{Document, NodeId, TextPatch};
 use ferroui_designer_language::LineIndex;
 use ferroui_designer_rsx::RsxProjection;
 use serde_json::{json, Value};
@@ -88,8 +90,41 @@ pub fn rust_property_transition_source_plan(
     require_rust_owner(args)?;
     ensure_revision(session, args)?;
     session
-        .rust_property_transition_plan(node_id(args, "owner")?, projection, command(args)?)
-        .map(|(_, patches)| patches)
+        .rust_property_transition_plan(node_id(args, "owner")?, projection, &command(args)?)
+}
+
+/// Report source ranges and choices after the native preview has resolved the owner.
+pub fn authored_property_transition_report(
+    document: &Document,
+    source: &str,
+    owner: NodeId,
+    projection: Option<&RsxProjection<'_>>,
+    native_options: Vec<TransitionPropertyChoice>,
+) -> Result<Value, String> {
+    let editor = if let Some(projection) = projection {
+        rust_property_transition_editor(document, owner, projection, true, Some(&native_options))?
+    } else {
+        let list = ferroui_designer_animation::PropertyTransitionList::read(document, owner)
+            .map_err(|error| error.to_string())?;
+        PropertyTransitionEditor {
+            requires_target: list.target_owner.is_none(),
+            list,
+            choices: native_options,
+            can_edit: true,
+        }
+    };
+    Ok(report(editor, source))
+}
+
+/// Plan an original Rust edit using property options from the accepted live registry.
+pub fn mapped_property_transition_plan(
+    document: &Document,
+    owner: NodeId,
+    projection: &RsxProjection<'_>,
+    native_options: &[TransitionPropertyChoice],
+    command: &PropertyTransitionCommand,
+) -> Result<Vec<TextPatch>, String> {
+    plan_rust_property_transition(document, owner, projection, command, Some(native_options))
 }
 
 fn require_rust_owner(args: &Value) -> Result<(), String> {

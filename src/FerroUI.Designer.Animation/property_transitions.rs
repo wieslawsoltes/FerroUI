@@ -2,12 +2,53 @@
 use crate::programs::NATIVE_XMLNS;
 use crate::{AnimationError, Result};
 use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, NodeKind, SourceSpan};
-use serde::Serialize;
+use serde::{Deserialize, Serialize};
 
 mod collection;
 mod timing;
 pub use collection::{PropertyTransitionCollectionEdit, XamlTransitionTarget};
 pub use timing::PropertyTransitionTiming;
+
+/// Edits of an authored transition collection. Property keys are supplied by the
+/// current native or mapped Rust catalog.
+#[derive(Debug, Deserialize, Serialize)]
+#[serde(tag = "action", rename_all = "snake_case", deny_unknown_fields)]
+pub enum PropertyTransitionCommand {
+    Timing {
+        transition: NodeId,
+        timing: PropertyTransitionTiming,
+    },
+    Add {
+        property: String,
+        type_name: Option<String>,
+        #[serde(default)]
+        timing: PropertyTransitionTiming,
+    },
+    Retarget {
+        transition: NodeId,
+        property: String,
+        type_name: Option<String>,
+    },
+    Move {
+        transition: NodeId,
+        index: usize,
+    },
+    Remove {
+        transition: NodeId,
+    },
+}
+
+impl PropertyTransitionCommand {
+    pub fn label(&self) -> &'static str {
+        match self {
+            Self::Timing { .. } => "Edit property transition timing",
+            Self::Add { .. } => "Add property transition",
+            Self::Retarget { .. } => "Retarget property transition",
+            Self::Move { .. } => "Reorder property transitions",
+            Self::Remove { .. } => "Remove property transition",
+        }
+    }
+}
 
 pub const PROPERTY_TRANSITION_TYPES: &[&str] = &[
     "BoolTransition",

@@ -50,6 +50,7 @@ pub use property_trace::property_trace_report;
 #[path = "mcp_property_transitions.rs"]
 mod property_transitions;
 pub use property_transitions::{
+    authored_property_transition_report, mapped_property_transition_plan,
     rust_property_transition_report, rust_property_transition_source_plan,
     PROPERTY_TRANSITIONS, PROPERTY_TRANSITION_EDIT,
 };

@@ -16,10 +16,12 @@ path = "lib.rs"
 
 [features]
 native-values = ["dep:ferroui-base"]
-native-preview = ["native-values", "dep:ferroui-markup-xaml"]
+native-preview = ["native-values", "dep:ferroui-markup", "dep:ferroui-markup-xaml", "dep:ferroui-designer-tools"]
 
 [dependencies]
 ferroui-base = { workspace = true, optional = true }
+ferroui-designer-tools = { workspace = true, optional = true }
+ferroui-markup = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"

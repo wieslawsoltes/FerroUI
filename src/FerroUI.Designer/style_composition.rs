@@ -7,8 +7,9 @@ use crate::{
 };
 use ferroui_base::media::Color;
 use ferroui_base::metadata::MarkupAssembly;
-use ferroui_base::{FerroProperty, StyledElement, TypeInfo};
-use ferroui_designer_core::{Document, MarkupValue, Node, NodeId, NodeKind};
+use ferroui_base::{FerroProperty, StyledElement};
+use ferroui_designer_animation::native::{parent_style, selector_parser};
+use ferroui_designer_core::{Document, MarkupValue, Node, NodeId};
 use ferroui_designer_tools::component_palette::{PaletteColorKind, PaletteLayer};
 use ferroui_designer_tools::component_styles::{authored_setters, plan_style_change, StyleChange};
 use ferroui_designer_tools::theme_variants::HighContrastProvider;
@@ -16,7 +17,7 @@ use ferroui_designer_tools::{
     component_property_attribute, component_resource_expression, resolve_component_resource,
     ComponentAction, ComponentEntry, ComponentKind, ComponentResourceSources, ResourceValue,
 };
-use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorSyntax};
 use std::rc::Rc;
 
 pub(crate) fn supports_styles(document: &Document, node: &Node) -> bool {
@@ -43,58 +44,6 @@ pub(crate) fn contrast_providers() -> Vec<HighContrastProvider> {
         .into_iter()
         .filter(|provider| MarkupAssembly::find(provider.assembly()).is_some())
         .collect()
-}
-
-fn parent_style(document: &Document, node: NodeId) -> Option<NodeId> {
-    let parent = document.ast().node(document.ast().node(node)?.parent?)?;
-    let parent = if parent.kind == NodeKind::PropertyElement {
-        document.ast().node(parent.parent?)?
-    } else {
-        parent
-    };
-    let type_ = registered_type(document, parent.id, &parent.name)?;
-    (ferroui_base::styling::Style::TYPE.is_assignable_from(type_)
-        || ferroui_base::styling::ControlTheme::TYPE.is_assignable_from(type_))
-    .then_some(parent.id)
-}
-
-fn selector_parser(document: &Document, node: NodeId) -> SelectorParser {
-    let namespaces = document.ast().namespaces(node);
-    SelectorParser::new(move |prefix, name| {
-        let uri = namespaces.get(prefix)?;
-        crate::native_types::registered_xml_type(uri, name)
-    })
-    .unknown_types_by_name()
-}
-
-pub(crate) fn selector_target(document: &Document, node: NodeId) -> Option<&'static TypeInfo> {
-    let selector = component_property_attribute(document, node, "Selector").ok()??;
-    let MarkupValue::Literal(selector) = selector.markup().ok()? else {
-        return None;
-    };
-    selector_parser(document, node)
-        .parse(&selector)
-        .ok()??
-        .target_type()
-        .or_else(|| {
-            let syntax = SelectorGrammar::parse(&selector).ok()?;
-            if syntax
-                .iter()
-                .any(|part| matches!(part, SelectorSyntax::Nesting))
-                && !syntax.iter().any(|part| {
-                    matches!(
-                        part,
-                        SelectorSyntax::Child
-                            | SelectorSyntax::Descendant
-                            | SelectorSyntax::Template
-                            | SelectorSyntax::Comma
-                    )
-                })
-            {
-                return setter_target_type(document, parent_style(document, node)?);
-            }
-            None
-        })
 }
 
 fn validate_selector(

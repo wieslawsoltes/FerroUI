@@ -59,7 +59,8 @@ pub use programs::{
     NativeAnimationCodec,
 };
 pub use property_transitions::{
-    AuthoredPropertyTransition, PropertyTransitionCollectionEdit, PropertyTransitionList,
+    AuthoredPropertyTransition, PropertyTransitionCollectionEdit, PropertyTransitionCommand,
+    PropertyTransitionList, PROPERTY_TRANSITION_TYPES,
     PropertyTransitionTiming, XamlTransitionTarget,
 };
 pub use states::{

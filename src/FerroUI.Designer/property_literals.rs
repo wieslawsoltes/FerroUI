@@ -2,14 +2,12 @@
 //! Portable property descriptors cannot prove that an application's `Width` is a number.
 use crate::{DesignerSession, Document, NodeId, PropertyEditorContext};
 use ferroui_base::{FerroObject, FerroProperty, TypeInfo};
-use ferroui_designer_core::MarkupValue;
+pub(crate) use ferroui_designer_animation::native::{registered_type, setter_target_type};
+use ferroui_designer_animation::native::element_type;
 #[cfg(feature = "mcp")]
 use ferroui_designer_tools::PropertyComponentType;
 use ferroui_inspect::Inspector;
 use std::rc::Rc;
-
-const FRAMEWORK: &str = "https://github.com/ferroui";
-const XAML: &str = "http://schemas.microsoft.com/winfx/2006/xaml";
 
 impl DesignerSession {
     pub(crate) fn canonical_property_literal(
@@ -87,29 +85,6 @@ impl DesignerSession {
     }
 }
 
-pub(crate) fn registered_type(document: &Document, node: NodeId, token: &str) -> Option<&'static TypeInfo> {
-    let (prefix, name) = token.split_once(':').unwrap_or(("", token));
-    let namespaces = document.ast().namespaces(node);
-    let uri = match namespaces.get(prefix) {
-        Some(uri) => uri.as_str(),
-        None if prefix.is_empty() => FRAMEWORK,
-        None => return None,
-    };
-    crate::native_types::registered_xml_type(uri, name)
-}
-
-pub(crate) fn element_type(document: &Document, node: NodeId) -> Option<&'static TypeInfo> {
-    let element = document.ast().node(node)?;
-    if let Some(class) = element.attributes.iter().find(|attribute| {
-        attribute.namespace_uri.as_deref() == Some(XAML)
-            && attribute.name.rsplit(':').next() == Some("Class")
-    }) {
-        let (namespace, name) = class.value.rsplit_once('.')?;
-        return TypeInfo::find(namespace, name);
-    }
-    registered_type(document, node, &element.name)
-}
-
 pub(crate) fn property_on_type(
     document: &Document,
     node: NodeId,
@@ -125,42 +100,6 @@ pub(crate) fn property_on_type(
     (!name.contains(':'))
         .then(|| type_.find_property(name))
         .flatten()
-}
-
-pub(crate) fn setter_target_type(document: &Document, owner: NodeId) -> Option<&'static TypeInfo> {
-    let type_ = element_type(document, owner)?;
-    if ferroui_base::styling::Style::TYPE.is_assignable_from(type_) {
-        return crate::style_composition::selector_target(document, owner);
-    }
-    if !ferroui_base::styling::ControlTheme::TYPE.is_assignable_from(type_) {
-        return None;
-    }
-    let value = document.ast().node(owner)?.attribute("TargetType")?;
-    let token = match MarkupValue::parse(value).ok()? {
-        MarkupValue::Literal(value) => value,
-        MarkupValue::Extension(extension) => {
-            let (prefix, name) = extension.name.split_once(':')?;
-            if name != "Type"
-                || document
-                    .ast()
-                    .namespaces(owner)
-                    .get(prefix)
-                    .map(String::as_str)
-                    != Some(XAML)
-            {
-                return None;
-            }
-            extension.arguments.into_iter().find_map(|argument| {
-                if argument.name.is_none() || argument.name.as_deref() == Some("TypeName") {
-                    if let MarkupValue::Literal(value) = argument.value {
-                        return Some(value);
-                    }
-                }
-                None
-            })?
-        }
-    };
-    registered_type(document, owner, token.trim())
 }
 
 #[cfg(test)]

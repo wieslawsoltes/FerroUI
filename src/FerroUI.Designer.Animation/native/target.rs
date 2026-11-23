@@ -1,6 +1,5 @@
 use ferroui_base::animation::{Animatable, Animation};
 use ferroui_base::media::Transform;
-use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::{FerroPropertyRegistry, TypeInfo};
 use ferroui_designer_core::{Document, NodeId};
 
@@ -69,28 +68,5 @@ pub(super) fn declared_type(document: &Document, id: NodeId) -> Option<&'static 
     }
     let (prefix, local) = name.split_once(':').unwrap_or(("", name));
     let namespace = namespaces.get(prefix)?;
-    if let Some(clr) = namespace
-        .strip_prefix("using:")
-        .or_else(|| namespace.strip_prefix("clr-namespace:"))
-    {
-        let (name, assembly) = clr
-            .split_once(";assembly=")
-            .map_or((clr, None), |(name, a)| (name, Some(a)));
-        let type_ = TypeInfo::find(name, local)?;
-        return assembly
-            .is_none_or(|name| {
-                MarkupAssembly::of_module(type_.module_path())
-                    .is_some_and(|owner| owner.name == name)
-            })
-            .then_some(type_);
-    }
-    let mut matches = MarkupAssembly::registered_assemblies()
-        .into_iter()
-        .flat_map(|assembly| assembly.xmlns_definitions)
-        .filter(|definition| definition.xml_namespace == namespace)
-        .filter_map(|definition| TypeInfo::find(definition.namespace, local));
-    let first = matches.next()?;
-    matches
-        .all(|other| std::ptr::eq(other, first))
-        .then_some(first)
+    super::registered_xml_type(namespace, local)
 }
