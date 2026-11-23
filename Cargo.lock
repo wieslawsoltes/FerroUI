@@ -1650,6 +1650,19 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-items-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-repeater",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
 name = "ferroui-controls-livecharts"
 version = "0.6.0-preview.1"
 dependencies = [

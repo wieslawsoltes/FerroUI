@@ -1,0 +1,50 @@
+[package]
+name = "ferroui-controls-items-view"
+description = "The ItemsView of FerroUI, a port of WinUI's ItemsView and ItemContainer, with its own control themes"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+# The build script compiles the theme documents of the crate and exports its type model with them;
+# Cargo hands the path of the file to the build scripts of the crates that depend on this one.
+links = "ferroui_controls_items_view_xaml"
+
+# Unit tests live next to the code, not as integration test targets.
+autotests = false
+autobenches = false
+autoexamples = false
+
+[lib]
+path = "lib.rs"
+
+[features]
+# The theme documents are also embedded as assets, next to their compiled markup: for an
+# application that loads its own markup at run time and includes the styles of the crate.
+document-assets = []
+
+[dependencies]
+# The compiled markup of the crate calls the typed functions of the declared members.
+ferroui-base = { workspace = true, features = ["markup-functions"] }
+ferroui-controls = { workspace = true }
+ferroui-controls-repeater = { workspace = true }
+# The runtime library of compiled markup. The crate does not link the run-time XAML loader.
+ferroui-markup-xaml = { workspace = true }
+
+[build-dependencies]
+ferroui-build = { workspace = true }
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime", "testing", "emitter"] }
+ferroui-themes-winui = { workspace = true }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

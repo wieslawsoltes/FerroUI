@@ -1,0 +1,14 @@
+<!-- The control themes of ItemsView and ItemContainer for an application with the WinUI theme.
+     An application that uses the controls includes this document; one that does not links none
+     of it. -->
+<Styles xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Styles.Resources>
+    <ResourceDictionary>
+      <ResourceDictionary.MergedDictionaries>
+        <MergeResourceInclude Source="ferres://FerroUI.Controls.ItemsView/Themes/WinUI/ItemContainer.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Controls.ItemsView/Themes/WinUI/ItemsView.xaml" />
+      </ResourceDictionary.MergedDictionaries>
+    </ResourceDictionary>
+  </Styles.Resources>
+</Styles>
