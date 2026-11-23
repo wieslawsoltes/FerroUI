@@ -44,8 +44,8 @@ export class DockView<State, Incoming extends { type: string }, Outgoing> implem
         this.sendState();
     }
 
-    post(message: Outgoing | { type: 'state'; state: State }): void {
-        if (this.visible && this.ready) void this.view?.webview.postMessage(message);
+    post(message: Outgoing | { type: 'state'; state: State }): Thenable<boolean> | undefined {
+        if (this.visible && this.ready) return this.view?.webview.postMessage(message);
     }
 
     private sendState(): void {

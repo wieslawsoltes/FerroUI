@@ -78,7 +78,7 @@ export class TimelineViewportView {
         this.grid.toggleAttribute('data-playhead-outside', !visibleTime(this.range, time));
     }
 
-    private apply(view: TimelineViewport): void {
+    apply(view: TimelineViewport): void {
         if (this.range.start === view.start && this.range.span === view.span) return;
         this.viewport = view;
         this.layout();

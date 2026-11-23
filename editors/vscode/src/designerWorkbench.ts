@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import * as vscode from 'vscode';
 import type { AnimationGraphMode } from './animationGraph';
 import type { TimelineLayout } from './timelineLayout';
+import type { TimelineViewportChange } from './timelineViewportProtocol';
 import type { BuiltProjects } from './builtProjects';
 import { ASSETS_VIEW, AssetsView } from './assetsView';
 import { BEHAVIORS_VIEW, BehaviorsView } from './behaviorsView';
@@ -491,7 +492,7 @@ export class DesignerWorkbench implements vscode.Disposable {
         return this.timeline.control(panel, frame, control, signal);
     }
 
-    timelineDisplay(panel: DesignerPanel) { return this.timeline.display(panel); }
+    timelineDisplay(panel: DesignerPanel, signal: AbortSignal) { return this.timeline.readDisplay(panel, signal); }
 
     async setTimelineGraph(panel: DesignerPanel, frame: FrameTarget, mode: AnimationGraphMode, signal: AbortSignal) {
         await this.revealTimeline(panel, frame, signal);
@@ -501,6 +502,11 @@ export class DesignerWorkbench implements vscode.Disposable {
     async setTimelineLayout(panel: DesignerPanel, frame: FrameTarget, layout: TimelineLayout, signal: AbortSignal) {
         await this.revealTimeline(panel, frame, signal);
         return this.timeline.setLayout(panel, frame, layout, signal);
+    }
+
+    async setTimelineViewport(panel: DesignerPanel, frame: FrameTarget, viewport: TimelineViewportChange, signal: AbortSignal) {
+        await this.revealTimeline(panel, frame, signal);
+        return this.timeline.setViewport(panel, frame, viewport, signal);
     }
 
     private async revealTimeline(panel: DesignerPanel, frame: FrameTarget, signal: AbortSignal) {

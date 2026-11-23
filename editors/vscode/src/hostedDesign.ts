@@ -36,6 +36,8 @@ import { chooseTransitionAction } from './studioPropertyTransitions';
 import { asPosition, asRange, languageOf, offsetAfterChanges, sourceOf } from './textDocument';
 import { writeTimelineClipboard } from './timelineKeyframeClipboard';
 import { isTimelineLayout, type TimelineLayout } from './timelineLayout';
+import type { TimelineViewportChange } from './timelineViewportProtocol';
+import { TimelineViewportRequests } from './timelineViewportRequests';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
 import type { PaletteEdit } from './stylesProtocol';
@@ -128,7 +130,7 @@ export class HostedDesign implements vscode.Disposable {
         return { generation: session.generation, status: session.message, ...state, frame };
     }
 
-    timelineDisplay(uri: vscode.Uri) { return this.session(uri).timelineDisplay(); }
+    timelineDisplay(uri: vscode.Uri, signal: AbortSignal) { return this.session(uri).readTimelineDisplay(signal); }
 
     setGraphMode(uri: vscode.Uri, generation: number, revision: number, mode: AnimationGraphMode) {
         const session = this.timelineSession(uri, generation, revision);
@@ -143,6 +145,10 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.timelineSession(uri, generation, revision);
         session.setTimelineLayout(layout);
         return session.timelineDisplay();
+    }
+
+    setTimelineViewport(uri: vscode.Uri, generation: number, revision: number, change: TimelineViewportChange, signal: AbortSignal) {
+        return this.timelineSession(uri, generation, revision).setTimelineViewport(change, signal);
     }
 
     private timelineSession(uri: vscode.Uri, generation: number, revision: number): HostedSession {
@@ -395,6 +401,8 @@ class HostedSession {
     private status = 'Building the selected Cargo target…';
     private graphMode: AnimationGraphMode = 'keys';
     private timelineLayout?: TimelineLayout;
+    private readonly timelineViewport = new TimelineViewportRequests<HostedAnimationFrame>(message =>
+        this.panel.visible ? this.post(message) : undefined);
     private displayPosition?: HostedAnimationState['position'];
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
@@ -492,6 +500,27 @@ class HostedSession {
         return { mode: this.graphMode, layout: this.timelineLayout ?? 'tracks', generation: this.generation, revision: this.revision,
             available_modes: availableGraphModes(programs.some(program => Boolean(program.curveTracks?.length)),
                 Boolean(this.client?.capabilities.timelineCurveVelocity)) };
+    }
+
+    async readTimelineDisplay(signal: AbortSignal) {
+        const viewport = this.panel.visible && this.currentFrame ? await this.requestTimelineViewport(signal) : undefined;
+        return { ...this.timelineDisplay(), viewport };
+    }
+
+    async setTimelineViewport(change: TimelineViewportChange, signal: AbortSignal) {
+        this.panel.reveal(this.panel.viewColumn, true);
+        const viewport = await this.requestTimelineViewport(signal, change);
+        if (!viewport) throw new Error('Show an App Preview curve or clip ruler first.');
+        return { ...this.timelineDisplay(), viewport };
+    }
+
+    private requestTimelineViewport(signal: AbortSignal, change?: TimelineViewportChange) {
+        const accepted = this.currentFrame;
+        if (!accepted) throw new Error('Wait for the current application preview.');
+        const { revision, sequence } = accepted;
+        const current = () => this.currentFrame?.revision === revision && this.currentFrame.sequence === sequence && !this.disposed;
+        const frame = { revision, sequence };
+        return change ? this.timelineViewport.request(frame, current, signal, change) : this.timelineViewport.read(frame, current, signal);
     }
 
     setGraphMode(mode: AnimationGraphMode): void {
@@ -940,6 +969,7 @@ class HostedSession {
     }
 
     private async receive(message: FromHosted): Promise<void> {
+        if (message.type === 'timelineViewportReply') { this.timelineViewport.receive(message); return; }
         if (message.type === 'ready') {
             this.ready = true;
             if (!this.timelineLayout && isTimelineLayout(message.layout)) this.timelineLayout = message.layout;
@@ -1147,8 +1177,8 @@ class HostedSession {
         throw new Error('The application preview changed before the fixture was accepted.');
     }
 
-    private post(message: ToHosted): void {
-        if (this.ready && !this.disposed) void this.panel.webview.postMessage(message);
+    private post(message: ToHosted): Thenable<boolean> | undefined {
+        if (this.ready && !this.disposed) return this.panel.webview.postMessage(message);
     }
 
     dispose(): Promise<void> {

@@ -8,6 +8,7 @@ import { editorFrame, type HostedKeyframeEditor } from './hostedKeyframes';
 import { TimelineCurvePlot } from './timelineCurves';
 import { curveEditValue, dragKeyframe, renderKeyframe } from './timelineKeyDrag';
 import { clamp, fitKeyTimes, fitTimeline, panTimeline, timelinePercent, visibleTime, zoomTimeline } from './timelineViewport';
+import type { TimelineRulerView } from './timelineViewportRequest';
 
 interface TrackChoice {
     track: TimelineTrack;
@@ -61,6 +62,13 @@ export class HostedCurves {
 
     setGraphMode(mode: AnimationGraphMode): void {
         if (this.graph.apply(mode)) this.paint();
+    }
+
+    rulerView(): TimelineRulerView | undefined {
+        if (this.panel.hidden || !this.program || !this.plot) return;
+        return { ruler: 'curve', program: this.program.id, range: this.view,
+            selectedKeys: this.selected === undefined || this.fitKey.disabled ? undefined : [this.selected],
+            apply: range => this.setView(range) };
     }
 
     follow(program: HostedAnimationProgram | undefined, targets: HostedAnimationTarget[], frame: HostedAnimationFrame | undefined,

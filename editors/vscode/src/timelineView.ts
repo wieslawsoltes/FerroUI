@@ -15,6 +15,8 @@ import { positionFromPose, TimelinePlayback } from './timelinePlayback';
 import { canPreviewProgram, canPreviewRange, previewClock } from './timelinePrograms';
 import { TimelineTransitions } from './timelineTransitions';
 import type { AnimationSourceIssue, CurvePoint, FromTimeline, KeyframeLocation, TimelineControl, TimelineMarkerAction, TimelineProgram, TimelineState, ToTimeline } from './timelineProtocol';
+import type { TimelineViewportChange } from './timelineViewportProtocol';
+import { TimelineViewportRequests } from './timelineViewportRequests';
 import { timelineHtml } from './view';
 
 export const TIMELINE_VIEW = 'ferroui.timeline';
@@ -34,6 +36,7 @@ interface Catalog {
 
 export class TimelineView implements vscode.Disposable {
     readonly view: DockView<TimelineState, FromTimeline, ToTimeline>;
+    private readonly viewport = new TimelineViewportRequests<FrameTarget>(message => this.view.post(message));
     private readonly playback: TimelinePlayback;
     private readonly transitions: TimelineTransitions;
     private readonly markers = new WeakMap<DesignerPanel, TimelineMarkers>();
@@ -77,6 +80,20 @@ export class TimelineView implements vscode.Disposable {
     display(panel: DesignerPanel) {
         return { mode: this.graphMode ?? 'keys', layout: this.layout ?? 'tracks', revision: panel.currentToken,
             available_modes: availableGraphModes(panel.supportsTimelineCurves, panel.supportsTimelineCurveVelocity) };
+    }
+
+    async readDisplay(panel: DesignerPanel, signal: AbortSignal) {
+        const frame = this.frame();
+        const current = () => this.panel === panel && Boolean(frame && panel.canUse(frame));
+        const viewport = frame && this.view.visible && current() ? await this.viewport.read(frame, current, signal) : undefined;
+        return { ...this.display(panel), viewport: current() ? viewport : undefined };
+    }
+
+    async setViewport(panel: DesignerPanel, frame: FrameTarget, change: TimelineViewportChange, signal: AbortSignal) {
+        const current = () => this.panel === panel && panel.canUse(frame);
+        const viewport = await this.viewport.request(frame, current, signal, change);
+        if (!viewport) throw new Error('Choose an animation or clip ruler in the Timeline.');
+        return { ...this.display(panel), viewport };
     }
 
     async setGraphMode(panel: DesignerPanel, frame: FrameTarget, mode: AnimationGraphMode) {
@@ -282,6 +299,7 @@ export class TimelineView implements vscode.Disposable {
     }
 
     private async receive(message: FromTimeline): Promise<void> {
+        if (message.type === 'timelineViewportReply') { this.viewport.receive(message); return; }
         if (message.type === 'timelineDisplayReady' || message.type === 'animationGraphMode' || message.type === 'timelineLayout') {
             try {
                 if (message.type === 'timelineDisplayReady') {

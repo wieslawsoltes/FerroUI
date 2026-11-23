@@ -75,6 +75,19 @@ The picker follows the open source document and uses the running app's registry.
 
 Escape dismisses the filter popup when it has focus.
 
+### Set the visible Timeline range from an agent
+
+1. Open the Timeline with an animation selected. In App Preview, choose a Value or Velocity curve, or open **Compare animation clips**. In Designer Studio, open the Timeline.
+2. Read `designer_timeline_view` or `designer_hosted_timeline_view`. When a ruler is visible, the `viewport` object reports the ruler type, `start`, `end`, `duration`, and `canFitSelection`. The track and curve rulers include the selected `program` when available. The clip ruler measures the shared elapsed clock. Tracks and curves measure authored seconds.
+3. Call `designer_timeline_set_viewport` with the returned `revision` as `expected_revision`. Pass the design `session` in VS Code or the active Studio document `uri` as `expected_uri`. App Preview uses `designer_hosted_timeline_set_viewport` with the design session and `generation` as `expected_generation`.
+4. In the `viewport` argument, copy the reported `ruler` and `program` if present. Set `action` to `window` and pass `start` and `end` in seconds to zoom or pan. Use `fit` to show the entire ruler or `fit_selection` when `canFitSelection` is true. An exact window must fit within the ruler, with a minimum span of 0.05 seconds or the entire duration for shorter clips.
+
+The tool returns the range rendered by the existing controls. A later read reflects zoom or pan performed in the UI. These controls change the view while preserving the playhead and source history. The tools require write permission. [MCP permissions and tools](reference.md#use-ferroui-with-vs-code-agents)
+
+![The docked Timeline shows the first 0.6 seconds of a 0.8-second clip, beside the XAML and native preview.](../images/vscode-timeline-mcp-viewport.png)
+
+[App Preview with the Opacity curve from 0.5 to 1.5 seconds](../images/vscode-hosted-mcp-viewport.png)
+
 ### Read a velocity curve
 
 ![The VS Code Timeline shows the Opacity velocity crossing zero before an eased key at 1.4 seconds](../images/vscode-velocity-curve.png)

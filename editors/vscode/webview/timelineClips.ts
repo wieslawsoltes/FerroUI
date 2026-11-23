@@ -5,6 +5,7 @@ import { create, element, labelButton } from './dom';
 import { bindClipDrag } from './timelineClipDrag';
 import { TimelineClipPlacement } from './timelineClipPlacement';
 import { clamp, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline, type TimelineViewport } from './timelineViewport';
+import type { TimelineRulerView } from './timelineViewportRequest';
 
 export interface TimelineClipRow {
     id: number;
@@ -99,7 +100,7 @@ export class TimelineClips<Frame extends ClipFrame> {
         this.zoomIn.onclick = () => this.zoom(1.25);
         this.zoomOut.onclick = () => this.zoom(.8);
         this.fit.onclick = () => this.fitClips();
-        this.pan.oninput = () => { this.view = panTimeline(this.view, this.pan.valueAsNumber); this.layout(); };
+        this.pan.oninput = () => this.applyViewport(panTimeline(this.view, this.pan.valueAsNumber));
         this.pane.onkeydown = event => {
             if (event.target instanceof HTMLInputElement || event.altKey || event.metaKey || event.ctrlKey) return;
             if (event.key === '+' || event.key === '=') this.zoom(1.25);
@@ -123,10 +124,13 @@ export class TimelineClips<Frame extends ClipFrame> {
     get viewport(): TimelineViewport { return this.view; }
     get elapsed(): number { return this.seconds; }
 
+    rulerView(): TimelineRulerView | undefined {
+        if (this.visible) return { ruler: 'clips', range: this.view, apply: range => this.applyViewport(range) };
+    }
+
     reveal(time: number): void {
         if (visibleTime(this.view, time)) return;
-        this.view = panTimeline(this.view, time - this.view.span / 2);
-        this.layout();
+        this.applyViewport(panTimeline(this.view, time - this.view.span / 2));
     }
 
     private get frame(): Frame | undefined { return !this.locked && this.visible ? this.state?.frame : undefined; }
@@ -249,9 +253,15 @@ export class TimelineClips<Frame extends ClipFrame> {
         this.pane.style.setProperty('--clip-head', head);
     }
 
-    private fitClips(): void { this.view = fitTimeline(this.view.duration); this.layout(); }
+    private fitClips(): void { this.applyViewport(fitTimeline(this.view.duration)); }
 
-    private zoom(factor: number): void { this.view = zoomTimeline(this.view, factor, this.seconds); this.layout(); }
+    private zoom(factor: number): void { this.applyViewport(zoomTimeline(this.view, factor, this.seconds)); }
+
+    private applyViewport(range: TimelineViewport): void {
+        if (range.start === this.view.start && range.span === this.view.span) return;
+        this.view = range;
+        this.layout();
+    }
 
     private layout(): void {
         const { start, span, duration } = this.view;

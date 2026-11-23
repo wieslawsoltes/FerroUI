@@ -116,6 +116,47 @@ fn studio_mcp_layout_shares_the_clip_toggle_and_keeps_the_active_program() {
 }
 
 #[test]
+fn studio_mcp_viewport_uses_the_native_ruler_and_keeps_source_history() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let owner = workspace.session();
+    let program = owner.borrow().animation_programs()[0].id;
+    owner.borrow_mut().select_animation_program(program).unwrap();
+    workspace.set_timeline_visible(true);
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    let revision = before["revision"].as_u64().unwrap();
+    let set = |revision, viewport: Value, permissions| provider.call("designer_timeline_set_viewport", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision, "viewport":viewport,
+    }), permissions);
+    assert_eq!(before["viewport"]["ruler"], "tracks");
+    assert_eq!(before["viewport"]["program"], json!(program));
+    let window = json!({"ruler":"tracks", "program":program, "action":"window", "start":0.1, "end":0.6});
+    assert!(set(revision, window.clone(), Permissions::default()).is_err());
+    assert!(set(revision + 1, window.clone(), write()).is_err());
+    let short = json!({"ruler":"tracks", "program":program, "action":"window", "start":0.25, "end":0.26});
+    assert!(set(revision, short, write()).unwrap_err().contains("within the ruler"));
+    assert_eq!(read(), before);
+    let changed = set(revision, window.clone(), write()).unwrap();
+    assert_eq!(changed["viewport"]["start"], 0.1);
+    assert_eq!(changed["viewport"]["end"], 0.6);
+    assert_eq!(read(), changed);
+    workspace.set_clip_comparison(true);
+    assert!(set(revision, window, write()).unwrap_err().contains("ruler or animation changed"));
+    let clips = set(revision, json!({"ruler":"clips", "action":"window", "start":0.5, "end":1.5}), write()).unwrap();
+    assert_eq!(clips["viewport"]["end"], 1.5);
+    let fit = set(revision, json!({"ruler":"clips", "action":"fit"}), write()).unwrap();
+    assert_eq!(fit["viewport"]["start"], 0.0);
+    assert_eq!(fit["viewport"]["end"], fit["viewport"]["duration"]);
+    let session = owner.borrow();
+    assert_eq!(session.document().source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.document().can_undo());
+}
+
+#[test]
 fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");

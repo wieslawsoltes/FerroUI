@@ -33,6 +33,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     if (data.type === 'animations') { animations.update(data.state, data.version, data.layout); return; }
     if (data.type === 'animationGraphMode') { animations.setGraphMode(data.mode); return; }
     if (data.type === 'timelineLayout') { animations.setTimelineLayout(data.layout); return; }
+    if (data.type === 'timelineViewportRequest') { animations.timelineViewport(data); return; }
     if (data.type === 'animationReply') { animations.reply(data.request); return; }
     if (data.type === 'curveReply') { animations.curve(data); return; }
     if (data.type === 'openKeyframe') { animations.keyframes.open(data.key); return; }

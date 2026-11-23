@@ -11,6 +11,7 @@ import { HostedKeyLanes } from './hostedKeyLanes';
 import { clipRulerExtent, TimelineClips } from './timelineClips';
 import { TimelineMarkerView } from './timelineMarkerView';
 import { fitTimeline } from './timelineViewport';
+import { answerTimelineViewport } from './timelineViewportRequest';
 import { TimelineWorkArea } from './timelineWorkArea';
 
 export class HostedAnimationView {
@@ -172,6 +173,18 @@ export class HostedAnimationView {
 
     setTimelineLayout(layout: TimelineLayout): void {
         if (this.clips.applyLayout(layout)) this.showTimelineLayout();
+    }
+
+    timelineViewport(request: Extract<ToHosted, { type: 'timelineViewportRequest' }>): void {
+        const { revision, sequence } = request.frame;
+        // The ruler is derived from the accepted catalog. Image decoding gates
+        // native input and authored edits, which also depend on the canvas.
+        if (this.state.frame?.revision !== revision || this.state.frame.sequence !== sequence) {
+            this.send({ type: 'timelineViewportReply', request: request.request,
+                error: 'Wait for the current App Preview frame and read the Timeline view again.' });
+            return;
+        }
+        this.send(answerTimelineViewport(request, this.clips.rulerView() ?? this.curves.rulerView()));
     }
 
     private showTimelineLayout(): void {

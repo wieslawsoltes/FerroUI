@@ -1,5 +1,6 @@
 import type { AnimationGraphMessage } from './animationGraph';
 import type { TimelineLayout, TimelineLayoutMessage } from './timelineLayout';
+import type { TimelineViewportReply, TimelineViewportRequest } from './timelineViewportProtocol';
 import type { PreviewSourceBuffer, Range, Source } from './protocol';
 import type { HostedAnimationCatalog, HostedAnimationControl, HostedAnimationFrame, HostedAnimationPresentation, HostedAnimationRestore,
     HostedAnimationState, HostedClipDraft, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupAction,
@@ -66,6 +67,7 @@ export type HostedGesture = (HostedPoint & ({ type: 'click' } | { type: 'scroll'
 export type HostedInput = HostedAnimationFrame & HostedPoint & HostedGesture;
 
 export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | AnimationGraphMessage | TimelineLayoutMessage
+    | TimelineViewportReply
     | { type: 'ready'; layout: TimelineLayout } | { type: 'refresh' }
     | { type: 'templates'; frame: HostedAnimationFrame }
     | { type: 'animation'; request: number; frame: HostedAnimationFrame; control: HostedAnimationControl }
@@ -82,6 +84,7 @@ export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | An
     | { type: 'keyframeGroup'; frame: HostedAnimationFrame; request: number; action: HostedKeyframeGroupAction }
     | { type: 'fixture'; revision: number; name: string | null };
 export type ToHosted = ToHostedPalette | ToHostedStyles | AnimationGraphMessage | TimelineLayoutMessage | { type: 'frame'; frame: HostedFrame }
+    | TimelineViewportRequest<HostedAnimationFrame>
     | { type: 'animations'; state: HostedAnimationState; version: number; layout?: TimelineLayout }
     | { type: 'animationReply'; request: number }
     | { type: 'openKeyframe'; key: HostedKeyframeSelection }

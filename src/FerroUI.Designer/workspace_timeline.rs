@@ -13,6 +13,9 @@ mod easing;
 mod markers;
 #[path = "workspace_timeline/range.rs"]
 mod range;
+#[cfg(feature = "mcp")]
+#[path = "workspace_timeline/viewport.rs"]
+mod viewport;
 
 use super::*;
 use crate::timeline_lane::{EasingPreview, TimelineLane};

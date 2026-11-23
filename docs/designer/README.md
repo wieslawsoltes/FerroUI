@@ -537,6 +537,11 @@ Agents can switch this layout with `designer_timeline_set_layout` using the acti
 URI and revision from `designer_timeline_view`.
 [VS Code workflow and MCP arguments](vscode/motion.md#compare-and-sequence-clips)
 
+Use the same viewport controls from MCP with `designer_timeline_set_viewport`. Use a window to zoom or
+pan in authored seconds on the track ruler or elapsed seconds on the clip ruler. Fit the full view
+or the selected curve keys with the corresponding action.
+[Viewport workflow](vscode/motion.md#set-the-visible-timeline-range-from-an-agent)
+
 App Preview uses the same placement rules with the selected binary’s registered animators and
 resolved timing. It samples the combined pose before displaying a compatible source replacement.
 [App Preview clip workflow](vscode/motion.md#compare-clips-in-app-preview)

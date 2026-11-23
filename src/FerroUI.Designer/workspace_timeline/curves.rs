@@ -60,28 +60,25 @@ impl DesignerWorkspace {
         self.rebuild_tracks();
     }
 
-    pub(super) fn fit_timeline_selection(&self) {
-        let range = {
-            let ui = self.timeline_ui.borrow();
-            (ui.curves.is_some() && ui.selection_explicit)
-                .then(|| {
-                    ui.selection
-                        .iter()
-                        .map(|key| key.time)
-                        .fold(None, |range, time| {
-                            Some(range.map_or((time, time), |(first, last): (f64, f64)| {
-                                (first.min(time), last.max(time))
-                            }))
-                        })
-                })
-                .flatten()
-        };
-        let view = range.map(|(first, last)| {
+    pub(super) fn timeline_selection_window(&self) -> Option<(f64, f64)> {
+        let ui = self.timeline_ui.borrow();
+        if ui.curves.is_none() || !ui.selection_explicit || ui.compare_clips {
+            return None;
+        }
+        let mut times = ui.selection.iter().map(|key| key.time);
+        let first = times.next()?;
+        let (first, last) = times.fold((first, first), |(first, last), time| {
+            (first.min(time), last.max(time))
+        });
+        Some({
             let duration = self.session.borrow().timeline().duration;
             let padding = ((last - first) * 0.1).max(duration * 0.03);
             ((first - padding).max(0.0), (last + padding).min(duration))
-        });
-        self.set_timeline_view(view);
+        })
+    }
+
+    pub(super) fn fit_timeline_selection(&self) {
+        self.set_timeline_view(self.timeline_selection_window());
     }
 
     pub(super) fn attach_timeline_curve(

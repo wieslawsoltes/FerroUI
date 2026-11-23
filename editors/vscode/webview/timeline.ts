@@ -17,6 +17,7 @@ import { keyframeId, TimelineSelection } from './timelineSelection';
 import { TimelineStateTransition } from './timelineStateTransition';
 import { TimelineTrackFilter } from './timelineTrackFilter';
 import { clamp } from './timelineViewport';
+import { answerTimelineViewport, type TimelineRulerView } from './timelineViewportRequest';
 import { TimelineViewportView } from './timelineViewportView';
 import { TimelineWorkArea } from './timelineWorkArea';
 
@@ -234,6 +235,10 @@ window.addEventListener('message', event => {
         if (graph.apply(message.mode)) { saveTimeline(); showCurves(); }
     } else if (message.type === 'timelineLayout') {
         if (clips.applyLayout(message.layout)) showTimelineLayout();
+    } else if (message.type === 'timelineViewportRequest') {
+        const frame = model.frame;
+        const matchingFrame = frame?.session === message.frame.session && frame.token === message.frame.token;
+        vscode.postMessage(answerTimelineViewport(message, matchingFrame ? timelineRuler() : undefined));
     } else if (message.type === 'position') {
         model.position = message.position;
         model.frame = message.frame;
@@ -478,6 +483,15 @@ function showTimelineLayout(): void {
     closeViewOptions();
     saveTimeline();
     showTracks();
+}
+
+function timelineRuler(): TimelineRulerView | undefined {
+    if (model.transition) return;
+    if (clips.visible) return clips.rulerView();
+    const selected = current();
+    if (!selected?.timeline) return;
+    return { ruler: 'tracks', program: selected.id, range: viewport.range, apply: range => viewport.apply(range),
+        selectedKeys: fitKeys.hidden ? undefined : selection.keys.map(key => key.time) };
 }
 
 function showCurves(): void {

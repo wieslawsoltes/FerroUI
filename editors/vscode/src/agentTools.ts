@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import type { AppSessions } from './appSessions';
 import type { AnimationGraphMode } from './animationGraph';
 import type { TimelineLayout } from './timelineLayout';
+import type { TimelineViewportChange } from './timelineViewportProtocol';
 import type { Collaboration } from './collaboration';
 import { collaborationTool, isCollaborationTool } from './collaborationAgents';
 import { agentCatalog, type AgentTool } from './agentCatalog';
@@ -58,6 +59,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_uri: string;
     graph_mode: AnimationGraphMode;
     layout: TimelineLayout;
+    viewport: TimelineViewportChange;
     prefix?: string;
     change?: CommandBindingEdit;
     expected_rust_version: number;
@@ -284,11 +286,13 @@ export class AgentTools {
             case 'designer_hosted_fixture':
                 return this.hosted.chooseFixture(document.uri, args.expected_generation, args.expected_revision, args.fixture ?? null, signal);
             case 'designer_hosted_animations': return this.hosted.animations(document.uri);
-            case 'designer_hosted_timeline_view': return this.hosted.timelineDisplay(document.uri);
+            case 'designer_hosted_timeline_view': return this.hosted.timelineDisplay(document.uri, signal);
             case 'designer_hosted_timeline_set_graph':
                 return this.hosted.setGraphMode(document.uri, args.expected_generation, args.expected_revision, args.graph_mode);
             case 'designer_hosted_timeline_set_layout':
                 return this.hosted.setTimelineLayout(document.uri, args.expected_generation, args.expected_revision, args.layout);
+            case 'designer_hosted_timeline_set_viewport':
+                return this.hosted.setTimelineViewport(document.uri, args.expected_generation, args.expected_revision, args.viewport, signal);
             case 'designer_hosted_curve':
                 return this.hosted.curve(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedCurveQuery, signal);
@@ -613,11 +617,13 @@ export class AgentTools {
                 await this.workbench.revealDesign(panel, 'timeline');
                 return this.workbench.controlTimeline(panel, { session: panel.session, token: args.expected_revision },
                     args.arguments as TimelineControl, signal);
-            case 'designer_timeline_view': return this.workbench.timelineDisplay(panel);
+            case 'designer_timeline_view': return this.workbench.timelineDisplay(panel, signal);
             case 'designer_timeline_set_graph':
                 return this.workbench.setTimelineGraph(panel, { session: panel.session, token: args.expected_revision }, args.graph_mode, signal);
             case 'designer_timeline_set_layout':
                 return this.workbench.setTimelineLayout(panel, { session: panel.session, token: args.expected_revision }, args.layout, signal);
+            case 'designer_timeline_set_viewport':
+                return this.workbench.setTimelineViewport(panel, { session: panel.session, token: args.expected_revision }, args.viewport, signal);
             case 'designer_timeline_markers':
             case 'designer_timeline_marker_edit':
                 if ((args.all === true) === (args.program !== undefined)) throw new Error('Choose a clip or the shared elapsed ruler.');
