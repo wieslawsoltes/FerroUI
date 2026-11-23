@@ -438,7 +438,7 @@ mod tests {
         assert_eq!(Some(BrowserRenderingMode::WebGL2), BrowserRenderingMode::parse("WebGL2"));
         assert_eq!(Some(BrowserRenderingMode::WebGL1), BrowserRenderingMode::parse("webgl1"));
         assert_eq!(Some(BrowserRenderingMode::Software2D), BrowserRenderingMode::parse("SOFTWARE2D"));
-        assert_eq!(None, BrowserRenderingMode::parse("WebGPU"));
+        assert_eq!(None, BrowserRenderingMode::parse("WebGL3"));
         assert_eq!(None, BrowserRenderingMode::parse(""));
     }
 }
