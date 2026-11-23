@@ -868,7 +868,7 @@ impl ProGpuEngine {
     }
 
     /// The engine, entered by the calling thread.
-    fn enter(&self) -> *mut progpu_native_engine {
+    pub(crate) fn enter(&self) -> *mut progpu_native_engine {
         self.device.enter();
         let thread = std::thread::current().id();
         if self.thread.get() != thread {
