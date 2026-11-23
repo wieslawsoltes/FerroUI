@@ -93,9 +93,18 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         assert.notEqual(typed.pixels, focused.pixels);
         const scrolled = await send({ type: 'scroll', x: .60, y: .78, delta: -8 });
         assert.notEqual(scrolled.pixels, typed.pixels);
+        const refresh = (expected_revision: number, expected_generation = generation) =>
+            invoke('designer_hosted_refresh', { session, expected_generation, expected_revision });
+        assert.match((await refresh(scrolled.revision, generation + 1)).content[0]?.text ?? '', /current application preview generation/);
+        assert.match((await refresh(scrolled.revision + 1)).content[0]?.text ?? '', /preview revision changed/i);
+        const updated = content<Pick<Capture, 'generation' | 'revision'>>(await refresh(scrolled.revision));
+        assert.deepEqual([updated.generation, updated.revision], [generation, scrolled.revision + 1]);
+        const refreshed = await image();
+        assert.equal(refreshed.revision, updated.revision);
+        assert.match((await input(scrolled, click)).content[0]?.text ?? '', /frame changed/i);
         assert.equal(document.version, version);
         assert.equal(document.getText(), original);
-        console.log('VS Code MCP focused, typed, and scrolled the native App Preview while fencing stale frame and generation requests');
+        console.log('VS Code MCP focused, typed, scrolled, and refreshed the native App Preview while rejecting stale requests');
     } finally {
         try {
             const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>

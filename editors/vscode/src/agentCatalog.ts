@@ -206,6 +206,8 @@ export const agentCatalog = {
     designer_hosted_open: tool('Open the app-hosted design and start its configured Cargo target. Read its preview generation and wait for a current frame before sampling animations.',
         { ...session, ...cargoSelection }, ['session'], true, false),
     designer_hosted_fixtures: tool('Read registered fixture choices and current generation of the open application preview for this source.', session, ['session']),
+    designer_hosted_refresh: tool('Refresh App Preview from the current source and its workspace dependencies. Use the generation and revision from designer_hosted_fixtures. Read designer_hosted_image for the new frame.',
+        { ...frame, expected_generation: integer(1) }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_hosted_fixture: tool('Select a registered fixture in the application preview and wait for its accepted frame. Omit fixture to return to the current source.', {
         ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
     }, ['session', 'expected_generation', 'expected_revision'], true, false),

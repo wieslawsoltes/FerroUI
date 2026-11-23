@@ -108,6 +108,15 @@ export class HostedDesign implements vscode.Disposable {
         return this.session(uri).fixtures();
     }
 
+    refresh(uri: vscode.Uri, generation: number, revision: number): HostedFixtureCatalog {
+        const session = this.session(uri);
+        const current = session.fixtures();
+        if (current.generation !== generation) throw new Error('Read the current application preview generation.');
+        if (current.revision !== revision) throw new Error('The application preview revision changed. Read the current preview fixtures.');
+        session.panel.reveal(session.panel.viewColumn, true);
+        return session.refresh();
+    }
+
     animations(uri: vscode.Uri) {
         const session = this.session(uri);
         const state = session.animations.state;
@@ -439,6 +448,11 @@ class HostedSession {
         this.application = undefined;
         this.animations.invalidate();
         this.report(message);
+    }
+
+    refresh(): HostedFixtureCatalog {
+        this.update();
+        return this.fixtures();
     }
 
     private update(): void {
@@ -864,7 +878,7 @@ class HostedSession {
             this.schedule(0);
             return;
         }
-        if (message.type === 'refresh') { this.update(); return; }
+        if (message.type === 'refresh') { this.refresh(); return; }
         if (message.type === 'palette') {
             await this.receivePalette(message);
             return;

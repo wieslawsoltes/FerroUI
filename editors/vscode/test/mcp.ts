@@ -139,7 +139,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_templates'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
-        for (const name of ['open', 'animations', 'animation', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
+        for (const name of ['open', 'refresh', 'animations', 'animation', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'property_transitions', 'property_transition_draft', 'property_transition',
             'palette', 'palette_edit_draft', 'palette_edit',
@@ -148,6 +148,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
         }
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_hosted_refresh', { session: 1, expected_generation: 1,
+            expected_revision: 1 })).content[0]?.text ?? '', /allowWrites/);
         assert.match((await invoke('designer_hosted_input', { session: 1, expected_generation: 1,
             expected_revision: 1, expected_sequence: 1, input: { type: 'text', text: 'Draft' } })).content[0]?.text ?? '', /allowWrites/);
         const guideWrite = { session: 1, expected_revision: 0, expected_epoch: 0, edit: { action: 'clear' } };

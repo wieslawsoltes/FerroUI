@@ -275,6 +275,8 @@ export class AgentTools {
         switch (tool) {
             case 'designer_hosted_open': return this.hosted.open(document, args, signal);
             case 'designer_hosted_fixtures': return this.hosted.fixtures(document.uri);
+            case 'designer_hosted_refresh':
+                return this.hosted.refresh(document.uri, args.expected_generation, args.expected_revision);
             case 'designer_hosted_fixture':
                 return this.hosted.chooseFixture(document.uri, args.expected_generation, args.expected_revision, args.fixture ?? null, signal);
             case 'designer_hosted_animations': return this.hosted.animations(document.uri);

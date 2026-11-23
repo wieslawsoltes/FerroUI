@@ -53,6 +53,10 @@ These gestures use the app’s native input path and keep the authored source bu
 
 ![App Preview shows the entered order note in the field and its bound badge, with the order list scrolled beside the XAML source.](../images/vscode-app-preview-agent-input.png)
 
+To use the toolbar’s **Refresh** action from an agent, read `designer_hosted_fixtures` and pass its `generation` and `revision`
+to `designer_hosted_refresh` as `expected_generation` and `expected_revision`. The refresh reads the current source and workspace
+dependencies. Wait for `designer_hosted_image` to return the new revision before sending further input.
+
 ### Edit a palette in App Preview
 
 1. Open an XAML App Preview with the current `ferroui-designer-support` and choose the **App Preview palette** color icon in the toolbar.
