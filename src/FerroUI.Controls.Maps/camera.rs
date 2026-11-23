@@ -1,6 +1,8 @@
 //! Where the map looks, and how it keeps moving after a gesture.
 
-use crate::projection::{pan, zoom_about, BasicGeoposition};
+use crate::projection::{
+    normalize_heading, pan, shortest_turn, view_to_world, zoom_about, BasicGeoposition,
+};
 
 /// The share of its speed a flick keeps after one second.
 const FLICK_RETAINED_PER_SECOND: f64 = 0.02;
@@ -15,6 +17,11 @@ const ZOOM_REMAINING_PER_SECOND: f64 = 0.000_1;
 /// A zoom animation this close to its target ends on it.
 const ZOOM_EPSILON: f64 = 0.001;
 
+/// The share of the remaining turn a smooth rotation has left after one second.
+const HEADING_REMAINING_PER_SECOND: f64 = 0.000_1;
+/// A smooth rotation this close to its target, in degrees, ends on it.
+const HEADING_EPSILON: f64 = 0.05;
+
 /// The lowest and highest zoom levels of the control.
 pub const MIN_ZOOM: f64 = 0.0;
 pub const MAX_ZOOM: f64 = 22.0;
@@ -28,6 +35,11 @@ pub struct MapCamera {
     max_zoom: f64,
     velocity: (f64, f64),
     zoom_target: Option<ZoomTarget>,
+    /// The compass direction at the top of the view, in `0..360`.
+    heading: f64,
+    /// Where a smooth rotation ends, as the heading plus the turn left: it may be outside
+    /// `0..360`.
+    heading_target: Option<f64>,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq)]
@@ -51,6 +63,8 @@ impl MapCamera {
             max_zoom: MAX_ZOOM,
             velocity: (0.0, 0.0),
             zoom_target: None,
+            heading: 0.0,
+            heading_target: None,
         };
         camera.zoom = camera.limit(zoom);
         camera
@@ -79,7 +93,53 @@ impl MapCamera {
 
     /// Whether [`step`](Self::step) still has something to do.
     pub fn is_moving(&self) -> bool {
-        self.velocity != (0.0, 0.0) || self.zoom_target.is_some()
+        self.velocity != (0.0, 0.0) || self.zoom_target.is_some() || self.heading_target.is_some()
+    }
+
+    /// The compass direction at the top of the view, in `0..360`.
+    pub fn heading(&self) -> f64 {
+        self.heading
+    }
+
+    /// The heading a running rotation ends on, or the current one.
+    pub fn target_heading(&self) -> f64 {
+        self.heading_target.map_or(self.heading, normalize_heading)
+    }
+
+    /// Turns the view at once, about its middle.
+    pub fn set_heading(&mut self, heading: f64) {
+        self.heading_target = None;
+        self.heading = normalize_heading(heading);
+    }
+
+    /// Turns the view by `degrees` at once, keeping the place under `anchor`, in pixels from the
+    /// middle of the view. A positive turn moves the heading clockwise.
+    pub fn rotate_by(&mut self, degrees: f64, anchor: (f64, f64)) {
+        if !degrees.is_finite() {
+            return;
+        }
+        self.heading_target = None;
+        let heading = normalize_heading(self.heading + degrees);
+        let before = view_to_world(anchor.0, anchor.1, self.heading);
+        let after = view_to_world(anchor.0, anchor.1, heading);
+        self.center = pan(
+            self.center,
+            self.zoom,
+            after.0 - before.0,
+            after.1 - before.1,
+        );
+        self.heading = heading;
+    }
+
+    /// Starts or retargets a smooth rotation about the middle of the view, the short way round.
+    pub fn animate_heading(&mut self, heading: f64) {
+        self.velocity = (0.0, 0.0);
+        let turn = shortest_turn(self.heading, normalize_heading(heading));
+        if turn.abs() <= HEADING_EPSILON {
+            self.set_heading(heading);
+        } else {
+            self.heading_target = Some(self.heading + turn);
+        }
     }
 
     /// Limits the zoom. The range is put in order and kept within what the control supports.
@@ -113,12 +173,23 @@ impl MapCamera {
     pub fn stop(&mut self) {
         self.velocity = (0.0, 0.0);
         self.zoom_target = None;
+        self.heading_target = None;
     }
 
-    /// Moves the content by a number of pixels, as a drag does.
+    /// Moves the content by a number of pixels of the view, as a drag does.
     pub fn drag(&mut self, dx: f64, dy: f64) {
         self.velocity = (0.0, 0.0);
-        self.center = pan(self.center, self.zoom, dx, dy);
+        self.move_content(dx, dy);
+    }
+
+    fn move_content(&mut self, dx: f64, dy: f64) {
+        let (x, y) = view_to_world(dx, dy, self.heading);
+        self.center = pan(self.center, self.zoom, x, y);
+    }
+
+    /// `anchor`, in pixels of the view from its middle, along the axes of the world.
+    fn world_anchor(&self, anchor: (f64, f64)) -> (f64, f64) {
+        view_to_world(anchor.0, anchor.1, self.heading)
     }
 
     /// Lets go of a drag at a speed in pixels per second.
@@ -136,7 +207,7 @@ impl MapCamera {
     pub fn zoom_at(&mut self, zoom: f64, anchor: (f64, f64)) {
         self.zoom_target = None;
         let zoom = self.limit(zoom);
-        self.center = zoom_about(self.center, self.zoom, zoom, anchor);
+        self.center = zoom_about(self.center, self.zoom, zoom, self.world_anchor(anchor));
         self.zoom = zoom;
     }
 
@@ -163,10 +234,28 @@ impl MapCamera {
             } else {
                 target.zoom - remaining
             };
-            self.center = zoom_about(self.center, self.zoom, zoom, target.anchor);
+            self.center = zoom_about(
+                self.center,
+                self.zoom,
+                zoom,
+                self.world_anchor(target.anchor),
+            );
             self.zoom = zoom;
             if zoom == target.zoom {
                 self.zoom_target = None;
+            }
+        }
+        if let Some(target) = self.heading_target {
+            let remaining = (target - self.heading) * HEADING_REMAINING_PER_SECOND.powf(seconds);
+            if remaining.abs() <= HEADING_EPSILON {
+                self.heading = normalize_heading(target);
+                self.heading_target = None;
+            } else {
+                // The target moves with the wrap of the heading, so the turn left stays the same.
+                let heading = target - remaining;
+                let wrapped = normalize_heading(heading);
+                self.heading_target = Some(target + (wrapped - heading));
+                self.heading = wrapped;
             }
         }
         if self.velocity != (0.0, 0.0) {
@@ -174,12 +263,7 @@ impl MapCamera {
             // flick does not depend on the frame rate.
             let decay = FLICK_RETAINED_PER_SECOND.powf(seconds);
             let travelled = (decay - 1.0) / FLICK_RETAINED_PER_SECOND.ln();
-            self.center = pan(
-                self.center,
-                self.zoom,
-                self.velocity.0 * travelled,
-                self.velocity.1 * travelled,
-            );
+            self.move_content(self.velocity.0 * travelled, self.velocity.1 * travelled);
             self.velocity = (self.velocity.0 * decay, self.velocity.1 * decay);
             if self.velocity.0.hypot(self.velocity.1) < FLICK_STOP_SPEED {
                 self.velocity = (0.0, 0.0);
@@ -296,6 +380,77 @@ mod tests {
         camera.stop();
         assert!(!camera.is_moving());
         assert_eq!(camera.target_zoom(), camera.zoom());
+    }
+
+    #[test]
+    fn a_drag_follows_the_pointer_on_a_turned_view() {
+        use crate::projection::MapView;
+        let mut camera = MapCamera::new(place(), 6.0);
+        camera.set_heading(70.0);
+        let before = MapView::new(camera.center(), 6.0, 70.0, 400.0, 300.0);
+        let held = before.view_to_place(120.0, 90.0);
+        camera.drag(35.0, -20.0);
+        let after = MapView::new(camera.center(), 6.0, 70.0, 400.0, 300.0);
+        let (x, y) = after.place_to_view(held);
+        near(x, 155.0, 1e-6);
+        near(y, 70.0, 1e-6);
+    }
+
+    #[test]
+    fn a_turn_keeps_the_place_under_its_anchor() {
+        use crate::projection::MapView;
+        let mut camera = MapCamera::new(place(), 6.0);
+        camera.set_heading(20.0);
+        let anchor = (80.0, -50.0);
+        let before = MapView::new(camera.center(), 6.0, 20.0, 400.0, 300.0);
+        let held = before.view_to_place(200.0 + anchor.0, 150.0 + anchor.1);
+        camera.rotate_by(-55.0, anchor);
+        near(camera.heading(), 325.0, 1e-9);
+        let after = MapView::new(camera.center(), 6.0, camera.heading(), 400.0, 300.0);
+        let (x, y) = after.place_to_view(held);
+        near(x, 280.0, 1e-6);
+        near(y, 100.0, 1e-6);
+    }
+
+    #[test]
+    fn a_zoom_keeps_the_place_under_its_anchor_on_a_turned_view() {
+        use crate::projection::MapView;
+        let mut camera = MapCamera::new(place(), 6.0);
+        camera.set_heading(130.0);
+        let anchor = (60.0, 45.0);
+        let before = MapView::new(camera.center(), 6.0, 130.0, 400.0, 300.0);
+        let held = before.view_to_place(260.0, 195.0);
+        camera.zoom_at(8.0, anchor);
+        let after = MapView::new(camera.center(), 8.0, 130.0, 400.0, 300.0);
+        let (x, y) = after.place_to_view(held);
+        near(x, 260.0, 1e-6);
+        near(y, 195.0, 1e-6);
+    }
+
+    #[test]
+    fn a_smooth_rotation_goes_the_short_way_and_ends_on_its_target() {
+        let mut camera = MapCamera::new(place(), 6.0);
+        camera.set_heading(350.0);
+        let center = camera.center();
+        camera.animate_heading(20.0);
+        assert_eq!(camera.target_heading(), 20.0);
+        let mut steps = 0;
+        while camera.is_moving() {
+            camera.step(1.0 / 60.0);
+            let heading = camera.heading();
+            assert!(
+                heading >= 350.0 || heading <= 20.0 + 1e-9,
+                "the long way round: {heading}"
+            );
+            steps += 1;
+            assert!(steps < 600, "the rotation does not end");
+        }
+        near(camera.heading(), 20.0, 1e-9);
+        assert_eq!(
+            camera.center(),
+            center,
+            "a rotation about the middle keeps the center"
+        );
     }
 
     #[test]

@@ -1,13 +1,15 @@
 //! The `MapControl` control.
 
 use crate::camera::{MapCamera, MAX_ZOOM};
-use crate::map_elements::{view_path, MapElement, MapElementsLayer};
-use crate::projection::{visible_tiles, BasicGeoposition, TILE_SIZE};
+use crate::map_elements::{
+    hit_test, view_path, MapElement, MapElementClickEventArgs, MapElementsLayer, ICON_RADIUS,
+};
+use crate::projection::{shortest_turn, BasicGeoposition, MapView, TILE_SIZE};
 use crate::tile_source::{RasterTileSource, SharedTileLoader};
 use crate::tile_store::{TileStore, MEMORY_BUDGET};
 use ferroui_base::input::gesture_recognizers::PinchGestureRecognizer;
 use ferroui_base::input::{
-    IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs,
+    IPointer, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
     PinchEndedEventArgs, PinchEventArgs, PointerCaptureLostEventArgs, PointerEventArgs,
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerType, PointerWheelEventArgs,
 };
@@ -24,7 +26,7 @@ use ferroui_base::utilities::Locale;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property,
     instantiate, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs,
-    Point, Rect, Ref, Size, StyledElementImpl, StyledProperty, VisualImpl,
+    Matrix, Point, Rect, Ref, Size, StyledElementImpl, StyledProperty, VisualImpl,
 };
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, ControlAutomationPeer,
@@ -44,7 +46,12 @@ const KEY_PAN: f64 = 100.0;
 const WHEEL_ZOOM: f64 = 0.5;
 /// How far back the speed of a released drag is measured, in milliseconds.
 const FLICK_WINDOW_MS: u64 = 100;
-const ICON_RADIUS: f64 = 7.0;
+/// The degrees a key turns the map.
+const KEY_TURN: f64 = 15.0;
+/// How far a pointer moves, in pixels, before a press is a drag and no longer a click.
+const CLICK_SLOP: f64 = 4.0;
+/// Nearer the middle of the view than this, in pixels, the angle of a pointer means nothing.
+const MIN_TURN_RADIUS: f64 = 8.0;
 const ATTRIBUTION_SIZE: f64 = 11.0;
 
 /// Whether an interaction is available to the user.
@@ -58,9 +65,23 @@ pub enum MapInteractionMode {
 ferroui_base::ferro_markup_enum!(MapInteractionMode { Auto, Disabled }, { namespace: "FerroUI.Controls.Maps" });
 ferroui_base::styled_value!(BasicGeoposition);
 
-struct Drag {
+/// What a press of a pointer is doing.
+#[derive(Clone, Copy, Debug, Eq, PartialEq)]
+enum GestureKind {
+    /// Moves the map, or clicks if the pointer stays put.
+    Pan,
+    /// Turns the map about the middle of the view.
+    Rotate,
+    /// Moving is disabled: the press can only click.
+    Click,
+}
+
+struct Gesture {
     pointer: Weak<dyn IPointer>,
+    kind: GestureKind,
+    start: Point,
     last: Point,
+    has_moved: bool,
     samples: VecDeque<(u64, Point)>,
 }
 
@@ -79,8 +100,10 @@ pub struct MapControl {
     is_syncing: Cell<bool>,
     is_frame_requested: Cell<bool>,
     last_frame: Cell<Option<f64>>,
-    drag: RefCell<Option<Drag>>,
+    gesture: RefCell<Option<Gesture>>,
     pinch_start: Cell<Option<f64>>,
+    /// The bearing of the two fingers at the last pinch event.
+    pinch_angle: Cell<Option<f64>>,
 }
 
 ferro_class!(MapControl: Control);
@@ -125,6 +148,21 @@ ferro_properties! { impl MapControl {
             FerroProperty::register::<MapControl, _>("ZoomInteractionMode", MapInteractionMode::Auto)
         }
     );
+
+    ferro_property!(
+        /// Defines the `Heading` property: the compass direction at the top of the view, in
+        /// degrees from 0 up to 360. At 90 the top of the view is east.
+        pub fn heading_property() -> StyledProperty<f64> {
+            FerroProperty::register::<MapControl, _>("Heading", 0.0)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `RotateInteractionMode` property.
+        pub fn rotate_interaction_mode_property() -> StyledProperty<MapInteractionMode> {
+            FerroProperty::register::<MapControl, _>("RotateInteractionMode", MapInteractionMode::Auto)
+        }
+    );
 }}
 
 impl MapControl {
@@ -146,8 +184,9 @@ impl MapControl {
             is_syncing: Cell::new(false),
             is_frame_requested: Cell::new(false),
             last_frame: Cell::new(None),
-            drag: RefCell::new(None),
+            gesture: RefCell::new(None),
             pinch_start: Cell::new(None),
+            pinch_angle: Cell::new(None),
         }
     }
 
@@ -185,6 +224,7 @@ impl MapControl {
             move |_, _: &PinchEndedEventArgs| {
                 if let Some(this) = weak.upgrade() {
                     this.pinch_start.set(None);
+                    this.pinch_angle.set(None);
                 }
             },
         );
@@ -239,6 +279,39 @@ impl MapControl {
     /// Sets whether the user can zoom the map.
     pub fn set_zoom_interaction_mode(&self, value: MapInteractionMode) {
         self.set_value(Self::zoom_interaction_mode_property(), value);
+    }
+
+    /// The compass direction at the top of the view, in degrees from 0 up to 360.
+    pub fn heading(&self) -> f64 {
+        self.get_value(Self::heading_property())
+    }
+
+    /// Turns the map about the middle of the view.
+    pub fn set_heading(&self, value: f64) {
+        self.set_value(Self::heading_property(), value);
+    }
+
+    /// Whether the user can turn the map.
+    pub fn rotate_interaction_mode(&self) -> MapInteractionMode {
+        self.get_value(Self::rotate_interaction_mode_property())
+    }
+
+    /// Sets whether the user can turn the map.
+    pub fn set_rotate_interaction_mode(&self, value: MapInteractionMode) {
+        self.set_value(Self::rotate_interaction_mode_property(), value);
+    }
+
+    /// What the view shows now, and the math between its pixels and the globe.
+    pub fn view(&self) -> MapView {
+        let size = self.bounds().size();
+        let camera = self.camera.borrow();
+        MapView::new(
+            camera.center(),
+            camera.zoom(),
+            camera.heading(),
+            size.width,
+            size.height,
+        )
     }
 
     /// The source of the tiles and what fetches them. No provider is built in.
@@ -321,13 +394,14 @@ impl MapControl {
 
     /// Writes the camera to the properties and redraws.
     fn sync_from_camera(&self) {
-        let (center, zoom) = {
+        let (center, zoom, heading) = {
             let camera = self.camera.borrow();
-            (camera.center(), camera.zoom())
+            (camera.center(), camera.zoom(), camera.heading())
         };
         self.is_syncing.set(true);
         self.set_value(Self::center_property(), center);
         self.set_value(Self::zoom_level_property(), zoom);
+        self.set_value(Self::heading_property(), heading);
         self.is_syncing.set(false);
         self.invalidate_visual();
     }
@@ -376,34 +450,84 @@ impl MapControl {
         self.zoom_interaction_mode() != MapInteractionMode::Disabled
     }
 
+    fn can_rotate(&self) -> bool {
+        self.rotate_interaction_mode() != MapInteractionMode::Disabled
+    }
+
     fn on_pinch(&self, args: &PinchEventArgs) {
-        if !self.can_zoom() || !(args.scale() > 0.0) {
+        let (can_zoom, can_rotate) = (self.can_zoom(), self.can_rotate());
+        if (!can_zoom && !can_rotate) || !(args.scale() > 0.0) {
             return;
         }
         // The recognizer holds the pointers of the pinch: the drag ends without releasing them.
-        self.drag.borrow_mut().take();
-        let start = match self.pinch_start.get() {
-            Some(start) => start,
-            None => {
-                let start = self.camera.borrow().zoom();
-                self.pinch_start.set(Some(start));
-                start
-            }
-        };
+        self.gesture.borrow_mut().take();
         let anchor = self.anchor(args.scale_origin());
-        self.camera
-            .borrow_mut()
-            .zoom_at(start + args.scale().log2(), anchor);
+        if can_zoom {
+            let start = match self.pinch_start.get() {
+                Some(start) => start,
+                None => {
+                    let start = self.camera.borrow().zoom();
+                    self.pinch_start.set(Some(start));
+                    start
+                }
+            };
+            self.camera
+                .borrow_mut()
+                .zoom_at(start + args.scale().log2(), anchor);
+        }
+        if can_rotate {
+            // The bearing of the fingers grows clockwise. The turn is taken from it and not from
+            // `angle_delta`, which jumps when the bearing wraps from 360 to 0. The content follows
+            // the fingers, so the heading goes the other way.
+            let angle = args.angle();
+            if let Some(previous) = self.pinch_angle.replace(Some(angle)) {
+                self.camera
+                    .borrow_mut()
+                    .rotate_by(-shortest_turn(previous, angle), anchor);
+            }
+        }
         self.sync_from_camera();
         args.set_handled(true);
     }
 
-    fn end_drag(&self) -> Option<Drag> {
-        let drag = self.drag.borrow_mut().take()?;
-        if let Some(pointer) = drag.pointer.upgrade() {
-            pointer.capture(None);
+    /// Ends the gesture of a pointer and gives it back, if that pointer has it.
+    fn take_gesture(&self, pointer: &Rc<dyn IPointer>) -> Option<Gesture> {
+        let is_same = self
+            .gesture
+            .borrow()
+            .as_ref()
+            .and_then(|gesture| gesture.pointer.upgrade())
+            .is_some_and(|held| Rc::ptr_eq(&held, pointer));
+        if !is_same {
+            return None;
         }
-        Some(drag)
+        let gesture = self.gesture.borrow_mut().take();
+        pointer.capture(None);
+        gesture
+    }
+
+    /// Runs a smooth motion to its end, as frames would.
+    #[cfg(test)]
+    pub(crate) fn settle_for_test(&self) {
+        let mut steps = 0;
+        while self.camera.borrow().is_moving() {
+            self.camera.borrow_mut().step(1.0 / 60.0);
+            steps += 1;
+            assert!(steps < 2000, "the motion does not end");
+        }
+        self.sync_from_camera();
+    }
+
+    /// Raises the click of the topmost element at a point of the view.
+    fn click_at(&self, point: Point) -> bool {
+        let view = self.view();
+        let layers = self.layers.borrow().clone();
+        let Some((layer, element)) = hit_test(&layers, &view, (point.x, point.y)) else {
+            return false;
+        };
+        let location = view.view_to_place(point.x, point.y);
+        layer.raise_click(&MapElementClickEventArgs { element, location });
+        true
     }
 
     /// The speed of the end of a drag, in pixels per second.
@@ -424,32 +548,24 @@ impl MapControl {
         ((last.x - first.x) / seconds, (last.y - first.y) / seconds)
     }
 
-    fn draw_elements(
-        &self,
-        context: &mut DrawingContext<'_>,
-        center: BasicGeoposition,
-        zoom: f64,
-        size: Size,
-    ) {
+    fn draw_elements(&self, context: &mut DrawingContext<'_>, view: &MapView) {
         let layers = self.layers.borrow().clone();
         for layer in layers.iter().filter(|layer| layer.is_visible()) {
             for element in layer.elements() {
                 match element {
                     MapElement::Polygon(polygon) => {
-                        let points =
-                            view_path(&polygon.path, center, zoom, size.width, size.height);
+                        let points = view_path(&polygon.path, view);
                         let fill = brush(polygon.fill);
                         let stroke = pen(polygon.stroke, polygon.stroke_thickness);
                         draw_path(context, &points, true, Some(&fill), Some(&stroke));
                     }
                     MapElement::Polyline(line) => {
-                        let points = view_path(&line.path, center, zoom, size.width, size.height);
+                        let points = view_path(&line.path, view);
                         let stroke = pen(line.stroke, line.stroke_thickness);
                         draw_path(context, &points, false, None, Some(&stroke));
                     }
                     MapElement::Icon(icon) => {
-                        let point =
-                            view_path(&[icon.location], center, zoom, size.width, size.height)[0];
+                        let point = view_path(&[icon.location], view)[0];
                         let fill = brush(icon.color);
                         let outline = pen(Color::from_rgb(0xFF, 0xFF, 0xFF), 2.0);
                         let bounds = Rect::new(
@@ -502,6 +618,23 @@ impl MapControl {
         context.fill_rectangle(&brush(Color::from_argb(0xC0, 0xFF, 0xFF, 0xFF)), back, 0.0);
         context.draw_text(&text, Point::new(back.x + 4.0, back.y + 1.0));
     }
+}
+
+/// Turns the north-up frame of the tiles about the middle of the view.
+pub(crate) fn content_transform(view: &MapView) -> Matrix {
+    Matrix::create_translation(-view.width / 2.0, -view.height / 2.0)
+        * Matrix::create_rotation((-view.heading).to_radians())
+        * Matrix::create_translation(view.width / 2.0, view.height / 2.0)
+}
+
+/// The clockwise turn, in degrees, of a pointer moving from `from` to `to` around `center`.
+pub(crate) fn pointer_turn(center: Point, from: Point, to: Point) -> f64 {
+    let (ax, ay) = (from.x - center.x, from.y - center.y);
+    let (bx, by) = (to.x - center.x, to.y - center.y);
+    if ax.hypot(ay) < MIN_TURN_RADIUS || bx.hypot(by) < MIN_TURN_RADIUS {
+        return 0.0;
+    }
+    (ax * by - ay * bx).atan2(ax * bx + ay * by).to_degrees()
 }
 
 fn brush(color: Color) -> Rc<dyn IBrush> {
@@ -560,9 +693,13 @@ impl FerroObjectImpl for MapControl {
         let property = change.property();
         if property == Self::center_property().as_property()
             || property == Self::zoom_level_property().as_property()
+            || property == Self::heading_property().as_property()
         {
-            let (center, zoom) = (this.center(), this.zoom_level());
-            this.camera.borrow_mut().set_view(center, zoom);
+            let (center, zoom, heading) = (this.center(), this.zoom_level(), this.heading());
+            let mut camera = this.camera.borrow_mut();
+            camera.set_view(center, zoom);
+            camera.set_heading(heading);
+            drop(camera);
             // The camera limits the values; the properties show what it kept.
             this.sync_from_camera();
         }
@@ -597,17 +734,18 @@ impl VisualImpl for MapControl {
             Rect::from_size(size),
             0.0,
         );
-        let (center, zoom) = {
-            let camera = this.camera.borrow();
-            (camera.center(), camera.zoom())
-        };
+        let view = this.view();
         let source = this.tile_source.borrow().clone();
         if let Some(source) = source {
-            let tiles = visible_tiles(center, zoom, size.width, size.height, source.max_zoom());
+            let tiles = view.tiles(source.max_zoom());
             let usable = tiles
                 .iter()
                 .filter(|tile| tile.id.zoom >= source.min_zoom());
             this.store.request(usable.map(|tile| tile.id));
+            let is_turned = view.heading != 0.0;
+            // A turned edge is antialiased: neighbours overlap by a pixel so no seam shows.
+            let overlap = if is_turned { 1.0 } else { 0.0 };
+            let turn = is_turned.then(|| context.push_transform(content_transform(&view)));
             for tile in &tiles {
                 let Some((bitmap, (left, top, side))) = this.store.best(tile.id) else {
                     continue;
@@ -628,11 +766,15 @@ impl VisualImpl for MapControl {
                 context.draw_image_with_rects(
                     &*bitmap,
                     source_rect,
-                    Rect::new(x0, y0, x1 - x0, y1 - y0),
+                    Rect::new(x0, y0, x1 - x0 + overlap, y1 - y0 + overlap),
                 );
             }
+            if let Some(turn) = turn {
+                context.pop(turn);
+            }
         }
-        this.draw_elements(context, center, zoom, size);
+        // Elements are placed through the view and stay upright; so does the attribution.
+        this.draw_elements(context, &view);
         this.draw_attribution(context, size);
     }
 }
@@ -640,28 +782,40 @@ impl VisualImpl for MapControl {
 impl InputElementImpl for MapControl {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
-        if this.drag.borrow().is_some() {
-            // A second finger: the drag stays with the first, and a pinch takes over from it.
+        if this.gesture.borrow().is_some() {
+            // A second finger: the gesture stays with the first, and a pinch takes over from it.
             return;
         }
         let point = e.get_current_point(Some(this));
         let is_primary =
             e.pointer().type_() != PointerType::Mouse || point.properties.is_left_button_pressed;
-        if !is_primary {
+        let wants_turn = point.properties.is_right_button_pressed
+            || point.properties.is_barrel_button_pressed
+            || (is_primary && e.key_modifiers().contains(KeyModifiers::CONTROL));
+        let kind = if wants_turn {
+            if !this.can_rotate() {
+                return;
+            }
+            GestureKind::Rotate
+        } else if !is_primary {
             return;
-        }
+        } else if this.can_pan() {
+            GestureKind::Pan
+        } else {
+            GestureKind::Click
+        };
         this.focus();
-        if !this.can_pan() {
-            return;
-        }
         this.camera.borrow_mut().stop();
         let position = e.get_position(Some(this));
         let mut samples = VecDeque::new();
         samples.push_back((e.timestamp(), position));
         e.pointer().capture(Some(&this.to_ref().upcast()));
-        *this.drag.borrow_mut() = Some(Drag {
+        *this.gesture.borrow_mut() = Some(Gesture {
             pointer: Rc::downgrade(e.pointer()),
+            kind,
+            start: position,
             last: position,
+            has_moved: false,
             samples,
         });
         e.set_handled(true);
@@ -670,51 +824,76 @@ impl InputElementImpl for MapControl {
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_moved(this, e);
         let position = e.get_position(Some(this));
-        let delta = {
-            let mut drag = this.drag.borrow_mut();
-            let Some(drag) = drag.as_mut() else { return };
-            let is_same = drag
+        let (kind, last) = {
+            let mut gesture = this.gesture.borrow_mut();
+            let Some(gesture) = gesture.as_mut() else {
+                return;
+            };
+            let is_same = gesture
                 .pointer
                 .upgrade()
                 .is_some_and(|pointer| Rc::ptr_eq(&pointer, e.pointer()));
             if !is_same {
                 return;
             }
-            let delta = (position.x - drag.last.x, position.y - drag.last.y);
-            drag.last = position;
-            drag.samples.push_back((e.timestamp(), position));
-            while drag.samples.len() > 16 {
-                drag.samples.pop_front();
+            if !gesture.has_moved {
+                let moved = (position.x - gesture.start.x).hypot(position.y - gesture.start.y);
+                if moved <= CLICK_SLOP {
+                    return;
+                }
+                gesture.has_moved = true;
             }
-            delta
+            let last = std::mem::replace(&mut gesture.last, position);
+            gesture.samples.push_back((e.timestamp(), position));
+            while gesture.samples.len() > 16 {
+                gesture.samples.pop_front();
+            }
+            (gesture.kind, last)
         };
-        this.camera.borrow_mut().drag(delta.0, delta.1);
+        match kind {
+            GestureKind::Pan => {
+                this.camera
+                    .borrow_mut()
+                    .drag(position.x - last.x, position.y - last.y);
+            }
+            GestureKind::Rotate => {
+                let size = this.bounds().size();
+                let center = Point::new(size.width / 2.0, size.height / 2.0);
+                // The content follows the pointer, so the heading goes the other way.
+                let turn = pointer_turn(center, last, position);
+                this.camera.borrow_mut().rotate_by(-turn, (0.0, 0.0));
+            }
+            GestureKind::Click => return,
+        }
         this.sync_from_camera();
         e.set_handled(true);
     }
 
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
         Self::parent_on_pointer_released(this, e);
-        let is_same = this
-            .drag
-            .borrow()
-            .as_ref()
-            .and_then(|drag| drag.pointer.upgrade())
-            .is_some_and(|pointer| Rc::ptr_eq(&pointer, e.pointer()));
-        if !is_same {
+        let Some(gesture) = this.take_gesture(e.pointer()) else {
             return;
+        };
+        match (gesture.kind, gesture.has_moved) {
+            (GestureKind::Pan, true) => {
+                let (vx, vy) = Self::release_speed(&gesture.samples);
+                this.camera.borrow_mut().flick(vx, vy);
+                this.request_frame();
+                e.set_handled(true);
+            }
+            (GestureKind::Rotate, true) | (GestureKind::Click, true) => e.set_handled(true),
+            (GestureKind::Pan | GestureKind::Click, false) => {
+                this.click_at(e.get_position(Some(this)));
+                e.set_handled(true);
+            }
+            // A right click that did not turn anything stays free for a context menu.
+            (GestureKind::Rotate, false) => {}
         }
-        if let Some(drag) = this.end_drag() {
-            let (vx, vy) = Self::release_speed(&drag.samples);
-            this.camera.borrow_mut().flick(vx, vy);
-            this.request_frame();
-        }
-        e.set_handled(true);
     }
 
     fn on_pointer_capture_lost(this: &Self, e: &PointerCaptureLostEventArgs) {
         Self::parent_on_pointer_capture_lost(this, e);
-        this.drag.borrow_mut().take();
+        this.gesture.borrow_mut().take();
     }
 
     fn on_pointer_wheel_changed(this: &Self, e: &PointerWheelEventArgs) {
@@ -735,6 +914,25 @@ impl InputElementImpl for MapControl {
 
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
+        let is_control = e.key_modifiers.contains(KeyModifiers::CONTROL);
+        let turn = match e.key {
+            Key::Left if is_control => Some(-KEY_TURN),
+            Key::Right if is_control => Some(KEY_TURN),
+            _ => None,
+        };
+        if turn.is_some() || e.key == Key::Home {
+            if this.can_rotate() {
+                {
+                    let mut camera = this.camera.borrow_mut();
+                    let target = turn.map_or(0.0, |turn| camera.target_heading() + turn);
+                    camera.animate_heading(target);
+                }
+                this.sync_from_camera();
+                this.request_frame();
+                e.set_handled(true);
+            }
+            return;
+        }
         let pan = match e.key {
             Key::Left => Some((KEY_PAN, 0.0)),
             Key::Right => Some((-KEY_PAN, 0.0)),
