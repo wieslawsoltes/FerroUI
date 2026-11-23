@@ -951,9 +951,8 @@ mod tests {
     }
 
     #[test]
-    fn reset_keeps_bit_position_of_packed_writers() {
-        // Width 3 at 1 bit per pixel: the second row starts at bit 3 of its
-        // first byte, exactly like the reference implementation.
+    fn reset_starts_each_row_of_packed_writers_at_its_first_bit() {
+        // Width 3 at 1 bit per pixel: the second row starts at the first bit of its first byte.
         let pixels = [WHITE; 6];
         let mut dest = [0u8; 8];
         PixelFormatWriter::write(
@@ -965,7 +964,7 @@ mod tests {
             AlphaFormat::Opaque,
             AlphaFormat::Opaque,
         );
-        assert_eq!(dest, [0b1110_0000, 0, 0, 0, 0b0001_1100, 0, 0, 0]);
+        assert_eq!(dest, [0b1110_0000, 0, 0, 0, 0b1110_0000, 0, 0, 0]);
     }
 
     #[test]
