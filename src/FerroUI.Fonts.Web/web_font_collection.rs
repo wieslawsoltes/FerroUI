@@ -1,16 +1,20 @@
 //! The font collection of declared web fonts.
 
+use crate::feature_shaper::{to_font_features, FontFeatureShaper};
 use crate::text_invalidation::invalidate_text_layouts;
 use crate::{brotli_decoder_factory, FontDataStream};
-use ferroui_base::media::fonts::IFontCollection;
+use ferroui_base::media::fonts::{IFontCollection, OpenTypeTag};
 use ferroui_base::media::{
-    FontFamily, FontManager, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
+    FontFamily, FontManager, FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight,
+    GlyphTypeface, Typeface,
 };
 use ferroui_base::platform::IFontManagerImpl;
 use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::Locale;
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use ferroui_fonts_web_core::css::{parse_stylesheet, FontFaceDescriptors, FontSource, FontTech, FontTechs};
+use ferroui_fonts_web_core::css::{
+    parse_stylesheet, FontFaceDescriptors, FontSource, FontStyleDescriptor, FontTech, FontTechs,
+};
 #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
 use ferroui_fonts_web_core::decode_font_with_brotli;
 use ferroui_fonts_web_core::loading::{
@@ -19,6 +23,7 @@ use ferroui_fonts_web_core::loading::{
 };
 use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
 use ferroui_fonts_web_core::sfnt::{apply_metric_overrides, make_invisible_font, SanitizeOptions};
+use ferroui_fonts_web_core::variations::{read_font_axes, resolve_font_variations, FontAxes};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -35,6 +40,9 @@ const DECODE_STEP: usize = 2 * 1024;
 /// How long one slice of decoding may run on the UI thread before it yields to the page. Well
 /// under the 50 ms of a long task, with room for what a single step cannot divide.
 const DECODE_SLICE: Duration = Duration::from_millis(4);
+/// The decoded fonts kept by default, in bytes. Over it, the least recently used face that nothing
+/// else holds is let go, and fetched again when it is next needed.
+const DEFAULT_MEMORY_BUDGET: usize = 128 * 1024 * 1024;
 /// The most fonts fetched at the same time.
 const MAX_CONCURRENT_FETCHES: usize = 8;
 
@@ -65,6 +73,35 @@ struct Slot {
     glyph_typeface: Option<Rc<GlyphTypeface>>,
     /// Whether the font arrived in time to replace the fallback.
     usable: bool,
+    /// The variation space of the font, for a variable font.
+    axes: Option<Rc<FontAxes>>,
+    /// The instances of the font made for requests, by what they were made for.
+    instances: Vec<(InstanceKey, Rc<GlyphTypeface>)>,
+    /// The size of the decoded font.
+    size: usize,
+    /// When the face was last used, in the ticks of the collection.
+    last_used: u64,
+    /// Let go under the memory budget: its status stays `loaded`, and the next use loads it.
+    evicted: bool,
+}
+
+/// What an instance of a font was made for.
+#[derive(Clone, Copy, PartialEq, Eq)]
+struct InstanceKey {
+    weight: i32,
+    width: i32,
+    style: i32,
+}
+
+impl InstanceKey {
+    fn new(request: &FontMatchRequest) -> Self {
+        let style = match request.style {
+            FontStyleRequest::Normal => 0,
+            FontStyleRequest::Italic => 1,
+            FontStyleRequest::Oblique(angle) => 2 + (angle * 16.0) as i32,
+        };
+        Self { weight: request.weight as i32, width: (request.width * 8.0) as i32, style }
+    }
 }
 
 struct DecodeJob {
@@ -92,6 +129,10 @@ struct Shared {
     clock: Box<dyn Fn() -> u64>,
     options: SanitizeOptions,
     invisible: RefCell<Option<Option<Rc<GlyphTypeface>>>>,
+    memory_budget: Cell<usize>,
+    use_tick: Cell<u64>,
+    /// The wrapper of the shaper, once a face has declared features.
+    feature_shaper: RefCell<Option<Rc<FontFeatureShaper>>>,
     listeners: RefCell<Vec<Rc<dyn Fn(&FontFaceSetEvent)>>>,
 }
 
@@ -108,6 +149,29 @@ fn match_request(style: FontStyle, weight: FontWeight, stretch: FontStretch) -> 
         FontStyle::Oblique => FontStyleRequest::Oblique(14.0),
     };
     FontMatchRequest { weight: weight.0.clamp(1, 1000) as f32, width: stretch_percent(stretch), style }
+}
+
+/// The simulations a request needs from a face, as `font-synthesis: auto` allows them: a bold
+/// for a weight from 600 on a lighter face, a slant for a face that is upright, and neither
+/// where an axis of the font does the work.
+fn simulations_for(
+    base: &GlyphTypeface,
+    face: &FontFaceDescriptors,
+    axes: Option<&FontAxes>,
+    request: &FontMatchRequest,
+) -> FontSimulations {
+    let has = |tag: &[u8; 4]| axes.is_some_and(|axes| axes.has(tag));
+    let mut simulations = FontSimulations::None;
+    let face_weight = face.weight.map_or(base.weight().0 as f32, |range| range.end);
+    if request.weight >= 600.0 && face_weight < 600.0 && !has(b"wght") {
+        simulations |= FontSimulations::Bold;
+    }
+    let upright = matches!(face.style, FontStyleDescriptor::Auto | FontStyleDescriptor::Normal)
+        && base.style() == FontStyle::Normal;
+    if request.style != FontStyleRequest::Normal && upright && !has(b"ital") && !has(b"slnt") {
+        simulations |= FontSimulations::Oblique;
+    }
+    simulations
 }
 
 /// What this build can draw of `tech()`. Color formats are answered per backend in a later part.
@@ -148,11 +212,18 @@ impl Shared {
     /// Starts loading a face, once. Its timeline starts at its first use.
     fn request_load(this: &Rc<Self>, id: FontFaceId) {
         let now = (this.clock)();
-        let unloaded = this.with_slot(id, |slot| {
+        let state = this.with_slot(id, |slot| {
             slot.timeline.start(now);
-            slot.status == FontFaceLoadStatus::Unloaded
+            let evicted = std::mem::take(&mut slot.evicted);
+            if evicted {
+                slot.next_source = 0;
+            }
+            (slot.status == FontFaceLoadStatus::Unloaded, evicted)
         });
-        if unloaded != Some(true) {
+        if state == Some((false, true)) {
+            Self::try_next_source(this, id);
+        }
+        if !matches!(state, Some((true, _))) {
             return;
         }
         this.set_status(id, FontFaceLoadStatus::Loading);
@@ -342,9 +413,13 @@ impl Shared {
         let now = (this.clock)();
         let mut changed = false;
         for (id, result) in finished {
+            let mut size = 0;
+            let mut axes = None;
             let typeface = result.ok().and_then(|mut font| {
                 // A font that cannot take the overrides is used as it is.
                 let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
+                size = font.len();
+                axes = read_font_axes(&font).map(Rc::new);
                 let mut stream = FontDataStream::new(font);
                 let typeface =
                     this.platform.try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)?;
@@ -354,16 +429,136 @@ impl Shared {
                 Self::try_next_source(this, id);
                 continue;
             };
+            let tick = this.next_tick();
             this.with_slot(id, |slot| {
-                slot.usable = slot.timeline.accepts_load(now);
+                slot.usable = slot.usable || slot.timeline.accepts_load(now);
                 changed |= slot.usable;
-                slot.glyph_typeface = Some(typeface);
+                slot.glyph_typeface = Some(typeface.clone());
+                slot.axes = axes;
+                slot.size = size;
+                slot.last_used = tick;
             });
+            this.register_features(id, &typeface);
             this.set_status(id, FontFaceLoadStatus::Loaded);
         }
         if changed {
             this.fonts_changed();
         }
+        this.enforce_memory_budget();
+    }
+
+    fn next_tick(&self) -> u64 {
+        let tick = self.use_tick.get() + 1;
+        self.use_tick.set(tick);
+        tick
+    }
+
+    /// Gives a typeface of a face the features the face declares.
+    fn register_features(&self, id: FontFaceId, typeface: &Rc<GlyphTypeface>) {
+        let features = self.with_slot(id, |slot| {
+            let settings = &slot.descriptors.feature_settings;
+            (!settings.is_empty()).then(|| to_font_features(settings))
+        });
+        let Some(Some(features)) = features else {
+            return;
+        };
+        if self.feature_shaper.borrow().is_none() {
+            *self.feature_shaper.borrow_mut() = FontFeatureShaper::install();
+        }
+        if let Some(shaper) = self.feature_shaper.borrow().as_ref() {
+            shaper.set_features(typeface, features);
+        }
+    }
+
+    /// Lets go of the least recently used faces nothing else holds, until the fonts fit.
+    fn enforce_memory_budget(&self) {
+        let budget = self.memory_budget.get();
+        let shaper = self.feature_shaper.borrow();
+        // The references the collection holds itself: the slot or its list of instances, and the
+        // shaper's table for a face that declares features.
+        let table = |slot: &Slot| (shaper.is_some() && !slot.descriptors.feature_settings.is_empty()) as usize;
+        let is_free = |slot: &Slot| {
+            let Some(typeface) = &slot.glyph_typeface else {
+                return false;
+            };
+            let listed = slot.instances.iter().filter(|(_, instance)| Rc::ptr_eq(instance, typeface)).count();
+            Rc::strong_count(typeface) <= 1 + listed + table(slot)
+                && slot
+                    .instances
+                    .iter()
+                    .filter(|(_, instance)| !Rc::ptr_eq(instance, typeface))
+                    .all(|(_, instance)| Rc::strong_count(instance) <= 1 + table(slot))
+        };
+        let mut faces = self.faces.borrow_mut();
+        loop {
+            let total: usize = faces.iter().filter(|slot| slot.glyph_typeface.is_some()).map(|slot| slot.size).sum();
+            if total <= budget {
+                return;
+            }
+            let Some(slot) = faces.iter_mut().filter(|slot| is_free(slot)).min_by_key(|slot| slot.last_used) else {
+                return;
+            };
+            if let Some(shaper) = shaper.as_ref() {
+                for (_, instance) in &slot.instances {
+                    shaper.remove(instance);
+                }
+                if let Some(typeface) = &slot.glyph_typeface {
+                    shaper.remove(typeface);
+                }
+            }
+            slot.instances.clear();
+            slot.glyph_typeface = None;
+            slot.evicted = true;
+        }
+    }
+
+    /// The typeface of a face for a request: the instance of a variable font, or a simulated
+    /// bold or oblique for a face that does not have them.
+    fn instance(&self, id: FontFaceId, request: &FontMatchRequest) -> Option<Rc<GlyphTypeface>> {
+        let base = self.usable_typeface(id)?;
+        let tick = self.next_tick();
+        let key = InstanceKey::new(request);
+        let (axes, descriptors) = self.with_slot(id, |slot| {
+            slot.last_used = tick;
+            (slot.axes.clone(), slot.descriptors.clone())
+        })?;
+        let known = self.with_slot(id, |slot| {
+            slot.instances.iter().find(|(known, _)| *known == key).map(|(_, instance)| instance.clone())
+        })?;
+        if let Some(found) = known {
+            return Some(found);
+        }
+        let mut made = None;
+        if let Some(axes) = &axes {
+            let settings = resolve_font_variations(axes, &descriptors, request);
+            let differs = settings
+                .iter()
+                .any(|setting| axes.axes.iter().any(|axis| axis.tag == setting.tag && axis.default != setting.value));
+            if differs {
+                let variations = settings.iter().map(|setting| FontVariation {
+                    tag: OpenTypeTag::new(u32::from_be_bytes(setting.tag)),
+                    value: setting.value as f64,
+                });
+                let settings = FontVariationSettings::new(variations);
+                made = base
+                    .platform_typeface()
+                    .with_variation_settings(&settings)
+                    .and_then(|typeface| GlyphTypeface::try_create(typeface, FontSimulations::None));
+            }
+        }
+        if made.is_none() {
+            let simulations = simulations_for(&base, &descriptors, axes.as_deref(), request);
+            if simulations != FontSimulations::None {
+                made = base.platform_typeface().try_get_stream().and_then(|mut stream| {
+                    let typeface = self.platform.try_create_glyph_typeface_from_stream(&mut *stream, simulations)?;
+                    GlyphTypeface::try_create(typeface, simulations)
+                });
+            }
+        }
+        let instance = made.unwrap_or(base);
+        self.register_features(id, &instance);
+        self.with_slot(id, |slot| slot.instances.push((key, instance.clone())));
+        Some(instance)
     }
 
     /// What is on the screen has to be set again: one generation of lookups, one layout pass.
@@ -486,6 +681,9 @@ impl WebFontCollection {
             clock,
             options: SanitizeOptions::default(),
             invisible: RefCell::new(None),
+            memory_budget: Cell::new(DEFAULT_MEMORY_BUDGET),
+            use_tick: Cell::new(0),
+            feature_shaper: RefCell::new(None),
             listeners: RefCell::new(Vec::new()),
         });
         Self { key, shared }
@@ -494,6 +692,13 @@ impl WebFontCollection {
     /// Replaces what fetches fonts.
     pub fn set_fetcher(&self, fetcher: Rc<dyn IFontFaceFetcher>) {
         *self.shared.fetcher.borrow_mut() = Some(fetcher);
+    }
+
+    /// How many bytes of decoded fonts to keep. Over it, the least recently used face that nothing
+    /// else holds is let go, and fetched again when it is next needed.
+    pub fn set_memory_budget(&self, bytes: usize) {
+        self.shared.memory_budget.set(bytes);
+        self.shared.enforce_memory_budget();
     }
 
     /// What relative URLs of `src` are resolved against.
@@ -515,6 +720,11 @@ impl WebFontCollection {
             next_source: 0,
             glyph_typeface: None,
             usable: false,
+            axes: None,
+            instances: Vec::new(),
+            size: 0,
+            last_used: 0,
+            evicted: false,
         });
         self.shared.fonts_changed();
         Ok(id)
@@ -634,15 +844,18 @@ impl IFontCollection for WebFontCollection {
         stretch: FontStretch,
     ) -> Option<Rc<GlyphTypeface>> {
         // The name of a fallback typeface, for one face of a composite.
+        let request = match_request(style, weight, stretch);
         if let Some((_, id)) = family_name.split_once(FACE_SEPARATOR) {
-            return self.shared.usable_typeface(FontFaceId(id.parse().ok()?));
+            let id = FontFaceId(id.parse().ok()?);
+            Shared::request_load(&self.shared, id);
+            return self.shared.instance(id, &request);
         }
-        let composite = self.shared.composite(family_name, &match_request(style, weight, stretch));
+        let composite = self.shared.composite(family_name, &request);
         // The first available font: the first face that includes the space.
         let first =
             composite.iter().copied().find(|id| self.shared.covers(*id, 0x20)).or(composite.first().copied())?;
         Shared::request_load(&self.shared, first);
-        if let Some(found) = self.shared.usable_typeface(first) {
+        if let Some(found) = self.shared.instance(first, &request) {
             return Some(found);
         }
         let now = (self.shared.clock)();
@@ -986,6 +1199,76 @@ mod tests {
         assert_eq!(set.descent, plain.descent, "what is not overridden stays");
         let big = harness.lookup("Big").unwrap().metrics();
         assert_eq!(big.design_em_height, plain.design_em_height / 2, "outlines and metrics scale together");
+    }
+
+    fn lookup_with(harness: &Harness, family: &str, style: FontStyle, weight: i32) -> Option<Rc<GlyphTypeface>> {
+        harness.collection.try_get_glyph_typeface(family, style, FontWeight(weight), FontStretch::Normal)
+    }
+
+    #[test]
+    fn a_variable_font_is_set_to_the_request() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: V; src: url(v.ttf); font-weight: 100 900 }");
+        harness.lookup("V");
+        let bytes = font("FerroUI.Base/test_assets/fonts/InterVariable.ttf");
+        harness.finish(&HashMap::from([("v.ttf", Ok(bytes))]));
+        let regular = lookup_with(&harness, "V", FontStyle::Normal, 400).unwrap();
+        let bold = lookup_with(&harness, "V", FontStyle::Normal, 700).unwrap();
+        assert!(!Rc::ptr_eq(&regular, &bold));
+        assert_eq!(bold.font_simulations(), FontSimulations::None, "the axis does the work");
+        let variation = bold.platform_typeface().variation_settings();
+        let weight = variation.variations().iter().find(|axis| axis.tag.value() == u32::from_be_bytes(*b"wght"));
+        assert_eq!(weight.map(|axis| axis.value), Some(700.0));
+        let again = lookup_with(&harness, "V", FontStyle::Normal, 700).unwrap();
+        assert!(Rc::ptr_eq(&bold, &again), "an instance is made once");
+    }
+
+    #[test]
+    fn a_face_without_bold_or_italic_is_simulated() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(a.ttf) }");
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
+        let regular = lookup_with(&harness, "A", FontStyle::Normal, 400).unwrap();
+        assert_eq!(regular.font_simulations(), FontSimulations::None);
+        let bold = lookup_with(&harness, "A", FontStyle::Normal, 700).unwrap();
+        assert!(bold.font_simulations().contains(FontSimulations::Bold));
+        let italic = lookup_with(&harness, "A", FontStyle::Italic, 400).unwrap();
+        assert!(italic.font_simulations().contains(FontSimulations::Oblique));
+    }
+
+    #[test]
+    fn over_the_budget_the_least_recently_used_face_is_let_go() {
+        let harness = Harness::new();
+        let ids = harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(a.ttf) } @font-face { font-family: B; src: url(b.ttf) }",
+        );
+        harness.lookup("A");
+        harness.lookup("B");
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter())), ("b.ttf", Ok(inter()))]));
+        drop(harness.lookup("A"));
+        let held = harness.lookup("B").unwrap();
+        let one_font = inter().len() + 1024;
+        harness.collection.set_memory_budget(one_font);
+        assert_eq!(harness.collection.face_status(ids[0]), Some(FontFaceLoadStatus::Loaded), "the status stays");
+        assert!(harness.urls().is_empty());
+        assert!(harness.lookup("A").is_none(), "A was let go, and is fetched again");
+        assert_eq!(harness.urls(), ["a.ttf"]);
+        harness.collection.set_memory_budget(usize::MAX);
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
+        assert!(harness.lookup("A").is_some());
+        assert!(Rc::ptr_eq(&held, &harness.lookup("B").unwrap()), "B was kept");
+    }
+
+    #[test]
+    fn a_face_in_use_is_not_let_go() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet("@font-face { font-family: A; src: url(a.ttf) }");
+        harness.lookup("A");
+        harness.finish(&HashMap::from([("a.ttf", Ok(inter()))]));
+        let held = harness.lookup("A").unwrap();
+        harness.collection.set_memory_budget(0);
+        assert!(Rc::ptr_eq(&held, &harness.lookup("A").unwrap()));
     }
 
     #[test]

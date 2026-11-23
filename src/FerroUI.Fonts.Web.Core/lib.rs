@@ -7,6 +7,7 @@
 //! - [`sfnt`]: the OpenType container and the sanitizer every font from the network goes through.
 //! - [`loading`]: the states of the CSS Font Loading API and the `font-display` timeline.
 //! - [`matching`]: which declared face a text uses (CSS Fonts 4, section 5.2).
+//! - [`variations`]: what a variable font is set to for a request.
 //! - [`FontDecoder`]: from the bytes of a file, whatever its container, to a sanitized font.
 
 #![forbid(unsafe_code)]
@@ -18,6 +19,7 @@ mod limits;
 pub mod loading;
 pub mod matching;
 pub mod sfnt;
+pub mod variations;
 mod woff;
 pub mod woff2;
 

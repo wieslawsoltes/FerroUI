@@ -9,6 +9,7 @@
 mod brotli;
 #[cfg(all(feature = "browser", target_family = "wasm"))]
 mod browser_fetcher;
+mod feature_shaper;
 mod fetchers;
 mod font_data_stream;
 #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
