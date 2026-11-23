@@ -15,7 +15,7 @@ use crate::bitmap::ProGpuBitmap;
 use crate::fragment::{moved, moved_rect, FragmentBrush, FragmentOp, FragmentRecorder, KeptRun, ProGpuFragment};
 use crate::geometry::{path_data_of, PathData};
 use crate::glyph_run::{Placement, ProGpuGlyphRun};
-use crate::gpu::{Gpu, Recording, SampledTexture};
+use crate::gpu::{Gpu, GpuTexture, Recording, SampledTexture};
 use crate::layer::ProGpuLayer;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder, NO_INDEX};
@@ -1169,24 +1169,15 @@ impl ProGpuDrawingContext {
         self.refuse_fragment();
         let any = source.as_any();
         if let Some(layer) = any.downcast_ref::<ProGpuLayer>() {
-            let texture = layer.texture()?;
-            if let Some((_, image)) = self.textures.iter().find(|(own, _)| Rc::ptr_eq(&own.texture, texture)) {
-                return Some(*image);
-            }
-            if !self.gpu.as_ref().is_some_and(|gpu| Rc::ptr_eq(gpu.device(), texture.device())) {
-                notes::note_once("layer-device", "a layer of another device is not drawn by the ProGPU backend");
-                return None;
-            }
-            let (width, height) = (texture.width(), texture.height());
-            let result = self.scene().add_external_image(width, height);
-            let (index, resource_id, generation) = self.record(result)?;
-            let image = SceneImage { index, width, height, row_bytes: width * 4, premultiplied: true, opaque: false };
-            self.textures.push((SampledTexture { texture: texture.clone(), resource_id, generation }, image));
-            return Some(image);
+            return self.sampled_texture(layer.texture()?, false);
         }
         if let Some(bitmap) = any.downcast_ref::<ProGpuBitmap>() {
             if !bitmap.pixels_ready() {
-                notes::note_once("pixels-pending", "a bitmap whose pixels are not back from the GPU is not drawn");
+                // The content is still on the GPU: it is drawn from there.
+                if let Some(frame) = bitmap.kept_frame() {
+                    return self.sampled_texture(&frame, bitmap.pixel_alpha_format() == AlphaFormat::Opaque);
+                }
+                notes::note_once("pixels-pending", "a bitmap whose pixels could not be read from the GPU is not drawn");
                 return None;
             }
             let key = (bitmap as *const ProGpuBitmap as usize, bitmap.version());
@@ -1234,6 +1225,26 @@ impl ProGpuDrawingContext {
         }
         notes::note_once("bitmap-kind", "a bitmap of another backend is not drawn by the ProGPU backend");
         None
+    }
+
+    /// The image resource of the scene for a premultiplied texture of the device.
+    fn sampled_texture(&mut self, texture: &Rc<GpuTexture>, opaque: bool) -> Option<SceneImage> {
+        if let Some((_, image)) = self.textures.iter().find(|(own, _)| Rc::ptr_eq(&own.texture, texture)) {
+            return Some(*image);
+        }
+        // A page has one WebGPU device, however many handles of it there are.
+        let same_device = cfg!(target_os = "emscripten")
+            || self.gpu.as_ref().is_some_and(|gpu| Rc::ptr_eq(gpu.device(), texture.device()));
+        if !same_device {
+            notes::note_once("layer-device", "a layer of another device is not drawn by the ProGPU backend");
+            return None;
+        }
+        let (width, height) = (texture.width(), texture.height());
+        let result = self.scene().add_external_image(width, height);
+        let (index, resource_id, generation) = self.record(result)?;
+        let image = SceneImage { index, width, height, row_bytes: width * 4, premultiplied: true, opaque };
+        self.textures.push((SampledTexture { texture: texture.clone(), resource_id, generation }, image));
+        Some(image)
     }
 
     fn state_entry(&self) -> ClipEntry {

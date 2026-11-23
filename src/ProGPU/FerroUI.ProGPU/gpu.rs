@@ -72,6 +72,14 @@ impl GpuTexture {
         self.version.set(self.version.get() + 1);
     }
 
+    /// A new texture with the content of this one, copied on the GPU.
+    pub(crate) fn copy(&self) -> Rc<Self> {
+        let copy = Self::new(&self.device, self.width, self.height);
+        self.device.copy_texture(self.texture, copy.texture, self.width, self.height);
+        copy.version.set(self.version.get());
+        copy
+    }
+
     /// The content, read back: premultiplied `RGBA`, row by row without padding.
     pub(crate) fn read(&self) -> Result<Vec<u8>, ProGpuDeviceError> {
         self.device.try_read_rgba8(self.texture, self.width, self.height)

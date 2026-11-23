@@ -69,19 +69,46 @@ impl Pixels {
     /// Brings the frame in `texture` into the pixels: at once on the desktop, and in the browser
     /// through the mapping of a buffer, until which the bitmap says that it is not ready.
     #[cfg(not(target_os = "emscripten"))]
-    fn store_frame(self: &Arc<Self>, texture: &GpuTexture, layout: FrameLayout) {
+    fn store_frame(self: &Arc<Self>, texture: &Rc<GpuTexture>, layout: FrameLayout) {
         self.deliver(texture.read(), layout);
     }
 
+    /// The texture stays the content of the bitmap until its pixels are back, so a frame drawn
+    /// meanwhile, or a drawing into the bitmap, finds the content on the GPU: no frame goes
+    /// without it, and none has to be drawn again when the pixels arrive.
     #[cfg(target_os = "emscripten")]
-    fn store_frame(self: &Arc<Self>, texture: &GpuTexture, layout: FrameLayout) {
+    fn store_frame(self: &Arc<Self>, texture: &Rc<GpuTexture>, layout: FrameLayout) {
+        let key = Arc::as_ptr(self) as usize;
+        KEPT_FRAMES.with(|frames| frames.borrow_mut().insert(key, texture.clone()));
         self.pending_reads.fetch_add(1, Ordering::AcqRel);
         let pixels = self.clone();
         texture.read_async(Box::new(move |frame| {
             pixels.deliver(frame, layout);
             pixels.pending_reads.fetch_sub(1, Ordering::AcqRel);
+            // After a failed read the texture is still the only copy of the content.
+            if pixels.ready() {
+                KEPT_FRAMES.with(|frames| frames.borrow_mut().remove(&key));
+            }
         }));
     }
+
+    #[cfg(target_os = "emscripten")]
+    fn kept_frame(self: &Arc<Self>) -> Option<Rc<GpuTexture>> {
+        KEPT_FRAMES.with(|frames| frames.borrow().get(&(Arc::as_ptr(self) as usize)).cloned())
+    }
+
+    #[cfg(not(target_os = "emscripten"))]
+    fn kept_frame(self: &Arc<Self>) -> Option<Rc<GpuTexture>> {
+        None
+    }
+}
+
+#[cfg(target_os = "emscripten")]
+ferroui_base::ferro_thread_local! {
+    /// The frames of the bitmaps whose pixels are on their way back from the GPU, by the address
+    /// of the pixels. The canvas and these textures belong to the thread of the page.
+    static KEPT_FRAMES: std::cell::RefCell<std::collections::HashMap<usize, Rc<GpuTexture>>> =
+        std::cell::RefCell::new(std::collections::HashMap::new());
 }
 
 /// How a frame read from the GPU is written into the pixels of a bitmap.
@@ -207,8 +234,15 @@ impl ProGpuBitmap {
     }
 
     /// Brings the premultiplied content of a texture of the size of the bitmap into its pixels.
-    pub(crate) fn store_frame(&self, texture: &GpuTexture) {
+    /// The bitmap takes the texture as its content until they arrive: the texture must not be
+    /// drawn into afterwards.
+    pub(crate) fn store_frame(&self, texture: &Rc<GpuTexture>) {
         self.pixels.store_frame(texture, self.frame_layout());
+    }
+
+    /// The texture that holds the content while the pixels are not back from the GPU.
+    pub(crate) fn kept_frame(&self) -> Option<Rc<GpuTexture>> {
+        self.pixels.kept_frame()
     }
 }
 
@@ -516,8 +550,9 @@ impl IRenderTargetBitmapImpl for ProGpuBitmap {
                 }
             })),
         );
-        // What was drawn before stays under what is drawn now.
-        if self.version() != 0 {
+        // What was drawn before stays under what is drawn now, also while its pixels are on
+        // their way back from the GPU.
+        if self.version() != 0 || self.kept_frame().is_some() {
             let all = Rect::new(0.0, 0.0, self.size.width as f64, self.size.height as f64);
             context.draw_bitmap(self, 1.0, all, all);
         }
