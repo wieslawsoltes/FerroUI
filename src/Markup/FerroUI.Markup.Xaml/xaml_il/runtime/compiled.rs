@@ -2326,6 +2326,9 @@ mod tests {
     }
 }
 
+/// The answer of a custom condition of a conditional namespace, for generated code.
+pub use crate::xaml_conditions::evaluate_xaml_condition as xaml_condition;
+
 /// Generated code retains development keys only in an enabled debug runtime.
 #[inline]
 pub const fn development_keys_enabled() -> bool {

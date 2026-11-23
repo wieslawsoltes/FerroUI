@@ -4,6 +4,8 @@
 use std::collections::HashMap;
 use std::sync::{Arc, OnceLock};
 
+use crate::parsers::XamlLoadCondition;
+
 /// An immutable lexical scope, shared through `Arc` so that the nodes that carry it stay `Send`
 /// and unwind-safe, as they were before the port kept scopes on them.
 /// Nodes without new declarations share their parent's handle;
@@ -13,6 +15,9 @@ pub struct XamlNamespaceScope {
     parent: Option<Arc<Self>>,
     declarations: HashMap<String, String>,
     flattened: OnceLock<HashMap<String, String>>,
+    /// The condition of a conditional namespace that guards the nodes of this scope until the
+    /// document loads (`parsers::conditional_namespace`); none for every other scope.
+    load_condition: Option<XamlLoadCondition>,
 }
 
 impl XamlNamespaceScope {
@@ -26,7 +31,29 @@ impl XamlNamespaceScope {
             parent,
             declarations,
             flattened: OnceLock::new(),
+            load_condition: None,
         })
+    }
+
+    /// A scope with the declarations of `parent`, whose nodes are guarded by `condition`.
+    pub fn with_load_condition(parent: Option<Arc<Self>>, condition: XamlLoadCondition) -> Arc<Self> {
+        Arc::new(Self {
+            parent,
+            declarations: HashMap::new(),
+            flattened: OnceLock::new(),
+            load_condition: Some(condition),
+        })
+    }
+
+    /// The conditions that guard the nodes of this scope, the outermost first.
+    pub fn load_conditions(&self) -> Vec<&XamlLoadCondition> {
+        let mut conditions = self.parent.as_ref().map(|parent| parent.load_conditions()).unwrap_or_default();
+        if let Some(condition) = &self.load_condition {
+            if !conditions.contains(&condition) {
+                conditions.push(condition);
+            }
+        }
+        conditions
     }
 
     pub fn lookup(&self, alias: &str) -> Option<&str> {

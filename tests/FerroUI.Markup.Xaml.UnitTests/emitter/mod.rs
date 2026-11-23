@@ -37,6 +37,8 @@ pub mod corpus;
 #[rustfmt::skip]
 pub mod generated;
 #[rustfmt::skip]
+pub mod generated_conditional;
+#[rustfmt::skip]
 pub mod generated_handlers;
 #[rustfmt::skip]
 pub mod rust_paths_check;
@@ -45,6 +47,8 @@ pub mod rust_paths_check;
 mod build_diagnostics;
 #[cfg(test)]
 mod catalog_measure;
+#[cfg(test)]
+mod conditional_namespaces;
 #[cfg(test)]
 mod differential_tests;
 #[cfg(test)]

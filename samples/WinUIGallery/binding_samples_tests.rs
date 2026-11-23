@@ -87,6 +87,29 @@ fn templates_page_code_template_and_items_panels_follow_the_source() {
 }
 
 #[test]
+fn custom_xaml_conditionals_keep_the_branches_of_the_active_flag() {
+    use ferroui_base::media::FontWeight;
+    use ferroui_controls::{Button, InfoBar, Window};
+    let _application = start();
+    let root = page("CustomXamlConditionals");
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    // Conditional elements: only the InfoBar of the flag that is true exists.
+    assert!(root.find_control::<InfoBar>("NewExperienceInfoBar").is_some());
+    assert!(root.find_control::<InfoBar>("LegacyModeInfoBar").is_none());
+    // Conditional attributes: the Background of the active flag.
+    let background = root.get_control::<Button>("ConditionalBackgroundButton").background().unwrap();
+    let green = ferroui_base::media::Color::from_rgb(0, 128, 0);
+    assert_eq!(background.as_solid_color_brush().map(|brush| brush.color()), Some(green));
+    // Conditional Setters: the values of the active flag.
+    let heading = root.get_control::<TextBlock>("ConditionalHeading");
+    assert_eq!(heading.font_size(), 28.0);
+    assert_eq!(heading.font_weight(), FontWeight::SemiBold);
+}
+
+#[test]
 fn xaml_styles_apply_the_keyed_and_the_implicit_style() {
     use ferroui_base::media::FontWeight;
     use ferroui_controls::{Button, Window};

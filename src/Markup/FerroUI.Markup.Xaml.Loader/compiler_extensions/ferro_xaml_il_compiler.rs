@@ -95,7 +95,7 @@ use super::group_transformers::{
     XamlMergeResourceGroupTransformer,
 };
 use super::transformers::*;
-use super::IXamlDocumentResource;
+use super::{CustomConditions, FerroXamlConditionResolver, IXamlDocumentResource};
 
 /// A transformer shared between the pipeline and the compiler, which changes its settings.
 struct SharedTransformer<T: IXamlAstTransformer>(Rc<T>);
@@ -194,6 +194,8 @@ pub struct FerroXamlIlCompiler {
     binding_transformer: Rc<FerroBindingExtensionTransformer>,
     add_source_info_transformer: Rc<FerroXamlIlAddSourceInfoTransformer>,
     resource_transformer: Rc<FerroXamlResourceTransformer>,
+    /// How custom conditions of conditional namespaces are answered.
+    custom_conditions: std::cell::Cell<CustomConditions>,
 }
 
 impl FerroXamlIlCompiler {
@@ -343,6 +345,7 @@ impl FerroXamlIlCompiler {
             binding_transformer,
             add_source_info_transformer,
             resource_transformer,
+            custom_conditions: std::cell::Cell::new(CustomConditions::default()),
         })
     }
 
@@ -362,6 +365,12 @@ impl FerroXamlIlCompiler {
     pub fn create_source_info(&self) -> bool {
         self.add_source_info_transformer.create_source_info()
             || self.resource_transformer.create_source_info()
+    }
+
+    /// How this compiler answers custom conditions: at load by default, which is what code
+    /// generated ahead of time needs; the run-time loader evaluates them while it parses.
+    pub fn set_custom_conditions(&self, value: CustomConditions) {
+        self.custom_conditions.set(value);
     }
 
     pub fn set_create_source_info(&self, value: bool) {
@@ -453,7 +462,11 @@ impl FerroXamlIlCompiler {
             XamlNamespaces::BLEND2008.to_string(),
         );
         compatibility_mappings.insert(DEVELOPMENT_NAMESPACE.into(), DEVELOPMENT_NAMESPACE.into());
-        let parsed = XDocumentXamlParser::parse(xaml, Some(&compatibility_mappings))?;
+        let resolver = FerroXamlConditionResolver {
+            configuration: &self.configuration,
+            custom: self.custom_conditions.get(),
+        };
+        let parsed = XDocumentXamlParser::parse_with_conditions(xaml, Some(&compatibility_mappings), Some(&resolver))?;
 
         let root = parsed.root()?;
         let root_object = root.cast::<XamlAstObjectNode>().ok_or_else(|| {

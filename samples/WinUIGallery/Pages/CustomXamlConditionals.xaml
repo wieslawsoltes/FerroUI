@@ -1,0 +1,38 @@
+<!-- Ported from the three pinned CustomXamlConditionals examples of WinUI Gallery (14061eea) and
+     the flags of CustomXamlConditionalsPage.xaml.cs (binding_samples.rs); see ../NOTICE.md. The
+     namespaces are conditional as in the source: FeatureFlagCondition is registered by name, so
+     its prefix needs no declaration of a class. The keyed ConditionalHeadingStyle is the style of
+     the class ConditionalHeadingStyle, which the heading applies with Classes. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:newExp="https://github.com/ferroui?cond:FeatureFlagCondition(NewExperience)"
+            xmlns:legacy="https://github.com/ferroui?cond:FeatureFlagCondition(LegacyMode)"
+            Spacing="24">
+  <StackPanel.Styles>
+    <Style Selector="TextBlock.ConditionalHeadingStyle">
+      <newExp:Setter Property="FontWeight" Value="SemiBold" />
+      <newExp:Setter Property="FontSize" Value="28" />
+      <legacy:Setter Property="FontWeight" Value="Normal" />
+      <legacy:Setter Property="FontSize" Value="18" />
+    </Style>
+  </StackPanel.Styles>
+  <TextBlock TextWrapping="Wrap"
+             Text="The flags are set before the page is parsed: NewExperience is true and LegacyMode is false. The result for each condition and argument is kept, so changing a flag later does not change markup that was already parsed." />
+  <StackPanel Spacing="8">
+    <TextBlock Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Conditional elements" />
+    <newExp:InfoBar x:Name="NewExperienceInfoBar" Title="New experience" IsOpen="True" Severity="Success"
+                    Message="This InfoBar is included because the 'NewExperience' flag is true." />
+    <legacy:InfoBar x:Name="LegacyModeInfoBar" Title="Legacy mode" IsOpen="True" Severity="Warning"
+                    Message="This InfoBar is included because the 'LegacyMode' flag is true." />
+  </StackPanel>
+  <StackPanel Spacing="8">
+    <TextBlock Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Conditional attributes" />
+    <Button x:Name="ConditionalBackgroundButton" Content="Background depends on the active flag"
+            newExp:Background="Green" legacy:Background="Gray" Foreground="White" />
+  </StackPanel>
+  <StackPanel Spacing="8">
+    <TextBlock Theme="{DynamicResource BodyStrongTextBlockStyle}" Text="Conditional Setters in a Style" />
+    <TextBlock x:Name="ConditionalHeading" Classes="ConditionalHeadingStyle"
+               Text="Heading styled with conditional Setters" />
+  </StackPanel>
+</StackPanel>

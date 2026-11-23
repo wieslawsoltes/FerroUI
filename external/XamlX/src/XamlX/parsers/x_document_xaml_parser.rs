@@ -22,6 +22,9 @@ use crate::exceptions::{XamlError, XamlResult};
 use crate::xaml_namespaces::XamlNamespaces;
 
 use super::compatible_xml_reader::{CompatibleXmlReader, MARKUP_COMPATIBILITY_NAMESPACE};
+use super::conditional_namespace::{
+    split_conditional_namespace, XamlConditionOutcome, XamlConditionResolver, XamlLoadCondition,
+};
 use super::system_xaml_markup_extension_parser::{MeScannerError, SystemXamlMarkupExtensionParser};
 use super::{CommaSeparatedParenthesesTreeParser, Node as TypeArgumentNode};
 
@@ -275,6 +278,9 @@ struct VisibleAttribute<'a, 'input> {
     local_name: &'a str,
     value: &'a str,
     line_info: XamlLineInfo,
+    /// Guarded by a condition that is answered when the document loads: the nodes of the
+    /// attribute are placed at the attribute, whose scope holds the condition.
+    guarded: bool,
     _marker: std::marker::PhantomData<&'input ()>,
 }
 
@@ -294,6 +300,72 @@ struct ParserContext<'input> {
     source: &'input str,
     compat: RefCell<CompatibleXmlReader>,
     namespace_scopes: RefCell<Vec<Arc<XamlNamespaceScope>>>,
+    /// The outcomes of the conditional namespaces of the document, by the namespace as written;
+    /// empty for a document without one.
+    conditions: HashMap<String, NamespaceCondition>,
+}
+
+/// What a conditional namespace of the document does to its nodes.
+#[derive(Clone)]
+enum NamespaceCondition {
+    Included,
+    Excluded,
+    AtLoad(XamlLoadCondition),
+}
+
+/// The outcomes of the conditional namespaces that elements and attributes of the document use.
+/// Without a resolver, a reader that only looks at the document, every node is read.
+fn resolve_conditions(
+    xml: &roxmltree::Document<'_>,
+    xml_text: &str,
+    lines: &LineIndex<'_>,
+    resolver: Option<&dyn XamlConditionResolver>,
+) -> XamlResult<HashMap<String, NamespaceCondition>> {
+    let mut conditions = HashMap::new();
+    // Most documents have no `?` outside of `<?xml ?>`, and are not walked.
+    let bytes = xml_text.as_bytes();
+    let has_candidate = (0..bytes.len()).any(|i| {
+        bytes[i] == b'?' && i > 0 && bytes[i - 1] != b'<' && bytes.get(i + 1) != Some(&b'>')
+    });
+    if !has_candidate {
+        return Ok(conditions);
+    }
+    let mut read = |namespace: &str, offset: usize| -> XamlResult<()> {
+        if conditions.contains_key(namespace) {
+            return Ok(());
+        }
+        let Some((_, condition)) = split_conditional_namespace(namespace) else { return Ok(()) };
+        let outcome = match resolver {
+            None => NamespaceCondition::Included,
+            Some(resolver) => match resolver.resolve(&condition) {
+                Ok(XamlConditionOutcome::Included) => NamespaceCondition::Included,
+                Ok(XamlConditionOutcome::Excluded) => NamespaceCondition::Excluded,
+                Ok(XamlConditionOutcome::AtLoad) => NamespaceCondition::AtLoad(XamlLoadCondition {
+                    name: condition.name.clone(),
+                    argument: condition.argument.clone(),
+                }),
+                Err(message) => {
+                    return Err(XamlError::parse_exception(
+                        format!("The condition of the namespace `{namespace}`: {message}"),
+                        Some(&lines.line_info(offset)),
+                    ));
+                }
+            },
+        };
+        conditions.insert(namespace.to_string(), outcome);
+        Ok(())
+    };
+    for element in xml.descendants().filter(|node| node.is_element()) {
+        read(element.tag_name().namespace().unwrap_or(""), element.range().start)?;
+        // A declaration only used inside a value (`{x:Type new:Name}`) reads as its base too.
+        for declared in element.namespaces() {
+            read(declared.uri(), element.range().start)?;
+        }
+        for attribute in element.attributes() {
+            read(attribute.namespace().unwrap_or(""), element.range().start)?;
+        }
+    }
+    Ok(conditions)
 }
 
 fn lookup_raw_namespace<'a>(el: XmlNode<'a, '_>, prefix: &str) -> Option<&'a str> {
@@ -315,7 +387,21 @@ impl<'input> ParserContext<'input> {
     }
 
     fn mapped(&self, ns: &str) -> String {
+        // A conditional namespace reads as the namespace before its condition, wherever it is
+        // named: the type of an element, a prefix in a value, a declaration of the scope.
+        let ns = match self.conditions.is_empty() {
+            true => ns,
+            false => split_conditional_namespace(ns).map_or(ns, |(base, _)| base),
+        };
         self.compat.borrow_mut().get_mapped(ns)
+    }
+
+    /// What the conditional namespace `ns`, as written, does to its nodes.
+    fn condition_of(&self, ns: Option<&str>) -> Option<&NamespaceCondition> {
+        if self.conditions.is_empty() {
+            return None;
+        }
+        self.conditions.get(ns?)
     }
 
     /// `XmlReader.LookupNamespace` through the compatibility layer.
@@ -349,6 +435,10 @@ impl<'input> ParserContext<'input> {
     fn is_hidden_child(&self, node: XmlNode<'_, 'input>, skip_following: &mut bool) -> bool {
         let swallow = std::mem::take(skip_following);
         if node.is_element() {
+            // An element a condition leaves out is skipped alone: the node after it is read.
+            if matches!(self.condition_of(node.tag_name().namespace()), Some(NamespaceCondition::Excluded)) {
+                return true;
+            }
             if self.is_ignored_element(node) {
                 *skip_following = !self.is_empty_element(node);
                 return true;
@@ -380,6 +470,7 @@ impl<'input> ParserContext<'input> {
         let mut xml_attributes = el.attributes();
         let mut attributes = Vec::with_capacity(raw_attributes.len());
         let mut declarations = HashMap::new();
+        let mut guards: Vec<(usize, XamlLoadCondition)> = Vec::new();
         for raw in raw_attributes {
             let line_info = self.lines.line_info(raw.offset);
             if let Some(prefix) = raw.declared_prefix() {
@@ -394,27 +485,53 @@ impl<'input> ParserContext<'input> {
             let Some(attribute) = xml_attributes.next() else {
                 break;
             };
-            let attribute_namespace = self.mapped(attribute.namespace().unwrap_or(""));
+            let condition = self.condition_of(attribute.namespace());
+            if matches!(condition, Some(NamespaceCondition::Excluded)) {
+                continue;
+            }
+            let mut attribute_namespace = self.mapped(attribute.namespace().unwrap_or(""));
             if self.compat.borrow().should_ignore(&attribute_namespace) {
                 continue;
+            }
+            // `legacy:Content="a"` is the property `Content` of the element, as `Content="a"` is:
+            // the namespace of the attribute only carries its condition.
+            if condition.is_some()
+                && attribute_namespace != XamlNamespaces::XAML2006
+                && !attribute.name().contains('.')
+            {
+                attribute_namespace = String::new();
+            }
+            if let Some(NamespaceCondition::AtLoad(condition)) = condition {
+                guards.push((attributes.len(), condition.clone()));
             }
             attributes.push(ElementAttribute::Attribute(VisibleAttribute {
                 namespace: attribute_namespace,
                 local_name: attribute.name(),
                 value: attribute.value(),
                 line_info,
+                guarded: false,
                 _marker: std::marker::PhantomData,
             }));
         }
 
-        let scope =
+        let mut scope =
             XamlNamespaceScope::new(self.namespace_scopes.borrow().last().cloned(), declarations);
+        if let Some(NamespaceCondition::AtLoad(condition)) = self.condition_of(el.tag_name().namespace()) {
+            scope = XamlNamespaceScope::with_load_condition(Some(scope), condition.clone());
+        }
         for attribute in &mut attributes {
             if let ElementAttribute::Attribute(attribute) = attribute {
                 attribute.line_info = attribute
                     .line_info
                     .clone()
                     .with_namespace_scope(Some(scope.clone()));
+            }
+        }
+        for (index, condition) in guards {
+            if let ElementAttribute::Attribute(attribute) = &mut attributes[index] {
+                let guarded = XamlNamespaceScope::with_load_condition(Some(scope.clone()), condition);
+                attribute.line_info = attribute.line_info.clone().with_namespace_scope(Some(guarded));
+                attribute.guarded = true;
             }
         }
         self.namespace_scopes.borrow_mut().push(scope);
@@ -684,8 +801,9 @@ impl<'input> ParserContext<'input> {
             }
             // Parse as a directive
             else if !attr.namespace.is_empty() && !attr.local_name.contains('.') {
+                let directive_li: &dyn IXamlLineInfo = if attr.guarded { &attr.line_info } else { &el_li };
                 i.children.borrow_mut().push(XamlAstXmlDirective::new(
-                    &el_li,
+                    directive_li,
                     Some(&attr.namespace),
                     attr.local_name,
                     vec![self.parse_text_value_or_markup_extension(
@@ -710,11 +828,12 @@ impl<'input> ParserContext<'input> {
                     ptype = XamlAstXmlTypeReference::new(&el_li, Some(&ns), type_name);
                 }
 
+                let property_li: &dyn IXamlLineInfo = if attr.guarded { &attr.line_info } else { &el_li };
                 i.children
                     .borrow_mut()
                     .push(XamlAstXamlPropertyValueNode::new(
-                        &el_li,
-                        XamlAstNamePropertyReference::new(&el_li, ptype, pname, type_.clone()),
+                        property_li,
+                        XamlAstNamePropertyReference::new(property_li, ptype, pname, type_.clone()),
                         self.parse_text_value_or_markup_extension(attr.value, el, &attr.line_info)?,
                         true,
                     ));
@@ -872,6 +991,17 @@ impl XDocumentXamlParser {
         s: &str,
         compatibility_mappings: Option<&HashMap<String, String>>,
     ) -> XamlResult<XamlDocument> {
+        Self::parse_with_conditions(s, compatibility_mappings, None)
+    }
+
+    /// [`parse`](Self::parse), with the conditional namespaces of the document answered by
+    /// `conditions` (`parsers::conditional_namespace`). Without a resolver, for a reader that
+    /// only looks at the document, every conditional node is read.
+    pub fn parse_with_conditions(
+        s: &str,
+        compatibility_mappings: Option<&HashMap<String, String>>,
+        conditions: Option<&dyn XamlConditionResolver>,
+    ) -> XamlResult<XamlDocument> {
         let lines = LineIndex::new(s);
 
         // The document type declaration is ignored: it is blanked out (keeping all offsets and
@@ -884,16 +1014,27 @@ impl XDocumentXamlParser {
             XamlError::xml_exception(e.to_string(), pos.row as i32, pos.col as i32)
         })?;
 
+        let conditions = resolve_conditions(&xml, xml_text, &lines, conditions)?;
         let context = ParserContext {
             lines,
             source: xml_text,
             compat: RefCell::new(CompatibleXmlReader::new(compatibility_mappings)),
             namespace_scopes: RefCell::new(Vec::new()),
+            conditions,
         };
 
         let root = xml.root_element();
         if context.is_ignored_element(root) {
             return Err(XamlError::xml_exception("Root element is missing.", 0, 0));
+        }
+        if matches!(
+            context.condition_of(root.tag_name().namespace()),
+            Some(NamespaceCondition::Excluded | NamespaceCondition::AtLoad(_))
+        ) {
+            return Err(XamlError::parse_exception(
+                "The root element of a document cannot be left out by a conditional namespace",
+                Some(&context.lines.line_info(root.range().start + 1)),
+            ));
         }
 
         let mut doc = XamlDocument::new();

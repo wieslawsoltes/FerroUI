@@ -1804,6 +1804,25 @@
       "notes": "Both source examples use native WrapPanel with the handlers of WrapPanelPage.xaml.cs in Rust (layout_samples.rs): the ten items of the first panel with OrientationGroup_SelectionChanged (the Tag of the selected option is the Orientation, and the host is 360 high for Vertical and 200 otherwise) and the ValueChanged handlers of the item spacing, line spacing and padding sliders, and the five fixed items and the accent-colored final item of the second panel. ThemeResource is DynamicResource and ControlCornerRadius is its value, 4; the sliders' Headers are composed, SnapsTo Ticks with StepFrequency 2 is IsSnapToTickEnabled with TickFrequency 2, and the ToggleSwitch's IsOn is IsChecked. FerroUI's WrapPanel has no Padding: the uniform padding of PaddingSlider_ValueChanged is the Padding of the host Border, the same layout. FerroUI's WrapPanel has no ItemsStretch, so the final item does not stretch to fill its line and StretchLastItemToggle_Toggled is not ported: the page is partial.",
       "examples": []
     },
+    "CustomXamlConditionals": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/CustomXamlConditionals.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/binding_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/binding_samples_tests.rs",
+          "name": "custom_xaml_conditionals_keep_the_branches_of_the_active_flag"
+        }
+      ],
+      "notes": "All three source examples with the flags of CustomXamlConditionalsPage.xaml.cs (binding_samples.rs), through conditional XAML namespaces (#559): a FeatureFlagCondition registered by name with NewExperience true and LegacyMode false, the conditional InfoBars, the conditional Background attributes of a Button, and the conditional Setters of a Style. The keyed ConditionalHeadingStyle is the style of a class, applied with Classes."
+    },
     "XamlResources": {
       "status": "ported",
       "implementation": [

@@ -47,6 +47,18 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
     }
 }
 
+ferroui_base::ferro_thread_local! {
+    static FEATURE_FLAGS_REGISTERED: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+}
+
+/// `FeatureFlagCondition` of the CustomXamlConditionals page, with the flags its constructor
+/// sets: registered once, since a new registration makes the loader parse documents again.
+pub(crate) fn register_feature_flags() {
+    if !FEATURE_FLAGS_REGISTERED.with(|registered| registered.replace(true)) {
+        ferroui_markup_xaml::register_xaml_condition("FeatureFlagCondition", |flag: &str| flag == "NewExperience");
+    }
+}
+
 /// `ExampleViewModel`.
 pub(crate) struct ExampleViewModel {
     pub(crate) title: String,

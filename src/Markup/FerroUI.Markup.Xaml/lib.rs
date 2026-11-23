@@ -35,6 +35,7 @@ mod runtime_xaml_loader_configuration;
 mod runtime_xaml_loader_document;
 #[doc(hidden)]
 pub mod xaml_error_scope;
+mod xaml_conditions;
 mod xaml_load_exception;
 mod xaml_types;
 
@@ -49,6 +50,9 @@ pub use runtime_xaml_loader_configuration::{
     RuntimeXamlDiagnostic, RuntimeXamlDiagnosticSeverity, RuntimeXamlLoaderConfiguration, XamlDiagnosticFunc,
 };
 pub use runtime_xaml_loader_document::RuntimeXamlLoaderDocument;
+pub use xaml_conditions::{
+    evaluate_xaml_condition, register_xaml_condition, xaml_conditions_generation, IXamlCondition,
+};
 pub use xaml_load_exception::XamlLoadError;
 #[allow(deprecated)]
 pub use xaml_load_exception::XamlLoadException;

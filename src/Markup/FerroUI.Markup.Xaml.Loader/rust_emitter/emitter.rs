@@ -1003,6 +1003,14 @@ struct Emitter<'a> {
     /// The theme dictionaries the body assigned a key outside every unit (#853,
     /// [`theme_units::ThemeUnitPlan::keys_in_runs`]), by the local that holds them.
     keyed_theme_dictionaries: HashSet<String>,
+    /// The conditions of conditional namespaces tested around the code being written.
+    load_conditions: Vec<xamlx::parsers::XamlLoadCondition>,
+}
+
+/// The tests [`Emitter::enter_load_conditions`] opened, and the compiler locals before them.
+struct LoadConditionGuards<'a> {
+    opened: usize,
+    compiler_locals: HashMap<usize, (String, Kind<'a>)>,
 }
 
 struct ScopedNamespaceTable {
@@ -1057,7 +1065,12 @@ impl<'a> Emitter<'a> {
         target: &Typed<'a>,
     ) -> Option<u32> {
         let plan = theme_units::ThemeUnitPlan::current();
-        if !plan.keys_in_runs() || self.deferred_depth != 0 || assignment.property.name() != "Key" {
+        // An entry under a condition stays out of the units: their code is written unguarded.
+        if !plan.keys_in_runs()
+            || self.deferred_depth != 0
+            || !self.load_conditions.is_empty()
+            || assignment.property.name() != "Key"
+        {
             return None;
         }
         if assignment.property.declaring_type.borrow().full_name() != "FerroUI.Controls.IThemeVariantProvider" {
@@ -1137,6 +1150,40 @@ impl<'a> Emitter<'a> {
             self.line(format!("::core::mem::drop({guard});"));
             self.namespace_aliases = previous;
         }
+    }
+    /// Opens a test of each condition that guards `assignment` and is not tested around it
+    /// already (a conditional namespace that is only answered when the document loads).
+    fn enter_load_conditions(&mut self, node: &Rc<dyn IXamlAstNode>) -> Option<LoadConditionGuards<'a>> {
+        let last_value = node
+            .cast::<XamlPropertyAssignmentNode>()
+            .and_then(|assignment| assignment.values.borrow().last().and_then(|value| value.namespace_scope()));
+        let mut opened = 0;
+        let mut locals = None;
+        for scope in [node.namespace_scope(), last_value].iter().flatten() {
+            for condition in scope.load_conditions() {
+                if self.load_conditions.contains(condition) {
+                    continue;
+                }
+                // A local of the block is not visible after it.
+                locals.get_or_insert_with(|| self.compiler_locals.clone());
+                self.line(format!(
+                    "if rt::xaml_condition({}, {}) {{",
+                    rust_string_literal(&condition.name),
+                    rust_string_literal(&condition.argument),
+                ));
+                self.load_conditions.push(condition.clone());
+                opened += 1;
+            }
+        }
+        locals.map(|compiler_locals| LoadConditionGuards { opened, compiler_locals })
+    }
+    fn leave_load_conditions(&mut self, guards: Option<LoadConditionGuards<'a>>) {
+        let Some(guards) = guards else { return };
+        for _ in 0..guards.opened {
+            self.line("}".to_string());
+            self.load_conditions.pop();
+        }
+        self.compiler_locals = guards.compiler_locals;
     }
     fn scoped_namespace_table(&mut self, aliases: &HashMap<String, String>) -> String {
         if aliases == &self.root_namespace_aliases && self.entry_path_types.is_none() {
@@ -2185,7 +2232,16 @@ impl<'a> Emitter<'a> {
         self.leave_namespace_scope(scope);
         result
     }
+    /// A manipulation, inside the tests of the conditions that guard it. A group is tested as
+    /// a whole: an element built top-down is assigned and then initialised by two of its
+    /// members, through a local the first one declares.
     fn manipulation_scoped(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
+        let guards = self.enter_load_conditions(node);
+        let result = self.manipulation_guarded(node, target);
+        self.leave_load_conditions(guards);
+        result
+    }
+    fn manipulation_guarded(&mut self, node: &Rc<dyn IXamlAstNode>, target: &Typed<'a>) -> EmitResult<()> {
         if let Some(n) = node.cast::<XamlObjectInitializationNode>() {
             return self.object_initialization(node, &n, target);
         }
@@ -2404,7 +2460,7 @@ impl<'a> Emitter<'a> {
             // An entry a merge inlined from a document of a unit of the theme (#568) is written
             // between the markers of its unit.
             let unit = match self.deferred_depth {
-                0 => self.documents.units().and_then(|units| units.unit_of(node)),
+                0 if self.load_conditions.is_empty() => self.documents.units().and_then(|units| units.unit_of(node)),
                 _ => None,
             };
             if let Some(unit) = unit {
@@ -5514,6 +5570,7 @@ pub fn emit_function<'a>(
         row_tables: Vec::new(),
         deferred_depth: 0,
         keyed_theme_dictionaries: HashSet::new(),
+        load_conditions: Vec::new(),
         theme_styles: theme_styles::StylePool::new(function_name, &document_name.replace('`', "'").replace(['\r', '\n'], " ")),
     };
     // `Build`: the root object, then `Populate` with a context of its own (its name
