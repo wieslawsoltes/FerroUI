@@ -19,7 +19,7 @@ use ferroui_base::rendering::composition::frames::{
 use ferroui_vulkan::ash::vk::{self as ash_vk, Handle};
 use ferroui_vulkan::dma_buf::{VulkanDmaBufImporter, VulkanDmaBufPlane, VulkanDmaBufPlanes, DRM_NV12, DRM_XB24};
 use skia_safe::gpu::{backend_textures, images, vk, BackendTexture, Protected, SurfaceOrigin, YUVABackendTextures};
-use skia_safe::{image_info::YUVColorSpace, yuva_info, AlphaType, ColorType, Image, YUVAInfo};
+use skia_safe::{yuva_info, AlphaType, ColorType, Image, YUVAInfo, YUVColorSpace};
 use std::rc::Rc;
 use std::sync::Arc;
 
