@@ -259,7 +259,7 @@ impl ScrollViewerAutomationPeer {
             offset = offset.with_y((owner.extent().height - owner.viewport().height) * vertical_percent * 0.01);
         }
 
-        owner.set_offset(offset);
+        owner.set_current_value(ScrollViewer::offset_property(), offset);
 
         Ok(())
     }

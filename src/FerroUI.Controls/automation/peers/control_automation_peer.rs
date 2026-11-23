@@ -94,8 +94,12 @@ impl AutomationPeerImpl for ControlAutomationPeer {
 
         let new_children = this.get_children_core().unwrap_or_default();
 
+        let this_object: &AutomationPeer = this;
         for peer in children.iter().filter(|peer| !new_children.contains(peer)) {
-            peer.try_set_parent(None);
+            // A peer that moved to a new parent keeps it.
+            if peer.get_parent().is_some_and(|parent| std::ptr::eq(&*parent, this_object)) {
+                peer.try_set_parent(None);
+            }
         }
 
         let this_peer: Ref<AutomationPeer> = this.to_ref().upcast();
@@ -488,6 +492,9 @@ impl ControlAutomationPeer {
         if !self.parent_valid.get() {
             let mut parent = self.get_visual_parent();
 
+            // Set first: asking the parent for its children can ask this peer for its parent.
+            self.parent_valid.set(true);
+
             while let Some(p) = parent {
                 if let Some(c) = p.cast::<Control>() {
                     let parent_peer = self.get_or_create(&c);
@@ -501,8 +508,6 @@ impl ControlAutomationPeer {
 
                 parent = p.get_visual_parent();
             }
-
-            self.parent_valid.set(true);
         }
     }
 }

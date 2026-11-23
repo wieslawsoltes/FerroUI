@@ -168,13 +168,13 @@ impl ComboBoxAutomationPeer {
 
     /// Closes the drop-down (the expand/collapse provider contract).
     pub fn collapse(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_drop_down_open(false);
+        self.owner().set_current_value(ComboBox::is_drop_down_open_property(), false);
         Ok(())
     }
 
     /// Opens the drop-down (the expand/collapse provider contract).
     pub fn expand(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_drop_down_open(true);
+        self.owner().set_current_value(ComboBox::is_drop_down_open_property(), true);
         Ok(())
     }
 

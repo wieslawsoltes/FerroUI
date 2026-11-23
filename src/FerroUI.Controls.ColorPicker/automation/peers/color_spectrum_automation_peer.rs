@@ -109,7 +109,7 @@ impl ColorSpectrumAutomationPeer {
             return Err(FormatError::from_string(format!("Invalid color string: '{}'.", value.unwrap_or_default())));
         };
 
-        self.owner().set_color(color);
+        self.owner().set_current_value(ColorSpectrum::color_property(), color);
         Ok(())
     }
 
