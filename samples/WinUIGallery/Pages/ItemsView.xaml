@@ -1,0 +1,165 @@
+<!-- Ported from the three pinned ItemsView examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The control themes of ItemsView and ItemContainer are in their own crate and are included
+     here, as an application that uses them includes them. The items are the CustomDataObject of
+     list_samples.rs and the handlers of ItemsViewPage.xaml.cs are in items_view_samples.rs.
+     NumberBox and the radio buttons keep the source's values; ThemeResource is DynamicResource;
+     a Visibility is IsVisible; the option panels' RadioButtons headers are texts. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.ItemsView/Themes/WinUI/WinUI.xaml" />
+  </StackPanel.Styles>
+  <StackPanel.Resources>
+    <DataTemplate x:Key="ImageTemplate">
+      <ItemContainer Width="200" Height="140" HorizontalAlignment="Left"
+                     AutomationProperties.Name="{Binding Title}">
+        <Image Margin="4" HorizontalAlignment="Center" VerticalAlignment="Center"
+               Source="{Binding Image}" Stretch="UniformToFill" />
+      </ItemContainer>
+    </DataTemplate>
+    <DataTemplate x:Key="LinedFlowLayoutItemTemplate">
+      <ItemContainer AutomationProperties.Name="{Binding Title}">
+        <Grid>
+          <Image MinWidth="70" HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Source="{Binding Image}" Stretch="UniformToFill" />
+          <StackPanel Height="40" VerticalAlignment="Bottom" Opacity="0.75"
+                      Background="{DynamicResource SystemControlBackgroundBaseMediumBrush}">
+            <TextBlock Margin="5,1,5,0" Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                       Text="{Binding Title}" />
+            <StackPanel Margin="5,0,5,1" Orientation="Horizontal">
+              <TextBlock Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="{Binding Likes}" />
+              <TextBlock Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text=" Likes" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </ItemContainer>
+    </DataTemplate>
+    <DataTemplate x:Key="StackLayoutItemTemplate">
+      <ItemContainer AutomationProperties.Name="{Binding Title}">
+        <Grid Width="480" MinHeight="80" MaxHeight="100" ColumnDefinitions="Auto,*" RowDefinitions="Auto,*">
+          <Image Grid.RowSpan="2" Width="24" Height="16" Margin="0,4,0,0" VerticalAlignment="Top"
+                 Source="{Binding Image}" Stretch="UniformToFill" />
+          <TextBlock Grid.Column="1" Margin="8,0,0,0" Theme="{DynamicResource BaseTextBlockStyle}"
+                     Text="{Binding Title}" />
+          <TextBlock Grid.Row="1" Grid.Column="1" Margin="8,4,8,4"
+                     Theme="{DynamicResource CaptionTextBlockStyle}" Text="{Binding Description}"
+                     TextTrimming="WordEllipsis" TextWrapping="Wrap" />
+        </Grid>
+      </ItemContainer>
+    </DataTemplate>
+    <DataTemplate x:Key="UniformGridLayoutItemTemplate">
+      <ItemContainer AutomationProperties.Name="{Binding Title}">
+        <Grid Width="150">
+          <Image HorizontalAlignment="Center" VerticalAlignment="Center"
+                 Source="{Binding Image}" Stretch="UniformToFill" />
+          <StackPanel Height="40" VerticalAlignment="Bottom" Opacity="0.75"
+                      Background="{DynamicResource SystemControlBackgroundBaseMediumBrush}">
+            <TextBlock Margin="5,1,5,0" Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                       Text="{Binding Title}" />
+            <StackPanel Margin="5,0,5,1" Orientation="Horizontal">
+              <TextBlock Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text="{Binding Likes}" />
+              <TextBlock Foreground="{DynamicResource SystemControlForegroundAltHighBrush}"
+                         Theme="{DynamicResource CaptionTextBlockStyle}" Text=" Likes" />
+            </StackPanel>
+          </StackPanel>
+        </Grid>
+      </ItemContainer>
+    </DataTemplate>
+  </StackPanel.Resources>
+
+  <StackPanel x:Name="ItemsViewExample1" Spacing="12">
+    <TextBlock Text="Basic ItemsView" FontSize="18" />
+    <TextBlock TextWrapping="Wrap"
+               Text="This is a basic ItemsView which uses its default StackLayout layout and a simple ItemTemplate. Hit the Enter key, double-click or double-tap an item to invoke it." />
+    <ItemsView x:Name="BasicItemsView" Width="220" Height="400" HorizontalAlignment="Left"
+               IsItemInvokedEnabled="True" ItemTemplate="{StaticResource ImageTemplate}" />
+    <TextBlock x:Name="tblBasicInvokeOutput" />
+  </StackPanel>
+
+  <Grid x:Name="ItemsViewExample2" ColumnDefinitions="*,300" ColumnSpacing="24">
+    <StackPanel Spacing="12">
+      <TextBlock Text="ItemsView with swappable layouts" FontSize="18" />
+      <TextBlock TextWrapping="Wrap"
+                 Text="Use the options on the right to control different layout customizations to the ItemsView." />
+      <ItemsView x:Name="SwappableLayoutsItemsView" Height="400" MaxWidth="500"
+                 ItemTemplate="{StaticResource LinedFlowLayoutItemTemplate}">
+        <ItemsView.Layout>
+          <LinedFlowLayout ItemsStretch="Fill" LineHeight="160" LineSpacing="5" MinItemSpacing="5" />
+        </ItemsView.Layout>
+      </ItemsView>
+    </StackPanel>
+    <StackPanel Grid.Column="1" Spacing="4">
+      <TextBlock FontWeight="SemiBold" Text="Layout" />
+      <RadioButton x:Name="rbLinedFlowLayout" Content="LinedFlowLayout" GroupName="ItemsViewLayouts" IsChecked="True" />
+      <RadioButton x:Name="rbUniformGridLayout" Content="UniformGridLayout" GroupName="ItemsViewLayouts" />
+      <RadioButton x:Name="rbStackLayout" Content="StackLayout" GroupName="ItemsViewLayouts" />
+      <StackPanel x:Name="spLinedFlowLayoutOptions" MinHeight="300" Spacing="12">
+        <TextBlock Margin="0,15,0,0" FontWeight="SemiBold" Text="LinedFlowLayout settings" />
+        <NumberBox x:Name="nbLineSpacing" AutomationProperties.Name="Space between lines"
+                   Header="Space between lines" Minimum="0" Maximum="100" Value="5"
+                   SpinButtonPlacementMode="Inline" SmallChange="1" MaxWidth="250" />
+        <NumberBox x:Name="nbMinItemSpacing" AutomationProperties.Name="Minimum space between items on a line"
+                   Header="Minimum space between items on a line" Minimum="0" Maximum="100" Value="5"
+                   SpinButtonPlacementMode="Inline" SmallChange="1" MaxWidth="250" />
+        <TextBlock Text="Line height" />
+        <RadioButton x:Name="rbSmallLineHeight" Content="Small" GroupName="LinedFlowLayoutLineHeights" />
+        <RadioButton x:Name="rbLargeLineHeight" Content="Large" GroupName="LinedFlowLayoutLineHeights" IsChecked="True" />
+      </StackPanel>
+      <StackPanel x:Name="spStackLayoutOptions" MinHeight="300" Spacing="12" IsVisible="False">
+        <TextBlock Margin="0,15,0,0" FontWeight="SemiBold" Text="StackLayout settings" />
+        <NumberBox x:Name="nbSpacing" AutomationProperties.Name="Space between rows"
+                   Header="Space between rows" Minimum="0" Maximum="100" Value="5"
+                   SpinButtonPlacementMode="Inline" SmallChange="1" MaxWidth="250" />
+      </StackPanel>
+      <StackPanel x:Name="spUniformGridLayoutOptions" MinHeight="300" Spacing="12" IsVisible="False">
+        <TextBlock Margin="0,15,0,0" FontWeight="SemiBold" Text="UniformGridLayout settings" />
+        <NumberBox x:Name="nbMinColumnSpacing" AutomationProperties.Name="Minimum space between columns"
+                   Header="Minimum space between columns" Minimum="0" Maximum="100" Value="5"
+                   SpinButtonPlacementMode="Inline" SmallChange="1" MaxWidth="250" />
+        <NumberBox x:Name="nbMinRowSpacing" AutomationProperties.Name="Minimum space between rows"
+                   Header="Minimum space between rows" Minimum="0" Maximum="100" Value="5"
+                   SpinButtonPlacementMode="Inline" SmallChange="1" MaxWidth="250" />
+        <NumberBox x:Name="nbMaximumRowsOrColumns" AutomationProperties.Name="Maximum number of items per row before wrapping"
+                   Header="Maximum number of items per row before wrapping" Minimum="1" Maximum="8" Value="3"
+                   SpinButtonPlacementMode="Inline" SmallChange="1" MaxWidth="250" />
+      </StackPanel>
+    </StackPanel>
+  </Grid>
+
+  <Grid x:Name="ItemsViewExample3" ColumnDefinitions="*,300" ColumnSpacing="24">
+    <StackPanel Spacing="12">
+      <TextBlock Text="ItemsView item invocation and selection" FontSize="18" />
+      <TextBlock TextWrapping="Wrap">
+        <Run Text="You can enable four different selection modes on the right." /><LineBreak />
+        <Run Text="None" FontWeight="Bold" /><Run Text=" disables selection all together." /><LineBreak />
+        <Run Text="Single" FontWeight="Bold" /><Run Text=" allows for only one item to be selected in the collection." /><LineBreak />
+        <Run Text="Multiple" FontWeight="Bold" /><Run Text=" causes checkboxes to appear within the items, so that multiple items can be selected." /><LineBreak />
+        <Run Text="Extended" FontWeight="Bold" /><Run Text=" allows the user to select multiple items by using Ctrl+Click to select them individually, or Shift+Click to select a range." />
+      </TextBlock>
+      <ItemsView x:Name="SwappableSelectionModesItemsView" Height="400" MaxWidth="500"
+                 ItemTemplate="{StaticResource UniformGridLayoutItemTemplate}" SelectionMode="Multiple">
+        <ItemsView.Layout>
+          <UniformGridLayout MaximumRowsOrColumns="3" MinColumnSpacing="5" MinRowSpacing="5" />
+        </ItemsView.Layout>
+      </ItemsView>
+      <TextBlock x:Name="tblInvocationOutput" />
+      <TextBlock x:Name="tblSelectionOutput" />
+    </StackPanel>
+    <Grid Grid.Column="1" ColumnDefinitions="Auto,*" RowDefinitions="Auto,Auto" RowSpacing="8">
+      <TextBlock Margin="0,0,10,0" VerticalAlignment="Center" Text="SelectionMode" />
+      <ComboBox x:Name="cmbSelectionMode" Grid.Column="1" HorizontalAlignment="Stretch"
+                AutomationProperties.Name="selection mode" SelectedIndex="2">
+        <ComboBoxItem>None</ComboBoxItem>
+        <ComboBoxItem>Single</ComboBoxItem>
+        <ComboBoxItem>Multiple</ComboBoxItem>
+        <ComboBoxItem>Extended</ComboBoxItem>
+      </ComboBox>
+      <TextBlock Grid.Row="1" Margin="0,0,10,0" VerticalAlignment="Center" Text="IsItemInvokedEnabled" />
+      <CheckBox x:Name="chkIsItemInvokedEnabled" Grid.Row="1" Grid.Column="1"
+                AutomationProperties.Name="is item invocation enabled?" />
+    </Grid>
+  </Grid>
+</StackPanel>

@@ -4088,11 +4088,65 @@
       ]
     },
     "ItemsView": {
-      "status": "pending",
-      "implementation": [],
-      "tests": [],
-      "notes": "G1 (#418) found no WinUI ItemsView on main: ferroui-controls-repeater has the ItemsRepeater, LinedFlowLayout and SelectionModel, but not ItemsView or ItemContainer (ferroui_controls::ItemsView in items_source.rs is an unrelated view of items). The three examples need its container selection modes, ItemInvoked and the ScrollView it hosts; the control is G2 work.",
-      "examples": []
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ItemsView.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/items_view_samples.rs",
+        "src/FerroUI.Controls.ItemsView/items_view.rs",
+        "src/FerroUI.Controls.ItemsView/item_container.rs",
+        "src/FerroUI.Controls.ItemsView/Themes/WinUI/ItemContainer.xaml",
+        "src/FerroUI.Controls.ItemsView/Themes/WinUI/ItemsView.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+          "name": "the_three_views_show_the_items_in_containers_of_their_theme"
+        }
+      ],
+      "notes": "All three source examples use the native ItemsView and ItemContainer of ferroui-controls-items-view with their control themes, included by the page, and the handlers of ItemsViewPage.xaml.cs in Rust (items_view_samples.rs): item invocation, the lined flow, uniform grid and stack layouts with their options, and the four selection modes. The items are the eight CustomDataObjects of list_samples.rs (the source's includeAllItems shows more). The ScrollView is a ScrollViewer, and a change of the lined flow layout follows its scroll to the top at once instead of when the view stops.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ItemsView/BasicItemsview.txt",
+          "source_sha256": "9812011bc70acc853203aaee63d3bbebb7623a4d425868ed654340bd2f03098f",
+          "status": "ported",
+          "notes": "The default stack layout, the image template and BasicItemsView_ItemInvoked.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+              "name": "the_three_views_show_the_items_in_containers_of_their_theme"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsView/ItemsviewSwappableLayouts.txt",
+          "source_sha256": "993262daee79d51ae4c757031b31ab74572d2f5e870346926fbd96e1a869dcdd",
+          "status": "ported",
+          "notes": "The lined flow, uniform grid and stack layouts with the source's options.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+              "name": "the_layout_options_swap_the_layout_and_its_settings"
+            }
+          ]
+        },
+        {
+          "source": "WinUIGallery/Samples/ItemsView/ItemsviewItemInvocationSelection.txt",
+          "source_sha256": "aa06f5ddbb39fa0f060838a9951c9d59c5b4fe0d4d326f3b8796b8fc7a4978ee",
+          "status": "ported",
+          "notes": "The four selection modes, IsItemInvokedEnabled and the outputs.",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/items_view_samples_tests.rs",
+              "name": "the_selection_options_set_the_mode_and_report_the_selection"
+            }
+          ]
+        }
+      ]
     },
     "SystemBackdropElement": {
       "status": "pending",

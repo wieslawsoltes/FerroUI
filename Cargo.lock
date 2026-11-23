@@ -7984,6 +7984,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-controls-color-picker",
  "ferroui-controls-inking",
+ "ferroui-controls-items-view",
  "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
  "ferroui-desktop",

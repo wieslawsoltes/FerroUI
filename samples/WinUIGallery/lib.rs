@@ -29,6 +29,7 @@ mod frame_sample;
 pub mod gallery;
 mod ink_samples;
 mod input_samples;
+mod items_view_samples;
 mod layout_samples;
 mod list_samples;
 mod materials_samples;
@@ -85,6 +86,8 @@ mod connected_animation_samples_tests;
 #[cfg(test)]
 mod media_samples_tests;
 
+#[cfg(test)]
+mod items_view_samples_tests;
 #[cfg(test)]
 mod materials_samples_tests;
 

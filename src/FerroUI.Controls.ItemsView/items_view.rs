@@ -11,7 +11,7 @@ use ferroui_controls_repeater::{ItemCollectionTransitionProvider, ItemsRepeater,
 use ferroui_base::input::{InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::reactive::Subscription;
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, FerroObjectImpl,
@@ -305,25 +305,25 @@ impl ItemsView {
     }
 
     /// `ItemInvoked`.
-    pub fn item_invoked(&self, handler: impl Fn(&ItemsViewItemInvokedEventArgs) + 'static) -> Subscription {
+    pub fn item_invoked(&self, handler: impl Fn(&ItemsViewItemInvokedEventArgs) + 'static) -> Rc<dyn IDisposable> {
         let token = self.item_invoked.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Subscription::new(ferroui_base::reactive::Disposable::create(move || {
+        Disposable::create(move || {
             if let Some(view) = weak.upgrade() {
                 view.item_invoked.remove(token);
             }
-        }))
+        })
     }
 
     /// `SelectionChanged`.
-    pub fn selection_changed(&self, handler: impl Fn(&ItemsViewSelectionChangedEventArgs) + 'static) -> Subscription {
+    pub fn selection_changed(&self, handler: impl Fn(&ItemsViewSelectionChangedEventArgs) + 'static) -> Rc<dyn IDisposable> {
         let token = self.selection_changed.add(Rc::new(handler));
         let weak = self.to_ref().downgrade();
-        Subscription::new(ferroui_base::reactive::Disposable::create(move || {
+        Disposable::create(move || {
             if let Some(view) = weak.upgrade() {
                 view.selection_changed.remove(token);
             }
-        }))
+        })
     }
 
     fn update_single_select(&self) {

@@ -1722,6 +1722,20 @@ The port of StaticViewLocator (<https://github.com/wieslawsoltes/StaticViewLocat
 | The tests compile each source text into an assembly of its own; a test of the generator also compiles its output. | The tests of the generator check the text of the output; the runtime tests are modules of one crate whose build script generates their locators, so every locator sees the view models of every module. Tests of C# features Rust lacks (`ref` overloads, `dynamic`, sealed classes, run-time type tests, base-class contracts) check the Rust counterpart under the same names. | Test | A Rust test cannot compile a crate; the generated source of each shape is compiled and run by `tests/FerroUI.StaticViewLocator.Tests`. | #310 |
 | The demos write their views in markup (AXAML) with compiled bindings, and `MainWindow` is a window class. | The sample writes its views with the builders of `ferroui-view` in `UserControl` classes, from the view model of their data context; both demos are tabs of one window. | Behaviour | The sample shows the locators, which are independent of how a view is written. | #310 |
 
+### WinUI ItemsView (`src/FerroUI.Controls.ItemsView/`)
+
+The port of `ItemsView` and `ItemContainer` of WinUI (`controls/dev/ItemsView`, `controls/dev/ItemContainer`, commit `7e4b0c2`). Upstream here is WinUI.
+
+| Upstream | Port | Kind | Why | Since |
+|---|---|---|---|---|
+| `ItemsView` and `ItemContainer` are part of the WinUI controls, with their styles in the framework's theme. | They are in the crate `ferroui-controls-items-view`, which owns their control themes (`Themes/WinUI/`). An application that uses them includes `WinUI.xaml`. | Representation | A hello world links none of the controls or their theme, and the WinUI theme does not depend on the repeater. | #418 |
+| The template of `ItemsView` holds a `ScrollView`, and `ItemsView.ScrollView` returns it. | It holds a `ScrollViewer`, and `scroll_view` returns it once the template is applied. | Representation | FerroUI has no `ScrollView`. | #418 |
+| `PART_CommonVisual` is a `Rectangle` and `PART_SelectionVisual` a `Grid`, and the root `Grid` has the corner radius. | Both are `Border`s, and a `PART_ContainerBackground` under the child draws the rounded background. | Representation | FerroUI's `Grid` has no border or corner radius. | #418 |
+| `PART_SelectionCheckbox` has its own style with an `AnimatedIcon`. | It uses the `CheckBox` theme of the application. | Missing | FerroUI has no `AnimatedIcon` yet (#557). | #418 |
+| `ItemContainer` exposes `CanUserSelect`, `CanUserInvoke` and `MultiSelectMode`, and reports `PointerPressed` as an interaction. | The view decides them from its selection mode and whether items can be invoked; the container reports the release, tap, double tap, Enter and Space. | Missing | The members are internal in WinUI's public API. | #418 |
+| The arrow keys, Page Up and Page Down navigate through the layout's own target search, queued around bring-into-view operations. | The arrow keys go to the nearest realized item in their direction, Home and End to the first and last item. Page Up and Page Down are not ported. | Missing | A first version of the keyboard over realized items. | #418 |
+| `ItemsViewAutomationPeer` and `ItemContainerAutomationPeer` expose selection and invoke patterns. | Not ported yet: the controls use the default peers. | Missing | Follow-up of this control. | #418 |
+
 ### WinUI inking (`src/FerroUI.Controls.Inking/`)
 
 The port of the inking controls and services of WinUI (`docs/porting/winui-inking.md`). Upstream here is WinUI's `InkCanvas`, `InkToolbar` and the `Windows.UI.Input.Inking` services they use.
