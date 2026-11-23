@@ -1980,6 +1980,7 @@ dependencies = [
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-fonts-web-core",
+ "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-vello",
  "js-sys",

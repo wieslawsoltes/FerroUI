@@ -17,6 +17,7 @@ mod font_face_builder;
 mod markup_types;
 #[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
 mod off_thread;
+mod rust_paths;
 mod text_invalidation;
 mod web_font_collection;
 mod web_fonts;

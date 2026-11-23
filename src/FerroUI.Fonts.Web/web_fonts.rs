@@ -11,15 +11,15 @@ use ferroui_base::{
 /// standard form of every descriptor:
 ///
 /// ```xml
-/// <Application xmlns:fonts="using:FerroUI.Fonts.Web">
-///   <fonts:WebFonts.StyleSheet>
+/// <Application>
+///   <WebFonts.StyleSheet>
 ///     @font-face {
 ///       font-family: Inter;
 ///       src: url(/fonts/Inter.woff2) format(woff2);
 ///       font-weight: 100 900;
 ///       font-display: swap;
 ///     }
-///   </fonts:WebFonts.StyleSheet>
+///   </WebFonts.StyleSheet>
 /// </Application>
 /// ```
 ///
