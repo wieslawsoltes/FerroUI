@@ -210,7 +210,7 @@ impl CompositionDrawListVisual {
 
     /// The extension of the visual, if it has one.
     pub fn extension(&self) -> Option<&Rc<dyn ICompositionDrawListVisualExtension>> {
-        self.extension.as_ref()
+        self.data().extension.as_ref()
     }
 
     /// Creates the composition visual of `visual` for a class derived from
