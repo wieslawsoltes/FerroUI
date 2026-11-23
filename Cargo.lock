@@ -3179,6 +3179,9 @@ dependencies = [
  "ferroui-themes-fluent",
  "ferroui-view-macros",
  "ferroui-view-syntax",
+ "ferroui-xaml-interactions",
+ "ferroui-xaml-interactions-custom",
+ "ferroui-xaml-interactivity",
  "proc-macro2",
  "syn 2.0.119",
 ]
@@ -6829,6 +6832,7 @@ dependencies = [
  "ferroui-skia",
  "ferroui-themes-winui",
  "ferroui-view",
+ "ferroui-xaml-interactions",
  "ferroui-xaml-interactions-custom",
  "todo-mvc",
 ]

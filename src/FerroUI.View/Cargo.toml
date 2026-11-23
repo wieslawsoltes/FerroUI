@@ -34,6 +34,8 @@ default = []
 desktop = ["dep:ferroui-desktop", "dep:ferroui-themes-fluent"]
 # XAML in a component (`load_xaml`, `use_xaml`): the XAML runtime library and its run-time loader.
 xaml = ["dep:ferroui-markup-xaml", "dep:ferroui-markup-xaml-loader", "ferroui-base/type-tables"]
+# Declarative attachment of the native interaction triggers and actions.
+behaviors = ["dep:ferroui-xaml-interactivity", "dep:ferroui-xaml-interactions", "dep:ferroui-xaml-interactions-custom"]
 # The builders of the other crates of controls (`scripts/generate_view_builders.py`, GROUPS).
 treedatagrid = ["dep:ferroui-controls-treedatagrid"]
 color-picker = ["dep:ferroui-controls-color-picker"]
@@ -56,6 +58,9 @@ ferroui-desktop = { workspace = true, optional = true }
 ferroui-themes-fluent = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
 ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
+ferroui-xaml-interactivity = { workspace = true, optional = true }
+ferroui-xaml-interactions = { workspace = true, optional = true }
+ferroui-xaml-interactions-custom = { workspace = true, optional = true }
 ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-controls-color-picker = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }

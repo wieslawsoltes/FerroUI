@@ -45,6 +45,8 @@
 extern crate self as ferroui_view;
 
 mod animation;
+#[cfg(feature = "behaviors")]
+pub mod behavior;
 pub mod async_data;
 pub mod builder;
 mod component_host;

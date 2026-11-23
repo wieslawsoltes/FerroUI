@@ -21,6 +21,7 @@ use std::{fs::File, path::Path};
 use std::rc::Rc;
 
 mod animation_codec;
+mod behaviors;
 mod motion;
 mod review_states;
 mod shader;
@@ -87,6 +88,9 @@ fn register_fixtures() {
     register_preview_fixture("/app_preview/motion.rs", "Compiled motion", || {
         Ok(PreviewFixture::RustView(motion::view()))
     }).expect("valid Todo Workbench motion fixture");
+    register_preview_fixture("/app_preview/behaviors.rs", "Compiled approval", || {
+        Ok(PreviewFixture::RustView(behaviors::view().mount()))
+    }).expect("valid Todo Workbench behavior fixture");
     register_preview_fixture("/app_preview/review_states.rs", "Interactive review", || {
         Ok(PreviewFixture::RustView(review_states::view()))
     }).expect("valid Todo Workbench state fixture");
@@ -126,6 +130,7 @@ fn register_fixtures() {
 fn register_markup() {
     FerroRuntimeXamlLoader::register();
     shader::register();
+    ferroui_xaml_interactions::register_types();
     ferroui_xaml_interactions_custom::register_types();
     ferroui_controls_treedatagrid::register_types();
     Animation::register_custom_animator::<ReviewCorners>();

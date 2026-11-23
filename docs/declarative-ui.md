@@ -587,6 +587,44 @@ Flyouts (`flyout`, `context_flyout`) are not controls (`FlyoutBase` derives from
 |---|---|
 | ![The gallery, light](images/declarative-ui/view-gallery.png) | ![The gallery, dark](images/declarative-ui/view-gallery-dark.png) |
 
+### Attach native behaviors
+
+Enable the `behaviors` feature of `ferroui-view`. Pass the trigger and its ordered actions to
+the control’s `behaviors` field. The same declarations also work with the `.behaviors(...)` builder method.
+
+```rust
+use ferroui_view::behavior::{add_class, change_property, event};
+use ferroui_view::prelude::*;
+
+fn approval() -> Element {
+    rsx! {
+        StackPanel {
+            TextBlock { name: "Status", text: "Waiting for review" }
+            Button {
+                content: "Approve",
+                behaviors: [event("Click", None, [
+                    change_property(Some("Status"), "Text", "Ready for handoff"),
+                    add_class(None, "approved"),
+                ])],
+            }
+        }
+    }
+}
+```
+
+`event` listens on the owner when its source is `None`. Pass a control name to listen on that
+control. An action with no explicit target uses the trigger sender. Named references resolve
+when the control joins the logical tree.
+
+`data("IsReady", Comparison::Equal, "True", true, [...])` compares a path on the current data
+context and restores reversible action values when the comparison becomes false.
+`invoke_command("SaveCommand", Some("approve"))` binds an existing command from the data context.
+`call_method` invokes a method through the native behavior registry. Literal property values
+use the same native converter as XAML behavior actions.
+
+Behavior declarations attach to each mounted control. Designer Studio and VS Code can edit the
+literal operands in a supported inline array. [Designer workflow](designer/vscode/authoring.md#edit-a-behavior-in-rust)
+
 ## 11. Tools (phase 4)
 
 ### 11.1 Hot reload of `rsx!`
