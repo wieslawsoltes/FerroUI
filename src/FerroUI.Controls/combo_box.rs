@@ -50,7 +50,7 @@ pub struct ComboBoxTextSubmittedEventArgs {
 }
 
 impl ComboBoxTextSubmittedEventArgs {
-    /// The text the user submitted.
+    /// The submitted text.
     pub fn text(&self) -> &str {
         &self.text
     }
@@ -524,7 +524,7 @@ impl ComboBox {
         }))
     }
 
-    /// Occurs when the user commits a text of an editable box that is no item (WinUI's
+    /// Occurs when a text of an editable box that is no item is committed (WinUI's
     /// `TextSubmitted`): with Enter, Tab or by leaving the box.
     pub fn text_submitted(
         &self,
