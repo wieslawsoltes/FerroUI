@@ -377,7 +377,7 @@ fn runtime_xaml_builds_editor_properties_and_direct_text() {
     register_types();
     ferroui_markup_xaml::register_types();
     let value=ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load(
-        r#"<edit:TextEditor xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit"
+        r#"<TextEditor xmlns="https://github.com/ferroui"
             ShowLineNumbers="True" LineNumbersMinWidthInDigits="4" LineNumbersMargin="3,0,6,0" WordWrap="True"
             FontSize="17" FontStyle="Italic" FontWeight="Bold" FontStretch="Condensed" Watermark="Enter code" Text="hello 😀"/>"#,
         Some(&crate::ASSEMBLY),None,None,false).unwrap();
@@ -402,7 +402,7 @@ fn runtime_xaml_selects_named_syntax_highlighting_for_the_current_document() {
     let _scope = test_scope();
     register_types();
     ferroui_markup_xaml::register_types();
-    let markup = r#"<edit:TextEditor xmlns:edit="using:FerroUI.Edit" SyntaxHighlighting="C#" Text="int value"/>"#;
+    let markup = r#"<TextEditor xmlns="https://github.com/ferroui" SyntaxHighlighting="C#" Text="int value"/>"#;
     let editor = FerroRuntimeXamlLoader::parse_as::<Ref<TextEditor>>(markup, None).unwrap();
     assert_eq!(editor.syntax_highlighting().unwrap().name, "C#");
     assert!(!editor
@@ -450,14 +450,14 @@ fn runtime_xaml_syntax_highlighting_setters_use_host_aliases_and_native_preceden
     FerroLocator::current_mutable()
         .bind::<dyn HighlightingDefinitionResolver>()
         .to_constant(Rc::new(manager));
-    let markup = r#"<UserControl xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit"
+    let markup = r#"<UserControl xmlns="https://github.com/ferroui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
         <UserControl.Styles>
             <Style Selector="edit|TextEditor"><Setter Property="SyntaxHighlighting" Value="Host Alias"/></Style>
         </UserControl.Styles>
         <StackPanel>
-            <edit:TextEditor x:Name="Editor" Text="word"/>
-            <edit:TextEditor x:Name="Cleared" SyntaxHighlighting="{x:Null}"/>
+            <TextEditor x:Name="Editor" Text="word"/>
+            <TextEditor x:Name="Cleared" SyntaxHighlighting="{x:Null}"/>
         </StackPanel>
     </UserControl>"#;
     let view = FerroRuntimeXamlLoader::parse_as::<Ref<UserControl>>(markup, None).unwrap();
@@ -501,10 +501,10 @@ fn runtime_xaml_applies_native_selection_styles_to_text_area() {
     register_types();
     ferroui_markup_xaml::register_types();
     let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load(
-        r#"<edit:TextArea xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit"
+        r#"<TextArea xmlns="https://github.com/ferroui"
                         SelectionBrush="Red" SelectionForeground="White" SelectionCornerRadius="5">
-            <edit:TextArea.SelectionBorder><Pen Brush="Blue" Thickness="2" /></edit:TextArea.SelectionBorder>
-        </edit:TextArea>"#,
+            <TextArea.SelectionBorder><Pen Brush="Blue" Thickness="2" /></TextArea.SelectionBorder>
+        </TextArea>"#,
         Some(&crate::ASSEMBLY), None, None, false,
     ).unwrap();
     let area = from_markup_value::<ferroui_base::Ref<crate::TextArea>>(&Some(value)).unwrap();

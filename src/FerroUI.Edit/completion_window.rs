@@ -564,7 +564,7 @@ mod tests {
         crate::register_types();
         ferroui_markup_xaml::register_types();
         let markup = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::load(
-            r#"<edit:TextEditor xmlns="https://github.com/ferroui" xmlns:edit="using:FerroUI.Edit" CompletionAcceptAction="PointerReleased"/>"#,
+            r#"<TextEditor xmlns="https://github.com/ferroui" CompletionAcceptAction="PointerReleased"/>"#,
             Some(&crate::ASSEMBLY), None, None, false,
         ).unwrap();
         let editor = from_markup_value::<Ref<TextEditor>>(&Some(markup)).unwrap();
