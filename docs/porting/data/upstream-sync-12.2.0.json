@@ -113,9 +113,9 @@
    "date": "2026-10-19",
    "area": "platform-x11",
    "class": "port",
-   "note": "X11 dispatcher: explicit background processing.",
-   "part": "x11",
-   "state": "planned"
+   "note": "The X11 run loop implements explicit background processing, with the restructured wait of upstream.",
+   "part": "x11b",
+   "state": "done"
   },
   {
    "hash": "f54736962114d0d83d4513dc58079612c6725135",
@@ -674,10 +674,8 @@
    "pr": 22379,
    "date": "2026-10-27",
    "area": "platform-x11",
-   "class": "port",
-   "note": "AT-SPI windows added on the UI thread.",
-   "part": "x11",
-   "state": "planned"
+   "class": "already",
+   "note": "`X11AtSpiAccessibility` starts its server and adds the tracked windows in a task on the UI thread (`spawn_local_with_priority`)."
   },
   {
    "hash": "a9d935b5c73bb62fbe4d04f8a00b8f1f3786c39d",
