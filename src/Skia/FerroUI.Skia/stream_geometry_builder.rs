@@ -168,6 +168,22 @@ impl IGeometryContext for StreamGeometryBuilder {
         }
     }
 
+    // A run of stroked lines is one call into Skia for the path of the stroke, and one for the
+    // path of the fill where the two are apart, where every point was a call for each.
+    fn lines_to(&mut self, points: &[Point], is_stroked: bool) {
+        if !is_stroked || points.len() < 2 {
+            for point in points {
+                self.line_to(*point, is_stroked);
+            }
+            return;
+        }
+        let run: Vec<skia_safe::Point> = points.iter().map(|point| to_sk_point(*point)).collect();
+        self.stroke.polyline_to(&run);
+        if self.duplicate() {
+            self.fill().polyline_to(&run);
+        }
+    }
+
     fn arc_to(
         &mut self,
         point: Point,
@@ -222,6 +238,49 @@ impl IGeometryContext for StreamGeometryBuilder {
 
         if self.duplicate() {
             self.fill().quad_to(p1, p2);
+        }
+    }
+}
+
+#[cfg(test)]
+mod run_of_lines_tests {
+    // Not from upstream.
+    use super::*;
+    use ferroui_base::platform::IStreamGeometryBuilder;
+
+    /// Section 9.95: a figure given to the builder as one run of lines is the path of the figure
+    /// given point by point, for the stroke and for the fill, filled or not, closed or open.
+    #[test]
+    fn a_run_of_lines_is_the_path_of_its_lines() {
+        let points: Vec<Point> =
+            (0..48).map(|index| Point::new(f64::from(index) * 3.0, f64::from((index * 7) % 13))).collect();
+        for count in [1, 2, 3, 48] {
+            for (is_filled, is_closed) in [(true, true), (false, false), (true, false), (false, true)] {
+                let build = |in_one_run: bool| {
+                    let mut builder = StreamGeometryBuilder::new(None);
+                    builder.begin_figure(points[0], is_filled);
+                    if in_one_run {
+                        builder.lines_to(&points[1..count], true);
+                    } else {
+                        for point in &points[1..count] {
+                            builder.line_to(*point, true);
+                        }
+                    }
+                    builder.end_figure(is_closed);
+                    let geometry = builder.to_geometry();
+                    let geometry = try_get_geometry_impl(&*geometry).expect("a geometry of this backend");
+                    let fill = match geometry.fill() {
+                        FillPath::SameAsStroke => (0, None),
+                        FillPath::Separate(path) => (1, Some(path)),
+                        FillPath::None => (2, None),
+                    };
+                    (geometry.stroke_path(), fill)
+                };
+                assert!(
+                    build(true) == build(false),
+                    "{count} points, filled {is_filled}, closed {is_closed}"
+                );
+            }
         }
     }
 }

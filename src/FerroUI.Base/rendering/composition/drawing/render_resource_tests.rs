@@ -163,6 +163,20 @@ impl RenderResourceTestHelper {
         recorder.get_render_results().expect("something was drawn")
     }
 
+    /// Records for a visual that already has `previous`, as the renderer does.
+    fn record_for(
+        &self,
+        previous: &Rc<CompositionRenderData>,
+        draw: impl FnOnce(&mut DrawingContext<'_>),
+    ) -> RecordedDrawing {
+        let mut recorder = RenderDataDrawingContext::new(Some(self.compositor.clone()));
+        {
+            let mut context = DrawingContext::new(&mut recorder);
+            draw(&mut context);
+        }
+        recorder.get_render_results_for(Some(previous), false)
+    }
+
     fn replay(&self, render_data: &CompositionRenderData) -> Vec<String> {
         let server =
             self.compositor.server().get::<ServerCompositionRenderData>(render_data.server()).expect("render data");
@@ -1107,6 +1121,103 @@ fn drawing_with_mutable_resources_follows_their_changes_without_recording_again(
     // A detached brush no longer registers for serialization.
     brush.set_color(Colors::RED);
     assert!(!helper.is_invalidated(&brush_res));
+}
+
+/// The server render data reads a new recording into the storage it has and
+/// moves its subscriptions while it reads (desktop-performance.md, section
+/// 9.31): afterwards it observes the resources of the new drawing, and those
+/// only.
+#[test]
+fn a_replaced_recording_observes_the_resources_of_the_new_drawing() {
+    let helper = RenderResourceTestHelper::new();
+    let server = helper.compositor.server().clone();
+    let first = SolidColorBrush::with_color(Colors::RED);
+    let second = SolidColorBrush::with_color(Colors::BLUE);
+    let (first_handle, second_handle): (Rc<dyn IBrush>, Rc<dyn IBrush>) = ((&first).into(), (&second).into());
+    let (first_res, second_res) = (brush_resource(&first), brush_resource(&second));
+
+    let render_data =
+        helper.record(|context| context.fill_rectangle(&first_handle, Rect::new(0.0, 0.0, 5.0, 5.0), 0.0));
+    // Another render data keeps the first brush on the compositor.
+    let other = helper.record(|context| context.fill_rectangle(&first_handle, Rect::new(5.0, 5.0, 5.0, 5.0), 0.0));
+    helper.run_jobs();
+    assert_eq!(server.object_count(), 3);
+    let server_data = server.get::<ServerCompositionRenderData>(render_data.server()).unwrap();
+
+    struct Observer(Cell<u32>);
+    impl IServerRenderResourceObserver for Observer {
+        fn dependency_queued_invalidate(&self, _sender: &dyn IServerRenderResource) {
+            self.0.set(self.0.get() + 1);
+        }
+    }
+    let observer = Rc::new(Observer(Cell::new(0)));
+    let as_observer: Rc<dyn IServerRenderResourceObserver> = observer.clone();
+    server_data.add_observer(&as_observer);
+
+    // A new drawing with the second brush, twice, into the same render data.
+    let updated = helper.record_for(&render_data, |context| {
+        context.fill_rectangle(&second_handle, Rect::new(0.0, 0.0, 8.0, 8.0), 0.0);
+        context.fill_rectangle(&second_handle, Rect::new(10.0, 10.0, 8.0, 8.0), 0.0);
+    });
+    assert!(matches!(updated, RecordedDrawing::Updated));
+    helper.assert_exists_on_compositor(&second_res, true);
+    helper.run_jobs();
+    // Two render data and two brushes.
+    assert_eq!(server.object_count(), 4);
+    let same_server_data = server.get::<ServerCompositionRenderData>(render_data.server()).unwrap();
+    assert!(Rc::ptr_eq(&server_data, &same_server_data));
+    assert_eq!(
+        helper.replay(&render_data),
+        ["DrawRectangle Blue none 0, 0, 8, 8 shadows=0", "DrawRectangle Blue none 10, 10, 8, 8 shadows=0"]
+    );
+    // The bounds are those of the new drawing.
+    let bounds = server_data.bounds().unwrap();
+    assert_eq!((bounds.left, bounds.top, bounds.right, bounds.bottom), (0.0, 0.0, 18.0, 18.0));
+
+    // The brush of the drawing before is no longer followed by this render
+    // data; the other one still follows it.
+    let before = observer.0.get();
+    first.set_color(Colors::GREEN);
+    helper.run_jobs();
+    assert_eq!(observer.0.get(), before);
+    assert_eq!(helper.replay(&other), ["DrawRectangle Green none 5, 5, 5, 5 shadows=0"]);
+
+    // The brush of the new drawing is followed, once for its two uses.
+    second.set_color(Colors::YELLOW);
+    helper.run_jobs();
+    assert_eq!(observer.0.get(), before + 1);
+    assert_eq!(
+        helper.replay(&render_data),
+        ["DrawRectangle Yellow none 0, 0, 8, 8 shadows=0", "DrawRectangle Yellow none 10, 10, 8, 8 shadows=0"]
+    );
+
+    // A smaller drawing after a larger one: nothing of the larger one is left.
+    let server_second = helper.server::<ServerCompositionSimpleSolidColorBrush>(&second_res);
+    let updated = helper.record_for(&render_data, |context| {
+        context.fill_rectangle(&first_handle, Rect::new(1.0, 1.0, 2.0, 2.0), 0.0);
+    });
+    assert!(matches!(updated, RecordedDrawing::Updated));
+    helper.assert_exists_on_compositor(&second_res, false);
+    helper.run_jobs();
+    assert!(server_second.is_disposed());
+    assert_eq!(server.object_count(), 3);
+    assert_eq!(helper.replay(&render_data), ["DrawRectangle Green none 1, 1, 2, 2 shadows=0"]);
+    let bounds = server_data.bounds().unwrap();
+    assert_eq!((bounds.left, bounds.top, bounds.right, bounds.bottom), (1.0, 1.0, 3.0, 3.0));
+    let before = observer.0.get();
+    first.set_color(Colors::RED);
+    helper.run_jobs();
+    assert_eq!(observer.0.get(), before + 1);
+    assert_eq!(helper.replay(&render_data), ["DrawRectangle Red none 1, 1, 2, 2 shadows=0"]);
+
+    // Disposed, the render data lets go of everything.
+    let server_first = helper.server::<ServerCompositionSimpleSolidColorBrush>(&first_res);
+    render_data.dispose();
+    other.dispose();
+    helper.assert_exists_on_compositor(&first_res, false);
+    helper.run_jobs();
+    assert_eq!(server.object_count(), 0);
+    assert!(server_first.is_disposed() && server_data.is_disposed());
 }
 
 #[test]

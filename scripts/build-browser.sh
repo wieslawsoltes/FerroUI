@@ -387,6 +387,7 @@ mkdir -p "$OUT"
 cp -R "$WWWROOT"/. "$OUT"/
 # The main script module, and the storage bundle it imports on first use from the same directory.
 cp "$CRATE/dist/ferroui.js" "$CRATE/dist/ferroui.js.map" "$CRATE/dist/storage.js" "$CRATE/dist/storage.js.map" "$OUT"/
+cp "$CRATE/dist/qr-worker.js" "$CRATE/dist/qr-worker.js.map" "$CRATE/dist/qr-worker.LICENSE.txt" "$OUT"/
 # The service worker, registered by the application with `register_ferro_service_worker` and, in a
 # threaded site on a host that does not send the headers of cross-origin isolation, by the check
 # below (as `ferroui-sw.js?coi=1`, which makes it add them). It is scoped to its own directory and

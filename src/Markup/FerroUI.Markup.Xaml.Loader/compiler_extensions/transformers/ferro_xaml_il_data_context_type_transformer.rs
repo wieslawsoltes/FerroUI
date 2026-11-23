@@ -1,5 +1,6 @@
 //! Port of `CompilerExtensions/Transformers/FerroXamlIlDataContextTypeTransformer.cs`.
 
+use super::FerroTransformErrors;
 use std::rc::Rc;
 
 use xamlx::ast::{
@@ -23,29 +24,29 @@ use crate::compiler_extensions::XamlIlBindingPathHelper;
 /// `XamlError::Transform` tagged with the class name, which is what
 /// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` (code `FRN2101`) and
 /// [`Self::is`] look at.
+#[deprecated(
+    since = "0.5.1",
+    note = "use `XamlError::data_context` (`FerroTransformErrors`) and `FerroTransformErrorKind::DataContext`"
+)]
 pub struct XamlDataContextException;
 
+#[allow(deprecated)]
 impl XamlDataContextException {
-    pub const TYPE_NAME: &'static str = "XamlDataContextException";
+    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::DataContext.type_name();
 
-    /// `new XamlDataContextException(message, lineInfo, innerException)`.
+    /// `new XamlDataContextException(message, lineInfo, innerException)`, now
+    /// [`XamlError::data_context`](super::FerroTransformErrors::data_context).
     pub fn new(
         message: impl Into<String>,
         line_info: &dyn IXamlLineInfo,
         inner_exception: Option<XamlError>,
     ) -> XamlError {
-        let error = match inner_exception {
-            Some(inner) => {
-                XamlError::transform_exception_with_inner(message, Some(line_info), inner)
-            }
-            None => XamlError::transform_exception(message, Some(line_info)),
-        };
-        error.with_derived_type_name(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::DataContext.error(message, line_info, inner_exception)
     }
 
     /// `e is XamlDataContextException`.
     pub fn is(error: &XamlError) -> bool {
-        error.is_derived_type(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::DataContext)
     }
 }
 
@@ -112,7 +113,7 @@ impl IXamlAstTransformer for FerroXamlIlDataContextTypeTransformer {
                                 .clone(),
                             ));
                     } else {
-                        return Err(XamlDataContextException::new(
+                        return Err(XamlError::data_context(
                             "x:DataType should be set to a type name.",
                             &*values[0],
                             None,
@@ -372,7 +373,7 @@ impl FerroXamlIlDataContextTypeTransformer {
                     .into_iter()
                     .find_map(|n| n.cast::<FerroXamlIlDataContextTypeMetadataNode>());
                 match parent_data_context_node {
-                    None => Err(XamlDataContextException::new(
+                    None => Err(XamlError::data_context(
                         "Cannot parse a compiled binding without an explicit x:DataType directive to give a starting data type for bindings.",
                         &**obj,
                         None,

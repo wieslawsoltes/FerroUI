@@ -1,26 +1,55 @@
-<!-- Adapted from Samples/Popup/PopupOffsetPositioning.txt; see ../NOTICE.md. The offsets and the
-     light-dismiss option keep the source's OneWay x:Bind, compiled by the x:Bind core (#525); the
-     placement target, which the source sets in code, is a Binding to the button. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="Popup with offset positioning" FontSize="18"/>
-  <Grid HorizontalAlignment="Left" VerticalAlignment="Top">
-    <Button x:Name="ShowPopup" Content="Show Popup (using Offset)"/>
-    <Popup x:Name="StandardPopup" PlacementTarget="{Binding #ShowPopup, Mode=OneWay}" Placement="Bottom"
-           VerticalOffset="{x:Bind VerticalOffset.Value, Mode=OneWay}"
-           HorizontalOffset="{x:Bind HorizontalOffset.Value, Mode=OneWay}"
-           IsLightDismissEnabled="{x:Bind LightDismiss.IsChecked, Mode=OneWay}">
-      <Border Padding="20" CornerRadius="8" Width="200" Height="160" BorderThickness="1" BorderBrush="Gray" Background="{DynamicResource SystemControlBackgroundAltHighBrush}">
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Spacing="8">
-          <TextBlock Text="Simple Popup" FontSize="16" HorizontalAlignment="Center"/>
-          <Button x:Name="ClosePopup" Content="Close"/>
-        </StackPanel>
-      </Border>
-    </Popup>
-  </Grid>
-  <TextBlock Text="Horizontal offset"/>
-  <Slider x:Name="HorizontalOffset" Minimum="-100" Maximum="100" Value="0" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Horizontal offset"/>
-  <TextBlock Text="Vertical offset"/>
-  <Slider x:Name="VerticalOffset" Minimum="-100" Maximum="100" Value="0" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Vertical offset"/>
-  <CheckBox x:Name="LightDismiss" Content="Light dismiss" IsChecked="True"/>
-  <TextBlock x:Name="PopupOutput" Text="Closed"/>
+<!-- Ported from the pinned Popup example of WinUI Gallery (14061eea) and the handlers of
+     PopupPage.xaml.cs (platform_samples.rs); see ../NOTICE.md. The offsets and the light dismiss
+     keep the source's OneWay x:Bind of the options, compiled by the x:Bind core (#525). As
+     WinUI's Popup without a placement target, the popup's top left corner is at the top left
+     corner of its parent grid, moved by the offsets (AnchorAndGravity, TopLeft and BottomRight).
+     WinUI's IsOn is IsChecked of the ToggleSwitch, whose Content is its Header; the NumberBoxes
+     have their Headers. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="PopupExample1" Spacing="8">
+    <TextBlock Text="Popup with Offset Positioning" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <Grid x:Name="Output" HorizontalAlignment="Left" VerticalAlignment="Top">
+        <Button x:Name="ShowPopup" Content="Show Popup (using Offset)" />
+        <Popup x:Name="StandardPopup"
+               Placement="AnchorAndGravity" PlacementAnchor="TopLeft" PlacementGravity="BottomRight"
+               HorizontalOffset="{x:Bind HorizontalOffset.Value, Mode=OneWay}"
+               IsLightDismissEnabled="{x:Bind IsLightDismissEnabledToggleSwitch.IsChecked, Mode=OneWay}"
+               VerticalOffset="{x:Bind VerticalOffset.Value, Mode=OneWay}">
+          <Border MinWidth="240" Padding="16" BorderThickness="1" CornerRadius="8"
+                  Background="{DynamicResource AcrylicBackgroundFillColorDefaultBrush}"
+                  BorderBrush="{DynamicResource SurfaceStrokeColorDefaultBrush}">
+            <StackPanel Spacing="8">
+              <TextBlock FontSize="16" Text="Simple Popup" />
+              <Button x:Name="ClosePopup" Content="Close" />
+            </StackPanel>
+          </Border>
+        </Popup>
+      </Grid>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <ToggleSwitch x:Name="IsLightDismissEnabledToggleSwitch"
+                      Content="IsLightDismissEnabled"
+                      IsChecked="True"
+                      OffContent="False"
+                      OnContent="True" />
+        <NumberBox x:Name="VerticalOffset"
+                   Header="VerticalOffset"
+                   LargeChange="100"
+                   Maximum="100"
+                   Minimum="-100"
+                   SmallChange="10"
+                   SpinButtonPlacementMode="Inline"
+                   Value="0" />
+        <NumberBox x:Name="HorizontalOffset"
+                   Header="HorizontalOffset"
+                   LargeChange="100"
+                   Maximum="500"
+                   Minimum="-100"
+                   SmallChange="10"
+                   SpinButtonPlacementMode="Inline"
+                   Value="200" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

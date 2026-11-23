@@ -81,7 +81,7 @@ impl Animator for EffectAnimator {
         match_: Rc<dyn IObservable<bool>>,
         on_complete: Option<Rc<dyn Fn()>>,
         should_pause_on_invisible: bool,
-    ) -> Option<Rc<dyn IDisposable>> {
+    ) -> Result<Option<Rc<dyn IDisposable>>, crate::animation::AnimationError> {
         let animator = this
             .try_create_animator::<BlurEffectAnimator>(|effect| effect.as_blur_effect().is_some())
             .or_else(|| this.try_create_animator::<DropShadowEffectAnimator>(|effect| effect.as_drop_shadow_effect().is_some()))
@@ -99,7 +99,7 @@ impl Animator for EffectAnimator {
         }
 
         let visual_target = control.downcast_ref::<Visual>().map(Visual::to_ref);
-        Some(apply_with_visual(
+        Ok(Some(apply_with_visual(
             this,
             animation,
             control,
@@ -108,7 +108,7 @@ impl Animator for EffectAnimator {
             on_complete,
             should_pause_on_invisible,
             visual_target,
-        ))
+        )))
     }
 
     /// Fallback implementation of effect animation.

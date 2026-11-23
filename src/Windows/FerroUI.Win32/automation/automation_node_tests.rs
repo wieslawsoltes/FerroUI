@@ -478,10 +478,10 @@ fn the_patterns_a_peer_provides_are_the_ones_a_client_gets() {
     assert!(!has_pattern(&edit, UiaPatternId::RangeValue));
     assert!(has_pattern(&slider, UiaPatternId::RangeValue));
     // Every node brings itself into view; no node has a pattern the
-    // reference does not answer.
+    // reference does not answer, except the text pattern of the text box (#430).
     for node in [&button, &edit, &check_box, &slider] {
         assert!(has_pattern(node, UiaPatternId::ScrollItem));
-        assert!(!has_pattern(node, UiaPatternId::Text));
+        assert_eq!(std::ptr::eq(node, &edit), has_pattern(node, UiaPatternId::Text));
         assert!(!has_pattern(node, UiaPatternId::Window));
     }
     // The provider of a pattern is the node.

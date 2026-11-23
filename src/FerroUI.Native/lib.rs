@@ -154,6 +154,9 @@ pub use self::{
 #[allow(non_camel_case_types, non_snake_case, clippy::all)]
 pub mod interop {
     include!(concat!(env!("OUT_DIR"), "/frn_interop.rs"));
+    // The crate carries the native library: its compilation depends on the sources of the library
+    // (see `build.rs`).
+    include!(concat!(env!("OUT_DIR"), "/native_sources.rs"));
 
     extern "C" {
         /// Entry point of the native library (`main.mm`). Returns a new

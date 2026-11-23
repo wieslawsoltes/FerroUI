@@ -120,9 +120,9 @@ mod tests {
     #[test]
     fn the_paths_of_the_port_do_not_name_the_reference() {
         assert_eq!(APP_PATH_PREFIX, "/org/ferroui/a11y");
-        assert!(zbus::zvariant::ObjectPath::try_from(format!("{APP_PATH_PREFIX}/1")).is_ok());
+        assert!(zbus::ObjectPath::try_from(format!("{APP_PATH_PREFIX}/1")).is_ok());
         for path in [ROOT_PATH, CACHE_PATH, NULL_PATH, REGISTRY_PATH, PATH_A11Y] {
-            assert!(zbus::zvariant::ObjectPath::try_from(path).is_ok());
+            assert!(zbus::ObjectPath::try_from(path).is_ok());
         }
     }
 }

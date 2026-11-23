@@ -421,6 +421,8 @@ fn message(lines: &[&str]) -> Ref<Control> {
 #[derive(Clone)]
 pub struct DesignStyleValue(pub Rc<dyn IStyle>);
 
+ferroui_base::styled_value!(DesignStyleValue);
+
 impl PartialEq for DesignStyleValue {
     fn eq(&self, other: &Self) -> bool {
         ferroui_base::styling::style_ptr_eq(&self.0, &other.0)

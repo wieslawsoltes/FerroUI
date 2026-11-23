@@ -28,38 +28,23 @@
     },
     {
       "document": "controls/dev/CommonStyles/MediaTransportControls_themeresources.xaml",
-      "key": "*",
-      "reason": "MediaTransportControls: no FerroUI control (no media playback)."
+      "key": "MediaTransportControlsTitleSafeBounds",
+      "reason": "The title safe bounds of a television (the Xbox layout of MediaTransportControls): the port has no television layout. The other resources of the document are ported (Resources/MediaTransportControls_themeresources.xaml) and its style is ported by hand (Controls/MediaTransportControls.xaml)."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
       "key": "re:MTC.*|\\{MediaPlayerElement\\}",
-      "reason": "MediaTransportControls and MediaPlayerElement: no FerroUI control (no media playback)."
-    },
-    {
-      "document": "controls/dev/CommonStyles/Pivot_themeresources.xaml",
-      "key": "*",
-      "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView."
+      "reason": "The portable controls use a focused MediaTransportControls template; the remaining upstream media resource variants are not ported."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:Pivot.*",
-      "reason": "Pivot: no FerroUI control; FerroUI's TabControl is ported from TabView."
+      "key": "re:\\{(Hub|HubSection|SemanticZoom|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
+      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
     },
     {
       "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:\\{(Hub|HubSection|SemanticZoom|ListView|GridView|ListViewHeaderItem|GridViewHeaderItem|GroupItem|AppBar|AppBarElementContainer|ListPickerFlyoutPresenter|PickerFlyoutPresenter)\\}|GridViewItemExpanded|FlyoutPickerListViewItemContentPresenterStyle|FlyoutPickerTitleTextBlockStyle|ListPickerFlyoutPresenterContentTemplate|BaseRichTextBlockStyle|BodyRichTextBlockStyle|LanguageSwitcherMenuFlyoutItemStyle|LanguageSwitcherMenuFlyoutSettingsRowStyle",
-      "reason": "Styles of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView, GridView, group headers, AppBar, the list and picker flyouts, RichTextBlock, the language switcher of the input method menu)."
-    },
-    {
-      "document": "dxaml/xcp/dxaml/themes/generic.xaml",
-      "key": "re:(Hub|SemanticZoom|ListViewHeader|GridViewHeader|ListPickerFlyout|PickerFlyout|FlyoutPicker|RichTextBlock|LanguageSwitcher|IMECandidate|KeyTip|Phone|GridViewItem).*",
-      "reason": "Resources of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView and GridView headers, the picker flyouts, RichTextBlock, the input method candidate list, key tips, the phone resources of the platform theme, GridView items)."
-    },
-    {
-      "document": "controls/dev/CommonStyles/GridViewItem_themeresources.xaml",
-      "key": "*",
-      "reason": "GridViewItem: no FerroUI control (no GridView)."
+      "key": "re:(Hub|SemanticZoom|ListViewHeader|GridViewHeader|ListPickerFlyout|PickerFlyout|FlyoutPicker|RichTextBlock|LanguageSwitcher|IMECandidate|KeyTip|Phone).*",
+      "reason": "Resources of WinUI controls FerroUI does not have (Hub, SemanticZoom, ListView and GridView headers, the picker flyouts, RichTextBlock, the input method candidate list, key tips, the phone resources of the platform theme)."
     },
     {
       "document": "controls/dev/MapControl/MapControl.xaml",
@@ -80,16 +65,6 @@
       "document": "controls/dev/TwoPaneView/TwoPaneView.xaml",
       "key": "*",
       "reason": "TwoPaneView: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/SwipeControl/SwipeControl.xaml",
-      "key": "*",
-      "reason": "SwipeControl: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/SwipeControl/SwipeControl_themeresources.xaml",
-      "key": "*",
-      "reason": "SwipeControl: no FerroUI control."
     },
     {
       "document": "controls/dev/AnnotatedScrollBar/AnnotatedScrollBar.xaml",

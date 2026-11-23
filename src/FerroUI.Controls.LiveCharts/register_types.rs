@@ -56,6 +56,8 @@ const TYPES: &[&TypeInfo] = &[
     crate::ChartVisualElement::TYPE,
     crate::AngularTicksVisual::TYPE,
     crate::NeedleVisual::TYPE,
+    crate::ChartLegend::TYPE,
+    crate::HeatLegend::TYPE,
     crate::ChartAutomationPeer::TYPE,
 ];
 ferroui_base::ferro_rust_paths! {
@@ -68,6 +70,7 @@ ferroui_base::ferro_rust_paths! {
         crate::SankeySeries,crate::TreemapSeries,crate::SankeyNode,crate::SankeyLink,crate::TreemapNode,
         crate::HeatLandSeries,crate::HeatLand,crate::GeoMarker,
         crate::ChartVisualElement,crate::AngularTicksVisual,crate::NeedleVisual,
+        crate::ChartLegend,crate::HeatLegend,
         crate::ChartAutomationPeer],
     types:[crate::ChartKind,crate::LegendPosition,crate::TooltipPosition,crate::ZoomAndPanMode,
         crate::MapInteractionMode,
@@ -107,10 +110,11 @@ pub fn register_types() {
     });
 }
 
-/// What the untyped value conversions must know: the children of a treemap node and the ends of a
-/// Sankey link are nullable, so a collection or a node object converts to them (a null child list
-/// is a leaf).
+/// What the untyped value conversions must know: the children of a treemap node, the ends of a
+/// Sankey link and the legend of a chart are nullable, so a collection or an object converts to
+/// them (a null child list is a leaf, a null legend the legend of the series).
 fn register_value_types() {
     ValueTypes::register_nullable::<crate::TreemapNodes>();
     ValueTypes::register_object::<crate::SankeyNode>();
+    ValueTypes::register_object::<crate::ChartLegend>();
 }

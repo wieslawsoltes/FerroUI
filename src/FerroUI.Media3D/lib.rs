@@ -24,12 +24,19 @@
 //! - the materials [`Material`], [`DiffuseMaterial`], [`SpecularMaterial`],
 //!   [`EmissiveMaterial`] and [`MaterialGroup`], painting with the brushes of FerroUI;
 //! - the visuals [`Visual3D`], [`ModelVisual3D`] and [`Viewport3DVisual`], and the control
-//!   [`Viewport3D`].
+//!   [`Viewport3D`];
+//! - the elements that take pointer input, [`UIElement3D`], [`ModelUIElement3D`] and
+//!   [`ContainerUIElement3D`], to which a `Viewport3D` routes its pointer events through the hit
+//!   testing.
 //!
 //! A `Viewport3DVisual` compiles its scene into an immutable [`Scene3DSnapshot`] (world
 //! matrices, shared meshes, material layers, lights in world space, the camera with its planes
 //! fitted to the scene, and three generations), which `Viewport3D` draws through the
 //! render-data operation `DrawScene3D`; the renderers are in another crate.
+//!
+//! The hit testing of WPF ([`VisualTreeHelper::hit_test`], [`VisualTreeHelper::hit_test_point`]
+//! and [`VisualTreeHelper::hit_test_ray`], reporting [`RayMeshGeometry3DHitTestResult`]s nearest
+//! first) runs on the CPU over the same tree, with a bounding-volume hierarchy per mesh.
 //!
 //! [`register_types`] adds the classes, the markup metadata of the values and collections (their
 //! text converters) and the XML namespace of the framework to the tables of the markup loader.
@@ -41,6 +48,7 @@ mod collections;
 mod controls;
 mod error;
 mod geometry_3d;
+mod hit_testing;
 mod light;
 mod markup_types;
 mod material;
@@ -55,6 +63,7 @@ mod scene_compiler;
 mod size_3d;
 mod text;
 mod transform_3d;
+mod ui_element_3d;
 mod vector_3d;
 mod viewport_3d_visual;
 mod visual_3d;
@@ -70,6 +79,10 @@ pub use collections::{
 };
 pub use controls::Viewport3D;
 pub use error::{Matrix3DError, QuaternionError, Size3DError};
+pub use hit_testing::{
+    HitTestFilterBehavior, HitTestFilterCallback, HitTestResult, HitTestResultBehavior, HitTestResultCallback,
+    RayHitTestParameters, RayHitTestResult, RayMeshGeometry3DHitTestResult, Viewport3DHitTestTarget, VisualTreeHelper,
+};
 pub use geometry_3d::{Geometry3D, Geometry3DImpl, Geometry3DImplExt, Geometry3DVTable, MeshGeometry3D};
 pub use light::{AmbientLight, DirectionalLight, Light, PointLight, PointLightBase, SpotLight};
 pub use markup_types::{register_types, ASSEMBLY};
@@ -88,6 +101,7 @@ pub use transform_3d::{
     MatrixTransform3D, RotateTransform3D, ScaleTransform3D, Transform3D, Transform3DGroup, Transform3DImpl,
     Transform3DImplExt, Transform3DVTable, TranslateTransform3D,
 };
+pub use ui_element_3d::{ContainerUIElement3D, ModelUIElement3D, Pointer3DEventArgs, UIElement3D};
 pub use vector_3d::Vector3D;
 pub use viewport_3d_visual::Viewport3DVisual;
 pub use visual_3d::{ModelVisual3D, Visual3D};
@@ -101,6 +115,9 @@ pub use ferroui_base::rendering::scene3d::{
 
 #[cfg(test)]
 mod scene_tests;
+
+#[cfg(test)]
+mod ui_element_3d_tests;
 
 #[cfg(test)]
 mod xaml_tests;

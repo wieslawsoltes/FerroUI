@@ -30,6 +30,12 @@ ferro_impl_classes!(Canvas: StyledElementImpl, VisualImpl, InteractiveImpl, Inpu
 ferroui_base::ferro_impl_classes!(Canvas: FerroObjectImpl);
 
 impl LayoutableImpl for Canvas {
+    /// The measure below gives every child an infinite size and wants none of its own, whatever
+    /// it is offered: it holds at every size (desktop-performance.md, section 9.86).
+    fn measure_hold_override(_this: &Self, _constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
+        Some(ferroui_base::layout::MeasureHold::ANY)
+    }
+
     fn measure_override(this: &Self, _available_size: Size) -> Size {
         let available_size = Size::new(f64::INFINITY, f64::INFINITY);
 

@@ -1,18 +1,17 @@
 name: macOS 26 theme
 
 on:
+  # A pull request runs it when it changes the theme or its scripts (docs/ci.md). Changes of the
+  # platform settings of ferroui-base, the native platform (ferroui-native, native/, the MicroCom
+  # generator), the catalog, the facade crate or the dependencies do not start it on a pull
+  # request: the CI workflow tests those (the native platform in its macOS job), and the nightly
+  # run of main runs this workflow.
   pull_request:
     paths:
       - 'src/FerroUI.Themes.MacOS/**'
-      - 'src/FerroUI.Base/platform/**'
-      - 'src/FerroUI.Native/**'
-      - 'native/FerroUI.Native/**'
-      - 'src/tools/MicroCom.CodeGenerator/**'
       - 'scripts/macos-theme/**'
       - 'scripts/themes/**'
       - '.github/workflows/macos-theme.yml'
-  # Changes of the catalog, the facade crate or the dependencies do not start this workflow on a
-  # pull request (the CI workflow tests those); the nightly run of main covers them.
   schedule:
     - cron: '47 2 * * *'
   workflow_dispatch:

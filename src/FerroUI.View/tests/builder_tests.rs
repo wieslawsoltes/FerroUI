@@ -1,8 +1,10 @@
 use crate::generated::builders::*;
 use crate::reactive::{signal, Owner};
-use crate::{Element, GridDefinitions, IntoElement};
+use crate::element::{PropEntry, PropValue};
+use crate::{Element, GridDefinitions, IntoElement, IntoProp};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
+use ferroui_base::media::Color;
 use ferroui_base::{BoxedValue, Ref, Thickness};
 use ferroui_controls::{Button, Control, Grid, StackPanel, TextBlock, TextBox};
 use std::cell::Cell;
@@ -36,6 +38,74 @@ fn setters_give_the_properties_their_values_with_the_conversions() {
     assert_eq!(text.horizontal_alignment(), HorizontalAlignment::Center);
     assert_eq!(text.name().as_deref(), Some("greeting"));
     assert!(text.classes().contains("title") && text.classes().contains("large"));
+    owner.dispose();
+}
+
+#[test]
+fn elements_that_name_a_color_share_its_brush() {
+    let (first, first_owner) = mount(text_block().text("a").foreground("#1E293B"));
+    let (second, second_owner) = mount(text_block().text("b").foreground("#1e293b"));
+    let (third, third_owner) = mount(text_block().text("c").foreground(Color::from_rgb(0x1E, 0x29, 0x3B)));
+    let (other, other_owner) = mount(text_block().text("d").foreground("#1E293C"));
+    let brush = |control: &Ref<Control>| {
+        control.cast::<TextBlock>().expect("a text block").foreground().expect("a brush")
+    };
+    let color = |control: &Ref<Control>| brush(control).as_solid_color_brush().map(|solid| solid.color());
+
+    // One color, written three ways, is one brush; another color is another.
+    assert!(Rc::ptr_eq(&brush(&first), &brush(&second)));
+    assert!(Rc::ptr_eq(&brush(&first), &brush(&third)));
+    assert!(!Rc::ptr_eq(&brush(&first), &brush(&other)));
+    assert_eq!(color(&first), Some(Color::from_rgb(0x1E, 0x29, 0x3B)));
+    // A name is a color too.
+    let (named, named_owner) = mount(text_block().text("e").foreground("Red"));
+    assert_eq!(color(&named), Some(Color::from_rgb(0xFF, 0, 0)));
+
+    for owner in [first_owner, second_owner, third_owner, other_owner, named_owner] {
+        owner.dispose();
+    }
+}
+
+/// Elements that give a property the same plain value hold the same box of it (section 9.100):
+/// a width, an alignment and a margin are plain; a text has a box of its own. More values than
+/// are kept change nothing but the boxes.
+#[test]
+fn elements_that_give_the_same_plain_value_share_its_box() {
+    use crate::element::PropValue;
+    let boxes = |element: Element| -> Vec<BoxedValue> {
+        let Element::Control(control) = element else { panic!("an element of a control") };
+        let values = control.props.iter().map(|entry| match &entry.value {
+            PropValue::Value(value) => value.clone(),
+            _ => panic!("a value"),
+        });
+        values.collect()
+    };
+    let tile = |text: &str| {
+        text_block()
+            .width(64.0)
+            .horizontal_alignment(HorizontalAlignment::Center)
+            .margin((4.0, 2.0, 0.0, 0.0))
+            .text(text.to_string())
+            .into_element()
+    };
+    let (first, second) = (boxes(tile("same")), boxes(tile("same")));
+    assert_eq!(first.len(), 4);
+    for index in 0..3 {
+        assert!(Rc::ptr_eq(&first[index], &second[index]), "the plain value {index} has one box");
+    }
+    assert!(!Rc::ptr_eq(&first[3], &second[3]), "a text has a box of its own");
+    assert_eq!(first[3].downcast_ref::<Option<String>>(), second[3].downcast_ref::<Option<String>>());
+    assert_eq!(first[0].downcast_ref::<f64>(), Some(&64.0));
+    assert_eq!(first[2].downcast_ref::<Thickness>(), Some(&Thickness::new(4.0, 2.0, 0.0, 0.0)));
+
+    // A hundred other widths pass through; each element still has its own value.
+    for width in 0..100 {
+        let made = boxes(text_block().width(f64::from(width)).into_element());
+        assert_eq!(made[0].downcast_ref::<f64>(), Some(&f64::from(width)));
+    }
+    let (control, owner) = mount(tile("mounted"));
+    let text = control.cast::<TextBlock>().expect("a text block");
+    assert_eq!((text.width(), text.margin()), (64.0, Thickness::new(4.0, 2.0, 0.0, 0.0)));
     owner.dispose();
 }
 
@@ -95,6 +165,65 @@ fn a_property_follows_a_signal_and_a_closure() {
 }
 
 #[test]
+fn a_closure_sets_its_property_typed_and_a_value_equal_to_the_one_before_changes_nothing() {
+    let owner = Owner::new_root();
+    let (version, control) = owner.with(|| {
+        let version = signal(0_u32);
+        let text = move || {
+            let version = version.get();
+            if version < 2 { String::from("same") } else { format!("at {version}") }
+        };
+        let control = text_block().text(text).foreground(move || {
+            let _ = version.get();
+            Color::from_rgb(1, 2, 3)
+        });
+        (version, control.into_element().mount())
+    });
+    let block = control.cast::<TextBlock>().unwrap();
+    let changes = Rc::new(Cell::new(0));
+    let counted = changes.clone();
+    let subscription = block.property_changed(move |e| {
+        if matches!(e.property().name(), "Text" | "Foreground") {
+            counted.set(counted.get() + 1);
+        }
+    });
+    let address = || block.foreground().map(|brush| Rc::as_ptr(&brush) as *const ());
+    let foreground = address();
+    version.set(1);
+    assert_eq!((changes.get(), block.text().as_deref()), (0, Some("same")));
+    // The brush of the property is the one it had: the equal one was not taken.
+    assert_eq!(address(), foreground);
+    version.set(2);
+    assert_eq!((changes.get(), block.text().as_deref()), (1, Some("at 2")));
+    subscription.dispose();
+    owner.dispose();
+}
+
+#[test]
+fn a_closure_run_outside_its_effect_and_a_closure_made_elsewhere_give_their_values() {
+    // Outside the effect of a property the closure of the builders returns its value boxed.
+    let PropValue::Dynamic(compute) = IntoProp::<f64, _>::into_prop(|| 5.0) else { panic!("a closure") };
+    assert_eq!(compute().downcast_ref::<f64>(), Some(&5.0));
+    assert_eq!(compute().downcast_ref::<f64>(), Some(&5.0));
+
+    // A closure that is not of the builders is set through the untyped setter.
+    let owner = Owner::new_root();
+    let (count, control) = owner.with(|| {
+        let count = signal(1);
+        let mut element = text_block().build();
+        let Element::Control(control) = &mut element else { panic!("a control element") };
+        let compute: Rc<dyn Fn() -> BoxedValue> = Rc::new(move || Rc::new(Some(format!("made {}", count.get()))));
+        control.props.push(PropEntry { property: TextBlock::text_property().as_property(), value: PropValue::Dynamic(compute) });
+        (count, element.mount())
+    });
+    let block = control.cast::<TextBlock>().unwrap();
+    assert_eq!(block.text().as_deref(), Some("made 1"));
+    count.set(2);
+    assert_eq!(block.text().as_deref(), Some("made 2"));
+    owner.dispose();
+}
+
+#[test]
 fn a_two_way_signal_follows_the_property_and_the_property_the_signal() {
     let owner = Owner::new_root();
     let (draft, control) = owner.with(|| {
@@ -149,6 +278,43 @@ fn grid_definitions_and_attached_properties() {
     assert_eq!(grid.column_definitions().count(), 2);
     let add = grid.children().to_vec().into_iter().nth(1).unwrap();
     assert_eq!(Grid::get_column(&add), 1);
+    owner.dispose();
+}
+
+#[test]
+fn definitions_of_the_same_count_and_kinds_take_their_sizes_in_place() {
+    use crate::{rerender, GridDefinitionsText};
+    use ferroui_controls::{ColumnDefinition, GridLength, GridUnitType};
+    let star = |value| GridLength::new(value, GridUnitType::Star);
+    let owner = Owner::new_root();
+    let (weight, pixels, control) = owner.with(|| {
+        let (weight, pixels) = (signal(1_u32), signal(false));
+        let control = rerender(move || {
+            let rows = if pixels.get() { "Auto,40" } else { "Auto,*" };
+            grid()
+                .row_definitions(rows)
+                .set(GridDefinitionsText::columns_property(), move || format!("{}*,Auto", weight.get()))
+        })
+        .into_element()
+        .mount();
+        (weight, pixels, control)
+    });
+    let grid = control.cast::<Grid>().unwrap();
+    let columns = grid.column_definitions();
+    let first: Ref<ColumnDefinition> = columns.snapshot()[0].clone();
+    assert_eq!(first.width(), star(1.0));
+
+    // The same count and kinds: the collection and its definitions stay and take the sizes.
+    weight.set(3);
+    assert!(grid.column_definitions() == columns);
+    assert!(grid.column_definitions().snapshot()[0].ptr_eq(&first));
+    assert_eq!(first.width(), star(3.0));
+
+    // Another kind: a new collection, as the setter of the grid gives it.
+    let rows = grid.row_definitions();
+    pixels.set(true);
+    assert!(grid.row_definitions() != rows);
+    assert_eq!(grid.row_definitions().snapshot()[1].height(), GridLength::new(40.0, GridUnitType::Pixel));
     owner.dispose();
 }
 

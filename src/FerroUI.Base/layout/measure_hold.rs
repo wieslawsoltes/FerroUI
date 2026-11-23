@@ -99,9 +99,45 @@ pub(crate) fn map_axis(range: (f64, f64), margin: f64, min: f64, max: f64, desir
     inside.then_some(mapped)
 }
 
+/// [`map_axis`], and where the desired size was cut to the available size, that available size
+/// alone: the axis depends on the available size and on nothing else, so at the same one it is
+/// what it was, whatever the other axis holds (section 9.86). `constraint` is what the
+/// `measure_override` received on this axis, which its range must contain.
+pub(crate) fn map_axis_or_its_size(
+    range: (f64, f64),
+    margin: f64,
+    min: f64,
+    max: f64,
+    desired: f64,
+    available: f64,
+    constraint: f64,
+) -> Option<(f64, f64)> {
+    map_axis(range, margin, min, max, desired, available).or_else(|| {
+        let (low, high) = range;
+        let inside = low <= constraint && (constraint < high || (high == f64::INFINITY && constraint == f64::INFINITY));
+        (desired > available && inside && available.is_finite()).then(|| (available, available.next_up()))
+    })
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn an_axis_cut_to_the_available_size_holds_at_that_size() {
+        // Not cut: the range of `map_axis`.
+        let any = f64::INFINITY;
+        assert_eq!(Some((110.0, 210.0)), map_axis_or_its_size((100.0, 200.0), 10.0, 0.0, any, 50.0, 150.0, 140.0));
+        // Cut: the available size alone.
+        assert_eq!(
+            Some((150.0, 150.0_f64.next_up())),
+            map_axis_or_its_size((100.0, 200.0), 10.0, 0.0, any, 160.0, 150.0, 140.0)
+        );
+        // Cut, and the range does not contain what was measured: nothing is known.
+        assert_eq!(None, map_axis_or_its_size((100.0, 120.0), 10.0, 0.0, any, 160.0, 150.0, 140.0));
+        // Not cut and outside the mapped range: nothing, as before.
+        assert_eq!(None, map_axis_or_its_size((100.0, 120.0), 10.0, 0.0, any, 50.0, 150.0, 140.0));
+    }
 
     #[test]
     fn the_constraint_range_maps_through_the_margin_and_the_desired_size() {

@@ -28,6 +28,7 @@ default = ["angle"]
 # targets the feature adds nothing). Without it the mode fails to initialise with a message that
 # says so, and the backend goes on to the next mode of the options: software rendering.
 angle = ["dep:mozangle"]
+native-d3d11 = []
 # The Skia backend with its Vulkan GPU, which draws in the rendering mode `Vulkan` (an application
 # names it in `Win32PlatformOptions::rendering_mode`; the default order, ANGLE then software, does
 # not change). Off by default: no published binary of Skia for Windows has Vulkan beside OpenGL,

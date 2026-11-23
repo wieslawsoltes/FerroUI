@@ -12,7 +12,7 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Phase / priority | 5 - desktop (Linux) / P1 |
 | Files | 88/88 (100.0%) |
 | Types | 183/291 (108 waived) (100.0%) |
-| Members | 3691/4897 (1206 waived) (100.0%) |
+| Members | 3690/4897 (1206 waived) (100.0%) |
 | Contracts (interfaces) | 8/8 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -34,7 +34,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 37/37, types 109/216 (107 waived), members 3251/4427 (1176 waived)
+### `(project root)` - files 37/37, types 109/216 (107 waived), members 3250/4427 (1176 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -52,7 +52,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `X11EglHelper.cs` | `x11_egl_helper.rs` | present | 1/1 | 3/3 |  |
 | `X11EnumExtensions.cs` | `x11_enum_extensions.rs` | present | 1/1 | 1/1 |  |
 | `X11Enums.cs` | `x11_enums.rs` | present | 5/5 | 78/78 |  |
-| `X11Exception.cs` | `x11_exception.rs` | present | 1/1 | 1/1 |  |
+| `X11Exception.cs` | `x11_exception.rs` | partial | 1/1 | 0/1 |  |
 | `X11FocusProxy.cs` | `x11_focus_proxy.rs` | present | 1/1 | 3/3 |  |
 | `X11FramebufferSurface.cs` | `x11_framebuffer_surface.rs` | present | 1/1 | 2/3 (1 waived) |  |
 | `X11Globals.cs` | `x11_globals.rs` | present | 2/2 | 15/15 |  |
@@ -75,6 +75,13 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `XLib.Helpers.cs` | `xlib.rs` | present | 1/1 | 3/3 | merged: the helpers of the partial class are functions of the same module as the calls |
 | `XLib.cs` | `xlib.rs` | present | 3/6 (3 waived) | 131/233 (102 waived) |  |
 | `XResources.cs` | `x_resources.rs` | present | 1/1 | 3/3 |  |
+
+<details><summary><code>X11Exception.cs</code> - 1 missing</summary>
+
+- `X11Exception` (class): 1 missing
+  - `X11Exception(string message)`
+
+</details>
 
 ### `Dispatching` - files 5/5, types 7/7, members 39/39
 

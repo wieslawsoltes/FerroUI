@@ -1451,6 +1451,62 @@ fn graphite_prewarms_pipelines_on_a_recorder_and_a_thread_of_their_own() {
     assert!(gr_context.create_surface(&info, &props).is_some());
 }
 
+/// The animation prewarm never submits its draws to the GPU or changes
+/// the live surface, and finishes on a worker rather than the render thread.
+#[test]
+fn animation_prewarm_compiles_off_thread_without_changing_the_live_surface() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let target = GraphiteTarget::new(&device);
+    target.draw(|context| context.clear(Colors::BLUE));
+    let prewarm = target.gr_context.begin_prewarm().unwrap();
+    let prewarm_context = prewarm
+        .gr_context
+        .as_any()
+        .downcast_ref::<crate::gpu::graphite::GraphitePrewarmContext>()
+        .unwrap();
+    let info = skia_safe::ImageInfo::new(
+        (512, 512),
+        ColorType::N32,
+        skia_safe::AlphaType::Premul,
+        None,
+    );
+    let surface = prewarm
+        .gr_context
+        .create_surface(&info, &skia_safe::SurfaceProps::default())
+        .unwrap();
+    {
+        let mut context = crate::DrawingContextImpl::new(
+            crate::drawing_context_impl::CreateInfo {
+                surface: Some(surface),
+                gr_context: Some(prewarm.gr_context.clone()),
+                ..crate::drawing_context_impl::CreateInfo::default()
+            },
+            Vec::new(),
+        );
+        crate::gpu::skia_gpu_render_target::prewarm_animation_pipelines(&mut context);
+        context.dispose();
+    }
+    let thread = prewarm_context.finish().unwrap();
+    assert_ne!(thread.thread().id(), std::thread::current().id());
+    assert!(
+        thread.join().unwrap(),
+        "the shadow and image draws made a recording"
+    );
+    assert!(prewarm_context.is_finished());
+    // A prewarm recording is dropped rather than submitted to the GPU.
+    let snapshot = target.snapshot();
+    let bitmap = snapshot.as_any().downcast_ref::<ImmutableBitmap>().unwrap();
+    for y in 0..64 {
+        for x in 0..64 {
+            assert_eq!(BLUE, pixel(bitmap, x, y));
+        }
+    }
+    target.dispose();
+}
+
 /// The render target of a window prewarms with the drawing context of its
 /// frames, offscreen: nothing is presented. With the option off it does not.
 #[test]
@@ -2305,4 +2361,123 @@ mod custom_effect_validation {
         // longer references the texture.
         unsafe { send(texture, sel(b"release\0")) };
     }
+}
+
+mod pipelined_frames;
+
+/// Not from the reference: the thread pool of Graphite's pipeline compiles
+/// (desktop-performance.md, section 9.81).
+#[test]
+fn the_pipeline_threads_follow_the_cores_and_the_environment() {
+    use super::skia_metal_gpu::pipeline_threads;
+    assert_eq!(pipeline_threads(None, 1), 1);
+    assert_eq!(pipeline_threads(None, 4), 4);
+    assert_eq!(pipeline_threads(None, 11), 8, "eight at most");
+    assert_eq!(pipeline_threads(Some("0"), 11), 0, "none when asked: Graphite compiles on the thread that snaps");
+    assert_eq!(pipeline_threads(Some(" 3 "), 11), 3);
+    assert_eq!(pipeline_threads(Some("many"), 11), 8, "what is no number asks for nothing");
+    assert_eq!(pipeline_threads(Some("-2"), 11), 0);
+}
+
+/// The contexts of this file are made with the pool, so every test here that draws and reads
+/// its pixels back draws with pipelines compiled on it.
+#[test]
+fn the_process_has_a_pipeline_pool_unless_the_environment_asks_for_none() {
+    use super::skia_metal_gpu::pipeline_executor_for_tests;
+    assert!(pipeline_executor_for_tests(), "the process has a pool unless the environment asks for none");
+}
+
+/// The table of shader libraries this crate carries is made of the texts Skia writes today: the
+/// pipelines of the record of ordinary drawing find theirs in it. When they do not, the table
+/// was made with another Skia and is made again (`scripts/perf/metal-libraries.py`; with
+/// `FERROUI_METAL_LIBRARY_RECORD=<folder>` this test, run alone, writes the texts of the record).
+#[test]
+fn the_libraries_of_ordinary_drawing_are_found_by_the_pipelines_of_the_record() {
+    use crate::gpu::graphite::pipeline_record::{ordinary_record, precompile};
+    use crate::metal_libraries::{counts, found_keys, ordinary_table, parse};
+    use skia_safe::gpu::graphite::mtl::{context_factory, BackendContext};
+    use std::time::{Duration, Instant};
+
+    /// The shader texts the pipelines of the record compile (what a recording run of this test
+    /// writes).
+    const TEXTS_OF_THE_RECORD: usize = 35;
+
+    let (Some(table), Some(record)) = (ordinary_table(), ordinary_record()) else { return };
+    let recording = std::env::var_os("FERROUI_METAL_LIBRARY_RECORD").is_some();
+    let libraries: Vec<u64> = parse(table).into_iter().map(|(key, _)| key).collect();
+    assert!(libraries.len() >= TEXTS_OF_THE_RECORD, "{} libraries", libraries.len());
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device");
+        return;
+    };
+    assert!(super::shader_libraries::install(device.device as _), "the table is in front of the device");
+    // SAFETY: the device and the queue are valid for the life of `device`, which outlives the
+    // context.
+    let backend_context = unsafe { BackendContext::new(device.device as _, device.queue as _) };
+    let options = super::skia_metal_gpu::ordered_recordings_options();
+    let mut context = context_factory::make_metal(&backend_context, &options).expect("a context");
+    let thread = precompile(&mut context, vec![std::borrow::Cow::Borrowed(record)]).expect("a thread");
+    assert!(thread.join().expect("the thread ends") > 0);
+
+    // The pipelines are made on the pool of the context after the thread has handed them over.
+    let deadline = Instant::now() + Duration::from_secs(60);
+    let mut quiet_since = (counts(), Instant::now());
+    loop {
+        let found = found_keys().lock().expect("the keys").clone();
+        let found = libraries.iter().filter(|key| found.contains(key)).count();
+        let now = counts();
+        if now != quiet_since.0 {
+            quiet_since = (now, Instant::now());
+        }
+        // Recording: until the device has been given no text for a while.
+        let done =
+            if recording { quiet_since.1.elapsed() > Duration::from_secs(3) } else { found >= TEXTS_OF_THE_RECORD };
+        if done {
+            break;
+        }
+        assert!(
+            Instant::now() < deadline,
+            "the pipelines of the record found {found} of their {TEXTS_OF_THE_RECORD} libraries in the table"
+        );
+        std::thread::sleep(Duration::from_millis(20));
+    }
+    drop(context);
+}
+
+/// The record of ordinary drawing this crate carries is a record, and where it is used (macOS on
+/// Apple silicon) the device takes every key of it: a key Skia refused would be a record made
+/// with another Skia or on another kind of device (desktop-performance.md, section 9.83).
+#[test]
+fn the_record_of_ordinary_drawing_is_taken_whole_where_it_is_used() {
+    use crate::gpu::graphite::pipeline_record::{keys, ordinary_record, precompile};
+    use skia_safe::gpu::graphite::mtl::{context_factory, BackendContext};
+
+    let Some(record) = ordinary_record() else { return };
+    let count = keys(record).expect("a record").len();
+    assert!(count > 0);
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device");
+        return;
+    };
+    // SAFETY: the device and the queue are valid for the life of `device`, which outlives the
+    // context.
+    let backend_context = unsafe { BackendContext::new(device.device as _, device.queue as _) };
+    // The options of the contexts of the windows.
+    let options = super::skia_metal_gpu::ordered_recordings_options();
+    let mut context = context_factory::make_metal(&backend_context, &options).expect("a context");
+    let refused: Vec<usize> = keys(record)
+        .expect("a record")
+        .iter()
+        .enumerate()
+        .filter(|(_, key)| {
+            let mut one = b"FPR1".to_vec();
+            one.extend((key.len() as u32).to_le_bytes());
+            one.extend(key.iter());
+            let thread = precompile(&mut context, vec![std::borrow::Cow::Owned(one)]).expect("a thread");
+            thread.join().expect("the thread ends") == 0
+        })
+        .map(|(index, _)| index)
+        .collect();
+    assert_eq!(refused, Vec::<usize>::new(), "keys of the record of {count} the device refused");
+    drop(context);
 }

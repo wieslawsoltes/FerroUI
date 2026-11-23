@@ -2,7 +2,8 @@ import { FerroExports } from "./ferroExports";
 
 // The Window Management API (getScreenDetails) and the "change" event of a screen, which the
 // compiler's library does not describe.
-type EventScreen = Screen & EventTarget;
+type EventScreen = Screen & Partial<Pick<EventTarget, "addEventListener" | "removeEventListener">>;
+type ScreenWindow = Window & { getScreenDetails?: () => Promise<ScreenDetails> };
 
 interface ScreenDetailed extends Screen, EventTarget {
     readonly left: number;
@@ -35,17 +36,24 @@ export class ScreenHelper {
         FerroExports.DomHelper?.ScreensChanged();
     }
 
-    public static async checkPermissions(globalThis: Window): Promise<void> {
-        // If previous session already granted "window-management" permissions, just re-request details, before they are used.
-        const { state } = await globalThis.navigator.permissions.query({ name: "window-management" } as any);
-        if (state === "granted") {
-            await this.requestDetailedScreens(globalThis);
+    public static async checkPermissions(globalThis: ScreenWindow): Promise<void> {
+        if (!globalThis.getScreenDetails) {
+            return;
+        }
+        try {
+            // Restore details automatically if a previous session already granted permission.
+            const permission = await globalThis.navigator.permissions?.query({ name: "window-management" as PermissionName });
+            if (permission?.state === "granted") {
+                await this.requestDetailedScreens(globalThis);
+            }
+        } catch {
+            // The current screen remains available if the permission check or restoration fails.
         }
     }
 
     public static subscribeOnChanged(globalThis: Window) {
         if (this.detailedScreens) {
-            (globalThis.screen as EventScreen).removeEventListener("change", this.raiseOnChanged);
+            (globalThis.screen as EventScreen).removeEventListener?.("change", this.raiseOnChanged);
             this.detailedScreens.addEventListener("screenschange", this.raiseOnChanged);
 
             // When any screen was added, we re-subscribe on all of them to keep it simpler.
@@ -54,7 +62,7 @@ export class ScreenHelper {
                 screen.addEventListener("change", this.raiseOnChanged);
             }
         } else {
-            (globalThis.screen as EventScreen).addEventListener("change", this.raiseOnChanged);
+            (globalThis.screen as EventScreen).addEventListener?.("change", this.raiseOnChanged);
         }
     }
 
@@ -67,12 +75,12 @@ export class ScreenHelper {
         }
     }
 
-    public static async requestDetailedScreens(globalThis: Window): Promise<boolean> {
+    public static async requestDetailedScreens(globalThis: ScreenWindow): Promise<boolean> {
         if (this.detailedScreens) {
             return true;
         }
-        if ("getScreenDetails" in globalThis) {
-            this.detailedScreens = await (globalThis as any).getScreenDetails() as ScreenDetails;
+        if (globalThis.getScreenDetails) {
+            this.detailedScreens = await globalThis.getScreenDetails();
             if (this.detailedScreens) {
                 this.subscribeOnChanged(globalThis);
                 globalThis.setTimeout(this.raiseOnChanged, 1);
@@ -141,7 +149,7 @@ export class ScreenHelper {
 
     /* eslint-disable indent */
     static getCurrentOrientation(screen: BrowserScreen): ScreenOrientation {
-        switch (screen.orientation.type) {
+        switch (screen.orientation?.type) {
             case "landscape-primary":
                 return ScreenOrientation.Landscape;
             case "landscape-secondary":
@@ -150,6 +158,8 @@ export class ScreenHelper {
                 return ScreenOrientation.Portrait;
             case "portrait-secondary":
                 return ScreenOrientation.PortraitFlipped;
+            default:
+                return ScreenOrientation.None;
         }
     }
 }

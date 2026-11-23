@@ -255,6 +255,68 @@ fn visual_tree_attachment_and_effective_visibility() {
 }
 
 #[test]
+fn only_an_element_with_a_handler_keeps_the_events_few_elements_have_one_for() {
+    fn bump(counts: &Rc<Cell<[u32; 6]>>, index: usize) {
+        let mut all = counts.get();
+        all[index] += 1;
+        counts.set(all);
+    }
+    // Into the trees, a data context, hidden and shown, and out of the trees.
+    fn life(root: &Ref<TestRoot>, leaves: &[&Ref<Leaf>]) {
+        for leaf in leaves {
+            add_child(root, leaf);
+        }
+        let source = TestSource::new(root.clone(), 1.0);
+        root.set_presentation_source_for_root_visual(Some(source));
+        let context: BoxedValue = Rc::new("context".to_string());
+        root.set_data_context(Some(context));
+        root.set_is_visible(false);
+        root.set_is_visible(true);
+        root.set_presentation_source_for_root_visual(None);
+        for leaf in leaves {
+            root.visual_children().remove(&(*leaf).clone().upcast());
+            root.logical_children().remove(&(*leaf).clone().upcast());
+        }
+        root.set_data_context(None);
+    }
+
+    let _dispatcher = crate::threading::Dispatcher::unit_test_scope();
+    let root = TestRoot::new();
+    let heard = Leaf::new(10.0, 10.0);
+    let quiet = Leaf::new(10.0, 10.0);
+    assert!(!heard.has_rare_events() && !heard.has_rare_visual_events());
+
+    let counts = Rc::new(Cell::new([0u32; 6]));
+    let c = counts.clone();
+    let attached_logical = heard.attached_to_logical_tree(move |_| bump(&c, 0));
+    assert!(heard.has_rare_events() && !heard.has_rare_visual_events());
+    let c = counts.clone();
+    let detached_logical = heard.detached_from_logical_tree(move |_| bump(&c, 1));
+    let c = counts.clone();
+    let data_context = heard.data_context_changed(move || bump(&c, 2));
+    let c = counts.clone();
+    let attached_visual = heard.attached_to_visual_tree(move |_| bump(&c, 3));
+    assert!(heard.has_rare_visual_events());
+    let c = counts.clone();
+    let detached_visual = heard.detached_from_visual_tree(move |_| bump(&c, 4));
+    let c = counts.clone();
+    let visible = heard.is_effectively_visible_changed(move || bump(&c, 5));
+
+    // The same life for both: the one with handlers hears all of it, the other one makes nothing.
+    life(&root, &[&heard, &quiet]);
+    let after = counts.get();
+    assert_eq!([1, 1, 1, 1], [after[0], after[1], after[3], after[4]]);
+    assert!(after[2] >= 1 && after[5] >= 2, "{after:?}");
+    assert!(!quiet.has_rare_events() && !quiet.has_rare_visual_events());
+
+    // A handler that was taken away hears nothing.
+    drop((attached_logical, detached_logical, data_context));
+    drop((attached_visual, detached_visual, visible));
+    life(&root, &[&heard, &quiet]);
+    assert_eq!(after, counts.get());
+}
+
+#[test]
 #[should_panic(expected = "already has a visual parent")]
 fn adding_visual_with_parent_panics() {
     let a = TestRoot::new();

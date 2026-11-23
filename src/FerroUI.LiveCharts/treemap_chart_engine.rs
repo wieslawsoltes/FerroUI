@@ -4,9 +4,13 @@
 //! the padding inset of every tile, hover areas and data labels on the leaves. Pure calculation
 //! produces a retained scene that the native controls draw like the other chart scenes.
 
+use crate::labelers::{node_tooltip_text, NodeTooltipFormatter};
 use crate::paint::{representative_color, snapshot_brush};
 use crate::scene::*;
-use crate::series::{Series, SeriesKind, DATA_LABELS_COLOR, DATA_LABELS_PADDING};
+use crate::label_lines::LabelLines;
+use crate::series::{
+    Series, SeriesKind, DATA_LABELS_COLOR, DATA_LABELS_MAX_WIDTH, DATA_LABELS_PADDING,
+};
 use ferroui_base::{media::Color, Point, Rect, Size};
 
 /// A node of a treemap (`Defaults/TreemapNode`). A leaf carries its weight in `value`; an internal
@@ -72,6 +76,19 @@ impl TreemapSeries {
 pub struct TreemapOptions {
     /// An explicit draw margin; `None` takes the whole control.
     pub draw_margin: Option<Rect>,
+}
+
+/// The properties of a treemap series that [`TreemapSeries`] does not carry, in the order of the
+/// series ([`TreemapChartEngine::measure_with_series_options`]). It is `non_exhaustive`: start
+/// from `TreemapSeriesOptions::default()` and set the fields.
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct TreemapSeriesOptions {
+    /// `DataLabelsMaxWidth`: the width a label breaks its text at, its padding included; `None`
+    /// is the source's [`DATA_LABELS_MAX_WIDTH`].
+    pub data_labels_max_width: Option<f64>,
+    /// `ToolTipLabelFormatter`: the tooltip text of a leaf; `None` is `<label>: <value>`.
+    pub tool_tip_label_formatter: Option<NodeTooltipFormatter>,
 }
 
 /// One tile of a laid out series.
@@ -249,7 +266,19 @@ impl TreemapChartEngine {
         size: Size,
         series: &[TreemapSeries],
         options: &TreemapOptions,
+        measure_text: impl FnMut(&str, f64) -> Size,
+    ) -> Result<Scene, ChartError> {
+        Self::measure_with_series_options(size, series, options, measure_text, &[])
+    }
+
+    /// [`Self::measure_with_labels`] with the options of the series, in their order; a series
+    /// without an entry takes the defaults.
+    pub fn measure_with_series_options(
+        size: Size,
+        series: &[TreemapSeries],
+        options: &TreemapOptions,
         mut measure_text: impl FnMut(&str, f64) -> Size,
+        series_options: &[TreemapSeriesOptions],
     ) -> Result<Scene, ChartError> {
         validate_size(size)?;
         let mut plot = match options.draw_margin {
@@ -302,7 +331,14 @@ impl TreemapChartEngine {
             });
             let fill = fill_style(paint, si);
             let stroke = stroke_style(paint);
-            let label_color = paint.data_labels_color.unwrap_or(DATA_LABELS_COLOR);
+            let label_style = PaintStyle::fill(paint.data_labels_color.unwrap_or(DATA_LABELS_COLOR));
+            let labels_max_width = series_options
+                .get(si)
+                .and_then(|o| o.data_labels_max_width)
+                .unwrap_or(DATA_LABELS_MAX_WIDTH);
+            let tool_tip_label_formatter = series_options
+                .get(si)
+                .and_then(|o| o.tool_tip_label_formatter.as_ref());
             // The z-indexes of the source paints: fills, then strokes, then the labels of every
             // series above all tiles.
             let z = si as f64;
@@ -341,32 +377,42 @@ impl TreemapChartEngine {
                     shape: HitShape::Rectangle(tile.bounds),
                     center,
                     value: tile.value,
-                    label: tooltip_text(&tile.name, tile.value),
+                    label: node_tooltip_text(
+                        tool_tip_label_formatter,
+                        &tile.name,
+                        tile.value,
+                        tile.node_index,
+                    ),
                 });
                 if !paint.data_labels || tile.name.is_empty() {
                     continue;
                 }
-                // A label that does not fit its tile (with the label padding) is culled.
-                let text = text_size(&mut measure_text, &tile.name, paint.data_labels_size);
+                // The label breaks at `DataLabelsMaxWidth` less the label padding; a label that
+                // does not fit its tile (with the label padding) is culled.
+                let mut measure = |text: &str, size: f64| text_size(&mut measure_text, text, size);
+                let lines = LabelLines::wrap(
+                    &mut measure,
+                    &tile.name,
+                    paint.data_labels_size,
+                    labels_max_width - DATA_LABELS_PADDING.0 * 2.0,
+                );
+                let text = lines.size;
                 if text.width + DATA_LABELS_PADDING.0 * 2.0 > tile.bounds.width
                     || text.height + DATA_LABELS_PADDING.1 * 2.0 > tile.bounds.height
                 {
                     continue;
                 }
-                layers.push((
-                    1000.0 + z + 0.3,
-                    Primitive::new(
-                        Geometry::Text {
-                            origin: Point::new(center.x, center.y - text.height * 0.5),
-                            text: tile.name.clone(),
-                            size: paint.data_labels_size,
-                            rotation: 0.0,
-                            anchor: TextAnchor::Center,
-                        },
-                        PaintStyle::fill(label_color),
-                    )
-                    .identified(id),
-                ));
+                let origin = Point::new(center.x, center.y - text.height * 0.5);
+                for primitive in lines.texts(
+                    origin,
+                    TextAnchor::Center,
+                    0.0,
+                    paint.data_labels_size,
+                    &label_style,
+                    id,
+                ) {
+                    layers.push((1000.0 + z + 0.3, primitive));
+                }
             }
         }
         layers.sort_by(|a, b| a.0.total_cmp(&b.0));
@@ -374,16 +420,6 @@ impl TreemapChartEngine {
             .primitives
             .extend(layers.into_iter().map(|(_, primitive)| primitive));
         Ok(scene)
-    }
-}
-
-/// The default tooltip text of a node (`GetPrimaryToolTipText`): `<label>: <value>`, or the value
-/// alone when the node has no label.
-pub(crate) fn tooltip_text(label: &str, value: f64) -> String {
-    if label.is_empty() {
-        format!("{value}")
-    } else {
-        format!("{label}: {value}")
     }
 }
 
@@ -860,5 +896,93 @@ mod tests {
             .primitives
             .iter()
             .any(|p| matches!(p.geometry, Geometry::Text { .. })));
+    }
+
+    /// `DataLabelsMaxWidth` of a treemap series: the label of a leaf breaks into lines at the width
+    /// less the label padding (170 by default), centred on the tile as a block whose lines start
+    /// at its left; the tile culls the label by the size of its lines, so a label that fits only
+    /// when broken is drawn, and the same label unbroken is culled.
+    #[test]
+    fn data_labels_break_at_their_max_width_and_cull_by_their_lines() {
+        let mut s = series(
+            vec![TreemapNode::new(10.0, "United States of America")],
+            0.0,
+        );
+        s.series.data_labels = true;
+        let metrics =
+            |text: &str, size: f64| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2);
+        let measure = |s: &TreemapSeries, max_width: Option<f64>| {
+            let mut options = TreemapSeriesOptions::default();
+            options.data_labels_max_width = max_width;
+            let scene = TreemapChartEngine::measure_with_series_options(
+                Size::new(150.0, 300.0),
+                std::slice::from_ref(s),
+                &TreemapOptions::default(),
+                metrics,
+                &[options],
+            )
+            .unwrap();
+            scene
+                .primitives
+                .iter()
+                .filter_map(|p| match &p.geometry {
+                    Geometry::Text {
+                        origin,
+                        text,
+                        anchor,
+                        ..
+                    } => Some((*origin, text.clone(), *anchor)),
+                    _ => None,
+                })
+                .collect::<Vec<_>>()
+        };
+        let lines = measure(&s, None);
+        assert_eq!(lines.len(), 2);
+        assert_eq!(lines[0].1, "United States of ");
+        assert_eq!(lines[1].1, "America");
+        // The block of 17 characters is centred on the tile of 150 by 300.
+        let block = 17.0 * 12.0 * 0.6;
+        for (i, (origin, _, anchor)) in lines.iter().enumerate() {
+            assert_eq!(*anchor, TextAnchor::Start);
+            assert!((origin.x - (75.0 - block * 0.5)).abs() < 1e-9);
+            assert!((origin.y - (150.0 - 14.4 + i as f64 * 14.4)).abs() < 1e-9);
+        }
+        assert!(
+            measure(&s, Some(400.0)).is_empty(),
+            "one line does not fit the tile"
+        );
+    }
+
+    /// `GetPrimaryToolTipText` of `CoreTreemapSeries`: `<label>: <value>` for a leaf, the value
+    /// alone without a label, and the text of `ToolTipLabelFormatter` when the series has one,
+    /// which reads the label, the value and the preorder index of the leaf.
+    #[test]
+    fn tooltip_text_is_the_label_and_value_or_the_formatter_of_the_series() {
+        let s = series(
+            vec![TreemapNode::with_children(
+                "Root",
+                vec![TreemapNode::new(3.0, "A"), TreemapNode::new(2.0, "")],
+            )],
+            0.0,
+        );
+        let labels = |options: TreemapSeriesOptions| {
+            let scene = TreemapChartEngine::measure_with_series_options(
+                Size::new(200.0, 200.0),
+                std::slice::from_ref(&s),
+                &TreemapOptions::default(),
+                |_, _| Size::new(10.0, 10.0),
+                &[options],
+            )
+            .unwrap();
+            let mut labels: Vec<_> = scene.hits.iter().map(|h| h.label.clone()).collect();
+            labels.sort();
+            labels
+        };
+        assert_eq!(labels(TreemapSeriesOptions::default()), ["2", "A: 3"]);
+        let mut options = TreemapSeriesOptions::default();
+        options.tool_tip_label_formatter = Some(NodeTooltipFormatter::new(|point| {
+            format!("{}#{} = {}", point.label, point.index, point.value)
+        }));
+        assert_eq!(labels(options), ["#2 = 2", "A#1 = 3"]);
     }
 }

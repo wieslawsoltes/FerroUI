@@ -1,5 +1,6 @@
 //! Port of `CompilerExtensions/Transformers/FerroBindingExtensionTransformer.cs`.
 
+use super::FerroTransformErrors;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -20,29 +21,29 @@ use super::FERRO_XML_NAMESPACE;
 /// `XamlError::Transform` tagged with the class name, which is what
 /// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` (code `FRN2100`) and
 /// [`Self::is`] look at.
+#[deprecated(
+    since = "0.5.1",
+    note = "use `XamlError::bindings_transform` (`FerroTransformErrors`) and `FerroTransformErrorKind::Bindings`"
+)]
 pub struct XamlBindingsTransformException;
 
+#[allow(deprecated)]
 impl XamlBindingsTransformException {
-    pub const TYPE_NAME: &'static str = "XamlBindingsTransformException";
+    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::Bindings.type_name();
 
-    /// `new XamlBindingsTransformException(message, lineInfo, innerException)`.
+    /// `new XamlBindingsTransformException(message, lineInfo, innerException)`, now
+    /// [`XamlError::bindings_transform`](super::FerroTransformErrors::bindings_transform).
     pub fn new(
         message: impl Into<String>,
         line_info: &dyn IXamlLineInfo,
         inner_exception: Option<XamlError>,
     ) -> XamlError {
-        let error = match inner_exception {
-            Some(inner) => {
-                XamlError::transform_exception_with_inner(message, Some(line_info), inner)
-            }
-            None => XamlError::transform_exception(message, Some(line_info)),
-        };
-        error.with_derived_type_name(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::Bindings.error(message, line_info, inner_exception)
     }
 
     /// `e is XamlBindingsTransformException`.
     pub fn is(error: &XamlError) -> bool {
-        error.is_derived_type(Self::TYPE_NAME)
+        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::Bindings)
     }
 }
 
@@ -101,7 +102,7 @@ impl IXamlAstTransformer for FerroBindingExtensionTransformer {
                         .cast::<XamlAstTextNode>()
                         .and_then(|text| try_parse_boolean(&text.text()));
                     let Some(compile_bindings) = compile_bindings else {
-                        return Err(XamlBindingsTransformException::new(
+                        return Err(XamlError::bindings_transform(
                             "The value of x:CompileBindings must be a literal boolean value.",
                             &*values[0],
                             None,

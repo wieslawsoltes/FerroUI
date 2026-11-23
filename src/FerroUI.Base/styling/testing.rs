@@ -30,8 +30,8 @@ pub fn selector(node: impl SelectorNode) -> Selector {
 }
 
 /// `target.GetValueStore().BeginStyling()`: starts a styling pass over the
-/// values of an object; the effective values are reevaluated once, when the
-/// outermost pass ends.
+/// values of an object; pending reevaluations are flushed when the outermost
+/// pass ends.
 pub fn begin_styling(target: &FerroObject) {
     target.values().begin_styling();
 }

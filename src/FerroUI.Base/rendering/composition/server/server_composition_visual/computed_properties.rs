@@ -73,6 +73,11 @@ impl ServerCompositionVisual {
         }
 
         let mut parent = self.parent();
+        // The table of the parent's children says which of them the update pass comes to (not
+        // from upstream; section 9.48): this one, and every visual above that gets a flag here.
+        if let Some(p) = &parent {
+            p.child_is_dirty(self);
+        }
         let set_is_dirty_for_render_in_subgraph = additional_dirty_region || dirty_for_render;
         while let Some(p) = parent {
             if !((needs_bounding_box_update && !p.needs_bounding_box_update.get())
@@ -84,6 +89,9 @@ impl ServerCompositionVisual {
             p.is_dirty_for_render_in_subgraph
                 .set(p.is_dirty_for_render_in_subgraph.get() | set_is_dirty_for_render_in_subgraph);
             parent = p.parent();
+            if let Some(above) = &parent {
+                above.child_is_dirty(&p);
+            }
         }
 
         self.needs_bounding_box_update.set(self.needs_bounding_box_update.get() | needs_bounding_box_update);
@@ -110,6 +118,14 @@ impl ServerCompositionVisual {
                 .set(self.compute_own_content_bounds().and_then(LtrbRect::null_if_zero_size));
             set_dirty_for_render = true;
             set_dirty_bounds = true;
+        } else if self.draw_items_dirty() {
+            // The drawing items changed and nothing else of the content: the bounds follow
+            // them, and the visual is not drawn again for it (section 9.42).
+            let bounds = self.compute_own_content_bounds().and_then(LtrbRect::null_if_zero_size);
+            if bounds != self.own_content_bounds.get() {
+                self.own_content_bounds.set(bounds);
+                set_dirty_bounds = true;
+            }
         }
 
         if self.clip_size_dirty.get() {
@@ -146,7 +162,7 @@ impl ServerCompositionVisual {
             // With the WinUI members (the relative adjustments, the rotation
             // axis, pixel snapping) applied; a visual with a
             // `ParentForTransform` is completed by the adorner pass.
-            self.own_transform.set(self.compute_own_transform_from_properties(self.transform_matrix()));
+            self.set_own_transform(self.compute_own_transform_from_properties(self.transform_matrix()));
             if self.parent_for_transform().is_some() {
                 self.adorner_helper_enqueue_for_adorner_update();
             }

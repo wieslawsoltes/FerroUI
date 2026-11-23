@@ -101,7 +101,7 @@ ferroui-controls-treedatagrid = { workspace = true, optional = true }
 ferroui-treedatagrid-core = { workspace = true, optional = true }
 ferroui-dialogs = { workspace = true, optional = true }
 ferroui-diagnostics = { workspace = true, optional = true }
-ferroui-designer = { workspace = true, optional = true }
+ferroui-designer = { workspace = true, optional = true, features = ["collaboration-client"] }
 ferroui-devtools = { workspace = true, optional = true, features = ["server"] }
 ferroui-system = { workspace = true, optional = true }
 ferroui-reactive = { workspace = true, optional = true }

@@ -192,9 +192,16 @@ fn the_badge_shows_a_number_a_glyph_or_an_image() {
     picture.set_badge_glyph("\u{E765}");
     assert!(has(&picture, ":badge"));
     assert_eq!("\u{E765}", glyph.glyph());
+    picture.set_badge_number(120);
+    assert_eq!(Some("99+"), number.text().as_deref());
+    assert!(glyph.glyph().is_empty());
+    picture.set_badge_number(0);
+    assert_eq!("\u{E765}", glyph.glyph());
+    assert_eq!(Some(""), number.text().as_deref());
     // An image wins over the number and the glyph.
     picture.set_badge_image_source(Some(image()));
     assert!(has(&picture, ":badgeimage") && !has(&picture, ":badge"));
+    assert!(glyph.glyph().is_empty());
     let ellipse = part::<Ellipse>(&picture, "BadgingEllipse");
     assert!(ellipse.fill().is_some());
 }
@@ -259,6 +266,19 @@ fn the_picture_keeps_itself_a_circle_and_scales_its_text() {
     assert_eq!(30.0, ellipse.width());
     let number = part::<TextBlock>(&picture, "BadgeNumberTextBlock");
     assert!((number.font_size() - 18.0).abs() < 1e-9);
+}
+
+#[test]
+fn the_picture_does_not_clip_its_badge() {
+    // The badge of WinUI's template is outside the picture by its margin
+    // (PersonPictureBadgeGridMargin), and a control of WinUI does not clip to its bounds.
+    let _app = start();
+    let picture = picture();
+    let _window = show(&picture);
+    assert!(!picture.clip_to_bounds());
+    // A style or a local value still clips it.
+    picture.set_clip_to_bounds(true);
+    assert!(picture.clip_to_bounds());
 }
 
 #[test]

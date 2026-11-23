@@ -26,10 +26,10 @@ use crate::element::{Attach, ControlElement, Handler, Element, ElementClass, Int
 use crate::reactive::{Memo, Signal, TwoWay};
 use ferroui_base::data::BindingBase;
 use ferroui_base::interactivity::{IRoutedEventArgs, Interactive, RoutedEvent};
-use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, Upcast};
+use ferroui_base::{AttachedProperty, BoxedValue, DirectProperty, FerroObject, FerroProperty, ObjectType, PropertyValue, Ref, StyledProperty, StyledValue, Upcast};
 use ferroui_controls::Control;
-use std::any::Any;
-use std::cell::RefCell;
+use std::any::{Any, TypeId};
+use std::cell::{Cell, RefCell};
 use std::marker::PhantomData;
 use std::rc::Rc;
 
@@ -60,19 +60,19 @@ impl<T: ViewClass> Builder for T {
 /// element take.
 pub trait TypedProperty: 'static {
     /// The type of the value of the property.
-    type Value: PropertyValue;
+    type Value: StyledValue;
     /// The property, untyped.
     fn untyped(&'static self) -> &'static FerroProperty;
 }
 
-impl<T: PropertyValue> TypedProperty for StyledProperty<T> {
+impl<T: StyledValue> TypedProperty for StyledProperty<T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         self.as_property()
     }
 }
 
-impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
+impl<T: StyledValue> TypedProperty for AttachedProperty<T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         let styled: &'static StyledProperty<T> = self;
@@ -80,7 +80,7 @@ impl<T: PropertyValue> TypedProperty for AttachedProperty<T> {
     }
 }
 
-impl<O: ObjectType, T: PropertyValue> TypedProperty for DirectProperty<O, T> {
+impl<O: ObjectType, T: StyledValue> TypedProperty for DirectProperty<O, T> {
     type Value = T;
     fn untyped(&'static self) -> &'static FerroProperty {
         let base: &'static ferroui_base::DirectPropertyBase<T> = self;
@@ -143,42 +143,202 @@ pub trait IntoProp<T, M> {
     fn into_prop(self) -> PropValue;
 }
 
-fn boxed<T: PropertyValue>(value: T) -> BoxedValue {
-    Rc::new(value)
+/// The values of one type whose boxes are kept, by the last use.
+const KEPT_BOXES: usize = 8;
+
+/// The largest value whose box is kept, in bytes.
+const KEPT_BOX_SIZE: usize = 32;
+
+/// The identifier of a type is a hash already.
+#[derive(Default)]
+struct TypeIdHasher(u64);
+
+impl std::hash::Hasher for TypeIdHasher {
+    fn finish(&self) -> u64 {
+        self.0
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for byte in bytes {
+            self.0 = self.0.rotate_left(8) ^ u64::from(*byte);
+        }
+    }
+
+    fn write_u64(&mut self, value: u64) {
+        self.0 ^= value;
+    }
 }
 
-impl<T: PropertyValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
+type KeptBoxes = std::collections::HashMap<TypeId, Box<dyn Any>, std::hash::BuildHasherDefault<TypeIdHasher>>;
+
+ferroui_base::ferro_thread_local! {
+    /// For a type of plain values, the boxes of the values used last (`Vec<Rc<T>>`).
+    static BOXES: RefCell<KeptBoxes> = RefCell::new(KeptBoxes::default());
+}
+
+/// The box of a value of a property.
+///
+/// A box cannot change and is compared by its value, so elements that give a property the same
+/// value can hold the same box, and an application gives the elements of a list or a wall the
+/// same few values (a width, an alignment, a margin, a font size): the boxes of the last
+/// [`KEPT_BOXES`] values of a type are kept on the thread, and a value among them takes its box
+/// from there, where every value of every element asked the allocator for one
+/// (docs/porting/desktop-performance.md, section 9.100). Only for plain values of up to
+/// [`KEPT_BOX_SIZE`] bytes: a value that owns something (a text, a brush) is as costly to
+/// compare as to box, and usually its own.
+fn boxed<T: PropertyValue>(value: T) -> BoxedValue {
+    if std::mem::needs_drop::<T>() || std::mem::size_of::<T>() > KEPT_BOX_SIZE {
+        return Rc::new(value);
+    }
+    // The table is not there any more while the thread is torn down: the value gets a box of
+    // its own then.
+    let mut value = Some(value);
+    let shared = BOXES.try_with(|boxes| {
+        let Some(value) = value.take() else { unreachable!("the value is taken once") };
+        let mut boxes = boxes.borrow_mut();
+        let kept = boxes.entry(TypeId::of::<T>());
+        let kept = kept.or_insert_with(|| Box::new(Vec::<Rc<T>>::with_capacity(KEPT_BOXES)));
+        let Some(kept) = kept.downcast_mut::<Vec<Rc<T>>>() else { unreachable!("the boxes are of their type") };
+        if let Some(index) = kept.iter().position(|kept| **kept == value) {
+            // Towards the front, so that the values in use stay.
+            if index > 0 {
+                kept.swap(index, index - 1);
+            }
+            return kept[index.saturating_sub(1)].clone() as BoxedValue;
+        }
+        // A new value takes the place of the one at the end, where the next new value finds
+        // it: values that come once pass through one place and leave the others alone.
+        let made = Rc::new(value);
+        if kept.len() == KEPT_BOXES {
+            kept.pop();
+        }
+        kept.push(made.clone());
+        made as BoxedValue
+    });
+    match (shared, value) {
+        (Ok(shared), _) => shared,
+        (Err(_), Some(value)) => Rc::new(value),
+        (Err(_), None) => unreachable!("the value is taken only where the table is"),
+    }
+}
+
+/// The box of the value of a reactive property, kept between the runs of its effect
+/// (docs/porting/desktop-performance.md, section 9.94). The property takes a copy of the value
+/// and the effect lets the box go, so a run can write its value into the box of the run before,
+/// where every run asked the allocator for a box and gave it back. A property that is computed
+/// once keeps nothing: the box is kept from the second run on, and only while nothing else
+/// holds it.
+struct KeptBox<T> {
+    kept: std::cell::RefCell<Option<Rc<T>>>,
+    ran: std::cell::Cell<bool>,
+}
+
+impl<T: PropertyValue> KeptBox<T> {
+    fn new() -> Self {
+        Self { kept: std::cell::RefCell::new(None), ran: std::cell::Cell::new(false) }
+    }
+
+    fn boxed(&self, value: T) -> BoxedValue {
+        if !self.ran.replace(true) {
+            // The first run, and for most properties the only one.
+            return boxed(value);
+        }
+        let mut kept = self.kept.borrow_mut();
+        match kept.as_mut().and_then(Rc::get_mut) {
+            Some(inside) => *inside = value,
+            None => *kept = Some(Rc::new(value)),
+        }
+        match &*kept {
+            Some(kept) => kept.clone(),
+            None => unreachable!("the box was just kept"),
+        }
+    }
+}
+
+ferroui_base::ferro_thread_local! {
+    /// The control and the property whose effect runs the closure of a reactive property
+    /// (`compute_into`): a closure made by the builders takes it and sets the property itself.
+    static TARGET: Cell<Option<(Ref<Control>, &'static FerroProperty)>> = const { Cell::new(None) };
+}
+
+/// Runs the closure of a reactive property (a value of [`PropValue::Dynamic`], of
+/// [`PropValue::Follows`] or the `get` of [`PropValue::TwoWay`]) for the property of a control.
+///
+/// A closure that the builders made knows the type of its value: it sets the property with it,
+/// through the typed setter, with no box and no copy of the value, and this returns `None`
+/// (docs/porting/desktop-performance.md, the typed path of #804). The value of any other closure
+/// is returned with the control, for the untyped setter. The typed path travels beside the
+/// public representation of a property value: the closure finds its target on the thread, so
+/// `PropValue` has neither a new variant nor a new field.
+pub(crate) fn compute_into(
+    control: Ref<Control>,
+    property: &'static FerroProperty,
+    compute: &dyn Fn() -> BoxedValue,
+) -> Option<(Ref<Control>, BoxedValue)> {
+    let previous = TARGET.replace(Some((control, property)));
+    let value = compute();
+    let left = TARGET.replace(previous);
+    left.map(|(control, _)| (control, value))
+}
+
+/// The closure of a reactive property of type `T`, from what computes its value: run by the
+/// effect of the property ([`compute_into`]) it sets the property with the value as it is; run
+/// anywhere else it returns the value in the box of the run before ([`KeptBox`]).
+fn typed_compute<T: StyledValue>(value: impl Fn() -> T + 'static) -> Rc<dyn Fn() -> BoxedValue> {
+    let kept = KeptBox::<T>::new();
+    Rc::new(move || {
+        // Taken before the value is computed, so that a closure the computation runs (one of a
+        // control it mounts) does not find it.
+        let target = TARGET.try_with(Cell::take).ok().flatten();
+        let value = value();
+        match target {
+            Some((control, property)) => {
+                crate::reactive::untrack(|| {
+                    if let Err(value) = control.try_set_value_typed(property, value) {
+                        // Not the type of the property: the untyped setter converts it.
+                        control.set_value_untyped(property, &value, ferroui_base::data::BindingPriority::LocalValue);
+                    }
+                });
+                // A value that sets nothing, wherever it is given.
+                ferroui_base::data::BindingOperations::do_nothing()
+            }
+            None => kept.boxed(value),
+        }
+    })
+}
+
+impl<T: StyledValue, V: IntoValue<T>> IntoProp<T, markers::Value> for V {
     fn into_prop(self) -> PropValue {
         PropValue::Value(boxed(self.into_value()))
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
+impl<T: StyledValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromSignal<V>> for Signal<V> {
     fn into_prop(self) -> PropValue {
-        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || boxed(self.get().into_value())) }
+        PropValue::Follows { source: self.source_id(), compute: typed_compute::<T>(move || self.get().into_value()) }
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
+impl<T: StyledValue, V: IntoValue<T> + Clone + 'static> IntoProp<T, markers::FromMemo<V>> for Memo<V> {
     fn into_prop(self) -> PropValue {
-        PropValue::Follows { source: self.source_id(), compute: Rc::new(move || boxed(self.get().into_value())) }
+        PropValue::Follows { source: self.source_id(), compute: typed_compute::<T>(move || self.get().into_value()) }
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
+impl<T: StyledValue, V: IntoValue<T>, F: Fn() -> V + 'static> IntoProp<T, markers::FromClosure<V>> for F {
     fn into_prop(self) -> PropValue {
-        PropValue::Dynamic(Rc::new(move || boxed(self().into_value())))
+        PropValue::Dynamic(typed_compute::<T>(move || self().into_value()))
     }
 }
 
-impl<T: PropertyValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'static> IntoProp<T, markers::FromTwoWay<V>>
+impl<T: StyledValue, V: IntoValue<T> + FromValue<T> + Clone + PartialEq + 'static> IntoProp<T, markers::FromTwoWay<V>>
     for TwoWay<V>
 {
     fn into_prop(self) -> PropValue {
         let signal = self.0;
         PropValue::TwoWay {
             source: Some(signal.source_id()),
-            get: Rc::new(move || boxed(signal.get().into_value())),
+            get: typed_compute::<T>(move || signal.get().into_value()),
             set: Rc::new(move |value: &dyn Any| {
                 if let Some(value) = value.downcast_ref::<T>().and_then(V::from_value) {
                     if signal.is_alive() {
@@ -209,7 +369,7 @@ impl<T: ObjectType + Upcast<Control>, E: IntoElement> IntoProp<Option<Ref<T>>, m
 /// (`.text(Bind(binding))`).
 pub struct Bind<B: BindingBase + 'static>(pub B);
 
-impl<T: PropertyValue, B: BindingBase + 'static> IntoProp<T, markers::FromBinding> for Bind<B> {
+impl<T: StyledValue, B: BindingBase + 'static> IntoProp<T, markers::FromBinding> for Bind<B> {
     fn into_prop(self) -> PropValue {
         PropValue::Binding(Rc::new(self.0))
     }
@@ -243,6 +403,9 @@ impl<T: ViewClass> Default for El<T> {
     }
 }
 
+/// The values the list of an element has room for when it gets its first.
+const PROPS_AT_FIRST: usize = 8;
+
 /// The part of a builder the generated setters use.
 pub trait ElementBuilder: Sized {
     /// The element being built.
@@ -254,6 +417,11 @@ pub trait ElementBuilder: Sized {
         let property = property.untyped();
         let value = value.into_prop();
         let props = &mut self.element_mut().props;
+        if props.capacity() == 0 {
+            // Room for the values an element usually has, taken once: a list that grows from
+            // nothing asks for room three times on the way to eight values.
+            props.reserve(PROPS_AT_FIRST);
+        }
         props.retain(|entry| !std::ptr::eq(entry.property, property));
         props.push(PropEntry { property, value });
         self

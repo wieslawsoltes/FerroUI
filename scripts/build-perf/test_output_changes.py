@@ -51,6 +51,69 @@ class CompareTests(unittest.TestCase):
         self.assertFalse(compare.summarize(records)["same_units_and_allowed_profiles"])
 
 
+    def test_added_units_are_reported_and_the_units_of_both_keep_their_profiles(self):
+        # A pull request that gives the package a dependency builds more units.
+        added = UNITS + [{"package": "q", "name": "q", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"},
+                          "fresh": False}]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=added),
+                   dict(row("candidate", {}), units=added), row("baseline", {})]
+        summary = compare.summarize(records)
+        self.assertFalse(summary["same_units_and_allowed_profiles"])
+        self.assertTrue(summary["common_units_keep_allowed_profiles"])
+        self.assertTrue(summary["units_deterministic_per_revision"])
+        self.assertEqual(summary["changed_unit_set"], {"added": ["q q lib"], "removed": []})
+        self.assertEqual(summary["changed_unit_features"], [])
+
+    def test_a_unit_of_both_with_another_profile_is_not_an_added_unit(self):
+        other = [dict(UNITS[0], profile={"opt_level": "3"}),
+                 {"package": "q", "name": "q", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"}, "fresh": False}]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=other)]
+        self.assertFalse(compare.summarize(records)["common_units_keep_allowed_profiles"])
+
+    def test_a_revision_that_does_not_repeat_its_units_is_not_deterministic(self):
+        added = UNITS + [{"package": "q", "name": "q", "kind": ["lib"], "features": [], "profile": {"opt_level": "0"},
+                          "fresh": False}]
+        records = [row("baseline", {}), dict(row("candidate", {}), units=added), row("candidate", {})]
+        self.assertFalse(compare.summarize(records)["units_deterministic_per_revision"])
+
+
+    def test_a_new_dependency_of_the_build_crate_is_a_build_only_unit(self):
+        # #850: `ferroui-build` reads the manifest with `toml`, a dependency only build scripts link.
+        toml = {"package": "registry+https://example.invalid/index#toml@1.1.6", "name": "toml", "kind": ["lib"],
+                "features": [], "profile": {"opt_level": "0"}}
+        runtime = {"package": "registry+https://example.invalid/index#other@1.0.0", "name": "other", "kind": ["lib"],
+                   "features": [], "profile": {"opt_level": "0"}}
+        units = UNITS + [toml, runtime]
+        additions = compare.build_only_additions(UNITS, units, {"toml"})
+        self.assertEqual([compare.unit_key(item) for item in additions], [compare.unit_key(toml)])
+        # Another added unit stays a change of the graph.
+        self.assertEqual(compare.without_units(units, additions), UNITS + [runtime])
+        # A unit the reference builds too is never left out.
+        self.assertEqual(compare.build_only_additions(units, units, {"toml"}), [])
+        self.assertEqual(compare.package_name(toml), "toml")
+
+    def test_a_crate_the_application_also_links_is_not_build_only(self):
+        # `ferroui-build` and the application both depend on the loader; `toml` only `ferroui-build`
+        # does. A new dependency of the loader is linked into the application: it is not exempt.
+        def dependency(name, kind=None):
+            return {"pkg": name, "dep_kinds": [{"kind": kind, "target": None}]}
+        packages = ["app", "ferroui-build", "loader", "loader-dep", "toml", "toml-dep", "tests-only"]
+        metadata = {"packages": [{"id": name, "name": name} for name in packages],
+                    "resolve": {"nodes": [
+                        {"id": "app", "deps": [dependency("loader"), dependency("ferroui-build", "build"),
+                                               dependency("tests-only", "dev")]},
+                        {"id": "ferroui-build", "deps": [dependency("loader"), dependency("toml")]},
+                        {"id": "loader", "deps": [dependency("loader-dep")]},
+                        {"id": "loader-dep", "deps": []},
+                        {"id": "toml", "deps": [dependency("toml-dep")]},
+                        {"id": "toml-dep", "deps": []},
+                        {"id": "tests-only", "deps": []}]}}
+        self.assertEqual(compare.build_only_names(metadata, ["app"]), {"toml", "toml-dep"})
+        # An edge that is a normal and a build dependency at once is followed as a normal one.
+        both = {"pkg": "toml", "dep_kinds": [{"kind": "build", "target": None}, {"kind": None, "target": None}]}
+        metadata["resolve"]["nodes"][0]["deps"].append(both)
+        self.assertEqual(compare.build_only_names(metadata, ["app"]), set())
+
 class ScannerTests(unittest.TestCase):
     def test_changed_files(self):
         self.assertEqual(scanner.changed_files({"a": "1", "b": "2"}, {"a": "1", "b": "3", "c": "4"}), ["b", "c"])

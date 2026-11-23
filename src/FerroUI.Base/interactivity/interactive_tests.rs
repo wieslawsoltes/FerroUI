@@ -89,7 +89,12 @@ fn create_tree(
         for visual in tree.get_self_and_visual_descendants() {
             let i = visual.cast::<Interactive>().unwrap();
             let handler = handler.clone();
-            i.add_handler_as::<RoutedEventArgs, _>(&ev, move |s, e| handler(s, e), handler_routes, handled_events_too);
+            i.add_handler_as::<RoutedEventArgs, _>(
+                &ev,
+                move |s, e| handler(s, e),
+                handler_routes,
+                handled_events_too,
+            );
         }
     }
 
@@ -790,4 +795,97 @@ fn a_copy_of_routed_event_args_shares_the_routing_state() {
     assert_eq!(args.route(), RoutingStrategies::TUNNEL);
     assert!(args == copy);
     assert!(args != RoutedEventArgs::new());
+}
+
+// --- the count of instance handlers (desktop-performance.md, section 9.28) ---
+
+#[test]
+fn the_count_of_instance_handlers_follows_added_removed_and_dropped_handlers() {
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    let count = Rc::new(Cell::new(0));
+
+    // Nothing listens: the route is empty and the ancestors are not asked.
+    assert!(!ev.has_instance_handlers());
+    assert!(!child.build_event_route(&ev).has_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+
+    // A handler on an ancestor is reached by a raise on the child.
+    let token = {
+        let count = count.clone();
+        parent.add_handler(&ev, move |_, _| count.set(count.get() + 1))
+    };
+    assert!(ev.has_instance_handlers());
+    assert!(child.build_event_route(&ev).has_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+    assert_eq!(count.get(), 1);
+
+    // Removed: nothing listens again.
+    assert!(parent.remove_handler(&ev, token));
+    assert!(!ev.has_instance_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+    assert_eq!(count.get(), 1);
+
+    // Handlers that go away with their interactive are not counted either.
+    {
+        let short_lived = TestInteractive::new("short lived");
+        short_lived.add_handler(&ev, |_, _| {});
+        short_lived.add_handler(&ev, |_, _| {});
+        assert!(ev.has_instance_handlers());
+    }
+    assert!(!ev.has_instance_handlers());
+}
+
+#[test]
+fn a_class_handler_is_reached_when_no_instance_handler_is_attached() {
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    let seen = Rc::new(RefCell::new(Vec::new()));
+    let recorded = seen.clone();
+    let subscription = ev.raised().subscribe(move |sender, _| recorded.borrow_mut().push(label_of(sender)));
+
+    assert!(!ev.has_instance_handlers());
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+    subscription.dispose();
+    child.raise_event(&RoutedEventArgs::with_event(&ev));
+
+    assert_eq!(*seen.borrow(), ["child", "parent"]);
+    drop(parent);
+}
+
+#[test]
+fn an_error_a_fallible_handler_returns_reaches_the_dispatcher_and_the_route_goes_on() {
+    #[derive(Debug)]
+    struct HandlerFailed;
+    impl std::fmt::Display for HandlerFailed {
+        fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+            f.write_str("the handler failed")
+        }
+    }
+    impl std::error::Error for HandlerFailed {}
+
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let dispatcher = crate::threading::Dispatcher::current_dispatcher();
+    let received = Rc::new(RefCell::new(Vec::new()));
+    let seen = received.clone();
+    let _handler = dispatcher.unhandled_exception(move |args| {
+        assert!(args.error().is_some_and(|error| error.is::<HandlerFailed>()));
+        seen.borrow_mut().push(args.exception_message().unwrap_or_default().to_owned());
+        args.set_handled(true);
+    });
+
+    let ev = RoutedEvent::<RoutedEventArgs>::new("test", RoutingStrategies::BUBBLE, TestInteractive::TYPE);
+    let child = TestInteractive::new("child");
+    let parent = TestInteractive::with_children("parent", vec![child.clone()]);
+    child.add_fallible_handler(&ev, |_, _| Err(HandlerFailed));
+    let reached = Rc::new(Cell::new(false));
+    let parent_reached = reached.clone();
+    parent.add_handler(&ev, move |_, _| parent_reached.set(true));
+
+    child.raise_event(&RoutedEventArgs::with_event_and_source(&ev, &child));
+
+    assert_eq!(*received.borrow(), ["the handler failed"]);
+    assert!(reached.get(), "a handled error does not stop the route");
 }

@@ -5,9 +5,10 @@
   (docs/porting/winui-theme.md). Copyright (c) Microsoft Corporation for the ported documents;
   licensed under the MIT License (see NOTICE.md of the crate).
 
-  The resources: the accent colour of the system, the system colours, and one document per
-  source document of the theme, in the order of the merge of WinUI. The list between the markers
-  is written by scripts/winui-theme/convert.py.
+  The resources: the accent colour of the system, the system colours (Accents/SystemColors, the
+  colours of the platform in high contrast), and one document per source document of the theme,
+  in the order of the merge of WinUI. The list between the markers is written by
+  scripts/winui-theme/convert.py.
 -->
 <Styles x:Class="FerroUI.Themes.WinUI.WinUITheme"
         xmlns="https://github.com/ferroui"
@@ -17,9 +18,9 @@
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <accents:SystemAccentColors />
+        <accents:SystemColors />
 
         <!-- resources:begin (written by scripts/winui-theme/convert.py; do not edit) -->
-        <MergeResourceInclude Source="/Resources/SystemResources.xaml" />
         <MergeResourceInclude Source="/Resources/Generic.xaml" />
         <MergeResourceInclude Source="/Resources/Common_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Common_themeresources_any.xaml" />
@@ -40,6 +41,7 @@
         <MergeResourceInclude Source="/Resources/ListBox_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToggleSwitch_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CommandBar_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/GridViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ListViewItem_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBlock_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TextBlock_themeresources_v2.5.xaml" />
@@ -47,6 +49,7 @@
         <MergeResourceInclude Source="/Resources/Button_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ToggleButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CornerRadius_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/MediaTransportControls_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RepeatButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CalendarDatePicker_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/CalendarView_themeresources.xaml" />
@@ -56,6 +59,7 @@
         <MergeResourceInclude Source="/Resources/DateTimePickerFlyout_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/FlipView_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/FlipViewItem_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/Pivot_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ScrollBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/ScrollViewer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/Slider_themeresources.xaml" />
@@ -70,6 +74,7 @@
         <MergeResourceInclude Source="/Resources/RefreshVisualizer_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/MenuBar_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/TreeView_themeresources.xaml" />
+        <MergeResourceInclude Source="/Resources/SwipeControl_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/SplitButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/DropDownButton_themeresources.xaml" />
         <MergeResourceInclude Source="/Resources/RadioButtons_themeresources.xaml" />

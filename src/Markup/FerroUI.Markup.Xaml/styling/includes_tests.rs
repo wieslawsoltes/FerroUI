@@ -238,7 +238,7 @@ fn resource_include_loads_its_dictionary_on_first_use() {
     assert!(include.try_get_resource(&key("missing"), None).is_none());
     // Loaded once.
     assert_eq!(LOADS.with(Cell::get), before + 1);
-    assert!(std::ptr::addr_eq(Rc::as_ptr(&include.loaded()), Rc::as_ptr(&include.try_loaded().unwrap())));
+    assert!(std::ptr::addr_eq(Rc::as_ptr(&include.try_loaded().unwrap()), Rc::as_ptr(&include.try_loaded().unwrap())));
 
     // The owner is the owner of the loaded dictionary.
     assert!(include.owner().is_none());
@@ -325,7 +325,7 @@ fn resource_include_reports_a_document_that_cannot_be_loaded() {
 #[test]
 #[should_panic(expected = "ResourceInclude.Source must be set.")]
 fn resource_include_requires_a_source() {
-    let _ = ResourceInclude::new(None).loaded();
+    let _ = ResourceInclude::new(None).try_loaded().unwrap();
 }
 
 #[test]
@@ -335,7 +335,7 @@ fn resource_include_requires_a_resource_dictionary() {
     FerroXamlLoader::register_compiled_xaml("includes.styles", compiled_styles);
     let include = ResourceInclude::new(None);
     include.set_source(Some(uri_ref("ferres://includes.styles/NotAStyle.xaml")));
-    let _ = include.loaded();
+    let _ = include.try_loaded().unwrap();
 }
 
 #[test]
@@ -351,7 +351,7 @@ fn merge_resource_include_behaves_like_a_resource_include() {
     let sp = TestServiceProvider::new().with_base_uri("ferres://includes.resources/Base.xaml").sp();
     let other = MergeResourceInclude::with_service_provider(sp);
     other.set_source(Some(uri_ref("Other.xaml")));
-    assert!(other.loaded().has_resources());
+    assert!(other.try_loaded().unwrap().has_resources());
 
     // It is a resource include: its base class part is reached by cast.
     let untyped: BoxedValue = include.clone();
@@ -375,7 +375,7 @@ fn style_include_loads_its_style_on_first_use() {
     assert!(include.children().is_empty());
     include.set_source(Some(uri_ref("Style.xaml")));
 
-    let loaded = include.loaded();
+    let loaded = include.try_loaded().unwrap();
     assert!(loaded.as_object().unwrap().is::<Style>());
     let children = include.children();
     assert_eq!(children.len(), 1);
@@ -408,7 +408,7 @@ fn style_include_is_a_style_among_parents_and_in_a_styles_collection() {
     let sp = TestServiceProvider::new().with_base_uri("ferres://includes.styles/App.xaml").sp();
     let include = StyleInclude::with_service_provider(sp);
     include.set_source(Some(uri_ref("/Styles.xaml")));
-    assert!(include.loaded().as_object().unwrap().is::<Styles>());
+    assert!(include.try_loaded().unwrap().as_object().unwrap().is::<Styles>());
 
     let styles = Styles::new();
     styles.add(include.as_style());
@@ -427,7 +427,7 @@ fn style_include_is_a_style_among_parents_and_in_a_styles_collection() {
 #[test]
 #[should_panic(expected = "StyleInclude.Source must be set.")]
 fn style_include_requires_a_source() {
-    let _ = StyleInclude::new(None).loaded();
+    let _ = StyleInclude::new(None).try_loaded().unwrap();
 }
 
 #[test]
@@ -437,7 +437,7 @@ fn style_include_requires_a_style() {
     FerroXamlLoader::register_compiled_xaml("includes.styles", compiled_styles);
     let include = StyleInclude::new(None);
     include.set_source(Some(uri_ref("ferres://includes.styles/NotAStyle.xaml")));
-    let _ = include.loaded();
+    let _ = include.try_loaded().unwrap();
 }
 
 #[test]
@@ -466,7 +466,7 @@ fn includes_are_constructed_and_loaded_through_their_metadata() {
     let source = markup.find_property("Source").unwrap();
     (source.set.unwrap())(&[include.clone(), into_markup_value(uri_ref("ferres://includes.styles/Style.xaml"))]).unwrap();
     let typed = from_markup_value::<Rc<StyleInclude>>(&include).unwrap();
-    assert!(typed.loaded().as_object().unwrap().is::<Style>());
+    assert!(typed.try_loaded().unwrap().as_object().unwrap().is::<Style>());
 
     // The loader itself.
     let loader = <FerroXamlLoader as MarkupTyped>::MARKUP;

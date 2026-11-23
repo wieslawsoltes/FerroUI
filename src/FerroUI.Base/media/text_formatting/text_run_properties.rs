@@ -63,8 +63,15 @@ pub trait TextRunProperties: 'static {
     /// Upstream caches it in a field of the base class; implementations that
     /// are used for more than a handful of runs should do the same (as
     /// [`GenericTextRunProperties`] does) and override this method.
+    ///
+    /// A variable font with an optical size axis is at the optical size of the text (#859).
     fn cached_glyph_typeface(&self) -> Rc<GlyphTypeface> {
-        self.typeface().glyph_typeface()
+        let typeface = self.typeface();
+        crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
+            typeface.glyph_typeface(),
+            typeface.font_family(),
+            self.effective_font_rendering_em_size(),
+        )
     }
 }
 
@@ -107,7 +114,11 @@ impl dyn TextRunProperties {
         )
         .with_requested_font_family(self.requested_font_family().clone())
         .with_font_scale(mapping.scale())
-        .with_cached_glyph_typeface(mapping.glyph_typeface().clone()))
+        .with_cached_glyph_typeface(crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
+            mapping.glyph_typeface().clone(),
+            mapping.typeface().font_family(),
+            self.font_rendering_em_size() * mapping.scale(),
+        )))
     }
 
     /// The same properties with another typeface.

@@ -125,6 +125,67 @@ pub struct DeferredContent {
     declaration: RefCell<Option<crate::reload_templates::Declaration>>,
 }
 
+/// Inline declaration context for compiled resource rows. Development capture
+/// and source-overlay builds retain DeferredContent, including all reload hooks.
+#[cfg(not(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions))))]
+#[derive(Clone)]
+pub(crate) struct CompactDeferredContext {
+    parent_name_scope: Option<Weak<dyn INameScope>>,
+    root_object: Option<WeakValue>,
+    parent_resource_nodes: Rc<CapturedResourceNodes>,
+}
+
+#[cfg(not(any(feature = "source-overlays", all(feature = "hot-reload", debug_assertions))))]
+impl CompactDeferredContext {
+    pub(crate) fn capture(provider: &Rc<dyn IServiceProvider>) -> Result<Self, XamlLoadError> {
+        let missing = |service: &str| XamlLoadError::with_message(format!("Service {service} hasn't been registered"));
+        let parent_stack = provider.get_service_of::<Rc<dyn IFerroXamlIlParentStackProvider>>()
+            .ok_or_else(|| missing("IFerroXamlIlParentStackProvider"))?;
+        let parent_resource_nodes = XamlIlRuntimeHelpers::as_resource_nodes_stack(&parent_stack);
+        let root_object = provider.get_service_of::<Rc<dyn IRootObjectProvider>>()
+            .ok_or_else(|| missing("IRootObjectProvider"))?.root_object();
+        let parent_scope = provider.get_name_scope();
+        Ok(Self {
+            parent_name_scope: parent_scope.map(|scope| Rc::downgrade(&scope)),
+            root_object: root_object.as_ref().map(WeakValue::new),
+            parent_resource_nodes,
+        })
+    }
+
+    pub(crate) fn has_owned_values(&self) -> bool {
+        matches!(self.root_object, Some(WeakValue::Value(_)))
+            || self.parent_resource_nodes.nodes.iter().any(|node| matches!(node, WeakValue::Value(_)))
+    }
+
+    /// Owning plain-value captures must retain their original per-resource
+    /// release point, rather than living until the last row in a group is used.
+    pub(crate) fn into_deferred(self, builder: DeferredContentBuilder) -> Rc<DeferredContent> {
+        Rc::new_cyclic(|this| DeferredContent {
+            this: this.clone(), parent_name_scope: self.parent_name_scope,
+            root_object: self.root_object, parent_resource_nodes: self.parent_resource_nodes,
+            builder, result_type: ValueType::object(),
+        })
+    }
+
+    pub(crate) fn try_build(
+        &self,
+        service_provider: Option<&Rc<dyn IServiceProvider>>,
+        builder: impl FnOnce(&Rc<dyn IServiceProvider>) -> Result<Option<BoxedValue>, XamlLoadError>,
+    ) -> Result<Option<BoxedValue>, XamlLoadError> {
+        let scope = match self.parent_name_scope.as_ref().and_then(Weak::upgrade) {
+            None => NameScopeRef::new(NameScope::new()),
+            Some(parent) => NameScopeRef::new(ChildNameScope::new(NameScopeRef(parent))),
+        };
+        let provider: Rc<dyn IServiceProvider> = DeferredParentServiceProvider::new(
+            service_provider.cloned(), self.parent_resource_nodes.alive(),
+            self.root_object.as_ref().and_then(WeakValue::upgrade), scope.clone(),
+        );
+        let result = builder(&provider)?;
+        scope.complete();
+        Ok(result)
+    }
+}
+
 /// The resource nodes above a declaration, held weakly, shared by the
 /// deferred content declared under the same parents.
 struct CapturedResourceNodes {
@@ -280,10 +341,10 @@ impl IDeferredContent for DeferredContent {
     ) -> Result<Option<BoxedValue>, DeferredContentFailed> {
         match self.try_build_with(service_provider) {
             Ok(built) => Ok(built.result),
-            Err(error) => match crate::xaml_error_scope::report(error) {
-                Ok(()) => Err(DeferredContentFailed),
-                Err(error) => crate::xaml_error_scope::throw(error),
-            },
+            Err(error) => {
+                crate::xaml_error_scope::report_or_raise(error);
+                Err(DeferredContentFailed)
+            }
         }
     }
 }
@@ -478,10 +539,12 @@ impl XamlIlRuntimeHelpers {
     }
 
     /// Creates the deferred content of a template whose result is a control.
+    ///
+    /// A provider without a parent stack or root object service is an error (#567).
     pub fn deferred_transformation_factory_v1(
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
         Self::deferred_transformation_factory_v2::<ferroui_base::Ref<ferroui_controls::Control>>(builder, provider)
     }
 
@@ -489,41 +552,30 @@ impl XamlIlRuntimeHelpers {
     ///
     /// The managed original returns the build function as a delegate; a
     /// function cannot be an untyped value here, so the deferred content
-    /// object stands for it.
+    /// object stands for it. A provider without a parent stack or root object
+    /// service is an error (#567).
     pub fn deferred_transformation_factory_v2<T: 'static>(
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
-        Self::deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
+        Self::try_deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
     }
 
     /// Creates deferred content whose result is a `T`: captures the
     /// resource nodes above the declaration, the root object and the name
-    /// scope from `provider`.
-    ///
-    /// # Panics
-    /// Panics if `provider` has no parent stack or root object service.
+    /// scope from `provider`. A provider without a parent stack or root object
+    /// service is an error (#567).
     pub fn deferred_transformation_factory_v3<T: 'static>(
         builder: DeferredContentBuilder,
         provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
-        Self::deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
+    ) -> Result<Rc<DeferredContent>, XamlLoadError> {
+        Self::try_deferred_transformation_factory_for(ValueType::of::<T>(), builder, provider)
     }
 
     /// The factory with the result type given as a value: what untyped
-    /// callers use in place of the type argument. The "any value" type
-    /// ([`ValueType::object`]) accepts every result.
-    pub fn deferred_transformation_factory_for(
-        result_type: ValueType,
-        builder: DeferredContentBuilder,
-        provider: &Rc<dyn IServiceProvider>,
-    ) -> Rc<DeferredContent> {
-        crate::throw(Self::try_deferred_transformation_factory_for(result_type, builder, provider))
-    }
-
-    /// [`deferred_transformation_factory_for`](Self::deferred_transformation_factory_for)
-    /// without panics: a provider without a parent stack or root object
-    /// service is an error. This is what untyped (metadata) callers use.
+    /// callers (the loader, metadata) use in place of the type argument. The
+    /// "any value" type ([`ValueType::object`]) accepts every result. A
+    /// provider without a parent stack or root object service is an error.
     pub fn try_deferred_transformation_factory_for(
         result_type: ValueType,
         builder: DeferredContentBuilder,
