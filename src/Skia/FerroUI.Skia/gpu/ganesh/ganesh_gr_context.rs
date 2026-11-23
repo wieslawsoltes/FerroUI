@@ -17,6 +17,9 @@ pub struct GaneshGrContext {
     frame_context_id: u64,
     frame_completion: RefCell<GpuCompletion>,
     frame_completion_handler: RefCell<Option<Rc<dyn Fn(GpuCompletion)>>>,
+    /// The flushes so far: what tells a texture a recording not yet submitted reads (the outputs
+    /// of the 3D scenes, #608 D8).
+    flushes: std::cell::Cell<u64>,
 }
 impl Drop for GaneshGrContext {
     fn drop(&mut self) {
@@ -32,6 +35,7 @@ impl GaneshGrContext {
             frame_context_id: crate::gpu::next_frame_context_id(),
             frame_completion: RefCell::new(GpuCompletion::new()),
             frame_completion_handler: RefCell::new(None),
+            flushes: std::cell::Cell::new(0),
         }
     }
     pub(crate) fn set_frame_completion_handler(&self, handler: Rc<dyn Fn(GpuCompletion)>) {
@@ -51,6 +55,12 @@ impl GaneshGrContext {
         }
     }
 
+    /// The flushes of the context so far.
+    #[cfg_attr(not(feature = "media3d"), allow(dead_code))]
+    pub(crate) fn flush_count(&self) -> u64 {
+        self.flushes.get()
+    }
+
     /// Runs `f` with the direct context, for creating surfaces that wrap
     /// platform framebuffers.
     ///
@@ -67,6 +77,8 @@ impl GaneshGrContext {
     /// resources are freed first, which needs the platform context to be
     /// alive and current; without it they are only forgotten.
     pub fn dispose(&self, release_resources: bool) {
+        #[cfg(feature = "media3d")]
+        crate::scene3d::release_gl_context(self.frame_context_id, release_resources);
         if release_resources {
             self.flush();
         } else {
@@ -133,6 +145,7 @@ impl ISkiaGrContext for GaneshGrContext {
         if let Some(context) = self.context.borrow_mut().as_mut() {
             context.flush_and_submit();
         }
+        self.flushes.set(self.flushes.get() + 1);
         self.finish_frame_submission();
     }
 
