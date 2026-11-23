@@ -2,8 +2,6 @@ import { strict as assert } from 'node:assert';
 import { verifyEventHandlers } from './eventHandlersMcp';
 import { verifyDictionaryExtraction } from './dictionaryExtractionMcp';
 import { verifyFileMoveMcp } from './fileMoveMcp';
-import { spawn } from 'node:child_process';
-import { createInterface } from 'node:readline';
 import * as vscode from 'vscode';
 import { verifyCanvasInteraction, verifyCanvasScroll } from './canvasInteraction';
 import { verifyCanvasGuides } from './canvasGuidesMcp';
@@ -81,64 +79,23 @@ import { verifyManagedApps } from './managedAppsMcp';
 import { verifyCommandBindings } from './commandBindingsMcp';
 import { verifyRsxCommandBindings } from './rsxCommandBindingsMcp';
 import { verifyLibraryScopes } from './libraryScopesMcp';
-
-interface ToolResponse {
-    content: { type: string; text?: string; data?: string }[];
-    isError: boolean;
-}
-
-export interface McpFixture {
-    invoke(name: string, args?: object): Promise<ToolResponse>;
-    content<T>(result: ToolResponse): T;
-}
+import { openEditorMcp } from './mcpFixture';
+export type { McpFixture } from './mcpFixture';
 
 export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
-    const definitions = await vscode.commands.executeCommand<vscode.McpServerDefinition[]>('ferroui.test.mcpDefinitions');
-    const server = definitions.find(definition => definition instanceof vscode.McpStdioServerDefinition) as vscode.McpStdioServerDefinition | undefined;
-    assert.ok(server, 'VS Code receives the bundled FerroUI MCP definition');
-    const child = spawn(server.command, server.args, { stdio: 'pipe', windowsHide: true,
-        env: { ...process.env, ...Object.fromEntries(Object.entries(server.env).filter(([,value]) => value !== null).map(([key, value]) => [key, String(value)])) } });
-    let output = '';
-    child.stderr.on('data', chunk => { output += chunk.toString(); });
-    let id = 0;
-    const readers = new Map<number, (value: unknown) => void>();
-    const lines = createInterface({ input: child.stdout });
-    lines.on('line', line => {
-        const message = JSON.parse(line);
-        readers.get(message.id)?.(message);
-    });
-    child.on('error', error => { output = error.message; });
-    const request = <T>(method: string, params = {}) => new Promise<T>((resolve, reject) => {
-        const key = ++id;
-        const timer = setTimeout(() => {
-            readers.delete(key);
-            reject(new Error(`MCP ${method} timed out. ${output}`));
-        }, 15_000);
-        readers.set(key, raw => {
-            clearTimeout(timer);
-            readers.delete(key);
-            const message = raw as { error?: { message: string }; result?: T };
-            if (message.error) reject(new Error(message.error.message));
-            else resolve(message.result!);
-        });
-        child.stdin.write(JSON.stringify({ jsonrpc: '2.0', id: key, method, params }) + '\n');
-    });
-    const invoke = (name: string, args = {}) => request<ToolResponse>('tools/call', { name, arguments: args });
-    const content = <T>(result: ToolResponse): T => {
-        assert.equal(result.isError, false, result.content[0]?.text);
-        return JSON.parse(result.content.find(item => item.type === 'text')!.text!);
-    };
+    const { request, invoke, content, close } = await openEditorMcp();
     const config = vscode.workspace.getConfiguration('ferroui.mcp');
     const original = document.getText();
     try {
-        const hello = await request<{ protocolVersion: string }>('initialize', { protocolVersion: '2025-11-25', capabilities: {}, clientInfo: { name: 'vscode-test', version: '1' } });
-        assert.equal(hello.protocolVersion, '2025-11-25');
-        child.stdin.write(JSON.stringify({ jsonrpc: '2.0', method: 'notifications/initialized' }) + '\n');
         const { tools } = await request<{ tools: { name: string }[] }>('tools/list');
         assert.ok(tools.some(tool => tool.name === 'designer_place'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_templates'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
+        for (const name of ['targets', 'run', 'stop']) assert.ok(tools.some(tool => tool.name === `ferroui_ios_simulator_${name}`));
+        if (process.platform !== 'darwin') {
+            assert.deepEqual(content(await invoke('ferroui_ios_simulator_targets')), { supported: false, devices: [], apps: [] });
+        }
         for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'timeline_set_layout', 'timeline_set_viewport', 'timeline_track_action', 'timeline_set_work_area', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'property_transitions', 'property_transition_draft', 'property_transition',
@@ -444,8 +401,6 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         console.log('VS Code MCP discovery, project Toolbox placement, shared Studio queries, PNG content, write permissions, stale revisions and editor undo passed');
     } finally {
         await config.update('allowWrites', undefined, vscode.ConfigurationTarget.Global);
-        lines.close();
-        child.stdin.end();
-        child.kill();
+        close();
     }
 }

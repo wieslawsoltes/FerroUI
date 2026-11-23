@@ -14,6 +14,7 @@ import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
 import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
+import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
@@ -30,6 +31,10 @@ export async function run(): Promise<void> {
     const extension = vscode.extensions.getExtension<{ designer: DesignerWorkbench; runtimeSource: RuntimeSourceEditor }>('FerroUI.ferroui')!;
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
     const { designer, runtimeSource } = await extension.activate();
+    if (process.env.FERROUI_TEST_IOS_SIMULATOR) {
+        await verifyIosSimulatorMcp(process.env.FERROUI_TEST_IOS_SIMULATOR);
+        return;
+    }
     await verifyRsxRecovery(workspace);
     verifyTimelineViewport();
     await verifyProcessShutdown();

@@ -3,8 +3,10 @@ import { createServer } from 'node:http';
 import { once } from 'node:events';
 import type { AddressInfo } from 'node:net';
 import { RuntimeClient } from '../src/runtimeClient';
+import { mcpEndpointPrefix, runtimeEndpointReader } from '../src/runtimeMcp';
 
 export async function verifyRuntimeClient(): Promise<void> {
+    verifyRuntimeAnnouncements();
     const token = 'a'.repeat(64);
     const session = 'live-test';
     const methods: string[] = [];
@@ -60,4 +62,21 @@ export async function verifyRuntimeClient(): Promise<void> {
         server.closeAllConnections();
         server.close();
     }
+}
+
+function verifyRuntimeAnnouncements(): void {
+    const read = runtimeEndpointReader();
+    const token = 'a'.repeat(64);
+    const bearer = `Authorization: Bearer ${token}`;
+    const address = '127.0.0.1:5555';
+    const url = `http://${address}/mcp`;
+    assert.equal(read(bearer), undefined);
+    assert.equal(read('FerroUI MCP: http://example.com:5555/mcp'), undefined);
+    assert.equal(read(bearer), undefined);
+    assert.equal(read(`FerroUI MCP: ${url}\r`), undefined);
+    assert.equal(read('An unrelated application log'), undefined);
+    assert.equal(read(bearer), undefined);
+    assert.equal(read(`FerroUI MCP: ${url}`), undefined);
+    assert.deepEqual(read(bearer), { url, token });
+    assert.deepEqual(read(mcpEndpointPrefix + JSON.stringify({ address, token })), { url, token });
 }

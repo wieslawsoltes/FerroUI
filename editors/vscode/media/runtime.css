@@ -23,7 +23,14 @@
     overflow: auto;
     padding: clamp(8px, 2vw, 22px);
 }
-#runtime-image { max-inline-size: 100%; block-size: auto; box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003; cursor: crosshair; }
+#runtime-image {
+    inline-size: auto;
+    block-size: auto;
+    max-inline-size: 100%;
+    max-block-size: max(180px, calc(100dvh - 140px));
+    box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003;
+    cursor: crosshair;
+}
 .runtime-canvas[data-mode=interact] #runtime-image { cursor: default; }
 #runtime-input { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 5px; border-block-start: 1px solid var(--line); }
 #runtime-input-value { flex: 1 1 74px; }

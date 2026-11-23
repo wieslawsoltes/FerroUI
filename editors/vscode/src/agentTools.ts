@@ -24,6 +24,7 @@ import type { ResourceRename } from './resourceRename';
 import type { ResourceMove, ResourceMoveInput } from './resourceMove';
 import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
+import type { IosSimulatorRun } from './iosSimulatorTargets';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
@@ -240,6 +241,12 @@ export class AgentTools {
             return describe(panel);
         }
         if (tool === 'ferroui_app_sessions') return this.appSessions.list();
+        if (tool === 'ferroui_ios_simulator_targets') return this.appSessions.simulators.targets((input as { folder?: string }).folder, signal);
+        if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal);
+        if (tool === 'ferroui_ios_simulator_stop') {
+            await this.appSessions.simulators.stop(args.runtime as AppRuntime);
+            return { stopped: true };
+        }
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
         if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }
         if (tool === 'ferroui_runtime_open') { this.appSessions.open(args.runtime as AppRuntime); return { runtime: args.runtime }; }

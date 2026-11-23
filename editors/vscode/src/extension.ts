@@ -16,6 +16,7 @@ import { EventHandlers } from './eventHandlers';
 import type { HandlerRequest } from './eventHandlerProtocol';
 import { HotReload } from './hotReload';
 import { HostedDesign } from './hostedDesign';
+import { IosSimulatorSessions } from './iosSimulatorSessions';
 import { FerroMcpProvider } from './mcpProvider';
 import { ProjectAssets } from './projectAssets';
 import { ProjectInventory } from './projectInventory';
@@ -78,11 +79,14 @@ export function activate(context: vscode.ExtensionContext) {
     const stages = new StagesPanel(context, previewOutput, projects);
     const reload = new HotReload();
     const projectView = new ProjectView(inventory, projects, reload, projectSetup);
-    stopProcesses = async () => { await Promise.all([reload.stop(), hosted.dispose(), schemaBuild.dispose(), scenarios.shutdown(), collaboration.shutdown()]); };
     const runtimes = new RuntimeConnections(reload);
+    const simulatorSessions = new IosSimulatorSessions(runtimes);
+    stopProcesses = async () => {
+        await Promise.all([reload.stop(), simulatorSessions.shutdown(), hosted.dispose(), schemaBuild.dispose(), scenarios.shutdown(), collaboration.shutdown()]);
+    };
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanels(context, runtimes, reload, runtimeSource);
-    const appSessions = new AppSessions(reload, runtimes, liveApp);
+    const appSessions = new AppSessions(reload, runtimes, liveApp, simulatorSessions);
     const runtimeProfiles = new RuntimeProfiles(runtimes, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer, runtimeProfiles);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
@@ -95,7 +99,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         designHandoff,
         projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, scenarioReviews, scenarios, designer, collaboration, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, appSessions, reload, runtimes, mcp, languageOutput, previewOutput,
-        reload.onDidBuild(publish),
+        simulatorSessions, reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))

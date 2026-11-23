@@ -135,6 +135,12 @@
         "icon": "$(debug-disconnect)"
       },
       {
+        "command": "ferroui.iosSimulator.run",
+        "title": "Run iOS Simulator App",
+        "category": "FerroUI",
+        "icon": "$(device-mobile)"
+      },
+      {
         "command": "ferroui.collaboration.host",
         "title": "Host XAML Room…",
         "category": "FerroUI",
@@ -789,7 +795,8 @@
       {
         "command": "ferroui.mcp.attach",
         "title": "Connect to Running MCP Server",
-        "category": "FerroUI"
+        "category": "FerroUI",
+        "icon": "$(plug)"
       },
       {
         "command": "ferroui.mcp.detach",
@@ -822,6 +829,10 @@
         {
           "command": "ferroui.appSessions.stop",
           "when": "false"
+        },
+        {
+          "command": "ferroui.iosSimulator.run",
+          "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
         },
         {
           "command": "ferroui.collaboration.incoming.apply",
@@ -1185,6 +1196,11 @@
           "group": "navigation@2"
         },
         {
+          "command": "ferroui.iosSimulator.run",
+          "when": "view == ferroui.appSessions && isWorkspaceTrusted && ferroui.iosSimulatorHost",
+          "group": "navigation@3"
+        },
+        {
           "command": "ferroui.hotReload.stopAll",
           "when": "view == ferroui.appSessions && ferroui.hasManagedApps",
           "group": "1_apps"
@@ -1303,7 +1319,7 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator)$/",
           "group": "inline@1"
         },
         {
@@ -1313,7 +1329,7 @@
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator)$/",
           "group": "inline@3"
         },
         {
@@ -1525,6 +1541,40 @@
           "default": false,
           "scope": "resource",
           "description": "Keep existing blank lines between XAML elements."
+        },
+        "ferroui.iosSimulator.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Launch profiles for FerroUI apps with a native inspector on an iOS simulator.",
+          "items": {
+            "type": "object",
+            "required": ["id", "bundleId"],
+            "additionalProperties": false,
+            "properties": {
+              "id": {
+                "type": "string",
+                "description": "Unique profile identifier in this workspace folder."
+              },
+              "bundleId": {
+                "type": "string",
+                "description": "Bundle identifier of the simulator app to launch."
+              },
+              "label": {
+                "type": "string",
+                "description": "App name shown in the profile picker and App Sessions."
+              },
+              "appPath": {
+                "type": "string",
+                "description": "Optional path to a built simulator .app bundle. Relative paths start at this workspace folder."
+              },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Arguments passed to the app, such as --mcp and --mcp-input when the app supports them."
+              }
+            }
+          }
         },
         "ferroui.mcp.enableDesigner": {
           "type": "boolean",

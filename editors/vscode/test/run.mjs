@@ -11,16 +11,32 @@ const workspace = join(sandbox, 'workspace');
 const profile = join(sandbox, 'profile');
 const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../target/debug'));
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
+const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 try {
-    await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
-    const animation = join(workspace, 'animation_view.rs');
-    // Seed the CRLF fixture before VS Code watches or loads its text model.
-    await writeFile(animation, (await readFile(animation, 'utf8')).replace(/\r?\n/g, '\r\n'));
-    await mkdir(join(workspace, 'Assets'));
-    await writeFile(join(workspace, 'Assets', 'Preview Image.png'), Buffer.from(
-        'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==', 'base64'));
+    let target = workspace;
+    let simulatorSettings = {};
+    if (simulator) {
+        const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
+        if (process.platform !== 'darwin' || !appPath) {
+            throw new Error('Set FERROUI_TEST_IOS_SIMULATOR_APP to the built Contact Review bundle on the workspace Mac.');
+        }
+        target = resolve(process.env.FERROUI_TEST_IOS_SIMULATOR_SOURCE ?? join(extension, '../..'));
+        simulatorSettings = { 'ferroui.iosSimulator.apps': [{
+            id: 'contact-review', label: 'Contact Review', bundleId: 'org.ferroui.simulator-inspector',
+            appPath: resolve(appPath), args: ['--mcp', '--mcp-input'],
+        }] };
+    } else {
+        await cp(join(extension, 'test/fixtures'), workspace, { recursive: true });
+        const animation = join(workspace, 'animation_view.rs');
+        // Seed the CRLF fixture before VS Code watches or loads its text model.
+        await writeFile(animation, (await readFile(animation, 'utf8')).replace(/\r?\n/g, '\r\n'));
+        await mkdir(join(workspace, 'Assets'));
+        await writeFile(join(workspace, 'Assets', 'Preview Image.png'), Buffer.from(
+            'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==', 'base64'));
+    }
     await mkdir(join(profile, 'User'), { recursive: true });
     await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
+        ...simulatorSettings,
         'ferroui.languageServer.path': executable('ferroui-xaml-lsp'),
         'ferroui.preview.path': executable('ferroui-designer-preview'),
         'workbench.startupEditor': 'none',
@@ -35,7 +51,8 @@ try {
             version: process.env.FERROUI_TEST_VSCODE_VERSION,
             extensionDevelopmentPath: extension,
         }),
-        launchArgs: [workspace, '--user-data-dir', profile, '--extensions-dir', join(sandbox, 'extensions'),
+        extensionTestsEnv: simulator ? { FERROUI_TEST_IOS_SIMULATOR: simulator } : undefined,
+        launchArgs: [target, '--user-data-dir', profile, '--extensions-dir', join(sandbox, 'extensions'),
             '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'],
     });
 } finally {

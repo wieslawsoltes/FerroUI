@@ -263,6 +263,12 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 2. Read `ferroui_app_sessions`. Use the returned `app_session` for `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history`. Supply the exact ID for controls such as `select`, `attach_debug`, `rebuild`, or `stop` when several managed apps are running. Use `stop_all` to stop the managed apps together.
 3. Use the returned `runtime` to pin a Live App editor with `ferroui_runtime_open`, inspect a mapped property, or disconnect one attachment with `ferroui_runtime_detach`. Pass the same `runtime` and the current connection generation for checked source and profiler operations. A replacement process retains the session ID and issues a new generation. `managed` follows the selected app and `attached` follows the most recent attachment.
 
+### Run an iOS simulator app with MCP
+
+1. Call `ferroui_ios_simulator_targets` on the workspace Mac. Supply `folder` if you want profiles from a particular workspace folder. Choose a device with `booted: true` and take a profile’s `id` and `folder`.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_simulator_run` with the device ID as `device`, the profile ID as `profile`, and its `folder`. The tool waits for the authenticated app inspector and its first native frame. It returns the exact simulator `runtime` and `generation`.
+3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s own permissions still apply. Call `ferroui_ios_simulator_stop` with the simulator runtime ID to stop the session. A new launch returns a new runtime identity. [Configure and run an iOS simulator app](runtime.md#run-an-app-on-an-ios-simulator)
+
 [App Sessions in the workbench](runtime.md#run-several-app-sessions)
 
 ### Inspect Live App templates with MCP
@@ -483,7 +489,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
-| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application** |
+| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Run iOS Simulator App** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
 
 ## Configure the workspace
@@ -497,6 +503,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.rsx.inlayHints` | `false` | Display types on mapped RSX fields. |
 | `ferroui.hostedPreview.assembly` | Empty | Name the application’s markup assembly when its name differs from the selected Cargo package. |
 | `ferroui.hotReload.targets` | `[]` | Offer chosen Cargo binaries and set their package, manifest, features, and arguments. An empty list discovers targets from Cargo. |
+| `ferroui.iosSimulator.apps` | `[]` | Set launch profiles for iOS simulator bundles with an opted-in app inspector. A profile can install the built app before launch. |
 | `ferroui.hotReload.cargoPath` | Empty | Choose a specific Cargo executable on the workspace host. |
 | `ferroui.hotReload.registeredSupervisor` | `scripts/hot-reload/supervisor.py` | Choose a workspace-relative script for registered Rust patching and state handoff. |
 | `ferroui.hotReload.pythonPath` | Empty | Select the Python executable for that supervisor. |

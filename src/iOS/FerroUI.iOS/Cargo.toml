@@ -48,6 +48,8 @@ libc.workspace = true
 # UIKit, Core Animation and Metal (docs/porting/ios-platform.md, section 2): the versions the
 # lock file already had for the `wgpu` renderer of the Vello backend, with UIKit added.
 [target.'cfg(target_os = "ios")'.dependencies]
+ferroui-mcp = { workspace = true, optional = true }
+ferroui-view = { workspace = true, optional = true }
 objc2 = { version = "=0.6.5" }
 block2 = { version = "=0.6.2" }
 objc2-foundation = { version = "=0.3.2", default-features = false, features = [
@@ -185,11 +187,17 @@ quartz-metal = ["dep:ferroui-quartz", "ferroui-quartz/metal"]
 quartz-runtime-shaders = ["quartz-metal", "ferroui-quartz/runtime-shaders"]
 # Builds `examples/ios_view.rs`: a view with the Simple theme and the smoke mode.
 example = ["dep:ferroui-themes-simple"]
+inspector-example = ["example", "dep:ferroui-mcp", "dep:ferroui-view"]
 
 [[example]]
 name = "ios_view"
 path = "examples/ios_view.rs"
 required-features = ["example"]
+
+[[example]]
+name = "simulator_inspector"
+path = "examples/simulator_inspector.rs"
+required-features = ["inspector-example"]
 
 # Runs the run loop of the main thread, which only the main thread can.
 [[test]]

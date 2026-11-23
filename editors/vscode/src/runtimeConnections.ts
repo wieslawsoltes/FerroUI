@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
 import { RuntimeClient } from './runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
-import { type AppRuntime, type RuntimeKind, type RuntimeTarget } from './runtimeTargets';
+import type { AppRuntime, IosRuntimeTarget, RuntimeKind, RuntimeTarget } from './runtimeTargets';
 
 export type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 
@@ -16,10 +16,11 @@ export interface RuntimeSummary {
     available: boolean;
     pid?: number;
     app_session?: string;
+    simulator?: IosRuntimeTarget;
 }
 
 interface Connection { endpoint: RuntimeMcpEndpoint; generation: number }
-interface Attachment extends Connection { runtime: AppRuntime; label: string }
+interface Attachment extends Connection { runtime: AppRuntime; label: string; simulator?: IosRuntimeTarget }
 
 /** Credentials stay in the workspace extension host. Public summaries use stable session IDs. */
 export class RuntimeConnections implements vscode.Disposable {
@@ -28,7 +29,7 @@ export class RuntimeConnections implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private readonly lifetime = new AbortController();
     private readonly managed = new Map<AppRuntime, Connection>();
-    private readonly attached = new Map<AppRuntime, Attachment>();
+    private readonly external = new Map<AppRuntime, Attachment>();
     private activeAttachment?: AppRuntime;
     private nextGeneration = Date.now() * 1024;
 
@@ -46,9 +47,10 @@ export class RuntimeConnections implements vscode.Disposable {
             runtime: run.runtime, kind: 'managed', label: run.label, status: run.state.status,
             app_session: run.id, pid: run.pid, generation: this.revision(run.runtime) ?? null, available: this.managed.has(run.runtime),
         }));
-        return managed.concat([...this.attached.values()].map(attachment => ({
-            runtime: attachment.runtime, kind: 'attached', label: attachment.label, status: 'Attached application',
-            generation: attachment.generation, available: true,
+        return managed.concat([...this.external.values()].map(attachment => ({
+            runtime: attachment.runtime, kind: attachment.simulator ? 'simulator' : 'attached', label: attachment.label,
+            status: attachment.simulator?.system ?? 'Attached application', generation: attachment.generation,
+            available: true, simulator: attachment.simulator,
         })));
     }
 
@@ -106,19 +108,38 @@ export class RuntimeConnections implements vscode.Disposable {
         }
         cancellation.throwIfAborted();
         if (!this.trusted()) throw new Error('The trusted workspace closed while connecting.');
-        const existing = [...this.attached.values()].find(item => item.endpoint.url === endpoint);
+        const existing = this.attachments().find(item => item.endpoint.url === endpoint);
         const runtime: AppRuntime = existing?.runtime ?? `attached:${randomUUID()}`;
         const label = name?.trim() || existing?.label || `Attached · ${new URL(endpoint).host}`;
-        this.attached.set(runtime, { runtime, label, endpoint: { url: endpoint, token }, generation: ++this.nextGeneration });
+        this.external.set(runtime, { runtime, label, endpoint: { url: endpoint, token }, generation: ++this.nextGeneration });
         this.activeAttachment = runtime;
         this.changed.fire();
         return this.describe(runtime)!;
     }
 
     detach(runtime: AppRuntime): void {
-        if (!this.attached.delete(runtime)) throw new Error('Select an attached app session.');
-        if (this.activeAttachment === runtime) this.activeAttachment = [...this.attached.keys()].at(-1);
+        const attachment = this.external.get(runtime);
+        if (!attachment) throw new Error('Select an attached app session.');
+        if (attachment.simulator) throw new Error('Stop this iOS simulator app from App Sessions or with ferroui_ios_simulator_stop.');
+        this.external.delete(runtime);
+        if (this.activeAttachment === runtime) this.activeAttachment = this.attachments().at(-1)?.runtime;
         this.changed.fire();
+    }
+
+    addSimulator(simulator: IosRuntimeTarget, label: string, endpoint: RuntimeMcpEndpoint): RuntimeSummary {
+        if (!this.trusted()) throw new Error('Open a trusted workspace before running an iOS simulator app.');
+        const runtime: AppRuntime = `simulator:${randomUUID()}`;
+        this.external.set(runtime, { runtime, label, endpoint, simulator, generation: ++this.nextGeneration });
+        this.changed.fire();
+        return this.describe(runtime)!;
+    }
+
+    removeSimulator(runtime: AppRuntime): void {
+        if (this.external.get(runtime)?.simulator && this.external.delete(runtime)) this.changed.fire();
+    }
+
+    private attachments(): Attachment[] {
+        return [...this.external.values()].filter(item => !item.simulator);
     }
 
     private resolve(target: RuntimeTarget): AppRuntime | undefined {
@@ -133,7 +154,7 @@ export class RuntimeConnections implements vscode.Disposable {
     private connection(target: RuntimeTarget): Connection | undefined {
         if (!this.trusted()) return;
         const runtime = this.resolve(target);
-        return runtime && (this.managed.get(runtime) ?? this.attached.get(runtime)) || undefined;
+        return runtime && (this.managed.get(runtime) ?? this.external.get(runtime)) || undefined;
     }
 
     private syncManaged(): void {
@@ -166,8 +187,9 @@ export class RuntimeConnections implements vscode.Disposable {
     }
 
     private async detachInteractive(runtime?: AppRuntime): Promise<void> {
-        if (!runtime && this.attached.size > 1) {
-            const picked = await vscode.window.showQuickPick([...this.attached.values()].map(({ label, runtime }) => ({ label, runtime })),
+        const attached = this.attachments();
+        if (!runtime && attached.length > 1) {
+            const picked = await vscode.window.showQuickPick(attached.map(({ label, runtime }) => ({ label, runtime })),
                 { title: 'Disconnect an Attached FerroUI App' });
             runtime = picked?.runtime;
         } else runtime ??= this.activeAttachment;
@@ -178,7 +200,7 @@ export class RuntimeConnections implements vscode.Disposable {
 
     dispose(): void {
         this.lifetime.abort();
-        this.attached.clear();
+        this.external.clear();
         this.managed.clear();
         this.subscriptions.forEach(subscription => subscription.dispose());
         this.changed.dispose();

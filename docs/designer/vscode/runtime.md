@@ -163,9 +163,44 @@ A save can affect one app or several. The extension tracks each app’s Cargo pa
 
 ![App Sessions lists Account Desk and Routing Queue with different PIDs. Each app has its own Live App canvas and visual tree in a separate editor group.](../images/vscode-app-sessions.png)
 
+### Run an app on an iOS simulator
+
+Open a trusted workspace on the Mac running Xcode. Boot an iOS simulator and build a simulator app with an opted-in FerroUI MCP inspector. To try the Contact Review example from the FerroUI repository root, run:
+
+```sh
+rustup target add aarch64-apple-ios-sim
+scripts/ios/bundle.sh --package ferroui-ios --example simulator_inspector \
+  --no-default-features --features quartz-metal,inspector-example \
+  --bundle-id org.ferroui.simulator-inspector
+```
+
+In the owning workspace folder’s settings, add a profile that uses the app’s bundle identifier. Set `appPath` to install the built bundle when you launch. Leave out that field to use the app already installed on the chosen simulator.
+
+```json
+{
+  "ferroui.iosSimulator.apps": [
+    {
+      "id": "contact-review",
+      "label": "Contact Review",
+      "bundleId": "org.ferroui.simulator-inspector",
+      "appPath": "target/ios-bundles/simulator_inspector.app",
+      "args": ["--mcp", "--mcp-input"]
+    }
+  ]
+}
+```
+
+1. In **App Sessions**, choose the device icon for **Run iOS Simulator App**. Select the profile and booted simulator. The command installs the optional bundle, launches it, and opens Live App after its inspector and native frame are ready.
+2. Use **Inspect** to pick controls, read their properties or accessibility information, and reveal mapped source from a matching debug build. Use **Interact** if the app enabled inputs. The example opts into inspection with `--mcp` and enables input with `--mcp-input`.
+3. Choose **Stop or Disconnect This App** on the simulator session to stop it. Running the same profile on the same device focuses its existing Live App session. To deploy a new build or switch launch profiles, stop the session, then run the desired profile. Use **Connect to Running MCP Server** to inspect an independently launched app without restarting it.
+
+A launch starts or restarts the chosen bundle on the selected simulator. Multiple app sessions appear in the same view. [iOS simulator MCP tools](reference.md#run-an-ios-simulator-app-with-mcp)
+
+![The Contact Review app on iOS 26.4 in App Sessions, with its Rust source, portrait Live App frame, and visual tree](../images/vscode-ios-simulator-live-app.png)
+
 ## Inspect the actual window in Live App
 
-1. Start the managed development binary or run **FerroUI: Connect to Running MCP Server** to attach an authenticated loopback inspector. Use the `--mcp` flags of a participating app such as Todo Workbench to start its server. **Open Live App** opens the supported application windows in the editor. Pick a window from its toolbar.
+1. Start a managed desktop target, run a configured iOS simulator app, or choose **FerroUI: Connect to Running MCP Server** to attach an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.
 2. In **Inspect**, select a control in the native frame or browse the visual, logical, and accessibility trees. Alt+click chooses among overlapping native hits. Read properties, their effective style values, resources, accessible names, roles, and native diagnostics. Switch to **Interact** for clicks, scroll, text, or keys when the app permits input.
 3. Try a property override in the inspector. Just the running session receives the override. Use **Reveal Source** to locate the authored value. When the current revision and source mapping match, use **Apply to Source** to write the supported RSX literal or XAML value into the editor. Review it, then save if you want hot reload to apply the source change.
 

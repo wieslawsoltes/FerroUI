@@ -36,6 +36,7 @@ Build and run Cargo targets from the connected window. Install your Rust debug a
 | Edit a clip or state transition, compare variants, or play a prototype | [Animate and preview variations](motion.md) |
 | Preview with the app’s types and data, inspect a running window, or hot reload | [Run and inspect a view](runtime.md) |
 | Run several Cargo targets and open a Live App editor for each | [Run several app sessions](runtime.md#run-several-app-sessions) |
+| Launch and inspect a native iOS simulator app | [Run an app on an iOS simulator](runtime.md#run-an-app-on-an-ios-simulator) |
 | Verify interaction and accessibility, compare baseline images, or run a CI suite | [Test UI and review visual changes](testing.md) |
 | Share XAML with a Studio or VS Code collaborator and review changes in the editor | [Share and review XAML in a room](collaboration.md) |
 | Set up MCP, find a command, or configure the workspace | [Use agents and configure the extension](reference.md) |

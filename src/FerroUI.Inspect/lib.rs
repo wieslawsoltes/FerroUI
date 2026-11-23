@@ -217,7 +217,7 @@ impl Inspector {
         self.overlays.retain(|weak| weak.upgrade().is_some());
     }
 
-    /// The open top levels: the registered roots and the windows of the desktop lifetime.
+    /// The open top levels from the application lifetime and explicitly registered roots.
     pub fn windows(&mut self) -> Vec<Ref<TopLevel>> {
         self.prune();
         self.roots.retain(|weak| weak.upgrade().is_some());
@@ -228,6 +228,13 @@ impl Inspector {
             .filter(|r| r.platform_impl().is_some())
             .collect();
         if let Some(lifetime) = Application::current().and_then(|a| a.application_lifetime()) {
+            if let Some(root) = lifetime
+                .as_single_top_level_application_lifetime()
+                .and_then(|lifetime| lifetime.top_level())
+                .filter(|root| root.platform_impl().is_some() && !roots.contains(root))
+            {
+                roots.push(root);
+            }
             if let Some(desktop) = lifetime.as_classic_desktop_style_application_lifetime() {
                 for window in desktop.windows() {
                     let root = window.upcast::<TopLevel>();
