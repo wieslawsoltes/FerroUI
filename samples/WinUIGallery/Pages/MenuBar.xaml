@@ -1,4 +1,95 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Menu><MenuItem Header="File"><MenuItem Header="New" InputGesture="Ctrl+N"/><MenuItem Header="Open"/><Separator/><MenuItem Header="Exit"/></MenuItem><MenuItem Header="Edit"><MenuItem Header="Undo"/><MenuItem Header="Redo"/><Separator/><MenuItem Header="Copy"/><MenuItem Header="Paste"/></MenuItem><MenuItem Header="Help"><MenuItem Header="About"/></MenuItem></Menu>
+<!-- Ported from the three pinned MenuBar examples of WinUI Gallery (14061eea) and OnElementClicked
+     of MenuBarPage.xaml.cs (menu_samples.rs); see ../NOTICE.md. WinUI's MenuBar and MenuBarItem
+     are FerroUI's Menu and its top MenuItems (Title is Header); MenuFlyoutItem,
+     MenuFlyoutSubItem, MenuFlyoutSeparator and RadioMenuFlyoutItem are MenuItem (Text is Header),
+     a MenuItem with items, Separator and a MenuItem with the ToggleType Radio. A
+     KeyboardAccelerator is the item's HotKey, shown as its InputGesture. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="MenuBarExample1" Spacing="8">
+    <TextBlock Text="A simple MenuBar" FontSize="18" />
+    <StackPanel>
+      <TextBlock x:Name="SelectedOptionText" Text="" />
+      <Menu x:Name="Example1">
+        <MenuItem Header="File">
+          <MenuItem x:Name="o1" Header="New" />
+          <MenuItem x:Name="o2" Header="Open" />
+          <MenuItem x:Name="o3" Header="Save" />
+          <MenuItem x:Name="o4" Header="Exit" />
+        </MenuItem>
+        <MenuItem Header="Edit">
+          <MenuItem x:Name="o5" Header="Undo" />
+          <MenuItem x:Name="o6" Header="Cut" />
+          <MenuItem x:Name="o7" Header="Copy" />
+          <MenuItem x:Name="o8" Header="Paste" />
+        </MenuItem>
+        <MenuItem Header="Help">
+          <MenuItem x:Name="o9" Header="About" />
+        </MenuItem>
+      </Menu>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuBarExample2" Spacing="8">
+    <TextBlock Text="MenuBar with keyboard accelerators" FontSize="18" />
+    <StackPanel>
+      <TextBlock x:Name="SelectedOptionText1" Text="" />
+      <Menu x:Name="Example2">
+        <MenuItem Header="File">
+          <MenuItem x:Name="t2" Header="New" HotKey="Ctrl+N" InputGesture="Ctrl+N" />
+          <MenuItem x:Name="t1" Header="Open" HotKey="Ctrl+O" InputGesture="Ctrl+O" />
+          <MenuItem x:Name="t3" Header="Save" HotKey="Ctrl+S" InputGesture="Ctrl+S" />
+          <MenuItem x:Name="t4" Header="Exit" HotKey="Ctrl+E" InputGesture="Ctrl+E" />
+        </MenuItem>
+        <MenuItem Header="Edit">
+          <MenuItem x:Name="t5" Header="Undo" HotKey="Ctrl+Z" InputGesture="Ctrl+Z" />
+          <MenuItem x:Name="t6" Header="Cut" HotKey="Ctrl+X" InputGesture="Ctrl+X" />
+          <MenuItem x:Name="t7" Header="Copy" HotKey="Ctrl+C" InputGesture="Ctrl+C" />
+          <MenuItem x:Name="t8" Header="Paste" HotKey="Ctrl+V" InputGesture="Ctrl+V" />
+        </MenuItem>
+        <MenuItem Header="Help">
+          <MenuItem x:Name="t9" Header="About" HotKey="Ctrl+I" InputGesture="Ctrl+I" />
+        </MenuItem>
+      </Menu>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuBarExample3" Spacing="8">
+    <TextBlock Text="MenuBar with submenus, separators, and radio items" FontSize="18" />
+    <StackPanel>
+      <TextBlock x:Name="SelectedOptionText2" Text="" />
+      <Menu x:Name="Example3">
+        <MenuItem Header="File">
+          <MenuItem Header="New">
+            <MenuItem x:Name="z1" Header="Plain Text Document" />
+            <MenuItem x:Name="z2" Header="Rich Text Document" />
+            <MenuItem x:Name="z3" Header="Other Formats" />
+          </MenuItem>
+          <MenuItem x:Name="z4" Header="Open" />
+          <MenuItem x:Name="z5" Header="Save" />
+          <Separator />
+          <MenuItem x:Name="z6" Header="Exit" />
+        </MenuItem>
+        <MenuItem Header="Edit">
+          <MenuItem x:Name="z7" Header="Undo" />
+          <MenuItem x:Name="z8" Header="Cut" />
+          <MenuItem x:Name="z9" Header="Copy" />
+          <MenuItem x:Name="z11" Header="Paste" />
+        </MenuItem>
+        <MenuItem Header="View">
+          <MenuItem x:Name="z12" Header="Output" />
+          <Separator />
+          <MenuItem x:Name="z13" GroupName="OrientationGroup" Header="Landscape" ToggleType="Radio" />
+          <MenuItem x:Name="z14" GroupName="OrientationGroup" Header="Portrait" ToggleType="Radio" IsChecked="True" />
+          <Separator />
+          <MenuItem x:Name="z15" GroupName="SizeGroup" Header="Small icons" ToggleType="Radio" />
+          <MenuItem x:Name="z16" GroupName="SizeGroup" Header="Medium icons" ToggleType="Radio" IsChecked="True" />
+          <MenuItem x:Name="z17" GroupName="SizeGroup" Header="Large icons" ToggleType="Radio" />
+        </MenuItem>
+        <MenuItem Header="Help">
+          <MenuItem x:Name="z18" Header="About" />
+        </MenuItem>
+      </Menu>
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

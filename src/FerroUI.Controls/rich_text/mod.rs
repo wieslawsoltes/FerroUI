@@ -8,7 +8,9 @@ mod rich_text_link;
 mod rich_text_transfer;
 mod rtf;
 
-pub(crate) use rich_edit_text_document::{unit_ranges as rich_text_unit_ranges, UnicodeTextUnit};
+pub(crate) use rich_edit_text_document::{
+    find_in_text as find_in_plain_text, unit_ranges as rich_text_unit_ranges, UnicodeTextUnit,
+};
 pub use rich_edit_text_document::{
     FindOptions, LetterCase, RangeGravity, RichEditTextDocument, RichEditTextRange,
     RichEditTextSelection, SelectionOptions, SelectionType, TextFindOptions, TextFormatValue,

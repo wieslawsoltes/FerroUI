@@ -1,7 +1,7 @@
 use super::{
     AutomationControlType, AutomationPeer, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::automation::provider::{IValueProvider, ProviderError, ProviderAdapter};
+use crate::automation::provider::{ITextProvider, ITextProvider2, IValueProvider, ProviderError, ProviderAdapter};
 use crate::automation::{ElementNotEnabledError, ValuePatternIdentifiers};
 use crate::TextBox;
 use ferroui_base::{
@@ -23,7 +23,11 @@ ferro_class! {
     }
 }
 ferroui_base::ferro_class_info!(TextBoxAutomationPeer {
-    interfaces: [Rc<dyn IValueProvider> => ProviderAdapter::as_value_provider]
+    interfaces: [
+        Rc<dyn IValueProvider> => ProviderAdapter::as_value_provider,
+        Rc<dyn ITextProvider> => ProviderAdapter::as_text_provider,
+        Rc<dyn ITextProvider2> => ProviderAdapter::as_text_provider2,
+    ]
 });
 
 impl FerroObjectImpl for TextBoxAutomationPeer {
@@ -43,7 +47,11 @@ impl ControlAutomationPeerImpl for TextBoxAutomationPeer {}
 
 impl AutomationPeerImpl for TextBoxAutomationPeer {
     fn get_provider_core(this: &Self, provider_type: ValueType) -> Option<BoxedValue> {
-        if provider_type == ValueType::of::<Rc<dyn IValueProvider>>() && this.accessible_text_owner().is_none() {
+        // A password box offers neither its value nor its text (`plain_text_automation`).
+        let discloses_text = provider_type == ValueType::of::<Rc<dyn IValueProvider>>()
+            || provider_type == ValueType::of::<Rc<dyn ITextProvider>>()
+            || provider_type == ValueType::of::<Rc<dyn ITextProvider2>>();
+        if discloses_text && this.accessible_text_owner().is_none() {
             None
         } else {
             Self::parent_get_provider_core(this, provider_type)
@@ -124,7 +132,7 @@ impl TextBoxAutomationPeer {
     }
 
     // RevealPassword changes rendering, not the confidentiality of the password field.
-    fn accessible_text_owner(&self) -> Option<Ref<TextBox>> {
+    pub(crate) fn accessible_text_owner(&self) -> Option<Ref<TextBox>> {
         let owner = self.try_owner()?.cast::<TextBox>()?;
         (owner.password_char() == '\0').then_some(owner)
     }

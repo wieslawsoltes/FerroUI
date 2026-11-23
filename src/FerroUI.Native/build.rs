@@ -3,15 +3,24 @@
 //! 1. runs `microcom-codegen` on `frn.idl`, producing the C++ header
 //!    `$OUT_DIR/inc/ferro-native.h` and the Rust bindings
 //!    `$OUT_DIR/frn_interop.rs` (included by the `interop` module);
-//! 2. compiles the Objective-C++ backend in `native/FerroUI.Native/src/OSX`
+//! 2. writes `$OUT_DIR/native_sources.rs`, a fingerprint of the sources of the
+//!    native library (included by the `interop` module);
+//! 3. compiles the Objective-C++ backend in `native/FerroUI.Native/src/OSX`
 //!    into static libraries and links them plus the system frameworks.
+//!
+//! The compiled crate carries the static libraries (`+whole-archive`), so its
+//! compilation depends on them, and nothing in the command line of the Rust
+//! compiler says so: a compiler cache keyed on the Rust sources and that
+//! command line gives a crate built before a change of the native sources
+//! back after it. The fingerprint is a Rust source of the crate, which every
+//! such cache reads.
 //!
 //! The native sources are reached through `native`, a symbolic link of the
 //! crate directory to `native/FerroUI.Native` of the repository: the package
 //! of the published crate holds the files behind it, so the crate builds
 //! from its package as it does in the repository.
 //!
-//! On docs.rs (`DOCS_RS`) the second step is left out: the documentation of
+//! On docs.rs (`DOCS_RS`) the third step is left out: the documentation of
 //! the macOS target is generated on a Linux host, which has no compiler for
 //! Objective-C++ against the macOS SDK, and generating it links nothing.
 
@@ -47,17 +56,43 @@ fn main() {
     write_if_changed(&gen_inc_dir.join("ferro-native.h"), &header);
     write_if_changed(&out_dir.join("frn_interop.rs"), &bindings);
 
-    // --- 2. native library --------------------------------------------------
+    // --- 2. fingerprint of the native sources -------------------------------
+    println!("cargo:rerun-if-changed={}", inc_dir.display());
+    println!("cargo:rerun-if-changed={}", src_dir.display());
+    let mut inputs: Vec<PathBuf> = [&inc_dir, &src_dir]
+        .into_iter()
+        .flat_map(|dir| fs::read_dir(dir).unwrap_or_else(|e| panic!("{}: {e}", dir.display())))
+        .map(|entry| entry.unwrap().path())
+        .filter(|path| path.is_file())
+        .collect();
+    inputs.sort();
+    // What the library is compiled from: this script (the flags), the generated header and the
+    // sources.
+    let mut fingerprint = Fnv1a::new();
+    fingerprint.write(include_bytes!("build.rs"));
+    fingerprint.write(env::var("PROFILE").unwrap_or_default().as_bytes());
+    fingerprint.write(header.as_bytes());
+    for path in &inputs {
+        println!("cargo:rerun-if-changed={}", path.display());
+        fingerprint.write(path.file_name().unwrap().as_encoded_bytes());
+        fingerprint.write(&fs::read(path).unwrap_or_else(|e| panic!("{}: {e}", path.display())));
+    }
+    write_if_changed(
+        &out_dir.join("native_sources.rs"),
+        &format!(
+            "/// A fingerprint of the sources the native library of this build was compiled from.\n\
+             pub const NATIVE_SOURCES: u64 = {:#018x};\n",
+            fingerprint.finish()
+        ),
+    );
+
+    // --- 3. native library --------------------------------------------------
     if env::var_os("DOCS_RS").is_some() {
         return;
     }
-    println!("cargo:rerun-if-changed={}", inc_dir.display());
-    println!("cargo:rerun-if-changed={}", src_dir.display());
     let mut arc_sources = Vec::new();
     let mut noarc_sources = Vec::new();
-    for entry in fs::read_dir(&src_dir).expect("native/FerroUI.Native/src/OSX") {
-        let path = entry.unwrap().path();
-        println!("cargo:rerun-if-changed={}", path.display());
+    for path in inputs.into_iter().filter(|path| path.starts_with(&src_dir)) {
         if path.extension().is_some_and(|e| e == "mm") {
             // Same per-file setting as the upstream Xcode project: everything
             // is built with ARC except noarc.mm.
@@ -149,4 +184,25 @@ fn write_if_changed(path: &Path, content: &str) {
         return;
     }
     fs::write(path, content).unwrap_or_else(|e| panic!("{}: {e}", path.display()));
+}
+
+/// FNV-1a, 64 bits: the same value for the same bytes on every host and toolchain.
+struct Fnv1a(u64);
+
+impl Fnv1a {
+    fn new() -> Self {
+        Self(0xcbf2_9ce4_8422_2325)
+    }
+
+    fn write(&mut self, bytes: &[u8]) {
+        for byte in bytes {
+            self.0 = (self.0 ^ u64::from(*byte)).wrapping_mul(0x0000_0100_0000_01b3);
+        }
+        // The end of the piece, so that two pieces do not read as one.
+        self.0 = (self.0 ^ 0xff).wrapping_mul(0x0000_0100_0000_01b3);
+    }
+
+    fn finish(&self) -> u64 {
+        self.0
+    }
 }

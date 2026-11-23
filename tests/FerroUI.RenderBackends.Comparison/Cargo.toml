@@ -18,8 +18,9 @@ ferroui-base.workspace = true
 ferroui-skia = { workspace = true, features = ["media3d"] }
 # With every rendering mode: the harness compares them (modes.rs).
 ferroui-vello = { workspace = true, features = ["hybrid", "gpu", "media3d"] }
-# The CPU reference itself, which the 3D scenes are compared with.
-ferroui-render3d.workspace = true
+# The CPU reference itself, which the 3D scenes are compared with, and the counters of the wgpu
+# executor (the texture uploads of the brushes of step D6).
+ferroui-render3d = { workspace = true, features = ["wgpu"] }
 # The text scenes: the shaper both backends are used with, and Skia itself
 # for the one thing the contracts have no member for, an instance of a
 # variable font.

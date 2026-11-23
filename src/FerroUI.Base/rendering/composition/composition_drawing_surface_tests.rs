@@ -554,6 +554,31 @@ fn a_drawing_surface_is_updated_on_the_render_thread() {
 }
 
 #[test]
+fn update_and_temporary_import_disposal_share_one_batch_without_disposing_the_surface_image() {
+    let services = RenderThreadServices::new();
+    let log = Arc::new(InteropLog::default());
+    let interop = services.interop(&log);
+    let imported = interop.import_image(
+        Rc::new(PlatformHandle::new(1, Some("Fake"))),
+        PlatformGraphicsExternalImageProperties { width: 1, height: 1, ..Default::default() },
+    );
+    let surface = services.compositor.create_drawing_surface();
+    let update = surface.update_async(&*imported);
+    let disposed = imported.dispose_async();
+    drop(imported);
+    let render_thread = services.run_jobs();
+    assert!(update.is_completed_successfully(), "{:?}", update.exception().map(|e| e.to_string()));
+    assert!(disposed.is_completed_successfully());
+    assert_eq!(*log.snapshots.lock().unwrap(), vec![render_thread]);
+    assert_eq!(*log.disposals.lock().unwrap(), vec![render_thread]);
+    let bitmap = log.last_snapshot.lock().unwrap().clone().unwrap();
+    assert!(!bitmap.is_disposed.load(std::sync::atomic::Ordering::SeqCst));
+    surface.dispose();
+    services.run_jobs();
+    assert!(bitmap.is_disposed.load(std::sync::atomic::Ordering::SeqCst));
+}
+
+#[test]
 fn an_update_with_a_disposed_image_fails_on_the_render_thread() {
     let services = RenderThreadServices::new();
     let log = Arc::new(InteropLog::default());

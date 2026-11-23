@@ -3,6 +3,12 @@
 #include <stdint.h>
 typedef struct FerroLinuxSession FerroLinuxSession;
 typedef struct FerroLinuxFrame FerroLinuxFrame;
+typedef struct FerroLinuxRecording FerroLinuxRecording;
+typedef struct {
+    uint32_t width, height;
+    uint64_t duration_ns, length;
+    char error[512];
+} FerroLinuxRecordingInfo;
 typedef struct {
     int32_t state, seekable, buffering, error_kind;
     uint32_t width, height, fps_n, fps_d;
@@ -31,4 +37,12 @@ void ferro_linux_alias_release(void *alias, int context_alive);
 int ferro_linux_convert(FerroLinuxFrame *f, intptr_t display, uint32_t output);
 /* Explicit still-photo transfer only, never called from the preview route. */
 int ferro_linux_photo_rgb(FerroLinuxFrame *f, uint8_t *rgb, uint64_t capacity);
+int ferro_linux_can_record(FerroLinuxSession *s);
+FerroLinuxRecording *ferro_linux_record(FerroLinuxSession *s);
+void ferro_linux_record_finish(FerroLinuxRecording *r);
+void ferro_linux_record_cancel(FerroLinuxRecording *r);
+void ferro_linux_record_release(FerroLinuxRecording *r);
+/* 0 pending, 1 recording, 2 complete, -1 failed, -2 cancelled. */
+int ferro_linux_record_poll(FerroLinuxRecording *r, FerroLinuxRecordingInfo *out);
+int ferro_linux_record_copy(FerroLinuxRecording *r, uint8_t *bytes, uint64_t length);
 #endif

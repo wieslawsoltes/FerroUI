@@ -16,9 +16,9 @@ port's notes). The other items of that tracker (materials, composition, Navigati
 application work) are covered elsewhere: Reveal and the materials by #325, `ThemeShadow` by #326,
 NavigationView by the W-series of `winui-controls.md`.
 
-Nothing here is implemented yet. Each item lands as a series of small pull requests from `main`
-(section 8), each with its tests, its rows in the deviation registers and a line in
-`CHANGELOG.md` under "Unreleased".
+Each item lands as a series of small pull requests from `main` (section 8), each with its tests,
+its rows in the deviation registers and a line in `CHANGELOG.md` under "Unreleased". The status
+of each step is in the table of section 8; high contrast (XAML-03) is tracked by #560.
 
 ## 1. Sources and revisions
 
@@ -183,9 +183,9 @@ virtualizing stack, and the List, ListItem and Invoke patterns.
 | WinUI behaviour | FerroUI `main` | PRs | Status |
 |---|---|---|---|
 | Detection: `SystemParametersInfo(SPI_GETHIGHCONTRAST)` and `HCF_HIGHCONTRASTON`; the scheme classified as Black, White or Custom from `GetSysColor(COLOR_WINDOW)` and `COLOR_WINDOWTEXT` | `PlatformColorValues::contrast_preference` (`NoPreference`, `High`) reported by Windows (`IAccessibilitySettings.HighContrast`, `win32_platform_settings.rs`), the browser (`prefers-contrast: more`), iOS (`accessibilityContrast`) and Android (`high_text_contrast_enabled`). macOS compares `effectiveAppearance.name` with the high contrast appearance names (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`), which "Increase contrast" does not select, so it probably never reports `High`; `accessibilityDisplayShouldIncreaseContrast` is not read. Linux reads `color-scheme` and `accent-color` of `org.freedesktop.appearance`, not `contrast` | #325 reads the contrast preference for the Reveal fallback (`reveal_brush.rs`) and adds `IsHighContrast` to `SystemBackdropConfiguration` | partial |
-| Selection: with high contrast on, the theme dictionary `HighContrastBlack`/`HighContrastWhite`/`HighContrastCustom`, falling back to `HighContrast` (the only key WinUI's themes define), whatever `RequestedTheme` says (a subtree's `RequestedTheme` only picks the White or Black key); `ActualThemeChanged` is suppressed while high contrast stays on | `ThemeVariant::update_actual_theme_variant` (`src/FerroUI.Base/styling/theme_variant.rs`) uses the requested variant, else Light or Dark of the platform; `contrast_preference` is read nowhere in Base, Controls or the themes. The WinUI theme's `HighContrast` dictionaries (61, keyed `{x:Static winui:WinUITheme.HighContrast}`, a variant inheriting Dark) apply only when an application requests the variant (theme G-5) | | missing |
-| System colours: 15 `SystemColor*Color` resources and brushes built from `GetSysColor` (`FrameworkTheming::RebuildColorAndBrushResources`), in a dictionary of the framework; the WinUI theme names 8 of them (Window, WindowText, ButtonFace, ButtonText, Highlight, HighlightText, Hotlight, GrayText) about 1,150 times | `Resources/SystemResources.xaml` of the WinUI theme: fixed values, Windows defaults in `Default`/`Light`, High Contrast Black in `HighContrast` (G-6); no backend reports system colours, only the accent (`Accents/system_accent_colors.rs` follows `color_values_changed` for the accent) | | missing |
-| Live update: `UISettings.ColorValuesChanged` (and the island's `ThemeChanged`) re-reads theme, contrast and accent, rebuilds the system colours and re-resolves every `ThemeResource` | `IPlatformSettings::color_values_changed`; Windows re-reads on `WM_SETTINGCHANGE` (`ImmersiveColorSet`, `WindowsThemeElement`); macOS by KVO on `NSApp.effectiveAppearance`; Linux on the portal's `SettingChanged` for its two keys; `{DynamicResource}` re-resolves on resource changes | | partial |
+| Selection: with high contrast on, the theme dictionary `HighContrastBlack`/`HighContrastWhite`/`HighContrastCustom`, falling back to `HighContrast` (the only key WinUI's themes define), whatever `RequestedTheme` says (a subtree's `RequestedTheme` only picks the White or Black key); `ActualThemeChanged` is suppressed while high contrast stays on | HC-1: `ThemeVariant::set_high_contrast_variant`, set by the WinUI theme while `UseSystemHighContrast` (default `true`); with the platform's `contrast_preference() == High` the application and the root top levels resolve to `WinUITheme.HighContrast`, also when they request Light or Dark (D10); a variant requested below a root is kept | | has (roots; theme G-5) |
+| System colours: 15 `SystemColor*Color` resources and brushes built from `GetSysColor` (`FrameworkTheming::RebuildColorAndBrushResources`), in a dictionary of the framework; the WinUI theme names 8 of them (Window, WindowText, ButtonFace, ButtonText, Highlight, HighlightText, Hotlight, GrayText) about 1,150 times | HC-1: `PlatformColorValues::system_colors()` (`SystemColors`, the 8 colours) and the provider `Accents/SystemColors` of the WinUI theme: in the high contrast variant the colours the platform reports, else High Contrast Black or White by the platform's variant; the standard colours of Windows in Light and Dark (G-6). The platforms report them from HC-2 (Windows) and HC-3 (macOS) | | partial (the 8 the theme names) |
+| Live update: `UISettings.ColorValuesChanged` (and the island's `ThemeChanged`) re-reads theme, contrast and accent, rebuilds the system colours and re-resolves every `ThemeResource` | `IPlatformSettings::color_values_changed`; Windows re-reads on `WM_SETTINGCHANGE` (`ImmersiveColorSet`, `WindowsThemeElement`); macOS by KVO on `NSApp.effectiveAppearance`; Linux on the portal's `SettingChanged` for its two keys; `{DynamicResource}` re-resolves on resource changes. HC-1: the application and the root top levels resolve again on `color_values_changed` and on a change of the high contrast variant; `Accents/SystemColors` raises a resource change when the colours change; `DefaultPlatformSettings::set_color_values` simulates a change for tests | | has (the platform messages: HC-2 to HC-4) |
 | `FrameworkElement.HighContrastChanged`; `Application/FrameworkElement.HighContrastAdjustment` (the text backplate of `TextBlock`, `RichTextBlock`, `TextBox`) | none | | missing (not in this plan, section 7.5) |
 
 ## 5. Design: visual states
@@ -299,6 +299,23 @@ base value), leaving out what the transition's own storyboard animates. As in Wi
 independent animations (opacity, render transform and translation values) get the full duration;
 the others get zero.
 
+**Status (VSM-4, done).** `VisualTransition` (`From`, `To`, `GeneratedDuration`,
+`GeneratedEasingFunction`, `Storyboard`) and `VisualStateGroup.Transitions` in
+`ferroui-controls` (`visual_state/visual_transition.rs`, `transitions.rs`). `GoToState` with
+transitions and system animations on (`IPlatformSettings::animations_enabled`) picks the
+transition by the score above; one of zero length (WinUI's `IsZeroDuration`) changes the state at
+once. Otherwise the group is in the new state at once, the transition's storyboard and the
+generated storyboard run (`Changing` is raised at the start), the values of the old state that
+the new one does not set are removed (the generated storyboard animates them back), and the
+setters and the storyboard of the new state apply when both storyboards have completed, which
+raises `CurrentStateChanged`. Another `GoToState` interrupts it (no `Changed` for it); `GoToState`
+to the state it goes to without transitions completes it. The generated storyboard follows
+`DynamicTransitionStoryboardGenerator`: to-values of the new state's animations (`From`, else
+`To`; the first key frame) and setters (doubles, colours, points), back-animations of the old
+state's, leaving out what the transition's storyboard animates; the opacity and the values of
+transforms take the full duration, eased, the rest jumps. Tests:
+`visual_state/transition_tests.rs`.
+
 ### 5.7 State triggers
 
 - When the groups are attached to a visual tree, after the template is applied, when the
@@ -346,6 +363,37 @@ implementations, so they also fit FerroUI's transitions), `RepeatBehavior`, `Fil
   (`(Visual.RenderTransform).(ScaleTransform.ScaleX)`, resolved at start by walking the values).
   FerroUI has no `CompositeTransform`; the Calculator's six paths through it become
   `ScaleTransform` paths in its markup (an application adaptation, not a framework type).
+- **The timing model (first step of VSM-3).** The clock arithmetic of WinUI's `CTimeline` and
+  the key frame segment search of `CAnimation` are values and functions in `ferroui-base`
+  (`animation::TimelineTiming`, `TimelineDuration`, `RepeatBehavior`, `FillBehavior`,
+  `ClockState`, `from_to_by`, `key_frame_segment`, `KeyFrameEase`): the active period (begin
+  time, speed ratio, repeat count or duration, auto-reverse), the clock state with the 0.5 ms
+  tolerance of the expiration, the progress and the iteration, the fill at the end, the end
+  points of an animation from, to or by a value, and the segment and eased progress of the key
+  frames (discrete, linear, spline, easing). The storyboard classes of `ferroui-controls` read
+  them with the time of their clock.
+- **The storyboard classes (second step of VSM-3, done).** `ferroui_controls::animation` (markup
+  namespace `FerroUI.Controls`, as the other WinUI additions of the crate: the framework XML
+  namespace maps the `FerroUI.Animation` namespace to the types of `ferroui-base` only) has
+  `Timeline`, `Storyboard` (children, the attached `TargetName` and `TargetProperty`,
+  `SetTarget`, `Begin`, `Stop`, `Pause`, `Resume`, `Seek`, `SeekAlignedToLastTick`,
+  `SkipToFill`, `GetCurrentState`, `GetCurrentTime`, `Completed`), `DoubleAnimation`,
+  `ColorAnimation`, `PointAnimation`, the `Double`, `Color` and `Point` key frame animations
+  with their `Discrete`, `Linear`, `Spline` and `Easing` key frames,
+  `ObjectAnimationUsingKeyFrames` with `DiscreteObjectKeyFrame`, `EasingFunctionBase` with
+  `EasingMode` and the eleven easing functions (`to_easing` hands one to the transitions of the
+  framework), and `VisualState.Storyboard` (the content property of a state: it begins when the
+  state is entered and stops when it is left; `GoToState` to the current state without
+  transitions skips it to its fill). The markup types `Duration`, `RepeatBehavior` and
+  `FillBehavior` of `ferroui-base` parse as WinUI writes them (`Automatic`, `Forever`,
+  `0:0:0.25`; `2x`). Deviations: a storyboard applies the values of its start at once when it
+  begins and of the time it seeks to at once (WinUI on the next tick); `TargetName` is looked up
+  in the elements of the template or the name scope of the document of the element given to
+  `Storyboard::set_target_scope` (the visual states set it), not in the name scope the
+  storyboard was loaded in; key frame values written as text are converted to the type of the
+  property when the animation begins (the compiler does not type them yet); colours interpolate
+  channel by channel in sRGB, as WinUI does. Tests: `ferroui-controls`,
+  `animation/storyboard/storyboard_tests.rs`.
 - **Not in scope:** theme animations (`PointerDownThemeAnimation` and the others, theme G-22),
   `Storyboard.TargetName` across namescopes, dependent animation throttling
   (`EnableDependentAnimation` is accepted and has no effect: FerroUI animates every property on the
@@ -396,6 +444,26 @@ the control's state (its pseudo-classes and properties) into `GoToState` calls. 
 installs a control's mapper when it applies a template whose root has groups (and only then), and
 re-runs it on the control's pseudo-class changes (`Classes::add_listener`) with transitions. A
 control without groups in its template is untouched; a mapper never changes pseudo-classes.
+
+**Status (VSM-5, done).** `visual_state/state_mappers.rs` of `ferroui-controls` has the mappers
+of `Button` (and `RepeatButton`), `ToggleButton`, `CheckBox`, `RadioButton`, `ListBoxItem` and
+`TextBox`, ports of WinUI's `ChangeVisualState` (`Button_Partial.cpp`, `ToggleButton_Partial.cpp`,
+`CheckBox_Partial.cpp`, `RadioButton_Partial.cpp`, `ListBoxItem_Partial.cpp`) and of the text
+box's `UpdateVisualState` (`TextBoxBase.cpp`, `TextBox.cpp`): `CommonStates` from `:disabled`,
+`:pressed` and `:pointerover`; the check states (`Checked`, `CheckedPointerOver`,
+`IndeterminatePressed`, ...; the combined states of the check box, else its older common and
+check states); the selection states of the list item (`SelectedUnfocused` while the selector
+around it does not have the keyboard focus: FerroUI's counterpart of `IsSelectionActive` is
+`:focus-within`); the focus states (`Focused` for keyboard focus, `:focus-visible`,
+`PointerFocused` for other focus); the text box's `Focused` state and its `ButtonStates`. A
+mapper is installed by `TemplatedControl::apply_template` only when the root of the new template
+has visual state groups; it sets the states without transitions then and with transitions when
+the classes of the control or the properties the states read (`IsChecked`, `IsSelected`, `Text`,
+`IsReadOnly`, ...) change. Controls of other families do nothing more than a type test. The
+catalog's "Visual States" page shows a button template written with visual states, a storyboard
+and a transition. Tests: `visual_state/state_mapper_tests.rs`. Left for later: the mappers of the
+other upstream-ported controls (`ComboBox`, `ComboBoxItem`, `ToggleSwitch`, `Slider`, ...), and the
+theme migration pilot of 5.11.
 
 ### 5.11 Can WinUI templates keep their visual state markup, and should the WinUI theme migrate?
 
@@ -457,6 +525,43 @@ lines of WinUI), incremental loading, semantic zoom, grouping and sticky headers
 animation helpers (FerroUI's `ConnectedAnimationService` serves them from application code), the
 scrolling placeholders.
 
+**Status (LV-1, done).** `ListViewBase`, `ListView`, `ListViewBaseItem`, `ListViewItem`,
+`ListViewItemTemplateSettings`, `ItemsStackPanel`, `ItemClickEventArgs`,
+`ContainerContentChangingEventArgs`, `ChoosingItemContainerEventArgs`, `ItemIndexRange` and the
+enums `ListViewSelectionMode`, `ScrollIntoViewAlignment`, `ListViewReorderMode`,
+`IncrementalLoadingTrigger`, `ItemsUpdatingScrollMode`, `GroupHeaderPlacement` in
+`ferroui-controls` (`list_view/`), with the peers `ListViewBaseAutomationPeer`,
+`ListViewAutomationPeer` (List, Selection), `ListViewBaseItemAutomationPeer` and
+`ListViewItemAutomationPeer` (ListItem, SelectionItem, Invoke while item clicks are enabled).
+`SelectionMode` of `ListViewBase` is its own property (found first by name on a list view) that
+sets the flags of the base as the table above says; `None` clears the selection and keeps input
+from selecting. Item clicks follow WinUI's `OnItemClick` (a tap, Enter, the Invoke pattern) with
+the data item as `ClickedItem`. `ContainerContentChanging` is raised in phase 0 when a container
+is prepared and when it is cleared (`InRecycleQueue`); `ChoosingItemContainer` lets a handler give
+the container. `ScrollIntoView` with `Leading` puts the item at the start of the viewport.
+`ItemsStackPanel` is FerroUI's virtualizing stack panel with WinUI's visible and cache indexes;
+the grouping members are accepted. `ListViewBase` and `ListViewBaseItem` have no markup
+constructor (WinUI's are protected). The WinUI theme has `Controls/ListView.xaml` (the ListView
+style of `generic.xaml`, with the header and the footer as content presenters around the items
+presenter, and the implicit theme of `ListViewItem` based on `DefaultListViewItemStyle`); the
+ListView waiver is removed and G-23 and LBI-8 are updated. `ListView` and `ListViewItem` join the
+WinUI-only list. The catalog has a "ListView" page in "Collections & Data". Tests:
+`list_view/list_view_tests.rs`.
+
+**Status (LV-2, done).** `GridView`, `GridViewItem`, `GridViewItemTemplateSettings`,
+`ItemsWrapGrid` and the peers `GridViewAutomationPeer` (List) and `GridViewItemAutomationPeer`
+(ListItem, SelectionItem, Invoke) in `ferroui-controls` (`list_view/`). `ItemsWrapGrid` derives
+from `WrapPanel` (decision D5): cells of one size (`ItemWidth` by `ItemHeight`, or the size of the
+first item, as in WinUI), in rows or columns that wrap at the edge or after
+`MaximumRowsOrColumns` items; it does not virtualize (recorded). The WinUI theme has
+`Controls/GridView.xaml` (the GridView style of `generic.xaml`, and `DefaultGridViewItemStyle`
+with the chrome of `ListViewItemPresenter` drawn with elements: the background of the state, the
+accent selection border of `GridViewItemSelectedBorderThickness`, the disabled opacity; the check
+mark and the multi-select check box are left out, as for the list items) and the converted
+`Resources/GridViewItem_themeresources.xaml`; the GridView waivers are removed. `GridView` and
+`GridViewItem` join the WinUI-only list; the catalog has a "GridView" page in "Collections &
+Data". Tests: the grid tests of `list_view/list_view_tests.rs`.
+
 ### 6.3 Templates and resources (WinUI theme)
 
 - `Controls/ListView.xaml` and `Controls/GridView.xaml` from GX 9284 and 9348:
@@ -492,6 +597,24 @@ model as WinUI's:
   gestures; no mouse drag.
 - Template and resources from `SwipeControl.xaml` and `SwipeControl_themeresources.xaml`;
   `SwipeItemStyle` on `AppBarButton`. No peer (WinUI has none).
+
+**Status (SW-1, done).** `SwipeControl`, `SwipeItems`, `SwipeItem`, `SwipeItemInvokedEventArgs`,
+`SwipeMode`, `SwipeBehaviorOnInvoked` (and `ExecuteItemsHaveOneItem`, the error of
+`SwipeItems::try_add` and `try_set_mode` where WinUI throws) in `ferroui-controls`
+(`swipe_control/`). The interaction is WinUI's on the composition interactions: the tracker
+owner's `ValuesChanged` (the content of the side, the last control closed, the threshold),
+`InteractingStateEntered`, `InertiaStateEntered` (the flick to the other side, the blocked sides)
+and `IdleStateEntered` (execute items invoke their item; closed items are removed), the resting
+values of `ConfigurePositionInertiaRestingValues` and the swipe expression of the content's
+`Translation` as WinUI writes them, `Close` with `c_MinimumCloseVelocity`; the items are
+`CommandBarButton`s with `SwipeItemStyle`, coloured as WinUI's `UpdateColors`. Without a
+compositor (headless) `Close` closes at once. The WinUI theme has `Controls/SwipeControl.xaml`
+and the converted `Resources/SwipeControl_themeresources.xaml` (the waivers are removed); the
+catalog has a "SwipeControl" page in "Collections & Data". Left for later: the execute
+expression and the clip animation of the items (`SetupExecuteExpressionAnimation`,
+`SetupClipAnimation`), the dismissal on a tap outside, a key or a change of the top level
+(`AttachDismissingHandlers`), the `InputEater` that keeps taps from the content while open, a
+precision touchpad's pan. Tests: `swipe_control/swipe_control_tests.rs`.
 
 ## 7. Design: Pivot and high contrast
 
@@ -538,6 +661,72 @@ The owner chose the structure of WinUI over a `Carousel` base. `Pivot` derives f
 The size is about 12.5k lines of WinUI. PV-1 is therefore split into three pull requests (section
 8).
 
+**Status (PV-1, done).** `Pivot`, `PivotItem`, `PivotItemEventArgs`, `PivotPanel`,
+`PivotHeaderFocusVisualPlacement`, `PivotSlideInAnimationGroup` and the peers
+`PivotAutomationPeer` (Tab, Selection) and `PivotItemAutomationPeer` (TabItem, SelectionItem) in
+`ferroui-controls` (`pivot/`, `automation/peers/pivot_automation_peer.rs`). The state machine
+(`pivot_state_machine.rs`) is WinUI's `PivotStateMachine` ported one to one, with its callbacks
+as a trait the pivot implements; it is driven as in WinUI: measure, arrange, the selection, the
+lock, the items, the carousel. Where WinUI listens to DManip (`ViewChanging`, `ViewChanged`,
+`DirectManipulationStarted/Completed`), the port takes the scroll gestures of the scroll viewer:
+the offset changes while a gesture runs are non-inertial view changes, the end of the gesture
+(after the scroll presenter snapped to a section) is the inertial view change at the final offset
+followed by the final view; programmatic offsets are the machine's own and are not reported back.
+`SetViewportEnabled` turns the scroll gesture recognizer of the scroll viewer on and off (WinUI
+switches the scroll mode). `PivotPanel` is WinUI's: one section per measure width, a thousand
+sections while the headers wrap, a regular snap point per section. Recorded deviations: WinUI
+arranges the `PivotLayoutElement` at the start of the panel and keeps it in the viewport with a
+secondary content relationship of the scroll viewer, and moves the items with the inverse
+relationship and `ItemsPresenterTranslateTransform`; the port arranges the layout element at the
+section the viewport rests on and drives both with expression animations of the composition
+`Translation` that read the scroll viewer's manipulation property set and a property set of the
+pivot (`LayoutOffset`, `SectionOffset`), so the pan runs on the compositor and layout and hit
+testing are where the content rests. The neighbours of the selected item get their
+`Translation` of one section while a pan runs, as in WinUI. `SelectionChanged` is the base's (the
+base keeps the item and the index together). The data item peer (`PivotItemDataAutomationPeer`)
+and the Scroll and ScrollItem patterns are left out: FerroUI has no data item peers. The fly-out
+and fly-in complete on the next turn of the dispatcher without animating until PV-2. Tests:
+`pivot/pivot_state_machine_tests.rs` (the machine with recorded callbacks) and
+`pivot/pivot_tests.rs` (the control with WinUI's template parts).
+
+**Status (PV-2, done).** `PivotHeaderItem`, `PivotHeaderPanel` (Primitives), the header manager
+(`pivot_header_manager.rs`, WinUI's `PivotHeaderManager`: one header per item with its content
+bound to the item's `Header`, the header template, the states, the lock, the move between the
+dynamic and the static panel) and `PivotCurveGenerator` ported one to one
+(`pivot_curve_generator.rs`). The pivot chooses static headers as WinUI's `ShouldUseStaticHeaders`
+(no carousel, or headers that fit), shows the previous and next buttons while a mouse or a pen is
+over the headers (WinUI's `UpdateVisualStates`), moves with Left, Right, Home and End in the
+headers, and places the focus follower on the selected header. The header states are WinUI's
+names, given to the visual state manager and shown through the pseudo-classes `:selected`,
+`:pressed`, `:locked` of the header and `:header-static`, `:previous-button-visible`,
+`:next-button-visible` of the pivot (decision D2). Animations, all on the compositor: the
+parallax of the headers is the parametric curve of the generator as a piecewise linear
+expression of the scroll viewer's manipulation property set (WinUI's DManip parallax
+relationship), the fly-out and fly-in of `PivotAnimator` are key frame animations of the
+pivot's property set (`SectionOffset`, `ItemsOpacity`, `HeaderOffset`) that the expressions of
+the items and of the header offset element read, with WinUI's durations, distances and spline
+and a scoped batch for the completion the machine waits for (without animations of the platform
+they jump to their end), and the slide-in of `Pivot_SlideInEffect_Partial.cpp` animates the
+`Translation.X` of the elements with a `SlideInAnimationGroup`. Recorded deviations: the ghost
+header (WinUI's layout transition elements) is a redirect visual of the header before the
+selected one; the header positions are arranged, not written to `Canvas.Left` and `Canvas.Top`;
+the static content curve of WinUI (`PivotStaticContentCurve`) is the expression of PV-1, which is
+the same line within the panel. Tests: `pivot/pivot_curve_generator.rs` (the curves and the
+expression) and the header tests of `pivot/pivot_tests.rs`.
+
+**Status (PV-3, done).** The WinUI theme has `Controls/Pivot.xaml` (hand-ported:
+`DefaultPivotStyle` with `NextTemplate`, `PreviousTemplate` and `TitleContentControlStyle`,
+`DefaultPivotItemStyle`, `DefaultPivotHeaderItemStyle`, `PivotTitleContentControlStyle` and the
+implicit themes) and the converted `Resources/Pivot_themeresources.xaml`; the two Pivot waivers
+are removed and G-23 no longer names Pivot. The states are pseudo-classes (decision D2):
+`:previous-button-visible` and `:next-button-visible` of the pivot for
+`NavigationButtonsVisibility`, `:selected`, `:pressed`, `:pointerover`, `:disabled` and `:locked`
+of the header item for `SelectionStates`; the header panels' visibility is set by the control
+(`HeaderStates`); the transforms of the template are composition animations of the control.
+`Pivot`, `PivotItem` and `PivotHeaderItem` join the WinUI-only list. The catalog has a "Pivot"
+page in "Navigation & Pages" (a pivot with a title, one whose headers wrap with slide-in groups,
+and one with `IsLocked` and `IsHeaderItemsCarouselEnabled` switches).
+
 ### 7.2 High contrast: the base library
 
 Additive members of `ferroui-base`:
@@ -563,9 +752,11 @@ Additive members of `ferroui-base`:
 - `Accents/SystemColors` (beside `SystemAccentColors`): a resource provider of the eight
   `SystemColor*Color` keys of the `HighContrast` dictionary, from `PlatformColorValues::system_colors()`,
   following `color_values_changed`. Without system colours: the High Contrast Black values (today's
-  fixed ones) when the platform variant is dark, High Contrast White when it is light. The
-  `HighContrast` entries of `Resources/SystemResources.xaml` move to the provider; `Default` and
-  `Light` keep their fixed values (as WinUI's own dictionaries).
+  fixed ones) when the platform variant is dark, High Contrast White when it is light. As built,
+  the provider answers the light and dark variants too, with the standard colours of Windows
+  (the former values of `Default` and `Light`), and `Resources/SystemResources.xaml` is gone:
+  theme dictionaries are searched before merged dictionaries, so a `Default` entry would hide the
+  provider from the high contrast variant (which falls back to `Default`).
 - The `{DynamicResource}` references of the theme re-resolve when the provider changes, so the
   colours update live; G-5 and G-6 are corrected, and the window frame follows the luminance of
   `SystemColorWindowColor`.
@@ -575,9 +766,9 @@ Additive members of `ferroui-base`:
 | Platform | Contrast | System colours | Change | Validation |
 |---|---|---|---|---|
 | Windows (`src/Windows/FerroUI.Win32/win32_platform_settings.rs`) | `SPI_GETHIGHCONTRAST` with `HCF_HIGHCONTRASTON` (as WinUI), the `IAccessibilitySettings` reading kept as the fallback | `GetSysColor` of `COLOR_WINDOW`, `COLOR_WINDOWTEXT`, `COLOR_BTNFACE`, `COLOR_BTNTEXT`, `COLOR_HIGHLIGHT`, `COLOR_HIGHLIGHTTEXT`, `COLOR_HOTLIGHT`, `COLOR_GRAYTEXT`, while high contrast is on | `WM_SETTINGCHANGE` with `SPI_SETHIGHCONTRAST`, and `WM_SYSCOLORCHANGE` | Windows VM: the four contrast themes, switching while running |
-| macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11) | an observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings); the native interface gains two methods at the end of `IFrnPlatformSettings` |
+| macOS (`native/FerroUI.Native/src/OSX/PlatformSettings.mm`, `src/FerroUI.Native/frn.idl`, `native_platform_settings.rs`) | `NSWorkspace.accessibilityDisplayShouldIncreaseContrast` ("Increase contrast"), as well as the high contrast appearance names | the dynamic `NSColor`s under the effective appearance: `windowBackgroundColor`, `labelColor`, `controlColor`, `controlTextColor`, `selectedContentBackgroundColor`, `alternateSelectedControlTextColor`, `linkColor`, `disabledControlTextColor` (decision D11), while the preference is `High` | the observer of `NSWorkspaceAccessibilityDisplayOptionsDidChangeNotification` (already re-reading the colour values) beside the appearance KVO | locally, with the owner switching the setting (an agent does not change system settings). As built (HC-3): an optional interface `IFrnContrastSettings` found with `QueryInterface`, as `IFrnAccessibilitySettings` and `IFrnPowerSettings`, instead of methods at the end of `IFrnPlatformSettings`, so an older native library keeps working |
 | Linux (`src/FerroUI.FreeDesktop/dbus_platform_settings.rs`) | the portal key `contrast` of `org.freedesktop.appearance` (1 is high) | none (the portal has none): the fixed palettes of 7.3 | `SettingChanged` for `contrast` | the fake portal of the crate's tests; the Linux VM with GNOME's high contrast switch |
-| Browser, iOS, Android | already report the preference; the browser can read the system colours of `forced-colors` from CSS system colours (follow-up HC-5) | | already | |
+| Browser, iOS, Android | already report the preference; the browser can read the system colours of `forced-colors` from CSS system colours (follow-up HC-5) | HC-5 (done, #560): the browser takes `forced-colors: active` as high contrast and reads `Canvas`, `CanvasText`, `ButtonFace`, `ButtonText`, `Highlight`, `HighlightText`, `LinkText`, `GrayText`; iOS and Android report none | already; the browser also on the `forced-colors` change | browser (Windows high contrast in Chrome or Edge) |
 
 ### 7.5 Not in this plan
 
@@ -605,11 +796,11 @@ to see. Efforts are working days of one agent, including review rounds.
 | PV-1 | `Pivot`, `PivotItem`, `PivotPanel` with the scroll viewer and the state machine (7.1), selection, keyboard, `IsLocked`, the item events; peers | W4 | D8 | | 7 |
 | PV-2 | The headers: `PivotHeaderManager`, `PivotHeaderPanel`, `PivotHeaderItem`, static headers, the parallax, the previous and next buttons, the fly-in, fly-out and slide-in animations | PV-1 | D8 | | 5 |
 | PV-3 | The WinUI theme documents of Pivot, PivotItem and PivotHeaderItem; WinUI-only list; catalog page | PV-2 | D8 | yes: the header carousel and flick against WinUI, the Tab peers | 3 |
-| HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | 2 |
-| HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | 2 |
-| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | 2 |
-| HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | 1 |
-| Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours; `ListViewItemPresenter` as an element (D6) | | | | |
+| HC-1 | Base: `SystemColors`, the high contrast variant (7.2); WinUI theme: `UseSystemHighContrast`, `Accents/SystemColors` (7.3); headless tests with simulated platform settings; catalog shows the variant | | D9, D10 | no | done (#560); no catalog page |
+| HC-2 | Windows: `SPI_GETHIGHCONTRAST`, `GetSysColor`, the messages | HC-1; after #325 (it changes the same file) | | **yes** | done (#560); to validate in the Windows VM |
+| HC-3 | macOS: "Increase contrast", the `NSColor`s, the notification | HC-1; after #325 (same files) | D11 | no (macOS; the owner toggles the setting) | done (#560); the owner validates it by toggling the setting |
+| HC-4 | Linux: the portal's `contrast` | HC-1 | | no (Linux VM to confirm with GNOME) | done (#560); to confirm in the Linux VM |
+| Follow-ups | LV-3 drag and reorder; LV-4 ItemsView and ItemContainer on #269; deferred states (5.9); the theme migration pilot (5.11); HC-5 browser system colours (done, #560); `ListViewItemPresenter` as an element (D6) | | | | |
 
 Order of work: VSM-1 to VSM-5 first. LV-1, SW-1 and PV-1 wait for W4 (#333). They change the
 WinUI theme, so each is rebased on `main` and regenerates `compiled_xaml.rs` and the theme

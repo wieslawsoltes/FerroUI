@@ -124,6 +124,18 @@ impl VisualStateManager {
             .changed()
             .add_class_handler::<Control>(Self::on_visual_state_groups_changed)
             .detach();
+        super::state_mappers::states_in_use(super::state_mappers::VisualStates {
+            has_groups: Self::has_groups_at_root,
+            go_to_state: Self::go_to_state,
+        });
+    }
+
+    /// Whether the root of the visual states of `control` has groups: when the state mapper of
+    /// its family is installed.
+    fn has_groups_at_root(control: &Ref<Control>) -> bool {
+        Self::implementation_root(control).is_some_and(|root| {
+            root.get_value(Self::visual_state_groups_property()).is_some_and(|groups| groups.count() > 0)
+        })
     }
 
     pub fn construct() -> Self {
@@ -271,10 +283,38 @@ impl VisualStateManager {
             }
             return true;
         }
-        let args = VisualStateChangedEventArgs::new(old_state, state.cloned(), Some(control.clone()));
+        let args = VisualStateChangedEventArgs::new(old_state.clone(), state.cloned(), Some(control.clone()));
         Self::raise_queued(group, args.clone(), true);
-        group.set_state(state, Some(template_root));
-        Self::raise_queued(group, args, false);
+        // With transitions (and system animations on), the transition of the change; one of
+        // zero length changes the state at once (WinUI's `IsZeroDuration`).
+        let transition = match state {
+            Some(state) if use_transitions && super::transitions::animations_enabled() => {
+                super::transitions::find_transition(&group.transitions(), old_state.as_ref(), state)
+                    .filter(|transition| !transition.is_zero_duration())
+            }
+            _ => None,
+        };
+        match (state, transition) {
+            (Some(state), Some(transition)) => {
+                // `CurrentStateChanged` when the transition completes; an interrupted transition
+                // raises none.
+                let weak = group.downgrade();
+                group.begin_transition(
+                    state,
+                    Some(template_root),
+                    &transition,
+                    Box::new(move || {
+                        if let Some(group) = weak.upgrade() {
+                            Self::raise_queued(&group, args, false);
+                        }
+                    }),
+                );
+            }
+            _ => {
+                group.set_state(state, Some(template_root));
+                Self::raise_queued(group, args, false);
+            }
+        }
         true
     }
 

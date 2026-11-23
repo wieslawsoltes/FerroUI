@@ -165,6 +165,18 @@ impl UntypedBindingExpression for MultiBindingExpression {
             *value = None;
         }
     }
+
+    /// The expressions of the bindings have the target of the multi-binding and are no entries of
+    /// its store: they are told through it (a template binding among them reads the templated
+    /// parent of the target).
+    fn templated_parent_changed(&self) {
+        let expressions: Vec<_> = self.expressions.borrow().iter().flatten().cloned().collect();
+        for expression in expressions {
+            if let Some(untyped) = expression.as_untyped() {
+                untyped.templated_parent_changed();
+            }
+        }
+    }
 }
 
 impl_untyped_binding_expression!(MultiBindingExpression);

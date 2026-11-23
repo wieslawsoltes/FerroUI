@@ -36,6 +36,11 @@ Copyright (c) 2019 Jimmy Wärting), pinned in `webapp/package.json` to commit
 `d43ad841581c2cc3ce47bbd1e8f11950ebdff027`, the commit the upstream project pins. Its optional dependency
 `fetch-blob` (MIT) is installed with it and is not bundled.
 
+The QR decoder worker (`qr-worker.js`, built from `webapp/modules/qr-worker.ts` and loaded on the first live
+analysis) includes `jsqr` 1.4.0 (https://github.com/cozmo/jsQR, Apache License 2.0), pinned in
+`webapp/package.json`. The build copies its license text beside the bundle as `qr-worker.LICENSE.txt`, and
+`scripts/build-browser.sh` puts both in the site.
+
 `webapp/modules/storage/downloadFileHandle.ts` (bundled into `storage.js`) is a TypeScript form of
 `src/adapters/downloader.js` of that polyfill (MIT, Copyright (c) 2019 Jimmy Wärting), changed in when it
 starts the download.

@@ -17,7 +17,7 @@
 //! compositor wakes it, as the copy of the harness of `samples/ControlCatalog/tests/frame_benchmark.rs`
 //! below does. The frames are the screens' own: each callback of the top level's animation frame
 //! advances the frame index once and requests the next one, and the media context runs the next
-//! render pass once the render thread has processed the batch before it. Nothing follows wall
+//! render pass once the render thread has accepted the batch before it. Nothing follows wall
 //! time: the global clock never ticks, and the screens read only the frame index. No frame waits
 //! for a display, so the times are the cost of a frame.
 //!
@@ -30,7 +30,12 @@
 //! with, per frame of the frame index: the time the UI thread spent running its jobs (the
 //! animation frame callback, layout, the recording of the render data, the commit and the jobs
 //! the frames post back; not the time it waited), the time the render thread spent in its ticks,
-//! and the wall time of the run. `rendered` is the frames the surface received.
+//! and the wall time of the run. `rendered` is the frames the surface received. The gate compares
+//! the three times for a frame the surface received (`frames / rendered` of them), and a scenario
+//! fails here when the surface receives fewer than nine in ten of its frames: every frame of the
+//! scenarios changes the picture, and a frame of the frame index that commits nothing is a second
+//! animation frame and a second layout for one picture (docs/porting/desktop-performance.md,
+//! section 9.46).
 
 use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::media::{FontManager, MediaContext};
@@ -425,6 +430,14 @@ fn measure(bench: &str, pointer: Option<Point>, screen: impl FnOnce() -> Ref<Con
     let run = gate.run(frames);
     let counters = ferroui_base::diagnostics::perf_counters::snapshot().since(&counters);
     assert!(run.rendered > 0, "{bench}: the surface received no frame");
+    // Every frame of the scenarios changes the picture, so every render pass has a batch to
+    // commit: fewer frames received than frames run means passes that committed nothing.
+    assert!(
+        u64::from(run.rendered) * 10 >= u64::from(run.frames) * 9,
+        "{bench}: the surface received {} frames of {}: render passes committed nothing",
+        run.rendered,
+        run.frames
+    );
 
     let per_frame = |time: Duration| time.as_secs_f64() * 1000.0 / f64::from(run.frames);
     let (ui, render, wall) = (per_frame(run.ui), per_frame(run.render), per_frame(run.wall));

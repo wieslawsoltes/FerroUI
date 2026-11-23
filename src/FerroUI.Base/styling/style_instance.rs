@@ -4,9 +4,10 @@ use crate::animation::IAnimation;
 use crate::data::BindingPriority;
 use crate::property_store::{FrameType, ValueFrame, ValueFrameBase};
 use crate::reactive::{IObservable, IObserver, LightweightSubject, Subscription};
+use crate::utilities::OptionCell;
 use crate::{Ref, StyledElement, WeakRef};
 use std::any::Any;
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::rc::{Rc, Weak};
 
 /// A style has two setters for the same property: the invalid operation the
@@ -39,11 +40,20 @@ pub struct StyleInstance {
     this: Weak<StyleInstance>,
     activator: Option<Rc<dyn IStyleActivator>>,
     is_active: Cell<bool>,
-    setters: RefCell<Vec<Rc<dyn ISetterInstance>>>,
-    animations: RefCell<Option<Vec<Rc<dyn IAnimation>>>>,
-    animation_apply_disposables: RefCell<Option<Vec<Subscription>>>,
-    animation_trigger: RefCell<Option<LightweightSubject<bool>>>,
+    /// What few instances have, made for the first of them (desktop-performance.md, section 9.64).
+    extras: OptionCell<Box<StyleInstanceExtras>>,
     source: WeakRef<StyleBase>,
+}
+
+/// The setter instances of a style instance that are no value entries, and the animations of its style with
+/// what applying them made. A style of a theme has neither, and its instances are most of what a control is
+/// styled with, so they are kept apart from the instance.
+#[derive(Default)]
+struct StyleInstanceExtras {
+    setters: Vec<Rc<dyn ISetterInstance>>,
+    animations: Option<Vec<Rc<dyn IAnimation>>>,
+    animation_apply_disposables: Vec<Subscription>,
+    animation_trigger: Option<LightweightSubject<bool>>,
 }
 
 impl StyleInstance {
@@ -58,10 +68,7 @@ impl StyleInstance {
             this: this.clone(),
             activator,
             is_active: Cell::new(false),
-            setters: RefCell::new(Vec::new()),
-            animations: RefCell::new(None),
-            animation_apply_disposables: RefCell::new(None),
-            animation_trigger: RefCell::new(None),
+            extras: OptionCell::new(),
             source: style,
         })
     }
@@ -83,6 +90,11 @@ impl StyleInstance {
         }
     }
 
+    /// Makes room for the instances of `setters` setters.
+    pub(crate) fn reserve(&self, setters: usize) {
+        self.base.reserve(setters);
+    }
+
     /// Adds the instance of a setter. A second setter for a property the
     /// style instance already has a value for is an error (the invalid
     /// operation of the managed original); nothing is added then.
@@ -97,7 +109,7 @@ impl StyleInstance {
                 }
                 self.base.add(value_entry);
             }
-            SetterInstanceKind::Other(instance) => self.setters.borrow_mut().push(instance),
+            SetterInstanceKind::Other(instance) => self.update_extras(|extras| extras.setters.push(instance)),
         }
         Ok(())
     }
@@ -112,22 +124,22 @@ impl StyleInstance {
     }
 
     pub(crate) fn add_animations(&self, animations: &[Rc<dyn IAnimation>]) {
-        self.animations.borrow_mut().get_or_insert_with(Vec::new).extend(animations.iter().cloned());
+        self.update_extras(|extras| {
+            extras.animations.get_or_insert_with(Vec::new).extend(animations.iter().cloned());
+        });
     }
 
     /// Applies the animations of the style to `control`: they run while the
     /// style instance is active.
     pub(crate) fn apply_animations(&self, control: &StyledElement) {
-        let animations = self.animations.borrow().clone();
+        let animations = self.extras.with(|extras| extras.and_then(|extras| extras.animations.clone()));
         if let Some(animations) = animations {
-            let trigger = self.animation_trigger.borrow_mut().get_or_insert_with(LightweightSubject::new).clone();
+            let trigger = self
+                .update_extras(|extras| extras.animation_trigger.get_or_insert_with(LightweightSubject::new).clone());
             let match_: Rc<dyn IObservable<bool>> = Rc::new(trigger.clone());
             for animation in &animations {
                 let disposable = animation.apply(control, None, match_.clone(), None, false);
-                self.animation_apply_disposables
-                    .borrow_mut()
-                    .get_or_insert_with(Vec::new)
-                    .push(Subscription::new(disposable));
+                self.update_extras(|extras| extras.animation_apply_disposables.push(Subscription::new(disposable)));
             }
 
             if self.activator.is_none() {
@@ -137,7 +149,7 @@ impl StyleInstance {
     }
 
     fn trigger_animations(&self, value: bool) {
-        let trigger = self.animation_trigger.borrow().clone();
+        let trigger = self.extras.with(|extras| extras.and_then(|extras| extras.animation_trigger.clone()));
         if let Some(trigger) = trigger {
             trigger.on_next(value);
         }
@@ -145,6 +157,21 @@ impl StyleInstance {
 
     pub(crate) fn make_shared(&self) {
         self.base.make_shared();
+    }
+
+    /// Changes the extras of the instance, which are made for the first change. Nothing of the instance is
+    /// asked for inside `update`: the extras are out of their cell while it runs.
+    fn update_extras<R>(&self, update: impl FnOnce(&mut StyleInstanceExtras) -> R) -> R {
+        let mut extras = self.extras.take().unwrap_or_default();
+        let result = update(&mut extras);
+        self.extras.set(Some(extras));
+        result
+    }
+
+    /// Whether the instance has its extras: setter instances that are no value entries, or animations.
+    #[cfg(test)]
+    pub(crate) fn has_extras(&self) -> bool {
+        self.extras.is_some()
     }
 
     fn get_priority(has_activator: bool) -> BindingPriority {
@@ -212,7 +239,11 @@ impl ValueFrame for StyleInstance {
         if let Some(activator) = &self.activator {
             activator.dispose();
         }
-        drop(self.animation_apply_disposables.take());
+        if self.extras.is_some() {
+            // Out of the instance before they are disposed of: what an animation stops may ask for it.
+            let disposables = self.update_extras(|extras| std::mem::take(&mut extras.animation_apply_disposables));
+            drop(disposables);
+        }
     }
 
     fn as_any(&self) -> &dyn Any {

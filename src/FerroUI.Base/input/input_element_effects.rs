@@ -118,7 +118,10 @@ impl InputElement {
         if let Some(effect) = new {
             let subscriptions = self.effect_input_subscriptions();
             let previous =
-                self.effect_input.replace(Some(EffectInputAttachment { effect: effect.clone(), _subscriptions: subscriptions }));
+                self.effect_input.replace(Some(Box::new(EffectInputAttachment {
+                    effect: effect.clone(),
+                    _subscriptions: subscriptions,
+                })));
             drop(previous);
             if let Some(handler) = effect.input_handler() {
                 let context = EffectHostContext::new(&effect, self);

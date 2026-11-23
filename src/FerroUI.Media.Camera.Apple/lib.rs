@@ -177,7 +177,7 @@ impl NativeCameraSession for AppleCameraSession {
                 "GPU completion is indeterminate; camera storage remains quarantined",
             ));
         }
-        let Some((buffer, timestamp)) = self.camera.frame() else {
+        let Some((buffer, timestamp, rotation)) = self.camera.frame() else {
             return Ok(None);
         };
         let (width, height, stride, bytes, color) = buffer.info();
@@ -214,7 +214,7 @@ impl NativeCameraSession for AppleCameraSession {
                 FrameColor::Rec709Full
             },
             alpha: FrameAlpha::Opaque,
-            rotation: FrameRotation::None,
+            rotation,
             mirrored: false,
             top_left_origin: true,
             timestamp: duration(timestamp).unwrap_or_default(),
@@ -235,6 +235,15 @@ impl NativeCameraSession for AppleCameraSession {
                 e.to_string(),
             )),
         }
+    }
+    fn supports_video_recording(&self) -> bool {
+        true
+    }
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        let recording = self.camera.record().map(|native| {
+            Rc::new(AppleCameraRecording(Rc::new(native))) as Rc<dyn NativeCameraRecording>
+        });
+        Box::pin(async move { recording })
     }
     fn photo(&self) -> CameraFuture<CameraPhoto> {
         if !self.settings.native_still {
@@ -307,5 +316,17 @@ impl NativeCameraSession for AppleCameraSession {
     }
     fn stop(&self) {
         self.camera.stop();
+    }
+}
+
+struct AppleCameraRecording(Rc<native::Recording>);
+impl NativeCameraRecording for AppleCameraRecording {
+    fn finish(&self) -> CameraFuture<CameraVideo> {
+        self.0.finish();
+        let native = self.0.clone();
+        wait(move || native.poll())
+    }
+    fn cancel(&self) {
+        self.0.cancel();
     }
 }

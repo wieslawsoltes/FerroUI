@@ -38,17 +38,31 @@ impl FerroObjectImpl for Polyline {
 impl ShapeImpl for Polyline {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         let is_filled = this.fill().is_some();
-        let points = this.points();
-        let geometry = PolylineGeometry::with_points_and_fill_rule(
-            points.as_ref().map(|p| p.to_vec()).unwrap_or_default(),
-            is_filled,
-            this.fill_rule(),
-        );
-        // Re-assign the live collection so the geometry observes changes to it (#20565).
-        if let Some(points) = points {
-            geometry.set_points(points);
-        }
+        // The geometry is made of the live collection, so that it observes changes to it
+        // (#20565).
+        let geometry = match this.points() {
+            Some(points) => PolylineGeometry::of_points(points, is_filled, this.fill_rule()),
+            None => PolylineGeometry::with_points_and_fill_rule(std::iter::empty(), is_filled, this.fill_rule()),
+        };
         Some(geometry.upcast())
+    }
+
+    /// The polyline geometry takes the collection of points the shape has now and follows it.
+    /// The fill rule is what a polyline geometry is made with: another one is another geometry.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        let (Some(geometry), Some(points)) = (geometry.cast::<PolylineGeometry>(), this.points()) else {
+            return false;
+        };
+        if geometry.fill_rule() != this.fill_rule() {
+            return false;
+        }
+        geometry.set_is_filled(this.fill().is_some());
+        if !geometry.points().ptr_eq(&points) {
+            geometry.set_points(points);
+            // The geometry follows the changes of a collection, not the change of collection.
+            geometry.invalidate_geometry();
+        }
+        true
     }
 }
 

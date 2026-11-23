@@ -67,17 +67,92 @@ fn seek(element: &Control, horizontal: bool, progress: f32) {
     ] {
         if let Some(controller) = visual.try_get_animation_controller(&property) {
             controller.pause();
-            controller.set_progress(if property.starts_with("CenterPoint") {
-                (progress * 3.0).min(1.0)
-            } else {
-                progress
-            });
+            controller.set_progress(progress);
         }
     }
 }
 
 fn close(actual: f64, expected: f64) {
     assert!((actual - expected).abs() < 0.05, "{actual} != {expected}");
+}
+
+fn rendered_edges(element: &Control, horizontal: bool) -> (f64, f64) {
+    let visual = server(element);
+    let (offset, pivot, scale, dimension) = if horizontal {
+        (visual.offset().x, visual.center_point().x, visual.scale().x, element.bounds().width)
+    } else {
+        (visual.offset().y, visual.center_point().y, visual.scale().y, element.bounds().height)
+    };
+    let start = offset + pivot * (1.0 - scale);
+    (start, start + dimension * scale)
+}
+
+#[test]
+fn pivot_keeps_both_indicators_inside_the_travel_span() {
+    for horizontal in [false, true] {
+        for reverse in [false, true] {
+            let (services, canvas, first, second) = scene(horizontal);
+            if horizontal {
+                Canvas::set_left(&second, 370.0);
+            } else {
+                Canvas::set_top(&second, 370.0);
+            }
+            services.run_jobs();
+            let end = 370.0 + if horizontal { second.bounds().width } else { second.bounds().height };
+            let animation = SelectionIndicatorAnimation::default();
+            let (from, to) = if reverse { (&second, &first) } else { (&first, &second) };
+            animation.update(&canvas, Some(from.clone()), horizontal);
+            animation.update(&canvas, Some(to.clone()), horizontal);
+            services.run_jobs();
+            for milliseconds in [199.7, 199.9, 200.0, 200.1, 200.3] {
+                for indicator in [&first, &second] {
+                    seek(indicator, horizontal, milliseconds / 600.0);
+                }
+                services.run_jobs();
+                services.run_jobs();
+                for indicator in [&first, &second] {
+                    let (start, finish) = rendered_edges(indicator, horizontal);
+                    assert!(
+                        start >= 9.95 && finish <= end + 0.05,
+                        "{milliseconds} ms, horizontal={horizontal}, reverse={reverse}: {start}..{finish}"
+                    );
+                }
+            }
+        }
+    }
+}
+
+#[test]
+fn distant_selection_bounds_edge_motion_at_60_and_120_hz() {
+    for hz in [60, 120] {
+        for reverse in [false, true] {
+            let (services, canvas, first, second) = scene(false);
+            Canvas::set_top(&second, 370.0);
+            services.run_jobs();
+            let animation = SelectionIndicatorAnimation::default();
+            let (from, to) = if reverse { (&second, &first) } else { (&first, &second) };
+            animation.update(&canvas, Some(from.clone()), false);
+            animation.update(&canvas, Some(to.clone()), false);
+            services.run_jobs();
+            let mut previous: Option<(f64, f64)> = None;
+            for frame in 0..=hz * 600 / 1000 {
+                let progress = frame as f32 * 1000.0 / (hz as f32 * 600.0);
+                seek(from, false, progress);
+                services.run_jobs();
+                services.run_jobs();
+                let edges = rendered_edges(from, false);
+                if let Some((start, end)) = previous {
+                    let movement = (edges.0 - start).abs().max((edges.1 - end).abs());
+                    assert!(
+                        movement < 72.0,
+                        "{hz} Hz, reverse={reverse}, frame={frame}: {movement} px"
+                    );
+                }
+                previous = Some(edges);
+            }
+            close(server(from).scale().y, 1.0);
+        }
+    }
 }
 
 #[test]
@@ -90,14 +165,14 @@ fn vertical_stretch_and_pivot_run_on_compositor_without_moving_layout() {
     let offset = visual(&first).offset();
     animation.update(&canvas, Some(second.clone()), false);
     services.run_jobs();
-    seek(&first, false, 0.333);
-    seek(&second, false, 0.333);
+    seek(&first, false, 1.0 / 3.0 + 0.000001);
+    seek(&second, false, 1.0 / 3.0 + 0.000001);
     services.run_jobs();
     services.run_jobs();
     close(server(&first).scale().y, 6.0); // 80 px travel / 16 px indicator + 1.
     close(server(&second).scale().y, 6.0);
-    close((server(&first).offset().y - first.bounds().y), 0.0);
-    close(server(&first).center_point().y, 0.0); // Just before the 200 ms pivot.
+    close((server(&first).offset().y - first.bounds().y), 80.0);
+    close(server(&first).center_point().y, 16.0); // Offset and pivot switch together at 200 ms.
     seek(&first, false, 0.5);
     seek(&second, false, 0.5);
     first.invalidate_visual(); // Renderer synchronization must not erase relative movement.

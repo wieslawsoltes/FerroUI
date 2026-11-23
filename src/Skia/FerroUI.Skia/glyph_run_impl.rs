@@ -54,6 +54,24 @@ fn create_font(font: &Font, text_options: TextOptions) -> Font {
     font
 }
 
+/// The font the bounds of a run's glyphs are measured with: the font of the run at its size.
+///
+/// Ideally the requested edging should be passed to the glyph run. Currently
+/// the edging is computed dynamically inside the drawing context, so we can't
+/// know it in advance. But the bounds depend on the edging: for now, always
+/// use subpixel antialiasing so we have consistent values. The resulting
+/// bounds may be shifted by 1px on some fonts.
+fn measuring_font(font: &Font) -> Font {
+    create_font(
+        font,
+        TextOptions {
+            text_rendering_mode: TextRenderingMode::SubpixelAntialias,
+            text_hinting_mode: TextHintingMode::Strong,
+            baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
+        },
+    )
+}
+
 /// The Skia implementation of a glyph run: glyph indices and positions that
 /// are turned into text blobs for drawing.
 pub struct GlyphRunImpl {
@@ -63,6 +81,8 @@ pub struct GlyphRunImpl {
     // A two level cache optimized for single-entry read, keyed by the font
     // configuration.
     text_blob_cache: Mutex<TwoLevelCache<TextOptions, Option<TextBlob>>>,
+    /// Whether the run has been drawn (`draw`).
+    drawn: std::sync::atomic::AtomicBool,
     font_rendering_em_size: f64,
     baseline_origin: Point,
     bounds: Rect,
@@ -84,8 +104,19 @@ impl GlyphRunImpl {
             .unwrap_or_else(|| panic!("The platform typeface was not created by the Skia backend"));
 
         let font = glyph_typeface_impl.create_sk_font(font_rendering_em_size as f32);
+        let glyph_indices: Vec<u16> = glyph_infos.iter().map(|glyph| glyph.glyph_index).collect();
 
-        Self::from_font(&font, font_rendering_em_size, glyph_infos, baseline_origin)
+        // The bounds the typeface kept for its glyphs at this size, and Skia's for the others
+        // (`glyph_bounds_cache`): a run of glyphs measured before takes no lock of Skia.
+        let mut glyph_bounds = vec![skia_safe::Rect::default(); glyph_indices.len()];
+        glyph_typeface_impl.glyph_bounds().get(
+            font_rendering_em_size as f32,
+            &glyph_indices,
+            &mut glyph_bounds,
+            |glyphs, bounds| measuring_font(&font).get_bounds(glyphs, bounds, None),
+        );
+
+        Self::with_bounds(font, font_rendering_em_size, glyph_infos, glyph_indices, &glyph_bounds, baseline_origin)
     }
 
     /// Creates a glyph run from a Skia font.
@@ -94,38 +125,35 @@ impl GlyphRunImpl {
     /// to render as intended (synthetic bold or italic); its size is replaced
     /// with `font_rendering_em_size`, its edging and hinting per text blob.
     pub fn from_font(font: &Font, font_rendering_em_size: f64, glyphs: &[GlyphInfo], baseline_origin: Point) -> Self {
-        let count = glyphs.len();
-
         let mut font = font.clone();
         font.set_size(font_rendering_em_size as f32);
 
         // The glyph bounds can only be fetched once the indices are known,
         // so this walk has to come first.
         let glyph_indices: Vec<u16> = glyphs.iter().map(|glyph| glyph.glyph_index).collect();
-        let mut glyph_positions = Vec::with_capacity(count);
+        let mut glyph_bounds = vec![skia_safe::Rect::default(); glyph_indices.len()];
+        measuring_font(&font).get_bounds(&glyph_indices, &mut glyph_bounds, None);
 
-        // Ideally the requested edging should be passed to the glyph run.
-        // Currently the edging is computed dynamically inside the drawing
-        // context, so we can't know it in advance. But the bounds depend on
-        // the edging: for now, always use subpixel antialiasing so we have
-        // consistent values. The resulting bounds may be shifted by 1px on
-        // some fonts.
-        let default_text_options = TextOptions {
-            text_rendering_mode: TextRenderingMode::SubpixelAntialias,
-            text_hinting_mode: TextHintingMode::Strong,
-            baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
-        };
-        let measuring_font = create_font(&font, default_text_options);
+        Self::with_bounds(font, font_rendering_em_size, glyphs, glyph_indices, &glyph_bounds, baseline_origin)
+    }
 
-        let mut glyph_bounds = vec![skia_safe::Rect::default(); count];
-        measuring_font.get_bounds(&glyph_indices, &mut glyph_bounds, None);
+    /// The run of `glyphs` with the ink bounds of each glyph.
+    fn with_bounds(
+        font: Font,
+        font_rendering_em_size: f64,
+        glyphs: &[GlyphInfo],
+        glyph_indices: Vec<u16>,
+        glyph_bounds: &[skia_safe::Rect],
+        baseline_origin: Point,
+    ) -> Self {
+        let mut glyph_positions = Vec::with_capacity(glyphs.len());
 
         // Build the glyph positions and union the run bounds in a single
         // pass: one accumulator covers both outputs.
         let mut current_x = 0.0;
         let mut run_bounds = Rect::default();
 
-        for (glyph, g_bounds) in glyphs.iter().zip(&glyph_bounds) {
+        for (glyph, g_bounds) in glyphs.iter().zip(glyph_bounds) {
             let offset = glyph.glyph_offset;
 
             glyph_positions.push(skia_safe::Point::new((current_x + offset.x) as f32, offset.y as f32));
@@ -145,6 +173,7 @@ impl GlyphRunImpl {
             glyph_indices,
             glyph_positions,
             text_blob_cache: Mutex::new(TwoLevelCache::with_secondary_size(3)),
+            drawn: std::sync::atomic::AtomicBool::new(false),
             font_rendering_em_size,
             baseline_origin,
             bounds: run_bounds.translate(Vector::new(baseline_origin.x, baseline_origin.y)),
@@ -160,16 +189,7 @@ impl GlyphRunImpl {
     ///
     /// Returns `None` for an empty run.
     pub fn get_text_blob(&self, text_options: TextOptions, render_options: RenderOptions) -> Option<TextBlob> {
-        let mut text_options = text_options;
-
-        if text_options.text_rendering_mode == TextRenderingMode::Unspecified {
-            text_options.text_rendering_mode = if render_options.edge_mode == EdgeMode::Aliased {
-                TextRenderingMode::Alias
-            } else {
-                TextRenderingMode::Antialias
-            };
-        }
-
+        let text_options = Self::resolve_text_options(text_options, render_options);
         self.text_blob_cache.lock().unwrap().get_or_add(text_options, |text_options| {
             if self.glyph_indices.is_empty() {
                 return None;
@@ -189,6 +209,50 @@ impl GlyphRunImpl {
 
             text_blob
         })
+    }
+
+    /// The text options a blob of the run is made with: an unspecified rendering mode follows
+    /// the edge mode.
+    fn resolve_text_options(mut text_options: TextOptions, render_options: RenderOptions) -> TextOptions {
+        if text_options.text_rendering_mode == TextRenderingMode::Unspecified {
+            text_options.text_rendering_mode = if render_options.edge_mode == EdgeMode::Aliased {
+                TextRenderingMode::Alias
+            } else {
+                TextRenderingMode::Antialias
+            };
+        }
+        text_options
+    }
+
+    /// Draws the run at `origin`. An addition (FerroUI deviation, desktop-performance.md section
+    /// 9.22): a text blob is a key of Skia's text blob cache, which hashes it, keeps the GPU
+    /// blob made of it and posts a purge message when it is dropped. Text that changes every
+    /// frame makes runs that are drawn once, and each paid that for nothing. A run's first draw
+    /// is of its glyphs alone, which Skia draws without the cache; the blob is made, and cached
+    /// by Skia, when the run is drawn again.
+    pub fn draw(&self, canvas: &skia_safe::Canvas, text_options: TextOptions, render_options: RenderOptions, origin: Point, paint: &skia_safe::Paint) {
+        if self.glyph_indices.is_empty() {
+            return;
+        }
+        ferroui_base::diagnostics::perf_counters::add(
+            ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphsDrawn,
+            self.glyph_indices.len() as u64,
+        );
+        let text_options = Self::resolve_text_options(text_options, render_options);
+        let origin = skia_safe::Point::new(origin.x as f32, origin.y as f32);
+        let cached = self.text_blob_cache.lock().unwrap().try_get(&text_options);
+        if cached.is_none() && !self.drawn.swap(true, std::sync::atomic::Ordering::Relaxed) {
+            ferroui_base::diagnostics::perf_counters::add(
+                ferroui_base::diagnostics::perf_counters::PerfCounter::RenderGlyphRunsFirstDrawn,
+                1,
+            );
+            let font = create_font(&self.font, text_options);
+            canvas.draw_glyphs_at(&self.glyph_indices, &self.glyph_positions[..], origin, &font, paint);
+            return;
+        }
+        if let Some(text_blob) = self.get_text_blob(text_options, render_options) {
+            canvas.draw_text_blob(text_blob, origin, paint);
+        }
     }
 }
 

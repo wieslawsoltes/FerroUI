@@ -4,6 +4,11 @@ use super::{
     TextEditChangeType, TextEditTextChangedEventArgs, TextPatternRangeEndpoint, TextProviderError,
     TextUnit,
 };
+use super::text_range_support::{
+    brush_color, endpoint_distance, enclosing_unit, horizontal_text_alignment, move_position,
+    move_range_by, paragraph_units, selection_with, selection_without, truncate_utf16,
+    ViewGeometry,
+};
 use crate::automation::peers::{
     AutomationPeer, ControlAutomationPeer, HyperlinkAutomationPeer, RichEditBoxAutomationPeer,
 };
@@ -20,11 +25,10 @@ use crate::rich_text::{
 use crate::{Control, RichEditBox, RichEditBoxTextPresenter, RichTextBlock};
 use ferroui_base::input::IScrollable;
 use ferroui_base::media::{
-    BaselineAlignment, Color, FlowDirection, FontStyle, IBrush, TextAlignment,
-    TextDecorationLocation,
+    BaselineAlignment, FlowDirection, FontStyle, TextDecorationLocation,
 };
 use ferroui_base::reactive::{CompositeDisposable, IDisposable, SerialDisposable, Subscription};
-use ferroui_base::{Matrix, ObjectType, Point, Rect, Ref, Visual, WeakRef};
+use ferroui_base::{ObjectType, Point, Rect, Ref, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::collections::HashSet;
@@ -669,7 +673,7 @@ impl ITextRangeProvider for RichTextAutomationRange {
     ) -> Result<i32, ProviderError> {
         let left = self.endpoint(endpoint);
         let right = self.compatible(range)?.endpoint(target_endpoint);
-        Ok((left as i128 - right as i128).clamp(i32::MIN as i128, i32::MAX as i128) as i32)
+        Ok(endpoint_distance(left, right))
     }
 
     fn expand_to_enclosing_unit(&self, unit: TextUnit) -> Result<(), ProviderError> {
@@ -817,42 +821,16 @@ impl ITextRangeProvider for RichTextAutomationRange {
 
     fn get_text(&self, max_length: Option<usize>) -> Result<String, ProviderError> {
         self.view()?;
-        let text = self.range.text()?;
-        let Some(max_length) = max_length else {
-            return Ok(text);
-        };
-        let mut length = 0;
-        Ok(text
-            .chars()
-            .take_while(|ch| {
-                length += ch.len_utf16();
-                length <= max_length
-            })
-            .collect())
+        Ok(truncate_utf16(self.range.text()?, max_length))
     }
 
     fn move_by(&self, unit: TextUnit, count: i32) -> Result<i32, ProviderError> {
         let units = self.units(unit)?;
-        if count == 0 || units.is_empty() {
-            return Ok(0);
+        let (target, moved) = move_range_by(units, self.range.range(), count);
+        if let Some(target) = target {
+            self.range.set_range(target.start, target.end)?;
         }
-        if self.range.is_degenerate() {
-            let (position, moved) = move_position(&units, self.range.start_position(), count);
-            self.range.set_range(position, position)?;
-            return Ok(moved);
-        }
-        let nonempty: Vec<_> = units.into_iter().filter(|unit| !unit.is_empty()).collect();
-        let Some(current) = enclosing_unit_index(&nonempty, self.range.start_position()) else {
-            return Ok(0);
-        };
-        let target = (current as i128 + count as i128)
-            .clamp(0, nonempty.len().saturating_sub(1) as i128) as usize;
-        let moved = target as i128 - current as i128;
-        if moved != 0 {
-            self.range
-                .set_range(nonempty[target].start, nonempty[target].end)?;
-        }
-        Ok(moved as i32)
+        Ok(moved)
     }
 
     fn move_endpoint_by_unit(
@@ -884,36 +862,13 @@ impl ITextRangeProvider for RichTextAutomationRange {
     fn add_to_selection(&self) -> Result<(), ProviderError> {
         self.view()?;
         let current = self.context.host.selection()?;
-        let added = self.range.range();
-        if current.is_empty() || added.is_empty() {
-            return self.select_range(added);
-        }
-        if added.end < current.start || current.end < added.start {
-            return Err(TextProviderError::MultipleSelectionNotSupported.into());
-        }
-        self.select_range(current.start.min(added.start)..current.end.max(added.end))
+        self.select_range(selection_with(current, self.range.range())?)
     }
 
     fn remove_from_selection(&self) -> Result<(), ProviderError> {
         self.view()?;
         let current = self.context.host.selection()?;
-        let removed = self.range.range();
-        if removed.is_empty() {
-            return self.select_range(removed);
-        }
-        let remaining =
-            if current.is_empty() || removed.end <= current.start || current.end <= removed.start {
-                current
-            } else if removed.start <= current.start && current.end <= removed.end {
-                current.start..current.start
-            } else if removed.start <= current.start {
-                removed.end..current.end
-            } else if current.end <= removed.end {
-                current.start..removed.start
-            } else {
-                return Err(TextProviderError::MultipleSelectionNotSupported.into());
-            };
-        self.select_range(remaining)
+        self.select_range(selection_without(current, self.range.range())?)
     }
 
     fn scroll_into_view(&self, align_to_top: bool) -> Result<(), ProviderError> {
@@ -1012,83 +967,6 @@ impl ITextRangeProvider for RichTextAutomationRange {
 fn selection(view: &RichTextBlock) -> Range<usize> {
     view.selection_start().min(view.selection_end())
         ..view.selection_start().max(view.selection_end())
-}
-
-fn paragraph_units(text: &str) -> Vec<Range<usize>> {
-    crate::rich_text::rich_text_unit_ranges(text, UnicodeTextUnit::Paragraph)
-}
-
-fn enclosing_unit_index(units: &[Range<usize>], position: usize) -> Option<usize> {
-    units
-        .iter()
-        .position(|unit| unit.start <= position && (position < unit.end || unit.is_empty()))
-        .or_else(|| units.len().checked_sub(1))
-}
-
-fn enclosing_unit(units: &[Range<usize>], position: usize) -> Option<&Range<usize>> {
-    enclosing_unit_index(units, position).map(|index| &units[index])
-}
-
-fn move_position(units: &[Range<usize>], position: usize, count: i32) -> (usize, i32) {
-    if count == 0 {
-        return (position, 0);
-    }
-    let mut boundaries: Vec<_> = units
-        .iter()
-        .flat_map(|range| [range.start, range.end])
-        .collect();
-    boundaries.sort_unstable();
-    boundaries.dedup();
-    let remaining = count.unsigned_abs() as usize;
-    if count > 0 {
-        let first = boundaries.partition_point(|value| *value <= position);
-        let moved = remaining.min(boundaries.len() - first);
-        if moved == 0 {
-            (position, 0)
-        } else {
-            (boundaries[first + moved - 1], moved as i32)
-        }
-    } else {
-        let end = boundaries.partition_point(|value| *value < position);
-        let moved = remaining.min(end);
-        if moved == 0 {
-            (position, 0)
-        } else {
-            (boundaries[end - moved], (-(moved as i64)) as i32)
-        }
-    }
-}
-
-struct ViewGeometry {
-    transform: Matrix,
-    clip: Rect,
-}
-impl ViewGeometry {
-    fn in_root(view: &RichTextBlock, root: &Ref<Visual>) -> Option<Self> {
-        if !view.is_effectively_visible() {
-            return None;
-        }
-        // The portable provider reports one root coordinate space. Overflow
-        // pages in a different presentation root cannot be expressed in it.
-        let transform = view.transform_to_visual(root)?;
-        let mut clip = Rect::from_size(root.bounds().size());
-        let mut current = Some(view.to_ref().upcast::<Visual>());
-        while let Some(visual) = current {
-            let to_root = visual.transform_to_visual(root)?;
-            if visual.clip_to_bounds() {
-                clip = clip
-                    .intersect(Rect::from_size(visual.bounds().size()).transform_to_aabb(to_root));
-            }
-            if let Some(geometry) = visual.clip() {
-                clip = clip.intersect(geometry.bounds().transform_to_aabb(to_root));
-            }
-            current = visual.visual_parent();
-        }
-        Some(Self { transform, clip })
-    }
-    fn visible(&self, local: Rect) -> Rect {
-        local.transform_to_aabb(self.transform).intersect(self.clip)
-    }
 }
 
 fn text_views(view: &Ref<RichTextBlock>) -> Vec<Ref<RichTextBlock>> {
@@ -1566,14 +1444,7 @@ fn attribute_value(
         }
         A::HorizontalTextAlignment => {
             let rtl = paragraph.flow_direction == Some(FlowDirection::RightToLeft);
-            V::Integer(match paragraph.text_alignment.unwrap_or_default() {
-                TextAlignment::Center => 1,
-                TextAlignment::Right => 2,
-                TextAlignment::Justify => 3,
-                TextAlignment::Start if rtl => 2,
-                TextAlignment::End if !rtl => 2,
-                _ => 0,
-            })
+            V::Integer(horizontal_text_alignment(paragraph.text_alignment.unwrap_or_default(), rtl))
         }
         A::IndentationFirstLine => {
             V::Number(paragraph.text_indent.unwrap_or_default() * 72.0 / 96.0)
@@ -1667,14 +1538,4 @@ fn decoration_color(
         result = Some(color);
     }
     result.unwrap_or(TextAttributeValue::NotSupported)
-}
-
-fn brush_color(brush: Option<&Rc<dyn IBrush>>) -> TextAttributeValue {
-    brush.and_then(|brush| brush.as_solid_color_brush()).map_or(
-        TextAttributeValue::NotSupported,
-        |brush| {
-            let color = brush.color();
-            TextAttributeValue::Color(Color::from_rgb(color.r, color.g, color.b))
-        },
-    )
 }

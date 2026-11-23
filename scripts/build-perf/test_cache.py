@@ -209,6 +209,30 @@ class IsolationTests(unittest.TestCase):
                 self.assertNotEqual(before, cache.source_fingerprint(root, report))
 
 
+    def test_source_fingerprint_takes_the_recorded_commit_of_a_submodule_that_is_not_checked_out(self):
+        with tempfile.TemporaryDirectory() as temporary:
+            root = Path(temporary)
+            report = root / "report"
+            report.mkdir()
+            git = ["git", "-c", "user.name=test", "-c", "user.email=test@example.invalid"]
+            subprocess.run(git + ["init", "-q"], cwd=root, check=True)
+            (root / "third_party" / "module").mkdir(parents=True)
+            commits = ["1" * 40, "2" * 40]
+
+            def record(commit):
+                subprocess.run(git + ["update-index", "--add", "--cacheinfo", f"160000,{commit},third_party/module"],
+                               cwd=root, check=True)
+
+            record(commits[0])
+            before = cache.source_fingerprint(root, report)
+            self.assertEqual(before, cache.source_fingerprint(root, report))
+            record(commits[1])
+            self.assertNotEqual(before, cache.source_fingerprint(root, report))
+            # A directory with files that is no repository is still an error.
+            (root / "third_party" / "module" / "source.cpp").write_text("first")
+            with self.assertRaisesRegex(RuntimeError, "Unexpanded tracked directory"):
+                cache.source_fingerprint(root, report)
+
     def test_source_fingerprint_follows_a_submodule_commit_and_its_changes(self):
         with tempfile.TemporaryDirectory() as temporary:
             root = Path(temporary)

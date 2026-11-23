@@ -6,9 +6,9 @@ use crate::data::core::{
 };
 use crate::data::{BindingMode, BindingOperations, BindingPriority};
 use crate::logging::LogEventLevel;
-use crate::utilities::CultureInfo;
+use crate::utilities::{CultureInfo, OptionCell};
 use crate::{BoxedValue, FerroObject, FerroPropertyChangedEventArgs, FerroProperty, Ref, StyledElement, WeakRef};
-use std::cell::{Cell, OnceCell, RefCell};
+use std::cell::{Cell, OnceCell};
 use std::rc::{Rc, Weak};
 
 /// A binding expression that reads a property of the templated parent of
@@ -16,18 +16,38 @@ use std::rc::{Rc, Weak};
 pub struct TemplateBindingExpression {
     this: Weak<TemplateBindingExpression>,
     base: UntypedBindingExpressionBase,
-    converter: Option<Rc<dyn IValueConverter>>,
-    converter_culture: Option<CultureInfo>,
-    converter_parameter: Option<BoxedValue>,
+    /// The converter and what it is called with, of an expression that has a converter. Few
+    /// have one, and a template makes an expression for every binding of every control it
+    /// builds, so the three fields are apart from the expression.
+    conversion: Option<Box<Conversion>>,
     mode: BindingMode,
     property: Option<&'static FerroProperty>,
     has_published_value: Cell<bool>,
-    target_subscription: RefCell<Option<Subscription>>,
-    parent_subscription: RefCell<Option<Subscription>>,
-    /// The handlers of the property changes of the target and of the templated parent, made
-    /// once and added again at every subscription.
-    target_handler: OnceCell<Rc<dyn Fn(&FerroPropertyChangedEventArgs<'_>)>>,
+    /// What an expression of a mode that writes to the source keeps for its target
+    /// (`TargetLink`), made when such an expression starts for the first time.
+    target_link: OnceCell<Box<TargetLink>>,
+    /// The subscription to the property changes of the templated parent. The templated
+    /// parent of the target is told by the store of the target
+    /// (`UntypedBindingExpression::templated_parent_changed`).
+    parent_subscription: OptionCell<Subscription>,
+    /// The handler of the property changes of the templated parent, made once and added
+    /// again at every subscription.
     parent_handler: OnceCell<Rc<dyn Fn(&FerroPropertyChangedEventArgs<'_>)>>,
+}
+
+/// The converter of a template binding, its culture and its parameter.
+struct Conversion {
+    converter: Rc<dyn IValueConverter>,
+    culture: Option<CultureInfo>,
+    parameter: Option<BoxedValue>,
+}
+
+/// The handler of the property changes of the target, made once and added again at every
+/// subscription, and the subscription: a change of the target property is written to the
+/// templated parent, in the modes that write to the source.
+struct TargetLink {
+    handler: Rc<dyn Fn(&FerroPropertyChangedEventArgs<'_>)>,
+    subscription: OptionCell<Subscription>,
 }
 
 /// A subscription to the property changes of an object.
@@ -53,18 +73,19 @@ impl TemplateBindingExpression {
         mode: BindingMode,
     ) -> Rc<Self> {
         crate::perf_count!(TemplateBindingExpressionsCreated);
+        // The culture and the parameter are read for a converter alone.
+        let conversion = converter.map(|converter| {
+            Box::new(Conversion { converter, culture: converter_culture, parameter: converter_parameter })
+        });
         Rc::new_cyclic(|this: &Weak<TemplateBindingExpression>| Self {
             this: this.clone(),
             base: UntypedBindingExpressionBase::new(this.clone(), BindingPriority::Template, None, false),
-            converter,
-            converter_culture,
-            converter_parameter,
+            conversion,
             mode,
             property,
             has_published_value: Cell::new(false),
-            target_subscription: RefCell::new(None),
-            parent_subscription: RefCell::new(None),
-            target_handler: OnceCell::new(),
+            target_link: OnceCell::new(),
+            parent_subscription: OptionCell::new(),
             parent_handler: OnceCell::new(),
         })
     }
@@ -109,13 +130,13 @@ impl TemplateBindingExpression {
                 None => Some(Rc::new(templated_parent.clone()) as BoxedValue),
             };
             let mut error: Option<ExpressionError> = None;
-            if let Some(converter) = &self.converter {
+            if let Some(conversion) = &self.conversion {
                 value = self.base.convert(
                     &|| self.should_log_error(),
                     &|| self.description(),
-                    &**converter,
-                    self.converter_culture.as_ref(),
-                    self.converter_parameter.as_ref(),
+                    &*conversion.converter,
+                    conversion.culture.as_ref(),
+                    conversion.parameter.as_ref(),
                     value.as_ref(),
                     self.base.target_type(),
                     &mut error,
@@ -134,8 +155,7 @@ impl TemplateBindingExpression {
     }
 
     fn unsubscribe_parent(&self) {
-        let subscription = self.parent_subscription.borrow_mut().take();
-        if let Some(s) = subscription {
+        if let Some(s) = self.parent_subscription.take() {
             s.dispose();
         }
     }
@@ -155,17 +175,13 @@ impl TemplateBindingExpression {
                 })
             });
             let token = templated_parent.add_property_changed_handler(handler.clone());
-            self.parent_subscription.replace(Some(Subscription { object: templated_parent.downgrade(), token }));
+            self.parent_subscription.set(Some(Subscription { object: templated_parent.downgrade(), token }));
         }
         self.publish();
     }
 
     fn on_target_property_changed(&self, property_id: u32) {
-        if property_id == StyledElement::templated_parent_property().id() {
-            self.on_templated_parent_changed();
-        } else if matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource)
-            && self.base.target_property().is_some_and(|p| p.id() == property_id)
-        {
+        if self.base.target_property().is_some_and(|p| p.id() == property_id) {
             if let (Some(target), Some(property)) = (self.base.try_get_target(), self.base.target_property()) {
                 self.write_value_to_source(get_property_value(&target, property));
             }
@@ -184,25 +200,39 @@ impl UntypedBindingExpression for TemplateBindingExpression {
 
     fn start_core(&self) {
         self.has_published_value.set(false);
-        self.on_templated_parent_changed();
+        // The store of the target tells the expression when the templated parent changes.
         if let Some(target) = self.base.try_get_target() {
-            let handler = self.target_handler.get_or_init(|| {
+            target.values().note_templated_parent_reader();
+        }
+        self.on_templated_parent_changed();
+        if !matches!(self.mode, BindingMode::TwoWay | BindingMode::OneWayToSource) {
+            return;
+        }
+        if let Some(target) = self.base.try_get_target() {
+            let link = self.target_link.get_or_init(|| {
                 let weak = self.this.clone();
-                Rc::new(move |e: &FerroPropertyChangedEventArgs<'_>| {
+                let handler = Rc::new(move |e: &FerroPropertyChangedEventArgs<'_>| {
                     if let Some(this) = weak.upgrade() {
                         this.on_target_property_changed(e.property().id());
                     }
-                })
+                });
+                Box::new(TargetLink { handler, subscription: OptionCell::new() })
             });
-            let token = target.add_property_changed_handler(handler.clone());
-            self.target_subscription.replace(Some(Subscription { object: target.downgrade(), token }));
+            let token = target.add_property_changed_handler(link.handler.clone());
+            // As before, a subscription that was left is dropped without being disposed.
+            link.subscription.set(Some(Subscription { object: target.downgrade(), token }));
+        }
+    }
+
+    fn templated_parent_changed(&self) {
+        if self.base.is_running() {
+            self.on_templated_parent_changed();
         }
     }
 
     fn stop_core(&self) {
         self.unsubscribe_parent();
-        let subscription = self.target_subscription.borrow_mut().take();
-        if let Some(s) = subscription {
+        if let Some(s) = self.target_link.get().and_then(|link| link.subscription.take()) {
             s.dispose();
         }
     }
@@ -212,13 +242,13 @@ impl UntypedBindingExpression for TemplateBindingExpression {
             return false;
         };
         let mut value = value;
-        if let Some(converter) = &self.converter {
+        if let Some(conversion) = &self.conversion {
             value = self.base.convert_back(
                 &|| self.should_log_error(),
                 &|| self.description(),
-                &**converter,
-                self.converter_culture.as_ref(),
-                self.converter_parameter.as_ref(),
+                &*conversion.converter,
+                conversion.culture.as_ref(),
+                conversion.parameter.as_ref(),
                 value.as_ref(),
                 self.base.target_type(),
             );
@@ -246,10 +276,10 @@ impl_untyped_binding_expression!(TemplateBindingExpression);
 
 impl Drop for TemplateBindingExpression {
     fn drop(&mut self) {
-        if let Some(s) = self.parent_subscription.get_mut().take() {
+        if let Some(s) = self.parent_subscription.take() {
             s.dispose();
         }
-        if let Some(s) = self.target_subscription.get_mut().take() {
+        if let Some(s) = self.target_link.get().and_then(|link| link.subscription.take()) {
             s.dispose();
         }
     }

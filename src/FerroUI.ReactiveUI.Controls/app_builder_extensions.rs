@@ -15,9 +15,12 @@
 use crate::startup_configuration::StartupConfiguration;
 use crate::view_registrar::{ViewAssembly, ViewRegistrar};
 use crate::{register_binding_integration, AutoDataTemplateBindingHook, FerroActivationForViewFetcher, FerroScheduler};
+use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_controls::AppBuilder;
 use ferroui_reactive::concurrency::{IScheduler, SchedulerDefaults};
-use ferroui_reactiveui::{IActivationForViewFetcher, IPropertyBindingHook, ReactiveUIBuilder};
+use ferroui_reactive::Observer;
+use ferroui_reactiveui::{IActivationForViewFetcher, IPropertyBindingHook, ReactiveUIBuilder, UnhandledError};
+use ferroui_system::{IObserver, ObservableError};
 use ferroui_splat::{AppLocator, IDependencyResolver, IMutableDependencyResolver, MutableDependencyResolverExt};
 use std::rc::Rc;
 
@@ -126,6 +129,22 @@ impl ReactiveUIBuilderFerroExtensions for ReactiveUIBuilder {
                 splat.register_constant::<dyn IPropertyBindingHook>(Rc::new(AutoDataTemplateBindingHook::new()));
                 register_binding_integration(splat);
             })
-            .with_suspension_host_of::<()>()
+            .with_suspension_host_of::<()>();
+        if self.exception_handler().is_none() {
+            self.with_exception_handler(dispatcher_exception_handler());
+        }
+        self
     }
+}
+
+/// The handler of the errors that no `thrown_exceptions` subscriber handles of a FerroUI
+/// application: the [`UnhandledError`] of the error is a job of the dispatcher of the user
+/// interface thread that fails, so it goes to the unhandled-exception events of the
+/// dispatcher without a panic, also when the build aborts on panic (#567), where the default
+/// handler of ReactiveUI panics on the main thread scheduler.
+pub(crate) fn dispatcher_exception_handler() -> Rc<dyn IObserver<ObservableError>> {
+    Observer::create(|error: ObservableError| {
+        let unhandled = UnhandledError::of_broken_pipeline(&*error);
+        Dispatcher::ui_thread().post_fallible(move || Err(unhandled), DispatcherPriority::SEND);
+    })
 }

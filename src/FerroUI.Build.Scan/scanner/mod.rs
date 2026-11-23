@@ -326,7 +326,11 @@ pub struct Statistics {
 pub struct SourceReferences {
     /// The identifiers that start with an upper-case letter: the names of types, of enumeration
     /// members and of constants as the code writes them, in expressions, types, `use` items and
-    /// the bodies of macro invocations.
+    /// the bodies of macro invocations. With them, the name of every function and method the code
+    /// calls, in the case of a type (`text_block()` gives `TextBlock`): a function named after the
+    /// class it constructs (the builders of the declarative layer, `button()`, `text_block()`)
+    /// and a setter named after the control it makes (`tool_tip("..")`) name the class as
+    /// `Button::new()` does.
     pub names: BTreeSet<String>,
     /// The values of the string literals, up to [`SourceReferences::MAX_STRING`] bytes long.
     pub strings: BTreeSet<String>,
@@ -339,6 +343,25 @@ impl SourceReferences {
     pub(crate) fn add_name(&mut self, name: &str) {
         if name.starts_with(|c: char| c.is_ascii_uppercase()) && !self.names.contains(name) {
             self.names.insert(name.to_string());
+        }
+    }
+
+    /// A function or a method the code calls, by its name: the name in the case of a type is a
+    /// name of the code (see [`names`](Self::names)).
+    pub(crate) fn add_call(&mut self, name: &str) {
+        if !name.starts_with(|c: char| c.is_ascii_lowercase()) {
+            return;
+        }
+        let mut type_name = String::with_capacity(name.len());
+        for part in name.split('_') {
+            let mut letters = part.chars();
+            if let Some(first) = letters.next() {
+                type_name.push(first.to_ascii_uppercase());
+                type_name.push_str(letters.as_str());
+            }
+        }
+        if !self.names.contains(&type_name) {
+            self.names.insert(type_name);
         }
     }
 

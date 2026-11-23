@@ -151,6 +151,18 @@ java -cp /tmp/media-geometry-tests Mp4GeometryContract tests/media/fixtures
 java -cp /tmp/media-geometry-tests FrameOrientationContract
 ```
 
+The camera dynamic-range admission contract needs the classes of
+`androidx.camera:camera-core` (the `classes.jar` of the AAR the Gradle build
+resolves) on the class path:
+
+```sh
+javac -cp /path/to/camera-core/classes.jar -d /tmp/media-camera-tests \
+  src/FerroUI.Media.Camera.Android/java/org/ferroui/media/camera/CameraPreviewProfile.java \
+  tests/media/android/CameraDynamicRangeContract.java
+java -cp /path/to/camera-core/classes.jar:/tmp/media-camera-tests \
+  org.ferroui.media.camera.CameraDynamicRangeContract
+```
+
 The 3D toggle records requested state separately from temporary source
 availability. Stop retires its output; restarting/replacing the camera restores
 the requested renderer when the replacement input becomes available. Native

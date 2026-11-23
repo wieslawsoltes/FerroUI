@@ -54,11 +54,10 @@ impl<T: Clone + PartialEq + 'static> ReadOnlyObservableCollection<T> {
     /// handler and one source property handler, as the original wrapper does.
     pub fn new(source: ObservableCollection<T>) -> Self {
         let inner = Rc::new_cyclic(|weak: &std::rc::Weak<Inner<T>>| {
-            let ids = Rc::new(Cell::new(0));
             let inner = Inner {
                 source: source.clone(),
-                typed: HandlerList::with_shared_ids(ids.clone()),
-                changed: Event::with_shared_ids(ids),
+                typed: HandlerList::new(),
+                changed: Event::new(),
                 properties: Event::new(),
                 collection_token: Cell::new(None),
                 property_token: Cell::new(None),

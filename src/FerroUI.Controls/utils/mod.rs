@@ -5,6 +5,7 @@ mod border_render_helper;
 
 pub use ancestor_finder::AncestorFinder;
 pub use border_render_helper::BorderRenderHelper;
+pub(crate) use border_render_helper::LazyBorderRenderHelper;
 
 mod string_utils;
 mod undo_redo_helper;

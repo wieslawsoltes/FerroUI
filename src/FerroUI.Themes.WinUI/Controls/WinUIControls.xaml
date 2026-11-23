@@ -64,6 +64,8 @@
              InfoBar uses InfoBarCloseButtonStyle of NotificationCard.xaml. -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/InfoBadge.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Pivot.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/SwipeControl.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TitleBar.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ProgressRing.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/WindowNotificationManager.xaml" />
@@ -95,6 +97,8 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/SplitButton.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ToggleSwitch.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Slider.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/MediaTransportControls.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/CameraCaptureUI.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NumericUpDown.xaml" />
         <!-- An input control of WinUI that FerroUI ports as a control (docs/porting/winui-controls.md). -->
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/NumberBox.xaml" />
@@ -116,6 +120,8 @@
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/Menu.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ListBoxItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ListBox.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ListView.xaml" />
+        <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/GridView.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ComboBoxItem.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/ComboBox.xaml" />
         <MergeResourceInclude Source="ferres://FerroUI.Themes.WinUI/Controls/TreeViewItem.xaml" />

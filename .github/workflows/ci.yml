@@ -10,7 +10,13 @@ on:
     # run replaced the results of the real run of the same commit (a failure looked like a skip). A
     # pull request of a stack that is retargeted to main gets a new run from scripts/stack/stack.py,
     # which brings the branch up to date with its new base (docs/stacked-pull-requests.md).
-    paths-ignore: ['docs/**', '**/*.md']
+    # The documentation alone runs nothing, except the data under docs/ that tests read.
+    paths:
+      - '**'
+      - '!docs/**'
+      - '!**/*.md'
+      - 'docs/porting/data/**'
+      - 'docs/designer/samples/**'
   workflow_dispatch:
     inputs:
       # A calibration run of the text rendering in the comparison of the WinUI theme gallery
@@ -52,13 +58,105 @@ env:
   CARGO_INCREMENTAL: 0
   RUST_BACKTRACE: 1
 
-# The checks of every pull request: the conventions and the packages, the Linux tests of the
-# workspace, the native macOS platform, the Windows backend, X11 and the browser catalog. The jobs
-# of one platform or backend alone are workflows of their own that a pull request starts only when it changes that area, so a
-# pull request shows no skipped check for them: vello.yml, browser.yml, ios.yml, android.yml,
+# The checks of a pull request: the conventions and the packages on every pull request, and of the
+# Linux tests of the workspace, the API gate, the native macOS platform, the Windows backend, X11
+# and the browser catalog those that build a file the pull request changes. The job `changes`
+# decides (scripts/ci/changed_areas.py, docs/ci.md: the packages each job builds, for its target,
+# against the files of the pull request); a change of this workflow, the root manifest, the lock
+# file or the cargo configuration runs them all, and so do a push to main, the nightly run and a
+# run started by hand. `CI result` sums them up in one check that a skipped job does not fail.
+# The jobs of one platform or backend alone are workflows of their own that a pull request
+# starts only when it changes that area: vello.yml, browser.yml, ios.yml, android.yml,
 # wayland.yml, linuxfb.yml; the informative jobs are in nightly.yml. All of them also run every
 # night on main and by hand (gh workflow run <file> --ref <branch>).
 jobs:
+  changes:
+    name: Changed areas
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    permissions:
+      contents: read
+      pull-requests: read
+    outputs:
+      api-gate: ${{ steps.areas.outputs.api-gate }}
+      linux: ${{ steps.areas.outputs.linux }}
+      macos: ${{ steps.areas.outputs.macos }}
+      windows: ${{ steps.areas.outputs.windows }}
+      browser: ${{ steps.areas.outputs.browser }}
+      x11: ${{ steps.areas.outputs.x11 }}
+      reduced: ${{ steps.areas.outputs.reduced }}
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      # The files of the pull request, with the old names of renamed ones. The API lists at most
+      # 3000 files: a larger pull request runs every job.
+      - name: Changed files
+        id: files
+        if: github.event_name == 'pull_request'
+        env:
+          GH_TOKEN: ${{ github.token }}
+          PR: ${{ github.event.pull_request.number }}
+          CHANGED: ${{ github.event.pull_request.changed_files }}
+          BASE_REF: ${{ github.event.pull_request.base.ref }}
+          DEFAULT_BRANCH: ${{ github.event.repository.default_branch }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          if [ "$BASE_REF" != "$DEFAULT_BRANCH" ]; then
+            # A part of a stack. The checks of the top part decide for the whole stack, so the jobs
+            # follow every file the stack changes up to this part, not only this part's own diff.
+            # The comparison lists at most 300 files: a larger stack, or one the API cannot
+            # compare, runs every job.
+            if gh api "repos/$GITHUB_REPOSITORY/compare/$DEFAULT_BRANCH...$HEAD_SHA" > "$RUNNER_TEMP/compare.json"; then
+              jq -r '.files[] | .filename, (.previous_filename // empty)' "$RUNNER_TEMP/compare.json" > "$RUNNER_TEMP/files.txt"
+              if [ "$(jq '.files | length' "$RUNNER_TEMP/compare.json")" -ge 300 ]; then
+                echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"
+              fi
+            else
+              echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"
+            fi
+          else
+            gh api --paginate "repos/$GITHUB_REPOSITORY/pulls/$PR/files" \
+              -q '.[] | .filename, (.previous_filename // empty)' > "$RUNNER_TEMP/files.txt"
+            if [ "${CHANGED:-0}" -ge 3000 ]; then echo "incomplete=--incomplete" >> "$GITHUB_OUTPUT"; fi
+          fi
+          touch "$RUNNER_TEMP/files.txt"
+          wc -l < "$RUNNER_TEMP/files.txt"
+      # A part of a stack with a part above it: the head of the top part contains this code, and
+      # its checks decide when the stack lands (scripts/stack/stack.py, docs/ci.md). A pull request
+      # based on this branch that is not a part of its stack carries the label `stack-independent`.
+      # A branch of a fork can have the name of a branch here, so only this repository's count.
+      - name: A pull request above this one
+        id: stack
+        if: github.event_name == 'pull_request' && github.event.pull_request.head.repo.full_name == github.repository
+        env:
+          GH_TOKEN: ${{ github.token }}
+          HEAD: ${{ github.head_ref }}
+        run: |
+          above=$(gh pr list --repo "$GITHUB_REPOSITORY" --state open --base "$HEAD" --limit 20 --json number,labels \
+            --jq '[.[] | select(all(.labels[]; .name != "stack-independent")) | .number | tostring] | join(",")')
+          echo "above=$above" >> "$GITHUB_OUTPUT"
+          echo "pull requests above: ${above:-none}"
+      - name: The jobs this run needs
+        id: areas
+        env:
+          EVENT: ${{ github.event_name }}
+          INCOMPLETE: ${{ steps.files.outputs.incomplete }}
+          ABOVE: ${{ steps.stack.outputs.above }}
+        run: |
+          touch "$RUNNER_TEMP/files.txt"
+          # shellcheck disable=SC2086
+          if ! python3 scripts/ci/changed_areas.py --event "$EVENT" --files "$RUNNER_TEMP/files.txt" $INCOMPLETE \
+              --output "$RUNNER_TEMP/areas.txt" --summary "$GITHUB_STEP_SUMMARY"; then
+            echo "::warning::the changed areas could not be worked out: every job runs"
+            printf '%s=true\n' api-gate linux macos windows browser x11 > "$RUNNER_TEMP/areas.txt"
+          fi
+          if [ -n "$ABOVE" ]; then
+            echo "::notice::#$ABOVE is above this pull request and runs the full checks; this run keeps the conventions"
+            printf '%s=false\n' api-gate linux macos windows browser x11 > "$RUNNER_TEMP/areas.txt"
+            echo 'reduced=true' >> "$RUNNER_TEMP/areas.txt"
+            printf '\nReduced run: #%s above this pull request runs the full checks.\n' "$ABOVE" >> "$GITHUB_STEP_SUMMARY"
+          fi
+          cat "$RUNNER_TEMP/areas.txt" >> "$GITHUB_OUTPUT"
+
   conventions:
     name: Source conventions and packages
     timeout-minutes: 20
@@ -89,6 +187,15 @@ jobs:
       # FerroUI.Base and FerroUI.Controls (docs/declarative-ui.md, section 4).
       - name: Generated view builders are up to date
         run: python3 scripts/generate_view_builders.py --check
+      # The API model of the bindings and the stable ID table of ferroui-capi, written from the
+      # sources of the framework and the C header, and the Osprey bindings written from the model
+      # (bindings/README.md, docs/osprey.md).
+      - name: Generated API model and bindings are up to date
+        run: |
+          python3 scripts/generate_api_model.py --check
+          python3 scripts/generate_osprey_bindings.py --check
+      - name: Tests of the binding generators
+        run: python3 scripts/test_generate_bindings.py
       # The XAML schema of the designer's language service, read from the markup metadata of the
       # framework crates: a new control or property changes it (#345, D3).
       - name: The designer's language schema is up to date
@@ -96,6 +203,9 @@ jobs:
       # The scoped names of the generator (two public types of one crate with the same name).
       - name: Tests of the view builder generator
         run: python3 scripts/test_generate_view_builders.py
+      # Which jobs of this workflow a pull request runs (docs/ci.md).
+      - name: Tests of the selection of the jobs
+        run: python3 -m unittest discover -s scripts/ci -p 'test_*.py'
       # The WinUI source paths keep their Windows spelling on Linux (InkToolbar and InkToolBar).
       - name: Tests of the WinUI theme scripts
         run: python3 -m unittest discover -s scripts/winui-theme -p 'test_*.py'
@@ -126,11 +236,11 @@ jobs:
       - name: Package the published crates without building
         run: scripts/release/publish.sh --dry-run --no-verify
 
-  # The API gate (docs/release.md, "API stability"): within 0.4 the public API of the published
+  # The API gate (docs/release.md, "API stability"): within 0.5 the public API of the published
   # crates only grows. cargo-semver-checks compares the rustdoc JSON of each published crate with
-  # that of the sources of 0.4.0 (scripts/api-gate/semver_checks.py: the tag v0.4.0), with the
-  # release type `minor`. While the workspace is at a preview of 0.5.0 it passes without building:
-  # the previews may change the API, and the release of 0.5.0 moves the baseline to it. The script documents all the
+  # that of the sources of 0.5.0 (scripts/api-gate/semver_checks.py: the tag v0.5.0), with the
+  # release type `minor`. While the workspace is at a preview of 0.6.0 it passes without building:
+  # the previews may change the API, and the release of 0.6.0 moves the baseline to it. The script documents all the
   # crates in one `cargo doc` for each side, so the dependencies are checked once and not once per
   # crate, and the documentation of the baseline is cached under the baseline commit and the rustc
   # version: a run documents the pull request only. It runs when a pull request changes the sources
@@ -141,7 +251,8 @@ jobs:
   # macOS. Like the macOS job, it does not run for a push to main.
   api-gate:
     name: API gate (cargo-semver-checks)
-    if: (github.event_name != 'push')
+    needs: changes
+    if: github.event_name != 'push' && needs.changes.outputs.api-gate == 'true'
     runs-on: macos-15
     timeout-minutes: 45
     env:
@@ -192,7 +303,7 @@ jobs:
           workspaces: ". -> target/api-gate/target-current"
           save-if: ${{ github.ref == 'refs/heads/main' }}
           cache-on-failure: true
-      - name: Documentation of 0.4.0
+      - name: Documentation of 0.5.0
         if: steps.changes.outputs.run == 'true' && steps.baseline-cache.outputs.cache-hit != 'true'
         run: python3 scripts/api-gate/semver_checks.py --fetch --baseline-only
       - uses: actions/cache/save@0057852bfaa89a56745cba8c7296529d2fc39830 # v4.3.0
@@ -200,7 +311,7 @@ jobs:
         with:
           path: target/api-gate/baseline
           key: ${{ steps.baseline.outputs.key }}
-      - name: Signatures against 0.4.0
+      - name: Signatures against 0.5.0
         if: steps.changes.outputs.run == 'true'
         run: python3 scripts/api-gate/semver_checks.py --fetch
 
@@ -215,6 +326,8 @@ jobs:
   # macOS job.
   linux:
     name: Build and test (Linux, the workspace)
+    needs: changes
+    if: needs.changes.outputs.linux == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -250,6 +363,13 @@ jobs:
             --skip text_layout_draws_mixed_direction_ligature_and_emoji_text \
             --skip watcher_revision_changed_during_preparation_discards_candidate_before_commit
 
+      # The workspace run above builds ferroui-markup-xaml with `hot-reload` and `source-overlays`
+      # on (ferroui-hot-reload and ferroui-designer ask for them, and features unify), and both
+      # switch the indexed resource groups of compiled dictionaries off. The crate on its own is
+      # built as an application builds it, so these are the tests of that path.
+      - name: Test the compiled resource groups (ferroui-markup-xaml on its own)
+        run: xvfb-run -a cargo test --locked -p ferroui-markup-xaml --lib
+
       - name: Test the detachable FerroBoard component
         env:
           CARGO_BUILD_JOBS: 1
@@ -266,7 +386,8 @@ jobs:
   # the nightly run and in a run started by hand. It does not run for a push to main.
   macos:
     name: Build and test (macOS, the native platform)
-    if: (github.event_name != 'push')
+    needs: changes
+    if: github.event_name != 'push' && needs.changes.outputs.macos == 'true'
     runs-on: macos-15
     timeout-minutes: 180
     env:
@@ -310,7 +431,8 @@ jobs:
   #   binaries are published stays informative: it gates them.
   windows:
     name: Build, test and smoke run (Windows platform backend)
-    if: (github.event_name != 'push')
+    needs: changes
+    if: github.event_name != 'push' && needs.changes.outputs.windows == 'true'
     runs-on: windows-latest
     permissions:
       contents: read
@@ -319,6 +441,13 @@ jobs:
     env:
       CARGO_PROFILE_DEV_DEBUG: 0
       CARGO_PROFILE_TEST_DEBUG: 0
+      # Since the image `windows-2025-vs2026` of 2026-11-16 the MSVC standard library of the
+      # image (14.52) refuses its libclang ("STL1000: Unexpected compiler version, expected
+      # Clang 22 or newer"), and the build script of the ANGLE binding, which generates its
+      # bindings with libclang, fails. The headers say how to pass the check; the bindings are
+      # declarations, not code that libclang compiles. The image of Visual Studio 2022 is no
+      # way out: it builds the binding, and the smoke runs through ANGLE do not end on it.
+      BINDGEN_EXTRA_CLANG_ARGS: -D_ALLOW_COMPILER_AND_STL_VERSION_MISMATCH
     defaults:
       run:
         shell: bash
@@ -516,6 +645,14 @@ jobs:
             ./target/debug/$sample.exe || { echo "::error::$sample ended with an error"; result=1; }
           done
           exit $result
+      # The opt-in Direct2D render backend (src/Windows/FerroUI.Direct2D), which no default build
+      # compiles: the XAML HelloWorld sample without Skia. The build script of the backend compiles
+      # the effect shaders with fxc.exe of the Windows SDK of the image. Built on every run: a change
+      # of the shared crates reaches the backend too.
+      - name: Build the HelloWorld sample with the Direct2D backend
+        if: ${{ !cancelled() }}
+        timeout-minutes: 30
+        run: cargo build --locked -p hello-world --no-default-features --features direct2d
       # Upstream's integration tests of the backend (tests/FerroUI.IntegrationTests.Win32): windows
       # of the window class on the desktop of the runner, in every state, with every kind of
       # decorations, their client area and bounds compared with the screen. One binary without
@@ -737,6 +874,8 @@ jobs:
 
   browser:
     name: Check (browser, wasm32-unknown-emscripten)
+    needs: changes
+    if: needs.changes.outputs.browser == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 150
     # The catalog site of a check is built with the `browser` profile without its link-time
@@ -756,7 +895,7 @@ jobs:
       - name: Script module (type check, lint, bundle, pixel and text input tests)
         run: |
           node scripts/browser/build-webapp.mjs build
-          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input)
+          (cd src/Browser/FerroUI.Browser/webapp && npm run test:pixels && npm run test:input && npm run test:media)
           node scripts/browser/tests/canvas_size.test.mjs
       - name: Skia features of the target
         run: |
@@ -777,6 +916,8 @@ jobs:
         run: scripts/build-browser.sh control-catalog-browser --webapp-prebuilt
       - name: ControlCatalog tests in headless Chrome (rendering, resize, console, drawer, navigation, click, typing)
         run: node scripts/browser/tests/control_catalog.test.mjs --screenshot target/browser/screenshots/control-catalog.png
+      - name: What a page switch costs in headless Chrome (the masks its frames upload, against their budget)
+        run: node scripts/browser/tests/navigation_cost.test.mjs
       - name: Keep the screenshot
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
@@ -798,6 +939,8 @@ jobs:
   # (xrandr --setmonitor). No compositing manager: that is not covered here.
   x11:
     name: Build and test (Linux, X11 under Xvfb)
+    needs: changes
+    if: needs.changes.outputs.x11 == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 90
     env:
@@ -945,12 +1088,14 @@ jobs:
           xvfb-run -a --server-args="-screen 0 1280x1024x24" \
             timeout 300 target/debug/examples/x11_window --smoke --mode=glx --expect-fallback --skip=input,popup,screens,clipboard
       # A window manager clamps the window to a screen narrower than it: the server and the
-      # framework have to agree on the size the window got.
+      # framework have to agree on the size the window got. Every run under a window manager
+      # starts it with `scripts/x11/with-window-manager.sh`, which waits until it manages the
+      # screen: one that takes the window in the middle of a run moves it under the pointer.
       - name: The same under a window manager (openbox)
         if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 600x500x24" \
-            sh -c 'openbox & sleep 2; timeout 300 target/debug/examples/x11_window --smoke'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke
       # Two monitors of the RandR extension, side by side: the first takes the output of the
       # server (which removes the monitor the server derives from it), the second has none. The
       # server must not reset when xrandr, its only client, disconnects: the monitors would be gone.
@@ -963,8 +1108,7 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           dbus-run-session -- xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --ime=ibus --skip=popup,resize,screens,clipboard'
       # Text through the input method of the server: the one Xlib has built in (@im=local), with a
       # compose sequence, which only an input method produces. A key gets the compose symbol (the
       # scroll lock key: the framework has no action for it, where the menu key would open the
@@ -977,8 +1121,7 @@ jobs:
           LANG=en_US.UTF-8 xvfb-run -a --server-args="-screen 0 1280x1024x24 -noreset" sh -c '
             set -e
             xmodmap -e "keycode 78 = Multi_key"
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --ime=xim --skip=popup,resize,screens,clipboard'
       # Drag and drop: the server synthesizes a press on a square that starts a drag, the movement
       # and the release; first over the window itself, then over the window of a second process
       # (the same example, as a drop target), so that the source side of one process and the target
@@ -1014,14 +1157,12 @@ jobs:
         if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --gtk-dialog --skip=input,popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --gtk-dialog --skip=input,popup,resize,screens,clipboard'
       - name: The file dialogs of GTK (on the UI thread, with the main loop of GLib)
         if: ${{ !cancelled() }}
         run: |
           xvfb-run -a --server-args="-screen 0 1280x1024x24" sh -c '
-            openbox & sleep 2
-            timeout 300 target/debug/examples/x11_window --smoke --glib --gtk-dialog --skip=input,popup,resize,screens,clipboard'
+            scripts/x11/with-window-manager.sh timeout 300 target/debug/examples/x11_window --smoke --glib --gtk-dialog --skip=input,popup,resize,screens,clipboard'
       # Stage 2f: a window of another client held by the native control host of the window (its
       # holder window, bounds, hiding, release), an XEmbed plug in a socket window of the example
       # (announced, embedded, drawn, resized by the embedder, destroyed), and the lifetime events.
@@ -1050,9 +1191,15 @@ jobs:
             timeout 300 target/debug/examples/x11_window --smoke --a11y=real --skip=input,popup,resize,screens,clipboard
       # The desktop host of the ControlCatalog with its native control demo for Linux (a window of
       # the X server for mplayer, a file chooser of GTK): compiled, not run.
-      - name: The ControlCatalog host with the native control demo compiles
+      - name: Check the ControlCatalog host and its optional F12 inspector
         if: ${{ !cancelled() }}
-        run: cargo check --locked -p control-catalog-desktop
+        run: |
+          graph="$(cargo tree --locked --color never -p control-catalog-desktop -e normal --prefix none -f '{p} {f}')"
+          if grep -E '^ferroui-diagnostics |^ferroui-base .*\b(full-themes|type-tables)\b' <<< "$graph"; then
+            echo "::error::the default ControlCatalog links inspector dependencies"
+            exit 1
+          fi
+          cargo check --locked -p control-catalog-desktop --features diagnostics
       # The GpuInterop sample: its Vulkan and dma-buf demos and the Skia context over their
       # device, which need Linux and Skia with Vulkan to compile (samples/GpuInterop/GAPS.md).
       - name: The GpuInterop sample compiles
@@ -1069,3 +1216,37 @@ jobs:
             xrandr --setmonitor FERRO-B 640/169x1024/271+640+0 none
             xrandr --listmonitors
             timeout 300 target/debug/examples/x11_window --smoke --expect-screens=2 --skip=clipboard'
+
+  # One check for the whole workflow: it fails when a job failed or was cancelled, and passes when
+  # the jobs a pull request does not need were skipped. A branch protection rule can require it
+  # alone, whatever the pull request changes.
+  # Marks a run that left the build and test jobs to the part above. `scripts/stack/stack.py` reads
+  # this check by its name and does not land a top part whose latest run has it.
+  stack-part:
+    name: Reduced CI (the pull request above runs the full checks)
+    needs: changes
+    if: needs.changes.outputs.reduced == 'true'
+    runs-on: ubuntu-latest
+    timeout-minutes: 2
+    steps:
+      - run: echo "The build and test jobs run on the top part of this stack."
+
+  result:
+    name: CI result
+    if: ${{ !cancelled() }}
+    needs: [changes, conventions, api-gate, linux, macos, windows, browser, x11]
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    steps:
+      - name: The results of the jobs
+        env:
+          RESULTS: ${{ toJSON(needs) }}
+        run: |
+          python3 - <<'PY'
+          import json, os, sys
+          results = {job: value["result"] for job, value in json.loads(os.environ["RESULTS"]).items()}
+          for job, result in results.items():
+              print(f"{job}: {result}")
+          if results["changes"] != "success" or any(r in ("failure", "cancelled") for r in results.values()):
+              sys.exit(1)
+          PY

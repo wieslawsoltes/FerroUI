@@ -21,6 +21,47 @@ crate::ferro_thread_local! {
     static WORD_JOINER_RUN: ReadOnlyMemory<u16> = ReadOnlyMemory::from_vec(vec![WORD_JOINER; WORD_JOINER_RUN_LENGTH]);
 }
 
+#[cfg(test)]
+crate::ferro_thread_local! {
+    /// Off: the shapeable length is found one grapheme cluster at a time for every character, as
+    /// upstream does (the tests compare).
+    pub(crate) static ASCII_CLUSTERS: std::cell::Cell<bool> = std::cell::Cell::new(true);
+}
+
+/// What the itemization asks of a character, for the code points below U+0080.
+#[derive(Clone, Copy)]
+struct AsciiCharacter {
+    script: Script,
+    /// General category Zs.
+    space_separator: bool,
+    /// `TextCharacters::needs_glyph`.
+    needs_glyph: bool,
+}
+
+/// The table of [`AsciiCharacter`], filled from the Unicode data at the first use.
+fn ascii_characters() -> &'static [AsciiCharacter; 128] {
+    static TABLE: std::sync::OnceLock<[AsciiCharacter; 128]> = std::sync::OnceLock::new();
+    TABLE.get_or_init(|| {
+        std::array::from_fn(|code| {
+            let codepoint = Codepoint::new(code as u32);
+            AsciiCharacter {
+                script: codepoint.script(),
+                space_separator: codepoint.general_category() == GeneralCategory::SpaceSeparator,
+                needs_glyph: TextCharacters::needs_glyph(codepoint),
+            }
+        })
+    })
+}
+
+/// Whether the character at `at` is a grapheme cluster of its own that the ASCII table answers
+/// for: a printable ASCII character that an ASCII character or the end of the text follows.
+/// Every character that extends a cluster (a mark, a joiner, a variation selector) is past
+/// U+007F, and of the ASCII characters only CR LF holds together.
+#[inline(always)]
+fn is_ascii_cluster(text: &[u16], at: usize) -> bool {
+    (0x20..=0x7E).contains(&text[at]) && text.get(at + 1).is_none_or(|&next| next < 0x80)
+}
+
 /// A text run that holds text characters.
 pub struct TextCharacters {
     text: ReadOnlyMemory<u16>,
@@ -413,56 +454,120 @@ impl TextCharacters {
             return None;
         }
 
-        let mut enumerator = GraphemeEnumerator::new(text);
+        // A run of printable ASCII characters is taken a character at a time from two tables (the
+        // properties of the 128 characters, and which of them each typeface has a glyph for): no
+        // grapheme cluster is found for them and no character map is searched. Other text is
+        // taken a grapheme cluster at a time; the enumerator starts at the cluster boundary the
+        // ASCII run ends at, and the ASCII run starts again at one the enumerator gives.
+        #[cfg(test)]
+        let ascii_clusters = ASCII_CLUSTERS.with(std::cell::Cell::get);
+        #[cfg(not(test))]
+        let ascii_clusters = true;
+        let ascii = ascii_characters();
+        let mut at = 0usize;
 
-        while let Some(current_grapheme) = enumerator.move_next() {
-            let current_codepoint = current_grapheme.first_codepoint();
-            let current_script = current_codepoint.script();
+        'text: while at < text.len() {
+            if ascii_clusters && is_ascii_cluster(text, at) {
+                let unit = text[at];
+                let character = &ascii[usize::from(unit)];
 
-            if current_codepoint.value() == 0 {
-                // Do not include null terminators
-                break;
+                if let Some(default_glyph_typeface) = default_glyph_typeface {
+                    if (default_can_shape_script || character.space_separator)
+                        && default_glyph_typeface.covers_ascii(unit)
+                    {
+                        break;
+                    }
+                }
+
+                if character.needs_glyph && !glyph_typeface.covers_ascii(unit) {
+                    break;
+                }
+
+                if !Self::continues_script(&mut script, character.script) {
+                    break;
+                }
+
+                length += 1;
+                at += 1;
+                continue;
             }
 
-            let cluster_text = &text[current_grapheme.offset()..current_grapheme.offset() + current_grapheme.length()];
+            let start = at;
+            let mut enumerator = GraphemeEnumerator::new(&text[start..]);
 
-            // A fallback run ends where the default typeface regains coverage, spacing whitespace
-            // included - practically every font maps U+0020, so exempting it would let the run
-            // shape the following space with the fallback's own advance. A default typeface that
-            // cannot shape this script still reclaims that whitespace, which carries no shaping.
-            // Only Zs qualifies: control and format codepoints (bidi controls, prepended number
-            // signs) keep their cluster with the probed font.
-            if let Some(default_glyph_typeface) = default_glyph_typeface {
-                if (default_can_shape_script || current_codepoint.general_category() == GeneralCategory::SpaceSeparator)
-                    && Self::cluster_is_covered(cluster_text, current_codepoint, default_glyph_typeface, require_full_cluster)
+            loop {
+                let Some(current_grapheme) = enumerator.move_next() else { break 'text };
+                let current_codepoint = current_grapheme.first_codepoint();
+
+                if current_codepoint.value() == 0 {
+                    // Do not include null terminators
+                    break 'text;
+                }
+
+                let offset = start + current_grapheme.offset();
+                let cluster_text = &text[offset..offset + current_grapheme.length()];
+
+                // A fallback run ends where the default typeface regains coverage, spacing
+                // whitespace included - practically every font maps U+0020, so exempting it would
+                // let the run shape the following space with the fallback's own advance. A default
+                // typeface that cannot shape this script still reclaims that whitespace, which
+                // carries no shaping. Only Zs qualifies: control and format codepoints (bidi
+                // controls, prepended number signs) keep their cluster with the probed font.
+                if let Some(default_glyph_typeface) = default_glyph_typeface {
+                    if (default_can_shape_script
+                        || current_codepoint.general_category() == GeneralCategory::SpaceSeparator)
+                        && Self::cluster_is_covered(
+                            cluster_text,
+                            current_codepoint,
+                            default_glyph_typeface,
+                            require_full_cluster,
+                        )
+                    {
+                        break 'text;
+                    }
+                }
+
+                // Stop at the first cluster this typeface can't render. A cluster that only holds
+                // a default ignorable (a stray variation selector, say) renders nothing whichever
+                // font it lands on, so it never ends the run.
+                if Self::needs_glyph(current_codepoint)
+                    && !Self::cluster_is_covered(cluster_text, current_codepoint, glyph_typeface, require_full_cluster)
                 {
+                    break 'text;
+                }
+
+                if !Self::continues_script(&mut script, current_codepoint.script()) {
+                    break 'text;
+                }
+
+                length += current_grapheme.length();
+                at = offset + current_grapheme.length();
+
+                if ascii_clusters && at < text.len() && is_ascii_cluster(text, at) {
                     break;
                 }
             }
-
-            // Stop at the first cluster this typeface can't render. A cluster that only holds a
-            // default ignorable (a stray variation selector, say) renders nothing whichever font
-            // it lands on, so it never ends the run.
-            if Self::needs_glyph(current_codepoint)
-                && !Self::cluster_is_covered(cluster_text, current_codepoint, glyph_typeface, require_full_cluster)
-            {
-                break;
-            }
-
-            if current_script != script {
-                if script == Script::Unknown
-                    || current_script != Script::Common && matches!(script, Script::Common | Script::Inherited)
-                {
-                    script = current_script;
-                } else if current_script != Script::Inherited && current_script != Script::Common {
-                    break;
-                }
-            }
-
-            length += current_grapheme.length();
         }
 
         (length > 0).then_some(length)
+    }
+
+    /// Whether a character of script `current` continues a run whose script so far is `script`
+    /// (unknown at the start), and the script of the run with it: a run takes the first script
+    /// that is not common or inherited, and ends at a character of another one.
+    #[inline(always)]
+    fn continues_script(script: &mut Script, current: Script) -> bool {
+        if current != *script {
+            if *script == Script::Unknown
+                || current != Script::Common && matches!(*script, Script::Common | Script::Inherited)
+            {
+                *script = current;
+            } else if current != Script::Inherited && current != Script::Common {
+                return false;
+            }
+        }
+
+        true
     }
 
     /// Determines whether the codepoint is one a font is expected to provide a glyph for. Break

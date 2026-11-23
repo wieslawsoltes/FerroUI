@@ -36,6 +36,20 @@ ferro_class! {
         /// Creates the shape's defining geometry.
         fn create_defining_geometry(this) -> Option<Ref<Geometry>>;
 
+        /// Gives the geometry the shape has what the shape is now (a property the geometry is
+        /// made of changed), and says whether it did. The geometry is then kept and builds
+        /// itself again, where the reference lets it go and makes another one for every
+        /// change: a shape that is resized, or whose points change, every frame made and
+        /// dropped an object and a subscription a frame. The default does not, and the shape
+        /// makes a new geometry as before (a FerroUI addition, desktop-performance.md,
+        /// section 9.88).
+        ///
+        /// An update describes one `create_defining_geometry` and is inherited only with it: a
+        /// class that makes a geometry of its own and does not say how to update it has no
+        /// update, whatever its base class has, and its geometry is made again as before.
+        fn update_defining_geometry(this, geometry: &Ref<Geometry>) -> bool,
+            follows create_defining_geometry else Shape::keeps_no_geometry;
+
         /// Called when the underlying [`Geometry`] changed.
         fn on_geometry_changed(this);
     }
@@ -48,6 +62,10 @@ impl ShapeImpl for Shape {
         panic!("Shape is abstract: 'create_defining_geometry' must be implemented by the deriving class")
     }
 
+    fn update_defining_geometry(_this: &Self, _geometry: &Ref<Geometry>) -> bool {
+        false
+    }
+
     fn on_geometry_changed(this: &Self) {
         *this.rendered_geometry.borrow_mut() = None;
 
@@ -55,7 +73,23 @@ impl ShapeImpl for Shape {
     }
 }
 
-impl FerroObjectImpl for Shape {
+ferroui_base::ferro_overrides! { impl FerroObjectImpl for Shape {
+    // The properties the handler below compares with: the stroke and the fill of a shape.
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        matches!(
+            property.name(),
+            "Stroke"
+                | "StrokeThickness"
+                | "StrokeDashArray"
+                | "StrokeDashOffset"
+                | "StrokeLineCap"
+                | "StrokeJoin"
+                | "StrokeMiterLimit"
+                | "Fill"
+        )
+        .into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
@@ -98,7 +132,7 @@ impl FerroObjectImpl for Shape {
             this.invalidate_visual();
         }
     }
-}
+} }
 
 impl VisualImpl for Shape {
     fn render(this: &Self, context: &mut DrawingContext) {
@@ -115,6 +149,14 @@ impl VisualImpl for Shape {
         if let Some(mask) = this.alpha_mask.get() {
             mask.update_if_available(this.upcast());
         }
+    }
+
+    /// A shape draws its geometry under the transform its arrange gives it, not its size: a
+    /// geometry that changes has the shape measured and recorded again (also the geometry of a
+    /// rectangle or an ellipse, which is made of the size), and a transform that changes
+    /// invalidates the visual in `arrange_override` (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(_this: &Self, _old: Size, _new: Size) -> bool {
+        false
     }
 
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -155,6 +197,9 @@ impl LayoutableImpl for Shape {
             if this.transform.get() != transform {
                 this.transform.set(transform);
                 *this.rendered_geometry.borrow_mut() = None;
+                // Another transform is another drawing, whether the size changed or not
+                // (`resize_changes_drawing`).
+                this.invalidate_visual();
             }
 
             return final_size;
@@ -230,6 +275,13 @@ ferroui_base::ferro_properties! { impl Shape {
 } }
 
 impl Shape {
+    /// The update of a class that overrides `create_defining_geometry` and not
+    /// `update_defining_geometry`: none, whatever its base class does (the fallback of the member
+    /// in the class declaration).
+    pub(crate) fn keeps_no_geometry(&self, _geometry: &Ref<Geometry>) -> bool {
+        false
+    }
+
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {
@@ -423,6 +475,22 @@ impl Shape {
         }
     }
 
+    /// A property the geometry of the shape is made of changed. The geometry the shape has is
+    /// given what the shape is now, where its class can do that (`update_defining_geometry`),
+    /// and the shape is measured again; else the geometry is let go, as in the reference.
+    fn geometry_property_changed(&self) {
+        let kept = self.defining_geometry.borrow().clone();
+        if kept.is_some_and(|geometry| self.update_defining_geometry(&geometry)) {
+            // What `on_geometry_changed` does for a geometry that says it changed, also where
+            // nothing listens to the geometry (a shape that is not in a tree) or nothing of it
+            // changed.
+            *self.rendered_geometry.borrow_mut() = None;
+            self.invalidate_measure();
+            return;
+        }
+        self.invalidate_geometry();
+    }
+
     /// Invalidates the geometry of this shape.
     pub fn invalidate_geometry(&self) {
         if self.defining_geometry.borrow().is_some() {
@@ -518,7 +586,7 @@ impl Shape {
             }
         }
 
-        control.invalidate_geometry();
+        control.geometry_property_changed();
     }
 
     /// Listens to changes of the defining geometry. At most one subscription

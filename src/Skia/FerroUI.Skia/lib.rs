@@ -22,13 +22,17 @@ mod font_manager_impl;
 mod framebuffer_render_target;
 mod geometry_group_impl;
 mod geometry_impl;
+mod glyph_bounds_cache;
 mod glyph_run_impl;
+mod graphite_metal_ownership;
 mod i_drawable_bitmap_impl;
 mod i_skia_api_lease_feature;
 mod immutable_bitmap;
 mod line_geometry_impl;
 mod locked_framebuffer;
+mod metal_libraries;
 mod picture_render_target;
+mod pipeline_records;
 mod platform_render_interface;
 mod rectangle_geometry_impl;
 mod runtime_effects;
@@ -63,11 +67,14 @@ pub use framebuffer_render_target::FramebufferRenderTarget;
 pub use geometry_group_impl::GeometryGroupImpl;
 pub use geometry_impl::{try_get_geometry_impl, GeometryImpl, GeometryImplBase};
 pub use glyph_run_impl::GlyphRunImpl;
+pub use graphite_metal_ownership::graphite_metal_ownership_fixed;
 pub use i_drawable_bitmap_impl::{try_get_drawable_bitmap, IDrawableBitmapImpl};
 pub use i_skia_api_lease_feature::{ISkiaApiLease, ISkiaApiLeaseFeature, ISkiaPlatformGraphicsApiLease};
 pub use immutable_bitmap::ImmutableBitmap;
+pub use pipeline_records::register_pipeline_record;
 pub use line_geometry_impl::LineGeometryImpl;
 pub use locked_framebuffer::LockedFramebuffer;
+pub use metal_libraries::register_metal_libraries;
 pub use picture_render_target::PictureRenderTarget;
 pub use platform_render_interface::PlatformRenderInterface;
 pub use rectangle_geometry_impl::RectangleGeometryImpl;
@@ -78,7 +85,10 @@ pub use sk_round_rect_cache::SkRoundRectCache;
 pub use sk_text_blob_builder_cache::SkTextBlobBuilderCache;
 pub use skia_backend_context::SkiaContext;
 pub use skia_application_extensions::SkiaApplicationExtensions;
-pub use skia_options::{DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES, SkiaOptions};
+pub use skia_options::{
+    DEFAULT_FRAME_PIPELINING_BANDS, DEFAULT_MAX_GPU_RESOURCE_SIZE_BYTES, MAX_FRAME_PIPELINING_BANDS, SkiaFramePipelining,
+    SkiaOptions,
+};
 pub use text_rendering_override::{
     set_text_rendering_override, startup_text_rendering_override, text_rendering_override, TextRenderingOverride,
     TEXT_OVERRIDE_ENV_PREFIX, TEXT_OVERRIDE_KEYS,

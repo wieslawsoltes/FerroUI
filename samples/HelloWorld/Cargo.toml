@@ -39,6 +39,8 @@ sample-support = { path = "../SampleSupport" }
 [features]
 default = ["skia"]
 skia = ["ferroui-desktop/skia"]
+direct2d = ["ferroui-desktop/direct2d", "dep:ferroui-direct2d"]
+direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
 quartz = ["ferroui-desktop/quartz", "dep:ferroui-native"]
 quartz-metal = ["quartz", "ferroui-desktop/quartz-metal", "dep:ferroui-quartz"]
 quartz-runtime-shaders = ["quartz-metal", "ferroui-desktop/quartz-runtime-shaders"]
@@ -46,6 +48,9 @@ quartz-runtime-shaders = ["quartz-metal", "ferroui-desktop/quartz-runtime-shader
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-native = { workspace = true, optional = true }
 ferroui-quartz = { workspace = true, optional = true, features = ["metal"] }
+
+[target.'cfg(windows)'.dependencies]
+ferroui-direct2d = { workspace = true, optional = true }
 
 [build-dependencies]
 sample-build = { path = "../SampleBuild" }

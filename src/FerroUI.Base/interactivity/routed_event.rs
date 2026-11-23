@@ -4,6 +4,7 @@ use crate::utilities::HandlerList;
 use crate::{ObjectType, StaticType, TypeInfo};
 use bitflags::bitflags;
 use std::any::TypeId;
+use std::cell::Cell;
 use std::fmt;
 use std::hash::{Hash, Hasher};
 use std::marker::PhantomData;
@@ -102,6 +103,11 @@ struct RoutedEventInner {
     owner_type: &'static TypeInfo,
     raised: RoutedEventObservable,
     route_finished: RouteFinishedObservable,
+    /// How many instance handlers of the event are attached to the
+    /// interactives of the thread (not from upstream: lets a raise skip the
+    /// walk over the ancestors when nothing listens; desktop-performance.md,
+    /// section 9.28).
+    instance_handlers: Cell<usize>,
 }
 
 /// The identity and description of a routed event.
@@ -171,6 +177,7 @@ fn create_inner<TEventArgs: IRoutedEventArgs>(
         owner_type,
         raised: RoutedEventObservable { handlers: HandlerList::new() },
         route_finished: RouteFinishedObservable { handlers: HandlerList::new() },
+        instance_handlers: Cell::new(0),
     }))
 }
 
@@ -255,6 +262,27 @@ impl<TEventArgs: ?Sized> RoutedEvent<TEventArgs> {
     #[inline]
     pub fn has_raised_subscriptions(&self) -> bool {
         self.inner.raised.has_observers()
+    }
+
+    /// Whether any interactive of the thread has an instance handler of the
+    /// event. With no instance handler and no class handler a raise has
+    /// nothing to visit, so its route is empty whatever the tree is.
+    #[inline]
+    pub fn has_instance_handlers(&self) -> bool {
+        self.inner.instance_handlers.get() != 0
+    }
+
+    /// Counts instance handlers of the event that were attached.
+    #[inline]
+    pub(crate) fn note_instance_handlers_added(&self, count: usize) {
+        self.inner.instance_handlers.set(self.inner.instance_handlers.get() + count);
+    }
+
+    /// Counts instance handlers of the event that were removed, or dropped
+    /// with their interactive.
+    #[inline]
+    pub(crate) fn note_instance_handlers_removed(&self, count: usize) {
+        self.inner.instance_handlers.set(self.inner.instance_handlers.get().saturating_sub(count));
     }
 
     /// Notifications of the event being raised on any element.
