@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -2770019047624328508;
+pub(crate) const API_FINGERPRINT: i64 = 8339196173667450423;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 509] = [
+pub(crate) static TYPE_NAMES: [&str; 510] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -76,6 +76,7 @@ pub(crate) static TYPE_NAMES: [&str; 509] = [
     "ContainerQuery",
     "ContentControl",
     "ContentControlAutomationPeer",
+    "ContentDialog",
     "ContentPage",
     "ContentPageAutomationPeer",
     "ContentPresenter",
@@ -521,7 +522,7 @@ pub(crate) static TYPE_NAMES: [&str; 509] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1056] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -667,6 +668,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "CloseButtonCommand",
     "CloseButtonCommandParameter",
     "CloseButtonStyle",
+    "CloseButtonText",
     "ClosedPaneHeight",
     "ClosedPaneWidth",
     "ClosingBehavior",
@@ -715,6 +717,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "DayTitleTemplate",
     "DayVisible",
     "DecreaseButton",
+    "DefaultButton",
     "DefaultFocusAdorner",
     "DefaultFrameThickness",
     "DefaultLabelPosition",
@@ -828,6 +831,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "FrameSize",
     "FrameThickness",
     "From",
+    "FullSizeDesired",
     "Geometry",
     "Geometry1",
     "Geometry2",
@@ -953,8 +957,10 @@ pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "IsPointerOver",
     "IsPressed",
     "IsPreviousButtonVisible",
+    "IsPrimaryButtonEnabled",
     "IsReadOnly",
     "IsScrollInertiaEnabled",
+    "IsSecondaryButtonEnabled",
     "IsSelected",
     "IsSettingsVisible",
     "IsSnapToTickEnabled",
@@ -1188,6 +1194,9 @@ pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "PreviousButtonStyle",
     "PreviousButtonTheme",
     "PreviousButtonVisibility",
+    "PrimaryButtonCommand",
+    "PrimaryButtonCommandParameter",
+    "PrimaryButtonText",
     "PrimaryCommands",
     "ProfilePicture",
     "Progress",
@@ -1267,6 +1276,9 @@ pub(crate) static PROPERTY_NAMES: [&str; 1045] = [
     "ScrollViewer.VerticalSnapPointsType",
     "SearchText",
     "SecondIncrement",
+    "SecondaryButtonCommand",
+    "SecondaryButtonCommandParameter",
+    "SecondaryButtonText",
     "SecondaryCommands",
     "Segments",
     "SelectedContent",

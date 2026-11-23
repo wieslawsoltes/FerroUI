@@ -309,6 +309,19 @@ pub fn content_control() -> El<ferroui_controls::ContentControl> {
     El::new()
 }
 
+pub use ferroui_controls::ContentDialog;
+
+impl ViewClass for ferroui_controls::ContentDialog {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::ContentDialog>::new()
+    }
+}
+
+/// Starts an element of [`ContentDialog`](ferroui_controls::ContentDialog).
+pub fn content_dialog() -> El<ferroui_controls::ContentDialog> {
+    El::new()
+}
+
 pub use ferroui_controls::ContentPage;
 
 impl ViewClass for ferroui_controls::ContentPage {
@@ -3416,6 +3429,85 @@ pub trait ContentControlProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::ContentControl>> ContentControlProps for El<T> {}
+
+/// The properties and routed events of [`ContentDialog`](ferroui_controls::ContentDialog).
+pub trait ContentDialogProps: ElementBuilder {
+    /// Sets [`ContentDialog::title_property`](ferroui_controls::ContentDialog::title_property).
+    fn title<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::title_property(), value)
+    }
+
+    /// Sets [`ContentDialog::title_template_property`](ferroui_controls::ContentDialog::title_template_property).
+    fn title_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::title_template_property(), value)
+    }
+
+    /// Sets [`ContentDialog::primary_button_text_property`](ferroui_controls::ContentDialog::primary_button_text_property).
+    fn primary_button_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::primary_button_text_property(), value)
+    }
+
+    /// Sets [`ContentDialog::secondary_button_text_property`](ferroui_controls::ContentDialog::secondary_button_text_property).
+    fn secondary_button_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::secondary_button_text_property(), value)
+    }
+
+    /// Sets [`ContentDialog::close_button_text_property`](ferroui_controls::ContentDialog::close_button_text_property).
+    fn close_button_text<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::close_button_text_property(), value)
+    }
+
+    /// Sets [`ContentDialog::is_primary_button_enabled_property`](ferroui_controls::ContentDialog::is_primary_button_enabled_property).
+    fn is_primary_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::is_primary_button_enabled_property(), value)
+    }
+
+    /// Sets [`ContentDialog::is_secondary_button_enabled_property`](ferroui_controls::ContentDialog::is_secondary_button_enabled_property).
+    fn is_secondary_button_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::is_secondary_button_enabled_property(), value)
+    }
+
+    /// Sets [`ContentDialog::default_button_property`](ferroui_controls::ContentDialog::default_button_property).
+    fn default_button<M>(self, value: impl IntoProp<ferroui_controls::ContentDialogButton, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::default_button_property(), value)
+    }
+
+    /// Sets [`ContentDialog::full_size_desired_property`](ferroui_controls::ContentDialog::full_size_desired_property).
+    fn full_size_desired<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::full_size_desired_property(), value)
+    }
+
+    /// Sets [`ContentDialog::primary_button_command_property`](ferroui_controls::ContentDialog::primary_button_command_property).
+    fn primary_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::primary_button_command_property(), value)
+    }
+
+    /// Sets [`ContentDialog::primary_button_command_parameter_property`](ferroui_controls::ContentDialog::primary_button_command_parameter_property).
+    fn primary_button_command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::primary_button_command_parameter_property(), value)
+    }
+
+    /// Sets [`ContentDialog::secondary_button_command_property`](ferroui_controls::ContentDialog::secondary_button_command_property).
+    fn secondary_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::secondary_button_command_property(), value)
+    }
+
+    /// Sets [`ContentDialog::secondary_button_command_parameter_property`](ferroui_controls::ContentDialog::secondary_button_command_parameter_property).
+    fn secondary_button_command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::secondary_button_command_parameter_property(), value)
+    }
+
+    /// Sets [`ContentDialog::close_button_command_property`](ferroui_controls::ContentDialog::close_button_command_property).
+    fn close_button_command<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::input::ICommand>>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::close_button_command_property(), value)
+    }
+
+    /// Sets [`ContentDialog::close_button_command_parameter_property`](ferroui_controls::ContentDialog::close_button_command_parameter_property).
+    fn close_button_command_parameter<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::ContentDialog>::close_button_command_parameter_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::ContentDialog>> ContentDialogProps for El<T> {}
 
 /// The properties and routed events of [`ContentPage`](ferroui_controls::ContentPage).
 pub trait ContentPageProps: ElementBuilder {
