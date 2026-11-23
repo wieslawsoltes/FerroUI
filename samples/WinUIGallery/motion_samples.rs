@@ -3,7 +3,7 @@
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::{FerroObject, Ref};
-use ferroui_controls::animation::storyboard::{
+use ferroui_controls::animation::{
     BackEase, BounceEase, CircleEase, CubicEase, DoubleAnimation, EasingFunctionBase, EasingMode, ElasticEase,
     ExponentialEase, PowerEase, QuadraticEase, QuarticEase, QuinticEase, SineEase, Storyboard,
 };
@@ -87,7 +87,8 @@ fn bind_exponent(root: &Ref<Control>, name: &str, animation: &Ref<DoubleAnimatio
                 ease.set_exponent(args.new_value());
             }
         }
-    });
+    })
+    .detach();
 }
 
 fn wire_easing_functions(root: &Ref<Control>) {

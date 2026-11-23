@@ -5,10 +5,10 @@ use crate::{examples, tests::start};
 use ferroui_base::animation::ClockState;
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::input::RoutedEventArgs;
+use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::Ref;
-use ferroui_controls::animation::storyboard::{DoubleAnimation, ElasticEase, EasingMode, Storyboard};
+use ferroui_controls::animation::{DoubleAnimation, EasingMode, ElasticEase, ExponentialEase, Storyboard};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{Button, ComboBox, Control, Grid, NumberBox, RadioButton};
 
@@ -52,9 +52,12 @@ fn the_exponents_follow_their_number_boxes() {
     let root = page();
     let accelerate = root.get_control::<NumberBox>("AccelerateEasingExponent");
     assert_eq!(accelerate.value(), 4.5);
-    accelerate.set_value(2.0);
-    click(&root, 2);
+    accelerate.set_value(NumberBox::value_property(), 2.0);
     let board = storyboard(&root, 2);
+    let animation = board.children().get(0).cast::<DoubleAnimation>().unwrap();
+    let ease = animation.easing_function().unwrap().cast::<ExponentialEase>().unwrap();
+    assert_eq!(ease.exponent(), 2.0);
+    click(&root, 2);
     board.skip_to_fill();
     assert_eq!(transform(&root, 2).x(), 200.0);
 }
