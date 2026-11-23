@@ -10497,6 +10497,11 @@ pub trait WrapPanelProps: ElementBuilder {
         self.prop(<ferroui_controls::WrapPanel>::items_alignment_property(), value)
     }
 
+    /// Sets [`WrapPanel::items_stretch_property`](ferroui_controls::WrapPanel::items_stretch_property).
+    fn items_stretch<M>(self, value: impl IntoProp<ferroui_controls::WrapPanelItemsStretch, M>) -> Self {
+        self.prop(<ferroui_controls::WrapPanel>::items_stretch_property(), value)
+    }
+
     /// Sets [`WrapPanel::item_width_property`](ferroui_controls::WrapPanel::item_width_property).
     fn item_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::item_width_property(), value)

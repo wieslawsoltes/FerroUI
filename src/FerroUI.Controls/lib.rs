@@ -114,7 +114,7 @@ pub use window_resized_event_args::{WindowResizeReason, WindowResizedEventArgs};
 pub use window_startup_location::WindowStartupLocation;
 pub use window_state::WindowState;
 pub use window_transparency_level::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
-pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment};
+pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment, WrapPanelItemsStretch};
 
 mod button;
 mod button_spinner;

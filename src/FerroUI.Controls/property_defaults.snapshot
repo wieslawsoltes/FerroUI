@@ -1113,6 +1113,7 @@ FerroUI.Controls.WrapPanel.ItemHeight: f64 = NaN; OneWay
 FerroUI.Controls.WrapPanel.ItemSpacing: f64 = 0; OneWay
 FerroUI.Controls.WrapPanel.ItemWidth: f64 = NaN; OneWay
 FerroUI.Controls.WrapPanel.ItemsAlignment: WrapPanelItemsAlignment = Start; OneWay
+FerroUI.Controls.WrapPanel.ItemsStretch: WrapPanelItemsStretch = None; OneWay
 FerroUI.Controls.WrapPanel.LineSpacing: f64 = 0; OneWay
 FerroUI.Controls.WrapPanel.Orientation: Orientation = Horizontal; OneWay
 FerroUI.Controls.X11Properties.NetWmWindowType: X11NetWmWindowType = Normal; OneWay; attached

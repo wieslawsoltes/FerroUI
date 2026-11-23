@@ -217,6 +217,13 @@ fn wrap_panel_options_set_the_orientation_spacing_and_padding() {
     let second = root.get_control::<WrapPanel>("Control2");
     assert_eq!(second.children().count(), 6);
     assert_eq!(second.item_spacing(), 8.0);
+    // `StretchLastItemToggle_Toggled`.
+    assert_eq!(second.items_stretch(), ferroui_controls::WrapPanelItemsStretch::Last);
+    let toggle = root.get_control::<ferroui_controls::primitives::ToggleButton>("StretchLastItemToggle");
+    toggle.set_is_checked(Some(false));
+    assert_eq!(second.items_stretch(), ferroui_controls::WrapPanelItemsStretch::None);
+    toggle.set_is_checked(Some(true));
+    assert_eq!(second.items_stretch(), ferroui_controls::WrapPanelItemsStretch::Last);
 }
 
 #[test]

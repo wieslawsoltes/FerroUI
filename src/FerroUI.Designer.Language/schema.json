@@ -30402,6 +30402,16 @@
         ],
         "attached": false
       },
+      "ItemsStretch": {
+        "name": "ItemsStretch",
+        "type_name": "WrapPanelItemsStretch",
+        "documentation": "WrapPanel.ItemsStretch: WrapPanelItemsStretch",
+        "values": [
+          "None",
+          "Last"
+        ],
+        "attached": false
+      },
       "ItemWidth": {
         "name": "ItemWidth",
         "type_name": "f64",
