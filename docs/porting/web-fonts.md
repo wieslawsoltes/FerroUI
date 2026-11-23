@@ -5,7 +5,7 @@ an application declares the way a web page does (`@font-face`), loads with the A
 Font Loading module (`FontFace`, `FontFaceSet`), and ships or fetches as WOFF or WOFF2, on every
 platform and rendering backend.
 
-Milestone: 0.6.0. Status: plan. Nothing in this document is implemented yet unless a later
+Tracking issue: #1205. Milestone: 0.6.0. Status: plan. Nothing in this document is implemented yet unless a later
 revision says so, and no number in it is a measurement. Section 11 lists what must be measured.
 
 ## 1. Why, and what exists today
@@ -263,9 +263,10 @@ application has enabled that API.
 No backend gets a new rasterizer. A face that a backend cannot draw on the GPU today is treated
 as it is today.
 
-Skia's safe API has no release callback for external memory, so the decoded bytes are copied
-once into `SkData` and the `Arc` is dropped: one long-lived copy and a short overlap during
-creation. Vello shares the `Arc` directly.
+There is exactly one long-lived copy of a decoded font. Skia's safe API has no release callback
+for external memory, so the decoded bytes are copied once into `SkData` and our buffer is
+released as soon as Skia owns its copy; the two overlap only during creation, and a test shows
+the buffer is gone afterwards. Vello shares the `Arc` directly.
 
 ### 5.3 Color formats
 
@@ -288,6 +289,8 @@ have their own support that varies by OS version.
 - Where threads exist, decoding runs on a worker.
 - The single-threaded browser build runs the decoder as a resumable task in slices, between
   frames. The decoder is written as a state machine with a step budget for this reason.
+- In the browser, decoding never makes a long task on the main thread, in either build. A
+  slice stays well below the 50 ms that defines a long task, and it yields between slices.
 
 ### 6.3 `font-display`
 
@@ -353,8 +356,10 @@ no origin, so the limits above and the HTTPS default are its protection.
 IFT is in scope and implemented last. The recommendation is that it should not block 0.6.0:
 
 - It is a Candidate Recommendation Draft whose test suite is still in development.
-- Table-keyed patches need a Brotli decoder with shared dictionary support, which has to be
-  confirmed for the approved decoder.
+- Table-keyed patches use the LZ77 dictionary of the Shared Brotli format (draft 15, section
+  3.2). The custom dictionary of `brotli-decompressor` 5.0.3 is a prefix of its ring buffer: the
+  addressing is the same only while the dictionary and the output fit in the window, so those
+  patches need a decoder with real Shared Brotli support. Glyph-keyed patches are plain RFC 7932.
 - `unicode-range` segments already give on-demand loading for most of the same cases.
 
 Until then, an `src` entry with `tech(incremental)` is skipped, as the standard requires of an
