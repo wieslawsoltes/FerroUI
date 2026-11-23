@@ -55,6 +55,10 @@ extern "C" {
     #[wasm_bindgen(js_namespace = InputHelper, js_name = setSurroundingText)]
     pub fn set_surrounding_text(html_element: &JsObject, text: &str, start: i32, end: i32);
 
+    /// Makes the hidden input element a password input while its field is masked.
+    #[wasm_bindgen(js_namespace = InputHelper, js_name = setInputMasked)]
+    pub fn set_input_masked(html_element: &JsObject, masked: bool);
+
     /// Moves the hidden input element so that its caret is where the caret
     /// of the text is.
     #[wasm_bindgen(js_namespace = InputHelper, js_name = setBounds)]

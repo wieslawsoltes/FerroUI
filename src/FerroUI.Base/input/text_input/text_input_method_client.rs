@@ -82,6 +82,15 @@ impl TextInputMethodClientEvents {
     }
 }
 
+/// The text an input method is given for a masked field.
+///
+/// An input method can be another process, so it never gets the real text. Each character
+/// becomes a mask of the same UTF-16 length, so that the offsets of a selection or of an edit
+/// that the input method reports still address the real text.
+pub fn masked_surrounding_text(text: &str) -> String {
+    text.chars().map(|c| if c.len_utf16() == 2 { '\u{10FFFD}' } else { '\u{2022}' }).collect()
+}
+
 /// The text editing side of a text input method: what a text editing
 /// control gives the input method of the platform to work with.
 ///

@@ -891,7 +891,8 @@ enum FrnTextInputContentType
     FrnTextInputContentUrl = 1,
     FrnTextInputContentEmailAddress = 2,
     FrnTextInputContentName = 3,
-    FrnTextInputContentTelephoneNumber = 4
+    FrnTextInputContentTelephoneNumber = 4,
+    FrnTextInputContentSecure = 5
 }
 
 // Optional extension of the text input method, as IFrnAccessibilitySettings: the vtable and IID of

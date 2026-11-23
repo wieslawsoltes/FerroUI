@@ -20,6 +20,15 @@ pub(crate) enum NativeTextContentType {
     EmailAddress,
     Name,
     TelephoneNumber,
+    /// A masked field: the view offers only Roman input sources, so no composing input
+    /// method sees its keys.
+    Secure,
+}
+
+/// Whether the options ask for a secure entry.
+pub(crate) fn is_secure_entry(options: &TextInputOptions) -> bool {
+    options.is_sensitive
+        || matches!(options.content_type, TextInputContentType::Password | TextInputContentType::Pin)
 }
 
 impl NativeTextContentType {
@@ -207,6 +216,15 @@ mod tests {
             let options = TextInputOptions { content_type, ..Default::default() };
             assert_eq!(of(&options, None), expected, "{content_type:?}");
         }
+    }
+
+    #[test]
+    fn a_secure_entry_is_a_password_a_pin_or_sensitive_content() {
+        assert!(is_secure_entry(&TextInputOptions { is_sensitive: true, ..TextInputOptions::default() }));
+        for content_type in [TextInputContentType::Password, TextInputContentType::Pin] {
+            assert!(is_secure_entry(&TextInputOptions { content_type, ..TextInputOptions::default() }));
+        }
+        assert!(!is_secure_entry(&TextInputOptions::default()));
     }
 
     #[test]

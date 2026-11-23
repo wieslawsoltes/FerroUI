@@ -1,7 +1,7 @@
 import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
-import { applyTextInputOptions } from "./inputOptions";
+import { applyMaskedInput, applyTextInputOptions, isUnforwardedMaskedInsertion } from "./inputOptions";
 import { ViewBox, viewBoxOf, viewPoint } from "./pointerPosition";
 import { setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement } from "./textInput";
 
@@ -521,6 +521,10 @@ export class InputHelper {
 
         const beforeInputHandler = (args: InputEvent) => {
             if (isTextInputElement(args.target)) return;
+            if (isUnforwardedMaskedInsertion(element.type, args.inputType)) {
+                args.preventDefault();
+                return;
+            }
             const ranges = args.getTargetRanges();
             let start = -1;
             let end = -1;
@@ -906,6 +910,14 @@ export class InputHelper {
         inputElement.setSelectionRange(start, end);
         inputElement.style.width = "20px";
         inputElement.style.width = `${inputElement.scrollWidth}px`;
+    }
+
+    public static setInputMasked(inputElement: HTMLInputElement, masked: boolean) {
+        if (!inputElement) {
+            return;
+        }
+
+        applyMaskedInput(inputElement, masked);
     }
 
     private static getModifiers(args: KeyboardEvent | PointerEvent | WheelEvent | DragEvent): number {

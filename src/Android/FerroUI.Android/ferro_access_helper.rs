@@ -945,6 +945,27 @@ mod tests {
     }
 
     #[test]
+    fn a_text_box_that_becomes_masked_is_invalidated_and_has_no_text() {
+        let _scope = Dispatcher::unit_test_scope();
+        let panel = onscreen!(StackPanel::new(), "");
+        let text_box = onscreen!(TextBox::new(), "Password");
+        text_box.set_text(Some("synthetic fixture"));
+        panel.children().add(text_box.clone());
+
+        let fixture = helper_of(&panel);
+        let id = id_of(&fixture, &text_box);
+        assert_eq!(Some("synthetic fixture".to_string()), fixture.helper.create_node_for_virtual_view(id).text);
+        fixture.host.content_changes.borrow_mut().clear();
+
+        // The system keeps the node it was given until the view is invalidated.
+        text_box.set_password_char('*');
+        assert!(fixture.host.content_changes.borrow().contains(&(id, CONTENT_CHANGE_TYPE_TEXT)));
+        let node = fixture.helper.create_node_for_virtual_view(id);
+        assert_ne!(Some("synthetic fixture".to_string()), node.text);
+        assert_eq!(None, node.text_selection);
+    }
+
+    #[test]
     fn a_slider_has_its_range_and_no_action_of_its_own() {
         let _scope = Dispatcher::unit_test_scope();
         let panel = onscreen!(StackPanel::new(), "");

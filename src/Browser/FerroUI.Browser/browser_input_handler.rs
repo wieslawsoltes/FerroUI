@@ -929,6 +929,7 @@ mod tests {
         fn focus_container_element(&self) {}
         fn clear_input_element(&self) {}
         fn set_surrounding_text(&self, _text: &str, _start: i32, _end: i32) {}
+        fn set_input_masked(&self, _masked: bool) {}
         fn has_text_input_element(&self) -> bool {
             false
         }

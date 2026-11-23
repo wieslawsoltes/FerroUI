@@ -1161,6 +1161,24 @@ mod tests {
     }
 
     #[test]
+    fn a_text_box_that_becomes_masked_forgets_its_cached_value() {
+        let _scope = Dispatcher::unit_test_scope();
+        let panel = onscreen!(StackPanel::new(), "");
+        let text_box = onscreen!(TextBox::new(), "Password");
+        text_box.set_text(Some("synthetic fixture"));
+        panel.children().add(text_box.clone());
+
+        let (wrapper, _view) = wrapper_of_control(&panel);
+        let element = wrapper.get_accessibility_element_at(0).unwrap();
+        assert_eq!(Some("synthetic fixture".to_string()), element.accessibility_value());
+
+        text_box.set_password_char('*');
+        assert_eq!(None, element.accessibility_value());
+        text_box.set_text(Some("other fixture"));
+        assert_eq!(None, element.accessibility_value());
+    }
+
+    #[test]
     fn a_slider_has_its_value_and_is_incremented_by_its_small_change() {
         let _scope = Dispatcher::unit_test_scope();
         let panel = onscreen!(StackPanel::new(), "");
