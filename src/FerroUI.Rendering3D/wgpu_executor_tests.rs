@@ -142,3 +142,254 @@ fn a_moving_camera_writes_only_the_frame_uniforms() {
     assert_eq!(0, same.uniform_bytes);
     assert_eq!(1, executor.mesh_count());
 }
+
+// Step D6: the brushes.
+
+#[test]
+fn the_brush_stride_follows_the_alignment_of_the_device() {
+    assert_eq!(256, std::mem::size_of::<BrushUniforms>());
+    assert_eq!(256, brush_uniforms_stride(256));
+    assert_eq!(256, brush_uniforms_stride(64));
+    assert_eq!(256, brush_uniforms_stride(0));
+    assert_eq!(crate::brush::BRUSH_UNIFORMS_STRIDE, brush_uniforms_stride(256));
+}
+
+/// A gradient of `stops` stops from red to `last` across the box of the texture coordinates.
+fn gradient(stops: usize, last: Color) -> ferroui_base::media::immutable::ImmutableLinearGradientBrush {
+    use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush};
+    let stops: Vec<ImmutableGradientStop> = (0..stops)
+        .map(|index| {
+            let color = if index + 1 == stops { last } else { Color::from_argb(255, 255, 0, 0) };
+            ImmutableGradientStop::new(index as f64 / (stops - 1) as f64, color)
+        })
+        .collect();
+    ImmutableLinearGradientBrush::from_stops(&stops)
+}
+
+/// Three quads: an image brush of `bitmap`, a gradient of `stops` stops ending in `last`, a solid
+/// colour.
+fn brush_scene(
+    bitmap: &std::sync::Arc<crate::test_scenes::PixelBitmap>,
+    stops: usize,
+    last: Color,
+) -> std::sync::Arc<Scene3DSnapshot> {
+    use crate::test_scenes::{brush_layer, image_brush};
+    use ferroui_base::media::{Stretch, TileMode};
+    use ferroui_base::rendering::scene3d::Scene3DMaterialKind;
+    use ferroui_base::RelativeRect;
+    let image = image_brush(bitmap, Stretch::Fill, TileMode::None, RelativeRect::FILL, RelativeRect::FILL);
+    let models = vec![
+        model(quad(7_101, -1.0, -1.0, -0.4, 1.0, 0.0), vec![brush_layer(Scene3DMaterialKind::Diffuse, &image)], vec![]),
+        model(
+            quad(7_102, -0.3, -1.0, 0.3, 1.0, 0.0),
+            vec![brush_layer(Scene3DMaterialKind::Diffuse, &gradient(stops, last))],
+            vec![],
+        ),
+        model(quad(7_103, 0.4, -1.0, 1.0, 1.0, 0.0), vec![diffuse(Color::from_argb(255, 0, 255, 0))], vec![]),
+    ];
+    snapshot(orthographic(), models, vec![white_ambient()])
+}
+
+#[test]
+fn a_brush_texture_is_uploaded_once_per_key_and_device() {
+    let Some((device, queue)) = device() else { return };
+    let view = output(&device);
+    let target = Scene3DTarget { view: &view, texture_size: (128, 128), size: (100, 100), antialiased: true };
+    let mut executor = Scene3DWgpuExecutor::new(&device).expect("the executor of the device");
+    let mut viewport = Scene3DViewport::new();
+    let bitmap = crate::test_scenes::PixelBitmap::rgba(2, 2, [0, 0, 255, 255].repeat(4));
+    let blue = Color::from_argb(255, 0, 0, 255);
+
+    let before = texture_counters();
+    let scene = brush_scene(&bitmap, 12, blue);
+    let first = executor.render(&device, &queue, &mut viewport, &scene, &target).expect("a render");
+    assert_eq!(2, texture_counters().textures_uploaded - before.textures_uploaded, "the image and the lookup texture");
+    assert_eq!(2, executor.texture_count());
+    // Three variants of the brush shader: the image, the gradient of the lookup texture, the
+    // solid colour.
+    assert_eq!(3, first.pipelines_created);
+
+    // The same brushes in a new snapshot: nothing uploaded, nothing written.
+    let scene = brush_scene(&bitmap, 12, blue);
+    let again = executor.render(&device, &queue, &mut viewport, &scene, &target).expect("a render");
+    assert!(again.is_uniform_only(), "{again:?}");
+    assert_eq!(0, again.uniform_bytes);
+    assert_eq!(2, texture_counters().textures_uploaded - before.textures_uploaded);
+
+    // New pixels of the bitmap: uploaded into its texture, which is not made again.
+    bitmap.set_pixels([255, 0, 0, 255].repeat(4));
+    let scene = brush_scene(&bitmap, 12, blue);
+    let new_pixels = executor.render(&device, &queue, &mut viewport, &scene, &target).expect("a render");
+    assert_eq!(3, texture_counters().textures_uploaded - before.textures_uploaded);
+    assert_eq!(0, new_pixels.resources_created, "{new_pixels:?}");
+    assert_eq!(2, executor.texture_count());
+
+    // Another device uploads its own.
+    let Some((second_device, second_queue)) = self::device() else { return };
+    let second_view = output(&second_device);
+    let second_target = Scene3DTarget { view: &second_view, ..target };
+    let mut second = Scene3DWgpuExecutor::new(&second_device).expect("the executor of the second device");
+    let before = texture_counters();
+    let scene = brush_scene(&bitmap, 12, blue);
+    second.render(&second_device, &second_queue, &mut Scene3DViewport::new(), &scene, &second_target).expect("a render");
+    assert_eq!(2, texture_counters().textures_uploaded - before.textures_uploaded);
+}
+
+#[test]
+fn a_change_of_a_brush_writes_only_the_uniforms_of_its_draw() {
+    let Some((device, queue)) = device() else { return };
+    let view = output(&device);
+    let target = Scene3DTarget { view: &view, texture_size: (128, 128), size: (100, 100), antialiased: true };
+    let mut executor = Scene3DWgpuExecutor::new(&device).expect("the executor of the device");
+    let mut viewport = Scene3DViewport::new();
+    let bitmap = crate::test_scenes::PixelBitmap::rgba(1, 1, vec![0, 0, 255, 255]);
+
+    let blue = Color::from_argb(255, 0, 0, 255);
+    let scene = brush_scene(&bitmap, 2, blue);
+    executor.render(&device, &queue, &mut viewport, &scene, &target).expect("a render");
+    let before = texture_counters();
+    // The last stop of the inline gradient changes: its brush uniforms alone are written.
+    let white = Color::from_argb(255, 255, 255, 255);
+    let scene = brush_scene(&bitmap, 2, white);
+    let changed = executor.render(&device, &queue, &mut viewport, &scene, &target).expect("a render");
+    assert!(changed.is_uniform_only(), "{changed:?}");
+    let stride = brush_uniforms_stride(device.limits().min_uniform_buffer_offset_alignment) as u64;
+    assert_eq!(stride, changed.uniform_bytes);
+    assert_eq!(before, texture_counters(), "no texture uploaded");
+}
+
+/// A bitmap without pixels to read: a frame that exists as a texture of the device.
+struct DeviceBitmap;
+
+impl ferroui_base::platform::IBitmapImpl for DeviceBitmap {
+    fn dpi(&self) -> ferroui_base::Vector {
+        ferroui_base::Vector::new(96.0, 96.0)
+    }
+
+    fn pixel_size(&self) -> ferroui_base::PixelSize {
+        ferroui_base::PixelSize::new(2, 2)
+    }
+
+    fn version(&self) -> i32 {
+        1
+    }
+
+    fn save(
+        &self,
+        _: &mut dyn std::io::Write,
+        _: &ferroui_base::media::imaging::BitmapEncoderOptions,
+    ) -> std::io::Result<()> {
+        Err(std::io::Error::from(std::io::ErrorKind::Unsupported))
+    }
+
+    fn dispose(&self) {}
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+/// Gives `texture` for every [`DeviceBitmap`], and counts how often it is asked.
+struct TestDeviceTextures {
+    texture: wgpu::Texture,
+    given: Cell<u32>,
+}
+
+impl Scene3DDeviceTextures for TestDeviceTextures {
+    fn is_on_device(&self, bitmap: &SharedBitmapImpl) -> bool {
+        bitmap.as_any().is::<DeviceBitmap>()
+    }
+
+    fn device_texture(&self, _: &SharedBitmapImpl) -> Option<Scene3DDeviceTexture> {
+        self.given.set(self.given.get() + 1);
+        Some(Scene3DDeviceTexture {
+            texture: self.texture.clone(),
+            view: self.texture.create_view(&wgpu::TextureViewDescriptor::default()),
+            owner: std::sync::Arc::new(()),
+        })
+    }
+}
+
+fn device_textures(device: &wgpu::Device, format: wgpu::TextureFormat) -> TestDeviceTextures {
+    let texture = device.create_texture(&wgpu::TextureDescriptor {
+        label: Some("FerroUI 3D executor tests"),
+        size: wgpu::Extent3d { width: 2, height: 2, depth_or_array_layers: 1 },
+        mip_level_count: 1,
+        sample_count: 1,
+        dimension: wgpu::TextureDimension::D2,
+        format,
+        usage: wgpu::TextureUsages::TEXTURE_BINDING | wgpu::TextureUsages::COPY_DST,
+        view_formats: &[],
+    });
+    TestDeviceTextures { texture, given: Cell::new(0) }
+}
+
+/// A quad over the viewport with an image brush of `bitmap`.
+fn device_bitmap_scene(bitmap: &std::sync::Arc<SharedBitmapImpl>) -> std::sync::Arc<Scene3DSnapshot> {
+    use crate::test_scenes::{brush_layer, image_brush_of};
+    use ferroui_base::media::{Stretch, TileMode};
+    use ferroui_base::rendering::scene3d::Scene3DMaterialKind;
+    use ferroui_base::RelativeRect;
+    let brush = image_brush_of(bitmap.clone(), Stretch::Fill, TileMode::None, RelativeRect::FILL, RelativeRect::FILL);
+    let layers = vec![brush_layer(Scene3DMaterialKind::Diffuse, &brush)];
+    snapshot(orthographic(), vec![model(quad(7_201, -1.0, -1.0, 1.0, 1.0, 0.0), layers, vec![])], vec![white_ambient()])
+}
+
+#[test]
+fn a_bitmap_on_the_device_is_sampled_without_an_upload() {
+    let Some((device, queue)) = device() else { return };
+    let view = output(&device);
+    let target = Scene3DTarget { view: &view, texture_size: (128, 128), size: (100, 100), antialiased: false };
+    let mut executor = Scene3DWgpuExecutor::new(&device).expect("the executor of the device");
+    let mut viewport = Scene3DViewport::new();
+    let textures = device_textures(&device, COLOR_FORMAT);
+    let first: std::sync::Arc<SharedBitmapImpl> = std::sync::Arc::new(DeviceBitmap);
+    let before = texture_counters();
+
+    // A renderer that does not have it: the layer is drawn with its colour, and nothing is kept.
+    executor.render(&device, &queue, &mut viewport, &device_bitmap_scene(&first), &target).expect("a render");
+    assert_eq!(0, executor.texture_count());
+    assert_eq!(0, texture_counters().textures_on_device - before.textures_on_device);
+
+    // Sampled from the device: asked once, and nothing is written.
+    for _ in 0..3 {
+        let scene = device_bitmap_scene(&first);
+        executor.render_with_textures(&device, &queue, &mut viewport, &scene, &target, &textures).expect("a render");
+    }
+    assert_eq!(1, textures.given.get());
+    assert_eq!(1, executor.texture_count());
+    assert_eq!(1, texture_counters().textures_on_device - before.textures_on_device);
+    assert_eq!(0, texture_counters().textures_uploaded - before.textures_uploaded);
+
+    // The next frame is another bitmap: one more texture of the device, no resource made.
+    let second: std::sync::Arc<SharedBitmapImpl> = std::sync::Arc::new(DeviceBitmap);
+    let scene = device_bitmap_scene(&second);
+    let next = executor.render_with_textures(&device, &queue, &mut viewport, &scene, &target, &textures);
+    let next = next.expect("a render");
+    assert_eq!(0, next.resources_created, "{next:?}");
+    assert_eq!(2, textures.given.get());
+    assert_eq!(0, texture_counters().textures_uploaded - before.textures_uploaded);
+
+    // A frame that is gone is not kept.
+    drop(first);
+    executor.render_with_textures(&device, &queue, &mut viewport, &scene, &target, &textures).expect("a render");
+    assert_eq!(1, executor.texture_count());
+}
+
+#[test]
+fn a_device_texture_of_another_format_is_not_sampled() {
+    let Some((device, queue)) = device() else { return };
+    let view = output(&device);
+    let target = Scene3DTarget { view: &view, texture_size: (128, 128), size: (100, 100), antialiased: false };
+    let mut executor = Scene3DWgpuExecutor::new(&device).expect("the executor of the device");
+    let textures = device_textures(&device, wgpu::TextureFormat::Bgra8Unorm);
+    let bitmap: std::sync::Arc<SharedBitmapImpl> = std::sync::Arc::new(DeviceBitmap);
+    let before = texture_counters();
+    let scene = device_bitmap_scene(&bitmap);
+    executor
+        .render_with_textures(&device, &queue, &mut Scene3DViewport::new(), &scene, &target, &textures)
+        .expect("a render");
+    assert_eq!(0, executor.texture_count());
+    assert_eq!(0, texture_counters().textures_on_device - before.textures_on_device);
+    assert_eq!(1, texture_counters().textures_refused - before.textures_refused);
+}

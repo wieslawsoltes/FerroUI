@@ -30,6 +30,12 @@
 //! camera looking down its negative z axis, and a projection to a clip depth between 0 and `w`
 //! (Direct3D, Metal and WebGPU; a GL executor remaps it), as WPF's matrices are.
 
+mod brush_content;
+mod video_frame;
+
+pub use brush_content::Scene3DBrushContent;
+pub use video_frame::{find_frame_provider, register_frame_provider, IScene3DFrameProvider, Scene3DFrameSlot};
+
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::{Color, SharedBrush};
 use crate::numerics::{Matrix4x4, Vector2, Vector3};
@@ -138,9 +144,10 @@ pub struct Scene3DMaterialLayer {
     pub ambient_color: Color,
     /// The `SpecularPower` of a specular layer (0 for the other kinds).
     pub specular_power: f32,
-    /// The brush of the layer in the form the render thread reads; `None` for a brush that has
-    /// no such form yet (a visual or drawing brush, step D6 of the port). A material without a
-    /// brush paints nothing, as in WPF, and is not a layer.
+    /// The brush of the layer in the form the render thread reads; a visual or drawing brush is
+    /// its recorded content ([`SharedBrush::scene_content`], step D6 of the port); `None` for a
+    /// brush that has no such form. A material without a brush paints nothing, as in WPF, and is
+    /// not a layer.
     pub brush: Option<SharedBrush>,
 }
 

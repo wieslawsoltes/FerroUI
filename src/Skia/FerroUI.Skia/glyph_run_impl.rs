@@ -54,6 +54,24 @@ fn create_font(font: &Font, text_options: TextOptions) -> Font {
     font
 }
 
+/// The font the bounds of a run's glyphs are measured with: the font of the run at its size.
+///
+/// Ideally the requested edging should be passed to the glyph run. Currently
+/// the edging is computed dynamically inside the drawing context, so we can't
+/// know it in advance. But the bounds depend on the edging: for now, always
+/// use subpixel antialiasing so we have consistent values. The resulting
+/// bounds may be shifted by 1px on some fonts.
+fn measuring_font(font: &Font) -> Font {
+    create_font(
+        font,
+        TextOptions {
+            text_rendering_mode: TextRenderingMode::SubpixelAntialias,
+            text_hinting_mode: TextHintingMode::Strong,
+            baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
+        },
+    )
+}
+
 /// The Skia implementation of a glyph run: glyph indices and positions that
 /// are turned into text blobs for drawing.
 pub struct GlyphRunImpl {
@@ -86,8 +104,19 @@ impl GlyphRunImpl {
             .unwrap_or_else(|| panic!("The platform typeface was not created by the Skia backend"));
 
         let font = glyph_typeface_impl.create_sk_font(font_rendering_em_size as f32);
+        let glyph_indices: Vec<u16> = glyph_infos.iter().map(|glyph| glyph.glyph_index).collect();
 
-        Self::from_font(&font, font_rendering_em_size, glyph_infos, baseline_origin)
+        // The bounds the typeface kept for its glyphs at this size, and Skia's for the others
+        // (`glyph_bounds_cache`): a run of glyphs measured before takes no lock of Skia.
+        let mut glyph_bounds = vec![skia_safe::Rect::default(); glyph_indices.len()];
+        glyph_typeface_impl.glyph_bounds().get(
+            font_rendering_em_size as f32,
+            &glyph_indices,
+            &mut glyph_bounds,
+            |glyphs, bounds| measuring_font(&font).get_bounds(glyphs, bounds, None),
+        );
+
+        Self::with_bounds(font, font_rendering_em_size, glyph_infos, glyph_indices, &glyph_bounds, baseline_origin)
     }
 
     /// Creates a glyph run from a Skia font.
@@ -96,38 +125,35 @@ impl GlyphRunImpl {
     /// to render as intended (synthetic bold or italic); its size is replaced
     /// with `font_rendering_em_size`, its edging and hinting per text blob.
     pub fn from_font(font: &Font, font_rendering_em_size: f64, glyphs: &[GlyphInfo], baseline_origin: Point) -> Self {
-        let count = glyphs.len();
-
         let mut font = font.clone();
         font.set_size(font_rendering_em_size as f32);
 
         // The glyph bounds can only be fetched once the indices are known,
         // so this walk has to come first.
         let glyph_indices: Vec<u16> = glyphs.iter().map(|glyph| glyph.glyph_index).collect();
-        let mut glyph_positions = Vec::with_capacity(count);
+        let mut glyph_bounds = vec![skia_safe::Rect::default(); glyph_indices.len()];
+        measuring_font(&font).get_bounds(&glyph_indices, &mut glyph_bounds, None);
 
-        // Ideally the requested edging should be passed to the glyph run.
-        // Currently the edging is computed dynamically inside the drawing
-        // context, so we can't know it in advance. But the bounds depend on
-        // the edging: for now, always use subpixel antialiasing so we have
-        // consistent values. The resulting bounds may be shifted by 1px on
-        // some fonts.
-        let default_text_options = TextOptions {
-            text_rendering_mode: TextRenderingMode::SubpixelAntialias,
-            text_hinting_mode: TextHintingMode::Strong,
-            baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
-        };
-        let measuring_font = create_font(&font, default_text_options);
+        Self::with_bounds(font, font_rendering_em_size, glyphs, glyph_indices, &glyph_bounds, baseline_origin)
+    }
 
-        let mut glyph_bounds = vec![skia_safe::Rect::default(); count];
-        measuring_font.get_bounds(&glyph_indices, &mut glyph_bounds, None);
+    /// The run of `glyphs` with the ink bounds of each glyph.
+    fn with_bounds(
+        font: Font,
+        font_rendering_em_size: f64,
+        glyphs: &[GlyphInfo],
+        glyph_indices: Vec<u16>,
+        glyph_bounds: &[skia_safe::Rect],
+        baseline_origin: Point,
+    ) -> Self {
+        let mut glyph_positions = Vec::with_capacity(glyphs.len());
 
         // Build the glyph positions and union the run bounds in a single
         // pass: one accumulator covers both outputs.
         let mut current_x = 0.0;
         let mut run_bounds = Rect::default();
 
-        for (glyph, g_bounds) in glyphs.iter().zip(&glyph_bounds) {
+        for (glyph, g_bounds) in glyphs.iter().zip(glyph_bounds) {
             let offset = glyph.glyph_offset;
 
             glyph_positions.push(skia_safe::Point::new((current_x + offset.x) as f32, offset.y as f32));

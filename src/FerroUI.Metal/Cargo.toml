@@ -17,14 +17,22 @@ path = "lib.rs"
 [features]
 # Offscreen platform surface for common renderer tests and benchmarks.
 offscreen = ["dep:objc2", "dep:objc2-metal"]
+# The Metal executor of 3D scenes (`scene3d`, #608 step D5, docs/porting/media3d.md, section 3.19),
+# which the Skia backend draws `Viewport3D` with on Graphite: the shader of `ferroui-render3d` in
+# the Metal Shading Language (its feature `msl`). Off by default; `ferroui-skia`'s `media3d` turns
+# it on. Apple targets only: elsewhere it adds nothing.
+scene3d = ["dep:ferroui-render3d", "ferroui-render3d?/msl", "dep:objc2", "dep:objc2-metal", "dep:objc2-foundation"]
 
 [dependencies]
 ferroui-base.workspace = true
+ferroui-render3d = { workspace = true, optional = true }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "rendering"
 
-[target.'cfg(target_os = "macos")'.dependencies]
+# The offscreen surface (macOS) and the 3D executor (every Apple target).
+[target.'cfg(target_vendor = "apple")'.dependencies]
 objc2 = { version = "0.6.3", optional = true }
-objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLAllocation", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLEvent"] }
+objc2-metal = { version = "0.3.2", optional = true, default-features = false, features = ["std", "MTLAllocation", "MTLDevice", "MTLCommandQueue", "MTLCommandBuffer", "MTLTexture", "MTLResource", "MTLPixelFormat", "MTLTypes", "MTLEvent", "MTLLibrary", "MTLRenderPipeline", "MTLRenderCommandEncoder", "MTLCommandEncoder", "MTLRenderPass", "MTLDepthStencil", "MTLBuffer", "MTLVertexDescriptor", "MTLBlitCommandEncoder", "MTLArgument", "MTLPipeline"] }
+objc2-foundation = { version = "0.3.2", optional = true, default-features = false, features = ["std", "NSString", "NSError"] }

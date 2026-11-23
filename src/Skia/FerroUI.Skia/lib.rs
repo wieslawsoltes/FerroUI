@@ -22,7 +22,9 @@ mod font_manager_impl;
 mod framebuffer_render_target;
 mod geometry_group_impl;
 mod geometry_impl;
+mod glyph_bounds_cache;
 mod glyph_run_impl;
+mod graphite_metal_ownership;
 mod i_drawable_bitmap_impl;
 mod i_skia_api_lease_feature;
 mod immutable_bitmap;
@@ -65,6 +67,7 @@ pub use framebuffer_render_target::FramebufferRenderTarget;
 pub use geometry_group_impl::GeometryGroupImpl;
 pub use geometry_impl::{try_get_geometry_impl, GeometryImpl, GeometryImplBase};
 pub use glyph_run_impl::GlyphRunImpl;
+pub use graphite_metal_ownership::graphite_metal_ownership_fixed;
 pub use i_drawable_bitmap_impl::{try_get_drawable_bitmap, IDrawableBitmapImpl};
 pub use i_skia_api_lease_feature::{ISkiaApiLease, ISkiaApiLeaseFeature, ISkiaPlatformGraphicsApiLease};
 pub use immutable_bitmap::ImmutableBitmap;
@@ -94,6 +97,8 @@ pub use text_rendering_settings::{TextRenderingSettings, TextRenderingSource, GR
 pub use skia_platform::SkiaPlatform;
 pub use skia_region_impl::SkiaRegionImpl;
 pub use skia_typeface::SkiaTypeface;
+#[cfg(feature = "media3d")]
+pub use scene3d::{scene3d_counters, SkiaScene3DCounters};
 pub use simple_geometry_impl::SimpleGeometryImpl;
 pub use stream_geometry_builder::StreamGeometryBuilder;
 pub use surface_render_target::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};

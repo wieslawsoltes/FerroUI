@@ -18,13 +18,19 @@ ferroui-base.workspace = true
 ferroui-skia = { workspace = true, features = ["media3d"] }
 # With every rendering mode: the harness compares them (modes.rs).
 ferroui-vello = { workspace = true, features = ["hybrid", "gpu", "media3d"] }
-# The CPU reference itself, which the 3D scenes are compared with.
-ferroui-render3d.workspace = true
+# The CPU reference itself, which the 3D scenes are compared with, and the counters of the wgpu
+# executor (the texture uploads of the brushes of step D6).
+ferroui-render3d = { workspace = true, features = ["wgpu"] }
 # The text scenes: the shaper both backends are used with, and Skia itself
 # for the one thing the contracts have no member for, an instance of a
 # variable font.
 ferroui-harfbuzz.workspace = true
 skia-safe.workspace = true
+
+# Skia on Graphite (Metal) for the 3D scenes (`scene3d_graphite_tests.rs`, step D5 of #608): a Graphite
+# context on an offscreen Metal device, and the uniform slots of the Metal executor.
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-metal = { workspace = true, features = ["offscreen", "scene3d"] }
 
 # The application on each backend (`application_tests.rs`): the headless
 # platform, the controls and the Fluent theme.

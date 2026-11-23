@@ -10,6 +10,9 @@ homepage.workspace = true
 readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
+# With the feature `msl`: the shader in the Metal Shading Language, translated by naga at build
+# time (`build.rs`); without it the script does nothing.
+build = "build.rs"
 
 # Unit tests live next to the code (`#[path = "..._tests.rs"]` modules of the library), not as
 # integration test targets.
@@ -31,10 +34,23 @@ wgpu = { workspace = true, optional = true }
 default = []
 # The wgpu executor (`wgpu_executor`): `ferroui-vello` turns it on with its GPU modes and `media3d`.
 wgpu = ["dep:wgpu"]
+# The shader in the Metal Shading Language (`shader::msl`, step D5), for the Metal executor of
+# `ferroui-metal` (feature `scene3d`) that the Skia backend draws with on Graphite. naga runs in the
+# build script only: nothing of it is linked.
+msl = ["dep:naga"]
+# The shader in GLSL ES 3.00 (`shader::glsl`, step D8), for the GL executor of `ferroui-opengl`
+# (feature `scene3d`) that the Skia backend draws with on Ganesh GL. naga runs in the build script
+# only: nothing of it is linked.
+glsl = ["dep:naga"]
+
+[build-dependencies]
+naga = { workspace = true, features = ["wgsl-in", "msl-out", "glsl-out"], optional = true }
 
 [dev-dependencies]
 # The validation of `shaders/scene3d.wgsl` and its translation to GLSL ES 3.00 for WebGL2.
 naga = { workspace = true, features = ["wgsl-in", "glsl-out"] }
+# The mock platform of the base library: the geometry of the drawing brushes of the tests.
+ferroui-base = { workspace = true, features = ["testing"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

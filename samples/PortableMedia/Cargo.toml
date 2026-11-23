@@ -9,6 +9,8 @@ publish = false
 [features]
 memory-audit = ["synthetic-camera"]
 native-pixel-tests = ["image/png", "dep:ferroui-skia", "dep:skia-safe"]
+# A video on a turning cube over the flat video (`--cube`, #608 D7).
+video-cube = ["dep:ferroui-media3d", "dep:ferroui-skia", "ferroui-skia/media3d"]
 macos-verification = ["native-pixel-tests", "ferroui-media-video-apple/native-lifetime-tests"]
 synthetic-camera = ["ferroui-media-camera-windows/synthetic-camera", "dep:ferroui-media-camera-controls", "native-pixel-tests"]
 [[bin]]
@@ -19,12 +21,16 @@ ferroui-base.workspace = true
 ferroui-media.workspace = true
 ferroui-controls.workspace = true
 ferroui-media-controls.workspace = true
+ferroui-media3d = {workspace=true,optional=true}
 ferroui-media-video-controls.workspace = true
 ferroui-media-video.workspace = true
 ferroui-media-camera.workspace = true
 image = { version = "0.25", default-features = false, features = ["jpeg"] }
 ferroui-desktop.workspace = true
 ferroui-themes-winui.workspace = true
+# The runtime library of markup: the table of the units of the theme the build writes
+# (`build.rs`) names the type of a unit.
+ferroui-markup-xaml.workspace = true
 
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-skia = {workspace=true,optional=true}
@@ -57,3 +63,4 @@ ferroui-opengl.workspace = true
 
 [build-dependencies]
 cc.workspace = true
+ferroui-build.workspace = true

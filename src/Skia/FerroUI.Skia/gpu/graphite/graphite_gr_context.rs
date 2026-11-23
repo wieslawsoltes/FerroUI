@@ -131,12 +131,16 @@ pub struct GraphiteGrContext {
     /// When the last flush ended: where the cost of a frame that a layer
     /// drew directly ends.
     last_flush_end: Cell<Option<Instant>>,
+    /// The flushes so far: a texture drawn since the last one is read by
+    /// commands not submitted yet (the outputs of 3D scenes, `scene3d.rs`).
+    flushes: Cell<u64>,
 }
 
 impl GraphiteGrContext {
     /// Wraps a Graphite context, creating its recorder. Returns `None` when
     /// the recorder cannot be created.
     pub fn new(mut context: graphite::Context) -> Option<Self> {
+        crate::graphite_metal_ownership::report_once();
         let recorder = context.make_recorder(None)?;
         Some(Self {
             state: RefCell::new(Some(GraphiteState {
@@ -153,6 +157,7 @@ impl GraphiteGrContext {
             direct_only_draws: Cell::new(0),
             layer_blit: Cell::new(false),
             last_flush_end: Cell::new(None),
+            flushes: Cell::new(0),
         })
     }
 
@@ -170,6 +175,13 @@ impl GraphiteGrContext {
     /// When the last flush of the context ended; `None` before the first.
     pub(super) fn last_flush_end(&self) -> Option<Instant> {
         self.last_flush_end.get()
+    }
+
+    /// How many times the context was flushed: what is drawn with it after
+    /// a flush is submitted by a later one.
+    #[cfg_attr(not(feature = "media3d"), allow(dead_code))]
+    pub(crate) fn flush_count(&self) -> u64 {
+        self.flushes.get()
     }
 
     /// Runs `f` with what pipelining a frame of a layer needs: the threads,
@@ -209,6 +221,9 @@ impl GraphiteGrContext {
 
     /// Releases the recorder and the context.
     pub fn dispose(&self) {
+        // The outputs of 3D scenes drawn with the context go before it.
+        #[cfg(feature = "media3d")]
+        crate::scene3d::release_context(self.frame_context_id);
         let mut state = self.state.borrow_mut();
         if let Some(state) = state.as_mut() {
             self.flush_now(state);
@@ -224,6 +239,7 @@ impl GraphiteGrContext {
     /// Flushes the recorder and notes when the flush ended.
     fn flush_now(&self, state: &mut GraphiteState) {
         Self::flush_state(state, self.layer_blit.take());
+        self.flushes.set(self.flushes.get().wrapping_add(1));
         self.last_flush_end.set(Some(Instant::now()));
     }
 

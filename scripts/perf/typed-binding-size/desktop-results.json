@@ -1,0 +1,221 @@
+{
+  "method": "Alternating stock/candidate and candidate/stock process pairs, one discarded warmup pair per lane; macOS arm64 Skia/Metal, WinUI Light. CI uses 8,000 fixed-seed bootstrap resamples of paired ratios per lane.",
+  "startup": {
+    "fresh_process_pairs": 31,
+    "stock_median_ms": 163.129958,
+    "candidate_median_ms": 166.419125,
+    "median_paired_ratio": 1.0164270293108237,
+    "paired_ratio_bootstrap_95": [
+      0.958323734205743,
+      1.0464291648984927
+    ]
+  },
+  "navigation": {
+    "fresh_process_pairs": 11,
+    "milliseconds_from_navigation_start": {
+      "ListBox": {
+        "first": {
+          "constructed": {
+            "stock_median_ms": 0.484,
+            "candidate_median_ms": 0.446,
+            "median_paired_ratio": 0.9376558603491272,
+            "paired_ratio_bootstrap_95": [
+              0.1058376839107736,
+              8.248076923076923
+            ]
+          },
+          "host-returned": {
+            "stock_median_ms": 2.587,
+            "candidate_median_ms": 2.43,
+            "median_paired_ratio": 0.9439212328767124,
+            "paired_ratio_bootstrap_95": [
+              0.41820023636670606,
+              2.3683803633552376
+            ]
+          },
+          "loaded": {
+            "stock_median_ms": 14.158,
+            "candidate_median_ms": 13.764,
+            "median_paired_ratio": 0.9148427053276094,
+            "paired_ratio_bootstrap_95": [
+              0.8740484916831124,
+              1.3110871905274488
+            ]
+          }
+        },
+        "revisit": {
+          "constructed": {
+            "stock_median_ms": 0.323,
+            "candidate_median_ms": 0.323,
+            "median_paired_ratio": 1.0,
+            "paired_ratio_bootstrap_95": [
+              0.9127725856697818,
+              1.0738461538461537
+            ]
+          },
+          "host-returned": {
+            "stock_median_ms": 1.814,
+            "candidate_median_ms": 1.944,
+            "median_paired_ratio": 1.0679775280898876,
+            "paired_ratio_bootstrap_95": [
+              0.9578199052132702,
+              1.1813953488372093
+            ]
+          },
+          "loaded": {
+            "stock_median_ms": 5.696,
+            "candidate_median_ms": 6.062,
+            "median_paired_ratio": 1.0439818700688266,
+            "paired_ratio_bootstrap_95": [
+              0.955559428372255,
+              1.1806208842897459
+            ]
+          }
+        }
+      },
+      "TreeDataGrid": {
+        "first": {
+          "constructed": {
+            "stock_median_ms": 1.307,
+            "candidate_median_ms": 1.351,
+            "median_paired_ratio": 1.0206513105639397,
+            "paired_ratio_bootstrap_95": [
+              0.11500923239250858,
+              11.242494226327944
+            ]
+          },
+          "host-returned": {
+            "stock_median_ms": 4.272,
+            "candidate_median_ms": 3.991,
+            "median_paired_ratio": 0.9107713372889092,
+            "paired_ratio_bootstrap_95": [
+              0.2783606788254348,
+              4.177718186250609
+            ]
+          },
+          "loaded": {
+            "stock_median_ms": 18.421,
+            "candidate_median_ms": 19.188,
+            "median_paired_ratio": 1.0029314369469629,
+            "paired_ratio_bootstrap_95": [
+              0.572174693197475,
+              1.8179143510951292
+            ]
+          }
+        },
+        "revisit": {
+          "constructed": {
+            "stock_median_ms": 1.185,
+            "candidate_median_ms": 1.113,
+            "median_paired_ratio": 0.964471403812825,
+            "paired_ratio_bootstrap_95": [
+              0.8807126258714175,
+              1.0299727520435966
+            ]
+          },
+          "host-returned": {
+            "stock_median_ms": 3.607,
+            "candidate_median_ms": 3.608,
+            "median_paired_ratio": 1.0351872871736663,
+            "paired_ratio_bootstrap_95": [
+              0.893279569892473,
+              1.0646208321038655
+            ]
+          },
+          "loaded": {
+            "stock_median_ms": 17.2,
+            "candidate_median_ms": 17.48,
+            "median_paired_ratio": 1.03193404168844,
+            "paired_ratio_bootstrap_95": [
+              0.969308447268395,
+              1.074265774934574
+            ]
+          }
+        }
+      },
+      "Data Validation": {
+        "first": {
+          "constructed": {
+            "stock_median_ms": 0.192,
+            "candidate_median_ms": 0.21,
+            "median_paired_ratio": 1.1475409836065573,
+            "paired_ratio_bootstrap_95": [
+              0.051144010767160165,
+              29.348958333333332
+            ]
+          },
+          "host-returned": {
+            "stock_median_ms": 1.768,
+            "candidate_median_ms": 1.847,
+            "median_paired_ratio": 1.0524216524216525,
+            "paired_ratio_bootstrap_95": [
+              0.3323771275578504,
+              4.000565610859729
+            ]
+          },
+          "loaded": {
+            "stock_median_ms": 6.293,
+            "candidate_median_ms": 6.334,
+            "median_paired_ratio": 0.9645061728395061,
+            "paired_ratio_bootstrap_95": [
+              0.5833744206685731,
+              1.8283807405053234
+            ]
+          }
+        },
+        "revisit": {
+          "constructed": {
+            "stock_median_ms": 0.183,
+            "candidate_median_ms": 0.177,
+            "median_paired_ratio": 0.9779005524861878,
+            "paired_ratio_bootstrap_95": [
+              0.8113207547169811,
+              1.135135135135135
+            ]
+          },
+          "host-returned": {
+            "stock_median_ms": 1.967,
+            "candidate_median_ms": 1.792,
+            "median_paired_ratio": 0.9410898379970546,
+            "paired_ratio_bootstrap_95": [
+              0.9018621036738802,
+              1.069258809234508
+            ]
+          },
+          "loaded": {
+            "stock_median_ms": 3.849,
+            "candidate_median_ms": 3.592,
+            "median_paired_ratio": 0.9506969540526586,
+            "paired_ratio_bootstrap_95": [
+              0.910106521174331,
+              0.9902289223897265
+            ]
+          }
+        }
+      }
+    }
+  },
+  "frames": {
+    "fresh_process_pairs": 7,
+    "stock_draws": 2342,
+    "candidate_draws": 2294,
+    "process_medians": {
+      "stock_median_ms": 8.832,
+      "candidate_median_ms": 8.833,
+      "median_paired_ratio": 0.9998871331828443,
+      "paired_ratio_bootstrap_95": [
+        0.03233295583238958,
+        1.0019248188405796
+      ]
+    },
+    "process_p95s": {
+      "stock_median_ms": 9.012,
+      "candidate_median_ms": 8.9974,
+      "median_paired_ratio": 0.9971981802041721,
+      "paired_ratio_bootstrap_95": [
+        0.9709166015406944,
+        1.032271049983227
+      ]
+    }
+  }
+}

@@ -43,12 +43,17 @@ mod disposable_lock;
 mod option_cell;
 mod ref_countable;
 mod release_excess;
+mod resting;
 mod uri_extensions;
 
 pub use disposable_lock::DisposableLock;
 pub use option_cell::OptionCell;
-pub use ref_countable::{RefCountable, RefCounted};
+pub use ref_countable::{RefCountable, RefCounted, WeakRefCounted};
 pub use release_excess::{ReleaseExcess, RETAINED_BUFFER_BYTES};
+pub use resting::{
+    register_resting_buffers, release_free_pages, release_resting_buffers, rest_after_burst, ReleaseAtRest,
+    RESTING_BUFFER_BYTES,
+};
 mod thread_bound;
 pub use thread_bound::ThreadBound;
 pub use uri_extensions::UriExtensions;

@@ -5,18 +5,31 @@
 //! record ([`Scene3DChange::Record`]); a new brush (or none), or a change of the children of a
 //! group, is a change of the structure ([`Scene3DChange::Structure`]): it changes the layers
 //! the model is drawn with.
+//!
+//! A `VisualBrush` or a `DrawingBrush` is recorded into a [`Scene3DBrushContent`] (step D6 of
+//! `docs/porting/media3d.md`, section 3.18) when a snapshot is made and its content is dirty: a
+//! change of the brush (its properties) or of what it draws (the drawing of a `DrawingBrush`)
+//! marks it dirty and is a change of a record; every other snapshot takes the kept recording,
+//! with the same identity and generation, so that the renderers keep the texture they rendered of
+//! it.
+//!
+//! A `VisualBrush` over an element that shows the frames of a video or a camera is not recorded:
+//! it samples the frame ([`IScene3DFrameProvider`], step D7), and a new frame is only a new
+//! drawing of the scene ([`Scene3DChange::Output`]).
 
 use crate::change::{ListLink, Notifier, Notifying, Scene3DChange};
 use crate::MaterialCollection;
 use ferroui_base::animation::Animatable;
-use ferroui_base::media::{subscribe_invalidated, Color, IBrush};
+use ferroui_base::media::{shared_brush_of, subscribe_invalidated, Color, IBrush, ISceneBrush, SharedBrush};
 use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::rendering::scene3d::{find_frame_provider, IScene3DFrameProvider, Scene3DBrushContent};
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, StyledProperty,
 };
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicU64, Ordering};
 
 /// The white of WPF's material and light defaults.
 pub(crate) const WHITE: Color = Color::from_argb(255, 255, 255, 255);
@@ -27,7 +40,37 @@ pub struct Material {
     base: Animatable,
     notifier: Rc<Notifier>,
     brush_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
+    /// What the content of a visual or drawing brush follows (the drawing of a `DrawingBrush`).
+    content_subscription: RefCell<Option<Subscription>>,
+    /// Whether the recorded content of the brush is out of date.
+    content_dirty: Rc<Cell<bool>>,
+    /// The recorded content of a visual or drawing brush.
+    content: RefCell<Option<KeptContent>>,
+    /// The frames a visual brush over a video or a camera samples instead of a recording.
+    frames: RefCell<Option<KeptFrames>>,
 }
+
+/// The frames of an element a visual brush paints with.
+struct KeptFrames {
+    /// The address of the brush.
+    brush: usize,
+    shared: SharedBrush,
+    /// Keeps the provider, and follows its new frames.
+    _provider: Rc<dyn IScene3DFrameProvider>,
+    _subscription: Subscription,
+}
+
+/// The recording of a visual or drawing brush a material keeps.
+struct KeptContent {
+    /// The address of the brush it was recorded of.
+    brush: usize,
+    id: u64,
+    generation: u64,
+    shared: Option<SharedBrush>,
+}
+
+/// The identities of the contents of visual and drawing brushes.
+static NEXT_CONTENT: AtomicU64 = AtomicU64::new(1);
 
 ferro_class!(Material: Animatable);
 ferro_impl_classes!(Material: FerroObjectImpl);
@@ -41,7 +84,76 @@ impl Notifying for Material {
 impl Material {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Animatable::construct(), notifier: Notifier::new(), brush_subscription: RefCell::new(None) }
+        Self {
+            base: Animatable::construct(),
+            notifier: Notifier::new(),
+            brush_subscription: RefCell::new(None),
+            content_subscription: RefCell::new(None),
+            content_dirty: Rc::new(Cell::new(true)),
+            content: RefCell::new(None),
+            frames: RefCell::new(None),
+        }
+    }
+
+    /// The form of `brush` (this material's brush) in a snapshot: its shared values, or for a
+    /// visual or drawing brush its recorded content, recorded again only when it is dirty (a new
+    /// generation of the same identity) or the brush is another one (a new identity). `None` for
+    /// a brush with neither, or a scene brush that draws nothing.
+    pub(crate) fn layer_brush(&self, brush: &Rc<dyn IBrush>) -> Option<SharedBrush> {
+        if let Some(shared) = shared_brush_of(&**brush) {
+            return Some(shared);
+        }
+        let scene = brush.as_scene_brush()?;
+        let identity = Rc::as_ptr(brush) as *const () as usize;
+        if let Some(shared) = self.frame_brush(brush, scene, identity) {
+            return Some(shared);
+        }
+        let mut kept = self.content.borrow_mut();
+        let same_brush = kept.as_ref().is_some_and(|kept| kept.brush == identity);
+        if !same_brush || self.content_dirty.get() {
+            let (id, generation) = match kept.as_ref() {
+                Some(kept) if same_brush => (kept.id, kept.generation + 1),
+                _ => (NEXT_CONTENT.fetch_add(1, Ordering::Relaxed), 1),
+            };
+            let shared = Scene3DBrushContent::record(scene, id, generation)
+                .and_then(|content| SharedBrush::from_scene_content(&**brush, content));
+            *kept = Some(KeptContent { brush: identity, id, generation, shared });
+            self.content_dirty.set(false);
+        }
+        kept.as_ref().and_then(|kept| kept.shared.clone())
+    }
+
+    /// The form of `brush` that samples the frames of the element it paints with, when that
+    /// element shows a video or a camera. Looked for again only when the brush is dirty.
+    fn frame_brush(
+        &self,
+        brush: &Rc<dyn IBrush>,
+        scene: &dyn ISceneBrush,
+        identity: usize,
+    ) -> Option<SharedBrush> {
+        let mut kept = self.frames.borrow_mut();
+        if !self.content_dirty.get() {
+            if let Some(frames) = kept.as_ref().filter(|frames| frames.brush == identity) {
+                return Some(frames.shared.clone());
+            }
+        }
+        *kept = None;
+        let provider = find_frame_provider(&scene.scene_visual()?)?;
+        let shared = SharedBrush::from_frame_slot(&**brush, provider.frame_slot())?;
+        let notifier = Rc::downgrade(&self.notifier);
+        let subscription = provider.subscribe_frames(Rc::new(move || {
+            if let Some(notifier) = notifier.upgrade() {
+                notifier.raise(Scene3DChange::Output);
+            }
+        }));
+        *kept = Some(KeptFrames {
+            brush: identity,
+            shared: shared.clone(),
+            _provider: provider,
+            _subscription: subscription,
+        });
+        self.content_dirty.set(false);
+        Some(shared)
     }
 
     /// Calls `handler` on every change of the material, until the returned guard is dropped.
@@ -56,16 +168,25 @@ impl Material {
         if let Some(previous) = self.brush_subscription.borrow_mut().take() {
             previous.dispose();
         }
+        if let Some(previous) = self.content_subscription.borrow_mut().take() {
+            previous.dispose();
+        }
         let notifier = Rc::downgrade(&self.notifier);
-        let subscription = subscribe_invalidated(
-            change.new_value(),
-            Rc::new(move || {
-                if let Some(notifier) = notifier.upgrade() {
-                    notifier.raise(Scene3DChange::Record);
-                }
-            }),
-        );
+        let dirty = self.content_dirty.clone();
+        let changed: Rc<dyn Fn()> = Rc::new(move || {
+            // A change of the brush or of what it draws: a visual or drawing brush is recorded
+            // again for the next snapshot.
+            dirty.set(true);
+            if let Some(notifier) = notifier.upgrade() {
+                notifier.raise(Scene3DChange::Record);
+            }
+        });
+        let subscription = subscribe_invalidated(change.new_value(), changed.clone());
         *self.brush_subscription.borrow_mut() = subscription;
+        let brush = change.get_new_value::<Option<Rc<dyn IBrush>>>();
+        *self.content_subscription.borrow_mut() =
+            brush.as_ref().and_then(|brush| brush.as_scene_brush()?.subscribe_content_changed(changed));
+        self.content_dirty.set(true);
         self.notifier.raise(Scene3DChange::Structure);
     }
 }

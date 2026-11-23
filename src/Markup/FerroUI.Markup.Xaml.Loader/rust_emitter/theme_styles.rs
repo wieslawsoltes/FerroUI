@@ -58,6 +58,10 @@ pub(super) struct StylePool {
     properties: HashMap<String, String>,
     /// The static of each selector chain, by the text of its slice.
     selectors: HashMap<String, String>,
+    /// Standalone selector candidates from the resolved visitor. Whole-theme programs inline their
+    /// steps without retaining a second static or a second slice of the binary module image.
+    resolved_names: HashMap<std::rc::Rc<[Step]>, String>,
+    resolved_selectors: HashMap<String, std::rc::Rc<[Step]>>,
     /// The function of each value of a property selector, by its expression.
     selector_values: HashMap<String, String>,
     /// The number of tables of template bindings written.
@@ -73,9 +77,46 @@ impl StylePool {
             document_text: document_text.to_string(),
             properties: HashMap::new(),
             selectors: HashMap::new(),
+            resolved_names: HashMap::new(),
+            resolved_selectors: HashMap::new(),
             selector_values: HashMap::new(),
             binding_tables: 0,
             items: Vec::new(),
+        }
+    }
+
+    pub(super) fn resolve_selector(&mut self, steps: Vec<Step>) -> String {
+        if let Some(name) = self.resolved_names.get(steps.as_slice()) {
+            return name.clone();
+        }
+        let name = format!("{}_SELECTOR_PROGRAM_{}", self.prefix.to_uppercase(), self.resolved_names.len());
+        let steps: std::rc::Rc<[Step]> = steps.into();
+        self.resolved_names.insert(steps.clone(), name.clone());
+        self.resolved_selectors.insert(name.clone(), steps);
+        name
+    }
+
+    pub(super) fn parse_resolved_theme(&self, lines: &[String], returned: &str) -> Option<Theme> {
+        parse_theme_with_selectors(lines, returned, &self.resolved_selectors)
+    }
+
+    /// Emit only selector programs referenced by the surviving factories, including typed call
+    /// imports. The immutable steps came from XamlX. A folded whole theme already owns its bytes.
+    pub(super) fn finish_selector_programs(&mut self, source: &mut String, image: &super::BytecodeImage) {
+        if self.resolved_selectors.is_empty() {
+            return;
+        }
+        let start = self.items.len();
+        for line in source.lines().filter(|line| line.contains("_SELECTOR_PROGRAM_") && !line.trim_start().starts_with("//")) {
+            for name in identifiers(line) {
+                if let Some(steps) = self.resolved_selectors.remove(&name) {
+                    program::standalone_selector(self, &name, &steps, image);
+                }
+            }
+        }
+        for item in self.items.drain(start..) {
+            source.push('\n');
+            source.push_str(&item);
         }
     }
 
@@ -129,6 +170,7 @@ impl StylePool {
                     let alternatives: Vec<String> = alternatives.iter().map(|alternative| self.chain(alternative)).collect();
                     format!("rt::SelectorStep::Or {{ alternatives: &[{}] }}", alternatives.join(", "))
                 }
+                Step::CapturedEquals { .. } => unreachable!("lexical selector operands are only in standalone programs"),
                 Step::PropertyEquals { property, value } => {
                     let property = self.property(property);
                     let value = self.selector_value(value);
@@ -158,7 +200,7 @@ impl StylePool {
 // --- the parts of a statement ------------------------------------------------------------
 
 /// `text` without its string literals (each replaced by `""`).
-fn without_strings(text: &str) -> String {
+pub(super) fn without_strings(text: &str) -> String {
     let mut out = String::with_capacity(text.len());
     let mut in_string = false;
     let mut escaped = false;
@@ -223,7 +265,7 @@ fn is_static_type(text: &str) -> bool {
 
 /// The property definition at the start of `text`, as generated code names it
 /// (`rt::property(<accessor>())` or `rt::class_property("<class>")`), and the text after it.
-fn split_property(text: &str) -> Option<(&str, &str)> {
+pub(super) fn split_property(text: &str) -> Option<(&str, &str)> {
     if let Some(rest) = text.strip_prefix("rt::property(") {
         let end = rest.find("())")? + 2;
         let accessor = &rest[..end];
@@ -251,32 +293,67 @@ fn is_f64_literal(text: &str) -> bool {
         || text.strip_suffix("_f64").is_some_and(|number| number.parse::<f64>().is_ok())
 }
 
+pub(super) fn number_literal(literal: &str) -> f64 {
+    match literal {
+        "::core::primitive::f64::NAN" => f64::NAN,
+        "::core::primitive::f64::INFINITY" => f64::INFINITY,
+        "::core::primitive::f64::NEG_INFINITY" => f64::NEG_INFINITY,
+        _ => literal.trim_end_matches("_f64").parse().expect("a recognized f64 literal"),
+    }
+}
+
+#[derive(Clone, Debug, PartialEq)]
+pub(super) enum Constant {
+    Null,
+    Bool(bool),
+    Int(i32),
+    Double(String),
+    Text(String),
+    Thickness([String; 4]),
+    CornerRadius([String; 4]),
+}
+
+impl Constant {
+    fn native(&self) -> String {
+        match self {
+            Self::Null => "rt::ThemeValue::Null".to_owned(),
+            Self::Bool(b) => format!("rt::ThemeValue::Bool({b})"),
+            Self::Int(i) => format!("rt::ThemeValue::Int({i}_i32)"),
+            Self::Double(n) => format!("rt::ThemeValue::Double({n})"),
+            Self::Text(s) => format!("rt::ThemeValue::Text({s})"),
+            Self::Thickness(v) => format!("rt::ThemeValue::Thickness([{}])", v.join(", ")),
+            Self::CornerRadius(v) => format!("rt::ThemeValue::CornerRadius([{}])", v.join(", ")),
+        }
+    }
+}
+
 /// The text of `ThemeValue` of a constant the emitter writes as the value of `rt::add_setter`:
 /// null, a boolean, an `i32`, an `f64`, a text, a thickness or a corner radius of literals.
-fn constant_value(value: &str) -> Option<String> {
+fn constant_value(value: &str) -> Option<Constant> {
     if value == NONE {
-        return Some("rt::ThemeValue::Null".to_string());
+        return Some(Constant::Null);
     }
     if let Some(text) = value.strip_prefix("rt::string_object(").and_then(|rest| rest.strip_suffix(')')) {
-        return is_string_literal(text).then(|| format!("rt::ThemeValue::Text({text})"));
+        return is_string_literal(text).then(|| Constant::Text(text.to_owned()));
     }
     let inner = value.strip_prefix("rt::to_object(")?.strip_suffix(')')?;
     match inner {
-        "::core::clone::Clone::clone(&true)" => return Some("rt::ThemeValue::Bool(true)".to_string()),
-        "::core::clone::Clone::clone(&false)" => return Some("rt::ThemeValue::Bool(false)".to_string()),
+        "::core::clone::Clone::clone(&true)" => return Some(Constant::Bool(true)),
+        "::core::clone::Clone::clone(&false)" => return Some(Constant::Bool(false)),
         _ => {}
     }
     if is_f64_literal(inner) {
-        return Some(format!("rt::ThemeValue::Double({inner})"));
+        return Some(Constant::Double(inner.to_owned()));
     }
-    if inner.strip_suffix("_i32").is_some_and(|number| number.parse::<i32>().is_ok()) {
-        return Some(format!("rt::ThemeValue::Int({inner})"));
+    if let Some(n) = inner.strip_suffix("_i32").and_then(|n| n.parse().ok()) {
+        return Some(Constant::Int(n));
     }
-    for (path, variant) in [(THICKNESS, "Thickness"), (CORNER_RADIUS, "CornerRadius")] {
+    for (path, variant) in [(THICKNESS, Constant::Thickness as fn(_) -> _), (CORNER_RADIUS, Constant::CornerRadius)] {
         if let Some(arguments) = inner.strip_prefix(&format!("{path}::__markup_new_3(")).and_then(|rest| rest.strip_suffix(')')) {
             let arguments: Vec<&str> = arguments.split(", ").collect();
             if arguments.len() == 4 && arguments.iter().all(|argument| is_f64_literal(argument)) {
-                return Some(format!("rt::ThemeValue::{variant}([{}])", arguments.join(", ")));
+                let components: [&str; 4] = arguments.try_into().ok()?;
+                return Some(variant(components.map(str::to_owned)));
             }
         }
     }
@@ -286,7 +363,7 @@ fn constant_value(value: &str) -> Option<String> {
 // --- the tree of a factory ---------------------------------------------------------------
 
 /// A step of a selector chain, with its operands as generated code wrote them.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Eq, Hash, PartialEq)]
 pub(super) enum Step {
     Nesting,
     Class(String),
@@ -301,6 +378,8 @@ pub(super) enum Step {
     Not(Vec<Step>),
     Or(Vec<Vec<Step>>),
     PropertyEquals { property: String, value: String },
+    /// A fallible or scope-dependent property conversion supplied at this invocation.
+    CapturedEquals { property: String, slot: usize },
 }
 
 /// The key of `BasedOn`: a string literal or a type (`<X as StaticType>::TYPE`).
@@ -335,7 +414,7 @@ pub(super) enum Value {
     Static { key: String, position: (i32, i32) },
     Template(Template),
     /// The text of a constant `rt::ThemeValue`.
-    Constant(String),
+    Constant(Constant),
     /// An expression that needs no context and cannot fail.
     Expression(String),
     /// The statements of the value (indented for the body of a function) and the value.
@@ -378,6 +457,7 @@ struct Code<'s> {
 /// The parser of a factory body.
 struct Parser<'s> {
     code: Vec<Code<'s>>,
+    resolved: &'s HashMap<String, std::rc::Rc<[Step]>>,
     index: usize,
     /// The indentation of the top level of the body.
     top: usize,
@@ -618,6 +698,10 @@ impl<'s> Parser<'s> {
                 return chains.is_empty().then_some(chain);
             }
             let (local, call) = text.strip_prefix("let ")?.split_once(" = ")?;
+            if let Some(steps) = call.strip_suffix(".build_selector()?;").and_then(|name| self.resolved.get(name)) {
+                chains.push((local.to_owned(), steps.to_vec()));
+                continue;
+            }
             let (operation, arguments) = call.strip_prefix(&format!("{SELECTORS}::"))?.strip_suffix(");")?.split_once('(')?;
             if !is_identifier(local) {
                 return None;
@@ -759,7 +843,12 @@ fn template_value(statements: &[&str], value: &str) -> Option<Template> {
 
 /// The tree of the factory whose body the emitter wrote as `lines`, returning `returned`, if
 /// every statement of it is part of a member a table holds.
-pub(super) fn parse_theme(lines: &[String], returned: &str) -> Option<Theme> {
+#[cfg(test)]
+fn parse_theme(lines: &[String], returned: &str) -> Option<Theme> {
+    parse_theme_with_selectors(lines, returned, &HashMap::new())
+}
+
+fn parse_theme_with_selectors(lines: &[String], returned: &str, resolved: &HashMap<String, std::rc::Rc<[Step]>>) -> Option<Theme> {
     if returned != "rt::to_value(control_theme_0.clone())" {
         return None;
     }
@@ -775,7 +864,7 @@ pub(super) fn parse_theme(lines: &[String], returned: &str) -> Option<Theme> {
     }
     let top = first.indent;
     let locals = code.iter().filter_map(|code| declared_local(code.text)).map(|(name, _)| name).collect();
-    let mut parser = Parser { code, index: 1, top, locals };
+    let mut parser = Parser { code, index: 1, top, locals, resolved };
     let parent = parser.take_if("context.push_parent(rt::to_value(control_theme_0.clone()));");
     let mut members = Vec::new();
     let mut popped = false;
@@ -855,13 +944,22 @@ fn render_value(function: &str, values: &mut Vec<String>, value: &Value) -> Stri
                 template.content_type, template.build, template.parent
             )
         }
-        Value::Constant(constant) => constant.clone(),
+        Value::Constant(constant) => constant.native(),
+        Value::Expression(_) => format!("rt::ThemeValue::Expression({})", native_value(function, values, value)),
+        Value::Computed { .. } => format!("rt::ThemeValue::Computed({})", native_value(function, values, value)),
+        Value::Absent => "rt::ThemeValue::Absent".to_string(),
+    }
+}
+
+/// A local typed callback for a setter whose resolved value requires native code.
+fn native_value(function: &str, values: &mut Vec<String>, value: &Value) -> String {
+    match value {
         Value::Expression(expression) => {
             let name = format!("{function}_value_{}", values.len());
             values.push(format!(
                 "/// A setter value of the control theme built by `{function}` (#568).\nfn {name}() -> {MARKUP_VALUE} {{\n    {expression}\n}}\n"
             ));
-            format!("rt::ThemeValue::Expression({name})")
+            name
         }
         Value::Computed { statements, value, uses_context } => {
             let name = format!("{function}_value_{}", values.len());
@@ -878,11 +976,15 @@ fn render_value(function: &str, values: &mut Vec<String>, value: &Value) -> Stri
             }
             text.push_str(&format!("    ::core::result::Result::Ok({value})\n}}\n"));
             values.push(text);
-            format!("rt::ThemeValue::Computed({name})")
+            name
         }
-        Value::Absent => "rt::ThemeValue::Absent".to_string(),
+        _ => unreachable!("a native setter value"),
     }
 }
+
+#[path = "theme_style_program.rs"]
+mod program;
+pub(super) use program::control_theme_program;
 
 /// The factory `function` of the control theme `theme` as a table: the table and the value
 /// functions of the factory are added to the items of `pool`, and the result is the statement
@@ -919,8 +1021,18 @@ pub(super) struct TemplateBinding<'s> {
 /// The parts of `statement` if it is the fused statement of a template binding.
 pub(super) fn template_binding(statement: &str) -> Option<TemplateBinding<'_>> {
     let arguments = statement.strip_prefix("rt::bind_template_binding(")?.strip_suffix(")?;")?;
+    template_binding_parts(arguments, false)
+}
+
+pub(super) fn template_binding_from(statement: &str) -> Option<TemplateBinding<'_>> {
+    let arguments = statement.strip_prefix("rt::bind_template_binding_from(")?.strip_suffix(")?;")?;
+    template_binding_parts(arguments, true)
+}
+
+fn template_binding_parts(arguments: &str, source_first: bool) -> Option<TemplateBinding<'_>> {
     let parts: Vec<&str> = arguments.split(", ").collect();
-    let &[object, target, source, line, column] = parts.as_slice() else { return None };
+    let &[object, first, second, line, column] = parts.as_slice() else { return None };
+    let (target, source) = if source_first { (second, first) } else { (first, second) };
     let object = object.strip_suffix(&format!(".upcast_ref::<{FERRO_OBJECT}>()"))?;
     let source = source.strip_prefix("rt::property(")?.strip_suffix(')')?;
     let position = (line.parse().ok()?, column.parse().ok()?);
@@ -973,6 +1085,156 @@ fn flush_bindings(pool: &mut StylePool, run: &mut Vec<FoundBinding<'_>>, lines: 
 
 /// `lines`, a body the emitter wrote, with each run of consecutive template bindings on one
 /// object (position markers between them allowed) written as one call over a table.
+// --- template bindings whose setter is chosen at run time (#854) ---------------------------
+
+/// Whether the build and the reference tests of the themes write a template binding whose setter
+/// is chosen at run time as the template binding it always is (#854,
+/// [`resolved_template_bindings`]). Off: the generated files are what they were before the
+/// experiment, byte for byte. The experiment is turned on here, and the checked-in generated
+/// files of the themes are then regenerated.
+pub const DEFAULT_RESOLVED_TEMPLATE_BINDINGS: bool = false;
+
+ferroui_base::ferro_thread_local! {
+    /// The choice [`with_resolved_template_bindings`] made for the emission on this thread.
+    static RESOLVED: std::cell::Cell<Option<bool>> = const { std::cell::Cell::new(None) };
+}
+
+/// Whether the emission on this thread resolves template bindings whose setter is chosen at run
+/// time (#854): the choice of [`with_resolved_template_bindings`], else
+/// [`DEFAULT_RESOLVED_TEMPLATE_BINDINGS`].
+pub fn resolves_template_bindings() -> bool {
+    RESOLVED.with(std::cell::Cell::get).unwrap_or(DEFAULT_RESOLVED_TEMPLATE_BINDINGS)
+}
+
+/// Runs `emit` with the resolution of template bindings whose setter is chosen at run time on or
+/// off (#854) on this thread, and restores the choice before it afterwards, also when `emit`
+/// panics.
+pub fn with_resolved_template_bindings<R>(resolved: bool, emit: impl FnOnce() -> R) -> R {
+    struct Restore(Option<bool>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            let before = self.0;
+            RESOLVED.with(|resolved| resolved.set(before));
+        }
+    }
+    let _restore = Restore(RESOLVED.with(|current| current.replace(Some(resolved))));
+    emit()
+}
+
+/// The statement of the template binding that the nine lines `lines` choose at run time, if they
+/// are that choice (#854): a property with several setters (`Content` of a `ContentPresenter`,
+/// whose type is `object`) whose value is `{TemplateBinding source}` is written as the choice of
+/// the setter when the program runs,
+///
+/// ```text
+/// let priority = BindingPriority::Template;
+/// let template_binding = TemplateBinding::__markup_new_1(rt::property(source));
+/// let provided = TemplateBinding::__markup_ProvideValue_0(&template_binding);
+/// let value: MarkupValue = rt::to_value(provided);
+/// if value.is_some() {
+///     rt::bind(object.upcast_ref::<FerroObject>(), property, value.clone(), line, position)?;
+/// } else {
+///     object.set_value_with_priority(property, rt::exact(value.clone(), ..)?, priority);
+/// }
+/// ```
+///
+/// The provided value of a template binding is the binding itself (`provide_value` returns
+/// `Rc<dyn BindingBase>`), never null, so the first branch is the one that runs: the statement
+/// is `rt::bind_template_binding(object, property, rt::property(source), line, position)`, which
+/// makes the calls of the first branch (the statement the emitter writes for a property with one
+/// setter, `fused_template_binding_bind`). `uses` counts the uses of each identifier in the body:
+/// the four locals must be named by these lines only. `template_binding` is the path of the class.
+fn resolved_template_binding<'l>(
+    lines: &'l [String],
+    uses: &HashMap<String, usize>,
+    template_binding: &str,
+) -> Option<String> {
+    let [priority, create, provide, value, test, bind, otherwise, fallback, end] = lines else { return None };
+    let indent = &priority[..priority.len() - priority.trim_start().len()];
+    // The statement of `line` at `depth` blocks below the indentation of the first line.
+    fn statement_at<'l>(line: &'l str, indent: &str, depth: usize) -> Option<&'l str> {
+        let line = line.strip_prefix(indent)?;
+        let inner = "    ".repeat(depth);
+        line.strip_prefix(inner.as_str()).filter(|line| !line.starts_with(' '))
+    }
+    let at = |line: &'l str, depth: usize| statement_at(line, indent, depth);
+    let (priority, rest) = at(priority, 0)?.strip_prefix("let ")?.split_once(" = ")?;
+    if !rest.ends_with("::BindingPriority::Template;") {
+        return None;
+    }
+    let (local, rest) = at(create, 0)?.strip_prefix("let ")?.split_once(" = ")?;
+    let source = rest.strip_prefix(&format!("{template_binding}::__markup_new_1(rt::property("))?.strip_suffix("));")?;
+    let (provided, rest) = at(provide, 0)?.strip_prefix("let ")?.split_once(" = ")?;
+    if rest != format!("{template_binding}::__markup_ProvideValue_0(&{local});") {
+        return None;
+    }
+    let (value_local, rest) = at(value, 0)?.strip_prefix("let ")?.split_once(&format!(": {MARKUP_VALUE} = "))?;
+    if rest != format!("rt::to_value({provided});") || at(test, 0)? != format!("if {value_local}.is_some() {{") {
+        return None;
+    }
+    let upcast = format!(".upcast_ref::<{FERRO_OBJECT}>(), ");
+    let (object, rest) = at(bind, 1)?.strip_prefix("rt::bind(")?.split_once(upcast.as_str())?;
+    let (property, rest) = rest.split_once(&format!(", {value_local}.clone(), "))?;
+    let (line, column) = rest.strip_suffix(")?;")?.split_once(", ")?;
+    if at(otherwise, 0)? != "} else {" || at(end, 0)? != "}" {
+        return None;
+    }
+    let fallback = at(fallback, 1)?;
+    if !fallback.starts_with(&format!("{object}.set_value_with_priority({property}, rt::exact({value_local}.clone(), "))
+        || !fallback.ends_with(&format!(", {priority});"))
+    {
+        return None;
+    }
+    // Each local is named by these lines only: the priority twice, the binding twice, the
+    // provided value twice, the value four times.
+    let named = |name: &str, times: usize| is_identifier(name) && uses.get(name) == Some(&times);
+    let numbers = line.parse::<i32>().is_ok() && column.parse::<i32>().is_ok();
+    let locals = named(priority, 2) && named(local, 2) && named(provided, 2) && named(value_local, 4);
+    if !(locals && numbers && is_identifier(object)) {
+        return None;
+    }
+    if !(is_plain_call(property) && is_plain_call(source)) {
+        return None;
+    }
+    Some(format!(
+        "{indent}rt::bind_template_binding({object}.upcast_ref::<{FERRO_OBJECT}>(), {property}, rt::property({source}), \
+         {line}, {column})?;"
+    ))
+}
+
+/// `lines`, a body the emitter wrote, with each template binding whose setter is chosen at run
+/// time written as the template binding it always is ([`resolved_template_binding`]), when the
+/// experiment of #854 is on ([`resolves_template_bindings`]); the statements then join the runs
+/// of [`template_binding_runs`]. `template_binding` is the path of the class `TemplateBinding`.
+pub(super) fn resolve_template_bindings(lines: Vec<String>, template_binding: Option<&str>) -> Vec<String> {
+    let Some(template_binding) = template_binding.filter(|_| resolves_template_bindings()) else {
+        return lines;
+    };
+    let marker = format!("{template_binding}::__markup_ProvideValue_0(");
+    if !lines.iter().any(|line| line.contains(&marker)) {
+        return lines;
+    }
+    let mut uses: HashMap<String, usize> = HashMap::new();
+    for line in lines.iter().map(|line| line.trim_start()).filter(|line| !line.starts_with("//")) {
+        for name in identifiers(line) {
+            *uses.entry(name).or_insert(0) += 1;
+        }
+    }
+    let mut body = Vec::with_capacity(lines.len());
+    let mut index = 0;
+    while index < lines.len() {
+        let window = lines.get(index..index + 9);
+        if let Some(statement) = window.and_then(|window| resolved_template_binding(window, &uses, template_binding)) {
+            body.push(statement);
+            index += 9;
+            continue;
+        }
+        body.push(lines[index].clone());
+        index += 1;
+    }
+    body
+}
+
 pub(super) fn template_binding_runs(pool: &mut StylePool, lines: Vec<String>) -> Vec<String> {
     if !lines.iter().any(|line| line.trim_start().starts_with("rt::bind_template_binding(")) {
         return lines;
@@ -1006,6 +1268,116 @@ pub(super) fn template_binding_runs(pool: &mut StylePool, lines: Vec<String>) ->
         index += 1;
     }
     flush_bindings(pool, &mut run, &lines, &mut body);
+    body
+}
+
+// --- dynamic resources --------------------------------------------------------------------
+
+/// The parts of `rt::bind_dynamic_resource(&context, <object>.upcast_ref::<FerroObject>(),
+/// <property>, <key>, <line>, <position>)?;`, the statement the emitter fuses a
+/// `{DynamicResource key}` bound to a registered property into.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct DynamicResource<'s> {
+    pub(super) object: &'s str,
+    pub(super) property: &'s str,
+    pub(super) key: &'s str,
+    pub(super) position: (i32, i32),
+}
+
+/// The parts of `statement` if it is the fused statement of a dynamic resource.
+pub(super) fn dynamic_resource(statement: &str) -> Option<DynamicResource<'_>> {
+    let arguments = statement.strip_prefix("rt::bind_dynamic_resource(&context, ")?.strip_suffix(")?;")?;
+    let (object, rest) = arguments.split_once(&format!(".upcast_ref::<{FERRO_OBJECT}>(), "))?;
+    let (property, rest) = rest.split_once(", ")?;
+    let (key, rest) = split_string_literal(rest)?;
+    let (line, column) = rest.strip_prefix(", ")?.split_once(", ")?;
+    let position = (line.parse().ok()?, column.parse().ok()?);
+    (is_identifier(object) && is_plain_call(property)).then_some(DynamicResource { object, property, key, position })
+}
+
+/// A dynamic resource found in a body: the index of its first line (its position markers) and
+/// of the statement.
+struct FoundResource<'s> {
+    start: usize,
+    statement: usize,
+    indent: usize,
+    resource: DynamicResource<'s>,
+}
+
+/// Ends the run `run`: a run as long as [`MIN_BINDING_RUN`] becomes the position markers of its
+/// first statement and one call of `rt::bind_dynamic_resources` over a new table (added to
+/// `pool`); a shorter run is written as it was.
+fn flush_resources(pool: &mut StylePool, run: &mut Vec<FoundResource<'_>>, lines: &[String], body: &mut Vec<String>) {
+    let Some(first) = run.first() else { return };
+    if run.len() < MIN_BINDING_RUN {
+        for found in run.iter() {
+            body.extend(lines[found.start..=found.statement].iter().cloned());
+        }
+        run.clear();
+        return;
+    }
+    let name = format!("{}_RESOURCES_{}", pool.prefix.to_uppercase(), pool.binding_tables);
+    pool.binding_tables += 1;
+    let mut table = format!(
+        "/// The dynamic resources of a run of `{}`, bound in order by `rt::bind_dynamic_resources` (#568).\n\
+         static {name}: &[rt::DynamicResourceRow] = &[\n",
+        pool.document_text
+    );
+    for found in run.iter() {
+        let DynamicResource { property, key, position: (line, column), .. } = &found.resource;
+        let property = pool.property(&format!("rt::property({property})"));
+        table.push_str(&format!(
+            "    rt::DynamicResourceRow {{ property: {property}, key: {key}, line: {line}, position: {column} }},\n"
+        ));
+    }
+    table.push_str("];\n");
+    pool.items.push(table);
+    body.extend(lines[first.start..first.statement].iter().cloned());
+    body.push(format!(
+        "{}rt::bind_dynamic_resources(&context, {}.upcast_ref::<{FERRO_OBJECT}>(), {name})?;",
+        " ".repeat(first.indent),
+        first.resource.object
+    ));
+    run.clear();
+}
+
+/// `lines`, a body the emitter wrote, with each run of consecutive dynamic resources bound on
+/// one object (position markers between them allowed) written as one call over a table, as the
+/// runs of template bindings are ([`template_binding_runs`]).
+pub(super) fn dynamic_resource_runs(pool: &mut StylePool, lines: Vec<String>) -> Vec<String> {
+    if !lines.iter().any(|line| line.trim_start().starts_with("rt::bind_dynamic_resource(")) {
+        return lines;
+    }
+    let mut body = Vec::with_capacity(lines.len());
+    let mut run: Vec<FoundResource<'_>> = Vec::new();
+    let mut index = 0;
+    while index < lines.len() {
+        let start = index;
+        while index < lines.len() && lines[index].trim_start().starts_with("//") {
+            index += 1;
+        }
+        if index == lines.len() {
+            flush_resources(pool, &mut run, &lines, &mut body);
+            body.extend(lines[start..].iter().cloned());
+            break;
+        }
+        let line = &lines[index];
+        let indent = line.len() - line.trim_start().len();
+        let Some(resource) = dynamic_resource(line.trim_start()) else {
+            flush_resources(pool, &mut run, &lines, &mut body);
+            body.extend(lines[start..=index].iter().cloned());
+            index += 1;
+            continue;
+        };
+        let continues =
+            run.first().is_some_and(|first| first.resource.object == resource.object && first.indent == indent);
+        if !continues {
+            flush_resources(pool, &mut run, &lines, &mut body);
+        }
+        run.push(FoundResource { start, statement: index, indent, resource });
+        index += 1;
+    }
+    flush_resources(pool, &mut run, &lines, &mut body);
     body
 }
 

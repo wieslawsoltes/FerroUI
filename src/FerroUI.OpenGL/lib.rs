@@ -29,6 +29,8 @@ mod i_platform_graphics_open_gl_context_factory;
 mod open_gl_exception;
 mod register_types;
 mod rust_paths;
+#[cfg(feature = "scene3d")]
+pub mod scene3d;
 mod shared_frame_texture;
 pub use shared_frame_texture::{SharedFrameTexture, SharedGlTextureOwner, SharedGlTextureRetirementQueue};
 

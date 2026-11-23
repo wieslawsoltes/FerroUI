@@ -48,6 +48,9 @@ mod renderer;
 #[cfg(all(any(windows, target_os = "macos"), feature = "native-pixel-tests"))]
 #[path = "video_pixels.rs"]
 mod video_pixels;
+#[cfg(feature = "video-cube")]
+#[path = "video_cube.rs"]
+mod video_cube;
 #[repr(C)]
 struct App {
     base: Application,
@@ -65,8 +68,14 @@ impl ApplicationImpl for App {
     fn initialize(this: &Self) {
         Self::parent_initialize(this);
         ferroui_media_video_controls::register_types();
-        this.styles()
-            .add(ferroui_themes_winui::WinUITheme::new().as_style());
+        // The units of the theme the sample needs: the table the build wrote (`build.rs`).
+        this.styles().add(
+            ferroui_themes_winui::WinUITheme::with_parts(
+                None,
+                crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME,
+            )
+            .as_style(),
+        );
     }
     fn on_framework_initialization_completed(this: &Self) {
         if let Some(lifetime) = this
@@ -102,6 +111,10 @@ impl ApplicationImpl for App {
             window.set_height(500.);
             let root = Panel::new();
             root.children().add(&view);
+            #[cfg(feature = "video-cube")]
+            if std::env::args().any(|a| a == "--cube") {
+                root.children().add(&video_cube::create(&view));
+            }
             window.set_content(Some(Control::boxed(root.clone())));
             let weak_root = root.downgrade();
             let weak = view.downgrade();

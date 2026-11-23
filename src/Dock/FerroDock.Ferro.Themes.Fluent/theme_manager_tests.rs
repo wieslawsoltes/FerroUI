@@ -246,14 +246,14 @@ fn source_switch_removes_every_matching_include_through_styles_and_custom_dictio
                 .add(include("RiderLight").as_resource_provider());
         }
         let unrelated = include("Default");
-        unrelated.loaded();
+        unrelated.try_loaded().unwrap();
         unrelated.set_source(Some(
             UriRef::parse("ferres://Other/Presets/Ide/Default.xaml").unwrap(),
         ));
         root.merged_dictionaries()
             .add(unrelated.as_resource_provider());
         let unset = include("Default");
-        unset.loaded();
+        unset.try_loaded().unwrap();
         unset.set_source(None);
         root.merged_dictionaries().add(unset.as_resource_provider());
         let plain = Style::new();
@@ -335,7 +335,7 @@ fn first_match_case_unknown_uri_and_default_owner_identity_follow_the_original_a
         root.merged_dictionaries()
             .add(custom.clone() as Rc<dyn IResourceProvider>);
         let source = include("RiderDark");
-        source.loaded();
+        source.try_loaded().unwrap();
         source.set_source(Some(
             UriRef::parse("FERRES://FERRODOCK.FERRO.THEMES.FLUENT/PRESETS/IDE/RIDERDARK.XAML")
                 .unwrap(),

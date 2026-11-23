@@ -7,7 +7,7 @@ use crate::type_system::{ChangeHandlerLayer, InheritedReaction};
 use crate::{
     AttachedProperty, DirectProperty, DirectPropertyMetadata, FerroObject, FerroPropertyChangedEventArgs,
     FerroPropertyMetadata, FerroPropertyRegistry, ObjectType, StaticType, StyledProperty, StyledPropertyMetadata,
-    TypeIdentity, TypeInfo,
+    StyledValue, TypeIdentity, TypeInfo,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
@@ -303,9 +303,24 @@ pub(crate) trait PropertyRoutes {
     /// The typed property behind the routes, for downcasting.
     fn as_any(&'static self) -> &'static dyn Any;
     /// Clones `value`, which must hold exactly the property's value type `T`,
-    /// into `out`, which must be an `&mut Option<T>`. Returns false if either
-    /// has a different type.
+    /// into `out`, which must be an `&mut Option<S>`: `S` is the type the value
+    /// store keeps values of `T` as ([`StyledValue::Storage`](crate::StyledValue::Storage)),
+    /// `T` itself for a direct property. Returns false if either has a
+    /// different type.
     fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool;
+    /// Calls `f` with `old` and `new`, values of the type the value store
+    /// keeps values of the property as, as values of the property's value
+    /// type: the values of a change notification of a styled property whose
+    /// value type is kept as a value of another type
+    /// ([`StyledValue::SHARED_STORAGE`](crate::StyledValue::SHARED_STORAGE)).
+    fn route_with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    ) {
+        f(old, new)
+    }
     /// Clones `value`, which must hold exactly the property's value type `T`,
     /// into a box of its own. `None` if it has a different type.
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
@@ -368,22 +383,32 @@ struct Hearing {
     /// The class each handler of the property is for, with its token (`None` for a handler of
     /// every class), and the question it asks an object before it runs, where it has one.
     targets: RefCell<Vec<(u64, Option<&'static TypeIdentity>, Option<Question>)>>,
-    /// The answers for the classes asked last, at a place made of a few bits of the address of
-    /// the class: a walk over a tree asks for a handful of classes in turn.
+    /// The answers for the classes asked last: a walk over a tree asks for a handful of classes
+    /// in turn. A class sits at the place made of a few bits of its address or at the next one,
+    /// so that two classes the link happens to put at one place do not evict each other.
     recent: [Cell<(*const TypeInfo, Heard)>; RECENT],
     by_class: RefCell<HashMap<*const TypeInfo, Heard, BuildHasherDefault<ClassHasher>>>,
     /// The questions of the classes that have some.
     asked: RefCell<Vec<Questions>>,
+    /// The questions that reached `by_class`.
+    #[cfg(test)]
+    past_recent: Cell<u32>,
 }
 
 /// The places of `Hearing::recent`.
 const RECENT: usize = 8;
 
-/// The place of a class in `Hearing::recent`.
+/// The first place of a class in `Hearing::recent`.
 #[inline]
 fn recent_place(class: *const TypeInfo) -> usize {
     let address = class as usize;
     ((address >> 4) ^ (address >> 8) ^ (address >> 12)) & (RECENT - 1)
+}
+
+/// The second place of a class whose first place is `place`.
+#[inline]
+fn second_recent_place(place: usize) -> usize {
+    (place + 1) & (RECENT - 1)
 }
 
 /// The hash of the address of the type information of a class: the addresses of statics, which
@@ -414,6 +439,8 @@ impl Hearing {
             recent: std::array::from_fn(|_| Cell::new((std::ptr::null(), Heard::Yes))),
             by_class: RefCell::new(HashMap::default()),
             asked: RefCell::new(Vec::new()),
+            #[cfg(test)]
+            past_recent: Cell::new(0),
         }
     }
 
@@ -435,17 +462,55 @@ impl Hearing {
         self.forget();
     }
 
+    /// The answer for a class: one comparison when it sits at its first place, a second one
+    /// when it sits at the next. Both stay inline, since a walk over a tree whose classes share
+    /// a place finds one of them at its second place at every step.
+    #[inline]
+    fn of_class(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        let place = recent_place(class);
+        let (recent, heard) = self.recent[place].get();
+        if std::ptr::eq(recent, class) {
+            return heard;
+        }
+        let (recent, heard) = self.recent[second_recent_place(place)].get();
+        if std::ptr::eq(recent, class) {
+            return heard;
+        }
+        self.past_recent(place, class, property)
+    }
+
     #[cold]
     #[inline(never)]
-    fn of_class(&self, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+    fn past_recent(&self, place: usize, class: &'static TypeInfo, property: &'static FerroProperty) -> Heard {
+        #[cfg(test)]
+        self.past_recent.set(self.past_recent.get() + 1);
         let known = self.by_class.borrow().get(&std::ptr::from_ref(class)).copied();
         let heard = known.unwrap_or_else(|| {
             let heard = self.find(class, property);
             self.by_class.borrow_mut().insert(class, heard);
             heard
         });
-        self.recent[recent_place(class)].set((class, heard));
+        self.remember(place, class, heard);
         heard
+    }
+
+    /// Keeps the answer for a class at an empty one of its two places, else at the first. What
+    /// the first place held moves to the second when that is a place of its class too; a class
+    /// visiting from the place before could not be found there, and is dropped.
+    fn remember(&self, place: usize, class: *const TypeInfo, heard: Heard) {
+        let first = &self.recent[place];
+        let second = &self.recent[second_recent_place(place)];
+        let held = first.get();
+        if held.0.is_null() {
+            first.set((class, heard));
+        } else if second.get().0.is_null() {
+            second.set((class, heard));
+        } else {
+            if recent_place(held.0) == place {
+                second.set(held);
+            }
+            first.set((class, heard));
+        }
     }
 
     #[cold]
@@ -521,10 +586,7 @@ impl PropertyChangedObservable {
         let Some(hearing) = &self.hearing else {
             return true;
         };
-        let class = object.get_type();
-        let (recent, heard) = hearing.recent[recent_place(class)].get();
-        let heard = if std::ptr::eq(recent, class) { heard } else { hearing.of_class(class, property) };
-        match heard {
+        match hearing.of_class(object.get_type(), property) {
             Heard::Yes => true,
             Heard::No => false,
             Heard::One(question) => question(object),
@@ -652,6 +714,17 @@ pub struct FerroProperty {
     notifying: Option<Rc<dyn Fn(&FerroObject, bool)>>,
     changed: Rc<PropertyChangedObservable>,
     routes: OnceCell<&'static dyn PropertyRoutes>,
+    /// The operations of a styled property that depend on its value type
+    /// ([`StyledCodec`](crate::styled_property::StyledCodec)): what its routes and the store ask
+    /// of the typed property. Empty for a direct property.
+    styled_codec: OnceCell<&'static dyn crate::styled_property::StyledCodec>,
+    /// The members of the value type when it is an enumeration the store keeps as an
+    /// [`EnumValue`](crate::EnumValue) ([`StyledValue::MEMBERS`]): what a change notification
+    /// hands out for a stored member. Empty otherwise.
+    members: &'static [(i64, &'static dyn Any)],
+    /// Whether the property validates its values (a styled property with a validation callback):
+    /// [`is_valid_value`](Self::is_valid_value) asks its routes only then.
+    validates: bool,
 }
 
 pub(crate) struct FerroPropertyInit {
@@ -700,7 +773,29 @@ impl FerroProperty {
             notifying: notifying.map(Rc::from),
             changed: Rc::new(PropertyChangedObservable::new(init.inherits)),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
+            members: &[],
+            validates: false,
         }
+    }
+
+    /// The property with the members of its value type ([`StyledValue::MEMBERS`]).
+    pub(crate) fn with_members(mut self, members: &'static [(i64, &'static dyn Any)]) -> Self {
+        self.members = members;
+        self
+    }
+
+    /// The property with a validation callback or without.
+    pub(crate) fn with_validation(mut self, validates: bool) -> Self {
+        self.validates = validates;
+        self
+    }
+
+    /// The members of the value type, when it is an enumeration kept as an
+    /// [`EnumValue`](crate::EnumValue).
+    #[inline]
+    pub(crate) fn members(&self) -> &'static [(i64, &'static dyn Any)] {
+        self.members
     }
 
     /// Creates the base of a property that shares its identity with `source`
@@ -723,7 +818,28 @@ impl FerroProperty {
             notifying: source.notifying.clone(),
             changed: source.changed.clone(),
             routes: OnceCell::new(),
+            styled_codec: OnceCell::new(),
+            members: source.members,
+            validates: source.validates,
         }
+    }
+
+    pub(crate) fn set_styled_codec(&self, codec: &'static dyn crate::styled_property::StyledCodec) {
+        if self.styled_codec.set(codec).is_err() {
+            panic!("the codec of the property is already set");
+        }
+    }
+
+    /// The codec of a styled property ([`StyledCodec`](crate::styled_property::StyledCodec)).
+    #[inline]
+    /// The codec of a styled property, `None` for a direct property.
+    #[inline]
+    pub(crate) fn styled_codec_if_any(&self) -> Option<&'static dyn crate::styled_property::StyledCodec> {
+        self.styled_codec.get().copied()
+    }
+
+    pub(crate) fn styled_codec(&self) -> &'static dyn crate::styled_property::StyledCodec {
+        *self.styled_codec.get().expect("a styled property has a codec")
     }
 
     pub(crate) fn set_routes(&self, routes: &'static dyn PropertyRoutes) {
@@ -934,6 +1050,11 @@ impl FerroProperty {
     /// Checks whether `value` is valid for the property: of the property's
     /// value type and accepted by its validation callback.
     pub fn is_valid_value(&self, value: &dyn Any) -> bool {
+        // Without a validation callback a value is valid when it is of the value type, which is
+        // what the routes would answer.
+        if !self.validates {
+            return value.type_id() == self.property_type;
+        }
         self.routes().route_is_valid_value(value)
     }
 
@@ -942,7 +1063,16 @@ impl FerroProperty {
     /// `None` for direct properties and when `T` is not the property's value
     /// type.
     pub fn as_styled<T: crate::PropertyValue>(&'static self) -> Option<&'static StyledProperty<T>> {
-        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<StyledProperty<T>>())
+        // From the codec directly: one call, as from the typed routes before the routes were shared.
+        // A typed write of the declarative layer asks this for every value it sets.
+        self.styled_codec.get().and_then(|codec| codec.typed().downcast_ref::<StyledProperty<T>>())
+    }
+
+    /// The property as a direct property with value type `T`: the typed view needed to set it
+    /// without boxing. `None` for styled properties and when `T` is not the property's value
+    /// type.
+    pub fn as_direct<T: crate::PropertyValue>(&'static self) -> Option<&'static crate::DirectPropertyBase<T>> {
+        self.routes.get().and_then(|routes| routes.as_any().downcast_ref::<crate::DirectPropertyBase<T>>())
     }
 
     /// The marker value that represents an unset property value.
@@ -954,7 +1084,7 @@ impl FerroProperty {
     }
 
     /// Registers a styled property with a default value.
-    pub fn register<TOwner: ObjectType, TValue: PropertyValue>(
+    pub fn register<TOwner: ObjectType, TValue: StyledValue>(
         name: &str,
         default_value: TValue,
     ) -> &'static StyledProperty<TValue> {
@@ -963,7 +1093,7 @@ impl FerroProperty {
 
     /// Registers a styled property.
     #[inline]
-    pub fn register_with<TOwner: ObjectType, TValue: PropertyValue>(
+    pub fn register_with<TOwner: ObjectType, TValue: StyledValue>(
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static StyledProperty<TValue> {
@@ -974,7 +1104,7 @@ impl FerroProperty {
     // coercion specialize this installation path; every owner of that value
     // type shares it without changing the typed read/write implementation.
     #[inline(never)]
-    fn register_with_core<TValue: PropertyValue>(
+    fn register_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         name: &str,
         options: StyledPropertyOptions<TValue>,
@@ -993,7 +1123,7 @@ impl FerroProperty {
     ///
     /// `TOwner` is the class that registers the property and `THost` the class
     /// of objects the property can be set on.
-    pub fn register_attached<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+    pub fn register_attached<TOwner: StaticType, THost: ObjectType, TValue: StyledValue>(
         name: &str,
         default_value: TValue,
     ) -> &'static AttachedProperty<TValue> {
@@ -1002,7 +1132,7 @@ impl FerroProperty {
 
     /// Registers an attached property.
     #[inline]
-    pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: PropertyValue>(
+    pub fn register_attached_with<TOwner: StaticType, THost: ObjectType, TValue: StyledValue>(
         name: &str,
         options: StyledPropertyOptions<TValue>,
     ) -> &'static AttachedProperty<TValue> {
@@ -1010,7 +1140,7 @@ impl FerroProperty {
     }
 
     #[inline(never)]
-    fn register_attached_with_core<TValue: PropertyValue>(
+    fn register_attached_with_core<TValue: StyledValue>(
         owner_type: &'static TypeInfo,
         host_type: &'static TypeInfo,
         name: &str,
@@ -1093,7 +1223,7 @@ pub struct StyledPropertyOptions<T> {
     notifying: Option<NotifyingCallback>,
 }
 
-impl<T: PropertyValue> StyledPropertyOptions<T> {
+impl<T: StyledValue> StyledPropertyOptions<T> {
     pub fn new(default_value: T) -> Self {
         Self {
             default_value,
@@ -1112,7 +1242,7 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
     pub fn inherits(mut self, inherits: bool) -> Self {
         self.inherits = inherits;
         self.inherited_value_changed = if inherits {
-            Some(EffectiveValue::<T>::notify_inherited_value_changed)
+            Some(EffectiveValue::<T::Storage>::notify_inherited_value_changed)
         } else {
             None
         };
@@ -1169,6 +1299,70 @@ impl<T: PropertyValue> StyledPropertyOptions<T> {
             metadata = metadata.with_registered_coercion(coerce);
         }
         (metadata, self.inherits, self.validate, self.notifying)
+    }
+}
+
+#[cfg(test)]
+mod hearing_tests {
+    use super::*;
+    use crate::StyledElement;
+
+    /// Two classes at one first place: of nine addresses, two share one of the eight places.
+    fn two_classes_at_one_place() -> (&'static TypeInfo, &'static TypeInfo) {
+        let mut seen: [Option<&'static TypeInfo>; RECENT] = [None; RECENT];
+        loop {
+            let class: &'static TypeInfo = Box::leak(Box::new(TypeInfo::new("AtOnePlace", None)));
+            let place = recent_place(class);
+            if let Some(other) = seen[place] {
+                return (other, class);
+            }
+            seen[place] = Some(class);
+        }
+    }
+
+    #[test]
+    fn two_classes_at_one_place_stay_known_across_alternating_questions() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let (one, other) = two_classes_at_one_place();
+        assert_eq!(recent_place(one), recent_place(other));
+        let hearing = Hearing::new();
+        hearing.of_class(one, property);
+        hearing.of_class(other, property);
+        assert_eq!(hearing.past_recent.get(), 2);
+        for _ in 0..100 {
+            hearing.of_class(one, property);
+            hearing.of_class(other, property);
+        }
+        assert_eq!(hearing.past_recent.get(), 2, "neither class left its two places");
+    }
+
+    #[test]
+    fn a_class_moved_to_its_second_place_is_found_there_with_both_places_taken() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let (one, other) = two_classes_at_one_place();
+        let hearing = Hearing::new();
+        let place = recent_place(one);
+        let stranger: &'static TypeInfo = Box::leak(Box::new(TypeInfo::new("Stranger", None)));
+        hearing.recent[place].set((one, Heard::No));
+        hearing.recent[second_recent_place(place)].set((stranger, Heard::No));
+        hearing.of_class(other, property);
+        assert_eq!(hearing.past_recent.get(), 1);
+        assert!(matches!(hearing.of_class(one, property), Heard::No), "moved with its answer");
+        hearing.of_class(other, property);
+        assert_eq!(hearing.past_recent.get(), 1, "both are at their places");
+    }
+
+    #[test]
+    fn forgetting_empties_both_places() {
+        let property: &'static FerroProperty = StyledElement::data_context_property();
+        let (one, other) = two_classes_at_one_place();
+        let hearing = Hearing::new();
+        hearing.of_class(one, property);
+        hearing.of_class(other, property);
+        hearing.forget();
+        hearing.of_class(one, property);
+        hearing.of_class(other, property);
+        assert_eq!(hearing.past_recent.get(), 4);
     }
 }
 

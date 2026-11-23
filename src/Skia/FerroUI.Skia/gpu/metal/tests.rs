@@ -2481,3 +2481,10 @@ fn the_record_of_ordinary_drawing_is_taken_whole_where_it_is_used() {
     assert_eq!(refused, Vec::<usize>::new(), "keys of the record of {count} the device refused");
     drop(context);
 }
+
+// 3D scenes on Graphite (#608, step D5)
+// ---------------------------------------------------------------------------
+
+#[cfg(feature = "media3d")]
+#[path = "scene3d_tests.rs"]
+mod scene3d;

@@ -13,7 +13,7 @@ use ferroui_base::{PixelPoint, Point};
 use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::provider::IRootProvider;
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiComponentHandler {
     server: Weak<AtSpiServer>,
@@ -175,7 +175,7 @@ impl DBusInterface for AtSpiComponentHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(Self::version()))
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
+        (name == "version").then(|| Variant::from(Self::version()))
     }
 }

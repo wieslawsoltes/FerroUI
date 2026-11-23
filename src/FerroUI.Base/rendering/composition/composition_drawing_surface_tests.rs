@@ -47,6 +47,7 @@ impl IBitmapImpl for TrackingBitmapImpl {
 #[derive(Default)]
 struct FakeImportedImage {
     last_snapshot: RefCell<Option<std::sync::Arc<TrackingBitmapImpl>>>,
+    acquired: Cell<u32>,
 }
 
 impl FakeImportedImage {
@@ -62,6 +63,14 @@ impl IPlatformRenderInterfaceImportedObject for FakeImportedImage {
 }
 
 impl IPlatformRenderInterfaceImportedImage for FakeImportedImage {
+    fn acquire_shared_bitmap(
+        &self,
+        _frame: frames::FrameLease,
+    ) -> Result<std::sync::Arc<crate::platform::SharedBitmapImpl>, frames::FrameError> {
+        self.acquired.set(self.acquired.get() + 1);
+        Ok(self.snapshot())
+    }
+
     fn snapshot_with_keyed_mutex(&self, _acquire_index: u32, _release_index: u32) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {
         self.snapshot()
     }
@@ -677,4 +686,63 @@ fn an_image_of_a_shared_context_is_imported_on_the_thread_of_the_compositor() {
     services.run_jobs();
     assert!(imported.import_completed().is_completed_successfully());
     assert_eq!(vec![thread::current().id()], *log.shared_imports.lock().unwrap());
+}
+
+/// Not from upstream (#608 D7): a frame shown on a surface and sampled by a 3D material is
+/// acquired once, and its bitmap is disposed when the last of the two lets it go.
+#[test]
+fn a_frame_on_a_surface_and_in_a_slot_is_acquired_once() {
+    use frames::*;
+    let services = TestCompositor::new();
+    let compositor = &services.compositor;
+    let feature = Rc::new(FakeExternalObjectsFeature::default());
+    let imported = import(&services, &feature);
+    services.run_jobs();
+
+    let budget = FrameBudget::new(Default::default());
+    let frame = budget
+        .lease(
+            FrameMetadata {
+                identity: FrameIdentity { source: 41, generation: 1, sequence: 1 },
+                width: 1,
+                height: 1,
+                visible: FrameRegion { x: 0, y: 0, width: 1, height: 1 },
+                format: FrameFormat::Bgra8,
+                color: FrameColor::Srgb,
+                alpha: FrameAlpha::Opaque,
+                rotation: FrameRotation::None,
+                mirrored: false,
+                top_left_origin: true,
+                timestamp: std::time::Duration::ZERO,
+                device: None,
+                device_generation: 1,
+                planes: vec![FramePlane { offset: 0, stride: 4, length: 4 }],
+                retained_bytes: 4,
+            },
+            (),
+        )
+        .unwrap();
+    let ready = GpuCompletion::new();
+    ready.complete();
+    let surface = compositor.create_drawing_surface();
+    let slot = crate::rendering::scene3d::Scene3DFrameSlot::new();
+
+    let flat = surface.update_shared_frame_async(&*imported, frame.clone(), ready.clone());
+    let material = surface.update_frame_slot_async(&*imported, frame, ready, slot.clone());
+    services.run_jobs();
+    assert!(flat.is_completed_successfully(), "{:?}", flat.exception().map(|e| e.to_string()));
+    assert!(material.is_completed_successfully(), "{:?}", material.exception().map(|e| e.to_string()));
+    assert_eq!(1, feature.image.acquired.get(), "one acquisition for the surface and the slot");
+    assert!(slot.current().is_some());
+
+    let bitmap = feature.image.last_snapshot.borrow().clone().expect("the bitmap of the frame");
+    let is_disposed = || bitmap.is_disposed.load(std::sync::atomic::Ordering::SeqCst);
+    let clear = surface.clear_async();
+    services.run_jobs();
+    assert!(clear.is_completed_successfully());
+    assert!(!is_disposed(), "the slot still holds the frame");
+    let cleared = surface.clear_frame_slot_async(slot.clone());
+    services.run_jobs();
+    assert!(cleared.is_completed_successfully());
+    assert!(is_disposed(), "the last holder let it go");
 }
