@@ -236,6 +236,36 @@ impl SceneBuilder {
     }
 
     /// Fills paths.
+    /// The index of the resource the last successful [`draw_paths`](Self::draw_paths) added.
+    pub fn last_path_resource(&self) -> Option<u32> {
+        let mut resource = 0;
+        // SAFETY: the builder is alive; the index is written by the call.
+        (unsafe { progpu_native_scene_builder_last_path_resource(self.raw, &mut resource) } != 0).then_some(resource)
+    }
+
+    /// Draws the paths of a resource of this generation again, with other brushes and under
+    /// another state. The segments are not copied into the stream a second time.
+    pub fn draw_path_resource(
+        &mut self,
+        resource: u32,
+        brush_indices: &[u32],
+        bounds: progpu_native_image_rect,
+        state_index: u32,
+    ) -> Result<(), SceneBuildError> {
+        // SAFETY: the span is borrowed for the call.
+        let ok = unsafe {
+            progpu_native_scene_builder_draw_path_resource(
+                self.raw,
+                resource,
+                brush_indices.as_ptr(),
+                brush_indices.len(),
+                bounds,
+                state_index,
+            )
+        };
+        self.check("draw_path_resource", ok)
+    }
+
     pub fn draw_paths(
         &mut self,
         paths: &[progpu_native_scene_path_fill],
