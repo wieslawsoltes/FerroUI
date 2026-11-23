@@ -55,8 +55,14 @@ pub fn read_patch_maps(font: &[u8], limits: &WebFontLimits) -> Result<Vec<PatchM
     let Some(first) = table(&IFT_TABLE) else {
         return Ok(Vec::new());
     };
+    patch_maps_from_tables(first, table(&IFTX_TABLE))
+}
+
+/// The patch maps of a font from its `IFT ` and `IFTX` tables, with the checks of
+/// [`read_patch_maps`].
+pub fn patch_maps_from_tables(first: &[u8], second: Option<&[u8]>) -> Result<Vec<PatchMap>, FontDecodeError> {
     let mut maps = vec![parse_patch_map(IFT_TABLE, first)?];
-    if let Some(second) = table(&IFTX_TABLE) {
+    if let Some(second) = second {
         let second = parse_patch_map(IFTX_TABLE, second)?;
         if second.compatibility_id() == maps[0].compatibility_id() {
             return Err(FontDecodeError::Malformed("IFT and IFTX have the same compatibility id"));

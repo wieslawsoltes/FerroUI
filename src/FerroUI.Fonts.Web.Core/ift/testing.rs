@@ -16,6 +16,14 @@ pub struct IncrementalFixture {
     pub patches: Vec<(String, Vec<u8>)>,
 }
 
+/// `font` with one more table.
+pub fn add_table(font: &[u8], tag: Tag, table: Vec<u8>) -> Vec<u8> {
+    let mut tables = font_tables(font);
+    tables.push((tag, table));
+    let mut references: Vec<(Tag, &[u8])> = tables.iter().map(|(tag, data)| (*tag, data.as_slice())).collect();
+    assemble(TRUETYPE, &mut references, &WebFontLimits::DEFAULT).unwrap()
+}
+
 /// A sparse bit set with a branch factor of 4.
 pub fn encode_sparse_bit_set(values: &[u32]) -> Vec<u8> {
     let values: BTreeSet<u32> = values.iter().copied().collect();
