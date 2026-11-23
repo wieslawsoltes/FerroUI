@@ -486,6 +486,8 @@ impl DrawingContextImpl {
 }
 
 /// What casts a shadow: a box, or for an inset shadow what lies around its hole.
+// Only the passes of WebGL2 read what lies around a hole; the other routes blur the path.
+#[cfg_attr(not(feature = "hybrid-webgl"), allow(dead_code))]
 #[derive(Clone, Copy, Debug)]
 pub(crate) enum ShadowShape {
     Box(RoundedRect),
