@@ -3,7 +3,7 @@
 
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{ContentPage, Control, Grid, TextBlock};
+use ferroui_controls::{ContentPage, TextBlock};
 use ferroui_controls_maps::{
     grid_tile_source, BasicGeoposition, GridTileLoader, MapControl, MapElement, MapElementClickEventArgs,
     MapElementsLayer, MapIcon, MapPolygon, MapPolyline,
@@ -32,8 +32,7 @@ impl MapControlPage {
         let this = instantiate(Self::construct());
         this.initialize_component();
 
-        let map = MapControl::new();
-        Grid::set_row(&map, 2);
+        let map = this.get_control::<MapControl>("Map");
         map.set_tile_source(Some(Rc::new(grid_tile_source())), Some(Rc::new(GridTileLoader)));
         map.set_zoom_level(2.0);
 
@@ -72,7 +71,6 @@ impl MapControlPage {
         }));
         map.add_layer(layer);
 
-        this.get_control::<Grid>("LayoutRoot").children().add(map.upcast::<Control>());
         this
     }
 }
