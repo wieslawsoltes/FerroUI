@@ -28,6 +28,18 @@ const TYPES: &[&str] = &[
     "WellKnownFolder",
     // FerroUI.Rendering
     "RendererDebugOverlays",
+    // FerroUI.Controls.Converters
+    "EnumToBoolConverter",
+    // FerroUI.Controls.Platform
+    "X11NetWmWindowType",
+    // FerroUI.Controls.Primitives.PopupPositioning
+    "PopupAnchor",
+    // FerroUI.Controls.Selection
+    "ISelectionModel",
+    // FerroUI.Navigation
+    "NavigationMode",
+    // FerroUI.Controls.Repeater
+    "IndexPath",
 ];
 
 struct Scope {

@@ -41,4 +41,6 @@ pub use root::*;
 pub use ferroui_treedatagrid_core as core;
 
 #[cfg(test)]
+mod default_xml_namespace_tests;
+#[cfg(test)]
 mod tests;

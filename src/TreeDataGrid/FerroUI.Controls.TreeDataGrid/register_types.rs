@@ -23,6 +23,8 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     crate_name: "ferroui_controls_treedatagrid",
     xmlns_definitions: &[
         XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Converters" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Models.TreeDataGrid" },
         XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Primitives" },
     ],
     xmlns_prefixes: &[],

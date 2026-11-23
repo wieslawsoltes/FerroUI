@@ -86,4 +86,6 @@ pub mod primitives {
 }
 
 #[cfg(test)]
+mod default_xml_namespace_tests;
+#[cfg(test)]
 mod tests;
