@@ -878,7 +878,10 @@ pub use page::{DrawerBehavior, DrawerClosingEventArgs, DrawerLayoutBehavior, Dra
 
 // --- pipspager ---
 mod pips_pager;
-pub use pips_pager::{PipsPager, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings};
+pub use pips_pager::{
+    PipsPager, PipsPagerButtonVisibility, PipsPagerSelectedIndexChangedEventArgs, PipsPagerTemplateSettings,
+    PipsPagerWrapMode,
+};
 
 // --- connected-animation ---
 

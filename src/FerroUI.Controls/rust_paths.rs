@@ -462,6 +462,8 @@ ferroui_base::ferro_rust_paths! {
         crate::PagerControlButtonVisibility,
         crate::PagerControlDisplayMode,
         crate::PagerControlSelectedIndexChangedEventArgs,
+        crate::PipsPagerButtonVisibility,
+        crate::PipsPagerWrapMode,
         crate::PivotHeaderFocusVisualPlacement,
         crate::PivotItemEventArgs,
         crate::PivotSlideInAnimationGroup,

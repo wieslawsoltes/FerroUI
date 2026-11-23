@@ -314,7 +314,7 @@ fn windowStartupLocation(value) = AttrText { attrTextProperty: 1027, attrTextVal
 // windowState(value: WindowState) -> Attr<M>: sets WindowState (Window).
 fn windowState(value) = AttrText { attrTextProperty: 1028, attrTextValue: windowStateName(value: value) }
 // zIndex(value: int) -> Attr<M>: sets ZIndex (Visual).
-fn zIndex(value) = AttrInteger { attrIntegerProperty: 1040, attrIntegerValue: value }
+fn zIndex(value) = AttrInteger { attrIntegerProperty: 1041, attrIntegerValue: value }
 
 // ---- attributes of events ------------------------------------------------------------------
 

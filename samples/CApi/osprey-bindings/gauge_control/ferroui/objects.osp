@@ -911,12 +911,12 @@ fn windowState(object, value) = {
 }
 // zIndex(object: int, value: int) -> int: sets ZIndex (Visual). Defines the `ZIndex` property.
 fn zIndex(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 1040, value: value)
+    let _ = ferro_set_i64(object: object, property: 1041, value: value)
     object
 }
 // getZIndex(object: int) -> int: reads ZIndex (Visual); the fallback of its kind when the read
 // fails (`failure()` tells): a plain value, no Result.
-fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1040, fallback: 0)
+fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1041, fallback: 0)
 
 // ---- events --------------------------------------------------------------------------------
 

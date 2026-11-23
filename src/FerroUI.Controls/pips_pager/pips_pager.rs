@@ -3,7 +3,9 @@ use crate::automation::AutomationProperties;
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt};
 use crate::{Button, Control, ControlImpl, ListBox, ScrollViewer, StackPanel};
 use ferroui_base::data::BindingMode;
-use ferroui_base::input::{InputElementImpl, InputElementImplExt, Key, KeyEventArgs};
+use ferroui_base::input::{
+    FocusChangedEventArgs, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, NavigationMethod,
+};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, RoutedEventHandlerToken, RoutingStrategies};
 use ferroui_base::layout::{LayoutableImpl, Orientation};
 use ferroui_base::reactive::Subscription;
@@ -12,7 +14,7 @@ use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority,
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_routed_event, instantiate,
     DirectProperty, DirectPropertyMetadata, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Nullable,
-    Ref, StyledElementImpl, StyledProperty, StyledPropertyOptions, Vector, VisualImpl,
+    FerroObject, Ref, StyledElementImpl, StyledProperty, StyledPropertyOptions, Vector, Visual, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
 use std::time::Duration;
@@ -26,6 +28,36 @@ const PC_LAST_PAGE: &str = ":last-page";
 const PC_VERTICAL: &str = ":vertical";
 const PC_HORIZONTAL: &str = ":horizontal";
 
+/// When a navigation button of a [`PipsPager`] is shown (WinUI `PipsPagerButtonVisibility`).
+///
+/// FerroUI's default is `Visible`, where WinUI's is `Collapsed`: a pager shows its buttons by
+/// default, as it did with `IsPreviousButtonVisible` and `IsNextButtonVisible`.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum PipsPagerButtonVisibility {
+    /// The button is shown.
+    #[default]
+    Visible = 0,
+    /// The button keeps its place and is shown while the pointer is over the pager or the
+    /// keyboard focus is on one of its buttons.
+    VisibleOnPointerOver = 1,
+    /// The button takes no place and is not shown.
+    Collapsed = 2,
+}
+
+/// What the navigation buttons of a [`PipsPager`] do at the first and last page (WinUI
+/// `PipsPagerWrapMode`).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+#[repr(i32)]
+pub enum PipsPagerWrapMode {
+    /// The buttons stop at the first and last page.
+    #[default]
+    None = 0,
+    /// The previous button of the first page goes to the last one, and the next button of the
+    /// last page to the first one.
+    Wrap = 1,
+}
+
 /// Represents a control that lets the user navigate through a paginated
 /// collection using a set of pips.
 #[repr(C)]
@@ -37,6 +69,9 @@ pub struct PipsPager {
     /// The `ContainerPrepared` / `ContainerIndexChanged` subscriptions on the pips list.
     pips_pager_list_container_subscriptions: RefCell<Vec<Subscription>>,
     scroll_pending: Cell<bool>,
+    /// Whether a navigation button has the focus by another way than the pointer (WinUI's
+    /// `m_isFocused`), which shows a `VisibleOnPointerOver` button.
+    is_button_focused: Cell<bool>,
     updating_pager_size: Cell<bool>,
     is_initial_load: Cell<bool>,
     last_selected_page_index: Cell<i32>,
@@ -64,6 +99,13 @@ impl FerroObjectImpl for PipsPager {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.update_pseudo_classes();
+    }
+
+    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+        Self::parent_on_property_changed(this, change);
+        if change.property() == InputElement::is_pointer_over_property().as_property() {
+            this.update_button_opacity();
+        }
     }
 }
 
@@ -160,6 +202,20 @@ impl ControlImpl for PipsPager {
 }
 
 impl InputElementImpl for PipsPager {
+    fn on_got_focus(this: &Self, e: &FocusChangedEventArgs) {
+        Self::parent_on_got_focus(this, e);
+        // As WinUI's OnGotFocus: a button focused by the pointer does not keep itself shown.
+        let on_button = e.source().is_some_and(|source| source.is::<Button>());
+        this.is_button_focused.set(on_button && e.navigation_method != NavigationMethod::Pointer);
+        this.update_button_opacity();
+    }
+
+    fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
+        Self::parent_on_lost_focus(this, e);
+        this.is_button_focused.set(false);
+        this.update_button_opacity();
+    }
+
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
@@ -206,7 +262,10 @@ ferro_properties! {
 
         /// Defines the `IsNextButtonVisible` property.
         pub fn is_next_button_visible_property() -> StyledProperty<bool> {
-            FerroProperty::register::<PipsPager, _>("IsNextButtonVisible", true)
+            FerroProperty::register_with::<PipsPager, _>(
+                "IsNextButtonVisible",
+                StyledPropertyOptions::new(true).coerce(PipsPager::coerce_is_next_button_visible),
+            )
         }
 
         /// Defines the `NumberOfPages` property.
@@ -221,7 +280,25 @@ ferro_properties! {
 
         /// Defines the `IsPreviousButtonVisible` property.
         pub fn is_previous_button_visible_property() -> StyledProperty<bool> {
-            FerroProperty::register::<PipsPager, _>("IsPreviousButtonVisible", true)
+            FerroProperty::register_with::<PipsPager, _>(
+                "IsPreviousButtonVisible",
+                StyledPropertyOptions::new(true).coerce(PipsPager::coerce_is_previous_button_visible),
+            )
+        }
+
+        /// Defines the `PreviousButtonVisibility` property.
+        pub fn previous_button_visibility_property() -> StyledProperty<PipsPagerButtonVisibility> {
+            FerroProperty::register::<PipsPager, _>("PreviousButtonVisibility", PipsPagerButtonVisibility::Visible)
+        }
+
+        /// Defines the `NextButtonVisibility` property.
+        pub fn next_button_visibility_property() -> StyledProperty<PipsPagerButtonVisibility> {
+            FerroProperty::register::<PipsPager, _>("NextButtonVisibility", PipsPagerButtonVisibility::Visible)
+        }
+
+        /// Defines the `WrapMode` property.
+        pub fn wrap_mode_property() -> StyledProperty<PipsPagerWrapMode> {
+            FerroProperty::register::<PipsPager, _>("WrapMode", PipsPagerWrapMode::None)
         }
 
         /// Defines the `SelectedPageIndex` property.
@@ -280,6 +357,27 @@ impl PipsPager {
             .changed()
             .add_class_handler::<PipsPager>(|x, _| x.on_is_next_button_visible_changed())
             .detach();
+        Self::previous_button_visibility_property()
+            .changed()
+            .add_class_handler::<PipsPager>(|x, _| {
+                x.coerce_value(Self::is_previous_button_visible_property().as_property());
+                x.update_button_opacity();
+            })
+            .detach();
+        Self::next_button_visibility_property()
+            .changed()
+            .add_class_handler::<PipsPager>(|x, _| {
+                x.coerce_value(Self::is_next_button_visible_property().as_property());
+                x.update_button_opacity();
+            })
+            .detach();
+        Self::wrap_mode_property()
+            .changed()
+            .add_class_handler::<PipsPager>(|x, _| {
+                x.update_buttons_state();
+                x.update_pseudo_classes();
+            })
+            .detach();
         Self::orientation_property().changed().add_class_handler::<PipsPager>(|x, _| x.on_orientation_changed()).detach();
         Self::max_visible_pips_property()
             .changed()
@@ -296,6 +394,7 @@ impl PipsPager {
             pips_pager_list: RefCell::new(None),
             pips_pager_list_container_subscriptions: RefCell::new(Vec::new()),
             scroll_pending: Cell::new(false),
+            is_button_focused: Cell::new(false),
             updating_pager_size: Cell::new(false),
             is_initial_load: Cell::new(false),
             last_selected_page_index: Cell::new(0),
@@ -333,6 +432,50 @@ impl PipsPager {
 
     pub fn set_is_next_button_visible(&self, value: bool) {
         self.set_value(Self::is_next_button_visible_property(), value)
+    }
+
+    /// When the previous button is shown. `Collapsed` also makes
+    /// [`is_previous_button_visible`](Self::is_previous_button_visible) false.
+    pub fn previous_button_visibility(&self) -> PipsPagerButtonVisibility {
+        self.get_value(Self::previous_button_visibility_property())
+    }
+
+    pub fn set_previous_button_visibility(&self, value: PipsPagerButtonVisibility) {
+        self.set_value(Self::previous_button_visibility_property(), value);
+    }
+
+    /// When the next button is shown. `Collapsed` also makes
+    /// [`is_next_button_visible`](Self::is_next_button_visible) false.
+    pub fn next_button_visibility(&self) -> PipsPagerButtonVisibility {
+        self.get_value(Self::next_button_visibility_property())
+    }
+
+    pub fn set_next_button_visibility(&self, value: PipsPagerButtonVisibility) {
+        self.set_value(Self::next_button_visibility_property(), value);
+    }
+
+    /// What the navigation buttons do at the first and last page. With `Wrap` and more than one
+    /// page no page is an edge: `:first-page` and `:last-page`, which hide a button, are not set.
+    pub fn wrap_mode(&self) -> PipsPagerWrapMode {
+        self.get_value(Self::wrap_mode_property())
+    }
+
+    pub fn set_wrap_mode(&self, value: PipsPagerWrapMode) {
+        self.set_value(Self::wrap_mode_property(), value);
+    }
+
+    fn coerce_is_previous_button_visible(sender: &FerroObject, value: bool) -> bool {
+        value && sender.get_value(Self::previous_button_visibility_property()) != PipsPagerButtonVisibility::Collapsed
+    }
+
+    fn coerce_is_next_button_visible(sender: &FerroObject, value: bool) -> bool {
+        value && sender.get_value(Self::next_button_visibility_property()) != PipsPagerButtonVisibility::Collapsed
+    }
+
+    /// Whether the buttons go round at the first and last page (WinUI's `IsWrapEnabled` with the
+    /// more than one page its buttons need).
+    fn wraps(&self) -> bool {
+        self.wrap_mode() == PipsPagerWrapMode::Wrap && self.number_of_pages() > 1
     }
 
     fn update_container_automation_properties(&self, container: &Ref<Control>, index: i32) {
@@ -505,30 +648,57 @@ impl PipsPager {
     fn previous_button_click(&self) {
         if self.selected_page_index() > 0 {
             self.set_current_value(Self::selected_page_index_property(), self.selected_page_index() - 1);
+        } else if self.wraps() {
+            self.set_current_value(Self::selected_page_index_property(), self.number_of_pages() - 1);
         }
     }
 
     fn next_button_click(&self) {
         if self.selected_page_index() < self.number_of_pages() - 1 {
             self.set_current_value(Self::selected_page_index_property(), self.selected_page_index() + 1);
+        } else if self.wraps() {
+            self.set_current_value(Self::selected_page_index_property(), 0);
         }
     }
 
     fn update_buttons_state(&self) {
+        let wraps = self.wraps();
         if let Some(previous_button) = self.previous_button_part() {
-            previous_button.set_is_enabled(self.selected_page_index() > 0);
+            previous_button.set_is_enabled(wraps || self.selected_page_index() > 0);
         }
 
         if let Some(next_button) = self.next_button_part() {
-            next_button.set_is_enabled(self.selected_page_index() < self.number_of_pages() - 1);
+            next_button.set_is_enabled(wraps || self.selected_page_index() < self.number_of_pages() - 1);
         }
+
+        self.update_button_opacity();
+    }
+
+    /// A `VisibleOnPointerOver` button keeps its place with no opacity (WinUI's
+    /// `PreviousPageButtonHidden` and `NextPageButtonHidden`) until the pointer is over the pager
+    /// or a button has the keyboard focus. Otherwise the opacity is the theme's.
+    fn update_button_opacity(&self) {
+        let shown = self.is_pointer_over() || self.is_button_focused.get();
+        let apply = |button: Option<Ref<Button>>, visibility: PipsPagerButtonVisibility| {
+            let Some(button) = button else { return };
+            if visibility == PipsPagerButtonVisibility::VisibleOnPointerOver && !shown {
+                button.set_opacity(0.0);
+            } else if button.is_set(Visual::opacity_property().as_property()) {
+                button.clear_value(Visual::opacity_property());
+            }
+        };
+        apply(self.previous_button_part(), self.previous_button_visibility());
+        apply(self.next_button_part(), self.next_button_visibility());
     }
 
     fn update_pseudo_classes(&self) {
         let pseudo_classes = self.pseudo_classes();
-        pseudo_classes.set(PC_FIRST_PAGE, self.selected_page_index() == 0);
-        pseudo_classes
-            .set(PC_LAST_PAGE, self.number_of_pages() > 0 && self.selected_page_index() >= self.number_of_pages() - 1);
+        let wraps = self.wraps();
+        pseudo_classes.set(PC_FIRST_PAGE, !wraps && self.selected_page_index() == 0);
+        pseudo_classes.set(
+            PC_LAST_PAGE,
+            !wraps && self.number_of_pages() > 0 && self.selected_page_index() >= self.number_of_pages() - 1,
+        );
         pseudo_classes.set(PC_VERTICAL, self.orientation() == Orientation::Vertical);
         pseudo_classes.set(PC_HORIZONTAL, self.orientation() == Orientation::Horizontal);
     }

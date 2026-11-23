@@ -215,7 +215,7 @@ fn width(value) = AttrNumber { attrNumberProperty: 1018, attrNumberValue: value 
 // TableViewColumn).
 fn widthText(value) = AttrText { attrTextProperty: 1018, attrTextValue: value }
 // zIndex(value: int) -> Attr<M>: sets ZIndex (Visual).
-fn zIndex(value) = AttrInteger { attrIntegerProperty: 1040, attrIntegerValue: value }
+fn zIndex(value) = AttrInteger { attrIntegerProperty: 1041, attrIntegerValue: value }
 
 // ---- attributes of events ------------------------------------------------------------------
 
