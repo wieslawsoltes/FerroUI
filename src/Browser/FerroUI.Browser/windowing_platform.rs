@@ -1,5 +1,5 @@
 use crate::browser_activatable_lifetime::BrowserActivatableLifetime;
-use crate::browser_app_builder::BrowserPlatformOptions;
+use crate::browser_app_builder::{BrowserPlatformOptions, BrowserRenderer, BrowserRenderingMode};
 use crate::browser_platform_settings::BrowserPlatformSettings;
 use crate::browser_runtime_platform::BrowserRuntimePlatform;
 use crate::browser_screens::BrowserScreens;
@@ -118,7 +118,11 @@ impl BrowserWindowingPlatform {
         // waits: a view created before the thread has reported itself is
         // not ready until it has. Without threads this does nothing.
         let options = FerroLocator::current().get_service::<BrowserPlatformOptions>();
-        if options.as_ref().is_none_or(|options| options.render_thread) {
+        // WebGPU draws on the thread of the page: its device is not shared with a worker.
+        let on_page = options.as_ref().is_some_and(|options| {
+            options.renderer == BrowserRenderer::External && options.rendering_mode.contains(&BrowserRenderingMode::WebGPU)
+        });
+        if !on_page && options.as_ref().is_none_or(|options| options.render_thread) {
             BrowserSharedRenderLoop::start_render_thread();
         }
 

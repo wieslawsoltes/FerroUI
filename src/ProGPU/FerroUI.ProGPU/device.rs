@@ -22,6 +22,11 @@ pub enum ProGpuDeviceError {
     NoDevice,
     /// The engine refused the device.
     Engine(progpu_native_status),
+    /// The WebGPU implementation could not map the buffer of a read-back.
+    ReadBackFailed,
+    /// A page cannot block on the GPU: pixels arrive through the mapping of a buffer, once the
+    /// page has returned to its event loop.
+    ReadBackNeedsEventLoop,
 }
 
 impl fmt::Display for ProGpuDeviceError {
@@ -31,6 +36,10 @@ impl fmt::Display for ProGpuDeviceError {
             ProGpuDeviceError::NoAdapter => write!(f, "the WebGPU implementation has no adapter"),
             ProGpuDeviceError::NoDevice => write!(f, "the WebGPU implementation created no device"),
             ProGpuDeviceError::Engine(status) => write!(f, "the ProGPU engine refused the device (status {status})"),
+            ProGpuDeviceError::ReadBackFailed => write!(f, "the pixels could not be read back from the GPU"),
+            ProGpuDeviceError::ReadBackNeedsEventLoop => {
+                write!(f, "in the browser pixels are read from the GPU asynchronously and are not available yet")
+            }
         }
     }
 }
@@ -205,6 +214,7 @@ fn no_label() -> WGPUStringView {
     WGPUStringView { data: ptr::null(), length: 0 }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 unsafe extern "C" fn on_adapter(status: WGPURequestAdapterStatus, adapter: WGPUAdapter, _: WGPUStringView, slot: *mut c_void, _: *mut c_void) {
     if status == WGPURequestAdapterStatus_Success {
         // SAFETY: `slot` is the `WGPUAdapter` slot of `ProGpuDevice::new`.
@@ -212,6 +222,7 @@ unsafe extern "C" fn on_adapter(status: WGPURequestAdapterStatus, adapter: WGPUA
     }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 unsafe extern "C" fn on_device(status: WGPURequestDeviceStatus, device: WGPUDevice, _: WGPUStringView, slot: *mut c_void, _: *mut c_void) {
     if status == WGPURequestDeviceStatus_Success {
         // SAFETY: `slot` is the `WGPUDevice` slot of `ProGpuDevice::new`.
@@ -219,6 +230,7 @@ unsafe extern "C" fn on_device(status: WGPURequestDeviceStatus, device: WGPUDevi
     }
 }
 
+#[cfg(not(target_os = "emscripten"))]
 unsafe extern "C" fn on_mapped(status: WGPUMapAsyncStatus, _: WGPUStringView, slot: *mut c_void, _: *mut c_void) {
     // SAFETY: `slot` is the flag of `ProGpuDevice::read_rgba8`.
     unsafe { *(slot as *mut i32) = if status == WGPUMapAsyncStatus_Success { 1 } else { -1 } };
@@ -228,6 +240,7 @@ impl ProGpuDevice {
     /// Creates a device on the default adapter of the WebGPU implementation: of the graphics API
     /// of the platform on Linux (Vulkan) and Windows (Direct3D 12), where the windows are drawn
     /// through surfaces of that API, and of any API without an adapter of it.
+    #[cfg(not(target_os = "emscripten"))]
     pub fn new() -> Result<Self, ProGpuDeviceError> {
         #[cfg(target_os = "linux")]
         if let Ok(device) = Self::on_backends(WGPUInstanceBackend_Vulkan) {
@@ -240,7 +253,31 @@ impl ProGpuDevice {
         Self::on_backends(WGPUInstanceBackend_All)
     }
 
+    /// The device the page requested before the module started, which the module cannot wait
+    /// for itself (the option `preinitializedWebGPUDevice` of the module).
+    #[cfg(target_os = "emscripten")]
+    pub fn new() -> Result<Self, ProGpuDeviceError> {
+        use progpu_native_sys::browser::{progpu_native_browser_device_queue, progpu_native_browser_imported_device};
+        if !progpu_native_sys::abi_matches() {
+            return Err(ProGpuDeviceError::AbiMismatch);
+        }
+        // SAFETY: plain queries of the module; a device that is not null is a reference owned here.
+        unsafe {
+            let device = progpu_native_browser_imported_device();
+            if device == 0 {
+                return Err(ProGpuDeviceError::NoDevice);
+            }
+            let queue = progpu_native_browser_device_queue(device);
+            if queue == 0 {
+                wgpuDeviceRelease(device as WGPUDevice);
+                return Err(ProGpuDeviceError::NoDevice);
+            }
+            Ok(Self { instance: ptr::null_mut(), adapter: ptr::null_mut(), device: device as WGPUDevice, queue: queue as WGPUQueue })
+        }
+    }
+
     /// Creates a device on the default adapter of `backends`.
+    #[cfg(not(target_os = "emscripten"))]
     fn on_backends(backends: WGPUInstanceBackend) -> Result<Self, ProGpuDeviceError> {
         if !progpu_native_sys::abi_matches() {
             return Err(ProGpuDeviceError::AbiMismatch);
@@ -347,7 +384,10 @@ impl ProGpuDevice {
         if !ENTERED.get() {
             // SAFETY: the device is alive; a poll that does not wait only completes what the
             // device has finished.
-            unsafe { wgpuDevicePoll(self.device, 0, ptr::null()) };
+            #[cfg(not(target_os = "emscripten"))]
+            unsafe {
+                wgpuDevicePoll(self.device, 0, ptr::null())
+            };
             MARK.with(|_| ());
             ENTERED.set(true);
         }
@@ -508,14 +548,13 @@ impl ProGpuDevice {
         }
     }
 
-    /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
-    pub fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
+    /// Copies a texture of `RGBA8Unorm` into a new buffer that can be mapped, on the queue.
+    fn begin_read_back(&self, texture: WGPUTexture, width: u32, height: u32) -> ReadBack {
         self.enter();
         // Rows of a copy are aligned to 256 bytes.
         let bytes_per_row = (width * 4).div_ceil(256) * 256;
         let size = u64::from(bytes_per_row) * u64::from(height);
-        // SAFETY: the calls of the WebGPU C ABI with the handles they return; the mapped range is
-        // read while the buffer is mapped.
+        // SAFETY: the calls of the WebGPU C ABI with the handles they return.
         unsafe {
             let buffer = wgpuDeviceCreateBuffer(
                 self.device,
@@ -541,12 +580,23 @@ impl ProGpuDevice {
             wgpuQueueSubmit(self.queue, 1, &commands);
             wgpuCommandBufferRelease(commands);
             wgpuCommandEncoderRelease(encoder);
-            let mut mapped = 0i32;
+            ReadBack { buffer, width, height, bytes_per_row, size: size as usize }
+        }
+    }
+
+    /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
+    #[cfg(not(target_os = "emscripten"))]
+    pub fn try_read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Result<Vec<u8>, ProGpuDeviceError> {
+        let back = self.begin_read_back(texture, width, height);
+        let mut mapped = 0i32;
+        // SAFETY: the buffer is alive; the flag outlives the wait below, which ends when the
+        // callback has written it.
+        unsafe {
             wgpuBufferMapAsync(
-                buffer,
+                back.buffer,
                 WGPUMapMode_Read,
                 0,
-                size as usize,
+                back.size,
                 WGPUBufferMapCallbackInfo {
                     nextInChain: ptr::null_mut(),
                     mode: WGPUCallbackMode_AllowSpontaneous,
@@ -558,19 +608,97 @@ impl ProGpuDevice {
             while mapped == 0 {
                 wgpuDevicePoll(self.device, 1, ptr::null());
             }
-            let mut pixels = Vec::with_capacity((width * height * 4) as usize);
-            if mapped == 1 {
-                let data = std::slice::from_raw_parts(wgpuBufferGetConstMappedRange(buffer, 0, size as usize) as *const u8, size as usize);
-                for row in 0..height as usize {
-                    let start = row * bytes_per_row as usize;
-                    pixels.extend_from_slice(&data[start..start + (width * 4) as usize]);
-                }
-                wgpuBufferUnmap(buffer);
-            }
-            wgpuBufferRelease(buffer);
-            pixels
+        }
+        back.finish(mapped == 1)
+    }
+
+    /// A page cannot wait for the GPU: [`read_rgba8_async`](Self::read_rgba8_async) is the read.
+    #[cfg(target_os = "emscripten")]
+    pub fn try_read_rgba8(&self, _texture: WGPUTexture, _width: u32, _height: u32) -> Result<Vec<u8>, ProGpuDeviceError> {
+        Err(ProGpuDeviceError::ReadBackNeedsEventLoop)
+    }
+
+    /// Reads a texture of `RGBA8Unorm` back through the mapping of a buffer: `done` is called from
+    /// the event loop of the page with `width * height * 4` bytes, row by row. The copy is on the
+    /// queue when this returns, so the texture may change or go away afterwards.
+    #[cfg(target_os = "emscripten")]
+    pub fn read_rgba8_async(&self, texture: WGPUTexture, width: u32, height: u32, done: ReadBackDone) {
+        let back = self.begin_read_back(texture, width, height);
+        let (buffer, size) = (back.buffer, back.size);
+        let pending = Box::into_raw(Box::new(PendingReadBack { back, done }));
+        // SAFETY: the buffer is alive; `on_read_back_mapped` takes the box back exactly once.
+        unsafe {
+            wgpuBufferMapAsync(
+                buffer,
+                WGPUMapMode_Read,
+                0,
+                size,
+                WGPUBufferMapCallbackInfo {
+                    nextInChain: ptr::null_mut(),
+                    mode: WGPUCallbackMode_AllowSpontaneous,
+                    callback: Some(on_read_back_mapped),
+                    userdata1: pending as *mut c_void,
+                    userdata2: ptr::null_mut(),
+                },
+            );
         }
     }
+
+    /// The pixels of a texture, for the tests.
+    #[cfg(test)]
+    pub(crate) fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
+        self.try_read_rgba8(texture, width, height).expect("the pixels of the texture")
+    }
+}
+
+/// A buffer holding the copy of a texture, until it is mapped and read.
+struct ReadBack {
+    buffer: WGPUBuffer,
+    width: u32,
+    height: u32,
+    bytes_per_row: u32,
+    size: usize,
+}
+
+impl ReadBack {
+    /// The pixels of a buffer that was mapped (`mapped`), and the release of the buffer.
+    fn finish(self, mapped: bool) -> Result<Vec<u8>, ProGpuDeviceError> {
+        // SAFETY: the buffer is owned here; the range is read while the buffer is mapped.
+        unsafe {
+            let result = if mapped {
+                let data = std::slice::from_raw_parts(wgpuBufferGetConstMappedRange(self.buffer, 0, self.size) as *const u8, self.size);
+                let row_bytes = self.width as usize * 4;
+                let mut pixels = Vec::with_capacity(row_bytes * self.height as usize);
+                for row in 0..self.height as usize {
+                    let start = row * self.bytes_per_row as usize;
+                    pixels.extend_from_slice(&data[start..start + row_bytes]);
+                }
+                wgpuBufferUnmap(self.buffer);
+                Ok(pixels)
+            } else {
+                Err(ProGpuDeviceError::ReadBackFailed)
+            };
+            wgpuBufferRelease(self.buffer);
+            result
+        }
+    }
+}
+
+/// What receives the pixels of an asynchronous read-back.
+#[cfg(target_os = "emscripten")]
+pub type ReadBackDone = Box<dyn FnOnce(Result<Vec<u8>, ProGpuDeviceError>)>;
+
+#[cfg(target_os = "emscripten")]
+struct PendingReadBack {
+    back: ReadBack,
+    done: ReadBackDone,
+}
+
+#[cfg(target_os = "emscripten")]
+unsafe extern "C" fn on_read_back_mapped(status: WGPUMapAsyncStatus, _: WGPUStringView, pending: *mut c_void, _: *mut c_void) {
+    // SAFETY: the box `read_rgba8_async` gave up, and the callback runs once.
+    let PendingReadBack { back, done } = *unsafe { Box::from_raw(pending as *mut PendingReadBack) };
+    done(back.finish(status == WGPUMapAsyncStatus_Success));
 }
 
 impl Drop for ProGpuDevice {
@@ -586,7 +714,9 @@ impl Drop for ProGpuDevice {
             if !self.adapter.is_null() {
                 wgpuAdapterRelease(self.adapter);
             }
-            wgpuInstanceRelease(self.instance);
+            if !self.instance.is_null() {
+                wgpuInstanceRelease(self.instance);
+            }
         }
     }
 }
@@ -595,6 +725,43 @@ impl ProGpuEngine {
     /// An engine on `device` rendering into targets of `format`, resolving its procedures from the
     /// linked wgpu-native.
     pub fn new(device: &Rc<ProGpuDevice>, format: TargetFormat) -> Result<Self, ProGpuDeviceError> {
+        let mut engine: *mut progpu_native_engine = ptr::null_mut();
+        // SAFETY: the options are borrowed for the call; the handles are those of the device.
+        let status = unsafe { Self::create(device, format, &mut engine) };
+        if status == PROGPU_NATIVE_STATUS_SUCCESS {
+            Ok(Self {
+                device: device.clone(),
+                engine,
+                format,
+                thread: Cell::new(std::thread::current().id()),
+                outlines_seen: Cell::new(0),
+                retained_stream: RefCell::new(None),
+            })
+        } else {
+            Err(ProGpuDeviceError::Engine(status))
+        }
+    }
+
+    /// Creates the engine of the C ABI on the WebGPU of the page.
+    #[cfg(target_os = "emscripten")]
+    unsafe fn create(device: &ProGpuDevice, format: TargetFormat, engine: *mut *mut progpu_native_engine) -> progpu_native_status {
+        use progpu_native_sys::browser::*;
+        let options = progpu_native_browser_engine_options {
+            struct_size: std::mem::size_of::<progpu_native_browser_engine_options>() as u32,
+            native_abi_version: PROGPU_NATIVE_ABI_VERSION,
+            adapter_abi_version: PROGPU_NATIVE_BROWSER_ADAPTER_ABI_VERSION,
+            target_format: format.engine_format(),
+            device: device.device as usize,
+            queue: device.queue as usize,
+            ..Default::default()
+        };
+        // SAFETY: the options are borrowed for the call; the slot is the caller's.
+        unsafe { progpu_native_browser_engine_create(&options, engine) }
+    }
+
+    /// Creates the engine of the C ABI, resolving its procedures from the linked wgpu-native.
+    #[cfg(not(target_os = "emscripten"))]
+    unsafe fn create(device: &ProGpuDevice, format: TargetFormat, engine: *mut *mut progpu_native_engine) -> progpu_native_status {
         let options = progpu_native_dawn_engine_options {
             struct_size: std::mem::size_of::<progpu_native_dawn_engine_options>() as u32,
             native_abi_version: PROGPU_NATIVE_ABI_VERSION,
@@ -609,14 +776,8 @@ impl ProGpuEngine {
             queue: device.queue as usize,
             flags: 0,
         };
-        let mut engine: *mut progpu_native_engine = ptr::null_mut();
-        // SAFETY: the options are borrowed for the call; the handles are those of the device.
-        let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
-        if status == PROGPU_NATIVE_STATUS_SUCCESS {
-            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()), outlines_seen: Cell::new(0), retained_stream: RefCell::new(None), })
-        } else {
-            Err(ProGpuDeviceError::Engine(status))
-        }
+        // SAFETY: the options are borrowed for the call; the slot is the caller's.
+        unsafe { progpu_native_dawn_engine_create(&options, engine) }
     }
 
     /// The device of the engine.

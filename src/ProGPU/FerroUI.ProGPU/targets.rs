@@ -107,10 +107,12 @@ impl IRenderTarget for FramebufferRenderTarget {
                 if let (true, Some(texture)) = (drawn, &texture) {
                     let (format, alpha_format, row_bytes) = (locked.format(), locked.alpha_format(), locked.row_bytes().max(0) as usize);
                     if size.width > 0 && size.height > 0 && is_supported(format) {
-                        let pixels = texture.read();
-                        locked.with_data(&mut |data| {
-                            write_frame(&pixels, size.width as usize, size.height as usize, data, row_bytes, format, alpha_format);
-                        });
+                        match texture.read() {
+                            Ok(pixels) => locked.with_data(&mut |data| {
+                                write_frame(&pixels, size.width as usize, size.height as usize, data, row_bytes, format, alpha_format);
+                            }),
+                            Err(error) => notes::failure(&format!("a frame was not written to the framebuffer: {error}")),
+                        }
                     } else if !is_supported(format) {
                         notes::note_once("framebuffer-format", "the ProGPU backend writes framebuffers of RGBA8888 and BGRA8888 only");
                     }

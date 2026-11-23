@@ -66,6 +66,10 @@ pub const RENDER_TARGET_KIND_SOFTWARE: i32 = 1;
 /// The kind of a render target a worker reports as rendered with WebGL.
 pub const RENDER_TARGET_KIND_WEB_GL: i32 = 2;
 
+/// The kind of a render target drawn with the WebGPU of the page. Never reported by a worker: such
+/// a canvas stays on the thread of the page.
+pub const RENDER_TARGET_KIND_WEB_GPU: i32 = 3;
+
 ferroui_base::ferro_thread_local! {
     // Per thread: the report arrives on the thread whose worker created the
     // render target, and that thread is the one that wants to hear of it.

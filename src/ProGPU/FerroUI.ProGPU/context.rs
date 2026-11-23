@@ -104,6 +104,12 @@ impl IPlatformRenderInterfaceContext for ProGpuContext {
             }
         }
 
+        // The canvas of a page comes before its framebuffer: the frame stays on the device.
+        #[cfg(target_os = "emscripten")]
+        if let Some(target) = crate::canvas_target::CanvasRenderTarget::try_new(gpu, surfaces) {
+            return Rc::new(target);
+        }
+
         // The handle of a window comes before its framebuffer: the frame stays on the device.
         #[cfg(any(target_os = "linux", windows))]
         if crate::window_surface::has_window(surfaces) {

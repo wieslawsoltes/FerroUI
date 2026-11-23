@@ -1,4 +1,6 @@
-use crate::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
+use crate::interop::canvas_helper::{
+    RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL, RENDER_TARGET_KIND_WEB_GPU,
+};
 use crate::interop::thread_proxy;
 use ferroui_base::PixelSize;
 use std::cell::RefCell;
@@ -363,7 +365,7 @@ impl BrowserSurfaceShared {
 
 fn assert_target_kind(kind: i32) {
     assert!(
-        kind == RENDER_TARGET_KIND_WEB_GL || kind == RENDER_TARGET_KIND_SOFTWARE,
+        kind == RENDER_TARGET_KIND_WEB_GL || kind == RENDER_TARGET_KIND_SOFTWARE || kind == RENDER_TARGET_KIND_WEB_GPU,
         "{kind} is not a kind of render target"
     );
 }

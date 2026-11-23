@@ -2,6 +2,7 @@ import { BrowserRenderingMode } from "./renderingMode";
 import { WebGlRenderTarget } from "./webGlRenderTarget";
 import { WebRenderTarget } from "./webRenderTarget";
 import { SoftwareRenderTarget } from "./softwareRenderTarget";
+import { WebGpuRenderTarget } from "./webGpuRenderTarget";
 import { FerroExports } from "../ferroExports";
 import { CanvasPresenter } from "./canvasPresenter";
 import { SharedGlFrames } from "./sharedGlFrames";
@@ -203,6 +204,7 @@ export class WebRenderTargetRegistry {
         for (const mode of modes) {
             try {
                 if (mode === BrowserRenderingMode.Software2D) { return new SoftwareRenderTarget(canvas); }
+                if (mode === BrowserRenderingMode.WebGPU) { return new WebGpuRenderTarget(canvas); }
                 return new WebGlRenderTarget(canvas, mode);
             } catch (e) {
                 let message = "";

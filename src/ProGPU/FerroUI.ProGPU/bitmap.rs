@@ -6,6 +6,7 @@
 //! as PNG or JPEG.
 
 use crate::drawing_context::ProGpuDrawingContext;
+use crate::device::ProGpuDeviceError;
 use crate::gpu::{default_gpu, GpuTexture};
 use crate::notes;
 use crate::scene::SceneBuilder;
@@ -18,19 +19,79 @@ use ferroui_base::{PixelSize, Rect, Vector};
 use std::any::Any;
 use std::io;
 use std::rc::Rc;
-use std::sync::atomic::{AtomicI32, Ordering};
+use std::sync::atomic::{AtomicBool, AtomicI32, AtomicU32, Ordering};
 use std::sync::{Arc, Mutex, MutexGuard};
 
 /// The pixels of a bitmap, shared with its locks.
 struct Pixels {
     data: Mutex<Vec<u8>>,
     version: AtomicI32,
+    /// The reads from the GPU that have not delivered their frame yet (in the browser).
+    pending_reads: AtomicU32,
+    /// The last read from the GPU failed: the pixels are not what was rendered.
+    read_failed: AtomicBool,
 }
 
 impl Pixels {
+    fn new(data: Vec<u8>) -> Self {
+        Self { data: Mutex::new(data), version: AtomicI32::new(0), pending_reads: AtomicU32::new(0), read_failed: AtomicBool::new(false) }
+    }
+
     fn data(&self) -> MutexGuard<'_, Vec<u8>> {
         self.data.lock().unwrap_or_else(|poisoned| poisoned.into_inner())
     }
+
+    /// Whether the pixels are what was last rendered into the bitmap.
+    fn ready(&self) -> bool {
+        self.pending_reads.load(Ordering::Acquire) == 0 && !self.read_failed.load(Ordering::Acquire)
+    }
+
+    /// Writes a frame read from the GPU, or records that the read failed.
+    fn deliver(&self, frame: Result<Vec<u8>, ProGpuDeviceError>, layout: FrameLayout) {
+        match frame {
+            Ok(frame) => {
+                let written = {
+                    let mut data = self.data();
+                    write_frame(&frame, layout.width, layout.height, &mut data, layout.row_bytes, layout.format, layout.alpha_format)
+                };
+                self.read_failed.store(!written, Ordering::Release);
+                if written {
+                    self.version.fetch_add(1, Ordering::Relaxed);
+                }
+            }
+            Err(error) => {
+                self.read_failed.store(true, Ordering::Release);
+                notes::failure(&format!("the pixels of a bitmap were not read: {error}"));
+            }
+        }
+    }
+
+    /// Brings the frame in `texture` into the pixels: at once on the desktop, and in the browser
+    /// through the mapping of a buffer, until which the bitmap says that it is not ready.
+    #[cfg(not(target_os = "emscripten"))]
+    fn store_frame(self: &Arc<Self>, texture: &GpuTexture, layout: FrameLayout) {
+        self.deliver(texture.read(), layout);
+    }
+
+    #[cfg(target_os = "emscripten")]
+    fn store_frame(self: &Arc<Self>, texture: &GpuTexture, layout: FrameLayout) {
+        self.pending_reads.fetch_add(1, Ordering::AcqRel);
+        let pixels = self.clone();
+        texture.read_async(Box::new(move |frame| {
+            pixels.deliver(frame, layout);
+            pixels.pending_reads.fetch_sub(1, Ordering::AcqRel);
+        }));
+    }
+}
+
+/// How a frame read from the GPU is written into the pixels of a bitmap.
+#[derive(Clone, Copy)]
+struct FrameLayout {
+    width: usize,
+    height: usize,
+    row_bytes: usize,
+    format: PixelFormat,
+    alpha_format: AlphaFormat,
 }
 
 /// A bitmap of pixels in memory: `RGBA8888` or `BGRA8888`, four bytes per pixel.
@@ -59,7 +120,7 @@ impl ProGpuBitmap {
             format,
             alpha_format,
             row_bytes: width * 4,
-            pixels: Arc::new(Pixels { data: Mutex::new(vec![0; width * height * 4]), version: AtomicI32::new(0) }),
+            pixels: Arc::new(Pixels::new(vec![0; width * height * 4])),
         }
     }
 
@@ -114,12 +175,40 @@ impl ProGpuBitmap {
     }
 
     /// Replaces the pixels (as many bytes as the bitmap has) and advances the version.
+    #[cfg(test)]
     pub(crate) fn set_pixels(&self, data: &[u8]) {
         let mut pixels = self.pixels.data();
         if pixels.len() == data.len() {
             pixels.copy_from_slice(data);
             self.pixels.version.fetch_add(1, Ordering::Relaxed);
         }
+    }
+
+    /// As a read from the GPU that failed.
+    #[cfg(test)]
+    pub(crate) fn fail_read(&self) {
+        self.pixels.deliver(Err(ProGpuDeviceError::ReadBackFailed), self.frame_layout());
+    }
+
+    /// Whether the pixels are what was last rendered: not while a read from the GPU is on its
+    /// way (in the browser), nor after one failed.
+    pub(crate) fn pixels_ready(&self) -> bool {
+        self.pixels.ready()
+    }
+
+    fn frame_layout(&self) -> FrameLayout {
+        FrameLayout {
+            width: self.size.width.max(0) as usize,
+            height: self.size.height.max(0) as usize,
+            row_bytes: self.row_bytes,
+            format: self.format,
+            alpha_format: self.alpha_format,
+        }
+    }
+
+    /// Brings the premultiplied content of a texture of the size of the bitmap into its pixels.
+    pub(crate) fn store_frame(&self, texture: &GpuTexture) {
+        self.pixels.store_frame(texture, self.frame_layout());
     }
 }
 
@@ -137,6 +226,9 @@ impl IBitmapImpl for ProGpuBitmap {
     }
 
     fn save(&self, stream: &mut dyn io::Write, options: &BitmapEncoderOptions) -> io::Result<()> {
+        if !self.pixels.ready() {
+            return Err(io::Error::new(io::ErrorKind::WouldBlock, "the pixels of the bitmap have not been read from the GPU"));
+        }
         let source = SavedPixels {
             width: self.size.width.max(0) as u32,
             height: self.size.height.max(0) as u32,
@@ -154,8 +246,10 @@ impl IBitmapImpl for ProGpuBitmap {
         self
     }
 
+    /// None while the pixels are not what was rendered: a reader gets no bitmap rather than an
+    /// empty one.
     fn as_readable_bitmap(&self) -> Option<&dyn IReadableBitmapImpl> {
-        Some(self)
+        self.pixels.ready().then_some(self as &dyn IReadableBitmapImpl)
     }
 }
 
@@ -407,7 +501,7 @@ impl IRenderTargetBitmapImpl for ProGpuBitmap {
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
         let gpu = default_gpu();
         let (width, height) = (self.size.width.max(1) as u32, self.size.height.max(1) as u32);
-        let (pixels, size, row_bytes, format, alpha_format) = (self.pixels.clone(), self.size, self.row_bytes, self.format, self.alpha_format);
+        let (pixels, layout) = (self.pixels.clone(), self.frame_layout());
         let target = gpu.clone();
         let mut context = ProGpuDrawingContext::with_gpu(
             SceneBuilder::new(),
@@ -417,13 +511,7 @@ impl IRenderTargetBitmapImpl for ProGpuBitmap {
                 let Some(engine) = gpu.offscreen() else { return };
                 let texture = GpuTexture::new(gpu.device(), width, height);
                 match recording.render(engine, texture.view(), width, height, false) {
-                    Ok(()) => {
-                        let frame = texture.read();
-                        let mut data = pixels.data();
-                        if write_frame(&frame, size.width.max(0) as usize, size.height.max(0) as usize, &mut data, row_bytes, format, alpha_format) {
-                            pixels.version.fetch_add(1, Ordering::Relaxed);
-                        }
-                    }
+                    Ok(()) => pixels.store_frame(&texture, layout),
                     Err(error) => notes::failure(&format!("a render-target bitmap was not drawn: {error}")),
                 }
             })),

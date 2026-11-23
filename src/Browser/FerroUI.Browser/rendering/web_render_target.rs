@@ -1,5 +1,7 @@
-use super::{BrowserSoftwareRenderTarget, BrowserWebGlRenderTarget};
-use crate::interop::canvas_helper::{RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL};
+use super::{BrowserSoftwareRenderTarget, BrowserWebGlRenderTarget, BrowserWebGpuRenderTarget};
+use crate::interop::canvas_helper::{
+    RENDER_TARGET_KIND_SOFTWARE, RENDER_TARGET_KIND_WEB_GL, RENDER_TARGET_KIND_WEB_GPU,
+};
 use crate::interop::{non_null, JsObject};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::IPlatformGraphicsContext;
@@ -95,6 +97,8 @@ pub enum BrowserRenderTarget {
     WebGl(Rc<BrowserWebGlRenderTarget>),
     /// A canvas that is rendered to in memory.
     Software(Rc<BrowserSoftwareRenderTarget>),
+    /// A canvas of the page that a backend draws to with the WebGPU of the page.
+    WebGpu(Rc<BrowserWebGpuRenderTarget>),
 }
 
 impl BrowserRenderTarget {
@@ -103,7 +107,7 @@ impl BrowserRenderTarget {
     pub fn platform_graphics_context(&self) -> Option<Rc<dyn IPlatformGraphicsContext>> {
         match self {
             Self::WebGl(target) => Some(target.gl_context()),
-            Self::Software(_) => None,
+            Self::Software(_) | Self::WebGpu(_) => None,
         }
     }
 
@@ -114,6 +118,7 @@ impl BrowserRenderTarget {
         match self {
             Self::WebGl(_) => RENDER_TARGET_KIND_WEB_GL,
             Self::Software(_) => RENDER_TARGET_KIND_SOFTWARE,
+            Self::WebGpu(_) => RENDER_TARGET_KIND_WEB_GPU,
         }
     }
 }
@@ -159,6 +164,9 @@ fn wrap_script_render_target(id: i32) -> Option<BrowserRenderTarget> {
     }
     if type_ == "software" {
         return Some(BrowserRenderTarget::Software(BrowserSoftwareRenderTarget::new(js)));
+    }
+    if type_ == "webgpu" {
+        return Some(BrowserRenderTarget::WebGpu(BrowserWebGpuRenderTarget::new(js)));
     }
     panic!("{type_}");
 }

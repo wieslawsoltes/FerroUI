@@ -74,7 +74,7 @@ impl IBitmapImpl for ProGpuLayer {
         let Some(texture) = &self.inner.texture else {
             return Err(unsupported_codec("saving a layer without a device"));
         };
-        let pixels = texture.read();
+        let pixels = texture.read().map_err(|error| io::Error::new(io::ErrorKind::WouldBlock, error.to_string()))?;
         let source = SavedPixels {
             width: texture.width(),
             height: texture.height(),
@@ -134,7 +134,7 @@ impl IDrawingContextLayerImpl for ProGpuLayer {
         let bitmap = ProGpuBitmap::new(size, self.inner.dpi, PixelFormat::RGBA8888, AlphaFormat::Premul);
         if let Some(texture) = &self.inner.texture {
             if texture.width() == size.width as u32 && texture.height() == size.height as u32 {
-                bitmap.set_pixels(&texture.read());
+                bitmap.store_frame(texture);
             }
         }
         Arc::new(bitmap)

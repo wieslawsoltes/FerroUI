@@ -24,6 +24,7 @@ ferroui-media-video-browser.workspace = true
 ferroui-media-camera-browser.workspace = true
 ferroui-media-camera.workspace = true
 ferroui-devtools = { workspace = true, optional = true, default-features = false, features = ["browser"] }
+ferroui-progpu = { workspace = true, optional = true }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-browser = { workspace = true }
@@ -37,6 +38,9 @@ wasm-bindgen = { workspace = true }
 cdp = ["dep:ferroui-devtools"]
 default = []
 vello = ["ferroui-browser/vello"]
+# The ProGPU backend beside Skia, on the WebGPU of the page, chosen with `?Renderer=ProGPU`. Off by
+# default: the published module is the Skia one.
+progpu = ["dep:ferroui-progpu"]
 macos-theme = ["control-catalog/macos-theme"]
 material-theme = ["control-catalog/material-theme"]
 

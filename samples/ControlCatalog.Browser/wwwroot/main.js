@@ -1,4 +1,4 @@
-import { FerroExports } from "./ferroui.js";
+import { FerroExports, WebGpuRenderTarget } from "./ferroui.js";
 import { loadModule } from "./ferroui-loader.js";
 import * as pageAssets from "./page-assets.js";
 
@@ -28,7 +28,14 @@ const loaded = await loadModule({ script: "./control-catalog-browser.js", elemen
 if (loaded) {
     // The steps of the start-up are marked on the performance timeline of the page
     // (scripts/browser/first-frame.mjs --phases reports them).
-    const runtime = await loaded.createRuntime();
+    // `?Renderer=ProGPU` draws on the WebGPU of the page, whose device has to exist before the
+    // module does. Without one the module starts as usual and says so.
+    const moduleOptions = {};
+    if (/(^|[?&])renderer=progpu(&|$)/i.test(globalThis.location.search)) {
+        const device = await WebGpuRenderTarget.requestDevice();
+        if (device) moduleOptions.preinitializedWebGPUDevice = device;
+    }
+    const runtime = await loaded.createRuntime(moduleOptions);
     performance.mark("module instantiated");
 
     // The script side resolves the exports of the framework through the module.
