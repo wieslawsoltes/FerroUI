@@ -6,7 +6,6 @@
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:local="using:FerroUI.Controls"
                     x:ClassModifier="internal">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">
@@ -25,7 +24,7 @@
       <StaticResource x:Key="TeachingTipTitleForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
       <StaticResource x:Key="TeachingTipSubtitleForegroundBrush" ResourceKey="TextFillColorPrimaryBrush" />
     </ResourceDictionary>
-    <ResourceDictionary x:Key="{x:Static local:TeachingTipThemeKeys.HighContrast}">
+    <ResourceDictionary x:Key="{x:Static TeachingTipThemeKeys.HighContrast}">
       <StaticResource x:Key="TeachingTipBorderBrush" ResourceKey="SystemColorWindowTextColorBrush" />
       <StaticResource x:Key="TeachingTipTransientBackground" ResourceKey="AcrylicInAppFillColorDefaultBrush" />
       <StaticResource x:Key="TeachingTipForegroundBrush" ResourceKey="SystemColorWindowTextColorBrush" />
