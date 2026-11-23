@@ -306,16 +306,25 @@ impl AccessKeyHandler {
 
     /// Handles the Alt/F10 keys being released in the window.
     pub fn on_preview_key_up(&self, e: &KeyEventArgs) {
-        if e.key == Key::LeftAlt || e.key == Key::RightAlt {
-            self.alt_is_down.set(false);
+        match e.key {
+            Key::LeftAlt | Key::RightAlt => {
+                self.alt_is_down.set(false);
 
-            if self.ignore_alt_up.get() {
-                self.ignore_alt_up.set(false);
-            } else if self.showing_access_keys.get() {
-                if let Some(main_menu) = self.main_menu() {
-                    main_menu.open();
+                if self.ignore_alt_up.get() {
+                    self.ignore_alt_up.set(false);
+                } else if self.showing_access_keys.get() && (e.key_modifiers & !KeyModifiers::ALT).is_empty() {
+                    if let Some(main_menu) = self.main_menu() {
+                        main_menu.open();
+                    }
                 }
             }
+            // A modifier released before Alt: this was a chord, not a press of Alt alone.
+            Key::LeftShift | Key::RightShift | Key::LeftCtrl | Key::RightCtrl | Key::LWin | Key::RWin => {
+                if self.alt_is_down.get() {
+                    self.ignore_alt_up.set(true);
+                }
+            }
+            _ => {}
         }
     }
 
