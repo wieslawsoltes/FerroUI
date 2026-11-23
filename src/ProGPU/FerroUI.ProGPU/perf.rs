@@ -9,8 +9,16 @@
 //!
 //! With the counts on, every frame asks the engine for the times of its stages, which costs the
 //! engine a few clock readings a frame; with them off nothing here runs but one load of a flag.
+//!
+//! The line also says what the page uploads cost and how much of that only moved because an
+//! insertion or removal shifted the rest of a page: the `share` is that time against encode
+//! plus flush, with the time the engine spent finding those bytes taken out of the encode
+//! stage. It is the number the rule on chunked buffers reads (the plan of the backend,
+//! section 2.3.12). Finding them makes these frames slower than frames without the counts.
 
-use progpu_native_sys::progpu::{progpu_native_scene_frame_metrics, progpu_native_scene_metrics};
+use progpu_native_sys::progpu::{
+    progpu_native_scene_frame_metrics, progpu_native_scene_metrics, progpu_native_upload_counters,
+};
 use std::sync::{Mutex, OnceLock};
 use std::time::Duration;
 
@@ -37,6 +45,12 @@ struct Totals {
     encode_ns: u64,
     flush_ns: u64,
     finalize_ns: u64,
+    uploaded_bytes: u64,
+    shifted_bytes: u64,
+    upload_ns: u64,
+    shifted_ns: u64,
+    counting_ns: u64,
+    counting_in_encode_ns: u64,
 }
 
 impl Totals {
@@ -60,6 +74,12 @@ impl Totals {
             encode_ns: 0,
             flush_ns: 0,
             finalize_ns: 0,
+            uploaded_bytes: 0,
+            shifted_bytes: 0,
+            upload_ns: 0,
+            shifted_ns: 0,
+            counting_ns: 0,
+            counting_in_encode_ns: 0,
         }
     }
 }
@@ -79,7 +99,14 @@ pub(crate) fn enabled() -> bool {
 
 /// Counts a scene the engine took (`stream_bytes` of stream in `update`) and rendered (in
 /// `render`, with the metrics of the engine).
-pub(crate) fn scene(stream_bytes: usize, update: Duration, _scene: &progpu_native_scene_metrics, render: Duration, frame: &progpu_native_scene_frame_metrics) {
+pub(crate) fn scene(
+    stream_bytes: usize,
+    update: Duration,
+    _scene: &progpu_native_scene_metrics,
+    render: Duration,
+    frame: &progpu_native_scene_frame_metrics,
+    uploads: &progpu_native_upload_counters,
+) {
     if !enabled() {
         return;
     }
@@ -105,6 +132,21 @@ pub(crate) fn scene(stream_bytes: usize, update: Duration, _scene: &progpu_nativ
     totals.encode_ns += frame.cpu_encode_nanoseconds;
     totals.flush_ns += frame.cpu_flush_nanoseconds;
     totals.finalize_ns += frame.cpu_finalize_nanoseconds;
+    totals.uploaded_bytes += uploads.uploaded_bytes;
+    totals.shifted_bytes += uploads.shifted_bytes;
+    totals.upload_ns += uploads.upload_nanoseconds;
+    totals.shifted_ns += uploads.shifted_nanoseconds;
+    totals.counting_ns += uploads.counting_nanoseconds;
+    totals.counting_in_encode_ns += uploads.counting_in_encode_nanoseconds;
+}
+
+/// The shifted uploads in percent of encode plus flush, without the time spent finding them.
+fn shifted_share(totals: &Totals) -> f64 {
+    let stages = (totals.encode_ns + totals.flush_ns).saturating_sub(totals.counting_in_encode_ns);
+    if stages == 0 {
+        return 0.0;
+    }
+    totals.shifted_ns as f64 * 100.0 / stages as f64
 }
 
 /// Counts a frame of a window and, at the chosen number of frames, writes the means of a frame
@@ -122,7 +164,10 @@ pub(crate) fn window_frame() {
     eprintln!(
         "[ProGPU perf] frames {}: scenes {:.2}, commands {:.0}, draws {:.0}, family switches {:.0}, submissions {:.2}, \
          stream {:.0} kB, geometry {:.0} kB, tables {:.0} kB, textures {:.0} kB, staging {:.0} kB, \
-         update {:.2} ms, render {:.2} ms (preflight {:.2}, resources {:.2}, encode {:.2}, flush {:.2}, finalize {:.2})",
+         update {:.2} ms, render {:.2} ms (preflight {:.2}, resources {:.2}, encode {:.2}, flush {:.2}, \
+         finalize {:.2}), \
+         uploads {:.0} kB in {:.3} ms, shifted {:.0} kB in {:.3} ms, share {:.1} % of encode + flush, \
+         counting {:.3} ms",
         totals.frames,
         mean(totals.scenes),
         mean(totals.commands),
@@ -141,6 +186,28 @@ pub(crate) fn window_frame() {
         ms(totals.encode_ns),
         ms(totals.flush_ns),
         ms(totals.finalize_ns),
+        mean(totals.uploaded_bytes) / 1024.0,
+        ms(totals.upload_ns),
+        mean(totals.shifted_bytes) / 1024.0,
+        ms(totals.shifted_ns),
+        shifted_share(&totals),
+        ms(totals.counting_ns),
     );
     *totals = Totals::new();
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn the_share_of_shifted_uploads_leaves_out_the_time_spent_counting() {
+        let mut totals = Totals::new();
+        assert_eq!(0.0, shifted_share(&totals));
+        totals.encode_ns = 900;
+        totals.flush_ns = 200;
+        totals.counting_in_encode_ns = 100;
+        totals.shifted_ns = 100;
+        assert!((shifted_share(&totals) - 10.0).abs() < 1.0e-9);
+    }
 }

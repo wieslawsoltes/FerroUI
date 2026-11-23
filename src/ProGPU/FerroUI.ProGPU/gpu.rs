@@ -139,7 +139,9 @@ impl Recording {
         });
         let frame_metrics = engine.render_scene_damaged(scene_id, generation, view, width, height, preserve, damage)?;
         if let (Some(started), Some(updated), Some(rendering)) = (started, updated, rendering) {
-            crate::perf::scene(stream_bytes, updated - started, &scene_metrics, rendering.elapsed(), &frame_metrics);
+            let render = rendering.elapsed();
+            let uploads = engine.take_upload_counters();
+            crate::perf::scene(stream_bytes, updated - started, &scene_metrics, render, &frame_metrics, &uploads);
         }
         Ok(())
     }
