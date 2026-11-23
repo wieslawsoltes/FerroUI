@@ -1,5 +1,9 @@
-<!-- Ported from all four original InfoBadge examples; see ../NOTICE.md.
-     The original NavigationView composition uses native controls. -->
+<!-- Ported from the four pinned InfoBadge examples of WinUI Gallery (14061eea) and the handlers of
+     InfoBadgePage.xaml.cs (feedback_samples.rs); see ../NOTICE.md. The styles are the control
+     themes of the WinUI theme's InfoBadge dictionary (Style is Theme). The page's InfoBadgeOpacity,
+     the source's x:Bind of the page's own property, is the code behind in Rust; the Headers of
+     the options are composed, IsOn is IsChecked, and SelectedValue is the index of the source's
+     value. The icon badge's SymbolThemeFontFamily is its value, Segoe Fluent Icons. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel.Resources>
@@ -9,7 +13,7 @@
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </StackPanel.Resources>
-  <TextBlock Text="InfoBadge embedded in a NavigationView" FontSize="18" />
+  <TextBlock Text="InfoBadge embedded in NavigationView" FontSize="18" />
   <Grid ColumnDefinitions="*,180" ColumnSpacing="24">
     <NavigationView x:Name="nvSample1" Height="300" PaneDisplayMode="Left">
       <NavigationView.MenuItems>
@@ -35,7 +39,7 @@
       </ComboBox>
     </StackPanel>
   </Grid>
-  <TextBlock Text="Different InfoBadge styles" FontSize="18" />
+  <TextBlock Text="Different InfoBadge Styles" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <StackPanel Orientation="Horizontal" Spacing="20" HorizontalAlignment="Center">
       <InfoBadge x:Name="StyleIconBadge" HorizontalAlignment="Right"
@@ -57,7 +61,7 @@
       </ComboBox>
     </StackPanel>
   </Grid>
-  <TextBlock Text="Placing an InfoBadge inside another control" FontSize="18" />
+  <TextBlock Text="Placing an InfoBadge Inside Another Control" FontSize="18" />
   <Button x:Name="RefreshButton" Padding="0" Width="200" Height="60"
           HorizontalAlignment="Center" HorizontalContentAlignment="Stretch"
           VerticalContentAlignment="Stretch" ToolTip.Tip="Refresh required"
@@ -73,7 +77,7 @@
       </InfoBadge>
     </Grid>
   </Button>
-  <TextBlock Text="InfoBadge with a dynamic value" FontSize="18" />
+  <TextBlock Text="InfoBadge with Dynamic Value" FontSize="18" />
   <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
     <InfoBadge x:Name="DynamicInfoBadge" Value="1" HorizontalAlignment="Center"
                      VerticalAlignment="Center" AutomationProperties.Name="Notification count" />

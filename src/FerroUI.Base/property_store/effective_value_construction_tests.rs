@@ -1,12 +1,14 @@
 //! Compare complete original constructor frames, including partial unwind.
 
 use super::*;
+#[allow(unused_imports)]
+use crate::{PropertyValue, StyledProperty};
 use crate::{ObjectType, StyledPropertyOptions, WeakRef};
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Weak;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
-impl<T: PropertyValue> EffectiveValue<T> {
+impl<T: crate::StyledValue> EffectiveValue<T> {
     // The original constructor body, kept as the owning-frame oracle.
     fn original_new_for_construction(
         owner: &FerroObject,
@@ -18,16 +20,24 @@ impl<T: PropertyValue> EffectiveValue<T> {
             Some(inherited) => inherited.value(),
             None => metadata.default_value().clone(),
         };
-        let uncommon = metadata.coerce_value().map(|coerce| UncommonFields {
-            coerce: coerce.clone(),
-            uncoerced_value: RefCell::new(value.clone()),
-            uncoerced_base_value: RefCell::new(value.clone()),
+        let uncommon = metadata.coerce_value().map(|coerce| {
+            Box::new(UncommonFields {
+                coerce: coerce.clone(),
+                uncoerced_value: RefCell::new(value.clone()),
+                uncoerced_base_value: RefCell::new(value.clone()),
+                set: EffectiveValue::<T>::set_and_raise_coerced,
+                operations: crate::ferro_property_metadata::CoercionOperations {
+                    equals: crate::ferro_property::value_equals::<T>,
+                    notify_value_changed: EffectiveValue::<T>::notify_value_changed,
+                    notify_base_value_changed: EffectiveValue::<T>::notify_base_value_changed,
+                },
+            })
         });
         Self {
             metadata,
             state: EffectiveValueState::new(property),
             value: RefCell::new(value),
-            base_value: RefCell::new(None),
+            base_value: OptionCell::new(),
             uncommon,
         }
     }
@@ -130,6 +140,8 @@ struct Tracked {
     trace: Rc<Trace>,
 }
 
+crate::styled_value!(Tracked);
+
 impl Clone for Tracked {
     fn clone(&self) -> Self {
         self.trace.record(Kind::Clone, self.serial, self.number, "");
@@ -230,7 +242,7 @@ fn run(original: bool, inherited: bool, coerce: bool, replace_on_clone: Option<u
         let effective = if original {
             EffectiveValue::original_new_for_construction(&owner, property, inherited.as_ref())
         } else {
-            EffectiveValue::new(&owner, property, inherited.as_ref())
+            EffectiveValue::new(property.as_property(), property.get_metadata_for(&owner), inherited.as_ref())
         };
         snapshots.push(Snapshot {
             retains_original_metadata: std::ptr::eq(Rc::as_ptr(&effective.metadata), trace.metadata.borrow().as_ptr()),
@@ -240,7 +252,7 @@ fn run(original: bool, inherited: bool, coerce: bool, replace_on_clone: Option<u
                 _ => false,
             },
             value: effective.value.borrow().number,
-            base_value: effective.base_value.borrow().as_ref().map(|value| value.number),
+            base_value: effective.with_base_value(|base| base.map(|value| value.number)),
             uncommon_values: effective.uncommon.as_ref().map(|fields| (
                 fields.uncoerced_value.borrow().number,
                 fields.uncoerced_base_value.borrow().number,

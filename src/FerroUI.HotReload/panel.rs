@@ -116,7 +116,7 @@ impl PanelReloadTarget {
     }
     /// Claims an initially populated literal root attribute for reversible reload.
     /// See ComponentReloadTarget::with_owned_root_property for the ownership contract.
-    pub fn with_owned_root_property<T: ferroui_base::PropertyValue>(
+    pub fn with_owned_root_property<T: ferroui_base::StyledValue>(
         mut self,
         property: &'static ferroui_base::StyledProperty<T>,
     ) -> Self {
@@ -137,7 +137,7 @@ impl PanelReloadTarget {
     /// attribute is unchanged. Call immediately after initial population. Dynamic
     /// resources, bindings and application overrides require another adapter or restart.
     /// Property callbacks must support reversible assignment.
-    pub fn with_owned_root_static_resource_property<T: ferroui_base::PropertyValue>(
+    pub fn with_owned_root_static_resource_property<T: ferroui_base::StyledValue>(
         mut self,
         property: &'static ferroui_base::StyledProperty<T>,
     ) -> Self {
@@ -155,7 +155,7 @@ impl PanelReloadTarget {
 
     /// Claims a literal or synchronous root binding with the same ownership and
     /// context contract as ComponentReloadTarget::with_owned_root_binding_property.
-    pub fn with_owned_root_binding_property<T: ferroui_base::PropertyValue>(
+    pub fn with_owned_root_binding_property<T: ferroui_base::StyledValue>(
         mut self,
         property: &'static ferroui_base::StyledProperty<T>,
     ) -> Self {

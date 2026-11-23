@@ -19,12 +19,13 @@ use ferroui_base::Ref;
 use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 use ferroui_controls::{Button, CheckBox, Control, StackPanel, TextBox, Window};
+use futures_util::StreamExt;
 use std::cell::Cell;
 use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
-use zbus::zvariant::{OwnedObjectPath, OwnedValue};
+use zbus::{OwnedObjectPath, OwnedVariant};
 
 const REGISTRY_UNIQUE_NAME: &str = ":1.9";
 
@@ -80,7 +81,7 @@ impl Fixture {
         let (socket_calls, registry_listeners) = (calls.clone(), registered);
         let connections = TestConnections::new_with(ROOT_PATH, false, move |builder| {
             builder
-                .serve_at(ROOT_PATH, SocketDouble { calls: socket_calls })?
+                .serve_at(ROOT_PATH, SocketDouble { calls: socket_calls })
                 .serve_at(REGISTRY_PATH, RegistryDouble { listeners: registry_listeners })
         });
         connections.start(BUS_NAME_REGISTRY);
@@ -92,21 +93,22 @@ impl Fixture {
         let markers_seen = Arc::new(AtomicU64::new(0));
         let (collector, seen) = (signals.clone(), markers_seen.clone());
         let own_name = connections.client.unique_name().map(|name| name.to_string());
-        let iterator = match &own_name {
-            Some(sender) => zbus::blocking::MessageIterator::for_match_rule(
+        let mut stream = match &own_name {
+            Some(sender) => zbus::block_on(zbus::MessageStream::for_match_rule(
                 zbus::MatchRule::builder()
                     .msg_type(zbus::message::Type::Signal)
                     .sender(sender.as_str())
-                    .unwrap()
-                    .build(),
+                    .build()
+                    .unwrap(),
                 &connections.service,
                 None,
-            )
+            ))
             .unwrap(),
-            None => zbus::blocking::MessageIterator::from(&connections.service),
+            None => zbus::MessageStream::from(&connections.service),
         };
         std::thread::spawn(move || {
-            for message in iterator.flatten() {
+            while let Some(message) = zbus::block_on(stream.next()) {
+                let Ok(message) = message else { continue };
                 let header = message.header();
                 let interface = header.interface().map(|name| name.to_string()).unwrap_or_default();
                 if interface == MARKER_INTERFACE {
@@ -118,7 +120,7 @@ impl Fixture {
                     continue;
                 }
                 let Ok((detail, detail1, _detail2, value, _properties)) =
-                    message.body().deserialize::<(String, i32, i32, OwnedValue, HashMap<String, OwnedValue>)>()
+                    message.body().deserialize::<(String, i32, i32, OwnedVariant, HashMap<String, OwnedVariant>)>()
                 else {
                     continue;
                 };
@@ -138,14 +140,14 @@ impl Fixture {
 
     fn call<B>(&self, path: &str, interface: &str, method: &str, body: B) -> zbus::Result<zbus::Message>
     where
-        B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType + Send + 'static,
+        B: zbus::export::serde::ser::Serialize + zbus::DynamicType + Send + 'static,
     {
         peer_call(&self.connections, path, interface, method, body)
     }
 
     fn accessible<T>(&self, path: &str, method: &str) -> T
     where
-        T: for<'a> zbus::export::serde::Deserialize<'a> + zbus::zvariant::Type,
+        T: for<'a> zbus::export::serde::Deserialize<'a> + zbus::Type,
     {
         self.call(path, IFACE_ACCESSIBLE, method, ()).unwrap().body().deserialize::<T>().unwrap()
     }
@@ -157,6 +159,8 @@ impl Fixture {
     fn error(&self, path: &str, interface: &str, method: &str) -> String {
         match self.call(path, interface, method, ()) {
             Err(zbus::Error::MethodError(name, _, _)) => name.to_string(),
+            // A reply with a standard error name arrives as this variant.
+            Err(zbus::Error::FDO(error)) => zbus::DBusError::name(&*error).to_string(),
             other => format!("{other:?}"),
         }
     }
@@ -197,8 +201,8 @@ impl Fixture {
         self.connections.settle();
         let sent = self.markers.0.get() + 1;
         self.markers.0.set(sent);
-        let marker = zbus::Message::signal(MARKER_PATH, MARKER_INTERFACE, MARKER_MEMBER).unwrap().build(&()).unwrap();
-        zbus::blocking::Connection::from(self.connections.client.clone()).send(&marker).unwrap();
+        let marker = zbus::Message::signal(MARKER_PATH, MARKER_INTERFACE, MARKER_MEMBER).build(&()).unwrap();
+        zbus::block_on(self.connections.client.send(&marker)).unwrap();
         pump_until(|| self.markers.1.load(Ordering::SeqCst) >= sent);
         std::mem::take(&mut *self.signals.lock().unwrap())
     }
@@ -272,7 +276,7 @@ fn dbus_the_root_object_answers_before_any_window() {
     assert_eq!(fixture.property(ROOT_PATH, IFACE_APPLICATION, "Id"), "0");
 
     // The registry sets the identifier of the application.
-    let set = (IFACE_APPLICATION.to_string(), "Id".to_string(), zbus::zvariant::Value::from(7i32));
+    let set = (IFACE_APPLICATION.to_string(), "Id".to_string(), zbus::Variant::from(7i32));
     fixture.call(ROOT_PATH, "org.freedesktop.DBus.Properties", "Set", set).unwrap();
     assert_eq!(fixture.property(ROOT_PATH, IFACE_APPLICATION, "Id"), "7");
 

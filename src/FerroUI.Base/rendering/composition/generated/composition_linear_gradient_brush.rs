@@ -187,6 +187,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StartPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::START_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::START_POINT);
+                }
             }
         }
         self.start_point.set(value);
@@ -228,6 +232,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "EndPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::END_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::END_POINT);
+                }
             }
         }
         self.end_point.set(value);
@@ -269,6 +277,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "AnchorPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::ANCHOR_POINT);
+                }
             }
         }
         self.anchor_point.set(value);
@@ -310,6 +322,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "CenterPoint", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::CENTER_POINT);
+                }
             }
         }
         self.center_point.set(value);
@@ -351,6 +367,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -392,6 +412,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "RotationAngle", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE);
+                }
             }
         }
         self.rotation_angle.set(value);
@@ -433,6 +457,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Scale", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::SCALE_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::SCALE);
+                }
             }
         }
         self.scale.set(value);
@@ -474,6 +502,10 @@ impl CompositionLinearGradientBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "TransformMatrix", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_linear_gradient_brush.get().contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
+                    self.changed_fields_of_composition_linear_gradient_brush.set(self.changed_fields_of_composition_linear_gradient_brush.get() & !CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX);
+                }
             }
         }
         self.transform_matrix.set(value);
@@ -557,45 +589,53 @@ impl CompositionLinearGradientBrushProps {
         CompositionLinearGradientBrushHooks::base_serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_linear_gradient_brush.get();
         writer.write(changed);
+        if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT) {
+            writer.write(self.start_point.get());
+        }
         if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_start_point_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT) {
-            writer.write(self.start_point.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT) {
+            writer.write(self.end_point.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_end_point_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT) {
-            writer.write(self.end_point.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT) {
+            writer.write(self.anchor_point.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_anchor_point_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT) {
-            writer.write(self.anchor_point.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT) {
+            writer.write(self.center_point.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_center_point_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT) {
-            writer.write(self.center_point.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::OFFSET) {
-            writer.write(self.offset.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE) {
+            writer.write(self.rotation_angle.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_rotation_angle_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE) {
-            writer.write(self.rotation_angle.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::SCALE) {
+            writer.write(self.scale.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::SCALE_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_scale_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::SCALE) {
-            writer.write(self.scale.get());
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX) {
+            writer.write(self.transform_matrix.get());
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLinearGradientBrushProps::id_of_transform_matrix_property().base()));
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX) {
-            writer.write(self.transform_matrix.get());
         }
         self.changed_fields_of_composition_linear_gradient_brush.set(CompositionLinearGradientBrushChangedFields::empty());
     }
@@ -866,6 +906,10 @@ impl ServerCompositionLinearGradientBrushProps {
         ServerCompositionLinearGradientBrushHooks::base_deserialize_changes_core(host, reader, committed_at);
         ServerCompositionLinearGradientBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionLinearGradientBrushChangedFields>();
+        if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT) {
+            let value = reader.read::<RelativePoint>();
+            self.set_start_point(host, value);
+        }
         if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `StartPoint` without an animation instance");
@@ -876,9 +920,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::START_POINT) {
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT) {
             let value = reader.read::<RelativePoint>();
-            self.set_start_point(host, value);
+            self.set_end_point(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -890,9 +935,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::END_POINT) {
-            let value = reader.read::<RelativePoint>();
-            self.set_end_point(host, value);
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT) {
+            let value = reader.read::<Vector>();
+            self.set_anchor_point(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -904,9 +950,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::ANCHOR_POINT) {
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT) {
             let value = reader.read::<Vector>();
-            self.set_anchor_point(host, value);
+            self.set_center_point(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -918,9 +965,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::CENTER_POINT) {
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::OFFSET) {
             let value = reader.read::<Vector>();
-            self.set_center_point(host, value);
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -932,9 +980,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::OFFSET) {
-            let value = reader.read::<Vector>();
-            self.set_offset(host, value);
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE) {
+            let value = reader.read::<f32>();
+            self.set_rotation_angle(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -946,9 +995,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::ROTATION_ANGLE) {
-            let value = reader.read::<f32>();
-            self.set_rotation_angle(host, value);
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::SCALE) {
+            let value = reader.read::<Vector>();
+            self.set_scale(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::SCALE_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -960,9 +1010,10 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::SCALE) {
-            let value = reader.read::<Vector>();
-            self.set_scale(host, value);
+        }
+        if changed.contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX) {
+            let value = reader.read::<Matrix>();
+            self.set_transform_matrix(host, value);
         }
         if changed.contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -974,9 +1025,6 @@ impl ServerCompositionLinearGradientBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLinearGradientBrushChangedFields::TRANSFORM_MATRIX) {
-            let value = reader.read::<Matrix>();
-            self.set_transform_matrix(host, value);
         }
         ServerCompositionLinearGradientBrushHooks::on_fields_deserialized(host, changed);
     }

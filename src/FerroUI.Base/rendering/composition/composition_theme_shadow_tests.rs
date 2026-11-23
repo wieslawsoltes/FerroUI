@@ -32,7 +32,7 @@ fn children(visual: &Rc<CompositionVisual>) -> Vec<Rc<CompositionVisual>> {
 #[test]
 fn the_parent_shows_the_shadow_visual_just_before_the_caster() {
     let s = CompositorCanvas::new();
-    let before = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    let before = TestBorder::layer(0.0, 0.0, 10.0, 10.0);
     s.canvas.add(&before);
     let (border, _shadow) = caster(&s, 32.0);
 

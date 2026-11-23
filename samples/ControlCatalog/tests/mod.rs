@@ -21,6 +21,7 @@ mod auto_complete_box_page;
 mod ferro_board_page;
 mod binding_reports;
 mod catalog_tour;
+mod calendar_page;
 #[cfg(not(feature = "runtime-markup"))]
 mod compiled_markup;
 mod custom_effects_pages;

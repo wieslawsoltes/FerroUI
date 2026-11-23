@@ -106,6 +106,7 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
-| `completion.rs` | A value set once on the main thread and the future that waits for it: what stands for the tasks the original completes from the completion handlers of UIKit | `Completion`, `CompletionFuture`, `State` |
+| `completion.rs` | A value set once on the main thread and the future that waits for it: what stands for the tasks the original completes from the completion handlers of UIKit | `Completion`, `CompletionFuture` |
+| `metal/external_frames.rs` | **unmapped** | `Texture` |
 
 Tests, examples and build scripts (not scanned): `examples/ios_view.rs`, `tests/dispatcher_main_loop.rs`.

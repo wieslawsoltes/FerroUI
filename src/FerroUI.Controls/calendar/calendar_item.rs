@@ -81,6 +81,8 @@ pub struct CalendarItem {
     year_view: RefCell<Option<Ref<Grid>>>,
     /// The Grid that hosts the week number labels when in month mode.
     week_number_labels: RefCell<Option<Ref<Grid>>>,
+    month_populated: Cell<bool>,
+    year_populated: Cell<bool>,
 }
 
 ferro_class!(CalendarItem: TemplatedControl);
@@ -139,7 +141,11 @@ impl TemplatedControlImpl for CalendarItem {
             this.update_disabled(owner.is_enabled());
         }
 
-        this.populate_grids();
+        this.month_populated.set(false);
+        this.year_populated.set(false);
+        // Day lookup and selection helpers also use the month cells in year mode.
+        // Keep those available, but build alternate-view cells only on first use.
+        this.populate_month_view();
 
         if let (Some(month_view), Some(year_view)) = (this.month_view(), this.year_view()) {
             if let Some(owner) = &owner {
@@ -203,6 +209,8 @@ impl CalendarItem {
             month_view: RefCell::new(None),
             year_view: RefCell::new(None),
             week_number_labels: RefCell::new(None),
+            month_populated: Cell::new(false),
+            year_populated: Cell::new(false),
         }
     }
 
@@ -341,7 +349,10 @@ impl CalendarItem {
         self.week_number_labels.borrow().clone()
     }
 
-    fn populate_grids(&self) {
+    fn populate_month_view(&self) {
+        if self.month_populated.replace(true) {
+            return;
+        }
         let owner = self.owner();
 
         if let Some(month_view) = self.month_view() {
@@ -415,6 +426,13 @@ impl CalendarItem {
 
             week_number_labels.children().add_range(children);
         }
+    }
+
+    fn populate_year_view(&self) {
+        if self.year_populated.replace(true) {
+            return;
+        }
+        let owner = self.owner();
 
         if let Some(year_view) = self.year_view() {
             let child_count = Calendar::ROWS_PER_YEAR * Calendar::COLUMNS_PER_YEAR;
@@ -491,6 +509,7 @@ impl CalendarItem {
     }
 
     pub(crate) fn update_month_mode(&self) {
+        self.populate_month_view();
         match self.owner() {
             Some(owner) => self.current_month.set(owner.display_date_internal()),
             None => self.current_month.set(DateTime::today()),
@@ -756,6 +775,7 @@ impl CalendarItem {
     }
 
     pub(crate) fn update_year_mode(&self) {
+        self.populate_year_view();
         match self.owner() {
             Some(owner) => self.current_month.set(owner.selected_month()),
             None => self.current_month.set(DateTime::today()),
@@ -838,6 +858,7 @@ impl CalendarItem {
     }
 
     pub(crate) fn update_decade_mode(&self) {
+        self.populate_year_view();
         let selected_year;
 
         match self.owner() {

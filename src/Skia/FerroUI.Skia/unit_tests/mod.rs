@@ -12,6 +12,7 @@
 mod combined_geometry_impl_tests;
 mod drawing_context_helper_tests;
 mod drawing_context_impl_tests;
+mod drawing_context_transform_tests;
 mod hit_testing;
 mod media;
 mod path_geometry_tests;

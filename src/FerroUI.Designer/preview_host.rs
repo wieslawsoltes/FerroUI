@@ -238,6 +238,17 @@ impl crate::DesignerSession {
     pub fn close_native_preview(&mut self) {
         self.preview.close_native();
     }
+    /// Whether the application shows windows, and so whether `open_native_preview` can open
+    /// one. A browser and a phone show a single view.
+    pub fn platform_shows_windows() -> bool {
+        crate::runtime::RuntimePreview::platform_shows_windows()
+    }
+    /// The document as a new control for the caller to show in its own view: the preview of a
+    /// platform without windows.
+    pub fn open_view_preview(&mut self) -> Result<Ref<Control>, String> {
+        let source = self.document().valid_source().to_owned();
+        self.preview.open_in_view(source)
+    }
 }
 
 #[cfg(debug_assertions)]

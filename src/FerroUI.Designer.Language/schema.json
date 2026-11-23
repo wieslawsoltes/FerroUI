@@ -1156,6 +1156,26 @@
     ]
   },
   {
+    "name": "BackEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::BackEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {
+      "Amplitude": {
+        "name": "Amplitude",
+        "type_name": "f64",
+        "documentation": "BackEase.Amplitude: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "BackEaseIn",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::BackEaseIn",
@@ -1499,6 +1519,33 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Converters",
       "clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "BounceEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::BounceEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {
+      "Bounces": {
+        "name": "Bounces",
+        "type_name": "i32",
+        "documentation": "BounceEase.Bounces: i32",
+        "values": [],
+        "attached": false
+      },
+      "Bounciness": {
+        "name": "Bounciness",
+        "type_name": "f64",
+        "documentation": "BounceEase.Bounciness: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -2339,6 +2386,18 @@
     ]
   },
   {
+    "name": "CircleEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::CircleEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "CircularEaseIn",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::CircularEaseIn",
@@ -2474,6 +2533,113 @@
     "namespace_aliases": [
       "using:FerroUI.Data.Core",
       "clr-namespace:FerroUI.Data.Core;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "ColorAnimation",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ColorAnimation",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "From": {
+        "name": "From",
+        "type_name": "Option<Color>",
+        "documentation": "ColorAnimation.From: Option<Color>",
+        "values": [],
+        "attached": false
+      },
+      "To": {
+        "name": "To",
+        "type_name": "Option<Color>",
+        "documentation": "ColorAnimation.To: Option<Color>",
+        "values": [],
+        "attached": false
+      },
+      "By": {
+        "name": "By",
+        "type_name": "Option<Color>",
+        "documentation": "ColorAnimation.By: Option<Color>",
+        "values": [],
+        "attached": false
+      },
+      "EasingFunction": {
+        "name": "EasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "ColorAnimation.EasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": [],
+        "attached": false
+      },
+      "EnableDependentAnimation": {
+        "name": "EnableDependentAnimation",
+        "type_name": "bool",
+        "documentation": "ColorAnimation.EnableDependentAnimation: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ColorAnimationUsingKeyFrames",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ColorAnimationUsingKeyFrames",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "EnableDependentAnimation": {
+        "name": "EnableDependentAnimation",
+        "type_name": "bool",
+        "documentation": "ColorAnimationUsingKeyFrames.EnableDependentAnimation: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "KeyFrames": {
+        "name": "KeyFrames",
+        "type_name": "FerroList<Ref<ColorKeyFrame>>",
+        "documentation": "ColorAnimationUsingKeyFrames.KeyFrames: FerroList<Ref<ColorKeyFrame>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ColorKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ColorKeyFrame",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "KeyTime": {
+        "name": "KeyTime",
+        "type_name": "SignedDuration",
+        "documentation": "ColorKeyFrame.KeyTime: SignedDuration",
+        "values": [],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "Color",
+        "documentation": "ColorKeyFrame.Value: Color",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -4780,6 +4946,18 @@
     ]
   },
   {
+    "name": "CubicEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::CubicEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "CubicEaseIn",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::CubicEaseIn",
@@ -5559,6 +5737,54 @@
     ]
   },
   {
+    "name": "DiscreteColorKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DiscreteColorKeyFrame",
+    "base": "ColorKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "DiscreteDoubleKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DiscreteDoubleKeyFrame",
+    "base": "DoubleKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "DiscreteObjectKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DiscreteObjectKeyFrame",
+    "base": "ObjectKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "DiscretePointKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DiscretePointKeyFrame",
+    "base": "PointKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "DoNothingForNullConverter",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_color_picker::converters::DoNothingForNullConverter",
@@ -5610,6 +5836,113 @@
         "name": "VerticalSpacing",
         "type_name": "f64",
         "documentation": "DockPanel.VerticalSpacing: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "DoubleAnimation",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DoubleAnimation",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "From": {
+        "name": "From",
+        "type_name": "Option<f64>",
+        "documentation": "DoubleAnimation.From: Option<f64>",
+        "values": [],
+        "attached": false
+      },
+      "To": {
+        "name": "To",
+        "type_name": "Option<f64>",
+        "documentation": "DoubleAnimation.To: Option<f64>",
+        "values": [],
+        "attached": false
+      },
+      "By": {
+        "name": "By",
+        "type_name": "Option<f64>",
+        "documentation": "DoubleAnimation.By: Option<f64>",
+        "values": [],
+        "attached": false
+      },
+      "EasingFunction": {
+        "name": "EasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "DoubleAnimation.EasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": [],
+        "attached": false
+      },
+      "EnableDependentAnimation": {
+        "name": "EnableDependentAnimation",
+        "type_name": "bool",
+        "documentation": "DoubleAnimation.EnableDependentAnimation: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "DoubleAnimationUsingKeyFrames",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DoubleAnimationUsingKeyFrames",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "EnableDependentAnimation": {
+        "name": "EnableDependentAnimation",
+        "type_name": "bool",
+        "documentation": "DoubleAnimationUsingKeyFrames.EnableDependentAnimation: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "KeyFrames": {
+        "name": "KeyFrames",
+        "type_name": "FerroList<Ref<DoubleKeyFrame>>",
+        "documentation": "DoubleAnimationUsingKeyFrames.KeyFrames: FerroList<Ref<DoubleKeyFrame>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "DoubleKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::DoubleKeyFrame",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "KeyTime": {
+        "name": "KeyTime",
+        "type_name": "SignedDuration",
+        "documentation": "DoubleKeyFrame.KeyTime: SignedDuration",
+        "values": [],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "f64",
+        "documentation": "DoubleKeyFrame.Value: f64",
         "values": [],
         "attached": false
       }
@@ -6229,6 +6562,90 @@
     ]
   },
   {
+    "name": "EasingColorKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::EasingColorKeyFrame",
+    "base": "ColorKeyFrame",
+    "constructible": true,
+    "properties": {
+      "EasingFunction": {
+        "name": "EasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "EasingColorKeyFrame.EasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "EasingDoubleKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::EasingDoubleKeyFrame",
+    "base": "DoubleKeyFrame",
+    "constructible": true,
+    "properties": {
+      "EasingFunction": {
+        "name": "EasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "EasingDoubleKeyFrame.EasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "EasingFunctionBase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::EasingFunctionBase",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "EasingMode": {
+        "name": "EasingMode",
+        "type_name": "EasingMode",
+        "documentation": "EasingFunctionBase.EasingMode: EasingMode",
+        "values": [
+          "EaseOut",
+          "EaseIn",
+          "EaseInOut"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "EasingPointKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::EasingPointKeyFrame",
+    "base": "PointKeyFrame",
+    "constructible": true,
+    "properties": {
+      "EasingFunction": {
+        "name": "EasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "EasingPointKeyFrame.EasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "Effect",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::Effect",
@@ -6250,6 +6667,33 @@
     "namespace_aliases": [
       "using:FerroUI.Animation",
       "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "ElasticEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ElasticEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {
+      "Oscillations": {
+        "name": "Oscillations",
+        "type_name": "i32",
+        "documentation": "ElasticEase.Oscillations: i32",
+        "values": [],
+        "attached": false
+      },
+      "Springiness": {
+        "name": "Springiness",
+        "type_name": "f64",
+        "documentation": "ElasticEase.Springiness: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -6631,6 +7075,26 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "ExponentialEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ExponentialEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {
+      "Exponent": {
+        "name": "Exponent",
+        "type_name": "f64",
+        "documentation": "ExponentialEase.Exponent: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -7777,6 +8241,73 @@
     "namespace_aliases": [
       "using:FerroUI.Controls",
       "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridView",
+    "base": "ListViewBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "GridViewAutomationPeer",
+    "base": "ListViewBaseAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewItem",
+    "base": "ListViewBaseItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "GridViewItemAutomationPeer",
+    "base": "ListViewBaseItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "GridViewItemTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::GridViewItemTemplateSettings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DragItemsCount": {
+        "name": "DragItemsCount",
+        "type_name": "i32",
+        "documentation": "GridViewItemTemplateSettings.DragItemsCount: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -10301,7 +10832,7 @@
   {
     "name": "InteractiveBurningFlameEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractiveBurningFlameEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractiveBurningFlameEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10313,7 +10844,7 @@
   {
     "name": "InteractivePointerSpotlightEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractivePointerSpotlightEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractivePointerSpotlightEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10325,7 +10856,7 @@
   {
     "name": "InteractiveReactiveGridEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractiveReactiveGridEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractiveReactiveGridEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10337,7 +10868,7 @@
   {
     "name": "InteractiveWaterRippleEffect",
     "namespace": "https://github.com/ferroui",
-    "documentation": "InteractiveWaterRippleEffect",
+    "documentation": "ferroui_base::media::effects::library::InteractiveWaterRippleEffect",
     "base": "Effect",
     "constructible": false,
     "properties": {},
@@ -10368,6 +10899,25 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Documents",
       "clr-namespace:FerroUI.Controls.Documents;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ItemClickEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemClickEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "ClickedItem": {
+        "name": "ClickedItem",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ItemClickEventArgs.ClickedItem: Option<BoxedValue>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -10793,6 +11343,77 @@
           "True",
           "False"
         ]
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ItemsStackPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemsStackPanel",
+    "base": "VirtualizingStackPanel",
+    "constructible": true,
+    "properties": {
+      "ItemsUpdatingScrollMode": {
+        "name": "ItemsUpdatingScrollMode",
+        "type_name": "ItemsUpdatingScrollMode",
+        "documentation": "ItemsStackPanel.ItemsUpdatingScrollMode: ItemsUpdatingScrollMode",
+        "values": [
+          "KeepItemsInView",
+          "KeepScrollOffset",
+          "KeepLastItemInView"
+        ],
+        "attached": false
+      },
+      "GroupPadding": {
+        "name": "GroupPadding",
+        "type_name": "Thickness",
+        "documentation": "ItemsStackPanel.GroupPadding: Thickness",
+        "values": [],
+        "attached": false
+      },
+      "GroupHeaderPlacement": {
+        "name": "GroupHeaderPlacement",
+        "type_name": "GroupHeaderPlacement",
+        "documentation": "ItemsStackPanel.GroupHeaderPlacement: GroupHeaderPlacement",
+        "values": [
+          "Top",
+          "Left"
+        ],
+        "attached": false
+      },
+      "AreStickyGroupHeadersEnabled": {
+        "name": "AreStickyGroupHeadersEnabled",
+        "type_name": "bool",
+        "documentation": "ItemsStackPanel.AreStickyGroupHeadersEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ItemsWrapGrid",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ItemsWrapGrid",
+    "base": "WrapPanel",
+    "constructible": true,
+    "properties": {
+      "MaximumRowsOrColumns": {
+        "name": "MaximumRowsOrColumns",
+        "type_name": "i32",
+        "documentation": "ItemsWrapGrid.MaximumRowsOrColumns: i32",
+        "values": [],
+        "attached": false
       }
     },
     "namespace_aliases": [
@@ -11598,6 +12219,30 @@
     ]
   },
   {
+    "name": "LinearColorKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::LinearColorKeyFrame",
+    "base": "ColorKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "LinearDoubleKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::LinearDoubleKeyFrame",
+    "base": "DoubleKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "LinearEasing",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::LinearEasing",
@@ -11634,6 +12279,18 @@
     "namespace_aliases": [
       "using:FerroUI.Media",
       "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "LinearPointKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::LinearPointKeyFrame",
+    "base": "PointKeyFrame",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -11812,6 +12469,266 @@
     "namespace_aliases": [
       "using:FerroUI.Automation.Peers",
       "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListView",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListView",
+    "base": "ListViewBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewAutomationPeer",
+    "base": "ListViewBaseAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewBase",
+    "base": "SelectingItemsControl",
+    "constructible": false,
+    "properties": {
+      "ListViewSelectionMode": {
+        "name": "ListViewSelectionMode",
+        "type_name": "ListViewSelectionMode",
+        "documentation": "ListViewBase.ListViewSelectionMode: ListViewSelectionMode",
+        "values": [
+          "None",
+          "Single",
+          "Multiple",
+          "Extended"
+        ],
+        "attached": false
+      },
+      "IsItemClickEnabled": {
+        "name": "IsItemClickEnabled",
+        "type_name": "bool",
+        "documentation": "ListViewBase.IsItemClickEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ListViewBase.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "ListViewBase.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "Footer": {
+        "name": "Footer",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ListViewBase.Footer: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "FooterTemplate": {
+        "name": "FooterTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "ListViewBase.FooterTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "SingleSelectionFollowsFocus": {
+        "name": "SingleSelectionFollowsFocus",
+        "type_name": "bool",
+        "documentation": "ListViewBase.SingleSelectionFollowsFocus: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsMultiSelectCheckBoxEnabled": {
+        "name": "IsMultiSelectCheckBoxEnabled",
+        "type_name": "bool",
+        "documentation": "ListViewBase.IsMultiSelectCheckBoxEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ShowsScrollingPlaceholders": {
+        "name": "ShowsScrollingPlaceholders",
+        "type_name": "bool",
+        "documentation": "ListViewBase.ShowsScrollingPlaceholders: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsSwipeEnabled": {
+        "name": "IsSwipeEnabled",
+        "type_name": "bool",
+        "documentation": "ListViewBase.IsSwipeEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanDragItems": {
+        "name": "CanDragItems",
+        "type_name": "bool",
+        "documentation": "ListViewBase.CanDragItems: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "CanReorderItems": {
+        "name": "CanReorderItems",
+        "type_name": "bool",
+        "documentation": "ListViewBase.CanReorderItems: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "ReorderMode": {
+        "name": "ReorderMode",
+        "type_name": "ListViewReorderMode",
+        "documentation": "ListViewBase.ReorderMode: ListViewReorderMode",
+        "values": [
+          "Disabled",
+          "Enabled"
+        ],
+        "attached": false
+      },
+      "IncrementalLoadingTrigger": {
+        "name": "IncrementalLoadingTrigger",
+        "type_name": "IncrementalLoadingTrigger",
+        "documentation": "ListViewBase.IncrementalLoadingTrigger: IncrementalLoadingTrigger",
+        "values": [
+          "None",
+          "Edge"
+        ],
+        "attached": false
+      },
+      "IncrementalLoadingThreshold": {
+        "name": "IncrementalLoadingThreshold",
+        "type_name": "f64",
+        "documentation": "ListViewBase.IncrementalLoadingThreshold: f64",
+        "values": [],
+        "attached": false
+      },
+      "DataFetchSize": {
+        "name": "DataFetchSize",
+        "type_name": "f64",
+        "documentation": "ListViewBase.DataFetchSize: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewBaseAutomationPeer",
+    "base": "SelectingItemsControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewBaseItem",
+    "base": "ListBoxItem",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewBaseItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewBaseItemAutomationPeer",
+    "base": "ListItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewItem",
+    "base": "ListViewBaseItem",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ListViewItemAutomationPeer",
+    "base": "ListViewBaseItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ListViewItemTemplateSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::ListViewItemTemplateSettings",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "DragItemsCount": {
+        "name": "DragItemsCount",
+        "type_name": "i32",
+        "documentation": "ListViewItemTemplateSettings.DragItemsCount: i32",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -14402,6 +15319,52 @@
     ]
   },
   {
+    "name": "ObjectAnimationUsingKeyFrames",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ObjectAnimationUsingKeyFrames",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "KeyFrames": {
+        "name": "KeyFrames",
+        "type_name": "FerroList<Ref<ObjectKeyFrame>>",
+        "documentation": "ObjectAnimationUsingKeyFrames.KeyFrames: FerroList<Ref<ObjectKeyFrame>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "ObjectKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::ObjectKeyFrame",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "KeyTime": {
+        "name": "KeyTime",
+        "type_name": "SignedDuration",
+        "documentation": "ObjectKeyFrame.KeyTime: SignedDuration",
+        "values": [],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "ObjectKeyFrame.Value: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "OffscreenTopLevel",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::embedding::offscreen::OffscreenTopLevel",
@@ -15678,6 +16641,222 @@
     ]
   },
   {
+    "name": "Pivot",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::Pivot",
+    "base": "SelectingItemsControl",
+    "constructible": true,
+    "properties": {
+      "Title": {
+        "name": "Title",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Pivot.Title: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "TitleTemplate": {
+        "name": "TitleTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.TitleTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "LeftHeader": {
+        "name": "LeftHeader",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Pivot.LeftHeader: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "LeftHeaderTemplate": {
+        "name": "LeftHeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.LeftHeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "RightHeader": {
+        "name": "RightHeader",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "Pivot.RightHeader: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "RightHeaderTemplate": {
+        "name": "RightHeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.RightHeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "HeaderTemplate": {
+        "name": "HeaderTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "Pivot.HeaderTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      },
+      "IsLocked": {
+        "name": "IsLocked",
+        "type_name": "bool",
+        "documentation": "Pivot.IsLocked: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "IsHeaderItemsCarouselEnabled": {
+        "name": "IsHeaderItemsCarouselEnabled",
+        "type_name": "bool",
+        "documentation": "Pivot.IsHeaderItemsCarouselEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "HeaderFocusVisualPlacement": {
+        "name": "HeaderFocusVisualPlacement",
+        "type_name": "PivotHeaderFocusVisualPlacement",
+        "documentation": "Pivot.HeaderFocusVisualPlacement: PivotHeaderFocusVisualPlacement",
+        "values": [
+          "ItemHeaders",
+          "SelectedItemHeader"
+        ],
+        "attached": false
+      },
+      "SlideInAnimationGroup": {
+        "name": "SlideInAnimationGroup",
+        "type_name": "PivotSlideInAnimationGroup",
+        "documentation": "Pivot.SlideInAnimationGroup: PivotSlideInAnimationGroup",
+        "values": [
+          "Default",
+          "GroupOne",
+          "GroupTwo",
+          "GroupThree"
+        ],
+        "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "PivotAutomationPeer",
+    "base": "SelectingItemsControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotHeaderItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotHeaderItem",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotHeaderPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotHeaderPanel",
+    "base": "Canvas",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotItem",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "Header": {
+        "name": "Header",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "PivotItem.Header: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotItemAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "PivotItemAutomationPeer",
+    "base": "ContentControlAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotItemEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotItemEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "Item": {
+        "name": "Item",
+        "type_name": "Ref<PivotItem>",
+        "documentation": "PivotItemEventArgs.Item: Ref<PivotItem>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PivotPanel",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::PivotPanel",
+    "base": "Panel",
+    "constructible": true,
+    "properties": {
+      "HorizontalSnapPointsChanged": {
+        "name": "HorizontalSnapPointsChanged",
+        "type_name": "RoutedEventArgs",
+        "documentation": "PivotPanel.HorizontalSnapPointsChanged routed event",
+        "event": true
+      },
+      "VerticalSnapPointsChanged": {
+        "name": "VerticalSnapPointsChanged",
+        "type_name": "RoutedEventArgs",
+        "documentation": "PivotPanel.VerticalSnapPointsChanged routed event",
+        "event": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls.Primitives",
+      "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "PlatformFeedback",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::PlatformFeedback",
@@ -15724,6 +16903,113 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Converters",
       "clr-namespace:FerroUI.Controls.Converters;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PointAnimation",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::PointAnimation",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "From": {
+        "name": "From",
+        "type_name": "Option<Point>",
+        "documentation": "PointAnimation.From: Option<Point>",
+        "values": [],
+        "attached": false
+      },
+      "To": {
+        "name": "To",
+        "type_name": "Option<Point>",
+        "documentation": "PointAnimation.To: Option<Point>",
+        "values": [],
+        "attached": false
+      },
+      "By": {
+        "name": "By",
+        "type_name": "Option<Point>",
+        "documentation": "PointAnimation.By: Option<Point>",
+        "values": [],
+        "attached": false
+      },
+      "EasingFunction": {
+        "name": "EasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "PointAnimation.EasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": [],
+        "attached": false
+      },
+      "EnableDependentAnimation": {
+        "name": "EnableDependentAnimation",
+        "type_name": "bool",
+        "documentation": "PointAnimation.EnableDependentAnimation: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PointAnimationUsingKeyFrames",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::PointAnimationUsingKeyFrames",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "EnableDependentAnimation": {
+        "name": "EnableDependentAnimation",
+        "type_name": "bool",
+        "documentation": "PointAnimationUsingKeyFrames.EnableDependentAnimation: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "KeyFrames": {
+        "name": "KeyFrames",
+        "type_name": "FerroList<Ref<PointKeyFrame>>",
+        "documentation": "PointAnimationUsingKeyFrames.KeyFrames: FerroList<Ref<PointKeyFrame>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "PointKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::PointKeyFrame",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "KeyTime": {
+        "name": "KeyTime",
+        "type_name": "SignedDuration",
+        "documentation": "PointKeyFrame.KeyTime: SignedDuration",
+        "values": [],
+        "attached": false
+      },
+      "Value": {
+        "name": "Value",
+        "type_name": "Point",
+        "documentation": "PointKeyFrame.Value: Point",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -16365,6 +17651,26 @@
     ]
   },
   {
+    "name": "PowerEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::PowerEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {
+      "Power": {
+        "name": "Power",
+        "type_name": "f64",
+        "documentation": "PowerEase.Power: f64",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "PreviewAdorner",
     "namespace": "https://github.com/ferroui",
     "documentation": "PreviewAdorner",
@@ -16710,6 +18016,18 @@
     ]
   },
   {
+    "name": "QuadraticEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::QuadraticEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "QuadraticEaseIn",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::QuadraticEaseIn",
@@ -16746,6 +18064,18 @@
     ]
   },
   {
+    "name": "QuarticEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::QuarticEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "QuarticEaseIn",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::QuarticEaseIn",
@@ -16779,6 +18109,18 @@
     "namespace_aliases": [
       "using:FerroUI.Animation.Easings",
       "clr-namespace:FerroUI.Animation.Easings;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "QuinticEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::QuinticEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -20381,6 +21723,18 @@
     ]
   },
   {
+    "name": "SelectionIndicator",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SelectionIndicator",
+    "base": "Rectangle",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "SelectionModel",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls_repeater::selection::SelectionModel",
@@ -20623,6 +21977,18 @@
     "namespace_aliases": [
       "using:FerroUI.Controls.Shapes",
       "clr-namespace:FerroUI.Controls.Shapes;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SineEase",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::SineEase",
+    "base": "EasingFunctionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -20925,6 +22291,46 @@
     ]
   },
   {
+    "name": "SplineColorKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::SplineColorKeyFrame",
+    "base": "ColorKeyFrame",
+    "constructible": true,
+    "properties": {
+      "KeySpline": {
+        "name": "KeySpline",
+        "type_name": "Option<Ref<KeySpline>>",
+        "documentation": "SplineColorKeyFrame.KeySpline: Option<Ref<KeySpline>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SplineDoubleKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::SplineDoubleKeyFrame",
+    "base": "DoubleKeyFrame",
+    "constructible": true,
+    "properties": {
+      "KeySpline": {
+        "name": "KeySpline",
+        "type_name": "Option<Ref<KeySpline>>",
+        "documentation": "SplineDoubleKeyFrame.KeySpline: Option<Ref<KeySpline>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "SplineEasing",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::animation::easings::SplineEasing",
@@ -20959,6 +22365,26 @@
     "namespace_aliases": [
       "using:FerroUI.Animation.Easings",
       "clr-namespace:FerroUI.Animation.Easings;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "SplinePointKeyFrame",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::SplinePointKeyFrame",
+    "base": "PointKeyFrame",
+    "constructible": true,
+    "properties": {
+      "KeySpline": {
+        "name": "KeySpline",
+        "type_name": "Option<Ref<KeySpline>>",
+        "documentation": "SplinePointKeyFrame.KeySpline: Option<Ref<KeySpline>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -21395,6 +22821,39 @@
     ]
   },
   {
+    "name": "Storyboard",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::Storyboard",
+    "base": "Timeline",
+    "constructible": true,
+    "properties": {
+      "TargetName": {
+        "name": "TargetName",
+        "type_name": "String",
+        "documentation": "Storyboard.TargetName: String",
+        "values": [],
+        "attached": true
+      },
+      "TargetProperty": {
+        "name": "TargetProperty",
+        "type_name": "String",
+        "documentation": "Storyboard.TargetProperty: String",
+        "values": [],
+        "attached": true
+      },
+      "Children": {
+        "name": "Children",
+        "type_name": "FerroList<Ref<Timeline>>",
+        "documentation": "Storyboard.Children: FerroList<Ref<Timeline>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "StreamGeometry",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::media::StreamGeometry",
@@ -21684,6 +23143,47 @@
     ]
   },
   {
+    "name": "SwipeControl",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeControl",
+    "base": "ContentControl",
+    "constructible": true,
+    "properties": {
+      "LeftItems": {
+        "name": "LeftItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.LeftItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      },
+      "RightItems": {
+        "name": "RightItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.RightItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      },
+      "TopItems": {
+        "name": "TopItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.TopItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      },
+      "BottomItems": {
+        "name": "BottomItems",
+        "type_name": "Option<Ref<SwipeItems>>",
+        "documentation": "SwipeControl.BottomItems: Option<Ref<SwipeItems>>",
+        "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "SwipeGestureEndedEventArgs",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::SwipeGestureEndedEventArgs",
@@ -21808,6 +23308,120 @@
     "namespace_aliases": [
       "using:FerroUI.Input.GestureRecognizers",
       "clr-namespace:FerroUI.Input.GestureRecognizers;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "SwipeItem",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeItem",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Text": {
+        "name": "Text",
+        "type_name": "String",
+        "documentation": "SwipeItem.Text: String",
+        "values": [],
+        "attached": false
+      },
+      "IconSource": {
+        "name": "IconSource",
+        "type_name": "Option<Ref<IconSource>>",
+        "documentation": "SwipeItem.IconSource: Option<Ref<IconSource>>",
+        "values": [],
+        "attached": false
+      },
+      "Background": {
+        "name": "Background",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "SwipeItem.Background: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "Foreground": {
+        "name": "Foreground",
+        "type_name": "Option<Rc<dyn IBrush>>",
+        "documentation": "SwipeItem.Foreground: Option<Rc<dyn IBrush>>",
+        "values": [],
+        "attached": false
+      },
+      "Command": {
+        "name": "Command",
+        "type_name": "Option<Rc<dyn ICommand>>",
+        "documentation": "SwipeItem.Command: Option<Rc<dyn ICommand>>",
+        "values": [],
+        "attached": false
+      },
+      "CommandParameter": {
+        "name": "CommandParameter",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "SwipeItem.CommandParameter: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "BehaviorOnInvoked": {
+        "name": "BehaviorOnInvoked",
+        "type_name": "SwipeBehaviorOnInvoked",
+        "documentation": "SwipeItem.BehaviorOnInvoked: SwipeBehaviorOnInvoked",
+        "values": [
+          "Auto",
+          "Close",
+          "RemainOpen"
+        ],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SwipeItemInvokedEventArgs",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeItemInvokedEventArgs",
+    "base": null,
+    "constructible": false,
+    "properties": {
+      "SwipeControl": {
+        "name": "SwipeControl",
+        "type_name": "Ref<SwipeControl>",
+        "documentation": "SwipeItemInvokedEventArgs.SwipeControl: Ref<SwipeControl>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "SwipeItems",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::SwipeItems",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "Mode": {
+        "name": "Mode",
+        "type_name": "SwipeMode",
+        "documentation": "SwipeItems.Mode: SwipeMode",
+        "values": [
+          "Reveal",
+          "Execute"
+        ],
+        "attached": false
+      },
+      "Items": {
+        "name": "Items",
+        "type_name": "FerroList<Ref<SwipeItem>>",
+        "documentation": "SwipeItems.Items: FerroList<Ref<SwipeItem>>",
+        "values": []
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
@@ -24806,6 +26420,72 @@
         "type_name": "SignedDuration",
         "documentation": "TimePickerPresenter.Time: SignedDuration",
         "values": [],
+        "attached": false
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "Timeline",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::animation::Timeline",
+    "base": "FerroObject",
+    "constructible": false,
+    "properties": {
+      "BeginTime": {
+        "name": "BeginTime",
+        "type_name": "Option<SignedDuration>",
+        "documentation": "Timeline.BeginTime: Option<SignedDuration>",
+        "values": [],
+        "attached": false
+      },
+      "Duration": {
+        "name": "Duration",
+        "type_name": "TimelineDuration",
+        "documentation": "Timeline.Duration: TimelineDuration",
+        "values": [
+          "Automatic",
+          "Forever"
+        ],
+        "attached": false
+      },
+      "AutoReverse": {
+        "name": "AutoReverse",
+        "type_name": "bool",
+        "documentation": "Timeline.AutoReverse: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "RepeatBehavior": {
+        "name": "RepeatBehavior",
+        "type_name": "RepeatBehavior",
+        "documentation": "Timeline.RepeatBehavior: RepeatBehavior",
+        "values": [
+          "Forever"
+        ],
+        "attached": false
+      },
+      "SpeedRatio": {
+        "name": "SpeedRatio",
+        "type_name": "f64",
+        "documentation": "Timeline.SpeedRatio: f64",
+        "values": [],
+        "attached": false
+      },
+      "FillBehavior": {
+        "name": "FillBehavior",
+        "type_name": "FillBehavior",
+        "documentation": "Timeline.FillBehavior: FillBehavior",
+        "values": [
+          "HoldEnd",
+          "Stop"
+        ],
         "attached": false
       }
     },
@@ -28063,6 +29743,12 @@
         "type_name": "FerroList<Ref<StateTriggerBase>>",
         "documentation": "VisualState.StateTriggers: FerroList<Ref<StateTriggerBase>>",
         "values": []
+      },
+      "Storyboard": {
+        "name": "Storyboard",
+        "type_name": "Option<Ref<Storyboard>>",
+        "documentation": "VisualState.Storyboard: Option<Ref<Storyboard>>",
+        "values": []
       }
     },
     "namespace_aliases": [
@@ -28087,6 +29773,12 @@
         "name": "States",
         "type_name": "FerroList<Ref<VisualState>>",
         "documentation": "VisualStateGroup.States: FerroList<Ref<VisualState>>",
+        "values": []
+      },
+      "Transitions": {
+        "name": "Transitions",
+        "type_name": "FerroList<Ref<VisualTransition>>",
+        "documentation": "VisualStateGroup.Transitions: FerroList<Ref<VisualTransition>>",
         "values": []
       },
       "CurrentState": {
@@ -28121,6 +29813,49 @@
         "documentation": "VisualStateManager.CustomVisualStateManager: Option<Ref<VisualStateManager>>",
         "values": [],
         "attached": true
+      }
+    },
+    "namespace_aliases": [
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+    ]
+  },
+  {
+    "name": "VisualTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_controls::VisualTransition",
+    "base": "FerroObject",
+    "constructible": true,
+    "properties": {
+      "From": {
+        "name": "From",
+        "type_name": "String",
+        "documentation": "VisualTransition.From: String",
+        "values": []
+      },
+      "To": {
+        "name": "To",
+        "type_name": "String",
+        "documentation": "VisualTransition.To: String",
+        "values": []
+      },
+      "GeneratedDuration": {
+        "name": "GeneratedDuration",
+        "type_name": "SignedDuration",
+        "documentation": "VisualTransition.GeneratedDuration: SignedDuration",
+        "values": []
+      },
+      "GeneratedEasingFunction": {
+        "name": "GeneratedEasingFunction",
+        "type_name": "Option<Ref<EasingFunctionBase>>",
+        "documentation": "VisualTransition.GeneratedEasingFunction: Option<Ref<EasingFunctionBase>>",
+        "values": []
+      },
+      "Storyboard": {
+        "name": "Storyboard",
+        "type_name": "Option<Ref<Storyboard>>",
+        "documentation": "VisualTransition.Storyboard: Option<Ref<Storyboard>>",
+        "values": []
       }
     },
     "namespace_aliases": [

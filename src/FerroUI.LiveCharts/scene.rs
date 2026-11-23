@@ -198,11 +198,9 @@ impl HitRegion {
 impl HitShape {
     pub fn contains(&self, point: Point) -> bool {
         match self {
+            // `RectangleHoverArea.IsPointerOver`: the edges are outside, every side at least 1 px.
             HitShape::Rectangle(r) => {
-                point.x >= r.x.min(r.x + r.width)
-                    && point.x <= r.x.max(r.x + r.width)
-                    && point.y >= r.y.min(r.y + r.height)
-                    && point.y <= r.y.max(r.y + r.height)
+                hover_span(r.x, r.width, point.x, 0.0) && hover_span(r.y, r.height, point.y, 0.0)
             }
             HitShape::Circle { center, radius } => {
                 (point.x - center.x).hypot(point.y - center.y) <= *radius
@@ -312,6 +310,43 @@ impl HitShape {
             _ => self.contains(point),
         }
     }
+
+    /// The rectangle of a rectangular hover area (`RectangleHoverArea` of the source).
+    fn hover_rectangle(&self) -> Option<Rect> {
+        match self {
+            Self::Rectangle(rect) | Self::WithHoverArea { bounds: rect, .. } => Some(*rect),
+            _ => None,
+        }
+    }
+
+    /// Whether the point is in the column (`x`) or the row of the hover extent, `tolerance`
+    /// wider on each side. A rectangular area takes the rule of `RectangleHoverArea.IsPointerOver`.
+    fn contains_hover_along(&self, x: bool, point: Point, tolerance: f64) -> bool {
+        let value = if x { point.x } else { point.y };
+        let span = |rect: Rect| {
+            if x {
+                (rect.x, rect.width)
+            } else {
+                (rect.y, rect.height)
+            }
+        };
+        if let Some(rect) = self.hover_rectangle() {
+            let (start, length) = span(rect);
+            return hover_span(start, length, value, tolerance);
+        }
+        let (start, length) = span(self.hover_bounds());
+        value >= start - tolerance && value <= start + length + tolerance
+    }
+}
+
+/// `RectangleHoverArea.IsPointerOver` of the source along one axis: the span from `start` over
+/// `length` (either sign) is at least 1 px long, and a value exactly on its edge is outside.
+/// `tolerance` widens the span on each side.
+fn hover_span(start: f64, length: f64, value: f64, tolerance: f64) -> bool {
+    let min = start.min(start + length);
+    let max = start.max(start + length);
+    let max = if max - min < 1.0 { min + 1.0 } else { max };
+    value > min - tolerance && value < max + tolerance
 }
 
 fn points_bounds(points: impl Iterator<Item = Point>) -> Rect {
@@ -463,14 +498,10 @@ impl Scene {
                     hit.contains(point)
                 }
                 FindingStrategy::CompareOnlyX | FindingStrategy::CompareOnlyXTakeClosest => {
-                    let bounds = hit.shape.hover_bounds();
-                    point.x >= bounds.x - tolerance
-                        && point.x <= bounds.x + bounds.width + tolerance
+                    hit.shape.contains_hover_along(true, point, tolerance)
                 }
                 FindingStrategy::CompareOnlyY | FindingStrategy::CompareOnlyYTakeClosest => {
-                    let bounds = hit.shape.hover_bounds();
-                    point.y >= bounds.y - tolerance
-                        && point.y <= bounds.y + bounds.height + tolerance
+                    hit.shape.contains_hover_along(false, point, tolerance)
                 }
                 _ => hit.shape.contains_hover(point) || distance(hit) <= tolerance,
             })
@@ -539,5 +570,142 @@ mod tests {
         assert!(!hit.contains(Point::new(0.0, 0.0)));
         assert!(!hit.contains(Point::new(-5.0, 0.0)));
         assert!(!hit.contains(Point::new(11.0, 0.0)));
+    }
+
+    /// A scene of one hit region, in a plot that holds every probe of the rectangle tests.
+    fn single_hit(shape: HitShape) -> Scene {
+        let mut scene = Scene::new(
+            Size::new(1000.0, 1000.0),
+            Rect::new(-1000.0, -1000.0, 3000.0, 3000.0),
+        );
+        scene.hits.push(HitRegion {
+            id: PointId {
+                series: 0,
+                point: 0,
+            },
+            center: shape.hover_center(),
+            shape,
+            value: 0.0,
+            label: String::new(),
+        });
+        scene
+    }
+
+    /// `RectangleHoverArea.IsPointerOver` of the source, through the hit test of a scene.
+    fn is_pointer_over(area: Rect, x: f64, y: f64, strategy: FindingStrategy) -> bool {
+        !single_hit(HitShape::Rectangle(area))
+            .hit_test(Point::new(x, y), strategy, 0.0)
+            .is_empty()
+    }
+
+    /// CoreObjectsTests/RectangleHoverAreaTesting.IsPointerOver_ZeroHeight_Tooltipable_OnXOnlyStrategy:
+    /// a column collapsed to zero height is found anywhere in its column by X.
+    #[test]
+    fn source_zero_height_is_tooltipable_on_x_only_strategy() {
+        let area = Rect::new(100.0, 200.0, 50.0, 0.0);
+        let strategy = FindingStrategy::CompareOnlyXTakeClosest;
+        for y in [50.0, 200.0, 350.0] {
+            assert!(is_pointer_over(area, 125.0, y, strategy), "in the column at {y}");
+        }
+        for x in [50.0, 180.0] {
+            assert!(!is_pointer_over(area, x, 200.0, strategy), "beside the column at {x}");
+        }
+    }
+
+    /// RectangleHoverAreaTesting.IsPointerOver_ZeroHeight_NotTooltipable_OnYOnlyStrategy: by Y
+    /// the zero-height area is found only in the row of 1 px its minimum size gives it.
+    #[test]
+    fn source_zero_height_is_not_tooltipable_on_y_only_strategy() {
+        let area = Rect::new(100.0, 200.0, 50.0, 0.0);
+        let strategy = FindingStrategy::CompareOnlyYTakeClosest;
+        assert!(!is_pointer_over(area, 125.0, 50.0, strategy));
+        assert!(!is_pointer_over(area, 125.0, 350.0, strategy));
+        assert!(is_pointer_over(area, 125.0, 200.5, strategy));
+    }
+
+    /// SeriesTests/SeriesHitTests.RectangleHoverArea_OnEdge_Misses: a pointer exactly on an edge
+    /// is outside.
+    #[test]
+    fn source_rectangle_hover_area_on_edge_misses() {
+        let area = Rect::new(10.0, 20.0, 30.0, 40.0);
+        for (x, y) in [(10.0, 30.0), (40.0, 30.0), (20.0, 20.0), (20.0, 60.0)] {
+            assert!(!is_pointer_over(area, x, y, FindingStrategy::CompareAll), "edge {x}, {y}");
+            assert!(!HitShape::Rectangle(area).contains(Point::new(x, y)));
+        }
+        assert!(is_pointer_over(area, 20.0, 30.0, FindingStrategy::CompareAll));
+    }
+
+    /// CoreObjectsTests/MeasureTesting.RectangleHoverAreaIsPointerOverCompareAll,
+    /// RectangleHoverAreaIsPointerOverCompareOnlyX and RectangleHoverAreaIsPointerOverCompareOnlyY.
+    #[test]
+    fn source_rectangle_hover_area_is_pointer_over_by_strategy() {
+        let area = Rect::new(10.0, 20.0, 100.0, 50.0);
+        let all = FindingStrategy::CompareAll;
+        assert!(is_pointer_over(area, 50.0, 40.0, all));
+        for (x, y) in [(5.0, 40.0), (50.0, 5.0), (200.0, 40.0), (50.0, 200.0)] {
+            assert!(!is_pointer_over(area, x, y, all), "outside at {x}, {y}");
+        }
+        assert!(is_pointer_over(area, 50.0, 999.0, FindingStrategy::CompareOnlyX));
+        assert!(!is_pointer_over(area, 5.0, 30.0, FindingStrategy::CompareOnlyX));
+        assert!(is_pointer_over(area, 999.0, 40.0, FindingStrategy::CompareOnlyY));
+        assert!(!is_pointer_over(area, 50.0, 5.0, FindingStrategy::CompareOnlyY));
+    }
+
+    /// MeasureTesting.RectangleHoverAreaMinWidthAndHeight: an area of no size is 1 px wide and
+    /// high.
+    #[test]
+    fn source_rectangle_hover_area_min_width_and_height() {
+        let area = Rect::new(50.0, 50.0, 0.0, 0.0);
+        assert!(is_pointer_over(area, 50.5, 50.5, FindingStrategy::CompareAll));
+    }
+
+    /// MeasureTesting.RectangleHoverAreaIsPointerOverNegativeHeight, ...NegativeWidth and
+    /// ...NegativeWidthAndHeight (issue 2165 of the source): the spans are unordered.
+    #[test]
+    fn source_rectangle_hover_area_is_pointer_over_negative_dimensions() {
+        let all = FindingStrategy::CompareAll;
+        let height = Rect::new(10.0, 70.0, 100.0, -50.0);
+        assert!(is_pointer_over(height, 50.0, 40.0, all));
+        assert!(is_pointer_over(height, 50.0, 40.0, FindingStrategy::CompareAllTakeClosest));
+        assert!(is_pointer_over(height, 50.0, 40.0, FindingStrategy::CompareOnlyY));
+        assert!(!is_pointer_over(height, 50.0, 10.0, all));
+        assert!(!is_pointer_over(height, 50.0, 80.0, all));
+        let width = Rect::new(110.0, 20.0, -100.0, 50.0);
+        assert!(is_pointer_over(width, 50.0, 40.0, all));
+        assert!(is_pointer_over(width, 50.0, 40.0, FindingStrategy::CompareOnlyX));
+        assert!(!is_pointer_over(width, 5.0, 40.0, all));
+        assert!(!is_pointer_over(width, 120.0, 40.0, all));
+        let both = Rect::new(110.0, 70.0, -100.0, -50.0);
+        assert!(is_pointer_over(both, 50.0, 40.0, all));
+        assert!(!is_pointer_over(both, 5.0, 40.0, all));
+        assert!(!is_pointer_over(both, 50.0, 80.0, all));
+    }
+
+    /// The hover area of a category (the bounds of `WithHoverArea`, a `RectangleHoverArea` in
+    /// the source) takes the same rule for every strategy; the native tolerance widens it on
+    /// each side and keeps its edge outside.
+    #[test]
+    fn category_hover_area_excludes_its_edges_and_widens_by_the_tolerance() {
+        let scene = single_hit(HitShape::WithHoverArea {
+            shape: Box::new(HitShape::Circle {
+                center: Point::new(25.0, 40.0),
+                radius: 2.0,
+            }),
+            bounds: Rect::new(10.0, 20.0, 30.0, 40.0),
+        });
+        let found = |x: f64, y: f64, strategy: FindingStrategy, tolerance: f64| {
+            scene.hit_test(Point::new(x, y), strategy, tolerance).len()
+        };
+        for strategy in [FindingStrategy::CompareAll, FindingStrategy::CompareOnlyX] {
+            assert_eq!(found(10.0, 30.0, strategy, 0.0), 0);
+            assert_eq!(found(40.0, 30.0, strategy, 0.0), 0);
+            assert_eq!(found(10.5, 30.0, strategy, 0.0), 1);
+        }
+        assert_eq!(found(30.0, 60.0, FindingStrategy::CompareOnlyY, 0.0), 0);
+        assert_eq!(found(30.0, 59.5, FindingStrategy::CompareOnlyY, 0.0), 1);
+        assert_eq!(found(5.0, 30.0, FindingStrategy::CompareOnlyX, 5.0), 0);
+        assert_eq!(found(5.5, 30.0, FindingStrategy::CompareOnlyX, 5.0), 1);
+        assert_eq!(found(45.5, 30.0, FindingStrategy::CompareOnlyX, 5.0), 0);
+        assert_eq!(found(44.5, 30.0, FindingStrategy::CompareOnlyX, 5.0), 1);
     }
 }

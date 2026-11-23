@@ -47,6 +47,19 @@ pub struct ServerCompositionTarget {
     disposed: Cell<bool>,
     attached_visuals: RefCell<HashMap<*const ServerCompositionVisual, Rc<ServerCompositionVisual>>>,
     dirty_rects: Rc<dyn IDirtyRectTracker>,
+    /// Whether a frame is drawn one dirty rectangle at a time, each under a
+    /// clip that is its rectangle, and not under one clip of them all: what
+    /// the render target of the frame asks for
+    /// (`IRenderTarget::clips_regions_per_draw`; section 9.56 of
+    /// desktop-performance.md).
+    draws_rects_apart: Cell<bool>,
+    /// The rectangles of such a frame (`IDirtyRectTracker::separate_rects`),
+    /// kept for their memory.
+    separate_rects: RefCell<Vec<LtrbRect>>,
+    /// Whether the dirty area of the frame holds a backdrop: such a frame
+    /// is drawn as one rectangle, since a backdrop reads what the frame
+    /// drew behind it, also beside its own area.
+    backdrop_in_dirty_area: Cell<bool>,
     id: i64,
     debug_events: RefCell<Option<Arc<dyn ICompositionTargetDebugEvents>>>,
     rendered_visuals: Cell<i32>,
@@ -65,6 +78,9 @@ pub struct ServerCompositionTarget {
     /// (docs/porting/gpu-rendering.md, "Pipelines made ahead of their first
     /// draw"). Not from the reference.
     slow_frame_ms: Option<f64>,
+    /// The counters of the render thread at the last report of them
+    /// (`report_render_counters`).
+    render_counters_reported: RefCell<Option<crate::diagnostics::perf_counters::PerfCountersSnapshot>>,
     /// How many frames the target drew while it measures them.
     frames_drawn: Cell<u64>,
     /// The generation of the effect prewarm list
@@ -75,6 +91,14 @@ pub struct ServerCompositionTarget {
     effect_prewarm_disabled: bool,
     /// Whether the render that is running drew a frame.
     drew_frame: Cell<bool>,
+    /// Whether the render that is running drew no scene: all it did was to
+    /// present the frame its layer held back.
+    only_presented_held_frame: Cell<bool>,
+    /// Whether the layer was drawn and not blitted onto the target since: a
+    /// tick drew it ahead of the target (section 9.51 of
+    /// desktop-performance.md) and had nothing new to present, or the
+    /// target was not ready. The next tick presents it.
+    layer_unpresented: Cell<bool>,
     /// The backdrops drawn in the frames so far (winui-materials.md): the
     /// visual that painted each and its area in device pixels. A dirty
     /// rectangle that touches one makes all of it dirty.
@@ -164,6 +188,9 @@ impl ServerCompositionTarget {
                 disposed: Cell::new(false),
                 attached_visuals: RefCell::new(HashMap::new()),
                 dirty_rects,
+                draws_rects_apart: Cell::new(false),
+                separate_rects: RefCell::new(Vec::new()),
+                backdrop_in_dirty_area: Cell::new(false),
                 id,
                 debug_events: RefCell::new(None),
                 rendered_visuals: Cell::new(0),
@@ -173,6 +200,7 @@ impl ServerCompositionTarget {
                 frame_times: RefCell::new(
                     std::env::var("FERROUI_FRAME_TIMES").is_ok_and(|value| value == "1").then(Vec::new),
                 ),
+                render_counters_reported: RefCell::new(None),
                 slow_frame_ms: std::env::var("FERROUI_SLOW_FRAME_MS")
                     .ok()
                     .and_then(|value| value.trim().parse::<f64>().ok())
@@ -181,18 +209,24 @@ impl ServerCompositionTarget {
                 prewarmed_effects: Cell::new(0),
                 effect_prewarm_disabled: std::env::var("FERROUI_EFFECT_PREWARM").is_ok_and(|value| value == "0"),
                 drew_frame: Cell::new(false),
+                only_presented_held_frame: Cell::new(false),
+                layer_unpresented: Cell::new(false),
                 backdrop_regions: RefCell::new(Vec::new()),
             }
         })
     }
 
-    /// Makes dirty the whole of every backdrop a dirty rectangle touches,
+    /// Makes dirty the whole of every backdrop the dirty area touches,
     /// until no more is added: a blurred backdrop drawn in part would mix the
-    /// new pixels with the old ones (winui-materials.md, the backdrop).
-    fn expand_dirty_rects_over_backdrops(&self) {
+    /// new pixels with the old ones (winui-materials.md, the backdrop). The
+    /// dirty area is the final one, which is what the frame draws: a tracker
+    /// answers `intersects` for nothing else, and the final area is larger
+    /// than the rectangles that were added.
+    fn expand_dirty_rects_over_backdrops(&self, render_bounds: LtrbRect) {
+        self.backdrop_in_dirty_area.set(false);
         let mut regions = self.backdrop_regions.borrow_mut();
         regions.retain(|(visual, _)| visual.upgrade().is_some_and(|visual| visual.root().is_some()));
-        if regions.is_empty() || self.dirty_rects.is_empty() {
+        if regions.is_empty() {
             return;
         }
         let mut added = vec![false; regions.len()];
@@ -200,7 +234,8 @@ impl ServerCompositionTarget {
             let mut changed = false;
             for (index, (_, region)) in regions.iter().enumerate() {
                 if !added[index] && self.dirty_rects.intersects(*region) {
-                    self.dirty_rects.add_rect(*region);
+                    self.dirty_rects.include(*region, render_bounds);
+                    self.backdrop_in_dirty_area.set(true);
                     added[index] = true;
                     changed = true;
                 }
@@ -336,10 +371,11 @@ impl ServerCompositionTarget {
     }
 
     pub fn render(self: &Rc<Self>) {
+        self.drew_frame.set(false);
+        self.only_presented_held_frame.set(false);
         if self.frame_times.borrow().is_none() && self.slow_frame_ms.is_none() {
             return self.render_frame();
         }
-        self.drew_frame.set(false);
         let start = std::time::Instant::now();
         self.render_frame();
         if self.drew_frame.get() {
@@ -354,6 +390,69 @@ impl ServerCompositionTarget {
                 eprintln!("slow frame of composition target {}: frame {frame} took {ms:.3} ms", self.id);
             }
         }
+    }
+
+    /// Whether the last [`render`](Self::render) got as far as drawing a
+    /// frame.
+    pub(crate) fn drew_frame(&self) -> bool {
+        self.drew_frame.get()
+    }
+
+    /// Whether the last render drew no scene: all it did was to present the
+    /// frame the layer held back.
+    pub(crate) fn only_presented_held_frame(&self) -> bool {
+        self.only_presented_held_frame.get()
+    }
+
+    /// Whether the layer of the target holds a frame back: what the target
+    /// drew last is presented by its next frame
+    /// ([`IDrawingContextLayerImpl::has_pending_frame`]).
+    pub(crate) fn has_pending_frame(&self) -> bool {
+        self.layer_unpresented.get() || self.layer.borrow().as_ref().is_some_and(|layer| layer.has_pending_frame())
+    }
+
+    /// The layer of the target, when this frame may be drawn into it before
+    /// the target is asked for its drawing context: the target and the layer
+    /// allow it, the batches miss display frames
+    /// ([`ServerCompositor::draws_layers_ahead`]), the layer is the one the
+    /// frame needs, and nothing is drawn over it on the target (section 9.51
+    /// of desktop-performance.md).
+    fn layer_to_draw_ahead(
+        &self,
+        compositor: &ServerCompositor,
+        render_target: &Rc<dyn IRenderTarget>,
+        scene_info: &RenderTargetSceneInfo,
+    ) -> Option<Rc<dyn IDrawingContextLayerImpl>> {
+        if !compositor.draws_layers_ahead()
+            || self.overlays.require_layer()
+            || !render_target.prepare_frame_ahead(scene_info)
+        {
+            return None;
+        }
+        let layer = self.layer.borrow().clone()?;
+        (scene_info.size == self.layer_size.get() && !layer.is_corrupted() && layer.draws_ahead_of_target())
+            .then_some(layer)
+    }
+
+    /// The beginning of a frame that draws the tree: the dirty rectangles
+    /// are final, with the backdrops they touch, and the frame is counted.
+    fn begin_scene(&self, render_bounds: LtrbRect, pixel_size: PixelSize) {
+        use crate::diagnostics::perf_counters::{add, PerfCounter};
+        super::take_backdrop_regions();
+        self.dirty_rects.finalize_frame(render_bounds);
+        self.expand_dirty_rects_over_backdrops(render_bounds);
+        let dirty = self.dirty_rects.combined_rect().intersect_or_empty(render_bounds);
+        add(PerfCounter::RenderFramesDrawn, 1);
+        add(PerfCounter::RenderDirtyBoundsPixels, (dirty.width().max(0.0) * dirty.height().max(0.0)) as u64);
+        add(PerfCounter::RenderTargetPixels, (pixel_size.width as u64) * (pixel_size.height as u64));
+    }
+
+    /// The end of a frame: nothing is dirty any more.
+    fn end_frame(&self, render_bounds: LtrbRect) {
+        self.rendered_visuals.set(0);
+        self.visited_visuals.set(0);
+        self.redraw_requested.set(false);
+        self.dirty_rects.initialize(render_bounds);
     }
 
     /// The times of the frames the target drew, as a line of text: their
@@ -393,6 +492,7 @@ impl ServerCompositionTarget {
             if let Some(layer) = self.layer.borrow_mut().take() {
                 layer.dispose();
             }
+            self.layer_unpresented.set(false);
             if let Some(render_target) = self.render_target.borrow_mut().take() {
                 render_target.dispose();
             }
@@ -410,13 +510,21 @@ impl ServerCompositionTarget {
         }
         let Some(render_target) = self.render_target.borrow().clone() else { return };
 
-        if self.dirty_rects.is_empty() && !self.redraw_requested.get() && !self.update_requested.get() {
+        // A frame the layer holds back is presented by this tick, also when
+        // the tick has nothing to draw (section 9.33 of
+        // desktop-performance.md).
+        let present_pending = self.has_pending_frame();
+        if self.dirty_rects.is_empty()
+            && !self.redraw_requested.get()
+            && !self.update_requested.get()
+            && !present_pending
+        {
             return;
         }
 
         self.redraw_requested.set(self.redraw_requested.get() | !self.dirty_rects.is_empty());
 
-        if !self.redraw_requested.get() {
+        if !self.redraw_requested.get() && !present_pending {
             return;
         }
 
@@ -429,6 +537,10 @@ impl ServerCompositionTarget {
         }
 
         let properties = render_target.properties();
+        // A target that applies a clip of several rectangles to each draw
+        // is given the dirty rectangles one at a time (section 9.56 of
+        // desktop-performance.md).
+        self.draws_rects_apart.set(render_target.clips_regions_per_draw());
         let need_layer = self.overlays.require_layer() // Check if we don't need overlays
             // Check if render target can be rendered to directly and preserves the previous frame
             || !(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);
@@ -442,13 +554,53 @@ impl ServerCompositionTarget {
             platform_specific_scene_info: self.platform_specific_scene_info(),
         };
         self.drew_frame.set(true);
+        let render_bounds = LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64);
+
+        // Where the target and its layer allow it, the tree is drawn into
+        // the layer before the target is asked for its drawing context
+        // (section 9.51 of desktop-performance.md): the wait for the surface
+        // of the target comes after the drawing, not before it.
+        let mut drawn_ahead = false;
+        let layer_ahead = need_layer.then(|| self.layer_to_draw_ahead(&compositor, &render_target, &scene_info)).flatten();
+        if let Some(layer) = layer_ahead {
+            let held_before = self.has_pending_frame();
+            if self.full_redraw_requested.replace(false) {
+                self.dirty_rects.initialize(render_bounds);
+                self.dirty_rects.add_rect(render_bounds);
+            }
+            if !self.dirty_rects.is_empty() {
+                self.begin_scene(render_bounds, pixel_size);
+                let mut context = layer.create_drawing_context();
+                self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
+                context.dispose();
+                self.record_backdrop_regions();
+                self.layer_unpresented.set(true);
+                drawn_ahead = true;
+                // The layer holds this frame back and held none before it:
+                // what a blit shows is the frame the target presented last.
+                // The tick presents nothing, and does not wait for a surface
+                // of the target; the next tick presents this frame.
+                if !held_before && layer.has_pending_frame() {
+                    self.end_frame(render_bounds);
+                    self.report_render_counters();
+                    return;
+                }
+            }
+        }
+
         let (mut render_target_context, properties) = match render_target.try_create_drawing_context(&scene_info) {
             Ok(created) => created,
-            Err(RenderTargetError::NotReady(_)) => {
-                self.is_waiting_for_ready_render_target.set(self.is_enabled());
+            Err(error) => {
+                // A frame drawn ahead stays in the layer, and is presented
+                // by the next tick that has the target.
+                if drawn_ahead {
+                    self.end_frame(render_bounds);
+                }
+                if matches!(error, RenderTargetError::NotReady(_)) {
+                    self.is_waiting_for_ready_render_target.set(self.is_enabled());
+                }
                 return;
             }
-            Err(RenderTargetError::Corrupted(_)) => return,
         };
 
         {
@@ -464,11 +616,13 @@ impl ServerCompositionTarget {
                 }
                 *self.layer.borrow_mut() = Some(render_target_context.create_layer(pixel_size));
                 self.layer_size.set(pixel_size);
+                self.layer_unpresented.set(false);
                 full_redraw = true;
             } else if !need_layer {
                 if let Some(layer) = self.layer.borrow_mut().take() {
                     layer.dispose();
                 }
+                self.layer_unpresented.set(false);
             }
 
             if self.full_redraw_requested.get() || (!need_layer && !properties.previous_frame_is_retained) {
@@ -476,25 +630,31 @@ impl ServerCompositionTarget {
                 full_redraw = true;
             }
 
-            let render_bounds = LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64);
-
             if full_redraw {
                 self.dirty_rects.initialize(render_bounds);
                 self.dirty_rects.add_rect(render_bounds);
             }
 
-            self.expand_dirty_rects_over_backdrops();
-            if !self.dirty_rects.is_empty() {
-                super::take_backdrop_regions();
-                self.dirty_rects.finalize_frame(render_bounds);
-                let layer = self.layer.borrow().clone();
+            let layer = self.layer.borrow().clone();
+            // Whether the tick draws the tree now. A tick that does not
+            // still presents the frame it drew ahead, or the frame its layer
+            // holds back.
+            let draws = !drawn_ahead && !self.dirty_rects.is_empty();
+            if draws || self.has_pending_frame() {
+                if draws {
+                    self.begin_scene(render_bounds, pixel_size);
+                }
                 match layer {
                     Some(layer) => {
-                        {
+                        if draws {
                             let mut context = layer.create_drawing_context();
                             self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
                             context.dispose();
+                        } else if !drawn_ahead {
+                            layer.complete_pending_frame();
+                            self.only_presented_held_frame.set(true);
                         }
+                        self.layer_unpresented.set(false);
 
                         render_target_context.clear(Colors::TRANSPARENT);
                         render_target_context.set_transform(Matrix::IDENTITY);
@@ -506,23 +666,46 @@ impl ServerCompositionTarget {
                         }
                         self.overlays.draw(self, &mut *render_target_context, true);
                     }
+                    // Without a layer no frame is held back: the tick draws.
                     None => {
                         self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
                         self.overlays.draw(self, &mut *render_target_context, false);
                     }
                 }
-                self.record_backdrop_regions();
+                if draws {
+                    self.record_backdrop_regions();
+                }
             }
 
-            self.rendered_visuals.set(0);
-            self.visited_visuals.set(0);
-
-            self.redraw_requested.set(false);
-            self.dirty_rects.initialize(render_bounds);
+            self.end_frame(render_bounds);
         }
         render_target_context.dispose();
+        self.report_render_counters();
 
         self.prewarm_effects(&compositor, &render_target, &scene_info);
+    }
+
+    /// With the feature `perf-counters` and `FERROUI_FRAME_TIMES=1`: every 300 frames drawn,
+    /// prints what the render thread counted since the last report, a frame. The counters are
+    /// those of this thread, so with several targets a report covers the frames of all of them.
+    fn report_render_counters(&self) {
+        super::unchanged_drawings::frame_drawn();
+        use crate::diagnostics::perf_counters::{self, PerfCounter};
+        if !perf_counters::ENABLED || self.frame_times.borrow().is_none() {
+            return;
+        }
+        let now = perf_counters::snapshot();
+        let mut last = self.render_counters_reported.borrow_mut();
+        let counted = match last.as_ref() {
+            Some(last) => now.since(last),
+            None => now.clone(),
+        };
+        let frames = counted.get(PerfCounter::RenderFramesDrawn);
+        if frames < 300 {
+            return;
+        }
+        eprintln!("render thread counters of composition target {}:\n{}", self.id, counted.report_per(frames, "frame"));
+        *last = Some(now);
     }
 
     /// After a frame: has the render target make the GPU programs of the
@@ -623,35 +806,62 @@ impl ServerCompositionTarget {
         root: &Rc<ServerCompositionVisual>,
     ) {
         let use_layer_clip = compositor.options().use_save_layer_root_clip.unwrap_or(false);
-        self.dirty_rects.begin_draw(context);
-        {
+        let scaling = self.scaling();
+        let pixel_size = self.pixel_size();
+        let bounds = LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64);
+        let (visited, rendered) = if self.draws_rects_apart.get() && !self.dirty_rects.is_single_dirty_rect_tracker() {
+            // One pass for each dirty rectangle, under a clip that is the
+            // rectangle: the backend of the target makes a mask for every
+            // draw under a clip of several rectangles, and one rectangle
+            // that holds them all draws what lies between them again.
+            let mut rects = self.separate_rects.borrow_mut();
+            self.dirty_rects.separate_rects(&mut rects);
+            if rects.len() > 1 && self.backdrop_in_dirty_area.get() {
+                let all = rects.iter().copied().reduce(|all, rect| all.union(rect)).unwrap_or_default();
+                rects.clear();
+                rects.push(all);
+            }
+            let transform = context.transform();
+            let mut counts = (0, 0);
+            for rect in rects.iter() {
+                context.set_transform(transform);
+                context.push_clip(rect.to_rect());
+                context.clear(Colors::TRANSPARENT);
+                if use_layer_clip {
+                    context.push_layer(rect.to_rect());
+                }
+                context.set_transform(Matrix::create_scale(scaling, scaling));
+                // A walk with no tracker draws what its clip holds, as one
+                // with a tracker of one rectangle does.
+                let (visited, rendered) =
+                    root.render(context, bounds.intersect_or_empty(*rect), None, true, false, false);
+                counts = (counts.0 + visited, counts.1 + rendered);
+                if use_layer_clip {
+                    context.pop_layer();
+                }
+                context.pop_clip();
+            }
+            counts
+        } else {
+            self.dirty_rects.begin_draw(context);
             context.clear(Colors::TRANSPARENT);
             if use_layer_clip {
                 context.push_layer(self.dirty_rects.combined_rect().to_rect());
             }
-            let scaling = self.scaling();
             context.set_transform(Matrix::create_scale(scaling, scaling));
-            let pixel_size = self.pixel_size();
-            let (visited, rendered) = root.render(
-                context,
-                LtrbRect::new(0.0, 0.0, pixel_size.width as f64, pixel_size.height as f64),
-                Some(self.dirty_rects.clone()),
-                true,
-                false,
-                false,
-            );
-            self.visited_visuals.set(visited);
-            self.rendered_visuals.set(rendered);
-            if let Some(events) = self.debug_events() {
-                events.set_rendered_visuals(rendered);
-                events.set_visited_visuals(visited);
-            }
-
+            let counts = root.render(context, bounds, Some(self.dirty_rects.clone()), true, false, false);
             if use_layer_clip {
                 context.pop_layer();
             }
+            self.dirty_rects.end_draw(context);
+            counts
+        };
+        self.visited_visuals.set(visited);
+        self.rendered_visuals.set(rendered);
+        if let Some(events) = self.debug_events() {
+            events.set_rendered_visuals(rendered);
+            events.set_visited_visuals(visited);
         }
-        self.dirty_rects.end_draw(context);
     }
 
     pub fn request_update(&self) {

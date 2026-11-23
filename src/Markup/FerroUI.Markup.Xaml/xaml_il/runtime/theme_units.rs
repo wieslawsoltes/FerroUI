@@ -75,6 +75,40 @@ pub fn apply_theme_unit(
     }
 }
 
+/// Applies the runs of a region of a build (#853) to `dictionary`, in the order of `region`:
+/// each pair is the canonical index of a unit and the index of one of its runs, and a pair whose
+/// unit the table `units` does not have adds nothing. The first failure is the error and the
+/// runs after it are not applied, as the calls of [`apply_theme_unit`] the region stands for.
+/// `units` is in canonical order (ascending indices); a region whose units ascend, which is what
+/// the emitter writes for the documents a theme merges in order, is applied in one pass over
+/// both, and any other order is applied too.
+#[inline(never)]
+pub fn apply_theme_region(
+    units: &[&ThemeUnit],
+    region: &[(u16, u16)],
+    context: &Rc<XamlIlContext>,
+    dictionary: &Ref<ResourceDictionary>,
+) -> Result<(), XamlLoadError> {
+    // The position in `units` of the first unit not below the unit of the last pair.
+    let mut position = 0;
+    let mut last = 0;
+    for &(unit, run) in region {
+        let unit = u32::from(unit);
+        if unit < last {
+            position = 0;
+        }
+        last = unit;
+        position += units[position..].partition_point(|known| known.index < unit);
+        let Some(found) = units.get(position).filter(|found| found.index == unit) else {
+            continue;
+        };
+        if let Some(apply) = found.runs.get(usize::from(run)) {
+            apply(context, dictionary)?;
+        }
+    }
+    Ok(())
+}
+
 /// The unit named `name` of the table `units`.
 pub fn find_theme_unit<'u>(units: &[&'u ThemeUnit], name: &str) -> Option<&'u ThemeUnit> {
     units.iter().copied().find(|unit| unit.name == name)
@@ -132,6 +166,31 @@ pub fn register_theme_parts_if_absent(class: &'static str, parts: ThemeParts) {
     let mut registered = REGISTERED.write().unwrap_or_else(|error| error.into_inner());
     if !registered.iter().any(|(known, _)| *known == class) {
         registered.push((class, parts));
+    }
+}
+
+/// [`register_theme_parts`] unless the parts registered for the class already have as many units
+/// (#846): what the generated `register()` of a crate calls. A library that constructs a theme
+/// registers the table of its own documents, and the application the table it computed with the
+/// references of every dependency; whichever crate registers first, the wider table stays.
+pub fn register_wider_theme_parts(class: &'static str, parts: ThemeParts) {
+    let mut registered = REGISTERED.write().unwrap_or_else(|error| error.into_inner());
+    match registered.iter_mut().find(|(known, _)| *known == class) {
+        Some(entry) if entry.1.len() >= parts.len() => {}
+        Some(entry) => entry.1 = parts,
+        None => registered.push((class, parts)),
+    }
+}
+
+/// The parts a compiled construction of the theme `class` applies (#846): the parts registered for
+/// the class when they have more units than `own`, the table of the crate that writes the
+/// construction, else `own`. A library compiled with `<WinUITheme />` thus constructs the theme with
+/// the table of the application that uses it (which roots what the application's documents and
+/// sources name), and with its own table when it is used alone.
+pub fn wider_theme_parts(class: &str, own: ThemeParts) -> ThemeParts {
+    match registered_theme_parts(class) {
+        Some(registered) if registered.len() > own.len() => registered,
+        _ => own,
     }
 }
 

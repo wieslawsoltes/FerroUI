@@ -1121,46 +1121,30 @@ impl RichEditTextRange {
             return Ok(None);
         }
         let source = self.text()?;
-        let case_sensitive = options.contains(TextFindOptions::MATCH_CASE);
-        let (haystack, boundaries) = searchable(&source, case_sensitive);
-        let (needle, _) = searchable(text, case_sensitive);
-        let words = if options.contains(TextFindOptions::WHOLE_WORD) {
+        let whole_word = options.contains(TextFindOptions::WHOLE_WORD);
+        let words = if whole_word {
             unit_ranges(&self.document().text(), UnicodeTextUnit::Word)
         } else {
             Vec::new()
         };
-        let mut found = None;
-        for byte_start in SubstringMatches::new(&haystack, &needle) {
-            let byte_end = byte_start + needle.len();
-            let start = boundaries
-                .binary_search_by_key(&byte_start, |(byte, _)| *byte)
-                .ok()
-                .map(|index| boundaries[index].1);
-            let end = boundaries
-                .binary_search_by_key(&byte_end, |(byte, _)| *byte)
-                .ok()
-                .map(|index| boundaries[index].1);
-            let (Some(start), Some(end)) = (start, end) else {
-                continue;
-            };
-            let start = self.start_position() + start;
-            let end = self.start_position() + end;
-            if options.contains(TextFindOptions::WHOLE_WORD)
-                && (words
-                    .binary_search_by_key(&start, |word| word.start)
-                    .is_err()
-                    || words.binary_search_by_key(&end, |word| word.end).is_err())
-            {
-                continue;
-            }
-            found = Some(start..end);
-            if !options.contains(TextFindOptions::BACKWARDS) {
-                break;
-            }
-        }
-        found
-            .map(|range| Self::new(self.editor.clone(), range))
-            .transpose()
+        let offset = self.start_position();
+        find_in_text(
+            &source,
+            text,
+            options.contains(TextFindOptions::MATCH_CASE),
+            options.contains(TextFindOptions::BACKWARDS),
+            |found| {
+                !whole_word
+                    || (words
+                        .binary_search_by_key(&(offset + found.start), |word| word.start)
+                        .is_ok()
+                        && words
+                            .binary_search_by_key(&(offset + found.end), |word| word.end)
+                            .is_ok())
+            },
+        )
+        .map(|found| Self::new(self.editor.clone(), offset + found.start..offset + found.end))
+        .transpose()
     }
     pub fn find_text(&self, text: &str, options: TextFindOptions) -> Result<bool, EditError> {
         let Some(found) = self.find(text, options)? else {
@@ -1423,6 +1407,43 @@ pub(crate) fn unit_ranges(text: &str, unit: UnicodeTextUnit) -> Vec<Range<usize>
             ranges
         }
     }
+}
+/// The UTF-16 range of the first match of `needle` in `source` that `accept` takes, or
+/// the last one when `backwards`. Case-insensitive matching uses Unicode lowercase
+/// mappings and only matches whole characters of `source`. Overlapping matches count.
+pub(crate) fn find_in_text(
+    source: &str,
+    needle: &str,
+    case_sensitive: bool,
+    backwards: bool,
+    mut accept: impl FnMut(&Range<usize>) -> bool,
+) -> Option<Range<usize>> {
+    let (haystack, boundaries) = searchable(source, case_sensitive);
+    let (needle, _) = searchable(needle, case_sensitive);
+    let mut found = None;
+    for byte_start in SubstringMatches::new(&haystack, &needle) {
+        let byte_end = byte_start + needle.len();
+        let start = boundaries
+            .binary_search_by_key(&byte_start, |(byte, _)| *byte)
+            .ok()
+            .map(|index| boundaries[index].1);
+        let end = boundaries
+            .binary_search_by_key(&byte_end, |(byte, _)| *byte)
+            .ok()
+            .map(|index| boundaries[index].1);
+        let (Some(start), Some(end)) = (start, end) else {
+            continue;
+        };
+        let range = start..end;
+        if !accept(&range) {
+            continue;
+        }
+        found = Some(range);
+        if !backwards {
+            break;
+        }
+    }
+    found
 }
 fn searchable(text: &str, case_sensitive: bool) -> (String, Vec<(usize, usize)>) {
     let mut output = String::new();

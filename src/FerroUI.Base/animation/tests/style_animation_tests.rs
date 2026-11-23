@@ -151,6 +151,80 @@ fn animation_preview_failed_setup_removes_created_transform() {
     assert!(!target.is_animating(Visual::render_transform_property()));
 }
 
+/// Not from upstream (#567): `try_apply_for_preview` returns the programs the framework rejects
+/// as `Err`, with the message `apply_for_preview` panics with, and applies nothing for them.
+#[test]
+fn animation_preview_rejections_are_errors_with_the_message_of_the_panic() {
+    let rotate = || {
+        let animation = Animation::new();
+        animation.set_duration(seconds(1.0));
+        animation.children().add(KeyFrame::with_key_time(
+            seconds(1.0),
+            [Setter::new(crate::media::RotateTransform::angle_property(), 90.0) as _],
+        ));
+        animation
+    };
+    let negative_speed = rotate();
+    negative_speed.set_speed_ratio(-1.0);
+    let negative_delay = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    negative_delay.set_delay(seconds(-1.0));
+    let no_property = Animation::new();
+    no_property.set_duration(seconds(1.0));
+    no_property.children().add(KeyFrame::with_key_time(seconds(1.0), [Setter::empty() as _]));
+
+    let border = |css: bool| {
+        let target = Border::new();
+        if css {
+            let operations = crate::media::transformation::TransformOperations::parse("rotate(10deg)").unwrap();
+            target.set_render_transform(Some(operations as Rc<dyn crate::media::ITransform>));
+        }
+        target.upcast::<Animatable>()
+    };
+    let cases: [(&Ref<Animation>, Ref<Animatable>, &str); 5] = [
+        (&negative_speed, border(false), "SpeedRatio value cannot be negative."),
+        (&negative_delay, border(false), "Delay value cannot be negative."),
+        (&no_property, border(false), "No Setter property assigned."),
+        (&rotate(), border(true), "CSS TransformOperations"),
+        (&rotate(), crate::media::RotateTransform::new().upcast::<Animatable>(), "to type 'Visual'"),
+    ];
+    for (animation, target, expected) in cases {
+        let transform = target.downcast_ref::<Visual>().and_then(Visual::render_transform);
+        let error = animation
+            .try_apply_for_preview(&target, Some(TestClock::new().as_clock()), None)
+            .err()
+            .expect("the program is rejected");
+        assert!(error.0.contains(expected), "{error}");
+        let render_transform = target.downcast_ref::<Visual>().and_then(Visual::render_transform);
+        assert_eq!(transform.is_some(), render_transform.is_some(), "{expected}: nothing is applied");
+        let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+            animation.apply_for_preview(&target, Some(TestClock::new().as_clock()), None)
+        }))
+        .err()
+        .expect("apply_for_preview panics");
+        let message = panic
+            .downcast_ref::<String>()
+            .cloned()
+            .or_else(|| panic.downcast_ref::<&str>().map(|text| text.to_string()));
+        assert_eq!(Some(error.0), message);
+    }
+
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    let target = Border::new();
+    let clock = TestClock::new();
+    let preview = animation.try_apply_for_preview(&target, Some(clock.as_clock()), None).unwrap();
+    clock.step(SignedDuration::ZERO);
+    clock.step(seconds(1.0));
+    assert_eq!(target.opacity(), 0.0);
+    preview.dispose();
+    assert_eq!(target.opacity(), 1.0);
+}
+
 #[test]
 fn animation_preview_completed_fill_keeps_original_program_precedence() {
     let first = create_opacity_animation(
@@ -502,6 +576,63 @@ fn animations_are_disposed_when_the_style_is_detached() {
     assert!(!clock.has_observers());
 }
 
+/// The style instances of `target` that have extras, of all its style instances.
+fn instances_with_extras(target: &Border) -> (usize, usize) {
+    let frames = target.values().frames();
+    let instances: Vec<&crate::styling::StyleInstance> =
+        frames.iter().filter_map(|frame| frame.as_any().downcast_ref()).collect();
+    (instances.iter().filter(|instance| instance.has_extras()).count(), instances.len())
+}
+
+#[test]
+fn only_a_style_instance_with_animations_keeps_extras() {
+    // Section 9.64 of desktop-performance.md: what few instances have is not a part of every instance.
+    // A frame is its entries, its owner and its priorities; an instance adds itself, its activator, its
+    // extras, whether it is active and its source.
+    let words = std::mem::size_of::<usize>();
+    let weak = std::mem::size_of::<WeakRef<FerroObject>>();
+    let frame = std::mem::size_of::<crate::property_store::ValueFrameBase>();
+    assert!(frame <= 5 * words + weak, "{frame}");
+    let instance = std::mem::size_of::<crate::styling::StyleInstance>();
+    assert!(instance <= frame + 5 * words + weak, "{instance}");
+
+    let clock = start();
+    let animation = create_opacity_animation(
+        SetterValue::Value(Rc::new(1.0_f64)),
+        SetterValue::Value(Rc::new(0.0_f64)),
+    );
+    animation.set_fill_mode(FillMode::None);
+    let animated = Style::with_selector(Selectors::of_type::<Border>().class("foo"));
+    animated.add_animation(&animation);
+    let setters = Style::with_selector(Selectors::of_type::<Border>().class("foo"));
+    setters.add(Setter::new(Layoutable::width_property(), 12.0_f64));
+    let root = TestRoot::new();
+    root.styles().add(animated);
+    root.styles().add(setters);
+    let target = Border::new();
+    root.set_child(&target);
+
+    assert_eq!(instances_with_extras(&target), (1, 2));
+
+    // The instance without extras is activated and deactivated as the one with them.
+    clock.pulse(SignedDuration::ZERO);
+    target.classes().add("foo");
+    assert_eq!(target.width(), 12.0);
+    clock.pulse(seconds(1.0));
+    clock.pulse(seconds(1.5));
+    assert_eq!(target.opacity(), 0.5);
+    assert_eq!(instances_with_extras(&target), (1, 2));
+
+    target.classes().remove("foo");
+    assert!(target.width().is_nan());
+    assert_eq!(target.opacity(), 1.0);
+
+    root.styles().clear();
+    assert_eq!(instances_with_extras(&target), (0, 0));
+    clock.pulse(seconds(1.75));
+    assert!(!clock.has_observers());
+}
+
 // --- The animation tests of the upstream style tests (`Styling/StyleTests.cs`) ---
 //
 // They are here because they need the clocks of the animation tests. `Class1`
@@ -622,4 +753,60 @@ fn animations_with_activator_trigger_should_be_activated_and_deactivated() {
 
     border.classes().add("foo");
     assert!(border.background() == Some(blue()));
+}
+
+/// An animator of `bool` values, given explicitly for a property of another type.
+struct BoolValuesAnimator;
+
+impl crate::animation::InterpolatingAnimator for BoolValuesAnimator {
+    type Value = bool;
+
+    fn interpolate(&self, progress: f64, old_value: &bool, new_value: &bool) -> bool {
+        if progress < 0.5 { *old_value } else { *new_value }
+    }
+}
+
+#[test]
+fn an_animator_that_rejects_its_property_is_an_error_of_apply_without_a_panic() {
+    let program = || {
+        let animator: Rc<dyn crate::animation::ICustomAnimator> = Rc::new(BoolValuesAnimator);
+        let setter: Rc<dyn crate::animation::IAnimationSetter> =
+            Setter::new(crate::layout::Layoutable::width_property(), 20.0);
+        Animation::set_animator(&setter, animator);
+        let animation = Animation::new();
+        animation.set_duration(seconds(1.0));
+        animation.children().add(KeyFrame::with_key_time(seconds(1.0), [setter as _]));
+        animation
+    };
+    let expected = "Unable to animate property";
+
+    // The preview of the Designer and `try_apply` return the error of the animator.
+    let animation = program();
+    let target = Border::new();
+    let error = animation
+        .try_apply_for_preview(&target, Some(TestClock::new().as_clock()), None)
+        .err()
+        .expect("the animator rejects the property");
+    assert!(error.0.contains(expected), "{error}");
+    let error = animation
+        .try_apply(&target, Some(TestClock::new().as_clock()), Observable::single_value(true), None, true)
+        .err()
+        .expect("the animator rejects the property");
+    assert!(error.0.contains(expected), "{error}");
+
+    // `apply` raises it on the dispatcher and applies nothing.
+    let _scope = crate::threading::Dispatcher::unit_test_scope();
+    let raised = Rc::new(RefCell::new(None::<String>));
+    let seen = raised.clone();
+    let _handler = crate::threading::Dispatcher::current_dispatcher().unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.exception_message().map(str::to_owned);
+        args.set_handled(true);
+    });
+    let clock = TestClock::new();
+    let applied = animation.apply(&target, Some(clock.as_clock()), Observable::single_value(true), None, true);
+    clock.step(SignedDuration::ZERO);
+    clock.step(seconds(1.0));
+    assert!(raised.take().is_some_and(|message| message.contains(expected)));
+    assert!(target.width().is_nan(), "nothing is applied");
+    applied.dispose();
 }

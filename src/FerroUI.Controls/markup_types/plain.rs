@@ -9,7 +9,11 @@ use crate::primitives::popup_positioning::{
 };
 use crate::primitives::CustomPopupPlacementCallbackValue;
 use crate::templates::{DataTemplates, IDataTemplate};
-use crate::{ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, TableViewColumn, VisualState, VisualStateGroup};
+use crate::animation::{ColorKeyFrame, DoubleKeyFrame, ObjectKeyFrame, PointKeyFrame, Timeline};
+use crate::{
+    ItemsSourceView, NativeMenuItemBase, Page, StateTriggerBase, SwipeItem, TableViewColumn, VisualState, VisualStateGroup,
+    VisualTransition,
+};
 use ferroui_base::collections::FerroList;
 use crate::{
     ColumnDefinition, ColumnDefinitions, Control, Controls, ItemCollection, RowDefinition, RowDefinitions, TrayIcon,
@@ -486,6 +490,20 @@ ferro_markup_type!(class FerroListOf<Ref<VisualState>> as "FerroList`1" {
     methods: [fn Add(Ref<VisualState>) => |list: &FerroList<Ref<VisualState>>, item: Ref<VisualState>| list.add(item)],
 });
 
+// The items of a swipe control side (`SwipeItems`).
+ferro_markup_type!(class FerroListOf<Ref<SwipeItem>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<SwipeItem>>, Option<FerroList<Ref<SwipeItem>>>],
+    this: FerroList<Ref<SwipeItem>>,
+    generic: "FerroList`1" [Ref<SwipeItem>],
+    constructors: [() => FerroList::<Ref<SwipeItem>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<SwipeItem>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<SwipeItem>) => |list: &FerroList<Ref<SwipeItem>>, item: Ref<SwipeItem>| list.add(item)],
+});
+
 // The triggers of a visual state (`VisualState.StateTriggers`).
 ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
@@ -498,6 +516,90 @@ ferro_markup_type!(class FerroListOf<Ref<StateTriggerBase>> as "FerroList`1" {
         Count: i32 { get: |list: &FerroList<Ref<StateTriggerBase>>| list.count() as i32 },
     ],
     methods: [fn Add(Ref<StateTriggerBase>) => |list: &FerroList<Ref<StateTriggerBase>>, item: Ref<StateTriggerBase>| list.add(item)],
+});
+
+// The transitions of a visual state group (`VisualStateGroup.Transitions`).
+ferro_markup_type!(class FerroListOf<Ref<VisualTransition>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<VisualTransition>>, Option<FerroList<Ref<VisualTransition>>>],
+    this: FerroList<Ref<VisualTransition>>,
+    generic: "FerroList`1" [Ref<VisualTransition>],
+    constructors: [() => FerroList::<Ref<VisualTransition>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<VisualTransition>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<VisualTransition>) => |list: &FerroList<Ref<VisualTransition>>, item: Ref<VisualTransition>| list.add(item)],
+});
+
+// The timelines of a storyboard (`Storyboard.Children`).
+ferro_markup_type!(class FerroListOf<Ref<Timeline>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<Timeline>>, Option<FerroList<Ref<Timeline>>>],
+    this: FerroList<Ref<Timeline>>,
+    generic: "FerroList`1" [Ref<Timeline>],
+    constructors: [() => FerroList::<Ref<Timeline>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<Timeline>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<Timeline>) => |list: &FerroList<Ref<Timeline>>, item: Ref<Timeline>| list.add(item)],
+});
+
+// The key frames of a `DoubleAnimationUsingKeyFrames`.
+ferro_markup_type!(class FerroListOf<Ref<DoubleKeyFrame>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<DoubleKeyFrame>>, Option<FerroList<Ref<DoubleKeyFrame>>>],
+    this: FerroList<Ref<DoubleKeyFrame>>,
+    generic: "FerroList`1" [Ref<DoubleKeyFrame>],
+    constructors: [() => FerroList::<Ref<DoubleKeyFrame>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<DoubleKeyFrame>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<DoubleKeyFrame>) => |list: &FerroList<Ref<DoubleKeyFrame>>, item: Ref<DoubleKeyFrame>| list.add(item)],
+});
+
+// The key frames of a `ColorAnimationUsingKeyFrames`.
+ferro_markup_type!(class FerroListOf<Ref<ColorKeyFrame>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<ColorKeyFrame>>, Option<FerroList<Ref<ColorKeyFrame>>>],
+    this: FerroList<Ref<ColorKeyFrame>>,
+    generic: "FerroList`1" [Ref<ColorKeyFrame>],
+    constructors: [() => FerroList::<Ref<ColorKeyFrame>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<ColorKeyFrame>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<ColorKeyFrame>) => |list: &FerroList<Ref<ColorKeyFrame>>, item: Ref<ColorKeyFrame>| list.add(item)],
+});
+
+// The key frames of a `PointAnimationUsingKeyFrames`.
+ferro_markup_type!(class FerroListOf<Ref<PointKeyFrame>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<PointKeyFrame>>, Option<FerroList<Ref<PointKeyFrame>>>],
+    this: FerroList<Ref<PointKeyFrame>>,
+    generic: "FerroList`1" [Ref<PointKeyFrame>],
+    constructors: [() => FerroList::<Ref<PointKeyFrame>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<PointKeyFrame>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<PointKeyFrame>) => |list: &FerroList<Ref<PointKeyFrame>>, item: Ref<PointKeyFrame>| list.add(item)],
+});
+
+// The key frames of an `ObjectAnimationUsingKeyFrames`.
+ferro_markup_type!(class FerroListOf<Ref<ObjectKeyFrame>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<ObjectKeyFrame>>, Option<FerroList<Ref<ObjectKeyFrame>>>],
+    this: FerroList<Ref<ObjectKeyFrame>>,
+    generic: "FerroList`1" [Ref<ObjectKeyFrame>],
+    constructors: [() => FerroList::<Ref<ObjectKeyFrame>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<ObjectKeyFrame>>| list.count() as i32 },
+    ],
+    methods: [fn Add(Ref<ObjectKeyFrame>) => |list: &FerroList<Ref<ObjectKeyFrame>>, item: Ref<ObjectKeyFrame>| list.add(item)],
 });
 
 // The arguments of `ScrollViewer.ScrollChanged` and the type of its routed event. `classes.rs`
@@ -574,6 +676,13 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<VisualStateGroup>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualState>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<StateTriggerBase>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<SwipeItem>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<VisualTransition>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<Timeline>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<DoubleKeyFrame>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<ColorKeyFrame>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<PointKeyFrame>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<ObjectKeyFrame>> as MarkupTyped>::MARKUP,
 ];
 
 /// Registers what the untyped value conversions need of the types of this file that
@@ -595,6 +704,13 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<VisualStateGroup>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualState>>>();
     ValueTypes::register_nullable::<FerroList<Ref<StateTriggerBase>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<SwipeItem>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<VisualTransition>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<Timeline>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<DoubleKeyFrame>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<ColorKeyFrame>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<PointKeyFrame>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<ObjectKeyFrame>>>();
     ValueTypes::register_nullable::<Rc<RefCell<CustomPopupPlacement>>>();
     // A named collection is the list it derives from: the same list, so that the members
     // of the list (`Capacity`) are reached through the collection.

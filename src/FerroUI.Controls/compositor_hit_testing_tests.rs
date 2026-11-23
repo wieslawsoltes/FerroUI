@@ -251,6 +251,28 @@ fn is_not(target: &Visual) -> impl Fn(&Visual) -> bool + '_ {
 
 // --- tests -------------------------------------------------------------------------
 
+/// Not in the reference (desktop-performance.md, section 9.69): the renderer of a border is made
+/// by the first render that has something to draw, and a border with no brush and no shadow draws
+/// nothing as before.
+#[test]
+fn only_a_border_with_something_to_draw_makes_its_renderer() {
+    let s = CompositorTestServices::new(Size::new(200.0, 200.0));
+    let filled = centered_border();
+    let plain = Border::new();
+    filled.set_child(&plain);
+
+    s.set_content(&filled);
+    s.run_jobs();
+
+    assert!(filled.has_border_renderer());
+    assert!(!plain.has_border_renderer());
+
+    // A brush given later is drawn by a renderer made then.
+    plain.set_background(Some(Brushes::red()));
+    s.run_jobs();
+    assert!(plain.has_border_renderer());
+}
+
 #[test]
 fn hit_test_should_find_controls_at_point() {
     let s = CompositorTestServices::new(Size::new(200.0, 200.0));

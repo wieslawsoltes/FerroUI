@@ -1,5 +1,133 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. The spacing is the
-     source's OneWay x:Bind to the slider (named Spacing here), compiled by the x:Bind core (#525). -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Slider x:Name="Spacing" Minimum="0" Maximum="32" Value="8" Width="300" HorizontalAlignment="Left"/><StackPanel Orientation="Horizontal" Spacing="{x:Bind Spacing.Value, Mode=OneWay}"><Button Content="First"/><Button Content="Second"/><Button Content="Third"/></StackPanel>
+<!-- Ported from the pinned Spacing page of WinUI Gallery (14061eea); see ../NOTICE.md. The page has
+     no code-behind upstream: its images of the theme (CardsImage and DialogImage of the
+     ThemeDictionaries, the source's Cards and Dialog PNGs, which the gallery's SampleThemeListener
+     follows) are set by brush_samples.rs. The keyed styles ValueTextStyle, DescriptionTextStyle and
+     VisualBorderStyle are style classes; the card styles are Borders with the card brushes;
+     ScrollView is a ScrollViewer; ThemeResource becomes DynamicResource; ControlCornerRadius is 4,
+     CaptionTextBlockStyle 12 and SubtitleTextBlockStyle 20 semibold, and the grid of
+     GalleryTileGridStyle is a Border with the card brushes. HorizontalScrollMode is the bar's
+     visibility. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="0">
+  <StackPanel.Styles>
+    <Style Selector="TextBlock.Value">
+      <Setter Property="Margin" Value="16,0,0,0" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="TextBlock.Description">
+      <Setter Property="FontSize" Value="12" />
+      <Setter Property="Grid.Column" Value="2" />
+      <Setter Property="TextWrapping" Value="Wrap" />
+      <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Border.Visual">
+      <Setter Property="Grid.Column" Value="1" />
+      <Setter Property="CornerRadius" Value="4" />
+      <Setter Property="Height" Value="20" />
+      <Setter Property="HorizontalAlignment" Value="Left" />
+      <Setter Property="Background" Value="{DynamicResource AccentFillColorDefaultBrush}" />
+    </Style>
+    <Style Selector="Border.DesignRowCard">
+      <Setter Property="Padding" Value="0,12" />
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorDefaultBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+    <Style Selector="Border.DesignRowLightCard">
+      <Setter Property="Padding" Value="0,12" />
+      <Setter Property="Background" Value="{DynamicResource CardBackgroundFillColorSecondaryBrush}" />
+      <Setter Property="BorderBrush" Value="{DynamicResource CardStrokeColorDefaultBrush}" />
+      <Setter Property="BorderThickness" Value="0,1,0,0" />
+    </Style>
+  </StackPanel.Styles>
+  <RichTextBlock TextWrapping="Wrap">
+    <Paragraph><Run Text="The use of consistently sized spacing and gutters semantically groups an experience into separate components. These values map to our rounded corner logic and together help create a cohesive and usable layout." /><Run Text=" A best practice in design is to use a 4px grid. This means that any spacing or sizing should be a multiple of 4. This helps to create a consistent and harmonious layout and these values are easy to scale." /><LineBreak /><Run Text="Below, you can find a few examples of common layout types with highlighted spacing values (in epx)." /></Paragraph>
+  </RichTextBlock>
+  <ScrollViewer Margin="0,24,0,0" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Disabled">
+    <StackPanel Margin="0,0,0,16" Orientation="Horizontal" Spacing="36">
+      <Grid VerticalAlignment="Top" RowDefinitions="Auto,*" RowSpacing="12">
+        <TextBlock HorizontalAlignment="Center" FontSize="20" FontWeight="SemiBold" Text="Page with cards layout" />
+        <Image x:Name="CardsImage" Grid.Row="1" Stretch="None"
+               AutomationProperties.Name="Example of spacing in a page with cards layout" />
+      </Grid>
+      <Grid VerticalAlignment="Top" RowDefinitions="Auto,*" RowSpacing="12">
+        <TextBlock HorizontalAlignment="Center" FontSize="20" FontWeight="SemiBold" Text="Form layout" />
+        <Image x:Name="DialogImage" Grid.Row="1" Stretch="None"
+               AutomationProperties.Name="Example of spacing in a form layout" />
+      </Grid>
+    </StackPanel>
+  </ScrollViewer>
+  <Border Margin="0,36,0,0" Background="{DynamicResource CardBackgroundFillColorDefaultBrush}"
+          BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
+    <ScrollViewer HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden">
+      <StackPanel Margin="12,24,12,12">
+        <!-- header -->
+        <Grid Margin="16,0,0,0" HorizontalAlignment="Stretch">
+          <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="206" />
+            <ColumnDefinition Width="*" MaxWidth="400" />
+          </Grid.ColumnDefinitions>
+          <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}" Text="Value" />
+          <TextBlock Grid.Column="1" FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                     Text="Usage" />
+        </Grid>
+        <!-- 4epx -->
+        <Border Classes="DesignRowLightCard" Margin="0,24,0,0">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="4epx" />
+            <Border x:Name="Spacing4" Classes="Visual" Width="4" />
+            <TextBlock Classes="Description" Text="Spacing used for compact sizing." />
+          </Grid>
+        </Border>
+        <!-- 8epx -->
+        <Border Classes="DesignRowCard">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="8epx" />
+            <Border x:Name="Spacing8" Classes="Visual" Width="8" />
+            <TextBlock Classes="Description" Text="Spacing between UI controls, control + label." />
+          </Grid>
+        </Border>
+        <!-- 12epx -->
+        <Border Classes="DesignRowLightCard">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="12epx" />
+            <Border x:Name="Spacing12" Classes="Visual" Width="12" />
+            <TextBlock Classes="Description" Text="Spacing between control + header, surface and edge text, text sections." />
+          </Grid>
+        </Border>
+        <!-- 16epx -->
+        <Border Classes="DesignRowCard">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="16epx" />
+            <Border x:Name="Spacing16" Classes="Visual" Width="16" />
+            <TextBlock Classes="Description" Text="Padding used in list styles, cards." />
+          </Grid>
+        </Border>
+        <!-- 24epx -->
+        <Border Classes="DesignRowLightCard">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="24epx" />
+            <Border x:Name="Spacing24" Classes="Visual" Width="24" />
+            <TextBlock Classes="Description" Text="Spacing between content sections." />
+          </Grid>
+        </Border>
+        <!-- 36epx -->
+        <Border Classes="DesignRowCard">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="36epx" />
+            <Border x:Name="Spacing36" Classes="Visual" Width="36" />
+            <TextBlock Classes="Description" Text="Padding on pages." />
+          </Grid>
+        </Border>
+        <!-- 48epx -->
+        <Border Classes="DesignRowLightCard">
+          <Grid ColumnDefinitions="86,136,*">
+            <TextBlock Classes="Value" Text="48epx" />
+            <Border x:Name="Spacing48" Classes="Visual" Width="48" />
+            <TextBlock Classes="Description" Text="Spacing between page sections with title." />
+          </Grid>
+        </Border>
+      </StackPanel>
+    </ScrollViewer>
+  </Border>
 </StackPanel>

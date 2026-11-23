@@ -123,7 +123,7 @@ fn top_level() -> Option<Ref<TopLevel>> {
 /// the current page, whether the navigation page of the main view is running
 /// a navigation (it ignores another one until it has finished), the focused
 /// element (its class, and its text when it is a text box) and every visible
-/// text block, text box, button and image with its class, its name, its text
+/// text block, text box, button, image and QR preview with its class, its name, its text
 /// (of a text block or a text box), its bounds in the coordinates of the view
 /// (CSS pixels of the canvas) and whether the pointer reaches it at its
 /// centre (`hit`: no other element covers it there); for a text block or a
@@ -167,7 +167,7 @@ pub fn catalog_state() -> String {
             (text_block.text(), format!(",\"font\":{}", font(text_block.font_family())))
         } else if let Some(text_box) = visual.cast::<TextBox>() {
             (text_box.text(), format!(",\"font\":{}", font(text_box.font_family())))
-        } else if visual.cast::<Button>().is_some() {
+        } else if visual.cast::<Button>().is_some() || visual.get_type().name() == "QrPreview" {
             (None, String::new())
         } else if let Some(image) = visual.cast::<Image>() {
             let source = image.source().map(|source| source.size());
@@ -218,11 +218,11 @@ pub fn catalog_media_state() -> String {
     };
     let counters = s.budget.counters().snapshot();
     format!(
-        "{{\"title\":{},\"status\":{},\"attached\":{},\"playing\":{},\"paused\":{},\"frame\":{},\"cameraActive\":{},\"frames\":{},\"imports\":{},\"reads\":{},\"quarantine\":{},\"previewAttempts\":{},\"previewBytes\":{}}}",
+        "{{\"title\":{},\"status\":{},\"attached\":{},\"playing\":{},\"paused\":{},\"frame\":{},\"cameraActive\":{},\"frames\":{},\"imports\":{},\"reads\":{},\"quarantine\":{},\"previewAttempts\":{},\"previewBytes\":{},\"analysisAttempts\":{},\"analysisBytes\":{}}}",
         json_string(s.title), json_string(&s.status), s.attached, s.playing, s.paused,
         s.frame, s.camera_active, s.budget.usage().frames, counters.gpu_imports,
         s.budget.gpu_reads(), s.budget.quarantined_reads(),
-        counters.preview.attempts, counters.preview.bytes
+        counters.preview.attempts, counters.preview.bytes, counters.analysis.attempts, counters.analysis.bytes
     )
 }
 

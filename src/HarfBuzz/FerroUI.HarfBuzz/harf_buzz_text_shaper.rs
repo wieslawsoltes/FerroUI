@@ -119,6 +119,10 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
 
             buffer.add_utf16(containing_text, start, length);
 
+            if options.produce_concat_flags() {
+                buffer.produce_unsafe_to_concat();
+            }
+
             Self::merge_break_pair(&mut buffer);
 
             buffer.guess_segment_properties();
@@ -144,6 +148,12 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
 
             let features = Self::get_features(options);
 
+            // The font of the typeface is shared by every size: the point size, which selects
+            // the tracking of a `trak` table (that of the system font of macOS), is set to the
+            // em size of this run, as the point size of a Core Text font is its em size.
+            let point_size =
+                if font_rendering_em_size.is_finite() { font_rendering_em_size.max(0.0) as f32 } else { 0.0 };
+
             // HarfBuzz produces glyphs in visual order for RTL by default:
             // the first glyph in the buffer is the leftmost visual glyph
             // (highest cluster value). LTR output already has clusters in
@@ -152,6 +162,7 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
             // operate on visual-order glyphs without an extra bidi reversal
             // step.
             let scale_x = harf_buzz_typeface.with_font(|font| {
+                font.set_ptem(point_size);
                 font.shape(&mut buffer, &features);
                 font.scale().0
             });
@@ -192,6 +203,24 @@ impl ITextShaperImpl for HarfBuzzTextShaper {
                 }
 
                 shaped_buffer.set(i, GlyphInfo::with_offset(glyph_index, glyph_cluster, glyph_advance, glyph_offset));
+            }
+
+            if options.produce_concat_flags() {
+                let flags: Rc<[u8]> = glyph_infos
+                    .iter()
+                    .map(|info| {
+                        let flags = hb::glyph_flags(info);
+                        let mut byte = 0;
+                        if flags & hb::GLYPH_FLAG_UNSAFE_TO_BREAK != 0 {
+                            byte |= ShapedBuffer::UNSAFE_TO_BREAK;
+                        }
+                        if flags & hb::GLYPH_FLAG_UNSAFE_TO_CONCAT != 0 {
+                            byte |= ShapedBuffer::UNSAFE_TO_CONCAT;
+                        }
+                        byte
+                    })
+                    .collect();
+                shaped_buffer.set_concat_flags(flags);
             }
 
             shaped_buffer

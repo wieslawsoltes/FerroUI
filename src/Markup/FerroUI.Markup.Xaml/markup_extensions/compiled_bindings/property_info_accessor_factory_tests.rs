@@ -135,7 +135,7 @@ fn registered_property_accessor_reads_writes_and_follows_changes() {
     border.set_tag(Some(boxed("one".to_string())));
     let source: BoxedValue = boxed(border.clone());
     let property: &'static FerroProperty = Control::tag_property();
-    let accessor = PropertyInfoAccessorFactory::create_ferro_property_accessor(&WeakValue::new(&source), property.as_property_info());
+    let accessor = PropertyInfoAccessorFactory::try_create_ferro_property_accessor(&WeakValue::new(&source), property.as_property_info()).unwrap();
 
     assert_eq!(accessor.property_type(), Some(ValueType::of::<Option<BoxedValue>>()));
     assert_eq!(accessor.value().unwrap().downcast_ref::<String>().unwrap(), "one");
@@ -159,7 +159,7 @@ fn registered_property_accessor_reads_writes_and_follows_changes() {
 
     // A value of the wrong type is an error, as the setter throwing.
     let width: &'static FerroProperty = ferroui_base::layout::Layoutable::width_property();
-    let accessor = PropertyInfoAccessorFactory::create_ferro_property_accessor(&WeakValue::new(&source), width.as_property_info());
+    let accessor = PropertyInfoAccessorFactory::try_create_ferro_property_accessor(&WeakValue::new(&source), width.as_property_info()).unwrap();
     assert!(accessor.set_value(Some(&boxed("wide".to_string())), BindingPriority::LocalValue).is_err());
     assert_eq!(accessor.set_value(Some(&boxed(12.0f64)), BindingPriority::LocalValue), Ok(true));
     assert_eq!(border.width(), 12.0);
@@ -169,7 +169,7 @@ fn registered_property_accessor_reads_writes_and_follows_changes() {
 fn registered_property_accessor_of_something_that_is_not_an_object() {
     let source: BoxedValue = boxed(5i32);
     let property: &'static FerroProperty = Control::tag_property();
-    let accessor = PropertyInfoAccessorFactory::create_ferro_property_accessor(&WeakValue::new(&source), property.as_property_info());
+    let accessor = PropertyInfoAccessorFactory::try_create_ferro_property_accessor(&WeakValue::new(&source), property.as_property_info()).unwrap();
     assert!(accessor.value().is_none());
     // The accessor of the base library: a write to a reference without a
     // target does nothing and reports success, and subscribing publishes

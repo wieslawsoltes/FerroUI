@@ -375,9 +375,8 @@ impl DateTimeOffset {
     /// Checked against results recorded from .NET for the invariant culture
     /// (`date_time_tests.rs`, `date_time_offset_parse_matches_net`). Not
     /// supported, as for [`DateTime::parse`]: what the heuristic parser of
-    /// .NET accepts beyond those forms (other time zone names, era names,
-    /// genitive month names), the `DateTimeStyles` overloads and
-    /// `ParseExact`.
+    /// .NET accepts beyond those forms (other time zone names, era names),
+    /// the `DateTimeStyles` overloads and `ParseExact`.
     pub fn parse(text: &str, provider: &(impl DateTimeFormatProvider + ?Sized)) -> Result<DateTimeOffset, FormatError> {
         let parsed =
             date_time_format::parse(text, &provider.get_date_time_format(), super::DateTimeStyles::NONE)?;

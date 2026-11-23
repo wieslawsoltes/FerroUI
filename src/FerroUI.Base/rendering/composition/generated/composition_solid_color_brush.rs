@@ -131,6 +131,10 @@ impl CompositionSolidColorBrushProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_solid_color_brush.get().contains(CompositionSolidColorBrushChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_composition_solid_color_brush.set(self.changed_fields_of_composition_solid_color_brush.get() & !CompositionSolidColorBrushChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -165,10 +169,11 @@ impl CompositionSolidColorBrushProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_solid_color_brush.get();
         writer.write(changed);
+        if changed.contains(CompositionSolidColorBrushChangedFields::COLOR) {
+            writer.write(self.color.get());
+        }
         if changed.contains(CompositionSolidColorBrushChangedFields::COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSolidColorBrushProps::id_of_color_property().base()));
-        } else if changed.contains(CompositionSolidColorBrushChangedFields::COLOR) {
-            writer.write(self.color.get());
         }
         self.changed_fields_of_composition_solid_color_brush.set(CompositionSolidColorBrushChangedFields::empty());
     }
@@ -253,6 +258,10 @@ impl ServerCompositionSolidColorBrushProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerCompositionSolidColorBrushHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionSolidColorBrushChangedFields>();
+        if changed.contains(CompositionSolidColorBrushChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
+        }
         if changed.contains(CompositionSolidColorBrushChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
@@ -263,9 +272,6 @@ impl ServerCompositionSolidColorBrushProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSolidColorBrushChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
         }
         ServerCompositionSolidColorBrushHooks::on_fields_deserialized(host, changed);
     }

@@ -144,7 +144,7 @@ impl EmojiPanelView {
             tone_popup: RefCell::new(None),
             bar_height: Cell::new(44.0),
             history_subscription: Cell::new(None),
-            search_requested: HandlerList::with_ordered_ids(),
+            search_requested: HandlerList::new(),
         })
     }
     pub fn bar_height(&self) -> f64 {

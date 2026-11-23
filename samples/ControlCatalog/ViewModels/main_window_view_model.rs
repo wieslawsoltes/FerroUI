@@ -492,6 +492,7 @@ impl MainWindowViewModel {
 
     async fn navigate_to_async(this: Rc<MainWindowViewModel>, item: Option<Rc<PageItem>>) {
         let Some(item) = item else { return };
+        let timing = crate::navigation_timing::NavigationTiming::start(&item);
         let host = this.page_host.borrow().clone();
         let navigator = this.navigator();
         if host.is_none() && navigator.is_none() {
@@ -524,7 +525,14 @@ impl MainWindowViewModel {
                 }
             }
 
+            if let Some(timing) = &timing {
+                timing.mark("assets-ready");
+            }
             let page = item.create_page();
+            if let Some(timing) = &timing {
+                timing.mark("constructed");
+                timing.observe_loaded(&page);
+            }
             this.note_current_page(&item);
 
             match (host, navigator) {
@@ -533,6 +541,10 @@ impl MainWindowViewModel {
                     let _ = navigator.replace_async(page).await;
                 }
                 (None, None) => {}
+            }
+
+            if let Some(timing) = &timing {
+                timing.mark("host-returned");
             }
 
             if matches!(this.display_mode(), SplitViewDisplayMode::CompactOverlay | SplitViewDisplayMode::Overlay) {

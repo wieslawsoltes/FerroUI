@@ -1,0 +1,17 @@
+<!-- Ported from TemperatureConverterControl.xaml of the pinned CustomUserControls page of WinUI
+     Gallery (14061eea), the UserControl of its third example; its code behind is in
+     custom_controls.rs. See ../NOTICE.md. The TextBox's Header is composed above it,
+     whose automation name it is; HasText(InputTextBox.Text), an x:Bind of a function of the
+     control, is the code behind in Rust. -->
+<UserControl xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Focusable="False">
+  <StackPanel Spacing="8">
+    <StackPanel Spacing="4">
+      <TextBlock Text="Enter Temperature in Celsius" />
+      <TextBox x:Name="InputTextBox" Width="200" HorizontalAlignment="Left" PlaceholderText="Celsius"
+               AutomationProperties.Name="Enter Temperature in Celsius" />
+    </StackPanel>
+    <Button x:Name="ConvertButton" Width="200" Content="Convert to Fahrenheit" IsEnabled="False" />
+    <TextBlock x:Name="ResultTextBlock" FontWeight="SemiBold" />
+  </StackPanel>
+</UserControl>

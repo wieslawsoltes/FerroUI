@@ -27,7 +27,8 @@
 class PlatformSettings : public ComObject,
                          public virtual IFrnPlatformSettings,
                          public virtual IFrnAccessibilitySettings,
-                         public virtual IFrnPowerSettings
+                         public virtual IFrnPowerSettings,
+                         public virtual IFrnContrastSettings
 {
     CocoaThemeObserver* observer = nil;
     CocoaLocaleObserver* localeObserver = nil;
@@ -38,6 +39,7 @@ class PlatformSettings : public ComObject,
     INTERFACE_MAP_ENTRY(IFrnPlatformSettings, IID_IFrnPlatformSettings)
     INTERFACE_MAP_ENTRY(IFrnAccessibilitySettings, IID_IFrnAccessibilitySettings)
     INTERFACE_MAP_ENTRY(IFrnPowerSettings, IID_IFrnPowerSettings)
+    INTERFACE_MAP_ENTRY(IFrnContrastSettings, IID_IFrnContrastSettings)
     END_INTERFACE_MAP()
 
 public:
@@ -206,6 +208,58 @@ public:
                                name:NSProcessInfoPowerStateDidChangeNotification
                              object:nil];
             }
+        }
+    }
+
+    virtual bool GetIncreaseContrast() override
+    {
+        return NSWorkspace.sharedWorkspace.accessibilityDisplayShouldIncreaseContrast;
+    }
+
+    // The system colours the WinUI theme takes as its high contrast colours (#560), resolved
+    // under the effective appearance of the application, which "Increase contrast" changes.
+    virtual unsigned int GetSystemColor(int index) override
+    {
+        @autoreleasepool
+        {
+            NSColor* (^colorOf)(void) = ^NSColor* {
+                switch (index)
+                {
+                    case 0: return [NSColor windowBackgroundColor];
+                    case 1: return [NSColor labelColor];
+                    case 2: return [NSColor controlColor];
+                    case 3: return [NSColor controlTextColor];
+                    case 4:
+                        if (@available(macOS 10.14, *))
+                        {
+                            return [NSColor selectedContentBackgroundColor];
+                        }
+                        return [NSColor alternateSelectedControlColor];
+                    case 5: return [NSColor alternateSelectedControlTextColor];
+                    case 6: return [NSColor linkColor];
+                    case 7: return [NSColor disabledControlTextColor];
+                    default: return nil;
+                }
+            };
+            __block NSColor* color = nil;
+            if (@available(macOS 11.0, *))
+            {
+                [[NSApp effectiveAppearance] performAsCurrentDrawingAppearance:^{
+                    color = [colorOf() colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+                }];
+            }
+            else if (@available(macOS 10.14, *))
+            {
+                auto previousAppearance = NSAppearance.currentAppearance;
+                NSAppearance.currentAppearance = [NSApp effectiveAppearance];
+                color = [colorOf() colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+                NSAppearance.currentAppearance = previousAppearance;
+            }
+            else
+            {
+                color = [colorOf() colorUsingColorSpace:NSColorSpace.sRGBColorSpace];
+            }
+            return color == nil ? 0 : to_argb(color);
         }
     }
 

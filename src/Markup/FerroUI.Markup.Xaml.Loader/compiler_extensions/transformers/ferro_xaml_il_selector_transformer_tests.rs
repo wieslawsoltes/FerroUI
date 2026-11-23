@@ -1,6 +1,7 @@
 //! Tests of `FerroXamlIlSelectorTransformer` and the selector nodes. The selector shapes come
 //! from the upstream `StyleTests` and `SelectorGrammarTests`.
 
+use crate::compiler_extensions::transformers::{FerroTransformErrorKind, FerroTransformErrors};
 use std::rc::Rc;
 
 use xamlx::ast::{IXamlAstNode, IXamlAstValueNode, XamlAstExtensions, XamlAstNodeExtensions, XamlAstObjectNode};
@@ -239,7 +240,7 @@ fn selector_errors() {
     assert_eq!(diagnostics[0].code, FerroXamlDiagnosticCodes::SELECTORS_TRANSFORM_ERROR);
     assert!(diagnostics[0].title.starts_with("Unable to parse selector: "), "{:?}", diagnostics[0].title);
     let inner = diagnostics[0].inner_exception.as_deref().expect("the exception");
-    assert!(XamlSelectorsTransformException::is(inner));
+    assert_eq!(inner.transform_kind(), Some(FerroTransformErrorKind::Selectors));
     assert_eq!(inner.inner_exception().map(|e| e.type_name()), Some("ExpressionParseException"));
 
     selector_error(

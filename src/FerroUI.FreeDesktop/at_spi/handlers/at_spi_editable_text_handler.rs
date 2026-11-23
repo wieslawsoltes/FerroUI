@@ -11,7 +11,7 @@ use crate::at_spi::dbus::descriptions::EDITABLE_TEXT;
 use crate::at_spi::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use ferroui_controls::automation::provider::IValueProvider;
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct AtSpiEditableTextHandler {
     node: Weak<AtSpiNode>,
@@ -129,8 +129,8 @@ impl DBusInterface for AtSpiEditableTextHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
-        (name == "version").then(|| Value::from(Self::version()))
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
+        (name == "version").then(|| Variant::from(Self::version()))
     }
 }
 

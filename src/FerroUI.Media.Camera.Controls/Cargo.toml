@@ -19,6 +19,9 @@ ferroui-controls.workspace = true
 ferroui-media.workspace = true
 ferroui-media-controls.workspace = true
 ferroui-media-camera.workspace = true
+ferroui-media-qr = { workspace = true, optional = true }
+[features]
+qr = ["dep:ferroui-media-qr"]
 [build-dependencies]
 ferroui-build-scan.workspace = true
 [package.metadata.release]

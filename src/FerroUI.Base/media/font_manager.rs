@@ -12,6 +12,7 @@ use crate::media::fonts::{
     SystemFontCollection,
 };
 use crate::media::text_formatting::unicode::Script;
+use crate::media::text_formatting::TextLayoutCache;
 use crate::media::{
     FontFallback, FontFamily, FontManagerOptions, FontStretch, FontStyle, FontWeight, GlyphTypeface, Typeface,
 };
@@ -39,6 +40,9 @@ pub struct FontManager {
     /// (FerroUI deviation, docs/porting/desktop-performance.md, section 9.4).
     resolved_glyph_typefaces: RefCell<HashMap<Typeface, Rc<GlyphTypeface>>>,
     resolved_generation: Cell<u64>,
+    /// The layouts of plain text made with this font manager, by what they were made of
+    /// (FerroUI addition, docs/porting/desktop-performance.md, section 9.29).
+    text_layouts: TextLayoutCache,
 }
 
 crate::ferro_thread_local! {
@@ -49,6 +53,12 @@ crate::ferro_thread_local! {
 /// set of glyph typefaces or the set of collections changed.
 pub(crate) fn advance_glyph_typeface_generation() {
     GLYPH_TYPEFACE_GENERATION.with(|generation| generation.set(generation.get().wrapping_add(1)));
+}
+
+/// The glyph typeface generation of the thread: what was found in a font collection holds while
+/// it stays the same.
+pub(crate) fn glyph_typeface_generation() -> u64 {
+    GLYPH_TYPEFACE_GENERATION.with(Cell::get)
 }
 
 /// Font managers compare by reference, so that a handle can be an untyped
@@ -95,6 +105,7 @@ impl FontManager {
             default_font_family: OnceCell::new(),
             resolved_glyph_typefaces: RefCell::new(HashMap::new()),
             resolved_generation: Cell::new(0),
+            text_layouts: TextLayoutCache::new(),
         };
 
         let default_font_family_name = font_manager.get_default_font_family_name(options.as_deref());
@@ -161,6 +172,11 @@ impl FontManager {
         FerroLocator::current_mutable().bind::<FontManager>().to_constant(current.clone());
 
         current
+    }
+
+    /// The layouts of plain text made with this font manager.
+    pub(crate) fn text_layouts(&self) -> &TextLayoutCache {
+        &self.text_layouts
     }
 
     /// Gets the system's default font family.

@@ -20,6 +20,15 @@ pub trait IPresentationSource {
     /// The layout root of the tree.
     fn layout_root(&self) -> Rc<dyn ILayoutRoot>;
 
+    /// The layout scaling of the layout root of the tree
+    /// (`layout_root().layout_scaling()`). Layout reads it for every element
+    /// it rounds; a source that is its own layout root answers without
+    /// handing out the root (FerroUI addition, desktop-performance.md,
+    /// section 9.28).
+    fn layout_root_scaling(&self) -> f64 {
+        self.layout_root().layout_scaling()
+    }
+
     /// The size of the client area, in device-independent pixels.
     fn client_size(&self) -> Size;
 

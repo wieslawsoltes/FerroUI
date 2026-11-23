@@ -25,6 +25,14 @@ struct EventSubscriptions {
     subscriptions: Vec<EventSubscription>,
 }
 
+impl Drop for EventSubscriptions {
+    /// The handlers that go away with their interactive leave the event's
+    /// count of instance handlers.
+    fn drop(&mut self) {
+        self.routed_event.note_instance_handlers_removed(self.subscriptions.len());
+    }
+}
+
 crate::ferro_thread_local! {
     static TOTAL_HANDLERS_COUNT: Cell<usize> = const { Cell::new(0) };
     static NEXT_TOKEN: Cell<u64> = const { Cell::new(1) };
@@ -61,6 +69,11 @@ impl Interactive {
     pub const DEFAULT_ROUTES: RoutingStrategies = RoutingStrategies::DIRECT.union(RoutingStrategies::BUBBLE);
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
+    // Kept out of line, with `Layoutable::construct` inlined into it: the code layout every
+    // element construction ran with before #567 added handler methods to this file, which made
+    // the compiler inline this into its callers instead (+2.3 % instructions mounting list
+    // controls in the gate).
+    #[inline(never)]
     pub fn construct() -> Self {
         Self { base: Layoutable::construct(), event_handlers: RefCell::new(Vec::new()) }
     }
@@ -104,6 +117,46 @@ impl Interactive {
         // The event's args type is `TEventArgs` by construction, so the
         // conversion below cannot fail for args accepted by `raise_event`.
         self.add_handler_as::<TEventArgs, TEventArgs>(routed_event, handler, routes, handled_events_too)
+    }
+
+    /// Adds a handler that may fail, listening to the direct and bubble routes
+    /// of unhandled events: its error goes to
+    /// [`Dispatcher::raise_unhandled_exception`](crate::threading::Dispatcher::raise_unhandled_exception)
+    /// and, when a handler of the dispatcher handles it, the route goes on
+    /// (#567). A handler fails by returning its error, not by panicking.
+    ///
+    /// Returns a token for [`remove_handler`](Self::remove_handler).
+    pub fn add_fallible_handler<TEventArgs, E>(
+        &self,
+        routed_event: &RoutedEvent<TEventArgs>,
+        handler: impl Fn(&Interactive, &TEventArgs) -> Result<(), E> + 'static,
+    ) -> RoutedEventHandlerToken
+    where
+        TEventArgs: IRoutedEventArgs,
+        E: Into<Box<dyn std::error::Error + Send + Sync>>,
+    {
+        self.add_fallible_handler_with(routed_event, handler, Self::DEFAULT_ROUTES, false)
+    }
+
+    /// [`add_fallible_handler`](Self::add_fallible_handler) with the routes and
+    /// whether handled events are seen, as [`add_handler_with`](Self::add_handler_with).
+    pub fn add_fallible_handler_with<TEventArgs, E>(
+        &self,
+        routed_event: &RoutedEvent<TEventArgs>,
+        handler: impl Fn(&Interactive, &TEventArgs) -> Result<(), E> + 'static,
+        routes: RoutingStrategies,
+        handled_events_too: bool,
+    ) -> RoutedEventHandlerToken
+    where
+        TEventArgs: IRoutedEventArgs,
+        E: Into<Box<dyn std::error::Error + Send + Sync>>,
+    {
+        let handler = move |sender: &Interactive, args: &TEventArgs| {
+            if let Err(error) = handler(sender, args) {
+                crate::threading::Dispatcher::current_dispatcher().raise_unhandled_exception(error);
+            }
+        };
+        self.add_handler_with(routed_event, handler, routes, handled_events_too)
     }
 
     /// Adds a handler written against args type `THandlerArgs` to any
@@ -204,6 +257,7 @@ impl Interactive {
 
         if removed.is_some() {
             TOTAL_HANDLERS_COUNT.set(TOTAL_HANDLERS_COUNT.get() - 1);
+            routed_event.note_instance_handlers_removed(1);
         }
         removed.is_some()
     }
@@ -226,6 +280,16 @@ impl Interactive {
         let e = e.as_routed_event();
         let mut result = EventRoute::new(&e);
         let has_class_handlers = e.has_raised_subscriptions();
+
+        // Nothing listens to the event anywhere on the thread: the route is
+        // empty whatever the ancestors are, so they are not walked (not
+        // from upstream; desktop-performance.md, section 9.28). A panel that
+        // raises an event from every arrange pays nothing for it then.
+        if !has_class_handlers && !e.has_instance_handlers() {
+            crate::perf_count!(RoutedEventRoutesSkipped);
+            return result;
+        }
+
         let strategies = e.routing_strategies();
         let this = self.to_ref();
 
@@ -259,6 +323,7 @@ impl Interactive {
             None => event_handlers.push(EventSubscriptions { routed_event, subscriptions: vec![subscription] }),
         }
 
+        routed_event.note_instance_handlers_added(1);
         TOTAL_HANDLERS_COUNT.set(TOTAL_HANDLERS_COUNT.get() + 1);
     }
 

@@ -1,0 +1,9 @@
+# Hello, World! with layer 1 of the generated Osprey bindings (docs/osprey.md).
+[project]
+name = "hello_world"
+source_roots = ["src", "ferroui", "../../../../bindings/osprey/runtime"]
+default_namespace = "app"
+entry = "src/main.osp"
+
+[modules]
+allow_wildcard_imports = true

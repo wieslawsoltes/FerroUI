@@ -17,10 +17,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::sync::Arc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -63,7 +63,7 @@ pub trait CompositionPathGeometryHooks: CompositionGeometryHooks {
 pub struct CompositionPathGeometryProps {
     base: CompositionGeometryProps,
     changed_fields_of_composition_path_geometry: Cell<CompositionPathGeometryChangedFields>,
-    path: RefCell<Option<Arc<CompositionPath>>>,
+    path: OptionCell<Arc<CompositionPath>>,
 }
 
 impl Default for CompositionPathGeometryProps {
@@ -80,7 +80,7 @@ impl CompositionPathGeometryProps {
         Self {
             base: CompositionGeometryProps::new(),
             changed_fields_of_composition_path_geometry: Cell::new(CompositionPathGeometryChangedFields::empty()),
-            path: RefCell::new(None),
+            path: OptionCell::new(),
         }
     }
 
@@ -103,24 +103,24 @@ impl CompositionPathGeometryProps {
 
     /// `Path` (FerroUI overlay).
     pub fn path(&self) -> Option<Arc<CompositionPath>> {
-        self.path.borrow().clone()
+        self.path.get()
     }
 
     /// Sets `Path` (FerroUI overlay).
     pub fn set_path(&self, host: &dyn CompositionPathGeometryHooks, value: Option<Arc<CompositionPath>>) {
         let mut changed = false;
-        let old_value = self.path.borrow().clone();
+        let old_value = self.path.get();
         if old_value.differs(&value) {
             CompositionPathGeometryHooks::validate_path_change(host, &old_value, &value);
             CompositionPathGeometryHooks::on_path_changing(host);
             changed = true;
             // Update the backing value
-            *self.path.borrow_mut() = value.clone();
+            self.path.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_path_geometry.set(self.changed_fields_of_composition_path_geometry.get() | CompositionPathGeometryChangedFields::PATH);
             host.register_for_serialization();
         }
-        *self.path.borrow_mut() = value;
+        self.path.set(value);
         if changed {
             CompositionPathGeometryHooks::on_path_changed(host);
         }
@@ -146,7 +146,7 @@ impl CompositionPathGeometryProps {
         let changed = self.changed_fields_of_composition_path_geometry.get();
         writer.write(changed);
         if changed.contains(CompositionPathGeometryChangedFields::PATH) {
-            writer.write_value(self.path.borrow().clone());
+            writer.write_value(self.path.get());
         }
         self.changed_fields_of_composition_path_geometry.set(CompositionPathGeometryChangedFields::empty());
     }
@@ -165,7 +165,7 @@ pub trait ServerCompositionPathGeometryHooks: ServerCompositionGeometryHooks {
 /// The server-side properties of `ServerCompositionPathGeometry`.
 pub struct ServerCompositionPathGeometryProps {
     base: ServerCompositionGeometryProps,
-    path: RefCell<Option<Arc<CompositionPath>>>,
+    path: OptionCell<Arc<CompositionPath>>,
 }
 
 impl Default for ServerCompositionPathGeometryProps {
@@ -180,7 +180,7 @@ impl ServerCompositionPathGeometryProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionGeometryProps::new(),
-            path: RefCell::new(None),
+            path: OptionCell::new(),
         }
     }
 
@@ -205,8 +205,8 @@ impl ServerCompositionPathGeometryProps {
             CompositionProperty::register::<ServerCompositionPathGeometryProps, Option<Arc<CompositionPath>>>(
                 "Path",
                 "ServerCompositionPathGeometry",
-                |obj| props_of::<ServerCompositionPathGeometryProps>(obj).path.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionPathGeometryProps>(obj).path.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionPathGeometryProps>(obj).path.get(),
+                |obj, v| props_of::<ServerCompositionPathGeometryProps>(obj).path.set(v),
                 None,
                 None,
             )
@@ -215,11 +215,11 @@ impl ServerCompositionPathGeometryProps {
 
     /// `Path`.
     pub fn path(&self) -> Option<Arc<CompositionPath>> {
-        self.path.borrow().clone()
+        self.path.get()
     }
 
     pub fn set_path(&self, host: &dyn ServerCompositionPathGeometryHooks, value: Option<Arc<CompositionPath>>) {
-        let old_value = self.path.borrow().clone();
+        let old_value = self.path.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionPathGeometryHooks::on_path_changing(host);
@@ -231,7 +231,7 @@ impl ServerCompositionPathGeometryProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.path.borrow_mut() = value.clone(),
+                assign: &mut || self.path.set(value.clone()),
             },
         );
         if changed {

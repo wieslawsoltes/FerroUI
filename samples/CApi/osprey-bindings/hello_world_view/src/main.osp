@@ -1,0 +1,75 @@
+// Hello, World! with layer 2 of the generated Osprey bindings of FerroUI (docs/osprey.md): the
+// view is a function of the model, the button sends a message, `update` makes the next model,
+// and the library reconciles the next frame into the window.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program clicks the button twice itself and prints the state.
+
+import ferroui::*
+import ferroviews::*
+
+type Message = Clicked
+
+type Model = { clicks: int }
+
+fn update(message: Message, model: Model) -> Model = match message {
+    Clicked => Model { clicks: model.clicks + 1 }
+}
+
+fn caption(clicks: int) -> string = match clicks {
+    0 => "Click me"
+    1 => "Clicked once"
+    _ => "Clicked ${clicks} times"
+}
+
+fn view(model: Model) -> Element<Message> =
+    window([title("Hello from Osprey"), width(400.0), height(240.0)], [
+        stackPanel([spacing(12.0), margin("24")], [
+            textBlock([text("Hello, World!")]),
+            button([key(1), content(caption(model.clicks)), fontSize(16.0), onClick(Clicked)], [])
+        ])
+    ])
+
+// The model, kept between events: a file-scope cell that only the arm of an effect handler
+// assigns (the rule of Osprey for mutable state).
+effect Store { put: fn(Model) -> Unit }
+
+mut model = Model { clicks: 0 }
+
+fn keep(next: Model) -> Unit = {
+    handle Store { put value => { model = value } }
+    perform Store.put(next)
+}
+
+fn script() -> Unit = {
+    let _ = raiseClickAt(1)
+    let _ = raiseClickAt(1)
+    let shown = textAtContent(1)
+    print("script: ${model.clicks} clicks, the button shows '${shown}': ${shown == "Clicked 2 times" ? "ok" : "FAILED"}")
+}
+
+// The content of a button as text.
+fn textAtContent(key: int) -> string = "${ferro_get_cstr_or(object: findKey(key), property: contentPropertyId(), fallback: "")}"
+
+fn dispatch(tag: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let next = match messageAt(view(model), tag) {
+        Success { value } => update(value, model)
+        Error { message } => model
+    }
+    keep(next)
+    report("render", render(view(next)))
+    match tag == 0 && envSet("FERROUI_SAMPLE_SCRIPT") {
+        true => script()
+        false => nothing()
+    }
+    0
+}
+
+fn main() = {
+    let rc = run(ferro_frame_dispatcher(function: dispatch))
+    print("the application returned ${rc}")
+}

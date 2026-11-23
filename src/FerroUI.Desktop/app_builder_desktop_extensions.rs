@@ -1,5 +1,8 @@
-#[cfg(not(any(feature = "skia", all(feature = "quartz", target_os = "macos"))))]
-compile_error!("Select a desktop rendering backend: skia, or quartz on macOS");
+#[cfg(not(any(feature = "skia", all(feature = "quartz", target_os = "macos"), all(feature = "direct2d", windows))))]
+compile_error!("Select a desktop rendering backend: skia, quartz on macOS, or direct2d on Windows");
+
+#[cfg(all(windows, feature = "direct2d", feature = "skia"))]
+compile_error!("Use --no-default-features --features direct2d to select the Windows native backend without bundled Skia/ANGLE");
 
 use ferroui_controls::AppBuilder;
 
@@ -20,7 +23,7 @@ pub trait AppBuilderDesktopExtensions {
 impl AppBuilderDesktopExtensions for AppBuilder {
     fn use_platform_detect(&self) -> AppBuilder {
         // The default backend retains its HarfBuzz shaper. Quartz supplies Core Text.
-        #[cfg(all(feature = "skia", not(all(feature = "quartz", target_os = "macos"))))]
+        #[cfg(all(feature = "skia", not(all(feature = "quartz", target_os = "macos")), not(all(feature = "direct2d", windows))))]
         load_harf_buzz(self);
 
         #[cfg(target_os = "macos")]
@@ -38,6 +41,11 @@ impl AppBuilderDesktopExtensions for AppBuilder {
         #[cfg(windows)]
         {
             load_win32(self);
+            #[cfg(feature = "direct2d")]
+            {
+                use ferroui_direct2d::Direct2DApplicationExtensions;
+                self.use_direct2d();
+            }
             #[cfg(feature = "skia")]
             load_skia(self);
         }
@@ -134,7 +142,7 @@ mod linux_tests {
     }
 }
 
-#[cfg(all(test, windows))]
+#[cfg(all(test, windows, feature = "skia", not(feature = "direct2d")))]
 mod windows_tests {
     use super::*;
     use ferroui_controls::Application;
@@ -153,5 +161,18 @@ mod windows_tests {
         assert!(builder.runtime_platform_services_initializer().is_some());
         // Nothing is initialized until the application is set up.
         assert!(builder.instance().is_none());
+    }
+}
+
+#[cfg(all(test, windows, feature = "direct2d"))]
+mod direct2d_tests {
+    use super::*;
+    use ferroui_controls::Application;
+    #[test]
+    fn native_platform_detection_selects_directwrite_without_harfbuzz() {
+        let builder = AppBuilder::configure::<Application>().use_platform_detect();
+        assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("DirectWrite"));
+        assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Direct2D"));
+        assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("Win32"));
     }
 }

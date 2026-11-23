@@ -8,13 +8,19 @@ use std::cell::Cell;
 use std::rc::Rc;
 
 /// Converts one corner of a corner radius to a double.
-#[derive(Default)]
 pub struct CornerRadiusToDoubleConverter {
     corner: Cell<Corners>,
 }
 
+impl Default for CornerRadiusToDoubleConverter {
+    fn default() -> Self {
+        Self::new()
+    }
+}
+
 impl CornerRadiusToDoubleConverter {
     pub fn new() -> Self {
+        register_casts!(Self);
         Self { corner: Cell::new(Corners::NONE) }
     }
 

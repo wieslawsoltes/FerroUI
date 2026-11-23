@@ -1,0 +1,682 @@
+{
+  "schema_version": 1,
+  "source": {
+    "main": "91704388e1e9ab9b721414992e3a795817fe7c87",
+    "candidate": "main at that commit plus the Calendar cell deferral and the catalog Calendar page virtualization",
+    "baseline_patch_sha256": "db7a619889c425a505ad6ff86b7dc3df7985d8e5849bc92c923987409f13b74a",
+    "hooks": [
+      "samples/ControlCatalog.Desktop/program.rs",
+      "samples/ControlCatalog/ViewModels/main_window_view_model.rs",
+      "samples/ControlCatalog/lib.rs",
+      "samples/ControlCatalog/markup.rs",
+      "samples/ControlCatalog/navigation_timing.rs"
+    ],
+    "profile": "dist",
+    "rustc": "rustc 1.99.1 (58cf8f9c3 2026-10-13)",
+    "build_command": "cargo rustc --locked --profile dist -p control-catalog-desktop --bin control-catalog-desktop -- -C strip=none",
+    "cpu": "Apple M4",
+    "physical_cores": 10,
+    "memory_bytes": 25769803776,
+    "power": "AC",
+    "background_load": "Measured under the development/simulator load of the machine; no benchmark-owned compiler or profiler runs during measurements.",
+    "cargo_lock_sha256": "f068f0a305abfae6ce8982dc4ea39032fd23897a21acc29398f3630388724d54",
+    "compiler_settings": {
+      "lto": "fat",
+      "codegen_units": 1,
+      "panic": "abort",
+      "strip": "none"
+    }
+  },
+  "run": {
+    "started_utc": "2026-11-09T12:53:31.935483+00:00",
+    "platform": "macOS-27.2-arm64-arm-64bit",
+    "rounds": 6,
+    "visits": 5,
+    "interval_ms": 800,
+    "theme": "winui",
+    "variant": "light",
+    "renderer": "metal",
+    "pages": [
+      "Buttons",
+      "Calendar"
+    ],
+    "warmups": 1,
+    "max_pair_attempts": 3,
+    "binaries": {
+      "before": {
+        "path": "<checkout>/target/calendar-latest-main/main-timed",
+        "sha256": "006cf4c114799f010d72fc400cbc4df4fd0ccde42c760f6f2f788770253502d8"
+      },
+      "after": {
+        "path": "<checkout>/target/calendar-latest-main/calendar-optimized",
+        "sha256": "bfddf555fa22b3e02786f9ec179aa596837f5d629abe4afd40f6eaae3cb294bc"
+      }
+    }
+  },
+  "summary": [
+    {
+      "previous": "Home",
+      "page": "Buttons",
+      "before": {
+        "constructed": 1.0015,
+        "host-returned": 16.424,
+        "loaded": 42.664500000000004,
+        "samples": 30
+      },
+      "after": {
+        "constructed": 1.13,
+        "host-returned": 19.094,
+        "loaded": 47.9795,
+        "samples": 30
+      },
+      "loaded_change_percent": 12.457663865743186,
+      "rounds": [
+        {
+          "round": 1,
+          "before": 35.437,
+          "after": 33.21,
+          "loaded_change_percent": -6.284392019640483
+        },
+        {
+          "round": 2,
+          "before": 32.704,
+          "after": 34.721,
+          "loaded_change_percent": 6.167441291585107
+        },
+        {
+          "round": 3,
+          "before": 35.021,
+          "after": 56.757,
+          "loaded_change_percent": 62.06561777219382
+        },
+        {
+          "round": 4,
+          "before": 26.112,
+          "after": 55.328,
+          "loaded_change_percent": 111.8872549019608
+        },
+        {
+          "round": 5,
+          "before": 55.602,
+          "after": 54.536,
+          "loaded_change_percent": -1.9171972231214585
+        },
+        {
+          "round": 6,
+          "before": 54.753,
+          "after": 29.952,
+          "loaded_change_percent": -45.2961481562654
+        }
+      ]
+    },
+    {
+      "previous": "Home",
+      "page": "Calendar",
+      "before": {
+        "constructed": 0.28,
+        "host-returned": 12.058,
+        "loaded": 89.384,
+        "samples": 30
+      },
+      "after": {
+        "constructed": 0.3205,
+        "host-returned": 16.134,
+        "loaded": 81.45349999999999,
+        "samples": 30
+      },
+      "loaded_change_percent": -8.872393269488954,
+      "rounds": [
+        {
+          "round": 1,
+          "before": 103.146,
+          "after": 62.394,
+          "loaded_change_percent": -39.50904543074864
+        },
+        {
+          "round": 2,
+          "before": 79.69,
+          "after": 65.346,
+          "loaded_change_percent": -17.99974902748148
+        },
+        {
+          "round": 3,
+          "before": 81.108,
+          "after": 92.838,
+          "loaded_change_percent": 14.46219855008135
+        },
+        {
+          "round": 4,
+          "before": 78.322,
+          "after": 91.563,
+          "loaded_change_percent": 16.905850208115215
+        },
+        {
+          "round": 5,
+          "before": 113.967,
+          "after": 95.727,
+          "loaded_change_percent": -16.004632920055805
+        },
+        {
+          "round": 6,
+          "before": 110.419,
+          "after": 59.168,
+          "loaded_change_percent": -46.41501915431221
+        }
+      ]
+    },
+    {
+      "previous": "Buttons",
+      "page": "Home",
+      "before": {
+        "constructed": 7.640499999999999,
+        "host-returned": 12.1685,
+        "loaded": 39.6235,
+        "samples": 30
+      },
+      "after": {
+        "constructed": 10.3635,
+        "host-returned": 16.7135,
+        "loaded": 50.228,
+        "samples": 30
+      },
+      "loaded_change_percent": 26.763158226809857,
+      "rounds": [
+        {
+          "round": 1,
+          "before": 43.204,
+          "after": 34.105,
+          "loaded_change_percent": -21.060549949078798
+        },
+        {
+          "round": 2,
+          "before": 34.218,
+          "after": 34.749,
+          "loaded_change_percent": 1.5518148342977378
+        },
+        {
+          "round": 3,
+          "before": 35.056,
+          "after": 59.176,
+          "loaded_change_percent": 68.80419899589229
+        },
+        {
+          "round": 4,
+          "before": 33.157,
+          "after": 59.893,
+          "loaded_change_percent": 80.6345568055011
+        },
+        {
+          "round": 5,
+          "before": 59.433,
+          "after": 57.945,
+          "loaded_change_percent": -2.503659583059914
+        },
+        {
+          "round": 6,
+          "before": 59.863,
+          "after": 32.958,
+          "loaded_change_percent": -44.944289460935806
+        }
+      ]
+    },
+    {
+      "previous": "Calendar",
+      "page": "Home",
+      "before": {
+        "constructed": 6.584,
+        "host-returned": 32.492000000000004,
+        "loaded": 70.66900000000001,
+        "samples": 30
+      },
+      "after": {
+        "constructed": 10.1595,
+        "host-returned": 26.458,
+        "loaded": 63.7915,
+        "samples": 30
+      },
+      "loaded_change_percent": -9.731989981462895,
+      "rounds": [
+        {
+          "round": 1,
+          "before": 67.366,
+          "after": 44.508,
+          "loaded_change_percent": -33.93106314758187
+        },
+        {
+          "round": 2,
+          "before": 56.988,
+          "after": 44.681,
+          "loaded_change_percent": -21.59577454902787
+        },
+        {
+          "round": 3,
+          "before": 69.554,
+          "after": 70.067,
+          "loaded_change_percent": 0.7375564309744842
+        },
+        {
+          "round": 4,
+          "before": 56.582,
+          "after": 72.299,
+          "loaded_change_percent": 27.777385034109802
+        },
+        {
+          "round": 5,
+          "before": 88.575,
+          "after": 65.23,
+          "loaded_change_percent": -26.356195314705054
+        },
+        {
+          "round": 6,
+          "before": 80.394,
+          "after": 44.629,
+          "loaded_change_percent": -44.487150782396704
+        }
+      ]
+    }
+  ],
+  "visit_groups": [
+    {
+      "previous": "Home",
+      "page": "Buttons",
+      "first": {
+        "before": {
+          "samples": 6,
+          "constructed": 1.7735,
+          "host-returned": 19.198999999999998,
+          "loaded": 49.858999999999995
+        },
+        "after": {
+          "samples": 6,
+          "constructed": 1.8045,
+          "host-returned": 24.3015,
+          "loaded": 59.6845
+        }
+      },
+      "repeat": {
+        "before": {
+          "samples": 24,
+          "constructed": 0.945,
+          "host-returned": 16.424,
+          "loaded": 42.664500000000004
+        },
+        "after": {
+          "samples": 24,
+          "constructed": 0.8895,
+          "host-returned": 15.058,
+          "loaded": 39.900000000000006
+        }
+      }
+    },
+    {
+      "previous": "Home",
+      "page": "Calendar",
+      "first": {
+        "before": {
+          "samples": 6,
+          "constructed": 0.4795,
+          "host-returned": 23.9165,
+          "loaded": 111.934
+        },
+        "after": {
+          "samples": 6,
+          "constructed": 0.6915,
+          "host-returned": 23.532,
+          "loaded": 93.64500000000001
+        }
+      },
+      "repeat": {
+        "before": {
+          "samples": 24,
+          "constructed": 0.1735,
+          "host-returned": 9.5515,
+          "loaded": 82.242
+        },
+        "after": {
+          "samples": 24,
+          "constructed": 0.245,
+          "host-returned": 10.9185,
+          "loaded": 72.128
+        }
+      }
+    },
+    {
+      "previous": "Buttons",
+      "page": "Home",
+      "first": {
+        "before": {
+          "samples": 6,
+          "constructed": 11.143,
+          "host-returned": 19.8625,
+          "loaded": 53.561499999999995
+        },
+        "after": {
+          "samples": 6,
+          "constructed": 10.684000000000001,
+          "host-returned": 18.2215,
+          "loaded": 54.884
+        }
+      },
+      "repeat": {
+        "before": {
+          "samples": 24,
+          "constructed": 6.1955,
+          "host-returned": 10.272,
+          "loaded": 35.900999999999996
+        },
+        "after": {
+          "samples": 24,
+          "constructed": 8.488,
+          "host-returned": 13.585,
+          "loaded": 42.7565
+        }
+      }
+    },
+    {
+      "previous": "Calendar",
+      "page": "Home",
+      "first": {
+        "before": {
+          "samples": 6,
+          "constructed": 9.2105,
+          "host-returned": 36.083,
+          "loaded": 76.5655
+        },
+        "after": {
+          "samples": 6,
+          "constructed": 10.857,
+          "host-returned": 28.112000000000002,
+          "loaded": 67.09899999999999
+        }
+      },
+      "repeat": {
+        "before": {
+          "samples": 24,
+          "constructed": 6.0035,
+          "host-returned": 28.509,
+          "loaded": 64.531
+        },
+        "after": {
+          "samples": 24,
+          "constructed": 9.6905,
+          "host-returned": 25.567999999999998,
+          "loaded": 60.906499999999994
+        }
+      }
+    }
+  ],
+  "control_referenced": [
+    {
+      "previous": "Home",
+      "page": "Calendar",
+      "method": "Subtract corresponding Buttons transition process median from Calendar transition process median, then compare the paired gaps.",
+      "rounds": [
+        {
+          "round": 1,
+          "before_gap_ms": 67.709,
+          "after_gap_ms": 29.183999999999997,
+          "gap_change_ms": -38.525000000000006
+        },
+        {
+          "round": 2,
+          "before_gap_ms": 46.986,
+          "after_gap_ms": 30.625000000000007,
+          "gap_change_ms": -16.36099999999999
+        },
+        {
+          "round": 3,
+          "before_gap_ms": 46.087,
+          "after_gap_ms": 36.080999999999996,
+          "gap_change_ms": -10.006000000000007
+        },
+        {
+          "round": 4,
+          "before_gap_ms": 52.21000000000001,
+          "after_gap_ms": 36.235,
+          "gap_change_ms": -15.975000000000009
+        },
+        {
+          "round": 5,
+          "before_gap_ms": 58.365,
+          "after_gap_ms": 41.191,
+          "gap_change_ms": -17.174
+        },
+        {
+          "round": 6,
+          "before_gap_ms": 55.666,
+          "after_gap_ms": 29.215999999999998,
+          "gap_change_ms": -26.45
+        }
+      ],
+      "median_gap_change_ms": -16.767499999999995
+    },
+    {
+      "previous": "Calendar",
+      "page": "Home",
+      "method": "Subtract corresponding Buttons transition process median from Calendar transition process median, then compare the paired gaps.",
+      "rounds": [
+        {
+          "round": 1,
+          "before_gap_ms": 24.162,
+          "after_gap_ms": 10.403000000000006,
+          "gap_change_ms": -13.758999999999993
+        },
+        {
+          "round": 2,
+          "before_gap_ms": 22.769999999999996,
+          "after_gap_ms": 9.931999999999995,
+          "gap_change_ms": -12.838000000000001
+        },
+        {
+          "round": 3,
+          "before_gap_ms": 34.498000000000005,
+          "after_gap_ms": 10.890999999999991,
+          "gap_change_ms": -23.607000000000014
+        },
+        {
+          "round": 4,
+          "before_gap_ms": 23.425000000000004,
+          "after_gap_ms": 12.406000000000006,
+          "gap_change_ms": -11.018999999999998
+        },
+        {
+          "round": 5,
+          "before_gap_ms": 29.142000000000003,
+          "after_gap_ms": 7.285000000000004,
+          "gap_change_ms": -21.857
+        },
+        {
+          "round": 6,
+          "before_gap_ms": 20.531000000000006,
+          "after_gap_ms": 11.671,
+          "gap_change_ms": -8.860000000000007
+        }
+      ],
+      "median_gap_change_ms": -13.298499999999997
+    }
+  ],
+  "processes": {
+    "round-1-attempt-1/after-1.process.json": {
+      "started_utc": "2026-11-09T12:54:29.792325+00:00",
+      "load_average_start": [
+        3.46484375,
+        12.00732421875,
+        50.0419921875
+      ],
+      "elapsed_seconds": 27.783357500000008,
+      "load_average_end": [
+        4.3740234375,
+        11.40234375,
+        48.50341796875
+      ]
+    },
+    "round-1-attempt-1/before-1.process.json": {
+      "started_utc": "2026-11-09T12:54:01.979130+00:00",
+      "load_average_start": [
+        2.85546875,
+        12.6826171875,
+        51.4091796875
+      ],
+      "elapsed_seconds": 27.812644208000002,
+      "load_average_end": [
+        3.46484375,
+        12.00732421875,
+        50.0419921875
+      ]
+    },
+    "round-2-attempt-1/after-2.process.json": {
+      "started_utc": "2026-11-09T12:54:57.577451+00:00",
+      "load_average_start": [
+        4.3740234375,
+        11.40234375,
+        48.50341796875
+      ],
+      "elapsed_seconds": 27.830119959,
+      "load_average_end": [
+        4.58251953125,
+        10.87451171875,
+        47.2373046875
+      ]
+    },
+    "round-2-attempt-1/before-2.process.json": {
+      "started_utc": "2026-11-09T12:55:25.408361+00:00",
+      "load_average_start": [
+        4.58251953125,
+        10.87451171875,
+        47.2373046875
+      ],
+      "elapsed_seconds": 27.92779166599999,
+      "load_average_end": [
+        4.2548828125,
+        10.19921875,
+        45.73291015625
+      ]
+    },
+    "round-3-attempt-1/after-3.process.json": {
+      "started_utc": "2026-11-09T12:56:21.172638+00:00",
+      "load_average_start": [
+        4.40380859375,
+        9.7626953125,
+        44.54638671875
+      ],
+      "elapsed_seconds": 27.968516833999985,
+      "load_average_end": [
+        4.078125,
+        9.17724609375,
+        43.1279296875
+      ]
+    },
+    "round-3-attempt-1/before-3.process.json": {
+      "started_utc": "2026-11-09T12:55:53.339239+00:00",
+      "load_average_start": [
+        4.2548828125,
+        10.19921875,
+        45.73291015625
+      ],
+      "elapsed_seconds": 27.831210250000026,
+      "load_average_end": [
+        4.40380859375,
+        9.7626953125,
+        44.54638671875
+      ]
+    },
+    "round-4-attempt-1/after-4.process.json": {
+      "started_utc": "2026-11-09T12:56:49.145819+00:00",
+      "load_average_start": [
+        4.078125,
+        9.17724609375,
+        43.1279296875
+      ],
+      "elapsed_seconds": 27.79122749999999,
+      "load_average_end": [
+        3.5751953125,
+        8.568359375,
+        41.73046875
+      ]
+    },
+    "round-4-attempt-1/before-4.process.json": {
+      "started_utc": "2026-11-09T12:57:16.939692+00:00",
+      "load_average_start": [
+        3.5751953125,
+        8.568359375,
+        41.73046875
+      ],
+      "elapsed_seconds": 27.83382854200002,
+      "load_average_end": [
+        3.5390625,
+        8.15283203125,
+        40.61962890625
+      ]
+    },
+    "round-5-attempt-1/after-5.process.json": {
+      "started_utc": "2026-11-09T12:58:12.614330+00:00",
+      "load_average_start": [
+        3.83251953125,
+        7.78564453125,
+        39.36083984375
+      ],
+      "elapsed_seconds": 27.83811558299999,
+      "load_average_end": [
+        3.98388671875,
+        7.498046875,
+        38.341796875
+      ]
+    },
+    "round-5-attempt-1/before-5.process.json": {
+      "started_utc": "2026-11-09T12:57:44.776606+00:00",
+      "load_average_start": [
+        3.5390625,
+        8.15283203125,
+        40.61962890625
+      ],
+      "elapsed_seconds": 27.836900000000014,
+      "load_average_end": [
+        3.83251953125,
+        7.78564453125,
+        39.36083984375
+      ]
+    },
+    "round-6-attempt-1/after-6.process.json": {
+      "started_utc": "2026-11-09T12:58:40.460210+00:00",
+      "load_average_start": [
+        3.98388671875,
+        7.498046875,
+        38.341796875
+      ],
+      "elapsed_seconds": 27.85211504199998,
+      "load_average_end": [
+        3.376953125,
+        7.00537109375,
+        37.09326171875
+      ]
+    },
+    "round-6-attempt-1/before-6.process.json": {
+      "started_utc": "2026-11-09T12:59:08.314839+00:00",
+      "load_average_start": [
+        3.376953125,
+        7.00537109375,
+        37.09326171875
+      ],
+      "elapsed_seconds": 27.830419750000033,
+      "load_average_end": [
+        3.0849609375,
+        6.64892578125,
+        36.09326171875
+      ]
+    }
+  },
+  "exclusions": {
+    "accepted_pair_attempts": [
+      1,
+      1,
+      1,
+      1,
+      1,
+      1
+    ],
+    "initial_aborted_comparison": "Excluded in full: an unscheduled Calendar navigation followed an app reopen event in the third process. Logs retained separately in target/calendar-latest-main/rejected-initial-comparison/.",
+    "final_comparison_retries": 0
+  },
+  "observations_sha256": "ee9a97b39f7e7d4c2479b6a3cc29f8b0e579d31ce69999cbc679aa1e37586152",
+  "runner_sha256": "95f8cd91dbcae4f150227611b22dafef13298c613cd1c0174037058a93693575"
+}

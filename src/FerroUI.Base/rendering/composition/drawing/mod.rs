@@ -25,7 +25,7 @@ mod server_resource_helper_extensions;
 
 pub use composition_painted_brush::CompositionPaintedBrush;
 pub(crate) use composition_painted_brush::{
-    draw_with_painted_brushes, is_painted_composition_brush, painted_brush_of, PaintedShape,
+    draw_with_painted_brushes, is_bounded_effect_context, is_painted_composition_brush, painted_brush_of, PaintedShape,
 };
 pub use composition_render_data::CompositionRenderData;
 pub use composition_render_data_scene_brush_content::{
@@ -36,7 +36,7 @@ pub use i_composition_render_resource::ICompositionRenderResource;
 pub use i_render_data_geometry::IRenderDataGeometry;
 pub use i_render_data_visitor::IRenderDataVisitor;
 pub use immediate_render_data_scene_brush_content::ImmediateRenderDataSceneBrushContent;
-pub use render_data_drawing_context::RenderDataDrawingContext;
+pub use render_data_drawing_context::{RecordedDrawing, RenderDataDrawingContext};
 pub use render_data_resources::{RenderDataResource, RenderDataResources, NULL_HANDLE};
 pub use render_data_opcode::RenderDataOpcode;
 pub use render_data_payloads::{

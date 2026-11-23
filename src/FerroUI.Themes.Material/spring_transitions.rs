@@ -22,7 +22,7 @@ use ferroui_base::reactive::{
     SingleSubscriberObservableBase, Subscription,
 };
 use ferroui_base::{
-    AnyValue, BoxedValue, CornerRadius, FerroObjectImpl, FerroProperty, PropertyValue, Ref,
+    AnyValue, BoxedValue, CornerRadius, FerroObjectImpl, FerroProperty, Ref, StyledValue,
     Thickness, Visual,
 };
 use std::any::{Any, TypeId};
@@ -116,7 +116,7 @@ implement_transition!(
 );
 implement_transition!(MaterialThicknessTransition, Thickness, ThicknessAnimator);
 
-trait SpringValue: PropertyValue {
+trait SpringValue: StyledValue {
     const COUNT: usize;
     fn components(&self) -> [f64; 4];
     fn from_components(value: [f64; 4]) -> Self;

@@ -71,6 +71,12 @@ impl ServerCompositionRenderData {
         rect.map(|r| LtrbRect { left: r.left.floor(), top: r.top.floor(), right: r.right.ceil(), bottom: r.bottom.ceil() })
     }
 
+    /// The bytes of the recorded operations: a measure of the commands of the drawing, for the
+    /// count of unchanged drawings (`unchanged_drawings`, #821).
+    pub(crate) fn recorded_bytes(&self) -> usize {
+        self.stream.borrow().as_ref().map_or(0, |stream| stream.opcodes().len())
+    }
+
     /// Replays the drawn content onto a platform drawing context.
     pub fn render(&self, context: &mut dyn IDrawingContextImpl) {
         if let Some(stream) = self.stream.borrow().as_ref() {
@@ -78,45 +84,63 @@ impl ServerCompositionRenderData {
         }
     }
 
-    fn reset(&self) {
+    /// Draws the geometry of a rectangular shape with radii supplied by its visual.
+    /// This preserves cap sizes during composition scaling without UI-thread redraws.
+    pub fn render_as_rounded_rectangle(&self, context: &mut dyn IDrawingContextImpl, radius: crate::Vector) {
+        if let Some(stream) = self.stream.borrow().as_ref() {
+            stream.replay_as_rounded_rectangle(context, &mut self.replay_scopes.borrow_mut(), radius);
+        }
+    }
+
+    /// Lets go of what the data drew: the subscriptions to the server-side resources and the
+    /// custom draw operations. Returns the emptied stream, with its buffers, for the next
+    /// content (FerroUI addition, desktop-performance.md, section 9.31): a visual whose drawing
+    /// changes every frame reads every frame into the storage it already has, where upstream
+    /// frees the stream and the list of resources and allocates them again.
+    fn release_content(&self) -> Option<RenderDataStream> {
         self.bounds.set(None);
         self.bounds_valid.set(false);
-        let referenced = std::mem::take(&mut *self.referenced_resources.borrow_mut());
-        if let Some(observer) = self.as_observer() {
-            for resource in &referenced {
-                resource.remove_observer(&observer);
+        {
+            let mut referenced = self.referenced_resources.borrow_mut();
+            if !referenced.is_empty() {
+                if let Some(observer) = self.as_observer() {
+                    for resource in referenced.iter() {
+                        resource.remove_observer(&observer);
+                    }
+                }
+                referenced.clear();
             }
         }
-        if let Some(mut stream) = self.stream.borrow_mut().take() {
-            stream.dispose_resources();
+        let mut stream = self.stream.borrow_mut().take()?;
+        stream.dispose_resources();
+        stream.recycle();
+        Some(stream)
+    }
+
+    fn reset(&self) {
+        if let Some(mut stream) = self.release_content() {
             stream.dispose();
         }
+        *self.referenced_resources.borrow_mut() = Vec::new();
     }
 }
 
 impl IServerObject for ServerCompositionRenderData {
     fn deserialize_changes_core(&self, reader: &mut BatchStreamReader<'_>, _committed_at: Duration) {
-        self.reset();
-        let mut stream = RenderDataStream::new();
+        let mut stream = self.release_content().unwrap_or_default();
         let compositor = self.compositor.upgrade();
-        let server_ids = RefCell::new(Vec::new());
-        stream.deserialize_from(reader, &|id| {
-            server_ids.borrow_mut().push(id);
-            compositor.as_ref().and_then(|c| c.get_object(id))
-        });
-        let server_ids = server_ids.into_inner();
+        let observer = self.as_observer();
 
         // Server-side brushes, pens and geometries are render resources:
         // follow their changes.
-        if let (Some(compositor), Some(observer)) = (&compositor, self.as_observer()) {
-            let mut referenced = self.referenced_resources.borrow_mut();
-            for id in &server_ids {
-                if let Some(resource) = compositor.get_object(*id).and_then(|o| o.as_render_resource()) {
-                    resource.add_observer(&observer);
-                    referenced.push(resource);
-                }
+        stream.deserialize_from(reader, &|id| {
+            let object = compositor.as_ref().and_then(|c| c.get_object(id))?;
+            if let (Some(observer), Some(resource)) = (&observer, object.clone().as_render_resource()) {
+                resource.add_observer(observer);
+                self.referenced_resources.borrow_mut().push(resource);
             }
-        }
+            Some(object)
+        });
         *self.stream.borrow_mut() = Some(stream);
     }
 

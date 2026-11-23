@@ -693,7 +693,11 @@ Visual property setters replace whole-property and subchannel animations even wh
 value being assigned has not changed. This is required by WinUI NavigationView's
 `ResetElementAnimationProperties`, which restores indicators using ordinary `Offset`, `Scale`
 and `Opacity` assignments. The direct value and any later `StartAnimation` retain their order in
-the serialized property stream. Same-value assignments do not trigger an implicit animation,
+the serialized property stream: a batch carries the assigned value first and the animation after
+it, so the animation starts from the assigned value and the components a sub-channel animation
+leaves alone (`Offset.Y` under an animation of `Offset.X`) are the assigned ones. An implicit
+animation of the assigned property starts from the value the compositor has, so the assigned
+value is not sent ahead of it. Same-value assignments do not trigger an implicit animation,
 matching [Microsoft's contract](https://learn.microsoft.com/en-us/uwp/api/windows.ui.composition.implicitanimationcollection).
 The element renderer forwards actual framework changes, preserving an application's animation
 on an unrelated repaint. See [selection indicator motion](selection-indicator-animations.md).
