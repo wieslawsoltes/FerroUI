@@ -504,8 +504,9 @@ fn table_counts(tag: &Tag, data: &[u8]) -> Counts {
 
 /// Whether a table holds the fields its version promises. The traversal of `read-fonts` 0.41
 /// unwraps exactly these version- and flag-dependent fields, so that a table too short for them
-/// would panic. This list has to be checked again whenever the pin of `read-fonts` moves.
-fn has_versioned_fields(tag: &Tag, data: &[u8]) -> bool {
+/// would panic. The fields are listed next to the dependency, in
+/// `[package.metadata.read-fonts-guards]` of this crate, and a test ties that list to the pin.
+pub(super) fn has_versioned_fields(tag: &Tag, data: &[u8]) -> bool {
     let check = || -> Option<bool> {
         let (major, minor) = (data.u16_at(0)?, data.u16_at(2).unwrap_or(0));
         Some(match tag {

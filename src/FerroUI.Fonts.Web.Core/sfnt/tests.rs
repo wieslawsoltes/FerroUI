@@ -343,7 +343,7 @@ fn sanitizes_a_list_of_fonts() {
 }
 
 mod contents {
-    use super::super::deep::{has_color_cycle, TableCheck, TableContext, Verdict};
+    use super::super::deep::{has_color_cycle, has_versioned_fields, TableCheck, TableContext, Verdict};
     use super::*;
 
     const INTER: &str = "FerroUI.Base/test_assets/fonts/Inter-Regular.ttf";
@@ -495,6 +495,81 @@ mod contents {
         // A lookup that says it has a mark filtering set and ends before it.
         let gsub = vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 10, 0, 1, 0, 4, 0, 1, 0, 0x10, 0, 0];
         assert_eq!(verdict(b"GSUB", &gsub, &context), Verdict::Invalid);
+    }
+
+    /// The fields listed next to the dependency, and the version they were audited for.
+    fn guarded_fields() -> (String, Vec<String>) {
+        let manifest = include_str!("../Cargo.toml");
+        let section = manifest.split("[package.metadata.read-fonts-guards]").nth(1).expect("the list of guards");
+        let section = section.split("\n[").next().unwrap();
+        let audited = section.lines().find_map(|line| line.strip_prefix("audited = ")).expect("the audited version");
+        let fields = section
+            .lines()
+            .filter_map(|line| line.trim().strip_prefix('"')?.strip_suffix("\",").map(str::to_owned))
+            .collect();
+        (audited.trim_matches('"').to_owned(), fields)
+    }
+
+    #[test]
+    fn the_guards_were_audited_for_the_pinned_version() {
+        let (audited, _) = guarded_fields();
+        let workspace =
+            std::fs::read_to_string(PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../Cargo.toml")).unwrap();
+        let pin = workspace.lines().find(|line| line.starts_with("read-fonts = ")).expect("the pin");
+        assert!(pin.contains(&format!("\"={audited}\"")), "audit the traversal for the new pin: {pin}");
+    }
+
+    /// For each guarded field, a table that promises it and is too short to hold it.
+    fn too_short_for(field: &str) -> Option<Vec<u8>> {
+        let os2 = |version: u8, length: usize| {
+            let mut table = vec![0u8; length];
+            table[1] = version;
+            table
+        };
+        Some(match field {
+            "BASE.item_var_store_offset" => vec![0, 1, 0, 1, 0, 0, 0, 0],
+            "COLR.base_glyph_list_offset"
+            | "COLR.clip_list_offset"
+            | "COLR.item_variation_store_offset"
+            | "COLR.layer_list_offset"
+            | "COLR.var_index_map_offset" => vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "CPAL.palette_entry_labels_array_offset"
+            | "CPAL.palette_labels_array_offset"
+            | "CPAL.palette_types_array_offset" => vec![0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 14, 0, 0, 1, 2, 3, 4],
+            "GDEF.mark_glyph_sets_def_offset" => vec![0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0],
+            "GDEF.item_var_store_offset" => vec![0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "GPOS.feature_variations_offset" | "GSUB.feature_variations_offset" => vec![0, 1, 0, 1, 0, 0, 0, 0, 0, 0],
+            "GPOS.mark_filtering_set" | "GSUB.mark_filtering_set" => {
+                vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 10, 0, 1, 0, 4, 0, 1, 0, 0x10, 0, 0]
+            }
+            "OS/2.ul_code_page_range_1" | "OS/2.ul_code_page_range_2" => os2(1, 85),
+            "OS/2.s_cap_height"
+            | "OS/2.sx_height"
+            | "OS/2.us_break_char"
+            | "OS/2.us_default_char"
+            | "OS/2.us_max_context" => os2(2, 95),
+            "OS/2.us_lower_optical_point_size" | "OS/2.us_upper_optical_point_size" => os2(5, 99),
+            "STAT.elided_fallback_name_id" => vec![0, 1, 0, 1, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0],
+            "avar.axis_index_map_offset" | "avar.var_store_offset" => vec![0, 2, 0, 0, 0, 0, 0, 1, 0, 0],
+            "name.lang_tag_count" | "name.lang_tag_record" => vec![0, 1, 0, 0, 0, 6],
+            "post.num_glyphs" | "post.glyph_name_index" => {
+                let mut table = vec![0u8; 32];
+                table[1] = 2;
+                table
+            }
+            _ => return None,
+        })
+    }
+
+    #[test]
+    fn every_guarded_field_has_a_guard() {
+        let (_, fields) = guarded_fields();
+        assert_eq!(fields.len(), 31);
+        for field in fields {
+            let bytes = too_short_for(&field).unwrap_or_else(|| panic!("{field} has no case proving its guard"));
+            let tag: Tag = field.as_bytes()[..4].try_into().unwrap();
+            assert!(!has_versioned_fields(&tag, &bytes), "{field} is not guarded");
+        }
     }
 
     #[test]

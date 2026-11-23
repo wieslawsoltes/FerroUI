@@ -520,6 +520,8 @@ png = { version = "=0.18.1" }
 skrifa = { version = "=0.44.0" }
 # Pinned in step with `skrifa` 0.44, which links this version. Only `ferroui-fonts-web-core` names
 # it, and only there is its feature `experimental_traverse` on: the walk of the sanitizer.
+# Moving this pin means auditing the fields listed in `[package.metadata.read-fonts-guards]` of
+# that crate: a test fails until the list says it was done.
 read-fonts = { version = "=0.41.0", default-features = false, features = ["std", "experimental_traverse"] }
 glifo = { version = "=0.4.0", default-features = false, features = ["std"] }
 fontique = { version = "=0.12.0" }

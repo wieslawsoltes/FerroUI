@@ -24,6 +24,46 @@ read-fonts.workspace = true
 # The encoder of WOFF2 test files, for the tests of this crate and of `ferroui-fonts-web`.
 testing = []
 
+# The fields the traversal of `read-fonts` unwraps, which panic on a table too short for its
+# version or flags. Each has a guard in `sfnt/deep.rs` (`has_versioned_fields`). When the pin of
+# `read-fonts` moves, audit its traversal again, update this list and `audited`: a test fails
+# until they agree with the pin, and when a field here has no case proving its guard.
+[package.metadata.read-fonts-guards]
+audited = "0.41.0"
+fields = [
+    "BASE.item_var_store_offset",
+    "COLR.base_glyph_list_offset",
+    "COLR.clip_list_offset",
+    "COLR.item_variation_store_offset",
+    "COLR.layer_list_offset",
+    "COLR.var_index_map_offset",
+    "CPAL.palette_entry_labels_array_offset",
+    "CPAL.palette_labels_array_offset",
+    "CPAL.palette_types_array_offset",
+    "GDEF.item_var_store_offset",
+    "GDEF.mark_glyph_sets_def_offset",
+    "GPOS.feature_variations_offset",
+    "GPOS.mark_filtering_set",
+    "GSUB.feature_variations_offset",
+    "GSUB.mark_filtering_set",
+    "OS/2.s_cap_height",
+    "OS/2.sx_height",
+    "OS/2.ul_code_page_range_1",
+    "OS/2.ul_code_page_range_2",
+    "OS/2.us_break_char",
+    "OS/2.us_default_char",
+    "OS/2.us_lower_optical_point_size",
+    "OS/2.us_max_context",
+    "OS/2.us_upper_optical_point_size",
+    "STAT.elided_fallback_name_id",
+    "avar.axis_index_map_offset",
+    "avar.var_store_offset",
+    "name.lang_tag_count",
+    "name.lang_tag_record",
+    "post.glyph_name_index",
+    "post.num_glyphs",
+]
+
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "controls"
