@@ -93,8 +93,7 @@ pub(super) fn tools() -> Vec<Value> {
             s::action("scrub",json!({"program":s::id(),"time":s::time()}), &["program","time"],true),
             s::action("scrub_all",json!({"program":s::id(),"time":s::time()}), &["time"],true),
             s::action("play_program",json!({"program":s::id(),"time":s::time(),"from_playhead":{"type":"boolean"}}), &["program"],true),
-            s::action("play_range", json!({"program":s::id(),"all":{"type":"boolean"},"range":
-                s::object(json!({"start":s::time(),"end":s::time(),"loop":{"type":"boolean"}}), &["start","end","loop"])}), &["range"],true),
+            s::action("play_range", json!({"program":s::id(),"all":{"type":"boolean"},"range":s::preview_range()}), &["range"],true),
             s::action("advance_program",json!({"program":s::id(),"seconds":s::time()}), &["program","seconds"],true),
             s::action("pause_program",json!({"program":s::id()}), &["program"],true),
             s::action("stop_program",json!({}), &[],true),

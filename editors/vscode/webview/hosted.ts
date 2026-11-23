@@ -3,6 +3,7 @@ import { element } from './dom';
 import { HostedAnimationView } from './hostedAnimations';
 import { HostedPaletteView } from './hostedPalette';
 import { HostedStylesView } from './hostedStyles';
+import { PreviewBitmap } from './previewBitmap';
 
 declare function acquireVsCodeApi(): {
     postMessage(message: FromHosted): void;
@@ -15,7 +16,8 @@ const animations = new HostedAnimationView(message => vscode.postMessage(message
     compare => vscode.setState({ compare }));
 const palettes = new HostedPaletteView(message => vscode.postMessage(message));
 const styles = new HostedStylesView(message => vscode.postMessage(message));
-const canvas = element<HTMLImageElement>('hosted-image');
+const canvas = element<HTMLCanvasElement>('hosted-image');
+const presenter = new PreviewBitmap(canvas);
 const status = element('hosted-status');
 const input = element<HTMLFormElement>('hosted-input');
 const text = element<HTMLInputElement>('hosted-text');
@@ -26,8 +28,8 @@ const templates = element<HTMLButtonElement>('hosted-templates-button');
 let fixtureRevision = 0;
 let availableFixtures: string[] = [];
 let current: HostedFrame | undefined;
+let staged: HostedFrame | undefined;
 let interactive = false;
-let request = 0;
 
 window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
     if (data.type === 'animations') { animations.update(data.state, data.version, data.layout); return; }
@@ -62,13 +64,15 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToHosted>) => {
         fixture.disabled = pending;
         return;
     }
-    const decoded = new Image();
-    const sequence = ++request;
-    decoded.src = `data:image/png;base64,${data.frame.image.png}`;
-    try { await decoded.decode(); } catch { return; }
-    if (sequence !== request) return;
-    current = data.frame;
-    canvas.src = decoded.src;
+    const frame = staged = data.frame;
+    let bitmap: ImageBitmap | null;
+    try { bitmap = await presenter.decode(frame.image.png); } catch { return; }
+    if (staged !== frame) {
+        bitmap?.close();
+        return;
+    }
+    presenter.present(frame.image.png, bitmap);
+    current = frame;
     canvas.hidden = false;
     input.hidden = false;
     animations.rendered(current);
@@ -83,7 +87,7 @@ function updateTemplates(): void {
 }
 
 function position(event?: MouseEvent) {
-    if (!current || !interactive) return undefined;
+    if (!current || current !== staged || !interactive) return undefined;
     const rect = canvas.getBoundingClientRect();
     return { revision: current.revision, sequence: current.sequence,
         x: event ? (event.clientX - rect.left) / rect.width : 0.5,

@@ -16,7 +16,9 @@ interface Playback {
 
 export function positionFromPose(session: number, pose: TimelinePreviewPose): TimelinePosition {
     return { session, program: pose.program, time: pose.time, playing: false, busy: false,
-        elapsed: pose.playback?.elapsed, all: pose.playback?.all, completed: pose.playback?.completed };
+        elapsed: pose.playback?.elapsed ?? (pose.previewRange ? pose.time : undefined),
+        all: pose.playback?.all ?? pose.previewRange?.all, completed: pose.playback?.completed,
+        previewRange: pose.previewRange?.range };
 }
 
 /** The extension measures elapsed time while Studio owns the clock and native values. */
@@ -84,6 +86,10 @@ export class TimelinePlayback {
                 await this.render(playback, { action: 'scrub', program: control.program, time: control.time }, signal);
             } else if (control.action === 'play' && timeline) {
                 await this.start(playback, control.time, previous?.all ? undefined : previous, timeline, signal);
+            } else if (control.action === 'play_range' && control.all) {
+                panel.setAnimationRecording(false);
+                const position = await this.render(playback, control, signal);
+                this.beginClock(playback, position);
             } else if (control.action === 'play_range' && timeline && !timeline.native) {
                 if (!validPreviewRange(control.range, timeline.duration)) throw new Error('Choose an In and Out time within the animation, with In before Out.');
                 const range = control.range;
@@ -136,8 +142,8 @@ export class TimelinePlayback {
     private async advance(playback: Playback): Promise<void> {
         try {
             await drivePreviewClock(() => playback.running, async seconds => {
-                const { previewRange: range, program, time } = playback.position;
-                if (range) {
+                const { previewRange: range, program, time, all } = playback.position;
+                if (range && !all) {
                     const next = stepPreviewRange(range, time, seconds);
                     const position = await this.render(playback, { action: 'scrub', program, time: next.time }, AbortSignal.timeout(15_000),
                         { previewRange: range, playing: !next.completed, completed: next.completed });
@@ -164,7 +170,7 @@ export class TimelinePlayback {
         try {
             await playback.loop;
             signal.throwIfAborted();
-            if (action === 'stop' || !playback.position.previewRange) {
+            if (action === 'stop' || !playback.position.previewRange || playback.position.all) {
                 await this.render(playback, action === 'pause'
                     ? { action: 'pause_program', program: playback.position.program }
                     : { action: 'stop_program' }, signal);
@@ -188,8 +194,8 @@ export class TimelinePlayback {
         }
         if (!presentation?.timelinePosition) throw new Error('The native preview did not report a timeline position.');
         playback.token = token + 1;
-        const { elapsed, time, all, completed, playing } = presentation.timelinePosition;
-        return this.commit(playback, { elapsed, time, all, completed, previewRange: undefined,
+        const { elapsed, time, all, completed, playing, previewRange } = presentation.timelinePosition;
+        return this.commit(playback, { elapsed, time, all, completed, previewRange: previewRange ?? undefined,
             ...range, playing: (range?.playing ?? playing) && !playback.interrupting });
     }
 

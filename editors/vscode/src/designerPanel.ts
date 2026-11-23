@@ -58,6 +58,7 @@ interface Frame {
     timelineCurveVelocity: boolean;
     timelineCombinedPlayback: boolean;
     timelineClipPlacement: boolean;
+    timelinePreviewRanges: boolean;
     stateTransitionPreview: boolean;
     rsxStateAuthoring: boolean;
     rsxStateStructure: boolean;
@@ -354,6 +355,7 @@ export class DesignerPanel implements vscode.Disposable {
     get supportsTimelineCurveVelocity(): boolean { return Boolean(this.frame?.timelineCurveVelocity); }
     get supportsTimelineCombinedPlayback(): boolean { return Boolean(this.frame?.timelineCombinedPlayback); }
     get supportsTimelineClipPlacement(): boolean { return Boolean(this.frame?.timelineClipPlacement); }
+    get supportsTimelinePreviewRanges(): boolean { return Boolean(this.frame?.timelinePreviewRanges); }
     get supportsStateTransitionPreview(): boolean { return Boolean(this.frame?.stateTransitionPreview); }
     get supportsRustStates(): boolean { return Boolean(this.language === 'rust' && this.frame?.rsxStateAuthoring); }
     get supportsRustStateStructure(): boolean { return this.supportsRustStates && Boolean(this.frame?.rsxStateStructure); }
@@ -1072,6 +1074,8 @@ export class DesignerPanel implements vscode.Disposable {
                 timelineCurveVelocity: Boolean(client.capabilities.timelineCurveVelocity),
                 timelineCombinedPlayback: Boolean(client.capabilities.timelineCombinedPlayback),
                 timelineClipPlacement: Boolean(client.capabilities.timelineClipPlacement),
+                // Both native preview paths gained range playback in the same helper update.
+                timelinePreviewRanges: Boolean(client.capabilities.hostedPreviewRanges),
                 stateTransitionPreview: Boolean(client.capabilities.stateTransitionPreview),
                 rsxStateAuthoring: Boolean(client.capabilities.rsxStateAuthoring),
                 rsxStateStructure: Boolean(client.capabilities.rsxStateStructure),

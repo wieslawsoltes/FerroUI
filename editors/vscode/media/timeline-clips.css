@@ -26,6 +26,9 @@
 .clip-axis { inset-block-start: 0; border-block-end: 1px solid var(--line); }
 .clip-pan { inset-block-end: 0; border-block-start: 1px solid var(--line); }
 .clip-ruler { position: relative; padding-block-end: 15px; }
+.clip-ruler .timeline-range-track { inset-inline: 0; }
+.clip-ruler:has(.timeline-range-track) { padding-block-end: 18px; }
+.clip-ruler:has(.timeline-range-track) .clip-marks { inset-block-end: 2px; }
 #clip-seek { appearance: none; display: block; inline-size: calc(100% + 10px); min-block-size: 19px; margin: 0 -5px; padding: 0; border: 0; background: transparent; }
 #clip-seek::-webkit-slider-runnable-track { block-size: 1px; background: var(--line); }
 #clip-seek::-webkit-slider-thumb { appearance: none; inline-size: 10px; block-size: 10px; margin-block-start: -4px; border-radius: 2px; border: 1px solid var(--vscode-button-foreground); background: var(--vscode-button-background); }

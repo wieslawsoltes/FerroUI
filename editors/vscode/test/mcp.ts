@@ -139,7 +139,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_source'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_templates'));
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
-        for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'timeline_set_layout', 'timeline_set_viewport', 'timeline_track_action', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
+        for (const name of ['open', 'refresh', 'animations', 'animation', 'timeline_view', 'timeline_set_graph', 'timeline_set_layout', 'timeline_set_viewport', 'timeline_track_action', 'timeline_set_work_area', 'image', 'input', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
             'state_group_draft', 'state_group', 'property_transitions', 'property_transition_draft', 'property_transition',
             'palette', 'palette_edit_draft', 'palette_edit',
@@ -150,6 +150,13 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_open', { session: 1 })).content[0]?.text ?? '', /allowWrites/);
         assert.ok(tools.some(tool => tool.name === 'designer_timeline_view'));
         const viewport = { action: 'fit', ruler: 'clips' };
+        const work_area = { scope: 'clips', action: 'disable' };
+        assert.match((await invoke('designer_timeline_set_work_area', { session: 1, expected_revision: 1, work_area }))
+            .content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_timeline_set_frame_rate', { session: 1, expected_revision: 1,
+            frame_snap: { program: 1, frame_rate: 24 } })).content[0]?.text ?? '', /allowWrites/);
+        assert.match((await invoke('designer_hosted_timeline_set_work_area', { session: 1, expected_revision: 1,
+            expected_generation: 1, expected_sequence: 1, work_area })).content[0]?.text ?? '', /allowWrites/);
         const filter = { action: 'filter', program: 1, query: 'Opacity', selectedOnly: false };
         assert.match((await invoke('designer_timeline_track_action', { session: 1, expected_revision: 1, track: filter }))
             .content[0]?.text ?? '', /allowWrites/);

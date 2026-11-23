@@ -7,6 +7,7 @@ import type { HostedGesture } from '../src/hostedProtocol';
 import type { McpFixture } from './mcp';
 import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
 import { verifyHostedTrackMcp } from './timelineTrackMcp';
+import { verifyTimelineTimingMcp } from './timelineTimingMcp';
 import { until } from './wait';
 
 const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design"
@@ -142,6 +143,7 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
             await verifyTimelineGraphMcp({ invoke, content }, session, document, generation);
             await verifyTimelineLayoutMcp({ invoke, content }, session, document, generation);
             await verifyHostedTrackMcp({ invoke, content }, session, document);
+            await verifyTimelineTimingMcp({ invoke, content }, session, document, true);
             await verifyLayoutPlayback({ invoke, content }, session, generation);
         } finally {
             content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));

@@ -570,6 +570,12 @@ and fits the work area to the replacement clock. In Studio MCP, use `designer_pr
 `action: "play_range"` and a `range` containing `start`, `end`, and `loop`. Include `all: true` for
 the shared clip clock. [App Preview range workflow](vscode/motion.md#rehearse-a-range-in-app-preview)
 
+Use `designer_timeline_set_work_area` to configure the same range for the next toolbar Play.
+Choose `scope: "program"` for the keyframe view or `scope: "clips"` for the shared clock.
+Use `designer_timeline_set_frame_rate` for the snap chooser on the keyframe ruler.
+Read `designer_timeline_view` for the work area, available snap rates, and active document identity.
+[Timeline timing workflow](vscode/motion.md#configure-preview-timing-from-an-agent)
+
 ### Bookmark poses in Designer Studio
 
 ![Designer Studio shows two saved poses in a compact strip below the clip lanes](images/studio-preview-markers.png)

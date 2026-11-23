@@ -56,7 +56,7 @@ impl DesignerWorkspace {
         )
     }
 
-    fn set_preview_range(&self, range: Option<PreviewRange>) -> Result<(), String> {
+    pub(super) fn set_preview_range(&self, range: Option<PreviewRange>) -> Result<(), String> {
         let session = self.session.borrow();
         if session.is_playing() {
             return Err("Pause playback before changing the preview range".into());
@@ -80,6 +80,14 @@ impl DesignerWorkspace {
         Ok(())
     }
 
+    pub(super) fn default_preview_range(&self, limit: Option<f64>) -> PreviewRange {
+        PreviewRange {
+            start: 0.0,
+            end: limit.unwrap_or_else(|| self.timeline_view_duration()),
+            looping: true,
+        }
+    }
+
     pub(in crate::workspace) fn show_preview_range(self: &Rc<Self>) -> Result<(), String> {
         let host = self
             .root
@@ -100,11 +108,7 @@ impl DesignerWorkspace {
         let current = self
             .preview_range_for_view(&session)
             .and_then(|range| range.fit(limit));
-        let default = PreviewRange {
-            start: 0.0,
-            end: limit.unwrap_or_else(|| self.timeline_view_duration()),
-            looping: true,
-        };
+        let default = self.default_preview_range(limit);
         drop(session);
         let range = current.unwrap_or(default);
         let body = StackPanel::new();
@@ -199,6 +203,30 @@ impl DesignerWorkspace {
         self.root.get_control::<Button>("TimelineRange").focus();
     }
 
+    pub(super) fn set_preview_range_boundary(&self, at_in: bool) -> Result<(), String> {
+        let session = self.session.borrow();
+        let limit = session.preview_range_limit(
+            session.active_animation_program(),
+            self.comparing_animation_clips(),
+        )?;
+        let default = self.default_preview_range(limit);
+        let mut range = self.preview_range_for_view(&session).unwrap_or(default);
+        let time = session.time();
+        if at_in {
+            range.start = time;
+            if range.end <= time {
+                range.end = default.end;
+            }
+        } else {
+            range.end = time;
+            if range.start >= time {
+                range.start = 0.0;
+            }
+        }
+        drop(session);
+        self.set_preview_range(Some(range))
+    }
+
     pub(super) fn connect_preview_range(
         self: &Rc<Self>,
         ruler: &TimelineLane,
@@ -213,36 +241,8 @@ impl DesignerWorkspace {
             let Some(workspace) = weak.upgrade() else {
                 return;
             };
-            let result = context.check(&workspace).and_then(|()| {
-                let session = workspace.session.borrow();
-                let limit = session.preview_range_limit(
-                    session.active_animation_program(),
-                    workspace.comparing_animation_clips(),
-                )?;
-                let end = limit.unwrap_or_else(|| workspace.timeline_view_duration());
-                let mut range =
-                    workspace
-                        .preview_range_for_view(&session)
-                        .unwrap_or(PreviewRange {
-                            start: 0.0,
-                            end,
-                            looping: true,
-                        });
-                let time = session.time();
-                if args.key == Key::I {
-                    range.start = time;
-                    if range.end <= time {
-                        range.end = end;
-                    }
-                } else {
-                    range.end = time;
-                    if range.start >= time {
-                        range.start = 0.0;
-                    }
-                }
-                drop(session);
-                workspace.set_preview_range(Some(range))
-            });
+            let result = context.check(&workspace)
+                .and_then(|()| workspace.set_preview_range_boundary(args.key == Key::I));
             args.set_handled(true);
             if result.is_ok() {
                 workspace.refresh(true);

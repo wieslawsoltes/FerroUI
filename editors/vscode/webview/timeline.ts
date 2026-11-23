@@ -2,8 +2,9 @@ import type { AnimationGraphMode } from '../src/animationGraph';
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineKeyAction, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
 import type { TimelineTrackCommand, TimelineTrackView } from '../src/timelineTrackProtocol';
-import { TimelineClips } from './timelineClips';
-import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
+import type { TimelineSnapChange, TimelineSnapState } from '../src/timelineTimingProtocol';
+import { clipRulerExtent, TimelineClips } from './timelineClips';
+import { canPreviewProgram, canPreviewRange, combinedRangeLimit, previewClock } from '../src/timelinePrograms';
 import { AnimationGraphMenu } from './animationGraphMenu';
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
@@ -18,7 +19,7 @@ import { keyframeId, TimelineSelection } from './timelineSelection';
 import { TimelineStateTransition } from './timelineStateTransition';
 import { TimelineTrackFilter } from './timelineTrackFilter';
 import { clamp } from './timelineViewport';
-import { answerTimelinePresentation } from './timelinePresentation';
+import { answerTimelinePresentation, type WorkAreaView } from './timelinePresentation';
 import type { TimelineRulerView } from './timelineViewportRequest';
 import { TimelineViewportView } from './timelineViewportView';
 import { TimelineWorkArea } from './timelineWorkArea';
@@ -56,7 +57,8 @@ const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 let model: TimelineState = { programs: [], names: {}, writable: false };
 const saved = vscode.getState();
 let remembered = typeof saved === 'number' ? { id: saved } : saved;
-let frameRate = [24, 30, 60].find(rate => typeof saved === 'object' && rate === saved.frameRate) ?? 0;
+const snapRates = [...snap.options].map(option => Number(option.value));
+let frameRate = snapRates.find(rate => typeof saved === 'object' && rate === saved.frameRate) ?? 0;
 const graph = new AnimationGraphMenu('timeline', typeof saved === 'object'
     ? saved.graph ?? (saved.curves ? 'value' : 'keys') : 'keys', mode => vscode.postMessage({ type: 'animationGraphMode', mode }));
 snap.value = String(frameRate);
@@ -95,6 +97,7 @@ let owner: { session: number; program: ProgramIdentity } | undefined;
 let keyEdit: { before: FrameTarget; accepted?: KeyframeLocation[] } | undefined;
 let appliedProgramEdit: string | undefined;
 let clipEdit: FrameTarget | undefined;
+let clipRangeScope: string | undefined;
 const clips = new TimelineClips<FrameTarget>(typeof saved === 'object' && saved.clips ? 'clips' : 'tracks', {
     changed: layout => {
         vscode.postMessage({ type: 'timelineLayout', layout });
@@ -107,7 +110,10 @@ const clips = new TimelineClips<FrameTarget>(typeof saved === 'object' && saved.
         seek();
     },
     transport: (action, program) => {
-        if (model.frame) send(model.frame, { action, program });
+        if (!model.frame) return;
+        const range = clipRange.range;
+        if (action === 'play_all' && range) send(model.frame, { action: 'play_range', program, range, all: true });
+        else send(model.frame, { action, program });
     },
     place: (frame, programs, start, gap) => {
         clipEdit = frame;
@@ -124,8 +130,9 @@ const clips = new TimelineClips<FrameTarget>(typeof saved === 'object' && saved.
         showTracks();
         programs.focus({ preventScroll: true });
     },
-    layout: () => sharedMarkers.layout(),
+    layout: () => { sharedMarkers.layout(); clipRange.layout(); },
 });
+const clipRange = new TimelineWorkArea('clip', element('timeline-clips'), () => clips.viewport, () => clips.elapsed, showPosition);
 const sharedMarkerButton = element<HTMLButtonElement>('clip-marker-options');
 const sharedMarkers = new TimelineMarkerView('clip', element('clip-seek'), () => clips.viewport, () => clips.elapsed, (edit, time) => {
     if (!model.frame || pending || clipEdit || model.position?.playing) return;
@@ -162,10 +169,7 @@ programs.addEventListener('change', () => {
     queued = undefined;
     showTracks();
 });
-snap.addEventListener('change', () => {
-    frameRate = Number(snap.value);
-    saveTimeline();
-});
+snap.addEventListener('change', () => setFrameRate(Number(snap.value)));
 fitKeys.onclick = () => viewport.fitKeys(selection.keys.map(key => key.time));
 play.addEventListener('click', () => {
     const selected = current();
@@ -242,6 +246,7 @@ window.addEventListener('message', event => {
         const matchingFrame = frame?.session === message.frame.session && frame.token === message.frame.token;
         vscode.postMessage(answerTimelinePresentation(message, matchingFrame ? {
             ruler: timelineRuler, tracks: timelineTrackView, changeTracks: changeTimelineTracks,
+            workArea: timelineWorkArea, snap: timelineSnap, changeSnap: changeFrameSnap,
         } : undefined));
     } else if (message.type === 'position') {
         model.position = message.position;
@@ -521,6 +526,34 @@ function changeTimelineTracks(command: TimelineTrackCommand): void {
     }
 }
 
+function timelineWorkArea(): WorkAreaView | undefined {
+    if (model.transition) return;
+    if (clips.visible) {
+        if (clipRange.state) return { area: clipRange, scope: 'clips', clock: 'elapsed' };
+    } else if (program !== undefined && workArea.state) {
+        return { area: workArea, scope: 'program', program, clock: 'authored' };
+    }
+}
+
+function timelineSnap(): TimelineSnapState | undefined {
+    if (!model.transition && !clips.visible && !snapField.hidden && program !== undefined) {
+        return { program, frame_rate: frameRate, rates: snapRates, editable: !snap.disabled };
+    }
+}
+
+function changeFrameSnap(change: TimelineSnapChange): void {
+    const current = timelineSnap();
+    if (!current?.editable || current.program !== change.program) throw new Error('Read the current editable keyframe snap settings.');
+    if (!snapRates.includes(change.frame_rate)) throw new Error('Choose a frame rate listed in the Timeline view.');
+    setFrameRate(change.frame_rate);
+}
+
+function setFrameRate(rate: number): void {
+    frameRate = rate;
+    snap.value = String(rate);
+    saveTimeline();
+}
+
 function showCurves(): void {
     const selected = current();
     const hasCurveTrack = selected?.timeline?.tracks.some(track => curveChannels(track).length);
@@ -553,18 +586,28 @@ function showPosition(): void {
         duration: program.preview?.duration ?? program.timeline?.duration ?? 1, keys: Boolean(program.timeline),
     }] : []);
     const markerEnd = Math.max(0, ...(model.sharedMarkers ?? []).map(marker => marker.time));
-    clips.follow({ frame: model.frame, scope: model.clipScope, programs: clipRows, reference, position: model.position, minimumDuration: markerEnd },
+    const combinedPosition = model.position?.all ? model.position : undefined;
+    clipRange.follow(model.canPlayAll && model.canPreviewCombinedRanges && model.clipScope ? combinedRangeLimit(model.programs) : 0,
+        clipRangeScope !== model.clipScope, clipRulerExtent(clipRows));
+    if (model.clipScope) clipRangeScope = model.clipScope;
+    clipRange.adopt(combinedPosition?.previewRange, Boolean(combinedPosition?.playing));
+    clips.follow({ frame: model.frame, scope: model.clipScope, programs: clipRows, reference, position: model.position,
+        rangeEnabled: Boolean(clipRange.range), minimumDuration: Math.max(markerEnd, clipRange.range?.end ?? 0) },
         pending, editing || Boolean(clipEdit), queued ?? submitted ?? combined ?? 0);
+    clipRange.show(!model.frame || pending || editing || Boolean(clipEdit || model.position?.playing),
+        combinedPosition?.playing ? combinedPosition.previewRange : undefined);
     sharedMarkerButton.hidden = model.sharedMarkers === undefined;
     sharedMarkerButton.disabled = !model.frame || pending || Boolean(clipEdit || model.position?.playing);
     sharedMarkers.show(model.sharedMarkers ?? [], sharedMarkerButton.disabled);
     container.hidden = !timeline || clips.visible;
     if (clips.visible) {
+        snapField.hidden = true;
         nativePreview.show(undefined, {}, 0, false, false);
         showCurves();
         return;
     }
     channels.showLocks(canRetimeKeys(), !model.frame || pending || playing || editing || Boolean(model.recording));
+    workArea.adopt(position?.all ? undefined : position?.previewRange, playing && !position?.all);
     workArea.show(!model.frame || pending || playing || editing, playing ? position?.previewRange : undefined);
     markerView.show(selected && canPreviewRange(selected) ? model.markers?.[selected.id] ?? [] : [],
         !model.frame || pending || playing || editing);

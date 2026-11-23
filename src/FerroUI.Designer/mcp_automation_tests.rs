@@ -227,6 +227,73 @@ fn studio_mcp_track_controls_use_the_native_header_and_component_picker() {
 }
 
 #[test]
+fn studio_mcp_work_area_and_snap_use_the_native_toolbar() {
+    use ferroui_base::interactivity::RoutedEventArgs;
+    use ferroui_controls::{automation::AutomationProperties, ComboBox};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml");
+    let workspace = DesignerWorkspace::new(source).unwrap();
+    let owner = workspace.session();
+    let program = owner.borrow().animation_programs()[0].id;
+    owner.borrow_mut().select_animation_program(program).unwrap();
+    workspace.set_timeline_visible(true);
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    let revision = before["revision"].as_u64().unwrap();
+    let area = |work_area: Value, rev, permissions| provider.call("designer_timeline_set_work_area", &json!({
+        "expected_uri":before["uri"], "expected_revision":rev, "work_area":work_area,
+    }), permissions);
+    let snap = |frame_rate: u32| provider.call("designer_timeline_set_frame_rate", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision,
+        "frame_snap":{"program":program,"frame_rate":frame_rate},
+    }), write());
+    let range = json!({"start":0.15,"end":0.6,"loop":false});
+    let program_range = json!({"scope":"program","program":program,"action":"set","range":range});
+    assert!(area(program_range.clone(), revision, Permissions::default()).is_err());
+    assert!(area(program_range.clone(), revision + 1, write()).is_err());
+    assert_eq!(read(), before);
+    let configured = area(program_range.clone(), revision, write()).unwrap();
+    assert_eq!(configured["work_area"]["range"], range);
+    assert_eq!(configured["work_area"]["clock"], "authored");
+    assert!(snap(25).unwrap_err().contains("frame rate listed"));
+    assert_eq!(snap(24).unwrap()["frame_snap"]["frame_rate"], 24);
+    let picker = workspace.control().get_logical_descendants().filter_map(|item| item.cast::<ComboBox>())
+        .find(|picker| AutomationProperties::get_name(picker).as_deref() == Some("Timeline snap unit")).unwrap();
+    assert_eq!(picker.selected_index(), 1);
+    picker.set_selected_index(2);
+    assert_eq!(read()["frame_snap"]["frame_rate"], 30);
+
+    workspace.set_clip_comparison(true);
+    assert!(read()["frame_snap"].is_null());
+    assert!(area(program_range, revision, write()).unwrap_err().contains("visible Timeline clock"));
+    let clips = json!({"scope":"clips","action":"set","range":{"start":0.35,"end":1.4,"loop":false}});
+    let configured = area(clips.clone(), revision, write()).unwrap();
+    assert_eq!(configured["work_area"]["clock"], "elapsed");
+    assert_eq!(configured["work_area"]["range"], clips["range"]);
+    workspace.control().get_control::<Button>("Play")
+        .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
+    assert_eq!(owner.borrow().time(), 0.35);
+    assert_eq!(read()["work_area"]["editable"], false);
+    let disable = json!({"scope":"clips","action":"disable"});
+    assert!(area(disable.clone(), revision, write()).unwrap_err().contains("Pause playback"));
+    owner.borrow_mut().advance(2.0).unwrap();
+    assert_eq!(owner.borrow().time(), 1.4);
+    let held = read();
+    assert_eq!(held["work_area"]["playhead"], 1.4);
+    assert_eq!(held["work_area"]["editable"], true);
+    assert_eq!(area(disable, revision, write()).unwrap()["work_area"]["enabled"], false);
+    workspace.set_clip_comparison(false);
+    assert_eq!(read()["work_area"]["range"], range);
+    assert_eq!(read()["frame_snap"]["frame_rate"], 30);
+    let session = owner.borrow();
+    assert_eq!(session.document().revision(), revision);
+    assert_eq!(session.authored_source(), source);
+    assert!(!session.can_undo());
+}
+
+#[test]
 fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");

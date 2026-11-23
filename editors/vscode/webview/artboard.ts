@@ -2,14 +2,13 @@ import type { Bounds, CanvasNode, CanvasSnapshot, Point, Viewport } from '../src
 import type { SnapLine } from '../src/canvasGuidesProtocol';
 import { CanvasViewport } from './canvasViewport';
 import { element } from './dom';
+import { PreviewBitmap } from './previewBitmap';
 import { SnapFeedback } from './snapFeedback';
 
 export class Artboard {
     readonly element = element('artboard');
     private readonly placeholder = element('placeholder');
-    private readonly frame = element<HTMLCanvasElement>('frame');
-    // The preview is already rasterized. Keep its backing pixels independent of the compositor.
-    private readonly presenter = this.frame.getContext('2d', { willReadFrequently: true })!;
+    private readonly presenter = new PreviewBitmap(element<HTMLCanvasElement>('frame'));
     private readonly selection = element('selection-box');
     private readonly selectionGroup = element('selection-group');
     private readonly hover = element('hover-box');
@@ -46,27 +45,14 @@ export class Artboard {
         viewport.element.addEventListener('pointerdown', () => this.clearHover());
     }
 
-    async decode(image: NonNullable<CanvasSnapshot['image']>): Promise<ImageBitmap | null> {
-        // Image element decoding can wait for a paint in an occluded VS Code window.
-        // Decode the PNG independently of document visibility. Null reuses the displayed bitmap.
-        if (image.png === this.snapshot?.image?.png) return null;
-        const png = atob(image.png);
-        const bytes = new Uint8Array(png.length);
-        for (let index = 0; index < png.length; index++) bytes[index] = png.charCodeAt(index);
-        return createImageBitmap(new Blob([bytes], { type: 'image/png' }));
+    decode(image: NonNullable<CanvasSnapshot['image']>): Promise<ImageBitmap | null> {
+        return this.presenter.decode(image.png);
     }
 
     present(snapshot: CanvasSnapshot, viewport: Viewport, bitmap: ImageBitmap | null): void {
         if (!snapshot.image) return;
         this.snapshot = snapshot;
-        if (bitmap) {
-            if (this.frame.width !== bitmap.width) this.frame.width = bitmap.width;
-            if (this.frame.height !== bitmap.height) this.frame.height = bitmap.height;
-            // Replace transparent pixels as well as opaque ones in the same paint.
-            this.presenter.globalCompositeOperation = 'copy';
-            this.presenter.drawImage(bitmap, 0, 0);
-            bitmap.close();
-        }
+        this.presenter.present(snapshot.image.png, bitmap);
         this.element.dataset.theme = viewport.dark ? 'dark' : 'light';
         this.element.hidden = false;
         this.placeholder.hidden = true;

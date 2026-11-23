@@ -11,7 +11,7 @@ import { HostedKeyLanes } from './hostedKeyLanes';
 import { clipRulerExtent, TimelineClips } from './timelineClips';
 import { TimelineMarkerView } from './timelineMarkerView';
 import { fitTimeline } from './timelineViewport';
-import { answerTimelinePresentation } from './timelinePresentation';
+import { answerTimelinePresentation, type WorkAreaView } from './timelinePresentation';
 import { TimelineWorkArea } from './timelineWorkArea';
 
 export class HostedAnimationView {
@@ -187,11 +187,20 @@ export class HostedAnimationView {
         this.send(answerTimelinePresentation(request, {
             ruler: () => this.clips.rulerView() ?? this.curves.rulerView(),
             tracks: () => this.clips.visible ? undefined : this.curves.trackView(),
+            workArea: () => this.activeWorkArea(),
             changeTracks: command => {
                 if (this.clips.visible) throw new Error('Open an App Preview property curve first.');
                 this.curves.applyTrack(command);
             },
         }));
+    }
+
+    private activeWorkArea(): WorkAreaView | undefined {
+        if (this.clips.visible) {
+            if (this.clipRange.state) return { area: this.clipRange, scope: 'clips', clock: 'elapsed' };
+        } else if (this.selectedProgram && this.workArea.state) {
+            return { area: this.workArea, program: this.selectedProgram.id, scope: 'program', clock: 'elapsed' };
+        }
     }
 
     private showTimelineLayout(): void {

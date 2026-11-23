@@ -18,9 +18,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 .hosted-animation-clock { display: flex; align-items: center; gap: 6px; padding: 2px 8px; }
 .hosted-playhead { flex: 1; min-inline-size: 0; }
 .hosted-playhead-clock { position: relative; padding-block-end: 4px; }
-.hosted-playhead .timeline-range-track, .clip-ruler .timeline-range-track { inset-inline: 0; }
-.clip-ruler:has(.timeline-range-track) { padding-block-end: 18px; }
-.clip-ruler:has(.timeline-range-track) .clip-marks { inset-block-end: 2px; }
+.hosted-playhead .timeline-range-track { inset-inline: 0; }
 .preview-range-popover:popover-open { display: grid; gap: 6px; }
 .preview-range-popover .timeline-check { display: flex; align-items: center; gap: 5px; }
 .preview-range-popover .timeline-check input { min-block-size: 0; accent-color: var(--focus); }
@@ -60,7 +58,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     place-items: center;
     padding: clamp(8px, 3vw, 28px);
 }
-.hosted-canvas img {
+.hosted-canvas canvas {
     max-inline-size: 100%;
     block-size: auto;
     box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003;

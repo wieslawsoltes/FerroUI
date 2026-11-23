@@ -11,3 +11,8 @@ export function canPreviewProgram(program?: TimelineProgram): boolean {
 export function canPreviewRange(program?: TimelineProgram): boolean {
     return Boolean(program?.timeline && program.timeline.duration > 0 && !program.preview?.native && canPreviewProgram(program));
 }
+
+export function combinedRangeLimit(programs: readonly TimelineProgram[]): number {
+    return programs.reduce((limit, program) => program.clip && canPreviewProgram(program)
+        ? Math.max(limit, program.clip.end ?? Infinity) : limit, 0);
+}

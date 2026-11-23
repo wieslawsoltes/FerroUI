@@ -4,6 +4,7 @@ import type { OutlineNode } from '../src/protocol';
 import { asRange } from '../src/textDocument';
 import type { CurvePoint, KeyframeLocation, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
+import { verifyTimelineTimingMcp } from './timelineTimingMcp';
 import { verifyRsxTrackMcp } from './timelineTrackMcp';
 import { until } from './wait';
 
@@ -35,6 +36,8 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     assert.ok(target.bounds && program.targets.includes(target.id));
     assert.match(document.getText(asRange(target.nameRange)), /^Border$/);
     await verifyRsxTrackMcp({ invoke, content }, session, document);
+    await verifyTimelineTimingMcp({ invoke, content }, session, document);
+    frame = await outline();
     const tools = content<{ edits: { name: string; inputSchema: { properties: { action?: { enum?: string[] } } } }[] }>(
         await invoke('designer_studio_tools', { session }));
     assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,

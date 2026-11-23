@@ -101,6 +101,7 @@ export interface TimelinePreviewPose {
     sourceKey?: string;
     anchor?: object;
     playback?: { elapsed: number; all: boolean; completed?: boolean };
+    previewRange?: { range: TimelinePreviewRange; all: boolean; playing: boolean };
 }
 
 export interface TimelineState {
@@ -125,6 +126,7 @@ export interface TimelineState {
     canShowVelocity?: boolean;
     curveCatalog?: string;
     canPlayAll?: boolean;
+    canPreviewCombinedRanges?: boolean;
     clipScope?: string;
     recording?: boolean;
     position?: TimelinePosition;
@@ -134,7 +136,7 @@ export interface TimelineState {
 
 export type TimelineTransportControl =
     | { action: 'seek' | 'scrub_all'; program: number; time: number }
-    | { action: 'play_range'; program: number; range: TimelinePreviewRange }
+    | { action: 'play_range'; program: number; range: TimelinePreviewRange; all?: boolean }
     | { action: 'play' | 'play_all'; program: number; time?: number }
     | { action: 'pause' | 'stop'; program: number };
 

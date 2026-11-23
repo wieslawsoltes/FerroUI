@@ -2,7 +2,7 @@ import type { LayerChange, LayerViewState, LayerViewsState } from './layerViews'
 import type { CanvasGuidesState, CanvasSnapInput, GuideEdit, SnapLine } from './canvasGuidesProtocol';
 import type { SpacingRequest, SpacingResponse } from './spacingProtocol';
 import type { GuideViewsState } from './guideViews';
-import type { KeyframeLocation, TimelinePreviewPose, TimelineTargetOverrides } from './timelineProtocol';
+import type { KeyframeLocation, TimelinePreviewPose, TimelinePreviewRange, TimelineTargetOverrides } from './timelineProtocol';
 import type { NativeTransitionPosition } from './stateTransitionProtocol';
 
 export interface Position { line: number; character: number }
@@ -321,7 +321,8 @@ export interface CanvasPresentation {
     selection: number[];
     definitionScope?: number | null;
     layerView?: LayerViewState;
-    timelinePosition?: { time: number; elapsed?: number; all?: boolean; completed?: boolean; playing: boolean; pose?: TimelinePreviewPose | null };
+    timelinePosition?: { time: number; elapsed?: number; all?: boolean; completed?: boolean; playing: boolean;
+        pose?: TimelinePreviewPose | null; previewRange?: TimelinePreviewRange | null };
     timelineTargets?: TimelineTargetOverrides;
     transitionPosition?: NativeTransitionPosition;
     openDefinition?: import('./includedTemplate').IncludedTemplatePreview | import('./stylesProtocol').StyleNavigation;

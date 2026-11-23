@@ -10,16 +10,18 @@ const SET_GRAPH: &str = "designer_timeline_set_graph";
 const SET_LAYOUT: &str = "designer_timeline_set_layout";
 const SET_VIEWPORT: &str = "designer_timeline_set_viewport";
 const SET_TRACK: &str = "designer_timeline_track_action";
+const SET_WORK_AREA: &str = "designer_timeline_set_work_area";
+const SET_FRAME_RATE: &str = "designer_timeline_set_frame_rate";
 const MODES: [&str; 3] = ["keys", "value", "velocity"];
 const LAYOUTS: [&str; 2] = ["tracks", "clips"];
 
 pub(super) fn handles(name: &str) -> bool {
-    matches!(name, READ | SET_GRAPH | SET_LAYOUT | SET_VIEWPORT | SET_TRACK)
+    matches!(name, READ | SET_GRAPH | SET_LAYOUT | SET_VIEWPORT | SET_TRACK | SET_WORK_AREA | SET_FRAME_RATE)
 }
 
-pub(super) fn tools() -> [Value; 5] {
+pub(super) fn tools() -> [Value; 7] {
     [
-        s::tool(READ, "Read Studio's Timeline layout, graph preference, document identity, ruler viewport and property tracks.",
+        s::tool(READ, "Read Studio's Timeline layout, graph, ruler, property tracks, work area, frame snap settings, and document identity.",
             s::object(json!({}), &[]), false),
         presentation_tool(SET_GRAPH, "Open Studio's Timeline and choose Keys, Value, or Velocity. Pass the document URI and revision from designer_timeline_view.",
             "graph_mode", &MODES),
@@ -34,7 +36,22 @@ pub(super) fn tools() -> [Value; 5] {
                 s::action("select", json!({"program":s::id(),"target":s::id(),"property":s::string()}), &["target","property"], false),
                 s::action("channel", json!({"program":s::id(),"target":s::id(),"property":s::string(),"channel":s::string()}), &["target","property","channel"], false),
             ]})),
+        presentation_tool_with_schema(SET_WORK_AREA, "Configure the visible Studio work area for the next Play. Use the scope and any program or invocation from work_area, with the current document URI and revision.",
+            "work_area", work_area_schema()),
+        presentation_tool_with_schema(SET_FRAME_RATE, "Choose keyframe snapping from Studio's available rates. Zero selects seconds. Use any program or invocation from frame_snap, with the current document URI and revision.",
+            "frame_snap", s::object(json!({"program":s::id(),"invocation":s::revision(),"frame_rate":s::revision()}),
+                &["frame_rate"])),
     ]
+}
+
+fn work_area_schema() -> Value {
+    let subject = json!({"scope":{"enum":["program","clips"]},"program":s::id(),"invocation":s::revision()});
+    let mut variants = ["enable", "disable", "set_in", "set_out"].into_iter()
+        .map(|action| s::action(action, subject.clone(), &["scope"], false)).collect::<Vec<_>>();
+    let mut settings = subject;
+    settings["range"] = s::preview_range();
+    variants.push(s::action("set", settings, &["scope","range"], false));
+    json!({"oneOf":variants})
 }
 
 fn presentation_tool(name: &str, description: &str, field: &str, choices: &[&str]) -> Value {
@@ -71,6 +88,8 @@ pub(super) fn call(workspace: &Rc<DesignerWorkspace>, name: &str, args: &Value) 
             }
             SET_VIEWPORT => workspace.change_timeline_viewport(decode(args, "viewport")?)?,
             SET_TRACK => workspace.change_timeline_tracks(decode(args, "track")?)?,
+            SET_WORK_AREA => workspace.change_timeline_work_area(decode(args, "work_area")?)?,
+            SET_FRAME_RATE => workspace.change_timeline_snap(decode(args, "frame_snap")?)?,
             _ => return Err("Unknown Studio Timeline tool.".into()),
         }
     }
@@ -83,5 +102,6 @@ pub(super) fn call(workspace: &Rc<DesignerWorkspace>, name: &str, args: &Value) 
     let layout = if workspace.comparing_animation_clips() { "clips" } else { "tracks" };
     Ok(json!({"mode":mode, "layout":layout, "available_modes":MODES, "visible":workspace.timeline_visible(),
         "uri":session.document_uri(), "revision":session.document().revision(), "viewport":workspace.timeline_viewport(),
-        "track_view":workspace.timeline_track_view()}))
+        "track_view":workspace.timeline_track_view(), "work_area":workspace.timeline_work_area(),
+        "frame_snap":workspace.timeline_snap()}))
 }

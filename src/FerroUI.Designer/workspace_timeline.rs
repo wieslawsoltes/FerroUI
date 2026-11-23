@@ -14,6 +14,9 @@ mod markers;
 #[path = "workspace_timeline/range.rs"]
 mod range;
 #[cfg(feature = "mcp")]
+#[path = "workspace_timeline/timing_controls.rs"]
+mod timing_controls;
+#[cfg(feature = "mcp")]
 #[path = "workspace_timeline/track_controls.rs"]
 mod track_controls;
 #[cfg(feature = "mcp")]
@@ -31,6 +34,7 @@ use ferroui_designer_animation::{
 };
 
 const TRACK_HEADER: f64 = 240.0;
+const TIMELINE_SNAP_RATES: [u32; 4] = [0, 24, 30, 60];
 type CurveTrack = (String, String, usize);
 #[derive(Default)]
 pub(super) struct TimelineUi {
@@ -254,7 +258,7 @@ impl DesignerWorkspace {
         snap.set_height(26.0);
         snap.set_font_size(10.0);
         snap.set_padding(Thickness::symmetric(5.0, 2.0));
-        let mut rates = vec![None, Some(24), Some(30), Some(60)];
+        let mut rates = TIMELINE_SNAP_RATES.map(|rate| (rate > 0).then_some(rate)).to_vec();
         if !rates.contains(&frame_rate) {
             rates.push(frame_rate);
         }
@@ -282,18 +286,11 @@ impl DesignerWorkspace {
         let weak_snap = snap.downgrade();
         snap.selection_changed(move |_, _| {
             if let (Some(this), Some(snap)) = (weak.upgrade(), weak_snap.upgrade()) {
-                if let Some(label) = snap
+                if let Some(rate) = snap
                     .selected_item()
-                    .and_then(|item| item.downcast_ref::<String>().cloned())
+                    .and_then(|item| item.downcast_ref::<String>().and_then(|label| timeline_snap_rate(label)))
                 {
-                    if label == "Sec" {
-                        this.set_timeline_frame_rate(None);
-                    } else if let Some(rate) = label
-                        .strip_suffix(" fps")
-                        .and_then(|rate| rate.parse().ok())
-                    {
-                        this.set_timeline_frame_rate(Some(rate));
-                    }
+                    this.set_timeline_frame_rate((rate > 0).then_some(rate));
                 }
             }
         });
@@ -1173,6 +1170,10 @@ fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {
             time: key.time,
         })
 }
+fn timeline_snap_rate(label: &str) -> Option<u32> {
+    if label == "Sec" { Some(0) } else { label.strip_suffix(" fps")?.parse().ok() }
+}
+
 fn timeline_target_name(syntax: &ferroui_designer_core::Ast, target: NodeId) -> String {
     syntax.node(target)
         .map(|node| node.xaml_name().unwrap_or_else(|| node.local_name()).to_owned())

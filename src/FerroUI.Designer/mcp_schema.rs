@@ -19,6 +19,9 @@ pub(super) fn number() -> Value {
 pub(super) fn time() -> Value {
     json!({"type":"number","minimum":0})
 }
+pub(super) fn preview_range() -> Value {
+    object(json!({"start":time(),"end":time(),"loop":{"type":"boolean"}}), &["start","end","loop"])
+}
 pub(super) fn nullable(schema: Value) -> Value {
     json!({"anyOf":[schema,{"type":"null"}]})
 }

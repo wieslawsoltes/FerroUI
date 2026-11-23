@@ -200,8 +200,14 @@ export class TimelineView implements vscode.Disposable {
         if ((control.action === 'play' || control.action === 'seek') && !canPreviewProgram(program)) {
             throw new Error('Choose live targets for this animation preview.');
         }
-        if (control.action === 'play_range' && !canPreviewRange(program)) {
-            throw new Error('Choose a typed animation with live targets to preview a range.');
+        if (control.action === 'play_range') {
+            if (control.all) {
+                if (!panel.supportsTimelineCombinedPlayback || !panel.supportsTimelinePreviewRanges) {
+                    throw new Error('Update the FerroUI preview helper to rehearse a range on the shared clip clock.');
+                }
+            } else if (!canPreviewRange(program)) {
+                throw new Error('Choose a typed animation with live targets to preview a range.');
+            }
         }
         return this.playback.control(panel, frame, control, previewClock(program), signal);
     }
@@ -291,6 +297,7 @@ export class TimelineView implements vscode.Disposable {
             canShowVelocity: panel?.supportsTimelineCurveVelocity,
             curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
             canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
+            canPreviewCombinedRanges: panel?.supportsTimelinePreviewRanges,
             clipScope: panel?.supportsTimelineClipPlacement && catalog?.programs
                 ? `${panel.session}:${panel.snapshot?.activeBlock?.start.line ?? 0}:${panel.snapshot?.activeBlock?.start.character ?? 0}` : undefined,
             canRecord: panel?.supportsTimelineRecording, canRecordGeometry: panel?.supportsTimelineGeometryRecording,

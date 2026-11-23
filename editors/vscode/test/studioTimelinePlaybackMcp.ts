@@ -5,6 +5,7 @@ import type { TimelineMarker, TimelinePosition, TimelineProgram } from '../src/t
 import type { McpFixture } from './mcp';
 import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
 import { verifyTimelineTrackMcp } from './timelineTrackMcp';
+import { verifyTimelineTimingMcp } from './timelineTimingMcp';
 import { until } from './wait';
 
 const scene = `<Canvas xmlns="https://github.com/ferroui">
@@ -42,6 +43,8 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     await verifyTimelineGraphMcp({ invoke, content }, session, document);
     await verifyTimelineLayoutMcp({ invoke, content }, session, document);
     await verifyTimelineTrackMcp({ invoke, content }, session, document);
+    await verifyTimelineTimingMcp({ invoke, content }, session, document);
+    frame = await wait();
     let program = (await programs()).find(item => item.selector === 'Button#Lead')!.id;
     const present = async (action: string, fields: object = {}) => {
         content(await invoke('designer_studio_present', { session, expected_revision: frame.revision, tool: 'designer_program',

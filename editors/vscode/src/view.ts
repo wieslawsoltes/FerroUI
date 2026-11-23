@@ -442,7 +442,7 @@ export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
 </section>
 ${keyframeEditorHtml(false)}
 <p id="hosted-status" class="dock-message" role="status">Starting application preview…</p>
-<main class="hosted-canvas preview-surface" aria-label="Application artboard"><img id="hosted-image" alt="App-hosted FerroUI design" draggable="false" hidden></main>
+<main class="hosted-canvas preview-surface" aria-label="Application artboard"><canvas id="hosted-image" role="img" aria-label="App-hosted FerroUI design" hidden></canvas></main>
 <form id="hosted-input" class="toolbar" aria-label="Preview input" hidden>
     <input id="hosted-text" aria-label="Text for the focused preview control" required maxlength="8192">
     <button type="submit" class="tool" title="Send Text" aria-label="Send Text">${icon('send')}</button>
@@ -576,11 +576,12 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
             ${tool('timeline-source-issues', 'warning', 'Open unsupported Rust animations in source', 'hidden')}
             ${tool('timeline-actions', 'ellipsis', 'More Animation Actions', 'disabled')}
         </div>
-        ${clipToolbarHtml('Open selected animation', tool('clip-marker-options', 'bookmark', 'Preview markers',
+        ${clipToolbarHtml('Open selected animation', previewRangeButton('clip') + tool('clip-marker-options', 'bookmark', 'Preview markers',
             'popovertarget="clip-preview-markers" aria-controls="clip-preview-markers" aria-expanded="false" hidden'))}
     </div>
-    ${clipBoardHtml('', markerStrip('clip'))}
+    ${clipBoardHtml(previewRangeBand('clip'), markerStrip('clip'))}
     ${previewRangeHtml('timeline', markerControls('timeline'))}
+    ${previewRangeHtml('clip')}
     <div id="clip-preview-markers" class="popover timeline-popover preview-range-popover" popover role="group" aria-label="Preview markers">
         ${markerControls('clip')}
     </div>

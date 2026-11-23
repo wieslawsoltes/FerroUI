@@ -4,6 +4,7 @@ import type { AnimationGraphMode } from './animationGraph';
 import type { TimelineLayout } from './timelineLayout';
 import type { TimelineViewportChange } from './timelineViewportProtocol';
 import type { TimelineTrackCommand } from './timelineTrackProtocol';
+import type { TimelineSnapChange, TimelineWorkAreaChange } from './timelineTimingProtocol';
 import type { Collaboration } from './collaboration';
 import { collaborationTool, isCollaborationTool } from './collaborationAgents';
 import { agentCatalog, type AgentTool } from './agentCatalog';
@@ -62,6 +63,8 @@ interface Arguments extends CanvasAction, CargoSelection {
     layout: TimelineLayout;
     viewport: TimelineViewportChange;
     track: TimelineTrackCommand;
+    work_area: TimelineWorkAreaChange;
+    frame_snap: TimelineSnapChange;
     prefix?: string;
     change?: CommandBindingEdit;
     expected_rust_version: number;
@@ -299,6 +302,9 @@ export class AgentTools {
             case 'designer_hosted_timeline_track_action':
                 return this.hosted.changeTimelinePresentation(document.uri, args.expected_generation, args.expected_revision,
                     { kind: 'tracks', track: args.track }, signal, args.expected_sequence);
+            case 'designer_hosted_timeline_set_work_area':
+                return this.hosted.changeTimelinePresentation(document.uri, args.expected_generation, args.expected_revision,
+                    { kind: 'work_area', work_area: args.work_area }, signal, args.expected_sequence);
             case 'designer_hosted_curve':
                 return this.hosted.curve(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedCurveQuery, signal);
@@ -634,6 +640,12 @@ export class AgentTools {
             case 'designer_timeline_track_action':
                 return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
                     { kind: 'tracks', track: args.track }, signal);
+            case 'designer_timeline_set_work_area':
+                return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
+                    { kind: 'work_area', work_area: args.work_area }, signal);
+            case 'designer_timeline_set_frame_rate':
+                return this.workbench.changeTimelinePresentation(panel, { session: panel.session, token: args.expected_revision },
+                    { kind: 'snap', snap: args.frame_snap }, signal);
             case 'designer_timeline_markers':
             case 'designer_timeline_marker_edit':
                 if ((args.all === true) === (args.program !== undefined)) throw new Error('Choose a clip or the shared elapsed ruler.');

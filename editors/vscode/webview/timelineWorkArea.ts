@@ -1,4 +1,5 @@
 import type { TimelinePreviewRange } from '../src/timelineProtocol';
+import type { TimelineWorkAreaEdit } from '../src/timelineTimingProtocol';
 import { validPreviewRange } from '../src/timelinePreviewRange';
 import { anchorPopover, element } from './dom';
 import { clamp, timelinePercent, type TimelineViewport } from './timelineViewport';
@@ -33,13 +34,31 @@ export class TimelineWorkArea {
         this.popup.addEventListener('toggle', event => {
             this.button.setAttribute('aria-expanded', String(event.newState === 'open'));
         });
-        this.enable.onchange = this.repeat.onchange = () => this.apply();
-        this.start.onchange = this.end.onchange = () => this.apply();
+        const applyFields = () => this.apply({
+            start: this.start.valueAsNumber, end: this.end.valueAsNumber, loop: this.repeat.checked,
+        }, this.enable.checked);
+        this.enable.onchange = this.repeat.onchange = this.start.onchange = this.end.onchange = applyFields;
         grid.addEventListener('keydown', event => this.setBoundary(event));
     }
 
     get range(): TimelinePreviewRange | undefined {
         if (!this.button.hidden && this.enable.checked) return this.settings;
+    }
+
+    get state() {
+        if (!this.button.hidden) return { range: this.settings, enabled: this.enable.checked,
+            limit: Number.isFinite(this.duration) ? this.duration : null, playhead: this.time(), editable: !this.enable.disabled };
+    }
+
+    change(edit: TimelineWorkAreaEdit): void {
+        if (this.button.hidden || this.enable.disabled) throw new Error('Pause playback before changing the visible work area.');
+        switch (edit.action) {
+            case 'set': this.commit(edit.range, true); return;
+            case 'enable': this.commit(this.settings, true); return;
+            case 'disable': this.commit(this.settings, false); return;
+            case 'set_in': this.commit(this.boundary('i'), true); return;
+            case 'set_out': this.commit(this.boundary('o'), true); return;
+        }
     }
 
     follow(duration: number, reset: boolean, visibleEnd = duration): void {
@@ -102,14 +121,23 @@ export class TimelineWorkArea {
         const key = event.key.toLowerCase();
         if (key !== 'i' && key !== 'o') return;
         event.preventDefault();
+        this.apply(this.boundary(key), true);
+    }
+
+    private boundary(key: 'i' | 'o'): TimelinePreviewRange {
         const time = this.time();
         const { start, end, loop } = this.settings;
-        const candidate = key === 'i'
+        return key === 'i'
             ? { start: time, end: time < end ? end : this.viewport().duration, loop }
             : { start: start < time ? start : 0, end: time, loop };
-        if (!validPreviewRange(candidate, this.duration)) return;
-        this.enable.checked = true;
-        this.settings = candidate;
+    }
+
+    private commit(range: TimelinePreviewRange, enabled: boolean): void {
+        if (!validPreviewRange(range, this.duration)) {
+            throw new Error('Choose an In and Out time within the animation, with In before Out.');
+        }
+        this.enable.checked = enabled;
+        this.settings = range;
         this.fill();
         this.report();
         this.changed();
@@ -121,16 +149,14 @@ export class TimelineWorkArea {
         this.repeat.checked = this.settings.loop;
     }
 
-    private apply(): void {
-        const range = { start: this.start.valueAsNumber, end: this.end.valueAsNumber, loop: this.repeat.checked };
-        if (validPreviewRange(range, this.duration)) {
-            this.settings = range;
-            this.report();
-        } else {
+    private apply(range: TimelinePreviewRange, enabled: boolean): void {
+        try {
+            this.commit(range, enabled);
+        } catch (error) {
             this.fill();
-            this.report('Choose an In and Out time within the animation, with In before Out.');
+            this.report(error instanceof Error ? error.message : String(error));
+            this.changed();
         }
-        this.changed();
     }
 
     private report(message?: string): void {

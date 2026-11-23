@@ -577,7 +577,11 @@ For MCP, read `clipAuthoring.owners` and `clipAuthoring.programs` from `designer
 2. Set **In** and **Out** in seconds, or seek to either point and press `I` or `O` with the ruler focused. A blue line marks the range on the ruler. Keep **Loop range** enabled for repeat playback or clear it to hold the Out pose after one pass.
 3. Use **Play preview range**, **Pause preview range**, and **Stop** in the transport. Play starts at the current playhead when it falls inside the range. Otherwise it starts at In. Playback disarms recording and samples the authored timeline. Clear **Limit playback to preview range** to use the clip's authored delay, repeat, and direction again.
 
-The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` with a program and a `range` containing `start`, `end`, and `loop`. Use the current designer revision for each action.
+To rehearse several clips together, choose **Compare animation clips** and open **Preview range** beside **Play all clips**. This work area uses elapsed seconds on the shared clip ruler. It keeps its own In, Out, and loop settings alongside the keyframe work area.
+
+![The bottom Timeline shows the clip work area from 0.125 to 0.5 seconds and the native preview held at Out](../images/vscode-timeline-mcp-work-area.png)
+
+The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` with a program and a `range` containing `start`, `end`, and `loop`. Pass `all: true` for the shared clip clock and the current designer revision for each action.
 
 ### Rehearse a range in App Preview
 
@@ -590,7 +594,21 @@ The VS Code MCP tool `designer_timeline_control` accepts `action: "play_range"` 
 
 App Preview range times are elapsed seconds, including authored delay, speed, and repetitions. The range is a preview setting. It leaves animation timing and keys in source intact. Use an updated FerroUI preview helper to retain the range across an app-hosted frame replacement.
 
+![App Preview shows the shared work area and two clip lanes above the native application at Out](../images/vscode-hosted-mcp-work-area.png)
+
 Agents supply `action: "play_range"` and `range: { "start": 0.4, "end": 1.5, "loop": true }` to `designer_hosted_animation`. Include `program` for a single animation or omit it to rehearse all playable clips. Use the current app generation, revision, and sequence reported by `designer_hosted_animations`.
+
+### Configure preview timing from an agent
+
+1. Open the Timeline, or choose **Compare animation clips** for the shared clock. Read `designer_timeline_view`. The `work_area` reports its `scope`, clock, bounds, playhead, enabled state, and range. Use the current revision and the reported program when present.
+2. Call `designer_timeline_set_work_area` with a `work_area` argument containing the reported scope and program. Use `set` with `range` containing `start`, `end`, and `loop`. Use `set_in` or `set_out` to take the current playhead, just as the ruler's **I** and **O** shortcuts do. Use `enable` or `disable` to control whether the next toolbar Play uses the work area. Pause to change a running work area.
+3. In the keyframe view, read `frame_snap` for the available `rates`. Call `designer_timeline_set_frame_rate` with `frame_snap` containing the program and chosen `frame_rate`. Zero selects **Free** in VS Code and **Sec** in Studio. Snap settings apply to the editing grid and keyframe gestures.
+
+![Timeline View options shows 30 fps keyframe snapping after a single-frame keyboard step](../images/vscode-timeline-mcp-snap.png)
+
+In App Preview, use `designer_hosted_timeline_view` and `designer_hosted_timeline_set_work_area`. Pass its generation, revision, and frame sequence as `expected_generation`, `expected_revision`, and `expected_sequence`. Both App Preview work areas use elapsed seconds.
+
+In standalone Studio, pass the reported `uri` and `revision` as `expected_uri` and `expected_revision`. Copy `program` and `invocation` when present from `work_area` or `frame_snap`. Work area and snapping commands require write permission, update the toolbar controls, and preserve authored source and Undo history. [MCP permissions and tools](reference.md#use-ferroui-with-vs-code-agents)
 
 ## Bookmark preview positions
 
