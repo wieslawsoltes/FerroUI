@@ -225,15 +225,37 @@ unsafe extern "C" fn on_mapped(status: WGPUMapAsyncStatus, _: WGPUStringView, sl
 }
 
 impl ProGpuDevice {
-    /// Creates a device on the default adapter of the WebGPU implementation.
+    /// Creates a device on the default adapter of the WebGPU implementation: of the graphics API
+    /// of the platform on Linux (Vulkan) and Windows (Direct3D 12), where the windows are drawn
+    /// through surfaces of that API, and of any API without an adapter of it.
     pub fn new() -> Result<Self, ProGpuDeviceError> {
+        #[cfg(target_os = "linux")]
+        if let Ok(device) = Self::on_backends(WGPUInstanceBackend_Vulkan) {
+            return Ok(device);
+        }
+        #[cfg(windows)]
+        if let Ok(device) = Self::on_backends(WGPUInstanceBackend_DX12) {
+            return Ok(device);
+        }
+        Self::on_backends(WGPUInstanceBackend_All)
+    }
+
+    /// Creates a device on the default adapter of `backends`.
+    fn on_backends(backends: WGPUInstanceBackend) -> Result<Self, ProGpuDeviceError> {
         if !progpu_native_sys::abi_matches() {
             return Err(ProGpuDeviceError::AbiMismatch);
         }
         // SAFETY: the calls of the WebGPU C ABI with the handles they return; the callbacks of
         // the requests write the slots they are given and run before the events are processed.
         unsafe {
-            let instance = wgpuCreateInstance(ptr::null());
+            let mut extras: WGPUInstanceExtras = std::mem::zeroed();
+            extras.chain.sType = WGPUSType_InstanceExtras as WGPUSType;
+            extras.backends = backends;
+            extras.flags = WGPUInstanceFlag_Default;
+            let mut descriptor: WGPUInstanceDescriptor = std::mem::zeroed();
+            descriptor.nextInChain = &mut extras.chain;
+            // Without a choice of API the instance is the one of the defaults.
+            let instance = wgpuCreateInstance(if backends == WGPUInstanceBackend_All { ptr::null() } else { &descriptor });
             if instance.is_null() {
                 return Err(ProGpuDeviceError::NoAdapter);
             }
@@ -385,6 +407,20 @@ impl ProGpuDevice {
             wgpuTextureViewRelease(view);
             wgpuTextureRelease(texture);
         }
+    }
+
+    /// The instance of the device, which the surfaces of windows are made on.
+    #[cfg(any(target_os = "linux", windows))]
+    pub(crate) fn instance(&self) -> WGPUInstance {
+        self.enter();
+        self.instance
+    }
+
+    /// The adapter of the device, which says what a surface can do.
+    #[cfg(any(target_os = "linux", windows))]
+    pub(crate) fn adapter(&self) -> WGPUAdapter {
+        self.enter();
+        self.adapter
     }
 
     /// The WebGPU device.

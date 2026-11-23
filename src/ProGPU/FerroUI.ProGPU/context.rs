@@ -28,6 +28,9 @@ pub struct ProGpuContext {
     graphics: Option<Rc<dyn IPlatformGraphicsContext>>,
     #[cfg(target_os = "macos")]
     metal: Option<Rc<dyn ferroui_metal::IMetalDevice>>,
+    /// What the surfaces of windows are made with, opened at the first window.
+    #[cfg(any(target_os = "linux", windows))]
+    window_display: std::cell::OnceCell<Option<Rc<crate::window_surface::WindowDisplay>>>,
     disposed: Cell<bool>,
 }
 
@@ -63,6 +66,8 @@ impl ProGpuContext {
             graphics,
             #[cfg(target_os = "macos")]
             metal,
+            #[cfg(any(target_os = "linux", windows))]
+            window_display: std::cell::OnceCell::new(),
             disposed: Cell::new(false),
         }
     }
@@ -99,11 +104,23 @@ impl IPlatformRenderInterfaceContext for ProGpuContext {
             }
         }
 
+        // The handle of a window comes before its framebuffer: the frame stays on the device.
+        #[cfg(any(target_os = "linux", windows))]
+        if crate::window_surface::has_window(surfaces) {
+            let display = self.window_display.get_or_init(crate::window_surface::WindowDisplay::open);
+            if let Some(target) = display
+                .as_ref()
+                .and_then(|display| crate::window_surface::WindowRenderTarget::try_new(gpu, display, surfaces))
+            {
+                return Rc::new(target);
+            }
+        }
+
         if let Some(surface) = surfaces.iter().find_map(|surface| surface.as_framebuffer_surface()) {
             return Rc::new(FramebufferRenderTarget::new(gpu.clone(), surface.create_framebuffer_render_target()));
         }
 
-        notes::note_once("no-surface", "the ProGPU backend draws to Metal surfaces and to framebuffer surfaces only");
+        notes::note_once("no-surface", "the ProGPU backend draws to Metal surfaces, window handles and framebuffer surfaces only");
         Rc::new(UnavailableRenderTarget)
     }
 

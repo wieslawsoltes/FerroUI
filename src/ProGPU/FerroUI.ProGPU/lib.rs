@@ -23,6 +23,8 @@ mod scene;
 mod targets;
 mod text_shaper;
 mod typeface;
+#[cfg(any(target_os = "linux", windows))]
+mod window_surface;
 
 pub use app::{initialize, initialize_text_shaping, ProGpuApplicationExtensions};
 pub use bitmap::ProGpuBitmap;
