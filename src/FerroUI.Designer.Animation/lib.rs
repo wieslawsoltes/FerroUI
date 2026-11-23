@@ -12,6 +12,7 @@ mod track_curve_channel;
 mod curve_metric;
 mod easing;
 mod interactions;
+mod keyframe_component;
 mod keyframe_draft;
 mod keyframe_edits;
 mod keyframe_clipboard;
@@ -44,6 +45,7 @@ pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
 pub use interactions::{
     BehaviorAction, BehaviorActionSource, BehaviorEdit, BehaviorModel, BehaviorSource, BehaviorTrigger,
 };
+pub use keyframe_component::KeyframeComponentEdit;
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDestination, KeyframePaste};

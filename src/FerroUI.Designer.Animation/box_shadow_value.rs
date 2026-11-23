@@ -92,6 +92,11 @@ impl AnimationBoxShadows {
         &self.layers
     }
 
+    pub(crate) fn layers_mut(&mut self) -> &mut [AnimationBoxShadow] {
+        self.spelling = None;
+        &mut self.layers
+    }
+
     pub fn to_native(&self) -> BoxShadows {
         let Some((first, rest)) = self.layers.split_first() else {
             return BoxShadows::default();

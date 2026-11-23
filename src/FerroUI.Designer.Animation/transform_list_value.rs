@@ -76,6 +76,11 @@ impl AnimationTransformList {
         &self.operations
     }
 
+    pub(crate) fn operations_mut(&mut self) -> &mut [AnimationTransformOperation] {
+        self.spelling = None;
+        &mut self.operations
+    }
+
     pub fn to_native(&self) -> Rc<TransformOperations> {
         if self.operations.is_empty() {
             return TransformOperations::identity();
