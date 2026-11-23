@@ -6,11 +6,15 @@
 
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::gpu::VelloWgpuDevice;
-use crate::scene::{cpu_scenes_made, IVelloSceneSink, VelloCpuSceneSink};
+use crate::scene::{cpu_scenes_made, IVelloSceneSink};
+#[cfg(feature = "gpu")]
+use crate::scene::VelloCpuSceneSink;
 use crate::vello_options::VelloRenderingMode;
 use ferroui_base::media::{BoxShadow, BoxShadows, Color};
 use ferroui_base::platform::IDrawingContextImpl;
-use ferroui_base::{Point, Rect, RoundedRect, Vector};
+#[cfg(feature = "gpu")]
+use ferroui_base::Point;
+use ferroui_base::{Rect, RoundedRect, Vector};
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -182,6 +186,7 @@ fn the_device_blur_of_the_compute_mode_agrees_with_the_cpu_reference() {
 
 /// The closed form of the compute mode against the CPU reference, away from the edge of the box,
 /// where the two renderers anti-alias the clip that keeps the shadow out of it differently.
+#[cfg(feature = "gpu")]
 #[test]
 fn the_closed_form_of_the_compute_mode_agrees_with_the_cpu_reference() {
     let device = match VelloWgpuDevice::headless() {
