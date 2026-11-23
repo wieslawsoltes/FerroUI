@@ -8,6 +8,8 @@ mod harf_buzz_text_shaper;
 #[cfg(test)]
 mod harf_buzz_text_shaper_tests;
 #[cfg(test)]
+mod language_tests;
+#[cfg(test)]
 mod point_size_and_variation_tests;
 #[cfg(test)]
 mod shaping_edit_tests;

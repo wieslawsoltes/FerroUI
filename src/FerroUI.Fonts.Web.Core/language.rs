@@ -3,10 +3,6 @@
 //! The shapers of the framework take a culture and not an OpenType tag, so the descriptor is
 //! applied by giving the run the culture of the tag. Only registered tags with one clear language
 //! are listed. A tag that is not listed is ignored by the caller and the text keeps its culture.
-//!
-//! `ZHT` and `ZHH` are left out on purpose. The HarfBuzz path passes only the primary language
-//! subtag, and `zh` selects `ZHS` there, so mapping them would set Traditional Chinese text with
-//! the Simplified forms of a font instead of leaving it alone. #1299 adds them.
 
 /// By tag, in byte order, for the binary search.
 const LANGUAGES: &[(&str, &str)] = &[
@@ -21,7 +17,7 @@ const LANGUAGES: &[(&str, &str)] = &[
     ("NOR", "nb"), ("NYN", "nn"), ("ORI", "or"), ("PAN", "pa"), ("PLK", "pl"), ("PTG", "pt"),
     ("ROM", "ro"), ("RUS", "ru"), ("SKY", "sk"), ("SLV", "sl"), ("SQI", "sq"), ("SRB", "sr"),
     ("SVE", "sv"), ("SWK", "sw"), ("TAM", "ta"), ("TEL", "te"), ("THA", "th"), ("TRK", "tr"),
-    ("UKR", "uk"), ("URD", "ur"), ("UZB", "uz"), ("VIT", "vi"), ("WEL", "cy"), ("ZHS", "zh-Hans"),
+    ("UKR", "uk"), ("URD", "ur"), ("UZB", "uz"), ("VIT", "vi"), ("WEL", "cy"), ("ZHH", "zh-HK"), ("ZHS", "zh-Hans"), ("ZHT", "zh-Hant"),
 ];
 
 /// The BCP 47 language of a registered OpenType language system tag. Tags are case-sensitive, and
@@ -51,11 +47,13 @@ mod tests {
         assert_eq!(opentype_language_to_bcp47("TRK"), Some("tr"));
         assert_eq!(opentype_language_to_bcp47("TRK "), Some("tr"));
         assert_eq!(opentype_language_to_bcp47("ZHS"), Some("zh-Hans"));
+        assert_eq!(opentype_language_to_bcp47("ZHT"), Some("zh-Hant"));
+        assert_eq!(opentype_language_to_bcp47("ZHH"), Some("zh-HK"));
     }
 
     #[test]
     fn other_tags_are_not_mapped() {
-        for tag in ["trk", "XXX", "", " ", "TR", "TRKX", "ZHT", "ZHH"] {
+        for tag in ["trk", "XXX", "", " ", "TR", "TRKX"] {
             assert_eq!(opentype_language_to_bcp47(tag), None, "{tag:?}");
         }
     }
