@@ -1300,6 +1300,12 @@ impl Build {
             let themes = dependencies.iter().flat_map(|metadata| metadata.theme_units.iter());
             let from_sources = source_roots(&source_references, themes, &graph);
             roots.extend(from_sources.clone());
+            // What the inspector of the declarative layer shows in a debug build (#954).
+            let from_inspector = theme_roots::view_inspector_roots(
+                direct_crates.iter().map(|name| name.as_str()),
+                env::var_os("CARGO_CFG_DEBUG_ASSERTIONS").is_some(),
+            );
+            roots.extend(from_inspector.clone());
             // What the documents of the ordinary classes of the dependencies name (#1002): roots
             // only where the class is live (the application names it, or a live class or a root
             // constructs it), closed over the classes their documents construct.
@@ -1378,6 +1384,7 @@ impl Build {
             let together = used_units.into_iter().zip(kept_of_themes).zip(&from_other_themes);
             for (((class, units), kept), from_others) in together {
                 let mut sources: Vec<(&str, &Roots)> = vec![
+                    ("inspector of the declarative layer", &from_inspector),
                     ("manifest", &from_manifest),
                     ("build script", &self.theme_roots),
                     ("documents", &document_roots),

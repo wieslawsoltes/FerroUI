@@ -225,6 +225,30 @@ fn the_sources_root_type_keys_classes_and_keys() {
     assert_eq!(kept_units(&theme, &roots, &graph, false), [0, 1, 2, 3, 4, 7, 8]);
 }
 
+/// Not from upstream (#954): a debug build of a declarative application keeps the controls of the
+/// inspector, which its sources do not name; a release build keeps nothing for it.
+#[test]
+fn the_inspector_of_the_declarative_layer_keeps_its_controls_in_a_debug_build() {
+    let debug = view_inspector_roots(["ferroui_controls", "ferroui_view"], true);
+    for class in ["CheckBox", "ListBox", "ScrollViewer"] {
+        assert!(debug.types.contains(class), "{class}");
+    }
+    assert_eq!(view_inspector_roots(["ferroui_view"], false), Roots::default());
+    assert_eq!(view_inspector_roots(["ferroui_controls"], true), Roots::default());
+
+    let theme = ThemeUnitsModel {
+        class: "Tests.Theme".to_string(),
+        table_path: "::tests::compiled_xaml::THEME_UNITS".to_string(),
+        units: vec![
+            unit(0, "ambient", &[], &[], &[], &[]),
+            unit(1, "Controls/CheckBox.xaml", &[], &["CheckBox"], &[], &[]),
+            unit(2, "Controls/Slider.xaml", &[], &["Slider"], &[], &[]),
+        ],
+    };
+    assert_eq!(kept_units(&theme, &debug, &TypeGraph::default(), false), [0, 1]);
+    assert_eq!(kept_units(&theme, &Roots::default(), &TypeGraph::default(), false), [0]);
+}
+
 /// Not from upstream (#603): compiled bindings are the default; the manifest turns them off for
 /// the crate (`compile-bindings = false`), or states the default, and refuses anything else.
 #[test]

@@ -413,6 +413,24 @@ impl BuildTarget {
     }
 }
 
+/// The crate of the declarative layer, as a dependency names it.
+const VIEW_CRATE: &str = "ferroui_view";
+
+/// The controls of the inspector of the declarative layer (`ferroui_view::inspect`).
+const VIEW_INSPECTOR_CLASSES: [&str; 8] =
+    ["Button", "CheckBox", "Grid", "ListBox", "ScrollViewer", "StackPanel", "TextBlock", "Window"];
+
+/// The roots of the inspector of the declarative layer (#954): `launch` attaches it in a build with
+/// debug assertions (Shift+F12), and the sources of the application do not name its controls, so a
+/// trimmed theme could leave them without templates. No root in a build without debug assertions,
+/// where the inspector is not compiled, nor for an application that does not use the layer.
+pub fn view_inspector_roots<'c>(direct_crates: impl IntoIterator<Item = &'c str>, debug_assertions: bool) -> Roots {
+    if !debug_assertions || !direct_crates.into_iter().any(|name| name == VIEW_CRATE) {
+        return Roots::default();
+    }
+    Roots { types: VIEW_INSPECTOR_CLASSES.iter().map(|class| class.to_string()).collect(), ..Roots::default() }
+}
+
 /// The roots the Rust sources of an application state (#568, step 4): its names that are a type
 /// key of a unit of `themes` or a class of `graph` (`CalendarView::new()`, `Ref<ListBox>`, a
 /// `use` of `CalendarView`), and its string literals that are a key a unit of `themes` defines
