@@ -29,6 +29,8 @@ mod rich_text_automation;
 #[cfg(test)]
 mod rich_text_automation_tests;
 mod text_range_support;
+mod text_span_ops;
+pub use text_span_ops::{text_span_ops, TextSelectionSpans, TextSpanOps, TextStyleSpan};
 
 pub use i_embedded_root_provider::IEmbeddedRootProvider;
 pub use i_expand_collapse_provider::IExpandCollapseProvider;

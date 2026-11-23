@@ -35,6 +35,29 @@ fn rooted(text: &str, size: Size, wrap: bool) -> (Ref<TextEditor>, Ref<Window>) 
 }
 
 #[test]
+fn the_editor_gives_a_native_bridge_its_span_operations() {
+    let _scope = test_scope();
+    let editor = laid_out_editor("one\ntwo");
+    let provider = provider(&editor);
+    let text = provider.as_ref();
+    let ops = text.text_span_ops().expect("the editor provides the span operations");
+
+    assert!(ops.supports_spans(text));
+    assert!(ops.can_select(text));
+    assert_eq!(ops.document_span(text), Some(0..7));
+    assert_eq!(ops.string(text, 4..7).as_deref(), Some("two"));
+    assert_eq!(ops.unit_span(text, 1, TextUnit::Character), Some(1..2));
+    assert!(ops.has_logical_lines(text));
+    assert_eq!(ops.line_for_index(text, 5), Some(1));
+    assert_eq!(ops.range_for_line(text, 1).map(|line| line.start), Some(4));
+
+    ops.select(text, 4..7);
+    let selection = ops.selection(text, Some(5..5)).unwrap();
+    assert_eq!(selection.spans, [4..7]);
+    assert_eq!(selection.primary, Some(4..7));
+}
+
+#[test]
 fn registered_patterns_expose_live_utf16_ranges_and_expire_on_rebinding() {
     let _scope = test_scope();
     let editor = laid_out_editor("a😀b CAFÉ café");
