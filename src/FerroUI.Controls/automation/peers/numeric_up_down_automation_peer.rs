@@ -133,7 +133,7 @@ impl NumericUpDownAutomationPeer {
 
     /// Sets the value of the control (the range value provider contract).
     pub fn set_value(&self, value: f64) -> Result<(), AutomationError> {
-        self.owner().set_numeric_value(Some(Decimal::from_f64(value)));
+        self.owner().set_current_value(NumericUpDown::value_property(), Some(Decimal::from_f64(value)));
         Ok(())
     }
 

@@ -152,25 +152,25 @@ impl CalendarDatePickerAutomationPeer {
     /// Opens the drop-down (the invoke provider contract).
     pub fn invoke(&self) -> Result<(), ElementNotEnabledError> {
         self.ensure_enabled()?;
-        self.owner().set_is_drop_down_open(true);
+        self.owner().set_current_value(CalendarDatePicker::is_drop_down_open_property(), true);
         Ok(())
     }
 
     /// Opens the drop-down (the expand/collapse provider contract).
     pub fn expand(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_drop_down_open(true);
+        self.owner().set_current_value(CalendarDatePicker::is_drop_down_open_property(), true);
         Ok(())
     }
 
     /// Closes the drop-down (the expand/collapse provider contract).
     pub fn collapse(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_drop_down_open(false);
+        self.owner().set_current_value(CalendarDatePicker::is_drop_down_open_property(), false);
         Ok(())
     }
 
     /// Sets the text of the date picker (the value provider contract).
     pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
-        self.owner().set_text(value);
+        self.owner().set_current_value(CalendarDatePicker::text_property(), value.map(str::to_owned));
         Ok(())
     }
 

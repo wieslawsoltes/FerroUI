@@ -89,7 +89,7 @@ impl CalendarDayButtonAutomationPeer {
         self.ensure_enabled()?;
 
         if let Some((calendar, date)) = self.try_get_selectable_date() {
-            calendar.set_selected_date(Some(date));
+            calendar.set_current_value(Calendar::selected_date_property(), Some(date));
         }
 
         Ok(())
@@ -108,7 +108,7 @@ impl CalendarDayButtonAutomationPeer {
         }
 
         if calendar.selection_mode() == CalendarSelectionMode::SingleDate {
-            calendar.set_selected_date(Some(date));
+            calendar.set_current_value(Calendar::selected_date_property(), Some(date));
         } else {
             calendar.selected_dates().add(date);
         }

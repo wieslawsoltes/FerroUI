@@ -469,3 +469,120 @@ mod a_control_that_is_gone {
         assert_eq!(target.get_name(), "");
     }
 }
+
+mod upstream_12_2 {
+    use super::*;
+    use crate::automation::provider::IExpandCollapseProvider;
+    use crate::automation::{ExpandCollapsePatternIdentifiers, ExpandCollapseState};
+    use crate::test_support::boxed_str;
+    use crate::{StackPanel, TextBlock, TreeViewItem};
+
+    #[test]
+    fn parent_kept_when_new_parent_reads_children_before_old_parent() {
+        let _scope = test_scope();
+        let border = Border::new();
+        let old_parent = Decorator::new();
+        old_parent.set_child(&border);
+        let new_parent = Decorator::new();
+        let root = StackPanel::new();
+        root.children().add(&old_parent);
+        root.children().add(&new_parent);
+        let old_parent_peer = create_peer(&old_parent);
+        let new_parent_peer = create_peer(&new_parent);
+        let target = create_peer(&border);
+
+        create_peer(&root).get_children();
+        assert_eq!(Some(old_parent_peer.clone()), target.get_parent());
+
+        old_parent.set_child(None::<Ref<Control>>);
+        new_parent.set_child(&border);
+
+        // An automation client may read the children of the new parent first.
+        assert!(new_parent_peer.get_children().contains(&target));
+        assert!(!old_parent_peer.get_children().contains(&target));
+        assert_eq!(Some(new_parent_peer), target.get_parent());
+    }
+
+    fn name_of_content(content: Option<BoxedValue>) -> String {
+        let target = Button::new();
+        target.set_content(content);
+        create_peer(&target).get_name()
+    }
+
+    #[test]
+    fn name_is_string_content() {
+        let _scope = test_scope();
+        assert_eq!("Hello", name_of_content(boxed_str("Hello")));
+    }
+
+    #[test]
+    fn name_is_not_type_name_when_content_is_a_control() {
+        let _scope = test_scope();
+        assert_eq!("", name_of_content(Some(Control::boxed(&Border::new()))));
+    }
+
+    #[test]
+    fn name_comes_from_text_block_in_content() {
+        let _scope = test_scope();
+        let text = TextBlock::new();
+        text.set_text(Some("Inner"));
+        let border = Border::new();
+        border.set_child(&text);
+        assert_eq!("Inner", name_of_content(Some(Control::boxed(&border))));
+    }
+
+    #[test]
+    fn automation_name_wins_over_content() {
+        let _scope = test_scope();
+        let target = Button::new();
+        target.set_content(boxed_str("Content"));
+        AutomationProperties::set_name(&target, Some("Explicit"));
+        assert_eq!("Explicit", create_peer(&target).get_name());
+    }
+
+    #[test]
+    fn tree_view_item_expands_collapses_and_reports_a_leaf() {
+        let _scope = test_scope();
+        let item = TreeViewItem::new();
+        let peer = create_peer(&item);
+        let provider = peer.get_provider::<dyn IExpandCollapseProvider>().expect("the provider");
+        assert_eq!(ExpandCollapseState::LeafNode, provider.expand_collapse_state());
+        assert!(provider.expand().is_err());
+        assert!(!item.is_expanded());
+
+        let raised = record(&peer);
+        item.items().add(boxed_str("child"));
+        assert_eq!(ExpandCollapseState::Collapsed, provider.expand_collapse_state());
+        provider.expand().unwrap();
+        assert!(item.is_expanded());
+        assert_eq!(ExpandCollapseState::Expanded, provider.expand_collapse_state());
+        provider.collapse().unwrap();
+        assert!(!item.is_expanded());
+
+        let state_events = raised
+            .borrow()
+            .iter()
+            .filter(|e| std::ptr::eq(e.property(), ExpandCollapsePatternIdentifiers::expand_collapse_state_property()))
+            .count();
+        assert_eq!(3, state_events);
+    }
+
+    #[test]
+    fn automation_keeps_a_style_value_of_an_expander() {
+        use crate::Expander;
+        use ferroui_base::data::BindingPriority;
+        let _scope = test_scope();
+        let target = Expander::new();
+        let style_value =
+            target.set_value_with_priority(Expander::is_expanded_property(), true, BindingPriority::Style);
+        let peer = create_peer(&target);
+        let provider = peer.get_provider::<dyn IExpandCollapseProvider>().expect("the provider");
+
+        provider.collapse().unwrap();
+        assert!(!target.is_expanded());
+        // A current value leaves the value of its priority in place.
+        target.clear_value(Expander::is_expanded_property());
+        assert!(target.is_expanded());
+        drop(style_value);
+    }
+}

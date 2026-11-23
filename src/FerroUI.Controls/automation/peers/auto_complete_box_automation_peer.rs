@@ -88,7 +88,7 @@ impl IValueProvider for ProviderAdapter<AutoCompleteBoxAutomationPeer> {
     /// The member of the contract is implemented apart from the setter of
     /// the `Value` property of the class: it sets the text unconditionally.
     fn set_value(&self, value: Option<&str>) -> Result<(), ProviderError> {
-        self.0.owner().set_text(value);
+        self.0.owner().set_current_value(AutoCompleteBox::text_property(), value.map(str::to_owned));
         Ok(())
     }
 }
@@ -123,13 +123,13 @@ impl AutoCompleteBoxAutomationPeer {
 
     /// Closes the drop-down (the expand and collapse provider contract).
     pub fn collapse(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_drop_down_open(false);
+        self.owner().set_current_value(AutoCompleteBox::is_drop_down_open_property(), false);
         Ok(())
     }
 
     /// Opens the drop-down (the expand and collapse provider contract).
     pub fn expand(&self) -> Result<(), AutomationError> {
-        self.owner().set_is_drop_down_open(true);
+        self.owner().set_current_value(AutoCompleteBox::is_drop_down_open_property(), true);
         Ok(())
     }
 
@@ -152,7 +152,7 @@ impl AutoCompleteBoxAutomationPeer {
             return;
         }
 
-        owner.set_text(value);
+        owner.set_current_value(AutoCompleteBox::text_property(), value.map(str::to_owned));
     }
 
     fn owner_property_changed(&self, e: &FerroPropertyChangedEventArgs<'_>) {

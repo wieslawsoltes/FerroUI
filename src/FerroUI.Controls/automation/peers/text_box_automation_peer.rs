@@ -145,7 +145,7 @@ impl TextBoxAutomationPeer {
 
     /// Sets the text of the text box (the value provider contract).
     pub fn set_value(&self, value: Option<&str>) -> Result<(), ElementNotEnabledError> {
-        self.owner().set_text(value);
+        self.owner().set_current_value(TextBox::text_property(), value.map(str::to_owned));
         Ok(())
     }
 }

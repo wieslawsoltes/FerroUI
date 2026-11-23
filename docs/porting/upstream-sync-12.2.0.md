@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (40 done, 77 planned) | 117 |
+| `port` (44 done, 73 planned) | 117 |
 | `already` | 13 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -227,7 +227,7 @@ left out only with a recorded performance or better-code reason.
 | `d8f2fc7b9f` | #22554 | 2026-10-22 | text | `port` | text | Line break search limited to the reach of the current line. Removes quadratic work on long unbroken runs. |
 | `e4452b5bdb` | #22429 | 2026-10-22 | input | `port` (done) | input | Double tap needs the same button for both clicks. |
 | `bd835340fb` | #21771 | 2026-10-22 | themes | `deferred` |  | Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class. |
-| `136efefc7d` | #22378 | 2026-10-22 | automation | `port` | automation | ContentControl name no longer falls back to a type name. |
+| `136efefc7d` | #22378 | 2026-10-22 | automation | `port` (done) | automation | ContentControl name no longer falls back to a type name. |
 | `7fda9c36a5` | #22562 | 2026-10-23 | automation | `port` | win32 | UI Automation Invoke returns immediately. |
 | `74b4e97962` | #22400 | 2026-10-23 | samples | `deferred` |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
 | `6a25cf4d9b` | #22399 | 2026-10-23 | controls | `port` | controls | A delayed submenu action no longer closes a reopened menu. |
@@ -239,7 +239,7 @@ left out only with a recorded performance or better-code reason.
 | `584ae6f3a7` | #22596 | 2026-10-25 | platform | `port` | controls | `FallbackStorageProvider` under concurrent calls. |
 | `6b6c573a03` | #22579 | 2026-10-25 | controls | `port` | controls | ColorPicker fixes. |
 | `99086ac183` | #22356 | 2026-10-26 | controls | `port` | controls | AutoCompleteBox keeps focus when an item is picked. |
-| `fb506057ea` | #22608 | 2026-10-26 | automation | `port` | automation | Automation peers use `set_current_value`, so bindings survive. |
+| `fb506057ea` | #22608 | 2026-10-26 | automation | `port` (done) | automation | Automation peers use `set_current_value`, so bindings survive. |
 | `e61863dff7` | #22612 | 2026-10-27 | samples | `port` | samples | Catalog date picker sample validation. |
 | `0a728569fc` | #22619 | 2026-10-27 | tests | `not-applicable` |  | Dispatcher leak in the upstream xUnit fixtures. |
 | `c67550d9ec` | #22604 | 2026-10-27 | base | `already` |  | Rust `str` comparisons are ordinal (`iteration_count.rs`, `classes.rs`). |
@@ -262,7 +262,7 @@ left out only with a recorded performance or better-code reason.
 | `725b5975e4` | #22611 | 2026-10-28 | themes | `deferred` |  | Fluent 2 brushes; follows the Fluent 2 decision. |
 | `d1cc67f3ae` | #22634 | 2026-10-28 | build | `not-applicable` |  | Upstream solution filter. |
 | `1c82a11d87` | #22636 | 2026-10-28 | themes | `deferred` |  | Fluent 2 resources; follows the Fluent 2 decision. |
-| `c85e221c60` | #22565 | 2026-10-28 | automation | `port` | automation | TreeViewItem expand and collapse provider. |
+| `c85e221c60` | #22565 | 2026-10-28 | automation | `port` (done) | automation | TreeViewItem expand and collapse provider. |
 | `23dce09edc` | #22569 | 2026-10-29 | themes | `deferred` |  | Fluent 2 ColorPicker themes; follows the Fluent 2 decision. |
 | `c9c7b90053` | #22641 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: popups report the window role. |
 | `5aa47e4f7f` | #22642 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: active state only for the active window. |
@@ -345,7 +345,7 @@ left out only with a recorded performance or better-code reason.
 | `16d8678a44` | #22835 | 2026-11-16 | rendering | `port` | rendering | Skia: multiply opacity applied once below an opacity mask. |
 | `ab578c3ea0` | #22793 | 2026-11-17 | platform | `port` | controls | Assembly resolved by exact name. |
 | `75497e3634` | #22857 | 2026-11-17 | themes | `port` | themes | Simple theme: missing resources. |
-| `a49cbefe8b` | #22864 | 2026-11-17 | automation | `port` | automation | Peer parent kept after a move. |
+| `a49cbefe8b` | #22864 | 2026-11-17 | automation | `port` (done) | automation | Peer parent kept after a move. |
 | `281e59e138` | #22866 | 2026-11-17 | build | `not-applicable` |  | Upstream contribution bot. |
 | `fda56217a5` | #22872 | 2026-11-18 | build | `not-applicable` |  | Upstream workflows. |
 | `251fda6155` |  | 2026-11-18 | build | `not-applicable` |  | Upstream contribution bot. |
