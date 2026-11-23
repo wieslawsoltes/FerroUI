@@ -20,7 +20,7 @@ pub mod testing;
 #[cfg(test)]
 mod tests;
 
-pub use map::{parse_patch_map, patches_to_load, PatchMap, SubsetTarget};
+pub use map::{parse_patch_map, plan_patches, PatchMap, PatchPlan, PlannedPatch, SubsetTarget};
 pub use patch::GlyphPatchJob;
 
 use crate::sfnt::{read_directory, Tag};
@@ -41,7 +41,7 @@ pub const DEFAULT_FEATURES: &[Tag] = &[
     *b"tjmo", *b"valt", *b"vatu", *b"vchw", *b"vert", *b"vjmo", *b"vkrn", *b"vpal", *b"vrt2", *b"vrtr",
 ];
 
-/// The most patches one font may take in one run of the extension algorithm (section 4.3).
+/// The most patches of any type in one run of the extension algorithm (section 4.3, step 9).
 pub const MAX_PATCHES: usize = 2000;
 
 /// The patch maps of a font, `IFT ` first. Empty when the font is not incremental. Fails when the
