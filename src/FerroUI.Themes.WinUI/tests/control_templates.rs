@@ -221,6 +221,7 @@ control_tests! {
     list_box_item => "ListBoxItem";
     list_view => "ListView";
     list_view_item => "ListViewItem";
+    list_view_header_item => "ListViewHeaderItem";
     menu => "Menu";
     menu_flyout_presenter => "MenuFlyoutPresenter";
     menu_item => "MenuItem";

@@ -4,6 +4,8 @@
 //! Microsoft Corporation, see NOTICE.md), on FerroUI's `SelectingItemsControl`
 //! (docs/porting/winui-calculator-gaps.md, section 6.2, LV-1).
 
+use super::{GroupStyle, GroupedItemsView};
+use ferroui_base::collections::FerroList;
 use crate::generators::RecycleKey;
 use crate::primitives::{
     SelectingItemsControl, SelectingItemsControlImpl, SelectingItemsControlImplExt, TemplateAppliedEventArgs,
@@ -230,6 +232,7 @@ pub struct ListViewBase {
     item_click: HandlerList<ItemClickHandler>,
     container_content_changing: HandlerList<ContainerContentChangingHandler>,
     choosing_item_container: HandlerList<ChoosingItemContainerHandler>,
+    group_style: FerroList<Ref<GroupStyle>>,
 }
 
 ferro_class!(ListViewBase: SelectingItemsControl);
@@ -238,6 +241,7 @@ ferroui_base::ferro_class_info!(ListViewBase {
     markup: {
         namespace: "FerroUI.Controls",
         attributes: [TemplatePart("ScrollViewer", type(Ref<ScrollViewer>))],
+        properties: [GroupStyle: FerroList<Ref<GroupStyle>> { get: ListViewBase::group_style }],
     },
 });
 ferro_impl_classes!(ListViewBase: StyledElementImpl, VisualImpl, LayoutableImpl, InteractiveImpl);
@@ -491,7 +495,18 @@ impl ListViewBase {
             item_click: HandlerList::new(),
             container_content_changing: HandlerList::new(),
             choosing_item_container: HandlerList::new(),
+            group_style: FerroList::new(),
         }
+    }
+
+    /// The styles of the group headers (WinUI's `GroupStyle`): the first one applies.
+    pub fn group_style(&self) -> FerroList<Ref<GroupStyle>> {
+        self.group_style.clone()
+    }
+
+    /// Whether the items come from a grouped source (WinUI's `IsGrouping`).
+    pub fn is_grouping(&self) -> bool {
+        self.items_source().is_some_and(|source| source.downcast_ref::<GroupedItemsView>().is_some())
     }
 
     pub fn new() -> Ref<Self> {

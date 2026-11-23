@@ -24,7 +24,7 @@ fn scroll_viewer_template() -> Rc<dyn IControlTemplate> {
 }
 
 /// WinUI's template of ListView: a scroll viewer around the items presenter.
-fn list_view_template() -> Option<Rc<dyn IControlTemplate>> {
+pub(super) fn list_view_template() -> Option<Rc<dyn IControlTemplate>> {
     Some(FuncControlTemplate::new(|_, scope| {
         let presenter = ItemsPresenter::new();
         presenter.set_name(Some("PART_ItemsPresenter".to_string()));
