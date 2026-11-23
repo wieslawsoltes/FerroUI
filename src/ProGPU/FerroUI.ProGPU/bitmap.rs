@@ -98,6 +98,16 @@ impl ProGpuBitmap {
         self.alpha_format
     }
 
+    /// The identity of the pixels of the bitmap: their address, and a handle that keeps the
+    /// address from being reused while it is held.
+    pub(crate) fn pixels_identity(&self) -> (usize, std::sync::Weak<dyn Any + Send + Sync>) {
+        let weak: std::sync::Weak<dyn Any + Send + Sync> = {
+            let strong: Arc<dyn Any + Send + Sync> = self.pixels.clone();
+            Arc::downgrade(&strong)
+        };
+        (Arc::as_ptr(&self.pixels) as usize, weak)
+    }
+
     /// Reads the pixels.
     pub fn with_pixels<R>(&self, read: impl FnOnce(&[u8]) -> R) -> R {
         read(&self.pixels.data())

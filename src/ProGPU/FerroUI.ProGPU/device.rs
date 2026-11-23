@@ -425,6 +425,53 @@ impl ProGpuDevice {
         }
     }
 
+    /// A texture of `RGBA8Unorm` that is written from the CPU and sampled.
+    pub(crate) fn create_image_texture(&self, width: u32, height: u32) -> (WGPUTexture, WGPUTextureView) {
+        self.enter();
+        // SAFETY: the calls of the WebGPU C ABI with the device; the descriptor is borrowed.
+        unsafe {
+            let texture = wgpuDeviceCreateTexture(
+                self.device,
+                &WGPUTextureDescriptor {
+                    nextInChain: ptr::null_mut(),
+                    label: no_label(),
+                    usage: WGPUTextureUsage_TextureBinding | WGPUTextureUsage_CopyDst | WGPUTextureUsage_CopySrc,
+                    dimension: WGPUTextureDimension_2D,
+                    size: WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
+                    format: WGPUTextureFormat_RGBA8Unorm,
+                    mipLevelCount: 1,
+                    sampleCount: 1,
+                    viewFormatCount: 0,
+                    viewFormats: ptr::null(),
+                },
+            );
+            let view = wgpuTextureCreateView(texture, ptr::null());
+            (texture, view)
+        }
+    }
+
+    /// Writes `width * height * 4` bytes of `RGBA8` into a texture.
+    pub(crate) fn write_rgba8(&self, texture: WGPUTexture, width: u32, height: u32, pixels: &[u8]) {
+        debug_assert_eq!(pixels.len(), width as usize * height as usize * 4);
+        self.enter();
+        // SAFETY: the texture is live and of that size; the bytes are borrowed for the call.
+        unsafe {
+            wgpuQueueWriteTexture(
+                self.queue,
+                &WGPUTexelCopyTextureInfo {
+                    texture,
+                    mipLevel: 0,
+                    origin: WGPUOrigin3D { x: 0, y: 0, z: 0 },
+                    aspect: WGPUTextureAspect_All,
+                },
+                pixels.as_ptr() as *const c_void,
+                pixels.len(),
+                &WGPUTexelCopyBufferLayout { offset: 0, bytesPerRow: width * 4, rowsPerImage: height },
+                &WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
+            );
+        }
+    }
+
     /// Reads a texture of `RGBA8Unorm` back: `width * height * 4` bytes, row by row.
     pub fn read_rgba8(&self, texture: WGPUTexture, width: u32, height: u32) -> Vec<u8> {
         self.enter();
