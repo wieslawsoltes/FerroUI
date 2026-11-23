@@ -16,11 +16,21 @@ import android.webkit.WebResourceRequest;
 import android.webkit.WebSettings;
 import android.webkit.WebView;
 import android.webkit.WebViewClient;
+import org.ferroui.android.NativeCallback;
 
 /** The system web view of one web view control; every method runs on the main thread. */
 public final class WebViewEngine {
     /** {@code WebViewClient.ERROR_FAILED_SSL_HANDSHAKE}, for a certificate the page failed on. */
     private static final int ERROR_CERTIFICATE = WebViewClient.ERROR_FAILED_SSL_HANDSHAKE;
+
+    // The kinds of call to the owner; the Rust side of this class has the same numbers.
+    private static final int NAVIGATION_STARTING = 0;
+    private static final int NAVIGATION_COMPLETED = 1;
+    private static final int SOURCE_CHANGED = 2;
+    private static final int HISTORY_CHANGED = 3;
+    private static final int TITLE_CHANGED = 4;
+    private static final int WEB_MESSAGE = 5;
+    private static final int SCRIPT_COMPLETED = 6;
 
     private final WebView view;
     private final Handler main = new Handler(Looper.getMainLooper());
@@ -222,18 +232,32 @@ public final class WebViewEngine {
         }
     }
 
-    private static native boolean nativeNavigationStarting(
-            long owner, long id, String uri, boolean isUserInitiated, boolean isRedirected);
+    private static boolean nativeNavigationStarting(
+            long owner, long id, String uri, boolean isUserInitiated, boolean isRedirected) {
+        return NativeCallback.invoke(owner, NAVIGATION_STARTING, id, 0, isUserInitiated, isRedirected, uri, null);
+    }
 
-    private static native void nativeNavigationCompleted(long owner, long id, boolean isSuccess, int error);
+    private static void nativeNavigationCompleted(long owner, long id, boolean isSuccess, int error) {
+        NativeCallback.invoke(owner, NAVIGATION_COMPLETED, id, error, isSuccess, false, null, null);
+    }
 
-    private static native void nativeSourceChanged(long owner, String uri);
+    private static void nativeSourceChanged(long owner, String uri) {
+        NativeCallback.invoke(owner, SOURCE_CHANGED, 0, 0, false, false, uri, null);
+    }
 
-    private static native void nativeHistoryChanged(long owner, boolean canGoBack, boolean canGoForward);
+    private static void nativeHistoryChanged(long owner, boolean canGoBack, boolean canGoForward) {
+        NativeCallback.invoke(owner, HISTORY_CHANGED, 0, 0, canGoBack, canGoForward, null, null);
+    }
 
-    private static native void nativeTitleChanged(long owner, String title);
+    private static void nativeTitleChanged(long owner, String title) {
+        NativeCallback.invoke(owner, TITLE_CHANGED, 0, 0, false, false, title, null);
+    }
 
-    private static native void nativeWebMessage(long owner, String source, String json);
+    private static void nativeWebMessage(long owner, String source, String json) {
+        NativeCallback.invoke(owner, WEB_MESSAGE, 0, 0, false, false, source, json);
+    }
 
-    private static native void nativeScriptCompleted(long owner, long id, String result);
+    private static void nativeScriptCompleted(long owner, long id, String result) {
+        NativeCallback.invoke(owner, SCRIPT_COMPLETED, id, 0, false, false, result, null);
+    }
 }

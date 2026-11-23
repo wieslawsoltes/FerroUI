@@ -154,7 +154,7 @@ impl JavaObject {
     /// `raw` is null or a reference that is valid on the calling thread (an
     /// argument of the native method that is running, a local or a global
     /// reference).
-    pub unsafe fn from_raw(raw: jobject) -> Option<JavaObject> {
+    pub(crate) unsafe fn from_raw(raw: jobject) -> Option<JavaObject> {
         if raw.is_null() {
             return None;
         }
@@ -744,7 +744,7 @@ pub(crate) fn raw_env() -> *mut c_void {
 }
 
 /// A native method of a class of the Java layer.
-pub struct NativeMethod {
+pub(crate) struct NativeMethod {
     pub name: &'static CStr,
     pub signature: &'static CStr,
     pub function: *mut c_void,
@@ -758,7 +758,7 @@ pub struct NativeMethod {
 ///
 /// # Panics
 /// Panics when the class does not declare one of the methods.
-pub unsafe fn register_natives(class: &JavaClass, methods: &[NativeMethod]) {
+pub(crate) unsafe fn register_natives(class: &JavaClass, methods: &[NativeMethod]) {
     let env = env();
     let table: Vec<JNINativeMethod> = methods
         .iter()
@@ -776,12 +776,6 @@ pub unsafe fn register_natives(class: &JavaClass, methods: &[NativeMethod]) {
     if status != JNI_OK {
         panic!("The native methods of {} could not be registered (status {status}).", class.name);
     }
-}
-
-/// Runs the body of a native method of a package outside this crate: a panic becomes a Java
-/// exception and `default` is returned.
-pub fn run_native_method<T>(default: T, body: impl FnOnce() -> T) -> T {
-    super::natives::guard(default, body)
 }
 
 /// Throws a `java.lang.RuntimeException` on the calling thread, which the

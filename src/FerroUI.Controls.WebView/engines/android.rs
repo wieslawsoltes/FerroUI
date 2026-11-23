@@ -11,46 +11,70 @@ use crate::engine::{
 };
 use crate::json;
 use ferroui_android::interop::java::{
-    call_object, call_void, new_object, register_natives, run_native_method, string_of, JavaClass,
-    JavaObject, JavaValue, NativeMethod,
+    call_object, call_void, new_object, JavaClass, JavaObject, JavaValue,
 };
+use ferroui_android::interop::java_callback::{JavaCallback, JavaCallbackArgs};
 use ferroui_android::AndroidViewControlHandle;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_controls::platform::IPlatformHandle;
-use jni_sys::{jclass, jint, jlong, jobject, JNIEnv};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
-use std::ffi::c_void;
-use std::rc::Rc;
-use std::sync::Once;
+use std::rc::{Rc, Weak};
 
 const CLASS: &str = "org/ferroui/webview/WebViewEngine";
 const POST_MESSAGE: &str = "function(text){ferrouiWebViewHost.postMessage(text);}";
 
-/// What the Java class calls back into. Java holds one strong count, as a number, until `close`.
+// The kinds of call from the Java class, with the same numbers there.
+const NAVIGATION_STARTING: i32 = 0;
+const NAVIGATION_COMPLETED: i32 = 1;
+const SOURCE_CHANGED: i32 = 2;
+const HISTORY_CHANGED: i32 = 3;
+const TITLE_CHANGED: i32 = 4;
+const WEB_MESSAGE: i32 = 5;
+const SCRIPT_COMPLETED: i32 = 6;
+
+/// What the Java class calls back into.
 struct Owner {
     events: Rc<dyn IWebViewEngineEvents>,
     scripts: RefCell<HashMap<i64, ScriptCompletion>>,
     next_script: Cell<i64>,
 }
 
-/// # Safety
-/// `raw` is 0 or the number the engine gave to Java, which Java clears in `close`.
-unsafe fn owner(raw: jlong) -> Option<Rc<Owner>> {
-    if raw == 0 {
-        return None;
+impl Owner {
+    fn called(&self, args: JavaCallbackArgs) -> bool {
+        let first_text = args.first_text.unwrap_or_default();
+        match args.kind {
+            NAVIGATION_STARTING => {
+                return self.events.navigation_starting(&WebViewNavigation {
+                    id: args.number as u64,
+                    uri: first_text,
+                    is_user_initiated: args.first,
+                    is_redirected: args.second,
+                });
+            }
+            NAVIGATION_COMPLETED => {
+                self.events.navigation_completed(args.number as u64, args.first, status_of(args.value));
+            }
+            SOURCE_CHANGED => self.events.source_changed(&first_text),
+            HISTORY_CHANGED => self.events.history_changed(args.first, args.second),
+            TITLE_CHANGED => self.events.document_title_changed(&first_text),
+            WEB_MESSAGE => {
+                self.events.web_message_received(&first_text, &args.second_text.unwrap_or_default());
+            }
+            SCRIPT_COMPLETED => {
+                let completion = self.scripts.borrow_mut().remove(&args.number);
+                if let Some(completion) = completion {
+                    // The value of the result script is a string, which the system returns as JSON.
+                    completion(match json::parse_string(&first_text) {
+                        Some(value) => bridge::parse_result(&value),
+                        None => Err(WebViewError::Engine("the script gave no result".to_owned())),
+                    });
+                }
+            }
+            _ => {}
+        }
+        false
     }
-    let pointer = raw as *const Owner;
-    Rc::increment_strong_count(pointer);
-    Some(Rc::from_raw(pointer))
-}
-
-/// # Safety
-/// `text` is null or a valid reference to a string for this call.
-unsafe fn text(value: jobject) -> String {
-    JavaObject::from_raw(value)
-        .map(|value| string_of(&value))
-        .unwrap_or_default()
 }
 
 fn status_of(error: i32) -> CoreWebView2WebErrorStatus {
@@ -66,173 +90,11 @@ fn status_of(error: i32) -> CoreWebView2WebErrorStatus {
     }
 }
 
-unsafe extern "system" fn native_navigation_starting(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    id: jlong,
-    uri: jobject,
-    is_user_initiated: u8,
-    is_redirected: u8,
-) -> u8 {
-    run_native_method(0, || {
-        let Some(owner) = owner(raw) else { return 0 };
-        let allowed = owner.events.navigation_starting(&WebViewNavigation {
-            id: id as u64,
-            uri: text(uri),
-            is_user_initiated: is_user_initiated != 0,
-            is_redirected: is_redirected != 0,
-        });
-        u8::from(allowed)
-    })
-}
-
-unsafe extern "system" fn native_navigation_completed(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    id: jlong,
-    is_success: u8,
-    error: jint,
-) {
-    run_native_method((), || {
-        if let Some(owner) = owner(raw) {
-            owner
-                .events
-                .navigation_completed(id as u64, is_success != 0, status_of(error));
-        }
-    });
-}
-
-unsafe extern "system" fn native_source_changed(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    uri: jobject,
-) {
-    run_native_method((), || {
-        if let Some(owner) = owner(raw) {
-            owner.events.source_changed(&text(uri));
-        }
-    });
-}
-
-unsafe extern "system" fn native_history_changed(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    can_go_back: u8,
-    can_go_forward: u8,
-) {
-    run_native_method((), || {
-        if let Some(owner) = owner(raw) {
-            owner
-                .events
-                .history_changed(can_go_back != 0, can_go_forward != 0);
-        }
-    });
-}
-
-unsafe extern "system" fn native_title_changed(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    title: jobject,
-) {
-    run_native_method((), || {
-        if let Some(owner) = owner(raw) {
-            owner.events.document_title_changed(&text(title));
-        }
-    });
-}
-
-unsafe extern "system" fn native_web_message(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    source: jobject,
-    message: jobject,
-) {
-    run_native_method((), || {
-        if let Some(owner) = owner(raw) {
-            owner
-                .events
-                .web_message_received(&text(source), &text(message));
-        }
-    });
-}
-
-unsafe extern "system" fn native_script_completed(
-    _env: *mut JNIEnv,
-    _class: jclass,
-    raw: jlong,
-    id: jlong,
-    result: jobject,
-) {
-    run_native_method((), || {
-        let Some(owner) = owner(raw) else { return };
-        let completion = owner.scripts.borrow_mut().remove(&id);
-        if let Some(completion) = completion {
-            // The value of the result script is a string, which the system returns as JSON.
-            completion(match json::parse_string(&text(result)) {
-                Some(value) => bridge::parse_result(&value),
-                None => Err(WebViewError::Engine("the script gave no result".to_owned())),
-            });
-        }
-    });
-}
-
-fn register(class: &JavaClass) {
-    static REGISTER: Once = Once::new();
-    REGISTER.call_once(|| {
-        let methods = [
-            NativeMethod {
-                name: c"nativeNavigationStarting",
-                signature: c"(JJLjava/lang/String;ZZ)Z",
-                function: native_navigation_starting as *mut c_void,
-            },
-            NativeMethod {
-                name: c"nativeNavigationCompleted",
-                signature: c"(JJZI)V",
-                function: native_navigation_completed as *mut c_void,
-            },
-            NativeMethod {
-                name: c"nativeSourceChanged",
-                signature: c"(JLjava/lang/String;)V",
-                function: native_source_changed as *mut c_void,
-            },
-            NativeMethod {
-                name: c"nativeHistoryChanged",
-                signature: c"(JZZ)V",
-                function: native_history_changed as *mut c_void,
-            },
-            NativeMethod {
-                name: c"nativeTitleChanged",
-                signature: c"(JLjava/lang/String;)V",
-                function: native_title_changed as *mut c_void,
-            },
-            NativeMethod {
-                name: c"nativeWebMessage",
-                signature: c"(JLjava/lang/String;Ljava/lang/String;)V",
-                function: native_web_message as *mut c_void,
-            },
-            NativeMethod {
-                name: c"nativeScriptCompleted",
-                signature: c"(JJLjava/lang/String;)V",
-                function: native_script_completed as *mut c_void,
-            },
-        ];
-        // SAFETY: each function has the parameters of its signature after the environment and
-        // the class, with `u8` for a Java `boolean`.
-        unsafe { register_natives(class, &methods) };
-    });
-}
-
 struct AndroidEngine {
     java: JavaObject,
     owner: Rc<Owner>,
-    /// The strong count Java holds as a number; 0 once given back.
-    java_owner: Cell<jlong>,
+    /// Ends the calls from Java when it is dropped.
+    callback: RefCell<Option<JavaCallback>>,
     control: Rc<AndroidViewControlHandle>,
     is_closed: Rc<Cell<bool>>,
 }
@@ -247,11 +109,8 @@ impl IWebViewEngine for AndroidEngine {
             return;
         }
         call_void(&self.java, "close", "()V", &[]);
-        let raw = self.java_owner.replace(0);
-        if raw != 0 {
-            // SAFETY: the count made for Java in `create`; Java no longer has the number.
-            drop(unsafe { Rc::from_raw(raw as *const Owner) });
-        }
+        let callback = self.callback.borrow_mut().take();
+        drop(callback);
         let scripts = std::mem::take(&mut *self.owner.scripts.borrow_mut());
         for (_, completion) in scripts {
             completion(Err(WebViewError::Closed));
@@ -342,7 +201,6 @@ impl IWebViewEngineFactory for AndroidEngineFactory {
                 "the application does not apply the packaging.gradle of this crate".to_owned(),
             )
         })?;
-        register(&class);
         let parent_view = parent
             .as_any()
             .downcast_ref::<AndroidViewControlHandle>()
@@ -361,14 +219,15 @@ impl IWebViewEngineFactory for AndroidEngineFactory {
             scripts: RefCell::new(HashMap::new()),
             next_script: Cell::new(1),
         });
-        let java_owner = Rc::into_raw(owner.clone()) as jlong;
+        let called: Weak<Owner> = Rc::downgrade(&owner);
+        let callback = JavaCallback::new(move |args| called.upgrade().is_some_and(|owner| owner.called(args)));
         let script = bridge::document_script(POST_MESSAGE);
         let java = new_object(
             &class,
             "(Landroid/content/Context;JLjava/lang/String;)V",
             &[
                 JavaValue::Object(Some(&context)),
-                JavaValue::Long(java_owner),
+                JavaValue::Long(callback.handle()),
                 JavaValue::String(&script),
             ],
         )
@@ -381,7 +240,7 @@ impl IWebViewEngineFactory for AndroidEngineFactory {
         let engine = Rc::new(AndroidEngine {
             java,
             owner,
-            java_owner: Cell::new(java_owner),
+            callback: RefCell::new(Some(callback)),
             control: Rc::new(AndroidViewControlHandle::new(view)),
             is_closed: is_closed.clone(),
         });
