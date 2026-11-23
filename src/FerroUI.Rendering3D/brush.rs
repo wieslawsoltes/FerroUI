@@ -43,9 +43,10 @@ use ferroui_base::media::{
     GradientSpreadMethod, IBrush, IGradientBrush, ITileBrush, MediaExtensions, SharedBrush, StretchDirection, TileMode,
 };
 use ferroui_base::platform::{AlphaFormat, PixelFormat, SharedBitmapImpl};
+use ferroui_base::rendering::composition::frames::{FrameMetadata, FrameRotation};
 use ferroui_base::rendering::scene3d::{MeshData, Scene3DBrushContent, Scene3DSnapshot};
 use ferroui_base::rendering::utilities::TileBrushCalculator;
-use ferroui_base::{Matrix, Rect, Size};
+use ferroui_base::{Matrix, Point, Rect, Size};
 use std::collections::hash_map::DefaultHasher;
 use std::hash::{Hash, Hasher};
 use std::sync::{Arc, Weak};
@@ -366,6 +367,24 @@ impl MaterialBrush {
         uniforms.to_brush_x = to_brush_x;
         uniforms.to_brush_y = to_brush_y;
 
+        if let (Some(slot), Some(tile)) = (brush.frame_slot(), brush.as_tile_brush()) {
+            // The frame of a video or a camera: sampled from the device only (step D7).
+            let Some((bitmap, metadata)) = slot.current() else {
+                // No frame yet: the brush paints nothing, as an image brush without an image.
+                uniforms.metadata = [kind::IMAGE, 0.0, 0.0, 1.0];
+                return MaterialBrush { shader: BrushShader::Image, uniforms, texture: None, unsampled: false };
+            };
+            if !on_device(&*bitmap) || !frame_uniforms(&mut uniforms, tile, &metadata, texture_bounds) {
+                return unsampled;
+            }
+            let key = BrushTextureKey::Image {
+                identity: Arc::as_ptr(&bitmap) as *const () as usize,
+                version: bitmap.version(),
+            };
+            let texture = BrushTextureSource { key, origin: TextureOrigin::Image(bitmap) };
+            return MaterialBrush { shader: BrushShader::Image, uniforms, texture: Some(texture), unsampled: false };
+        }
+
         if let (Some(content), Some(tile)) = (brush.scene_content(), brush.as_tile_brush()) {
             // A visual or drawing brush: its content rendered offscreen over its bounds, sampled
             // as an image of the size of those bounds.
@@ -513,6 +532,13 @@ pub fn scene_texture_inputs(scene: &Scene3DSnapshot) -> u64 {
     for model in &scene.models {
         for layer in model.front.iter().chain(&model.back) {
             let Some(brush) = &layer.brush else { continue };
+            if let Some(slot) = brush.frame_slot() {
+                // A new frame changes no generation of the snapshot.
+                let hasher = hasher.get_or_insert_with(DefaultHasher::new);
+                let frame = slot.current();
+                frame.as_ref().map(|(bitmap, _)| Arc::as_ptr(bitmap) as *const () as usize).hash(hasher);
+                continue;
+            }
             if let Some(content) = brush.scene_content() {
                 let hasher = hasher.get_or_insert_with(DefaultHasher::new);
                 (content.id(), content.generation()).hash(hasher);
@@ -612,7 +638,121 @@ fn image_size(bitmap: &SharedBitmapImpl) -> Size {
 /// tile to the texture coordinate of the bitmap (the viewbox stretched and aligned into the tile,
 /// as `TileBrushCalculator` places it), the viewbox as the clip, and the tile mode.
 fn image_uniforms(uniforms: &mut BrushUniforms, tile: &dyn ITileBrush, image: Size, bounds: Rect) {
-    let source = tile.source_rect().to_pixels(image);
+    placed_image_uniforms(uniforms, tile, image, image, Point::new(0.0, 0.0), bounds);
+}
+
+/// The uniforms of a frame of a video or a camera: its visible region is the image the tile
+/// brush places, turned and mirrored as the 2D path shows it (`FrameMetadata::orient`). `false`
+/// for a frame without a visible region.
+///
+/// A frame that is neither turned nor mirrored is an image whose viewbox is inside the visible
+/// region. Otherwise the point of the brush is mapped to a pixel of the stored frame by the rows
+/// of the brush, and the frame is drawn as one tile: the tile modes are not applied to it.
+fn frame_uniforms(
+    uniforms: &mut BrushUniforms,
+    tile: &dyn ITileBrush,
+    frame: &FrameMetadata,
+    bounds: Rect,
+) -> bool {
+    let crop = frame.visible;
+    if crop.width == 0 || crop.height == 0 || frame.width == 0 || frame.height == 0 {
+        return false;
+    }
+    let image = Size::new(f64::from(frame.width), f64::from(frame.height));
+    let origin = Point::new(f64::from(crop.x), f64::from(crop.y));
+    let (crop_width, crop_height) = (f64::from(crop.width), f64::from(crop.height));
+    let turned = matches!(frame.rotation, FrameRotation::Clockwise90 | FrameRotation::Clockwise270);
+    let shown = if turned { Size::new(crop_height, crop_width) } else { Size::new(crop_width, crop_height) };
+    if frame.rotation == FrameRotation::None && !frame.mirrored {
+        placed_image_uniforms(uniforms, tile, image, shown, origin, bounds);
+        return true;
+    }
+
+    // The unit square of the visible region onto the unit square as it is shown.
+    let (Some((ax, ay)), Some((bx, by)), Some((cx, cy))) =
+        (frame.orient(0.0, 0.0), frame.orient(1.0, 0.0), frame.orient(0.0, 1.0))
+    else {
+        return false;
+    };
+    let Some(shown_to_stored) = Matrix::new(bx - ax, by - ay, cx - ax, cy - ay, ax, ay).try_invert() else {
+        return false;
+    };
+    let source = tile.source_rect().to_pixels(shown);
+    let destination = tile.destination_rect().to_pixels_rect(bounds);
+    let scale =
+        MediaExtensions::calculate_scaling(tile.stretch(), destination.size(), source.size(), StretchDirection::Both);
+    let translate =
+        TileBrushCalculator::calculate_translate(tile.alignment_x(), tile.alignment_y(), source, destination, scale);
+    if scale.x <= 0.0 || scale.y <= 0.0 || destination.width <= 0.0 || destination.height <= 0.0 {
+        uniforms.metadata = [kind::IMAGE, 0.0, 0.0, 1.0];
+        return true;
+    }
+    // A point of what is shown, in pixels, to a pixel of the stored frame.
+    let to_stored = Matrix::create_scale(1.0 / shown.width, 1.0 / shown.height)
+        * shown_to_stored
+        * Matrix::create_scale(crop_width, crop_height)
+        * Matrix::create_translation(origin.x, origin.y);
+    // A point of the brush to a point of what is shown, as `placed_image_uniforms` places it.
+    let to_shown = Matrix::create_translation(-destination.x, -destination.y)
+        * Matrix::create_scale(1.0 / scale.x, 1.0 / scale.y)
+        * Matrix::create_translation(source.x - translate.x / scale.x, source.y - translate.y / scale.y);
+    let to_frame = to_shown * to_stored;
+    let tile_box = transformed_box(destination, &to_frame);
+    let viewbox = transformed_box(source, &to_stored);
+
+    uniforms.metadata = [kind::IMAGE, 0.0, 0.0, 0.0];
+    uniforms.geometry = [tile_box.x as f32, tile_box.y as f32, tile_box.width as f32, tile_box.height as f32];
+    uniforms.geometry2 = [
+        (1.0 / image.width) as f32,
+        (1.0 / image.height) as f32,
+        (tile_box.x / image.width) as f32,
+        (tile_box.y / image.height) as f32,
+    ];
+    let clamp = |value: f64| value.clamp(0.0, 1.0) as f32;
+    uniforms.clip = [
+        clamp(viewbox.x / image.width),
+        clamp(viewbox.y / image.height),
+        clamp((viewbox.x + viewbox.width) / image.width),
+        clamp((viewbox.y + viewbox.height) / image.height),
+    ];
+    // The rows of the brush, then the map to the frame.
+    let [m11, m21, m31, _] = uniforms.to_brush_x;
+    let [m12, m22, m32, _] = uniforms.to_brush_y;
+    let row = f64::from;
+    let rows = Matrix::new(row(m11), row(m12), row(m21), row(m22), row(m31), row(m32));
+    let m = rows * to_frame;
+    uniforms.to_brush_x = [m.m11 as f32, m.m21 as f32, m.m31 as f32, 0.0];
+    uniforms.to_brush_y = [m.m12 as f32, m.m22 as f32, m.m32 as f32, 0.0];
+    true
+}
+
+/// The axis-aligned box of `rect` through `matrix`.
+fn transformed_box(rect: Rect, matrix: &Matrix) -> Rect {
+    let corners = [
+        Point::new(rect.x, rect.y),
+        Point::new(rect.x + rect.width, rect.y),
+        Point::new(rect.x, rect.y + rect.height),
+        Point::new(rect.x + rect.width, rect.y + rect.height),
+    ]
+    .map(|corner| corner.transform(*matrix));
+    let min_x = corners.iter().map(|p| p.x).fold(f64::INFINITY, f64::min);
+    let min_y = corners.iter().map(|p| p.y).fold(f64::INFINITY, f64::min);
+    let max_x = corners.iter().map(|p| p.x).fold(f64::NEG_INFINITY, f64::max);
+    let max_y = corners.iter().map(|p| p.y).fold(f64::NEG_INFINITY, f64::max);
+    Rect::new(min_x, min_y, max_x - min_x, max_y - min_y)
+}
+
+/// [`image_uniforms`] of an image whose viewbox is given over `viewbox_space` (the size the tile
+/// brush sees) placed at `offset` of the bitmap of size `image`.
+fn placed_image_uniforms(
+    uniforms: &mut BrushUniforms,
+    tile: &dyn ITileBrush,
+    image: Size,
+    viewbox_space: Size,
+    offset: Point,
+    bounds: Rect,
+) {
+    let source = tile.source_rect().to_pixels(viewbox_space);
     let destination = tile.destination_rect().to_pixels_rect(bounds);
     let scale =
         MediaExtensions::calculate_scaling(tile.stretch(), destination.size(), source.size(), StretchDirection::Both);
@@ -642,15 +782,15 @@ fn image_uniforms(uniforms: &mut BrushUniforms, tile: &dyn ITileBrush, image: Si
     uniforms.geometry2 = [
         (1.0 / (scale.x * image.width)) as f32,
         (1.0 / (scale.y * image.height)) as f32,
-        ((source.x - translate.x / scale.x) / image.width) as f32,
-        ((source.y - translate.y / scale.y) / image.height) as f32,
+        ((source.x + offset.x - translate.x / scale.x) / image.width) as f32,
+        ((source.y + offset.y - translate.y / scale.y) / image.height) as f32,
     ];
     let clamp = |value: f64| value.clamp(0.0, 1.0) as f32;
     uniforms.clip = [
-        clamp(source.x / image.width),
-        clamp(source.y / image.height),
-        clamp((source.x + source.width) / image.width),
-        clamp((source.y + source.height) / image.height),
+        clamp((source.x + offset.x) / image.width),
+        clamp((source.y + offset.y) / image.height),
+        clamp((source.x + offset.x + source.width) / image.width),
+        clamp((source.y + offset.y + source.height) / image.height),
     ];
 }
 

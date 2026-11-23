@@ -441,3 +441,140 @@ fn the_box_of_the_texture_coordinates_holds_them_all() {
     assert_eq!(Rect::new(0.25, 0.0, 0.5, 2.0), texture_coordinate_bounds(&mesh));
     assert_eq!(Rect::default(), texture_coordinate_bounds(&MeshData::default()));
 }
+
+/// A bitmap of `width` by `height` pixels that cannot be read: a frame on a device.
+struct FrameBitmap(i32, i32);
+
+impl ferroui_base::platform::IBitmapImpl for FrameBitmap {
+    fn dpi(&self) -> ferroui_base::Vector {
+        ferroui_base::Vector::new(96.0, 96.0)
+    }
+    fn pixel_size(&self) -> ferroui_base::PixelSize {
+        ferroui_base::PixelSize::new(self.0, self.1)
+    }
+    fn version(&self) -> i32 {
+        1
+    }
+    fn save(
+        &self,
+        _: &mut dyn std::io::Write,
+        _: &ferroui_base::media::imaging::BitmapEncoderOptions,
+    ) -> std::io::Result<()> {
+        Err(std::io::Error::from(std::io::ErrorKind::Unsupported))
+    }
+    fn dispose(&self) {}
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+fn frame_metadata(
+    rotation: ferroui_base::rendering::composition::frames::FrameRotation,
+    mirrored: bool,
+) -> ferroui_base::rendering::composition::frames::FrameMetadata {
+    use ferroui_base::rendering::composition::frames::*;
+    FrameMetadata {
+        identity: FrameIdentity { source: 1, generation: 1, sequence: 1 },
+        width: 400,
+        height: 200,
+        visible: FrameRegion { x: 100, y: 50, width: 200, height: 100 },
+        format: FrameFormat::Bgra8,
+        color: FrameColor::Srgb,
+        alpha: FrameAlpha::Opaque,
+        rotation,
+        mirrored,
+        top_left_origin: true,
+        timestamp: std::time::Duration::ZERO,
+        device: None,
+        device_generation: 1,
+        planes: vec![FramePlane { offset: 0, stride: 1600, length: 320_000 }],
+        retained_bytes: 320_000,
+    }
+}
+
+/// A material of the frame in a slot over the unit box, stretched to fill it.
+fn frame_material(
+    frame: ferroui_base::rendering::composition::frames::FrameMetadata,
+    on_device: bool,
+) -> MaterialBrush {
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{AlignmentX, AlignmentY, SharedBrush};
+    use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
+    use ferroui_base::utilities::RefCountable;
+    let tile = ImmutableImageBrush::new(
+        None,
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(RelativeRect::FILL),
+        1.0,
+        None,
+        ferroui_base::RelativePoint::TOP_LEFT,
+        Some(RelativeRect::FILL),
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    );
+    let slot = Scene3DFrameSlot::new();
+    let bitmap: Arc<ferroui_base::platform::SharedBitmapImpl> = Arc::new(FrameBitmap(400, 200));
+    slot.publish(RefCountable::create(bitmap, || {}), frame);
+    let brush = SharedBrush::from_frame_slot(&tile, slot).expect("a tile brush");
+    MaterialBrush::of_with(Some(&brush), UNIT, &|_| on_device)
+}
+
+#[test]
+fn a_frame_is_placed_as_the_2d_path_shows_it() {
+    use ferroui_base::rendering::composition::frames::FrameRotation as R;
+    for rotation in [R::None, R::Clockwise90, R::Clockwise180, R::Clockwise270] {
+        for mirrored in [false, true] {
+            let frame = frame_metadata(rotation, mirrored);
+            let material = frame_material(frame.clone(), true);
+            assert!(!material.is_unsampled(), "{rotation:?} {mirrored}");
+            assert!(material.texture().is_some());
+            // A point of the visible region, and where the 2D path shows it in the unit box.
+            for (x, y) in [(0.1, 0.2), (0.9, 0.2), (0.1, 0.8), (0.75, 0.6)] {
+                let (u, v) = frame.orient(x, y).unwrap();
+                let point = brush_point(material.uniforms(), [u as f32, v as f32]);
+                let uv = image_coordinate(material.uniforms(), point).expect("inside the frame");
+                let expected = [(100.0 + x * 200.0) / 400.0, (50.0 + y * 100.0) / 200.0];
+                assert!(
+                    (f64::from(uv[0]) - expected[0]).abs() < 1e-4 && (f64::from(uv[1]) - expected[1]).abs() < 1e-4,
+                    "{rotation:?} {mirrored} ({x}, {y}): {uv:?}, expected {expected:?}"
+                );
+            }
+        }
+    }
+}
+
+#[test]
+fn a_frame_is_sampled_inside_its_visible_region_only() {
+    use ferroui_base::rendering::composition::frames::FrameRotation as R;
+    for rotation in [R::None, R::Clockwise90] {
+        let material = frame_material(frame_metadata(rotation, false), true);
+        let uniforms = material.uniforms();
+        let clip = uniforms.clip;
+        for (edge, expected) in clip.iter().zip([0.25f32, 0.25, 0.75, 0.75]) {
+            assert!((edge - expected).abs() < 1e-6, "{rotation:?}: {clip:?}");
+        }
+    }
+}
+
+#[test]
+fn a_frame_that_is_not_on_the_device_is_not_sampled() {
+    use ferroui_base::rendering::composition::frames::FrameRotation;
+    let material = frame_material(frame_metadata(FrameRotation::None, false), false);
+    assert!(material.is_unsampled());
+    assert!(material.texture().is_none());
+}
+
+#[test]
+fn an_empty_slot_paints_nothing() {
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::SharedBrush;
+    use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
+    let tile = ImmutableImageBrush::from_bitmap(None);
+    let brush = SharedBrush::from_frame_slot(&tile, Scene3DFrameSlot::new()).expect("a tile brush");
+    let material = MaterialBrush::of_with(Some(&brush), UNIT, &|_| true);
+    assert!(!material.is_unsampled());
+    assert!(material.texture().is_none());
+    assert!(image_coordinate(material.uniforms(), [0.5, 0.5]).is_none());
+}
