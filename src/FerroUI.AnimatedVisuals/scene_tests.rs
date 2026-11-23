@@ -330,3 +330,39 @@ fn each_merge_mode_keeps_its_part_of_two_shapes() {
         assert_eq!((red(12), red(23), red(34)), (first, both, second), "merge mode {mode}");
     }
 }
+
+/// The same frames through the compositor on the device, in each GPU mode of Vello, against the
+/// same reference. Without an adapter there is nothing to run them on.
+#[cfg(feature = "device-tests")]
+#[test]
+fn mattes_and_icons_match_their_references_on_the_device() {
+    if let Err(error) = ferroui_vello::gpu::VelloWgpuDevice::headless() {
+        println!("skipped: no adapter: {error}");
+        return;
+    }
+    for mode in [VelloRenderingMode::Hybrid, VelloRenderingMode::Gpu] {
+        let options = ferroui_vello::VelloOptions { rendering_modes: [Some(mode), None, None], ..Default::default() };
+        let _app = UnitTestApplication::start(
+            TestServices::styled_window().with_render_interface(Rc::new(PlatformRenderInterface::new(options))),
+        );
+        for kind in 1..=4 {
+            let matte = square(14.0, 24.0, 20.0, [1.0, 1.0, 1.0]);
+            let black = square(34.0, 24.0, 20.0, [0.0, 0.0, 0.0]);
+            let visual = document(json!([
+                {"ty": 4, "ind": 1, "td": 1, "ip": 0, "op": 30, "ks": {}, "shapes": [
+                    {"ty": "gr", "it": [matte[0], matte[1], {"ty": "tr"}]},
+                    {"ty": "gr", "it": [black[0], black[1], {"ty": "tr"}]},
+                ]},
+                {"ty": 4, "ind": 2, "tt": kind, "ip": 0, "op": 30, "ks": {}, "shapes": square(24.0, 24.0, 48.0, [0.0, 0.0, 1.0])}
+            ]));
+            assert_frames(&format!("{mode:?}, matte {kind}"), &visual, &[0.0]);
+        }
+        for (name, json) in ICON_DOCUMENTS {
+            let visual = Rc::new(AnimatedVisual::parse(json).unwrap());
+            let mut progresses: Vec<f64> = visual.progress_markers().into_iter().map(|(_, progress)| progress).collect();
+            progresses.sort_by(f64::total_cmp);
+            progresses.dedup();
+            assert_frames(&format!("{mode:?}, {name}"), &visual, &progresses);
+        }
+    }
+}
