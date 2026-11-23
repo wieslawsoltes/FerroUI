@@ -145,6 +145,10 @@ impl IDrawingContextLayerImpl for ProGpuLayer {
         let bitmap = ProGpuBitmap::new(size, self.inner.dpi, PixelFormat::RGBA8888, AlphaFormat::Premul);
         if let Some(texture) = &self.inner.texture {
             if texture.width() == size.width as u32 && texture.height() == size.height as u32 {
+                // In the browser the texture stays the content of the snapshot until its pixels
+                // are back, and the snapshot does not change with the layer: a copy on the GPU.
+                #[cfg(target_os = "emscripten")]
+                let texture = &texture.copy();
                 bitmap.store_frame(texture);
             }
         }

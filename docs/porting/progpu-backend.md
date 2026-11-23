@@ -844,11 +844,12 @@ As built (step P9):
   does this for `?Renderer=ProGPU` in a module built with the feature `progpu`; without a device
   it starts with the default backend.
 - **Reading pixels back.** A page cannot wait for the GPU, so pixels come back through WebGPU
-  buffer mapping (`read_rgba8_async`), on the GPU path. A render target bitmap or a snapshot of a
-  layer is not ready until its frame arrives: until then it is not drawn, `as_readable_bitmap`
-  gives `None` and `save` fails with `WouldBlock`. A synchronous read of a layer (`save`) fails
-  with the same error. A read that fails leaves the bitmap in that state, and no call returns
-  an empty image in its place.
+  buffer mapping (`read_rgba8_async`), on the GPU path. Until the pixels of a render target bitmap
+  or a layer snapshot arrive, its texture stays its content: frames sample it and a drawing into
+  the bitmap starts from it, so no frame misses the content and none has to be drawn again when
+  the pixels arrive. Meanwhile `as_readable_bitmap` gives `None` and `save` fails with
+  `WouldBlock`, as a synchronous read of a layer does. After a failed read the texture is still
+  drawn and readers keep that error; no call returns an empty image in place of the pixels.
 - The canvas shows the frame when the task that drew it returns.
 
 ### 2.7 The platform render interface (P3)

@@ -534,7 +534,10 @@ impl ProGpuDevice {
                 &WGPUTextureDescriptor {
                     nextInChain: ptr::null_mut(),
                     label: no_label(),
-                    usage: WGPUTextureUsage_RenderAttachment | WGPUTextureUsage_CopySrc | WGPUTextureUsage_TextureBinding,
+                    usage: WGPUTextureUsage_RenderAttachment
+                        | WGPUTextureUsage_CopySrc
+                        | WGPUTextureUsage_CopyDst
+                        | WGPUTextureUsage_TextureBinding,
                     dimension: WGPUTextureDimension_2D,
                     size: WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
                     format: WGPUTextureFormat_RGBA8Unorm,
@@ -593,6 +596,27 @@ impl ProGpuDevice {
                 &WGPUTexelCopyBufferLayout { offset: 0, bytesPerRow: width * 4, rowsPerImage: height },
                 &WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
             );
+        }
+    }
+
+    /// Copies `width` by `height` pixels between two textures of `RGBA8Unorm`, on the queue.
+    pub(crate) fn copy_texture(&self, source: WGPUTexture, destination: WGPUTexture, width: u32, height: u32) {
+        self.enter();
+        let origin = WGPUOrigin3D { x: 0, y: 0, z: 0 };
+        // SAFETY: the calls of the WebGPU C ABI with live textures of this device; the records
+        // are borrowed for the calls.
+        unsafe {
+            let encoder = wgpuDeviceCreateCommandEncoder(self.device, ptr::null());
+            wgpuCommandEncoderCopyTextureToTexture(
+                encoder,
+                &WGPUTexelCopyTextureInfo { texture: source, mipLevel: 0, origin, aspect: WGPUTextureAspect_All },
+                &WGPUTexelCopyTextureInfo { texture: destination, mipLevel: 0, origin, aspect: WGPUTextureAspect_All },
+                &WGPUExtent3D { width, height, depthOrArrayLayers: 1 },
+            );
+            let commands = wgpuCommandEncoderFinish(encoder, ptr::null());
+            wgpuQueueSubmit(self.queue, 1, &commands);
+            wgpuCommandBufferRelease(commands);
+            wgpuCommandEncoderRelease(encoder);
         }
     }
 
