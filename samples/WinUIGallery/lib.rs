@@ -6,6 +6,7 @@
 
 #![forbid(unsafe_code)]
 
+mod animated_visual_samples;
 mod assets;
 mod assets_data;
 mod cat_data;
@@ -47,6 +48,9 @@ pub use app::App;
 
 #[cfg(test)]
 mod tests;
+
+#[cfg(test)]
+mod animated_visual_samples_tests;
 
 #[cfg(test)]
 mod feedback_samples_tests;

@@ -38,6 +38,7 @@ ferroui-media-camera.workspace = true
 ferroui-media-controls.workspace = true
 ferroui-media-video-controls.workspace = true
 ferroui-media-camera-controls.workspace = true
+ferroui-animated-visuals = { workspace = true }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-controls-color-picker = { workspace = true, features = ["document-assets"] }

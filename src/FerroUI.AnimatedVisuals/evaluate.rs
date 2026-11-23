@@ -1,10 +1,14 @@
 //! A frame of an animated visual as a list of drawing commands, in the space of the composition.
 
+use crate::content::{document_at, lines_of, Glyph, ImageAsset, TextDocument};
 use crate::model::{AnimatedVisual, GradientModel, Layer, LayerKind, MatteMode, ShapeItem, StrokeModel};
-use crate::path::PathData;
+use crate::path::{PathData, Polystar};
+use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{Animated, Components};
 use ferroui_base::media::Color;
 use ferroui_base::{Matrix, Point};
+use std::collections::HashMap;
+use std::rc::Rc;
 
 /// How deep precompositions nest: a document that refers to itself stops here.
 const MAX_DEPTH: usize = 32;
@@ -43,6 +47,27 @@ pub struct ShapeDraw {
     pub stroke: Option<StrokeStyle>,
     pub even_odd: bool,
     pub opacity: f64,
+    /// The colour property a solid paint takes its colour from, when one is set.
+    pub binding: Option<Rc<str>>,
+}
+
+/// Text of a font the document does not carry the glyphs of, drawn by the text stack of the
+/// backend: `lines` from the baseline of the first at the origin of the layer.
+#[derive(Clone, Debug, PartialEq)]
+pub struct TextDraw {
+    pub lines: Vec<String>,
+    pub family: String,
+    pub size: f64,
+    pub fill: Option<Color>,
+    pub stroke: Option<(Color, f64)>,
+    pub stroke_over_fill: bool,
+    /// 0 left, 1 right, 2 centre.
+    pub justify: u8,
+    pub line_height: f64,
+    /// Added after each character, in the units of the layer.
+    pub tracking: f64,
+    pub baseline_shift: f64,
+    pub opacity: f64,
 }
 
 /// How a mask combines with the masks before it.
@@ -58,12 +83,19 @@ pub enum MaskMode {
 pub enum FrameCommand {
     PushTransform(Matrix),
     PushOpacity(f64),
+    /// What follows up to its `Pop` is one group, mixed with what is under it.
+    PushBlend(BitmapBlendingMode),
     /// Clips what follows to a path of the current space.
     PushMask { path: PathData, mode: MaskMode, inverted: bool, opacity: f64 },
+    /// Keeps what the union of these paths covers, each with its opacity.
+    PushCoverage(Vec<(PathData, f64)>),
     /// What follows up to `EndMatteSource` is the matte of what follows after it, up to `Pop`.
     BeginMatte(MatteMode),
     EndMatteSource,
     Draw(ShapeDraw),
+    /// An image at the origin of the current space, at the size of the asset.
+    DrawImage(Rc<ImageAsset>),
+    DrawText(TextDraw),
     Pop,
 }
 
@@ -192,7 +224,21 @@ fn evaluate_items(
                 geometry.push(PathData::ellipse(Point::new(p[0], p[1]), s[0], s[1]).transformed(transform));
             }
             ShapeItem::Path(shape) => geometry.push(shape.path_at(frame).transformed(transform)),
-            ShapeItem::Fill { color: paint, opacity: own, even_odd } => {
+            ShapeItem::Polystar { star, position, points, rotation, outer_radius, outer_roundness, inner_radius, inner_roundness } => {
+                let center = position.at(frame);
+                let shape = Polystar {
+                    star: *star,
+                    center: Point::new(center[0], center[1]),
+                    points: points.at(frame)[0],
+                    rotation: rotation.at(frame)[0],
+                    outer_radius: outer_radius.at(frame)[0],
+                    outer_roundness: outer_roundness.at(frame)[0],
+                    inner_radius: inner_radius.at(frame)[0],
+                    inner_roundness: inner_roundness.at(frame)[0],
+                };
+                geometry.push(PathData::polystar(&shape).transformed(transform));
+            }
+            ShapeItem::Fill { color: paint, opacity: own, even_odd, binding } => {
                 let alpha = (own.at(frame)[0] / 100.0).clamp(0.0, 1.0);
                 draws.push(ShapeDraw {
                     path: merged(geometry),
@@ -200,9 +246,10 @@ fn evaluate_items(
                     stroke: None,
                     even_odd: *even_odd,
                     opacity: opacity * alpha,
+                    binding: binding.clone(),
                 });
             }
-            ShapeItem::Stroke { color: paint, opacity: own, stroke } => {
+            ShapeItem::Stroke { color: paint, opacity: own, stroke, binding } => {
                 let alpha = (own.at(frame)[0] / 100.0).clamp(0.0, 1.0);
                 draws.push(ShapeDraw {
                     path: merged(geometry),
@@ -210,6 +257,7 @@ fn evaluate_items(
                     stroke: Some(stroke_style(stroke, frame, scale_of(transform))),
                     even_odd: false,
                     opacity: opacity * alpha,
+                    binding: binding.clone(),
                 });
             }
             ShapeItem::GradientFill { gradient, opacity: own, even_odd } => {
@@ -220,6 +268,7 @@ fn evaluate_items(
                     stroke: None,
                     even_odd: *even_odd,
                     opacity: opacity * alpha,
+                    binding: None,
                 });
             }
             ShapeItem::GradientStroke { gradient, opacity: own, stroke } => {
@@ -230,6 +279,7 @@ fn evaluate_items(
                     stroke: Some(stroke_style(stroke, frame, scale_of(transform))),
                     even_odd: false,
                     opacity: opacity * alpha,
+                    binding: None,
                 });
             }
             ShapeItem::Trim { start, end, offset } => {
@@ -345,14 +395,19 @@ impl AnimatedVisual {
         if opacity <= 0.0 || matches!(layer.kind, LayerKind::Null | LayerKind::NotDrawn) {
             return;
         }
-        out.push(FrameCommand::PushTransform(world_matrix(layers, layer, frame)));
         let mut pushed = 1;
+        if let Some(blend) = layer.blend {
+            out.push(FrameCommand::PushBlend(blend));
+            pushed += 1;
+        }
+        out.push(FrameCommand::PushTransform(world_matrix(layers, layer, frame)));
         if opacity < 1.0 {
             out.push(FrameCommand::PushOpacity(opacity));
             pushed += 1;
         }
-        // Added masks are a union, which nested clips are not: they are one path.
-        let mut added = PathData::default();
+        // Added masks are a union, which nested clips are not: one path, or at partial opacity
+        // a coverage each path adds to.
+        let mut added: Vec<(PathData, f64)> = Vec::new();
         for mask in &layer.masks {
             let mode = match mask.mode {
                 b'a' => MaskMode::Add,
@@ -361,16 +416,24 @@ impl AnimatedVisual {
                 _ => continue,
             };
             let path = mask.path.path_at(local);
+            let opacity = (mask.opacity.at(local)[0] / 100.0).clamp(0.0, 1.0);
             if mode == MaskMode::Add && !mask.inverted {
-                added.append(&path);
+                added.push((path, opacity));
                 continue;
             }
-            let opacity = (mask.opacity.at(local)[0] / 100.0).clamp(0.0, 1.0);
             out.push(FrameCommand::PushMask { path, mode, inverted: mask.inverted, opacity });
             pushed += 1;
         }
-        if !added.is_empty() {
-            out.push(FrameCommand::PushMask { path: added, mode: MaskMode::Add, inverted: false, opacity: 1.0 });
+        if added.iter().any(|(path, _)| !path.is_empty()) {
+            if added.iter().all(|(_, opacity)| *opacity >= 1.0) {
+                let mut union = PathData::default();
+                for (path, _) in &added {
+                    union.append(path);
+                }
+                out.push(FrameCommand::PushMask { path: union, mode: MaskMode::Add, inverted: false, opacity: 1.0 });
+            } else {
+                out.push(FrameCommand::PushCoverage(added));
+            }
             pushed += 1;
         }
         match &layer.kind {
@@ -387,6 +450,7 @@ impl AnimatedVisual {
                     stroke: None,
                     even_odd: false,
                     opacity: 1.0,
+                    binding: None,
                 }));
             }
             LayerKind::Precomposition { reference, width, height, time_remap } => {
@@ -403,12 +467,103 @@ impl AnimatedVisual {
                     self.evaluate_layers(inner, inner_frame, depth + 1, out);
                 }
             }
+            LayerKind::Image { reference } => {
+                if let Some(image) = self.images.get(reference) {
+                    out.push(FrameCommand::DrawImage(image.clone()));
+                }
+            }
+            LayerKind::Text(documents) => {
+                if let Some(document) = document_at(documents, local) {
+                    match self.fonts.glyphs_for(&document.font, &document.text) {
+                        Some(glyphs) => glyph_draws(document, glyphs, local, out),
+                        None => out.push(FrameCommand::DrawText(text_draw(document, self.fonts.family_of(&document.font)))),
+                    }
+                }
+            }
             LayerKind::Null | LayerKind::NotDrawn => {}
         }
         for _ in 0..pushed {
             out.push(FrameCommand::Pop);
         }
     }
+}
+
+fn text_color(components: Option<crate::value::Components>) -> Option<Color> {
+    components.map(|value| color(value, value[3].clamp(0.0, 1.0)))
+}
+
+fn text_draw(document: &TextDocument, family: &str) -> TextDraw {
+    TextDraw {
+        lines: lines_of(&document.text).map(str::to_owned).collect(),
+        family: family.to_owned(),
+        size: document.size,
+        fill: text_color(document.fill),
+        stroke: text_color(document.stroke).filter(|_| document.stroke_width > 0.0).map(|paint| (paint, document.stroke_width)),
+        stroke_over_fill: document.stroke_over_fill,
+        justify: document.justify,
+        line_height: document.line_height,
+        tracking: document.tracking * document.size / 1000.0,
+        baseline_shift: document.baseline_shift,
+        opacity: 1.0,
+    }
+}
+
+/// The text from the shapes the document carries: one path per paint, placed line by line.
+fn glyph_draws(document: &TextDocument, glyphs: &HashMap<char, Glyph>, frame: f64, out: &mut Vec<FrameCommand>) {
+    let scale = document.size / 100.0;
+    let tracking = document.tracking * document.size / 1000.0;
+    let mut path = PathData::default();
+    for (index, line) in lines_of(&document.text).enumerate() {
+        let width: f64 = line.chars().map(|character| glyphs[&character].advance * scale + tracking).sum();
+        let mut x = match document.justify {
+            1 => -width,
+            2 => -width * 0.5,
+            _ => 0.0,
+        };
+        let y = index as f64 * document.line_height - document.baseline_shift;
+        for character in line.chars() {
+            let glyph = &glyphs[&character];
+            let matrix = Matrix::create_scale(scale, scale) * Matrix::create_translation(x, y);
+            let (mut geometry, mut ignored) = (Vec::new(), Vec::new());
+            evaluate_items(&glyph.shapes, frame, matrix, 1.0, &mut geometry, &mut ignored);
+            for part in &geometry {
+                path.append(part);
+            }
+            x += glyph.advance * scale + tracking;
+        }
+    }
+    if path.is_empty() {
+        return;
+    }
+    let fill = text_color(document.fill).map(|paint| {
+        FrameCommand::Draw(ShapeDraw {
+            path: path.clone(),
+            paint: Paint::Solid(Color::from_rgb(paint.r, paint.g, paint.b)),
+            stroke: None,
+            even_odd: false,
+            opacity: f64::from(paint.a) / 255.0,
+            binding: None,
+        })
+    });
+    let stroke = text_color(document.stroke).filter(|_| document.stroke_width > 0.0).map(|paint| {
+        FrameCommand::Draw(ShapeDraw {
+            path: path.clone(),
+            paint: Paint::Solid(Color::from_rgb(paint.r, paint.g, paint.b)),
+            stroke: Some(StrokeStyle {
+                width: document.stroke_width,
+                cap: 1,
+                join: 2,
+                miter: 4.0,
+                dashes: Vec::new(),
+                dash_offset: 0.0,
+            }),
+            even_odd: false,
+            opacity: f64::from(paint.a) / 255.0,
+            binding: None,
+        })
+    });
+    let ordered = if document.stroke_over_fill { [fill, stroke] } else { [stroke, fill] };
+    out.extend(ordered.into_iter().flatten());
 }
 
 fn visible(layer: &Layer, frame: f64) -> bool {

@@ -1,11 +1,14 @@
 //! The model of a Lottie document, read once: layers, shapes, transforms and markers.
 
+use crate::content::{text_documents, DocumentFonts, ImageAsset, TextDocument};
 use crate::path::{BezierShape, PathData};
+use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{keyframes, parse_eases, Animated, Components, Ease};
 use ferroui_base::Matrix;
 use serde_json::Value;
 use std::collections::HashMap;
 use std::fmt;
+use std::rc::Rc;
 
 /// Why a document could not be read.
 #[derive(Clone, Debug, PartialEq, Eq)]
@@ -271,8 +274,18 @@ pub(crate) enum ShapeItem {
     Rectangle { position: Animated, size: Animated, radius: Animated },
     Ellipse { position: Animated, size: Animated },
     Path(AnimatedShape),
-    Fill { color: Animated, opacity: Animated, even_odd: bool },
-    Stroke { color: Animated, opacity: Animated, stroke: StrokeModel },
+    Polystar {
+        star: bool,
+        position: Animated,
+        points: Animated,
+        rotation: Animated,
+        outer_radius: Animated,
+        outer_roundness: Animated,
+        inner_radius: Animated,
+        inner_roundness: Animated,
+    },
+    Fill { color: Animated, opacity: Animated, even_odd: bool, binding: Option<Rc<str>> },
+    Stroke { color: Animated, opacity: Animated, stroke: StrokeModel, binding: Option<Rc<str>> },
     GradientFill { gradient: GradientModel, opacity: Animated, even_odd: bool },
     GradientStroke { gradient: GradientModel, opacity: Animated, stroke: StrokeModel },
     Trim { start: Animated, end: Animated, offset: Animated },
@@ -314,11 +327,18 @@ fn gradient_model(item: &Value) -> Option<GradientModel> {
 
 const FULL: Components = [100.0, 0.0, 0.0, 0.0];
 
-fn shape_items(items: Option<&Value>) -> Vec<ShapeItem> {
+pub(crate) fn shape_items(items: Option<&Value>) -> Vec<ShapeItem> {
     let Some(items) = items.and_then(Value::as_array) else {
         return Vec::new();
     };
     items.iter().filter_map(shape_item).collect()
+}
+
+/// The colour property a paint is bound to: `{color:Name}` in its name.
+fn color_binding(item: &Value) -> Option<Rc<str>> {
+    let (_, rest) = item.get("nm")?.as_str()?.split_once("{color:")?;
+    let (name, _) = rest.split_once('}')?;
+    Some(Rc::from(name.trim()))
 }
 
 fn shape_item(item: &Value) -> Option<ShapeItem> {
@@ -340,15 +360,27 @@ fn shape_item(item: &Value) -> Option<ShapeItem> {
         },
         "el" => ShapeItem::Ellipse { position: Animated::of(item, "p", [0.0; 4]), size: Animated::of(item, "s", [0.0; 4]) },
         "sh" => ShapeItem::Path(AnimatedShape::parse(item.get("ks")?)?),
+        "sr" => ShapeItem::Polystar {
+            star: item.get("sy").and_then(Value::as_u64).unwrap_or(1) == 1,
+            position: Animated::of(item, "p", [0.0; 4]),
+            points: Animated::of(item, "pt", [5.0, 0.0, 0.0, 0.0]),
+            rotation: Animated::of(item, "r", [0.0; 4]),
+            outer_radius: Animated::of(item, "or", [0.0; 4]),
+            outer_roundness: Animated::of(item, "os", [0.0; 4]),
+            inner_radius: Animated::of(item, "ir", [0.0; 4]),
+            inner_roundness: Animated::of(item, "is", [0.0; 4]),
+        },
         "fl" => ShapeItem::Fill {
             color: Animated::of(item, "c", [0.0, 0.0, 0.0, 1.0]),
             opacity: Animated::of(item, "o", FULL),
             even_odd,
+            binding: color_binding(item),
         },
         "st" => ShapeItem::Stroke {
             color: Animated::of(item, "c", [0.0, 0.0, 0.0, 1.0]),
             opacity: Animated::of(item, "o", FULL),
             stroke: stroke_model(item),
+            binding: color_binding(item),
         },
         "gf" => ShapeItem::GradientFill { gradient: gradient_model(item)?, opacity: Animated::of(item, "o", FULL), even_odd },
         "gs" => ShapeItem::GradientStroke {
@@ -392,7 +424,10 @@ pub(crate) enum LayerKind {
     Solid { color: Components, width: f64, height: f64 },
     Null,
     Precomposition { reference: String, width: f64, height: f64, time_remap: Option<Animated> },
-    /// A kind this runtime does not draw (an image or text): its transform can still be a parent.
+    Image { reference: String },
+    Text(Vec<(f64, TextDocument)>),
+    /// A kind this runtime does not draw (audio, data and the like): its transform can still be
+    /// a parent.
     NotDrawn,
 }
 
@@ -410,12 +445,37 @@ pub(crate) struct Layer {
     pub(crate) matte_parent: Option<i64>,
     pub(crate) masks: Vec<MaskModel>,
     pub(crate) kind: LayerKind,
+    /// How the layer mixes with what is under it, when not normally.
+    pub(crate) blend: Option<BitmapBlendingMode>,
 }
 
 fn hex_color(text: &str) -> Components {
     let hex = text.trim_start_matches('#');
     let channel = |at: usize| hex.get(at..at + 2).and_then(|part| u8::from_str_radix(part, 16).ok()).unwrap_or(0);
     [f64::from(channel(0)) / 255.0, f64::from(channel(2)) / 255.0, f64::from(channel(4)) / 255.0, 1.0]
+}
+
+/// The blend mode of a layer (`bm`).
+fn blend_mode(value: Option<u64>) -> Option<BitmapBlendingMode> {
+    Some(match value? {
+        1 => BitmapBlendingMode::Multiply,
+        2 => BitmapBlendingMode::Screen,
+        3 => BitmapBlendingMode::Overlay,
+        4 => BitmapBlendingMode::Darken,
+        5 => BitmapBlendingMode::Lighten,
+        6 => BitmapBlendingMode::ColorDodge,
+        7 => BitmapBlendingMode::ColorBurn,
+        8 => BitmapBlendingMode::HardLight,
+        9 => BitmapBlendingMode::SoftLight,
+        10 => BitmapBlendingMode::Difference,
+        11 => BitmapBlendingMode::Exclusion,
+        12 => BitmapBlendingMode::Hue,
+        13 => BitmapBlendingMode::Saturation,
+        14 => BitmapBlendingMode::Color,
+        15 => BitmapBlendingMode::Luminosity,
+        16 => BitmapBlendingMode::Plus,
+        _ => return None,
+    })
 }
 
 fn layer(value: &Value) -> Option<Layer> {
@@ -436,8 +496,10 @@ fn layer(value: &Value) -> Option<Layer> {
             width: float("sw", 0.0),
             height: float("sh", 0.0),
         },
+        2 => LayerKind::Image { reference: text("refId")?.to_owned() },
         3 => LayerKind::Null,
         4 => LayerKind::Shape(shape_items(value.get("shapes"))),
+        5 => LayerKind::Text(text_documents(value)),
         _ => LayerKind::NotDrawn,
     };
     let matte = match value.get("tt").and_then(Value::as_u64) {
@@ -478,6 +540,7 @@ fn layer(value: &Value) -> Option<Layer> {
         matte_parent: value.get("tp").and_then(Value::as_i64),
         masks,
         kind,
+        blend: blend_mode(value.get("bm").and_then(Value::as_u64)),
     })
 }
 
@@ -500,6 +563,8 @@ pub struct AnimatedVisual {
     pub markers: Vec<Marker>,
     pub(crate) layers: Vec<Layer>,
     pub(crate) precompositions: HashMap<String, Vec<Layer>>,
+    pub(crate) images: HashMap<String, Rc<ImageAsset>>,
+    pub(crate) fonts: DocumentFonts,
 }
 
 impl AnimatedVisual {
@@ -518,9 +583,12 @@ impl AnimatedVisual {
             return Err(AnimatedVisualError::Invalid("layers"));
         }
         let mut precompositions = HashMap::new();
+        let mut images = HashMap::new();
         for asset in root.get("assets").and_then(Value::as_array).into_iter().flatten() {
             if let (Some(id), Some(_)) = (asset.get("id").and_then(Value::as_str), asset.get("layers")) {
                 precompositions.insert(id.to_owned(), layers(asset.get("layers")));
+            } else if let Some(image) = ImageAsset::parse(asset) {
+                images.insert(image.id.clone(), Rc::new(image));
             }
         }
         let markers = root
@@ -539,7 +607,25 @@ impl AnimatedVisual {
                     .collect()
             })
             .unwrap_or_default();
-        Ok(Self { width, height, frame_rate, in_point, out_point, markers, layers: layers(root.get("layers")), precompositions })
+        let fonts = DocumentFonts::parse(&root);
+        Ok(Self { width, height, frame_rate, in_point, out_point, markers, layers: layers(root.get("layers")), precompositions, images, fonts })
+    }
+
+    /// The images that are in files, by id and path: a loader gives their bytes to
+    /// [`set_image_bytes`](Self::set_image_bytes).
+    pub fn image_files(&self) -> Vec<(String, String)> {
+        self.images
+            .values()
+            .filter(|image| image.bytes.is_none())
+            .filter_map(|image| Some((image.id.clone(), image.path.clone()?)))
+            .collect()
+    }
+
+    /// Gives an image that is in a file its encoded bytes.
+    pub fn set_image_bytes(&mut self, id: &str, bytes: Vec<u8>) {
+        if let Some(image) = self.images.get_mut(id) {
+            Rc::make_mut(image).bytes = Some(Rc::from(bytes));
+        }
     }
 
     /// The length of the animation in seconds.

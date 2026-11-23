@@ -1,0 +1,19 @@
+<!-- Adapted from the pinned AnimatedVisualPlayer example; see ../NOTICE.md. The source plays its
+     generated LottieLogo1, which is not part of the pinned sources: the page plays the settings
+     icon, a document of the animated-visual runtime. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="16">
+  <TextBlock Text="Playback of a Lottie animation." FontSize="18" />
+  <StackPanel Orientation="Horizontal" Spacing="24">
+    <AnimatedVisualPlayer x:Name="Player" AutoPlay="False" Width="192" Height="192"
+                          AutomationProperties.Name="Animated visual">
+      <AnimatedSettingsVisualSource />
+    </AnimatedVisualPlayer>
+    <StackPanel Spacing="8" VerticalAlignment="Center">
+      <Button x:Name="PlayButton" Content="Play" MinWidth="96" />
+      <Button x:Name="PauseButton" Content="Pause" MinWidth="96" />
+      <Button x:Name="ResumeButton" Content="Resume" MinWidth="96" />
+      <Button x:Name="StopButton" Content="Stop" MinWidth="96" />
+    </StackPanel>
+  </StackPanel>
+</StackPanel>

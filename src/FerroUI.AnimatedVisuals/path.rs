@@ -22,7 +22,58 @@ pub struct PathData {
 /// The control point distance that makes a cubic Bezier a quarter circle of radius one.
 const CIRCLE: f64 = 0.552_284_749_830_793_6;
 
+/// A star or a polygon (`sr`), its corners on circles around `center`.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct Polystar {
+    pub(crate) star: bool,
+    pub(crate) center: Point,
+    pub(crate) points: f64,
+    /// Of the first corner, in degrees from straight up.
+    pub(crate) rotation: f64,
+    pub(crate) outer_radius: f64,
+    /// In percent, as the two below.
+    pub(crate) outer_roundness: f64,
+    pub(crate) inner_radius: f64,
+    pub(crate) inner_roundness: f64,
+}
+
 impl PathData {
+    /// The closed path of a star or a polygon. The tangents of a round corner run along the
+    /// circle of the corner, as long as a share of the arc to the next corner.
+    pub(crate) fn polystar(shape: &Polystar) -> Self {
+        let tips = shape.points.floor().clamp(0.0, 4096.0) as usize;
+        let count = if shape.star { tips * 2 } else { tips };
+        let mut path = Self::default();
+        if count < 2 {
+            return path;
+        }
+        let step = std::f64::consts::TAU / count as f64;
+        let share = if shape.star { count * 2 } else { count * 4 } as f64;
+        let corners: Vec<(Point, Point, Point)> = (0..count)
+            .map(|index| {
+                let outer = !shape.star || index % 2 == 0;
+                let (radius, roundness) = if outer {
+                    (shape.outer_radius, shape.outer_roundness)
+                } else {
+                    (shape.inner_radius, shape.inner_roundness)
+                };
+                let angle = shape.rotation.to_radians() - std::f64::consts::FRAC_PI_2 + step * index as f64;
+                let (sin, cos) = angle.sin_cos();
+                let at = Point::new(shape.center.x + radius * cos, shape.center.y + radius * sin);
+                let length = std::f64::consts::TAU * radius / share * roundness / 100.0;
+                let (along_x, along_y) = (-sin * length, cos * length);
+                (at, Point::new(at.x - along_x, at.y - along_y), Point::new(at.x + along_x, at.y + along_y))
+            })
+            .collect();
+        path.commands.push(PathCommand::MoveTo(corners[0].0));
+        for index in 0..count {
+            let (from, to) = (corners[index], corners[(index + 1) % count]);
+            path.commands.push(PathCommand::CubicTo(from.2, to.1, to.0));
+        }
+        path.commands.push(PathCommand::Close);
+        path
+    }
+
     pub fn is_empty(&self) -> bool {
         self.commands.is_empty()
     }
