@@ -442,7 +442,9 @@ impl InputElementImpl for TextArea {
                 return;
             }
         }
-        if modifiers == keymap.command_modifiers {
+        // Control+D and Control+I on every keymap: Command+D and Command+I belong to the browser
+        // and the system on Apple platforms.
+        if modifiers == KeyModifiers::CONTROL {
             let line_command = match e.key {
                 Key::D => Some(EditorCommandKind::Transform(TextTransformation::DeleteLines)),
                 Key::I => Some(EditorCommandKind::Reindent),
