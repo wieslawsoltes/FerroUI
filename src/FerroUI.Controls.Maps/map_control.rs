@@ -3,7 +3,6 @@
 use crate::camera::{MapCamera, MAX_ZOOM};
 use crate::map_elements::{view_path, MapElement, MapElementsLayer};
 use crate::projection::{visible_tiles, BasicGeoposition, TILE_SIZE};
-use crate::tile_cache::source_key;
 use crate::tile_source::{RasterTileSource, SharedTileLoader};
 use crate::tile_store::{TileStore, MEMORY_BUDGET};
 use ferroui_base::input::gesture_recognizers::PinchGestureRecognizer;
@@ -34,6 +33,7 @@ use ferroui_controls::automation::peers::{
 use ferroui_controls::{Control, ControlImpl};
 use std::cell::{Cell, RefCell};
 use std::collections::VecDeque;
+use std::path::{Path, PathBuf};
 use std::rc::{Rc, Weak};
 
 /// A decoded tile of 256 by 256 pixels, for the budget of the memory cache.
@@ -73,6 +73,8 @@ pub struct MapControl {
     layers: RefCell<Vec<Rc<MapElementsLayer>>>,
     layer_listener: RefCell<Option<Rc<dyn Fn()>>>,
     tile_source: RefCell<Option<Rc<RasterTileSource>>>,
+    /// The folder and the budget in bytes of the disk cache.
+    disk_cache: RefCell<Option<(PathBuf, u64)>>,
     /// The camera is writing its values to the properties.
     is_syncing: Cell<bool>,
     is_frame_requested: Cell<bool>,
@@ -140,6 +142,7 @@ impl MapControl {
             layers: RefCell::new(Vec::new()),
             layer_listener: RefCell::new(None),
             tile_source: RefCell::new(None),
+            disk_cache: RefCell::new(None),
             is_syncing: Cell::new(false),
             is_frame_requested: Cell::new(false),
             last_frame: Cell::new(None),
@@ -246,6 +249,8 @@ impl MapControl {
     ) {
         *self.tile_source.borrow_mut() = source.clone();
         self.store.set_source(source, loader);
+        // Without its disk cache the new source still works: its tiles are loaded each time.
+        let _ = self.open_disk_cache();
         self.invalidate_visual();
     }
 
@@ -254,26 +259,33 @@ impl MapControl {
         self.tile_source.borrow().clone()
     }
 
-    /// Keeps the encoded tiles of a source in a folder, within a budget of bytes. `template`
-    /// names the source in the folder. Not available in the browser.
-    pub fn set_disk_cache(
-        &self,
-        folder: &std::path::Path,
-        template: &str,
-        budget: u64,
-    ) -> std::io::Result<()> {
-        #[cfg(not(target_arch = "wasm32"))]
-        {
+    /// Keeps the encoded tiles in a folder, within a budget of bytes for each source, or stops
+    /// with `None`. Each source has its own subfolder. Not available in the browser.
+    pub fn set_disk_cache(&self, folder: Option<&Path>, budget: u64) -> std::io::Result<()> {
+        if cfg!(target_arch = "wasm32") && folder.is_some() {
+            return Err(std::io::ErrorKind::Unsupported.into());
+        }
+        *self.disk_cache.borrow_mut() = folder.map(|folder| (folder.to_path_buf(), budget));
+        self.open_disk_cache()
+    }
+
+    #[cfg(not(target_arch = "wasm32"))]
+    fn open_disk_cache(&self) -> std::io::Result<()> {
+        // First: if the new one cannot be opened, no tile goes to the folder of the old source.
+        self.store.set_disk(None);
+        let config = self.disk_cache.borrow().clone();
+        let source = self.tile_source.borrow().clone();
+        if let (Some((folder, budget)), Some(source)) = (config, source) {
             let worker =
-                crate::tile_store::disk::DiskWorker::open(folder, &source_key(template), budget)?;
+                crate::tile_store::disk::DiskWorker::open(&folder, &source.cache_key(), budget)?;
             self.store.set_disk(Some(worker));
-            Ok(())
         }
-        #[cfg(target_arch = "wasm32")]
-        {
-            let _ = (folder, source_key(template), budget);
-            Err(std::io::ErrorKind::Unsupported.into())
-        }
+        Ok(())
+    }
+
+    #[cfg(target_arch = "wasm32")]
+    fn open_disk_cache(&self) -> std::io::Result<()> {
+        Ok(())
     }
 
     /// The layers, in drawing order.
@@ -368,7 +380,8 @@ impl MapControl {
         if !self.can_zoom() || !(args.scale() > 0.0) {
             return;
         }
-        self.end_drag();
+        // The recognizer holds the pointers of the pinch: the drag ends without releasing them.
+        self.drag.borrow_mut().take();
         let start = match self.pinch_start.get() {
             Some(start) => start,
             None => {
@@ -394,7 +407,7 @@ impl MapControl {
     }
 
     /// The speed of the end of a drag, in pixels per second.
-    fn release_speed(samples: &VecDeque<(u64, Point)>) -> (f64, f64) {
+    pub(crate) fn release_speed(samples: &VecDeque<(u64, Point)>) -> (f64, f64) {
         let Some(&(last_time, last)) = samples.back() else {
             return (0.0, 0.0);
         };
@@ -627,6 +640,10 @@ impl VisualImpl for MapControl {
 impl InputElementImpl for MapControl {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
+        if this.drag.borrow().is_some() {
+            // A second finger: the drag stays with the first, and a pinch takes over from it.
+            return;
+        }
         let point = e.get_current_point(Some(this));
         let is_primary =
             e.pointer().type_() != PointerType::Mouse || point.properties.is_left_button_pressed;

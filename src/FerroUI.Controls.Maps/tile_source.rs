@@ -84,6 +84,7 @@ enum Part {
 /// A raster tile source: an address template and what the provider requires to be shown.
 #[derive(Clone, Debug, Eq, PartialEq)]
 pub struct RasterTileSource {
+    template: String,
     parts: Vec<Part>,
     subdomains: Vec<String>,
     attribution: String,
@@ -120,6 +121,7 @@ impl RasterTileSource {
             return Err(TileTemplateError::NoSubdomains);
         }
         Ok(Self {
+            template: template.to_owned(),
             parts,
             subdomains: subdomains.iter().map(|name| (*name).to_owned()).collect(),
             attribution: attribution.into(),
@@ -133,6 +135,12 @@ impl RasterTileSource {
         self.min_zoom = min_zoom.min(max_zoom);
         self.max_zoom = max_zoom;
         self
+    }
+
+    /// The name of the folder of this source in a disk cache.
+    #[cfg_attr(target_arch = "wasm32", allow(dead_code))]
+    pub(crate) fn cache_key(&self) -> String {
+        crate::tile_cache::source_key(&self.template)
     }
 
     /// The text the provider requires next to the map.
