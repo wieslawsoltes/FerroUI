@@ -5234,6 +5234,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-media3d",
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
