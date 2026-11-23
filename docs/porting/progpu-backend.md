@@ -923,9 +923,9 @@ lock state. Objects released while the thread runs are released as usual.
 |---|---|
 | Fills and strokes with an image or visual brush | drawn on the GPU through the outline of the shape; a brush kind the backend does not know is said once in the log |
 | Opacity masks of image and visual brushes | drawn on the GPU as a destination-in layer of the tiled brush |
-| Custom effects (#455), luminance to alpha | passes of the backend on the device (`effect_passes.rs`); a program that does not compile, or whose uniforms are not those of the convention, is said once and its content is drawn unchanged |
-| Acrylic (`IDrawingContextWithAcrylicLikeSupport`) | the tint, then the noise tile repeated by the sampler |
-| Layers of WinUI composition effects (`IDrawingContextImplWithLayerEffects`) | blend modes are layers of the scene; colour matrix, multiply, convolution, lighting and pixel operations are passes on the device |
+| Custom effects (#455), luminance to alpha | passes of the engine (`progpu_native_layer_effects.h`), called through the C ABI from `effect_passes.rs`; a program that does not compile, or whose uniforms are not those of the convention, is said once and its content is drawn unchanged |
+| Acrylic (`IDrawingContextWithAcrylicLikeSupport`) | the tint, then a tile of the material noise of the engine repeated by the sampler |
+| Layers of WinUI composition effects (`IDrawingContextImplWithLayerEffects`) | blend modes are layers of the scene; colour matrix, multiply, convolution, lighting and pixel operations are passes of the engine, written from the definitions of the effects in `FerroUI.Base`; the output of the other backends is only a test reference |
 | 3D scenes (`IDrawingContextImplWithScene3D`) | the executor of `ferroui-render3d` on the WebGPU C ABI (`scene3d.rs`). A frame of a video has no texture of this device yet: its layer is drawn with its colour, said once |
 | A clear under a rounded, rotated or geometry clip | drawn on the GPU: a destination-out layer, then a plus layer, both under the clip mask |
 | An inset shadow under a geometry clip | drawn on the GPU in a layer masked by the clip; more nested rounded clips than one chain holds are said once in the log |
