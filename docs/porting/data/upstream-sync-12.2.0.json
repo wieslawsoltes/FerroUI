@@ -1534,8 +1534,8 @@
    "area": "themes",
    "class": "port",
    "note": "Simple theme: missing resources.",
-   "part": "themes",
-   "state": "planned"
+   "part": "themes2",
+   "state": "done"
   },
   {
    "hash": "a49cbefe8b787eda66229063115aacb2c6021f9d",

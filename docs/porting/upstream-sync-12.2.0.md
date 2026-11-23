@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (89 done, 23 planned) | 112 |
+| `port` (90 done, 22 planned) | 112 |
 | `already` | 18 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -344,7 +344,7 @@ left out only with a recorded performance or better-code reason.
 | `9f6a652216` | #22846 | 2026-11-16 | platform-browser | `already` |  | `webapp/modules/ferroui/timer.ts` already passes the timestamp. |
 | `16d8678a44` | #22835 | 2026-11-16 | rendering | `port` (done) | rendering | Skia: multiply opacity applied once below an opacity mask. |
 | `ab578c3ea0` | #22793 | 2026-11-17 | platform | `port` (done) | controls2 | Assembly resolved by exact name. |
-| `75497e3634` | #22857 | 2026-11-17 | themes | `port` | themes | Simple theme: missing resources. |
+| `75497e3634` | #22857 | 2026-11-17 | themes | `port` (done) | themes2 | Simple theme: missing resources. |
 | `a49cbefe8b` | #22864 | 2026-11-17 | automation | `port` (done) | automation | Peer parent kept after a move. |
 | `281e59e138` | #22866 | 2026-11-17 | build | `not-applicable` |  | Upstream contribution bot. |
 | `fda56217a5` | #22872 | 2026-11-18 | build | `not-applicable` |  | Upstream workflows. |
