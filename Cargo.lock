@@ -1699,6 +1699,7 @@ dependencies = [
  "ferroui-system",
  "libc",
  "objc2",
+ "windows-sys 0.61.2",
 ]
 
 [[package]]

@@ -3,11 +3,13 @@
 use crate::engine::IWebViewEngineFactory;
 use std::rc::Rc;
 
-#[cfg(any(target_vendor = "apple", test))]
+#[cfg(any(target_vendor = "apple", windows, test))]
 pub(crate) mod bridge;
 
 #[cfg(target_vendor = "apple")]
 mod apple;
+#[cfg(windows)]
+mod windows;
 
 /// The engine of this platform, or `None` where the crate has none.
 pub fn default_factory() -> Option<Rc<dyn IWebViewEngineFactory>> {
@@ -15,7 +17,11 @@ pub fn default_factory() -> Option<Rc<dyn IWebViewEngineFactory>> {
     {
         Some(Rc::new(apple::AppleEngineFactory))
     }
-    #[cfg(not(target_vendor = "apple"))]
+    #[cfg(windows)]
+    {
+        Some(Rc::new(windows::WindowsEngineFactory))
+    }
+    #[cfg(not(any(target_vendor = "apple", windows)))]
     {
         None
     }

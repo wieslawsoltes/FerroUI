@@ -29,6 +29,16 @@ libc.workspace = true
 objc2 = { version = "=0.6.5" }
 block2 = { version = "=0.6.2" }
 
+# The WebView2 runtime is reached through its loader library, found at run time.
+[target.'cfg(windows)'.dependencies]
+windows-sys = { workspace = true, features = [
+    "Win32_Foundation",
+    "Win32_Graphics_Gdi",
+    "Win32_System_Com",
+    "Win32_System_LibraryLoader",
+    "Win32_UI_WindowsAndMessaging",
+] }
+
 [build-dependencies]
 ferroui-build-scan.workspace = true
 
