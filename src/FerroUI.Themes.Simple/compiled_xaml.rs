@@ -19465,6 +19465,7 @@ fn build_controls_simplecontrols_xaml_deferred_121(
     rt::pop_parent_end_init(&context, &canvas_0, 127, 14)?;
     rt::pop_parent_end_init(&context, &grid_1, 69, 12)?;
     rt::pop_parent_end_init(&context, &grid_0, 59, 10)?;
+    rt::publish_template_parts(&["PART_MovingKnobs", "PART_OffContentPresenter", "PART_OnContentPresenter", "PART_SwitchKnob", "PART_ContentPresenter"], &[::core::option::Option::Some(::core::clone::Clone::clone(&grid_3).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -22182,6 +22183,7 @@ fn build_controls_simplecontrols_xaml_deferred_154(
     rt::bind_dynamic_resource(&context, panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "ThemeControlMidBrush", 37, 18)?;
     rt::pop_parent_end_init(&context, &panel_0, 35, 12)?;
     rt::pop_parent_end_init(&context, &grid_0, 10, 10)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -22433,6 +22435,7 @@ fn build_controls_simplecontrols_xaml_deferred_156(
     rt::bind_template_binding(scroll_content_presenter_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_base::layout::Layoutable::margin_property(), rt::property(::ferroui_controls::primitives::TemplatedControl::padding_property()), 89, 35)?;
     rt::end_init(&scroll_content_presenter_0, 88, 12)?;
     rt::pop_parent_end_init(&context, &dock_panel_0, 49, 10)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::None, ::core::option::Option::None, ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(dock_panel_0.clone()))
 }
 
@@ -23137,6 +23140,7 @@ fn build_controls_simplecontrols_xaml_deferred_163(
     rt::pop_parent_end_init(&context, &text_block_0, 43, 14)?;
     rt::pop_parent_end_init(&context, &layout_transform_control_0, 39, 12)?;
     rt::pop_parent_end_init(&context, &grid_0, 25, 10)?;
+    rt::publish_template_parts(&["PART_Indicator"], &[::core::option::Option::Some(::core::clone::Clone::clone(&border_1).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -31162,6 +31166,7 @@ fn build_controls_simplecontrols_xaml_deferred_278(
     rt::bind_dynamic_resource(&context, panel_0.upcast_ref::<::ferroui_base::FerroObject>(), ::ferroui_controls::Panel::background_property(), "ThemeControlMidBrush", 58, 18)?;
     rt::pop_parent_end_init(&context, &panel_0, 55, 12)?;
     rt::pop_parent_end_init(&context, &grid_0, 21, 10)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
