@@ -2,7 +2,7 @@
 
 use crate::placement::{image_rect, measure};
 use crate::{register_types, BitmapIcon, ImageIcon};
-use ferroui_base::{Rect, Size, StaticType, TypeInfo};
+use ferroui_base::{Rect, Size, StaticType};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
 
 #[test]
@@ -49,6 +49,6 @@ fn an_icon_without_an_image_takes_no_space() {
 #[test]
 fn the_icons_are_registered_for_markup() {
     register_types();
-    assert!(TypeInfo::find("FerroUI.Controls.BitmapIcon").is_some() || <BitmapIcon as StaticType>::TYPE.name().ends_with("BitmapIcon"));
+    assert!(<BitmapIcon as StaticType>::TYPE.name().ends_with("BitmapIcon"));
     assert!(<ImageIcon as StaticType>::TYPE.name().ends_with("ImageIcon"));
 }

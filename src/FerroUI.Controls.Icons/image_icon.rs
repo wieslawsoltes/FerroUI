@@ -3,10 +3,10 @@
 use crate::placement;
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
-use ferroui_base::layout::LayoutableImpl;
+use ferroui_base::layout::{Layoutable, LayoutableImpl};
 use ferroui_base::media::{DrawingContext, IImage};
 use ferroui_base::{
-    ferro_class, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl, FerroProperty, Layoutable, Ref,
+    ferro_class, ferro_impl_classes, ferro_properties, instantiate, FerroObjectImpl, FerroProperty, Ref,
     Size, StyledElementImpl, StyledProperty, Visual, VisualImpl,
 };
 use ferroui_controls::primitives::TemplatedControlImpl;
