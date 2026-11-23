@@ -782,8 +782,11 @@ impl IPlatformRenderInterfaceImportedImage for GlSkiaImportedImage {
             .frame_context_id()
             .ok_or(FrameError::MissingSynchronization)?;
         frame.counters().gpu_import();
-        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::new(
-            image, frame, context,
+        Ok(Arc::new(crate::leased_gpu_bitmap::LeasedGpuBitmap::with_gl_texture(
+            image,
+            frame,
+            context,
+            *texture_id,
         )))
     }
     /// # Panics
