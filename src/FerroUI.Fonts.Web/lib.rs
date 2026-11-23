@@ -7,9 +7,11 @@
 #![forbid(unsafe_code)]
 
 mod brotli;
+#[cfg(all(feature = "browser", target_family = "wasm"))]
+mod browser_fetcher;
 mod fetchers;
 mod font_data_stream;
-#[cfg(not(target_family = "wasm"))]
+#[cfg(any(not(target_family = "wasm"), target_feature = "atomics"))]
 mod off_thread;
 mod text_invalidation;
 mod web_font_collection;

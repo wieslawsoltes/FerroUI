@@ -280,8 +280,9 @@ have their own support that varies by OS version.
 
 - Fetching is asynchronous on every platform.
 - Where threads exist, decoding runs on a worker.
-- The single-threaded browser build runs the decoder as a resumable task in slices, between
-  frames. The decoder is written as a state machine with a step budget for this reason.
+- The single-threaded browser build runs the decoder as a resumable task in slices of 4 ms, with
+  a yield to the page between them. The decoder is a state machine with a step budget for this
+  reason. The threaded build decodes on a thread, and falls back to slices if none starts.
 - In the browser, decoding never makes a long task on the main thread, in either build. A
   slice stays well below the 50 ms that defines a long task, and it yields between slices.
 

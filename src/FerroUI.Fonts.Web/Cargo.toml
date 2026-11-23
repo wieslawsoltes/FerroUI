@@ -21,6 +21,8 @@ woff2 = ["dep:brotli-decompressor"]
 # Fonts over `https:` on desktop and mobile. Off by default: it brings a TLS stack. In the browser
 # fonts are fetched by the browser, and this feature adds nothing.
 http = ["dep:ureq"]
+# Fonts over the network in the browser, through `fetch()`.
+browser = ["dep:wasm-bindgen", "dep:js-sys"]
 
 [dependencies]
 ferroui-base.workspace = true
@@ -28,6 +30,8 @@ ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-fonts-web-core.workspace = true
 url.workspace = true
+wasm-bindgen = { workspace = true, optional = true }
+js-sys = { workspace = true, optional = true }
 brotli-decompressor = { workspace = true, optional = true }
 
 # HTTPS only unless plain HTTP is asked for, with limits on redirects, size and time.
