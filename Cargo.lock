@@ -1696,6 +1696,18 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-teaching-tip"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
 name = "ferroui-controls-treedatagrid"
 version = "0.6.0-preview.1"
 dependencies = [
