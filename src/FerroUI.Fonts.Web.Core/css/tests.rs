@@ -119,6 +119,27 @@ fn a_descriptor_set_from_code_reports_what_is_wrong() {
 }
 
 #[test]
+fn the_descriptors_of_level_5() {
+    let face = only(
+        "@font-face { font-family: A; src: url(a); font-size: 24 12; superscript-position-override: 40%;
+         subscript-position-override: -20% 10%; superscript-size-override: from-font 70%;
+         subscript-size-override: 60%; }",
+    );
+    assert_eq!(face.size_range, Some((12.0, 24.0)));
+    assert_eq!(face.superscript_position_override, MetricOverride::Value { first: 0.4, second: None });
+    assert_eq!(face.subscript_position_override, MetricOverride::Value { first: -0.2, second: Some(0.1) });
+    assert_eq!(face.superscript_size_override, MetricOverride::Normal, "the first value is from the font");
+    assert_eq!(face.subscript_size_override, MetricOverride::Value { first: 0.6, second: None });
+    assert_eq!(parse_font_size_range("auto").unwrap(), None);
+    for invalid in ["", "-1", "1 2 3", "12px"] {
+        assert!(parse_font_size_range(invalid).is_err(), "{invalid}");
+    }
+    assert!(parse_script_override("-5%", false).is_err(), "a size is not negative");
+    assert!(parse_script_override("-5%", true).is_ok(), "a position may be");
+    assert!(parse_script_override("1% 2% 3%", true).is_err());
+}
+
+#[test]
 fn family_names() {
     assert_eq!(parse_family_name("Open   Sans").unwrap(), "Open Sans");
     assert_eq!(parse_family_name("'serif'").unwrap(), "serif");

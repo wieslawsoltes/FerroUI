@@ -242,6 +242,49 @@ pub fn match_font_faces(faces: &[&FontFaceDescriptors], request: &FontMatchReque
     candidates
 }
 
+/// The faces of a composite that match a font size, by the `font-size` descriptor of CSS Fonts 5:
+/// `auto` matches any size. When none matches, the composite stays as it is, since this step only
+/// chooses among faces. The ends of a range count as inside it, which the standard leaves open.
+pub fn narrow_by_font_size(faces: &[&FontFaceDescriptors], composite: &[usize], size: f32) -> Vec<usize> {
+    let matching: Vec<usize> = composite
+        .iter()
+        .copied()
+        .filter(|index| faces[*index].size_range.is_none_or(|(start, end)| start <= size && size <= end))
+        .collect();
+    if matching.is_empty() {
+        composite.to_vec()
+    } else {
+        matching
+    }
+}
+
+/// The size taken for a request that has none: `medium` of CSS.
+const REFERENCE_FONT_SIZE: f32 = 16.0;
+
+/// The faces of a composite to use when the size of the text is not known, which is every lookup
+/// of the font manager today. A face limited to a size must not be chosen over one for any size
+/// because it was declared later, so the `auto` faces are kept when there are any. Otherwise the
+/// faces of the range nearest to the reference size are kept, and among equally near ranges those
+/// of the last rule, so that the choice does not depend on anything but the declarations.
+pub fn narrow_for_unknown_font_size(faces: &[&FontFaceDescriptors], composite: &[usize]) -> Vec<usize> {
+    let any_size: Vec<usize> = composite.iter().copied().filter(|index| faces[*index].size_range.is_none()).collect();
+    if !any_size.is_empty() {
+        return any_size;
+    }
+    let distance = |(start, end): (f32, f32)| {
+        if start <= REFERENCE_FONT_SIZE && REFERENCE_FONT_SIZE <= end {
+            0.0
+        } else {
+            (start - REFERENCE_FONT_SIZE).abs().min((end - REFERENCE_FONT_SIZE).abs())
+        }
+    };
+    let nearest = composite
+        .iter()
+        .filter_map(|index| faces[*index].size_range)
+        .min_by(|a, b| distance(*a).total_cmp(&distance(*b)));
+    composite.iter().copied().filter(|index| faces[*index].size_range == nearest).collect()
+}
+
 /// The first face of a composite whose `unicode-range` includes a character. Whether the font
 /// really has a glyph for it is known only after it is loaded.
 pub fn face_for_character(faces: &[&FontFaceDescriptors], composite: &[usize], code_point: u32) -> Option<usize> {
@@ -440,6 +483,16 @@ mod tests {
         assert_eq!(faces_for_text(&references, &matched, "BAB"), vec![3, 0]);
         assert_eq!(faces_for_text(&references, &matched, "\u{100}B"), vec![1, 0]);
         assert!(faces_for_text(&references, &matched, "\u{3042}").is_empty());
+    }
+
+    #[test]
+    fn the_font_size_descriptor_chooses_among_faces() {
+        let faces = [face("font-size: 8 12"), face("font-size: 12 36"), face("")];
+        let references: Vec<&FontFaceDescriptors> = faces.iter().collect();
+        assert_eq!(narrow_by_font_size(&references, &[0, 1, 2], 10.0), [0, 2]);
+        assert_eq!(narrow_by_font_size(&references, &[0, 1, 2], 12.0), [0, 1, 2], "the ends are inside");
+        assert_eq!(narrow_for_unknown_font_size(&references, &[2, 1, 0]), [2], "the face for any size");
+        assert_eq!(narrow_by_font_size(&references, &[0, 1], 72.0), [0, 1], "none matches: unchanged");
     }
 
     #[test]

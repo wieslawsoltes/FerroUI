@@ -22,7 +22,9 @@ use ferroui_fonts_web_core::loading::{
     check_faces, find_matching_faces, FontDisplayPhase, FontDisplayTimeline, FontFaceId, FontFaceLoadStatus,
     FontFaceSetError, FontFaceSetEvent, FontFaceSetLoadStatus, FontFaceSetState, FontFaceView,
 };
-use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
+use ferroui_fonts_web_core::matching::{
+    family_matches, match_font_faces, narrow_for_unknown_font_size, FontMatchRequest, FontStyleRequest,
+};
 use ferroui_fonts_web_core::sfnt::{
     apply_font_palette, apply_metric_overrides, has_metric_overrides, make_invisible_font, SanitizeOptions,
 };
@@ -298,6 +300,21 @@ impl Shared {
             let url = match source {
                 FontSource::Url { url, .. } => url,
                 FontSource::Local { name } => {
+                    #[cfg(all(feature = "browser", target_family = "wasm"))]
+                    if crate::browser_fetcher::has_local_font(&name) {
+                        let weak = Rc::downgrade(this);
+                        let limit = this.options.limits.max_encoded_size;
+                        crate::browser_fetcher::read_local_font(
+                            &name,
+                            limit,
+                            Box::new(move |result| {
+                                if let Some(this) = weak.upgrade() {
+                                    Shared::fetched(&this, id, result);
+                                }
+                            }),
+                        );
+                        return;
+                    }
                     if Self::install_local(this, id, &name) {
                         return;
                     }
@@ -711,7 +728,8 @@ impl Shared {
         let faces = self.faces.borrow();
         let family_faces: Vec<&Slot> = faces.iter().filter(|slot| family_matches(&slot.descriptors, family)).collect();
         let descriptors: Vec<&FontFaceDescriptors> = family_faces.iter().map(|slot| &slot.descriptors).collect();
-        match_font_faces(&descriptors, request).into_iter().map(|index| family_faces[index].id).collect()
+        let composite = match_font_faces(&descriptors, request);
+        narrow_for_unknown_font_size(&descriptors, &composite).into_iter().map(|index| family_faces[index].id).collect()
     }
 
     fn covers(&self, id: FontFaceId, code_point: u32) -> bool {
@@ -863,6 +881,14 @@ impl WebFontCollection {
         });
         self.shared.fonts_changed();
         Ok(id)
+    }
+
+    /// Asks for the installed fonts through the Local Font Access API, for `local()` in the
+    /// browser. The browser shows a permission prompt, so this has to come from a user gesture,
+    /// and nothing asks for it otherwise. `done` says whether access was given.
+    #[cfg(all(feature = "browser", target_family = "wasm"))]
+    pub fn request_local_font_access(&self, done: impl FnOnce(bool) + 'static) {
+        crate::browser_fetcher::request_local_fonts(Box::new(done));
     }
 
     /// Says which technologies of `tech()` count as supported, for an application that knows
@@ -1563,6 +1589,29 @@ mod tests {
         assert!(harness.collection.set_font_palette("A", None));
         assert!(harness.lookup("A").is_none(), "the font is loaded again with its own palette");
         assert_eq!(harness.urls(), ["a.ttf"]);
+    }
+
+    #[test]
+    fn a_face_for_some_sizes_is_not_chosen_over_one_for_any_size() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(any.ttf) }
+             @font-face { font-family: A; src: url(display.ttf); font-size: 48 200 }",
+        );
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["any.ttf"]);
+    }
+
+    #[test]
+    fn with_only_sized_faces_the_range_nearest_the_default_size_is_used() {
+        let harness = Harness::new();
+        harness.collection.add_style_sheet(
+            "@font-face { font-family: A; src: url(caption.ttf); font-size: 6 11 }
+             @font-face { font-family: A; src: url(text.ttf); font-size: 12 24 }
+             @font-face { font-family: A; src: url(display.ttf); font-size: 25 200 }",
+        );
+        harness.lookup("A");
+        assert_eq!(harness.urls(), ["text.ttf"]);
     }
 
     #[test]
