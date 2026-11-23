@@ -1424,7 +1424,8 @@ mod tests {
     fn a_source_this_build_cannot_use_is_skipped() {
         let harness = Harness::new();
         harness.collection.add_style_sheet(
-            "@font-face { font-family: A; src: url(a.svg) format(svg), url(b.ttf) tech(features-graphite), url(c.ttf) }",
+            "@font-face { font-family: A; src: url(a.svg) format(svg), \
+             url(b.ttf) tech(features-graphite), url(c.ttf) }",
         );
         harness.lookup("A");
         assert_eq!(harness.urls(), ["c.ttf"]);
