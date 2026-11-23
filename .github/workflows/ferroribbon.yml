@@ -44,7 +44,8 @@ jobs:
             os: ubuntu-latest
             wrapper: xvfb-run -a
           - name: macOS
-            os: macos-15
+            # The recorded locale corpus follows the data of this release of the system.
+            os: macos-26
             wrapper: ''
           - name: Windows
             os: windows-latest
