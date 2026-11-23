@@ -510,7 +510,7 @@
       "examples": []
     },
     "ComboBox": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ComboBox.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -530,7 +530,7 @@
           "name": "native_pages_compile_the_x_bind_of_their_source_and_initialize_it"
         }
       ],
-      "notes": "All three source examples use native ComboBox with ColorComboBox_SelectionChanged and Combo3_Loaded of ComboBoxPage.xaml.cs in Rust: the color rectangle, the font list (FontHelper.Fonts as their names, the output's font following the selection in Rust instead of the x:Bind of FontItem.Font through a cast), and the editable font sizes (the source's FontSizes) with the source's OneWay x:Bind of SelectedValue to the output's font size. Header is composed. Missing: FerroUI's ComboBox has no TextSubmitted event and there is no ContentDialog, so Combo3_TextSubmitted (accepting a typed size between 8 and 100, or reverting the text and showing the dialog) is not ported and the page stays partial.",
+      "notes": "All three source examples use native ComboBox with ColorComboBox_SelectionChanged and Combo3_Loaded of ComboBoxPage.xaml.cs in Rust: the color rectangle, the font list (FontHelper.Fonts as their names, the output's font following the selection in Rust instead of the x:Bind of FontItem.Font through a cast), and the editable font sizes (the source's FontSizes) with the source's OneWay x:Bind of SelectedValue to the output's font size. Header is composed. Combo3_TextSubmitted accepts a typed size between 8 and 100, or reverts the text and shows the source's ContentDialog; a custom size is the output's current value, because a FerroUI selection holds only items.",
       "examples": []
     },
     "CommandBar": {

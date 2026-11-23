@@ -43,6 +43,28 @@ impl Drop for Reset<'_> {
     }
 }
 
+/// The arguments of [`ComboBox::text_submitted`] (WinUI's `ComboBoxTextSubmittedEventArgs`).
+pub struct ComboBoxTextSubmittedEventArgs {
+    text: String,
+    handled: Cell<bool>,
+}
+
+impl ComboBoxTextSubmittedEventArgs {
+    /// The text the user submitted.
+    pub fn text(&self) -> &str {
+        &self.text
+    }
+
+    /// Whether a handler dealt with the text.
+    pub fn handled(&self) -> bool {
+        self.handled.get()
+    }
+
+    pub fn set_handled(&self, value: bool) {
+        self.handled.set(value);
+    }
+}
+
 /// A drop-down list control.
 #[repr(C)]
 pub struct ComboBox {
@@ -57,6 +79,9 @@ pub struct ComboBox {
     skip_next_text_changed: Cell<bool>,
     drop_down_closed: HandlerList<dyn Fn()>,
     drop_down_opened: HandlerList<dyn Fn()>,
+    text_submitted: HandlerList<dyn Fn(&ComboBoxTextSubmittedEventArgs)>,
+    /// The custom text last submitted: the same text is not submitted twice.
+    last_submitted: RefCell<Option<String>>,
 }
 
 ferro_class!(ComboBox: SelectingItemsControl);
@@ -72,6 +97,14 @@ impl ControlImpl for ComboBox {
 impl FerroObjectImpl for ComboBox {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         let property = change.property();
+
+        // `OnLostFocus`: the focus left the control with a text that is no item.
+        if property == InputElement::is_keyboard_focus_within_property().as_property()
+            && !this.is_keyboard_focus_within()
+            && !this.is_drop_down_open()
+        {
+            this.commit_editable_text();
+        }
 
         if property == SelectingItemsControl::selected_item_property().as_property() {
             let new_value = change.get_new_value::<Option<BoxedValue>>();
@@ -132,6 +165,20 @@ impl InputElementImpl for ComboBox {
         }
 
         let alt = e.key_modifiers.contains(KeyModifiers::ALT);
+
+        // `OnKeyDown`: Enter and Tab commit the text of an editable box.
+        if this.is_editable() {
+            match e.key {
+                Key::Enter => {
+                    this.commit_editable_text();
+                    this.set_current_value(Self::is_drop_down_open_property(), false);
+                    e.set_handled(true);
+                    return;
+                }
+                Key::Tab => this.commit_editable_text(),
+                _ => {}
+            }
+        }
 
         if (e.key == Key::F4 && !alt) || ((e.key == Key::Down || e.key == Key::Up) && alt) {
             this.set_current_value(Self::is_drop_down_open_property(), !this.is_drop_down_open());
@@ -454,6 +501,8 @@ impl ComboBox {
             skip_next_text_changed: Cell::new(false),
             drop_down_closed: HandlerList::new(),
             drop_down_opened: HandlerList::new(),
+            text_submitted: HandlerList::new(),
+            last_submitted: RefCell::new(None),
         }
     }
 
@@ -473,6 +522,43 @@ impl ComboBox {
                 this.drop_down_closed.remove(token);
             }
         }))
+    }
+
+    /// Occurs when the user commits a text of an editable box that is no item (WinUI's
+    /// `TextSubmitted`): with Enter, Tab or by leaving the box.
+    pub fn text_submitted(
+        &self,
+        handler: impl Fn(&ComboBoxTextSubmittedEventArgs) + 'static,
+    ) -> Subscription {
+        let token = self.text_submitted.add(Rc::new(handler));
+        let weak = self.to_ref().downgrade();
+        Subscription::new(Disposable::create(move || {
+            if let Some(this) = weak.upgrade() {
+                this.text_submitted.remove(token);
+            }
+        }))
+    }
+
+    /// `CommitRevertEditableSearch`: a text that matches an item is already selected; any other
+    /// text that is not blank is submitted, once.
+    fn commit_editable_text(&self) {
+        if !self.is_editable() || self.selected_index() >= 0 {
+            self.last_submitted.borrow_mut().take();
+            return;
+        }
+        let text = self.text().unwrap_or_default();
+        if text.trim().is_empty() {
+            self.last_submitted.borrow_mut().take();
+            return;
+        }
+        if self.last_submitted.borrow().as_deref() == Some(text.as_str()) {
+            return;
+        }
+        *self.last_submitted.borrow_mut() = Some(text.clone());
+        let args = ComboBoxTextSubmittedEventArgs { text, handled: Cell::new(false) };
+        for (_, handler) in self.text_submitted.snapshot().iter() {
+            handler(&args);
+        }
     }
 
     /// Occurs after the drop-down (popup) list of the [`ComboBox`] opens.

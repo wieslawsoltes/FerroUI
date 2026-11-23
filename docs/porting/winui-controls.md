@@ -454,7 +454,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | SelectorBar | 3 of 3; the third example's ItemsView is an ItemsControl | ported | `selector_bar_samples.rs` | `selector_bar_samples_tests.rs` |
 | Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
-| ComboBox | 2 ported, 1 partial: no TextSubmitted, no ContentDialog | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| ComboBox | 3 of 3; a custom size is the output's current value | ported | `button_samples.rs` | `button_samples_tests.rs` |
 | ContentDialog | 2 of 2 | ported | `content_dialog_samples.rs` | `content_dialog_samples_tests.rs` |
 | Border | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | Canvas | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |

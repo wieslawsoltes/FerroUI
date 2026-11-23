@@ -690,7 +690,7 @@ mod virtualizing_panel;
 mod virtualizing_stack_panel;
 
 pub use assigned_binding::{AssignedBinding};
-pub use combo_box::{ComboBox};
+pub use combo_box::{ComboBox, ComboBoxTextSubmittedEventArgs};
 pub use combo_box_item::{ComboBoxItem};
 pub use container_clearing_event_args::{ContainerClearingEventArgs};
 pub use container_index_changed_event_args::{ContainerIndexChangedEventArgs};
