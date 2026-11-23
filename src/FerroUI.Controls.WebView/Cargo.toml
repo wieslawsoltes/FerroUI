@@ -23,12 +23,24 @@ ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls.workspace = true
 ferroui-system.workspace = true
 
+# WebKit itself is loaded at run time, with the first web view.
+[target.'cfg(target_vendor = "apple")'.dependencies]
+libc.workspace = true
+objc2 = { version = "=0.6.5" }
+block2 = { version = "=0.6.2" }
+
 [build-dependencies]
 ferroui-build-scan.workspace = true
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+
+# A real engine in a run loop; see the file for how to run it.
+[[test]]
+name = "engine"
+path = "engine_apple_test.rs"
+harness = false
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

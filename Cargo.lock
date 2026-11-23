@@ -1692,10 +1692,13 @@ dependencies = [
 name = "ferroui-controls-webview"
 version = "0.6.0-preview.1"
 dependencies = [
+ "block2",
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-system",
+ "libc",
+ "objc2",
 ]
 
 [[package]]
