@@ -518,3 +518,78 @@ fn an_underline_band_is_crossed_by_descenders_and_not_by_the_rest() {
     // The order of the limits does not matter.
     assert_eq!(below, run("xpx", 40.0, Point::new(10.0, 50.0)).get_intersections(4.0, 2.0));
 }
+
+/// Draws black text on white through a context of a target that is opaque or not.
+fn lcd_frame(engine: &ProGpuEngine, opaque: bool, draw: impl FnOnce(&mut ProGpuDrawingContext)) -> Frame {
+    use ferroui_base::platform::RenderTargetSceneInfo;
+    use ferroui_base::rendering::composition::CompositionTransparencyLevel as Level;
+    let level = if opaque { Level::None } else { Level::Transparent };
+    let info = RenderTargetSceneInfo::new(ferroui_base::PixelSize::new(WIDTH as i32, HEIGHT as i32), 1.0, level);
+    let mut context =
+        ProGpuDrawingContext::new(SceneBuilder::new(), None).with_target_size(WIDTH, HEIGHT).with_scene_info(&info);
+    context.clear(Color::from_rgb(255, 255, 255));
+    draw(&mut context);
+    let (mut scene, error) = context.finish();
+    assert!(error.is_none(), "recording: {error:?}");
+    present(engine, &mut scene)
+}
+
+fn subpixel() -> ferroui_base::media::TextOptions {
+    ferroui_base::media::TextOptions {
+        text_rendering_mode: ferroui_base::media::TextRenderingMode::SubpixelAntialias,
+        ..Default::default()
+    }
+}
+
+/// The pixels whose channels differ: the colour fringes of LCD text.
+fn fringes(frame: &Frame) -> usize {
+    (0..HEIGHT)
+        .flat_map(|y| (0..WIDTH).map(move |x| (x, y)))
+        .filter(|&(x, y)| {
+            let [r, g, b, _] = frame.rgba(x, y);
+            r.abs_diff(g) > 8 || g.abs_diff(b) > 8
+        })
+        .count()
+}
+
+#[test]
+fn subpixel_text_on_an_opaque_target_has_a_coverage_per_channel() {
+    let Some(engine) = engine() else { return };
+    let black = black();
+    let text = run("Hxg", 40.0, Point::new(8.25, 44.0));
+    let lcd = lcd_frame(&engine, true, |context| {
+        context.push_text_options(subpixel());
+        context.draw_glyph_run(Some(&black), &text);
+        context.pop_text_options();
+    });
+    assert!(fringes(&lcd) > 50, "colour at the edges: {}", fringes(&lcd));
+    let grey = lcd_frame(&engine, true, |context| context.draw_glyph_run(Some(&black), &text));
+    assert_eq!(0, fringes(&grey), "the default mode is greyscale");
+    // The same glyphs with the same weight: the green channel is centred on the pixel.
+    let (lcd_ink, grey_ink) = (lcd.ink_in(0..WIDTH, 0..HEIGHT) as f64, grey.ink_in(0..WIDTH, 0..HEIGHT) as f64);
+    assert!((0.93..1.07).contains(&(lcd_ink / grey_ink)), "the ink of LCD text over grey: {lcd_ink} {grey_ink}");
+    let (lcd_middle, grey_middle) = (lcd.ink_middle(0..WIDTH, 0..HEIGHT), grey.ink_middle(0..WIDTH, 0..HEIGHT));
+    assert!((lcd_middle - grey_middle).abs() < 0.1, "the same place: {lcd_middle} {grey_middle}");
+    assert_eq!([255, 255, 255, 255], lcd.rgba(2, 2), "outside the text");
+}
+
+#[test]
+fn subpixel_text_stays_grey_where_the_destination_may_be_transparent() {
+    let Some(engine) = engine() else { return };
+    let black = black();
+    let text = run("Hxg", 40.0, Point::new(8.25, 44.0));
+    let on_transparent = lcd_frame(&engine, false, |context| {
+        context.push_text_options(subpixel());
+        context.draw_glyph_run(Some(&black), &text);
+        context.pop_text_options();
+    });
+    assert_eq!(0, fringes(&on_transparent), "a target with transparency");
+    let in_layer = lcd_frame(&engine, true, |context| {
+        context.push_text_options(subpixel());
+        context.push_opacity(0.5, None);
+        context.draw_glyph_run(Some(&black), &text);
+        context.pop_opacity();
+        context.pop_text_options();
+    });
+    assert_eq!(0, fringes(&in_layer), "inside a layer");
+}

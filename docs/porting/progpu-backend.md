@@ -767,7 +767,8 @@ section 6.
   its exact place horizontally, and vertically it is on the snapped baseline.
 - The colour rule of the transfer is sure for greys and for the tested accent colours; saturated
   blue and magenta were measured as dark, which was not examined further.
-- Subpixel (LCD) text is drawn as greyscale. Text filled with a gradient or an image is a path
+- Subpixel (LCD) text is drawn as greyscale unless it is on an opaque target outside any layer
+  (section 2.7). Text filled with a gradient or an image is a path
   fill of the plain outlines (not weighted). Text under a rotation is filtered linearly and its
   raster scale is quantized; section 2.3.11 is the design that replaces this.
 - The reference is the CPU rasterizer of Skia, not its GPU text path.
@@ -928,10 +929,10 @@ lock state. Objects released while the thread runs are released as usual.
 | 3D scenes (`IDrawingContextImplWithScene3D`) | the executor of `ferroui-render3d` on the WebGPU C ABI (`scene3d.rs`). A frame of a video has no texture of this device yet: its layer is drawn with its colour, said once |
 | A clear under a rounded, rotated or geometry clip | drawn on the GPU: a destination-out layer, then a plus layer, both under the clip mask |
 | An inset shadow under a geometry clip | drawn on the GPU in a layer masked by the clip; more nested rounded clips than one chain holds are said once in the log |
-| Text: LCD raster | grayscale. The decided route is a filtered LCD raster in the engine that keeps the quarter-pixel phases and the measured weight transfer, used only where the resolved mode is subpixel and the target is opaque |
+| Text: LCD raster | a five-tap filter of the engine (`lcd_text.rs`), with the quarter-pixel phases and the measured weight transfer, used only where the resolved mode is subpixel on an opaque target outside any layer; everything else is greyscale. Each run is a layer and its coverage is rastered every frame: its cost and its comparison with Skia are not measured yet |
 | Text: the sample grid of the rasterizer | the regular 8x8 grid (section 6.1). Rule: revisit only after the LCD raster is measured against Skia, because a new grid changes all glyph coverage |
 | `IGlyphRunImpl::get_intersections` | the outlines of each glyph against the band, so underlines skip descenders |
-| The Rust writer of `progpu-native` (P7) | not written; the backend uses the C ABI over the builder |
+| The Rust writer of `progpu-native` (P7) | written in ProGPU (`SceneWriter`, with a byte-for-byte differential test against the C++ builder). The backend stays on the C ABI until the writer is measured in a frame |
 
 A frame that fails is logged every time and leaves the target as it was. None of these crashes.
 

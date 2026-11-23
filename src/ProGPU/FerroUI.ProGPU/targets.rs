@@ -124,7 +124,8 @@ impl IRenderTarget for FramebufferRenderTarget {
                 frame.texture = if drawn { texture } else { None };
             })),
         )
-        .with_target_size(width, height);
+        .with_target_size(width, height)
+        .with_scene_info(scene_info);
         (Box::new(context), RenderTargetDrawingContextProperties { previous_frame_is_retained: retained })
     }
 
@@ -196,7 +197,7 @@ mod metal {
 
         fn try_create_drawing_context(
             &self,
-            _scene_info: &RenderTargetSceneInfo,
+            scene_info: &RenderTargetSceneInfo,
         ) -> Result<(Box<dyn IDrawingContextImpl>, RenderTargetDrawingContextProperties), RenderTargetError> {
             let Some(target) = self.target.borrow().clone() else {
                 return Err(RenderTargetCorruptedError::new_with_message("The render target of the window was disposed.").into());
@@ -253,7 +254,8 @@ mod metal {
                     *slot.borrow_mut() = Some(recording.scene);
                 })),
             )
-            .with_target_size(width, height);
+            .with_target_size(width, height)
+            .with_scene_info(scene_info);
             Ok((Box::new(context), RenderTargetDrawingContextProperties { previous_frame_is_retained: false }))
         }
 

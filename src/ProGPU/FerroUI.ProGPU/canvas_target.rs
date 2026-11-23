@@ -144,7 +144,8 @@ impl IRenderTarget for CanvasRenderTarget {
                 *slot.borrow_mut() = Some(recording.scene);
             })),
         )
-        .with_target_size(size.width as u32, size.height as u32);
+        .with_target_size(size.width as u32, size.height as u32)
+        .with_scene_info(scene_info);
         Ok((Box::new(context), RenderTargetDrawingContextProperties { previous_frame_is_retained: false }))
     }
 
