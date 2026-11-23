@@ -318,7 +318,9 @@ impl ServerObjectAnimations {
     pub fn evaluate_animations(&self) {
         let animations = self.animations.borrow().clone();
         for animation in animations {
-            if animation.is_dirty.get() {
+            // Not `is_dirty`: an expression reading the property clears it without writing the
+            // value, and the visual would draw its previous value for a frame.
+            if animation.needs_update.get() {
                 self.update_target_property(&animation);
             }
         }

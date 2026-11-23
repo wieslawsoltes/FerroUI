@@ -45,6 +45,28 @@ ferroui_base::ferro_class_info!(ContentPresenter { new: ContentPresenter::new })
 ferro_impl_classes!(ContentPresenter: InteractiveImpl, InputElementImpl, ControlImpl);
 
 impl VisualImpl for ContentPresenter {
+    fn clip_to_bounds_radius(this: &Self) -> Option<CornerRadius> {
+        Some(this.corner_radius())
+    }
+
+    // Only a presenter that clips with a corner radius pays for a composition visual of its own;
+    // the others, nearly all of them, stay as they are.
+    fn requires_composition_visual(this: &Self) -> bool {
+        this.clip_to_bounds() && this.corner_radius() != CornerRadius::default()
+    }
+
+    fn create_composition_visual(
+        this: &Self,
+        compositor: &Rc<ferroui_base::rendering::composition::Compositor>,
+    ) -> ferroui_base::rendering::composition::CompositionDrawListVisual {
+        if !Self::requires_composition_visual(this) {
+            return Self::parent_create_composition_visual(this, compositor);
+        }
+        let border_visual = crate::border_visual::CompositionBorderVisual::new(compositor, this);
+        border_visual.set_corner_radius(this.corner_radius());
+        border_visual.as_draw_list_visual().clone()
+    }
+
     fn render(this: &Self, context: &mut DrawingContext) {
         this.border_renderer.render(
             context,
@@ -80,6 +102,11 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for ContentPresenter {
             "Content" | "ContentTemplate" => this.content_changed(change),
             "TemplatedParent" => this.templated_parent_changed(change),
             "UseLayoutRounding" | "BorderThickness" => this.layout_thickness.set(None),
+            "CornerRadius" => {
+                if let Some(visual) = this.composition_visual() {
+                    crate::border_visual::CompositionBorderVisual::set_corner_radius_of(&visual, this.corner_radius());
+                }
+            }
             _ => {}
         }
     }

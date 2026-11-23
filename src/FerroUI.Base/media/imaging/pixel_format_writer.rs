@@ -343,6 +343,7 @@ impl IPixelFormatWriter for BlackWhitePixelFormatWriter {
 
     fn reset(&mut self, address: usize) {
         self.address = address;
+        self.bit = 0;
     }
 }
 
@@ -393,6 +394,7 @@ impl IPixelFormatWriter for Gray2PixelFormatWriter {
 
     fn reset(&mut self, address: usize) {
         self.address = address;
+        self.bit = 0;
     }
 }
 
@@ -429,6 +431,7 @@ impl IPixelFormatWriter for Gray4PixelFormatWriter {
 
     fn reset(&mut self, address: usize) {
         self.address = address;
+        self.bit = 0;
     }
 }
 

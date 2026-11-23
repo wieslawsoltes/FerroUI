@@ -28,6 +28,12 @@ pub trait ICompositionDrawListVisualExtension: 'static {
     /// list visual.
     fn serialize_changes_core(&self, writer: &mut BatchStreamWriter<'_>);
 
+    /// The extension as [`Any`](std::any::Any), for a control that reaches it through the visual
+    /// instead of keeping a field for it.
+    fn as_any(&self) -> Option<&dyn std::any::Any> {
+        None
+    }
+
     /// Whether the control writes what this adds whether or not the control is in a visual tree,
     /// so that the composition visual of a control that left its tree and is back before the next
     /// update pass of the renderer is the same as one created then, and is kept (an addition,
@@ -200,6 +206,11 @@ impl CompositionDrawListVisual {
     /// Creates the composition visual of `visual`.
     pub fn new(compositor: &Rc<Compositor>, visual: &Visual) -> CompositionDrawListVisual {
         Self::create(compositor, visual, false)
+    }
+
+    /// The extension of the visual, if it has one.
+    pub fn extension(&self) -> Option<&Rc<dyn ICompositionDrawListVisualExtension>> {
+        self.extension.as_ref()
     }
 
     /// Creates the composition visual of `visual` for a class derived from

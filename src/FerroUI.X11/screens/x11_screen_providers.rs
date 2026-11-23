@@ -272,12 +272,8 @@ const EDID_STRUCTURE_LENGTH: usize = 32 * 4;
 
 /// The physical size in millimetres an EDID block states, `None` when the
 /// block is too short or states no size.
-///
-/// # Panics
-/// Panics for a block of exactly 22 bytes: the reference accepts that
-/// length and then reads the byte at index 22, which throws.
 pub fn physical_monitor_size_from_edid_bytes(edid: &[u8]) -> Option<Size> {
-    if edid.len() < 22 {
+    if edid.len() < 23 {
         return None;
     }
     let width = edid[21]; // 0x15 1 Max. Horizontal Image Size cm.
@@ -717,9 +713,8 @@ mod tests {
     }
 
     #[test]
-    #[should_panic]
-    fn an_edid_block_of_22_bytes_fails() {
-        physical_monitor_size_from_edid_bytes(&edid(60, 0, 22));
+    fn an_edid_block_of_22_bytes_is_too_short() {
+        assert_eq!(physical_monitor_size_from_edid_bytes(&edid(60, 0, 22)), None);
     }
 
     #[test]

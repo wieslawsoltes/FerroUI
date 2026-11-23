@@ -195,7 +195,7 @@ impl ServerCompositionVisualCache {
 
             *self.layer.borrow_mut() = Some(render_context.create_offscreen_render_target(
                 desired,
-                Vector::new(self.scale_x.get(), self.scale_x.get()),
+                Vector::new(self.scale_x.get(), self.scale_y.get()),
                 self.enable_clear_type(),
             ));
             self.layer_has_text_antialiasing.set(self.enable_clear_type());

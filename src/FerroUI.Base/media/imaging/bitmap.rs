@@ -302,6 +302,14 @@ impl Bitmap {
     ///
     /// Panics when the pixels of the bitmap cannot be read.
     pub fn copy_pixels_to_framebuffer(&self, buffer: &dyn ILockedFramebuffer) {
+        let size = self.pixel_size();
+        if buffer.size().width < size.width || buffer.size().height < size.height {
+            panic!("The buffer is smaller than the bitmap.");
+        }
+        if (buffer.row_bytes() as i64) < (size.width as i64 * buffer.format().bits_per_pixel() as i64 + 7) / 8 {
+            panic!("The buffer row size is too small.");
+        }
+
         let item = self.platform_impl.item();
         let readable = match item.as_readable_bitmap() {
             Some(readable) if readable.format().is_some() && readable.alpha_format().is_some() => readable,
@@ -333,7 +341,8 @@ impl Bitmap {
             fb.dispose();
         } else {
             let fb = readable.lock();
-            let (source_rect, stride) = (PixelRect::from_size(fb.size()), fb.row_bytes());
+            // The rows of the destination are `buffer.row_bytes()` apart, whatever the source's are.
+            let (source_rect, stride) = (PixelRect::from_size(fb.size()), buffer.row_bytes());
             let buffer_size = (buffer.row_bytes() as i64 * buffer.size().height as i64).max(0) as usize;
             buffer.with_data(&mut |dest| {
                 let length = buffer_size.min(dest.len());

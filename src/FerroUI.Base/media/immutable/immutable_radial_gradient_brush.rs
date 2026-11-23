@@ -94,7 +94,7 @@ impl ImmutableRadialGradientBrush {
             gradient_origin: source.gradient_origin(),
             radius_x: source.radius_x(),
             // The reference implementation copies the horizontal radius here.
-            radius_y: source.radius_x(),
+            radius_y: source.radius_y(),
         }
     }
 
