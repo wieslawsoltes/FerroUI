@@ -1751,6 +1751,13 @@ WinUI members added to upstream-ported controls (`winui-controls.md`, section 6)
 | `NumberBox.IsWrapEnabled` | `NumericUpDown::is_wrap_enabled_property` (`IsWrapEnabled`), `false` by default: a step stops at the bounds, as upstream. With it, a step past `Maximum` goes to `Minimum` and below `Minimum` to `Maximum` (`NumberBox::StepValue`), and both spin directions stay valid at a bound. | Behaviour (opt-in) | Tests: `winui_additions_default_to_upstream`, `is_wrap_enabled_wraps_at_the_bounds`. | 2026-10-30 (W7) |
 | `AutoSuggestBox.QuerySubmitted` | `AutoCompleteBox::query_submitted_event` (`QuerySubmitted`, routed, bubbling) with `AutoCompleteBoxQuerySubmittedEventArgs` (`query_text`, `chosen_suggestion`). Raised for Enter after upstream's handling of the key, which is unchanged: Enter stays handled only when the drop-down is open. The chosen suggestion is the selected item when the drop-down was open. | Behaviour (opt-in: an event nothing listens to by default) | The search boxes of WinUI markup submit with Enter. Tests: `enter_with_the_drop_down_closed_submits_the_text_and_stays_unhandled`, `enter_in_the_open_drop_down_submits_the_chosen_suggestion`. | 2026-10-30 (W7) |
 
+### MapControl (`src/FerroUI.Controls.Maps/`)
+
+- The interaction mode enumeration is `MapControlInteractionMode`, not WinUI's `MapInteractionMode`. Every public type
+  is usable from the default XML namespace, and `MapInteractionMode` is already the published enumeration of the
+  LiveCharts maps (0.5.0). The property names (`PanInteractionMode`, `ZoomInteractionMode`, `RotateInteractionMode`)
+  and the values stay as in WinUI, so markup that sets them is unchanged.
+
 ### Rich text editing, compositing layers and outlines (`src/FerroUI.Base/media/`, `src/FerroUI.Controls/text_box*.rs`, `src/FerroUI.Controls/presenters/text_presenter*.rs`, `src/Skia/`, `src/Vello/`, `src/Browser/`)
 
 The framework part of the FerroDesign editor (pull request 358, split from 254). The additions have no upstream counterpart and leave upstream's behaviour unchanged where they are not used; the rows below the additions change upstream's behaviour.

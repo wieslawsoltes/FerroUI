@@ -1,7 +1,9 @@
 use super::{
     AutomationPeer, AutomationPeerImpl, ContentControlAutomationPeer, ControlAutomationPeer, ControlAutomationPeerImpl,
 };
-use crate::automation::provider::{IEmbeddedRootProvider, IRootProvider, ProviderAdapter};
+use crate::automation::provider::{
+    focused_descendant_or_self, IEmbeddedRootProvider, IRootProvider, ProviderAdapter, IFocusedDescendantProvider,
+};
 use crate::embedding::EmbeddableControlRoot;
 use crate::platform::ITopLevelImpl;
 use crate::Control;
@@ -21,6 +23,8 @@ pub struct EmbeddableControlRootAutomationPeer {
     focus: RefCell<Option<WeakRef<Control>>>,
     focus_changed: HandlerList<dyn Fn()>,
     keyboard_device_subscription: RefCell<Option<Subscription>>,
+    /// Follows the focused part of the focused control.
+    descendant_subscription: RefCell<Option<Rc<dyn IDisposable>>>,
     opened_subscription: RefCell<Option<Subscription>>,
     closed_subscription: RefCell<Option<Subscription>>,
 }
@@ -116,6 +120,7 @@ impl EmbeddableControlRootAutomationPeer {
             focus: RefCell::new(None),
             focus_changed: HandlerList::new(),
             keyboard_device_subscription: RefCell::new(None),
+            descendant_subscription: RefCell::new(None),
             opened_subscription: RefCell::new(None),
             closed_subscription: RefCell::new(None),
         }
@@ -148,7 +153,7 @@ impl EmbeddableControlRootAutomationPeer {
     /// Gets the peer of the currently focused element (the root provider
     /// contracts).
     pub fn get_focus(&self) -> Option<Ref<AutomationPeer>> {
-        self.focus().map(|focus| self.get_or_create(&focus))
+        self.focus().map(|focus| focused_descendant_or_self(self.get_or_create(&focus)))
     }
 
     /// Gets the peer of the element at the specified point, expressed in
@@ -170,16 +175,44 @@ impl EmbeddableControlRootAutomationPeer {
             });
             *self.keyboard_device_subscription.borrow_mut() = Some(subscription);
             self.on_focus_changed(keyboard_device.focused_element());
+            // When tracking starts again on the same control, no change above follows its parts.
+            if let Some(focus) = self.focus() {
+                let peer = self.get_or_create(&focus);
+                self.follow_focused_descendant(Some(&peer));
+            }
         }
     }
 
     fn stop_tracking_focus(&self) {
+        self.follow_focused_descendant(None);
         if KeyboardDevice::instance().is_some() {
             let subscription = self.keyboard_device_subscription.borrow_mut().take();
             if let Some(subscription) = subscription {
                 subscription.dispose();
             }
         }
+    }
+
+    /// Follows the focused part of the focused control, if it has parts.
+    fn follow_focused_descendant(&self, peer: Option<&Ref<AutomationPeer>>) {
+        let previous = self.descendant_subscription.borrow_mut().take();
+        if let Some(previous) = previous {
+            previous.dispose();
+        }
+        let Some(provider) =
+            peer.and_then(|peer| peer.get_provider::<dyn IFocusedDescendantProvider>())
+        else {
+            return;
+        };
+        let weak = self.to_ref().downgrade();
+        let subscription = provider.focused_descendant_changed(Rc::new(move || {
+            if let Some(this) = weak.upgrade() {
+                for (_, handler) in this.focus_changed.snapshot().iter() {
+                    handler();
+                }
+            }
+        }));
+        *self.descendant_subscription.borrow_mut() = Some(subscription);
     }
 
     fn focus(&self) -> Option<Ref<Control>> {
@@ -197,7 +230,8 @@ impl EmbeddableControlRootAutomationPeer {
         if new_focus != old_focus {
             // As in the reference, the peer of the newly focused control is
             // created here although the event does not carry it.
-            let _peer = new_focus.as_ref().map(|focus| self.get_or_create(focus));
+            let peer = new_focus.as_ref().map(|focus| self.get_or_create(focus));
+            self.follow_focused_descendant(peer.as_ref());
             for (_, handler) in self.focus_changed.snapshot().iter() {
                 handler();
             }
