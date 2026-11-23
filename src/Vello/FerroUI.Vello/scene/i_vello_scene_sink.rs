@@ -378,8 +378,8 @@ pub trait IVelloSceneSink {
 
     /// Fills `path` under `transform` with a texture of the WebGL2 context of the sink, whose
     /// pixels `(0, 0)` to `size` are placed by `texture_transform` (from the pixels of the texture
-    /// to the space of the path), with the opacity `alpha`, composed with `blend_mode` and
-    /// without anti-aliasing.
+    /// to the space of the path), with the opacity `alpha`, composed with `blend_mode`, sampled
+    /// with `quality` and without anti-aliasing.
     ///
     /// # Panics
     /// Panics in a sink that does not belong to a WebGL2 context
@@ -395,8 +395,9 @@ pub trait IVelloSceneSink {
         texture_transform: Affine,
         alpha: f32,
         blend_mode: BlendMode,
+        quality: peniko::ImageQuality,
     ) {
-        let _ = (path, transform, texture, size, texture_transform, alpha, blend_mode);
+        let _ = (path, transform, texture, size, texture_transform, alpha, blend_mode, quality);
         panic!(
             "The {:?} rendering mode of the Vello backend paints with no texture of a WebGL context",
             self.rendering_mode()

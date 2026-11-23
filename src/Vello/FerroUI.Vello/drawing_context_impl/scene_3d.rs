@@ -117,7 +117,9 @@ impl DrawingContextImpl {
             * Affine::scale_non_uniform(bounds.width / f64::from(width), bounds.height / f64::from(height));
         let alpha = ((255.0 * self.current_opacity.clamp(0.0, 1.0)) as u8) as f32 / 255.0;
         let (path, blend, size) = (rect_path(bounds), BlendMode::default(), (width, height));
-        self.sink().fill_with_web_gl_texture(&path, transform, &texture, size, texture_transform, alpha, blend);
+        // Sampled bilinearly, as the output of the other routes is.
+        let (place, quality) = (texture_transform, ImageQuality::Medium);
+        self.sink().fill_with_web_gl_texture(&path, transform, &texture, size, place, alpha, blend, quality);
         true
     }
 }

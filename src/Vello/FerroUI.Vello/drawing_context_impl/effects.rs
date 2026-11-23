@@ -1165,7 +1165,8 @@ impl DrawingContextImpl {
         }
         let path = rect_path(layer.bounds);
         let sink = self.sink();
-        sink.fill_with_web_gl_texture(&path, layer.transform, &texture, size, texture_transform, alpha, blend_mode);
+        let (place, quality) = (texture_transform, peniko::ImageQuality::Low);
+        sink.fill_with_web_gl_texture(&path, layer.transform, &texture, size, place, alpha, blend_mode, quality);
     }
 
     /// Ends a layer drawn on the WebGL2 context: its content rendered and copied into a texture
@@ -1202,6 +1203,39 @@ impl DrawingContextImpl {
             Ok(None) => {}
             Err(error) => crate::web_gl::log_render_failure(&error),
         }
+    }
+
+    /// Draws the frame of a producer from its texture of the context of the scene, as an image
+    /// is drawn: the source rectangle onto the destination with the opacity, the sampling and the
+    /// blending mode in effect. On a scene of another context or of the CPU it draws nothing:
+    /// a frame has no path through memory.
+    pub(super) fn draw_web_gl_frame(
+        &mut self,
+        frame: &crate::web_gl::VelloWebGlFrameBitmap,
+        opacity: f64,
+        source_rect: Rect,
+        dest_rect: Rect,
+    ) {
+        if source_rect.width <= 0.0 || source_rect.height <= 0.0 || dest_rect.width <= 0.0 || dest_rect.height <= 0.0 {
+            return;
+        }
+        let Some(gpu) = self.scene().web_gl_gpu() else {
+            return;
+        };
+        let Some((texture, size)) = frame.texture(&gpu) else {
+            return;
+        };
+        let texture_transform = Affine::translate((dest_rect.x, dest_rect.y))
+            * Affine::scale_non_uniform(dest_rect.width / source_rect.width, dest_rect.height / source_rect.height)
+            * Affine::translate((-source_rect.x, -source_rect.y));
+        let is_upscaling = dest_rect.width > source_rect.width || dest_rect.height > source_rect.height;
+        let (quality, _) =
+            crate::vello_extensions::to_sampling(self.render_options.bitmap_interpolation_mode, is_upscaling);
+        let alpha = ((255.0 * opacity * self.current_opacity) as u8) as f32 / 255.0;
+        let blend = crate::vello_extensions::to_blend_mode(self.render_options.bitmap_blending_mode);
+        let (path, transform) = (rect_path(dest_rect), self.device_transform());
+        let place = texture_transform;
+        self.sink().fill_with_web_gl_texture(&path, transform, &texture, size, place, alpha, blend, quality);
     }
 
     /// Ends a shader effect drawn on the WebGL2 context: the content rendered and copied into a

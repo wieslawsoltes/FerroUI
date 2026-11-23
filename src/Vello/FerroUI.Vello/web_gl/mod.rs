@@ -27,12 +27,14 @@
 //! in paints with. The shader effects of the library run their GLSL ES 3.0, translated at build
 //! time (`shader_programs.rs`).
 
+mod external_objects;
 mod frame_textures;
 mod layer_programs;
 #[cfg(feature = "media3d")]
 mod scene3d;
 mod shader_programs;
 
+pub use external_objects::{VelloWebGlExternalObjectsFeature, VelloWebGlFrameBitmap};
 pub use frame_textures::VelloWebGlTexture;
 use frame_textures::TexturePool;
 pub(crate) use layer_programs::{LayerProgram, PassInput};
@@ -52,14 +54,16 @@ use ferroui_base::platform::{
     IDrawingContextImpl, IOptionalFeatureProvider, IPlatformGraphicsContext, IRenderTarget, PlatformRenderTargetState,
     RenderTargetDrawingContextProperties, RenderTargetProperties, RenderTargetSceneInfo,
 };
+use ferroui_opengl::gl_consts::{GL_COLOR_ATTACHMENT0, GL_READ_FRAMEBUFFER, GL_TEXTURE_2D};
 use ferroui_opengl::surfaces::{try_get_gl_surface, IGlPlatformSurfaceRenderTarget};
 use ferroui_opengl::IGlContext;
 use peniko::color::AlphaColor;
 use peniko::ImageData;
 use std::borrow::Cow;
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
+use std::sync::atomic::{AtomicU64, Ordering};
 use std::sync::Arc;
 use vello_gpu::{RenderSettings, RenderSize, Resources, Scene, TextureId, WebGlRenderer, WebGlTextureBindings};
 use wasm_bindgen::{JsCast, JsValue};
@@ -116,7 +120,16 @@ pub struct VelloWebGlGpu {
     max_texture_size: u32,
     /// `None` once the GPU is disposed: the context draws nothing more.
     state: RefCell<Option<WebGlState>>,
+    /// Names this GPU among those of the process: the frame bitmaps of its pool say which.
+    identity: u64,
+    /// The feature that imports the frames of producers, made when first asked for.
+    external_objects: RefCell<Option<Rc<VelloWebGlExternalObjectsFeature>>>,
+    /// The framebuffer of the OpenGL contracts a frame is read through; 0 until the first frame.
+    frame_read_framebuffer: Cell<i32>,
 }
+
+/// The identity of the next GPU.
+static NEXT_GPU: AtomicU64 = AtomicU64::new(1);
 
 impl VelloWebGlGpu {
     /// The GPU of a graphics context that is the WebGL2 context of a
@@ -169,6 +182,9 @@ impl VelloWebGlGpu {
                 #[cfg(feature = "media3d")]
                 scenes: scene3d::WebGlScenes::default(),
             })),
+            identity: NEXT_GPU.fetch_add(1, Ordering::Relaxed),
+            external_objects: RefCell::new(None),
+            frame_read_framebuffer: Cell::new(0),
         })))
     }
 
@@ -220,6 +236,10 @@ impl VelloWebGlGpu {
     /// context current, as the compositor does before it releases a backend
     /// context.
     pub fn dispose(&self) {
+        let framebuffer = self.frame_read_framebuffer.replace(0);
+        if framebuffer != 0 {
+            self.gl_context.gl_interface().delete_framebuffer(framebuffer);
+        }
         if let Some(mut state) = self.state.borrow_mut().take() {
             for image in state.images.values() {
                 self.gl.delete_texture(Some(&image.texture));
@@ -387,6 +407,68 @@ impl VelloWebGlGpu {
         let WebGlState { scenes, textures, .. } = state.as_mut()?;
         let limit = self.max_texture_size;
         scenes.scene_texture(&self.gl, &self.gl_context, textures, limit, scene, size, scale, antialiased, origin)
+    }
+
+    /// What names this GPU: the frame bitmaps of its pool carry it.
+    pub(crate) fn identity(&self) -> u64 {
+        self.identity
+    }
+
+    /// The feature that imports the frames of producers (#575, `external_objects.rs`); `None` for
+    /// a context that takes none.
+    pub(crate) fn external_objects(self: &Rc<Self>) -> Option<Rc<VelloWebGlExternalObjectsFeature>> {
+        let mut feature = self.external_objects.borrow_mut();
+        if feature.is_none() {
+            let weak = Rc::downgrade(self);
+            *feature = VelloWebGlExternalObjectsFeature::new(weak, self.gl_context.clone()).map(Rc::new);
+        }
+        feature.clone()
+    }
+
+    /// The texture `name` of the context (a name of the OpenGL contracts, RGBA8) copied on the GPU
+    /// into a texture of the pool, its first row the top one of the frame; `bottom_up` when the
+    /// first row of `name` is the bottom one.
+    pub(crate) fn copy_frame_texture(
+        &self,
+        name: u32,
+        (width, height): (u32, u32),
+        bottom_up: bool,
+    ) -> Result<Rc<VelloWebGlTexture>, String> {
+        external_objects::release_retired();
+        let copy = self.acquire_texture(width, height)?;
+        let current = self.gl_context.ensure_current();
+        let interface = self.gl_context.gl_interface();
+        if self.frame_read_framebuffer.get() == 0 {
+            self.frame_read_framebuffer.set(interface.gen_framebuffer());
+        }
+        let gl = &self.gl;
+        let scissor = gl.is_enabled(WebGl2RenderingContext::SCISSOR_TEST);
+        gl.disable(WebGl2RenderingContext::SCISSOR_TEST);
+        interface.bind_framebuffer(GL_READ_FRAMEBUFFER, self.frame_read_framebuffer.get());
+        interface.framebuffer_texture_2d(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, name as i32, 0);
+        gl.bind_framebuffer(WebGl2RenderingContext::DRAW_FRAMEBUFFER, Some(&copy.framebuffer));
+        let (width, height) = (width as i32, height as i32);
+        let (top, bottom) = if bottom_up { (height, 0) } else { (0, height) };
+        gl.blit_framebuffer(
+            0,
+            0,
+            width,
+            height,
+            0,
+            top,
+            width,
+            bottom,
+            WebGl2RenderingContext::COLOR_BUFFER_BIT,
+            WebGl2RenderingContext::NEAREST,
+        );
+        interface.framebuffer_texture_2d(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, 0, 0);
+        gl.bind_framebuffer(WebGl2RenderingContext::READ_FRAMEBUFFER, None);
+        gl.bind_framebuffer(WebGl2RenderingContext::DRAW_FRAMEBUFFER, None);
+        if scissor {
+            gl.enable(WebGl2RenderingContext::SCISSOR_TEST);
+        }
+        current.dispose();
+        Ok(copy)
     }
 
     /// Whether the shader effect `effect` is drawn on the context: it is one of the library's and

@@ -80,6 +80,13 @@ impl IOptionalFeatureProvider for VelloContext {
         if let Some(gpu) = &self.gpu {
             return gpu.try_get_feature(feature_type);
         }
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(web_gl) = &self.web_gl {
+            if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+                let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = web_gl.external_objects()?;
+                return Some(Rc::new(feature));
+            }
+        }
         let _ = feature_type;
         None
     }

@@ -239,6 +239,11 @@ The route, in pull requests stacked on the Skia ones:
      writes two uniform buffers and draws one triangle. The content is copied, turned upright with
      `blitFramebuffer`, and read by texel. A program that does not compile is logged once and the
      effect keeps its CPU reference.
+   - *Done: the shared media frames of a web page* (#575, `web_gl/external_objects.rs`). A frame
+     of the context (`SHARED_GL_TEXTURE`) or one transferred to the render worker is copied on the
+     GPU with `blitFramebuffer` into a texture of the pool, and drawn like an image. The lease of
+     a frame of the context is held by a WebGL2 fence until the copy is done. **Not done:** a video
+     frame on a 3D mesh on this route is drawn with the colour of its layer.
    - *Next*, in the same way: the page transitions (the shader effects with images) and the shader
      effects of an application, which keep their CPU references; the lighting fill of a scene
      lighting effect (`draw_lighting`). Until each lands, WebGL2 draws it with the CPU path.

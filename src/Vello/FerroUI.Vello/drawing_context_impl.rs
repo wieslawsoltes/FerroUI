@@ -1271,6 +1271,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
             return;
         }
 
+        // A frame of a producer in a web page is drawn on its context only.
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(frame) = source.as_any().downcast_ref::<crate::web_gl::VelloWebGlFrameBitmap>() {
+            self.draw_web_gl_frame(frame, opacity, source_rect, dest_rect);
+            return;
+        }
+
         let drawable_image = try_get_drawable_bitmap(source)
             .unwrap_or_else(|| panic!("The bitmap was not created by the Vello backend"));
         let Some(image) = drawable_image.image() else {
