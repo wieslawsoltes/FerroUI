@@ -17,6 +17,9 @@ path = "lib.rs"
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+# The code no longer names this crate, so the linker drops it. The entry stays until the
+# separate lock files of the components can change with it.
+ferroui-dialogs.workspace = true
 ferroui-freedesktop.workspace = true
 ferroui-opengl.workspace = true
 # The source files the reference compiles into both Linux backends (the grouping of raw input, the

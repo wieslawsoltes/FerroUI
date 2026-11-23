@@ -1,6 +1,9 @@
+#[cfg(not(target_arch = "wasm32"))]
 use crate::ManagedStorageProvider;
 use ferroui_base::data::core::{ValueTypeRegistration, ValueTypes};
 use ferroui_base::platform::storage::IStorageProvider;
+#[cfg(target_arch = "wasm32")]
+use ferroui_base::platform::storage::NoopStorageProvider;
 use ferroui_base::{ferro_markup_type, Ref};
 use ferroui_controls::platform::IStorageProviderFactory;
 use ferroui_controls::TopLevel;
@@ -38,8 +41,16 @@ impl ValueTypeRegistration for ManagedStorageFallback {
 }
 
 impl IStorageProviderFactory for ManagedStorageFallback {
+    #[cfg(not(target_arch = "wasm32"))]
     fn create_provider(&self, top_level: &Ref<TopLevel>) -> Rc<dyn IStorageProvider> {
         Rc::new(ManagedStorageProvider::new(Some(top_level), None))
+    }
+
+    // The themes are the same in the browser, which has no managed provider and whose platform
+    // never asks for this fallback.
+    #[cfg(target_arch = "wasm32")]
+    fn create_provider(&self, _top_level: &Ref<TopLevel>) -> Rc<dyn IStorageProvider> {
+        Rc::new(NoopStorageProvider)
     }
 }
 

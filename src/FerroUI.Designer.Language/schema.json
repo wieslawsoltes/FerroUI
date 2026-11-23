@@ -12965,6 +12965,18 @@
     ]
   },
   {
+    "name": "ManagedStorageFallback",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_dialogs::internal::ManagedStorageFallback",
+    "base": null,
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Dialogs.Internal",
+      "clr-namespace:FerroUI.Dialogs.Internal;assembly=FerroUI.Dialogs"
+    ]
+  },
+  {
     "name": "MarginMultiplierConverter",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::converters::MarginMultiplierConverter",
