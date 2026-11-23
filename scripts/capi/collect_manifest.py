@@ -4,7 +4,7 @@
     python3 scripts/capi/collect_manifest.py <file or directory>... [--out ferroui.json]
     python3 scripts/capi/collect_manifest.py <file or directory>... --check ferroui.json
 
-Reads C and C++ (`.c .h .cc .cpp .cxx .hpp`) and Osprey (`.osp`) and writes the `ferroui.json` the
+Reads C and C++ (`.c .h .cc .cpp .cxx .hpp`), Go (`.go`) and Osprey (`.osp`) and writes the `ferroui.json` the
 generators of the bindings and of the library take: the `classes`, `properties` and `events` the
 sources name and the groups of calls (`abi`) they use. With `--check` it writes nothing and fails
 when a manifest leaves out a class, a property, an event or a group the sources use.
@@ -18,6 +18,7 @@ hand. Generated bindings (a `ferroui/` directory) and the outputs of the library
 | --- | --- | --- | --- |
 | C | `ferro_type_stack_panel()`, a literal `"StackPanel"` | a literal `"FontSize"` | a literal `"Click"` |
 | C++ | `StackPanel` | `.font_size(`, `Grid::set_row(` | `.on_click(`, `.subscribe_click(` |
+| Go | `NewStackPanel(`, `ferroui.StackPanel` | `.SetFontSize(`, `.FontSize(`, `GridSetRow(` | `.OnClick(` |
 | Osprey | `stackPanel(` | `fontSize(`, `getFontSize(` | `onClick(`, `raiseClick(` |
 
 Osprey programs run on its runtime, which uses frames and signals, so a manifest collected from
@@ -39,6 +40,7 @@ from generate_osprey_bindings import load_model, scalar_kinds, weights  # noqa: 
 
 C_SUFFIXES = {".c", ".h"}
 CPP_SUFFIXES = {".cc", ".cpp", ".cxx", ".hpp"}
+GO_SUFFIXES = {".go"}
 OSPREY_SUFFIXES = {".osp"}
 SKIPPED_DIRECTORIES = {"ferroui", "ferroui-library"}
 
@@ -65,6 +67,7 @@ class Spellings:
         self.entries = {cls["entry"]: cls["name"] for cls in model["classes"] if cls.get("entry")}
         self.cpp_properties, self.cpp_attached, self.cpp_events = {}, {}, {}
         self.osprey_classes, self.osprey_properties, self.osprey_events = {}, {}, {}
+        self.go_properties, self.go_attached, self.go_events = {}, {}, {}
         weight = weights(model)
         for cls in model["classes"]:
             if cls["creatable"]:
@@ -75,7 +78,13 @@ class Spellings:
                     owner, short = prop["name"].rsplit(".", 1)
                     key = (owner, self._snake_of(short))
                     self.cpp_attached[key] = prop["name"]
+                    self.go_attached[f"{owner}{short}"] = prop["name"]
+                    self.go_attached[f"{owner}Set{short}"] = prop["name"]
                 else:
+                    pascal = "".join(word.capitalize() for word in prop["words"])
+                    for spelling in (pascal, pascal + "Value", pascal + "Object", "Set" + pascal,
+                                     "Set" + pascal + "Value", "Set" + pascal + "Object"):
+                        self.go_properties.setdefault(spelling, set()).add(prop["name"])
                     base = cpp_safe(snake(prop["words"]))
                     self.cpp_properties.setdefault(base, set()).add(prop["name"])
                     self.cpp_properties.setdefault(base + "_object", set()).add(prop["name"])
@@ -90,6 +99,7 @@ class Spellings:
             self.cpp_events[f"on_{words}"] = event["name"]
             self.cpp_events[f"subscribe_{words}"] = event["name"]
             self.osprey_events[names.event(event)] = event["name"]
+            self.go_events["On" + "".join(word.capitalize() for word in event["words"])] = event["name"]
             self.osprey_events["raise" + "".join(word.capitalize() for word in event["words"])] = event["name"]
 
     @staticmethod
@@ -144,6 +154,19 @@ def read_cpp(text, spellings, usage):
             usage.properties.add(name)
 
 
+def read_go(text, spellings, usage):
+    code = LITERAL.sub('""', text)
+    for word in re.findall(r"\b(?:New|ferroui\.)([A-Z]\w*)", code):
+        if word in spellings.class_names:
+            usage.classes.add(word)
+    for member in re.findall(r"\.\s*([A-Z]\w*)\s*\(", code):
+        usage.properties.update(spellings.go_properties.get(member, ()))
+        if member in spellings.go_events:
+            usage.events.add(spellings.go_events[member])
+        if member in spellings.go_attached:
+            usage.properties.add(spellings.go_attached[member])
+
+
 def read_osprey(text, spellings, usage):
     usage.osprey = True
     code = LITERAL.sub('""', text)
@@ -181,6 +204,8 @@ def collect(paths, model=None, names=None):
             language, reader = "c", read_c
         elif suffix in CPP_SUFFIXES:
             language, reader = "cpp", read_cpp
+        elif suffix in GO_SUFFIXES:
+            language, reader = "go", read_go
         elif suffix in OSPREY_SUFFIXES:
             language, reader = "osprey", read_osprey
         else:
@@ -189,7 +214,7 @@ def collect(paths, model=None, names=None):
             reader(strip_comments(file.read(), language), spellings, usage)
         found += 1
     if not found:
-        raise SystemExit("no C, C++ or Osprey source among the paths")
+        raise SystemExit("no C, C++, Go or Osprey source among the paths")
     return usage.manifest()
 
 

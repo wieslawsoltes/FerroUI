@@ -37,6 +37,7 @@ import ferroui_selection  # noqa: E402
 MODEL = load("generate_api_model")
 OSPREY = load("generate_osprey_bindings")
 CPP = load("generate_cpp_bindings")
+GO = load("generate_go_bindings")
 sys.path.insert(0, os.path.join(SCRIPTS, "capi"))
 _collect = importlib.util.spec_from_file_location("collect_manifest", os.path.join(SCRIPTS, "capi", "collect_manifest.py"))
 COLLECT = importlib.util.module_from_spec(_collect)
@@ -220,6 +221,49 @@ class OspreyTests(unittest.TestCase):
                     self.assertEqual(f.read(), text, f"{path} is stale: python3 scripts/generate_osprey_bindings.py")
 
 
+class GoTests(unittest.TestCase):
+    """What can be checked without a Go toolchain; the job of capi.yml compiles and runs it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(GO.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.files = dict(GO.generate(cls.model))
+        cls.api = cls.files["api.go"]
+
+    def test_accessors_are_on_their_class(self):
+        self.assertIn("type Button struct{ ContentControl }", self.api)
+        self.assertRegex(self.api, r"func \(o TextBlock\) SetText\(value string\) error \{ return setString\(o\.h, \d+, value\) \}")
+        self.assertRegex(self.api, r"func GridSetRow\(target Wrapper, value int64\) error")
+        self.assertRegex(self.api, r"func \(o Button\) OnClick\(handler func\(Button\)\) \(Subscription, error\)")
+        self.assertNotIn('import "C"', self.api, "only the runtime and the entries use cgo")
+
+    def test_names_do_not_collide(self):
+        methods = re.findall(r"^func \(o (\w+)\) (\w+)\(", self.api, re.M)
+        self.assertEqual(len(methods), len(set(methods)))
+        names = re.findall(r"^(?:func|type) (\w+)", self.api, re.M) + re.findall(r"^\t(\w+) \w+ = ", self.api, re.M)
+        self.assertEqual(len(names), len(set(names)))
+        embedded = dict(re.findall(r"^type (\w+) struct\{ (\w+) \}", self.api, re.M))
+        self.assertEqual([m for m in methods if embedded.get(m[0]) == m[1]], [], "a method named as its embedded base")
+
+    def test_a_selection_registers_its_classes(self):
+        files = dict(GO.generate(self.model, {"classes": ["Button"]}))
+        self.assertIn("C.ferro_type_button()", files["entries.go"])
+        self.assertIn("type ContentControl struct", files["api.go"])
+        self.assertNotIn("type Grid struct", files["api.go"])
+        self.assertNotIn('import "C"', self.files["entries.go"], "the full bindings register nothing")
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in GO.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            for name, text in GO.generate(self.model, manifest):
+                with open(os.path.join(directory, name), encoding="utf-8") as file:
+                    self.assertEqual(file.read(), text, f"{directory}/{name} is stale: python3 scripts/generate_go_bindings.py")
+
+
 class ManifestTests(unittest.TestCase):
     """The lists of properties and events of a manifest, and a manifest collected from sources."""
 
@@ -282,6 +326,19 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(found["events"], ["Click"])
         self.assertEqual(found["abi"], [])
 
+    def test_go_sources(self):
+        found = self.collect("app.go", """
+            // Slider in a comment is not a use.
+            button, _ := ferroui.NewButton()
+            button.SetFontSize(12)
+            button.SetContent("Grid in a text")
+            button.OnClick(func(ferroui.Button) {})
+            ferroui.GridSetRow(button, 1)
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+
     def test_osprey_sources_keep_every_group(self):
         found = self.collect("app.osp", 'let b = button() |> fontSize(12.0) |> onClick(1)\n')
         self.assertEqual(found["classes"], ["Button"])
@@ -304,6 +361,8 @@ class ManifestTests(unittest.TestCase):
         for manifest in glob.glob(os.path.join(samples, "cpp", "*", "ferroui.json")):
             if "hello_world" in manifest:
                 cases.append(([os.path.dirname(manifest)], manifest))
+        cases.append(([os.path.join(samples, "go", "hello_world", "main.go")],
+                      os.path.join(samples, "go", "hello_world", "ferroui.json")))
         for manifest in glob.glob(os.path.join(samples, "osprey-bindings", "*", "ferroui.json")):
             cases.append(([os.path.dirname(manifest)], manifest))
         self.assertGreater(len(cases), 5)

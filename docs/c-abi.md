@@ -349,8 +349,9 @@ machine: the numbers say how large the overhead is, not its exact value.
   sources of the application are section 17.
 - **Bindings:** C++ is there (`bindings/cpp/`, `scripts/generate_cpp_bindings.py`): a header-only
   library with RAII handles and typed accessors, generated from the model or a selection; a
-  failed call throws, and nothing unwinds across the ABI. Still to come: Go (cgo,
-  `runtime.LockOSThread` for the UI thread); Dart and Flutter
+  failed call throws, and nothing unwinds across the ABI. Go is there too (`bindings/go/`,
+  `scripts/generate_go_bindings.py`: cgo, `runtime.LockOSThread` for the UI thread, handlers
+  through `cgo.Handle`). Still to come: Dart and Flutter
   (`dart:ffi`, `ffigen`); C#, Python, Swift and Zig as demand shows.
 - **Osprey (#950):** the generated bindings of section 12 (shape 1: an Osprey executable over
   the dynamic library with named-function callbacks); FerroUI owning the process with Osprey as

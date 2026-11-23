@@ -170,3 +170,14 @@ jobs:
         env:
           FERROUI_SMOKE_EXIT_MS: 3000
         run: xvfb-run -a make -C samples/CApi run-cpp
+      # The Go bindings (#636): the toolchain is installed here, and this is their only check.
+      - uses: actions/setup-go@d8cbb8045d7f43706b9177cceb36c1f91a6644d5 # v7.1.0
+        with:
+          go-version: '1.22'
+          cache: false
+      - name: Tests of the Go bindings
+        run: make -C samples/CApi test-go
+      - name: The Go hello world for three seconds
+        env:
+          FERROUI_SMOKE_EXIT_MS: 3000
+        run: xvfb-run -a make -C samples/CApi run-go
