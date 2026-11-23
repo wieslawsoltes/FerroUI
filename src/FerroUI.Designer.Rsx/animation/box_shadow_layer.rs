@@ -1,5 +1,5 @@
 use super::{TextSource, constructor, span};
-use crate::animation::{FloatSource, color::ColorSource, number_source::FloatReader};
+use crate::animation::{FloatSource, color::ColorSource, constant_source::ConstantReader};
 use ferroui_base::media::BoxShadow;
 use ferroui_designer_animation::{AnimationBoxShadow, AnimationValue};
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -35,7 +35,7 @@ impl ShadowLayer {
     pub(super) fn read(
         expr: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<Self> {
         if let Some((value, source)) = TextSource::parse_call(expr, resolve, FACTORIES) {
             let value = BoxShadow::parse(&value).ok()?.into();
@@ -47,7 +47,7 @@ impl ShadowLayer {
         let Expr::Struct(layer) = expr else {
             return None;
         };
-        let (value, fields) = Fields::read(layer, resolve, numbers)?;
+        let (value, fields) = Fields::read(layer, resolve, constants)?;
         Some(Self {
             value,
             source: LayerSyntax::Fields(Box::new(fields)),
@@ -74,7 +74,7 @@ impl Fields {
     fn read(
         layer: &ExprStruct,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        reader: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationBoxShadow, Self)> {
         if !layer.attrs.is_empty() || layer.qself.is_some() {
             return None;
@@ -123,7 +123,7 @@ impl Fields {
             let name = name.to_string();
             match name.as_str() {
                 "color" if fields.color.is_none() => {
-                    let (color, source) = ColorSource::read_with(&field.expr, false, resolve)?;
+                    let (color, source) = ColorSource::read(&field.expr, false, resolve, constants)?;
                     value.argb = color.argb8()?;
                     fields.color = Some(source);
                 }
@@ -142,7 +142,7 @@ impl Fields {
                 }
                 name => {
                     let index = NUMBERS.iter().position(|candidate| *candidate == name)?;
-                    let number = reader.read(&field.expr)?;
+                    let number = constants.float(&field.expr)?;
                     *numbers[index] = number.value;
                     if fields.numbers[index].replace(number).is_some() {
                         return None;

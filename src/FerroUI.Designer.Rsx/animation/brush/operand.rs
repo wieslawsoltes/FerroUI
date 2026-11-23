@@ -1,6 +1,6 @@
 use super::super::{
     FloatSource,
-    number_source::FloatReader,
+    constant_source::ConstantReader,
     relative::{self, RelativeSource},
     syntax,
 };
@@ -97,14 +97,14 @@ impl GeometrySource {
         expression: &Expr,
         default: &AnimationValue,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationValue, Self)> {
         if matches!(default, AnimationValue::Number(_)) {
-            let number = numbers.read(expression)?;
+            let number = constants.float(expression)?;
             return Some((AnimationValue::Number(number.value), Self::Number(number)));
         }
         if let Some(operand) = optional(expression, resolve)? {
-            if let Some((value, source)) = RelativeSource::read(operand, default.kind(), resolve, numbers) {
+            if let Some((value, source)) = RelativeSource::read(operand, default.kind(), resolve, constants) {
                 return Some((value, Self::Relative(source)));
             }
             let value = relative_constant(&resolve(operand)?)?;
@@ -171,7 +171,7 @@ pub(super) fn geometry_literal(value: &AnimationValue) -> Result<String, String>
 pub(super) fn transform(
     expression: &Expr,
     resolve: &impl Fn(&Expr) -> Option<String>,
-    numbers: &FloatReader<'_>,
+    constants: &ConstantReader<'_>,
 ) -> Option<Option<AnimationTransformList>> {
     let Some(operand) = optional(expression, resolve)? else {
         return Some(None);
@@ -193,7 +193,7 @@ pub(super) fn transform(
         let args = call
             .args
             .iter()
-            .map(|expression| numbers.read(expression))
+            .map(|expression| constants.float(expression))
             .map(|number| number.map(|number| number.value))
             .collect::<Option<Vec<_>>>()?;
         match (resolve(&call.func)?.as_str(), args.as_slice()) {

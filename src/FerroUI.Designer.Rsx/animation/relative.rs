@@ -1,4 +1,4 @@
-use super::{number_source::FloatReader, variant::VariantSource, FloatSource};
+use super::{constant_source::ConstantReader, variant::VariantSource, FloatSource};
 use ferroui_designer_animation::{AnimationValue, RelativeUnit, ValueKind};
 use ferroui_designer_core::TextPatch;
 use syn::Expr;
@@ -18,7 +18,7 @@ impl RelativeSource {
         expr: &Expr,
         kind: ValueKind,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationValue, Self)> {
         let Expr::Call(call) = expr else { return None };
         if !call.attrs.is_empty() {
@@ -28,7 +28,7 @@ impl RelativeSource {
         let args = call.args.iter().collect::<Vec<_>>();
         let (first, second, unit) = match (kind, factory.as_str(), args.as_slice()) {
             (ValueKind::RelativePoint, "ferroui_base::RelativePoint::new", [x, y, unit]) => {
-                (numbers.read(x)?, Some(numbers.read(y)?), *unit)
+                (constants.float(x)?, Some(constants.float(y)?), *unit)
             }
             (
                 ValueKind::RelativePoint,
@@ -38,13 +38,13 @@ impl RelativeSource {
                 && point.attrs.is_empty() && point.args.len() == 2 =>
             {
                 (
-                    numbers.read(&point.args[0])?,
-                    Some(numbers.read(&point.args[1])?),
+                    constants.float(&point.args[0])?,
+                    Some(constants.float(&point.args[1])?),
                     *unit,
                 )
             }
             (ValueKind::RelativeScalar, "ferroui_base::RelativeScalar::new", [value, unit]) => {
-                (numbers.read(value)?, None, *unit)
+                (constants.float(value)?, None, *unit)
             }
             _ => return None,
         };

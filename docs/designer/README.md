@@ -579,6 +579,9 @@ The graph stays focused when a keyboard apply rebuilds the Timeline.
 For a mapped Rust key that uses a shared numeric constant, changing the key writes a typed literal
 at the edited use. Undo restores the reference. [Shared numeric key workflow](vscode/motion.md#edit-a-key-that-uses-a-shared-rust-number)
 
+Packed ARGB integers, channel constants, and typed Rust swatches follow the same edit and Undo
+workflow in the color graph and the keyframe inspector. [Shared color key workflow](vscode/motion.md#edit-a-key-that-uses-a-shared-rust-color)
+
 ![Designer Studio shows both incoming Bézier handles beneath the selected Width keyframe](images/designer-easing-handles.png)
 
 To change the spacing of selected keys, set the playhead to the pivot, enter a **Factor** in the

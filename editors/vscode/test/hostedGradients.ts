@@ -226,18 +226,20 @@ fn view() { rsx! {
 }
 
 async function verifyMappedSolidBrush(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
-    const packed = 'Solid::from_uint32(/* preserve 🧭 */ 0xFF33_6688_u32)';
+    const packed = 'Solid::from_uint32(/* preserve 🧭 */ BRAND_ARGB)';
     const original = `use ferroui_view::prelude::*;
 use ferroui_controls::Border as Card;
 use ferroui_base::{animation::FillMode, media::{IBrush, Color, immutable::ImmutableSolidColorBrush as Solid}};
 use std::rc::Rc;
 const FINAL_OPACITY: f64 = 1.0;
+const BRAND_ARGB: u32 = 0xFF33_6688_u32;
+const FINAL_COLOR: Color = Color::from_uint32(BRAND_ARGB);
 fn view() -> Element { rsx! {
     StackPanel {
         styles: [style("Border#Card").animation(animation(ms(2000))
             .key_frame(0.0, |key| key.set(Card::background_property(), Some(Rc::new(${packed}) as Rc<dyn IBrush>)))
             .key_frame(1.0, |key| key.set(Card::background_property(),
-                Some(Rc::new(Solid::with_opacity(Color::from_rgb(51, 102, 136), /* shared 🧭 */ FINAL_OPACITY)) as Rc<dyn IBrush>)))
+                Some(Rc::new(Solid::with_opacity(FINAL_COLOR, /* shared 🧭 */ FINAL_OPACITY)) as Rc<dyn IBrush>)))
             .fill_mode(FillMode::Both))],
         Border { name: "Card", width: 230.0, height: 126.0, background: "#336688" }
     }
@@ -247,7 +249,7 @@ fn view() -> Element { rsx! {
         const draft = update(revision, text);
         return { ...draft, projectPath: '/SolidBrushMotion.rs', document: { ...draft.document,
             uri: new URL('SolidBrushMotion.rs', draft.document.uri).toString(), language: 'rust',
-            caret: { line: 5, character: 25 },
+            caret: { line: 7, character: 25 },
         } };
     };
     const frame = await preview.renderHosted(source(4155, original));
@@ -259,7 +261,7 @@ fn view() -> Element { rsx! {
     assert.ok(patch);
     const revised = apply(original, patch);
     assert.equal(revised, original.replace(packed,
-        'Solid::with_opacity(/* preserve 🧭 */ ::ferroui_base::media::Color::from_uint32(0xFF33_6688_u32), 0.6)'));
+        'Solid::with_opacity(/* preserve 🧭 */ ::ferroui_base::media::Color::from_uint32(BRAND_ARGB), 0.6)'));
     const accepted = await preview.renderHosted(source(4156, revised));
     const updated = trackOf(accepted);
     const curve = await preview.hostedCurve(identity(accepted), { ...updated.query, channel });
@@ -269,6 +271,12 @@ fn view() -> Element { rsx! {
         component: { channel, value: .72 } });
     assert.ok(final.patch);
     assert.equal(apply(revised, final.patch), revised.replace('*/ FINAL_OPACITY', '*/ 0.72f64'));
+    const tint = await preview.planHostedKeyframe(identity(accepted), { program: updated.program.id,
+        target: updated.track.target, property, previous: 2, time: 2, easing: 'LinearEasing',
+        value: '<SolidColorBrush Color="#FF497788" Opacity="1"/>' });
+    assert.ok(tint.patch);
+    assert.equal(apply(revised, tint.patch), revised.replace('with_opacity(FINAL_COLOR,',
+        'with_opacity(::ferroui_base::media::Color::from_argb(255, 73, 119, 136),'));
 }
 
 function trackOf(frame: HostedFrame) {

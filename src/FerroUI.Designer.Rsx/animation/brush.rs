@@ -3,7 +3,7 @@ mod operand;
 mod solid;
 mod stops;
 
-use super::{number_source::FloatReader, syntax};
+use super::{color::rust_literal as color_literal, constant_source::ConstantReader, syntax};
 use arguments::Arguments;
 use ferroui_designer_animation::{
     AnimationBrush, AnimationGradient, AnimationGradientStop, AnimationValue, GradientShape,
@@ -43,7 +43,7 @@ impl BrushSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
         shared_stops: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationValue, Self)> {
         let operand = syntax::unparen(operand::optional(expression, resolve)??);
         let operand = match operand {
@@ -69,11 +69,11 @@ impl BrushSource {
         let resolved = resolve(&call.func)?;
         let (class, method) = resolved.strip_prefix(IMMUTABLE)?.rsplit_once("::")?;
         if class == "SolidColorBrush" {
-            let (brush, source) = SolidSource::read(call, method, resolve, numbers)?;
+            let (brush, source) = SolidSource::read(call, method, resolve, constants)?;
             return Some((AnimationValue::Brush(brush), Self::Solid(source)));
         }
         let shape = GradientShape::defaults(class)?;
-        let (values, stops) = StopsSource::read(call.args.first()?, resolve, shared_stops, numbers)?;
+        let (values, stops) = StopsSource::read(call.args.first()?, resolve, shared_stops, constants)?;
         let mut gradient = AnimationGradient::from_stops(shape, values);
         gradient.transform_origin = ferroui_base::RelativePoint::TOP_LEFT.into();
         let (gradient, constructor) = match method {
@@ -96,7 +96,7 @@ impl BrushSource {
                 };
                 let operands = call.args.iter().skip(1).collect::<Vec<_>>();
                 let (gradient, args) =
-                    Arguments::read(gradient, &operands, shared_radius, resolve, numbers)?;
+                    Arguments::read(gradient, &operands, shared_radius, resolve, constants)?;
                 (gradient, Constructor::Full(Box::new(args)))
             }
             _ => return None,
@@ -163,7 +163,7 @@ pub(super) fn literal(brush: &AnimationBrush) -> Result<String, String> {
             format!("::{IMMUTABLE}{class}::new({stops}, {args})")
         }
         AnimationBrush::Solid { argb, opacity, .. } => {
-            let color = stops::color_literal(*argb);
+            let color = color_literal(*argb);
             format!("::{IMMUTABLE}SolidColorBrush::with_opacity({color}, {opacity:?})")
         }
     };

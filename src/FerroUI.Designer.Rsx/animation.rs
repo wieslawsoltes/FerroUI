@@ -7,9 +7,11 @@ mod effect;
 mod effect_constructor;
 mod color_integer;
 mod color_text;
+mod constant_source;
 mod keyframe;
 mod number_source;
 mod numbers;
+mod operand_source;
 pub(crate) mod program_comment;
 mod relative;
 mod retime;
@@ -20,6 +22,7 @@ mod transform_list;
 mod value;
 mod variant;
 
+use constant_source::ConstantValues;
 use ferroui_designer_animation::{native_key_time, AnimationGradientStop, Easing, KeyframeEdit, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use std::collections::BTreeMap;
@@ -60,7 +63,7 @@ pub struct RsxAnimation {
     keys: Vec<KeySource>,
     imports: BTreeMap<String, String>,
     shared_stops: BTreeMap<String, Vec<AnimationGradientStop>>,
-    shared_numbers: BTreeMap<String, f64>,
+    constants: ConstantValues,
     pub(crate) attachment: Option<program_comment::AnimationAttachment>,
 }
 

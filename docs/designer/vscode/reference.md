@@ -408,6 +408,8 @@ Use `components` in App Preview when the program’s `authoring.componentBatch` 
 
 For a Rust cue, spline coordinate, or typed value that references a mapped `f64` constant, the same keyframe draft edits the selected use. Apply writes a typed literal for the changed argument and keeps the shared declaration and sibling references intact. [Shared numeric key workflow](motion.md#edit-a-key-that-uses-a-shared-rust-number)
 
+Use the same draft to edit a shared Rust ARGB integer, color channel, or typed `Color` at one key. A packed integer edit keeps its initializer's radix, grouping, and explicit suffix. A whole `Color` reference becomes an explicit color constructor at the selected use. [Shared color key workflow](motion.md#edit-a-key-that-uses-a-shared-rust-color)
+
 For a registered shader, copy the exact channel from the key’s `curve_values`, for example `effect_parameter/spotlight/strength/value`. A Boolean handle reports `step: "boolean"` and accepts 0 or 1. An integer handle reports `step: "integer"` and accepts a signed 32-bit integer. App Preview resolves project-registered effects against the loaded application. [Registered shader workflow](motion.md#animate-registered-shader-parameters)
 
 ### Edit property transitions with MCP

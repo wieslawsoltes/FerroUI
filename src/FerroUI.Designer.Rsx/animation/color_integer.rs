@@ -1,31 +1,68 @@
-use super::syntax::span;
+use super::constant_source::{ConstantReader, ConstantType, ConstantValue};
+use super::operand_source::OperandSource;
+use super::syntax::{span, unparen};
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::{Expr, Lit};
 
 /// An unsigned channel or packed ARGB literal, with its authored spelling.
 #[derive(Clone, Debug)]
 pub(super) struct ColorInteger {
-    pub(super) value: u32,
-    span: SourceSpan,
+    literal: IntegerLiteral,
+    source: OperandSource,
+}
+
+#[derive(Clone, Debug)]
+pub(super) struct IntegerLiteral {
+    value: u32,
     spelling: String,
     suffix: &'static str,
 }
 
 impl ColorInteger {
     pub(super) fn read(
-        mut expression: &Expr,
-        integer_type: &'static str,
-        max: u32,
+        expression: &Expr,
+        ty: ConstantType,
+        constants: &ConstantReader<'_>,
     ) -> Option<Self> {
-        let literal = loop {
-            match expression {
-                Expr::Paren(group) if group.attrs.is_empty() => expression = &group.expr,
-                Expr::Group(group) if group.attrs.is_empty() => expression = &group.expr,
-                Expr::Lit(literal) if literal.attrs.is_empty() => break &literal.lit,
-                _ => return None,
-            }
+        let expression = unparen(expression);
+        if let Some((literal, span)) = IntegerLiteral::read(expression, ty) {
+            return Some(Self {
+                literal,
+                source: OperandSource::literal(span),
+            });
+        }
+        let source = OperandSource::reference(expression)?;
+        let ConstantValue::Integer(literal) = constants.get(expression, ty)? else {
+            return None;
         };
-        let Lit::Int(literal) = literal else {
+        Some(Self { literal, source })
+    }
+
+    pub(super) fn value(&self) -> u32 {
+        self.literal.value
+    }
+
+    pub(super) fn plan(&self, value: u32, patches: &mut Vec<TextPatch>) {
+        if self.value() != value {
+            self.source.plan(self.literal.replacement(value), patches);
+        }
+    }
+}
+
+impl IntegerLiteral {
+    pub(super) fn read(expression: &Expr, ty: ConstantType) -> Option<(Self, SourceSpan)> {
+        let (integer_type, max) = match ty {
+            ConstantType::U8 => ("u8", u32::from(u8::MAX)),
+            ConstantType::U32 => ("u32", u32::MAX),
+            _ => return None,
+        };
+        let Expr::Lit(expression) = unparen(expression) else {
+            return None;
+        };
+        if !expression.attrs.is_empty() {
+            return None;
+        }
+        let Lit::Int(literal) = &expression.lit else {
             return None;
         };
         let suffix = match literal.suffix() {
@@ -34,19 +71,14 @@ impl ColorInteger {
             _ => return None,
         };
         let value = literal.base10_parse().ok().filter(|value| *value <= max)?;
-        Some(Self {
-            value,
-            span: span(literal),
-            spelling: literal.to_string(),
-            suffix,
-        })
-    }
-
-    pub(super) fn patch(&self, value: u32) -> Option<TextPatch> {
-        (self.value != value).then(|| TextPatch {
-            span: self.span,
-            replacement: self.replacement(value),
-        })
+        Some((
+            Self {
+                value,
+                spelling: literal.to_string(),
+                suffix,
+            },
+            span(literal),
+        ))
     }
 
     fn replacement(&self, value: u32) -> String {

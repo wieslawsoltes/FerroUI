@@ -1,4 +1,4 @@
-use super::number_source::FloatReader;
+use super::constant_source::ConstantReader;
 use super::syntax::{authored_path, method_suffix, path, span};
 use super::{KeySource, Property, TargetType, ValueShape, TRACK_TARGET};
 use crate::RsxCatalog;
@@ -16,12 +16,12 @@ pub(super) fn keyframe(
     catalog: &RsxCatalog,
     resolve: &impl Fn(&Expr) -> Option<String>,
     shared_stops: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
-    numbers: &FloatReader<'_>,
+    constants: &ConstantReader<'_>,
 ) -> Option<Vec<MappedKey>> {
     if method.args.len() != 2 {
         return None;
     }
-    let cue = numbers.read(&method.args[0])?;
+    let cue = constants.float(&method.args[0])?;
     if !(0.0..=1.0).contains(&cue.value) {
         return None;
     }
@@ -45,10 +45,10 @@ pub(super) fn keyframe(
             return None;
         }
         let points = [
-            numbers.read(&outer.args[0])?,
-            numbers.read(&outer.args[1])?,
-            numbers.read(&outer.args[2])?,
-            numbers.read(&outer.args[3])?,
+            constants.float(&outer.args[0])?,
+            constants.float(&outer.args[1])?,
+            constants.float(&outer.args[2])?,
+            constants.float(&outer.args[3])?,
         ];
         (setter, Some(points))
     } else {
@@ -67,7 +67,7 @@ pub(super) fn keyframe(
         }
         let (getter, property) = read_property(&current.args[0], catalog, resolve)?;
         let value = property.shape.read_keyframe(
-            &current.args[1], catalog.project_effects, resolve, shared_stops, numbers,
+            &current.args[1], catalog.project_effects, resolve, shared_stops, constants,
         )?;
         keys.push(MappedKey {
             source: KeySource {

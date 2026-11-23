@@ -45,7 +45,7 @@ impl<'a> RustSourceScope<'a> {
         &'source self,
         path: &'source Expr,
         types: &[&str],
-    ) -> Option<&'source Expr> {
+    ) -> Option<(&'source Expr, Self)> {
         let value = self.resolver.value_in_checked(self.scope, path, |value, attrs| {
             attrs.iter().all(|attr| {
                 ["doc", "allow", "expect", "warn", "deny", "forbid"]
@@ -53,7 +53,7 @@ impl<'a> RustSourceScope<'a> {
                     .any(|name| attr.path().is_ident(*name))
             }) && self.resolver.value_type_path(value).is_some_and(|ty| types.contains(&ty.as_str()))
         })?;
-        value.constant.map(|_| value.expression)
+        value.constant.map(|_| (value.expression, Self { scope: value.scope, ..*self }))
     }
 
     pub(crate) fn returned_builder(mut self, assignment: &Expr) -> Option<ReturnedBuilder<'a>> {

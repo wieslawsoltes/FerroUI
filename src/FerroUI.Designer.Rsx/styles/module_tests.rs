@@ -77,10 +77,12 @@ fn view() -> Element { rsx! { Border {
 fn shared_gradient_keys_follow_an_unsaved_palette_module() {
     let fixture = Fixture::create();
     fixture.write("application.rs", "mod palette; mod screen;\n");
-    let initial = r#"use ferroui_base::media::{immutable::ImmutableGradientStop as Stop, Colors};
+    let initial = r#"use ferroui_base::media::{immutable::ImmutableGradientStop as Stop, Color, Colors};
 pub const OFFSET: f64 = 0.2;
 pub const CUE: f64 = 1.0;
-pub const PALETTE: &[Stop] = &[Stop::new(OFFSET, Colors::STEEL_BLUE), Stop::new(1.0, Colors::MEDIUM_SEA_GREEN)];
+pub const PACKED: u32 = 0xFF46_82B4;
+pub const ACCENT: Color = Color::from_uint32(PACKED);
+pub const PALETTE: &[Stop] = &[Stop::new(OFFSET, ACCENT), Stop::new(1.0, Colors::MEDIUM_SEA_GREEN)];
 "#;
     let palette = fixture.write("palette.rs", initial);
     let screen = r#"use crate::palette::{CUE, PALETTE};
@@ -101,8 +103,11 @@ fn view() -> Element { rsx! { Border {
         view.preview_markup().animations[0].1.xaml.clone()
     };
     assert!(render(&modules).contains("Offset=\"0.2\""));
-    let draft = modules.with_file_text(&palette, &initial.replace("0.2;", "0.37;").replace("1.0;", "0.8;")).unwrap();
-    assert!(render(&draft).contains("Offset=\"0.37\""));
+    let draft = modules.with_file_text(&palette, &initial.replace("0.2;", "0.37;").replace("1.0;", "0.8;")
+        .replace("0xFF46_82B4", "0xFF22_82B4")).unwrap();
+    let updated = render(&draft);
+    assert!(updated.contains("Offset=\"0.37\""));
+    assert!(updated.contains("Color=\"#FF2282B4\""));
     let view = catalog.project_with_modules(screen, caret, Some(&draft)).unwrap();
     assert!(view.preview_markup().animations[0].1.maps_key(
         "Background", 0.8, ferroui_designer_animation::ValueKind::Brush,

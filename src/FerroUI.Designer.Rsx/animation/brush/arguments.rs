@@ -1,5 +1,5 @@
 use super::{
-    super::{number_source::FloatReader, variant::VariantSource, FloatSource},
+    super::{constant_source::ConstantReader, variant::VariantSource, FloatSource},
     operand::{self, GeometrySource, Leaf},
 };
 use ferroui_designer_animation::{
@@ -37,7 +37,7 @@ impl Arguments {
         operands: &[&Expr],
         shared_radius: Option<SourceSpan>,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationGradient, Self)> {
         let [opacity, transform, origin, spread, geometry @ .., last] = operands else {
             return None;
@@ -52,25 +52,25 @@ impl Arguments {
         if geometry.len() != defaults.len() {
             return None;
         }
-        let opacity = numbers.read(opacity)?;
+        let opacity = constants.float(opacity)?;
         value.opacity = opacity.value;
         value.spread = GradientSpread::parse(
             resolve(spread)?.strip_prefix("ferroui_base::media::GradientSpreadMethod::")?,
         )?;
         let spread = VariantSource::read(spread, SPREAD_TYPE, value.spread.name(), resolve)?;
         let (transform_origin, origin) =
-            GeometrySource::read(origin, &value.transform_origin.value(), resolve, numbers)?;
+            GeometrySource::read(origin, &value.transform_origin.value(), resolve, constants)?;
         value.transform_origin = point(&transform_origin)?;
-        value.transform = operand::transform(transform, resolve, numbers)?;
+        value.transform = operand::transform(transform, resolve, constants)?;
         let (mut values, geometry): (Vec<_>, Vec<_>) = defaults
             .into_iter()
             .zip(geometry)
-            .map(|((_, default), expr)| GeometrySource::read(expr, &default, resolve, numbers))
+            .map(|((_, default), expr)| GeometrySource::read(expr, &default, resolve, constants))
             .collect::<Option<Vec<_>>>()?
             .into_iter()
             .unzip();
         let trailing = if let Some(constructor) = shared_radius {
-            let radius = numbers.read(last)?;
+            let radius = constants.float(last)?;
             let value = GradientDistance {
                 scalar: radius.value,
                 unit: RelativeUnit::Relative,
@@ -83,7 +83,7 @@ impl Arguments {
                 expression: Leaf::read(last)?,
             }
         } else {
-            value.relative_transform = operand::transform(last, resolve, numbers)?;
+            value.relative_transform = operand::transform(last, resolve, constants)?;
             TrailingArguments::RelativeTransform(Leaf::read(last)?)
         };
         value.shape = shape(value.shape, &values)?;

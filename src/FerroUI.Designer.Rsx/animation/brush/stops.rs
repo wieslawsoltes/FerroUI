@@ -1,4 +1,8 @@
-use super::super::{color::ColorSource, number_source::{constant_value, FloatReader}, syntax, FloatSource};
+use super::super::{
+    color::{ColorSource, rust_literal as color_literal},
+    constant_source::{ConstantReader, value_in_scope},
+    syntax, FloatSource,
+};
 use super::operand::Leaf;
 use crate::blocks::keep_comments;
 use crate::local_rust::RustSourceScope;
@@ -34,10 +38,10 @@ impl StopsSource {
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
         shared: &impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(Vec<AnimationGradientStop>, Self)> {
         if let Some(array) = borrowed(expression).and_then(array) {
-            let (values, source) = InlineStops::read(array, resolve, numbers)?;
+            let (values, source) = InlineStops::read(array, resolve, constants)?;
             return Some((values, Self::Inline(source)));
         }
         Some((shared(expression)?, Self::Shared(Leaf::read(expression)?)))
@@ -83,7 +87,7 @@ pub(in crate::animation) fn shared_values(
     InlineStops::read(
         array,
         &|path| scope.path(path),
-        &FloatReader(&|path| constant_value(path, scope)),
+        &ConstantReader(&|path, ty| value_in_scope(path, ty, scope)),
     )
     .map(|(values, _)| values)
 }
@@ -107,7 +111,7 @@ impl InlineStops {
     fn read(
         array: &ExprArray,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(Vec<AnimationGradientStop>, Self)> {
         let mut values = Vec::with_capacity(array.elems.len());
         let mut stops = Vec::with_capacity(array.elems.len());
@@ -119,8 +123,8 @@ impl InlineStops {
             {
                 return None;
             }
-            let offset = numbers.read(&call.args[0])?;
-            let (color, source) = ColorSource::read_with(&call.args[1], false, resolve)?;
+            let offset = constants.float(&call.args[0])?;
+            let (color, source) = ColorSource::read(&call.args[1], false, resolve, constants)?;
             values.push(AnimationGradientStop {
                 offset: offset.value,
                 argb: color.argb8()?,
@@ -181,10 +185,6 @@ impl InlineStops {
         }
         Ok(())
     }
-}
-
-pub(super) fn color_literal([a, r, g, b]: [u8; 4]) -> String {
-    format!("::ferroui_base::media::Color::from_argb({a}, {r}, {g}, {b})")
 }
 
 fn stop_literal(stop: &AnimationGradientStop) -> String {

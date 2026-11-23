@@ -32,7 +32,7 @@ impl RsxAnimation {
             if !destinations.insert((&key.property, time.to_bits())) {
                 return Err("Another Rust keyframe occupies the destination time".into());
             }
-            let (_, agreed) = cues.entry(key.cue.literal.start).or_insert((&key.cue, time));
+            let (_, agreed) = cues.entry(key.cue.anchor()).or_insert((&key.cue, time));
             if *agreed != time {
                 return Err("Select every setter that shares the Rust keyframe cue".into());
             }

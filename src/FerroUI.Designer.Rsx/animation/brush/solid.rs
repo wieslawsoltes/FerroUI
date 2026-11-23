@@ -1,4 +1,4 @@
-use super::super::{FloatSource, color::ColorSource, number_source::FloatReader, syntax};
+use super::super::{FloatSource, color::ColorSource, constant_source::ConstantReader, syntax};
 use super::operand;
 use ferroui_designer_animation::{AnimationBrush, AnimationValue, BrushForm};
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -25,7 +25,7 @@ impl SolidSource {
         call: &ExprCall,
         method: &str,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationBrush, Self)> {
         let color = call.args.first()?;
         let (value, opacity, source) = match (method, call.args.len()) {
@@ -36,9 +36,9 @@ impl SolidSource {
                 {
                     return None;
                 }
-                let opacity = numbers.read(&call.args[1])?;
+                let opacity = constants.float(&call.args[1])?;
                 (
-                    ColorSource::read_with(color, false, resolve)?,
+                    ColorSource::read(color, false, resolve, constants)?,
                     opacity.value,
                     OpacitySource::Explicit(opacity),
                 )
@@ -49,9 +49,9 @@ impl SolidSource {
                 };
                 let packed = method == "from_uint32";
                 let value = if packed {
-                    ColorSource::read_packed(color)?
+                    ColorSource::read_packed(color, constants)?
                 } else {
-                    ColorSource::read_with(color, false, resolve)?
+                    ColorSource::read(color, false, resolve, constants)?
                 };
                 (
                     value,

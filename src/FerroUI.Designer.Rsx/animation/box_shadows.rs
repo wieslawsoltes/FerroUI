@@ -3,7 +3,7 @@
 #[path = "box_shadow_layer.rs"]
 mod layer;
 
-use super::{number_source::FloatReader, syntax::span};
+use super::{constant_source::ConstantReader, syntax::span};
 use super::text_source::TextSource;
 use ferroui_base::media::BoxShadows;
 use ferroui_designer_animation::{AnimationBoxShadows, AnimationValue};
@@ -28,7 +28,7 @@ impl BoxShadowsSource {
     pub(super) fn read(
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<(AnimationBoxShadows, Self)> {
         if let Some((value, source)) = TextSource::parse_call(expression, resolve, FACTORIES) {
             return Some((
@@ -43,7 +43,7 @@ impl BoxShadowsSource {
         let (value, layers) = match (method.as_str(), args.as_slice()) {
             ("default", []) => (BoxShadows::default(), Vec::new()),
             ("new", [first]) => {
-                let first = ShadowLayer::read(first, resolve, numbers)?;
+                let first = ShadowLayer::read(first, resolve, constants)?;
                 (BoxShadows::new(first.value.into()), vec![first])
             }
             ("with_rest", [first, Expr::Reference(rest)]) => {
@@ -53,11 +53,11 @@ impl BoxShadowsSource {
                 if rest.mutability.is_some() || !rest.attrs.is_empty() || !array.attrs.is_empty() {
                     return None;
                 }
-                let first = ShadowLayer::read(first, resolve, numbers)?;
+                let first = ShadowLayer::read(first, resolve, constants)?;
                 let rest = array
                     .elems
                     .iter()
-                    .map(|layer| ShadowLayer::read(layer, resolve, numbers))
+                    .map(|layer| ShadowLayer::read(layer, resolve, constants))
                     .collect::<Option<Vec<_>>>()?;
                 let values = rest
                     .iter()

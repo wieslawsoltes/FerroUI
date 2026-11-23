@@ -2,7 +2,7 @@ use super::box_shadows::BoxShadowsSource;
 use super::brush::BrushSource;
 use super::color::{packed_argument, ColorSource};
 use super::effect::EffectSource;
-use super::number_source::FloatReader;
+use super::constant_source::{ConstantReader, ConstantType};
 use super::numbers::Numbers;
 use super::relative::RelativeSource;
 use super::transform_list::TransformListSource;
@@ -88,31 +88,31 @@ impl ValueShape {
         expression: &Expr,
         resolve: impl Fn(&Expr) -> Option<String>,
     ) -> Option<ValueSource> {
-        self.read_value(expression, &resolve, &FloatReader::LITERALS, false)
+        self.read_value(expression, &resolve, &ConstantReader::LITERALS, false)
     }
 
     fn read_value(
         self,
         expression: &Expr,
         resolve: &impl Fn(&Expr) -> Option<String>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
         project_effects: bool,
     ) -> Option<ValueSource> {
         let kind = self.kind;
         if kind == ValueKind::Color {
-            return ColorSource::read_with(expression, self.brush, resolve)
+            return ColorSource::read(expression, self.brush, resolve, constants)
                 .map(ValueSource::color);
         }
         if matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar) {
-            let (value, source) = RelativeSource::read(expression, kind, resolve, numbers)?;
+            let (value, source) = RelativeSource::read(expression, kind, resolve, constants)?;
             return Some(ValueSource { value, source: ValueSyntax::Relative(Box::new(source)) });
         }
         if kind == ValueKind::Effect {
-            let (value, source) = EffectSource::read(expression, resolve, project_effects, numbers)?;
+            let (value, source) = EffectSource::read(expression, resolve, project_effects, constants)?;
             return Some(ValueSource { value: AnimationValue::Effect(value), source: ValueSyntax::Effect(source) });
         }
         if kind == ValueKind::BoxShadows {
-            let (value, source) = BoxShadowsSource::read(expression, resolve, numbers)?;
+            let (value, source) = BoxShadowsSource::read(expression, resolve, constants)?;
             return Some(ValueSource {
                 value: AnimationValue::BoxShadows(value),
                 source: ValueSyntax::BoxShadows(source),
@@ -125,7 +125,7 @@ impl ValueShape {
                 source: ValueSyntax::TransformList(source),
             });
         }
-        let (value, source) = Numbers::read(expression, kind, resolve, numbers)?;
+        let (value, source) = Numbers::read(expression, kind, resolve, constants)?;
         Some(ValueSource { value, source: ValueSyntax::Numbers(source) })
     }
 
@@ -135,15 +135,15 @@ impl ValueShape {
         project_effects: bool,
         resolve: &impl Fn(&Expr) -> Option<String>,
         shared_stops: &impl Fn(&Expr) -> Option<Vec<ferroui_designer_animation::AnimationGradientStop>>,
-        numbers: &FloatReader<'_>,
+        constants: &ConstantReader<'_>,
     ) -> Option<ValueSource> {
         if self.brush {
-            if let Some((value, source)) = BrushSource::read(expression, resolve, shared_stops, numbers) {
+            if let Some((value, source)) = BrushSource::read(expression, resolve, shared_stops, constants) {
                 value.validate().ok()?;
                 return Some(ValueSource { value, source: ValueSyntax::Brush(Box::new(source)) });
             }
         }
-        self.read_value(expression, resolve, numbers, project_effects)
+        self.read_value(expression, resolve, constants, project_effects)
     }
 }
 
@@ -160,17 +160,13 @@ impl ValueSource {
         };
         if let Some(argument) = packed {
             let operand = bindings.operand(&initializer, argument)?;
-            let value = Self::color(ColorSource::read_packed(operand.expression)?);
+            let value = Self::color(ColorSource::read_packed(operand.expression, &ConstantReader::LITERALS)?);
             if operand.constant.is_none() {
                 return Some((value, initializer));
             }
-            return matches!(
-                bindings.value_type_path(&operand).as_deref(),
-                Some("u32" | "core::primitive::u32" | "std::primitive::u32")
-            )
-            .then_some((value, operand));
+            return ConstantType::U32.accepts(&bindings.value_type_path(&operand)?).then_some((value, operand));
         }
-        let value = Self::color(ColorSource::read_with(initializer.expression, false, resolve)?);
+        let value = Self::color(ColorSource::read(initializer.expression, false, &resolve, &ConstantReader::LITERALS)?);
         Some((value, initializer))
     }
 
@@ -238,10 +234,8 @@ pub(crate) fn rust_literal(value: &AnimationValue) -> Result<String, String> {
     if let AnimationValue::Number(number) = value {
         return Ok(format!("{number:?}"));
     }
-    if let Some([a, r, g, b]) = value.argb8() {
-        return Ok(format!(
-            "::ferroui_base::media::Color::from_argb({a}, {r}, {g}, {b})"
-        ));
+    if let Some(bytes) = value.argb8() {
+        return Ok(super::color::rust_literal(bytes));
     }
     if let Some(relative) = super::relative::literal(value) {
         return Ok(relative);

@@ -23,14 +23,15 @@ export async function verifyHostedColorCurves(preview: NativePreview, update: (r
     assert.equal(midpoint.frame.image.png, reference.image.png, 'The four values reproduce the sampled native color');
     await assert.rejects(preview.hostedCurve(identity(started), { ...xaml.query, channel: 'red' }), /frame changed/i);
 
-    const rust = `fn separate() { rsx! { TextBlock { text: "Keep 🧭" } } }
+    const rust = `const TARGET_RED: u8 = 255u8;
+fn separate() { rsx! { TextBlock { text: "Keep 🧭" } } }
 fn view() { rsx! {
     StackPanel {
         styles: [ferroui_view::style("Border#ReviewCard").animation(
             ferroui_view::animation(ferroui_view::ms(2000))
                 .key_frame(0.0, |key| key.set(ferroui_controls::Border::background_property(), "#000000"))
                 .key_frame(1.0, |key| key.set(ferroui_controls::Border::background_property(),
-                    ferroui_base::media::Color::from_argb(128, /* Red 🧭 */ 255u8, 128, 64)))
+                    ferroui_base::media::Color::from_argb(128, /* Red 🧭 */ TARGET_RED, 128, 64)))
                 .fill_mode(ferroui_base::animation::FillMode::Both)
         )],
         Border { name: "ReviewCard", width: 180.0, height: 100.0, background: "#305DB6" }
@@ -40,7 +41,7 @@ fn view() { rsx! {
     const rsx = (revision: number, source: string): HostedSource => {
         const frame = update(revision, source);
         return { ...frame, projectPath: '/ColorReview.rs', document: { ...frame.document, language: 'rust',
-            uri: new URL('ColorReview.rs', frame.document.uri).toString(), caret: { line: 2, character: 8 } } };
+            uri: new URL('ColorReview.rs', frame.document.uri).toString(), caret: { line: 3, character: 8 } } };
     };
     const mapped = await preview.renderHosted(rsx(212, rust));
     const { program, query } = await checkCurves(preview, mapped);
@@ -53,7 +54,7 @@ fn view() { rsx! {
     const { start, end, expected: original, replacement } = draft.patch;
     assert.equal(rust.slice(start, end), original);
     const rebuilt = rust.slice(0, start) + replacement + rust.slice(end);
-    assert.equal(rebuilt, rust.replace('128, /* Red 🧭 */ 255u8', '96, /* Red 🧭 */ 192u8'));
+    assert.equal(rebuilt, rust.replace('128, /* Red 🧭 */ TARGET_RED', '96, /* Red 🧭 */ 192u8'));
     const edited = await preview.renderHosted(rsx(213, rebuilt));
     const next = edited.animations!.programs.find(item => item.curveTracks?.some(track => track.property === 'Background'))!;
     const red = await preview.hostedCurve(identity(edited), { ...query, program: next.id, target: next.defaultTargets[0], channel: 'red' });

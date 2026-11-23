@@ -335,6 +335,25 @@ Agents can request `"red"`, `"green"`, `"blue"`, or `"alpha"` from `designer_ani
 
 ![App Preview shows the blue velocity of a mapped Rust brush animation and the live application at the retained playhead](../images/vscode-app-preview-color-curves.jpg)
 
+#### Edit a key that uses a shared Rust color
+
+1. Open [palette_motion.rs](../../../editors/vscode/test/fixtures/palette_motion.rs) in Design and
+   show the Timeline. The first and last Background keys both read `brand::INK`.
+2. Select the last key at **2 s**, choose **Edit keyframe value as text**, enter `#FF376E55`,
+   and choose **Apply keyframe**. The edited argument reads
+   `/* end ink 🎨 */ 0xFF37_6E55_u32` inside `Color::from_uint32`. The first key still uses
+   the shared blue swatch. Seek to each key to compare their native colors.
+3. Use Undo to restore the shared reference. Edit the declaration in Rust to update every
+   reference to that palette value.
+
+The Timeline, Studio, and App Preview read unconditional packed `u32` colors and `u8` channels
+with literal initializers. They also read `Color` constants initialized with a supported constructor,
+explicit struct fields, or a FerroUI swatch. Named imports and aliases can come from unsaved
+modules in the selected Cargo target. The same rule applies to solid brushes, inline gradient
+stops, and shadow colors. Use source editing for computed or conditional declarations.
+
+![The Timeline displays the edited green Background key at 2 seconds beside its Rust literal and the blue palette reference at the first key](../images/vscode-shared-color-keyframes.png)
+
 ### Inspect a blur or drop-shadow animation
 
 1. Open an `Effect` animation with literal blur keys or literal drop-shadow keys. In the docked Timeline or App Preview, open **Animation graph** and choose **Value curves** or **Velocity curves**. In App Preview, choose the effect track and its live target.

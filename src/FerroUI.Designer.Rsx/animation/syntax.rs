@@ -1,6 +1,6 @@
 use super::keyframe::{keyframe, record, MappedKey};
 use super::brush::{shared_key, shared_values};
-use super::number_source::{constant_value, FloatReader};
+use super::constant_source::{value_in_scope, ConstantReader, ConstantType, ConstantValue};
 use super::{
     DelaySource, FloatSource, RsxAnimation, TargetType, TRACK_TARGET,
 };
@@ -26,7 +26,7 @@ pub(crate) fn authored_clip(expr: &Expr, catalog: &RsxCatalog, bindings: &LocalR
         catalog,
         |expression| bindings.path(expression),
         |expression| shared_values(expression, scope),
-        |path| constant_value(path, scope),
+        |path, ty| value_in_scope(path, ty, scope),
     )
 }
 
@@ -35,13 +35,13 @@ pub(super) fn clip(
     catalog: &RsxCatalog,
     resolve: impl Fn(&Expr) -> Option<String>,
     read_stops: impl Fn(&Expr) -> Option<Vec<AnimationGradientStop>>,
-    read_number: impl Fn(&Expr) -> Option<f64>,
+    read_constant: impl Fn(&Expr, ConstantType) -> Option<ConstantValue>,
 ) -> Option<RsxAnimation> {
     // Structural edits reparse the clip by itself. Retain the imported paths
     // resolved in this accepted source scope for that detached check.
     let imports = RefCell::new(BTreeMap::new());
     let stops = RefCell::new(BTreeMap::new());
-    let numbers = RefCell::new(BTreeMap::new());
+    let constants = RefCell::new(BTreeMap::new());
     let resolve = |expression: &Expr| {
         let resolved = resolve(expression)?;
         let written = authored_path(expression)?;
@@ -58,13 +58,13 @@ pub(super) fn clip(
         stops.borrow_mut().insert(name, values.clone());
         Some(values)
     };
-    let read_number = |expression: &Expr| {
+    let read_constant = |expression: &Expr, ty| {
         let name = authored_path(expression)?;
-        let value = read_number(expression)?;
-        numbers.borrow_mut().insert(name, value);
+        let value = read_constant(expression, ty)?;
+        constants.borrow_mut().insert((name, ty), value.clone());
         Some(value)
     };
-    let numbers_reader = FloatReader(&read_number);
+    let constant_reader = ConstantReader(&read_constant);
     let (factory, methods) = chain(expr)?;
     let duration = milliseconds(view_argument_with(factory, "animation", &resolve)?, &resolve)?;
     let mut timeline = Timeline::new(duration).ok()?;
@@ -77,7 +77,7 @@ pub(super) fn clip(
         match method.method.to_string().as_str() {
             "key_frame" => {
                 for MappedKey { source: key, owner } in
-                    keyframe(method, duration, catalog, &resolve, &read_stops, &numbers_reader)?
+                    keyframe(method, duration, catalog, &resolve, &read_stops, &constant_reader)?
                 {
                     if let Some(owner) = owner {
                         if target_type.as_ref().is_some_and(|target| *target != owner) {
@@ -116,7 +116,7 @@ pub(super) fn clip(
         keys,
         imports: imports.into_inner(),
         shared_stops: stops.into_inner(),
-        shared_numbers: numbers.into_inner(),
+        constants: constants.into_inner(),
         attachment: None,
     })
 }
@@ -288,7 +288,7 @@ fn easing(expr: &Expr) -> Option<Easing> {
 }
 
 pub(crate) fn float(expr: &Expr) -> Option<FloatSource> {
-    FloatReader::LITERALS.read(expr)
+    ConstantReader::LITERALS.float(expr)
 }
 
 pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {
@@ -297,11 +297,13 @@ pub(crate) fn span(tokens: &impl Spanned) -> SourceSpan {
 }
 
 pub(super) fn unparen(mut expression: &Expr) -> &Expr {
-    while let Expr::Paren(paren) = expression {
-        if !paren.attrs.is_empty() { break; }
-        expression = &paren.expr;
+    loop {
+        expression = match expression {
+            Expr::Paren(paren) if paren.attrs.is_empty() => &paren.expr,
+            Expr::Group(group) if group.attrs.is_empty() => &group.expr,
+            _ => return expression,
+        };
     }
-    expression
 }
 
 pub(super) fn rc_interface_cast(
