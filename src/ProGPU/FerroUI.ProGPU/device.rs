@@ -4,7 +4,7 @@ use crate::notes;
 use crate::outline_log::{self, Entry};
 use progpu_native_sys::progpu::*;
 use progpu_native_sys::webgpu::*;
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::ffi::{c_char, c_void, CStr};
 use std::fmt;
 use std::ptr;
@@ -138,6 +138,55 @@ pub struct ProGpuEngine {
     thread: Cell<ThreadId>,
     /// The entry of the outline log the engine holds the glyph outlines up to.
     outlines_seen: Cell<u64>,
+    /// The stream the engine retains, kept only while scene deltas are on.
+    retained_stream: RefCell<Option<Vec<u8>>>,
+}
+
+/// Whether frames are sent as the bytes that differ from the frame before
+/// (`FERROUI_PROGPU_SCENE_DELTA=1`). Off by default: the engine still validates and hashes the
+/// whole stream, so a delta has no measured gain yet and costs a copy of the stream here.
+fn scene_deltas_enabled() -> bool {
+    static ENABLED: std::sync::OnceLock<bool> = std::sync::OnceLock::new();
+    *ENABLED.get_or_init(|| std::env::var_os("FERROUI_PROGPU_SCENE_DELTA").is_some_and(|value| value == "1"))
+}
+
+/// The unit in which two streams are compared for a delta.
+const DELTA_BLOCK: usize = 256;
+
+/// The runs of `next` that differ from `previous`, with their bytes, compared in blocks; what
+/// lies past the end of `previous` is one run with what touches it.
+pub(crate) fn scene_delta_ranges(previous: &[u8], next: &[u8]) -> (Vec<progpu_native_scene_delta_range>, Vec<u8>) {
+    let common = previous.len().min(next.len());
+    let (mut ranges, mut bytes): (Vec<progpu_native_scene_delta_range>, Vec<u8>) = (Vec::new(), Vec::new());
+    let mut push = |start: usize, end: usize| {
+        match ranges.last_mut() {
+            Some(last) if (last.offset + last.size) as usize == start => last.size += (end - start) as u64,
+            _ => ranges.push(progpu_native_scene_delta_range { offset: start as u64, size: (end - start) as u64 }),
+        }
+        bytes.extend_from_slice(&next[start..end]);
+    };
+    let mut at = 0;
+    while at < common {
+        let end = (at + DELTA_BLOCK).min(common);
+        if previous[at..end] != next[at..end] {
+            push(at, end);
+        }
+        at = end;
+    }
+    if next.len() > common {
+        push(common, next.len());
+    }
+    (ranges, bytes)
+}
+
+/// The identity of a stream: its scene and its generation.
+fn stream_identity(stream: &[u8]) -> Option<(u64, u64)> {
+    if stream.len() < std::mem::size_of::<progpu_native_scene_header>() {
+        return None;
+    }
+    // SAFETY: the stream holds a header, read without assuming its alignment.
+    let header = unsafe { std::ptr::read_unaligned(stream.as_ptr() as *const progpu_native_scene_header) };
+    Some((header.scene_id, header.generation))
 }
 
 /// The most outlines and segments of one registration call: far below what the engine takes in
@@ -481,7 +530,7 @@ impl ProGpuEngine {
         // SAFETY: the options are borrowed for the call; the handles are those of the device.
         let status = unsafe { progpu_native_dawn_engine_create(&options, &mut engine) };
         if status == PROGPU_NATIVE_STATUS_SUCCESS {
-            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()), outlines_seen: Cell::new(0) })
+            Ok(Self { device: device.clone(), engine, format, thread: Cell::new(std::thread::current().id()), outlines_seen: Cell::new(0), retained_stream: RefCell::new(None), })
         } else {
             Err(ProGpuDeviceError::Engine(status))
         }
@@ -601,6 +650,57 @@ impl ProGpuEngine {
     /// Sends a scene stream to the engine (`progpu_native_engine_update_scene`): only when its
     /// generation changed; the engine keeps the scene and renders it until the next stream.
     pub fn update_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
+        if scene_deltas_enabled() {
+            self.update_scene_by_delta(stream)
+        } else {
+            self.update_whole_scene(stream)
+        }
+    }
+
+    /// Sends `stream` as the bytes that differ from the stream the engine retains when it is the
+    /// next generation of that scene, and whole otherwise or if the engine refuses the delta.
+    pub(crate) fn update_scene_by_delta(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
+        let mut retained = self.retained_stream.borrow_mut();
+        let follows = retained.as_deref().and_then(stream_identity).zip(stream_identity(stream)).is_some_and(
+            |((scene, generation), (next_scene, next_generation))| scene == next_scene && generation < next_generation,
+        );
+        if follows {
+            let previous = retained.as_deref().unwrap_or_default();
+            let base_generation = stream_identity(previous).map_or(0, |(_, generation)| generation);
+            let (ranges, bytes) = scene_delta_ranges(previous, stream);
+            let engine = self.enter();
+            self.register_outlines(engine);
+            let delta = progpu_native_scene_delta {
+                struct_size: std::mem::size_of::<progpu_native_scene_delta>() as u32,
+                range_count: ranges.len() as u32,
+                scene_id: stream_identity(stream).map_or(0, |(scene, _)| scene),
+                base_generation,
+                stream_size: stream.len() as u64,
+                ranges: ranges.as_ptr(),
+                bytes: bytes.as_ptr() as *const c_void,
+                byte_count: bytes.len() as u64,
+            };
+            // SAFETY: the engine is alive; the record and its spans are borrowed for the call.
+            let (status, metrics) = unsafe {
+                let mut metrics: progpu_native_scene_metrics = std::mem::zeroed();
+                metrics.struct_size = std::mem::size_of::<progpu_native_scene_metrics>() as u32;
+                (progpu_native_engine_update_scene_delta(engine, &delta, &mut metrics), metrics)
+            };
+            if status == PROGPU_NATIVE_STATUS_SUCCESS {
+                let kept = retained.get_or_insert_with(Vec::new);
+                kept.clear();
+                kept.extend_from_slice(stream);
+                return Ok(metrics);
+            }
+        }
+        let metrics = self.update_whole_scene(stream)?;
+        let kept = retained.get_or_insert_with(Vec::new);
+        kept.clear();
+        kept.extend_from_slice(stream);
+        Ok(metrics)
+    }
+
+    fn update_whole_scene(&self, stream: &[u8]) -> Result<progpu_native_scene_metrics, String> {
         let engine = self.enter();
         self.register_outlines(engine);
         // SAFETY: the engine is alive; the stream is borrowed for the call.
