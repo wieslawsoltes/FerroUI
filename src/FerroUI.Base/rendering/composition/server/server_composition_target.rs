@@ -487,11 +487,16 @@ impl ServerCompositionTarget {
             if !self.dirty_rects.is_empty() {
                 super::take_backdrop_regions();
                 self.dirty_rects.finalize_frame(render_bounds);
+                // What a frame that is not a full redraw changes of a target that keeps its content.
+                let damage = (!full_redraw).then(|| self.dirty_rects.combined_rect().to_rect());
                 let layer = self.layer.borrow().clone();
                 match layer {
                     Some(layer) => {
                         {
                             let mut context = layer.create_drawing_context();
+                            if let Some(damage) = damage {
+                                context.set_frame_damage(damage);
+                            }
                             self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
                             context.dispose();
                         }
@@ -507,6 +512,9 @@ impl ServerCompositionTarget {
                         self.overlays.draw(self, &mut *render_target_context, true);
                     }
                     None => {
+                        if let Some(damage) = damage {
+                            render_target_context.set_frame_damage(damage);
+                        }
                         self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
                         self.overlays.draw(self, &mut *render_target_context, false);
                     }

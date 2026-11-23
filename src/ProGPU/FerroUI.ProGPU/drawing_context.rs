@@ -233,6 +233,10 @@ pub struct ProGpuDrawingContext {
     complete: Option<Box<dyn FnOnce(Recording)>>,
     /// What is being kept as a fragment (`fragment.rs`).
     fragment: Option<FragmentRecorder>,
+    /// What this frame changes of a target that keeps its content.
+    damage: Option<Rect>,
+    /// The scene has a layer or a state with a mask: the engine cannot replay it in part.
+    needs_whole_replay: bool,
 }
 
 impl ProGpuDrawingContext {
@@ -268,6 +272,8 @@ impl ProGpuDrawingContext {
             error,
             complete,
             fragment: None,
+            damage: None,
+            needs_whole_replay: false,
         }
     }
 
@@ -323,6 +329,7 @@ impl ProGpuDrawingContext {
             state.clip_rect = image_rect(clip);
         }
         if self.current.mask != NO_INDEX {
+            self.needs_whole_replay = true;
             state.flags |= PROGPU_NATIVE_SCENE_STATE_MASK as u32;
             state.mask_resource_index = self.current.mask;
         }
@@ -1065,6 +1072,7 @@ impl ProGpuDrawingContext {
             reserved0: 0,
             reserved1: 0,
         };
+        self.needs_whole_replay = true;
         let result = self.scene().push_layer(&layer);
         self.record(result);
         self.layers.push(LayerEntry::Layer);
@@ -1109,6 +1117,7 @@ impl ProGpuDrawingContext {
             reserved0: 0,
             reserved1: 0,
         };
+        self.needs_whole_replay = true;
         let result = self.scene().push_layer(&layer);
         self.record(result);
         self.layers.push(LayerEntry::Layer);
@@ -1211,6 +1220,7 @@ impl ProGpuDrawingContext {
             reserved0: 0,
             reserved1: 0,
         };
+        self.needs_whole_replay = true;
         let result = self.scene().push_layer(&layer);
         self.record(result);
         self.clips.push(ClipEntry::Layer);
@@ -1292,6 +1302,7 @@ impl ProGpuDrawingContext {
             reserved0: 0,
             reserved1: 0,
         };
+        self.needs_whole_replay = true;
         let result = self.scene().push_layer(&layer);
         self.record(result);
         self.layers.push(LayerEntry::Layer);
@@ -1311,6 +1322,10 @@ impl ProGpuDrawingContext {
 impl IDrawingContextImpl for ProGpuDrawingContext {
     fn transform(&self) -> Matrix {
         self.current.transform
+    }
+
+    fn set_frame_damage(&mut self, damage: Rect) {
+        self.damage = Some(damage);
     }
 
     fn set_transform(&mut self, value: Matrix) {
@@ -1636,7 +1651,8 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         }
         if let (Some(scene), Some(complete)) = (self.scene.take(), self.complete.take()) {
             let images = self.textures.drain(..).map(|(texture, _)| texture).collect();
-            complete(Recording { scene, error: self.error.take(), images });
+            let damage = self.damage.filter(|_| !self.needs_whole_replay);
+            complete(Recording { scene, error: self.error.take(), images, damage });
         }
     }
 }

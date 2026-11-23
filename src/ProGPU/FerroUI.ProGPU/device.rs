@@ -761,6 +761,23 @@ impl ProGpuEngine {
         height: u32,
         preserve: bool,
     ) -> Result<progpu_native_scene_frame_metrics, String> {
+        self.render_scene_damaged(scene_id, generation, target_view, width, height, preserve, None)
+    }
+
+    /// [`render_scene`](Self::render_scene) that replays only `damage` (`x, y, width, height` in
+    /// pixels) over a target that keeps its content. The engine takes it for a flat scene only:
+    /// on a scene with layers or masks it would clear the target, so the caller leaves it out.
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn render_scene_damaged(
+        &self,
+        scene_id: u64,
+        generation: u64,
+        target_view: WGPUTextureView,
+        width: u32,
+        height: u32,
+        preserve: bool,
+        damage: Option<[f32; 4]>,
+    ) -> Result<progpu_native_scene_frame_metrics, String> {
         // SAFETY: the engine is alive; the view is borrowed for the call.
         unsafe {
             let mut frame: progpu_native_scene_frame = std::mem::zeroed();
@@ -774,6 +791,13 @@ impl ProGpuEngine {
             frame.generation = generation;
             if preserve {
                 frame.flags = PROGPU_NATIVE_SCENE_FRAME_PRESERVE_TARGET as u32;
+                if let Some([x, y, damage_width, damage_height]) = damage {
+                    frame.flags |= PROGPU_NATIVE_SCENE_FRAME_DAMAGE_RECT as u32;
+                    frame.damage_x = x;
+                    frame.damage_y = y;
+                    frame.damage_width = damage_width;
+                    frame.damage_height = damage_height;
+                }
             }
             if crate::perf::enabled() {
                 frame.flags |= PROGPU_NATIVE_SCENE_FRAME_CAPTURE_CPU_STAGES as u32;

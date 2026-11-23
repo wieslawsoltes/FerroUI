@@ -100,6 +100,11 @@ pub trait IDrawingContextImpl {
         panic!("This rendering backend does not support isolated compositing layers");
     }
 
+    /// Tells the context that this frame changes only `damage` (in device pixels) of a target
+    /// that keeps its previous content: everything drawn is clipped to it. A backend may use it
+    /// to limit its work. The default ignores it, and no drawing depends on it.
+    fn set_frame_damage(&mut self, _damage: Rect) {}
+
     /// Pushes an opacity value.
     fn push_opacity(&mut self, opacity: f64, bounds: Option<Rect>);
 

@@ -520,3 +520,60 @@ fn frames_sent_as_deltas_read_back_like_whole_streams() {
         assert!(actual == expected, "frame {frame}");
     }
 }
+
+/// What a context hands over for a frame drawn by `draw`.
+fn damage_of(draw: impl FnOnce(&mut ProGpuDrawingContext)) -> Option<Rect> {
+    let handed = Rc::new(std::cell::Cell::new(None));
+    let kept = handed.clone();
+    let complete: Box<dyn FnOnce(crate::gpu::Recording)> = Box::new(move |recording| kept.set(Some(recording.damage)));
+    let mut context = ProGpuDrawingContext::with_gpu(SceneBuilder::new(), None, Some(complete));
+    draw(&mut context);
+    context.dispose();
+    handed.get().expect("the frame was handed over")
+}
+
+#[test]
+fn a_frame_hands_over_its_damage_only_when_the_engine_can_replay_it_in_part() {
+    let blue = solid(0, 0, 255);
+    let damage = Rect::new(4.0, 4.0, 20.0, 20.0);
+    assert_eq!(None, damage_of(|context| fill_rect(context, blue.as_ref(), Rect::new(0.0, 0.0, 8.0, 8.0))), "no damage was told");
+    assert_eq!(Some(damage), damage_of(|context| {
+        context.set_frame_damage(damage);
+        fill_rect(context, blue.as_ref(), Rect::new(0.0, 0.0, 8.0, 8.0));
+    }), "a flat scene");
+    assert_eq!(None, damage_of(|context| {
+        context.set_frame_damage(damage);
+        context.push_opacity(0.5, None);
+        fill_rect(context, blue.as_ref(), Rect::new(0.0, 0.0, 8.0, 8.0));
+        context.pop_opacity();
+    }), "a scene with a layer");
+    assert_eq!(None, damage_of(|context| {
+        context.set_frame_damage(damage);
+        context.push_clip_rounded(RoundedRect::from_radius(Rect::new(0.0, 0.0, 16.0, 16.0), 4.0));
+        fill_rect(context, blue.as_ref(), Rect::new(0.0, 0.0, 8.0, 8.0));
+        context.pop_clip();
+    }), "a scene with a mask");
+}
+
+#[test]
+fn a_damaged_frame_changes_only_its_damage() {
+    let Some(engine) = device() else { return };
+    let target = engine.device();
+    let (texture, view) = target.create_target(SIZE, SIZE);
+    let frame = |color: Color, damage: Option<[f32; 4]>, preserve: bool| {
+        let brush = Rc::new(ImmutableSolidColorBrush::new(color));
+        let mut context = ProGpuDrawingContext::new(SceneBuilder::new(), None);
+        fill_rect(&mut context, brush.as_ref(), Rect::new(0.0, 0.0, 96.0, 96.0));
+        let (mut scene, error) = context.finish();
+        assert!(error.is_none(), "recording: {error:?}");
+        let stream = scene.build().expect("the stream").to_vec();
+        engine.update_scene(&stream).expect("the scene");
+        engine.render_scene_damaged(scene.scene_id(), scene.generation(), view, SIZE, SIZE, preserve, damage).expect("the frame");
+    };
+    frame(Color::from_rgb(255, 0, 0), None, false);
+    frame(Color::from_rgb(0, 0, 255), Some([16.0, 16.0, 32.0, 32.0]), true);
+    let pixels = target.read_rgba8(texture, SIZE, SIZE);
+    target.release_texture(texture, view);
+    assert_eq!([0, 0, 255, 255], pixel(&pixels, 30, 30), "inside the damage");
+    assert_eq!([255, 0, 0, 255], pixel(&pixels, 70, 70), "outside the damage");
+}

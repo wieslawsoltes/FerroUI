@@ -305,6 +305,10 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         self.inner.pop_layer();
     }
 
+    fn set_frame_damage(&mut self, damage: Rect) {
+        self.inner.set_frame_damage(damage);
+    }
+
     fn push_opacity(&mut self, opacity: f64, bounds: Option<Rect>) {
         self.add_command(PendingCommand::PushOpacity(opacity, bounds));
     }
