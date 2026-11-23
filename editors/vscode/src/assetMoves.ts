@@ -7,7 +7,7 @@ import { isCompiledXamlRust } from './fileMoveRust';
 import { checkedFileMove, fileMoveDrafts } from './fileMoveSources';
 import type { FileMoveRequest } from './fileMoves';
 import { SourceChangeReview } from './sourceChangeReview';
-import { isWorkspaceFile, newWorkspaceFile, resolveWorkspaceFile } from './workspacePaths';
+import { newWorkspaceFile, resolveWorkspaceFile, workspaceSourceUri } from './workspacePaths';
 import type { XamlServer } from './xamlServer';
 
 export class AssetMoves implements vscode.Disposable {
@@ -18,9 +18,9 @@ export class AssetMoves implements vscode.Disposable {
 
     constructor(private readonly server: XamlServer) {}
 
-    async open(from: vscode.Uri | undefined): Promise<void> {
-        if (!from) throw new Error('Choose an image, font, or media file in Assets.');
-        const { folder, extension } = await assetInWorkspace(from);
+    async open(source: vscode.Uri | undefined): Promise<void> {
+        if (!source) throw new Error('Choose an image, font, or media file in Assets.');
+        const { uri: from, folder, extension } = await assetInWorkspace(source);
         const display = (uri: vscode.Uri) => vscode.workspace.asRelativePath(uri, false);
         const destination = await vscode.window.showInputBox({
             title: 'Move FerroUI Asset', prompt: `Destination relative to ${folder.name}`, value: display(from),
@@ -49,8 +49,8 @@ export class AssetMoves implements vscode.Disposable {
 
     async agent(request: FileMoveRequest, review: string | undefined, signal: AbortSignal, published?: vscode.Uri) {
         signal.throwIfAborted();
-        const from = published ?? await resolveWorkspaceFile(request.path, request.folder);
-        const { folder, extension } = await assetInWorkspace(from);
+        const source = published ?? await resolveWorkspaceFile(request.path, request.folder);
+        const { uri: from, folder, extension } = await assetInWorkspace(source);
         const to = await assetDestination(request.destination, folder, extension);
         if (review !== undefined) return this.apply(from, to, review, signal);
         const plan = await this.plan(from, to);
@@ -95,13 +95,14 @@ export class AssetMoves implements vscode.Disposable {
     dispose(): void { this.review.dispose(); }
 }
 
-async function assetInWorkspace(uri: vscode.Uri) {
-    const folder = vscode.workspace.getWorkspaceFolder(uri);
-    const format = assetFormat(uri.fsPath);
-    if (!vscode.workspace.isTrusted || !folder || !format || format.kind === 'XAML' || !await isWorkspaceFile(uri)) {
+async function assetInWorkspace(source: vscode.Uri) {
+    const uri = vscode.workspace.isTrusted ? await workspaceSourceUri(source) : undefined;
+    const folder = uri && vscode.workspace.getWorkspaceFolder(uri);
+    const format = uri && assetFormat(uri.fsPath);
+    if (!uri || !folder || !format || format.kind === 'XAML') {
         throw new Error('Choose an image, font, or media file in a trusted workspace.');
     }
-    return { folder, extension: format.extension };
+    return { uri, folder, extension: format.extension };
 }
 
 async function assetDestination(destination: string, folder: vscode.WorkspaceFolder, extension: string) {

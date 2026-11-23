@@ -1,4 +1,4 @@
-import { fileKey } from './reloadScope';
+import { fileKey } from './workspacePaths';
 
 const queues = new Map<string, Promise<void>>();
 

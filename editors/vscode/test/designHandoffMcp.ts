@@ -23,7 +23,10 @@ const definitions = [
 
 export async function verifyDesignHandoff({ invoke, content }: McpFixture): Promise<void> {
     const base = 'Design Handoff';
+    const linked = 'Linked Handoff';
     const root = vscode.workspace.workspaceFolders![0].uri;
+    const alias = vscode.Uri.joinPath(root, linked);
+    let aliasCreated = false;
     const file = (name: string) => vscode.Uri.joinPath(root, base, name);
     const path = (name: string) => `${base}/${name}`;
     const manifest = path('Checkout.ferroui-handoff.json');
@@ -50,8 +53,9 @@ export async function verifyDesignHandoff({ invoke, content }: McpFixture): Prom
     ]);
     const knownTabs = new Set(['Design · Checkout.xaml', 'Design · checkout.rs', 'Handoff · Checkout.xaml', 'Handoff · checkout.rs']);
     const close = async () => {
-        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab => knownTabs.has(tab.label)
-            || (tab.input instanceof vscode.TabInputText && tab.input.uri.fsPath.startsWith(file('').fsPath + (process.platform === 'win32' ? '\\' : '/'))));
+        const folders = [file('').path, alias.path];
+        const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(({ label, input }) => knownTabs.has(label)
+            || (input instanceof vscode.TabInputText && folders.some(folder => input.uri.path.startsWith(folder + '/'))));
         if (tabs.length) assert.ok(await vscode.window.tabGroups.close(tabs));
     };
     try {
@@ -121,14 +125,11 @@ export async function verifyDesignHandoff({ invoke, content }: McpFixture): Prom
         await send('designer_history', { session: rsx, expected_version: rustDoc.version, action: 'undo' });
         assert.equal(rustDoc.getText(), rust);
 
-        const linked = 'Linked Handoff';
-        const alias = vscode.Uri.joinPath(root, linked);
         await symlink(file('').fsPath, alias.fsPath, process.platform === 'win32' ? 'junction' : 'dir');
-        try {
-            const opened = await send<{ session: number }>('designer_open', { path: `${linked}/Checkout.xaml` });
-            const asset = (await plan(opened.session)).rows.find(row => row.id === 'mark');
-            assert.equal(asset?.reference, 'Assets/Brand%20Icon.png');
-        } finally { await unlink(alias.fsPath); }
+        aliasCreated = true;
+        const opened = await send<{ session: number }>('designer_open', { path: `${linked}/Checkout.xaml` });
+        const asset = (await plan(opened.session)).rows.find(row => row.id === 'mark');
+        assert.equal(asset?.reference, 'Assets/Brand%20Icon.png');
     } finally {
         for (const name of ['Checkout.xaml', 'checkout.rs', 'Definitions.xaml']) {
             const draft = vscode.workspace.textDocuments.find(document => document.uri.toString() === file(name).toString() && document.isDirty);
@@ -138,6 +139,7 @@ export async function verifyDesignHandoff({ invoke, content }: McpFixture): Prom
             }
         }
         await close();
+        if (aliasCreated) await unlink(alias.fsPath);
         await vscode.workspace.fs.delete(file(''), { recursive: true, useTrash: false });
     }
     console.log('Design handoff reviewed scoped definitions, copied exact assets in both directions and placed checked XAML and RSX source with one Undo');

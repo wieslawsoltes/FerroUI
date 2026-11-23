@@ -7,6 +7,7 @@ import { DockView } from './dockView';
 import { ProjectAssets, rasterThumbnail } from './projectAssets';
 import { errorMessage, imageSourceProperties, type AssetsState, type DragOrigin, type FrameTarget, type FromAssets, type ProjectAsset, type ToAssets } from './protocol';
 import { assetsHtml } from './view';
+import { workspaceLocation } from './workspacePaths';
 
 export const ASSETS_VIEW = 'ferroui.assets';
 
@@ -72,7 +73,7 @@ export class AssetsView {
             if (!format) return [];
             return [{ id: address, label: path.posix.basename(key), path: `${assembly} · ${key}`,
                 kind: format.kind, relative: address, published: true, thumbnail: Boolean(format.mime),
-                movable: format.kind !== 'XAML' && Boolean(sourceRoot && vscode.workspace.getWorkspaceFolder(vscode.Uri.file(sourceRoot))),
+                movable: format.kind !== 'XAML' && Boolean(sourceRoot && workspaceLocation(sourceRoot)),
                 source: format.mime ? address : undefined }];
         });
         return [...packaged, ...files];

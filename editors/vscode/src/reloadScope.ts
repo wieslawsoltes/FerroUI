@@ -1,27 +1,8 @@
-import { realpathSync } from 'node:fs';
 import * as path from 'node:path';
 import type { CargoTarget } from './cargoTarget';
-import { isInside, localFolders } from './workspacePaths';
+import { fileKey, isInside, localFolders } from './workspacePaths';
 
 export const reloadWatchPattern = '**/{*.[rR][sS],*.[xX][aA][mM][lL],Cargo.toml}';
-
-export function fileKey(file: string): string {
-    const absolute = path.resolve(file);
-    let ancestor = absolute;
-    let real = absolute;
-    for (;;) {
-        try {
-            // Keep the resolved path stable when Cargo creates a build directory through a symlink.
-            real = path.resolve(realpathSync.native(ancestor), path.relative(ancestor, absolute));
-            break;
-        } catch (error) {
-            const parent = path.dirname(ancestor);
-            if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || parent === ancestor) break;
-            ancestor = parent;
-        }
-    }
-    return process.platform === 'win32' ? real.toLowerCase() : real;
-}
 
 /** Route source saves by Cargo ownership. A nested package is a separate owner even if the
  * selected package is at the workspace root. Runtime notifications can register exact includes. */

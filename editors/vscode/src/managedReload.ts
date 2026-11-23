@@ -6,10 +6,10 @@ import { ReloadDebugger } from './reloadDebugger';
 import type { ReloadHistory } from './reloadHistory';
 import { ReloadLog } from './reloadLog';
 import type { ProjectMetadata } from './reloadProcess';
-import { fileKey } from './reloadScope';
 import { ReloadSession } from './reloadSession';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 import type { AppRuntime } from './runtimeTargets';
+import { fileKey } from './workspacePaths';
 
 export type ReloadRecipe = { kind: 'cargo'; target: CargoTarget } | { kind: 'registered'; folder: vscode.WorkspaceFolder };
 

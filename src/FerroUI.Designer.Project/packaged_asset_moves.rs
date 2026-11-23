@@ -109,7 +109,7 @@ impl PackagedAssets {
     }
 
     pub(crate) fn tracks_input(&self, uri: &str) -> bool {
-        let Ok(file) = file_path(uri) else {
+        let Ok(file) = file_path(uri).and_then(|path| canonical_path(&path)) else {
             return false;
         };
         self.packages.values().flatten().any(|package| {

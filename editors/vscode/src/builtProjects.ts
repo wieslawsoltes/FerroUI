@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import { assetFormat } from './assetFormats';
 import { errorMessage } from './protocol';
 import type { ProjectMetadata } from './reloadProcess';
-import { isInside } from './workspacePaths';
+import { isInside, workspaceLocation } from './workspacePaths';
 
 const stateKey = 'ferroui.builtProjectMetadata.v1';
 
@@ -48,10 +48,13 @@ export class BuiltProjects implements vscode.Disposable {
         if (uri.scheme !== 'file' || !vscode.workspace.isTrusted) return;
         const workspace = vscode.workspace.getWorkspaceFolder(uri)?.uri.fsPath;
         let best: BuiltProject | undefined;
-        for (const project of this.projects.values()) {
-            const root = path.dirname(project.metadata.manifest);
-            if (project.workspaceRoot === workspace && isInside(root, uri.fsPath)
-                && (!best || root.length > path.dirname(best.metadata.manifest).length)) best = project;
+        let depth = 0;
+        for (const [manifest, project] of this.projects) {
+            const root = path.dirname(manifest);
+            if (project.workspaceRoot === workspace && isInside(root, uri.fsPath) && root.length > depth) {
+                best = project;
+                depth = root.length;
+            }
         }
         return best;
     }
@@ -59,9 +62,9 @@ export class BuiltProjects implements vscode.Disposable {
     private store(metadata: ProjectMetadata): boolean {
         if (!vscode.workspace.isTrusted || typeof metadata?.manifest !== 'string' || !path.isAbsolute(metadata.manifest)
             || !Array.isArray(metadata.directories) || metadata.directories.some(directory => typeof directory !== 'string')) return false;
-        const folder = vscode.workspace.getWorkspaceFolder(vscode.Uri.file(metadata.manifest));
-        if (!folder || folder.uri.scheme !== 'file') return false;
-        this.projects.set(metadata.manifest, { metadata, workspaceRoot: folder.uri.fsPath });
+        const owner = workspaceLocation(metadata.manifest);
+        if (!owner) return false;
+        this.projects.set(owner.uri.fsPath, { metadata, workspaceRoot: owner.folder.uri.fsPath });
         return true;
     }
 

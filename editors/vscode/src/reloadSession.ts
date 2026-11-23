@@ -7,7 +7,8 @@ import { buildCargo, launchArtifact, ReloadProcess, revision, type ProjectMetada
 import type { ReloadHistory, ReloadIdentity, ReloadRecord } from './reloadHistory';
 import type { RuntimeFrameReceipt } from './reloadFrames';
 import type { ProcessOutput } from './reloadLog';
-import { fileKey, ReloadScope } from './reloadScope';
+import { ReloadScope } from './reloadScope';
+import { fileKey } from './workspacePaths';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
 const reloadWindow = 1800;

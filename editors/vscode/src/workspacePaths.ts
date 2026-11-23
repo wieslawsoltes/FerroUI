@@ -1,3 +1,4 @@
+import { realpathSync } from 'node:fs';
 import { lstat, realpath, stat } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
@@ -7,8 +8,41 @@ export function isInside(root: string, file: string): boolean {
     return relative !== '..' && !relative.startsWith(`..${path.sep}`) && !path.isAbsolute(relative);
 }
 
+/** Resolve existing ancestors so a workspace alias has the same identity before and after a file is created. */
+export function fileKey(file: string): string {
+    const absolute = path.resolve(file);
+    let ancestor = absolute;
+    let real = absolute;
+    for (;;) {
+        try {
+            real = path.resolve(realpathSync.native(ancestor), path.relative(ancestor, absolute));
+            break;
+        } catch (error) {
+            const parent = path.dirname(ancestor);
+            if ((error as NodeJS.ErrnoException).code !== 'ENOENT' || parent === ancestor) break;
+            ancestor = parent;
+        }
+    }
+    return process.platform === 'win32' ? real.toLowerCase() : real;
+}
+
 export function localFolders(): vscode.WorkspaceFolder[] {
     return vscode.workspace.workspaceFolders?.filter(folder => folder.uri.scheme === 'file') ?? [];
+}
+
+/** Map a tool's physical path into the workspace folder VS Code uses for its buffers. */
+export function workspaceLocation(file: string): { uri: vscode.Uri; folder: vscode.WorkspaceFolder } | undefined {
+    if (!path.isAbsolute(file)) return;
+    const uri = vscode.Uri.file(file);
+    const direct = vscode.workspace.getWorkspaceFolder(uri);
+    if (direct?.uri.scheme === 'file') return { uri, folder: direct };
+    const physical = fileKey(file);
+    const candidates = localFolders().map(folder => ({ folder, key: fileKey(folder.uri.fsPath) }))
+        .filter(candidate => isInside(candidate.key, physical)).sort((left, right) => right.key.length - left.key.length);
+    const nearest = candidates[0];
+    if (!nearest || candidates[1]?.key === nearest.key) return;
+    const { folder, key } = nearest;
+    return { folder, uri: vscode.Uri.file(path.join(folder.uri.fsPath, path.relative(key, physical))) };
 }
 
 export function workspaceFolders(reference?: string): vscode.WorkspaceFolder[] {

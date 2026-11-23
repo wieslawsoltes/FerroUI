@@ -10,8 +10,8 @@ import { inCargoBuildSlot } from '../src/cargoBuildGate';
 import { ReloadHistory } from '../src/reloadHistory';
 import { parseFrameReceipt, type RuntimeFrameReceipt } from '../src/reloadFrames';
 import { ReloadProcess } from '../src/reloadProcess';
-import { fileKey } from '../src/reloadScope';
 import { ReloadSession } from '../src/reloadSession';
+import { fileKey } from '../src/workspacePaths';
 import { until } from './wait';
 
 export async function verifyProcessShutdown(): Promise<void> {
