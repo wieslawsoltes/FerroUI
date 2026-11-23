@@ -14,6 +14,7 @@
 use crate::bitmap::ProGpuBitmap;
 use crate::fragment::{moved, moved_rect, FragmentBrush, FragmentOp, FragmentRecorder, KeptRun, ProGpuFragment};
 use crate::geometry::{path_data_of, PathData};
+use tile_brush::is_tile_brush;
 use crate::glyph_run::{Placement, ProGpuGlyphRun};
 use crate::gpu::{Gpu, GpuTexture, Recording, SampledTexture};
 use crate::layer::ProGpuLayer;
@@ -111,6 +112,9 @@ pub(crate) fn affine(matrix: &Matrix) -> progpu_native_affine_2d {
         m32: matrix.m32 as f32,
     }
 }
+
+#[path = "tile_brush.rs"]
+mod tile_brush;
 
 fn identity() -> progpu_native_affine_2d {
     affine(&Matrix::IDENTITY)
@@ -474,7 +478,10 @@ impl ProGpuDrawingContext {
             }
             return self.record(result);
         }
-        let (native, stops) = Self::gradient_record(brush, bounds)?;
+        let Some((native, stops)) = Self::gradient_record(brush, bounds) else {
+            notes::note_once("brush-kind", "a brush of a kind the ProGPU backend does not paint is not drawn");
+            return None;
+        };
         let result = self.scene().add_brush(&native, &stops);
         if let Some(fragment) = &mut self.fragment {
             fragment.set_brush(FragmentBrush::Gradient { brush: Box::new(native), stops: stops.into_boxed_slice() });
@@ -652,7 +659,7 @@ impl ProGpuDrawingContext {
     /// geometry, so that its address names it for the whole frame. Inside a fragment the commands
     /// are kept to be sent again in another frame, where the resource is not there.
     fn fill_shared_path(&mut self, data: &Arc<PathData>, brush: &dyn IBrush) {
-        if self.fragment.is_some() {
+        if self.fragment.is_some() || is_tile_brush(brush) {
             self.fill_path(data, brush);
             return;
         }
@@ -675,6 +682,14 @@ impl ProGpuDrawingContext {
 
     /// Fills the canonical segments of `data` (its filled figures) with a brush.
     fn fill_path(&mut self, data: &PathData, brush: &dyn IBrush) -> bool {
+        self.fill_path_on(data, brush, data.bounds())
+    }
+
+    /// Fills `data` with a brush placed on the box `target`: the shape a stroke is the outline of.
+    fn fill_path_on(&mut self, data: &PathData, brush: &dyn IBrush, target: Rect) -> bool {
+        if is_tile_brush(brush) {
+            return self.fill_with_tile_brush(data, brush, target);
+        }
         let segments = data.filled_segments();
         if segments.is_empty() {
             return false;
@@ -856,6 +871,18 @@ impl ProGpuDrawingContext {
 
     /// The fill and the stroke of a rectangle.
     fn rectangle_shape(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, rect: &RoundedRect) {
+        // A tile brush paints through the outline of the shape.
+        let stroke = pen.filter(|pen| pen.thickness() > 0.0).and_then(|pen| Some((pen, pen.brush()?)));
+        if brush.is_some_and(is_tile_brush) || stroke.as_ref().is_some_and(|(_, brush)| is_tile_brush(brush.as_ref())) {
+            let path = Self::rounded_rect_path(rect);
+            if let Some(brush) = brush {
+                self.fill_path_on(&path, brush, rect.rect);
+            }
+            if let Some((pen, stroke_brush)) = stroke {
+                self.fill_path_on(&path.widen(pen), stroke_brush.as_ref(), rect.rect);
+            }
+            return;
+        }
         let uniform = rect.is_uniform() && rect.radii_top_left.x == rect.radii_top_left.y;
         let local = rect.rect;
         let bounds = transform_bounds(local, &self.current.transform);
@@ -1490,7 +1517,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0) {
             if let Some(stroke_brush) = pen.brush() {
                 let outline = data.widen(pen);
-                self.fill_path(&outline, stroke_brush.as_ref());
+                self.fill_path_on(&outline, stroke_brush.as_ref(), data.bounds());
             }
         }
     }
@@ -1514,6 +1541,18 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn draw_ellipse(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, rect: Rect) {
+        // A tile brush paints through the outline of the shape.
+        let stroke = pen.filter(|pen| pen.thickness() > 0.0).and_then(|pen| Some((pen, pen.brush()?)));
+        if brush.is_some_and(is_tile_brush) || stroke.as_ref().is_some_and(|(_, brush)| is_tile_brush(brush.as_ref())) {
+            let path = PathData::ellipse(rect);
+            if let Some(brush) = brush {
+                self.fill_path_on(&path, brush, rect);
+            }
+            if let Some((pen, stroke_brush)) = stroke {
+                self.fill_path_on(&path.widen(pen), stroke_brush.as_ref(), rect);
+            }
+            return;
+        }
         let bounds = transform_bounds(rect, &self.current.transform);
         if let Some(brush) = brush {
             if let Some(index) = self.brush(brush, rect) {
