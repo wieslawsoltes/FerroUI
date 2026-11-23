@@ -2,7 +2,8 @@
 
 use crate::content::{document_at, lines_of, Glyph, ImageAsset, TextDocument};
 use crate::model::{AnimatedVisual, GradientModel, Layer, LayerKind, MatteMode, ShapeItem, StrokeModel};
-use crate::path::PathData;
+use crate::path::{PathData, Polystar};
+use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{Animated, Components};
 use ferroui_base::media::Color;
 use ferroui_base::{Matrix, Point};
@@ -82,6 +83,8 @@ pub enum MaskMode {
 pub enum FrameCommand {
     PushTransform(Matrix),
     PushOpacity(f64),
+    /// What follows up to its `Pop` is one group, mixed with what is under it.
+    PushBlend(BitmapBlendingMode),
     /// Clips what follows to a path of the current space.
     PushMask { path: PathData, mode: MaskMode, inverted: bool, opacity: f64 },
     /// Keeps what the union of these paths covers, each with its opacity.
@@ -221,6 +224,20 @@ fn evaluate_items(
                 geometry.push(PathData::ellipse(Point::new(p[0], p[1]), s[0], s[1]).transformed(transform));
             }
             ShapeItem::Path(shape) => geometry.push(shape.path_at(frame).transformed(transform)),
+            ShapeItem::Polystar { star, position, points, rotation, outer_radius, outer_roundness, inner_radius, inner_roundness } => {
+                let center = position.at(frame);
+                let shape = Polystar {
+                    star: *star,
+                    center: Point::new(center[0], center[1]),
+                    points: points.at(frame)[0],
+                    rotation: rotation.at(frame)[0],
+                    outer_radius: outer_radius.at(frame)[0],
+                    outer_roundness: outer_roundness.at(frame)[0],
+                    inner_radius: inner_radius.at(frame)[0],
+                    inner_roundness: inner_roundness.at(frame)[0],
+                };
+                geometry.push(PathData::polystar(&shape).transformed(transform));
+            }
             ShapeItem::Fill { color: paint, opacity: own, even_odd, binding } => {
                 let alpha = (own.at(frame)[0] / 100.0).clamp(0.0, 1.0);
                 draws.push(ShapeDraw {
@@ -378,8 +395,12 @@ impl AnimatedVisual {
         if opacity <= 0.0 || matches!(layer.kind, LayerKind::Null | LayerKind::NotDrawn) {
             return;
         }
-        out.push(FrameCommand::PushTransform(world_matrix(layers, layer, frame)));
         let mut pushed = 1;
+        if let Some(blend) = layer.blend {
+            out.push(FrameCommand::PushBlend(blend));
+            pushed += 1;
+        }
+        out.push(FrameCommand::PushTransform(world_matrix(layers, layer, frame)));
         if opacity < 1.0 {
             out.push(FrameCommand::PushOpacity(opacity));
             pushed += 1;

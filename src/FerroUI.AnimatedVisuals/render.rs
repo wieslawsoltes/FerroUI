@@ -33,6 +33,8 @@ const OUTSIDE: f64 = 1_000_000.0;
 
 /// What a push of a frame leaves to its `Pop`.
 enum Scope {
+    /// A push the backend has no layer for.
+    Nothing,
     State(PushedState),
     /// A group whose content is cut, when it ends, by what `coverage` fills.
     Cut { group: PushedState, blend: BitmapBlendingMode, coverage: Vec<(Ref<Geometry>, f64)> },
@@ -362,6 +364,7 @@ impl VisualRenderer {
 
     fn end_scope(&mut self, scope: Scope, bounds: Rect, context: &mut DrawingContext<'_>) {
         match scope {
+            Scope::Nothing => {}
             Scope::State(state) => context.pop(state),
             Scope::Cut { group, blend, coverage } => {
                 if let Some(cut) = context.try_push_compositing_layer(blend, 1.0, bounds) {
@@ -388,6 +391,10 @@ impl VisualRenderer {
                     bounds = area_inside(bounds, *matrix);
                 }
                 FrameCommand::PushOpacity(opacity) => scopes.push((Scope::State(context.push_opacity(*opacity)), bounds)),
+                FrameCommand::PushBlend(mode) => {
+                    let scope = context.try_push_compositing_layer(*mode, 1.0, bounds).map_or(Scope::Nothing, Scope::State);
+                    scopes.push((scope, bounds));
+                }
                 FrameCommand::PushMask { path, mode, inverted, opacity } => {
                     let cut = (*opacity < 1.0).then(|| {
                         let area = self.mask_area(path, *inverted);
@@ -496,6 +503,7 @@ fn matte_range(commands: &[FrameCommand], begin: usize) -> (usize, usize) {
         match command {
             FrameCommand::PushTransform(_)
             | FrameCommand::PushOpacity(_)
+            | FrameCommand::PushBlend(_)
             | FrameCommand::PushMask { .. }
             | FrameCommand::PushCoverage(_)
             | FrameCommand::BeginMatte(_) => depth += 1,
@@ -720,6 +728,41 @@ mod tests {
         });
         let text = text.expect("the text is drawn by the backend");
         assert_eq!((text.lines.as_slice(), text.family.as_str(), text.tracking), (&["one".to_owned(), "two".to_owned()][..], "Body", 1.0));
+    }
+
+    #[test]
+    fn a_layer_with_a_blend_mode_mixes_with_what_is_under_it() {
+        let document = visual(json!([
+            {"ty": 4, "ind": 1, "bm": 1, "ip": 0, "op": 30, "ks": {}, "shapes": square(20.0, 20.0, 20.0, [0.0, 1.0, 1.0])},
+            {"ty": 4, "ind": 2, "ip": 0, "op": 30, "ks": {}, "shapes": square(20.0, 20.0, 40.0, [1.0, 1.0, 0.0])}
+        ]));
+        let mut renderer = VisualRenderer::new();
+        let target = draw(&mut renderer, &document, 0.0);
+        assert_eq!(pixel(&target, 20, 20), (0, 255, 0, 255), "multiplied");
+        assert_eq!(pixel(&target, 2, 2), (255, 255, 0, 255), "what the layer does not cover");
+    }
+
+    #[test]
+    fn a_polygon_and_a_star_have_their_corners_on_their_circles() {
+        let shape = |star: bool| {
+            PathData::polystar(&crate::path::Polystar {
+                star,
+                center: Point::new(20.0, 20.0),
+                points: 4.0,
+                rotation: 0.0,
+                outer_radius: 10.0,
+                outer_roundness: 0.0,
+                inner_radius: 5.0,
+                inner_roundness: 0.0,
+            })
+        };
+        let ends = |path: &PathData| path.commands.iter().filter(|command| matches!(command, PathCommand::CubicTo(..))).count();
+        assert_eq!(ends(&shape(false)), 4);
+        assert_eq!(ends(&shape(true)), 8);
+        let PathCommand::MoveTo(first) = shape(true).commands[0] else { panic!("a path starts with a move") };
+        assert!((first.x - 20.0).abs() < 1e-9 && (first.y - 10.0).abs() < 1e-9, "the first corner is straight up");
+        let PathCommand::CubicTo(_, _, second) = shape(true).commands[1] else { panic!("a cubic") };
+        assert!(((second.x - 20.0).hypot(second.y - 20.0) - 5.0).abs() < 1e-9, "the next corner is on the inner circle");
     }
 
     #[test]

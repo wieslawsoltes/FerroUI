@@ -2,6 +2,7 @@
 
 use crate::content::{text_documents, DocumentFonts, ImageAsset, TextDocument};
 use crate::path::{BezierShape, PathData};
+use ferroui_base::media::imaging::BitmapBlendingMode;
 use crate::value::{keyframes, parse_eases, Animated, Components, Ease};
 use ferroui_base::Matrix;
 use serde_json::Value;
@@ -273,6 +274,16 @@ pub(crate) enum ShapeItem {
     Rectangle { position: Animated, size: Animated, radius: Animated },
     Ellipse { position: Animated, size: Animated },
     Path(AnimatedShape),
+    Polystar {
+        star: bool,
+        position: Animated,
+        points: Animated,
+        rotation: Animated,
+        outer_radius: Animated,
+        outer_roundness: Animated,
+        inner_radius: Animated,
+        inner_roundness: Animated,
+    },
     Fill { color: Animated, opacity: Animated, even_odd: bool, binding: Option<Rc<str>> },
     Stroke { color: Animated, opacity: Animated, stroke: StrokeModel, binding: Option<Rc<str>> },
     GradientFill { gradient: GradientModel, opacity: Animated, even_odd: bool },
@@ -349,6 +360,16 @@ fn shape_item(item: &Value) -> Option<ShapeItem> {
         },
         "el" => ShapeItem::Ellipse { position: Animated::of(item, "p", [0.0; 4]), size: Animated::of(item, "s", [0.0; 4]) },
         "sh" => ShapeItem::Path(AnimatedShape::parse(item.get("ks")?)?),
+        "sr" => ShapeItem::Polystar {
+            star: item.get("sy").and_then(Value::as_u64).unwrap_or(1) == 1,
+            position: Animated::of(item, "p", [0.0; 4]),
+            points: Animated::of(item, "pt", [5.0, 0.0, 0.0, 0.0]),
+            rotation: Animated::of(item, "r", [0.0; 4]),
+            outer_radius: Animated::of(item, "or", [0.0; 4]),
+            outer_roundness: Animated::of(item, "os", [0.0; 4]),
+            inner_radius: Animated::of(item, "ir", [0.0; 4]),
+            inner_roundness: Animated::of(item, "is", [0.0; 4]),
+        },
         "fl" => ShapeItem::Fill {
             color: Animated::of(item, "c", [0.0, 0.0, 0.0, 1.0]),
             opacity: Animated::of(item, "o", FULL),
@@ -424,12 +445,37 @@ pub(crate) struct Layer {
     pub(crate) matte_parent: Option<i64>,
     pub(crate) masks: Vec<MaskModel>,
     pub(crate) kind: LayerKind,
+    /// How the layer mixes with what is under it, when not normally.
+    pub(crate) blend: Option<BitmapBlendingMode>,
 }
 
 fn hex_color(text: &str) -> Components {
     let hex = text.trim_start_matches('#');
     let channel = |at: usize| hex.get(at..at + 2).and_then(|part| u8::from_str_radix(part, 16).ok()).unwrap_or(0);
     [f64::from(channel(0)) / 255.0, f64::from(channel(2)) / 255.0, f64::from(channel(4)) / 255.0, 1.0]
+}
+
+/// The blend mode of a layer (`bm`).
+fn blend_mode(value: Option<u64>) -> Option<BitmapBlendingMode> {
+    Some(match value? {
+        1 => BitmapBlendingMode::Multiply,
+        2 => BitmapBlendingMode::Screen,
+        3 => BitmapBlendingMode::Overlay,
+        4 => BitmapBlendingMode::Darken,
+        5 => BitmapBlendingMode::Lighten,
+        6 => BitmapBlendingMode::ColorDodge,
+        7 => BitmapBlendingMode::ColorBurn,
+        8 => BitmapBlendingMode::HardLight,
+        9 => BitmapBlendingMode::SoftLight,
+        10 => BitmapBlendingMode::Difference,
+        11 => BitmapBlendingMode::Exclusion,
+        12 => BitmapBlendingMode::Hue,
+        13 => BitmapBlendingMode::Saturation,
+        14 => BitmapBlendingMode::Color,
+        15 => BitmapBlendingMode::Luminosity,
+        16 => BitmapBlendingMode::Plus,
+        _ => return None,
+    })
 }
 
 fn layer(value: &Value) -> Option<Layer> {
@@ -494,6 +540,7 @@ fn layer(value: &Value) -> Option<Layer> {
         matte_parent: value.get("tp").and_then(Value::as_i64),
         masks,
         kind,
+        blend: blend_mode(value.get("bm").and_then(Value::as_u64)),
     })
 }
 
