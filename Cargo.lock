@@ -8016,6 +8016,7 @@ dependencies = [
  "ferroui-controls-icons",
  "ferroui-controls-inking",
  "ferroui-controls-livecharts",
+ "ferroui-controls-password-box",
  "ferroui-controls-repeater",
  "ferroui-controls-teaching-tip",
  "ferroui-desktop",
