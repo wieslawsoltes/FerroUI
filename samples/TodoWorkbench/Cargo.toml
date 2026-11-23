@@ -34,7 +34,7 @@ ferroui-controls-treedatagrid = { workspace = true, optional = true, features = 
 ferroui-designer-animation = { workspace = true, optional = true }
 ferroui-designer-support = { workspace = true, optional = true }
 ferroui-markup-xaml = { workspace = true, optional = true }
-ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["runtime"] }
+ferroui-markup-xaml-loader = { workspace = true, optional = true, features = ["source-overlays"] }
 ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz = { workspace = true, optional = true }
 ferroui-xaml-interactions = { workspace = true, optional = true }
