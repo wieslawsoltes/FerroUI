@@ -5,6 +5,7 @@ mod brush_curve;
 mod clock;
 mod curve;
 mod curve_value;
+mod design_tokens;
 mod programs;
 mod property_transitions;
 mod property_transition_catalog;
@@ -20,6 +21,7 @@ mod xaml_types;
 
 pub use clock::{animation_timing, FrozenPreviewClock, NativePlayback};
 pub use curve::{sample_curve_track, sample_keyframe_value, sample_scalar_track, sample_typed_keyframe};
+pub use design_tokens::plan_design_tokens;
 pub use programs::NativeProgramIndex;
 pub use property_transitions::native_property_transition_types;
 pub use property_transition_catalog::{

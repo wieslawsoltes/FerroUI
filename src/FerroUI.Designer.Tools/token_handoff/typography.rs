@@ -2,12 +2,11 @@ use super::{
     font,
     references::Tokens,
     scalars::{append_note, dimension, finite, literal_number},
-    ValueResult,
+    theme, ValueResult,
 };
-use crate::components::{escape, framework, key_attribute, FRAMEWORK, XAML};
-use ferroui_designer_core::{Document, MarkupValue, Node, NodeKind};
+use crate::components::FRAMEWORK;
+use ferroui_designer_core::{Document, Node};
 use serde_json::{json, Value};
-use std::{collections::BTreeMap, fmt::Write};
 
 const SETTERS: [&str; 5] = [
     "FontFamily",
@@ -62,55 +61,18 @@ pub(super) fn import<'a>(
 }
 
 pub(super) fn export(document: &Document, theme: &Node) -> ValueResult<Typography> {
-    if !targets_text_block(document, theme)
-        || theme.attributes.iter().any(|attribute| {
-            !attribute.is_namespace()
-                && Some(attribute) != key_attribute(theme)
-                && attribute.name != "TargetType"
-        })
-    {
-        return Err(
-            "Export typography from a keyed TextBlock ControlTheme with no other theme attributes"
-                .into(),
-        );
+    if !theme::target(document, theme).is_some_and(|(namespace, name)| {
+        name == "TextBlock"
+            && matches!(
+                namespace.as_str(),
+                FRAMEWORK
+                    | "using:FerroUI.Controls"
+                    | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
+            )
+    }) {
+        return Err("Export typography from a keyed TextBlock ControlTheme".into());
     }
-
-    let mut setters = BTreeMap::new();
-    for child in theme
-        .children
-        .iter()
-        .filter_map(|id| document.ast().node(*id))
-    {
-        if trivia(child) {
-            continue;
-        }
-        if child.local_name() != "Setter"
-            || !framework(child)
-            || child.attributes.iter().any(|attribute| {
-                !attribute.is_namespace()
-                    && !matches!(attribute.name.as_str(), "Property" | "Value")
-            })
-            || child
-                .children
-                .iter()
-                .filter_map(|id| document.ast().node(*id))
-                .any(|child| !trivia(child))
-        {
-            return Err("Typography export requires direct literal Setter elements".into());
-        }
-        let property = child
-            .attribute("Property")
-            .ok_or("A Setter needs a Property")?;
-        let value = child
-            .attribute("Value")
-            .ok_or("A Setter needs a literal Value")?
-            .trim();
-        if !SETTERS.contains(&property) || setters.insert(property, value).is_some() {
-            return Err(format!(
-                "Unexpected or repeated typography setter {property}"
-            ));
-        }
-    }
+    let setters = theme::literal_setters(document, theme, &SETTERS)?;
     let [Some(family), Some(size), Some(weight), Some(spacing), Some(line_height)] =
         SETTERS.map(|name| setters.get(name).copied())
     else {
@@ -123,51 +85,6 @@ pub(super) fn export(document: &Document, theme: &Node) -> ValueResult<Typograph
         spacing: literal_number(spacing)?,
         line_height: positive(literal_number(line_height)?, "Line height")?,
     })
-}
-
-fn targets_text_block(document: &Document, theme: &Node) -> bool {
-    let Some(target) = theme.attribute("TargetType") else {
-        return false;
-    };
-    let namespaces = document.ast().namespaces(theme.id);
-    let target = match MarkupValue::parse(target.trim()) {
-        Ok(MarkupValue::Literal(target)) => target,
-        Ok(MarkupValue::Extension(extension)) => {
-            let Some((prefix, "Type")) = extension.name.split_once(':') else {
-                return false;
-            };
-            let [argument] = extension.arguments.as_slice() else {
-                return false;
-            };
-            if namespaces.get(prefix).map(String::as_str) != Some(XAML) || argument.name.is_some() {
-                return false;
-            }
-            let MarkupValue::Literal(target) = &argument.value else {
-                return false;
-            };
-            target.clone()
-        }
-        Err(_) => return false,
-    };
-    let (prefix, name) = target.split_once(':').unwrap_or(("", &target));
-    name == "TextBlock"
-        && matches!(
-            namespaces.get(prefix).map(String::as_str),
-            Some(
-                FRAMEWORK
-                    | "using:FerroUI.Controls"
-                    | "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
-            )
-        )
-}
-
-fn trivia(node: &Node) -> bool {
-    node.kind == NodeKind::Comment
-        || matches!(node.kind, NodeKind::Text | NodeKind::CData)
-            && node
-                .text
-                .as_deref()
-                .is_some_and(|text| text.trim().is_empty())
 }
 
 fn positive(value: f64, name: &str) -> ValueResult<f64> {
@@ -186,23 +103,14 @@ impl Typography {
     }
 
     pub(super) fn xaml(&self, key: &str) -> String {
-        let key = escape(key);
-        let mut theme = format!("    <ControlTheme x:Key=\"{key}\" TargetType=\"TextBlock\">\n");
         let values = [
-            escape(&self.family),
+            self.family.clone(),
             self.size.to_string(),
             self.weight.to_string(),
             self.spacing.to_string(),
             self.line_height.to_string(),
         ];
-        for (property, value) in SETTERS.into_iter().zip(values) {
-            let _ = writeln!(
-                theme,
-                "        <Setter Property=\"{property}\" Value=\"{value}\"/>"
-            );
-        }
-        theme.push_str("    </ControlTheme>\n");
-        theme
+        theme::write(key, "TextBlock", SETTERS.into_iter().zip(values))
     }
 
     pub(super) fn token_value(&self) -> ValueResult<Value> {

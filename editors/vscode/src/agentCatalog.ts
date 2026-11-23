@@ -165,10 +165,11 @@ export const agentCatalog = {
     ...fileMoveCatalog,
     ...renameCatalog,
     ...resourceMoveCatalog,
-    designer_design_tokens: tool('Review colors, numbers, dimensions, durations, gradients, layered shadows, easing curves, font families, weights and typography between DTCG and a XAML dictionary. Mapping keys use token paths during import and XAML resource keys during export. Read generated source and issues before creating the reviewed file.',
+    designer_design_tokens: tool('Review scalar, typography, outline and transition tokens between DTCG and a XAML dictionary. Mapping keys use token paths during import and XAML resource keys during export. Set transition.property to a registered Type.Property, such as Visual.Opacity, when importing a transition. Read the generated source and issues before creating the reviewed file.',
         { direction: choice('import', 'export'), source: text, options: { type: 'object', additionalProperties: false, properties: {
             pixelsPerRem: { type: 'number' }, mappings: { type: 'object', maxProperties: 4096,
-                additionalProperties: { type: 'object', additionalProperties: false, properties: { key: text, token: text, kind: text, xamlType: text } } },
+                additionalProperties: { type: 'object', additionalProperties: false, properties: { key: text, token: text, kind: text, xamlType: text,
+                    transition: { type: 'object', additionalProperties: false, properties: { property: text, namespace: text, class: text }, required: ['property'] } } } },
         } } }, ['direction', 'source']),
     designer_design_handoff: tool('Review a local design handoff manifest against the active XAML or RSX design. Pass a workspace-relative manifest path and the designer session. Returns exact component targets, references, transfer paths and review IDs.',
         { ...session, manifest: workspacePath }, ['session', 'manifest']),

@@ -1,4 +1,4 @@
-use super::{valid_token_name, Issue, EXTENSION, GRADIENT_PROPERTIES};
+use super::{outline, transition, valid_token_name, Issue, EXTENSION, GRADIENT_PROPERTIES};
 use serde_json::Value;
 use std::collections::{BTreeMap, HashMap};
 
@@ -20,6 +20,8 @@ pub(super) struct Resolved<'a> {
     pub reference: Option<&'a str>,
     pub xaml_type: Option<&'a str>,
     pub gradient_properties: Option<&'a Value>,
+    pub outline: Option<&'a Value>,
+    pub transition: Option<&'a Value>,
 }
 
 type Result<T> = std::result::Result<T, String>;
@@ -43,18 +45,14 @@ impl<'a> Tokens<'a> {
         issues: &mut Vec<Issue>,
     ) {
         let Some(children) = node.as_object() else {
-            issues.push(Issue {
-                path: path.into(),
-                message: "Expected a token or group object".into(),
-            });
+            issues.push(Issue::new(path.into(), "Expected a token or group object"));
             return;
         };
         if children.contains_key("$extends") || children.contains_key("$ref") {
-            issues.push(Issue {
-                path: path.into(),
-                message: "Group inheritance must be resolved before this group can be imported"
-                    .into(),
-            });
+            issues.push(Issue::new(
+                path.into(),
+                "Group inheritance must be resolved before this group can be imported",
+            ));
             return;
         }
         let kind = node["$type"].as_str().or(parent_kind);
@@ -69,10 +67,7 @@ impl<'a> Tokens<'a> {
             };
             if (!valid_token_name(name) && name != "$root") || (name == "$root" && !is_token(child))
             {
-                issues.push(Issue {
-                    path,
-                    message: "Invalid token or group name".into(),
-                });
+                issues.push(Issue::new(path, "Invalid token or group name"));
             } else if is_token(child) {
                 let kind = child["$type"].as_str().or(kind);
                 self.entries.insert(path, Token { node: child, kind });
@@ -167,6 +162,8 @@ impl<'a> Tokens<'a> {
                 reference: None,
                 xaml_type: None,
                 gradient_properties: None,
+                outline: None,
+                transition: None,
             })
         }?;
         if let Some(native) = node
@@ -180,6 +177,8 @@ impl<'a> Tokens<'a> {
             resolved.gradient_properties = native
                 .get(GRADIENT_PROPERTIES)
                 .or(resolved.gradient_properties);
+            resolved.outline = native.get(outline::METADATA).or(resolved.outline);
+            resolved.transition = native.get(transition::METADATA).or(resolved.transition);
         }
         Ok(resolved)
     }

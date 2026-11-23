@@ -1,8 +1,9 @@
 use super::scalars::{duration_ms, hex_color, literal_number};
 use super::GRADIENT_PROPERTIES;
 use super::{
-    bezier, font, gradient, gradient_geometry, native_type, shadow, size, typography,
-    valid_token_name, Conversion, Issue, Options, Plan, ValueResult, EXTENSION,
+    bezier, font, gradient, gradient_geometry, native_type, outline, shadow, size, transition,
+    typography, valid_token_name, Conversion, Issue, Options, Plan, TransitionRenderer,
+    ValueResult, EXTENSION,
 };
 use crate::components::{framework, key_attribute, literal_key, XAML};
 use crate::{Result, ToolError};
@@ -12,6 +13,14 @@ use std::collections::BTreeSet;
 
 /// Export direct literal entries. Included dictionaries and dynamic values remain source-owned.
 pub fn plan_export(source: &str, options: &Options) -> Result<Plan> {
+    plan(source, options, None)
+}
+
+pub(super) fn plan(
+    source: &str,
+    options: &Options,
+    render: Option<TransitionRenderer>,
+) -> Result<Plan> {
     size(source)?;
     let document = Document::new(source).map_err(crate::error)?;
     if !document.is_valid() {
@@ -45,10 +54,10 @@ pub fn plan_export(source: &str, options: &Options) -> Result<Plan> {
                 if !seen.insert(key.clone()) {
                     return Err("Duplicate XAML resource key".into());
                 }
-                let (mapping, resource) = conversion(&document, node, &key, options)?;
+                let (mapping, resource) = conversion(&document, node, &key, options, render)?;
                 let mut identity = json!({"key":key,"xamlType":mapping.xaml_type});
-                if let Some(properties) = resource.gradient_properties {
-                    identity[GRADIENT_PROPERTIES] = properties;
+                if let Some((kind, properties)) = resource.metadata {
+                    identity[kind] = properties;
                 }
                 install(
                     &mut output,
@@ -60,14 +69,14 @@ pub fn plan_export(source: &str, options: &Options) -> Result<Plan> {
             });
         match result {
             Ok(mapping) => mappings.push(mapping),
-            Err(message) => issues.push(Issue { path, message }),
+            Err(message) => issues.push(Issue::new(path, message)),
         }
     }
     for key in options.mappings.keys().filter(|key| !seen.contains(*key)) {
-        issues.push(Issue {
-            path: key.clone(),
-            message: "Mapping does not match an authored resource key".into(),
-        });
+        issues.push(Issue::new(
+            key.clone(),
+            "Mapping does not match an authored resource key",
+        ));
     }
     let source = serde_json::to_string_pretty(&output).map_err(crate::error)? + "\n";
     size(&source)?;
@@ -84,7 +93,7 @@ struct ExportedResource {
     value: Value,
     display: String,
     note: Option<String>,
-    gradient_properties: Option<Value>,
+    metadata: Option<(&'static str, Value)>,
 }
 
 fn conversion(
@@ -92,12 +101,14 @@ fn conversion(
     node: &Node,
     key: &str,
     options: &Options,
+    render: Option<TransitionRenderer>,
 ) -> ValueResult<(Conversion, ExportedResource)> {
     let mapping = options.mappings.get(key);
     let token = mapping
         .and_then(|mapping| mapping.token.as_deref())
         .unwrap_or(key);
     let name = node.local_name();
+    let mut transition = None;
     let resource = if native_type(node, "FerroUI.Media") && gradient_geometry::TYPES.contains(&name)
     {
         let brush = gradient::export(document, node)?;
@@ -108,17 +119,48 @@ fn conversion(
             value: Value::Array(brush.stops),
             display,
             note: Some("Retained FerroUI gradient properties in the token extensions".into()),
-            gradient_properties: Some(json!(brush.properties)),
+            metadata: Some((GRADIENT_PROPERTIES, json!(brush.properties))),
         }
+    } else if name == "Transitions" && native_type(node, "FerroUI.Animation") {
+        let timing = transition::export(document, node)?;
+        // Reuse the host's native property and clock validation before advertising a round trip.
+        timing.xaml(key, render)?;
+        let resource = ExportedResource {
+            kind: "transition".into(),
+            xaml_type: "Transitions",
+            value: timing.token_value(),
+            display: timing.summary(),
+            note: Some(
+                "Preserved the qualified property and transition class in the token extension"
+                    .into(),
+            ),
+            metadata: Some((transition::METADATA, json!(timing.binding))),
+        };
+        transition = Some(timing.binding);
+        resource
     } else if name == "ControlTheme" && framework(node) {
-        let style = typography::export(document, node)?;
-        ExportedResource {
-            kind: "typography".into(),
-            xaml_type: "ControlTheme",
-            value: style.token_value()?,
-            display: style.summary(),
-            note: Some("Converted XAML LineHeight to a multiplier of FontSize".into()),
-            gradient_properties: None,
+        if let Some(target) = outline::target(document, node) {
+            let outline = outline::export(document, node, target)?;
+            ExportedResource {
+                kind: outline.kind().into(),
+                xaml_type: "ControlTheme",
+                value: outline.token_value()?,
+                display: outline.summary(),
+                note: Some(
+                    "Preserved the FerroUI theme target and its stroke width where authored".into(),
+                ),
+                metadata: Some((outline::METADATA, outline.metadata())),
+            }
+        } else {
+            let style = typography::export(document, node)?;
+            ExportedResource {
+                kind: "typography".into(),
+                xaml_type: "ControlTheme",
+                value: style.token_value()?,
+                display: style.summary(),
+                note: Some("Converted XAML LineHeight to a multiplier of FontSize".into()),
+                metadata: None,
+            }
         }
     } else {
         scalar_resource(
@@ -135,6 +177,7 @@ fn conversion(
             xaml_type: resource.xaml_type.into(),
             value: resource.display.clone(),
             note: resource.note.clone(),
+            transition,
         },
         resource,
     ))
@@ -185,12 +228,18 @@ fn scalar_resource(
             json!({"value":duration_ms(&content)?,"unit":"ms"}),
             content,
         ),
-        "FontFamily" if media && plain => {
-            ("fontFamily", "FontFamily", font::export_family(&content)?, content)
-        }
-        "FontWeight" if media && plain => {
-            ("fontWeight", "FontWeight", json!(font::export_weight(&content)?), content)
-        }
+        "FontFamily" if media && plain => (
+            "fontFamily",
+            "FontFamily",
+            font::export_family(&content)?,
+            content,
+        ),
+        "FontWeight" if media && plain => (
+            "fontWeight",
+            "FontWeight",
+            json!(font::export_weight(&content)?),
+            content,
+        ),
         "BoxShadows" if media && plain => {
             ("shadow", "BoxShadows", shadow::export(&content)?, content)
         }
@@ -227,7 +276,7 @@ fn scalar_resource(
         value,
         display,
         note,
-        gradient_properties: None,
+        metadata: None,
     })
 }
 

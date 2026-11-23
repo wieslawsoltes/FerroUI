@@ -6,13 +6,18 @@ mod font;
 mod gradient;
 mod gradient_geometry;
 mod import;
+mod outline;
 mod references;
 mod scalars;
 mod shadow;
+mod stroke;
+mod theme;
+mod transition;
 mod typography;
 
 pub use export::plan_export;
 pub use import::plan_import;
+pub use transition::{TransitionMapping, TransitionRenderer, TransitionTiming};
 
 use crate::{Result, ToolError};
 use ferroui_designer_core::Node;
@@ -50,6 +55,19 @@ impl Request {
     }
 }
 
+/// Share the portable token conversion with a host's registered transition planner.
+pub fn plan_with_transitions(
+    direction: Direction,
+    source: &str,
+    options: &Options,
+    render: TransitionRenderer,
+) -> Result<Plan> {
+    match direction {
+        Direction::Import => import::plan(source, options, Some(render)),
+        Direction::Export => export::plan(source, options, Some(render)),
+    }
+}
+
 /// Overrides are keyed by DTCG token path during import and XAML key during export.
 #[derive(Clone, Default, Deserialize)]
 #[serde(default, deny_unknown_fields, rename_all = "camelCase")]
@@ -65,6 +83,7 @@ pub struct Mapping {
     pub token: Option<String>,
     pub kind: Option<String>,
     pub xaml_type: Option<String>,
+    pub transition: Option<TransitionMapping>,
 }
 
 #[derive(Debug, Serialize)]
@@ -84,12 +103,26 @@ pub struct Conversion {
     pub xaml_type: String,
     pub value: String,
     pub note: Option<String>,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub transition: Option<TransitionMapping>,
 }
 
 #[derive(Debug, Serialize)]
 pub struct Issue {
     pub path: String,
     pub message: String,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub kind: Option<String>,
+}
+
+impl Issue {
+    fn new(path: String, message: impl Into<String>) -> Self {
+        Self {
+            path,
+            message: message.into(),
+            kind: None,
+        }
+    }
 }
 
 fn size(source: &str) -> Result<()> {
@@ -136,6 +169,8 @@ fn native_type(node: &Node, namespace: &str) -> bool {
 
 #[cfg(test)]
 mod compound_tests;
+#[cfg(test)]
+mod outline_tests;
 #[cfg(test)]
 mod tests;
 #[cfg(test)]

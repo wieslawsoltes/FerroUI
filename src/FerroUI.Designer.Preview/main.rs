@@ -117,8 +117,7 @@ fn respond(
                 let stage = renderer.as_ref().ok_or("Render the design before snapping")?.stage(request.frame)?;
                 serialize(request.resolve(stage))
             }),
-        "designTokens" => serde_json::from_value::<ferroui_designer_tools::token_handoff::Request>(message["params"].clone())
-            .map_err(|error| error.to_string()).and_then(|request| serialize(request.plan().map_err(|error| error.to_string()))),
+        "designTokens" => design_handoff::tokens(message["params"].clone()),
         "designHandoff" => serde_json::from_value(message["params"].clone())
             .map_err(|error| error.to_string()).and_then(|request| design_handoff::run(projects, request)),
         "configureProject" => serde_json::from_value(message["params"].clone())

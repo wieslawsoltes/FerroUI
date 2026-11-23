@@ -699,6 +699,9 @@ In Designer Studio, open **Project** and choose **Review design tokens**. Use th
 | Font family | `FontFamily` with the primary installed family followed by its fallbacks |
 | Font weight | `FontWeight` with a whole number from 1 to 1000. DTCG aliases such as `semi-bold` import as their numeric weights. |
 | Typography | A keyed `ControlTheme` for `TextBlock` with font family, size, weight, letter spacing, and line height |
+| Stroke style | A keyed Shape `ControlTheme` for solid, dashed, dotted, or explicitly dimensioned strokes |
+| Border | A uniform solid `Border` theme or a Shape theme for a dashed outline, including its brush and width |
+| Transition | A keyed `Transitions` collection with one registered property, duration, delay, and cubic Bézier curve |
 
 Standard DTCG stops import as a horizontal linear gradient by default. You can choose another brush type in the mapping. A FerroUI export also records brush geometry, opacity, and spread in the `com.github.ferroui` extension. Import preserves those values when the brush type matches. If you choose a different type, the review shows the new geometry and keeps the stops, opacity, and spread. Literal colors in XAML composites use hexadecimal sRGB. Dynamic resources, unsupported brush properties, and XAML stop positions outside zero to one appear under skipped entries. DTCG positions outside that range are clamped on import and recorded in the review. [DTCG gradient and shadow definitions](https://www.designtokens.org/tr/2025.10/format/#composite-types)
 
@@ -719,6 +722,19 @@ Import resolves typed aliases inside typography values. Export reads a keyed `Te
 ![VS Code reviews the family fallbacks, weight, and complete typography theme beside the generated XAML.](../images/vscode-design-typography.png)
 
 The generated theme styles the heading and the standalone font resources style the subtitle. Studio can export the dictionary back to the typography tokens. [Native preview](../images/native-design-typography.png) · [Studio export review](../images/studio-design-typography.png)
+
+### Apply outline and transition tokens
+
+1. Import the [customer example tokens](../../../editors/vscode/test/fixtures/customer-design.tokens.json). Set **Logical pixels per rem** to `16` for the relative dimensions. In VS Code, use the pencil on `motion.hover` and enter `Visual.Opacity` as its registered transition property. In Studio, select the row, enter the same property, and choose the check icon.
+2. Save the reviewed dictionary as `CustomerTokens.xaml` and include it in the view’s resources. Use `Theme="{StaticResource outline.card}"` on a `Border`. Use `Theme="{StaticResource outline.divider}"` on a `Rectangle` or another Shape to draw its dashed outline. A stroke-only theme supplies the pattern and cap. Give the Shape a `Stroke` brush and keep the width from the theme for a custom absolute dash pattern.
+3. Set `Transitions="{StaticResource motion.hover}"` on a control with `Opacity`. When that property changes, the native transition uses the reviewed duration, delay, and curve. The registered property determines the compatible transition class.
+4. Export the dictionary to check the reverse mapping. Custom dash lengths export in logical pixels. The FerroUI token extension retains the native theme target, an authored standalone stroke width, the default stroke setters that were omitted, and the qualified transition property and class. Importing the exported file restores those choices.
+
+FerroUI stores dash intervals relative to the stroke width. Import scales the intervals for a border’s width, or uses a one-pixel stroke for a standalone absolute pattern. The review reports CSS effects that require several strokes, asymmetric Borders, nonzero dash offsets, and dynamic effects that cannot round-trip as standard DTCG values. Transition export reads a single literal native transition from a keyed collection. Linear and literal spline easing export as cubic Bézier points. [DTCG stroke, border, and transition values](https://www.designtokens.org/tr/2025.10/format/#composite-types)
+
+![VS Code reviews the registered opacity transition, solid card border, and custom dash pattern beside the generated XAML](../images/vscode-design-outline-transition.png)
+
+The native preview renders the card’s solid border and the Shape’s dashed outline from the reviewed dictionary. [Native outline preview](../images/native-design-outline.png)
 
 ## Review design handoff
 

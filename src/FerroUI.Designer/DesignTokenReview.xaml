@@ -12,6 +12,7 @@
       <ComboBox Name="TokenEntry" AutomationProperties.Name="Select a token or resource" HorizontalAlignment="Stretch" />
       <TextBox Name="TokenMapping" Grid.Column="1" AutomationProperties.Name="Mapped key or token path" />
       <ComboBox Name="TokenRepresentation" Grid.Column="2" MinWidth="145" AutomationProperties.Name="Token representation" HorizontalAlignment="Stretch" />
+      <TextBox Name="TokenTransitionProperty" Grid.Column="2" MinWidth="145" PlaceholderText="Type.Property" AutomationProperties.Name="Registered transition property" IsVisible="False" />
       <TextBox Name="TokenScale" Grid.Column="3" MinWidth="115" PlaceholderText="Pixels per rem" AutomationProperties.Name="Logical pixels per rem" />
       <Button Name="ReviewMapping" Grid.Column="4" Classes="designer-icon-button" ToolTip.Tip="Update token review" AutomationProperties.Name="Update token review" />
     </Grid>

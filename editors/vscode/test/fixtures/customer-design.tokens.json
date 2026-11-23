@@ -16,7 +16,21 @@
   },
   "motion": {
     "fade": { "$type": "duration", "$value": { "value": 250, "unit": "ms" } },
-    "settle": { "$type": "cubicBezier", "$value": [0.2, 0.8, 0.3, 1.18] }
+    "settle": { "$type": "cubicBezier", "$value": [0.2, 0.8, 0.3, 1.18] },
+    "hover": { "$type": "transition", "$value": {
+      "duration": "{motion.fade}", "delay": { "value": 30, "unit": "ms" }, "timingFunction": "{motion.settle}"
+    } }
+  },
+  "outline": {
+    "segments": { "$type": "strokeStyle", "$value": {
+      "dashArray": [{ "value": 8, "unit": "px" }, { "value": 4, "unit": "px" }], "lineCap": "round"
+    } },
+    "card": { "$type": "border", "$value": {
+      "color": "{brand.accent}", "width": { "value": 2, "unit": "px" }, "style": "solid"
+    } },
+    "divider": { "$type": "border", "$value": {
+      "color": "{brand.accent}", "width": { "value": 4, "unit": "px" }, "style": "{outline.segments}"
+    } }
   },
   "depth": {
     "card": { "$type": "shadow", "$value": [

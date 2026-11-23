@@ -3,7 +3,8 @@ use super::DesignerWorkspace;
 use crate::{icons, workspace::inspector_actions::SOURCE};
 use ferroui_base::{threading::Dispatcher, Ref};
 use ferroui_controls::{Button, Control, TextBlock, TextBox, Window};
-use ferroui_designer_tools::token_handoff::{self, Direction, Options, Plan};
+use ferroui_designer_animation::native::plan_design_tokens;
+use ferroui_designer_tools::token_handoff::{Direction, Options, Plan};
 use ferroui_markup_xaml::FromXamlObject;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::{
@@ -236,10 +237,7 @@ impl TokenReview {
 
     fn review(&self, source: TokenSource, options: Options) {
         let direction = source.direction();
-        let result = match direction {
-            Direction::Import => token_handoff::plan_import(source.text(), &options),
-            Direction::Export => token_handoff::plan_export(source.text(), &options),
-        };
+        let result = plan_design_tokens(direction, source.text(), &options);
         match result {
             Ok(plan) => {
                 self.status.set_text(Some(&format!(

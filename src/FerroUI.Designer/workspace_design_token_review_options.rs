@@ -1,6 +1,8 @@
 use ferroui_base::Ref;
 use ferroui_controls::{Border, Button, ComboBox, Control, TextBox};
-use ferroui_designer_tools::token_handoff::{Conversion, Direction, Options, Plan};
+use ferroui_designer_tools::token_handoff::{
+    Conversion, Direction, Options, Plan, TransitionMapping,
+};
 use std::{
     cell::{Cell, RefCell},
     collections::BTreeMap,
@@ -21,6 +23,7 @@ struct Row {
     target: String,
     representations: &'static [(&'static str, &'static str)],
     representation: String,
+    transition: Option<TransitionMapping>,
 }
 
 pub(super) struct ReviewOptions {
@@ -29,6 +32,7 @@ pub(super) struct ReviewOptions {
     entry: Ref<ComboBox>,
     mapping: Ref<TextBox>,
     representation: Ref<ComboBox>,
+    transition: Ref<TextBox>,
     scale: Ref<TextBox>,
     rows: RefCell<Vec<Row>>,
     populating: Cell<bool>,
@@ -42,6 +46,7 @@ impl ReviewOptions {
             entry: root.get_control("TokenEntry"),
             mapping: root.get_control("TokenMapping"),
             representation: root.get_control("TokenRepresentation"),
+            transition: root.get_control("TokenTransitionProperty"),
             scale: root.get_control("TokenScale"),
             rows: RefCell::new(Vec::new()),
             populating: Cell::new(false),
@@ -59,7 +64,7 @@ impl ReviewOptions {
                 options.show_selected();
             }
         });
-        for field in [&self.mapping, &self.scale] {
+        for field in [&self.mapping, &self.scale, &self.transition] {
             let options = Rc::downgrade(self);
             let edit = edit.clone();
             field.text_changing(move |_, _| {
@@ -115,6 +120,9 @@ impl ReviewOptions {
                     target: target.clone(),
                     representations,
                     representation: representation.clone(),
+                    transition: (direction == Direction::Import)
+                        .then(|| row.transition.clone())
+                        .flatten(),
                 },
             );
         }
@@ -129,6 +137,13 @@ impl ReviewOptions {
                 target: target.unwrap_or_default(),
                 representations: &[],
                 representation: String::new(),
+                transition: (direction == Direction::Import
+                    && issue.kind.as_deref() == Some("transition"))
+                .then(|| {
+                    mapping
+                        .and_then(|mapping| mapping.transition.clone())
+                        .unwrap_or_default()
+                }),
             });
         }
         self.populating.set(true);
@@ -181,6 +196,10 @@ impl ReviewOptions {
         }
         self.representation
             .set_is_visible(row.is_some_and(|row| !row.representations.is_empty()));
+        let transition = row.and_then(|row| row.transition.as_ref());
+        self.transition.set_is_visible(transition.is_some());
+        self.transition
+            .set_text(transition.map(|value| value.property.as_str()));
         self.populating.set(false);
     }
 
@@ -215,7 +234,15 @@ impl ReviewOptions {
             .representations
             .get(self.representation.selected_index() as usize)
             .map(|(_, value)| *value);
-        if target == row.target && representation.is_none_or(|value| value == row.representation) {
+        let transition = self.transition.text().unwrap_or_default();
+        let transition = transition.trim();
+        if target == row.target
+            && representation.is_none_or(|value| value == row.representation)
+            && row
+                .transition
+                .as_ref()
+                .is_none_or(|value| value.property == transition)
+        {
             return Ok(options);
         }
         let mapping = options.mappings.entry(row.path.clone()).or_default();
@@ -224,6 +251,18 @@ impl ReviewOptions {
             Direction::Import => {
                 mapping.key = target;
                 mapping.xaml_type = representation.map(str::to_owned);
+                if let Some(current) = &row.transition {
+                    mapping.transition = (!transition.is_empty()).then(|| {
+                        if current.property == transition {
+                            current.clone()
+                        } else {
+                            TransitionMapping {
+                                property: transition.into(),
+                                ..Default::default()
+                            }
+                        }
+                    });
+                }
             }
             Direction::Export => {
                 mapping.token = target;

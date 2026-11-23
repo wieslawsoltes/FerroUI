@@ -9,6 +9,17 @@ use serde::Deserialize;
 use serde_json::{json, Value};
 use std::{collections::BTreeMap, path::PathBuf};
 
+pub(crate) fn tokens(params: Value) -> Result<Value, String> {
+    let request: ferroui_designer_tools::token_handoff::Request =
+        serde_json::from_value(params).map_err(|error| error.to_string())?;
+    ferroui_controls::register_types();
+    ferroui_controls_treedatagrid::register_types();
+    let plan = ferroui_designer_animation::native::plan_design_tokens(
+        request.direction, &request.source, &request.options,
+    ).map_err(|error| error.to_string())?;
+    serde_json::to_value(plan).map_err(|error| error.to_string())
+}
+
 #[derive(Deserialize)]
 #[serde(rename_all = "camelCase")]
 pub(crate) struct Request {

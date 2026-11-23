@@ -126,11 +126,21 @@ export class DesignTokenReview implements vscode.Disposable {
     private async editMapping(plan: TokenPlan, key: string): Promise<TokenOptions | undefined> {
         const importing = this.direction === 'import';
         const row = plan.mappings.find(mapping => (importing ? mapping.token : mapping.key) === key);
-        if (!row && !plan.issues.some(issue => issue.path === key && key)) return;
+        const issue = plan.issues.find(issue => issue.path === key && key);
+        if (!row && !issue) return;
         const value = await vscode.window.showInputBox({ title, prompt: importing ? 'XAML resource key' : 'Dotted DTCG token path',
             value: (importing ? row?.key : row?.token) ?? this.options.mappings[key]?.[importing ? 'key' : 'token'] ?? key });
         if (!value?.trim()) return;
         const mapping = { ...this.options.mappings[key], [importing ? 'key' : 'token']: value.trim() };
+        if (importing && (row?.kind ?? issue?.kind) === 'transition') {
+            const prior = mapping.transition ?? row?.transition;
+            const property = await vscode.window.showInputBox({ title, prompt: 'Registered transition property',
+                placeHolder: 'Visual.Opacity', value: prior?.property,
+                validateInput: value => /^[_\p{L}][_\p{L}\p{N}]*\.[_\p{L}][_\p{L}\p{N}]*$/u.test(value.trim()) ? undefined : 'Use Type.Property, for example Visual.Opacity.' });
+            if (!property) return;
+            const target = property.trim();
+            mapping.transition = prior?.property === target ? prior : { property: target };
+        }
         const forms = importing ? row?.kind === 'color' ? ['SolidColorBrush', 'Color']
             : row?.kind === 'gradient' ? ['LinearGradientBrush', 'RadialGradientBrush', 'ConicGradientBrush'] : undefined
             : row?.xamlType === 'x:Double' ? ['number', 'dimension'] : undefined;

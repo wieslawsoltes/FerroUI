@@ -1,5 +1,6 @@
 use super::schema as s;
 use crate::DesignerWorkspace;
+use ferroui_designer_animation::native::plan_design_tokens;
 use ferroui_designer_project::{create_new_file, file_uri, ProjectWorkspace};
 use ferroui_designer_tools::token_handoff::{Direction, Plan, Request};
 use serde_json::{json, Value};
@@ -14,7 +15,7 @@ pub(super) const CREATE: &str = "designer_create_design_token_file";
 pub(super) fn tool() -> Value {
     s::tool(
         NAME,
-        "Review colors, numbers, dimensions, durations, gradients, layered shadows, easing curves, font families, weights and typography between DTCG and XAML. Returns generated source, mappings and issues. options.mappings is keyed by token path during import and resource key during export.",
+        "Review scalar, typography, outline and transition tokens between DTCG and XAML. Returns generated source, mappings and issues. options.mappings is keyed by token path during import and resource key during export. Set transition.property to a registered Type.Property such as Visual.Opacity when importing a transition.",
         request_schema(),
         false,
     )
@@ -25,7 +26,8 @@ fn request_schema() -> Value {
         json!({
             "direction":{"type":"string","enum":["import","export"]}, "source":s::string(),
             "options":s::object(json!({"pixelsPerRem":s::number(), "mappings":s::dictionary(s::object(json!({
-                "key":s::string(), "token":s::string(), "kind":s::string(), "xamlType":s::string()
+                "key":s::string(), "token":s::string(), "kind":s::string(), "xamlType":s::string(),
+                "transition":s::object(json!({"property":s::string(),"namespace":s::string(),"class":s::string()}), &["property"])
             }), &[]))}), &[])
         }),
         &["direction", "source"],
@@ -95,7 +97,9 @@ pub(super) fn create(workspace: &DesignerWorkspace, args: &Value) -> Result<Valu
 fn reviewed(args: &Value) -> Result<(Direction, Plan, String), String> {
     let request: Request =
         serde_json::from_value(args.clone()).map_err(|error| error.to_string())?;
-    let plan = request.plan().map_err(|error| error.to_string())?;
+    ferroui_controls::register_types();
+    let plan = plan_design_tokens(request.direction, &request.source, &request.options)
+        .map_err(|error| error.to_string())?;
     let mut key = DefaultHasher::new();
     (request.source.as_str(), plan.source.as_str()).hash(&mut key);
     Ok((request.direction, plan, format!("{:016x}", key.finish())))

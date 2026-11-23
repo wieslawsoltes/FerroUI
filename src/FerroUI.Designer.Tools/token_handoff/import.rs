@@ -1,8 +1,8 @@
-use super::references::{Token, Tokens};
+use super::references::{Resolved, Token, Tokens};
 use super::scalars::{color, dimension, duration, finite};
 use super::{
-    bezier, font, gradient, shadow, simple_key, size, typography, valid_key, Conversion, Issue,
-    Options, Plan, ValueResult, EXTENSION, MAX_SOURCE_BYTES,
+    bezier, font, gradient, outline, shadow, simple_key, size, transition, typography, valid_key,
+    Conversion, Issue, Options, Plan, TransitionRenderer, ValueResult, EXTENSION, MAX_SOURCE_BYTES,
 };
 use crate::components::{escape, FRAMEWORK, XAML};
 use crate::{Result, ToolError};
@@ -12,6 +12,14 @@ use std::collections::BTreeMap;
 
 /// Plan a new dictionary. Unsupported or ambiguous rows remain visible as issues.
 pub fn plan_import(source: &str, options: &Options) -> Result<Plan> {
+    plan(source, options, None)
+}
+
+pub(super) fn plan(
+    source: &str,
+    options: &Options,
+    render: Option<TransitionRenderer>,
+) -> Result<Plan> {
     size(source)?;
     let tokens: Value =
         serde_json::from_str(source.trim_start_matches('\u{feff}')).map_err(crate::error)?;
@@ -33,7 +41,12 @@ pub fn plan_import(source: &str, options: &Options) -> Result<Plan> {
     let mut entries = Vec::new();
     let mut generated = 0;
     for (path, token) in &tokens.entries {
-        match conversion(&tokens, path, *token, options) {
+        let mut kind = token.kind;
+        let converted = tokens.resolve(*token).and_then(|resolved| {
+            kind = resolved.kind;
+            conversion(&tokens, path, *token, resolved, options, render)
+        });
+        match converted {
             Ok((entry, xaml)) => {
                 generated += xaml.len();
                 if generated > MAX_SOURCE_BYTES {
@@ -41,10 +54,11 @@ pub fn plan_import(source: &str, options: &Options) -> Result<Plan> {
                 }
                 entries.push((entry, xaml));
             }
-            Err(message) => issues.push(Issue {
-                path: path.clone(),
-                message,
-            }),
+            Err(message) => {
+                let mut issue = Issue::new(path.clone(), message);
+                issue.kind = kind.filter(|kind| *kind == "transition").map(str::to_owned);
+                issues.push(issue);
+            }
         }
     }
     for path in options
@@ -52,10 +66,7 @@ pub fn plan_import(source: &str, options: &Options) -> Result<Plan> {
         .keys()
         .filter(|path| !tokens.entries.contains_key(*path))
     {
-        issues.push(Issue {
-            path: path.clone(),
-            message: "Mapping does not match a token".into(),
-        });
+        issues.push(Issue::new(path.clone(), "Mapping does not match a token"));
     }
     let mut counts = BTreeMap::new();
     for (entry, _) in &entries {
@@ -65,13 +76,13 @@ pub fn plan_import(source: &str, options: &Options) -> Result<Plan> {
         if counts[&entry.key] == 1 {
             return true;
         }
-        issues.push(Issue {
-            path: entry.token.clone(),
-            message: format!(
+        issues.push(Issue::new(
+            entry.token.clone(),
+            format!(
                 "Duplicate resource key {}. Choose a distinct key.",
                 entry.key
             ),
-        });
+        ));
         false
     });
     let mut source = format!(
@@ -94,9 +105,10 @@ fn conversion(
     tokens: &Tokens<'_>,
     path: &str,
     token: Token<'_>,
+    resolved: Resolved<'_>,
     options: &Options,
+    render: Option<TransitionRenderer>,
 ) -> ValueResult<(Conversion, String)> {
-    let resolved = tokens.resolve(token)?;
     let kind = resolved
         .kind
         .ok_or("Token needs a $type or a typed reference")?;
@@ -115,6 +127,7 @@ fn conversion(
         .reference
         .map(|reference| format!("Resolved {reference}"));
     let target = mapping.and_then(|mapping| mapping.xaml_type.as_deref());
+    let mut transition = None;
     let (xaml_type, value, xaml) = match kind {
         "gradient" => {
             let brush = gradient::import(tokens, &resolved, target, &mut note)?;
@@ -127,6 +140,25 @@ fn conversion(
             let style =
                 typography::import(tokens, resolved.value, options.pixels_per_rem, &mut note)?;
             ("ControlTheme", style.summary(), style.xaml(&key))
+        }
+        "strokeStyle" | "border" => {
+            if target.is_some_and(|target| target != "ControlTheme") {
+                return Err("Map a stroke or border to a FerroUI ControlTheme".into());
+            }
+            let outline =
+                outline::import(tokens, &resolved, kind, options.pixels_per_rem, &mut note)?;
+            ("ControlTheme", outline.summary(), outline.xaml(&key)?)
+        }
+        "transition" => {
+            if target.is_some_and(|target| target != "Transitions") {
+                return Err("Map a transition token to a FerroUI Transitions resource".into());
+            }
+            let binding = mapping.and_then(|mapping| mapping.transition.as_ref());
+            let timing = transition::import(tokens, &resolved, binding)?;
+            let xaml = timing.xaml(&key, render)?;
+            let summary = timing.summary();
+            transition = Some(timing.binding);
+            ("Transitions", summary, xaml)
         }
         _ => {
             let (element, value) = scalar_resource(
@@ -155,6 +187,7 @@ fn conversion(
             xaml_type: xaml_type.into(),
             value,
             note,
+            transition,
         },
         xaml,
     ))
