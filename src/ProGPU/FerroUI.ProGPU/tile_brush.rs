@@ -5,7 +5,7 @@
 //! of tiles costs nothing. Strokes and text arrive here as the filled outlines they are.
 //!
 //! The geometry of the tile (the stretch, the alignment, the source and destination rectangles and
-//! the two brush transforms) is that of the other backends.
+//! the two brush transforms) comes from `TileBrushCalculator` and the members of the brush.
 
 use super::*;
 use crate::layer::ProGpuLayer;
@@ -13,9 +13,9 @@ use ferroui_base::media::{Colors, ISceneBrushContent, ITileBrush, MediaExtension
 use ferroui_base::rendering::utilities::TileBrushCalculator;
 use ferroui_base::RelativeUnit;
 
-/// The most pixels a tile of scalable content is replayed into; beyond it the tile is replayed at
-/// a lower resolution and enlarged.
-const MAX_TILE_AREA: f64 = 2048.0 * 2048.0;
+/// The longest side a tile of scalable content is replayed at. A longer tile is replayed smaller,
+/// in the same proportions, and enlarged by the sampler.
+const MAX_SCALABLE_TILE_SIDE: f64 = 4096.0;
 
 /// The largest side of the layer of a tile.
 const MAX_TILE_SIDE: i32 = 8192;
@@ -302,11 +302,11 @@ impl ProGpuDrawingContext {
         if !(scale_x.is_finite() && scale_y.is_finite() && scale_x > 0.0 && scale_y > 0.0) {
             return None;
         }
-        let area = tile.width * scale_x * tile.height * scale_y;
-        if area > MAX_TILE_AREA {
-            let shrink = (MAX_TILE_AREA / area).sqrt();
-            scale_x *= shrink;
-            scale_y *= shrink;
+        let longest = (tile.width * scale_x).max(tile.height * scale_y);
+        if longest > MAX_SCALABLE_TILE_SIDE {
+            let fit = MAX_SCALABLE_TILE_SIDE / longest;
+            scale_x *= fit;
+            scale_y *= fit;
         }
         let pixels = PixelSize::new(
             (tile.width * scale_x).ceil().clamp(1.0, f64::from(MAX_TILE_SIDE)) as i32,
