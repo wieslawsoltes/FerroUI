@@ -2680,6 +2680,7 @@ dependencies = [
  "cc",
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-harfbuzz",
  "ferroui-media-apple",
  "ferroui-metal",
  "kurbo",
