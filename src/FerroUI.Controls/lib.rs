@@ -670,6 +670,10 @@ mod selection_mode;
 mod selection_indicator_animation;
 mod selection_indicator;
 pub use selection_indicator::SelectionIndicator;
+mod selector_bar;
+pub use selector_bar::{SelectorBar, SelectorBarItem};
+#[cfg(test)]
+mod selector_bar_tests;
 mod tab_control;
 mod tab_item;
 mod tree_view;

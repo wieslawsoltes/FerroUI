@@ -324,6 +324,8 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::symbol_icon::SymbolIcon,
     crate::icon_source::SymbolIconSource,
     crate::tab_control::TabControl,
+    crate::selector_bar::SelectorBar,
+    crate::selector_bar::SelectorBarItem,
     crate::tab_item::TabItem,
     crate::text_block::TextBlock,
     crate::rich_text_block::RichTextBlock,

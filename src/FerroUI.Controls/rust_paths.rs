@@ -485,6 +485,8 @@ ferroui_base::ferro_rust_paths! {
         crate::ScrollIntoViewAlignment,
         crate::SelectionChangedEventArgs,
         crate::SelectionMode,
+        crate::SelectorBar,
+        crate::SelectorBarItem,
         crate::ShutdownMode,
         crate::SizeChangedEventArgs,
         crate::SizeToContent,
