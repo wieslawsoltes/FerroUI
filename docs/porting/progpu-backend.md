@@ -192,7 +192,8 @@ made of the same pointer-free commands and resources as a scene stream.
   family buffers, and keeps those ranges while the generation stays. The buffers become chunks of
   a fixed size with ranges handed out from them, so a new or changed span uploads its own ranges
   and nothing else moves; a removed span returns its ranges.
-- **Placement.** What a frame says about a span without changing it: an offset in whole device
+- **Placement** (not adopted, like the chunks above: section 2.3.12). What a frame says about a
+  span without changing it: an offset in whole device
   pixels, the clip of its ancestors (a rectangle and, for rounded and rotated clips, the analytic
   mask chain of section 2.7) and the group it is drawn into. Placements live in a table on the GPU
   (a storage buffer, one record for each span of the order); every vertex and instance of a span
@@ -342,17 +343,17 @@ second before any of this; section 6.2 has the numbers after each part):
 | 2 | The bundles and draws of section 2.3.10, in three parts: spans as command lists with bundles kept by content (built), fewer draws, `update_scene` with changed content only (R4) | engine | the engine tests of the lists, the replay and the kept bundles; a scene drawn again, sent again with other colours and sent again with other draws reads back the bytes of a new engine; the gauntlet frames of section 6.2 unchanged to the byte; draws a frame, frames a second and render thread time at tier 16 (section 6.2) |
 | R1 | Groups before the root pass | engine (`Scene/` render execution, layer resources) | the layer and clip tests read back the same bytes; pass and command-buffer counts of a frame with many groups; the gauntlet at tier 16 on a queue of the default capacity |
 | R3 | Scenes per target | engine C ABI | two targets on one engine keep their scenes: the second frame of each is a snapshot hit |
-| R4 | Spans compiled once, chunked buffers, the placement table | engine (family page compilers, shaders, bundle recording) | read-back equality of moved spans against whole streams for every family, with clips and masks; upload bytes of a frame with one changed span (the metrics of the engine report them) |
+| R4 | Pages that upload only the ranges that changed (written, one family at a time). Chunked buffers and the placement table: **not adopted** (section 2.3.12) | engine (family page compilers, uploads) | read-back equality against whole uploads for every family; upload bytes of a frame with one changed span (the metrics of the engine report them); the counter of shifted uploads |
 | R5 | The delta call | engine C ABI, bindings, backend | the same frames through deltas and through whole streams; validation errors of a bad span leave the scene as it was |
 | R6 | The other resources by identifier (paths, images), damage, cached groups | engine, backend | partial redraw scenarios of section 4 |
 | R2 | Fragments in the backend against the whole-stream call: built, by reissuing the builder calls (section 2.3.6) | backend | the pixels of a fragment against those of its commands, in place, moved by whole pixels and under other clips; the backend suite |
 
 Half of the content of a gauntlet frame is new (section 2.3.2), so after step 1 the cost of a
 changed visual is the likely next item: the seven passes of `update_scene` over the whole stream
-and the pages compiled again from offset 0. R4 and R5 stay designed and are not built before a
-profile asks for them. R2 is skipped until a profile shows that the encoding of the backend
-matters; today the UI thread and the walk of the compositor together are under a tenth of a
-frame. The rotated text of section 2.3.11 is a matter of quality, not of speed, and is scheduled
+and the pages compiled again from offset 0. R4 is written as range uploads and R5 as the delta
+call, which stays off by default until a measurement shows a gain; the chunked buffers and the
+placement table of section 2.3.3 are not adopted, for the reasons and under the rule of
+section 2.3.12. The rotated text of section 2.3.11 is a matter of quality, not of speed, and is scheduled
 apart.
 
 Every engine part is a pull request of its own in the ProGPU repository, stacked on the branch
@@ -581,6 +582,29 @@ variant, no second strike) or document the exact difference in section 2.4.1.
 
 #### 2.3.12 What this design does not settle
 
+- **Chunked buffers and the placement table: not adopted.** Pages stay contiguous and upload the
+  ranges that changed (R4). Two concrete reasons:
+  - *The shared shaders.* A placement slot on every vertex changes the vertex formats of
+    `src/ProGPU.Backend/Shaders/Vector.wgsl`, `Text.wgsl` and `Texture.wgsl`, each of which
+    declares its inputs at `@location(0)` to `@location(7)`, and which the native engine embeds
+    from that shared folder. A table needs a bind group of its own, and `Texture.wgsl` already
+    uses `@group(0)` to `@group(3)`, the default WebGPU limit of four. A native copy of these
+    shaders would be a worse trade than the cost it removes.
+  - *The merge rule.* `try_merge_semantic_analytic_draw` joins two draws only when their vertex
+    and index ranges are contiguous. Ranges handed out from chunks stop being adjacent after
+    replacements, and passing a slot through `firstInstance` would keep neighbouring spans apart
+    in the same way, so both raise the draws of a frame and with them encode and flush.
+
+  **The rule to revisit it, set before any data:** chunks are looked at again only if, at
+  gauntlet tier 16 over the existing measured frames, uploads caused by an insertion shifting
+  the rest of a page take at least 10 percent of encode plus flush time. `FERROUI_PROGPU_PERF`
+  reports it as the `share` of each line, from
+  `progpu_native_engine_take_upload_counters`. Shifted bytes are written bytes whose content the
+  engine finds at another offset of the same page, in windows of 256 bytes; indices count when
+  their differences match, since an insertion also moves their values. The time of the writes is
+  shared out by bytes, so it is an estimate, and the time spent finding those bytes is taken out
+  of the encode stage. Vertices whose content an insertion changes (a brush index that moved)
+  do not count as shifted. This has not been measured yet.
 - **Draw calls.** Spans compiled in order are adjacent and stay merged; after many replacements
   the ranges of neighbours are apart and a run falls into more draws. Compacting a chunk (moving
   ranges and their index bases) is the answer if the counts show it; it is not in the first

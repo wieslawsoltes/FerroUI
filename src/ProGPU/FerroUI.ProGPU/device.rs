@@ -861,6 +861,24 @@ impl ProGpuEngine {
     }
 }
 
+impl ProGpuEngine {
+    /// What the page uploads cost since the last call; zero if the engine refuses the call, as
+    /// the counts are only for measurements.
+    pub(crate) fn take_upload_counters(&self) -> progpu_native_upload_counters {
+        let mut counters = progpu_native_upload_counters {
+            struct_size: std::mem::size_of::<progpu_native_upload_counters>() as u32,
+            ..Default::default()
+        };
+        // SAFETY: the engine is alive and the counters outlive the call.
+        let status = unsafe { progpu_native_engine_take_upload_counters(self.enter(), &mut counters) };
+        if status == PROGPU_NATIVE_STATUS_SUCCESS {
+            counters
+        } else {
+            progpu_native_upload_counters::default()
+        }
+    }
+}
+
 impl Drop for ProGpuEngine {
     fn drop(&mut self) {
         // The engine of a thread that is ending is not destroyed: destroying it releases its
