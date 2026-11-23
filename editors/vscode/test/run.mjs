@@ -18,11 +18,14 @@ const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const browser = process.env.FERROUI_TEST_BROWSER_URL;
 const browserBuild = process.env.FERROUI_TEST_BROWSER_BUILD;
 const browserDebugSite = process.env.FERROUI_TEST_BROWSER_DEBUG_SITE;
+const browserDwarfExtensions = process.env.FERROUI_TEST_BROWSER_DWARF_EXTENSIONS;
 try {
     let target = workspace;
     let targetSettings = {};
     let targetEnv;
-    if ([simulator, android, browser, browserBuild, browserDebugSite].filter(Boolean).length > 1) throw new Error('Choose one platform acceptance fixture per run.');
+    if ([simulator, android, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
+        throw new Error('Choose one platform acceptance fixture per run.');
+    }
     if (simulator) {
         const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
         if (process.platform !== 'darwin' || !appPath) {
@@ -47,15 +50,17 @@ try {
             }],
         };
         targetEnv = { FERROUI_TEST_ANDROID_DEVICE: android };
-    } else if (browser || browserBuild || browserDebugSite) {
+    } else if (browser || browserBuild || browserDebugSite || browserDwarfExtensions) {
         const chrome = process.env.FERROUI_TEST_BROWSER_EXECUTABLE;
         const toolkit = resolve(process.env.FERROUI_TEST_BROWSER_SOURCE ?? join(extension, '../..'));
         targetSettings = { ...(chrome ? { 'ferroui.browser.executablePath': resolve(chrome) } : {}) };
-        if (browserBuild) {
+        if (browserBuild || browserDwarfExtensions) {
             await browserBuildWorkspace(workspace, toolkit);
             targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-check', label: 'Dispatch Check',
-                build: { application: 'dispatch-check', toolchain: toolkit } }];
-            targetEnv = { FERROUI_TEST_BROWSER_BUILD: browserBuild, CARGO_TARGET_DIR: process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo') };
+                build: { application: 'dispatch-check', toolchain: toolkit, debugSymbols: Boolean(browserDwarfExtensions) } }];
+            targetEnv = { CARGO_TARGET_DIR: process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo') };
+            if (browserDwarfExtensions) targetEnv.FERROUI_TEST_BROWSER_RUST_DEBUG = '1';
+            else targetEnv.FERROUI_TEST_BROWSER_BUILD = browserBuild;
             const buildTimeout = process.env.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS;
             if (buildTimeout) targetEnv.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS = buildTimeout;
         } else if (browserDebugSite) {
@@ -95,7 +100,7 @@ try {
             extensionDevelopmentPath: extension,
         }),
         extensionTestsEnv: targetEnv,
-        launchArgs: [target, '--user-data-dir', profile, '--extensions-dir', join(sandbox, 'extensions'),
+        launchArgs: [target, '--user-data-dir', profile, '--extensions-dir', browserDwarfExtensions ? resolve(browserDwarfExtensions) : join(sandbox, 'extensions'),
             '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'],
     });
 } finally {

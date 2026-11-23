@@ -90,6 +90,11 @@ mod app {
         }
     }
 
+    fn mark_dispatched(count: &mut u32) {
+        *count = count.saturating_add(1);
+        save_dispatch_count(*count);
+    }
+
     #[component(rerender)]
     fn DispatchDesk() -> Element {
         let dispatched = use_signal(|| load_dispatch_count());
@@ -103,10 +108,7 @@ mod app {
                     Border { background: "#FFFFFF", corner_radius: 14.0, padding: 19.0,
                         StackPanel { spacing: 12.0,
                             TextBox { name: "Search", placeholder_text: "Find an order" }
-                            Button { name: "DispatchOrder", on_click: move |_| dispatched.update(|count| {
-                                *count = count.saturating_add(1);
-                                save_dispatch_count(*count);
-                            }), "Mark dispatched" }
+                            Button { name: "DispatchOrder", on_click: move |_| dispatched.update(mark_dispatched), "Mark dispatched" }
                             TextBlock { name: "DispatchedCount", text: format!("Dispatched orders: {}", dispatched.get()), foreground: "#246455" }
                         }
                     }

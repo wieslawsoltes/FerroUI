@@ -20,6 +20,7 @@ import { verifyBrowserMcp } from './browserMcp';
 import { verifyBrowserReload } from './browserReloadMcp';
 import { verifyBrowserBuildTarget } from './browserBuildTarget';
 import { verifyBrowserDebug } from './browserDebugMcp';
+import { verifyBrowserRustDebug } from './browserRustDebugMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
@@ -54,6 +55,10 @@ export async function run(): Promise<void> {
     }
     if (process.env.FERROUI_TEST_BROWSER_DEBUG) {
         await verifyBrowserDebug();
+        return;
+    }
+    if (process.env.FERROUI_TEST_BROWSER_RUST_DEBUG) {
+        await verifyBrowserRustDebug();
         return;
     }
     await verifyBrowserBuildTarget(workspace);

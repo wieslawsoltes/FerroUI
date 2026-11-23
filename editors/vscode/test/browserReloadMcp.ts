@@ -5,17 +5,8 @@ import type { ReloadRecord } from '../src/reloadHistory';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import type { RuntimeNode, RuntimeViewSnapshot } from '../src/runtimeProtocol';
 import { runtimeApp } from './browserMcp';
+import { browserBuildTimeout, waitFor } from './browserTestSupport';
 import { openEditorMcp } from './mcpFixture';
-
-async function waitFor<T>(check: () => Promise<T | undefined>, title: string, timeout = 30_000): Promise<T> {
-    const deadline = Date.now() + timeout;
-    for (;;) {
-        const value = await check();
-        if (value !== undefined) return value;
-        if (Date.now() >= deadline) throw new Error(`Timed out waiting for ${title}.`);
-        await delay(180);
-    }
-}
 
 async function save(document: vscode.TextDocument, text: string): Promise<void> {
     const edit = new vscode.WorkspaceEdit();
@@ -25,8 +16,7 @@ async function save(document: vscode.TextDocument, text: string): Promise<void> 
 }
 
 export async function verifyBrowserReload(): Promise<void> {
-    const requestedTimeout = Number(process.env.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS);
-    const buildTimeout = Number.isFinite(requestedTimeout) && requestedTimeout > 0 ? requestedTimeout : 90_000;
+    const buildTimeout = browserBuildTimeout();
     const initialTimeout = Math.max(360_000, buildTimeout);
     const folder = vscode.workspace.workspaceFolders![0].uri;
     const request = { profile: 'dispatch-check', folder: folder.toString() };
