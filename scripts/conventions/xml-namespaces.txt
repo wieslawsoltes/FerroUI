@@ -9,6 +9,8 @@
 # Stay out.
 exception FerroUI.Automation.Peers # automation peers are created by controls and are not markup
 exception FerroUI.Controls.Automation.Peers # automation peers are created by controls and are not markup
+exception FerroUI.Controls.Embedding.Offscreen # a top level created from code to render off screen
+exception FerroUI.Controls.Utils # a helper that controls use from code
 exception FerroUI.Data.Core # the property system behind bindings, used from code
 exception FerroUI.Data.Core.Plugins # the property system behind bindings, used from code
 exception FerroUI.Markup.Xaml # the contract of the markup language: loader and extension base types, used from code
@@ -45,15 +47,6 @@ open FerroDock.Model.ReactiveUI.Controls # #1280, Dock
 open FerroDock.Model.ReactiveUI.Core # #1280, Dock
 open FerroDock.Model.ReactiveUI.Services.Ferro.Controls # #1280, Dock
 open FerroDock.Model.Services # #1280, Dock
-open FerroUI.Controls.Converters # #1280
-open FerroUI.Controls.Embedding.Offscreen # #1280
-open FerroUI.Controls.Models.TreeDataGrid # #1280
-open FerroUI.Controls.Platform # #1280
-open FerroUI.Controls.Primitives.Converters # #1280
-open FerroUI.Controls.Primitives.PopupPositioning # #1280
-open FerroUI.Controls.Repeater # #1280
-open FerroUI.Controls.Selection # #1280
-open FerroUI.Controls.Utils # #1280
 open FerroUI.Diagnostics # #1280
 open FerroUI.Diagnostics.Behaviors # #1280, decision 4: DevTools details, proposed *.Internal
 open FerroUI.Diagnostics.Controls # #1280, decision 4: DevTools details, proposed *.Internal
@@ -64,7 +57,6 @@ open FerroUI.Diagnostics.Views # #1280, decision 4: DevTools details, proposed *
 open FerroUI.Dialogs # #1280
 open FerroUI.LiveCharts # #1281
 open FerroUI.LiveCharts.Core # #1281
-open FerroUI.Navigation # #1280
 open FerroUI.OpenGL.Controls # #1280
 open FerroUI.Themes.Fluent.Accents # #1280, decision 4: theme details, proposed *.Internal
 open FerroUI.Themes.MacOS.Accents # #1280, decision 4: theme details, proposed *.Internal

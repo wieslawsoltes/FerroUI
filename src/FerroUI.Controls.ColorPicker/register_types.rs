@@ -29,8 +29,10 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     crate_name: "ferroui_controls_color_picker",
     xmlns_definitions: &[
         XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Converters" },
         XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Collections" },
         XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Primitives" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Primitives.Converters" },
     ],
     xmlns_prefixes: &[],
     metadata: &[],

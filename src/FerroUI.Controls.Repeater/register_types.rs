@@ -16,7 +16,10 @@ const NAMESPACES: &[(&str, &str)] = &[
 pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "FerroUI.Controls.Repeater",
     crate_name: "ferroui_controls_repeater",
-    xmlns_definitions: &[XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls" }],
+    xmlns_definitions: &[
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.Controls.Repeater" },
+    ],
     xmlns_prefixes: &[],
     metadata: &[],
 };
