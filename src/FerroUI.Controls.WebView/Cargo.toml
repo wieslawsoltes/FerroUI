@@ -44,6 +44,10 @@ windows-sys = { workspace = true, features = [
 ferroui-android.workspace = true
 jni-sys.workspace = true
 
+[target.'cfg(all(target_arch = "wasm32", target_os = "unknown"))'.dependencies]
+ferroui-browser.workspace = true
+wasm-bindgen.workspace = true
+
 [build-dependencies]
 ferroui-build-scan.workspace = true
 
