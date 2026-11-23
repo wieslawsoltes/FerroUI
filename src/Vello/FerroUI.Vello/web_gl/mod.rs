@@ -540,6 +540,19 @@ impl VelloWebGlGpu {
         Ok(upright)
     }
 
+    /// Whether the image of the lights of the context holds `lights` rows (#1158).
+    pub(crate) fn holds_lights(&self, lights: usize) -> bool {
+        lights <= self.max_texture_size as usize
+    }
+
+    /// Writes the lights the many-lights programs read next (#1158).
+    pub(crate) fn write_light_rows(&self, rows: &[f32]) -> bool {
+        match self.state.borrow_mut().as_mut() {
+            Some(state) => state.programs.write_light_rows(&self.gl, rows, self.max_texture_size),
+            None => false,
+        }
+    }
+
     /// The pass of the shader effect `effect` over `content` (upright, holding `area` pixels whose
     /// top left is `origin` of the area of the effect, of `size` pixels at `scale`) into a texture
     /// of the pool. `None` when its program is not there or its uniforms do not match it.

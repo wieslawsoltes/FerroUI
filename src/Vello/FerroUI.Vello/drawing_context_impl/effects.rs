@@ -1082,6 +1082,12 @@ impl DrawingContextImpl {
     }
 }
 
+/// The lights the uniform block of the lighting programs holds.
+#[cfg(feature = "hybrid-webgl")]
+fn blocks_max_lights() -> usize {
+    crate::effect_uniforms::MAX_LIGHTS
+}
+
 impl LayerOperation {
     /// The program of the WebGL2 context that draws the operation; `None` for a multiply layer
     /// of factors (drawn on the processor).
@@ -1090,7 +1096,11 @@ impl LayerOperation {
         use crate::web_gl::LayerProgram;
         match self {
             LayerOperation::Matrix { .. } => Some(LayerProgram::ColorMatrix),
-            LayerOperation::LightingMultiply { .. } => Some(LayerProgram::LightMultiply),
+            LayerOperation::LightingMultiply { lighting, .. } => Some(if lighting.lights.len() > blocks_max_lights() {
+                LayerProgram::ManyLightMultiply
+            } else {
+                LayerProgram::LightMultiply
+            }),
             LayerOperation::Convolve(_) => Some(LayerProgram::Convolution),
             LayerOperation::Multiply { .. } => Some(LayerProgram::MultiplyFactors),
         }
@@ -1203,7 +1213,16 @@ impl DrawingContextImpl {
             LayerOperation::LightingMultiply { lighting, scene_to_local } => {
                 // The pass evaluates the lights at the pixels of the area, from its top left.
                 let to_local = *scene_to_local * Affine::translate((f64::from(layer.x), f64::from(layer.y)));
-                (LayerProgram::LightMultiply, blocks::light_multiply(lighting, size, to_local))
+                if lighting.lights.len() > blocks::MAX_LIGHTS {
+                    let lights = blocks::many_light_multiply(lighting, size, to_local);
+                    if !layer.gpu.write_light_rows(&lights.rows) {
+                        crate::web_gl::log_render_failure("the context did not take the lights");
+                        return;
+                    }
+                    (LayerProgram::ManyLightMultiply, Some(lights.head.to_vec()))
+                } else {
+                    (LayerProgram::LightMultiply, blocks::light_multiply(lighting, size, to_local))
+                }
             }
             LayerOperation::Convolve(convolution) => {
                 (LayerProgram::Convolution, Some(blocks::convolution(convolution, size)))
@@ -1273,10 +1292,9 @@ impl DrawingContextImpl {
         let Some(gpu) = self.scene().web_gl_gpu() else {
             return false;
         };
-        if self.sink_origin != Vec2::ZERO
-            || lighting.lights.len() > ferroui_base::platform::LightingParameters::MAX_LIGHTS
-            || !gpu.prepare(LayerProgram::LightFill)
-        {
+        let many = lighting.lights.len() > blocks::MAX_LIGHTS;
+        let program = if many { LayerProgram::ManyLightFill } else { LayerProgram::LightFill };
+        if self.sink_origin != Vec2::ZERO || !gpu.holds_lights(lighting.lights.len()) || !gpu.prepare(program) {
             return false;
         }
         let transform = self.device_transform();
@@ -1288,8 +1306,17 @@ impl DrawingContextImpl {
         };
         let (x0, y0) = (region.origin.x as f64, region.origin.y as f64);
         let size = (region.size.width as u32, region.size.height as u32);
-        let uniforms = blocks::lighting(lighting, LightingOutput::Light, (x0 as u32, y0 as u32), transform.inverse());
-        let texture = match gpu.layer_texture(LayerProgram::LightFill, &[], size, &uniforms) {
+        let origin = (x0 as u32, y0 as u32);
+        let uniforms = if many {
+            let lights = blocks::many_lighting(lighting, LightingOutput::Light, origin, transform.inverse());
+            if !gpu.write_light_rows(&lights.rows) {
+                return false;
+            }
+            lights.head.to_vec()
+        } else {
+            blocks::lighting(lighting, LightingOutput::Light, origin, transform.inverse())
+        };
+        let texture = match gpu.layer_texture(program, &[], size, &uniforms) {
             Ok(Some(texture)) => texture,
             Ok(None) => return false,
             Err(error) => {
@@ -1766,6 +1793,14 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         self.restore();
     }
 
+    /// The renderer's own lighting programs evaluate any number of lights in the GPU modes and on
+    /// WebGL2 (#1158): a draw it cannot make on the device returns `false`, and the compositor's
+    /// light map draws it, as in the CPU mode.
+    #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
+    fn evaluates_lighting(&mut self, _lighting: &LightingParameters) -> bool {
+        true
+    }
+
     /// In a GPU mode: the content is recorded into a scene of the device,
     /// and the light multiply pass of `gpu/effect_passes.rs` multiplies it
     /// by the lights it evaluates at each pixel; in the hybrid mode of a web
@@ -1775,17 +1810,25 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
     /// (`push_multiply_layer`).
     #[cfg(any(feature = "hybrid", feature = "gpu", feature = "hybrid-webgl"))]
     fn push_lighting_multiply_layer(&mut self, bounds: Rect, lighting: &LightingParameters) -> bool {
-        if lighting.lights.len() > LightingParameters::MAX_LIGHTS {
-            return false;
-        }
         let entered = 'entered: {
             #[cfg(any(feature = "hybrid", feature = "gpu"))]
             if let Some(layer) = self.device_layer(Some(bounds)) {
+                if !crate::gpu::effect_passes::holds_lights(&layer.device, lighting.lights.len()) {
+                    return false;
+                }
                 break 'entered Some((self.enter_device_scene(&layer), Some(layer), None));
             }
             #[cfg(feature = "hybrid-webgl")]
-            if let Some(layer) = self.web_gl_layer(Some(bounds), crate::web_gl::LayerProgram::LightMultiply) {
-                break 'entered Some((self.enter_web_gl_scene(), None, Some(layer)));
+            {
+                use crate::web_gl::LayerProgram;
+                let many = lighting.lights.len() > crate::effect_uniforms::MAX_LIGHTS;
+                let program = if many { LayerProgram::ManyLightMultiply } else { LayerProgram::LightMultiply };
+                let held = self.scene().web_gl_gpu().is_none_or(|gpu| gpu.holds_lights(lighting.lights.len()));
+                if held {
+                    if let Some(layer) = self.web_gl_layer(Some(bounds), program) {
+                        break 'entered Some((self.enter_web_gl_scene(), None, Some(layer)));
+                    }
+                }
             }
             None
         };
@@ -1941,7 +1984,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
                 None => return false,
             }
         };
-        if lighting.lights.len() > ferroui_base::platform::LightingParameters::MAX_LIGHTS {
+        if !crate::gpu::effect_passes::holds_lights(&device, lighting.lights.len()) {
             return false;
         }
         let transform = self.device_transform();
