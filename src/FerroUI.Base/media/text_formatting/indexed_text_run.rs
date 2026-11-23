@@ -10,4 +10,7 @@ pub struct IndexedTextRun {
     pub run_index: Cell<i32>,
     pub next_run_index: Cell<i32>,
     pub text_run: std::cell::RefCell<Option<Rc<dyn TextRun>>>,
+    /// The bidi level the run was reordered with. Its parity is the direction of the run, also
+    /// for a run without glyphs.
+    pub bidi_level: i8,
 }

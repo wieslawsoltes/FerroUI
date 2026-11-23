@@ -108,6 +108,45 @@ fn build_line_of_runs(texts: &[&str]) -> Rc<dyn TextLine> {
     format_line(&source, 0, f64::INFINITY, &paragraph_props, None).unwrap()
 }
 
+/// The glyphs a line can still draw: a disposed run has none.
+fn glyph_count(line: &dyn TextLine) -> usize {
+    line.text_runs()
+        .iter()
+        .filter_map(|run| run.downcast_ref::<ShapedTextRun>())
+        .map(|run| run.shaped_buffer().length())
+        .sum()
+}
+
+#[test]
+fn collapsing_leaves_the_source_line_intact_and_the_collapsed_line_outlives_it() {
+    let _scope = TextTestScope::new();
+
+    type Collapser = fn(f64) -> Rc<dyn TextCollapsingProperties>;
+    let collapsers: [Collapser; 4] = [
+        |width| trailing_char(width, FlowDirection::LeftToRight),
+        |width| trailing_word(width, FlowDirection::LeftToRight),
+        |width| leading_prefix(2, width, FlowDirection::LeftToRight),
+        |width| path_segment(width, FlowDirection::LeftToRight),
+    ];
+
+    for collapser in collapsers {
+        let line = build_line("Hello/wonderful/world of text", FlowDirection::LeftToRight);
+        let source_glyphs = glyph_count(&*line);
+
+        let collapsed = collapse(&line, collapser(line.width() / 2.0));
+        assert_collapsed(&collapsed, &line);
+
+        assert_eq!(glyph_count(&*line), source_glyphs, "a split must not empty the source line");
+
+        let collapsed_glyphs = glyph_count(&*collapsed);
+        assert!(collapsed_glyphs > 0);
+
+        line.dispose();
+
+        assert_eq!(glyph_count(&*collapsed), collapsed_glyphs, "the collapsed line owns its runs");
+    }
+}
+
 #[test]
 fn ltr_trailing_character_trims_from_end() {
     let _scope = TextTestScope::new();

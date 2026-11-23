@@ -890,7 +890,13 @@ impl TextLayout {
 
             let Some(mut line) = candidate else {
                 if previous_line.as_ref().is_none_or(|line| line.new_line_length() > 0) {
-                    let line = TextFormatterImpl::create_empty_text_line(self.text_source_length, width, &properties);
+                    let line_indent = TextFormatterImpl::get_line_indent(&*properties, previous_line_break.as_ref());
+                    let line = TextFormatterImpl::create_indented_empty_text_line(
+                        self.text_source_length,
+                        width,
+                        &properties,
+                        line_indent,
+                    );
                     self.line_placements.push(LinePlacement { origin, width, properties });
                     self.update_metrics(&*line, origin, indent, &mut first);
                     self.metrics.height += after;
@@ -926,7 +932,9 @@ impl TextLayout {
                 break;
             }
             if line.has_overflowed() && !self.is_trimming_none() {
-                line = line.collapse(&[self.get_collapsing_properties(width, &properties)]);
+                let collapsed_width = width - Self::formatter_line_indent(&*line);
+                let collapsing_properties = self.get_collapsing_properties(collapsed_width, &properties);
+                line = Self::collapse_line(line, collapsing_properties);
             }
 
             self.line_placements.push(LinePlacement { origin, width, properties });
@@ -959,6 +967,8 @@ impl TextLayout {
     }
 
     fn update_metrics(&mut self, current_line: &dyn TextLine, origin: Point, indent: f64, first: &mut bool) {
+        // An indented line occupies its indent as well, so a host sized to the layout fits it.
+        let indent = indent + Self::formatter_line_indent(current_line);
         let metrics = &mut self.metrics;
 
         // 1) Accumulate total layout height by adding the line's Height.
@@ -999,6 +1009,24 @@ impl TextLayout {
         Rc::ptr_eq(&self.text_trimming, &<dyn TextTrimming>::none())
     }
 
+    /// Collapses `line` and releases it when the collapsed line replaces it: the collapsed line
+    /// holds its own references to the runs it reuses, and the layout keeps only that line.
+    fn collapse_line(
+        line: Rc<dyn TextLine>,
+        collapsing_properties: Option<Rc<dyn TextCollapsingProperties>>,
+    ) -> Rc<dyn TextLine> {
+        let collapsed = line.clone().collapse(&[collapsing_properties]);
+        if !std::ptr::addr_eq(Rc::as_ptr(&collapsed), Rc::as_ptr(&line)) {
+            line.dispose();
+        }
+        collapsed
+    }
+
+    /// The indent the formatter gave the line, on top of the one of a paragraph style.
+    fn formatter_line_indent(line: &dyn TextLine) -> f64 {
+        line.as_any().downcast_ref::<TextLineImpl>().map_or(0.0, TextLineImpl::line_indent)
+    }
+
     /// Gets the `TextCollapsingProperties` for current text trimming mode.
     ///
     /// * `width` — the collapsing width.
@@ -1024,7 +1052,7 @@ impl TextLayout {
             return line;
         }
 
-        line.collapse(&[collapsing_properties])
+        Self::collapse_line(line, collapsing_properties)
     }
 
     /// Releases the text lines. A layout its font manager keeps

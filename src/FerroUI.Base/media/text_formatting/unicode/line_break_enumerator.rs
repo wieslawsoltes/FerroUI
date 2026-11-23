@@ -12,12 +12,29 @@ const DOT_CIRCLE: u32 = 0x25CC;
 pub struct LineBreakEnumerator<'a> {
     text: &'a [u16],
     state: LineBreakState,
+    /// The text index from which no further opportunity is searched for; `usize::MAX` for none.
+    limit: usize,
+    after_space: bool,
+    limit_reached: bool,
 }
 
 impl<'a> LineBreakEnumerator<'a> {
     #[inline]
     pub fn new(text: &'a [u16]) -> Self {
-        Self { text, state: LineBreakState::new() }
+        Self::with_limit(text, usize::MAX)
+    }
+
+    /// An enumerator that stops at text index `limit`. Whitespace and the break that ends it are
+    /// still resolved, as whitespace hangs on the line however long it is.
+    #[inline]
+    pub(crate) fn with_limit(text: &'a [u16], limit: usize) -> Self {
+        Self { text, state: LineBreakState::new(), limit, after_space: false, limit_reached: false }
+    }
+
+    /// Whether enumeration stopped at the limit, before a break opportunity or the end of the text.
+    #[inline]
+    pub(crate) fn limit_reached(&self) -> bool {
+        self.limit_reached
     }
 
     /// The text being enumerated (a public field upstream).
@@ -38,6 +55,16 @@ impl<'a> LineBreakEnumerator<'a> {
 
         loop {
             self.state.read(self.text);
+
+            if self.limit != usize::MAX {
+                let current = &self.state.current;
+                let is_space = current.line_break_class == LineBreakClass::Space;
+                if current.start as usize >= self.limit && !current.end_of_text && !self.after_space && !is_space {
+                    self.limit_reached = true;
+                    return None;
+                }
+                self.after_space = is_space;
+            }
 
             if let Some(result) = execute_rules(self.text, &mut self.state) {
                 return Some(result);

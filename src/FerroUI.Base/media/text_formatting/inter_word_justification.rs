@@ -112,7 +112,8 @@ impl JustificationProperties for InterWordJustification {
             return;
         };
 
-        let paragraph_width = self.width;
+        // An indented line is aligned within the paragraph width minus its indent, so that is what it fills.
+        let paragraph_width = self.width - line_impl.line_indent();
 
         if paragraph_width.is_infinite() {
             return;

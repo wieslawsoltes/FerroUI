@@ -893,6 +893,58 @@ fn should_layout_empty_string() {
 }
 
 #[test]
+fn hit_test_point_reports_is_inside_for_a_point_inside_any_line() {
+    let _scope = TextTestScope::new();
+
+    let layout = layout("First line\nSecond line\nThird line", options());
+    assert_eq!(layout.text_lines().len(), 3);
+
+    let mut top = 0.0;
+    for line in layout.text_lines() {
+        let hit = layout.hit_test_point(Point::new(5.0, top + line.height() / 2.0));
+
+        assert_eq!(hit.character_hit().first_character_index(), line.first_text_source_index());
+        assert!(hit.is_inside());
+
+        top += line.height();
+    }
+}
+
+#[test]
+fn hit_test_point_reports_is_inside_relative_to_an_aligned_line() {
+    let _scope = TextTestScope::new();
+
+    for alignment in [TextAlignment::Center, TextAlignment::Right] {
+        let layout = layout("Hello", TextLayoutOptions { text_alignment: alignment, max_width: 200.0, ..options() });
+        let line = &layout.text_lines()[0];
+        assert!(line.start() > 0.0);
+
+        let inside = layout.hit_test_point(Point::new(line.start() + line.width() - 1.0, line.height() / 2.0));
+        assert!(inside.is_inside());
+
+        let before = layout.hit_test_point(Point::new(line.start() - 1.0, line.height() / 2.0));
+        assert!(!before.is_inside());
+    }
+}
+
+#[test]
+fn end_of_paragraph_sits_at_the_visual_end_of_a_right_to_left_line() {
+    let _scope = TextTestScope::new();
+
+    let layout = layout("אבג\nabc", TextLayoutOptions { flow_direction: FlowDirection::RightToLeft, ..options() });
+    assert_eq!(layout.text_lines().len(), 2);
+
+    let line = &layout.text_lines()[0];
+    let runs = line.text_runs();
+    assert!(runs[0].as_text_end_of_line().is_some(), "the end of line is the leftmost run");
+    assert!(line.text_line_break().is_some());
+
+    // The end of line has no width and is never hit: the left edge is the last character.
+    let hit = line.get_character_hit_from_distance(line.start());
+    assert_eq!(hit.first_character_index(), 2);
+}
+
+#[test]
 fn should_hit_test_point_right_to_left() {
     let _scope = TextTestScope::new();
 
