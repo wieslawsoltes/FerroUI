@@ -1088,27 +1088,65 @@ fn write_changed(queue: WGPUQueue, buffer: WGPUBuffer, old: &[u8], new: &[u8], s
     write_buffer(queue, buffer, range.start as u64, &new[range]);
 }
 
-/// A kept output: the texture a scene was drawn into, what it was drawn for, and the uniform
-/// buffers of its viewport.
-struct Slot {
-    scene: Weak<Scene3DSnapshot>,
+/// What a finished output shows: the same stamp of the same scene is the same pixels.
+#[derive(Clone, Copy, PartialEq)]
+struct OutputStamp {
     generations: (u64, u64, u64),
     size: (u32, u32),
     scale_bits: u64,
     antialiased: bool,
     inputs: u64,
-    origin: (i32, i32),
+}
+
+/// A place in a window and the pixels of it.
+type OutputPlace = ((i32, i32), (u32, u32));
+
+/// How an output is reused for another render, the lowest first.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+enum Reuse {
+    /// The same place, for the same scene or for a scene that is gone.
+    SamePlaceFree,
+    /// The same place, now for another scene.
+    SamePlace,
+    /// Elsewhere, for a scene that is gone.
+    Free,
+    /// In use elsewhere: taken only when no output can be added.
+    InUse,
+}
+
+/// The texture of a scene on the device, with the uniform buffers of its viewport.
+struct KeptOutput {
+    source: Weak<Scene3DSnapshot>,
+    /// `None` while it holds no finished image.
+    stamp: Option<OutputStamp>,
+    place: OutputPlace,
     texture: Rc<GpuTexture>,
     viewport: Viewport,
     last_used: u64,
 }
 
-/// The executor of a device and its kept outputs.
+impl KeptOutput {
+    fn is_of(&self, scene: &Arc<Scene3DSnapshot>) -> bool {
+        ptr::eq(self.source.as_ptr(), Arc::as_ptr(scene))
+    }
+
+    fn reuse(&self, scene: &Arc<Scene3DSnapshot>, place: OutputPlace) -> Reuse {
+        let free = self.source.strong_count() == 0;
+        match (self.place == place, free || self.is_of(scene)) {
+            (true, true) => Reuse::SamePlaceFree,
+            (true, false) => Reuse::SamePlace,
+            (false, _) if free => Reuse::Free,
+            (false, _) => Reuse::InUse,
+        }
+    }
+}
+
+/// The executor of a device and the outputs it keeps.
 #[derive(Default)]
 pub(crate) struct Scene3DPasses {
     /// Made at the first scene; an executor that cannot be made is said once.
     executor: RefCell<Option<Option<Executor>>>,
-    slots: RefCell<Vec<Slot>>,
+    outputs: RefCell<Vec<KeptOutput>>,
     clock: std::cell::Cell<u64>,
 }
 
@@ -1131,96 +1169,74 @@ impl Scene3DPasses {
         origin: (i32, i32),
     ) -> Option<DrawnScene> {
         let size = (size.width.max(1) as u32, size.height.max(1) as u32);
-        let scale_bits = scale.to_bits();
-        let generations = scene.generations();
-        let inputs = scene_texture_inputs(scene);
+        let stamp = OutputStamp {
+            generations: scene.generations(),
+            size,
+            scale_bits: scale.to_bits(),
+            antialiased,
+            inputs: scene_texture_inputs(scene),
+        };
         let mut executor = self.executor.borrow_mut();
         let executor = executor
-            .get_or_insert_with(|| match Executor::new(gpu.device()) {
-                Ok(executor) => Some(executor),
-                Err(error) => {
-                    notes::note_once("scene3d-executor", &format!("3D scenes are not drawn on this device: {error}"));
-                    None
-                }
+            .get_or_insert_with(|| {
+                Executor::new(gpu.device())
+                    .map_err(|error| {
+                        let message = format!("3D scenes are not drawn on this device: {error}");
+                        notes::note_once("scene3d-executor", &message);
+                    })
+                    .ok()
             })
             .as_mut()?;
-        let clock = self.clock.get() + 1;
-        self.clock.set(clock);
-        let mut slots = self.slots.borrow_mut();
-
-        let same_scene = |slot: &Slot| ptr::eq(slot.scene.as_ptr(), Arc::as_ptr(scene));
-        if let Some(slot) = slots.iter_mut().find(|slot| {
-            same_scene(slot)
-                && slot.generations == generations
-                && slot.size == size
-                && slot.scale_bits == scale_bits
-                && slot.antialiased == antialiased
-                && slot.inputs == inputs
-        }) {
-            slot.last_used = clock;
-            return Some(DrawnScene { texture: slot.texture.clone(), size });
+        let now = self.clock.get() + 1;
+        self.clock.set(now);
+        let mut outputs = self.outputs.borrow_mut();
+        if let Some(kept) = outputs.iter_mut().find(|kept| kept.stamp == Some(stamp) && kept.is_of(scene)) {
+            kept.last_used = now;
+            return Some(DrawnScene { texture: kept.texture.clone(), size });
         }
 
-        let gone = |slot: &Slot| slot.scene.strong_count() == 0;
-        let same_viewport = |slot: &Slot| slot.origin == origin && slot.size == size;
-        let chosen = slots
-            .iter()
-            .position(|slot| same_viewport(slot) && (gone(slot) || same_scene(slot)))
-            .or_else(|| slots.iter().position(same_viewport))
-            .or_else(|| {
-                let free = slots.iter().enumerate().filter(|&(_, slot)| gone(slot));
-                free.min_by_key(|(_, slot)| slot.last_used).map(|(index, _)| index)
-            });
-        let index = match chosen {
-            Some(index) => index,
-            None if slots.len() < CAPACITY => {
-                slots.push(Slot {
-                    scene: Weak::new(),
-                    generations: (0, 0, 0),
-                    size,
-                    scale_bits,
-                    antialiased,
-                    inputs: 0,
-                    origin,
+        let place = (origin, size);
+        let rank = |output: &KeptOutput| (output.reuse(scene, place), output.last_used);
+        let best = (0..outputs.len()).min_by_key(|&index| rank(&outputs[index]));
+        let index = match best {
+            Some(index) if outputs.len() >= CAPACITY || outputs[index].reuse(scene, place) != Reuse::InUse => index,
+            _ => {
+                outputs.push(KeptOutput {
+                    source: Weak::new(),
+                    stamp: None,
+                    place,
                     texture: gpu.passes().texture(gpu, size.0, size.1),
                     viewport: Viewport::default(),
-                    last_used: clock,
+                    last_used: now,
                 });
-                slots.len() - 1
+                outputs.len() - 1
             }
-            None => slots.iter().enumerate().min_by_key(|(_, slot)| slot.last_used).map_or(0, |(index, _)| index),
         };
-        let slot = &mut slots[index];
+        let output = &mut outputs[index];
         // A texture too small, or one a scene that is not rendered yet still samples (held by more
         // than the pool and this output): another of the pool.
-        if slot.texture.width() < size.0 || slot.texture.height() < size.1 || Rc::strong_count(&slot.texture) > 2 {
-            slot.texture = gpu.passes().texture(gpu, size.0, size.1);
+        let held_elsewhere = Rc::strong_count(&output.texture) > 2;
+        if held_elsewhere || output.texture.width() < size.0 || output.texture.height() < size.1 {
+            output.texture = gpu.passes().texture(gpu, size.0, size.1);
         }
+        // Until the render ends the output holds no whole frame.
+        output.stamp = None;
+        output.source = Weak::new();
         let target = RenderTarget {
-            view: slot.texture.view(),
-            texture_size: (slot.texture.width(), slot.texture.height()),
+            view: output.texture.view(),
+            texture_size: (output.texture.width(), output.texture.height()),
             size,
             antialiased,
         };
-        match executor.render(gpu.device(), &mut slot.viewport, scene, &target) {
-            Ok(()) => {
-                slot.texture.changed();
-                slot.scene = Arc::downgrade(scene);
-                slot.generations = generations;
-                slot.size = size;
-                slot.scale_bits = scale_bits;
-                slot.antialiased = antialiased;
-                slot.inputs = inputs;
-                slot.origin = origin;
-                slot.last_used = clock;
-                Some(DrawnScene { texture: slot.texture.clone(), size })
-            }
-            Err(error) => {
-                // What the slot held was not replaced by a whole frame.
-                slot.scene = Weak::new();
-                notes::note_once("scene3d-render", &format!("a 3D scene was not drawn: {error}"));
-                None
-            }
+        if let Err(error) = executor.render(gpu.device(), &mut output.viewport, scene, &target) {
+            notes::note_once("scene3d-render", &format!("a 3D scene was not drawn: {error}"));
+            return None;
         }
+        output.texture.changed();
+        output.stamp = Some(stamp);
+        output.source = Arc::downgrade(scene);
+        output.place = place;
+        output.last_used = now;
+        Some(DrawnScene { texture: output.texture.clone(), size })
     }
 }

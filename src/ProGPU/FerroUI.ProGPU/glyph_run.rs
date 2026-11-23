@@ -423,59 +423,79 @@ pub(crate) fn add_outline(builder: &mut PathBuilder, segments: &[progpu_native_p
 /// below what an underline can show.
 const CURVE_PIECES: u32 = 16;
 
-/// Widens `interval` by the part of a segment of an outline between two horizontal lines.
-fn segment_in_band(
-    segment: &progpu_native_path_segment,
-    place: &impl Fn(progpu_native_sys::progpu::progpu_native_point) -> (f64, f64),
+/// How far the outline of a glyph reaches across a horizontal band.
+#[derive(Clone, Copy)]
+struct BandExtent {
     lower: f64,
     upper: f64,
-    interval: &mut Option<(f64, f64)>,
-) {
-    let (p0, p1, p2, p3) = (place(segment.p0), place(segment.p1), place(segment.p2), place(segment.p3));
-    let kind = segment.kind;
-    let at = |t: f64| -> (f64, f64) {
-        let u = 1.0 - t;
-        let mix = |a: f64, b: f64, c: f64, d: f64| {
-            if kind == PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC as u32 {
-                u * u * a + 2.0 * u * t * b + t * t * c
-            } else {
-                u * u * u * a + 3.0 * u * u * t * b + 3.0 * u * t * t * c + t * t * t * d
+    left: f64,
+    right: f64,
+}
+
+impl BandExtent {
+    fn new(lower: f64, upper: f64) -> Self {
+        BandExtent { lower, upper, left: f64::INFINITY, right: f64::NEG_INFINITY }
+    }
+
+    /// Adds what the line from `a` to `b` has inside the band: the line is cut to the range of
+    /// its parameter between the two limits.
+    fn add_line(&mut self, a: (f64, f64), b: (f64, f64)) {
+        let rise = b.1 - a.1;
+        let (mut enter, mut leave) = (0.0f64, 1.0f64);
+        if rise == 0.0 {
+            if a.1 < self.lower || a.1 > self.upper {
+                return;
             }
+        } else {
+            let (at_lower, at_upper) = ((self.lower - a.1) / rise, (self.upper - a.1) / rise);
+            enter = enter.max(at_lower.min(at_upper));
+            leave = leave.min(at_lower.max(at_upper));
+            if enter > leave {
+                return;
+            }
+        }
+        for t in [enter, leave] {
+            let x = a.0 + (b.0 - a.0) * t;
+            self.left = self.left.min(x);
+            self.right = self.right.max(x);
+        }
+    }
+
+    /// Adds a segment of an outline, a curve as `CURVE_PIECES` lines.
+    fn add_segment(
+        &mut self,
+        segment: &progpu_native_path_segment,
+        place: &impl Fn(progpu_native_sys::progpu::progpu_native_point) -> (f64, f64),
+    ) {
+        let (p0, p1, p2, p3) = (place(segment.p0), place(segment.p1), place(segment.p2), place(segment.p3));
+        let lerp = |a: (f64, f64), b: (f64, f64), t: f64| (a.0 + (b.0 - a.0) * t, a.1 + (b.1 - a.1) * t);
+        let curve: fn(_, _, _, _, _, f64) -> (f64, f64) = if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC as u32
+        {
+            |lerp: &dyn Fn((f64, f64), (f64, f64), f64) -> (f64, f64), a, b, c, _, t| {
+                lerp(lerp(a, b, t), lerp(b, c, t), t)
+            }
+        } else if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_CUBIC as u32 {
+            |lerp: &dyn Fn((f64, f64), (f64, f64), f64) -> (f64, f64), a, b, c, d, t| {
+                let (ab, bc, cd) = (lerp(a, b, t), lerp(b, c, t), lerp(c, d, t));
+                lerp(lerp(ab, bc, t), lerp(bc, cd, t), t)
+            }
+        } else {
+            if segment.kind == PROGPU_NATIVE_PATH_SEGMENT_LINE as u32 {
+                self.add_line(p0, p1);
+            }
+            return;
         };
-        (mix(p0.0, p1.0, p2.0, p3.0), mix(p0.1, p1.1, p2.1, p3.1))
-    };
-    if kind == PROGPU_NATIVE_PATH_SEGMENT_LINE as u32 {
-        line_in_band(p0, p1, lower, upper, interval);
-    } else if kind == PROGPU_NATIVE_PATH_SEGMENT_QUADRATIC as u32 || kind == PROGPU_NATIVE_PATH_SEGMENT_CUBIC as u32 {
         let mut from = p0;
         for piece in 1..=CURVE_PIECES {
-            let to = at(f64::from(piece) / f64::from(CURVE_PIECES));
-            line_in_band(from, to, lower, upper, interval);
+            let to = curve(&lerp, p0, p1, p2, p3, f64::from(piece) / f64::from(CURVE_PIECES));
+            self.add_line(from, to);
             from = to;
         }
     }
-}
 
-/// Widens `interval` by the part of a line between two horizontal lines.
-fn line_in_band(a: (f64, f64), b: (f64, f64), lower: f64, upper: f64, interval: &mut Option<(f64, f64)>) {
-    if a.1.max(b.1) < lower || a.1.min(b.1) > upper {
-        return;
-    }
-    let mut include = |x: f64| {
-        *interval = Some(match *interval {
-            Some((left, right)) => (left.min(x), right.max(x)),
-            None => (x, x),
-        });
-    };
-    for point in [a, b] {
-        if point.1 >= lower && point.1 <= upper {
-            include(point.0);
-        }
-    }
-    for y in [lower, upper] {
-        if (a.1 - y) * (b.1 - y) < 0.0 {
-            include(a.0 + (y - a.1) / (b.1 - a.1) * (b.0 - a.0));
-        }
+    /// From where to where the outline is in the band, when it is.
+    fn range(&self) -> Option<(f64, f64)> {
+        (self.left <= self.right).then_some((self.left, self.right))
     }
 }
 
@@ -518,8 +538,7 @@ impl IGlyphRunImpl for ProGpuGlyphRun {
 
     /// For each glyph whose outline lies partly between the two limits (distances below the
     /// baseline), from where to where it does: two values a glyph, relative to the baseline origin
-    /// of the run, in the order of the glyphs, as the other backends answer. An underline uses
-    /// them to skip descenders.
+    /// of the run, in the order of the glyphs. An underline uses them to skip descenders.
     fn get_intersections(&self, lower_limit: f32, upper_limit: f32) -> Vec<f32> {
         let Some(font) = &self.font else { return Vec::new() };
         let (lower, upper) = (lower_limit.min(upper_limit) as f64, lower_limit.max(upper_limit) as f64);
@@ -531,7 +550,7 @@ impl IGlyphRunImpl for ProGpuGlyphRun {
         } else {
             0.0
         };
-        let mut intersections = Vec::new();
+        let mut spans = Vec::new();
         for glyph in &self.glyphs {
             let Some(outline) = font.face.cached_outline(glyph.glyph, &font.coordinates, 0, false) else { continue };
             let (x, y) = (f64::from(glyph.x), f64::from(glyph.y));
@@ -539,16 +558,15 @@ impl IGlyphRunImpl for ProGpuGlyphRun {
                 let (px, py) = (f64::from(point.x) * scale, -f64::from(point.y) * scale);
                 (x + px - py * skew, y + py)
             };
-            let mut interval = None;
+            let mut extent = BandExtent::new(lower, upper);
             for segment in &outline.segments {
-                segment_in_band(segment, &place, lower, upper, &mut interval);
+                extent.add_segment(segment, &place);
             }
-            if let Some((left, right)) = interval {
-                intersections.push((left - widening) as f32);
-                intersections.push((right + widening) as f32);
+            if let Some((left, right)) = extent.range() {
+                spans.extend([(left - widening) as f32, (right + widening) as f32]);
             }
         }
-        intersections
+        spans
     }
 
     fn dispose(&self) {}
