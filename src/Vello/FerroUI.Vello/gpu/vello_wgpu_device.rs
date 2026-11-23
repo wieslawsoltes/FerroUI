@@ -477,11 +477,30 @@ impl VelloWgpuDevice {
         );
         self.queue.submit([encoder.finish()]);
 
-        let mapped = Arc::new(AtomicBool::new(false));
+        const PENDING: u8 = 0;
+        const MAPPED: u8 = 1;
+        const FAILED: u8 = 2;
+        let mapped = Arc::new(std::sync::atomic::AtomicU8::new(PENDING));
         let flag = mapped.clone();
-        buffer.slice(..).map_async(wgpu::MapMode::Read, move |result| flag.store(result.is_ok(), Ordering::SeqCst));
+        buffer.slice(..).map_async(wgpu::MapMode::Read, move |result| {
+            flag.store(if result.is_ok() { MAPPED } else { FAILED }, Ordering::SeqCst)
+        });
 
-        if self.device.poll(wgpu::PollType::wait_indefinitely()).is_err() || !mapped.load(Ordering::SeqCst) {
+        if self.device.poll(wgpu::PollType::wait_indefinitely()).is_err() {
+            self.mark_lost();
+            return false;
+        }
+        // The callback runs on the thread whose poll finds the work done, which may be another
+        // thread of this device that is still on its way to it: that is not a lost device.
+        let waiting = std::time::Instant::now();
+        while mapped.load(Ordering::SeqCst) == PENDING {
+            if waiting.elapsed() > std::time::Duration::from_secs(5) || self.device.poll(wgpu::PollType::Poll).is_err() {
+                self.mark_lost();
+                return false;
+            }
+            std::thread::yield_now();
+        }
+        if mapped.load(Ordering::SeqCst) != MAPPED {
             self.mark_lost();
             return false;
         }
