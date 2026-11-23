@@ -85,6 +85,158 @@ pub fn zoom_about(
     unproject(anchor_x - anchor.0, anchor_y - anchor.1, new_zoom)
 }
 
+/// `heading` in `0..360`: the compass direction at the top of the view.
+pub fn normalize_heading(heading: f64) -> f64 {
+    if !heading.is_finite() {
+        return 0.0;
+    }
+    let value = heading.rem_euclid(360.0);
+    // `rem_euclid` of a tiny negative number rounds up to the modulus.
+    if value >= 360.0 {
+        0.0
+    } else {
+        value
+    }
+}
+
+/// The shortest turn from one heading to another, in `-180..=180` degrees.
+pub fn shortest_turn(from: f64, to: f64) -> f64 {
+    let turn = (to - from).rem_euclid(360.0);
+    if turn > 180.0 {
+        turn - 360.0
+    } else {
+        turn
+    }
+}
+
+/// A distance on the view as a distance on the world, whose north is up. At a heading of 90
+/// degrees the top of the view is east.
+pub fn view_to_world(dx: f64, dy: f64, heading: f64) -> (f64, f64) {
+    let (sine, cosine) = heading.to_radians().sin_cos();
+    (dx * cosine - dy * sine, dx * sine + dy * cosine)
+}
+
+/// A distance on the world as a distance on the view.
+pub fn world_to_view(dx: f64, dy: f64, heading: f64) -> (f64, f64) {
+    let (sine, cosine) = heading.to_radians().sin_cos();
+    (dx * cosine + dy * sine, -dx * sine + dy * cosine)
+}
+
+/// What a view of a map shows, and the math between its pixels and the globe.
+///
+/// The tiles are placed in the frame of the world, north up, around the middle of the view; the
+/// content is then turned about that middle by the heading.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub struct MapView {
+    pub center: BasicGeoposition,
+    pub zoom: f64,
+    pub heading: f64,
+    pub width: f64,
+    pub height: f64,
+}
+
+impl MapView {
+    pub fn new(center: BasicGeoposition, zoom: f64, heading: f64, width: f64, height: f64) -> Self {
+        Self {
+            center: center.normalized(),
+            zoom,
+            heading: normalize_heading(heading),
+            width,
+            height,
+        }
+    }
+
+    /// A point of the north-up frame of the tiles as a point of the view.
+    pub fn frame_to_view(&self, x: f64, y: f64) -> (f64, f64) {
+        let (dx, dy) = world_to_view(x - self.width / 2.0, y - self.height / 2.0, self.heading);
+        (dx + self.width / 2.0, dy + self.height / 2.0)
+    }
+
+    /// A point of the view as a point of the north-up frame of the tiles.
+    pub fn view_to_frame(&self, x: f64, y: f64) -> (f64, f64) {
+        let (dx, dy) = view_to_world(x - self.width / 2.0, y - self.height / 2.0, self.heading);
+        (dx + self.width / 2.0, dy + self.height / 2.0)
+    }
+
+    /// The pixel of the view that shows a place, on the copy of the world nearest the middle.
+    pub fn place_to_view(&self, place: BasicGeoposition) -> (f64, f64) {
+        let (center_x, center_y) = project(self.center, self.zoom);
+        let (x, y) = project(place, self.zoom);
+        let world = world_size(self.zoom);
+        let x = x - world * ((x - center_x) / world).round();
+        self.frame_to_view(
+            x - center_x + self.width / 2.0,
+            y - center_y + self.height / 2.0,
+        )
+    }
+
+    /// The place shown at a pixel of the view.
+    pub fn view_to_place(&self, x: f64, y: f64) -> BasicGeoposition {
+        let (frame_x, frame_y) = self.view_to_frame(x, y);
+        let (center_x, center_y) = project(self.center, self.zoom);
+        unproject(
+            center_x + frame_x - self.width / 2.0,
+            center_y + frame_y - self.height / 2.0,
+            self.zoom,
+        )
+    }
+
+    /// The tiles that cover the view, placed in the north-up frame, nearest the middle first.
+    pub fn tiles(&self, max_tile_zoom: u8) -> Vec<PlacedTile> {
+        let (sine, cosine) = self.heading.to_radians().sin_cos();
+        let (sine, cosine) = (sine.abs(), cosine.abs());
+        let around_width = self.width * cosine + self.height * sine;
+        let around_height = self.width * sine + self.height * cosine;
+        let mut tiles = visible_tiles(
+            self.center,
+            self.zoom,
+            around_width,
+            around_height,
+            max_tile_zoom,
+        );
+        let (shift_x, shift_y) = (
+            (self.width - around_width) / 2.0,
+            (self.height - around_height) / 2.0,
+        );
+        for tile in &mut tiles {
+            tile.left += shift_x;
+            tile.top += shift_y;
+        }
+        if self.heading != 0.0 {
+            tiles.retain(|tile| self.shows(tile));
+        }
+        tiles
+    }
+
+    /// Whether a tile of the north-up frame overlaps the turned view: two rectangles are apart
+    /// only if the axes of one of them separate them.
+    fn shows(&self, tile: &PlacedTile) -> bool {
+        let (left, top, right, bottom) = (
+            tile.left,
+            tile.top,
+            tile.left + tile.size,
+            tile.top + tile.size,
+        );
+        let in_view = [(left, top), (right, top), (right, bottom), (left, bottom)]
+            .map(|(x, y)| self.frame_to_view(x, y));
+        let in_frame = [
+            (0.0, 0.0),
+            (self.width, 0.0),
+            (self.width, self.height),
+            (0.0, self.height),
+        ]
+        .map(|(x, y)| self.view_to_frame(x, y));
+        let apart = |points: &[(f64, f64); 4], low_x: f64, low_y: f64, high_x: f64, high_y: f64| {
+            points.iter().all(|point| point.0 < low_x)
+                || points.iter().all(|point| point.0 > high_x)
+                || points.iter().all(|point| point.1 < low_y)
+                || points.iter().all(|point| point.1 > high_y)
+        };
+        !apart(&in_view, 0.0, 0.0, self.width, self.height)
+            && !apart(&in_frame, left, top, right, bottom)
+    }
+}
+
 /// The address of a tile.
 #[derive(Clone, Copy, Debug, Eq, Hash, Ord, PartialEq, PartialOrd)]
 pub struct TileId {
@@ -373,6 +525,98 @@ mod tests {
         let tiles = visible_tiles(BasicGeoposition::default(), 21.0, 256.0, 256.0, 19);
         assert!(tiles.iter().all(|t| t.id.zoom == 19));
         near(tiles[0].size, 1024.0);
+    }
+
+    #[test]
+    fn a_heading_is_kept_in_its_range_and_turns_the_short_way() {
+        near(normalize_heading(-90.0), 270.0);
+        near(normalize_heading(450.0), 90.0);
+        near(normalize_heading(f64::NAN), 0.0);
+        assert!(normalize_heading(-1e-20) < 360.0);
+        near(shortest_turn(350.0, 10.0), 20.0);
+        near(shortest_turn(10.0, 350.0), -20.0);
+    }
+
+    #[test]
+    fn at_a_heading_of_90_the_top_of_the_view_is_east() {
+        let center = BasicGeoposition {
+            latitude: 0.0,
+            longitude: 0.0,
+        };
+        let view = MapView::new(center, 4.0, 90.0, 400.0, 300.0);
+        let top = view.view_to_place(200.0, 0.0);
+        assert!(top.longitude > 0.0, "{top:?}");
+        near(top.latitude, 0.0);
+        let east = BasicGeoposition {
+            latitude: 0.0,
+            longitude: 10.0,
+        };
+        let (x, y) = view.place_to_view(east);
+        near(x, 200.0);
+        assert!(y < 150.0, "east is up: {y}");
+    }
+
+    #[test]
+    fn places_and_pixels_round_trip_at_any_heading() {
+        let center = BasicGeoposition {
+            latitude: 35.0,
+            longitude: 139.0,
+        };
+        for heading in [0.0, 17.5, 90.0, 133.0, 180.0, 271.0, 359.0] {
+            let view = MapView::new(center, 6.5, heading, 640.0, 480.0);
+            near(view.place_to_view(center).0, 320.0);
+            near(view.place_to_view(center).1, 240.0);
+            for (x, y) in [(0.0, 0.0), (640.0, 0.0), (123.0, 456.0), (640.0, 480.0)] {
+                let (back_x, back_y) = view.place_to_view(view.view_to_place(x, y));
+                near(back_x, x);
+                near(back_y, y);
+            }
+        }
+    }
+
+    #[test]
+    fn the_tiles_cover_a_turned_view_without_gaps() {
+        let center = BasicGeoposition {
+            latitude: 20.0,
+            longitude: 10.0,
+        };
+        for heading in [0.0, 30.0, 45.0, 90.0, 200.0, 315.0] {
+            let view = MapView::new(center, 4.5, heading, 900.0, 500.0);
+            let tiles = view.tiles(19);
+            for step_x in 0..=30 {
+                for step_y in 0..=20 {
+                    let (x, y) =
+                        view.view_to_frame(f64::from(step_x) * 30.0, f64::from(step_y) * 25.0);
+                    assert!(
+                        tiles.iter().any(|t| x >= t.left - 1e-6
+                            && x <= t.left + t.size + 1e-6
+                            && y >= t.top - 1e-6
+                            && y <= t.top + t.size + 1e-6),
+                        "heading {heading}: ({step_x}, {step_y}) is not covered"
+                    );
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn a_turned_view_asks_for_no_tile_it_does_not_show() {
+        let center = BasicGeoposition {
+            latitude: 0.0,
+            longitude: 0.0,
+        };
+        let view = MapView::new(center, 6.0, 45.0, 1200.0, 100.0);
+        let around = visible_tiles(
+            center,
+            6.0,
+            (1300.0_f64) / 2.0_f64.sqrt(),
+            1300.0 / 2.0_f64.sqrt(),
+            19,
+        );
+        assert!(
+            view.tiles(19).len() < around.len(),
+            "the corners of the bounding box are left out"
+        );
     }
 
     #[test]

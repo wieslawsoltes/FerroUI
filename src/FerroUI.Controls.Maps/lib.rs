@@ -18,10 +18,13 @@ mod tests;
 pub use camera::{MapCamera, MAX_ZOOM, MIN_ZOOM};
 pub use grid_tiles::{grid_tile_source, GridTileLoader};
 pub use map_control::{MapControl, MapControlAutomationPeer, MapInteractionMode};
-pub use map_elements::{MapElement, MapElementsLayer, MapIcon, MapPolygon, MapPolyline};
+pub use map_elements::{
+    MapElement, MapElementClickEventArgs, MapElementsLayer, MapIcon, MapPolygon, MapPolyline,
+};
 pub use projection::{
-    pan, project, unproject, visible_tiles, world_size, wrap_longitude, zoom_about,
-    BasicGeoposition, PlacedTile, TileId, MAX_LATITUDE, MAX_TILE_ZOOM, TILE_SIZE,
+    normalize_heading, pan, project, shortest_turn, unproject, view_to_world, visible_tiles,
+    world_size, world_to_view, wrap_longitude, zoom_about, BasicGeoposition, MapView, PlacedTile,
+    TileId, MAX_LATITUDE, MAX_TILE_ZOOM, TILE_SIZE,
 };
 pub use tile_cache::{source_key, DiskTileCache, LruBudget};
 pub use tile_source::{

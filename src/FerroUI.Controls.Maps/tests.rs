@@ -306,3 +306,562 @@ fn the_speed_of_a_release_comes_from_the_end_of_the_drag() {
     let one: VecDeque<(u64, Point)> = [(10, Point::new(1.0, 1.0))].into();
     assert_eq!(MapControl::release_speed(&one), (0.0, 0.0));
 }
+
+mod input {
+    use super::*;
+    use crate::map_control::{content_transform, pointer_turn};
+    use ferroui_base::input::{
+        InputElement, Key, KeyEventArgs, KeyModifiers, MouseButton, PinchEndedEventArgs,
+        PinchEventArgs, Pointer, PointerEventArgs, PointerPointProperties, PointerPressedEventArgs,
+        PointerReleasedEventArgs, PointerType, PointerUpdateKind, RawInputModifiers,
+    };
+    use ferroui_base::interactivity::Interactive;
+    use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
+    use ferroui_base::{Point, Ref, Size, Visual};
+    use ferroui_controls::testing::MockWindowingPlatform;
+    use ferroui_controls::{Control, Window};
+
+    const WIDTH: f64 = 400.0;
+    const HEIGHT: f64 = 300.0;
+
+    /// A map in a root: a pointer position is relative to the visual tree.
+    struct Placed {
+        _window: Ref<Window>,
+        map: Ref<MapControl>,
+    }
+
+    impl std::ops::Deref for Placed {
+        type Target = Ref<MapControl>;
+
+        fn deref(&self) -> &Ref<MapControl> {
+            &self.map
+        }
+    }
+
+    fn map() -> Placed {
+        let placed = place_in_window(MapControl::new());
+        placed.set_zoom_level(4.0);
+        placed
+    }
+
+    fn place_in_window(map: Ref<MapControl>) -> Placed {
+        map.set_width(WIDTH);
+        map.set_height(HEIGHT);
+        map.set_horizontal_alignment(HorizontalAlignment::Left);
+        map.set_vertical_alignment(VerticalAlignment::Top);
+        let window = Window::with_impl(MockWindowingPlatform::create_window_mock());
+        window.set_content(Some(Control::boxed(map.clone())));
+        window.show();
+        window.update_layout();
+        assert_eq!(map.bounds().size(), Size::new(WIDTH, HEIGHT));
+        Placed {
+            _window: window,
+            map,
+        }
+    }
+
+    fn root_of(map: &Ref<MapControl>) -> Ref<Visual> {
+        map.visual_root().expect("the map is in a root")
+    }
+
+    /// A pointer that presses, moves and releases on the map, as the input system does.
+    struct Finger {
+        pointer: Rc<Pointer>,
+        modifiers: KeyModifiers,
+        buttons: RawInputModifiers,
+        button: MouseButton,
+        time: Cell<u64>,
+    }
+
+    impl Finger {
+        fn new(kind: PointerType, button: MouseButton) -> Self {
+            let buttons = match button {
+                MouseButton::Right => RawInputModifiers::RIGHT_MOUSE_BUTTON,
+                _ => RawInputModifiers::LEFT_MOUSE_BUTTON,
+            };
+            Self {
+                pointer: Pointer::new(Pointer::get_next_free_id(), kind, true),
+                modifiers: KeyModifiers::NONE,
+                buttons,
+                button,
+                time: Cell::new(1000),
+            }
+        }
+
+        fn stamp(&self) -> u64 {
+            self.time.set(self.time.get() + 16);
+            self.time.get()
+        }
+
+        fn down(&self, map: &Ref<MapControl>, at: (f64, f64)) {
+            let kind = match self.button {
+                MouseButton::Right => PointerUpdateKind::RightButtonPressed,
+                _ => PointerUpdateKind::LeftButtonPressed,
+            };
+            let root = root_of(map);
+            map.raise_event(&PointerPressedEventArgs::new(
+                map.clone().upcast::<Interactive>(),
+                self.pointer.clone(),
+                &root,
+                Point::new(at.0, at.1),
+                self.stamp(),
+                PointerPointProperties::new(self.buttons, kind),
+                self.modifiers,
+                1,
+            ));
+        }
+
+        fn to(&self, map: &Ref<MapControl>, at: (f64, f64)) {
+            let root = root_of(map);
+            map.raise_event(&PointerEventArgs::new(
+                Some(InputElement::pointer_moved_event()),
+                map.clone().upcast::<Interactive>(),
+                self.pointer.clone(),
+                Some(&*root),
+                Point::new(at.0, at.1),
+                self.stamp(),
+                PointerPointProperties::new(self.buttons, PointerUpdateKind::Other),
+                self.modifiers,
+            ));
+        }
+
+        fn up(&self, map: &Ref<MapControl>, at: (f64, f64)) {
+            let kind = match self.button {
+                MouseButton::Right => PointerUpdateKind::RightButtonReleased,
+                _ => PointerUpdateKind::LeftButtonReleased,
+            };
+            let root = root_of(map);
+            map.raise_event(&PointerReleasedEventArgs::new(
+                map.clone().upcast::<Interactive>(),
+                self.pointer.clone(),
+                &root,
+                Point::new(at.0, at.1),
+                self.stamp(),
+                PointerPointProperties::new(RawInputModifiers::NONE, kind),
+                self.modifiers,
+                self.button,
+            ));
+        }
+    }
+
+    fn near(a: f64, b: f64, tolerance: f64) {
+        assert!((a - b).abs() <= tolerance, "{a} is not {b}");
+    }
+
+    fn press_key(map: &MapControl, key: Key, modifiers: KeyModifiers) -> bool {
+        let mut args = KeyEventArgs::new();
+        args.key = key;
+        args.key_modifiers = modifiers;
+        <MapControl as ferroui_base::input::InputElementImpl>::on_key_down(map, &args);
+        args.handled()
+    }
+
+    /// Runs what a smooth motion would do over a few seconds of frames.
+    fn settle(map: &MapControl) {
+        map.settle_for_test();
+    }
+
+    fn clicks(layer: &Rc<MapElementsLayer>) -> Rc<RefCell<Vec<MapElementClickEventArgs>>> {
+        let seen = Rc::new(RefCell::new(Vec::new()));
+        let store = seen.clone();
+        layer
+            .map_element_click()
+            .add(Rc::new(move |args: &MapElementClickEventArgs| {
+                store.borrow_mut().push(args.clone());
+            }));
+        seen
+    }
+
+    #[test]
+    fn the_content_transform_is_the_math_of_the_view() {
+        let center = BasicGeoposition {
+            latitude: 12.0,
+            longitude: 34.0,
+        };
+        for heading in [0.0, 30.0, 90.0, 211.0] {
+            let view = MapView::new(center, 5.0, heading, WIDTH, HEIGHT);
+            let matrix = content_transform(&view);
+            for (x, y) in [(0.0, 0.0), (400.0, 0.0), (17.0, 250.0)] {
+                let drawn = matrix.transform(Point::new(x, y));
+                let (expected_x, expected_y) = view.frame_to_view(x, y);
+                near(drawn.x, expected_x, 1e-6);
+                near(drawn.y, expected_y, 1e-6);
+            }
+        }
+    }
+
+    /// Draws the map on a context that records what it is asked.
+    fn drawn(map: &MapControl) -> Vec<String> {
+        use ferroui_base::media::{DrawingContext, PlatformDrawingContext};
+        use ferroui_base::rendering::testing::{DrawingLog, MockDrawingContextImpl};
+        let log = DrawingLog::new();
+        let mut platform = MockDrawingContextImpl::new(log.clone());
+        {
+            let mut core = PlatformDrawingContext::borrowed(&mut platform);
+            let mut context = DrawingContext::new(&mut core);
+            <MapControl as ferroui_base::VisualImpl>::render(map, &mut context);
+        }
+        log.take()
+    }
+
+    /// A map on the offline grid whose tiles are blank bitmaps, with one of each element.
+    fn drawing_map() -> Placed {
+        use ferroui_base::media::imaging::Bitmap;
+        use ferroui_base::platform::{AlphaFormat, PixelFormat};
+        use ferroui_base::{PixelSize, Vector};
+        let map = MapControl::with_decoder(|_| {
+            let pixels = vec![0u8; 256 * 256 * 4];
+            let bitmap = Bitmap::from_pixels(
+                PixelFormat::RGBA8888,
+                AlphaFormat::Premul,
+                &pixels,
+                PixelSize::new(256, 256),
+                Vector::new(96.0, 96.0),
+                256 * 4,
+            );
+            Some((bitmap, 256 * 256 * 4))
+        });
+        let placed = place_in_window(map);
+        let source = RasterTileSource::new("tile://grid/{z}/{x}/{y}", "").unwrap();
+        placed.set_tile_source(Some(Rc::new(source)), Some(Rc::new(GridTileLoader)));
+        let layer = MapElementsLayer::new();
+        let spot = BasicGeoposition {
+            latitude: 3.0,
+            longitude: 4.0,
+        };
+        layer.add(MapElement::Polygon(MapPolygon::new(vec![
+            spot,
+            BasicGeoposition {
+                latitude: 3.0,
+                longitude: 8.0,
+            },
+            BasicGeoposition {
+                latitude: 6.0,
+                longitude: 8.0,
+            },
+        ])));
+        layer.add(MapElement::Polyline(MapPolyline::new(vec![
+            spot,
+            BasicGeoposition {
+                latitude: -3.0,
+                longitude: -4.0,
+            },
+        ])));
+        layer.add(MapElement::Icon(MapIcon::new(spot)));
+        placed.add_layer(layer);
+        // The first pass asks for the tiles, the jobs load them, the second pass draws them.
+        drawn(&placed);
+        for _ in 0..8 {
+            run_jobs();
+            drawn(&placed);
+        }
+        run_jobs();
+        placed
+    }
+
+    #[test]
+    fn a_north_up_map_draws_its_tiles_without_a_transform() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = drawing_map();
+        let log = drawn(&map);
+        let tiles = map.view().tiles(19).len();
+        assert!(tiles > 0);
+        assert_eq!(
+            log.iter()
+                .filter(|entry| entry.starts_with("DrawBitmap"))
+                .count(),
+            tiles
+        );
+        assert!(
+            !log.iter().any(|entry| entry.starts_with("SetTransform")),
+            "{log:?}"
+        );
+    }
+
+    #[test]
+    fn a_turned_map_turns_its_tiles_and_keeps_its_elements_in_view_coordinates() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = drawing_map();
+        map.set_heading(30.0);
+        for _ in 0..8 {
+            drawn(&map);
+            run_jobs();
+        }
+        let log = drawn(&map);
+        let view = map.view();
+        let position = |prefix: &str| log.iter().position(|entry| entry.starts_with(prefix));
+        let last_bitmap = log
+            .iter()
+            .rposition(|entry| entry.starts_with("DrawBitmap"))
+            .unwrap();
+        let first_bitmap = position("DrawBitmap").unwrap();
+        let first_element = position("DrawGeometry").unwrap();
+        assert_eq!(
+            log.iter()
+                .filter(|entry| entry.starts_with("DrawBitmap"))
+                .count(),
+            view.tiles(19).len()
+        );
+        assert_eq!(
+            log[first_bitmap - 1],
+            format!("SetTransform {}", content_transform(&view))
+        );
+        assert_eq!(
+            log[last_bitmap + 1],
+            format!("SetTransform {}", ferroui_base::Matrix::IDENTITY)
+        );
+        assert!(
+            first_element > last_bitmap,
+            "the elements are drawn over the tiles, unturned"
+        );
+    }
+
+    #[test]
+    fn the_turn_of_a_pointer_is_clockwise_and_ignores_the_middle() {
+        let center = Point::new(200.0, 150.0);
+        near(
+            pointer_turn(center, Point::new(300.0, 150.0), Point::new(200.0, 250.0)),
+            90.0,
+            1e-9,
+        );
+        near(
+            pointer_turn(center, Point::new(200.0, 250.0), Point::new(300.0, 150.0)),
+            -90.0,
+            1e-9,
+        );
+        assert_eq!(
+            pointer_turn(center, Point::new(202.0, 151.0), Point::new(300.0, 150.0)),
+            0.0
+        );
+    }
+
+    #[test]
+    fn the_heading_property_is_kept_in_range_and_keeps_the_center() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let center = BasicGeoposition {
+            latitude: 20.0,
+            longitude: 30.0,
+        };
+        map.set_center(center);
+        map.set_heading(-90.0);
+        assert_eq!(map.heading(), 270.0);
+        near(map.center().latitude, 20.0, 1e-9);
+        near(map.center().longitude, 30.0, 1e-9);
+        assert_eq!(map.view().heading, 270.0);
+    }
+
+    #[test]
+    fn a_right_drag_turns_the_map_with_the_pointer() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let center = map.center();
+        let finger = Finger::new(PointerType::Mouse, MouseButton::Right);
+        finger.down(&map, (300.0, 150.0));
+        finger.to(&map, (200.0, 250.0));
+        finger.up(&map, (200.0, 250.0));
+        // A quarter turn clockwise of the content: the heading goes back by 90 degrees.
+        near(map.heading(), 270.0, 1e-6);
+        assert_eq!(
+            map.center(),
+            center,
+            "a turn about the middle keeps the center"
+        );
+    }
+
+    #[test]
+    fn control_and_drag_turns_the_map_for_a_pen_or_a_trackpad() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let mut finger = Finger::new(PointerType::Pen, MouseButton::Left);
+        finger.modifiers = KeyModifiers::CONTROL;
+        finger.down(&map, (300.0, 150.0));
+        finger.to(&map, (200.0, 50.0));
+        finger.up(&map, (200.0, 50.0));
+        near(map.heading(), 90.0, 1e-6);
+    }
+
+    #[test]
+    fn a_disabled_rotation_ignores_the_right_button_and_leaves_it_free() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        map.set_rotate_interaction_mode(MapInteractionMode::Disabled);
+        let finger = Finger::new(PointerType::Mouse, MouseButton::Right);
+        finger.down(&map, (300.0, 150.0));
+        finger.to(&map, (200.0, 250.0));
+        finger.up(&map, (200.0, 250.0));
+        assert_eq!(map.heading(), 0.0);
+        assert!(!press_key(&map, Key::Right, KeyModifiers::CONTROL));
+        assert!(!press_key(&map, Key::Home, KeyModifiers::NONE));
+    }
+
+    #[test]
+    fn a_drag_on_a_turned_map_keeps_the_place_under_the_pointer() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        map.set_heading(40.0);
+        let held = map.view().view_to_place(150.0, 100.0);
+        let finger = Finger::new(PointerType::Touch, MouseButton::Left);
+        finger.down(&map, (150.0, 100.0));
+        finger.to(&map, (190.0, 130.0));
+        let (x, y) = map.view().place_to_view(held);
+        near(x, 190.0, 1e-6);
+        near(y, 130.0, 1e-6);
+        finger.up(&map, (190.0, 130.0));
+    }
+
+    #[test]
+    fn two_fingers_turn_the_map_about_their_middle_across_the_wrap_of_the_bearing() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let origin = Point::new(120.0, 90.0);
+        let held = map.view().view_to_place(origin.x, origin.y);
+        let pinch =
+            |angle: f64| map.raise_event(&PinchEventArgs::with_angle(1.0, origin, angle, 0.0));
+        pinch(350.0);
+        assert_eq!(map.heading(), 0.0, "the first event only sets the bearing");
+        pinch(10.0);
+        near(map.heading(), 340.0, 1e-6);
+        let (x, y) = map.view().place_to_view(held);
+        near(x, origin.x, 1e-6);
+        near(y, origin.y, 1e-6);
+        map.raise_event(&PinchEndedEventArgs::new());
+        pinch(100.0);
+        near(map.heading(), 340.0, 1e-6);
+    }
+
+    #[test]
+    fn a_pinch_zooms_and_turns_only_what_is_enabled() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        map.set_rotate_interaction_mode(MapInteractionMode::Disabled);
+        let origin = Point::new(200.0, 150.0);
+        map.raise_event(&PinchEventArgs::with_angle(1.0, origin, 10.0, 0.0));
+        map.raise_event(&PinchEventArgs::with_angle(2.0, origin, 80.0, 0.0));
+        near(map.zoom_level(), 5.0, 1e-9);
+        assert_eq!(map.heading(), 0.0);
+    }
+
+    #[test]
+    fn the_keys_turn_the_map_and_home_goes_back_to_north() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let center = map.center();
+        assert!(press_key(&map, Key::Right, KeyModifiers::CONTROL));
+        assert!(press_key(&map, Key::Right, KeyModifiers::CONTROL));
+        settle(&map);
+        near(map.heading(), 30.0, 1e-6);
+        assert!(press_key(&map, Key::Left, KeyModifiers::CONTROL));
+        settle(&map);
+        near(map.heading(), 15.0, 1e-6);
+        assert_eq!(
+            map.center(),
+            center,
+            "control and an arrow turns and does not move the map"
+        );
+        assert!(press_key(&map, Key::Home, KeyModifiers::NONE));
+        settle(&map);
+        near(map.heading(), 0.0, 1e-6);
+    }
+
+    #[test]
+    fn a_click_reports_the_element_and_the_place_at_any_heading() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        for heading in [0.0, 65.0, 180.0] {
+            let map = map();
+            map.set_heading(heading);
+            let place = BasicGeoposition {
+                latitude: 8.0,
+                longitude: 12.0,
+            };
+            let layer = MapElementsLayer::new();
+            layer.add(MapElement::Icon(MapIcon::new(place)));
+            map.add_layer(layer.clone());
+            let seen = clicks(&layer);
+            let at = map.view().place_to_view(place);
+            let finger = Finger::new(PointerType::Mouse, MouseButton::Left);
+            finger.down(&map, at);
+            finger.up(&map, at);
+            let seen = seen.borrow();
+            assert_eq!(seen.len(), 1, "heading {heading}");
+            assert_eq!(seen[0].element, MapElement::Icon(MapIcon::new(place)));
+            near(seen[0].location.latitude, 8.0, 1e-6);
+            near(seen[0].location.longitude, 12.0, 1e-6);
+        }
+    }
+
+    #[test]
+    fn a_small_wobble_is_still_a_click_and_a_drag_is_not() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let place = map.center();
+        let layer = MapElementsLayer::new();
+        layer.add(MapElement::Icon(MapIcon::new(place)));
+        map.add_layer(layer.clone());
+        let seen = clicks(&layer);
+        let finger = Finger::new(PointerType::Touch, MouseButton::Left);
+        finger.down(&map, (200.0, 150.0));
+        finger.to(&map, (202.0, 151.0));
+        assert_eq!(map.center(), place, "within the slop nothing moves");
+        finger.up(&map, (202.0, 151.0));
+        assert_eq!(seen.borrow().len(), 1);
+
+        finger.down(&map, (200.0, 150.0));
+        finger.to(&map, (240.0, 150.0));
+        finger.up(&map, (240.0, 150.0));
+        assert_eq!(seen.borrow().len(), 1, "a drag is not a click");
+    }
+
+    #[test]
+    fn a_click_works_with_panning_disabled_and_misses_empty_map() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        map.set_pan_interaction_mode(MapInteractionMode::Disabled);
+        let place = map.center();
+        let layer = MapElementsLayer::new();
+        layer.add(MapElement::Icon(MapIcon::new(place)));
+        map.add_layer(layer.clone());
+        let seen = clicks(&layer);
+        let finger = Finger::new(PointerType::Mouse, MouseButton::Left);
+        finger.down(&map, (40.0, 40.0));
+        finger.up(&map, (40.0, 40.0));
+        assert!(seen.borrow().is_empty());
+        finger.down(&map, (200.0, 150.0));
+        finger.to(&map, (260.0, 150.0));
+        assert_eq!(map.center(), place, "the map does not move");
+        finger.up(&map, (260.0, 150.0));
+        assert!(seen.borrow().is_empty(), "moved away: no click");
+        finger.down(&map, (200.0, 150.0));
+        finger.up(&map, (200.0, 150.0));
+        assert_eq!(seen.borrow().len(), 1);
+    }
+
+    #[test]
+    fn a_second_finger_hands_the_drag_to_the_pinch() {
+        let _app = UnitTestApplication::start(TestServices::styled_window());
+        let map = map();
+        let layer = MapElementsLayer::new();
+        layer.add(MapElement::Icon(MapIcon::new(
+            map.view().view_to_place(100.0, 100.0),
+        )));
+        map.add_layer(layer.clone());
+        let seen = clicks(&layer);
+        let first = Finger::new(PointerType::Touch, MouseButton::Left);
+        let second = Finger::new(PointerType::Touch, MouseButton::Left);
+        first.down(&map, (100.0, 100.0));
+        second.down(&map, (300.0, 200.0));
+        let center = map.center();
+        second.to(&map, (340.0, 200.0));
+        first.to(&map, (140.0, 100.0));
+        assert_eq!(
+            map.center(),
+            center,
+            "two fingers are a pinch and do not drag"
+        );
+        first.up(&map, (100.0, 100.0));
+        assert!(
+            seen.borrow().is_empty(),
+            "the end of a pinch is not a click"
+        );
+    }
+}
