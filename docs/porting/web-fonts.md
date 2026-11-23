@@ -110,7 +110,7 @@ core (phases B and C). Section 12 lists what is deliberately left out.
 | `features-aat`, `features-graphite` | Reported only where the shaper build supports them |
 | `color-COLRv0`, `color-COLRv1`, `color-CBDT`, `color-sbix`, `color-SVG` | Per backend, section 5.3 |
 | `palettes` | Phase C |
-| `incremental` | Phase C (section 9) |
+| `incremental` | Phase C, glyph-keyed patches only (section 9) |
 
 A `tech()` the active backend cannot draw makes the entry unsupported, so the next `src` entry
 is used. That is what the standard intends, and it keeps a color font that cannot be drawn from
@@ -148,7 +148,7 @@ only if its effective character map has the character.
 | Variable fonts | Full, through the existing axis code of each backend | Core |
 | COLR v0/v1, CBDT, sbix, SVG in OpenType | As the backend draws them (section 5.3) | Core |
 | `@font-palette-values`, `font-palette` | Implemented where a backend takes a palette | C |
-| Incremental Font Transfer | Implemented last (section 9) | C |
+| Incremental Font Transfer | Glyph-keyed patches, implemented last (section 9) | C |
 | Local Font Access API | Browser only, on request, behind a permission | C |
 
 ## 4. Architecture
@@ -362,8 +362,13 @@ IFT is in scope and implemented last. The recommendation is that it should not b
   patches need a decoder with real Shared Brotli support. Glyph-keyed patches are plain RFC 7932.
 - `unicode-range` segments already give on-demand loading for most of the same cases.
 
-Until then, an `src` entry with `tech(incremental)` is skipped, as the standard requires of an
-unsupported technology, so a page-style declaration with a WOFF2 fallback works.
+Scope of the client: **glyph-keyed patches only**. FerroUI does not write its own Shared Brotli
+addressing and does not take a second decoder for it. A font that needs a table-keyed patch is
+never decoded approximately: the face fails over to the next `src` entry, as for any font that
+cannot be used.
+
+Until the client lands, an `src` entry with `tech(incremental)` is skipped, as the standard
+requires of an unsupported technology, so a page-style declaration with a WOFF2 fallback works.
 
 ## 10. Phases
 
@@ -394,7 +399,7 @@ Each step is one draft pull request, stacked on the one below.
 
 16. Color capability answers, `@font-palette-values` and `font-palette`.
 17. Level 5 descriptors and Local Font Access.
-18. Incremental Font Transfer.
+18. Incremental Font Transfer, glyph-keyed patches only.
 
 ## 11. What must be measured
 
@@ -426,5 +431,7 @@ Nothing below has been measured yet.
   no new CPU path.
 - **Keeping hinting programs by default.** They are the riskiest part of a font, and the GPU
   paths here do not need them.
+- **Table-keyed IFT patches.** They need the Shared Brotli LZ77 dictionary, which the planned
+  decoder does not implement. Such a font falls through to the next `src` entry.
 - **Sharing fetched fonts between applications**, as Android's provider model does. It needs a
   trusted system service.
