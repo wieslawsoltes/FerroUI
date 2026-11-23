@@ -3,7 +3,7 @@
 
 use crate::markup::{content_page_class, xaml_class};
 use ferroui_base::{ferro_class_info, instantiate, Ref};
-use ferroui_controls::{ContentPage, Control, Grid, TextBlock};
+use ferroui_controls::{ContentPage, TextBlock};
 use ferroui_controls_webview::{CoreWebView2InitializedEventArgs, WebMessageReceivedEventArgs, WebView2};
 use std::rc::Rc;
 
@@ -33,8 +33,7 @@ impl WebViewPage {
         this.initialize_component();
 
         let status = this.get_control::<TextBlock>("Status");
-        let view = WebView2::new();
-        Grid::set_row(&view, 2);
+        let view = this.get_control::<WebView2>("View");
 
         let weak_status = status.downgrade();
         view.core_web_view2_initialized().add(Rc::new(move |args: &CoreWebView2InitializedEventArgs| {
@@ -58,7 +57,6 @@ impl WebViewPage {
         }));
         view.navigate_to_string(DOCUMENT);
 
-        this.get_control::<Grid>("LayoutRoot").children().add(view.upcast::<Control>());
         this
     }
 }

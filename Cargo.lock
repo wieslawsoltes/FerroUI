@@ -1699,6 +1699,7 @@ dependencies = [
  "ferroui-browser",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-markup-xaml-loader",
  "ferroui-system",
  "ferroui-x11",
  "libc",
