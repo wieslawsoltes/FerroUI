@@ -106,7 +106,7 @@ fn other_values_convert_to_the_unset_value_and_there_is_no_way_back() {
 fn the_converter_is_created_and_configured_from_markup() {
     crate::register_types();
     let find = |name: &str| {
-        MarkupType::find("FerroUI.Themes.MacOS.Converters", name).unwrap_or_else(|| panic!("{name} has no markup metadata"))
+        MarkupType::find("FerroUI.Themes.MacOS.Internal.Converters", name).unwrap_or_else(|| panic!("{name} has no markup metadata"))
     };
     let markup = find("CornerRadiusToThicknessConverter");
     assert_eq!(12, find("CornerRadiusToThicknessConverterKind").enum_members.len());

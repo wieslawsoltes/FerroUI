@@ -3,7 +3,7 @@
      7e4b0c2096be402f51cc8f7d203ebf67cff183d0. Copyright (c) Microsoft Corporation.
      Licensed under the MIT License; see NOTICE.md.
      Acrylic backing is the portable fallback for native Liquid Glass. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converters="using:FerroUI.Controls.Converters" xmlns:primitives="using:FerroUI.Themes.MacOS.Primitives" x:ClassModifier="internal">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:converters="using:FerroUI.Controls.Converters" xmlns:primitives="using:FerroUI.Themes.MacOS.Internal.Primitives" x:ClassModifier="internal">
   <Design.PreviewWith>
     <Border Width="480" Padding="20">
       <TabControl Height="180">

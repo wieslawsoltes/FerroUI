@@ -58,9 +58,9 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_material::extended_fab", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::range_slider", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::snackbar", "FerroUI.Themes.Material"),
-    ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Accents"),
-    ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Converters"),
-    ("ferroui_themes_material::primitives", "FerroUI.Themes.Material.Primitives"),
+    ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Internal.Accents"),
+    ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Internal.Converters"),
+    ("ferroui_themes_material::primitives", "FerroUI.Themes.Material.Internal.Primitives"),
 ];
 
 /// What this crate states about itself for markup: its assembly name and

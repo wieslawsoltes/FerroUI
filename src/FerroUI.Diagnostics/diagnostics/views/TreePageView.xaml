@@ -3,7 +3,7 @@
              xmlns:vm="using:FerroUI.Diagnostics.ViewModels"
              xmlns:vmm="using:FerroUI.Diagnostics.ViewModels"
              xmlns:local="using:FerroUI.Diagnostics.Views"
-             xmlns:lb="using:FerroUI.Diagnostics.Behaviors"
+             xmlns:lb="using:FerroUI.Diagnostics.Internal.Behaviors"
              x:Class="FerroUI.Diagnostics.Views.TreePageView"
              x:DataType="vm:TreePageViewModel">
   <!--
