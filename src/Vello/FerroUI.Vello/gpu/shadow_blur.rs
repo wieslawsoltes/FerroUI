@@ -29,7 +29,9 @@ struct Params {
     weights: array<vec4<f32>, 4>,
     // What the blurred coverage is multiplied by: a premultiplied colour.
     color: vec4<f32>,
-    // x, y: the direction of the pass; z: how many texels it reads at each side.
+    // Gaussian: x, y the direction, z how many texels it reads at each side, w 1 to keep the
+    // colours of the content rather than give its alpha `color`. Reduction: x the texels of the
+    // content per texel of the result. Scaling up: x the texels of the content per pixel.
     step: vec4<f32>,
 }
 
@@ -42,12 +44,12 @@ fn vs_main(@builtin(vertex_index) index: u32) -> @builtin(position) vec4<f32> {
     return vec4<f32>(uv * 2.0 - 1.0, 0.0, 1.0);
 }
 
-fn coverage(p: vec2<i32>) -> f32 {
+fn texel(p: vec2<i32>) -> vec4<f32> {
     let size = vec2<i32>(textureDimensions(content));
     if (any(p < vec2<i32>(0)) || any(p >= size)) {
-        return 0.0;
+        return vec4<f32>(0.0);
     }
-    return textureLoad(content, p, 0).a;
+    return textureLoad(content, p, 0);
 }
 
 fn weight(index: i32) -> f32 {
@@ -60,17 +62,64 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
     let pixel = vec2<i32>(floor(fragment.xy));
     let direction = vec2<i32>(i32(params.step.x), i32(params.step.y));
     let radius = i32(params.step.z);
-    var sum = weight(0) * coverage(pixel);
+    var sum = weight(0) * texel(pixel);
     for (var i = 1; i <= radius; i = i + 1) {
         let offset = direction * i;
-        sum = sum + weight(i) * (coverage(pixel + offset) + coverage(pixel - offset));
+        sum = sum + weight(i) * (texel(pixel + offset) + texel(pixel - offset));
     }
-    return params.color * sum;
+    if (params.step.w > 0.5) {
+        return sum;
+    }
+    return params.color * sum.a;
+}
+
+// The mean of the texels of the content a texel of the result covers.
+@fragment
+fn fs_reduce(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    let side = i32(params.step.x);
+    let first = vec2<i32>(floor(fragment.xy)) * side;
+    var sum = vec4<f32>(0.0);
+    for (var y = 0; y < side; y = y + 1) {
+        for (var x = 0; x < side; x = x + 1) {
+            sum = sum + texel(first + vec2<i32>(x, y));
+        }
+    }
+    return sum / f32(side * side);
+}
+
+// The content at a reduced scale, read with a bilinear filter.
+@fragment
+fn fs_scale_up(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    let at = (floor(fragment.xy) + 0.5) * params.step.x - 0.5;
+    let corner = vec2<i32>(floor(at));
+    let f = at - vec2<f32>(corner);
+    let top = mix(texel(corner), texel(corner + vec2<i32>(1, 0)), f.x);
+    let bottom = mix(texel(corner + vec2<i32>(0, 1)), texel(corner + vec2<i32>(1, 1)), f.x);
+    return mix(top, bottom, f.y);
 }
 "#;
 
+/// The fragment stages of the module.
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum PassKind {
+    Gaussian,
+    Reduce,
+    ScaleUp,
+}
+
+impl PassKind {
+    fn entry_point(self) -> &'static str {
+        match self {
+            PassKind::Gaussian => "fs_main",
+            PassKind::Reduce => "fs_reduce",
+            PassKind::ScaleUp => "fs_scale_up",
+        }
+    }
+}
+
 struct BlurPipeline {
     device: Weak<VelloWgpuDevice>,
+    kind: PassKind,
     pipeline: wgpu::RenderPipeline,
     layout: wgpu::BindGroupLayout,
     buffer: wgpu::Buffer,
@@ -80,7 +129,7 @@ ferroui_base::ferro_thread_local! {
     static PIPELINES: RefCell<Vec<BlurPipeline>> = const { RefCell::new(Vec::new()) };
 }
 
-fn create_pipeline(device: &Arc<VelloWgpuDevice>) -> BlurPipeline {
+fn create_pipeline(device: &Arc<VelloWgpuDevice>, kind: PassKind) -> BlurPipeline {
     let wgpu_device = device.device();
     let label = Some("shadow blur");
     let module = wgpu_device.create_shader_module(wgpu::ShaderModuleDescriptor {
@@ -128,7 +177,7 @@ fn create_pipeline(device: &Arc<VelloWgpuDevice>) -> BlurPipeline {
         },
         fragment: Some(wgpu::FragmentState {
             module: &module,
-            entry_point: Some("fs_main"),
+            entry_point: Some(kind.entry_point()),
             targets: &[Some(wgpu::ColorTargetState {
                 format: wgpu::TextureFormat::Rgba8Unorm,
                 blend: None,
@@ -148,30 +197,45 @@ fn create_pipeline(device: &Arc<VelloWgpuDevice>) -> BlurPipeline {
         usage: wgpu::BufferUsages::UNIFORM | wgpu::BufferUsages::COPY_DST,
         mapped_at_creation: false,
     });
-    BlurPipeline { device: Arc::downgrade(device), pipeline, layout, buffer }
+    BlurPipeline { device: Arc::downgrade(device), kind, pipeline, layout, buffer }
 }
 
-/// One pass over `content` into a texture of the pool of its size.
+/// One Gaussian pass over `content` into a texture of the pool of its size: the alpha given
+/// `color`, or the colours kept when `color` is `None`.
 fn blur_pass(
     device: &Arc<VelloWgpuDevice>,
     content: &Arc<VelloDeviceTexture>,
     direction: (f32, f32),
     deviation: f64,
-    color: [f32; 4],
+    color: Option<[f32; 4]>,
 ) -> Arc<VelloDeviceTexture> {
-    let output = pooled_texture(device, content.width(), content.height());
     let (weights, radius) = gaussian_weights(deviation);
     let mut floats = [0.0f32; 24];
     floats[..WEIGHTS].copy_from_slice(&weights);
-    floats[16..20].copy_from_slice(&color);
-    floats[20..24].copy_from_slice(&[direction.0, direction.1, radius as f32, 0.0]);
+    floats[16..20].copy_from_slice(&color.unwrap_or([1.0; 4]));
+    let keep_colours = if color.is_none() { 1.0 } else { 0.0 };
+    floats[20..24].copy_from_slice(&[direction.0, direction.1, radius as f32, keep_colours]);
+    run_pass(device, PassKind::Gaussian, content, (content.width(), content.height()), &floats)
+}
+
+/// A pass of `kind` over `content` into a texture of the pool of `size`.
+fn run_pass(
+    device: &Arc<VelloWgpuDevice>,
+    kind: PassKind,
+    content: &Arc<VelloDeviceTexture>,
+    size: (u32, u32),
+    floats: &[f32; 24],
+) -> Arc<VelloDeviceTexture> {
+    let output = pooled_texture(device, size.0, size.1);
     let bytes: Vec<u8> = floats.iter().flat_map(|value| value.to_ne_bytes()).collect();
     PIPELINES.with(|pipelines| {
         let mut pipelines = pipelines.borrow_mut();
         pipelines.retain(|pipeline| pipeline.device.strong_count() > 0);
-        let found = pipelines.iter().position(|pipeline| std::ptr::eq(pipeline.device.as_ptr(), Arc::as_ptr(device)));
+        let found = pipelines
+            .iter()
+            .position(|pipeline| pipeline.kind == kind && std::ptr::eq(pipeline.device.as_ptr(), Arc::as_ptr(device)));
         let index = found.unwrap_or_else(|| {
-            pipelines.push(create_pipeline(device));
+            pipelines.push(create_pipeline(device, kind));
             pipelines.len() - 1
         });
         let pipeline = &pipelines[index];
@@ -253,15 +317,45 @@ pub(crate) fn blurred_shape(
         return None;
     }
 
-    let across = blur_pass(device, &content, (1.0, 0.0), deviation_x / reduction, [1.0; 4]);
+    let across = blur_pass(device, &content, (1.0, 0.0), deviation_x / reduction, Some([1.0; 4]));
     let [red, green, blue, alpha] = color.components;
     let premultiplied = [red * alpha, green * alpha, blue * alpha, alpha];
-    let texture = blur_pass(device, &across, (0.0, 1.0), deviation_y / reduction, premultiplied);
+    let texture = blur_pass(device, &across, (0.0, 1.0), deviation_y / reduction, Some(premultiplied));
     Some(BlurredShape {
         texture,
         to_area: Affine::scale(reduction) * Affine::translate((-margin, -margin)),
         reduced: reduction > 1.0,
     })
+}
+
+/// `content` (premultiplied colours in a texture of the pool) blurred by a Gaussian of these
+/// deviations in texels, for the blur and drop shadow effects of the compute mode, which has no
+/// filter layers (#1146). With `tint`, a premultiplied colour, the result is that colour through
+/// the blurred alpha, the shadow of the content. A large deviation is blurred at a reduced scale;
+/// the box of the reduction and the bilinear filter that scales back blur too, by a variance of
+/// a quarter of a reduced texel, which the Gaussian leaves out.
+#[cfg_attr(not(test), allow(dead_code))]
+pub(crate) fn blurred_content(
+    device: &Arc<VelloWgpuDevice>,
+    content: &Arc<VelloDeviceTexture>,
+    (deviation_x, deviation_y): (f64, f64),
+    tint: Option<[f32; 4]>,
+) -> Arc<VelloDeviceTexture> {
+    let reduction = crate::shadow_gaussian::reduction_for(deviation_x.max(deviation_y));
+    if reduction <= 1.0 {
+        let across = blur_pass(device, content, (1.0, 0.0), deviation_x, None);
+        return blur_pass(device, &across, (0.0, 1.0), deviation_y, tint);
+    }
+    let reduced_deviation = |deviation: f64| ((deviation / reduction).powi(2) - 0.25).max(0.0).sqrt();
+    let side = |length: u32| (f64::from(length) / reduction).ceil() as u32;
+    let size = pooled_size(device, side(content.width()), side(content.height()));
+    let mut floats = [0.0f32; 24];
+    floats[20] = reduction as f32;
+    let reduced = run_pass(device, PassKind::Reduce, content, size, &floats);
+    let across = blur_pass(device, &reduced, (1.0, 0.0), reduced_deviation(deviation_x), None);
+    let blurred = blur_pass(device, &across, (0.0, 1.0), reduced_deviation(deviation_y), tint);
+    floats[20] = (1.0 / reduction) as f32;
+    run_pass(device, PassKind::ScaleUp, &blurred, (content.width(), content.height()), &floats)
 }
 
 /// The most pictures a thread keeps, and the most bytes of their textures.
@@ -392,10 +486,10 @@ pub(crate) fn kept_picture(
         log_render_failure("shadow", &error);
         return None;
     }
-    let across = blur_pass(device, &content, (1.0, 0.0), raster.deviation, [1.0; 4]);
+    let across = blur_pass(device, &content, (1.0, 0.0), raster.deviation, Some([1.0; 4]));
     let [red, green, blue, alpha] = color.components;
     let premultiplied = [red * alpha, green * alpha, blue * alpha, alpha];
-    let texture = blur_pass(device, &across, (0.0, 1.0), raster.deviation, premultiplied);
+    let texture = blur_pass(device, &across, (0.0, 1.0), raster.deviation, Some(premultiplied));
     KEPT_PICTURES.with(|pictures| {
         pictures.borrow_mut().get_or_insert_with(Default::default).insert(device, key, texture.clone())
     });
