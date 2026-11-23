@@ -1664,7 +1664,7 @@ impl AutoCompleteBox {
 
     /// Connects to the closed event of the drop down popup.
     fn is_inside_drop_down(&self, element: Option<&Ref<InputElement>>) -> bool {
-        let Some(visual) = element.and_then(|element| element.cast::<Visual>()) else {
+        let Some(visual) = element.and_then(|element| element.cast::<ferroui_base::Visual>()) else {
             return false;
         };
         let popup = self.drop_down_popup.borrow().as_ref().map(|(popup, _)| popup.clone());
