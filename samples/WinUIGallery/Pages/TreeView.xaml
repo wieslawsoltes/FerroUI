@@ -3,10 +3,33 @@
      templates from tree_samples.rs, as the source's constructor; the bound trees' items are
      expanded by the source's IsExpanded="True" of their templates, a style here. ThemeResource
      becomes DynamicResource and the bordered Grids are Borders (FerroUI's Grid has no border).
-     FerroUI's TreeView has no drag and drop of its items (CanDragItems, AllowDrop), so the first
-     tree does not move items. -->
+     The first tree's CanDragItems and AllowDrop are the drag of tree_samples.rs; the styles below
+     show where a dragged item lands. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Styles>
+    <Style Selector="TreeViewItem.DropBefore">
+      <Setter Property="AdornerLayer.Adorner">
+        <Template>
+          <Border BorderThickness="0 2 0 0" BorderBrush="{DynamicResource SystemAccentColor}" IsHitTestVisible="False" />
+        </Template>
+      </Setter>
+    </Style>
+    <Style Selector="TreeViewItem.DropAfter">
+      <Setter Property="AdornerLayer.Adorner">
+        <Template>
+          <Border BorderThickness="0 0 0 2" BorderBrush="{DynamicResource SystemAccentColor}" IsHitTestVisible="False" />
+        </Template>
+      </Setter>
+    </Style>
+    <Style Selector="TreeViewItem.DropInside">
+      <Setter Property="AdornerLayer.Adorner">
+        <Template>
+          <Border BorderThickness="2" BorderBrush="{DynamicResource SystemAccentColor}" IsHitTestVisible="False" />
+        </Template>
+      </Setter>
+    </Style>
+  </StackPanel.Styles>
   <StackPanel x:Name="TreeViewExample1" Spacing="8">
     <TextBlock Text="A simple TreeView with drag and drop support" FontSize="18" />
     <Border Height="280" BorderBrush="{DynamicResource TextControlBorderBrush}" BorderThickness="1">

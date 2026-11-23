@@ -1697,7 +1697,7 @@
       "examples": []
     },
     "TreeView": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/TreeView.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1732,7 +1732,7 @@
           "name": "embedded_sample_media_resolve_original_paths_and_exact_bytes"
         }
       ],
-      "notes": "All four source examples use native TreeView with the code behind of TreeViewPage.xaml.cs in Rust (tree_samples.rs): the nodes of InitializeSampleTreeView as TreeViewItems with their content as the header (FerroUI has no TreeViewNode), the multi-selection tree (Multiple with Toggle: a click toggles an item, without check boxes), the tree bound to GetData with the names and children of its ExplorerItems, and ExplorerItemTemplateSelector as the folder and file data templates of the tree, with the source's folder.png and the E8A5 glyph. The source's item templates are TreeViewItems with the x:Bind of Children: here hierarchical data templates (FuncTreeDataTemplate) whose children are the item's Children, and the templates' IsExpanded is a style of the tree. FerroUI's TreeView has no drag and drop of its items (CanDragItems, AllowDrop), so the first tree does not move items and the page is partial. The glyph needs the platform's symbol font.",
+      "notes": "All four source examples use native TreeView with the code behind of TreeViewPage.xaml.cs in Rust (tree_samples.rs): the nodes of InitializeSampleTreeView as TreeViewItems with their content as the header (FerroUI has no TreeViewNode), the multi-selection tree (Multiple with Toggle: a click toggles an item, without check boxes), the tree bound to GetData with the names and children of its ExplorerItems, and ExplorerItemTemplateSelector as the folder and file data templates of the tree, with the source's folder.png and the E8A5 glyph. The source's item templates are TreeViewItems with the x:Bind of Children: here hierarchical data templates (FuncTreeDataTemplate) whose children are the item's Children, and the templates' IsExpanded is a style of the tree. The first tree's CanDragItems and AllowDrop are a drag in Rust that moves an item before, inside or after the item under the pointer, with an adorner showing where it lands; WinUI's default of both being on is not applied to other trees. The glyph needs the platform's symbol font.",
       "examples": []
     },
     "Typography": {

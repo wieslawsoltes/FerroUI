@@ -481,7 +481,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | CalendarView | 1 partial: no IsGroupLabelVisible, IsOutOfScopeEnabled, CalendarIdentifier or Language | partial | `date_samples.rs` | `date_samples_tests.rs` |
 | AutoSuggestBox | 2 of 2 | ported | `control_samples.rs` | `tests.rs` |
 | ListView | 5 ported, 5 partial: a ListBox; no grouping or sticky headers, no IsTextTrimmed, no ItemsUpdatingScrollMode, no None selection mode or check boxes | partial | `list_samples.rs` | `list_samples_tests.rs` |
-| TreeView | 3 ported, 1 partial: no drag and drop of the items | partial | `tree_samples.rs` | `tree_samples_tests.rs` |
+| TreeView | 4 of 4; the first tree's drag and drop is in the sample | ported | `tree_samples.rs` | `tree_samples_tests.rs` |
 | SplitView | 1 of 1 | ported | `split_view_samples.rs` | `split_view_samples_tests.rs`, `x_bind_tests.rs` |
 | ScrollViewer | 1 of 1 | ported | `scroll_samples.rs` | `scroll_samples_tests.rs` |
 | Shape | 3 of 3 | ported | `Pages/Shape.xaml` (no code-behind upstream) | `shape_samples_tests.rs` |

@@ -159,3 +159,115 @@ fn tree_view_template_selector_picks_the_folder_and_the_file_template() {
         Some("ProjectProposal")
     );
 }
+
+fn headers(items: &ItemsControl) -> Vec<String> {
+    nodes(items).iter().map(|item| header(item)).collect()
+}
+
+#[test]
+fn tree_view_drop_position_follows_the_row_quarters() {
+    use crate::tree_samples::TreeDrop;
+    assert_eq!(TreeDrop::at(1.0, 40.0), TreeDrop::Before);
+    assert_eq!(TreeDrop::at(20.0, 40.0), TreeDrop::Inside);
+    assert_eq!(TreeDrop::at(39.0, 40.0), TreeDrop::After);
+}
+
+#[test]
+fn tree_view_drag_moves_items_before_inside_and_after() {
+    use crate::tree_samples::{move_tree_item, TreeDrop};
+    let _application = start();
+    let root = page();
+    let tree = root.get_control::<TreeView>("sampleTreeView");
+    let top = nodes(&tree);
+    let (work, personal) = (top[0].clone(), top[1].clone());
+    let spec = nodes(&work)[0].clone();
+    let schedule = nodes(&work)[1].clone();
+
+    // After a sibling of the same list.
+    assert!(move_tree_item(&spec, &schedule, TreeDrop::After));
+    assert_eq!(headers(&work), ["Feature Schedule", "XYZ Functional Spec"]);
+    // Before an item of another list.
+    assert!(move_tree_item(&spec, &personal, TreeDrop::Before));
+    assert_eq!(headers(&tree), ["Work Documents", "XYZ Functional Spec", "Personal Documents"]);
+    assert_eq!(headers(&work), ["Feature Schedule"]);
+    // Inside an item, at its end, which expands it.
+    schedule.set_is_expanded(false);
+    assert!(move_tree_item(&spec, &schedule, TreeDrop::Inside));
+    assert_eq!(headers(&schedule), ["XYZ Functional Spec"]);
+    assert!(schedule.is_expanded());
+}
+
+#[test]
+fn tree_view_drag_does_not_move_an_item_into_itself() {
+    use crate::tree_samples::{move_tree_item, TreeDrop};
+    let _application = start();
+    let root = page();
+    let tree = root.get_control::<TreeView>("sampleTreeView");
+    let personal = nodes(&tree)[1].clone();
+    let remodel = nodes(&personal)[0].clone();
+    let paint = nodes(&remodel)[1].clone();
+
+    for position in [TreeDrop::Before, TreeDrop::Inside, TreeDrop::After] {
+        assert!(!move_tree_item(&personal, &personal, position));
+        assert!(!move_tree_item(&personal, &paint, position));
+    }
+    assert_eq!(headers(&tree), ["Work Documents", "Personal Documents"]);
+    assert_eq!(headers(&remodel), ["Contractor Contact Info", "Paint Color Scheme"]);
+}
+
+/// The drag events of the first tree in a window: the row shows where the item lands, a drop moves
+/// it, and a drop into its own subtree is refused.
+#[cfg(feature = "theme")]
+#[test]
+fn tree_view_drag_events_show_the_target_and_move_the_item() {
+    use crate::tree_samples::{row_of, tree_item_format};
+    use ferroui_base::input::{
+        DataTransfer, DataTransferItem, DragDrop, DragDropEffects, DragEventArgs, IDataTransfer, KeyModifiers,
+    };
+    use ferroui_base::interactivity::Interactive;
+    use ferroui_base::Point;
+    use ferroui_controls::Window;
+    use std::rc::Rc;
+
+    let _application = crate::tests::start_winui();
+    let root = page();
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(root.clone())));
+    window.show();
+    window.update_layout();
+    let tree = root.get_control::<TreeView>("sampleTreeView");
+    let work = nodes(&tree)[0].clone();
+    let spec = nodes(&work)[0].clone();
+    let schedule = nodes(&work)[1].clone();
+
+    let transfer_of = |item: &Ref<TreeViewItem>| -> Rc<dyn IDataTransfer> {
+        let data = DataTransferItem::new();
+        data.set(&tree_item_format(), Some(item.clone()));
+        let transfer = DataTransfer::new();
+        transfer.add(data);
+        transfer
+    };
+    let raise = |event, item: &Ref<TreeViewItem>, target: &Ref<TreeViewItem>, y: f64| {
+        let args = DragEventArgs::new(
+            Some(event),
+            transfer_of(item),
+            target.clone().upcast::<Interactive>(),
+            Point::new(2.0, y),
+            KeyModifiers::NONE,
+        );
+        target.raise_event(&args);
+        args.drag_effects()
+    };
+
+    let bottom = row_of(&schedule).bounds().height - 1.0;
+    assert_eq!(raise(DragDrop::drag_over_event(), &spec, &schedule, bottom), DragDropEffects::MOVE);
+    assert!(schedule.classes().contains("DropAfter"));
+
+    assert_eq!(raise(DragDrop::drop_event(), &spec, &schedule, bottom), DragDropEffects::MOVE);
+    assert!(!schedule.classes().contains("DropAfter"));
+    assert_eq!(headers(&work), ["Feature Schedule", "XYZ Functional Spec"]);
+
+    assert_eq!(raise(DragDrop::drop_event(), &work, &schedule, bottom), DragDropEffects::NONE);
+    assert_eq!(headers(&tree), ["Work Documents", "Personal Documents"]);
+    window.close();
+}
