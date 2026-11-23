@@ -19,6 +19,7 @@ export class HostedAnimationView {
     private readonly issues = element<HTMLButtonElement>('hosted-animation-issues');
     private readonly clipActions = element<HTMLButtonElement>('hosted-clip-actions');
     private readonly stateActions = element<HTMLButtonElement>('hosted-state-actions');
+    private readonly propertyTransitions = element<HTMLButtonElement>('hosted-property-transitions');
     private readonly edit = element<HTMLButtonElement>('hosted-animation-keyframe');
     private readonly play = element<HTMLButtonElement>('hosted-animation-play');
     private readonly stop = element<HTMLButtonElement>('hosted-animation-stop');
@@ -102,6 +103,7 @@ export class HostedAnimationView {
         };
         this.clipActions.onclick = () => this.openActions('clipActions');
         this.stateActions.onclick = () => this.openActions('stateActions');
+        this.propertyTransitions.onclick = () => this.openActions('propertyTransitionActions');
         this.edit.onclick = () => this.choose(this.selectedProgram?.stateRoute ? 'editStateRoute' : 'chooseKeyframe');
         this.play.onclick = () => {
             if (this.state.position?.playing) this.control({ action: 'pause' }, true);
@@ -194,10 +196,12 @@ export class HostedAnimationView {
         if (this.canUse() && this.decoded) this.send({ type, frame: this.decoded, program: Number(this.programs.value) });
     }
 
-    private openActions(type: 'clipActions' | 'stateActions'): void {
+    private openActions(type: 'clipActions' | 'stateActions' | 'propertyTransitionActions'): void {
         if (!this.canUse() || !this.decoded || this.state.position?.playing) return;
-        const program = this.clips.visible ? undefined : this.selectedProgram?.id;
-        this.send({ type, frame: this.decoded, request: this.pending = ++this.request, program });
+        const request = this.pending = ++this.request;
+        const frame = this.decoded;
+        if (type === 'propertyTransitionActions') this.send({ type, frame, request });
+        else this.send({ type, frame, request, program: this.clips.visible ? undefined : this.selectedProgram?.id });
         this.paint();
     }
 
@@ -274,6 +278,8 @@ export class HostedAnimationView {
         const states = this.state.stateAuthoring;
         this.stateActions.hidden = !states?.owners.some(owner => owner.canCreate) && !states?.groups.length;
         this.stateActions.disabled = !usable;
+        this.propertyTransitions.hidden = !this.state.propertyTransitionOwners?.length;
+        this.propertyTransitions.disabled = !usable;
         labelButton(this.source, program?.sourceOffset == null ? 'Animation source is unavailable'
             : program.stateRoute ? 'Reveal visual state in source' : 'Reveal animation in source');
         this.edit.hidden = endpoint || (!program?.authoring && !program?.stateRoute);

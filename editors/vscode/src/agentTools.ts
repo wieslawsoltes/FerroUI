@@ -23,6 +23,7 @@ import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
 import type { HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
+import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
 import { filterOutline } from './outlineFilter';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import type { ProjectFile, ProjectInventory } from './projectInventory';
@@ -355,6 +356,14 @@ export class AgentTools {
             case 'designer_hosted_state_group':
                 return this.hosted.stateGroup(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as StateGroupEdit, tool === 'designer_hosted_state_group', signal);
+            case 'designer_hosted_property_transitions':
+                return this.hosted.propertyTransitions(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.arguments as TransitionOwner, signal);
+            case 'designer_hosted_property_transition_draft':
+            case 'designer_hosted_property_transition':
+                return this.hosted.propertyTransitionEdit(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.arguments as TransitionEdit,
+                    tool === 'designer_hosted_property_transition', signal);
             case 'designer_hosted_keyframe_group_draft':
             case 'designer_hosted_keyframe_group':
                 return this.hosted.keyframeGroup(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },

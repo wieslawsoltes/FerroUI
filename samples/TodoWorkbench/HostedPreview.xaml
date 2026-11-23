@@ -17,13 +17,16 @@
         </Animation>
       </Style.Animations>
     </Style>
+    <Style Selector="app|PreviewBadge#ReviewBadge:pointerover">
+      <Setter Property="Emphasis" Value="1.4" />
+    </Style>
   </Window.Styles>
   <StackPanel Margin="24" Spacing="12">
     <TextBlock Text="Write a label for the next task" FontSize="16" />
     <TextBox Name="LabelInput" Text="Review the project" />
     <Border Name="ReviewCard" Background="#FFFFFF" BorderBrush="#CEDBED" BorderThickness="1" CornerRadius="0" Padding="21">
       <StackPanel Spacing="7">
-        <app:PreviewBadge Text="{Binding #LabelInput.Text}" Foreground="#192E54" />
+        <app:PreviewBadge Name="ReviewBadge" Text="{Binding #LabelInput.Text}" Foreground="#192E54" />
         <TextBlock Text="{ReflectionBinding ., FallbackValue=Application data}" Foreground="#486386" />
       </StackPanel>
     </Border>

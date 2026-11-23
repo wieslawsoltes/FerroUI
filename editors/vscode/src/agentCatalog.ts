@@ -97,6 +97,26 @@ const stateModel = { type: 'object', required: ['owner', 'name', 'states', 'tran
 const hostedStateGroup = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['action'],
         properties: { action: choice('upsert', 'remove'), model: stateModel, owner: node, group: text } } };
+const hostedTransitionOwner = { owner: node, target_type: text };
+const transitionTiming = { type: 'object', additionalProperties: false,
+    properties: { duration: time, delay: time, easing: object } };
+const transitionChoice = { property: text, type_name: text };
+const transitionCommand = (action: string, properties: object, required: string[]) => ({
+    type: 'object', additionalProperties: false, required: ['action', ...required],
+    properties: { action: choice(action), ...properties },
+});
+const hostedTransitionRead = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
+    arguments: { type: 'object', required: ['owner'], additionalProperties: false, properties: hostedTransitionOwner } };
+const hostedTransitionEdit = { ...hostedTransitionRead, arguments: {
+    type: 'object', required: ['owner', 'command'], additionalProperties: false,
+    properties: { ...hostedTransitionOwner, command: { oneOf: [
+        transitionCommand('add', { ...transitionChoice, timing: transitionTiming }, ['property']),
+        transitionCommand('retarget', { ...transitionChoice, transition: node }, ['property', 'transition']),
+        transitionCommand('timing', { transition: node, timing: transitionTiming }, ['transition', 'timing']),
+        transitionCommand('move', { transition: node, index: integer(0) }, ['transition', 'index']),
+        transitionCommand('remove', { transition: node }, ['transition']),
+    ] } },
+} };
 const hostedClips = { ...frame, expected_generation: integer(1), expected_sequence: integer(1),
     arguments: { type: 'object', additionalProperties: false, required: ['programs'],
         properties: { programs: { type: 'array', items: node, minItems: 1, maxItems: 4096 }, start: time, gap: { type: 'number' } } } };
@@ -201,6 +221,12 @@ export const agentCatalog = {
         hostedStateGroup, hostedFrameRequired),
     designer_hosted_state_group: tool('Apply a checked XAML or mapped Rust visual-state group edit as one Undo step. Supply the current app generation and accepted frame.',
         hostedStateGroup, hostedFrameRequired, true),
+    designer_hosted_property_transitions: tool('Read a transition collection and compatible choices from the running app’s registry. Choose an owner from propertyTransitionOwners in designer_hosted_animations. Supply target_type for a standalone XAML Transitions resource.',
+        hostedTransitionRead, hostedFrameRequired),
+    designer_hosted_property_transition_draft: tool('Return checked XAML or mapped Rust patches for an add, retarget, move, remove, or timing command. Use the current app generation and frame, an accepted owner and property choice, and timing in seconds.',
+        hostedTransitionEdit, hostedFrameRequired),
+    designer_hosted_property_transition: tool('Apply a checked property transition edit as one Undo step. Use the same arguments as designer_hosted_property_transition_draft.',
+        hostedTransitionEdit, hostedFrameRequired, true),
     designer_hosted_clip_placement_draft: tool('Preview checked XAML or mapped Rust patches that arrange native clips in the supplied order. Start and signed gap use elapsed seconds. Omit start to keep the first clip’s delay.',
         hostedClips, hostedFrameRequired),
     designer_hosted_clip_placement: tool('Place or sequence native animation clips in the app-preview source buffer as one undoable edit. Use editable clip IDs from the current frame.',

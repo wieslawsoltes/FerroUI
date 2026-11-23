@@ -58,6 +58,7 @@ export interface HostedAnimationCatalog {
     keyframeSelection?: boolean;
     clipAuthoring?: HostedClipAuthoring;
     stateAuthoring?: HostedStateAuthoring;
+    propertyTransitionOwners?: HostedAnimationTarget[];
 }
 
 export interface HostedAnimationFrame {

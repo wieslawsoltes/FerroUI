@@ -6,10 +6,13 @@ mod curve;
 mod playback;
 #[path = "hosted_keyframe_sample.rs"]
 mod keyframe_sample;
+#[path = "hosted_property_transitions.rs"]
+mod property_transitions;
 #[path = "hosted_state_routes.rs"]
 mod state_routes;
 
 pub(super) use curve::curve;
+pub(super) use property_transitions::request as property_transition_request;
 
 use crate::design_window_loader::LoadedDesign;
 use super::hosted_keyframes::{HostedKeyframeCapabilities, HostedKeyframes};
@@ -36,9 +39,11 @@ use ferroui_remote_protocol::designer::{
     DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY, DESIGN_ANIMATION_TRANSFORM_LISTS_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
     DESIGN_KEYFRAME_SAMPLING_QUERY,
+    DESIGN_PROPERTY_TRANSITIONS_QUERY,
 };
 use std::cell::{Cell, RefCell};
 use std::collections::{BTreeMap, BTreeSet};
+use std::rc::Rc;
 use url::Url;
 
 ferroui_base::ferro_thread_local! {
@@ -58,6 +63,7 @@ ferroui_base::ferro_thread_local! {
     static CLIP_AUTHORING: Cell<bool> = const { Cell::new(false) };
     static STATE_ROUTES: Cell<bool> = const { Cell::new(false) };
     static STATE_AUTHORING: Cell<bool> = const { Cell::new(false) };
+    static PROPERTY_TRANSITIONS: Cell<bool> = const { Cell::new(false) };
     static ACTIVE: RefCell<Option<HostedAnimations>> = const { RefCell::new(None) };
 }
 
@@ -83,12 +89,13 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     CLIP_AUTHORING.set(AUTHORING.get() && requested(DESIGN_CLIP_AUTHORING_QUERY));
     STATE_ROUTES.set(enabled && requested(DESIGN_STATE_ROUTES_QUERY));
     STATE_AUTHORING.set(STATE_ROUTES.get() && AUTHORING.get() && requested(DESIGN_STATE_AUTHORING_QUERY));
+    PROPERTY_TRANSITIONS.set(AUTHORING.get() && requested(DESIGN_PROPERTY_TRANSITIONS_QUERY));
     ACTIVE.with(|active| active.borrow_mut().take());
 }
 
 pub(super) struct AnimationSource {
     pub(super) identity: String,
-    document: Document,
+    document: Rc<Document>,
     programs: Vec<AnimationProgram>,
     states: Vec<StatePreviewGroup>,
 }
@@ -110,9 +117,9 @@ pub(super) fn prepare(update: &UpdateDesignMessage) -> Option<AnimationSource> {
         programs.retain(|program| !AnimationPrograms::is_state_managed(&document, program.id));
     }
     let states = STATE_ROUTES.get().then(|| StatePreviewGroup::scan(&document, full_states)).unwrap_or_default();
-    (!programs.is_empty() || !states.is_empty() || CLIP_AUTHORING.get() || full_states).then(|| AnimationSource {
+    (!programs.is_empty() || !states.is_empty() || CLIP_AUTHORING.get() || full_states || PROPERTY_TRANSITIONS.get()).then(|| AnimationSource {
         identity: format!("ferroui-design/{}", update.revision),
-        document,
+        document: Rc::new(document),
         programs,
         states,
     })
@@ -232,6 +239,7 @@ struct HostedAnimations {
     current: Vec<(i64, Vec<i64>)>,
     playback: NativePlayback,
     keyframes: Option<HostedKeyframes>,
+    property_transitions: Option<property_transitions::HostedPropertyTransitions>,
     state_routes: HostedStateRoutes,
     _state_triggers: NativeStateTriggers,
 }
@@ -263,6 +271,9 @@ impl HostedAnimations {
             .into_iter()
             .filter_map(|(id, control)| Some((id, control?)))
             .collect::<BTreeMap<_, _>>();
+        let property_transitions = PROPERTY_TRANSITIONS.get().then(|| {
+            property_transitions::HostedPropertyTransitions::mount(source.document.clone(), &targets, catalog)
+        });
         let index =
             NativeProgramIndex::discover(&source.document, &locations, &source.programs, controls);
         let mut previous = 0;
@@ -324,6 +335,7 @@ impl HostedAnimations {
             current: Vec::new(),
             playback: NativePlayback::default(),
             keyframes,
+            property_transitions,
             state_routes,
             _state_triggers: state_triggers,
         }

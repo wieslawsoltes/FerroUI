@@ -11,6 +11,7 @@ use ferroui_remote_protocol::designer::{
     DesignPaletteContextMessage,
     DesignTemplateCatalogMessage,
     DesignKeyframeSelectionResult,
+    DesignPropertyTransitionsResult,
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
@@ -65,6 +66,8 @@ struct Events {
     keyframe_result: Option<DesignAnimationAuthoringResult>,
     keyframe_selection: bool,
     keyframe_selection_result: Option<DesignKeyframeSelectionResult>,
+    property_transitions: bool,
+    property_transition_result: Option<DesignPropertyTransitionsResult>,
     curve_result: Option<DesignAnimationCurveResult>,
     authorable: BTreeSet<i64>,
     sampleable_keys: BTreeSet<(i64, i64, String)>,
@@ -228,6 +231,7 @@ impl Relay {
                 if state.requested == Some(catalog.revision) {
                     state.animation_supported = true;
                     state.keyframe_selection = catalog.keyframe_selection == Some(true);
+                    state.property_transitions = catalog.property_transition_owners.is_some();
                     state.curve_programs = catalog.programs.iter().filter(|program| program.curve_tracks.is_some())
                         .map(|program| program.id).collect();
                     state.animation_catalog = Some(catalog.clone());
@@ -250,6 +254,11 @@ impl Relay {
             } else if let Some(outcome) = message.downcast_ref::<DesignAnimationCurveResult>() {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
                     state.curve_result = Some(outcome.clone());
+                    result.1.notify_all();
+                }
+            } else if let Some(outcome) = message.downcast_ref::<DesignPropertyTransitionsResult>() {
+                if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
+                    state.property_transition_result = Some(outcome.clone());
                     result.1.notify_all();
                 }
             } else if let Some(context) = message.downcast_ref::<DesignPaletteContextMessage>() {
@@ -444,6 +453,12 @@ impl Relay {
             None => authored.as_ref().map(|source| templates::Templates::capture(source, catalog)),
         });
         let states = state.animation_catalog.as_mut().map(|catalog| {
+            if document.rsx.is_some() {
+                if let Some(owners) = &mut catalog.property_transition_owners {
+                    owners.retain(|owner| u64::try_from(owner.id).ok()
+                        .and_then(|id| document.rsx_node(id)).is_some());
+                }
+            }
             HostedStates::capture(&document.xaml, catalog, authored_rsx.as_ref())
         });
         if let Some(catalog) = &state.animation_catalog {

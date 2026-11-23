@@ -79,7 +79,8 @@ impl SourceMap {
         catalog: &DesignAnimationCatalogMessage,
         states: HostedStates,
     ) -> Option<Self> {
-        if catalog.programs.is_empty() && catalog.clip_authoring != Some(true) && catalog.state_authoring != Some(true) {
+        if catalog.programs.is_empty() && catalog.clip_authoring != Some(true) && catalog.state_authoring != Some(true)
+            && catalog.property_transition_owners.is_none() {
             return None;
         }
         let clips = catalog
@@ -265,6 +266,14 @@ impl SourceMap {
             overrides,
             position,
         }
+    }
+}
+
+impl SourceMaps {
+    pub(crate) fn authoring_document(&self, frame: FrameIdentity) -> Result<&Document, String> {
+        self.current.as_ref().filter(|source| source.contains(&frame))
+            .map(|source| &source.document)
+            .ok_or_else(|| "Read the current app-hosted preview frame".into())
     }
 }
 

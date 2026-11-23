@@ -138,7 +138,8 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.ok(tools.some(tool => tool.name === 'ferroui_runtime_template_source'));
         for (const name of ['open', 'animations', 'animation', 'image', 'curve', 'keyframe_draft', 'keyframe',
             'keyframe_group_draft', 'keyframe_group', 'clip_placement_draft', 'clip_placement', 'clip_draft', 'clip_edit',
-            'state_group_draft', 'state_group', 'palette', 'palette_edit_draft', 'palette_edit',
+            'state_group_draft', 'state_group', 'property_transitions', 'property_transition_draft', 'property_transition',
+            'palette', 'palette_edit_draft', 'palette_edit',
             'palette_source', 'palette_references', 'palette_show', 'styles', 'style_edit_draft', 'style_edit',
             'style_resources', 'style_source', 'style_show', 'templates', 'template_source', 'template_copy_draft', 'template_copy']) {
             assert.ok(tools.some(tool => tool.name === `designer_hosted_${name}`));
@@ -161,6 +162,12 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_keyframe', sampleKey)).content[0]?.text ?? '', /allowWrites/);
         const mixedKey = { ...sampleKey, arguments: { ...sampleKey.arguments, value: '.3', easing: 'Linear' } };
         assert.match((await invoke('designer_hosted_keyframe_draft', mixedKey)).content[0]?.text ?? '', /matching input form/);
+        const transition = { ...hostedKey, arguments: {
+            owner: 1, command: { action: 'add', property: 'Opacity', timing: { duration: .6 } },
+        } };
+        assert.match((await invoke('designer_hosted_property_transition', transition)).content[0]?.text ?? '', /allowWrites/);
+        const transitionDraft = await invoke('designer_hosted_property_transition_draft', transition);
+        assert.ok(transitionDraft.isError && !transitionDraft.content[0]?.text?.includes('allowWrites'));
         const palette = { ...hostedKey, arguments: {
             target: { address: 'ferres://sample/View.xaml', owner: 1 }, edit: { action: 'set', node: 2, color: '#FFFF0000' },
         } };

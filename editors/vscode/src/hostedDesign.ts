@@ -24,11 +24,14 @@ import { prepareHostedKeyframeGroup } from './hostedKeyframeGroup';
 import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
 import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { editHostedStateRoute } from './hostedStateRoutes';
+import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
 import type { StateGroupEdit } from './stateGroupProtocol';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Language, type Range } from './protocol';
 import { buildCargo, launchArtifact, type ProjectMetadata, type ReloadProcess } from './reloadProcess';
 import { chooseAnimationIssue } from './studioPrograms';
+import { choose } from './studioContext';
+import { chooseTransitionAction } from './studioPropertyTransitions';
 import { asPosition, asRange, languageOf, offsetAfterChanges, sourceOf } from './textDocument';
 import { writeTimelineClipboard } from './timelineKeyframeClipboard';
 import { hostedHtml, webviewOptions } from './view';
@@ -107,7 +110,11 @@ export class HostedDesign implements vscode.Disposable {
 
     animations(uri: vscode.Uri) {
         const session = this.session(uri);
-        return { generation: session.generation, status: session.message, ...session.animations.state };
+        const state = session.animations.state;
+        const current = session.currentFrame;
+        const frame = current?.revision === state.frame?.revision && current?.sequence === state.frame?.sequence
+            ? state.frame : undefined;
+        return { generation: session.generation, status: session.message, ...state, frame };
     }
 
     image(uri: vscode.Uri) {
@@ -255,6 +262,19 @@ export class HostedDesign implements vscode.Disposable {
         const session = this.session(uri);
         if (session.generation !== generation) throw new Error('Read the current application preview generation.');
         return session.stateGroup(frame, command, apply, signal);
+    }
+
+    propertyTransitions(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, options: TransitionOwner, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.propertyTransitions(frame, options, signal);
+    }
+
+    propertyTransitionEdit(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, edit: TransitionEdit,
+        apply: boolean, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.propertyTransitionEdit(frame, edit, apply, signal);
     }
 
     clipPlacement(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, draft: HostedClipDraft,
@@ -650,6 +670,18 @@ class HostedSession {
         return this.editAnimationSource(frame, apply, signal, client => client.planHostedStateGroup(frame, command));
     }
 
+    propertyTransitions(frame: HostedAnimationFrame, options: TransitionOwner, signal: AbortSignal) {
+        return this.withAcceptedFrame(frame, signal, async (client, ensure) => {
+            const list = await client.hostedPropertyTransitions(frame, options);
+            ensure();
+            return list;
+        });
+    }
+
+    propertyTransitionEdit(frame: HostedAnimationFrame, edit: TransitionEdit, apply: boolean, signal: AbortSignal) {
+        return this.editAnimationSource(frame, apply, signal, client => client.planHostedPropertyTransition(frame, edit));
+    }
+
     clipPlacement(frame: HostedAnimationFrame, draft: HostedClipDraft, apply: boolean, signal: AbortSignal) {
         return this.editAnimationSource(frame, apply, signal, client => client.planHostedClipPlacement(frame, draft));
     }
@@ -735,6 +767,28 @@ class HostedSession {
         if (action.type === 'edit') await this.stateGroup(current, action.command, true, signal);
         else if (action.type === 'preview') await this.animations.control(current, { action: 'seek', program: action.program.id, elapsed: 0 }, signal);
         else await this.revealSource(current, asRange(action.range));
+    }
+
+    private async promptPropertyTransitions(frame: HostedAnimationFrame): Promise<void> {
+        const current = () => {
+            const accepted = this.currentFrame;
+            if (accepted?.revision !== frame.revision) throw new Error('The application source changed. Open Property Transitions again.');
+            return { revision: accepted.revision, sequence: accepted.sequence };
+        };
+        current();
+        const owners = this.animations.state.propertyTransitionOwners;
+        if (!owners?.length) throw new Error('Open an App Preview with authored transition owners.');
+        const selected = owners.length === 1 ? owners[0] : (await choose('Property transition owner', owners.map(owner => ({
+            label: owner.label, description: owner.typeName, owner,
+        }))))?.owner;
+        if (!selected) return;
+        await chooseTransitionAction({
+            read: target_type => this.propertyTransitions(current(), { owner: selected.id, target_type }, AbortSignal.timeout(15_000)),
+            edit: async (command, target_type) => {
+                await this.propertyTransitionEdit(current(), { owner: selected.id, target_type, command }, true, AbortSignal.timeout(15_000));
+            },
+            reveal: range => this.revealSource(current(), asRange(range)),
+        });
     }
 
     async curve(frame: HostedAnimationFrame, query: HostedCurveQuery, signal: AbortSignal) {
@@ -869,6 +923,12 @@ class HostedSession {
         }
         if (message.type === 'stateActions') {
             try { await this.promptStateGroup(message.frame, message.program); }
+            catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
+            this.post({ type: 'animationReply', request: message.request });
+            return;
+        }
+        if (message.type === 'propertyTransitionActions') {
+            try { await this.promptPropertyTransitions(message.frame); }
             catch (error) { this.report(errorMessage(error), Boolean(this.currentFrame)); }
             this.post({ type: 'animationReply', request: message.request });
             return;

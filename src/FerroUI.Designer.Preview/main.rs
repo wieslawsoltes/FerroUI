@@ -154,6 +154,7 @@ fn respond(
                 DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY, DESIGN_ANIMATION_TRANSFORM_LISTS_QUERY, DESIGN_ANIMATION_VERSION,
                 DESIGN_STATE_ROUTES_QUERY, DESIGN_KEYFRAME_SELECTION_QUERY, DESIGN_CLIP_AUTHORING_QUERY,
                 DESIGN_STATE_AUTHORING_QUERY, DESIGN_KEYFRAME_SAMPLING_QUERY,
+                DESIGN_PROPERTY_TRANSITIONS_QUERY,
                 DESIGN_PALETTE_QUERY, DESIGN_PALETTE_VERSION,
                 DESIGN_SOURCE_SNAPSHOT_QUERY, DESIGN_SOURCE_SNAPSHOT_VERSION,
                 DESIGN_TEMPLATES_QUERY, DESIGN_TEMPLATES_VERSION,
@@ -177,6 +178,7 @@ fn respond(
                 DESIGN_ANIMATION_BRUSHES_QUERY,
                 DESIGN_STATE_ROUTES_QUERY,
                 DESIGN_STATE_AUTHORING_QUERY,
+                DESIGN_PROPERTY_TRANSITIONS_QUERY,
             ]
             .map(|key| format!("{key}={DESIGN_ANIMATION_VERSION}"))
             .join("&");
@@ -206,6 +208,8 @@ fn respond(
             .and_then(|draft| hosted.as_ref().ok_or("Start an app-hosted session")?.plan_state(draft)),
         "hostedStateGroup" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|draft| hosted.as_ref().ok_or("Start an app-hosted session")?.plan_state_group(draft)),
+        "hostedPropertyTransitions" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| hosted.as_mut().ok_or("Start an app-hosted session")?.property_transitions(request)),
         "hostedClipPlacement" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|draft| hosted.as_ref().ok_or("Start an app-hosted session")?.plan_clip_placement(draft)),
         "hostedClipEdit" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

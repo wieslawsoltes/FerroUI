@@ -1,13 +1,14 @@
 use ferroui_base::{
     animation::{animators::CornerRadiusAnimator, Animation, InterpolatingAnimator},
-    ferro_class, ferro_class_info, ferro_impl_classes,
+    ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties,
     input::InputElementImpl,
     instantiate,
     interactivity::InteractiveImpl,
     layout::LayoutableImpl,
     metadata::{from_markup_value, MarkupAssembly},
     platform::storage::file_io::StorageProviderHelpers,
-    CornerRadius, FerroObjectImpl, Ref, StyledElementImpl, TypeInfo, VisualImpl,
+    CornerRadius, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
+    StyledElementImpl, StyledProperty, TypeInfo, VisualImpl,
 };
 use ferroui_controls::{AppBuilder, Application, ControlImpl, TextBlock, TextBlockImpl, Window};
 use ferroui_designer_support::remote::RemoteDesignerEntryPoint;
@@ -174,8 +175,25 @@ ferro_class_info!(PreviewBadge {
     new: PreviewBadge::new,
     markup: { namespace: "TodoWorkbench.Design" },
 });
-ferro_impl_classes!(PreviewBadge: FerroObjectImpl, StyledElementImpl, VisualImpl, LayoutableImpl,
+ferro_impl_classes!(PreviewBadge: StyledElementImpl, VisualImpl, LayoutableImpl,
     InteractiveImpl, InputElementImpl, ControlImpl, TextBlockImpl);
+
+ferro_properties! {
+    impl PreviewBadge {
+        pub fn emphasis_property() -> StyledProperty<f64> {
+            FerroProperty::register::<PreviewBadge, _>("Emphasis", 1.0)
+        }
+    }
+}
+
+impl FerroObjectImpl for PreviewBadge {
+    fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+        Self::parent_on_property_changed(this, change);
+        if change.property() == Self::emphasis_property().as_property() {
+            this.set_font_size(24.0 * this.get_value(Self::emphasis_property()).clamp(0.5, 2.0));
+        }
+    }
+}
 
 impl PreviewBadge {
     fn new() -> Ref<Self> {

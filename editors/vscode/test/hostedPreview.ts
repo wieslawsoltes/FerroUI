@@ -12,6 +12,7 @@ import { verifyHostedRelativeCurves } from './hostedRelativeCurves';
 import { verifyHostedEffectCurves } from './hostedEffectCurves';
 import { verifyHostedEffectObjects } from './hostedEffectObjects';
 import { verifyHostedGradients } from './hostedGradients';
+import { verifyHostedPropertyTransitions } from './hostedPropertyTransitions';
 import { verifyHostedBoxShadows } from './hostedBoxShadows';
 import { verifyHostedRegisteredEffects } from './hostedRegisteredEffects';
 import { verifyHostedKeyframeGroups } from './hostedKeyframeGroups';
@@ -128,6 +129,7 @@ export async function verifyHostedPreview(preview: NativePreview, uri: string): 
         await verifyHostedBoxShadows(preview, update);
         await verifyHostedTransformList(preview, update);
         await verifyHostedGradients(preview, update);
+        await verifyHostedPropertyTransitions(preview, update);
         assert.equal(child.exitCode, null);
         console.log('App-hosted design rendered a custom control, native bindings and registered XAML/Rust fixtures, and fenced invalid updates and stale input');
     } catch (error) {

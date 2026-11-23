@@ -22,6 +22,7 @@ pub struct DesignAnimationCatalogMessage {
     pub keyframe_selection: Option<bool>,
     pub clip_authoring: Option<bool>,
     pub state_authoring: Option<bool>,
+    pub property_transition_owners: Option<Vec<DesignAnimationTarget>>,
 }
 
 ferro_remote_message_guid!(
@@ -35,6 +36,7 @@ bson_class!(DesignAnimationCatalogMessage as "DesignAnimationCatalogMessage" {
     "KeyframeSelection" => keyframe_selection: Option<bool>,
     "ClipAuthoring" => clip_authoring: Option<bool>,
     "StateAuthoring" => state_authoring: Option<bool>,
+    "PropertyTransitionOwners" => property_transition_owners: Option<Vec<DesignAnimationTarget>>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

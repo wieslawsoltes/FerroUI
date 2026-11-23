@@ -11,6 +11,7 @@ use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnim
 use crate::design_keyframe_selection::{DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, StartDesignSourceSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::design_palette_context::DesignPaletteContextMessage;
+use crate::design_property_transitions::{DesignPropertyTransitionsRequest, DesignPropertyTransitionsResult};
 use crate::design_template_catalog::DesignTemplateCatalogMessage;
 use crate::ferro_remote_message_guid_attribute::{FerroRemoteMessage, FerroRemoteMessageGuidAttribute};
 use crate::input_messages::{
@@ -81,6 +82,8 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<DesignAnimationAuthoringResult>(),
         ExportedType::of::<DesignKeyframeSelectionRequest>(),
         ExportedType::of::<DesignKeyframeSelectionResult>(),
+        ExportedType::of::<DesignPropertyTransitionsRequest>(),
+        ExportedType::of::<DesignPropertyTransitionsResult>(),
         ExportedType::of::<DesignAnimationCurveRequest>(),
         ExportedType::of::<DesignAnimationCurveResult>(),
         // TransportMessages
@@ -146,6 +149,8 @@ mod tests {
         ("DesignAnimationAuthoringResult", "51B25CB4-4324-4890-B1C0-5B81766D5673"),
         ("DesignKeyframeSelectionRequest", "98B491F9-0A74-443A-AA95-A07FCEF91C72"),
         ("DesignKeyframeSelectionResult", "EEE58C45-00F9-40D6-9369-DC72A6919308"),
+        ("DesignPropertyTransitionsRequest", "FD80E1E5-D4B7-46F1-93EE-77DB98D81153"),
+        ("DesignPropertyTransitionsResult", "2852370B-1720-4BEB-B629-EECC105E88BD"),
         ("DesignAnimationCurveRequest", "29312A91-E412-4881-A469-1B0F1739BC77"),
         ("DesignAnimationCurveResult", "2D4276FD-9106-4657-9EBA-530413ED4F11"),
     ];

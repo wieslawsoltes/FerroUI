@@ -32,6 +32,7 @@ mod design_animation_messages;
 mod design_keyframe_selection;
 mod design_messages;
 mod design_palette_context;
+mod design_property_transitions;
 mod design_template_catalog;
 mod error;
 mod event_stash;
@@ -83,6 +84,7 @@ pub mod designer {
     pub use crate::design_keyframe_selection::*;
     pub use crate::design_messages::*;
     pub use crate::design_palette_context::*;
+    pub use crate::design_property_transitions::*;
     pub use crate::design_template_catalog::*;
 }
 

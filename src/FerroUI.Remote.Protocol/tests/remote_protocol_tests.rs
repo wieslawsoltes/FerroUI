@@ -19,6 +19,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationClip, DesignAnimationClipBinding,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
+    DesignPropertyTransitionsRequest, DesignPropertyTransitionsResult, DesignTransitionProperty,
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse,
     DesignIncludedSource, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
     UpdateDesignMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
@@ -221,6 +222,9 @@ fn entities() -> Vec<Message> {
             keyframe_selection: Some(true),
             clip_authoring: Some(true),
             state_authoring: Some(true),
+            property_transition_owners: Some(vec![DesignAnimationTarget {
+                id: 12, label: "ReviewCard".into(), type_name: "Border".into(),
+            }]),
         }),
         Arc::new(DesignAnimationRequestMessage {
             revision: 40, request: 31, program: None, targets: None, elapsed: 1.25, restart: true,
@@ -257,6 +261,20 @@ fn entities() -> Vec<Message> {
         Arc::new(DesignKeyframeSelectionResult {
             revision: 40, request: 34, clipboard: Some("typed clipboard".into()),
             timeline: Some("typed timeline".into()), ..Default::default()
+        }),
+        Arc::new(DesignPropertyTransitionsRequest {
+            revision: 40, request: 35, owner: 12, target_type: Some("Border".into()),
+            command: Some(r#"{"action":"remove","transition":13}"#.into()),
+        }),
+        Arc::new(DesignPropertyTransitionsResult {
+            revision: 40, request: 35,
+            properties: vec![DesignTransitionProperty {
+                property: "Opacity".into(), label: "Opacity".into(), type_name: "DoubleTransition".into(),
+            }],
+            patch: Some(DesignAnimationSourcePatch {
+                start: 30, end: 31, expected: "1".into(), replacement: "2".into(),
+            }),
+            error: Some("Portable transition result".into()),
         }),
         Arc::new(DesignAnimationCurveResult {
             revision: 40, request: 33,

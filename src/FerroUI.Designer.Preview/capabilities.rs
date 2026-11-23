@@ -12,6 +12,7 @@ pub(crate) fn initialize() -> Value {
         "hostedPreviewRanges",
         "hostedClipAuthoring",
         "hostedStateAuthoring",
+        "hostedPropertyTransitions",
         "rsxLanguage",
         "stages",
         "stageKeyboard",

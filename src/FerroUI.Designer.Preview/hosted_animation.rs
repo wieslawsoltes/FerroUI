@@ -191,5 +191,11 @@ pub(crate) fn catalog(catalog: DesignAnimationCatalogMessage) -> Value {
             })
         })
         .collect::<Vec<_>>();
-    json!({"programs": programs, "targets": targets, "keyframeSelection": catalog.keyframe_selection.unwrap_or(false)})
+    let mut value = json!({"programs": programs, "targets": targets, "keyframeSelection": catalog.keyframe_selection.unwrap_or(false)});
+    if let Some(owners) = catalog.property_transition_owners {
+        value["propertyTransitionOwners"] = json!(owners.into_iter()
+            .map(|owner| json!({"id": owner.id, "label": owner.label, "typeName": owner.type_name}))
+            .collect::<Vec<_>>());
+    }
+    value
 }

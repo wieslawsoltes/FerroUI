@@ -66,6 +66,7 @@ export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | { 
     | { type: 'clipPlacement'; request: number; frame: HostedAnimationFrame; draft: HostedClipDraft }
     | { type: 'clipActions'; request: number; frame: HostedAnimationFrame; program?: number }
     | { type: 'stateActions'; request: number; frame: HostedAnimationFrame; program?: number }
+    | { type: 'propertyTransitionActions'; request: number; frame: HostedAnimationFrame }
     | { type: 'animationTargets' | 'animationSource'; frame: HostedAnimationFrame; program: number }
     | { type: 'animationIssues'; frame: HostedAnimationFrame }
     | { type: 'chooseKeyframe' | 'editStateRoute'; frame: HostedAnimationFrame; program: number }

@@ -17,9 +17,10 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationTrack,
 };
 use std::collections::BTreeMap;
+use std::rc::Rc;
 
 pub(super) struct HostedKeyframes {
-    document: Document,
+    document: Rc<Document>,
     programs: BTreeMap<i64, (AnimationProgram, ImportOptions)>,
 }
 
@@ -38,7 +39,7 @@ pub(super) struct HostedKeyframeCapabilities {
 
 impl HostedKeyframes {
     pub(super) fn mount(
-        document: Document,
+        document: Rc<Document>,
         programs: Vec<AnimationProgram>,
         native: &NativeProgramIndex,
         targets: &BTreeMap<i64, Ref<StyledElement>>,
@@ -236,7 +237,7 @@ impl HostedKeyframes {
     fn source_patch(&self, program: NodeId, source: &str) -> Result<Option<DesignAnimationSourcePatch>, String> {
         let edits = compose_animation_edit(&self.document, program, source)
             .map_err(|error| error.to_string())?;
-        let mut candidate = self.document.clone();
+        let mut candidate = self.document.as_ref().clone();
         candidate
             .apply("Edit application animation keys", edits)
             .map_err(|error| error.to_string())?;

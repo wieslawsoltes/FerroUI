@@ -2,6 +2,8 @@
 mod keyframe;
 #[path = "keyframe_selection.rs"]
 mod keyframe_selection;
+#[path = "property_transitions.rs"]
+mod property_transitions;
 
 use super::{send, Connection, Relay, FRAME_TIMEOUT};
 use crate::{hosted_animation, hosted_animation_restore::Presentation};
