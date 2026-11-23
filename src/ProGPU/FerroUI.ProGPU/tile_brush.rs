@@ -36,6 +36,14 @@ struct TilePaint {
     opacity: f32,
 }
 
+/// An opacity mask of a tile brush, waiting for the content of its group. Without a tile the
+/// brush paints nothing, so the mask keeps nothing.
+pub(super) struct TileMask {
+    paint: Option<TilePaint>,
+    bounds: Rect,
+    transform: Matrix,
+}
+
 /// The relative transform of a brush, on the box of the shape as a unit square.
 fn relative_transform(brush: &dyn IBrush, target: Rect) -> Option<Matrix> {
     let relative = brush.relative_transform()?;
@@ -112,6 +120,33 @@ impl ProGpuDrawingContext {
         let drawn = self.draw_tiles(&paint, bounds);
         self.pop_clip();
         drawn
+    }
+
+    /// Opens a group whose content the tile brush masks when it closes: the tile is composed over
+    /// the content with destination-in, which keeps the content where the tile has alpha.
+    pub(super) fn push_tile_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {
+        self.refuse_fragment();
+        let paint = self.tile_paint(mask, bounds);
+        let target = transform_bounds(bounds, &self.current.transform);
+        self.push_isolated_layer(target);
+        self.layers.push(LayerEntry::TileMask(Box::new(TileMask { paint, bounds, transform: self.current.transform })));
+    }
+
+    /// Composes the tile of a mask over the content of its group, which is still open.
+    pub(super) fn apply_tile_mask(&mut self, mask: TileMask) {
+        let saved = self.current;
+        self.current.transform = mask.transform;
+        // The clips of the state apply to the group when it is composed, once.
+        self.current.mask = NO_INDEX;
+        self.current.clip_rect = None;
+        self.changed();
+        self.push_scene_layer(Some(mask.bounds), 1.0, PROGPU_NATIVE_BLEND_DST_IN as u32);
+        if let Some(paint) = &mask.paint {
+            self.draw_tiles(paint, mask.bounds);
+        }
+        self.pop_scene_layer();
+        self.current = saved;
+        self.changed();
     }
 
     /// The pixels of the target per logical unit along the axes of the transform.

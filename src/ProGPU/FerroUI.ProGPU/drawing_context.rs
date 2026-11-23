@@ -187,6 +187,9 @@ enum ClipEntry {
 /// What a layer of the stack is, to pop it.
 enum LayerEntry {
     Layer,
+    /// A group that an image or visual brush masks when it closes: the tile is drawn over the
+    /// content and keeps it where it has alpha.
+    TileMask(Box<tile_brush::TileMask>),
 }
 
 /// The current state of the context (what the next draw's state is made of).
@@ -1005,10 +1008,30 @@ impl ProGpuDrawingContext {
             [rect.radii_top_left.x as f32, rect.radii_top_right.x as f32, rect.radii_bottom_right.x as f32, rect.radii_bottom_left.x as f32],
             [rect.radii_top_left.y as f32, rect.radii_top_right.y as f32, rect.radii_bottom_right.y as f32, rect.radii_bottom_left.y as f32],
         );
-        let Some(mask) = self.blurred_layer_mask(Some(shape)) else {
-            notes::note_once("inset-shadow-mask", "an inset shadow under a clip of a geometry or under many nested clips is not drawn by the ProGPU backend");
+        if let Some(mask) = self.blurred_layer_mask(Some(shape)) {
+            self.draw_inset_shadow(rect, shadow, sigma, mask);
             return;
-        };
+        }
+        // Under a clip with a texture: the shadow is drawn in a layer that clip masks.
+        if !self.analytic.is_empty() {
+            notes::note_once("inset-shadow-mask", "an inset shadow under more nested rounded clips than one chain holds is not drawn by the ProGPU backend");
+            return;
+        }
+        let saved = self.current;
+        self.push_masked_layer(saved.mask);
+        self.current.mask = NO_INDEX;
+        self.current.clip_rect = None;
+        self.changed();
+        if let Some(mask) = self.blurred_layer_mask(Some(shape)) {
+            self.draw_inset_shadow(rect, shadow, sigma, mask);
+        }
+        self.current = saved;
+        self.changed();
+        self.pop_clip();
+    }
+
+    /// The frame around the shape, blurred and seen through `mask`.
+    fn draw_inset_shadow(&mut self, rect: &RoundedRect, shadow: &ferroui_base::media::BoxShadow, sigma: f32, mask: u32) {
         let reach = 3.0 * f64::from(sigma) + shadow.offset_x.abs().max(shadow.offset_y.abs()) + shadow.spread.abs() + 1.0;
         let hole = Self::spread_rect(rect, -shadow.spread, shadow.offset_x, shadow.offset_y);
         let frame = Self::frame_path(rect.rect.inflate(reach), &hole);
@@ -1153,8 +1176,12 @@ impl ProGpuDrawingContext {
             self.push_scene_layer(Some(bounds), alpha.clamp(0.0, 1.0), PROGPU_NATIVE_BLEND_SRC_OVER as u32);
             return;
         }
+        if is_tile_brush(mask) {
+            self.push_tile_mask(mask, bounds);
+            return;
+        }
         let Some((brush, stops)) = Self::gradient_record(mask, bounds) else {
-            notes::note_once("opacity-mask", "opacity masks of brushes other than solid colours and gradients are not applied by the ProGPU backend yet");
+            notes::note_once("opacity-mask", "an opacity mask of a brush of an unknown kind is not applied by the ProGPU backend");
             self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
             return;
         };
@@ -1409,13 +1436,60 @@ impl ProGpuDrawingContext {
     }
 
     fn pop_scene_layer(&mut self) {
-        if self.layers.pop().is_some() {
+        if let Some(entry) = self.layers.pop() {
+            if let LayerEntry::TileMask(mask) = entry {
+                self.apply_tile_mask(*mask);
+            }
             if let Some(fragment) = &mut self.fragment {
                 fragment.pop_layer();
             }
             let result = self.scene().pop_layer();
             self.record(result);
         }
+    }
+
+    /// A layer that exists whatever its opacity and blend, for what is composed into it.
+    fn push_isolated_layer(&mut self, target: Rect) {
+        self.refuse_fragment();
+        let layer = progpu_native_scene_layer {
+            struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
+            flags: (PROGPU_NATIVE_SCENE_LAYER_BOUNDS | PROGPU_NATIVE_SCENE_LAYER_FORCE_ISOLATION) as u32,
+            bounds: image_rect(target),
+            opacity: 1.0,
+            blend_mode: PROGPU_NATIVE_BLEND_SRC_OVER as u32,
+            mask_resource_index: NO_INDEX,
+            effect_resource_index: NO_INDEX,
+            content_revision: 0,
+            composite_revision: 0,
+            reserved0: 0,
+            reserved1: 0,
+        };
+        self.needs_whole_replay = true;
+        let result = self.scene().push_layer(&layer);
+        self.record(result);
+    }
+
+    /// What the mask of the state covers replaced by `color`, on the GPU: the coverage is taken
+    /// out of what is there and the colour times the coverage is added, so an antialiased edge
+    /// is the mix of the two.
+    fn clear_under_mask(&mut self, color: progpu_native_color) {
+        // Past any target; the scissor of the target and the state clip it.
+        const REACH: f64 = 32768.0;
+        let area = self.current.clip_rect.unwrap_or(Rect::new(-REACH, -REACH, 2.0 * REACH, 2.0 * REACH));
+        let saved = self.current.transform;
+        self.current.transform = Matrix::IDENTITY;
+        self.changed();
+        let opaque = progpu_native_color { r: 0.0, g: 0.0, b: 0.0, a: 1.0 };
+        for (blend, fill) in [(PROGPU_NATIVE_BLEND_DST_OUT, opaque), (PROGPU_NATIVE_BLEND_PLUS, color)] {
+            self.push_device_layer(self.current.clip_rect, 1.0, blend as u32);
+            let result = self.scene().add_solid_brush(fill, 1.0);
+            if let Some(index) = self.record(result) {
+                self.analytic(Self::primitive(PROGPU_NATIVE_PRIMITIVE_RECTANGLE, area, 0.0, 0.0), index, area);
+            }
+            self.pop_scene_layer();
+        }
+        self.current.transform = saved;
+        self.changed();
     }
 }
 
@@ -1438,8 +1512,7 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     fn clear(&mut self, color: Color) {
         self.refuse_fragment();
         if self.current.mask != NO_INDEX {
-            // The engine clears through a clip rectangle; under a coverage mask it needs a layer.
-            notes::note_once("clear-under-mask", "a clear under a rounded or geometry clip is not drawn by the ProGPU backend yet");
+            self.clear_under_mask(native_color(color, 1.0));
             return;
         }
         let color = native_color(color, 1.0);

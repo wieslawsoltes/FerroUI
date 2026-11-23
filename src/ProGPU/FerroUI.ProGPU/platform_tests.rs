@@ -375,6 +375,163 @@ fn a_geometry_drawn_twice_in_a_frame_keeps_each_brush() {
     target.dispose();
 }
 
+/// A brush that repeats a tile of two by two pixels: red and blue on the first row, blue and red
+/// on the second.
+fn checker_brush(mode: ferroui_base::media::TileMode, opacity: f64) -> ferroui_base::media::immutable::ImmutableImageBrush {
+    use ferroui_base::media::imaging::Bitmap;
+    use ferroui_base::media::{AlignmentX, AlignmentY, Stretch};
+    use ferroui_base::{RelativePoint, RelativeRect, RelativeUnit};
+    let pixels = [255, 0, 0, 255, 0, 0, 255, 255, 0, 0, 255, 255, 255, 0, 0, 255];
+    let bitmap = crate::ProGpuBitmap::from_pixels(
+        PixelFormat::RGBA8888,
+        AlphaFormat::Premul,
+        &pixels,
+        PixelSize::new(2, 2),
+        Vector::new(96.0, 96.0),
+        8,
+    )
+    .expect("the pixels");
+    let source = Rc::new(Bitmap::from_impl(Arc::new(bitmap)));
+    let tile = RelativeRect::from_rect(Rect::new(0.0, 0.0, 2.0, 2.0), RelativeUnit::Absolute);
+    ferroui_base::media::immutable::ImmutableImageBrush::new(
+        Some(source),
+        AlignmentX::Left,
+        AlignmentY::Top,
+        Some(tile),
+        opacity,
+        None,
+        RelativePoint::default(),
+        Some(tile),
+        Stretch::None,
+        mode,
+        None,
+    )
+}
+
+#[test]
+fn an_image_brush_repeats_its_tile_through_the_shape() {
+    use ferroui_base::media::TileMode;
+    let Some(context) = context() else { return };
+    let surface = MemorySurface::new(16, 16);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    let brush = checker_brush(TileMode::Tile, 1.0);
+    frame.draw_rectangle(Some(&brush), None, RoundedRect::from_rect(Rect::new(4.0, 4.0, 8.0, 8.0)), &BoxShadows::default());
+    frame.dispose();
+    assert_eq!(RED, surface.rgba(4, 4), "the tile at an even place");
+    assert_eq!(BLUE, surface.rgba(5, 4));
+    assert_eq!(BLUE, surface.rgba(4, 5));
+    assert_eq!(RED, surface.rgba(5, 5));
+    assert_eq!(RED, surface.rgba(10, 10), "and further on");
+    assert_eq!(WHITE, surface.rgba(2, 2), "outside the shape");
+    assert_eq!(WHITE, surface.rgba(13, 13));
+    target.dispose();
+}
+
+#[test]
+fn a_flipped_tile_mirrors_and_no_tile_mode_paints_one_tile() {
+    use ferroui_base::media::TileMode;
+    let Some(context) = context() else { return };
+    let surface = MemorySurface::new(16, 16);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    let flipped = checker_brush(TileMode::FlipX, 1.0);
+    frame.draw_rectangle(Some(&flipped), None, RoundedRect::from_rect(Rect::new(0.0, 0.0, 8.0, 2.0)), &BoxShadows::default());
+    let single = checker_brush(TileMode::None, 1.0);
+    frame.draw_rectangle(Some(&single), None, RoundedRect::from_rect(Rect::new(0.0, 8.0, 8.0, 8.0)), &BoxShadows::default());
+    frame.dispose();
+    // Red, blue, then mirrored: blue, red.
+    assert_eq!(RED, surface.rgba(0, 0));
+    assert_eq!(BLUE, surface.rgba(1, 0));
+    assert_eq!(BLUE, surface.rgba(2, 0));
+    assert_eq!(RED, surface.rgba(3, 0));
+    assert_eq!(WHITE, surface.rgba(6, 12), "no tile beside the one tile");
+    target.dispose();
+}
+
+#[test]
+fn an_image_brush_masks_the_opacity_of_what_is_drawn() {
+    use ferroui_base::media::TileMode;
+    let Some(context) = context() else { return };
+    // The tile: opaque on its left column, transparent on its right one.
+    let pixels = [255, 255, 255, 255, 0, 0, 0, 0, 255, 255, 255, 255, 0, 0, 0, 0];
+    let bitmap = crate::ProGpuBitmap::from_pixels(
+        PixelFormat::RGBA8888,
+        AlphaFormat::Premul,
+        &pixels,
+        PixelSize::new(2, 2),
+        Vector::new(96.0, 96.0),
+        8,
+    )
+    .expect("the pixels");
+    let tile = ferroui_base::RelativeRect::from_rect(Rect::new(0.0, 0.0, 2.0, 2.0), ferroui_base::RelativeUnit::Absolute);
+    let mask = ferroui_base::media::immutable::ImmutableImageBrush::new(
+        Some(Rc::new(ferroui_base::media::imaging::Bitmap::from_impl(Arc::new(bitmap)))),
+        ferroui_base::media::AlignmentX::Left,
+        ferroui_base::media::AlignmentY::Top,
+        Some(tile),
+        1.0,
+        None,
+        ferroui_base::RelativePoint::default(),
+        Some(tile),
+        ferroui_base::media::Stretch::None,
+        TileMode::Tile,
+        None,
+    );
+    let surface = MemorySurface::new(8, 8);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    frame.push_opacity_mask(&mask, Rect::new(0.0, 0.0, 8.0, 8.0));
+    fill(&mut *frame, &solid(0, 0, 255), Rect::new(0.0, 0.0, 8.0, 8.0));
+    frame.pop_opacity_mask();
+    frame.dispose();
+    assert_eq!(BLUE, surface.rgba(2, 3), "where the tile is opaque");
+    assert_eq!(WHITE, surface.rgba(3, 3), "where the tile is transparent");
+    target.dispose();
+}
+
+#[test]
+fn a_clear_under_a_geometry_clip_replaces_what_the_clip_covers() {
+    let Some(context) = context() else { return };
+    let interface = crate::ProGpuPlatformRenderInterface::new();
+    let clip = interface.create_rectangle_geometry(Rect::new(4.0, 4.0, 8.0, 8.0));
+    let surface = MemorySurface::new(16, 16);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    fill(&mut *frame, &solid(255, 0, 0), Rect::new(0.0, 0.0, 16.0, 16.0));
+    frame.push_geometry_clip(&*clip);
+    frame.clear(Color::from_rgb(0, 0, 255));
+    frame.pop_geometry_clip();
+    frame.dispose();
+    assert_eq!(BLUE, surface.rgba(8, 8), "inside the clip");
+    assert_eq!(RED, surface.rgba(2, 2), "outside it");
+    target.dispose();
+}
+
+#[test]
+fn an_inset_shadow_under_a_geometry_clip_is_drawn_inside_the_clip() {
+    use ferroui_base::media::{BoxShadow, BoxShadows};
+    let Some(context) = context() else { return };
+    let interface = crate::ProGpuPlatformRenderInterface::new();
+    let clip = interface.create_rectangle_geometry(Rect::new(0.0, 0.0, 16.0, 32.0));
+    let surface = MemorySurface::new(32, 32);
+    let target = context.create_render_target(&[surface.clone() as Arc<dyn IPlatformRenderSurface>]);
+    let (mut frame, _) = target.create_drawing_context(&scene_info(surface.size()));
+    frame.clear(Color::from_rgb(255, 255, 255));
+    let shadow = BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 0.0, spread: 4.0, color: Color::from_rgb(0, 0, 255), is_inset: true };
+    frame.push_geometry_clip(&*clip);
+    frame.draw_rectangle(None, None, RoundedRect::from_rect(Rect::new(2.0, 2.0, 28.0, 28.0)), &BoxShadows::new(shadow));
+    frame.pop_geometry_clip();
+    frame.dispose();
+    assert_eq!(BLUE, surface.rgba(3, 16), "the inset edge inside the clip");
+    assert_eq!(WHITE, surface.rgba(28, 16), "the inset edge outside the clip");
+    target.dispose();
+}
+
 /// A bitmap whose pixels did not come back from the GPU refuses to be read or saved: it does not
 /// pass for an empty image.
 #[test]
