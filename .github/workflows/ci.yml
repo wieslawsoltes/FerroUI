@@ -614,6 +614,8 @@ jobs:
         if: ${{ steps.skia.outputs.raster == 'true' }}
         timeout-minutes: 60
         run: cargo test --locked -p ferroui-desktop --lib
+      - name: The desktop crate with Vello and without Skia (#306)
+        run: cargo check --locked -p ferroui-desktop --no-default-features --features vello --example hello_window
       - name: hello_window for two seconds
         if: ${{ steps.skia.outputs.raster == 'true' }}
         timeout-minutes: 30
@@ -1025,6 +1027,8 @@ jobs:
       - name: The desktop entry point selects X11 on Linux
         if: ${{ !cancelled() }}
         run: cargo test --locked -p ferroui-desktop --lib
+      - name: The desktop crate with Vello and without Skia (#306)
+        run: cargo check --locked -p ferroui-desktop --no-default-features --features vello --example hello_window
       - name: Build the window example
         if: ${{ !cancelled() }}
         run: cargo build --locked -p ferroui-x11 --features example --example x11_window

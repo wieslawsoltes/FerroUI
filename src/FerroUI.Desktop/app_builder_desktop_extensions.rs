@@ -1,5 +1,10 @@
-#[cfg(not(any(feature = "skia", all(feature = "quartz", target_os = "macos"), all(feature = "direct2d", windows))))]
-compile_error!("Select a desktop rendering backend: skia, quartz on macOS, or direct2d on Windows");
+#[cfg(not(any(
+    feature = "skia",
+    feature = "vello",
+    all(feature = "quartz", target_os = "macos"),
+    all(feature = "direct2d", windows)
+)))]
+compile_error!("Select a desktop rendering backend: skia, vello, quartz on macOS, or direct2d on Windows");
 
 #[cfg(all(windows, feature = "direct2d", feature = "skia"))]
 compile_error!("Use --no-default-features --features direct2d to select the Windows native backend without bundled Skia/ANGLE");
@@ -9,7 +14,8 @@ use ferroui_controls::AppBuilder;
 /// Selects the platform subsystems of a desktop application.
 pub trait AppBuilderDesktopExtensions {
     /// Configures the application for the operating system it runs on:
-    /// The native windowing backend with Skia and HarfBuzz by default.
+    /// The native windowing backend with Skia and HarfBuzz by default. With the feature
+    /// `vello` and without `skia`, the Vello backend and HarfBuzz.
     /// The experimental `quartz` feature selects Core Graphics and Core Text
     /// on macOS 13+ with Software surfaces. `quartz-metal` uses direct Metal GPU
     /// rendering and requires Metal window surfaces.
@@ -23,7 +29,11 @@ pub trait AppBuilderDesktopExtensions {
 impl AppBuilderDesktopExtensions for AppBuilder {
     fn use_platform_detect(&self) -> AppBuilder {
         // The default backend retains its HarfBuzz shaper. Quartz supplies Core Text.
-        #[cfg(all(feature = "skia", not(all(feature = "quartz", target_os = "macos")), not(all(feature = "direct2d", windows))))]
+        #[cfg(all(
+            any(feature = "skia", feature = "vello"),
+            not(all(feature = "quartz", target_os = "macos")),
+            not(all(feature = "direct2d", windows))
+        ))]
         load_harf_buzz(self);
 
         #[cfg(target_os = "macos")]
@@ -36,6 +46,8 @@ impl AppBuilderDesktopExtensions for AppBuilder {
             }
             #[cfg(all(feature = "skia", not(feature = "quartz")))]
             load_skia(self);
+            #[cfg(all(feature = "vello", not(feature = "skia"), not(feature = "quartz")))]
+            load_vello(self);
         }
 
         #[cfg(windows)]
@@ -48,6 +60,8 @@ impl AppBuilderDesktopExtensions for AppBuilder {
             }
             #[cfg(feature = "skia")]
             load_skia(self);
+            #[cfg(all(feature = "vello", not(feature = "skia"), not(feature = "direct2d")))]
+            load_vello(self);
         }
 
         #[cfg(target_os = "linux")]
@@ -55,6 +69,8 @@ impl AppBuilderDesktopExtensions for AppBuilder {
             load_x11(self);
             #[cfg(feature = "skia")]
             load_skia(self);
+            #[cfg(all(feature = "vello", not(feature = "skia")))]
+            load_vello(self);
         }
 
         #[cfg(not(any(target_os = "macos", windows, target_os = "linux")))]
@@ -95,7 +111,13 @@ fn load_skia(builder: &AppBuilder) {
     builder.use_skia();
 }
 
-#[cfg(feature = "skia")]
+#[cfg(all(feature = "vello", not(feature = "skia"), any(target_os = "macos", windows, target_os = "linux")))]
+fn load_vello(builder: &AppBuilder) {
+    use ferroui_vello::VelloApplicationExtensions;
+    builder.use_vello();
+}
+
+#[cfg(any(feature = "skia", feature = "vello"))]
 fn load_harf_buzz(builder: &AppBuilder) {
     use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
     builder.use_harfbuzz();
@@ -174,5 +196,22 @@ mod direct2d_tests {
         assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("DirectWrite"));
         assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Direct2D"));
         assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("Win32"));
+    }
+}
+
+#[cfg(all(test, target_os = "macos", feature = "vello", not(feature = "skia"), not(feature = "quartz")))]
+mod vello_tests {
+    // Not from upstream (#306).
+    use super::*;
+    use ferroui_controls::Application;
+
+    #[test]
+    fn platform_detect_selects_vello_without_skia() {
+        let builder = AppBuilder::configure::<Application>().use_platform_detect();
+
+        assert_eq!(builder.text_shaping_subsystem_name().as_deref(), Some("HarfBuzz"));
+        assert_eq!(builder.rendering_subsystem_name().as_deref(), Some("Vello"));
+        assert_eq!(builder.windowing_subsystem_name().as_deref(), Some("FerroNative"));
+        assert!(builder.instance().is_none());
     }
 }

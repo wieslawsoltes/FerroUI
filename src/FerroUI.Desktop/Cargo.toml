@@ -23,6 +23,12 @@ direct2d = ["dep:ferroui-direct2d", "ferroui-win32/native-d3d11"]
 # Custom effects whose programs are compiled at run time (naga and the system's D3DCompiler).
 direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
 # Experimental macOS 13+ system text and drawing backend.
+# The Vello backend with HarfBuzz and without Skia: select it with
+# `--no-default-features --features vello` (its CPU mode), `vello-hybrid` or `vello-gpu` (#306). Beside
+# `skia`, Skia stays the backend of `use_platform_detect`, and an application can still call `use_vello`.
+vello = ["dep:ferroui-vello", "dep:ferroui-harfbuzz"]
+vello-hybrid = ["vello", "ferroui-vello/hybrid"]
+vello-gpu = ["vello", "ferroui-vello/gpu"]
 quartz = ["dep:ferroui-quartz"]
 quartz-metal = ["quartz", "ferroui-quartz/metal"]
 quartz-runtime-shaders = ["quartz-metal", "ferroui-quartz/runtime-shaders"]
@@ -32,6 +38,7 @@ ferroui-base.workspace = true
 ferroui-controls.workspace = true
 ferroui-skia = { workspace = true, optional = true }
 ferroui-harfbuzz = { workspace = true, optional = true }
+ferroui-vello = { workspace = true, optional = true }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-native.workspace = true

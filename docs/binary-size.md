@@ -2012,6 +2012,10 @@ Not measured or not established:
   symbolised backtraces from the field (on Windows keep the PDB). The mobile packages take the
   profile as an option: `scripts/android/apk.sh --profile dist` and `scripts/ios/bundle.sh
   --profile dist`.
+- To leave Skia out, use the Vello backend: depend on `ferroui-desktop` with
+  `default-features = false, features = ["vello"]` (its CPU mode; `vello-hybrid` and `vello-gpu`
+  add the GPU modes), and take the rest from `ferroui` with `default-features = false`, since its
+  `desktop` feature means Skia. `use_platform_detect()` then selects Vello and HarfBuzz (#306).
 - Depend only on the themes the application uses. A theme declared in a document, or registered in
   `register_types()`, is linked; a theme that is not named is not.
 - Keep theme trimming on (the default, section 4.11), leave the developer tools and the run-time
