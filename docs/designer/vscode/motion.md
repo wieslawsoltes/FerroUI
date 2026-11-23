@@ -113,6 +113,10 @@ Switch groups to edit another part of the same value. Use the **Edit keyframe va
 
 The XAML codec can regenerate the edited animation block when applying the draft. Undo restores its original formatting.
 
+![The docked VS Code Timeline shows the brush geometry, edited key at 1.25 seconds, and accepted native card](../images/vscode-timeline-keyframe-fields.png)
+
+![App Preview displays an authored gradient stop with offset and color component fields above the application frame](../images/vscode-app-preview-keyframe-fields.png)
+
 [Draft and apply a batch with MCP](reference.md#edit-one-keyframe-component-with-mcp)
 
 ### Animate a render transform
