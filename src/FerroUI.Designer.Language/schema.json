@@ -24128,6 +24128,16 @@
         ],
         "attached": false
       },
+      "CanUserSortColumns": {
+        "name": "CanUserSortColumns",
+        "type_name": "bool",
+        "documentation": "TableView.CanUserSortColumns: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "DisplayMemberBinding": {
         "name": "DisplayMemberBinding",
         "type_name": "Option<AssignedBinding>",
@@ -24241,6 +24251,28 @@
         "type_name": "Option<bool>",
         "documentation": "TableViewColumn.CanUserResize: Option<bool>",
         "values": [],
+        "attached": false
+      },
+      "CanSort": {
+        "name": "CanSort",
+        "type_name": "bool",
+        "documentation": "TableViewColumn.CanSort: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
+      "SortCycle": {
+        "name": "SortCycle",
+        "type_name": "TableViewSortCycle",
+        "documentation": "TableViewColumn.SortCycle: TableViewSortCycle",
+        "values": [
+          "AscendingDescending",
+          "AscendingDescendingNone",
+          "DescendingAscending",
+          "DescendingAscendingNone"
+        ],
         "attached": false
       },
       "HorizontalContentAlignment": {
