@@ -1181,7 +1181,8 @@ impl Scene3DPasses {
             .get_or_insert_with(|| {
                 Executor::new(gpu.device())
                     .map_err(|error| {
-                        notes::note_once("scene3d-executor", &format!("3D scenes are not drawn on this device: {error}"))
+                        let message = format!("3D scenes are not drawn on this device: {error}");
+                        notes::note_once("scene3d-executor", &message);
                     })
                     .ok()
             })
@@ -1195,7 +1196,8 @@ impl Scene3DPasses {
         }
 
         let place = (origin, size);
-        let best = (0..outputs.len()).min_by_key(|&index| (outputs[index].reuse(scene, place), outputs[index].last_used));
+        let rank = |output: &KeptOutput| (output.reuse(scene, place), output.last_used);
+        let best = (0..outputs.len()).min_by_key(|&index| rank(&outputs[index]));
         let index = match best {
             Some(index) if outputs.len() >= CAPACITY || outputs[index].reuse(scene, place) != Reuse::InUse => index,
             _ => {
