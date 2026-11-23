@@ -6,11 +6,10 @@
 //! size of a table are bounded.
 
 use crate::markdown_text_block::MarkdownImageResolver;
-use ferroui_base::layout::Thickness;
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
 use ferroui_base::media::{Color, FontFamily, FontWeight, IBrush, TextDecorations, TextWrapping};
 use ferroui_base::utilities::HandlerList;
-use ferroui_base::Ref;
+use ferroui_base::{Ref, Thickness};
 use ferroui_controls::documents::{
     Block, Bold, Hyperlink, HyperlinkClickEventArgs, InlineCollection, InlineUIContainer, Italic, LineBreak,
     Paragraph, Run, Span,
