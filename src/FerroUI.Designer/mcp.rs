@@ -47,6 +47,8 @@ pub use item_templates::{rust_template_declaration_plan, rust_template_navigatio
 #[path = "mcp_property_trace.rs"]
 mod property_trace;
 pub use property_trace::property_trace_report;
+#[path = "mcp_property_transitions.rs"]
+mod property_transitions;
 #[cfg(test)]
 #[path = "mcp_components_tests.rs"]
 mod components_tests;
@@ -323,6 +325,7 @@ impl UiToolProvider for DesignerMcp {
         ];
         tools.extend(authoring::tools());
         tools.extend(behaviors::tools());
+        tools.extend(property_transitions::tools());
         tools.extend(timeline_markers::tools());
         tools.extend(binding::tools());
         tools.push(brush::tool());
@@ -359,6 +362,7 @@ impl UiToolProvider for DesignerMcp {
             .ok_or("Unknown designer tool")?;
         if authoring::handles(name)
             || behaviors::handles(name)
+            || property_transitions::handles(name)
             || timeline_markers::handles(name)
             || binding::handles(name)
             || name == brush::NAME
@@ -654,6 +658,9 @@ impl UiToolProvider for DesignerMcp {
         }
         if behaviors::handles(name) {
             return behaviors::call(&mut session, name, args, permissions);
+        }
+        if property_transitions::handles(name) {
+            return property_transitions::call(&mut session, name, args);
         }
         if timeline_markers::handles(name) {
             return timeline_markers::call(&mut session, name, args);

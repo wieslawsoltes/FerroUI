@@ -394,6 +394,14 @@ Stage checks include `accessibility.tree`, `accessibility.tab_order`, and `acces
 
 In Designer Studio, `designer_preview_checks` reads the current canvas. `designer_preview_stage_checks` takes the current stage model. Studio reports `source` as a byte span in the authored document. [Preview Checks in VS Code](authoring.md#diagnose-a-design-time-issue)
 
+### Edit property transitions with MCP
+
+From the current XAML canvas, read `designer_property_transitions` through `designer_studio_query` in VS Code. Pass the design `session` and `arguments: {"owner": 1}` using the selected control's node ID. Studio calls `designer_property_transitions` directly. The response contains the transition `id`, authored ranges and values, and `editableTiming` fields for each row.
+
+Call `designer_property_transition_edit` with `action: "timing"`, the same `owner`, the chosen `transition` ID, and a `timing` object. A single call can pass `{"duration": 0.55, "delay": 0.1, "easing": {"kind": "Named", "value": "CubicEaseOut"}}`. Omitted fields keep their authored values. Studio also takes the current `expected_revision`. In VS Code, pass the fields as `arguments` to `designer_studio_edit`, with the design `session` and `expected_revision` from the current outline at the outer level. Use one Undo to restore all fields from that call.
+
+[Property transition workflow](motion.md#edit-property-transitions)
+
 ### Edit and preview behaviors with MCP
 
 1. Open a designer for an XAML view. Use `designer_outline` to find the control and `designer_studio_query` with `tool: "designer_behaviors"` and `arguments: { owner }`. The report includes attached triggers, `actionRows` in source order, UTF-16 ranges, editing capabilities, and the active preview ID.

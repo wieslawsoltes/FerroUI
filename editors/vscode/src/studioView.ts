@@ -7,6 +7,7 @@ import { contentSections } from './studioContent';
 import { focusItems } from './studioFocus';
 import { chooseGridTrack, gridItems } from './studioGrid';
 import { layerItems } from './studioLayers';
+import { choosePropertyTransition, propertyTransitionItems } from './studioPropertyTransitions';
 import { stateItems } from './studioStates';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 import { timelineItems } from './studioTimeline';
@@ -31,6 +32,13 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
                     const context = this.context();
                     if (!context) throw new Error('Open a FerroUI design before editing its Grid tracks.');
                     await chooseGridTrack(context);
+                } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
+            }),
+            vscode.commands.registerCommand('ferroui.studio.propertyTransitions', async () => {
+                try {
+                    const context = this.context();
+                    if (!context) throw new Error('Open a FerroUI XAML design and select a control.');
+                    await choosePropertyTransition(context);
                 } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
             }),
             vscode.commands.registerCommand(runId, async (item: StudioItem) => {
@@ -78,6 +86,8 @@ export class StudioView implements vscode.TreeDataProvider<StudioItem>, vscode.D
             { id: 'focus', label: 'Focus and Labels', icon: 'list-ordered', children: () => focusItems(context) },
             { id: 'timeline', label: 'Timeline', icon: 'history', children: () => timelineItems(context) },
             { id: 'states', label: 'States', icon: 'symbol-enum', children: () => stateItems(context, this.previewTransition) },
+            ...(context.writable ? [{ id: 'property-transitions', label: 'Property Transitions', icon: 'watch',
+                children: () => propertyTransitionItems(context) }] : []),
             ...(context.panel.supportsBehaviorAuthoring
                 ? [{ id: 'behaviors', label: 'Behaviors', icon: 'zap', run: async () => {
                     context.ensure();

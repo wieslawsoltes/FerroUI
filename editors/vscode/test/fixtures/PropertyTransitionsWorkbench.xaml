@@ -1,0 +1,23 @@
+<Border xmlns="https://github.com/ferroui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        Name="AccountCard" Background="#F4F8F6" Padding="26">
+  <Border.Resources>
+    <CubicEaseOut x:Key="CardEasing"/>
+  </Border.Resources>
+  <Border.Transitions>
+    <Transitions>
+      <!-- Preserve the separate timing for each property. -->
+      <DoubleTransition Property="Opacity" Duration="0:0:0.3" Easing="CubicEaseOut"/>
+      <BrushTransition Property="Background" Duration="0:0:0.45" Easing="{StaticResource CardEasing}"/>
+    </Transitions>
+  </Border.Transitions>
+  <Border.Styles>
+    <Style Selector="Border#AccountCard:pointerover">
+      <Setter Property="Opacity" Value="0.6"/>
+    </Style>
+  </Border.Styles>
+  <StackPanel Spacing="6">
+    <TextBlock Text="Account activity" Foreground="#172E26" FontSize="24" FontWeight="SemiBold"/>
+    <TextBlock Text="Latest renewals and customer requests" Foreground="#51675D"/>
+  </StackPanel>
+</Border>

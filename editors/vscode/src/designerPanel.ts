@@ -651,7 +651,7 @@ export class DesignerPanel implements vscode.Disposable {
             const { name } = tool as { name: string };
             if (name === 'designer_rsx_styles') return this.language === 'rust' && this.supportsRustStyles;
             if (name === 'designer_rsx_commands') return this.language === 'rust';
-            return this.language === 'xaml' || name !== 'designer_behaviors';
+            return this.language === 'xaml' || (name !== 'designer_behaviors' && name !== 'designer_property_transitions');
         });
         return { tools: queries, presentations: availablePresentations ?? [], edits };
     }

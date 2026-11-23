@@ -161,6 +161,9 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
     if query.name == "designer_behaviors" && stage.authored_rsx.is_some() {
         return Err("Behavior collections use authored XAML".into());
     }
+    if query.name == "designer_property_transitions" && stage.authored_rsx.is_some() {
+        return Err("Property transition timing uses an authored XAML collection".into());
+    }
     if query.name == RSX_STYLES {
         stage.studio.validate(&query.name, &query.arguments)?;
         let rust = stage.authored_rsx.as_ref().ok_or("Open an authored RSX view")?;
@@ -497,6 +500,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_behavior" => matches!(action, Some(
             "upsert" | "remove" | "source" | "set_trigger" | "append_action" | "set_action" | "move_action" | "remove_action"
         )),
+        "designer_property_transition_edit" => action == Some("timing"),
         "designer_design_data_edit" => {
             matches!(action, Some("set_value" | "set_object" | "sample_items"))
         }

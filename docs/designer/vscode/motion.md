@@ -5,6 +5,19 @@ description: "Edit animation tracks, test native state transitions, compare desi
 
 Open the source with **FerroUI: Open Designer** first. The animation and stage tools render FerroUI controls with the native layout and animation engines.
 
+## Edit property transitions
+
+A transition animates a property when its effective value changes. Use the [property transitions workbench](../../../editors/vscode/test/fixtures/PropertyTransitionsWorkbench.xaml) to try the Opacity and Background transitions on the account card.
+
+1. Select the card in the XAML designer. In VS Code, expand **Property Transitions** in **Studio**, or run **FerroUI: Edit Property Transitions**. In Designer Studio, use the clock icon beside **Definition**.
+2. Choose a property and edit **Duration**, **Start delay**, or **Easing**. Enter times in seconds. Easing accepts a native name such as `CubicEaseOut`, four Bézier coordinates, or `Spring(mass,stiffness,damping,velocity)`. Studio applies the edited fields together when you choose the check icon. VS Code applies each confirmed field in one Undo step.
+3. Choose **Reveal transition in source** to open its declaration. The editor exposes literal timing fields. Resource-backed easing and object values remain available in source.
+4. In Studio, switch the artboard to **Interact** and move the pointer onto or off the account card to trigger its opacity change. In source, the example changes Opacity through the `:pointerover` selector.
+
+![The VS Code property transition picker shows duration, start delay, and easing beside the authored XAML and native canvas.](../images/vscode-property-transitions.png)
+
+[Studio timing editor](../images/studio-property-transitions.png) · [Property transitions through MCP](reference.md#edit-property-transitions-with-mcp)
+
 ## Edit an animation
 
 1. Open [DesignWorkflows.xaml](../samples/DesignWorkflows.xaml) or an XAML file with an authored animation. Choose **FerroUI: Show Animation Timeline**. In the default VS Code layout, the **FerroUI Timeline** tab opens below the source and design. Drag the Panel divider or use **Maximize Panel** for more space. If you previously moved the view, open its title context menu and choose **Reset Location**.

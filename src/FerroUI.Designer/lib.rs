@@ -273,6 +273,7 @@ mod workspace_guides_tests;
 #[cfg(test)]
 mod workspace_navigation_file_tests;
 mod workspace_tools;
+mod property_transition_session;
 
 pub use layout_helper_renderer::{
     DragVisualGhost, LayoutHelperRenderState, hit_test_layout_handle, hover_layout_handle,

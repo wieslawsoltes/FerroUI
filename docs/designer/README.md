@@ -553,6 +553,10 @@ Pause, seek to the pose, then choose **Preview range**. Enter a **Marker name** 
 
 The keyframe view and **Compare animation clips** keep their own marker lists. Typed keys use authored seconds, and the shared ruler uses elapsed seconds. Markers stay with their preview scope and are kept out of source and Undo history. In Studio MCP, read `designer_timeline_markers` with the current `expected_revision`. Use `designer_timeline_marker_edit` with `action`, `name`, and `time` for `set`. Use `name` for `seek` or `remove`. Supply `program` for a particular clip or `all: true` for the shared ruler. [VS Code and App Preview marker controls](vscode/motion.md#bookmark-preview-positions)
 
+### Edit property transitions
+
+Select a control in XAML Design and choose the clock icon next to **Definition**. Edit the duration, delay, and easing of a literal transition. Choose the check icon to apply the timing or the source icon to reveal the declaration. Switch the artboard to **Interact** and trigger the property change to verify its native behavior. [Property transition example](vscode/motion.md#edit-property-transitions)
+
 ### Edit tracks and keyframes
 
 Select a key and drag either handle in the incoming easing graph. The graph and **Curve**

@@ -55,6 +55,7 @@ import { verifyPrototypeMcp } from './prototypeMcp';
 import { verifyStageContrast } from './stageContrastMcp';
 import { verifyStageText } from './stageTextMcp';
 import { verifyDesignTokens } from './designTokenMcp';
+import { verifyPropertyTransitions } from './propertyTransitionMcp';
 import { verifyBrushMcp } from './studioBrushMcp';
 import { verifyFocusOverlay } from './studioFocusMcp';
 import { verifyResourcePromotion } from './studioResourceMcp';
@@ -350,6 +351,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyStageContrast({ invoke, content });
         await verifyStageText({ invoke, content });
         await verifyDesignTokens({ invoke, content });
+        await verifyPropertyTransitions({ invoke, content });
         await verifyBrushMcp({ invoke, content });
         await verifyFocusOverlay({ invoke, content });
         // Make the returning canvas present a fresh bitmap before it can acknowledge zoom.

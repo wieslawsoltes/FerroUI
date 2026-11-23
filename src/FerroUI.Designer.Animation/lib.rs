@@ -22,6 +22,7 @@ mod preview_range;
 mod program_edit;
 mod program_locator;
 mod programs;
+mod property_transitions;
 mod states;
 mod timeline;
 #[cfg(feature = "native-values")]
@@ -57,6 +58,7 @@ pub use programs::{
     AnimationCodecRegistry, AnimationProgram, AnimationProgramIdentity, AnimationPrograms,
     NativeAnimationCodec,
 };
+pub use property_transitions::{AuthoredPropertyTransition, PropertyTransitionList, PropertyTransitionTiming};
 pub use states::{
     StateGroupEdit, StatePreviewGroup, StatePreviewRoute,
     resolve_state_target, rewrite_design_metadata, state_value, ProjectedStateGroup,

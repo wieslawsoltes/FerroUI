@@ -377,6 +377,9 @@
             <Button Name="StatesMode" Classes="panel-tab" Content="States" ToolTip.Tip="Visual states and transitions" />
             <Button Name="BehaviorsMode" Classes="panel-tab" Content="Behaviors" ToolTip.Tip="Triggers and actions" />
             <Button Name="DefinitionMode" Classes="panel-tab" Content="Definition" ToolTip.Tip="Inspect the selected component or resource" />
+            <Button Name="PropertyTransitionsMode" Classes="panel-tab" ToolTip.Tip="Property transitions" AutomationProperties.Name="Property transitions">
+              <PathIcon Classes="designer-icon" Width="14" Height="14" Data="F0 M8 1A7 7 0 1 1 8 15A7 7 0 1 1 8 1Z M8 2.5A5.5 5.5 0 1 0 8 13.5A5.5 5.5 0 1 0 8 2.5Z M7.25 4H8.75V7.6L11.4 9L10.7 10.3L7.25 8.5Z" />
+            </Button>
           </StackPanel>
         </Border>
         <Grid Name="InspectorDesignPane" Grid.Row="1" RowDefinitions="54,Auto,38,Auto,*">

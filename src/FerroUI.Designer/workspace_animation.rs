@@ -5,6 +5,8 @@ mod behavior_drafts;
 mod behaviors;
 #[path = "workspace_animation/rust_states.rs"]
 mod rust_states;
+#[path = "workspace_animation/property_transitions.rs"]
+mod property_transitions;
 
 use super::*;
 use ferroui_base::media::{FontWeight, TextWrapping};
@@ -215,6 +217,7 @@ impl DesignerWorkspace {
             "PlayAll",
             "StatesMode",
             "BehaviorsMode",
+            "PropertyTransitionsMode",
             "CloseAuthoring",
         ] {
             let weak = Rc::downgrade(self);
@@ -341,6 +344,10 @@ impl DesignerWorkspace {
                 self.authoring.borrow_mut().mode = 3;
                 Ok(())
             }
+            "PropertyTransitionsMode" => {
+                self.authoring.borrow_mut().mode = 4;
+                Ok(())
+            }
             _ => {
                 self.authoring.borrow_mut().mode = 0;
                 self.session.borrow_mut().clear_interaction_preview();
@@ -357,7 +364,7 @@ impl DesignerWorkspace {
         ] {
             self.root.get_control::<Button>(name).set_is_visible(!rust && !clips);
         }
-        for name in ["BehaviorsMode", "SetAnimationSelector"] {
+        for name in ["BehaviorsMode", "PropertyTransitionsMode", "SetAnimationSelector"] {
             self.root.get_control::<Button>(name).set_is_visible(!rust);
         }
         self.root.get_control::<Button>("TimelineCurves").set_is_visible(!clips);
@@ -442,7 +449,7 @@ impl DesignerWorkspace {
         panel.children().clear();
         panel.set_spacing(8.0);
         let mut authoring = self.authoring.borrow_mut();
-        if self.session.borrow().uses_rust_source() && authoring.mode == 2 {
+        if self.session.borrow().uses_rust_source() && matches!(authoring.mode, 2 | 4) {
             authoring.mode = 0;
         }
         let mode = authoring.mode;
@@ -457,6 +464,7 @@ impl DesignerWorkspace {
             ("CloseAuthoring", 0),
             ("StatesMode", 1),
             ("BehaviorsMode", 2),
+            ("PropertyTransitionsMode", 4),
         ] {
             self.root
                 .get_control::<Button>(name)
@@ -468,6 +476,7 @@ impl DesignerWorkspace {
                 1 => "Visual states",
                 2 => "Behaviors",
                 3 => "Animation settings",
+                4 => "Property transitions",
                 _ => "Properties",
             }));
         }
@@ -482,6 +491,7 @@ impl DesignerWorkspace {
             1 => self.build_state_panel(&panel, owner),
             2 => self.build_behavior_panel(&panel, owner),
             3 => self.build_animation_settings(&panel),
+            4 => self.build_property_transition_panel(&panel, owner),
             _ => {}
         }
     }

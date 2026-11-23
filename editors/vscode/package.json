@@ -452,6 +452,12 @@
         "icon": "$(zap)"
       },
       {
+        "command": "ferroui.studio.propertyTransitions",
+        "title": "Edit Property Transitions",
+        "category": "FerroUI",
+        "icon": "$(watch)"
+      },
+      {
         "command": "ferroui.behaviors.attach",
         "title": "Attach Behavior",
         "icon": "$(add)"
