@@ -453,7 +453,7 @@ fn runtime_xaml_syntax_highlighting_setters_use_host_aliases_and_native_preceden
     let markup = r#"<UserControl xmlns="https://github.com/ferroui"
         xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
         <UserControl.Styles>
-            <Style Selector="edit|TextEditor"><Setter Property="SyntaxHighlighting" Value="Host Alias"/></Style>
+            <Style Selector="TextEditor"><Setter Property="SyntaxHighlighting" Value="Host Alias"/></Style>
         </UserControl.Styles>
         <StackPanel>
             <TextEditor x:Name="Editor" Text="word"/>
