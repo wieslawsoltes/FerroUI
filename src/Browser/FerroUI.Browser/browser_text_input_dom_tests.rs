@@ -44,6 +44,7 @@ impl ITextInputPage for RecordingPage {
     fn set_surrounding_text(&self, text: &str, start: i32, end: i32) {
         self.0.legacy.borrow_mut().push(format!("text '{text}' {start} {end}"));
     }
+    fn set_input_masked(&self, _masked: bool) {}
     fn has_text_input_element(&self) -> bool {
         true
     }
