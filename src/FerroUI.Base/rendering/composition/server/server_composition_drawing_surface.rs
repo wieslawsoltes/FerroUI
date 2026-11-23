@@ -1,7 +1,7 @@
 use super::{IServerCompositionSurface, IServerObject, ServerCompositor, ServerCompositionSurfaceChanged};
 use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostError};
 use crate::rendering::composition::{IServerGpuImportedObject, ServerImportedGpuImage, ServerImportedGpuSemaphore};
-use crate::utilities::{RefCountable, RefCounted};
+use crate::utilities::{RefCountable, RefCounted, WeakRefCounted};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
 use std::sync::Arc;
@@ -23,6 +23,55 @@ type UpdateResult = Result<(), crate::rendering::composition::ServerJobError>;
 
 fn context_lost() -> crate::rendering::composition::ServerJobError {
     Arc::new(PlatformGraphicsContextLostError)
+}
+
+/// A frame acquired on the render thread: what names it, and its bitmap for as long as something
+/// shows it.
+struct AcquiredFrame {
+    identity: crate::rendering::composition::frames::FrameIdentity,
+    device_generation: u64,
+    context: *const (),
+    bitmap: WeakRefCounted<crate::platform::SharedBitmapImpl>,
+}
+
+crate::ferro_thread_local! {
+    /// The frames on screen, so that a frame shown flat and on a 3D material is acquired, and
+    /// converted, once (#608, step D7).
+    static ACQUIRED_FRAMES: RefCell<Vec<AcquiredFrame>> = const { RefCell::new(Vec::new()) };
+}
+
+/// The bitmap of `frame` on the context of `image`: the one acquired for that frame while
+/// something still shows it, otherwise a new one.
+fn acquire_frame(
+    image: &ServerImportedGpuImage,
+    frame: crate::rendering::composition::frames::FrameLease,
+) -> Result<RefCounted<crate::platform::SharedBitmapImpl>, crate::rendering::composition::frames::FrameError> {
+    let identity = frame.metadata().identity;
+    let device_generation = frame.metadata().device_generation;
+    let context = Rc::as_ptr(image.context()) as *const ();
+    let held = ACQUIRED_FRAMES.with(|frames| {
+        let mut frames = frames.borrow_mut();
+        frames.retain(|acquired| acquired.bitmap.is_alive());
+        frames
+            .iter()
+            .find(|acquired| {
+                acquired.identity == identity
+                    && acquired.device_generation == device_generation
+                    && std::ptr::eq(acquired.context, context)
+            })
+            .and_then(|acquired| acquired.bitmap.upgrade())
+    });
+    if let Some(bitmap) = held {
+        return Ok(bitmap);
+    }
+    let bitmap = image.image().acquire_shared_bitmap(frame)?;
+    let item = bitmap.clone();
+    let counted = RefCountable::create(bitmap, move || item.dispose());
+    let weak = counted.downgrade();
+    ACQUIRED_FRAMES.with(|frames| {
+        frames.borrow_mut().push(AcquiredFrame { identity, device_generation, context, bitmap: weak });
+    });
+    Ok(counted)
 }
 
 /// The server-side counterpart of a
@@ -103,6 +152,25 @@ impl ServerCompositionDrawingSurface {
         self.changed.invoke();
     }
 
+    /// [`update`](Self::update) with a counted reference another holder may share: the bitmap
+    /// is disposed when the last reference goes.
+    fn update_counted(
+        &self,
+        new_image: RefCounted<crate::platform::SharedBitmapImpl>,
+        context: Rc<dyn IPlatformRenderInterfaceContext>,
+    ) {
+        if self.disposed.get() {
+            new_image.dispose();
+            return;
+        }
+        if let Some(bitmap) = self.bitmap.borrow_mut().take() {
+            bitmap.dispose();
+        }
+        *self.bitmap.borrow_mut() = Some(new_image);
+        *self.created_with_context.borrow_mut() = Some(context);
+        self.changed.invoke();
+    }
+
     /// Runs `f` with the graphics context current.
     fn with_current_context(&self, f: impl FnOnce() -> UpdateResult) -> UpdateResult {
         let current = self.compositor().render_interface().ensure_current();
@@ -131,9 +199,34 @@ impl ServerCompositionDrawingSurface {
             if ready.status() != GpuCompletionStatus::Complete {
                 return Err(Arc::new(FrameError::ProducerNotReady));
             }
-            let bitmap = image.image().acquire_shared_bitmap(frame)
+            let bitmap = acquire_frame(image, frame)
                 .map_err(|e| Arc::new(e) as crate::rendering::composition::ServerJobError)?;
-            self.update(bitmap, image.context().clone());
+            self.update_counted(bitmap, image.context().clone());
+            Ok(())
+        })
+    }
+
+    /// Puts `frame` into `slot` for the 3D materials that sample it: the checks of
+    /// [`update_shared_frame`](Self::update_shared_frame), and the same acquired bitmap when the
+    /// frame is also shown flat. The surface itself does not change.
+    pub fn update_frame_slot(
+        &self,
+        image: &ServerImportedGpuImage,
+        frame: crate::rendering::composition::frames::FrameLease,
+        ready: crate::rendering::composition::frames::GpuCompletion,
+        slot: &crate::rendering::scene3d::Scene3DFrameSlot,
+    ) -> UpdateResult {
+        use crate::rendering::composition::frames::{FrameError, GpuCompletionStatus};
+        self.with_current_context(|| {
+            self.perform_sanity_checks(image)?;
+            if !frame.is_current() { return Err(Arc::new(FrameError::StaleGeneration)); }
+            if ready.status() != GpuCompletionStatus::Complete {
+                return Err(Arc::new(FrameError::ProducerNotReady));
+            }
+            let metadata = frame.metadata().clone();
+            let bitmap = acquire_frame(image, frame)
+                .map_err(|e| Arc::new(e) as crate::rendering::composition::ServerJobError)?;
+            slot.publish(bitmap, metadata);
             Ok(())
         })
     }
