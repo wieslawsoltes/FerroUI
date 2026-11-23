@@ -32,9 +32,15 @@ def load(name):
     return module
 
 
+import ferroui_selection  # noqa: E402
+
 MODEL = load("generate_api_model")
 OSPREY = load("generate_osprey_bindings")
 CPP = load("generate_cpp_bindings")
+sys.path.insert(0, os.path.join(SCRIPTS, "capi"))
+_collect = importlib.util.spec_from_file_location("collect_manifest", os.path.join(SCRIPTS, "capi", "collect_manifest.py"))
+COLLECT = importlib.util.module_from_spec(_collect)
+_collect.loader.exec_module(COLLECT)
 
 
 class ModelTests(unittest.TestCase):
@@ -212,6 +218,98 @@ class OspreyTests(unittest.TestCase):
                 path = os.path.join(directory, name)
                 with open(path, encoding="utf-8") as f:
                     self.assertEqual(f.read(), text, f"{path} is stale: python3 scripts/generate_osprey_bindings.py")
+
+
+class ManifestTests(unittest.TestCase):
+    """The lists of properties and events of a manifest, and a manifest collected from sources."""
+
+    @classmethod
+    def setUpClass(cls):
+        cls.model, cls.names = OSPREY.load_model()
+
+    def collect(self, name, text):
+        with tempfile.TemporaryDirectory() as directory:
+            path = os.path.join(directory, name)
+            with open(path, "w", encoding="utf-8") as file:
+                file.write(text)
+            return COLLECT.collect([path], self.model, self.names)
+
+    def test_the_lists_narrow_the_bindings_and_not_the_library(self):
+        whole = {"classes": ["Button"]}
+        narrow = {"classes": ["Button"], "properties": ["Content"], "events": ["Click"]}
+        self.assertEqual(ferroui_selection.AppSelection(self.model, whole).fingerprint,
+                         ferroui_selection.AppSelection(self.model, narrow).fingerprint)
+        cpp = CPP.generate(self.model, narrow)
+        self.assertIn("Self& content(std::string_view value_)", cpp)
+        self.assertIn("Self& on_click(Handler&& handler)", cpp)
+        self.assertNotIn(" font_size(", cpp)
+        self.assertNotIn("on_pointer_pressed(", cpp)
+        self.assertLess(len(cpp), len(CPP.generate(self.model, whole)))
+        objects = dict(OSPREY.outputs({**narrow, "layers": ["objects"]}, self.model, self.names)[0])["objects.osp"]
+        self.assertIn("fn content(object, value)", objects)
+        self.assertNotIn("fn fontSize(", objects)
+
+    def test_a_name_the_model_does_not_have_is_refused(self):
+        with self.assertRaises(SystemExit):
+            ferroui_selection.AppSelection(self.model, {"classes": ["Button"], "properties": ["NoSuchProperty"]})
+        with self.assertRaises(SystemExit):
+            ferroui_selection.AppSelection(self.model, {"classes": ["Button"], "events": ["NoSuchEvent"]})
+
+    def test_c_sources(self):
+        found = self.collect("app.c", """
+            /* TextBox in a comment is not a use. */
+            // Neither is "Slider".
+            int64_t t = ferro_type_button();
+            int64_t p = ferro_property_id("FontSize", -1);
+            int64_t e = ferro_event_id("Click", -1);
+            ferro_frame_begin();
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["FontSize"])
+        self.assertEqual(found["events"], ["Click"])
+        self.assertEqual(found["abi"], ["frames"])
+
+    def test_cpp_sources(self):
+        found = self.collect("app.cpp", """
+            // Slider in a comment is not a use.
+            auto button = Button::create();
+            button.font_size(12).content("Grid in a text");
+            button.on_click([](Button&) {});
+            Grid::set_row(button, 1);
+        """)
+        self.assertEqual(found["classes"], ["Button", "Grid"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+        self.assertEqual(found["abi"], [])
+
+    def test_osprey_sources_keep_every_group(self):
+        found = self.collect("app.osp", 'let b = button() |> fontSize(12.0) |> onClick(1)\n')
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertIn("FontSize", found["properties"])
+        self.assertEqual(found["events"], ["Click"])
+        self.assertNotIn("abi", found)
+
+    def test_a_manifest_that_leaves_out_a_use_is_reported(self):
+        found = {"classes": ["Button", "Grid"], "properties": ["Content"], "events": [], "abi": ["frames"]}
+        self.assertEqual(COLLECT.missing(found, {"classes": ["Button"]}), [("classes", ["Grid"])])
+        self.assertEqual(COLLECT.missing(found, {"classes": ["Button", "Grid"], "properties": [], "abi": []}),
+                         [("properties", ["Content"]), ("abi", ["frames"])])
+        self.assertEqual(COLLECT.missing(found, {"classes": ["Button", "Grid"]}), [])
+
+    def test_the_manifests_of_the_samples_cover_their_sources(self):
+        samples = os.path.join(MODEL.ROOT, "samples", "CApi")
+        cases = [([os.path.join(samples, "hello_world.c")], os.path.join(samples, "hello_world.ferroui.json")),
+                 ([os.path.join(samples, "gauge.c"), os.path.join(samples, "gauge.h")],
+                  os.path.join(samples, "gauge.ferroui.json"))]
+        for manifest in glob.glob(os.path.join(samples, "cpp", "*", "ferroui.json")):
+            if "hello_world" in manifest:
+                cases.append(([os.path.dirname(manifest)], manifest))
+        for manifest in glob.glob(os.path.join(samples, "osprey-bindings", "*", "ferroui.json")):
+            cases.append(([os.path.dirname(manifest)], manifest))
+        self.assertGreater(len(cases), 5)
+        for paths, manifest in cases:
+            with open(manifest, encoding="utf-8") as file:
+                self.assertEqual(COLLECT.missing(COLLECT.collect(paths, self.model, self.names), json.load(file)), [], manifest)
 
 
 class SelectionTests(unittest.TestCase):

@@ -82,9 +82,11 @@ them dispatches tags.
    in the generated file.
 3. Name with `words` and an override file of the language; escape its reserved words.
 4. Call the ABI with the IDs of the model as constants and check the fingerprint at start.
-5. Generate a selection from a manifest (`{"layers": [...], "classes": [...]}`): an
-   application builds against what it uses, not the whole model, and the names of a selection
-   are the names of the full bindings.
+5. Generate a selection from a manifest (`{"layers": [...], "classes": [...]}`, optionally with
+   the `properties` and `events` it uses): an application builds against what it uses, not the
+   whole model, and the names of a selection are the names of the full bindings. Teach
+   `scripts/capi/collect_manifest.py` the spelling of the language, so that a manifest can be
+   collected from its sources.
 6. Add the `--check` to the step "Generated API model and bindings are up to date" of
    `.github/workflows/ci.yml`, tests to `scripts/test_generate_bindings.py`, samples, and a
    benchmark of the same operations as `src/FerroUI.CApi/benches/call_overhead.rs`.

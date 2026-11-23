@@ -172,6 +172,9 @@ def main():
         "classes": selection.classes,
         "entries": selection.entries,
         "groups": selection.groups,
+        # What the manifest lists for its bindings; the library keeps the names of the model.
+        "properties": None if selection.properties is None else sorted(selection.properties),
+        "events": None if selection.events is None else sorted(selection.events),
         "theme_units": {"ambient": ambient, "selection": units},
         "exports": len(selection.exports),
         "cargo_features": FEATURES,

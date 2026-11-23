@@ -345,9 +345,8 @@ machine: the numbers say how large the overhead is, not its exact value.
 ## 11. Phase 2 and later
 
 - **Selection and generation (#636, step 2):** the manifest of the classes and groups of calls
-  of an application and the generator of a library for it are section 17; still to come: a
-  manifest collected from the sources of the application, and properties and events in the
-  selection of the library (today it selects classes and groups of calls).
+  of an application, the generator of a library for it, and a manifest collected from the
+  sources of the application are section 17.
 - **Bindings:** C++ is there (`bindings/cpp/`, `scripts/generate_cpp_bindings.py`): a header-only
   library with RAII handles and typed accessors, generated from the model or a selection; a
   failed call throws, and nothing unwinds across the ABI. Still to come: Go (cgo,
@@ -925,5 +924,27 @@ against 221.2 ms, `hello_world.c` 231.9 against 217.1 ms, `gauge.c` 229.0 agains
 medians; the minimums 200 to 216 ms for all). The groups of calls matter little (`gauge.c` with
 the controls group alone is 0.06 MB smaller than with all three): the classes and the theme are
 what a library keeps.
+
+**A manifest from the sources.** `scripts/capi/collect_manifest.py` reads the C, C++ and Osprey
+sources of an application and writes its manifest: the classes, properties and events they name
+and the groups of calls they use. With `--check` it fails when a manifest leaves out something
+the sources use, which is how a manifest written by hand stays right.
+
+```sh
+python3 scripts/capi/collect_manifest.py app/src --out app/ferroui.json
+python3 scripts/capi/collect_manifest.py app/src --check app/ferroui.json
+```
+
+It is conservative: a token that can be a name counts, so a word that happens to match keeps a
+class the program does not use (size, nothing else). A name the program builds at run time is
+not found and goes in the manifest by hand.
+
+**Properties and events.** A manifest can list `properties` and `events`. They narrow the
+generated bindings, to what the application calls. They do not change the library: its IDs are
+the positions of the names of the model, and all of those names together are about 37 kB (the
+text and the pointers of 1,042 properties and 96 events, 0.19 % of the 19.83 MB of the hello
+world library), so they stay, and the lists are not part of the fingerprint. One library serves
+the bindings of a manifest with or without them. The code of a class's properties is kept by the
+class, which is what the `classes` of the manifest select.
 
 How to ship the library in each language is docs/c-abi-languages.md, section 8.

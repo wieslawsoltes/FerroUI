@@ -5,7 +5,9 @@ bindings of one manifest agree on its fingerprint.
 
 A manifest names classes (`classes`) and, optionally, the groups of calls of the ABI it uses
 (`abi`, a subset of `GROUPS`; all of them when it is left out). The core calls (handles, IDs,
-values, events, the application and the thread) are always there.
+values, events, the application and the thread) are always there. It can also list the
+`properties` and `events` the application uses, which narrow its generated bindings. A manifest
+can be collected from the sources of the application (`scripts/capi/collect_manifest.py`).
 """
 
 # The groups of calls of the ABI beyond the core, by the prefix of their names.
@@ -37,11 +39,28 @@ def fnv1a(text):
     return value - (1 << 64) if value >= (1 << 63) else value
 
 
+def selected_names(model, manifest, key):
+    """The names a manifest lists under `properties` or `events` (`key`), or None when it lists
+    none: then the bindings have everything the classes of the selection declare. They narrow the
+    generated bindings alone. The names of the model stay in the library, whose IDs are their
+    positions (all of them are about 37 kB), so they are not part of the fingerprint: one library
+    serves the bindings of a manifest with or without these lists."""
+    if not manifest or key not in manifest:
+        return None
+    known = {entry["name"] for entry in model[key]}
+    unknown = sorted(set(manifest[key]) - known)
+    if unknown:
+        raise SystemExit(f"the manifest names {unknown} under `{key}`, not in the model")
+    return set(manifest[key])
+
+
 class AppSelection:
     """What a manifest selects: the classes it names (with their entries), the groups of calls,
     the exports of a library built for it, and its fingerprint."""
 
     def __init__(self, model, manifest):
+        self.properties = selected_names(model, manifest, "properties")
+        self.events = selected_names(model, manifest, "events")
         by_name = {cls["name"]: cls for cls in model["classes"]}
         self.classes = []
         for name in manifest.get("classes", []):

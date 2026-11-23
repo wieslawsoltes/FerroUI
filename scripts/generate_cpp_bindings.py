@@ -19,7 +19,8 @@ Two kinds of output, as for the other backends (bindings/README.md):
 
     the full bindings   bindings/cpp/full/ferroui.hpp
     a selection         <application>/ferroui/ferroui.hpp, from <application>/ferroui.json:
-                        the classes it names, their bases, and what those declare
+                        the classes it names, their bases, and what those declare (only the
+                        `properties` and `events` it lists, when it lists them)
 
 Every call uses the stable IDs of the model as constants, so no name is looked up at run time.
 
@@ -469,13 +470,15 @@ def ordered(model, selection):
     return result
 
 
-def class_lines(cls, properties, events, inherited):
+def class_lines(cls, properties, events, inherited, selection):
     """The API template and the wrapper of a class, and the member names it has."""
     name = cls["name"]
     base = f"{cls['base']}Api<Self>" if cls["base"] else "ObjectApi<Self>"
     members, body = [], []
     for prop_name in cls["properties"]:
         prop = properties[prop_name]
+        if not selection.prop(prop):
+            continue
         for declaration in prop["declarations"]:
             if declaration["owner"] != name:
                 continue
@@ -492,6 +495,8 @@ def class_lines(cls, properties, events, inherited):
             break
     for event_name in cls["events"]:
         event = events[event_name]
+        if not selection.event(event):
+            continue
         declaration = next(d for d in event["declarations"] if d["owner"] == name)
         words = snake(event["words"])
         on, subscribe = f"on_{words}", f"subscribe_{words}"
@@ -550,6 +555,8 @@ def generate(model, manifest=None):
     classes = ordered(model, selection)
     for cls in classes:
         for prop_name in cls["properties"]:
+            if not selection.prop(properties[prop_name]):
+                continue
             for declaration in properties[prop_name]["declarations"]:
                 if declaration["owner"] == cls["name"]:
                     used.update(kind[5:] for kind in kinds_of(declaration) if kind.startswith("enum:"))
@@ -573,7 +580,7 @@ def generate(model, manifest=None):
         while current:
             inherited |= members[current]
             current = next(c["base"] for c in classes if c["name"] == current)
-        class_text, own = class_lines(cls, properties, events, inherited)
+        class_text, own = class_lines(cls, properties, events, inherited, selection)
         lines += class_text
         members[cls["name"]] = set(own)
     lines.append("/// Registers the classes of the selection, with the units of the theme they need: what a")
