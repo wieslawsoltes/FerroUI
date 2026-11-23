@@ -258,8 +258,10 @@ enum Stage {
 }
 
 /// Decodes a WOFF2 file in steps.
-pub(crate) struct Woff2Decoder<'a> {
-    input: &'a [u8],
+pub(crate) struct Woff2Decoder<D> {
+    data: D,
+    /// Where the compressed stream is in `data`.
+    input: std::ops::Range<usize>,
     brotli: Box<dyn IBrotliDecoder>,
     limits: WebFontLimits,
     flavor: u32,
@@ -270,14 +272,15 @@ pub(crate) struct Woff2Decoder<'a> {
     stage: Stage,
 }
 
-impl<'a> Woff2Decoder<'a> {
+impl<D: AsRef<[u8]>> Woff2Decoder<D> {
     /// Validates the whole layout of the file. The stream is allocated only after that.
     pub(crate) fn new(
-        data: &'a [u8],
+        source: D,
         options: &SanitizeOptions,
         brotli: BrotliDecoderFactory,
     ) -> Result<Self, FontDecodeError> {
         const TRUNCATED: FontDecodeError = FontDecodeError::Truncated;
+        let data = source.as_ref();
         let limits = options.limits;
         if data.len() < HEADER_SIZE {
             return Err(TRUNCATED);
@@ -331,7 +334,7 @@ impl<'a> Woff2Decoder<'a> {
 
         let start = reader.position;
         let mut end = start.checked_add(compressed).filter(|end| *end <= data.len()).ok_or(TRUNCATED)?;
-        let input = &data[start..end];
+        let input = start..end;
         // The compressed data is padded to four bytes, even at the end of the file: decoders of
         // browsers refuse a file that is not.
         if end.checked_add(3).map(|value| value & !3).is_none_or(|padded| padded > data.len()) {
@@ -350,6 +353,7 @@ impl<'a> Woff2Decoder<'a> {
             return Err(malformed("WOFF2 data after the last block"));
         }
         Ok(Self {
+            data: source,
             input,
             brotli: brotli(),
             limits,
@@ -372,6 +376,7 @@ impl<'a> Woff2Decoder<'a> {
 
     fn step_decompress(&mut self, budget: &mut usize) -> Result<bool, FontDecodeError> {
         const BAD: FontDecodeError = FontDecodeError::Malformed("WOFF2 compressed stream");
+        let input = &self.data.as_ref()[self.input.clone()];
         while *budget > 0 {
             if self.output_position == self.stream.len() {
                 self.stage = Stage::VerifyEnd;
@@ -381,22 +386,22 @@ impl<'a> Woff2Decoder<'a> {
             let before = (self.input_position, self.output_position);
             let window = &mut self.stream[self.output_position..self.output_position + chunk];
             let mut written = 0;
-            let status = self.brotli.decompress(self.input, &mut self.input_position, window, &mut written);
-            if written > chunk || self.input_position > self.input.len() {
+            let status = self.brotli.decompress(input, &mut self.input_position, window, &mut written);
+            if written > chunk || self.input_position > input.len() {
                 return Err(BAD);
             }
             self.output_position += written;
             *budget = budget.saturating_sub(written.max(1));
             match status {
                 BrotliStatus::Finished => {
-                    if self.output_position != self.stream.len() || self.input_position != self.input.len() {
+                    if self.output_position != self.stream.len() || self.input_position != input.len() {
                         return Err(BAD);
                     }
                     self.stage = Stage::Prepare;
                     return Ok(true);
                 }
                 BrotliStatus::Failed => return Err(BAD),
-                BrotliStatus::NeedsMoreInput if self.input_position == self.input.len() && written == 0 => {
+                BrotliStatus::NeedsMoreInput if self.input_position == input.len() && written == 0 => {
                     return Err(FontDecodeError::Truncated);
                 }
                 _ => {}
@@ -412,21 +417,22 @@ impl<'a> Woff2Decoder<'a> {
     /// byte shows a stream that would write more than it declared.
     fn verify_end(&mut self) -> Result<(), FontDecodeError> {
         const BAD: FontDecodeError = FontDecodeError::Malformed("WOFF2 compressed stream");
+        let input = &self.data.as_ref()[self.input.clone()];
         let mut spare = [0u8; 1];
         loop {
             let before = self.input_position;
             let mut written = 0;
-            let status = self.brotli.decompress(self.input, &mut self.input_position, &mut spare, &mut written);
+            let status = self.brotli.decompress(input, &mut self.input_position, &mut spare, &mut written);
             if written != 0 {
                 return Err(BAD);
             }
             match status {
-                BrotliStatus::Finished if self.input_position == self.input.len() => {
+                BrotliStatus::Finished if self.input_position == input.len() => {
                     self.stage = Stage::Prepare;
                     return Ok(());
                 }
                 BrotliStatus::Finished | BrotliStatus::Failed => return Err(BAD),
-                BrotliStatus::NeedsMoreInput if self.input_position == self.input.len() => {
+                BrotliStatus::NeedsMoreInput if self.input_position == input.len() => {
                     return Err(FontDecodeError::Truncated);
                 }
                 _ if self.input_position == before => return Err(BAD),

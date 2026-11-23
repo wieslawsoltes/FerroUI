@@ -46,8 +46,8 @@ fn optional_block(data: &[u8], field: usize) -> Result<(usize, usize), FontDecod
 }
 
 /// Decodes the tables of a WOFF file into one buffer, which is a plain sfnt.
-pub(crate) struct Woff1Decoder<'a> {
-    data: &'a [u8],
+pub(crate) struct Woff1Decoder<D> {
+    data: D,
     entries: Vec<Entry>,
     output: Vec<u8>,
     next: usize,
@@ -55,9 +55,10 @@ pub(crate) struct Woff1Decoder<'a> {
     inflate: Option<Decompress>,
 }
 
-impl<'a> Woff1Decoder<'a> {
+impl<D: AsRef<[u8]>> Woff1Decoder<D> {
     /// Validates the whole layout of the file. The output is allocated only after that.
-    pub(crate) fn new(data: &'a [u8], limits: &WebFontLimits) -> Result<Self, FontDecodeError> {
+    pub(crate) fn new(source: D, limits: &WebFontLimits) -> Result<Self, FontDecodeError> {
+        let data = source.as_ref();
         const TRUNCATED: FontDecodeError = FontDecodeError::Truncated;
         if data.len() < HEADER_SIZE {
             return Err(TRUNCATED);
@@ -166,7 +167,7 @@ impl<'a> Woff1Decoder<'a> {
             output[record + 8..record + 12].copy_from_slice(&(entry.output as u32).to_be_bytes());
             output[record + 12..record + 16].copy_from_slice(&(entry.original as u32).to_be_bytes());
         }
-        Ok(Self { data, entries, output, next: 0, position: 0, inflate: None })
+        Ok(Self { data: source, entries, output, next: 0, position: 0, inflate: None })
     }
 
     /// Decodes up to about `budget` bytes. Returns whether every table is done.
@@ -176,7 +177,7 @@ impl<'a> Woff1Decoder<'a> {
                 return Ok(false);
             }
             if entry.compressed == entry.original {
-                let source = &self.data[entry.offset..entry.offset + entry.original];
+                let source = &self.data.as_ref()[entry.offset..entry.offset + entry.original];
                 self.output[entry.output..entry.output + entry.original].copy_from_slice(source);
                 budget = budget.saturating_sub(entry.original.max(1));
                 self.next += 1;
@@ -195,7 +196,7 @@ impl<'a> Woff1Decoder<'a> {
     /// never go past its declared length.
     fn inflate_table(&mut self, entry: Entry, budget: &mut usize) -> Result<bool, FontDecodeError> {
         const BAD: FontDecodeError = FontDecodeError::Malformed("WOFF compressed table");
-        let input = &self.data[entry.offset..entry.offset + entry.compressed];
+        let input = &self.data.as_ref()[entry.offset..entry.offset + entry.compressed];
         let inflate = self.inflate.get_or_insert_with(|| Decompress::new(true));
         while *budget > 0 && self.position < entry.original {
             let consumed = inflate.total_in() as usize;

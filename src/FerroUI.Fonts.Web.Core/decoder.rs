@@ -27,38 +27,39 @@ pub fn sniff_container(data: &[u8]) -> Option<FontContainer> {
     }
 }
 
-enum Stage<'a> {
-    Woff(Box<Woff1Decoder<'a>>),
-    Woff2(Box<Woff2Decoder<'a>>),
-    SanitizeInput(Box<Sanitizer<&'a [u8]>>),
+enum Stage<D> {
+    Woff(Box<Woff1Decoder<D>>),
+    Woff2(Box<Woff2Decoder<D>>),
+    SanitizeInput(Box<Sanitizer<D>>),
     SanitizeDecoded(Box<Sanitizer<Vec<u8>>>),
     Finished,
 }
 
 /// Decodes and sanitizes a font in steps, so that a thread that must stay responsive can give
-/// it a budget at a time.
-pub struct FontDecoder<'a> {
-    stage: Stage<'a>,
+/// it a budget at a time. `D` holds the bytes of the file: borrowed, or owned so that the
+/// decoder can be kept between slices of work.
+pub struct FontDecoder<D> {
+    stage: Stage<D>,
     options: SanitizeOptions,
 }
 
-impl<'a> FontDecoder<'a> {
+impl<D: AsRef<[u8]>> FontDecoder<D> {
     /// Starts decoding a font file, without a Brotli decoder: WOFF2 is refused.
-    pub fn new(data: &'a [u8], options: SanitizeOptions) -> Result<Self, FontDecodeError> {
+    pub fn new(data: D, options: SanitizeOptions) -> Result<Self, FontDecodeError> {
         Self::with_brotli(data, options, None)
     }
 
     /// Starts decoding a font file. Headers are validated here, before any large allocation.
     /// `brotli` makes the decoders WOFF2 needs.
     pub fn with_brotli(
-        data: &'a [u8],
+        data: D,
         options: SanitizeOptions,
         brotli: Option<BrotliDecoderFactory>,
     ) -> Result<Self, FontDecodeError> {
-        if data.len() > options.limits.max_encoded_size {
+        if data.as_ref().len() > options.limits.max_encoded_size {
             return Err(FontDecodeError::LimitExceeded("encoded size"));
         }
-        let stage = match sniff_container(data).ok_or(FontDecodeError::UnknownFormat)? {
+        let stage = match sniff_container(data.as_ref()).ok_or(FontDecodeError::UnknownFormat)? {
             FontContainer::OpenType | FontContainer::Collection => {
                 Stage::SanitizeInput(Box::new(Sanitizer::new(data, options)?))
             }

@@ -1976,7 +1976,11 @@ name = "ferroui-fonts-web"
 version = "0.6.0-preview.1"
 dependencies = [
  "brotli-decompressor",
+ "ferroui-base",
+ "ferroui-controls",
  "ferroui-fonts-web-core",
+ "ferroui-vello",
+ "url",
 ]
 
 [[package]]

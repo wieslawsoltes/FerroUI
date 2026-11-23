@@ -135,6 +135,41 @@ const fn padded(length: usize) -> Option<usize> {
     }
 }
 
+/// A font with the character map and the metrics of `font` and no outlines: text set in it takes
+/// the same room and draws nothing. It stands in during the block period of `font-display`,
+/// through the normal path of each backend, so that no backend needs a case for invisible text.
+pub fn make_invisible_font(font: &[u8], limits: &WebFontLimits) -> Result<Vec<u8>, FontDecodeError> {
+    let (_, records) = read_directory(font, 0, limits)?;
+    let table = |tag: &Tag| {
+        records.iter().find(|record| record.tag == *tag).map(|record| &font[record.offset..][..record.length])
+    };
+    let required = |tag: &'static Tag| table(tag).ok_or(FontDecodeError::MissingTable(*tag));
+    let mut head = required(b"head")?.to_vec();
+    if head.len() < 54 {
+        return Err(FontDecodeError::Malformed("head"));
+    }
+    head[50..52].fill(0);
+    let glyphs = required(b"maxp")?.u16_at(4).ok_or(FontDecodeError::Malformed("maxp"))?;
+    let mut maxp = vec![0u8; 32];
+    maxp[..4].copy_from_slice(&TRUETYPE.to_be_bytes());
+    maxp[4..6].copy_from_slice(&glyphs.to_be_bytes());
+    let loca = vec![0u8; (glyphs as usize + 1) * 2];
+    let mut post = vec![0u8; 32];
+    post[..4].copy_from_slice(&0x0003_0000u32.to_be_bytes());
+    let mut tables: Vec<(Tag, &[u8])> =
+        vec![(*b"glyf", &[]), (*b"head", &head), (*b"loca", &loca), (*b"maxp", &maxp), (*b"post", &post)];
+    for tag in [b"cmap", b"hhea", b"hmtx"] {
+        tables.push((*tag, required(tag)?));
+    }
+    // What decides the advances of shaped text stays, so that the text takes the same room.
+    for tag in [b"GDEF", b"GPOS", b"GSUB", b"OS/2", b"name"] {
+        if let Some(bytes) = table(tag) {
+            tables.push((*tag, bytes));
+        }
+    }
+    assemble(TRUETYPE, &mut tables, limits)
+}
+
 /// Fills in the checksums of a font in canonical layout, and `head.checkSumAdjustment`.
 pub(crate) fn update_checksums(font: &mut [u8]) {
     let count = font.u16_at(4).unwrap_or(0) as usize;
