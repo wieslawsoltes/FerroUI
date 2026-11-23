@@ -269,3 +269,40 @@ fn the_grid_source_needs_no_network() {
     run_jobs();
     assert!(*store.best(tile(3, 1, 2)).unwrap().0 > 256 * 256 * 4);
 }
+
+#[test]
+fn each_source_has_its_own_folder_in_the_disk_cache() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let folder = std::env::temp_dir().join(format!("ferroui-map-sources-{}", std::process::id()));
+    let _ = std::fs::remove_dir_all(&folder);
+    let first = Rc::new(RasterTileSource::new("https://a.example.test/{z}/{x}/{y}", "").unwrap());
+    // The same address for the first tile, another for every other one.
+    let second = Rc::new(RasterTileSource::new("https://a.example.test/{z}/{y}/{x}", "").unwrap());
+    assert_ne!(first.cache_key(), second.cache_key());
+    let map = MapControl::new();
+    map.set_disk_cache(Some(&folder), 1024).unwrap();
+    map.set_tile_source(Some(first.clone()), None);
+    assert!(folder.join(first.cache_key()).is_dir());
+    assert!(!folder.join(second.cache_key()).exists());
+    map.set_tile_source(Some(second.clone()), None);
+    assert!(folder.join(second.cache_key()).is_dir());
+    map.set_disk_cache(None, 0).unwrap();
+    let _ = std::fs::remove_dir_all(&folder);
+}
+
+#[test]
+fn the_speed_of_a_release_comes_from_the_end_of_the_drag() {
+    use ferroui_base::Point;
+    use std::collections::VecDeque;
+    let samples: VecDeque<(u64, Point)> = [
+        (0, Point::new(0.0, 0.0)),
+        (500, Point::new(0.0, 0.0)),
+        (550, Point::new(50.0, 0.0)),
+        (600, Point::new(100.0, -20.0)),
+    ]
+    .into();
+    assert_eq!(MapControl::release_speed(&samples), (1000.0, -200.0));
+    assert_eq!(MapControl::release_speed(&VecDeque::new()), (0.0, 0.0));
+    let one: VecDeque<(u64, Point)> = [(10, Point::new(1.0, 1.0))].into();
+    assert_eq!(MapControl::release_speed(&one), (0.0, 0.0));
+}
