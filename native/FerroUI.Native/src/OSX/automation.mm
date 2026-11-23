@@ -98,7 +98,7 @@
         case AutomationImage: return NSAccessibilityImageRole;
         case AutomationListItem: return NSAccessibilityRowRole;
         case AutomationList: return NSAccessibilityListRole;
-        case AutomationMenu: return NSAccessibilityMenuBarRole;
+        case AutomationMenu: return NSAccessibilityMenuRole;
         case AutomationMenuBar: return NSAccessibilityMenuBarRole;
         case AutomationMenuItem: return NSAccessibilityMenuItemRole;
         case AutomationProgressBar: return NSAccessibilityProgressIndicatorRole;
@@ -142,6 +142,7 @@
     switch (controlType) {
         case AutomationList: return @"AXContentList";
         case AutomationListItem: return NSAccessibilityTableRowSubrole;
+        case AutomationTabItem: return NSAccessibilityTabButtonSubrole;
     }
 
     auto landmarkType = _peer->GetLandmarkType();
@@ -331,6 +332,12 @@
 {
     auto bounds = _peer->GetBoundingRectangle();
     return [self rectToScreen:bounds];
+}
+
+- (NSPoint)accessibilityActivationPoint
+{
+    auto frame = [self accessibilityFrame];
+    return NSMakePoint(NSMidX(frame), NSMidY(frame));
 }
 
 - (id)accessibilityParent
@@ -524,6 +531,10 @@
     {
         return _peer->IsRangeValueProvider();
     }
+    else if (selector == @selector(setAccessibilityFocused:))
+    {
+        return _peer->IsKeyboardFocusable();
+    }
 
     return [super isAccessibilitySelectorAllowed:selector];
 }
@@ -631,6 +642,10 @@
     auto name = _peer->GetName();
     if (name != nullptr)
     {
+        NSString* announcement = GetNSStringAndRelease(name);
+        if (announcement.length == 0)
+            return;
+
         NSAccessibilityPriorityLevel priority = NSAccessibilityPriorityLow;
         switch (_peer->GetLiveSetting())
         {
@@ -645,7 +660,7 @@
         }
 
         NSDictionary <NSString *, id> *userInfo = @{
-            NSAccessibilityAnnouncementKey: GetNSStringAndRelease(name),
+            NSAccessibilityAnnouncementKey: announcement,
             NSAccessibilityPriorityKey: @(priority)
         };
 
