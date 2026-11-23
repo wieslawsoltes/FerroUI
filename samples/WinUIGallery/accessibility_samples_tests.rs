@@ -193,11 +193,11 @@ fn accessibility_keyboard_key_tips_open_the_menu_and_show_its_items() {
         .filter_map(|item| item.cast::<MenuItem>())
         .find(|item| AccessKeyManager::get_access_key(item).as_deref() == Some("E"))
         .expect("the Edit menu");
-    assert!(edit.is_submenu_open());
+    assert!(edit.is_sub_menu_open());
     assert_eq!(AccessKeyManager::visible_key_tips(), ["C", "U", "V", "X"], "Cut and Paste have keys");
 
     key(InputElement::key_down_event(), Key::Escape, None);
-    assert!(!edit.is_submenu_open());
+    assert!(!edit.is_sub_menu_open());
     assert_eq!(AccessKeyManager::visible_key_tips(), ["E", "F", "H"]);
     AccessKeyManager::exit_display_mode();
     let _ = KeyModifiers::NONE;
