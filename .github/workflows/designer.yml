@@ -21,8 +21,6 @@ on:
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
       - 'samples/TodoWorkbench/**'
-      - 'Cargo.toml'
-      - 'Cargo.lock'
       - '.github/workflows/designer.yml'
   schedule:
     - cron: '5 4 * * *'
