@@ -2,17 +2,22 @@
 //!
 //! Features are given to the shaper with each text run, by the properties of the text. What a
 //! face declares is added here, in front of them, by a shaper that wraps the active one: it is
-//! installed only when a face declares one of the two, so nothing else pays for it. A language
-//! override replaces the culture of the run, which every shaper already reads.
+//! installed only when a face needs it, so nothing else pays for it. A language override replaces
+//! the culture of the run, which every shaper already reads.
+//!
+//! The `font-size` descriptor is applied here too. A lookup of the font manager has no size, but a
+//! run reaches the shaper with its size, and what is drawn follows the typeface of the shaped
+//! buffer. So a run in a family with faces for different sizes is shaped in the face for its size,
+//! and `ferroui-base` does not change. The line metrics of the run stay those of the face the lookup
+//! found.
 
 use ferroui_base::media::text_formatting::{ShapedBuffer, TextShaper, TextShaperOptions};
 use ferroui_base::media::{FontFeature, GlyphTypeface, ITextShaperTypeface};
 use ferroui_base::platform::ITextShaperImpl;
 use ferroui_base::utilities::{Locale, ReadOnlyMemory};
 use ferroui_base::{FerroLocator, LocatorExtensions};
-use ferroui_fonts_web_core::css::{FontFaceDescriptors, FontFeatureSetting};
+use ferroui_fonts_web_core::css::FontFeatureSetting;
 use ferroui_fonts_web_core::language::opentype_language_to_bcp47;
-#[cfg(feature = "incremental")]
 use ferroui_fonts_web_core::loading::FontFaceId;
 use std::cell::RefCell;
 use std::collections::HashMap;
@@ -48,11 +53,8 @@ pub(crate) fn language_of(tag: &str) -> Option<Locale> {
     opentype_language_to_bcp47(tag)?.parse().ok()
 }
 
-/// Whether a face has something for the shaper to add to its runs.
-pub(crate) fn needs_shaper(face: &FontFaceDescriptors) -> bool {
-    !face.feature_settings.is_empty()
-        || face.language_override.as_deref().is_some_and(|tag| opentype_language_to_bcp47(tag).is_some())
-}
+/// Chooses the face for a run of a size: `None` keeps the one the run has.
+pub(crate) type SizeChooser = Rc<dyn Fn(FontFaceId, &Rc<GlyphTypeface>, f64) -> Option<Rc<GlyphTypeface>>>;
 
 /// Told of the text set in an incremental face, and of the features of the run.
 #[cfg(feature = "incremental")]
@@ -64,6 +66,8 @@ struct FaceShaping {
     _typeface: Rc<GlyphTypeface>,
     features: Rc<Vec<FontFeature>>,
     language: Option<Locale>,
+    /// The face this typeface is of, when its family has faces for different sizes.
+    sized: Option<FontFaceId>,
     #[cfg(feature = "incremental")]
     observed: Option<FontFaceId>,
 }
@@ -73,6 +77,7 @@ pub(crate) struct FontFeatureShaper {
     inner: Rc<dyn ITextShaperImpl>,
     /// By the address of the typeface, which the entry keeps alive.
     faces: RefCell<HashMap<*const GlyphTypeface, FaceShaping>>,
+    size_chooser: RefCell<Option<SizeChooser>>,
     #[cfg(feature = "incremental")]
     observer: RefCell<Option<TextObserver>>,
 }
@@ -84,6 +89,7 @@ impl FontFeatureShaper {
         let shaper = Rc::new(Self {
             inner,
             faces: RefCell::new(HashMap::new()),
+            size_chooser: RefCell::new(None),
             #[cfg(feature = "incremental")]
             observer: RefCell::new(None),
         });
@@ -104,10 +110,53 @@ impl FontFeatureShaper {
             _typeface: typeface.clone(),
             features,
             language,
+            sized: None,
             #[cfg(feature = "incremental")]
             observed: None,
         };
         self.faces.borrow_mut().insert(Rc::as_ptr(typeface), shaping);
+    }
+
+    /// Marks a typeface as one of a family with faces for different sizes.
+    pub(crate) fn set_sized(&self, typeface: &Rc<GlyphTypeface>, id: FontFaceId) {
+        if let Some(entry) = self.faces.borrow_mut().get_mut(&Rc::as_ptr(typeface)) {
+            entry.sized = Some(id);
+        }
+    }
+
+    pub(crate) fn has_size_chooser(&self) -> bool {
+        self.size_chooser.borrow().is_some()
+    }
+
+    pub(crate) fn set_size_chooser(&self, chooser: SizeChooser) {
+        *self.size_chooser.borrow_mut() = Some(chooser);
+    }
+
+    /// Whether this shaper holds a reference to a typeface.
+    pub(crate) fn contains(&self, typeface: &Rc<GlyphTypeface>) -> bool {
+        self.faces.borrow().contains_key(&Rc::as_ptr(typeface))
+    }
+
+    /// The options of a run in the face for its size, when that is another face.
+    fn for_size(&self, options: &TextShaperOptions) -> Option<TextShaperOptions> {
+        let id = self.faces.borrow().get(&Rc::as_ptr(options.glyph_typeface())).and_then(|entry| entry.sized)?;
+        let chooser = self.size_chooser.borrow().clone()?;
+        let face = chooser(id, options.glyph_typeface(), options.font_rendering_em_size())?;
+        if Rc::ptr_eq(&face, options.glyph_typeface()) {
+            return None;
+        }
+        Some(
+            TextShaperOptions::with_all(
+                face,
+                options.font_rendering_em_size(),
+                options.bidi_level(),
+                options.culture().cloned(),
+                options.incremental_tab_width(),
+                options.letter_spacing(),
+                options.font_features().cloned(),
+            )
+            .with_concat_flags(options.produce_concat_flags()),
+        )
     }
 
     /// Reports the text of this typeface, which belongs to an incremental face.
@@ -130,6 +179,8 @@ impl FontFeatureShaper {
 
 impl ITextShaperImpl for FontFeatureShaper {
     fn shape_text(&self, text: &ReadOnlyMemory<u16>, options: &TextShaperOptions) -> Rc<ShapedBuffer> {
+        let for_size = self.for_size(options);
+        let options = for_size.as_ref().unwrap_or(options);
         #[cfg(feature = "incremental")]
         {
             let key = Rc::as_ptr(options.glyph_typeface());
