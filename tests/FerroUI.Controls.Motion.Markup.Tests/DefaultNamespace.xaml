@@ -17,7 +17,7 @@
   </Rectangle>
   <Rectangle x:Name="Translation" Width="50" Height="50" Translation="4,5,0">
     <Rectangle.TranslationTransition>
-      <Vector3Transition />
+      <Vector3Transition Components="X, Y" />
     </Rectangle.TranslationTransition>
   </Rectangle>
   <ContentPresenter x:Name="Presenter" Background="Blue" Width="50" Height="50">

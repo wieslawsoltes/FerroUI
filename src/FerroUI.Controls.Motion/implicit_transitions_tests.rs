@@ -1,4 +1,4 @@
-use crate::{ImplicitTransitions, ScalarTransition, Vector3Transition};
+use crate::{ImplicitTransitions, ScalarTransition, Vector3Transition, Vector3TransitionComponents};
 use ferroui_base::animation::{BrushTransition, SignedDuration};
 use ferroui_base::numerics::Vector3;
 use ferroui_base::Vector3D;
@@ -49,6 +49,18 @@ fn a_changed_duration_reaches_every_element_of_the_transition() {
     transition.set_duration(milliseconds(100));
     assert_eq!(first.opacity_transition().map(|value| value.duration()), Some(Duration::from_millis(100)));
     assert!(second.opacity_transition().is_none());
+}
+
+#[test]
+fn the_components_of_a_vector_transition_reach_the_facade() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let element = Border::new();
+    let transition = Vector3Transition::new();
+    assert_eq!(transition.components(), Vector3TransitionComponents::all());
+    ImplicitTransitions::set_scale_transition(&element, Some(transition.clone()));
+    transition.set_components(Vector3TransitionComponents::X | Vector3TransitionComponents::Z);
+    let expected = ferroui_base::Vector3TransitionComponents::X | ferroui_base::Vector3TransitionComponents::Z;
+    assert_eq!(element.scale_transition().map(|value| value.components()), Some(expected));
 }
 
 #[test]

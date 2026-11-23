@@ -35,7 +35,7 @@ const TYPES: &[&TypeInfo] = &[
 
 ferroui_base::ferro_rust_paths! {
     classes: [crate::ParallaxView, crate::ScalarTransition, crate::Vector3Transition],
-    types: [crate::ParallaxSourceOffsetKind, crate::ImplicitTransitions],
+    types: [crate::ParallaxSourceOffsetKind, crate::ImplicitTransitions, crate::Vector3TransitionComponents],
     contracts: [], generics: [], generic_contracts: [],
 }
 
@@ -46,7 +46,7 @@ pub fn register_types() {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_table(TYPES);
-        MarkupType::register_table(&[crate::ParallaxSourceOffsetKind::MARKUP]);
+        MarkupType::register_table(&[crate::ParallaxSourceOffsetKind::MARKUP, crate::Vector3TransitionComponents::MARKUP]);
         register_rust_paths();
         MarkupAssembly::register_table(&ASSEMBLY);
     });

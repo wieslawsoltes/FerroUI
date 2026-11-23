@@ -19,7 +19,7 @@ mod parallax_expressions;
 mod parallax_view;
 mod register_types;
 
-pub use implicit_transitions::{ImplicitTransitions, ScalarTransition, Vector3Transition};
+pub use implicit_transitions::{ImplicitTransitions, ScalarTransition, Vector3Transition, Vector3TransitionComponents};
 pub use parallax_view::{ParallaxSourceOffsetKind, ParallaxView};
 pub use register_types::{register_types, ASSEMBLY};
 

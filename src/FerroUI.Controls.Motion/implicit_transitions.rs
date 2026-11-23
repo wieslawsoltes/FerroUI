@@ -108,6 +108,32 @@ impl ScalarTransition {
     }
 }
 
+bitflags::bitflags! {
+    /// `Microsoft.UI.Xaml.Vector3TransitionComponents`: the components a [`Vector3Transition`]
+    /// animates. The others take their new value at once.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
+    pub struct Vector3TransitionComponents: u32 {
+        /// The X component.
+        const X = 1;
+        /// The Y component.
+        const Y = 2;
+        /// The Z component.
+        const Z = 4;
+    }
+}
+
+impl Default for Vector3TransitionComponents {
+    fn default() -> Self {
+        Self::all()
+    }
+}
+
+ferroui_base::ferro_markup_enum!(flags Vector3TransitionComponents {
+    X = Vector3TransitionComponents::X,
+    Y = Vector3TransitionComponents::Y,
+    Z = Vector3TransitionComponents::Z,
+}, { namespace: "FerroUI.Controls" });
+
 /// `Microsoft.UI.Xaml.Vector3Transition`: the animation of a change of `Scale` or `Translation`.
 #[repr(C)]
 pub struct Vector3Transition {
@@ -124,13 +150,19 @@ ferro_properties! {
         pub fn duration_property() -> StyledProperty<SignedDuration> {
             FerroProperty::register::<Vector3Transition, _>("Duration", SignedDuration::from_ticks(300 * SignedDuration::TICKS_PER_MILLISECOND))
         }
+        /// Defines the `Components` property: all three by default.
+        pub fn components_property() -> StyledProperty<Vector3TransitionComponents> {
+            FerroProperty::register::<Vector3Transition, _>("Components", Vector3TransitionComponents::all())
+        }
     }
 }
 
 impl FerroObjectImpl for Vector3Transition {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
-        if change.property() == Self::duration_property().as_property() {
+        if change.property() == Self::duration_property().as_property()
+            || change.property() == Self::components_property().as_property()
+        {
             let value = this.value();
             this.targets.borrow_mut().retain(|(visual, _)| visual.upgrade().is_some());
             for (visual, facade) in this.targets.borrow().iter() {
@@ -163,8 +195,19 @@ impl Vector3Transition {
         self.set_value(Self::duration_property(), value);
     }
 
+    /// The components that animate.
+    pub fn components(&self) -> Vector3TransitionComponents {
+        self.get_value(Self::components_property())
+    }
+
+    /// Sets [`components`](Self::components); the elements that use the transition follow.
+    pub fn set_components(&self, value: Vector3TransitionComponents) {
+        self.set_value(Self::components_property(), value);
+    }
+
     fn value(&self) -> ferroui_base::Vector3Transition {
-        ferroui_base::Vector3Transition::with(std_duration(self.duration()), ferroui_base::Vector3TransitionComponents::all())
+        let components = ferroui_base::Vector3TransitionComponents::from_bits_truncate(self.components().bits());
+        ferroui_base::Vector3Transition::with(std_duration(self.duration()), components)
     }
 }
 

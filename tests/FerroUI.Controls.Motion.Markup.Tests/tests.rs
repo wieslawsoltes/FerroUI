@@ -20,7 +20,8 @@ fn assert_page(root: &Ref<StackPanel>) {
     assert!(scale.scale_transition().is_some());
     assert_eq!(scale.scale(), Vector3::new(2.0, 2.0, 1.0));
     let translation = named(root, "Translation");
-    assert!(translation.translation_transition().is_some());
+    let components = translation.translation_transition().map(|value| value.components());
+    assert_eq!(components, Some(ferroui_base::Vector3TransitionComponents::X | ferroui_base::Vector3TransitionComponents::Y));
     assert_eq!(translation.translation(), Vector3D::new(4.0, 5.0, 0.0));
     for name in ["Presenter", "Panel"] {
         let element = named(root, name);

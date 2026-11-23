@@ -18,6 +18,7 @@ links = "ferroui_controls_motion_xaml"
 path = "lib.rs"
 
 [dependencies]
+bitflags.workspace = true
 ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
 
