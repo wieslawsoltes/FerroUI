@@ -80,6 +80,12 @@ pub struct TextLayout {
     paragraph_styles: Option<TextParagraphStyles>,
     line_placements: Vec<LinePlacement>,
     metrics: CachedMetrics,
+    /// The ink metrics of the layout, measured when first asked for: they need the platform
+    /// glyph runs of the lines (step 3 of docs/porting/text-layout-performance.md).
+    ink: std::cell::Cell<Option<LayoutInk>>,
+    /// The first line of the largest width with trailing white space, whose overhangs are the
+    /// overhangs of the layout.
+    widest_line: Option<usize>,
     text_run_cache: Option<Rc<TextRunCache>>,
 
     text_source_length: i32,
@@ -210,6 +216,8 @@ impl TextLayout {
             paragraph_styles: TextParagraphStyle::normalize(paragraph_styles),
             line_placements: Vec::new(),
             metrics: CachedMetrics::default(),
+            ink: std::cell::Cell::new(None),
+            widest_line: None,
             text_run_cache,
             text_source_length: 0,
             max_width,
@@ -353,7 +361,7 @@ impl TextLayout {
     /// The distance from the topmost black pixel of the first line to the
     /// bottommost black pixel of the last line.
     pub fn extent(&self) -> f64 {
-        self.metrics.extent
+        self.layout_ink().extent
     }
 
     /// The distance from the top of the first line to the baseline of the first line.
@@ -363,17 +371,17 @@ impl TextLayout {
 
     /// The distance from the bottom of the last line to the extent bottom.
     pub fn overhang_after(&self) -> f64 {
-        self.metrics.overhang_after
+        self.layout_ink().overhang_after
     }
 
     /// The maximum distance from the leading black pixel to the leading alignment point of a line.
     pub fn overhang_leading(&self) -> f64 {
-        self.metrics.overhang_leading
+        self.layout_ink().overhang_leading
     }
 
     /// The maximum distance from the trailing black pixel to the trailing alignment point of a line.
     pub fn overhang_trailing(&self) -> f64 {
-        self.metrics.overhang_trailing
+        self.layout_ink().overhang_trailing
     }
 
     /// The maximum advance width between the leading and trailing alignment
@@ -388,6 +396,24 @@ impl TextLayout {
     /// end of the line.
     pub fn width_including_trailing_whitespace(&self) -> f64 {
         self.metrics.width_including_trailing_whitespace
+    }
+
+    /// The ink metrics of the layout.
+    fn layout_ink(&self) -> LayoutInk {
+        if let Some(ink) = self.ink.get() {
+            return ink;
+        }
+        let ink = LayoutInk::of(&self.text_lines, self.widest_line);
+        self.ink.set(Some(ink));
+        ink
+    }
+
+    /// Measures the ink of `lines` now: a line is about to change (trimmed or justified) and the
+    /// metrics of the layout are those of the lines as they were laid out.
+    fn settle_ink(&self, lines: &[Rc<dyn TextLine>]) {
+        if self.ink.get().is_none() {
+            self.ink.set(Some(LayoutInk::of(lines, self.widest_line)));
+        }
     }
 
     /// The range of maximum widths `[low, high)` over which a layout of the same text with the
@@ -910,6 +936,7 @@ impl TextLayout {
                 if !self.is_trimming_none() && has_real_content
                     && text_lines[last].text_line_break().is_some_and(|value| value.is_split())
                 {
+                    self.settle_ink(&text_lines);
                     text_lines[last] = self.collapse_for_truncation(text_lines[last].clone(),
                         &self.line_placements[last].properties);
                 }
@@ -920,6 +947,7 @@ impl TextLayout {
                 self.truncated_by_max_lines |= has_real_content;
                 if !self.is_trimming_none() && has_real_content {
                     let last = text_lines.len() - 1;
+                    self.settle_ink(&text_lines);
                     text_lines[last] = self.collapse_for_truncation(text_lines[last].clone(),
                         &self.line_placements[last].properties);
                 }
@@ -951,6 +979,7 @@ impl TextLayout {
             if placement.properties.text_alignment() != TextAlignment::Justify
                 || !placement.width.is_finite() || placement.width <= 0.0
                 || index + 1 == text_lines.len() || Self::required_break(&**line) { continue; }
+            self.settle_ink(&text_lines);
             line.justify(&InterWordJustification::new(placement.width));
         }
         let result = text_lines.to_vec();
@@ -968,26 +997,18 @@ impl TextLayout {
         //    use the maximum of the line widths rather than the bounding box.
         metrics.width = metrics.width.max(indent + current_line.width());
 
-        // 3) Extent is the max black-pixel extent among lines.
-        metrics.extent = metrics.extent.max(current_line.extent());
-
-        // 4) TextWidth is the max of the text width among lines.
-        // We choose to update all related metrics at once (OverhangLeading,
-        // WidthIncludingTrailingWhitespace, OverhangTrailing) if the current line has a
-        // larger text width.
+        // 3) TextWidth is the max of the text width among lines. The overhangs of the layout
+        // are those of the first line of that width (`LayoutInk`, measured when asked for).
         let previous_text_width = metrics.width_including_trailing_whitespace;
         let text_width = indent + current_line.width_including_trailing_whitespace();
 
         if previous_text_width < text_width {
             metrics.width_including_trailing_whitespace = text_width;
-            metrics.overhang_leading = current_line.overhang_leading();
-            metrics.overhang_trailing = current_line.overhang_trailing();
+            // The line is pushed after its placement.
+            self.widest_line = Some(self.line_placements.len() - 1);
         }
 
-        // 5) OverhangAfter is the last line's OverhangAfter.
-        metrics.overhang_after = current_line.overhang_after();
-
-        // 6) Capture the baseline from the first line.
+        // 4) Capture the baseline from the first line.
         if *first {
             metrics.baseline = origin.y + current_line.baseline();
             *first = false;
@@ -1038,8 +1059,37 @@ impl TextLayout {
             return;
         }
 
+        // What was drawn stays for the next layout of the text: a line of the same glyphs takes
+        // its platform glyph run. The lines make those when they are drawn, after the layout.
+        if let Some(text_run_cache) = &self.text_run_cache {
+            text_run_cache.keep_drawn_glyph_runs();
+        }
+
         for line in &self.text_lines {
             line.dispose();
+        }
+    }
+}
+
+/// The metrics of a layout that come from the ink of its lines.
+#[derive(Clone, Copy, Default)]
+struct LayoutInk {
+    extent: f64,
+    overhang_after: f64,
+    overhang_leading: f64,
+    overhang_trailing: f64,
+}
+
+impl LayoutInk {
+    /// The extent is the largest of the lines, the overhang after is the one of the last line
+    /// and the leading and trailing overhangs are those of `widest_line`.
+    fn of(lines: &[Rc<dyn TextLine>], widest_line: Option<usize>) -> Self {
+        let widest = widest_line.and_then(|index| lines.get(index));
+        Self {
+            extent: lines.iter().fold(0.0, |extent: f64, line| extent.max(line.extent())),
+            overhang_after: lines.last().map_or(0.0, |line| line.overhang_after()),
+            overhang_leading: widest.map_or(0.0, |line| line.overhang_leading()),
+            overhang_trailing: widest.map_or(0.0, |line| line.overhang_trailing()),
         }
     }
 }
@@ -1060,11 +1110,4 @@ struct CachedMetrics {
     width: f64,
     width_including_trailing_whitespace: f64,
 
-    // vertical bounding box metrics
-    extent: f64,
-    overhang_after: f64,
-
-    // horizontal bounding box metrics
-    overhang_leading: f64,
-    overhang_trailing: f64,
 }

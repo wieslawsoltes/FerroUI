@@ -43,6 +43,9 @@ pub struct FontManager {
     /// The layouts of plain text made with this font manager, by what they were made of
     /// (FerroUI addition, docs/porting/desktop-performance.md, section 9.29).
     text_layouts: TextLayoutCache,
+    /// The prepared paragraphs of `PreparedParagraph::shared`, made at the first use. Behind
+    /// `Any`: a font manager whose application never asks for one links none of their code.
+    prepared_paragraphs: OnceCell<Box<dyn std::any::Any>>,
 }
 
 crate::ferro_thread_local! {
@@ -106,6 +109,7 @@ impl FontManager {
             resolved_glyph_typefaces: RefCell::new(HashMap::new()),
             resolved_generation: Cell::new(0),
             text_layouts: TextLayoutCache::new(),
+            prepared_paragraphs: OnceCell::new(),
         };
 
         let default_font_family_name = font_manager.get_default_font_family_name(options.as_deref());
@@ -177,6 +181,14 @@ impl FontManager {
     /// The layouts of plain text made with this font manager.
     pub(crate) fn text_layouts(&self) -> &TextLayoutCache {
         &self.text_layouts
+    }
+
+    /// The prepared paragraphs this font manager keeps.
+    pub(crate) fn prepared_paragraphs(&self) -> &crate::media::text_formatting::PreparedParagraphs {
+        self.prepared_paragraphs
+            .get_or_init(crate::media::text_formatting::PreparedParagraphs::boxed)
+            .downcast_ref()
+            .expect("only prepared paragraphs are stored here")
     }
 
     /// Gets the system's default font family.

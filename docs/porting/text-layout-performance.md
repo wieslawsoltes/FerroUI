@@ -148,6 +148,27 @@ changes behavior upstream defines.
    or asked for, not to measure. A public API in `ferroui-base` (`PreparedParagraph`: prepare,
    layout at a width, line ranges, natural width, line count) serves `TextBlock`, `RichTextBlock`,
    `SelectableTextBlock`, `TextPresenter`, `FormattedText` and applications.
+
+   Done:
+   - **Ink when asked for.** A line measures its ink bounds, extent and overhangs at the first
+     read (`TextLineImpl::measure_ink`), and a layout its own from them (`LayoutInk`). The ink
+     needs the platform glyph run of every run, so a layout that is only measured makes none.
+     The values are those of the lines as they were laid out: a layout measures its ink before
+     it trims or justifies a line, whose ink then changes. A line that was disposed no longer
+     measures (its runs are released) and reports no ink.
+   - **Glyph runs across layouts.** The lines now make their platform glyph runs after the
+     layout, so the run cache takes them later: from the lines of the last layout when the next
+     layout starts, and when a layout is let go (`keep_drawn_glyph_runs`).
+   - **`PreparedParagraph`** (public, `ferroui-base`): prepare a text, then `layout`, `lines`,
+     `line_count`, `height` at a width and `natural_width`. It shapes once and keeps the layout
+     for any width inside its hold when the lines do not move with the width. The text formatter
+     makes its lines, so they are the lines of a new `TextLayout` at that width (a sweep test
+     compares them in the three wrapping modes).
+
+   Left, until a measurement asks for it: lines as ranges without line objects. Wrapping already
+   searches the prefix sums of the advances and reads the break table, so what a new width still
+   costs is the split runs and the line objects. The controls keep their own run cache and width
+   hold and do not use `PreparedParagraph`; moving them to it changes no result by itself.
 4. **Cache fixes.** `SelectableTextBlock` passes no run cache (it shapes on every layout);
    `TextBlock` drops its shaped runs on a foreground or decoration change, which do not change
    shaping.
@@ -162,9 +183,22 @@ changes behavior upstream defines.
    properties, a change of the run cache of its own.
 5. **Stable glyph runs.** Lines cut at the same range of the same shaped run reuse their glyph
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
+
+   Covered for long texts by step 7: the lines of a layout give their platform glyph runs to the
+   lines of the next layout that have the same glyphs, now also when those runs were made after
+   the layout (step 3). A short text keeps no table of its lines: its layouts are shared
+   (section 9.29 of desktop-performance.md), and a run that is laid out but not drawn no longer
+   makes a platform glyph run at all.
 6. **A shared text service.** The prepared paragraphs and their caches (key: text, properties
    and paragraph properties; admission of a changed text on its second use; ageing by layout
    pass) as a service any control or application uses, as the comparison's layout cache is.
+
+   Done as `PreparedParagraph::shared`: one prepared paragraph for a text, its run properties and
+   its paragraph properties, kept by the font manager from the second use of the text. Of the
+   paragraphs nothing else holds, the ones used last stay (512 paragraphs, 1 MB of text), aged by
+   use rather than by layout pass, because the text layer has no hook into the layout pass. A
+   change of the fonts lets all of them go. The font manager stores the set behind `Any`, so an
+   application that never asks for a shared paragraph links none of it.
 
 7. **Edits.** A text that is set again with a small change (a word of a paragraph replaced, a
    message that grows as it streams) is laid out again whole: one frame of the `paragraph` scene

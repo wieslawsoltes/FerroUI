@@ -31,8 +31,23 @@ pub struct TextLineImpl {
     length: i32,
     has_collapsed: bool,
 
+    /// Whether the ink of the line (its ink bounds, extent and overhangs) is still to be measured
+    /// ([`TextLineImpl::measure_ink`]): it needs the platform glyph runs, which a layout that is
+    /// only measured never draws (step 3 of docs/porting/text-layout-performance.md).
+    ink_pending: Cell<bool>,
     ink_bounds: Cell<Rect>,
     bounds: Cell<Rect>,
+}
+
+/// The vertical box of a line, from the metrics of its runs.
+struct LineBox {
+    ascent: f64,
+    height: f64,
+    baseline: f64,
+    /// How far below the top of the box the ink bounds are drawn.
+    ink_offset: f64,
+    /// How far the ink bounds, aligned at a baseline `-ascent` below the top, are moved.
+    ink_shift: f64,
 }
 
 impl TextLineImpl {
@@ -58,6 +73,7 @@ impl TextLineImpl {
             first_text_source_index,
             length,
             has_collapsed,
+            ink_pending: Cell::new(false),
             ink_bounds: Cell::new(Rect::default()),
             bounds: Cell::new(Rect::default()),
         })
@@ -82,7 +98,69 @@ impl TextLineImpl {
     /// The ink bounds of the line.
     #[allow(dead_code)] // used by the text layout (a later step)
     pub(crate) fn ink_bounds(&self) -> Rect {
+        self.ensure_ink();
         self.ink_bounds.get()
+    }
+
+    /// Measures the ink of the line when it is first asked for.
+    #[inline]
+    fn ensure_ink(&self) {
+        if self.ink_pending.replace(false) {
+            self.measure_ink();
+        }
+    }
+
+    /// The metrics of the line with its ink measured.
+    fn metrics_with_ink(&self) -> TextLineMetrics {
+        self.ensure_ink();
+        self.text_line_metrics.get()
+    }
+
+    /// Measures the ink bounds of the runs, which makes their platform glyph runs, and the extent
+    /// and overhangs that follow from them.
+    fn measure_ink(&self) {
+        let text_runs = self.text_runs.borrow();
+        let line_box = self.line_box(&text_runs);
+        let mut metrics = self.text_line_metrics.get();
+        let mut ink_bounds = Rect::default();
+        let mut advance = 0f64;
+
+        for run in text_runs.iter() {
+            if let Some(text_run) = run.downcast_ref::<ShapedTextRun>() {
+                // Align the ink bounds at the common baseline
+                let offset_y = -line_box.ascent - text_run.baseline();
+
+                let run_bounds = text_run.glyph_run().ink_bounds().translate(Vector::new(advance, offset_y));
+
+                ink_bounds = ink_bounds.union(run_bounds);
+
+                advance += text_run.size().width;
+            } else if let Some(drawable_text_run) = run.as_drawable() {
+                // Align the bounds at the common baseline
+                let offset_y = -line_box.ascent - drawable_text_run.baseline();
+
+                ink_bounds = ink_bounds.union(Rect::from_position_size(
+                    Point::new(advance, offset_y),
+                    drawable_text_run.size(),
+                ));
+
+                advance += drawable_text_run.size().width;
+            }
+        }
+
+        metrics.extent = ink_bounds.height;
+        // The height of overhanging pixels at the bottom
+        metrics.overhang_after = ink_bounds.bottom() - metrics.height + line_box.ink_offset;
+        // The reference keeps the ink bounds of a line aligned at a baseline `-ascent` below its
+        // top; a trimmed box moves them with its baseline.
+        let ink_bounds = ink_bounds.translate(Vector::new(0.0, line_box.ink_shift));
+        // The width of overhanging pixels at the natural alignment point. Positive value means we are inside.
+        metrics.overhang_leading = ink_bounds.left();
+        // The width of overhanging pixels at the end of the natural bounds. Positive value means we are inside.
+        metrics.overhang_trailing = metrics.width_including_trailing_whitespace - ink_bounds.right();
+
+        self.ink_bounds.set(ink_bounds.translate(Vector::new(metrics.start, 0.0)));
+        self.text_line_metrics.set(metrics);
     }
 
     /// The vertical offset that aligns a run in a line according to the
@@ -782,16 +860,13 @@ impl TextLineImpl {
         (current_run, text_position)
     }
 
-    fn create_line_metrics(&self) -> TextLineMetrics {
-        let text_runs = self.text_runs.borrow();
+    /// The vertical box of the line.
+    fn line_box(&self, text_runs: &[Rc<dyn TextRun>]) -> LineBox {
         let default_text_run_properties = self.paragraph_properties.default_text_run_properties();
 
         let font_metrics = default_text_run_properties.cached_glyph_typeface().metrics();
         let font_rendering_em_size = default_text_run_properties.effective_font_rendering_em_size();
         let scale = font_rendering_em_size / font_metrics.design_em_height as f64;
-        let mut width_including_whitespace = 0f64;
-        let mut trailing_whitespace_length = 0;
-        let mut new_line_length = 0;
         let mut ascent = font_metrics.ascent as f64 * scale;
         let mut descent = font_metrics.descent as f64 * scale;
         let mut line_gap = font_metrics.line_gap as f64 * scale;
@@ -834,32 +909,6 @@ impl TextLineImpl {
             }
         }
 
-        let mut ink_bounds = Rect::default();
-
-        for run in text_runs.iter() {
-            if let Some(text_run) = run.downcast_ref::<ShapedTextRun>() {
-                let glyph_run = text_run.glyph_run();
-                // Align the ink bounds at the common baseline
-                let offset_y = -ascent - text_run.baseline();
-
-                let run_bounds = glyph_run.ink_bounds().translate(Vector::new(width_including_whitespace, offset_y));
-
-                ink_bounds = ink_bounds.union(run_bounds);
-
-                width_including_whitespace += text_run.size().width;
-            } else if let Some(drawable_text_run) = run.as_drawable() {
-                // Align the bounds at the common baseline
-                let offset_y = -ascent - drawable_text_run.baseline();
-
-                ink_bounds = ink_bounds.union(Rect::from_position_size(
-                    Point::new(width_including_whitespace, offset_y),
-                    drawable_text_run.size(),
-                ));
-
-                width_including_whitespace += drawable_text_run.size().width;
-            }
-        }
-
         let half_line_gap = line_gap * 0.5;
 
         // The box of the line (a FerroUI addition after WinUI's TextLineBounds,
@@ -867,7 +916,7 @@ impl TextLineImpl {
         // line gap, or the cap height when the top is trimmed; below it the descent and half the
         // line gap, or nothing when the bottom is trimmed. `Full` is the reference's box.
         let (above, gap_above, below, gap_below) = if use_font_family {
-            let metrics = self.font_family_line_metrics(&text_runs);
+            let metrics = self.font_family_line_metrics(text_runs);
             (metrics.baseline, 0.0, metrics.height - metrics.baseline, 0.0)
         } else {
             let (above, gap_above) =
@@ -902,6 +951,34 @@ impl TextLineImpl {
         // draw baseline, including a caller's explicit line height. Other
         // alignment modes and the default policy retain their existing rules.
         let ink_offset = if use_font_family { baseline + ascent } else { ink_offset };
+        let ink_shift = if use_font_family {
+            ink_offset
+        } else if text_line_bounds == TextLineBounds::Full {
+            0.0
+        } else {
+            ink_offset - half_line_gap
+        };
+
+        LineBox { ascent, height, baseline, ink_offset, ink_shift }
+    }
+
+    /// The metrics of the line without its ink, which [`TextLineImpl::measure_ink`] adds when it
+    /// is asked for.
+    fn create_line_metrics(&self) -> TextLineMetrics {
+        let text_runs = self.text_runs.borrow();
+        let line_box = self.line_box(&text_runs);
+        let height = line_box.height;
+        let mut width_including_whitespace = 0f64;
+        let mut trailing_whitespace_length = 0;
+        let mut new_line_length = 0;
+
+        for run in text_runs.iter() {
+            if let Some(text_run) = run.downcast_ref::<ShapedTextRun>() {
+                width_including_whitespace += text_run.size().width;
+            } else if let Some(drawable_text_run) = run.as_drawable() {
+                width_including_whitespace += drawable_text_run.size().width;
+            }
+        }
 
         let mut width = width_including_whitespace;
 
@@ -937,43 +1014,26 @@ impl TextLineImpl {
             }
         }
 
-        let extent = ink_bounds.height;
-        // The height of overhanging pixels at the bottom
-        let overhang_after = ink_bounds.bottom() - height + ink_offset;
-        // The reference keeps the ink bounds of a line aligned at a baseline `-ascent` below its
-        // top; a trimmed box moves them with its baseline.
-        let ink_bounds = if use_font_family {
-            ink_bounds.translate(Vector::new(0.0, ink_offset))
-        } else if text_line_bounds == TextLineBounds::Full {
-            ink_bounds
-        } else {
-            ink_bounds.translate(Vector::new(0.0, ink_offset - half_line_gap))
-        };
-        // The width of overhanging pixels at the natural alignment point. Positive value means we are inside.
-        let overhang_leading = ink_bounds.left();
-        // The width of overhanging pixels at the end of the natural bounds. Positive value means we are inside.
-        let overhang_trailing = width_including_whitespace - ink_bounds.right();
         let has_overflowed = MathUtilities::greater_than(width, self.paragraph_width);
 
         let start = self.get_paragraph_offset_x(width, width_including_whitespace);
 
-        self.ink_bounds.set(ink_bounds.translate(Vector::new(start, 0.0)));
-
         self.bounds.set(Rect::new(start, 0.0, width_including_whitespace, height));
+        self.ink_pending.set(true);
 
         TextLineMetrics {
             has_overflowed,
             height,
-            extent,
+            extent: 0.0,
             newline_length: new_line_length,
             start,
-            text_baseline: baseline,
+            text_baseline: line_box.baseline,
             trailing_whitespace_length,
             width,
             width_including_trailing_whitespace: width_including_whitespace,
-            overhang_leading,
-            overhang_trailing,
-            overhang_after,
+            overhang_leading: 0.0,
+            overhang_trailing: 0.0,
+            overhang_after: 0.0,
         }
     }
 
@@ -1114,7 +1174,7 @@ impl TextLine for TextLineImpl {
     }
 
     fn extent(&self) -> f64 {
-        self.text_line_metrics.get().extent
+        self.metrics_with_ink().extent
     }
 
     fn height(&self) -> f64 {
@@ -1126,15 +1186,15 @@ impl TextLine for TextLineImpl {
     }
 
     fn overhang_after(&self) -> f64 {
-        self.text_line_metrics.get().overhang_after
+        self.metrics_with_ink().overhang_after
     }
 
     fn overhang_leading(&self) -> f64 {
-        self.text_line_metrics.get().overhang_leading
+        self.metrics_with_ink().overhang_leading
     }
 
     fn overhang_trailing(&self) -> f64 {
-        self.text_line_metrics.get().overhang_trailing
+        self.metrics_with_ink().overhang_trailing
     }
 
     fn trailing_whitespace_length(&self) -> i32 {
@@ -1650,6 +1710,8 @@ impl TextLine for TextLineImpl {
     }
 
     fn dispose(&self) {
+        // The runs are released: ink that was not asked for is not measured any more.
+        self.ink_pending.set(false);
         for text_run in self.text_runs.borrow().iter() {
             if let Some(shaped_text_run) = text_run.downcast_ref::<ShapedTextRun>() {
                 shaped_text_run.dispose();
