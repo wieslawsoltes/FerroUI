@@ -54,8 +54,8 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 | Page state | Count |
 |---|---:|
 | pending | 35 |
-| partial | 27 |
-| ported | 64 |
+| partial | 25 |
+| ported | 66 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -93,11 +93,11 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | ComboBox | Basic input | partial | 3 |
 | CommandBar | Menus & toolbars | ported | 1 |
 | CommandBarFlyout | Menus & toolbars | pending | 1 |
-| CompactSizing | Styles | partial | 1 |
+| CompactSizing | Styles | ported | 1 |
 | ConnectedAnimation | Motion | partial | 4 |
 | ContentDialog | Dialogs & flyouts | pending | 2 |
 | ContentIsland | System | pending | 0 |
-| CustomUserControls | Fundamentals | partial | 3 |
+| CustomUserControls | Fundamentals | ported | 3 |
 | CustomXamlConditionals | Fundamentals | pending | 3 |
 | DatePicker | Date & time | ported | 2 |
 | DropDownButton | Basic input | ported | 2 |
