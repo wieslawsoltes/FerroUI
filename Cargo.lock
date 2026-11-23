@@ -1695,12 +1695,13 @@ dependencies = [
  "block2",
  "ferroui-android",
  "ferroui-base",
+ "ferroui-browser",
  "ferroui-build-scan",
  "ferroui-controls",
  "ferroui-system",
- "jni-sys 0.4.1",
  "libc",
  "objc2",
+ "wasm-bindgen",
  "windows-sys 0.61.2",
 ]
 
