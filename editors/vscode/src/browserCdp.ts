@@ -17,6 +17,7 @@ export class BrowserCdp {
     private readonly pending = new Map<number, (reply?: Reply) => void>();
     private readonly listeners = new Set<(event: BrowserEvent) => void>();
     private readonly life = new AbortController();
+    readonly signal = this.life.signal;
     readonly closed: Promise<void>;
     private ended!: () => void;
 
@@ -47,8 +48,9 @@ export class BrowserCdp {
         });
     }
 
-    onEvent(listener: (event: BrowserEvent) => void): void {
+    onEvent(listener: (event: BrowserEvent) => void): () => void {
         this.listeners.add(listener);
+        return () => { this.listeners.delete(listener); };
     }
 
     accept(packet: string): void {

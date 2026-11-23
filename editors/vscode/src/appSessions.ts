@@ -56,7 +56,11 @@ export class AppSessions implements vscode.Disposable {
             new DeviceAppCommands(simulators, android, runtime => this.open(runtime)),
             new BrowserAppCommands(browser, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
-            managed('select'), managed('rebuild'), managed('debug'), managed('showOutput'),
+            managed('select'), managed('debug'),
+            command('rebuild', session => session.browser?.development ? this.browser.rebuild(session.runtime)
+                : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session)),
+            command('showOutput', session => session.browser?.development ? this.browser.showOutput()
+                : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session)),
             command('stop', session => this.stop(session)),
         ];
     }
@@ -87,10 +91,11 @@ export class AppSessions implements vscode.Disposable {
         item.description = [session.pid ? `PID ${session.pid}` : undefined, session.status].filter(Boolean).join(' · ');
         item.tooltip = `${session.label}\n${item.description}${selected ? '\nSelected managed app' : ''}`;
         item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
-        const problem = run && 'problem' in run && run.problem;
+        const problem = (run && 'problem' in run && run.problem) || (session.browser?.development && session.status.endsWith('failed'));
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : selected ? 'play-circle'
             : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
-        item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
+        item.contextValue = session.browser?.development ? 'app-session-browser-development'
+            : run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         item.command = { command: 'ferroui.appSessions.preview', title: 'Open Live App', arguments: [session.runtime] };
         return item;
     }

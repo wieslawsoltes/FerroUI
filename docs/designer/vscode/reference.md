@@ -278,10 +278,17 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 ### Run or attach a browser app with MCP
 
 1. Call `ferroui_browser_targets` to read the workspace browser profiles. Use `folder` when the same profile ID is present in several workspace folders.
-2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_browser_run` with `profile` and its `folder`, or call `ferroui_browser_attach` for a profile with an independently started Chromium tab and debug port. Either action returns the exact `runtime` and `generation` after the first browser frame.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_browser_run` with `profile` and its `folder`, or call `ferroui_browser_attach` for a profile with an independently started Chromium tab and debug port. A served profile returns the exact `runtime` and `generation` after the first browser frame. A managed build profile returns its session while the first build runs.
 3. Use `ferroui_runtime_open` to show the session in Live App. Use `ferroui_runtime_tools`, `ferroui_runtime_query`, and `ferroui_runtime_call` to read the shared FerroUI inspector, capture a PNG, and send input where the app permits it. The browser uses the workspace’s editor MCP server. Use `ferroui_browser_stop` with that exact runtime to release the connection. A newly attached document has a new runtime and generation. [Configure a browser app](runtime.md#run-or-attach-a-browser-app)
 
 [App Sessions in the workbench](runtime.md#run-several-app-sessions)
+
+### Build and reload a browser app with MCP
+
+1. Choose a profile with `build` from `ferroui_browser_targets` and call `ferroui_browser_run`. Pass the returned `runtime` to `ferroui_runtime_open` to pin its Live App tab. Read `ferroui_app_sessions` until the session is available and has an inspector generation.
+2. Save authored source in VS Code or call `ferroui_browser_rebuild` with that runtime. The rebuild tool queues the build and returns the current session. Use `ferroui_browser_output` with the same runtime and optional `lines` to read compiler and startup messages.
+3. Read `ferroui_reload_history` with the browser runtime ID as `app_session` for save outcomes and accepted frame receipts. A successful build keeps its runtime ID and advances its inspection generation. Use the new generation for inspector, view, and source operations. A failed build or startup leaves the accepted generation available.
+4. Call `ferroui_browser_stop` with the runtime ID to release the compiler, browser, and temporary sites. [Managed browser build setup](runtime.md#build-and-reload-a-browser-app-in-vs-code)
 
 ### Control the Live App editor with MCP
 
@@ -536,7 +543,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.android.adbPath` | Empty | Select the Android Debug Bridge executable on the workspace host. |
 | `ferroui.android.apps` | `[]` | Set profiles for debuggable Android apps with an opted-in Live App inspector. A profile can install its APK before launching. |
 | `ferroui.browser.executablePath` | Empty | Select a custom Chrome or Chromium executable on the workspace host. |
-| `ferroui.browser.apps` | `[]` | Set browser profiles with an exact loopback `url`, optional managed viewport, and a `debugPort` for attach. |
+| `ferroui.browser.apps` | `[]` | Set a managed `build` with its Cargo application, or a served profile with an exact loopback `url` and optional attach port. Both accept viewport dimensions. |
 | `ferroui.hotReload.cargoPath` | Empty | Choose a specific Cargo executable on the workspace host. |
 | `ferroui.hotReload.registeredSupervisor` | `scripts/hot-reload/supervisor.py` | Choose a workspace-relative script for registered Rust patching and state handoff. |
 | `ferroui.hotReload.pythonPath` | Empty | Select the Python executable for that supervisor. |

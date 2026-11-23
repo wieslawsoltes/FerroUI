@@ -1,13 +1,18 @@
 import * as vscode from 'vscode';
+import { BrowserDevelopment } from './browserDevelopment';
 import { BrowserInspection } from './browserInspection';
 import { attachBrowser, launchBrowser, type BrowserPage } from './browserProcess';
-import { browserProfiles, type BrowserApp, type BrowserMode, type BrowserRequest } from './browserTargets';
+import { browserProfiles, type BrowserApp, type BrowserMode, type BrowserRequest, type ServedBrowserApp } from './browserTargets';
+import type { ReloadHistory } from './reloadHistory';
+import { ReloadLog } from './reloadLog';
+import type { ProjectMetadata } from './reloadProcess';
+import { reloadWatchPattern } from './reloadScope';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import { verifyRuntime } from './runtimeReady';
 import type { AppRuntime } from './runtimeTargets';
 
 interface Session {
-    app: BrowserApp;
+    app: ServedBrowserApp;
     page: Promise<BrowserPage>;
     stop: AbortController;
     runtime?: AppRuntime;
@@ -17,14 +22,30 @@ interface Session {
 export class BrowserSessions implements vscode.Disposable {
     private readonly lifetime = new AbortController();
     private readonly sessions = new Map<string, Session>();
+    private readonly development = new Map<string, BrowserDevelopment>();
+    private readonly subscriptions: vscode.Disposable[];
+    private output?: vscode.OutputChannel;
+    private closing?: Promise<void>;
     private readonly folders = vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
         const closed = new Set(removed.map(folder => folder.uri.toString()));
         for (const [key, session] of this.sessions) {
             if (closed.has(session.app.folder)) this.retire(key, session);
         }
+        for (const [key, session] of this.development) {
+            if (closed.has(session.app.folder)) void this.closeDevelopment(key, session).catch(error => console.warn(error));
+        }
     });
 
-    constructor(private readonly connections: RuntimeConnections) {}
+    constructor(private readonly connections: RuntimeConnections, private readonly history: ReloadHistory,
+        private readonly publish: (metadata: ProjectMetadata) => void) {
+        const observe = (uri: vscode.Uri) => { for (const session of this.development.values()) session.observe(uri); };
+        const watchers = [reloadWatchPattern, '**/Cargo.lock', '**/.cargo/config{,.toml}', '**/wwwroot/**'];
+        this.subscriptions = [this.folders, vscode.workspace.onDidSaveTextDocument(document => observe(document.uri)),
+            ...watchers.flatMap(pattern => {
+                const watcher = vscode.workspace.createFileSystemWatcher(pattern);
+                return [watcher, watcher.onDidChange(observe), watcher.onDidCreate(observe), watcher.onDidDelete(observe)];
+            })];
+    }
 
     targets(folder?: string) {
         this.requireWorkspace();
@@ -37,13 +58,25 @@ export class BrowserSessions implements vscode.Disposable {
         const apps = this.targets(request.folder).apps.filter(app => app.id === request.profile);
         if (apps.length !== 1) throw new Error('Choose an unambiguous browser app profile.');
         const [app] = apps;
+        if (app.build && mode === 'attach') throw new Error('Run this managed browser profile from App Sessions.');
         const key = mode === 'attach' ? `page:${app.debugPort}:${app.url}` : `run:${app.folder}:${app.id}`;
-        const current = this.sessions.get(key);
+        const current = this.sessions.get(key) ?? this.development.get(key);
         if (current) {
             const ready = current.runtime && this.connections.describe(current.runtime);
             if (ready && sameProfile(current.app, app)) return ready;
             throw new Error('Close the current browser session before opening this profile.');
         }
+        if (app.build) {
+            this.output ??= vscode.window.createOutputChannel('FerroUI Browser Reload');
+            const session = new BrowserDevelopment(app, this.connections, this.history, new ReloadLog(this.output), this.publish);
+            this.development.set(key, session);
+            session.rebuild();
+            return this.connections.describe(session.runtime)!;
+        }
+        return this.openServed(app, key, mode, signal);
+    }
+
+    private async openServed(app: ServedBrowserApp, key: string, mode: BrowserMode, signal: AbortSignal): Promise<RuntimeSummary> {
         const stop = new AbortController();
         const timeout = AbortSignal.timeout(30_000);
         const active = AbortSignal.any([signal, this.lifetime.signal, stop.signal, timeout]);
@@ -52,7 +85,7 @@ export class BrowserSessions implements vscode.Disposable {
         this.sessions.set(key, session);
         try {
             const browser = await page;
-            void browser.cdp.closed.then(() => this.retire(key, session));
+            void browser.closed.then(() => this.retire(key, session));
             const channel = await BrowserInspection.open(browser, app.url, active);
             await verifyRuntime({ channel }, active);
             active.throwIfAborted();
@@ -69,9 +102,35 @@ export class BrowserSessions implements vscode.Disposable {
     }
 
     async stop(runtime: AppRuntime): Promise<void> {
+        const development = this.developmentFor(runtime);
+        if (development) return this.closeDevelopment(...development);
         const current = [...this.sessions].find(([, session]) => session.runtime === runtime);
         if (!current) throw new Error('Choose a current browser app session.');
         await this.close(...current);
+    }
+
+    rebuild(runtime: AppRuntime): RuntimeSummary {
+        const session = this.developmentFor(runtime)?.[1];
+        if (!session) throw new Error('Choose a managed browser development session.');
+        session.rebuild();
+        return this.connections.describe(runtime)!;
+    }
+
+    recentOutput(runtime: AppRuntime, lines: number): { runtime: AppRuntime; output: string } {
+        const session = this.developmentFor(runtime)?.[1];
+        if (!session) throw new Error('Choose a managed browser development session.');
+        return { runtime, output: session.recentOutput(lines) };
+    }
+
+    showOutput(): void { this.output?.show(true); }
+
+    private developmentFor(runtime: AppRuntime) {
+        return [...this.development].find(([, session]) => session.runtime === runtime);
+    }
+
+    private async closeDevelopment(key: string, session: BrowserDevelopment): Promise<void> {
+        try { await session.close(); }
+        finally { if (this.development.get(key) === session) this.development.delete(key); }
     }
 
     private requireWorkspace(): void {
@@ -95,10 +154,15 @@ export class BrowserSessions implements vscode.Disposable {
         return session.closing;
     }
 
-    async shutdown(): Promise<void> {
+    shutdown(): Promise<void> {
+        if (this.closing) return this.closing;
         this.lifetime.abort();
-        this.folders.dispose();
-        await Promise.allSettled([...this.sessions].map(([key, session]) => this.close(key, session)));
+        this.subscriptions.forEach(subscription => subscription.dispose());
+        this.closing = Promise.allSettled([
+            ...[...this.sessions].map(([key, session]) => this.close(key, session)),
+            ...[...this.development].map(([key, session]) => this.closeDevelopment(key, session)),
+        ]).then(() => this.output?.dispose());
+        return this.closing;
     }
 
     dispose(): void { void this.shutdown(); }
@@ -106,5 +170,6 @@ export class BrowserSessions implements vscode.Disposable {
 
 function sameProfile(previous: BrowserApp, next: BrowserApp): boolean {
     return previous.folder === next.folder && previous.id === next.id && previous.url === next.url
-        && previous.width === next.width && previous.height === next.height && previous.debugPort === next.debugPort;
+        && previous.width === next.width && previous.height === next.height && previous.debugPort === next.debugPort
+        && JSON.stringify(previous.build) === JSON.stringify(next.build);
 }

@@ -6,46 +6,107 @@ import type { Readable, Writable } from 'node:stream';
 import type { BrowserCdp } from './browserCdp';
 import { browserPipe, browserSocket } from './browserCdpTransport';
 import { browserExecutable } from './browserExecutable';
-import { loopbackPage, type BrowserApp } from './browserTargets';
+import { loopbackPage, type BrowserApp, type ServedBrowserApp } from './browserTargets';
 import { OwnedProcess } from './ownedProcess';
 
-export interface BrowserPage {
-    cdp: BrowserCdp;
-    sessionId?: string;
-    close(): Promise<void>;
+export class BrowserPage {
+    private readonly lifetime = new AbortController();
+    readonly signal = this.lifetime.signal;
+    readonly closed: Promise<void>;
+    private closing?: Promise<void>;
+    private readonly removeListener: () => void;
+    private readonly disconnected = () => { void this.close(); };
+
+    constructor(readonly cdp: BrowserCdp, readonly sessionId: string | undefined, private readonly disconnect: () => Promise<void>) {
+        this.closed = new Promise(resolve => this.signal.addEventListener('abort', () => resolve(), { once: true }));
+        this.removeListener = cdp.onEvent(event => {
+            const detached = this.sessionId !== undefined && event.method === 'Target.detachedFromTarget'
+                && (event.params as { sessionId?: string })?.sessionId === this.sessionId;
+            const ended = event.sessionId === this.sessionId && ['Inspector.detached', 'Inspector.targetCrashed'].includes(event.method);
+            if (detached || ended) this.disconnected();
+        });
+        cdp.signal.addEventListener('abort', this.disconnected, { once: true });
+        if (cdp.signal.aborted) this.disconnected();
+    }
+
+    close(): Promise<void> {
+        if (!this.closing) {
+            this.closing = Promise.resolve().then(this.disconnect);
+            this.cdp.signal.removeEventListener('abort', this.disconnected);
+            this.removeListener();
+            this.lifetime.abort(new Error('The Chromium app document has closed.'));
+        }
+        return this.closing;
+    }
 }
 
-export async function launchBrowser(app: BrowserApp, signal: AbortSignal): Promise<BrowserPage> {
-    const executable = await browserExecutable();
-    signal.throwIfAborted();
-    const profile = await mkdtemp(path.join(tmpdir(), 'ferroui-chromium-'));
-    const cleanup = () => rm(profile, { recursive: true, force: true, maxRetries: 5 });
-    try { signal.throwIfAborted(); } catch (error) { await cleanup(); throw error; }
-    const child = spawn(executable, ['--headless', '--remote-debugging-pipe', `--user-data-dir=${profile}`,
-        '--no-first-run', '--no-default-browser-check', '--disable-background-networking', 'about:blank'],
-    { detached: true, windowsHide: true, stdio: ['ignore', 'ignore', 'ignore', 'pipe', 'pipe'] });
-    const process = new OwnedProcess(child, cleanup);
-    const cdp = browserPipe(child.stdio[3] as Writable, child.stdio[4] as Readable);
-    const close = async () => { cdp.close(); await process.stop(); };
-    void process.closed.then(() => cdp.close(), () => cdp.close());
-    try {
-        const { targetId } = await cdp.request<{ targetId: string }>('Target.createTarget', { url: 'about:blank' }, signal);
-        const { sessionId } = await cdp.request<{ sessionId: string }>('Target.attachToTarget', { targetId, flatten: true }, signal);
-        await cdp.request('Page.enable', {}, signal, sessionId);
-        await cdp.request('Emulation.setDeviceMetricsOverride', {
-            width: app.width, height: app.height, deviceScaleFactor: 1, mobile: false,
-        }, signal, sessionId);
-        const result = await cdp.request<{ errorText?: string }>('Page.navigate', { url: app.url }, signal, sessionId);
-        if (result.errorText) throw new Error('Chromium could not open the configured app URL.');
-        return { cdp, sessionId, close };
-    } catch (error) {
-        await close();
+export class ManagedBrowser {
+    private constructor(readonly cdp: BrowserCdp, private readonly process: OwnedProcess) {}
+
+    get pid(): number | undefined { return this.process.pid; }
+
+    static async launch(signal: AbortSignal): Promise<ManagedBrowser> {
+        const executable = await browserExecutable();
         signal.throwIfAborted();
+        const profile = await mkdtemp(path.join(tmpdir(), 'ferroui-chromium-'));
+        const cleanup = () => rm(profile, { recursive: true, force: true, maxRetries: 5 });
+        try { signal.throwIfAborted(); } catch (error) { await cleanup(); throw error; }
+        const child = spawn(executable, ['--headless', '--remote-debugging-pipe', `--user-data-dir=${profile}`,
+            '--no-first-run', '--no-default-browser-check', '--disable-background-networking', 'about:blank'],
+        { detached: true, windowsHide: true, stdio: ['ignore', 'ignore', 'ignore', 'pipe', 'pipe'] });
+        const process = new OwnedProcess(child, cleanup);
+        const cdp = browserPipe(child.stdio[3] as Writable, child.stdio[4] as Readable);
+        void process.closed.then(() => cdp.close(), () => cdp.close());
+        return new ManagedBrowser(cdp, process);
+    }
+
+    async openPage(url: string, viewport: Pick<BrowserApp, 'width' | 'height'>, signal: AbortSignal, ownsBrowser = false): Promise<BrowserPage> {
+        const cdp = this.cdp;
+        signal.throwIfAborted();
+        // Receive the target ID even if a save supersedes this page during creation.
+        const { targetId } = await cdp.request<{ targetId: string }>('Target.createTarget', { url: 'about:blank' }, cdp.signal);
+        const disconnect = () => ownsBrowser ? this.close() : this.closeTarget(targetId);
+        let page: BrowserPage | undefined;
+        try {
+            const { sessionId } = await cdp.request<{ sessionId: string }>('Target.attachToTarget', { targetId, flatten: true }, signal);
+            page = new BrowserPage(cdp, sessionId, disconnect);
+            const active = AbortSignal.any([signal, page.signal]);
+            await cdp.request('Page.enable', {}, active, sessionId);
+            await cdp.request('Emulation.setDeviceMetricsOverride', {
+                width: viewport.width, height: viewport.height, deviceScaleFactor: 1, mobile: false,
+            }, active, sessionId);
+            const result = await cdp.request<{ errorText?: string }>('Page.navigate', { url }, active, sessionId);
+            if (result.errorText) throw new Error('Chromium could not open the configured app URL.');
+            return page;
+        } catch (error) {
+            await (page?.close() ?? disconnect());
+            signal.throwIfAborted();
+            throw error;
+        }
+    }
+
+    close(): Promise<void> {
+        this.cdp.close();
+        return this.process.stop();
+    }
+
+    private async closeTarget(targetId: string): Promise<void> {
+        if (this.cdp.signal.aborted) return;
+        await this.cdp.request('Target.closeTarget', { targetId }, AbortSignal.timeout(3_000)).catch(() => {});
+    }
+}
+
+export async function launchBrowser(app: ServedBrowserApp, signal: AbortSignal): Promise<BrowserPage> {
+    const browser = await ManagedBrowser.launch(signal);
+    try {
+        return await browser.openPage(app.url, app, signal, true);
+    } catch (error) {
+        await browser.close();
         throw error;
     }
 }
 
-export async function attachBrowser(app: BrowserApp, signal: AbortSignal): Promise<BrowserPage> {
+export async function attachBrowser(app: ServedBrowserApp, signal: AbortSignal): Promise<BrowserPage> {
     if (!app.debugPort) throw new Error('Set a local Chromium debug port in the app profile before attaching.');
     const targets = await browserPages(app.debugPort, signal);
     const pages = targets.filter(page => page.type === 'page' && loopbackPage(page.url)?.href === app.url);
@@ -55,7 +116,7 @@ export async function attachBrowser(app: BrowserApp, signal: AbortSignal): Promi
     const cdp = await browserSocket(`ws://127.0.0.1:${app.debugPort}/devtools/page/${id}`, signal);
     try {
         await cdp.request('Page.enable', {}, signal);
-        return { cdp, async close() { cdp.close(); } };
+        return new BrowserPage(cdp, undefined, async () => { cdp.close(); });
     } catch (error) { cdp.close(); throw error; }
 }
 

@@ -1,0 +1,2 @@
+<TextBlock xmlns="https://github.com/ferroui" Name="DispatchInstructions"
+           Text="Confirm the orders ready for pickup" Foreground="#3C607D" />

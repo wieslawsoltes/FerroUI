@@ -23,7 +23,13 @@ export interface RuntimeSummary {
 
 interface Connection { endpoint: RuntimeEndpoint; generation: number }
 type ExternalKind = PlatformRuntime | { kind: 'attached' };
-interface Attachment extends Connection { runtime: AppRuntime; label: string; target: ExternalKind }
+interface Attachment {
+    runtime: AppRuntime;
+    label: string;
+    target: ExternalKind;
+    connection?: Connection;
+    status?: string;
+}
 
 /** Credentials stay in the workspace extension host. Public summaries use stable session IDs. */
 export class RuntimeConnections implements vscode.Disposable {
@@ -50,10 +56,10 @@ export class RuntimeConnections implements vscode.Disposable {
             runtime: run.runtime, kind: 'managed', label: run.label, status: run.state.status,
             app_session: run.id, pid: run.pid, generation: this.revision(run.runtime) ?? null, available: this.managed.has(run.runtime),
         }));
-        return managed.concat([...this.external.values()].map(({ runtime, label, generation, target }): RuntimeSummary => ({
-            ...target, runtime, label, generation, available: true,
-            status: externalStatus(target),
-            ...(target.kind === 'android' ? { pid: target.android.pid } : {}),
+        return managed.concat([...this.external.values()].map(({ runtime, label, connection, status, target }): RuntimeSummary => ({
+            ...target, runtime, label, generation: connection?.generation ?? null, available: Boolean(connection),
+            status: status ?? externalStatus(target),
+            ...(target.kind === 'android' ? { pid: target.android.pid } : target.kind === 'browser' ? { pid: target.browser.pid } : {}),
         })));
     }
 
@@ -111,10 +117,14 @@ export class RuntimeConnections implements vscode.Disposable {
         }
         cancellation.throwIfAborted();
         if (!this.trusted()) throw new Error('The trusted workspace closed while connecting.');
-        const existing = this.attachments().find(item => 'url' in item.endpoint && item.endpoint.url === endpoint);
+        const existing = this.attachments().find(item => {
+            const current = item.connection?.endpoint;
+            return current && 'url' in current && current.url === endpoint;
+        });
         const runtime: AppRuntime = existing?.runtime ?? `attached:${randomUUID()}`;
         const label = name?.trim() || existing?.label || `Attached · ${new URL(endpoint).host}`;
-        this.external.set(runtime, { runtime, label, endpoint: { url: endpoint, token }, generation: ++this.nextGeneration, target: { kind: 'attached' } });
+        this.external.set(runtime, { runtime, label, target: { kind: 'attached' },
+            connection: { endpoint: { url: endpoint, token }, generation: ++this.nextGeneration } });
         this.activeAttachment = runtime;
         this.changed.fire();
         return this.describe(runtime)!;
@@ -132,9 +142,29 @@ export class RuntimeConnections implements vscode.Disposable {
     }
 
     addPlatform(target: PlatformRuntime, label: string, endpoint: RuntimeEndpoint): RuntimeSummary {
+        return this.addExternal(target, label, { endpoint, generation: ++this.nextGeneration });
+    }
+
+    beginBrowser(target: BrowserRuntimeTarget, label: string): RuntimeSummary {
+        return this.addExternal({ kind: 'browser', browser: target }, label, undefined, 'Browser build queued');
+    }
+
+    /** Status updates preserve the exact inspector identity. Swapping a page retires that connection. */
+    updateBrowser(runtime: AppRuntime, status: string, page?: { url: string; pid?: number; endpoint: RuntimeEndpoint } | null): void {
+        const item = this.external.get(runtime);
+        if (item?.target.kind !== 'browser') return;
+        item.status = status;
+        if (page !== undefined) {
+            item.connection = page ? { endpoint: page.endpoint, generation: ++this.nextGeneration } : undefined;
+            item.target = { kind: 'browser', browser: { ...item.target.browser, url: page?.url, pid: page?.pid } };
+        }
+        this.changed.fire();
+    }
+
+    private addExternal(target: PlatformRuntime, label: string, connection?: Connection, status?: string): RuntimeSummary {
         if (!this.trusted()) throw new Error('Open a trusted workspace before connecting an app.');
         const runtime: AppRuntime = `${target.kind}:${randomUUID()}`;
-        this.external.set(runtime, { runtime, label, endpoint, target, generation: ++this.nextGeneration });
+        this.external.set(runtime, { runtime, label, connection, target, status });
         this.changed.fire();
         return this.describe(runtime)!;
     }
@@ -160,7 +190,7 @@ export class RuntimeConnections implements vscode.Disposable {
     private connection(target: RuntimeTarget): Connection | undefined {
         if (!this.trusted()) return;
         const runtime = this.resolve(target);
-        return runtime && (this.managed.get(runtime) ?? this.external.get(runtime)) || undefined;
+        return runtime && (this.managed.get(runtime) ?? this.external.get(runtime)?.connection) || undefined;
     }
 
     private syncManaged(): void {

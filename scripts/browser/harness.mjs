@@ -9,12 +9,7 @@ import path from "node:path";
 import zlib from "node:zlib";
 import { spawn } from "node:child_process";
 
-const TYPES = {
-    ".html": "text/html", ".js": "text/javascript", ".mjs": "text/javascript", ".wasm": "application/wasm",
-    ".css": "text/css", ".map": "application/json", ".json": "application/json", ".png": "image/png",
-    ".ico": "image/x-icon", ".svg": "image/svg+xml", ".br": "application/octet-stream", ".gz": "application/gzip",
-    ".mp4": "video/mp4"
-};
+import { serveSiteFile } from "./site-files.cjs";
 
 export const sleep = (ms) => new Promise((resolve) => setTimeout(resolve, ms));
 
@@ -52,45 +47,15 @@ export function findChrome() {
 // carries the two headers that make a page cross-origin isolated, which a site built with threads
 // needs (docs/porting/browser-platform.md, "Threads (opt-in)").
 export function serve(siteDirectory, { isolated = false, port = 0 } = {}) {
-    const root = path.resolve(siteDirectory);
+    const root = fs.realpathSync(siteDirectory);
     const server = http.createServer((request, response) => {
         if (isolated) {
             response.setHeader("cross-origin-opener-policy", "same-origin");
             response.setHeader("cross-origin-embedder-policy", "require-corp");
         }
-        let relative = decodeURIComponent(request.url.split("?")[0]);
-        if (relative.endsWith("/")) { relative += "index.html"; }
-        // The browser asks for /favicon.ico on its own, at a moment of its choosing; a site
-        // without one answers "no content", so that the request is not a failed load in the log.
-        if (relative === "/favicon.ico" && !fs.existsSync(path.join(root, relative))) {
-            response.statusCode = 204; response.end(); return;
-        }
-        const file = path.join(root, relative);
-        if (!file.startsWith(root) || !fs.existsSync(file) || fs.statSync(file).isDirectory()) {
-            response.statusCode = 404; response.end(); return;
-        }
-        response.setHeader("content-type", TYPES[path.extname(file)] ?? "application/octet-stream");
-        // Native media seeking depends on byte-range support. Serve a bounded
-        // single range; an empty seekable interval is not seek capability.
-        const size=fs.statSync(file).size;
-        response.setHeader("accept-ranges","bytes");
-        if(request.headers.range){
-            const range=/^bytes=(\d*)-(\d*)$/.exec(request.headers.range);
-            let start=range?.[1]?Number(range[1]):0;
-            let end=range?.[2]?Number(range[2]):size-1;
-            if(range && !range[1] && range[2]){start=Math.max(0,size-end);end=size-1;}
-            end=Math.min(end,size-1);
-            if(!range||(!range[1]&&!range[2])||!Number.isSafeInteger(start)||!Number.isSafeInteger(end)||start<0||start>end||start>=size){
-                response.statusCode=416;response.setHeader("content-range",`bytes */${size}`);response.end();return;
-            }
-            response.statusCode=206;response.setHeader("content-range",`bytes ${start}-${end}/${size}`);
-            response.setHeader("content-length",end-start+1);
-            fs.createReadStream(file,{start,end}).pipe(response);return;
-        }
-        response.setHeader("content-length",size);
-        fs.createReadStream(file).pipe(response);
+        void serveSiteFile(root, request.url.split("?")[0], request, response).catch(error => response.destroy(error));
     });
-    return new Promise((resolve) => server.listen(port, "127.0.0.1", () => resolve(server)));
+    return new Promise((resolve, reject) => server.once("error", reject).listen(port, "127.0.0.1", () => resolve(server)));
 }
 
 // Decodes an 8-bit grayscale, RGB or RGBA non-interlaced PNG (screenshots and fixtures).

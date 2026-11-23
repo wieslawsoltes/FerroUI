@@ -22,13 +22,21 @@ export class BrowserInspection implements RuntimeInspectionChannel {
     private navigation = 0;
 
     private constructor(private readonly page: BrowserPage) {
-        this.page.cdp.onEvent(event => this.onEvent(event));
+        const unsubscribe = this.page.cdp.onEvent(event => this.onEvent(event));
+        this.page.signal.addEventListener('abort', unsubscribe, { once: true });
     }
 
-    static async open(page: BrowserPage, url: string, signal: AbortSignal): Promise<BrowserInspection> {
+    static async open(page: BrowserPage, url: string, signal: AbortSignal, report?: (message: string) => void): Promise<BrowserInspection> {
         const inspection = new BrowserInspection(page);
-        const deadline = AbortSignal.any([signal, AbortSignal.timeout(15_000)]);
+        const deadline = AbortSignal.any([signal, page.signal, AbortSignal.timeout(15_000)]);
+        const unsubscribe = report && page.cdp.onEvent(event => {
+            if (event.sessionId !== page.sessionId || event.method !== 'Runtime.exceptionThrown') return;
+            const details = (event.params as { exceptionDetails?: { exception?: { description?: string }; text?: string } })?.exceptionDetails;
+            const message = details?.exception?.description ?? details?.text;
+            if (typeof message === 'string') report(message.slice(0, 4_000));
+        });
         try {
+            if (report) await inspection.request('Runtime.enable', {}, deadline);
             while (!deadline.aborted) {
                 const revision = inspection.navigation;
                 // The target can advertise its destination while the main frame is still empty or blank.
@@ -48,8 +56,9 @@ export class BrowserInspection implements RuntimeInspectionChannel {
             }
         } catch (error) {
             signal.throwIfAborted();
+            page.signal.throwIfAborted();
             if (!deadline.aborted) throw error;
-        }
+        } finally { unsubscribe?.(); }
         throw new Error('The browser app did not provide a Live App inspector. Serve a debug build with the inspector installed.');
     }
 
@@ -125,20 +134,18 @@ export class BrowserInspection implements RuntimeInspectionChannel {
 
     private async request<T>(method: string, args: object, signal: AbortSignal): Promise<T> {
         const revision = this.navigation;
-        const response = await this.page.cdp.request<T>(method, args, signal, this.page.sessionId);
-        signal.throwIfAborted();
+        const active = AbortSignal.any([signal, this.page.signal]);
+        const response = await this.page.cdp.request<T>(method, args, active, this.page.sessionId);
+        active.throwIfAborted();
         if (this.objectId && this.navigation !== revision) throw new Error('The Chromium app document has changed.');
         return response;
     }
 
     private onEvent(event: BrowserEvent): void {
-        if (event.method === 'Target.detachedFromTarget' && this.page.sessionId
-            && (event.params as { sessionId?: string })?.sessionId === this.page.sessionId) this.page.cdp.close();
         if (event.sessionId !== this.page.sessionId) return;
-        if (event.method === 'Inspector.detached' || event.method === 'Inspector.targetCrashed') this.page.cdp.close();
         if (event.method === 'Page.frameNavigated' && !(event.params as { frame?: { parentId?: string } })?.frame?.parentId) {
             this.navigation++;
-            if (this.objectId) this.page.cdp.close();
+            if (this.objectId) void this.page.close();
         }
     }
 }

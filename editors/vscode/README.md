@@ -92,6 +92,8 @@ For the Android workflow, build Service Review and select a test emulator or dev
 
 For Browser Live App, build and serve the Dispatch Desk debug example. Run `npm test` with `FERROUI_TEST_BROWSER_URL` set to its full loopback URL. The test discovers Chromium or uses `FERROUI_TEST_BROWSER_EXECUTABLE` when provided. It exercises the managed browser and a separate temporary debug profile. [Build and run Dispatch Desk](../../docs/designer/vscode/runtime.md#run-or-attach-a-browser-app)
 
+Run `npm test` with `FERROUI_TEST_BROWSER_BUILD=1` and the browser toolchain active to check managed builds. The test creates an independent Cargo project and saves XAML and Rust from VS Code. It checks compiler and startup failures, superseded pages, state, source reveal, and cleanup in Chromium. Set `CARGO_TARGET_DIR` to reuse a browser build cache. [Managed browser workflow](../../docs/designer/vscode/runtime.md#build-and-reload-a-browser-app-in-vs-code)
+
 Build a platform VSIX from the repository root, then install it using **Extensions: Install from VSIX**. Pass the native output directory of your own toolchain when using a custom Cargo target directory.
 
 ```sh
@@ -175,6 +177,8 @@ Agents can read and change the window, hierarchy, selection, mode, and filters o
 Choose **Open Mobile App** from **App Sessions** to run a configured iOS simulator app or run or attach an opted-in Android app through the workspace host’s ADB. [Configure an iOS simulator app](../../docs/designer/vscode/runtime.md#run-an-app-on-an-ios-simulator) · [Configure an Android app](../../docs/designer/vscode/runtime.md#run-or-attach-an-android-app)
 
 Choose **Open Browser App** to inspect an opted-in WebAssembly debug app in managed Chromium or attach to its local debug tab. Live App shows the browser’s rendered frame and reads the FerroUI tree and source mappings through the app inspector. [Configure a browser app](../../docs/designer/vscode/runtime.md#run-or-attach-a-browser-app)
+
+Use a browser profile with `build` to rebuild on Rust and XAML saves. The pinned Live App editor retains the running page until Chromium presents the replacement. App Sessions and MCP can both rebuild and read build output. [Browser build and reload](../../docs/designer/vscode/runtime.md#build-and-reload-a-browser-app-in-vs-code)
 
 **Apply to Source** writes verified XAML values or mapped RSX literals to the editor in one undo step. The application keeps running while you review the buffer. The runtime identifies its original source revision through compiled or runtime-loaded XAML metadata or the RSX macro. For externally launched debug apps, use `FERROUI_EDITOR_SOURCE=1` to record runtime source information. Compiling XAML with source information also records the original file and revision. Agents can pass the same session ID from `ferroui_app_sessions` along with the connection generation and buffer version from `ferroui_runtime_source` to `ferroui_runtime_apply_source`.
 

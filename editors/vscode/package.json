@@ -1380,17 +1380,17 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser|browser-development)$/",
           "group": "inline@1"
         },
         {
           "command": "ferroui.appSessions.rebuild",
-          "when": "view == ferroui.appSessions && viewItem == app-session-managed",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|browser-development)$/",
           "group": "inline@2"
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser|browser-development)$/",
           "group": "inline@3"
         },
         {
@@ -1405,7 +1405,7 @@
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|browser-development)$/",
           "group": "1_apps@3"
         },
         {
@@ -1613,10 +1613,14 @@
           "type": "array",
           "default": [],
           "scope": "resource",
-          "description": "Live App profiles for debug builds of FerroUI browser apps served from the workspace host loopback address.",
+          "description": "Live App profiles for managed browser builds or served debug apps on the workspace host loopback address.",
           "items": {
             "type": "object",
-            "required": ["id", "url"],
+            "required": ["id"],
+            "oneOf": [
+              { "required": ["url"], "not": { "required": ["build"] } },
+              { "required": ["build"], "not": { "anyOf": [{ "required": ["url"] }, { "required": ["debugPort"] }] } }
+            ],
             "additionalProperties": false,
             "properties": {
               "id": { "type": "string", "description": "Unique profile ID in this workspace folder." },
@@ -1624,7 +1628,20 @@
               "label": { "type": "string", "description": "App name shown in the picker and App Sessions." },
               "width": { "type": "integer", "default": 960, "minimum": 240, "maximum": 2560, "description": "Managed browser viewport width in CSS pixels." },
               "height": { "type": "integer", "default": 620, "minimum": 240, "maximum": 1600, "description": "Managed browser viewport height in CSS pixels." },
-              "debugPort": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Loopback Chromium debugging port for an independently started browser profile." }
+              "debugPort": { "type": "integer", "minimum": 1, "maximum": 65535, "description": "Loopback Chromium debugging port for an independently started browser profile." },
+              "build": {
+                "type": "object",
+                "required": ["application"],
+                "additionalProperties": false,
+                "description": "Build the Cargo browser app and reload it when its source is saved.",
+                "properties": {
+                  "application": { "type": "string", "description": "Name of the FerroUI browser example or the Cargo package and its matching browser binary." },
+                  "toolchain": { "type": "string", "description": "Path to the FerroUI checkout that contains scripts/build-browser.sh. Defaults to the profile's workspace folder." },
+                  "manifestPath": { "type": "string", "description": "Cargo manifest for the app's workspace. Defaults to Cargo.toml in the profile's workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features for the selected browser target." },
+                  "threads": { "type": "boolean", "default": false, "description": "Use the installed threaded browser toolchain and cross-origin isolation." }
+                }
+              }
             }
           }
         },

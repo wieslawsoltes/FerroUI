@@ -234,7 +234,7 @@ For your own app, enable the `live-inspector` feature of `ferroui-android` and i
 
 ### Run or attach a browser app
 
-Install Chrome or Chromium and the FerroUI browser toolchain on the workspace host. Open a trusted workspace. To try Dispatch Desk from the FerroUI repository root, build its debug site and serve it on loopback:
+Install Chrome or Chromium and the FerroUI browser toolchain on the workspace host. Open a trusted workspace. Use a managed build when you want VS Code to rebuild on save. For a served profile, run these commands from the FerroUI checkout to build Dispatch Desk and serve it on loopback.
 
 ```sh
 scripts/build-browser.sh live_inspector --debug --features inspector-example
@@ -271,6 +271,32 @@ Use `"debugPort": 9222` in the matching VS Code profile. Keep this profile for l
 The app opts in through the `live-inspector` feature of `ferroui-browser`. On the UI thread after platform setup, call `ferroui_browser::live_inspector::install` with the element ID passed to `start_browser_app` and the app permissions. Keep the returned handle alive while the view is available. For RSX source reveal and mapped edits, call `ferroui_view::hot::enable_editor_source_locations()` before mounting the controls. [Browser toolchain](../../porting/browser-platform.md) · [Browser app MCP tools](reference.md#run-or-attach-a-browser-app-with-mcp)
 
 ![Dispatch Desk running in Chromium after a click in VS Code Live App, with Rust source, the visual tree, and the selected heading's Text property](../images/vscode-browser-live-app.png)
+
+### Build and reload a browser app in VS Code
+
+Activate the Emscripten SDK and the matching Rust and wasm-bindgen toolchain on the workspace host before starting the VS Code extension host. Add this managed build profile to Workspace Settings in the FerroUI checkout.
+
+```json
+{
+  "ferroui.browser.apps": [
+    {
+      "id": "dispatch-development",
+      "label": "Dispatch Desk Development",
+      "build": {
+        "application": "live_inspector",
+        "features": ["inspector-example"]
+      }
+    }
+  ]
+}
+```
+
+1. In **App Sessions**, choose **Open Browser App**, then **Run Browser App** and the development profile. The pinned **Live App** editor opens while the first build runs. The session shows when Chromium has presented the first frame.
+2. Save a Rust or XAML file in the selected Cargo target or one of its local dependencies. Try changing **Dispatch desk** in `main.rs` or the text in `Instructions.xaml`. Saves to the app's `wwwroot`, Cargo manifest, lockfile, and Cargo configuration also request a build. Other packages keep their own sessions.
+3. Select the session to keep inspecting the running app while an update builds. A successful candidate opens a new WebAssembly document in the same Chromium profile and loopback origin. It keeps the Live App tab and session ID. Browser-backed storage stays available. For example, click **Mark dispatched** before saving and check that the recorded count is present after the reload.
+4. If compilation or startup fails, the running page and its inspector stay available. Open **Show App Output** from the session to read the build and startup messages. **Diagnostics → Hot Reload History** shows failed and superseded saves and the first verified frame of accepted updates. Correct the source and save again, or choose the refresh icon on the App Sessions row for **Rebuild This App**. **Stop or Disconnect This App** releases the managed browser, candidate sites, and watch session.
+
+For a separate app repository, set `build.toolchain` to the FerroUI checkout that owns `scripts/build-browser.sh`. Use the package and its matching browser binary as `application`. Set `build.manifestPath` if its workspace manifest is below the folder root. Use document-relative URLs for files in `wwwroot` so each candidate can load its own site. A profile with `build.threads` enabled uses the installed threaded toolchain and serves its pages with Chromium's cross-origin isolation headers. [Browser toolchain and project setup](../../porting/browser-platform.md) · [MCP build and reload controls](reference.md#build-and-reload-a-browser-app-with-mcp)
 
 ## Inspect the actual window in Live App
 

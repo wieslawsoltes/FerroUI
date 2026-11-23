@@ -39,7 +39,7 @@ default = ["skia"]
 skia = ["dep:ferroui-skia"]
 vello = ["dep:ferroui-vello"]
 live-inspector = ["dep:ferroui-inspect", "dep:serde_json"]
-inspector-example = ["live-inspector", "dep:ferroui-themes-simple", "dep:ferroui-view"]
+inspector-example = ["live-inspector", "dep:ferroui-themes-simple", "ferroui-view/xaml"]
 
 [dev-dependencies]
 # The tests of the textarea protocol run a RichEditBox in a test application.

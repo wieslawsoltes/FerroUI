@@ -266,6 +266,8 @@ export class AgentTools {
             await this.appSessions.browser.stop(args.runtime as AppRuntime);
             return { closed: true };
         }
+        if (tool === 'ferroui_browser_rebuild') return this.appSessions.browser.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_browser_output') return this.appSessions.browser.recentOutput(args.runtime as AppRuntime, args.lines ?? 60);
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
         if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }
         if (tool === 'ferroui_runtime_open') { this.appSessions.open(args.runtime as AppRuntime); return { runtime: args.runtime }; }

@@ -23,8 +23,10 @@ export interface AndroidRuntimeTarget {
 export interface BrowserRuntimeTarget {
     folder: string;
     profile: string;
-    url: string;
+    url?: string;
     launched: boolean;
+    development?: boolean;
+    pid?: number;
 }
 
 export type PlatformRuntime = { kind: 'simulator'; simulator: IosRuntimeTarget }

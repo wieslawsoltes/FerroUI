@@ -19,9 +19,27 @@ mod app {
     use ferroui_fonts_inter::AppBuilderExtension;
     use ferroui_themes_simple::SimpleTheme;
     use ferroui_view::prelude::*;
+    use ferroui_view::use_xaml;
     use std::cell::RefCell;
     use std::rc::Rc;
     use wasm_bindgen::prelude::*;
+
+    #[wasm_bindgen(inline_js = r#"
+        const countKey = "ferroui.dispatch-count";
+        export function loadDispatchCount() {
+            const count = Number(localStorage.getItem(countKey));
+            return Number.isInteger(count) && count >= 0 && count <= 0xffffffff ? count : 0;
+        }
+        export function saveDispatchCount(count) {
+            localStorage.setItem(countKey, String(count));
+        }
+    "#)]
+    extern "C" {
+        #[wasm_bindgen(js_name = loadDispatchCount)]
+        fn load_dispatch_count() -> u32;
+        #[wasm_bindgen(js_name = saveDispatchCount)]
+        fn save_dispatch_count(count: u32);
+    }
 
     #[repr(C)]
     struct App {
@@ -74,17 +92,21 @@ mod app {
 
     #[component(rerender)]
     fn DispatchDesk() -> Element {
-        let dispatched = use_signal(|| 0);
+        let dispatched = use_signal(|| load_dispatch_count());
+        let instructions = use_xaml(include_str!("Instructions.xaml"));
         rsx! {
             Border { background: "#EDF3F9", padding: 30.0,
                 StackPanel { vertical_alignment: VerticalAlignment::Center, spacing: 16.0,
                     TextBlock { name: "Heading", text: "Dispatch desk", font_size: 34.0,
                         font_weight: FontWeight::SemiBold, foreground: "#1C3B5B" }
-                    TextBlock { text: "Confirm the orders ready for pickup", foreground: "#3C607D" }
+                    {instructions}
                     Border { background: "#FFFFFF", corner_radius: 14.0, padding: 19.0,
                         StackPanel { spacing: 12.0,
                             TextBox { name: "Search", placeholder_text: "Find an order" }
-                            Button { name: "DispatchOrder", on_click: move |_| dispatched.update(|count| *count += 1), "Mark dispatched" }
+                            Button { name: "DispatchOrder", on_click: move |_| dispatched.update(|count| {
+                                *count = count.saturating_add(1);
+                                save_dispatch_count(*count);
+                            }), "Mark dispatched" }
                             TextBlock { name: "DispatchedCount", text: format!("Dispatched orders: {}", dispatched.get()), foreground: "#246455" }
                         }
                     }
