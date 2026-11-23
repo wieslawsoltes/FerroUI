@@ -298,6 +298,8 @@ Activate the Emscripten SDK and the matching Rust and wasm-bindgen toolchain on 
 
 For a separate app repository, set `build.toolchain` to the FerroUI checkout that owns `scripts/build-browser.sh`. Use the package and its matching browser binary as `application`. Set `build.manifestPath` if its workspace manifest is below the folder root. Use document-relative URLs for files in `wwwroot` so each candidate can load its own site. A profile with `build.threads` enabled uses the installed threaded toolchain and serves its pages with Chromium's cross-origin isolation headers. [Browser toolchain and project setup](../../porting/browser-platform.md) · [MCP build and reload controls](reference.md#build-and-reload-a-browser-app-with-mcp)
 
+![Live App after a managed Chromium replacement, showing two retained dispatched orders, the matching Rust source, and the selected heading's Text property](../images/vscode-browser-reload.png)
+
 ## Inspect the actual window in Live App
 
 1. Start a managed desktop target, open a mobile or browser app from App Sessions, or choose **FerroUI: Connect to Running MCP Server** for an authenticated loopback inspector. Use the app’s inspector flags, such as `--mcp` in Todo Workbench, to start its server. **Open Live App** opens the supported windows in the editor. Pick a window from its toolbar.
