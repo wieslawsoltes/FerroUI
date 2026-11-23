@@ -1,5 +1,6 @@
 //! The OpenType container: reading its table directory, writing a new one, and the sanitizer.
 
+mod deep;
 mod glyf;
 mod sanitize;
 mod tables;

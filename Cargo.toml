@@ -518,6 +518,9 @@ vello_cpu = { version = "=0.3.0", default-features = false, features = ["std", "
 linesweeper = { version = "=0.5.0" }
 png = { version = "=0.18.1" }
 skrifa = { version = "=0.44.0" }
+# Pinned in step with `skrifa` 0.44, which links this version. Only `ferroui-fonts-web-core` names
+# it, and only there is its feature `experimental_traverse` on: the walk of the sanitizer.
+read-fonts = { version = "=0.41.0", default-features = false, features = ["std", "experimental_traverse"] }
 glifo = { version = "=0.4.0", default-features = false, features = ["std"] }
 fontique = { version = "=0.12.0" }
 # The codecs of the Vello render backend beside PNG (vello-backend.md, section 1.4), one crate a

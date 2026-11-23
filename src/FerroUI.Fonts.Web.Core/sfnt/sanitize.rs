@@ -1,6 +1,7 @@
 //! The sanitizer: a font from the network goes in, a new font goes out that holds only what
 //! passed validation. Modeled on the OpenType Sanitizer of the browsers.
 
+use super::deep::{TableCheck, TableContext, Verdict};
 use super::glyf::{validate_glyph, write_without_instructions, ComponentGraph, GlyphLayout};
 use super::tables::*;
 use super::{assemble, read_directory, ReadBe, TableRecord, Tag, OPEN_TYPE_CFF};
@@ -17,14 +18,33 @@ pub struct SanitizeOptions {
     pub strip_hinting: bool,
 }
 
-/// The tables that are kept when they pass. Anything else is dropped, including `DSIG`, which
-/// no longer holds for a rewritten font.
-const KEPT_TABLES: [&Tag; 49] = [
-    b"BASE", b"CBDT", b"CBLC", b"CFF ", b"CFF2", b"COLR", b"CPAL", b"EBDT", b"EBLC", b"EBSC", b"GDEF", b"GPOS",
-    b"GSUB", b"HVAR", b"JSTF", b"LTSH", b"MATH", b"MVAR", b"OS/2", b"PCLT", b"STAT", b"SVG ", b"VDMX", b"VORG",
-    b"VVAR", b"avar", b"cmap", b"cvar", b"cvt ", b"fpgm", b"fvar", b"gasp", b"glyf", b"gvar", b"hdmx", b"head",
-    b"hhea", b"hmtx", b"kern", b"loca", b"maxp", b"meta", b"name", b"post", b"prep", b"sbix", b"vhea", b"vmtx",
-    b"ltag",
+/// The tables that are kept when they pass. Anything else is dropped, including `DSIG`, which no
+/// longer holds for a rewritten font, and the tables there is no validator for (`JSTF`, `MATH`,
+/// `VDMX`, `LTSH`, `PCLT`, `EBSC`).
+const KEPT_TABLES: [&Tag; 43] = [
+    b"BASE", b"CBDT", b"CBLC", b"CFF ", b"CFF2", b"COLR", b"CPAL", b"EBDT", b"EBLC", b"GDEF", b"GPOS", b"GSUB",
+    b"HVAR", b"MVAR", b"OS/2", b"STAT", b"SVG ", b"VORG", b"VVAR", b"avar", b"cmap", b"cvar", b"cvt ", b"fpgm",
+    b"fvar", b"gasp", b"glyf", b"gvar", b"hdmx", b"head", b"hhea", b"hmtx", b"kern", b"loca", b"ltag", b"maxp",
+    b"meta", b"name", b"post", b"prep", b"sbix", b"vhea", b"vmtx",
+];
+
+/// The tables a font cannot be used without: when one of them fails, the font is refused.
+const REQUIRED_TABLES: [&Tag; 7] = [b"CFF ", b"CFF2", b"cmap", b"head", b"hhea", b"hmtx", b"maxp"];
+
+/// Tables that mean nothing without another: `(table, what it needs)`.
+const DEPENDENCIES: [(&Tag, &Tag); 12] = [
+    (b"COLR", b"CPAL"),
+    (b"CBDT", b"CBLC"),
+    (b"CBLC", b"CBDT"),
+    (b"EBDT", b"EBLC"),
+    (b"EBLC", b"EBDT"),
+    (b"vhea", b"vmtx"),
+    (b"vmtx", b"vhea"),
+    (b"avar", b"fvar"),
+    (b"gvar", b"fvar"),
+    (b"HVAR", b"fvar"),
+    (b"MVAR", b"fvar"),
+    (b"VVAR", b"fvar"),
 ];
 
 /// The tables that only a valid `fvar` gives a meaning to.
@@ -38,8 +58,17 @@ enum Output {
 }
 
 enum Stage {
-    Tables { next: usize },
-    Glyphs { next: u32 },
+    Tables {
+        next: usize,
+    },
+    Glyphs {
+        next: u32,
+    },
+    /// The content of each table that is still kept.
+    Contents {
+        next: usize,
+        check: Option<Box<TableCheck>>,
+    },
     Finish,
     Done,
 }
@@ -304,6 +333,13 @@ impl<D: AsRef<[u8]>> Sanitizer<D> {
                 Stage::Glyphs { next } => {
                     self.stage = self.step_glyphs(next, &mut budget)?;
                     if matches!(self.stage, Stage::Finish) {
+                        self.stage = Stage::Contents { next: 0, check: None };
+                    }
+                }
+                Stage::Contents { next, check } => {
+                    self.stage = self.step_contents(next, check, &mut budget)?;
+                    if matches!(self.stage, Stage::Finish) {
+                        self.finish_contents()?;
                         return Ok(true);
                     }
                 }
@@ -317,6 +353,86 @@ impl<D: AsRef<[u8]>> Sanitizer<D> {
                 return Ok(false);
             }
         }
+    }
+
+    /// The bytes a table will be written with.
+    fn output_bytes(&self, index: usize) -> Option<&[u8]> {
+        let record = self.records.get(index)?;
+        match self.outputs.get(index)? {
+            Output::Keep => Some(&self.data.as_ref()[record.offset..][..record.length]),
+            Output::Replace(table) => Some(table),
+            Output::Drop => None,
+        }
+    }
+
+    /// Validates the content of the kept tables, one at a time, until the budget is spent.
+    fn step_contents(
+        &mut self,
+        mut next: usize,
+        mut check: Option<Box<TableCheck>>,
+        budget: &mut usize,
+    ) -> Result<Stage, FontDecodeError> {
+        let palette_entries = (0..self.records.len())
+            .find(|index| self.records[*index].tag == *b"CPAL")
+            .and_then(|index| self.output_bytes(index))
+            .and_then(|table| table.u16_at(2));
+        let axis_count = self.fvar_axes.unwrap_or(0);
+        let context = TableContext { glyph_count: self.glyph_count, axis_count, palette_entries };
+        while next < self.records.len() {
+            if *budget == 0 {
+                return Ok(Stage::Contents { next, check });
+            }
+            let record = self.records[next];
+            let verdict = match self.output_bytes(next) {
+                None => Verdict::Valid,
+                Some(table) => {
+                    let state = check.get_or_insert_with(|| Box::new(TableCheck::new(record.tag, table.len())));
+                    state.step(table, &context, budget)
+                }
+            };
+            match verdict {
+                Verdict::Pending => return Ok(Stage::Contents { next, check }),
+                Verdict::Valid => {}
+                Verdict::Invalid => {
+                    if REQUIRED_TABLES.contains(&&record.tag) {
+                        return Err(FontDecodeError::Malformed("a required table did not validate"));
+                    }
+                    self.outputs[next] = Output::Drop;
+                }
+            }
+            check = None;
+            next += 1;
+        }
+        Ok(Stage::Finish)
+    }
+
+    /// Drops what lost a table it depends on, and refuses a font left without glyphs.
+    fn finish_contents(&mut self) -> Result<(), FontDecodeError> {
+        let kept = |this: &Self, tag: &Tag| {
+            this.records
+                .iter()
+                .position(|record| record.tag == *tag)
+                .is_some_and(|index| !matches!(this.outputs[index], Output::Drop))
+        };
+        loop {
+            let mut changed = false;
+            for (table, needs) in DEPENDENCIES {
+                if kept(self, table) && !kept(self, needs) {
+                    if let Some(index) = self.records.iter().position(|record| record.tag == *table) {
+                        self.outputs[index] = Output::Drop;
+                        changed = true;
+                    }
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+        let outlines: [&Tag; 7] = [b"glyf", b"CFF ", b"CFF2", b"CBDT", b"sbix", b"EBDT", b"SVG "];
+        if !outlines.iter().any(|tag| kept(self, tag)) {
+            return Err(FontDecodeError::Malformed("no glyph table validated"));
+        }
+        Ok(())
     }
 
     /// Whether the validated font keeps every table exactly as it came.

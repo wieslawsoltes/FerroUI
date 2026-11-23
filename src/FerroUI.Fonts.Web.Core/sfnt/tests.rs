@@ -326,9 +326,275 @@ fn sanitizes_a_list_of_fonts() {
             Ok(clean) => {
                 verify_checksums(&clean);
                 passed += 1;
+                let (_, records) = read_directory(&data, 0, &WebFontLimits::DEFAULT).unwrap();
+                let dropped: Vec<String> = records
+                    .iter()
+                    .filter(|record| table(&clean, &record.tag).is_none())
+                    .map(|record| String::from_utf8_lossy(&record.tag).into_owned())
+                    .collect();
+                if !dropped.is_empty() {
+                    println!("{}: dropped {}", path.rsplit('/').next().unwrap(), dropped.join(" "));
+                }
             }
             Err(error) => refused.push(format!("{path}: {error}")),
         }
     }
     println!("passed {passed}, refused {}:\n{}", refused.len(), refused.join("\n"));
+}
+
+mod contents {
+    use super::super::deep::{has_color_cycle, TableCheck, TableContext, Verdict};
+    use super::*;
+
+    const INTER: &str = "FerroUI.Base/test_assets/fonts/Inter-Regular.ttf";
+    const VARIABLE: &str = "FerroUI.Base/test_assets/fonts/InterVariable.ttf";
+
+    fn context(data: &[u8]) -> TableContext {
+        let maxp = table(data, b"maxp").unwrap();
+        TableContext {
+            glyph_count: maxp.u16_at(4).unwrap(),
+            axis_count: table(data, b"fvar").and_then(|fvar| fvar.u16_at(8)).unwrap_or(0),
+            palette_entries: table(data, b"CPAL").and_then(|cpal| cpal.u16_at(2)),
+        }
+    }
+
+    fn verdict(tag: &Tag, bytes: &[u8], context: &TableContext) -> Verdict {
+        let mut check = TableCheck::new(*tag, bytes.len());
+        let mut budget = usize::MAX;
+        check.step(bytes, context, &mut budget)
+    }
+
+    #[test]
+    fn the_tables_of_real_fonts_validate() {
+        for path in [INTER, VARIABLE] {
+            let data = font(path);
+            let context = context(&data);
+            for tag in [b"GSUB", b"GPOS", b"GDEF", b"cmap", b"name", b"post", b"OS/2"] {
+                if let Some(bytes) = table(&data, tag) {
+                    assert_eq!(verdict(tag, bytes, &context), Verdict::Valid, "{path}: {tag:?}");
+                }
+            }
+        }
+        let data = font(VARIABLE);
+        let context = context(&data);
+        for tag in [b"fvar", b"gvar", b"HVAR", b"STAT"] {
+            if let Some(bytes) = table(&data, tag) {
+                assert_eq!(verdict(tag, bytes, &context), Verdict::Valid, "{tag:?}");
+            }
+        }
+    }
+
+    #[test]
+    fn a_walk_resumes_where_it_stopped() {
+        let data = font(INTER);
+        let context = context(&data);
+        for tag in [b"GSUB", b"GPOS"] {
+            let bytes = table(&data, tag).unwrap();
+            let mut check = TableCheck::new(*tag, bytes.len());
+            let mut steps = 0;
+            let result = loop {
+                steps += 1;
+                let mut budget = 512;
+                match check.step(bytes, &context, &mut budget) {
+                    Verdict::Pending => {}
+                    verdict => break verdict,
+                }
+            };
+            assert_eq!(result, Verdict::Valid);
+            assert!(steps > 4, "{tag:?} took {steps} steps");
+        }
+    }
+
+    /// A small GSUB: one script-less feature list, one lookup of type 1, format 2, with a
+    /// coverage of the given glyphs.
+    fn small_gsub(coverage: &[u16], feature_lookup: u16, substitute: u16) -> Vec<u8> {
+        let mut gsub = vec![0, 1, 0, 0, 0, 10, 0, 12, 0, 26];
+        gsub.extend_from_slice(&[0, 0]); // ScriptList: no scripts.
+        gsub.extend_from_slice(&[0, 1]); // FeatureList with one record.
+        gsub.extend_from_slice(b"liga");
+        gsub.extend_from_slice(&[0, 8]);
+        gsub.extend_from_slice(&[0, 0, 0, 1]); // Feature: no params, one lookup.
+        gsub.extend_from_slice(&feature_lookup.to_be_bytes());
+        assert_eq!(gsub.len(), 26);
+        gsub.extend_from_slice(&[0, 1, 0, 4]); // LookupList with one lookup.
+        gsub.extend_from_slice(&[0, 1, 0, 0, 0, 1, 0, 8]); // Lookup of type 1 with one subtable.
+        let count = coverage.len() as u16;
+        let coverage_offset = 6 + 2 * count;
+        gsub.extend_from_slice(&[0, 2]);
+        gsub.extend_from_slice(&coverage_offset.to_be_bytes());
+        gsub.extend_from_slice(&count.to_be_bytes());
+        for _ in coverage {
+            gsub.extend_from_slice(&substitute.to_be_bytes());
+        }
+        gsub.extend_from_slice(&[0, 1]);
+        gsub.extend_from_slice(&count.to_be_bytes());
+        for glyph in coverage {
+            gsub.extend_from_slice(&glyph.to_be_bytes());
+        }
+        gsub
+    }
+
+    #[test]
+    fn values_that_point_nowhere_are_refused() {
+        let context = TableContext { glyph_count: 16, ..Default::default() };
+        assert_eq!(verdict(b"GSUB", &small_gsub(&[1, 2], 0, 3), &context), Verdict::Valid);
+        assert_eq!(verdict(b"GSUB", &small_gsub(&[1, 99], 0, 3), &context), Verdict::Invalid, "a covered glyph");
+        assert_eq!(verdict(b"GSUB", &small_gsub(&[1, 2], 0, 99), &context), Verdict::Invalid, "a substitute");
+        assert_eq!(verdict(b"GSUB", &small_gsub(&[1, 2], 7, 3), &context), Verdict::Invalid, "a lookup index");
+        assert_eq!(verdict(b"GSUB", &small_gsub(&[2, 1], 0, 3), &context), Verdict::Invalid, "coverage order");
+        assert_eq!(verdict(b"GSUB", &small_gsub(&[2, 2], 0, 3), &context), Verdict::Valid, "a repeat, as shipped");
+    }
+
+    #[test]
+    fn shared_subtables_cannot_multiply_the_work() {
+        // A lookup list whose thousands of lookups are all the same lookup, each with thousands
+        // of subtable offsets to the same subtable.
+        const LOOKUPS: u16 = 3000;
+        let mut gsub = vec![0, 1, 0, 0, 0, 10, 0, 12, 0, 14, 0, 0, 0, 0];
+        gsub.extend_from_slice(&LOOKUPS.to_be_bytes());
+        let lookup = 2 + LOOKUPS * 2;
+        for _ in 0..LOOKUPS {
+            gsub.extend_from_slice(&lookup.to_be_bytes());
+        }
+        const SUBTABLES: u16 = 12000;
+        gsub.extend_from_slice(&[0, 1, 0, 0]);
+        gsub.extend_from_slice(&SUBTABLES.to_be_bytes());
+        let subtable = 6 + SUBTABLES * 2;
+        for _ in 0..SUBTABLES {
+            gsub.extend_from_slice(&subtable.to_be_bytes());
+        }
+        gsub.extend_from_slice(&[0, 1, 0, 6, 0, 1, 0, 1, 0, 1, 0, 1]);
+        let context = TableContext { glyph_count: 16, ..Default::default() };
+        assert_eq!(verdict(b"GSUB", &gsub, &context), Verdict::Invalid);
+    }
+
+    #[test]
+    fn tables_too_short_for_their_version_do_not_panic() {
+        let context = TableContext { glyph_count: 4, axis_count: 1, palette_entries: Some(2) };
+        let cases: [(&Tag, Vec<u8>); 12] = [
+            (b"BASE", vec![0, 1, 0, 1, 0, 0, 0, 0]),
+            (b"COLR", vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            (b"CPAL", vec![0, 1, 0, 1, 0, 1, 0, 1, 0, 0, 0, 14, 0, 0, 1, 2, 3, 4]),
+            (b"GDEF", vec![0, 1, 0, 2, 0, 0, 0, 0, 0, 0, 0, 0]),
+            (b"GDEF", vec![0, 1, 0, 3, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            (b"GSUB", vec![0, 1, 0, 1, 0, 0, 0, 0, 0, 0]),
+            (b"GPOS", vec![0, 1, 0, 1, 0, 0, 0, 0, 0, 0]),
+            (b"STAT", vec![0, 1, 0, 1, 0, 8, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0]),
+            (b"avar", vec![0, 2, 0, 0, 0, 0, 0, 1, 0, 0]),
+            (b"name", vec![0, 1, 0, 0, 0, 6]),
+            (b"post", {
+                let mut post = vec![0; 32];
+                post[1] = 2;
+                post
+            }),
+            (b"OS/2", vec![0, 5, 0, 0]),
+        ];
+        for (tag, bytes) in cases {
+            assert_eq!(verdict(tag, &bytes, &context), Verdict::Invalid, "{tag:?}");
+        }
+        // A lookup that says it has a mark filtering set and ends before it.
+        let gsub = vec![0, 1, 0, 0, 0, 0, 0, 0, 0, 10, 0, 1, 0, 4, 0, 1, 0, 0x10, 0, 0];
+        assert_eq!(verdict(b"GSUB", &gsub, &context), Verdict::Invalid);
+    }
+
+    #[test]
+    fn tuple_stores_are_read_to_their_end() {
+        let context = TableContext { glyph_count: 1, axis_count: 1, ..Default::default() };
+        // One tuple with an embedded peak, whose data is one run of two zero deltas.
+        let good = vec![0, 1, 0, 0, 0, 1, 0, 14, 0, 1, 0x80, 0, 0x40, 0, 0x81];
+        assert_eq!(verdict(b"cvar", &good, &context), Verdict::Valid);
+        let mut no_peak = good.clone();
+        no_peak[10] = 0;
+        assert_eq!(verdict(b"cvar", &no_peak, &context), Verdict::Invalid, "cvar has no shared tuples");
+        let mut too_long = good.clone();
+        too_long[9] = 40;
+        assert_eq!(verdict(b"cvar", &too_long, &context), Verdict::Invalid, "a tuple past the end");
+        let mut run_past = good.clone();
+        run_past[14] = 0x05;
+        assert_eq!(verdict(b"cvar", &run_past, &context), Verdict::Invalid, "a run past the tuple");
+    }
+
+    #[test]
+    fn kern_pairs_are_checked() {
+        let context = TableContext { glyph_count: 8, ..Default::default() };
+        let kern = |first: u16, second: u16| {
+            let mut bytes = vec![0, 0, 0, 1, 0, 0, 0, 26, 0, 1, 0, 2, 0, 0, 0, 0, 0, 0];
+            for pair in [(1u16, 2u16), (first, second)] {
+                bytes.extend_from_slice(&pair.0.to_be_bytes());
+                bytes.extend_from_slice(&pair.1.to_be_bytes());
+                bytes.extend_from_slice(&[0, 1]);
+            }
+            bytes
+        };
+        assert_eq!(verdict(b"kern", &kern(1, 3), &context), Verdict::Valid);
+        assert_eq!(verdict(b"kern", &kern(1, 1), &context), Verdict::Invalid, "out of order");
+        assert_eq!(verdict(b"kern", &kern(1, 9), &context), Verdict::Invalid, "no such glyph");
+    }
+
+    #[test]
+    fn color_glyph_cycles_are_found() {
+        assert!(!has_color_cycle(&[(1, 2), (2, 3), (1, 3)]));
+        assert!(has_color_cycle(&[(1, 2), (2, 3), (3, 1)]));
+        assert!(has_color_cycle(&[(5, 5)]));
+    }
+
+    #[test]
+    fn a_table_with_no_validator_is_not_kept() {
+        let data = font(INTER);
+        let mut renamed = data.clone();
+        let count = data.u16_at(4).unwrap() as usize;
+        // `MATH` sorts where this name does, so the directory stays in order.
+        let entry = (0..count).map(|index| 12 + index * 16).find(|entry| &data[*entry..*entry + 4] == b"GSUB").unwrap();
+        renamed[entry..entry + 4].copy_from_slice(b"MATH");
+        let clean = sanitize(&renamed, &SanitizeOptions::default()).unwrap();
+        assert!(table(&clean, b"MATH").is_none());
+    }
+
+    /// Seeded corruption of each table on its own, where a lie reaches the deep checks instead
+    /// of being stopped by the directory.
+    fn corrupt_tables(path: &str, rounds: usize) {
+        let data = font(path);
+        let context = context(&data);
+        let (_, records) = read_directory(&data, 0, &WebFontLimits::DEFAULT).unwrap();
+        let mut state = 0x7F4A_7C15_9E37_79B9u64;
+        let mut next = move || {
+            state ^= state << 13;
+            state ^= state >> 7;
+            state ^= state << 17;
+            state as usize
+        };
+        for record in records.iter().filter(|record| record.length >= 4 && record.length <= 128 * 1024) {
+            let original = &data[record.offset..record.offset + record.length];
+            for _ in 0..rounds {
+                let mut copy = original.to_vec();
+                for _ in 0..1 + next() % 8 {
+                    // Headers are where offsets and counts are.
+                    let range = if next() % 2 == 0 { copy.len().min(256) } else { copy.len() };
+                    let position = next() % range;
+                    copy[position] = if next() % 3 == 0 { 0xFF } else { next() as u8 };
+                }
+                if next() % 4 == 0 {
+                    copy.truncate(next() % copy.len() + 1);
+                }
+                let _ = verdict(&record.tag, &copy, &context);
+            }
+        }
+    }
+
+    #[test]
+    fn corrupted_tables_never_panic() {
+        corrupt_tables(INTER, 24);
+        corrupt_tables(VARIABLE, 12);
+        corrupt_tables("../samples/ControlCatalog/Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf", 24);
+    }
+
+    /// The same, for as long as asked: `FERROUI_FUZZ_ROUNDS` rounds of each table.
+    #[test]
+    #[ignore = "a long run"]
+    fn corrupted_tables_never_panic_long() {
+        let rounds = std::env::var("FERROUI_FUZZ_ROUNDS").ok().and_then(|text| text.parse().ok()).unwrap_or(2000);
+        for path in FONTS {
+            corrupt_tables(path, rounds);
+        }
+    }
 }

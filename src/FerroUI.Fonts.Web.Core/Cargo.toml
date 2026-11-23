@@ -17,6 +17,8 @@ path = "lib.rs"
 [dependencies]
 # Inflates the tables of WOFF 1 (pure Rust, `miniz_oxide`).
 flate2.workspace = true
+# The typed tables and the traversal the sanitizer validates fonts with. In step with `skrifa`.
+read-fonts.workspace = true
 
 [features]
 # The encoder of WOFF2 test files, for the tests of this crate and of `ferroui-fonts-web`.

@@ -328,11 +328,24 @@ approach of OTS: parse, validate, and write out a new font containing only what 
 - Hinting is kept by default, as in browsers, because removing it changes how text looks and
   would break the rule that a font renders the same from TTF, WOFF and WOFF2.
   `SanitizeOptions::strip_hinting` removes the programs and the instructions of each glyph.
-- **The limit of this sanitizer.** For `GSUB`, `GPOS`, `GDEF`, `CFF `, `CFF2`, `COLR`, `CPAL`,
-  `sbix`, `gvar` and the other complex tables it checks headers, counts and offsets. It does not
-  validate their full content as OTS does. That depth stays with the readers: the sanitizer of
-  HarfBuzz, `read-fonts`, FreeType, Core Text and DirectWrite. Deeper validation of a table is
-  added here if a reader turns out to need it.
+- **Every table that is kept has its content validated, or it is not kept.** The offset graph is
+  walked with the traversal of `read-fonts` under a work budget, so that subtables shared many
+  times cannot multiply the work. On top of the walk come the checks it does not make: glyph
+  ids, lookup and feature indices, the order of coverage and class ranges, layer and palette
+  indices, cycles of color glyphs, the value records of `GPOS`, the tuple stores of `gvar` and
+  `cvar`, the names of `post`, `kern` pairs, and every charstring of `CFF ` and `CFF2`, run with
+  a limit on the work of subroutines.
+- **Fail closed.** A table that fails, or that has no validator (`JSTF`, `MATH`, `VDMX`, `LTSH`,
+  `PCLT`, `EBSC`, the AAT tables), is dropped when the font works without it. A failure in a
+  table the font needs refuses the font, and the next `src` entry is used.
+- **This is not the OpenType Sanitizer.** It takes the same approach and is not equal to it: the
+  checks are its own, and its verdicts have not been compared with those of OTS.
+- **The traversal can panic** on a table too short for the fields of its version. Those fields
+  are a closed list in `read-fonts` 0.41, and each is guarded before the walk. The list has to be
+  checked again whenever the pin moves, which follows `skrifa`.
+- Three tolerances exist because shipped fonts need them and no reader is harmed: an offset of
+  zero is null even where the format does not call it optional, coverage ranges may share their
+  last glyph with the next range, and a coverage array may repeat a glyph.
 - Decompression output is bounded by the declared size and by the limits below, before any
   allocation. No code path panics on input; a fuzz target covers the decoders.
 - Failure marks the face as `error` and the next `src` entry is tried.
