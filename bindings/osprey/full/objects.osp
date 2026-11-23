@@ -362,9 +362,10 @@ fn fontIconSource() = ferro_create(typeId: 125)
 // registered for its type (`register_page_factory`) or by the default constructor the page
 // type carries. The upstream pages (`Page`, `NavigationPage`) are another model;
 // docs/porting/winui-controls.md, section 7, compares them. The WinUI theme has the template
-// (WinUI's `Frame` style of `generic.xaml`); the Fluent and Simple themes have none. Missing
-// (docs/porting/winui-controls.md, section 10.4): the navigation transitions
-// (`ContentTransitions`, the `NavigationTransitionInfo` of `Navigate`), `GetNavigationState`
+// (WinUI's `Frame` style of `generic.xaml`); the Fluent and Simple themes have none. A
+// navigation plays a [`NavigationTransitionInfo`] when it is asked for
+// ([`navigate_with_transition`](Self::navigate_with_transition)). Missing
+// (docs/porting/winui-controls.md, section 10.4): `ContentTransitions`, `GetNavigationState`
 // and `SetNavigationState`.
 fn frame() = ferro_create(typeId: 126)
 // framePage() -> int: creates a FramePage. A page a [`Frame`] navigates to (WinUI's `Page`, a

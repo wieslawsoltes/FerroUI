@@ -5435,7 +5435,7 @@
     "SourcePageType"
    ],
    "events": [],
-   "doc": "A content control that navigates between pages of the WinUI model (WinUI's `Frame`): it shows a [`FramePage`] of the type of a navigation and keeps a journal of the pages it showed (the back and the forward stack) and a cache of pages (`CacheSize`, `FramePage::navigation_cache_mode`). A navigation is synchronous: `navigate`, `go_back` and `go_forward` raise `Navigating`, which can cancel it, call the callbacks of the old and the new page, raise `Navigated`, and return; a navigation requested by one of those handlers while the frame navigates is ignored. The type of a page is a [`PageType`] (`PageType::of::<MyPage>()`, WinUI's `TypeName`); a page is created by the page factory registered for its type (`register_page_factory`) or by the default constructor the page type carries. The upstream pages (`Page`, `NavigationPage`) are another model; docs/porting/winui-controls.md, section 7, compares them. The WinUI theme has the template (WinUI's `Frame` style of `generic.xaml`); the Fluent and Simple themes have none. Missing (docs/porting/winui-controls.md, section 10.4): the navigation transitions (`ContentTransitions`, the `NavigationTransitionInfo` of `Navigate`), `GetNavigationState` and `SetNavigationState`."
+   "doc": "A content control that navigates between pages of the WinUI model (WinUI's `Frame`): it shows a [`FramePage`] of the type of a navigation and keeps a journal of the pages it showed (the back and the forward stack) and a cache of pages (`CacheSize`, `FramePage::navigation_cache_mode`). A navigation is synchronous: `navigate`, `go_back` and `go_forward` raise `Navigating`, which can cancel it, call the callbacks of the old and the new page, raise `Navigated`, and return; a navigation requested by one of those handlers while the frame navigates is ignored. The type of a page is a [`PageType`] (`PageType::of::<MyPage>()`, WinUI's `TypeName`); a page is created by the page factory registered for its type (`register_page_factory`) or by the default constructor the page type carries. The upstream pages (`Page`, `NavigationPage`) are another model; docs/porting/winui-controls.md, section 7, compares them. The WinUI theme has the template (WinUI's `Frame` style of `generic.xaml`); the Fluent and Simple themes have none. A navigation plays a [`NavigationTransitionInfo`] when it is asked for ([`navigate_with_transition`](Self::navigate_with_transition)). Missing (docs/porting/winui-controls.md, section 10.4): `ContentTransitions`, `GetNavigationState` and `SetNavigationState`."
   },
   {
    "id": 127,
@@ -8183,7 +8183,7 @@
    "children": "none",
    "properties": [],
    "events": [],
-   "doc": "An entry of the journal of a [`Frame`]: the type of a page and the parameter of its navigation. The parameter is kept as it is (by identity), as in WinUI. Missing (docs/porting/winui-controls.md, section 10.4): `NavigationTransitionInfo`, FerroUI's frame has no navigation transitions."
+   "doc": "An entry of the journal of a [`Frame`]: the type of a page and the parameter of its navigation. The parameter is kept as it is (by identity), as in WinUI."
   },
   {
    "id": 257,
