@@ -12,7 +12,7 @@ mod overlay_layer_registry;
 pub use control_list::OverlayControlList;
 pub use i_overlay_layer::IOverlayLayer;
 pub use overlay_host::OverlayHost;
-pub use overlay_layer::OverlayLayer;
+pub use overlay_layer::DockOverlayLayer;
 pub use overlay_layer_collection::{
     OrderedOverlayLayerIterator, OrderedOverlayLayers, OverlayLayerCollection,
 };

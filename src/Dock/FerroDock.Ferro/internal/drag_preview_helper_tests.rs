@@ -86,8 +86,8 @@ fn layer() -> (Ref<ManagedWindowLayer>, Ref<Canvas>, Scene) {
         .unwrap();
     (layer, canvas, scene)
 }
-fn install_window() -> (Ref<DragPreviewWindow>, Ref<DragPreviewControl>) {
-    let window = DragPreviewWindow::new();
+fn install_window() -> (Ref<DockDragPreviewWindow>, Ref<DragPreviewControl>) {
+    let window = DockDragPreviewWindow::new();
     let control = DragPreviewControl::new();
     let state = DragPreviewHelper::state();
     state.window.replace(Some(window.clone()));

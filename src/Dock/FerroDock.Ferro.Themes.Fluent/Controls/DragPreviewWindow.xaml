@@ -2,7 +2,7 @@
                     xmlns:d="using:FerroDock.Ferro.Controls"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     x:CompileBindings="True">
-  <ControlTheme x:Key="{x:Type d:DragPreviewWindow}" TargetType="d:DragPreviewWindow" x:DataType="d:DragPreviewWindow"
+  <ControlTheme x:Key="{x:Type d:DockDragPreviewWindow}" TargetType="d:DockDragPreviewWindow" x:DataType="d:DockDragPreviewWindow"
                 BasedOn="{StaticResource {x:Type Window}}">
     <Setter Property="WindowDecorations" Value="None" />
     <Setter Property="ShowInTaskbar" Value="False" />

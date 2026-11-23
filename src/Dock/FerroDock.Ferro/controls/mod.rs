@@ -71,7 +71,7 @@ pub use tool_dock_control::ToolDockControl;
 mod drag_preview_control;
 pub use drag_preview_control::DragPreviewControl;
 mod drag_preview_window;
-pub use drag_preview_window::DragPreviewWindow;
+pub use drag_preview_window::DockDragPreviewWindow;
 mod dock_selector_overlay;
 pub use dock_selector_overlay::DockSelectorOverlay;
 mod dock_command_bar_host;

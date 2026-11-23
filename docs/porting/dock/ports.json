@@ -1708,7 +1708,7 @@
       "status": "ported",
       "members": [
         "Original Window subclass and automation peer creation",
-        "Original StyleKeyOverride remains DragPreviewWindow for derived native window classes"
+        "Original StyleKeyOverride remains the class (DockDragPreviewWindow here) for derived native window classes"
       ],
       "notes": "Complete source class bodies use the native Window/platform factory. Source default behavior remains in the framework and window styling is mapped separately. Both construction and derived style/peer dispatch are tested; full drag-preview helper/desktop integration remains separate pending work."
     },
@@ -3477,7 +3477,7 @@
       ],
       "status": "partial",
       "members": [
-        "OverlayLayer",
+        "OverlayLayer (DockOverlayLayer here: the framework has its own OverlayLayer)",
         "ZIndex",
         "IsVisible",
         "BlocksInput",

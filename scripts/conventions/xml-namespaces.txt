@@ -108,9 +108,7 @@ collision CornerRadiusToThicknessConverter # decision 4
 collision CornerRadiusToThicknessConverterKind # decision 4
 collision DateTimeAxis # decision 3
 collision DensityStyle # decision 2, live
-collision DragPreviewWindow # decision 1
 collision InfoBarPanel # decision 4
 collision LineSeries # decision 3
-collision OverlayLayer # decision 1, live
 collision SystemAccentColors # decision 4
 collision TabViewEqualWidthPanel # decision 4
