@@ -297,6 +297,11 @@ impl DrawingContextImpl {
         // filter reaches.
         let scene_transform = Affine::translate((-bounds.x0, -bounds.y0)) * transform;
 
+        #[cfg(feature = "gpu")]
+        if self.draw_blurred_path_in_compute_mode(path, fill_rule, scene_transform, std_deviation, color, bounds) {
+            return;
+        }
+
         // A picture the CPU renderer makes is kept: the same shadow at
         // another place on whole pixels, or in the next frame, is the same
         // picture.
@@ -322,6 +327,51 @@ impl DrawingContextImpl {
                 self.draw_filter_scene(&mut *scene, bounds.x0, bounds.y0, width, height, crate::perf::Phase::ShadowAsImage)
             }
         }
+    }
+
+    /// In the compute mode, on its device: the blur of `gpu/shadow_blur.rs`, which needs no filter
+    /// layers, composed over `bounds` under the clips of the context. A failure of the device
+    /// draws no shadow rather than a picture of the CPU renderer. `false` in any other scene.
+    #[cfg(feature = "gpu")]
+    fn draw_blurred_path_in_compute_mode(
+        &mut self,
+        path: &BezPath,
+        fill_rule: Fill,
+        to_area: Affine,
+        std_deviation: f64,
+        color: AlphaColor<Srgb>,
+        bounds: kurbo::Rect,
+    ) -> bool {
+        if self.scene().rendering_mode() != crate::VelloRenderingMode::Gpu {
+            return false;
+        }
+        let Some(device) = self.scene().device().cloned() else {
+            return false;
+        };
+        if !self.draws_on_device(&device) {
+            return false;
+        }
+        let (width, height) = (bounds.width() as u16, bounds.height() as u16);
+        crate::perf::count(crate::perf::Phase::ShadowAsImage, u64::from(width) * u64::from(height) * 4);
+        let Some(blurred) =
+            crate::gpu::shadow_blur::blurred_shape(&device, path, fill_rule, to_area, std_deviation, color, width, height)
+        else {
+            return true;
+        };
+        let quality = if blurred.reduced { ImageQuality::Medium } else { ImageQuality::Low };
+        let paint = VelloScenePaint {
+            brush: VelloSceneBrush::Texture(crate::scene::VelloSceneTexture {
+                texture: blurred.texture,
+                x_extend: Extend::Pad,
+                y_extend: Extend::Pad,
+                quality,
+                alpha: 1.0,
+            }),
+            transform: Affine::translate((bounds.x0, bounds.y0)) * blurred.to_area,
+        };
+        let area = rect_path(Rect::new(bounds.x0, bounds.y0, f64::from(width), f64::from(height)));
+        self.sink().fill(&area, Fill::NonZero, Affine::IDENTITY, &paint, BlendMode::default(), false);
+        true
     }
 
     /// Draws an image with its pixels on the pixels of the scene of the

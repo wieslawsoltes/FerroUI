@@ -136,6 +136,28 @@ enum FirstClip {
     Rect { rect: kurbo::Rect, transform: Affine, anti_alias: bool },
 }
 
+#[cfg(test)]
+ferroui_base::ferro_thread_local! {
+    /// The scenes of the CPU renderer this thread made: what the tests of the GPU modes count to
+    /// show that a route stayed on the device.
+    static CPU_SCENES_MADE: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
+}
+
+/// What the closed form of a blurred rounded rectangle of every renderer is given for a Gaussian
+/// of `std_deviation`. The renderers evaluate `erf(distance / std_dev)` where the blur of an edge
+/// by a Gaussian of deviation s is `erf(distance / (s √2))`: what they call the standard deviation
+/// is √2 times the Gaussian's (measured against the blur filter of the CPU renderer: with the
+/// factor the two agree to 5 of 255 on a rectangle, without it they are 21 apart).
+pub(crate) fn closed_form_std_dev(std_deviation: f64) -> f64 {
+    std_deviation * std::f64::consts::SQRT_2
+}
+
+/// The scenes of the CPU renderer this thread has made so far.
+#[cfg(test)]
+pub(crate) fn cpu_scenes_made() -> usize {
+    CPU_SCENES_MADE.with(std::cell::Cell::get)
+}
+
 impl VelloCpuSceneSink {
     /// Creates the scene of a target of the given size: a large one is
     /// rendered by the thread pool of the renderer ([`render_threads`]),
@@ -152,6 +174,8 @@ impl VelloCpuSceneSink {
     }
 
     fn with_threads(width: u16, height: u16, threads: u16) -> Self {
+        #[cfg(test)]
+        CPU_SCENES_MADE.with(|made| made.set(made.get() + 1));
         let (context, resources) = RendererPool::take(width, height, threads);
 
         Self {
@@ -751,12 +775,7 @@ impl IVelloSceneSink for VelloCpuSceneSink {
         self.context.set_paint_transform(Affine::IDENTITY);
         self.context.set_transform(transform);
         self.context.set_fill_rule(Fill::NonZero);
-        // The renderer evaluates `erf(distance / std_dev)` where the blur of
-        // an edge by a Gaussian of deviation s is `erf(distance / (s √2))`:
-        // what it calls the standard deviation is √2 times the Gaussian's
-        // (measured against its own blur filter: with the factor the two
-        // agree to 5 of 255 on a rectangle, without it they are 21 apart).
-        let std_dev = std_deviation * std::f64::consts::SQRT_2;
+        let std_dev = closed_form_std_dev(std_deviation);
         self.context.fill_blurred_rounded_rect(&rect, radius as f32, std_dev as f32, invert);
     }
 }

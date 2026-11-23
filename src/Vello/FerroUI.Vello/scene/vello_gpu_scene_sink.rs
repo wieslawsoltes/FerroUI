@@ -1,9 +1,9 @@
 use crate::gpu::{log_render_failure, premultiply_pixel, VelloGpuTexture, VelloWgpuDevice};
 use crate::scene::image_textures::{release_unused_textures, rgba_bytes};
-use crate::scene::vello_cpu_scene_sink::{prepare, stroke_outline};
+use crate::scene::vello_cpu_scene_sink::{closed_form_std_dev, prepare, stroke_outline};
 use crate::scene::{
-    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneGlyphRun, VelloScenePaint, VelloScenePixelRect,
-    VelloSceneTexture,
+    IVelloSceneSink, VelloSceneBrush, VelloSceneCapabilities, VelloSceneFilterCapabilities, VelloSceneGlyphRun,
+    VelloScenePaint, VelloScenePixelRect, VelloSceneTexture,
 };
 use crate::vello_options::VelloRenderingMode;
 use kurbo::{Affine, BezPath, Diagonal2, PathEl, Point, Rect, Stroke, Vec2};
@@ -1176,6 +1176,32 @@ impl IVelloSceneSink for VelloGpuSceneSink {
             let clips = self.local_clips();
             self.open_clips(&clips);
         }
+    }
+
+    fn filter_capabilities(&self) -> VelloSceneFilterCapabilities {
+        // The renderer has no filter layers; it has the closed form.
+        VelloSceneFilterCapabilities { filter_layers: false, blurred_rounded_rects: true }
+    }
+
+    /// # Panics
+    /// Panics with `invert`: the renderer has no inverted form, and the box shadows draw an inset
+    /// shadow through its shape.
+    fn fill_blurred_rounded_rect(
+        &mut self,
+        rect: Rect,
+        radius: f64,
+        std_deviation: f64,
+        invert: bool,
+        transform: Affine,
+        color: AlphaColor<peniko::color::Srgb>,
+    ) {
+        assert!(!invert, "The compute renderer has no inverted blurred rounded rectangle");
+        self.drawing();
+        // The renderer evaluates the blur at the corner of a pixel, not at its center, as it does
+        // a gradient (see `fill`). The shape the blur is drawn in reaches past where the blur
+        // ends, so moving both by half a pixel moves only the blur.
+        let transform = Affine::translate((-0.5, -0.5)) * self.placed(transform);
+        self.scene.draw_blurred_rounded_rect(transform, rect, color, radius, closed_form_std_dev(std_deviation));
     }
 
     fn render_to_pixels(&mut self, pixels: &mut [u8]) {
