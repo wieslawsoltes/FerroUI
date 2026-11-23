@@ -99,11 +99,7 @@ fn lexical_patch(source: &str, attribute: &Attribute, old: &str, new: &str) -> R
     let text = XmlText::attribute(source, attribute.value_span).ok_or_else(unmapped)?;
     let literal = text.value().strip_prefix("{}").unwrap_or(text.value());
     require(literal == old, unmapped().0)?;
-    let escape = text.value().len() - literal.len();
-    let patch = TextPatch::between(old, new).ok_or_else(unmapped)?;
-    let span = text
-        .source_span(patch.span.start + escape..patch.span.end + escape)
-        .ok_or_else(unmapped)?;
-    let replacement = crate::xaml::escape(&patch.replacement).replace('\'', "&apos;");
-    Ok(TextPatch { span, replacement })
+    let prefix = &text.value()[..text.value().len() - literal.len()];
+    crate::keyframe_source::attribute_text_patch(source, attribute, &format!("{prefix}{new}"))?
+        .ok_or_else(unmapped)
 }

@@ -7,8 +7,8 @@ use ferroui_base::media::CustomEffectRegistry;
 use ferroui_base::{Ref, StyledElement};
 use ferroui_designer_animation::native::{native_keyframe_options_for_target, NativeProgramIndex};
 use ferroui_designer_animation::{
-    animation_fragment, compose_animation_edit, registered_key_value_patch, AnimationError, AnimationProgram, AnimationValue,
-    CurveChannel, ImportOptions, KeyframeComponentEdit, KeyframeEdit, KeyframeLocation,
+    animation_fragment, compose_animation_edit, native_keyframe_patches, AnimationError, AnimationProgram, AnimationValue,
+    CurveChannel, ImportOptions, KeyframeComponentEdit, KeyframeEdit, KeyframeLocation, Timeline,
     TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, NodeId, TextPatch};
@@ -207,35 +207,16 @@ impl HostedKeyframes {
                 )
             })
             .map_err(|error| error.to_string())?;
-        let literal = registered_key_value_patch(&self.document, program, &draft)
-            .map_err(|error| error.to_string())?;
-        let (source, accepted) = with_codecs(|codecs| {
-            let source = if let Some(patch) = &literal {
-                let mut candidate = self.document.as_ref().clone();
-                candidate.apply_text_patches(candidate.revision(), "Stage a registered effect key", vec![patch.clone()])
-                    .map_err(|error| AnimationError(error.to_string()))?;
-                animation_fragment(&candidate, program.id)?
-            } else if sampled.is_some() {
-                codecs.encode_keyframes_for_document(&self.document, program, &draft)?
-            } else {
-                codecs.encode_for_document(&self.document, program, &draft)?
-            };
-            let mut accepted = program.clone();
-            codecs.decode(&mut accepted, &source, options);
-            Ok::<_, AnimationError>((source, accepted))
-        })
-        .map_err(|error| error.to_string())?;
-        let accepted_timeline = accepted
-            .timeline
-            .as_ref()
-            .filter(|_| accepted.codec == program.codec)
-            .ok_or("The animation codec could not read its encoded program")?;
+        let retimed = edit.retiming(target, property);
+        let (accepted_timeline, patch) = self.edit_source(
+            program, &draft, retimed.as_slice(), options, sampled.is_some(),
+        )?;
         let mut location = KeyframeLocation {
             target,
             property: property.clone(),
             time,
         };
-        location.reconcile_time(accepted_timeline);
+        location.reconcile_time(&accepted_timeline);
         let expected = draft
             .track(target, property)
             .and_then(|track| track.keyframes.iter().find(|key| key.time == time));
@@ -249,10 +230,6 @@ impl HostedKeyframes {
         let preview = accepted_timeline
             .inspect_keyframe(target, property, location.time)
             .map_err(|error| error.to_string())?;
-        let patch = match literal {
-            Some(patch) => Some(DesignAnimationSourcePatch::from_utf8(self.document.source(), patch.span.range(), patch.replacement)?),
-            None => self.source_patch(program.id, &source)?,
-        };
         let resolved_key = round_trip.filter(|_| component_value.is_some()).map(|key| DesignAnimationKeyframe {
             time: key.time, value: key.value.to_xaml(), easing: key.easing.to_xaml(),
             value_kind: format!("{:?}", key.value.kind()), curve_values: None,
@@ -269,6 +246,43 @@ impl HostedKeyframes {
             }),
             resolved_key,
             error: None,
+        })
+    }
+
+    fn edit_source(
+        &self,
+        program: &AnimationProgram,
+        draft: &Timeline,
+        retimed: &[(KeyframeLocation, KeyframeLocation)],
+        options: &ImportOptions,
+        authored_keys: bool,
+    ) -> Result<(Timeline, Option<DesignAnimationSourcePatch>), String> {
+        let precise = native_keyframe_patches(&self.document, program, draft, retimed, || options)
+            .map_err(|error| error.to_string())?;
+        with_codecs(|codecs| {
+            let (source, patch) = if let Some(patches) = precise {
+                let mut candidate = self.document.as_ref().clone();
+                let change = candidate.apply_text_patches(candidate.revision(), "Stage a native keyframe edit", patches)
+                    .map_err(|error| error.to_string())?;
+                let source = animation_fragment(&candidate, program.id).map_err(|error| error.to_string())?;
+                let patch = change.patches.into_iter().next().map(|patch| {
+                    DesignAnimationSourcePatch::from_utf8(self.document.source(), patch.span.range(), patch.replacement)
+                }).transpose()?;
+                (source, patch)
+            } else {
+                let source = if authored_keys {
+                    codecs.encode_keyframes_for_document(&self.document, program, draft)
+                } else {
+                    codecs.encode_for_document(&self.document, program, draft)
+                }.map_err(|error| error.to_string())?;
+                let patch = self.source_patch(program.id, &source)?;
+                (source, patch)
+            };
+            let mut accepted = program.clone();
+            codecs.decode(&mut accepted, &source, options);
+            let timeline = accepted.timeline.filter(|_| accepted.codec == program.codec)
+                .ok_or("The animation codec could not read its encoded program")?;
+            Ok((timeline, patch))
         })
     }
 

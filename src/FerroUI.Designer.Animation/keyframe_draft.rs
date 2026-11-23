@@ -1,5 +1,5 @@
 use crate::{
-    require, AnimationError, AnimationProgram, AnimationValue, Easing, Result, Timeline, ValueKind,
+    require, AnimationError, AnimationProgram, AnimationValue, Easing, KeyframeLocation, Result, Timeline, ValueKind,
 };
 use serde::Serialize;
 
@@ -12,6 +12,16 @@ pub enum KeyframeEdit<'a> {
         easing: &'a str,
     },
     Remove(f64),
+}
+
+impl KeyframeEdit<'_> {
+    pub fn retiming(self, target: u64, property: &str) -> Option<(KeyframeLocation, KeyframeLocation)> {
+        let Self::Upsert { previous: Some(previous), time, .. } = self else {
+            return None;
+        };
+        let location = |time| KeyframeLocation { target, property: property.into(), time };
+        (previous != time).then(|| (location(previous), location(time)))
+    }
 }
 
 #[derive(Serialize)]

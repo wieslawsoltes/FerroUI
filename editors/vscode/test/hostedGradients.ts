@@ -25,7 +25,7 @@ function card(brush: string, animation = '') {
 export async function verifyHostedGradients(preview: NativePreview, update: (revision: number, source: string) => HostedSource) {
     const source = card(first, `<Window.Styles><Style Selector="Border#Card"><Style.Animations>
     <Animation Duration="0:0:2" FillMode="Forward">
-        <KeyFrame Cue="50%"><Setter Property="Background"><Setter.Value>${second}</Setter.Value></Setter></KeyFrame>
+        <KeyFrame Cue="50%"><!-- Keep with the midpoint 🌿 --><Setter Property="Background"><Setter.Value>${second}</Setter.Value></Setter></KeyFrame>
         <KeyFrame Cue="100%"><Setter Property="Background">${radial}</Setter></KeyFrame>
     </Animation>
 </Style.Animations></Style></Window.Styles>`);
@@ -52,7 +52,7 @@ export async function verifyHostedGradients(preview: NativePreview, update: (rev
     });
     assert.ok(component.patch && component.resolvedKey);
     assert.match(component.resolvedKey.value_text, /GradientStop Offset="0\.44"/);
-    assert.match(apply(source, component.patch), /Color="#FF62BAAB"/);
+    assert.equal(apply(source, component.patch), source.replace('Offset="0.6"', 'Offset="0.44"'));
     const batch = await preview.planHostedKeyframe(identity(pose.frame), {
         program: program.id, target: track.target, property, previous: key.time, time: key.time,
         easing: key.easing_text, components: [
@@ -63,7 +63,8 @@ export async function verifyHostedGradients(preview: NativePreview, update: (rev
     assert.ok(batch.patch && batch.resolvedKey);
     assert.match(batch.resolvedKey.value_text, /StartPoint="26%,0%"/);
     assert.match(batch.resolvedKey.value_text, /GradientStop Offset="0\.35"/);
-    assert.match(apply(source, batch.patch), /Color="#FF62BAAB"/);
+    assert.equal(apply(source, batch.patch), source.replace('Offset="0.6"', 'Offset="0.35"')
+        .replace('StartPoint="40%,0%"', 'StartPoint="26%,0%"'));
     const result = await preview.planHostedKeyframe(identity(pose.frame), { program: program.id, target: track.target,
         property, time: .5, previewTarget: query.target, sample: true });
     assert.equal(result.sampledKey?.value_kind, 'Brush');

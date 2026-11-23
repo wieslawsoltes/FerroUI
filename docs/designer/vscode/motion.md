@@ -111,9 +111,11 @@ Handles cover literal geometry, color, built-in effects, [registered shader para
 
 Switch groups to edit another part of the same value. Use the **Edit keyframe value as text** code icon to enter a complete value, for example to add a gradient stop or include a shader’s text argument. Each mode keeps its own draft while that key stays open. Apply uses the active mode. Rebuild the selected Cargo target if App Preview only offers the text field for a compound key.
 
-The XAML codec can regenerate the edited animation block when applying the draft. Undo restores its original formatting.
+For an existing XAML key, value edits follow the authored setter. The editor preserves XML quoting, comment positions, and property wrappers around mapped fields. Time and incoming easing can update the same KeyFrame when its setters share the timing change. Group moves and scaling follow the original frames, including when a destination reuses another selected key’s old time. Retiming one setter in a shared frame can split the key so each track receives its authored time.
 
 ![The docked VS Code Timeline shows the brush geometry, edited key at 1.25 seconds, and accepted native card](../images/vscode-timeline-keyframe-fields.png)
+
+![The selected CornerRadius key changes two values inside its original XAML setter, with the shared cue and opacity visible beside the native card](../images/vscode-xaml-keyframe-source.png)
 
 ![App Preview displays an authored gradient stop with offset and color component fields above the application frame](../images/vscode-app-preview-keyframe-fields.png)
 

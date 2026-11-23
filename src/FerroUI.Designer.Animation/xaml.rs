@@ -169,13 +169,7 @@ impl Timeline {
                 format!(" KeySpline=\"{}\"", escape(&easing.to_xaml()))
             };
             let property = escape(property);
-            let object = match &value {
-                AnimationValue::Effect(effect) if effect.form() != EffectForm::Literal =>
-                    Some(effect.setter_object_xaml()),
-                #[cfg(feature = "native-values")]
-                AnimationValue::Brush(brush) => brush.setter_object_xaml(),
-                _ => None,
-            };
+            let object = setter_object(&value);
             let setter = if let Some(object) = object {
                 format!("<Setter Property=\"{property}\">{object}</Setter>")
             } else {
@@ -689,7 +683,18 @@ pub(crate) fn easing_from_source(source: &str) -> Result<Easing> {
     import_easing(document.root_element())
 }
 
-fn literal_value(value: &AnimationValue) -> String {
+pub(crate) fn setter_object(value: &AnimationValue) -> Option<String> {
+    match value {
+        AnimationValue::Effect(effect) if effect.form() != EffectForm::Literal => {
+            Some(effect.setter_object_xaml())
+        }
+        #[cfg(feature = "native-values")]
+        AnimationValue::Brush(brush) => brush.setter_object_xaml(),
+        _ => None,
+    }
+}
+
+pub(crate) fn literal_value(value: &AnimationValue) -> String {
     let source = value.to_xaml();
     if matches!(value, AnimationValue::Discrete(_)) && source.starts_with('{') {
         format!("{{}}{source}")

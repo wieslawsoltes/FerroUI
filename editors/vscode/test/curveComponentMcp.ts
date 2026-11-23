@@ -7,8 +7,11 @@ const xaml = `<Window xmlns="https://github.com/ferroui" Width="420" Height="260
     <Window.Styles>
         <Style Selector="Border#ReviewCard"><Style.Animations>
             <Animation Duration="0:0:2" FillMode="Both">
-                <!-- keep the corner review 🧭 -->
-                <KeyFrame Cue="25%"><Setter Property="CornerRadius" Value="4,8,16,24"/></KeyFrame>
+                <KeyFrame Cue="25%">
+                    <!-- keep the corner review 🧭 -->
+                    <Setter Property="CornerRadius" Value = '4,8,16,24'/>
+                    <Setter Property="Opacity" Value="0&#46;8"/>
+                </KeyFrame>
                 <KeyFrame Cue="100%"><Setter Property="CornerRadius" Value="16,20,28,38"/></KeyFrame>
             </Animation>
         </Style.Animations></Style>
@@ -86,10 +89,27 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
                 'Radius::top_bottom(/* retain 🧭 */ 8.0f64, 24.0)',
                 'Radius::new(/* retain 🧭 */ 8.0f64, 30.0, 24.0, 42.0)',
             ));
-            else assert.match(document.getText(), /keep the corner review 🧭/u);
+            else assert.equal(document.getText(), original.replace("'4,8,16,24'", "'4,30,16,42'"));
             assert.ok((await commit(revision)).isError);
             content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
             assert.equal(document.getText(), original);
+            if (path.endsWith('.xaml')) {
+                const { revision: accepted } = await frame();
+                const current = await tracks();
+                const key = current.track.keyframes[1];
+                content(await invoke('designer_studio_edit', { session, expected_revision: accepted,
+                    tool: 'designer_program', arguments: {
+                        action: 'upsert_keyframe', program: current.program, target: current.track.target,
+                        property: current.track.property, previous: key.time, time: 1.75, easing: '0.2,0.3,0.8,1',
+                        component: { channel: 'top_right', value: 30 },
+                    } }));
+                assert.equal(document.getText(), original.replace(
+                    'Cue="100%"><Setter Property="CornerRadius" Value="16,20,28,38"',
+                    'Cue="87.5%" KeySpline="0.2,0.3,0.8,1"><Setter Property="CornerRadius" Value="16,30,28,38"',
+                ));
+                content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+                assert.equal(document.getText(), original);
+            }
         } finally {
             const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs)
                 .filter(tab => tab.label === path || tab.label === `Design · ${path}`);
@@ -97,5 +117,5 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
             await vscode.workspace.fs.delete(uri);
         }
     }
-    console.log('MCP edited two components in one XAML and mapped Rust key, rejected invalid and stale batches, and restored the exact source with Undo');
+    console.log('MCP patched XAML setters and a mapped Rust key, rejected stale and invalid edits, and verified exact Undo');
 }

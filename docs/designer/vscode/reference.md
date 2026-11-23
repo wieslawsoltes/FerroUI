@@ -404,7 +404,7 @@ For several fields on the same key, pass `components: [{"channel": "top_right", 
 
 For App Preview, read the authored key from `designer_hosted_animations`. Use its generation and accepted revision and sequence for `designer_hosted_keyframe_draft` and `designer_hosted_keyframe`. The draft returns a UTF-16 source patch and the complete `resolvedKey` from the running app’s codec. Units match the Value graph. Use logical pixels for absolute distances, percentage points for relative coordinates, degrees for rotation, and values from 0 to 1 for color channels. [Curve graph workflow](motion.md#edit-a-curve-component)
 
-Use `components` in App Preview when the program’s `authoring.componentBatch` is true. [Compound keyframe workflow](motion.md#edit-compound-keyframe-values)
+Use `components` in App Preview when the program’s `authoring.componentBatch` is true. The source plan for an existing native XAML key targets its authored setter and any compatible timing attributes. It checks the candidate with the same native codec before Apply. [Compound keyframe workflow](motion.md#edit-compound-keyframe-values)
 
 For a registered shader, copy the exact channel from the key’s `curve_values`, for example `effect_parameter/spotlight/strength/value`. A Boolean handle reports `step: "boolean"` and accepts 0 or 1. An integer handle reports `step: "integer"` and accepts a signed 32-bit integer. App Preview resolves project-registered effects against the loaded application. [Registered shader workflow](motion.md#animate-registered-shader-parameters)
 

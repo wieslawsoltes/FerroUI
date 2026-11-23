@@ -1,6 +1,6 @@
-use super::{HostedKeyframes, with_codecs};
+use super::HostedKeyframes;
 use ferroui_designer_animation::{
-    AnimationError, KeyframeSelection, KeyframeSelectionPlan, Timeline, native_key_time,
+    KeyframeSelection, KeyframeSelectionPlan, Timeline, native_key_time,
 };
 use ferroui_remote_protocol::designer::{
     DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
@@ -39,34 +39,22 @@ impl HostedKeyframes {
             }
             KeyframeSelectionPlan::Edit { timeline, mut keys } => {
                 if !request.projected && &timeline != original {
-                    let (source, accepted) = with_codecs(|codecs| {
-                        let source = codecs.encode_keyframes_for_document(
-                            &self.document,
-                            program,
-                            &timeline,
-                        )?;
-                        let mut accepted = program.clone();
-                        accepted.timeline = None;
-                        accepted.codec = None;
-                        codecs.decode(&mut accepted, &source, options);
-                        let accepted_timeline = accepted
-                            .timeline
-                            .filter(|_| accepted.codec == program.codec)
-                            .ok_or_else(|| {
-                                AnimationError(
-                                    "The animation codec could not read its encoded program".into(),
-                                )
-                            })?;
-                        Ok::<_, AnimationError>((source, accepted_timeline))
-                    })
-                    .map_err(|error| error.to_string())?;
+                    let retimed = if command.group_edit().is_some_and(|edit| edit.retimes()) {
+                        command.keyframes().iter().cloned().map(|mut location| {
+                            location.reconcile_time(original);
+                            location
+                        }).zip(keys.iter().cloned()).collect::<Vec<_>>()
+                    } else {
+                        Vec::new()
+                    };
+                    let (accepted, patch) = self.edit_source(program, &timeline, &retimed, options, true)?;
                     if !same_animation(&timeline, &accepted) {
                         return Err("The animation codec did not preserve the planned keys and clip timing".into());
                     }
                     for key in &mut keys {
                         key.reconcile_time(&accepted);
                     }
-                    answer.patch = self.source_patch(program.id, &source)?;
+                    answer.patch = patch;
                 }
                 answer.keys =
                     Some(serde_json::to_string(&keys).map_err(|error| error.to_string())?);

@@ -83,7 +83,13 @@ impl DesignerSession {
                 .with_keyframe_edit(keys, edit)
                 .map_err(|error| error.to_string())?;
             if &timeline != authored {
-                self.update_animation_program(id, timeline)?;
+                let retimed = if edit.retimes() {
+                    keys.iter().cloned().zip(changed.iter().cloned()).collect::<Vec<_>>()
+                } else {
+                    Vec::new()
+                };
+                let edits = self.program_edits(id, &timeline, &retimed)?;
+                self.apply_program_edits(id, edits)?;
             }
             changed
         };
@@ -108,7 +114,9 @@ impl DesignerSession {
             }
             return Ok(());
         }
-        self.update_animation_program(program, timeline)
+        let retimed = edit.retiming(target, property);
+        let edits = self.program_edits(program, &timeline, retimed.as_slice())?;
+        self.apply_program_edits(program, edits)
     }
 
     /// Validate a draft against an accepted program and its loaded property types.
@@ -162,7 +170,7 @@ impl DesignerSession {
             }
             rust.keyframe(&self.document, program, property, draft)?;
         } else {
-            self.program_edits(program, &timeline)?;
+            self.program_edits(program, &timeline, draft.retiming(target, property).as_slice())?;
         }
         serde_json::to_value(
             timeline

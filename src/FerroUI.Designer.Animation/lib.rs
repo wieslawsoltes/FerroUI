@@ -14,6 +14,7 @@ mod easing;
 mod interactions;
 mod keyframe_component;
 mod keyframe_draft;
+mod keyframe_source;
 mod keyframe_edits;
 mod keyframe_clipboard;
 mod keyframe_mirror;
@@ -53,6 +54,7 @@ pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDes
 pub use keyframe_selection::{KeyframeSelection, KeyframeSelectionPlan};
 pub use preview_range::PreviewRange;
 pub use registered_key_patch::registered_key_value_patch;
+pub use keyframe_source::native_keyframe_patches;
 pub use program_edit::compose_animation_edit;
 pub use program_locator::AnimationProgramLocator;
 pub use preview_markers::{PreviewMarker, PreviewMarkerEdit, PreviewMarkers};

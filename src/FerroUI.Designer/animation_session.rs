@@ -5,7 +5,7 @@ use ferroui_base::{BoxedValue, FerroProperty, StyledElement, TypeInfo};
 use ferroui_designer_animation::native::{native_list_base, native_list_kind};
 use ferroui_designer_animation::{
     AnimationBoxShadows, AnimationBrush, AnimationCodec, AnimationCodecRegistry, AnimationEffect, AnimationProgram, AnimationPrograms, AnimationTransformList, AnimationValue,
-    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, TrackCurveChannel, ValueKind,
+    CompiledTimeline, CurveChannel, CurvePoint, CurveWindow, Easing, ImportOptions, KeyframeLocation, Player, PreviewRange, Sample, Timeline, TimelineTimingEdit, TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, Edit, NodeId};
 use ferroui_markup::markup::parsers::SelectorParser;
@@ -263,8 +263,11 @@ impl DesignerSession {
         id: NodeId,
         timeline: Timeline,
     ) -> Result<(), String> {
+        let edits = self.program_edits(id, &timeline, &[])?;
+        self.apply_program_edits(id, edits)
+    }
+    pub(crate) fn apply_program_edits(&mut self, id: NodeId, edits: Vec<Edit>) -> Result<(), String> {
         let active = self.animation.active == Some(id);
-        let edits = self.program_edits(id, &timeline)?;
         self.apply("Edit animation program", edits)
             .map_err(|error| error.to_string())?;
         if active && !self.animation.elapsed_clock {
@@ -927,7 +930,12 @@ impl DesignerSession {
         }
         Ok(())
     }
-    pub(crate) fn program_edits(&self, id: NodeId, timeline: &Timeline) -> Result<Vec<Edit>, String> {
+    pub(crate) fn program_edits(
+        &self,
+        id: NodeId,
+        timeline: &Timeline,
+        retimed: &[(KeyframeLocation, KeyframeLocation)],
+    ) -> Result<Vec<Edit>, String> {
         if self.uses_rust_source() {
             return Err("Edit the Rust program in source or choose mapped keyframes in Timeline".into());
         }
@@ -937,10 +945,14 @@ impl DesignerSession {
             .iter()
             .find(|program| program.id == id)
             .ok_or("Unknown animation program")?;
-        if let Some(patch) = ferroui_designer_animation::registered_key_value_patch(&self.document, program, timeline)
+        if let Some(patches) = ferroui_designer_animation::native_keyframe_patches(
+            &self.document, program, timeline, retimed, || self.animation_import_options(program),
+        )
             .map_err(|error| error.to_string())?
         {
-            return Ok(vec![Edit::Text { span: patch.span, replacement: patch.replacement }]);
+            return Ok(patches.into_iter().rev()
+                .map(|patch| Edit::Text { span: patch.span, replacement: patch.replacement })
+                .collect());
         }
         let generated = self
             .animation
@@ -1001,7 +1013,7 @@ impl DesignerSession {
             let mut timeline = candidate.clone();
             timeline.tracks.retain(|track| track.target == target);
             if Some(target) == primary {
-                edits.extend(self.program_edits(active.expect("active"), &timeline)?);
+                edits.extend(self.program_edits(active.expect("active"), &timeline, &[])?);
             } else {
                 let owner = self
                     .document

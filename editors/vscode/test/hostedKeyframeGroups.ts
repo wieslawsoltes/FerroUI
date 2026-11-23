@@ -12,7 +12,7 @@ export async function verifyHostedKeyframeGroups(preview: NativePreview, update:
         <Animation Duration="0:0:2" FillMode="Both">
             <!-- Keep the animation note -->
             <KeyFrame Cue="0%"><Setter Property="CornerRadius" Value="0"/><Setter Property="Opacity" Value="0.4"/></KeyFrame>
-            <KeyFrame Cue="20%"><Setter Property="CornerRadius" Value="12"/><Setter Property="Opacity" Value="0.7"/></KeyFrame>
+            <KeyFrame Cue="20%"><!-- Follow this shared cue 🧭 --><Setter Property="CornerRadius" Value="12"/><Setter Property="Opacity" Value="0.7"/></KeyFrame>
             <KeyFrame Cue="40%" KeySpline="0.2,0.3,0.8,1.2"><Setter Property="Opacity" Value="0.8"/></KeyFrame>
             <KeyFrame Cue="100%"><Setter Property="CornerRadius" Value="32"/><Setter Property="Opacity" Value="1"/></KeyFrame>
         </Animation>
@@ -57,8 +57,7 @@ export async function verifyHostedKeyframeGroups(preview: NativePreview, update:
     } });
     assert.deepEqual(pasted.keys?.map(key => key.time).sort((a, b) => a - b), [1.25, 1.65, 1.65]);
     const changed = applyClipDraft(authored, moved.patches);
-    assert.match(changed, /<!-- Preserve the view 🧪 -->/u);
-    assert.match(changed, /<!-- Keep the animation note -->/);
+    assert.equal(changed, authored.replace('Cue="20%"', 'Cue="30%"').replace('Cue="40%"', 'Cue="50%"'));
     assert.doesNotMatch(changed, /(?<!\r)\n/);
     const position = { program: program.id, elapsed: 1.25, playing: false, completed: false };
     const replacement = await preview.renderHosted({ ...update(171, changed),
