@@ -20,8 +20,9 @@ use ferroui_controls::{
     automation::AutomationProperties,
     primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt},
 };
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::collections::{
-    object_model::ObservableCollection, specialized::INotifyCollectionChanged,
+    specialized::INotifyCollectionChanged,
 };
 use std::{
     cell::{Cell, RefCell},

@@ -1,6 +1,7 @@
 use ferroribbon_core::{ObservableObjectImpl, RibbonMergeAction, RibbonString, model::*};
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
-    collections::{object_model::ObservableCollection, specialized::NotifyCollectionChangedAction},
+    collections::{specialized::NotifyCollectionChangedAction},
     component_model::INotifyPropertyChanged,
     events::Event,
 };

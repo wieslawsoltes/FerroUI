@@ -36,8 +36,9 @@ use ferroui_controls::{
         TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt,
     },
 };
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::collections::{
-    object_model::ObservableCollection, specialized::INotifyCollectionChanged,
+    specialized::INotifyCollectionChanged,
 };
 use std::{
     cell::{Cell, RefCell},

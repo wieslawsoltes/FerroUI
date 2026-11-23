@@ -99,7 +99,7 @@ fn explicit_removal_releases_captured_objects() {
 }
 #[test]
 fn framework_collection_identity_and_notification_order() {
-    use ferroui_system::collections::object_model::ObservableCollection;
+    use ferroribbon_core::collections::ObservableCollection;
     let collection = ObservableCollection::<String>::new();
     let alias = collection.clone();
     let trace = Rc::new(RefCell::new(Vec::new()));

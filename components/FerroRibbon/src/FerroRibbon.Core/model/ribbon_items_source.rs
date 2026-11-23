@@ -2,7 +2,7 @@
 //! Shared repeatable input for actual ribbon collection/binding properties.
 //! A source has reference identity and yields ordinary Rust iterators. It supplies
 //! no LINQ operators, CLR enumerator state, Current/Reset, or panic recovery.
-use ferroui_system::collections::object_model::ObservableCollection;
+use crate::collections::ObservableCollection;
 use std::rc::Rc;
 pub type RibbonIterator<T> = Box<dyn Iterator<Item = T>>;
 type Factory<T> = Rc<dyn Fn() -> RibbonIterator<T>>;

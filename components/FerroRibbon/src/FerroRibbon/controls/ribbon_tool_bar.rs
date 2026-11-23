@@ -41,9 +41,10 @@ use ferroui_controls::{
     },
     shapes::{Rectangle, Shape},
 };
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
     IDisposable,
-    collections::{object_model::ObservableCollection, specialized::INotifyCollectionChanged},
+    collections::{specialized::INotifyCollectionChanged},
 };
 use std::{
     cell::{Cell, RefCell},

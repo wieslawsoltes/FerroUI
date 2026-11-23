@@ -5,8 +5,9 @@ use crate::{
     RibbonMinimizeBehavior, RibbonQuickAccessPosition, RibbonString, RibbonVisibilityMode,
     commands::RibbonCommandCatalog, text::ordinal::OrdinalKey,
 };
+use crate::collections::ObservableCollection;
 use ferroui_system::{
-    collections::object_model::ObservableCollection, component_model::INotifyPropertyChanged,
+    component_model::INotifyPropertyChanged,
     events::Event,
 };
 use std::{any::Any, cell::RefCell, collections::HashMap, rc::Rc};

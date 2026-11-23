@@ -22,7 +22,7 @@ use ferroui_controls::{
     primitives::{FlyoutBase, ToggleButton},
     shapes::{Rectangle, Shape},
 };
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::{cell::RefCell, rc::Rc};
 
 type Nodes = ObservableCollection<RibbonNodeReference>;

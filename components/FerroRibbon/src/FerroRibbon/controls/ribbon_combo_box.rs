@@ -36,7 +36,7 @@ use ferroui_controls::{
     },
     templates::IDataTemplate,
 };
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,

@@ -54,7 +54,7 @@ use ferroui_base::{
     threading::{Dispatcher, DispatcherPriority},
 };
 use ferroui_controls::{Control, TextBox, primitives::TemplatedControl};
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::{collections::HashSet, rc::Rc};
 
 pub type RibbonAdditionalSearchEntries = ObservableCollection<Option<Rc<RibbonSearchEntry>>>;

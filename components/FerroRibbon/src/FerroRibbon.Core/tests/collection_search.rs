@@ -1,4 +1,4 @@
-use ferroui_system::collections::object_model::{CollectionItemView, ObservableCollection};
+use ferroribbon_core::collections::{CollectionItemView, ObservableCollection};
 use serde_json::Value;
 use std::{
     cell::{Cell, RefCell},

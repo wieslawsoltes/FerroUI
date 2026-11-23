@@ -36,8 +36,9 @@ use ferroui_controls::{
         Popup, ScrollBarVisibility, TemplatedControl, TemplatedControlImpl, ToggleButton,
     },
 };
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::collections::{
-    object_model::ObservableCollection, specialized::NotifyCollectionChangedEventArgs,
+    specialized::NotifyCollectionChangedEventArgs,
 };
 use std::{cell::RefCell, rc::Rc};
 type ItemSubscription<T> = (WeakRef<T>, Rc<dyn IDisposable>);

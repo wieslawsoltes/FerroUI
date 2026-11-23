@@ -4,8 +4,9 @@ use ferroui_base::{
     data::{core::ValueTypes, model::ModelTypes},
     metadata::{MarkupType, MarkupTyped},
 };
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
-    collections::object_model::ObservableCollection, component_model::INotifyPropertyChanged,
+    component_model::INotifyPropertyChanged,
 };
 use std::{any::TypeId, rc::Rc};
 mod node;

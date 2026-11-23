@@ -15,8 +15,9 @@ use ferroui_base::{
     metadata::{MarkupDelegate, from_markup_value},
 };
 use ferroui_controls::{Flyout, TopLevel};
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::collections::{
-    object_model::ObservableCollection, specialized::INotifyCollectionChanged,
+    specialized::INotifyCollectionChanged,
 };
 use std::{cell::Cell, rc::Rc};
 struct Reset<'a>(&'a Cell<bool>);

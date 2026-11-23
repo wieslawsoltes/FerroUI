@@ -14,7 +14,7 @@ use ferroui_base::{
 use ferroui_controls::{
     Button, Control, StackPanel, TextBlock, Window, presenters::ContentPresenter,
 };
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::rc::Rc;
 fn cast<T: Clone + 'static>(v: &BoxedValue) -> T {
     ValueTypes::try_cast(v, ValueType::of::<T>())

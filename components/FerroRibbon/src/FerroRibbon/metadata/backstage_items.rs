@@ -1,7 +1,7 @@
 //! Closed ObservableCollection<RibbonBackstageItem> using native System storage.
 use crate::controls::RibbonBackstageItem;
 use ferroui_base::Ref;
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 pub type RibbonBackstageItems = ObservableCollection<Option<Ref<RibbonBackstageItem>>>;
 pub struct RibbonBackstageItemsMetadata;
 ferroui_base::ferro_markup_type!(class RibbonBackstageItemsMetadata as "ObservableCollection`1"{

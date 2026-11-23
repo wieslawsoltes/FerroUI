@@ -1,7 +1,8 @@
 use ferroribbon_core::collections::RibbonFixedItems;
 use ferroribbon_core::{commands::RibbonCommandCatalog, model::*, *};
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
-    collections::object_model::ObservableCollection, component_model::INotifyPropertyChanged,
+    component_model::INotifyPropertyChanged,
     events::Event,
 };
 use serde_json::{Value, json};

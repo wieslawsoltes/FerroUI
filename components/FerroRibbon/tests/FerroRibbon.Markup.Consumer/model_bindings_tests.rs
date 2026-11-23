@@ -11,9 +11,9 @@ use ferroui_base::{
     metadata::{MarkupDelegate, MarkupTyped},
 };
 use ferroui_controls::{Control, StackPanel, TextBlock, Window};
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
-    IDisposable, collections::object_model::ObservableCollection,
-    component_model::INotifyPropertyChanged,
+    IDisposable, component_model::INotifyPropertyChanged,
 };
 use std::{
     cell::{Cell, RefCell},

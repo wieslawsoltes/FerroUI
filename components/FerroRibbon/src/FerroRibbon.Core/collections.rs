@@ -1,4 +1,8 @@
 //! Core array and shared-item contracts, without UI dependencies.
+mod observable_collection;
+pub use observable_collection::{
+    CollectionChangedHandler, CollectionItemView, ObservableCollection, ObservableCollectionIter,
+};
 use std::{cell::RefCell, rc::Rc};
 /// Shared fixed-length items. The alias uses ordinary Rust reference ownership.
 pub type RibbonArray<T> = Rc<RibbonFixedItems<T>>;

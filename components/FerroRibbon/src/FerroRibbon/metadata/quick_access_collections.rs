@@ -1,7 +1,7 @@
 //! Source QAT string collections retain UTF-16 in Rust. Native markup string
 //! conversions reject unpaired surrogates instead of replacing them.
 use ferroribbon_core::{RibbonString, collections::RibbonReadOnlyList};
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 pub type RibbonQuickAccessCandidates = ObservableCollection<Option<RibbonString>>;
 pub type RibbonQuickAccessItemIds = RibbonReadOnlyList<Option<RibbonString>>;
 pub struct RibbonQuickAccessCandidatesMetadata;

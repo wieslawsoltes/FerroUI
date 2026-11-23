@@ -1,5 +1,5 @@
 //! Focused selected-System defect reproducer. No Ribbon model/control implementation involved.
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::rc::Rc;
 #[derive(Clone)]
 struct Value {

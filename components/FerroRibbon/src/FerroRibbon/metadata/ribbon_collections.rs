@@ -2,7 +2,7 @@
 use crate::controls::{RibbonContextualTabGroup, RibbonGroup, RibbonTab};
 use ferroribbon_core::collections::RibbonFixedItems;
 use ferroui_base::Ref;
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 pub type RibbonGroups = ObservableCollection<Option<Ref<RibbonGroup>>>;
 pub type RibbonTabs = ObservableCollection<Option<Ref<RibbonTab>>>;
 pub type RibbonContextualGroups = ObservableCollection<Option<Ref<RibbonContextualTabGroup>>>;

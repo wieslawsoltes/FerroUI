@@ -1,8 +1,9 @@
 //! Container and segment portions of the pinned RibbonItemModel.cs.
 use super::*;
 use crate::{ObservableObject, ObservableObjectImpl, RibbonItemSize, RibbonString};
+use crate::collections::ObservableCollection;
 use ferroui_system::{
-    collections::object_model::ObservableCollection, component_model::INotifyPropertyChanged,
+    component_model::INotifyPropertyChanged,
     events::Event,
 };
 use std::{cell::RefCell, rc::Rc};

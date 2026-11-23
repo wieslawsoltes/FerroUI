@@ -300,7 +300,7 @@ impl PartialEq for RibbonToggleButtonModel {
 
 pub struct RibbonDropDownButtonModel {
     base: RibbonItemModel,
-    menu_items: ferroui_system::collections::object_model::ObservableCollection<
+    menu_items: crate::collections::ObservableCollection<
         Option<Rc<dyn RibbonNodeModelImpl>>,
     >,
     drop_down_content: RefCell<Option<RibbonObject>>,
@@ -311,7 +311,7 @@ pub trait RibbonDropDownButtonModelImpl: RibbonItemModelImpl {
 pub trait RibbonDropDownButtonModelExt: RibbonDropDownButtonModelImpl {
     fn menu_items(
         &self,
-    ) -> ferroui_system::collections::object_model::ObservableCollection<
+    ) -> crate::collections::ObservableCollection<
         Option<Rc<dyn RibbonNodeModelImpl>>,
     > {
         self.drop_down_button_model().menu_items.clone()

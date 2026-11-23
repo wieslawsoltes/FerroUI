@@ -312,7 +312,7 @@ fn menu_items_defer_validation_and_creation_and_reject_live_collection_version_c
     crate::group_tests::run(|| {
         let f = RibbonElementFactory::new();
         let b = RibbonModelBindings::new();
-        let items = ferroui_system::collections::object_model::ObservableCollection::new_managed();
+        let items = ferroribbon_core::collections::ObservableCollection::new_managed();
         let m = RibbonMenuItemModel::new(None, Some("First".into()));
         items.add(Some(m.clone() as Rc<dyn RibbonNodeModelImpl>));
         let query = f.create_menu_items(

@@ -3,8 +3,9 @@
 use crate::controls::RibbonItemHelper;
 use ferroribbon_core::{RibbonString, collections::RibbonList, model::RibbonItemsSource};
 use ferroui_base::{FerroObject, FerroProperty, ObjectType, Ref, threading::Dispatcher};
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
-    collections::{object_model::ObservableCollection, specialized::INotifyCollectionChanged},
+    collections::{specialized::INotifyCollectionChanged},
     component_model::INotifyPropertyChanged,
 };
 use std::{

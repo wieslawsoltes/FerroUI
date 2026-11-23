@@ -1,7 +1,7 @@
 //! Port of the pinned RibbonModelMerger.cs. Undo is explicit; Drop never unmerges.
 use super::*;
 use crate::RibbonMergeAction;
-use ferroui_system::collections::object_model::ObservableCollection;
+use crate::collections::ObservableCollection;
 use std::{cell::RefCell, rc::Rc};
 type Undo = Rc<dyn Fn()>;
 type MergeChildren<T> = fn(&RibbonModelMerger, T, T);

@@ -1,7 +1,8 @@
 use super::{RibbonIcon, RibbonNodeModel, RibbonNodeModelExt, RibbonNodeModelImpl, RibbonObject};
 use crate::{ObservableObject, ObservableObjectImpl, RibbonString, commands::ICommand};
+use crate::collections::ObservableCollection;
 use ferroui_system::{
-    collections::object_model::ObservableCollection, component_model::INotifyPropertyChanged,
+    component_model::INotifyPropertyChanged,
     events::Event,
 };
 use std::{cell::RefCell, rc::Rc};

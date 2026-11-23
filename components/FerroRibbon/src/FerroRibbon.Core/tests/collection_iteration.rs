@@ -1,5 +1,6 @@
+use ferroribbon_core::collections::ObservableCollection;
 use ferroui_system::{
-    collections::object_model::ObservableCollection, component_model::INotifyPropertyChanged,
+    component_model::INotifyPropertyChanged,
 };
 use serde_json::{Value, json};
 use std::{

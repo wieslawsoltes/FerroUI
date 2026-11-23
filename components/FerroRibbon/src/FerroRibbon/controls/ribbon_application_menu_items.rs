@@ -9,7 +9,7 @@ use ferroui_base::{
     reactive::{Disposable, IDisposable},
     utilities::{EventArgs, HandlerList},
 };
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,

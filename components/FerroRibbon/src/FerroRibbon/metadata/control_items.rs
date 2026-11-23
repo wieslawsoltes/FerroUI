@@ -2,7 +2,7 @@
 //! Actual storage/notifications/iteration are FerroUI.System's existing collection.
 use ferroui_base::Ref;
 use ferroui_controls::Control;
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 pub type RibbonControlItems = ObservableCollection<Option<Ref<Control>>>;
 #[doc(hidden)]
 pub struct RibbonControlItemsMetadata;

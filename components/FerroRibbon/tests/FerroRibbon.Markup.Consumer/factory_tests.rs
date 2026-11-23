@@ -5,7 +5,7 @@ use ferroribbon::{
 use ferroribbon_core::model::*;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_controls::StackPanel;
-use ferroui_system::collections::object_model::ObservableCollection;
+use ferroribbon_core::collections::ObservableCollection;
 use std::rc::Rc;
 
 #[test]
