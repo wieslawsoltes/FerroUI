@@ -3,8 +3,10 @@ import { WebRenderTarget } from "./webRenderTarget";
 // The part of `navigator.gpu` this file uses: the types of WebGPU are not in the libraries of the
 // project.
 interface PageGpu {
-    getPreferredCanvasFormat(): string;
-    requestAdapter(options?: { powerPreference?: string }): Promise<{ requestDevice(): Promise<unknown> } | null>;
+    getPreferredCanvasFormat: () => string;
+    requestAdapter: (options?: {
+        powerPreference?: string;
+    }) => Promise<{ requestDevice: () => Promise<unknown> } | null>;
 }
 
 function pageGpu(): PageGpu | undefined {
