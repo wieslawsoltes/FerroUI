@@ -474,6 +474,17 @@ fn image_files_are_decoded_and_drawn() {
     let webp = b"RIFF\x10\0\0\0WEBPVP8 ".to_vec();
     assert_eq!(std::io::ErrorKind::Unsupported, interface.load_bitmap(&mut std::io::Cursor::new(webp)).err().expect("refused").kind());
 
+    // Saving: a PNG of a bitmap reads back; a JPEG is written with its colours over black.
+    let source = crate::ProGpuBitmap::decode(&file).expect("a PNG is decoded");
+    let mut saved = Vec::new();
+    ferroui_base::platform::IBitmapImpl::save(&source, &mut saved, &ferroui_base::media::imaging::PngBitmapEncoderOptions::DEFAULT.into()).expect("saved as PNG");
+    let again = crate::ProGpuBitmap::decode(&saved).expect("the saved PNG is decoded");
+    source.with_pixels(|first| again.with_pixels(|second| assert_eq!(first, second)));
+    let mut saved = Vec::new();
+    ferroui_base::platform::IBitmapImpl::save(&source, &mut saved, &ferroui_base::media::imaging::JpegBitmapEncoderOptions::DEFAULT.into()).expect("saved as JPEG");
+    assert_eq!(&saved[..3], &[0xFF, 0xD8, 0xFF]);
+    assert_eq!(ferroui_base::platform::IBitmapImpl::pixel_size(&source), ferroui_base::platform::IBitmapImpl::pixel_size(&crate::ProGpuBitmap::decode(&saved).expect("the saved JPEG is decoded")));
+
     // A BMP of one row of two pixels: the formats of the image module come through the same way.
     let mut bmp = Vec::new();
     bmp.extend_from_slice(b"BM");
