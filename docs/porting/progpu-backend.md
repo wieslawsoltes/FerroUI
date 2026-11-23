@@ -831,9 +831,13 @@ As built (step P9):
   (`WebGpuRenderTarget.requestDevice`, the module option `preinitializedWebGPUDevice`). The catalog
   does this for `?Renderer=ProGPU` in a module built with the feature `progpu`; without a device
   it starts with the default backend.
-- **Limits.** A page cannot wait for the GPU, so reading pixels back gives transparent pixels and
-  says so once in the log: `RenderTargetBitmap` contents and encoders do not work in this mode yet.
-  The canvas shows the frame when the task that drew it returns.
+- **Reading pixels back.** A page cannot wait for the GPU, so pixels come back through WebGPU
+  buffer mapping (`read_rgba8_async`), on the GPU path. A render target bitmap or a snapshot of a
+  layer is not ready until its frame arrives: until then it is not drawn, `as_readable_bitmap`
+  gives `None` and `save` fails with `WouldBlock`. A synchronous read of a layer (`save`) fails
+  with the same error. A read that fails leaves the bitmap in that state, and no call returns
+  an empty image in its place.
+- The canvas shows the frame when the task that drew it returns.
 
 ### 2.7 The platform render interface (P3)
 
