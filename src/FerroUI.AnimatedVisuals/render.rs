@@ -52,6 +52,8 @@ pub struct VisualRenderer {
     solid_brushes: HashMap<u32, Rc<ImmutableSolidColorBrush>>,
     /// The decoded images, by asset. An image that does not decode is kept as `None`.
     images: HashMap<usize, Option<Rc<Bitmap>>>,
+    /// The colours of the paints bound to a name.
+    colors: HashMap<String, Color>,
     frame: u64,
     built: u64,
 }
@@ -142,6 +144,24 @@ impl VisualRenderer {
         Self::default()
     }
 
+    /// Sets the colour of the paints bound to `name`, or gives them back the colour of the
+    /// document.
+    pub fn set_color(&mut self, name: &str, color: Option<Color>) {
+        match color {
+            Some(color) => {
+                self.colors.insert(name.to_owned(), color);
+            }
+            None => {
+                self.colors.remove(name);
+            }
+        }
+    }
+
+    #[cfg(test)]
+    pub(crate) fn color(&self, name: &str) -> Option<Color> {
+        self.colors.get(name).copied()
+    }
+
     /// How many geometries were built so far: a frame that changes no path builds none.
     pub fn geometries_built(&self) -> u64 {
         self.built
@@ -221,7 +241,11 @@ impl VisualRenderer {
             return;
         }
         let geometry = self.geometry(&draw.path, draw.even_odd);
-        let brush = self.paint(&draw.paint, draw.opacity);
+        let bound = draw.binding.as_ref().and_then(|name| self.colors.get(&**name)).copied();
+        let brush: Rc<dyn IImmutableBrush> = match (bound, &draw.paint) {
+            (Some(color), Paint::Solid(_)) => self.solid(with_opacity(color, draw.opacity)),
+            _ => self.paint(&draw.paint, draw.opacity),
+        };
         match &draw.stroke {
             Some(style) if style.width > 0.0 => {
                 let pen = pen_of(style, brush);

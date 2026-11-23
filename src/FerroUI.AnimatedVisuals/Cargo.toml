@@ -11,17 +11,27 @@ readme.workspace = true
 keywords.workspace = true
 categories.workspace = true
 
+build = "build.rs"
+links = "ferroui_animated_visuals_xaml"
+
 [lib]
 path = "lib.rs"
 
 [features]
+markup-functions = ["ferroui-base/markup-functions"]
+compiler-metadata = ["markup-functions", "ferroui-base/compiler-metadata"]
 # The tests of the matte layers on the Vello modes of the device.
 device-tests = ["ferroui-vello/hybrid", "ferroui-vello/gpu"]
 
 [dependencies]
 ferroui-base.workspace = true
 ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
 serde_json.workspace = true
+url.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
 
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }

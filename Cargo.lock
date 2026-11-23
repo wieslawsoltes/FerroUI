@@ -1689,9 +1689,12 @@ name = "ferroui-animated-visuals"
 version = "0.5.1-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-markup-xaml",
  "ferroui-vello",
  "serde_json",
+ "url",
 ]
 
 [[package]]

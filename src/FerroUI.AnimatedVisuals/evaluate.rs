@@ -46,6 +46,8 @@ pub struct ShapeDraw {
     pub stroke: Option<StrokeStyle>,
     pub even_odd: bool,
     pub opacity: f64,
+    /// The colour property a solid paint takes its colour from, when one is set.
+    pub binding: Option<Rc<str>>,
 }
 
 /// Text of a font the document does not carry the glyphs of, drawn by the text stack of the
@@ -219,7 +221,7 @@ fn evaluate_items(
                 geometry.push(PathData::ellipse(Point::new(p[0], p[1]), s[0], s[1]).transformed(transform));
             }
             ShapeItem::Path(shape) => geometry.push(shape.path_at(frame).transformed(transform)),
-            ShapeItem::Fill { color: paint, opacity: own, even_odd } => {
+            ShapeItem::Fill { color: paint, opacity: own, even_odd, binding } => {
                 let alpha = (own.at(frame)[0] / 100.0).clamp(0.0, 1.0);
                 draws.push(ShapeDraw {
                     path: merged(geometry),
@@ -227,9 +229,10 @@ fn evaluate_items(
                     stroke: None,
                     even_odd: *even_odd,
                     opacity: opacity * alpha,
+                    binding: binding.clone(),
                 });
             }
-            ShapeItem::Stroke { color: paint, opacity: own, stroke } => {
+            ShapeItem::Stroke { color: paint, opacity: own, stroke, binding } => {
                 let alpha = (own.at(frame)[0] / 100.0).clamp(0.0, 1.0);
                 draws.push(ShapeDraw {
                     path: merged(geometry),
@@ -237,6 +240,7 @@ fn evaluate_items(
                     stroke: Some(stroke_style(stroke, frame, scale_of(transform))),
                     even_odd: false,
                     opacity: opacity * alpha,
+                    binding: binding.clone(),
                 });
             }
             ShapeItem::GradientFill { gradient, opacity: own, even_odd } => {
@@ -247,6 +251,7 @@ fn evaluate_items(
                     stroke: None,
                     even_odd: *even_odd,
                     opacity: opacity * alpha,
+                    binding: None,
                 });
             }
             ShapeItem::GradientStroke { gradient, opacity: own, stroke } => {
@@ -257,6 +262,7 @@ fn evaluate_items(
                     stroke: Some(stroke_style(stroke, frame, scale_of(transform))),
                     even_odd: false,
                     opacity: opacity * alpha,
+                    binding: None,
                 });
             }
             ShapeItem::Trim { start, end, offset } => {
@@ -423,6 +429,7 @@ impl AnimatedVisual {
                     stroke: None,
                     even_odd: false,
                     opacity: 1.0,
+                    binding: None,
                 }));
             }
             LayerKind::Precomposition { reference, width, height, time_remap } => {
@@ -514,6 +521,7 @@ fn glyph_draws(document: &TextDocument, glyphs: &HashMap<char, Glyph>, frame: f6
             stroke: None,
             even_odd: false,
             opacity: f64::from(paint.a) / 255.0,
+            binding: None,
         })
     });
     let stroke = text_color(document.stroke).filter(|_| document.stroke_width > 0.0).map(|paint| {
@@ -530,6 +538,7 @@ fn glyph_draws(document: &TextDocument, glyphs: &HashMap<char, Glyph>, frame: f6
             }),
             even_odd: false,
             opacity: f64::from(paint.a) / 255.0,
+            binding: None,
         })
     });
     let ordered = if document.stroke_over_fill { [fill, stroke] } else { [stroke, fill] };

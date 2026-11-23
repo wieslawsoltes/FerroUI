@@ -5,19 +5,30 @@
 
 mod content;
 mod evaluate;
+mod icons;
 mod model;
 mod path;
 mod playback;
 mod player;
+mod register_types;
 mod render;
 mod source;
 mod value;
 
 pub use content::ImageAsset;
 pub use evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle, TextDraw};
+pub use icons::{
+    AnimatedAcceptVisualSource, AnimatedBackVisualSource, AnimatedChevronDownSmallVisualSource,
+    AnimatedChevronRightDownSmallVisualSource, AnimatedChevronUpDownSmallVisualSource, AnimatedFindVisualSource,
+    AnimatedGlobalNavigationButtonVisualSource, AnimatedSettingsVisualSource,
+};
 pub use model::{AnimatedVisual, AnimatedVisualError, MatteMode, Marker};
 pub use path::{PathCommand, PathData};
 pub use playback::AnimatedIconAnimationQueueBehavior;
 pub use player::{AnimatedIcon, AnimatedVisualPlayer, PlayCompletion};
+pub use register_types::{register_types, ASSEMBLY};
 pub use render::VisualRenderer;
-pub use source::{IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader, LottieVisualSource};
+pub use source::{
+    AnimatedVisualSource, IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader,
+    LottieDocumentSource, LottieVisualSource,
+};

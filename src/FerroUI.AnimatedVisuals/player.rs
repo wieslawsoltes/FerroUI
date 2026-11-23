@@ -2,18 +2,21 @@
 //! evaluated and drawn through the drawing context, on the GPU of the backend.
 
 use crate::playback::{AnimatedIconAnimationQueueBehavior, IconMove, IconStates, PlayerClock};
-use crate::{AnimatedVisual, AnimatedVisualError, FrameCommands, IAnimatedVisualSource, VisualRenderer};
+use crate::{AnimatedVisual, AnimatedVisualError, AnimatedVisualSource, FrameCommands, IAnimatedVisualSource, VisualRenderer};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::LayoutableImpl;
-use ferroui_base::media::{DrawingContext, MediaExtensions, Stretch, StretchDirection};
+use ferroui_base::media::{Color, DrawingContext, FlowDirection, IBrush, ISolidColorBrush, MediaExtensions, Stretch, StretchDirection};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_properties, instantiate, AttachedProperty, FerroObject, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, Rect, Ref, Size, StyledElementImpl,
     StyledProperty, StyledPropertyOptions, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
-use ferroui_controls::{Control, ControlImpl};
+use ferroui_controls::automation::peers::{AutomationPeer, ImageAutomationPeer};
+use ferroui_controls::documents::TextElement;
+use ferroui_controls::primitives::ToggleButton;
+use ferroui_controls::{Button, ComboBox, Control, ControlImpl, IconSource, NavigationViewItem};
 use std::cell::{Cell, RefCell};
 use std::future::Future;
 use std::pin::Pin;
@@ -45,7 +48,21 @@ impl Presenter {
         }
     }
 
-    fn render(&mut self, progress: f64, stretch: Stretch, bounds: Size, context: &mut DrawingContext<'_>) {
+    /// Takes `visual` and the colours of its source. Whether the visual is another one.
+    fn take(&mut self, visual: Option<Rc<AnimatedVisual>>, source: Option<&Rc<dyn IAnimatedVisualSource>>) -> bool {
+        let same = match (&self.visual, &visual) {
+            (Some(old), Some(new)) => Rc::ptr_eq(old, new),
+            (None, None) => true,
+            _ => false,
+        };
+        self.visual = visual;
+        for (name, color) in source.map_or_else(Vec::new, |source| source.color_properties()) {
+            self.renderer.set_color(&name, Some(color));
+        }
+        !same
+    }
+
+    fn render(&mut self, progress: f64, stretch: Stretch, mirrored: bool, bounds: Size, context: &mut DrawingContext<'_>) {
         let Some(visual) = self.visual.clone() else {
             return;
         };
@@ -55,8 +72,11 @@ impl Presenter {
         let source = Size::new(visual.width, visual.height);
         let scale = MediaExtensions::calculate_scaling(stretch, bounds, source, StretchDirection::Both);
         let (width, height) = (source.width * scale.x, source.height * scale.y);
-        let matrix = Matrix::create_scale(scale.x, scale.y)
+        let mut matrix = Matrix::create_scale(scale.x, scale.y)
             * Matrix::create_translation((bounds.width - width) * 0.5, (bounds.height - height) * 0.5);
+        if mirrored {
+            matrix = matrix * Matrix::new(-1.0, 0.0, 0.0, 1.0, bounds.width, 0.0);
+        }
         visual.evaluate(visual.frame_at(progress), &mut self.commands);
         let clip = context.push_clip(Rect::from_size(bounds));
         let transform = context.push_transform(matrix);
@@ -121,7 +141,7 @@ impl Future for PlayCompletion {
 #[repr(C)]
 pub struct AnimatedVisualPlayer {
     base: Control,
-    source: RefCell<Option<Rc<dyn IAnimatedVisualSource>>>,
+    source_generation: Rc<Cell<u64>>,
     presenter: RefCell<Presenter>,
     clock: RefCell<PlayerClock>,
     timer: RefCell<Option<Rc<DispatcherTimer>>>,
@@ -132,7 +152,11 @@ pub struct AnimatedVisualPlayer {
 }
 
 ferro_class!(AnimatedVisualPlayer: Control);
-ferro_impl_classes!(AnimatedVisualPlayer: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+ferroui_base::ferro_class_info!(AnimatedVisualPlayer {
+    new: AnimatedVisualPlayer::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals", content: Source },
+});
+ferro_impl_classes!(AnimatedVisualPlayer: StyledElementImpl, InteractiveImpl, InputElementImpl);
 
 ferro_properties! {
     impl AnimatedVisualPlayer {
@@ -145,6 +169,12 @@ ferro_properties! {
         pub fn stretch_property() -> StyledProperty<Stretch> {
             FerroProperty::register::<Self, _>("Stretch", Stretch::Uniform)
         }
+        pub fn source_property() -> StyledProperty<Option<Ref<AnimatedVisualSource>>> {
+            FerroProperty::register::<Self, _>("Source", None)
+        }
+        pub fn fallback_content_property() -> StyledProperty<Option<Ref<Control>>> {
+            FerroProperty::register::<Self, _>("FallbackContent", None)
+        }
     }
 }
 
@@ -152,7 +182,14 @@ impl FerroObjectImpl for AnimatedVisualPlayer {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         let property = change.property();
-        if property == Self::stretch_property().as_property() {
+        if property == Self::source_property().as_property() {
+            this.watch_source();
+            if this.attached.get() {
+                this.load();
+            }
+        } else if property == Self::fallback_content_property().as_property() {
+            this.change_fallback(this.get_value(Self::fallback_content_property()));
+        } else if property == Self::stretch_property().as_property() {
             this.invalidate_measure();
             this.invalidate_visual();
         } else if property == Self::auto_play_property().as_property()
@@ -185,7 +222,7 @@ impl LayoutableImpl for AnimatedVisualPlayer {
 impl VisualImpl for AnimatedVisualPlayer {
     fn render(this: &Self, context: &mut DrawingContext<'_>) {
         let progress = this.clock.borrow().progress;
-        this.presenter.borrow_mut().render(progress, this.stretch(), this.bounds().size(), context);
+        this.presenter.borrow_mut().render(progress, this.stretch(), false, this.bounds().size(), context);
     }
 
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -201,11 +238,17 @@ impl VisualImpl for AnimatedVisualPlayer {
     }
 }
 
+impl ControlImpl for AnimatedVisualPlayer {
+    fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
+        ImageAutomationPeer::new(this).upcast()
+    }
+}
+
 impl AnimatedVisualPlayer {
     pub fn new() -> Ref<Self> {
         instantiate(Self {
             base: Control::construct(),
-            source: RefCell::new(None),
+            source_generation: Rc::new(Cell::new(0)),
             presenter: RefCell::new(Presenter::default()),
             clock: RefCell::new(PlayerClock::default()),
             timer: RefCell::new(None),
@@ -236,26 +279,49 @@ impl AnimatedVisualPlayer {
     }
 
     /// The source of the visual. A new source is loaded at once when the player is in a tree.
-    pub fn source(&self) -> Option<Rc<dyn IAnimatedVisualSource>> {
-        self.source.borrow().clone()
+    pub fn source(&self) -> Option<Ref<AnimatedVisualSource>> {
+        self.get_value(Self::source_property())
     }
-    pub fn set_source(&self, source: Option<Rc<dyn IAnimatedVisualSource>>) {
-        *self.source.borrow_mut() = source;
-        if self.attached.get() {
-            self.load();
-        }
+    pub fn set_source(&self, source: Option<Ref<AnimatedVisualSource>>) {
+        self.set_value(Self::source_property(), source);
     }
 
     /// What is shown when the source gives no visual.
     pub fn fallback_content(&self) -> Option<Ref<Control>> {
-        self.fallback.borrow().clone()
+        self.get_value(Self::fallback_content_property())
     }
     pub fn set_fallback_content(&self, content: Option<Ref<Control>>) {
+        self.set_value(Self::fallback_content_property(), content);
+    }
+
+    fn change_fallback(&self, content: Option<Ref<Control>>) {
         let old = std::mem::replace(&mut *self.fallback.borrow_mut(), content);
         if let Some(old) = old {
             self.visual_children().remove(&old.upcast::<Visual>());
         }
         self.update_fallback();
+    }
+
+    /// Follows a source whose visual can change. An earlier source stops counting.
+    fn watch_source(&self) {
+        let generation = self.source_generation.get() + 1;
+        self.source_generation.set(generation);
+        let Some(source) = self.source().and_then(|source| source.source()) else {
+            return;
+        };
+        if let Some(dynamic) = source.as_dynamic() {
+            let weak = self.to_ref().downgrade();
+            let current = self.source_generation.clone();
+            dynamic.add_animated_visual_invalidated(Rc::new(move || {
+                if current.get() == generation {
+                    if let Some(player) = weak.upgrade() {
+                        if player.attached.get() {
+                            player.load();
+                        }
+                    }
+                }
+            }));
+        }
     }
 
     pub fn is_animated_visual_loaded(&self) -> bool {
@@ -306,8 +372,8 @@ impl AnimatedVisualPlayer {
     }
 
     fn load(&self) {
-        let source = self.source.borrow().clone();
-        let loaded = source.map(|source| source.try_create_animated_visual());
+        let source = self.source().and_then(|source| source.source());
+        let loaded = source.as_ref().map(|source| source.try_create_animated_visual());
         let visual = match loaded {
             Some(Ok(visual)) => {
                 self.load_error.borrow_mut().take();
@@ -323,9 +389,13 @@ impl AnimatedVisualPlayer {
             }
         };
         let has_visual = visual.is_some();
-        self.presenter.borrow_mut().visual = visual;
-        self.update_fallback();
+        let changed = self.presenter.borrow_mut().take(visual, source.as_ref());
         self.invalidate_visual();
+        if !changed {
+            // The same visual, with new colours: the play goes on.
+            return;
+        }
+        self.update_fallback();
         if !has_visual {
             self.complete_play();
             self.clock.borrow_mut().set_progress(0.0);
@@ -443,7 +513,10 @@ struct IconSegment {
 #[repr(C)]
 pub struct AnimatedIcon {
     base: Control,
-    source: RefCell<Option<Rc<dyn IAnimatedVisualSource>>>,
+    source_generation: Rc<Cell<u64>>,
+    pending_state: Cell<bool>,
+    state_owner: RefCell<Option<(Ref<Control>, u64)>>,
+    derived_state: RefCell<Option<String>>,
     presenter: RefCell<Presenter>,
     markers: RefCell<Vec<(String, f64)>>,
     states: RefCell<IconStates>,
@@ -456,7 +529,11 @@ pub struct AnimatedIcon {
 }
 
 ferro_class!(AnimatedIcon: Control);
-ferro_impl_classes!(AnimatedIcon: StyledElementImpl, InteractiveImpl, InputElementImpl, ControlImpl);
+ferroui_base::ferro_class_info!(AnimatedIcon {
+    new: AnimatedIcon::new,
+    markup: { namespace: "FerroUI.AnimatedVisuals", content: Source },
+});
+ferro_impl_classes!(AnimatedIcon: StyledElementImpl, InteractiveImpl, InputElementImpl);
 
 ferro_properties! {
     impl AnimatedIcon {
@@ -467,14 +544,44 @@ ferro_properties! {
                 StyledPropertyOptions::new(None).inherits(true),
             )
         }
+        pub fn source_property() -> StyledProperty<Option<Ref<AnimatedVisualSource>>> {
+            FerroProperty::register::<Self, _>("Source", None)
+        }
+        pub fn fallback_icon_source_property() -> StyledProperty<Option<Ref<IconSource>>> {
+            FerroProperty::register::<Self, _>("FallbackIconSource", None)
+        }
+        pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
+            TextElement::foreground_property().add_owner::<AnimatedIcon>()
+        }
+        pub fn mirrored_when_right_to_left_property() -> StyledProperty<bool> {
+            FerroProperty::register::<Self, _>("MirroredWhenRightToLeft", false)
+        }
     }
 }
 
 impl FerroObjectImpl for AnimatedIcon {
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
-        if change.property() == Self::state_property().as_property() {
+        let property = change.property();
+        if property == Self::state_property().as_property() {
             this.on_state_changed();
+        } else if property == Self::source_property().as_property() {
+            this.watch_source();
+            if this.attached.get() {
+                this.load();
+            }
+        } else if property == Self::fallback_icon_source_property().as_property() {
+            let element = this
+                .get_value(Self::fallback_icon_source_property())
+                .and_then(|source| source.create_icon_element())
+                .map(|element| element.upcast::<Control>());
+            this.set_fallback_icon(element);
+        } else if property == Self::foreground_property().as_property() {
+            this.apply_foreground();
+        } else if property == Self::mirrored_when_right_to_left_property().as_property()
+            || property == Visual::flow_direction_property().as_property()
+        {
+            this.invalidate_visual();
         }
     }
 }
@@ -492,6 +599,10 @@ impl LayoutableImpl for AnimatedIcon {
         if let Some(fallback) = this.shown_fallback() {
             fallback.arrange(Rect::from_size(final_size));
         }
+        // A state waits for the layout it changed in (`OnLayoutUpdatedAfterStateChanged`).
+        if this.pending_state.replace(false) {
+            this.take_state();
+        }
         final_size
     }
 }
@@ -499,19 +610,54 @@ impl LayoutableImpl for AnimatedIcon {
 impl VisualImpl for AnimatedIcon {
     fn render(this: &Self, context: &mut DrawingContext<'_>) {
         let progress = this.progress.get();
-        this.presenter.borrow_mut().render(progress, Stretch::Uniform, this.bounds().size(), context);
+        let mirrored = this.mirrored_when_right_to_left() && this.flow_direction() == FlowDirection::RightToLeft;
+        this.presenter.borrow_mut().render(progress, Stretch::Uniform, mirrored, this.bounds().size(), context);
+    }
+
+    /// An icon turns only when `MirroredWhenRightToLeft` says so.
+    fn bypass_flow_direction_policies(_this: &Self) -> bool {
+        true
     }
 
     fn on_attached_to_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree(this, e);
         this.attached.set(true);
         this.load();
+        this.apply_foreground();
+        this.follow_state_owner();
     }
 
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.attached.set(false);
         this.stop_timer();
+        this.leave_state_owner();
         Self::parent_on_detached_from_visual_tree(this, e);
+    }
+}
+
+impl ControlImpl for AnimatedIcon {
+    fn on_create_automation_peer(this: &Self) -> Ref<AutomationPeer> {
+        ImageAutomationPeer::new(this).upcast()
+    }
+}
+
+/// The state of an icon inside `owner`, as the templates of WinUI set it: the interaction, and for
+/// a toggle whether it is on.
+fn state_of(owner: &Control) -> String {
+    let classes = owner.classes();
+    let pressed = owner.downcast_ref::<Button>().map_or_else(|| classes.contains(":pressed"), Button::is_pressed);
+    let interaction = if pressed {
+        "Pressed"
+    } else if owner.is_pointer_over() {
+        "PointerOver"
+    } else {
+        "Normal"
+    };
+    match owner.downcast_ref::<ToggleButton>().map(ToggleButton::is_checked) {
+        Some(Some(true)) => format!("{interaction}On"),
+        Some(Some(false)) => format!("{interaction}Off"),
+        Some(None) => format!("{interaction}Indeterminate"),
+        None => interaction.to_owned(),
     }
 }
 
@@ -519,7 +665,10 @@ impl AnimatedIcon {
     pub fn new() -> Ref<Self> {
         instantiate(Self {
             base: Control::construct(),
-            source: RefCell::new(None),
+            source_generation: Rc::new(Cell::new(0)),
+            pending_state: Cell::new(false),
+            state_owner: RefCell::new(None),
+            derived_state: RefCell::new(None),
             presenter: RefCell::new(Presenter::default()),
             markers: RefCell::new(Vec::new()),
             states: RefCell::new(IconStates::default()),
@@ -542,21 +691,115 @@ impl AnimatedIcon {
         element.set_value(Self::state_property(), state);
     }
 
-    pub fn source(&self) -> Option<Rc<dyn IAnimatedVisualSource>> {
-        self.source.borrow().clone()
+    pub fn source(&self) -> Option<Ref<AnimatedVisualSource>> {
+        self.get_value(Self::source_property())
     }
-    pub fn set_source(&self, source: Option<Rc<dyn IAnimatedVisualSource>>) {
-        *self.source.borrow_mut() = source;
-        if self.attached.get() {
-            self.load();
+    pub fn set_source(&self, source: Option<Ref<AnimatedVisualSource>>) {
+        self.set_value(Self::source_property(), source);
+    }
+
+    pub fn fallback_icon_source(&self) -> Option<Ref<IconSource>> {
+        self.get_value(Self::fallback_icon_source_property())
+    }
+    pub fn set_fallback_icon_source(&self, source: Option<Ref<IconSource>>) {
+        self.set_value(Self::fallback_icon_source_property(), source);
+    }
+
+    pub fn foreground(&self) -> Option<Rc<dyn IBrush>> {
+        self.get_value(Self::foreground_property())
+    }
+    pub fn set_foreground(&self, value: Option<Rc<dyn IBrush>>) {
+        self.set_value(Self::foreground_property(), value);
+    }
+
+    pub fn mirrored_when_right_to_left(&self) -> bool {
+        self.get_value(Self::mirrored_when_right_to_left_property())
+    }
+    pub fn set_mirrored_when_right_to_left(&self, value: bool) {
+        self.set_value(Self::mirrored_when_right_to_left_property(), value);
+    }
+
+    /// The colour the paints bound to `Foreground` take: that of a solid foreground. A brush of
+    /// another kind leaves the colour of the document.
+    fn apply_foreground(&self) {
+        let color: Option<Color> =
+            self.foreground().and_then(|brush| brush.as_solid_color_brush().map(ISolidColorBrush::color));
+        self.presenter.borrow_mut().renderer.set_color("Foreground", color);
+        self.invalidate_visual();
+    }
+
+    /// Follows a source whose visual can change. An earlier source stops counting.
+    fn watch_source(&self) {
+        let generation = self.source_generation.get() + 1;
+        self.source_generation.set(generation);
+        let Some(source) = self.source().and_then(|source| source.source()) else {
+            return;
+        };
+        if let Some(dynamic) = source.as_dynamic() {
+            let weak = self.to_ref().downgrade();
+            let current = self.source_generation.clone();
+            dynamic.add_animated_visual_invalidated(Rc::new(move || {
+                if current.get() == generation {
+                    if let Some(icon) = weak.upgrade() {
+                        if icon.attached.get() {
+                            icon.load();
+                        }
+                    }
+                }
+            }));
         }
     }
 
-    /// What is shown when the source gives no visual (`FallbackIconSource`).
-    pub fn fallback_icon(&self) -> Option<Ref<Control>> {
-        self.fallback.borrow().clone()
+    /// Takes its state from the nearest button, combo box or navigation item around it, unless
+    /// something else sets the state.
+    fn follow_state_owner(&self) {
+        self.leave_state_owner();
+        let owner = self.get_visual_ancestors().filter_map(|ancestor| ancestor.cast::<Control>()).find(|control| {
+            control.downcast_ref::<Button>().is_some()
+                || control.downcast_ref::<ComboBox>().is_some()
+                || control.downcast_ref::<NavigationViewItem>().is_some()
+        });
+        let Some(owner) = owner else {
+            return;
+        };
+        let weak = self.to_ref().downgrade();
+        let token = owner.add_property_changed_handler(Rc::new(move |change| {
+            if matches!(change.property().name(), "IsPointerOver" | "IsPressed" | "IsChecked") {
+                if let Some(icon) = weak.upgrade() {
+                    icon.update_from_owner();
+                }
+            }
+        }));
+        *self.state_owner.borrow_mut() = Some((owner, token));
+        self.update_from_owner();
     }
-    pub fn set_fallback_icon(&self, icon: Option<Ref<Control>>) {
+
+    fn leave_state_owner(&self) {
+        if let Some((owner, token)) = self.state_owner.borrow_mut().take() {
+            owner.remove_property_changed_handler(token);
+        }
+        if self.derived_state.borrow_mut().take().is_some() {
+            self.clear_value(Self::state_property());
+        }
+    }
+
+    fn update_from_owner(&self) {
+        let owner = self.state_owner.borrow().as_ref().map(|(owner, _)| owner.clone());
+        let Some(owner) = owner else {
+            return;
+        };
+        // A state set by the application or inherited from it stays.
+        let current: Option<String> = self.get_value(Self::state_property());
+        if current != *self.derived_state.borrow() {
+            return;
+        }
+        let state = state_of(&owner);
+        *self.derived_state.borrow_mut() = Some(state.clone());
+        self.set_value(Self::state_property(), Some(state));
+    }
+
+    /// What is shown when the source gives no visual (`FallbackIconSource`).
+    pub(crate) fn set_fallback_icon(&self, icon: Option<Ref<Control>>) {
         let old = std::mem::replace(&mut *self.fallback.borrow_mut(), icon);
         if let Some(old) = old {
             self.visual_children().remove(&old.upcast::<Visual>());
@@ -599,15 +842,29 @@ impl AnimatedIcon {
     }
 
     fn load(&self) {
-        let source = self.source.borrow().clone();
-        let visual = source.and_then(|source| source.try_create_animated_visual().ok());
+        let source = self.source().and_then(|source| source.source());
+        let visual = source.as_ref().and_then(|source| source.try_create_animated_visual().ok());
         *self.markers.borrow_mut() = visual.as_ref().map_or_else(Vec::new, |visual| visual.progress_markers());
-        self.presenter.borrow_mut().visual = visual;
+        self.presenter.borrow_mut().take(visual, source.as_ref());
+        // The colours of the source do not replace the foreground of the icon.
+        if self.foreground().is_some() {
+            self.apply_foreground();
+        }
         self.update_fallback();
         self.invalidate_visual();
     }
 
+    /// In a tree a state is taken after the next layout; outside one, at once.
     fn on_state_changed(&self) {
+        if self.attached.get() {
+            self.pending_state.set(true);
+            self.invalidate_arrange();
+        } else {
+            self.take_state();
+        }
+    }
+
+    fn take_state(&self) {
         let state = self.get_value(Self::state_property()).unwrap_or_default();
         let step = {
             let markers = self.markers.borrow();
@@ -698,3 +955,7 @@ impl Drop for AnimatedIcon {
         }
     }
 }
+
+#[cfg(test)]
+#[path = "player_tests.rs"]
+mod tests;

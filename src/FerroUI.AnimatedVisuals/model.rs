@@ -273,8 +273,8 @@ pub(crate) enum ShapeItem {
     Rectangle { position: Animated, size: Animated, radius: Animated },
     Ellipse { position: Animated, size: Animated },
     Path(AnimatedShape),
-    Fill { color: Animated, opacity: Animated, even_odd: bool },
-    Stroke { color: Animated, opacity: Animated, stroke: StrokeModel },
+    Fill { color: Animated, opacity: Animated, even_odd: bool, binding: Option<Rc<str>> },
+    Stroke { color: Animated, opacity: Animated, stroke: StrokeModel, binding: Option<Rc<str>> },
     GradientFill { gradient: GradientModel, opacity: Animated, even_odd: bool },
     GradientStroke { gradient: GradientModel, opacity: Animated, stroke: StrokeModel },
     Trim { start: Animated, end: Animated, offset: Animated },
@@ -323,6 +323,13 @@ pub(crate) fn shape_items(items: Option<&Value>) -> Vec<ShapeItem> {
     items.iter().filter_map(shape_item).collect()
 }
 
+/// The colour property a paint is bound to: `{color:Name}` in its name.
+fn color_binding(item: &Value) -> Option<Rc<str>> {
+    let (_, rest) = item.get("nm")?.as_str()?.split_once("{color:")?;
+    let (name, _) = rest.split_once('}')?;
+    Some(Rc::from(name.trim()))
+}
+
 fn shape_item(item: &Value) -> Option<ShapeItem> {
     if item.get("hd").and_then(Value::as_bool) == Some(true) {
         return None;
@@ -346,11 +353,13 @@ fn shape_item(item: &Value) -> Option<ShapeItem> {
             color: Animated::of(item, "c", [0.0, 0.0, 0.0, 1.0]),
             opacity: Animated::of(item, "o", FULL),
             even_odd,
+            binding: color_binding(item),
         },
         "st" => ShapeItem::Stroke {
             color: Animated::of(item, "c", [0.0, 0.0, 0.0, 1.0]),
             opacity: Animated::of(item, "o", FULL),
             stroke: stroke_model(item),
+            binding: color_binding(item),
         },
         "gf" => ShapeItem::GradientFill { gradient: gradient_model(item)?, opacity: Animated::of(item, "o", FULL), even_odd },
         "gs" => ShapeItem::GradientStroke {
