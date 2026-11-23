@@ -6,7 +6,7 @@ import { AnimationGraphMenu, type AnimationGraphMode } from './animationGraphMen
 import { anchorPopover, element, labelButton } from './dom';
 import { TimelineChannels } from './timelineChannels';
 import { curveChannels, TimelineCurves } from './timelineCurves';
-import { dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
+import { curveEditValue, dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 import { bindTimelineMarquee } from './timelineMarquee';
 import { TimelineMarkerView } from './timelineMarkerView';
@@ -347,6 +347,7 @@ function showTracks(): void {
         renderedKeys = [];
         curves.clear();
         slider.max = String(timeline.duration);
+        const curveTracks = new Map<string, number>();
         channels.render(timeline.tracks, model.names, newProgram, (track, index, target) => {
             const row = document.createElement('li');
             row.className = 'timeline-track';
@@ -359,7 +360,10 @@ function showTracks(): void {
             name.title = `${target} · ${track.property}`;
             const lane = document.createElement('div');
             lane.className = 'timeline-lane';
-            const plot = curveChannels(track).length ? curves.add(lane, name, track) : undefined;
+            const curveTrack = JSON.stringify([model.frame?.session ?? owner?.session, model.names[track.target], track.property]);
+            const occurrence = curveTracks.get(curveTrack) ?? 0;
+            curveTracks.set(curveTrack, occurrence + 1);
+            const plot = curveChannels(track).length ? curves.add(lane, name, track, `${curveTrack}:${occurrence}`) : undefined;
             lane.addEventListener('dblclick', event => {
                 if (event.target !== lane) return;
                 const bounds = lane.getBoundingClientRect();
@@ -376,25 +380,24 @@ function showTracks(): void {
                 const easing = key.easing_text.replace(/\s/g, '').toLowerCase();
                 button.toggleAttribute('data-eased', Boolean(easing && easing !== 'lineareasing' && easing !== '0,0,1,1'));
                 renderedKeys.push(rendered);
-                const value = key.value_kind === 'Number' ? Number(key.value_text) : NaN;
-                if (plot) plot.keys.push({ rendered, value: Number.isFinite(value) ? value : undefined });
+                if (plot) plot.keys.push({ rendered, keyframe: key });
                 const open = (frame: FrameTarget, focus: boolean) => {
                     if (!model.canEditKeyframes || !(model.writable || selected.sourceRange) || model.documentVersion === undefined) return false;
                     keyframeEditor.open(frame, model.documentVersion, selected.id, track.target, track.property, key,
                         target, timeline.duration, focus);
                     return true;
                 };
-                const editableCurve = plot && Number.isFinite(value) && model.canEditKeyframes && (model.writable || selected.sourceRange);
+                const editableCurve = plot && model.canEditKeyframes && (model.writable || selected.sourceRange);
                 if (canRetimeKeys() && timeline.duration > 0) dragKeyframe(rendered, lane, () => viewport.range,
                     () => selection.has(location) ? editableKeys.filter(item => selection.has(item.key)) : [rendered],
                     () => channels.isLocked(track.target) ? undefined : gestureFrame(),
                     time => Math.round(time * (frameRate || 1000)) / (frameRate || 1000),
                     (keys, offset, frame) => editKeys(keys, frame, { action: 'move_keyframes', offset }),
-                    editableCurve ? { value, scale: () => curves.canEdit(plot) ? plot.scale : undefined, commit: (time, value, frame) => {
+                    editableCurve ? { handle: () => curves.handle(plot, key), commit: (time, value, channel, frame) => {
                         if (!open(frame, false)) return;
                         selection.replace([location]);
                         showKeySelection();
-                        keyframeEditor.applyCurveDrag(frame, time, value);
+                        keyframeEditor.applyCurveDrag(frame, time, curveEditValue(channel, value));
                     } } : undefined);
                 button.addEventListener('click', event => {
                     const frame = gestureFrame();

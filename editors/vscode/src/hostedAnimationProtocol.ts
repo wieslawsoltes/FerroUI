@@ -1,4 +1,4 @@
-import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftPreview, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineMarker, TimelineMarkerAction, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
+import type { AnimationSourceIssue, KeyframeDraft, KeyframeDraftLocation, KeyframeDraftPreview, KeyframeValueDraft, TimelineClipTiming, TimelineCurveRequest, TimelineKeyframe, TimelineMarker, TimelineMarkerAction, TimelinePreviewRange, TimelineTrack } from './timelineProtocol';
 import type { Range } from './protocol';
 import type { StateTransitionRoute } from './stateTransitionProtocol';
 import type { AuthoredStateGroup } from './stateGroupProtocol';
@@ -122,7 +122,7 @@ export type HostedKeyframeSample = Pick<KeyframeDraft, 'program' | 'target' | 'p
     sample: true;
     previewTarget?: number;
 };
-export type HostedKeyframeDraft = (Omit<KeyframeDraft, 'previous'> & { previous?: number }) | HostedKeyframeSample;
+export type HostedKeyframeDraft = (Omit<KeyframeDraftLocation, 'previous'> & { previous?: number } & KeyframeValueDraft) | HostedKeyframeSample;
 export type HostedCurveQuery = Pick<TimelineCurveRequest, 'program' | 'target' | 'property' | 'window' | 'metric' | 'channel'>;
 export interface HostedStateDraft { program: number; duration: number; easing: string }
 export interface HostedClipDraft { programs: number[]; start?: number; gap?: number }
@@ -152,6 +152,7 @@ export interface HostedKeyframeGroupAction {
 export interface HostedKeyframePlan extends KeyframeDraftPreview {
     patch: HostedSourcePatch | null;
     sampledKey?: TimelineKeyframe | null;
+    resolvedKey?: TimelineKeyframe | null;
 }
 
 export interface HostedKeyframeSelection {

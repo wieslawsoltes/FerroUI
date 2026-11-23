@@ -1,5 +1,5 @@
 import type { FrameTarget } from '../src/protocol';
-import type { KeyframeLocation } from '../src/timelineProtocol';
+import type { CurveChannel, KeyframeComponent, KeyframeLocation } from '../src/timelineProtocol';
 import { create, labelButton } from './dom';
 import type { CurveScale } from './timelineCurveScale';
 import { clamp, timelinePercent, type TimelineViewport } from './timelineViewport';
@@ -14,10 +14,30 @@ export function renderKeyframe(key: KeyframeLocation, label: string): RenderedKe
     return { key, button };
 }
 
-interface CurveDrag {
+export interface CurveHandle {
     value: number;
-    scale: () => CurveScale | undefined;
-    commit: (time: number, value: number, frame: FrameTarget) => void;
+    scale: CurveScale;
+    channel: CurveChannel;
+    normalized: boolean;
+    keyRow: number;
+}
+
+interface CurveDrag {
+    handle: () => CurveHandle | undefined;
+    commit: (time: number, value: number, channel: CurveChannel, frame: FrameTarget) => void;
+}
+
+export function curveKeyPosition(percent: number, keyRow: number): string {
+    return keyRow ? `calc(${percent}% - ${percent / 100 * keyRow}px)` : `${percent}%`;
+}
+
+export function curveEditValue(channel: CurveChannel, value: number): number | KeyframeComponent {
+    return channel === 'value' ? value : { channel, value };
+}
+
+function boundCurveValue(handle: CurveHandle, value: number): number {
+    if (!Number.isFinite(value)) return handle.value;
+    return handle.normalized ? clamp(value, 0, 1) : value;
 }
 
 /** Retiming in a lane moves the selection. A curve marker edits one time and value. */
@@ -34,9 +54,9 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
         if (event.button !== 0 || !event.isPrimary || !target || width <= 0 || height <= 0) return;
         if (event.ctrlKey || event.metaKey || event.shiftKey || event.altKey) return;
         const display = lane.dataset.curve;
-        const graph = display === 'value';
-        const scale = graph ? curve?.scale() : undefined;
-        if (graph && !scale) return;
+        const handle = curve?.handle();
+        if (button.hasAttribute('data-curve-key') && !handle) return;
+        const graph = Boolean(handle);
         const axis = viewport();
         event.preventDefault();
         button.focus({ preventScroll: true });
@@ -51,8 +71,9 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
         const options = { capture: true, signal: listeners.signal };
         const unchanged = () => {
             const current = frame();
+            const active = curve?.handle();
             return viewport() === axis && current?.session === target.session && current.token === target.token
-                && lane.dataset.curve === display && (!graph || curve?.scale() === scale);
+                && lane.dataset.curve === display && (!handle || (active?.scale === handle.scale && active.channel === handle.channel));
         };
         const delta = (pointer: PointerEvent) => {
             const dx = pointer.clientX - startX;
@@ -60,10 +81,9 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
             // A few pixels of incidental movement should preserve the other coordinate.
             const offset = Math.abs(dx) < (graph ? 4 : 1) ? 0 :
                 clamp(snapTime(initial + dx * axis.span / width) - initial, limits.low, limits.high);
-            let value = curve?.value;
-            if (value !== undefined && scale && Math.abs(dy) >= 4) {
-                const proposed = scale.fromOffset(value, 100 * dy / height);
-                if (Number.isFinite(proposed)) value = proposed;
+            let value = handle?.value;
+            if (handle && Math.abs(dy) >= 4) {
+                value = boundCurveValue(handle, handle.scale.fromOffset(handle.value, 100 * dy / Math.max(1, height - handle.keyRow)));
             }
             return { offset, value };
         };
@@ -72,12 +92,18 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
                 button.style.left = `${clamp(timelinePercent(viewport(), key.time + offset), 0, 100)}%`;
                 button.classList.toggle('timeline-key-dragging', dragging);
             }
-            if (scale && value !== undefined) button.style.top = `${clamp(scale.percent(value), 3, 97)}%`;
+            if (handle && value !== undefined) {
+                button.style.top = curveKeyPosition(clamp(handle.scale.percent(value), 3, 97), handle.keyRow);
+            }
         };
         const finish = () => {
             listeners.abort();
-            if (viewport() === axis) show(0, curve?.value, false);
-            else for (const { button } of group) button.classList.remove('timeline-key-dragging');
+            for (const { button, key } of group) {
+                button.style.left = `${clamp(timelinePercent(viewport(), key.time), 0, 100)}%`;
+                button.classList.remove('timeline-key-dragging');
+            }
+            const current = curve?.handle();
+            if (handle && current) button.style.top = curveKeyPosition(current.scale.percent(current.value), current.keyRow);
             if (button.hasPointerCapture(pointerId)) button.releasePointerCapture(pointerId);
         };
         const cancel = () => { swallowClick = true; finish(); };
@@ -100,8 +126,8 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
             const valid = unchanged();
             finish();
             if (!swallowClick || !valid) return;
-            if (graph && curve && value !== undefined && (offset !== 0 || value !== curve.value)) {
-                curve.commit(initial + offset, value, target);
+            if (handle && curve && value !== undefined && (offset !== 0 || value !== handle.value)) {
+                curve.commit(initial + offset, value, handle.channel, target);
             } else if (!graph && offset !== 0) commitGroup(group.map(({ key }) => key), offset, target);
         }, options);
         button.addEventListener('lostpointercapture', cancel, options);
@@ -111,6 +137,16 @@ export function dragKeyframe(item: RenderedKeyframe, lane: HTMLElement, viewport
             if (key.key === 'Escape') { key.preventDefault(); key.stopPropagation(); cancel(); }
         }, options);
         button.setPointerCapture(pointerId);
+    });
+    button.addEventListener('keydown', event => {
+        if (!curve || !event.altKey || event.ctrlKey || event.metaKey || (event.key !== 'ArrowUp' && event.key !== 'ArrowDown')) return;
+        const target = frame();
+        const handle = curve.handle();
+        if (!target || !handle) return;
+        event.preventDefault();
+        event.stopPropagation();
+        const value = boundCurveValue(handle, handle.scale.nudge(handle.value, event.key === 'ArrowUp'));
+        if (value !== handle.value) curve.commit(initial, value, handle.channel, target);
     });
     button.addEventListener('click', event => {
         if (!swallowClick || event.detail === 0) return;

@@ -43,6 +43,15 @@ export async function verifyHostedGradients(preview: NativePreview, update: (rev
     assert.ok(velocity.some(point => point.time > .4 && point.time < .6 && Math.abs(point.value - .4) < 1e-9));
     const pose = await preview.sampleHostedAnimation({ ...identity(frame), program: program.id, elapsed: .5, restart: true });
     assert.deepEqual(await preview.hostedCurve(identity(pose.frame), query), curve);
+    const key = track.keyframes[0];
+    assert.equal(key.curve_values?.find(value => value.channel === offset)?.value, .6);
+    const component = await preview.planHostedKeyframe(identity(pose.frame), {
+        program: program.id, target: track.target, property, previous: key.time, time: key.time,
+        easing: key.easing_text, component: { channel: offset, value: .44 },
+    });
+    assert.ok(component.patch && component.resolvedKey);
+    assert.match(component.resolvedKey.value_text, /GradientStop Offset="0\.44"/);
+    assert.match(apply(source, component.patch), /Color="#FF62BAAB"/);
     const result = await preview.planHostedKeyframe(identity(pose.frame), { program: program.id, target: track.target,
         property, time: .5, previewTarget: query.target, sample: true });
     assert.equal(result.sampledKey?.value_kind, 'Brush');
@@ -126,12 +135,16 @@ fn view() { rsx! {
     await checkRadius(initial, 'x', 32);
     await checkRadius(initial, 'y', 32);
     const before = await preview.sampleHostedAnimation({ ...identity(initial), program: program.id, elapsed: 2, restart: true });
-    const authoredValue = track.keyframes.at(-1)!.value_text;
-    const value = authoredValue.replace('RadiusY="32%"', 'RadiusY="47%"');
-    assert.notEqual(value, authoredValue);
-    const { patch } = await preview.planHostedKeyframe(identity(before.frame), {
-        program: program.id, target: track.target, property, previous: 2, time: 2, easing: 'LinearEasing', value,
-    });
+    const key = track.keyframes.at(-1)!;
+    const channel = 'gradient/radius_y/percent';
+    assert.equal(key.curve_values?.find(value => value.channel === channel)?.value, 32);
+    const draft = { program: program.id, target: track.target, property, previous: key.time, time: key.time,
+        easing: key.easing_text, component: { channel, value: 47 } } as const;
+    await assert.rejects(preview.planHostedKeyframe(identity(before.frame), {
+        ...draft, component: { channel: 'gradient/radius_y/absolute', value: 47 },
+    }), /no editable component/i);
+    const { patch, resolvedKey } = await preview.planHostedKeyframe(identity(before.frame), draft);
+    assert.match(resolvedKey?.value_text ?? '', /RadiusX="32%" RadiusY="47%"/);
     assert.ok(patch);
     const revised = apply(original, patch);
     assert.match(revised, /ImmutableRadialGradientBrush::new\(/);
@@ -139,6 +152,7 @@ fn view() { rsx! {
     assert.doesNotMatch(revised, /(?<!\r)\n/);
     assert.equal(revised.split('fn view()')[0], original.split('fn view()')[0]);
     const accepted = await preview.renderHosted(source(4154, revised));
+    await assert.rejects(preview.planHostedKeyframe(identity(before.frame), draft), /frame changed/i);
     await checkRadius(accepted, 'x', 32);
     await checkRadius(accepted, 'y', 47);
     const editedProgram = trackOf(accepted).program;

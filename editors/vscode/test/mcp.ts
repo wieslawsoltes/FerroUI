@@ -61,6 +61,7 @@ import { verifyBrushMcp } from './studioBrushMcp';
 import { verifyFocusOverlay } from './studioFocusMcp';
 import { verifyResourcePromotion } from './studioResourceMcp';
 import { verifyRsxAnimation } from './rsxAnimationMcp';
+import { verifyCurveComponentMcp } from './curveComponentMcp';
 import { verifyRsxPrograms } from './rsxProgramsMcp';
 import { verifyRsxStates } from './rsxStatesMcp';
 import { verifyRsxStateTriggers } from './rsxStateTriggersMcp';
@@ -245,6 +246,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyCollaboration({ invoke, content });
         await verifyManagedApps({ invoke, content });
         const rsxKeyframeClipboard = await verifyRsxAnimation({ invoke, content });
+        await verifyCurveComponentMcp({ invoke, content });
         await verifyRsxPrograms({ invoke, content });
         await verifyRsxStates({ invoke, content });
         await verifyRsxStateTriggers({ invoke, content });

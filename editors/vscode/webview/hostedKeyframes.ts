@@ -1,5 +1,6 @@
 import type { HostedAnimationFrame, HostedKeyframeSelection } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
+import type { KeyframeComponent } from '../src/timelineProtocol';
 import { TimelineKeyframeEditor } from './timelineKeyframeEditor';
 
 export function editorFrame(frame: HostedAnimationFrame) {
@@ -25,7 +26,7 @@ export class HostedKeyframeEditor {
             key.keyframe, key.targetName, key.duration, focus);
     }
 
-    drag(key: HostedKeyframeSelection, time: number, value: number | string) {
+    drag(key: HostedKeyframeSelection, time: number, value: number | string | KeyframeComponent) {
         this.open(key, false);
         this.editor.applyCurveDrag(editorFrame(key.frame), time, value);
     }

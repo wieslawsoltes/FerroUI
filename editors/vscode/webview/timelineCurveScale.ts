@@ -38,6 +38,10 @@ export class CurveScale {
         return Number(next.toPrecision(digits));
     }
 
+    nudge(value: number, up: boolean): number {
+        return this.fromOffset(value, (bottom - top) / 100 * (up ? -1 : 1));
+    }
+
     get bounds(): [number, number] {
         return [this.start * this.factor, (this.start + this.span) * this.factor];
     }

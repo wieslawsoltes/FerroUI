@@ -1,7 +1,14 @@
 import type { FrameTarget, Range } from './protocol';
 import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
-export interface TimelineKeyframe { time: number; value_text: string; easing_text: string; value_kind?: string }
+export interface KeyframeComponent { channel: CurveChannel; value: number }
+export interface TimelineKeyframe {
+    time: number;
+    value_text: string;
+    easing_text: string;
+    value_kind?: string;
+    curve_values?: KeyframeComponent[] | null;
+}
 export interface TimelineTrack { target: number; property: string; keyframes: TimelineKeyframe[]; curve_channels?: CurveChannel[] }
 export interface AnimationSourceIssue { range: Range; reason: string }
 export interface KeyframeLocation { target: number; property: string; time: number }
@@ -151,15 +158,16 @@ export type ToTimeline = { type: 'position'; position?: TimelinePosition; frame?
     | TimelineCurveResponse
     | { type: 'error'; message: string };
 
-export interface KeyframeDraft {
+export interface KeyframeDraftLocation {
     program: number;
     target: number;
     property: string;
     previous: number;
     time: number;
-    value: string;
     easing: string;
 }
+export type KeyframeValueDraft = { value: string; component?: never } | { value?: never; component: KeyframeComponent };
+export type KeyframeDraft = KeyframeDraftLocation & KeyframeValueDraft;
 
 export interface TimelineKeyframeRequest {
     type: 'keyframeDraft';

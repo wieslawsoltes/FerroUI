@@ -1,11 +1,11 @@
 import type { HostedAnimationFrame, HostedAnimationProgram, HostedAnimationTarget, HostedKeyframeSelection } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
-import type { CurveChannel, CurveMetric, TimelineTrack } from '../src/timelineProtocol';
+import type { CurveChannel, CurveMetric, KeyframeComponent, TimelineTrack } from '../src/timelineProtocol';
 import { AnimationGraphMenu } from './animationGraphMenu';
 import { create, element } from './dom';
 import { editorFrame, type HostedKeyframeEditor } from './hostedKeyframes';
 import { TimelineCurvePlot } from './timelineCurves';
-import { dragKeyframe, renderKeyframe } from './timelineKeyDrag';
+import { curveEditValue, dragKeyframe, renderKeyframe } from './timelineKeyDrag';
 import { clamp, fitKeyTimes, fitTimeline, panTimeline, timelinePercent, visibleTime, zoomTimeline } from './timelineViewport';
 
 interface TrackChoice {
@@ -116,8 +116,6 @@ export class HostedCurves {
             this.channels.get(track.property), channel => { this.channels.set(track.property, channel); this.paint(); }) : undefined;
         if (plot && program && choice && track) {
             for (const key of track.keyframes) {
-                const scalar = key.value_kind === 'Number' ? Number(key.value_text) : NaN;
-                const value = Number.isFinite(scalar) ? scalar : undefined;
                 const location = { time: key.time, target: track.target, property: track.property };
                 const rendered = renderKeyframe(location, `${track.property}, ${this.number.format(key.time)} s · ${key.value_text}`);
                 const { button } = rendered;
@@ -132,7 +130,7 @@ export class HostedCurves {
                         this.editor.open(open(this.frame));
                         this.paint();
                     };
-                    const commit = (time: number, value: number | string) => {
+                    const commit = (time: number, value: number | string | KeyframeComponent) => {
                         if (!this.frame) return;
                         this.selected = key.time;
                         this.editor.drag(open(this.frame), time, value);
@@ -140,12 +138,12 @@ export class HostedCurves {
                     };
                     dragKeyframe(rendered, this.lane, () => this.view, () => [rendered],
                         () => this.frame && this.plot === plot && this.graph.mode !== 'keys' ? editorFrame(this.frame) : undefined,
-                        time => Math.round(time * 1000) / 1000, (_, offset) => commit(key.time + offset, key.value_text), value === undefined ? undefined : {
-                            value, scale: () => plot.has(this.key() ?? '') ? plot.scale : undefined,
-                            commit,
+                        time => Math.round(time * 1000) / 1000, (_, offset) => commit(key.time + offset, key.value_text), {
+                            handle: () => plot.handle(key, this.key()),
+                            commit: (time, value, channel) => commit(time, curveEditValue(channel, value)),
                         });
                 }
-                plot.keys.push({ rendered, value });
+                plot.keys.push({ rendered, keyframe: key });
                 this.lane.append(button);
             }
         }

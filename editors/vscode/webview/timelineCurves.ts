@@ -1,8 +1,8 @@
 import type { FrameTarget } from '../src/protocol';
-import type { CurveChannel, CurveMetric, CurvePoint, TimelineCurveRequest, TimelineCurveResponse, TimelineTrack } from '../src/timelineProtocol';
+import type { CurveChannel, CurveMetric, CurvePoint, TimelineCurveRequest, TimelineCurveResponse, TimelineKeyframe, TimelineTrack } from '../src/timelineProtocol';
 import { create } from './dom';
 import { CurveScale } from './timelineCurveScale';
-import type { RenderedKeyframe } from './timelineKeyDrag';
+import { curveKeyPosition, type CurveHandle, type RenderedKeyframe } from './timelineKeyDrag';
 import { timelinePercent, visibleTime, type TimelineViewport } from './timelineViewport';
 
 interface CurveSnapshot {
@@ -66,7 +66,7 @@ export class TimelineCurvePlot {
     private readonly ticks = [create('span'), create('span')];
     private readonly unit = create('span');
     private readonly channelPicker?: HTMLSelectElement;
-    readonly keys: { rendered: RenderedKeyframe; value?: number }[] = [];
+    readonly keys: { rendered: RenderedKeyframe; keyframe: TimelineKeyframe }[] = [];
     private accepted?: { key: string; metric: CurveMetric; channel: CurveChannel; points: CurvePoint[] };
     private painted?: { metric?: CurveMetric; channel: CurveChannel; view: TimelineViewport; points?: CurvePoint[]; error?: string };
     scale?: CurveScale;
@@ -110,6 +110,24 @@ export class TimelineCurvePlot {
     get channel(): CurveChannel { return (this.channelPicker?.value as CurveChannel | undefined) ?? curveChannels(this.track)[0] ?? 'value'; }
     has(key: string): boolean { return this.accepted?.key === key; }
 
+    handle(keyframe: TimelineKeyframe, current: string | undefined): CurveHandle | undefined {
+        const value = this.value(keyframe);
+        if (value === undefined || !this.scale || this.painted?.metric !== 'value' || !current || !this.has(current)) return;
+        return { value, scale: this.scale, channel: this.channel, normalized: this.normalized(),
+            keyRow: this.channel === 'value' ? 0 : 20 };
+    }
+
+    private value(keyframe: TimelineKeyframe): number | undefined {
+        const value = keyframe.curve_values?.find(item => item.channel === this.channel)?.value
+            ?? (this.channel === 'value' && keyframe.value_kind === 'Number' ? Number(keyframe.value_text) : undefined);
+        return value !== undefined && Number.isFinite(value) ? value : undefined;
+    }
+
+    private normalized(): boolean {
+        return colorChannels.has(channelComponent(this.channel)) || this.channel === 'shadow_opacity'
+            || this.channel === 'gradient/opacity/value';
+    }
+
     receive(key: string, metric: CurveMetric, channel: CurveChannel, message: Pick<TimelineCurveResponse, 'points' | 'error' | 'stale'>): void {
         if (message.points?.length && message.points.every(point => Number.isFinite(point.time) && Number.isFinite(point.value))) {
             this.accepted = { key, metric, channel, points: message.points };
@@ -129,11 +147,15 @@ export class TimelineCurvePlot {
         if (!metric) {
             delete this.lane.dataset.curve;
             this.scale = undefined;
-            for (const { rendered } of this.keys) rendered.button.style.top = '';
+            for (const { rendered } of this.keys) {
+                rendered.button.style.top = '';
+                rendered.button.removeAttribute('data-curve-key');
+                rendered.button.removeAttribute('aria-description');
+            }
             return;
         }
-        const editsValues = channel === 'value' && metric === 'value';
-        this.lane.dataset.curve = metric === 'value' && !editsValues ? 'component' : metric;
+        const scalar = channel === 'value' && metric === 'value';
+        this.lane.dataset.curve = metric === 'value' && !scalar ? 'component' : metric;
         const component = channelComponent(channel);
         this.line.dataset.channel = component;
         const visible = points?.filter(point => visibleTime(view, point.time)) ?? [];
@@ -143,10 +165,11 @@ export class TimelineCurvePlot {
         const before = points?.findLast(point => point.time < (first?.time ?? view.start));
         const after = points?.find(point => point.time > (last?.time ?? view.start + view.span));
         const isVelocity = metric === 'velocity';
-        const keyValues = isVelocity ? [0] : colorChannels.has(component) ? [0, 1]
-            : this.keys.flatMap(({ rendered, value }) =>
-                value !== undefined && visibleTime(view, rendered.key.time) ? [value] : []);
-        const allValues = this.keys.flatMap(({ value }) => value === undefined ? [] : [value]);
+        const handles = this.keys.map(({ keyframe }) => isVelocity ? undefined : this.value(keyframe));
+        const keyValues = isVelocity ? [0] : this.normalized() ? [0, 1]
+            : handles.flatMap((value, index) =>
+                value !== undefined && visibleTime(view, this.keys[index].rendered.key.time) ? [value] : []);
+        const allValues = handles.filter(value => value !== undefined);
         const scale = this.scale = new CurveScale(visible.length || keyValues.length ? visible : points ?? [],
             keyValues.length || visible.length ? keyValues : allValues.length ? allValues : [0]);
         const trace = [...(before ? [before] : []), ...visible, ...(after ? [after] : [])];
@@ -157,7 +180,7 @@ export class TimelineCurvePlot {
             return `${starts ? 'M' : 'L'}${position}${starts && ends ? `L${position}` : ''}`;
         }).join(' '));
         const [low, high] = scale.bounds;
-        this.scaleLabels.toggleAttribute('data-waiting', !editsValues && !points?.length);
+        this.scaleLabels.toggleAttribute('data-waiting', !scalar && !points?.length);
         this.ticks[0].textContent = axisNumber.format(low);
         this.ticks[1].textContent = axisNumber.format(high);
         this.unit.textContent = component.startsWith('percent') ? (isVelocity ? 'pp/s' : '%')
@@ -168,7 +191,14 @@ export class TimelineCurvePlot {
         const baseline = scale.percent(0).toFixed(3);
         this.zeroLine.setAttribute('y1', baseline);
         this.zeroLine.setAttribute('y2', baseline);
-        for (const { rendered, value } of this.keys) rendered.button.style.top = editsValues && value !== undefined ? `${scale.percent(value)}%` : '';
+        this.keys.forEach(({ rendered }, index) => {
+            const value = handles[index];
+            rendered.button.toggleAttribute('data-curve-key', value !== undefined);
+            if (value === undefined) rendered.button.removeAttribute('aria-description');
+            else rendered.button.setAttribute('aria-description', `${channelLabel(channel)}, ${axisNumber.format(value)}`);
+            rendered.button.style.top = value === undefined ? ''
+                : curveKeyPosition(scale.percent(value), scalar ? 0 : 20);
+        });
     }
 }
 
@@ -193,8 +223,7 @@ export class TimelineCurves {
         }, { root: grid, rootMargin: '30px 0px' });
     }
 
-    add(lane: HTMLElement, label: HTMLElement, track: TimelineTrack): TimelineCurvePlot {
-        const identity = `${track.target}:${track.property}`;
+    add(lane: HTMLElement, label: HTMLElement, track: TimelineTrack, identity: string): TimelineCurvePlot {
         const plot = new TimelineCurvePlot(lane, label, track, this.channels.get(identity), channel => {
             this.channels.set(identity, channel);
             if (this.range) plot.draw(this.metric, this.range, this.key(plot));
@@ -218,9 +247,8 @@ export class TimelineCurves {
         this.schedule();
     }
 
-    canEdit(plot: TimelineCurvePlot): boolean {
-        const key = this.key(plot);
-        return this.metric === 'value' && plot.channel === 'value' && key !== undefined && plot.has(key);
+    handle(plot: TimelineCurvePlot, keyframe: TimelineKeyframe): CurveHandle | undefined {
+        return plot.handle(keyframe, this.key(plot));
     }
 
     receive(message: TimelineCurveResponse): void {

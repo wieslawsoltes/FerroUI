@@ -65,7 +65,7 @@
     pointer-events: none;
 }
 [data-curve] .timeline-key-dragging { cursor: move; }
-[data-curve]:not([data-curve=value]) .timeline-key-dragging { cursor: ew-resize; }
+[data-curve] .timeline-key-dragging:not([data-curve-key]) { cursor: ew-resize; }
 [data-curve]:not([data-curve=value]) .timeline-curve-plot { block-size: calc(100% - 20px); }
 [data-curve]:not([data-curve=value]) .timeline-key { inset-block-start: calc(100% - 10px); }
 .timeline-curve-channel { max-inline-size: 100%; min-block-size: 18px; padding-block: 0; font-size: .85em; }

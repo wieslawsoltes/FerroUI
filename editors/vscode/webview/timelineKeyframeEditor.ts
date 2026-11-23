@@ -1,5 +1,5 @@
 import type { FrameTarget } from '../src/protocol';
-import type { AppliedKeyframe, KeyframeDraft, KeyframeLocation, TimelineKeyframe, TimelineKeyframeRequest, TimelineKeyframeResponse } from '../src/timelineProtocol';
+import type { AppliedKeyframe, KeyframeComponent, KeyframeDraft, KeyframeDraftLocation, KeyframeLocation, TimelineKeyframe, TimelineKeyframeRequest, TimelineKeyframeResponse } from '../src/timelineProtocol';
 import easingPresets from '../../../src/FerroUI.Designer.Animation/keyframe-easing-presets.json';
 import { element } from './dom';
 import { EasingHandles } from './easingHandles';
@@ -143,16 +143,18 @@ export class TimelineKeyframeEditor {
         if (key && !this.applying && !visible({ target: key.target, property: key.property, time: key.keyframe.time })) this.close();
     }
 
-    applyCurveDrag(frame: FrameTarget, time: number, value: number | string): void {
+    applyCurveDrag(frame: FrameTarget, time: number, value: number | string | KeyframeComponent): void {
         const key = this.selected;
         if (!key || this.applying || frame.session !== this.frame?.session || frame.token !== this.frame.token) return;
         this.clearRequest();
         this.time.value = String(time);
-        this.value.value = String(value);
+        if (typeof value !== 'object') this.value.value = String(value);
         this.easing.value = key.keyframe.easing_text;
         this.syncPreset();
         this.applyFocus = this.value;
-        this.submit(this.draft(key, time), frame, true);
+        const location = this.location(key, time);
+        this.submit(typeof value === 'object' ? { ...location, component: value }
+            : { ...location, value: this.value.value }, frame, true);
         this.enable();
     }
 
@@ -187,8 +189,12 @@ export class TimelineKeyframeEditor {
     }
 
     private draft(key: SelectedKeyframe, time: number): KeyframeDraft {
+        return { ...this.location(key, time), value: this.value.value };
+    }
+
+    private location(key: SelectedKeyframe, time: number): KeyframeDraftLocation {
         return { program: key.program, target: key.target, property: key.property, previous: key.keyframe.time,
-            time, value: this.value.value, easing: this.easing.value };
+            time, easing: this.easing.value };
     }
 
     private submit(draft: KeyframeDraft, frame: FrameTarget, apply: boolean): void {
