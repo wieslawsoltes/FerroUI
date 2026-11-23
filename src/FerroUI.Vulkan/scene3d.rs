@@ -27,7 +27,6 @@ use crate::IVulkanDevice;
 use ash::vk::{self, Handle};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::SharedBitmapImpl;
-use ferroui_base::reactive::IDisposable;
 use ferroui_base::rendering::scene3d::{MeshData, Scene3DMaterialLayer, Scene3DModel, Scene3DSnapshot};
 use ferroui_base::Rect;
 use ferroui_render3d::brush::DeviceBitmap;
