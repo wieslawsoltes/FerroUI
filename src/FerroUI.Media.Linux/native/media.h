@@ -32,6 +32,8 @@ void ferro_linux_audio(FerroLinuxSession *s, double volume, int muted);
 FerroLinuxFrame *ferro_linux_take(FerroLinuxSession *s);
 void ferro_linux_frame_info(FerroLinuxFrame *f, FerroLinuxFrameInfo *info);
 void ferro_linux_frame_release(FerroLinuxFrame *f);
+/* 1 when the implicit fences of every buffer of the frame have signalled; does not wait. */
+int ferro_linux_frame_ready(FerroLinuxFrame *f);
 void *ferro_linux_alias(FerroLinuxFrame *f, intptr_t display, uint32_t *texture);
 void ferro_linux_alias_release(void *alias, int context_alive);
 int ferro_linux_convert(FerroLinuxFrame *f, intptr_t display, uint32_t output);

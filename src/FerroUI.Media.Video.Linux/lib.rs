@@ -3,13 +3,14 @@
 #![forbid(unsafe_code)]
 #[cfg(feature = "controls")]
 pub use ferroui_media_linux::NativeGlTextureImporter;
-use ferroui_media_linux::{admitted_caps, poll_native, LinuxFrameStream, NativeSession};
-use ferroui_media_opengl::NativeGlFrameProducer;
+use ferroui_media_linux::{
+    admitted_caps, poll_native, LinuxFrameSource, LinuxFrameStream, NativeSession,
+};
 use ferroui_media_video::{frames::*, *};
 use std::{path::PathBuf, rc::Rc, task::Poll, time::Duration};
 
 pub struct LinuxVideoProvider {
-    pub frames: NativeGlFrameProducer,
+    pub frames: LinuxFrameSource,
 }
 fn error(message: impl Into<String>) -> MediaError {
     MediaError::new(MediaErrorKind::InvalidSource, message)

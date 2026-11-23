@@ -41,7 +41,7 @@ pub fn video(
     #[cfg(target_os = "linux")]
     {
         Ok(Rc::new(ferroui_media_video_linux::LinuxVideoProvider {
-            frames: ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
+            frames: ferroui_media_linux::LinuxFrameSource::from_interop(interop, budget)?,
         }))
     }
 }
@@ -85,7 +85,7 @@ pub fn camera(
             };
         Ok(Rc::new(
             ferroui_media_camera_linux::LinuxCameraProvider::new(
-                ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
+                ferroui_media_linux::LinuxFrameSource::from_interop(interop, budget)?,
                 profile,
             ),
         ))

@@ -2374,6 +2374,7 @@ dependencies = [
  "cc",
  "ferroui-base",
  "ferroui-media",
+ "ferroui-media-controls",
  "ferroui-media-opengl",
  "ferroui-opengl",
  "pkg-config",
@@ -3045,6 +3046,7 @@ dependencies = [
 name = "ferroui-vello"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ash",
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",

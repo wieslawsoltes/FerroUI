@@ -30,6 +30,7 @@ void ferro_linux_frame_info(FerroLinuxFrame *f, FerroLinuxFrameInfo *info) {
     if (info != NULL) memset(info, 0, sizeof *info);
 }
 void ferro_linux_frame_release(FerroLinuxFrame *f) { (void)f; }
+int ferro_linux_frame_ready(FerroLinuxFrame *f) { (void)f; return 0; }
 void *ferro_linux_alias(FerroLinuxFrame *f, intptr_t display, uint32_t *texture) {
     (void)f; (void)display; (void)texture;
     return NULL;
