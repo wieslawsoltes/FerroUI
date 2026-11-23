@@ -181,8 +181,10 @@ and checks that the shared input metadata clears when focus leaves the view.
 ## Apple keyboard layout
 
 The browser registers the same Command and Option editing keymap as the
-macOS desktop backend when the page reports an Apple platform. The editor
-uses Control for rectangular selection with that keymap.
+macOS desktop backend when the page reports an Apple platform. With that
+keymap the editor uses Control for rectangular selection from the keyboard and
+Option for a rectangle drawn with the pointer, because Control with a click is
+the secondary click. Delete Line and Reindent stay on Control+D and Control+I.
 
 The linked regression sets the platform before startup and routes Command
 navigation, Find, Select All, Copy, Cut, Paste, and Undo through browser key
