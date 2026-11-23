@@ -1,5 +1,6 @@
 import { readFile, stat } from 'node:fs/promises';
-import type { Uri } from 'vscode';
+import * as path from 'node:path';
+import { Uri } from 'vscode';
 import { buildBrowserSite, resolveBrowserBuild, type BrowserBuildTarget, type BuiltBrowserSite } from './browserBuild';
 import { BrowserInspection } from './browserInspection';
 import { ManagedBrowser, type BrowserPage } from './browserProcess';
@@ -27,6 +28,7 @@ const sourceFile = /(?:\.(?:rs|xaml)$|(?:^|[\\/])(?:Cargo\.(?:toml|lock)|\.cargo
 /** Owns the compiler, site snapshots and Chromium profile for one configured development app. */
 export class BrowserDevelopment {
     readonly runtime: AppRuntime;
+    private readonly discoveryManifest: string;
     private readonly lifetime = new AbortController();
     private readonly changes = new Map<string, ReloadRecord>();
     private readonly stamps = new Map<string, string>();
@@ -45,6 +47,7 @@ export class BrowserDevelopment {
 
     constructor(readonly app: DevelopmentBrowserApp, private readonly connections: RuntimeConnections, private readonly history: ReloadHistory,
         private readonly output: ReloadLog, private readonly publishMetadata: (metadata: ProjectMetadata) => void) {
+        this.discoveryManifest = fileKey(path.resolve(Uri.parse(app.folder, true).fsPath, app.build.manifestPath));
         this.runtime = connections.beginBrowser({ folder: app.folder, profile: app.id, launched: true, development: true }, app.label).runtime;
     }
 
@@ -62,13 +65,12 @@ export class BrowserDevelopment {
         if (uri.scheme !== 'file' || this.lifetime.signal.aborted) return;
         const file = fileKey(uri.fsPath);
         const target = this.target;
-        if (!target || !this.scope) return;
         const source = sourceFile.test(file);
-        const insidePage = isInside(target.hostPage, file);
-        const workspaceInput = target.workspaceInputs.includes(file);
-        if (!(insidePage || source && (workspaceInput || this.scope.observes(file)))) return;
+        const insidePage = target && isInside(target.hostPage, file);
+        const workspaceInput = file === this.discoveryManifest || target?.workspaceInputs.includes(file);
+        if (!(insidePage || workspaceInput || source && this.scope?.observes(file))) return;
         const observed = Date.now();
-        const pending: Promise<void> = this.observeRevision(file, source, observed, () => this.reads.get(file) === pending);
+        const pending: Promise<void> = this.observeRevision(file, Boolean(source || workspaceInput), observed, () => this.reads.get(file) === pending);
         this.reads.set(file, pending);
         void pending.finally(() => { if (this.reads.get(file) === pending) this.reads.delete(file); });
     }
