@@ -62,7 +62,7 @@ mod writeable_bitmap_impl;
 pub use combined_geometry_impl::CombinedGeometryImpl;
 pub use drawing_context_impl::{CanvasSource, CreateInfo, DrawingContextImpl};
 pub use ellipse_geometry_impl::EllipseGeometryImpl;
-pub use font_manager_impl::FontManagerImpl;
+pub use font_manager_impl::{create_typeface_from_font_data, FontManagerImpl};
 pub use framebuffer_render_target::FramebufferRenderTarget;
 pub use geometry_group_impl::GeometryGroupImpl;
 pub use geometry_impl::{try_get_geometry_impl, GeometryImpl, GeometryImplBase};

@@ -85,6 +85,14 @@ extern "C" {
     pub fn d2_font_family_faces(family: *const i8) -> Ptr;
     pub fn d2_path_intercepts(path: Ptr, lower: f64, upper: f64) -> Ptr;
     pub fn d2_font_data(data: *const u8, n: usize) -> Ptr;
+    /// A font over bytes it does not copy. `release` is called with `context` when the font is
+    /// done with them, and also when this fails.
+    pub fn d2_font_data_shared(
+        data: *const u8,
+        n: usize,
+        context: *mut std::ffi::c_void,
+        release: extern "C" fn(*mut std::ffi::c_void),
+    ) -> Ptr;
     pub fn d2_font_name(font: Ptr, out: *mut u8, n: usize);
     pub fn d2_font_table(font: Ptr, tag: u32) -> Ptr;
     pub fn d2_font_names() -> Ptr;

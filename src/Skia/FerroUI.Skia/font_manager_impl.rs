@@ -10,6 +10,26 @@ use skia_safe::{Data, FontMgr};
 use std::cell::RefCell;
 use std::io::Read;
 use std::rc::Rc;
+use std::sync::Arc;
+
+ferroui_base::ferro_thread_local! {
+    /// The font manager that makes typefaces from font data.
+    static FONT_DATA_MANAGER: FontMgr = FontMgr::new();
+}
+
+/// A typeface over a decoded font. Skia keeps its own copy of the bytes, as its safe API has no
+/// release callback for memory it does not own, so `data` is released here: once this returns,
+/// the copy inside Skia is the only one. Only web fonts reach this, so an application without
+/// them does not link it.
+pub fn create_typeface_from_font_data(
+    data: Arc<[u8]>,
+    font_simulations: FontSimulations,
+) -> Option<Rc<dyn IPlatformTypeface>> {
+    let sk_data = Data::new_copy(&data);
+    drop(data);
+    let sk_typeface = FONT_DATA_MANAGER.with(|manager| manager.new_from_data(sk_data, None))?;
+    Some(SkiaTypeface::new(sk_typeface, font_simulations))
+}
 
 /// The Skia font manager: system fonts through Skia's default font manager.
 pub struct FontManagerImpl {
@@ -173,5 +193,24 @@ impl IFontManagerImpl for FontManagerImpl {
         }
 
         Some(typefaces)
+    }
+}
+
+#[cfg(test)]
+mod font_data_tests {
+    use super::*;
+
+    #[test]
+    fn the_decoded_buffer_is_released_once_skia_owns_its_copy() {
+        let data: Arc<[u8]> = Arc::from(&include_bytes!("test_assets/assets/Inter-Regular.ttf")[..]);
+        let weak = Arc::downgrade(&data);
+        let typeface = create_typeface_from_font_data(data, FontSimulations::None).expect("a typeface");
+        assert!(weak.upgrade().is_none(), "one long-lived copy: the one inside Skia");
+        assert!(typeface.family_name().contains("Inter"));
+    }
+
+    #[test]
+    fn bytes_that_are_not_a_font_give_no_typeface() {
+        assert!(create_typeface_from_font_data(Arc::from(&b"not a font"[..]), FontSimulations::None).is_none());
     }
 }

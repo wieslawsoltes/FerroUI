@@ -173,6 +173,34 @@ void *q_font_data(const uint8_t *bytes, size_t n) {
     return NULL;
   }
 }
+void *q_font_data_shared(const uint8_t *bytes, size_t n, void *context,
+                         void (*release)(void *, const void *, size_t)) {
+  @try {
+    if (!bytes || !n) {
+      release(context, bytes, n);
+      return NULL;
+    }
+    // The provider owns `context` from here: it calls `release` when the last font using the
+    // bytes is gone.
+    CGDataProviderRef provider =
+        CGDataProviderCreateWithData(context, bytes, n, release);
+    if (!provider) {
+      release(context, bytes, n);
+      return NULL;
+    }
+    CGFontRef cg = CGFontCreateWithDataProvider(provider);
+    CTFontRef font =
+        cg ? CTFontCreateWithGraphicsFont(cg, 12, NULL, NULL) : NULL;
+    if (cg)
+      CGFontRelease(cg);
+    CGDataProviderRelease(provider);
+    return (void *)font;
+
+  } @catch (NSException *error) {
+    NSLog(@"Quartz native operation failed: %@", error);
+    return NULL;
+  }
+}
 void q_font_name(void *font, char *out, size_t n) {
   @try {
     if (!font)

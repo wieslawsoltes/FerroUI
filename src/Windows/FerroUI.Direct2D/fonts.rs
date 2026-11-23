@@ -36,7 +36,7 @@ pub struct Typeface {
     style: FontStyle,
     stretch: FontStretch,
     simulations: FontSimulations,
-    data: Option<Vec<u8>>,
+    data: Option<Arc<[u8]>>,
 }
 impl Typeface {
     fn new(
@@ -151,6 +151,31 @@ fn style_cost(desired: FontStyle, actual: FontStyle) -> i32 {
         _ => 1, // Italic and oblique stand in for each other.
     }
 }
+/// A typeface over a decoded font, sharing `data` with DirectWrite with no copy. Only web fonts
+/// reach this, so an application without them does not link it.
+pub fn create_typeface_from_font_data(
+    data: Arc<[u8]>,
+    simulations: FontSimulations,
+) -> Option<Rc<dyn IPlatformTypeface>> {
+    extern "C" fn release(context: *mut std::ffi::c_void) {
+        // SAFETY: `context` is the box made below, and the owner object calls this once.
+        drop(unsafe { Box::from_raw(context.cast::<Arc<[u8]>>()) });
+    }
+    let context = Box::into_raw(Box::new(data.clone())).cast::<std::ffi::c_void>();
+    // SAFETY: the bytes stay alive until `release`, as `context` holds a reference to them.
+    let raw = unsafe { ffi::d2_font_data_shared(data.as_ptr(), data.len(), context, release) };
+    if raw.is_null() {
+        return None;
+    }
+    // SAFETY: `raw` is a font this call owns.
+    let font = unsafe { NativeFont::from_raw(raw) };
+    let (weight, style, stretch) = declared_attributes(&font);
+    let mut face = Typeface::new(font, weight, style, stretch);
+    face.simulations = simulations;
+    face.data = Some(data);
+    Some(Rc::new(face))
+}
+
 #[derive(Default)]
 pub struct FontManager {
     embedded: RefCell<Vec<EmbeddedFont>>,
@@ -207,7 +232,7 @@ impl FontManager {
             }
             let mut face = Typeface::new(font, weight, style, stretch);
             face.simulations = simulations;
-            face.data = Some(data);
+            face.data = Some(data.into());
             Some(Rc::new(face))
         }
     }

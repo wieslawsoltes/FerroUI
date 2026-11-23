@@ -182,6 +182,33 @@ fn style_cost(desired: FontStyle, actual: FontStyle) -> i32 {
         _ => 1, // Italic and oblique stand in for each other.
     }
 }
+/// A typeface over a decoded font, sharing `data` with Core Graphics with no copy. Only web fonts
+/// reach this, so an application without them does not link it.
+pub fn create_typeface_from_font_data(
+    data: Arc<[u8]>,
+    simulations: FontSimulations,
+) -> Option<Rc<dyn IPlatformTypeface>> {
+    extern "C" fn release(context: *mut std::ffi::c_void, _: *const std::ffi::c_void, _: usize) {
+        // SAFETY: `context` is the box made below, and the provider calls this once.
+        drop(unsafe { Box::from_raw(context.cast::<Arc<[u8]>>()) });
+    }
+    let context = Box::into_raw(Box::new(data.clone())).cast::<std::ffi::c_void>();
+    // SAFETY: the bytes stay alive until `release`, as `context` holds a reference to them.
+    let raw = unsafe { ffi::q_font_data_shared(data.as_ptr(), data.len(), context, release) };
+    if raw.is_null() {
+        return None;
+    }
+    // SAFETY: `raw` is a font this call owns.
+    let mut font = unsafe { NativeFont::from_raw(raw) };
+    if let Some(native) = Arc::get_mut(&mut font) {
+        native.data = Some(data.clone());
+    }
+    let mut face = Typeface::new(font, FontWeight::Normal, FontStyle::Normal, FontStretch::Normal);
+    face.simulations = simulations;
+    face.data = Some(data);
+    Some(Rc::new(face))
+}
+
 #[derive(Default)]
 pub struct FontManager {
     embedded: RefCell<Vec<Arc<NativeFont>>>,
@@ -476,5 +503,29 @@ impl ITextShaperImpl for TextShaper {
             );
         }
         shaped
+    }
+}
+
+#[cfg(test)]
+mod font_data_tests {
+    use super::*;
+
+    #[test]
+    fn the_typeface_shares_the_decoded_buffer() {
+        let bytes = include_bytes!("../../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf");
+        let data: Arc<[u8]> = Arc::from(&bytes[..]);
+        let weak = Arc::downgrade(&data);
+        let typeface = create_typeface_from_font_data(data, FontSimulations::None).expect("a typeface");
+        assert!(weak.upgrade().is_some(), "the typeface reads the same bytes");
+        assert!(typeface.family_name().contains("Inter"));
+        drop(typeface);
+    }
+
+    #[test]
+    fn bytes_that_are_not_a_font_give_no_typeface_and_release_them() {
+        let data: Arc<[u8]> = Arc::from(&b"not a font"[..]);
+        let weak = Arc::downgrade(&data);
+        assert!(create_typeface_from_font_data(data, FontSimulations::None).is_none());
+        assert!(weak.upgrade().is_none());
     }
 }
