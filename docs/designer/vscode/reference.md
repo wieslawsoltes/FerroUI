@@ -22,7 +22,7 @@ In a remote window, **FerroUI Designer in VS Code** starts its native MCP helper
 
 ### Run app tools through the editor MCP server
 
-Use **FerroUI Designer in VS Code** to reach a managed app, attached runtime, mobile app, or Studio session. Android app tools use this editor connection through the workspace host’s ADB forward.
+Use **FerroUI Designer in VS Code** to reach a managed app, attached runtime, mobile app, browser app, or Studio session. The editor connection reaches Android through the workspace host’s ADB forward and Chromium through its debugger.
 
 1. Call `ferroui_app_sessions` and take the exact `runtime` ID of the available session. Call `ferroui_runtime_tools` with that ID to read the app’s tool names, schemas, and `generation`.
 2. For a tool with `readOnlyHint: true`, call `ferroui_runtime_query`. Pass the same `runtime`, the generation as `expected_generation`, the tool name in `tool`, and its own `arguments`. For example, use `list_windows` to get window IDs and `screenshot` to return a native PNG.

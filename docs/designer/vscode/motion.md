@@ -90,7 +90,7 @@ Use `designer_timeline_track_action` with the design `session` and the returned 
 
 In App Preview, choose Value or Velocity curves and read `designer_hosted_timeline_view`. The `tracks` list includes live targets with eligible properties. The plotted property is marked `visible` and returned as `selected`. Call `designer_hosted_timeline_track_action` with the design session. Pass the reported `generation`, `revision`, and `sequence` as `expected_generation`, `expected_revision`, and `expected_sequence`. Set `track.action` to `select` and include the current `program`, `target`, and `property`. Select a property before using `channel` to choose its component.
 
-Designer Studio supports `select` and `channel` on its track header and component picker. Pass `expected_uri` and `expected_revision` from `designer_timeline_view`. Include the program when reported. Selecting a track uses the closest key at the current playhead. The presentation commands require write permission and preserve source and Undo history. [MCP permissions and tools](reference.md#use-ferroui-with-vs-code-agents)
+Designer Studio supports `select` and `channel` on its track header and component picker. Pass `expected_uri` and `expected_revision` from `designer_timeline_view`. Include the program when reported. Selecting a track uses the closest key at the current playhead. The presentation commands require write permission and preserve source and Undo history. [MCP permissions and tools](reference.md#start-the-right-mcp-server)
 
 ![The Timeline shows the Overview filter, a locked group, and the Top right component beside its design.](../images/vscode-timeline-mcp-tracks.png)
 
@@ -103,7 +103,7 @@ Designer Studio supports `select` and `channel` on its track header and componen
 3. Call `designer_timeline_set_viewport` with the returned `revision` as `expected_revision`. Pass the design `session` in VS Code or the active Studio document `uri` as `expected_uri`. App Preview uses `designer_hosted_timeline_set_viewport` with the design session and `generation` as `expected_generation`.
 4. In the `viewport` argument, copy the reported `ruler` and `program` if present. Set `action` to `window` and pass `start` and `end` in seconds to zoom or pan. Use `fit` to show the entire ruler or `fit_selection` when `canFitSelection` is true. An exact window must fit within the ruler, with a minimum span of 0.05 seconds or the entire duration for shorter clips.
 
-The tool returns the range rendered by the existing controls. A later read reflects zoom or pan performed in the UI. These controls change the view while preserving the playhead and source history. The tools require write permission. [MCP permissions and tools](reference.md#use-ferroui-with-vs-code-agents)
+The tool returns the range rendered by the existing controls. A later read reflects zoom or pan performed in the UI. These controls change the view while preserving the playhead and source history. The tools require write permission. [MCP permissions and tools](reference.md#start-the-right-mcp-server)
 
 ![The docked Timeline shows the first 0.6 seconds of a 0.8-second clip, beside the XAML and native preview.](../images/vscode-timeline-mcp-viewport.png)
 
@@ -608,7 +608,7 @@ Agents supply `action: "play_range"` and `range: { "start": 0.4, "end": 1.5, "lo
 
 In App Preview, use `designer_hosted_timeline_view` and `designer_hosted_timeline_set_work_area`. Pass its generation, revision, and frame sequence as `expected_generation`, `expected_revision`, and `expected_sequence`. Both App Preview work areas use elapsed seconds.
 
-In standalone Studio, pass the reported `uri` and `revision` as `expected_uri` and `expected_revision`. Copy `program` and `invocation` when present from `work_area` or `frame_snap`. Work area and snapping commands require write permission, update the toolbar controls, and preserve authored source and Undo history. [MCP permissions and tools](reference.md#use-ferroui-with-vs-code-agents)
+In standalone Studio, pass the reported `uri` and `revision` as `expected_uri` and `expected_revision`. Copy `program` and `invocation` when present from `work_area` or `frame_snap`. Work area and snapping commands require write permission, update the toolbar controls, and preserve authored source and Undo history. [MCP permissions and tools](reference.md#start-the-right-mcp-server)
 
 ## Bookmark preview positions
 
