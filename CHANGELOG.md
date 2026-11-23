@@ -173,6 +173,8 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 ### Fixed
 
+- **Behavior change: `PinchEventArgs::angle_delta` follows its documentation** (#1234, `ferroui-base`): the value is the shortest signed turn in degrees, in the range (-180, 180], and positive for clockwise rotation. It had the opposite sign and jumped by nearly 360 degrees when a turn crossed the wrap of the angle. Code that negated the value to correct the sign should stop doing so.
+
 - **Dependency advisories**: the lock files take `rustix` 1.1.6 (RUSTSEC-2026-0486), `rustls-webpki` 0.103.16 (RUSTSEC-2026-0382), `webpki-roots` 1.0.10 (RUSTSEC-2026-0381), `libz-sys` 1.1.33 (RUSTSEC-2026-0418, RUSTSEC-2026-0544) and `tar` 0.4.46 (GHSA-3pv8-6f4r-ffg2).
 
 - **A library that constructs a theme gets the table of the application that uses it** (#846, `ferroui-build`, `ferroui-markup-xaml`, `ferroui-markup-xaml-loader`, docs/porting/theme-trimming.md section 20). A library document with `<WinUITheme />` was compiled with the units the library needs. An application that used the library and added a control wrote no table, so the control had no template. Compiled constructions now apply the wider of their own table and the table registered for the class (`rt::wider_theme_parts`), and `register()` keeps the wider table (`rt::register_wider_theme_parts`). An application writes and registers a table for every theme that the documents of a direct dependency construct, when the theme's crate is a direct dependency too. New: `rt::wider_theme_parts`, `rt::register_wider_theme_parts`, `ModelSet::read_with_direct`.
