@@ -1534,6 +1534,43 @@ fn nested_popup_should_be_in_parent_popup_opened_popups(use_popup_host: bool) {
 
 /// Not in the reference suite: covers the transform tracking of a popup
 /// that inherits the transform of its placement target.
+fn inherits_transform_applies_the_scale_of_each_axis(use_popup_host: bool) {
+    use ferroui_base::media::{ITransform, ScaleTransform};
+
+    let _app = create_services(use_popup_host);
+    let placement_target = Border::new();
+    placement_target.set_width(100.0);
+    placement_target.set_height(20.0);
+    let scaled = Decorator::new();
+    let scale: Rc<dyn ITransform> = ScaleTransform::with_scale(1.0, 2.0).into();
+    scaled.set_render_transform(Some(scale));
+    scaled.set_child(placement_target.clone());
+    let popup = Popup::new();
+    popup.set_placement_target(placement_target.clone());
+    popup.set_inherits_transform(true);
+    popup.set_width(100.0);
+    popup.set_height(50.0);
+    popup.set_parent(popup.placement_target().unwrap());
+
+    let window = prepared_window(Some(scaled.clone().upcast()));
+    window.show();
+    popup.open();
+
+    let host = popup.host().unwrap();
+    assert_eq!(100.0, host.width());
+    assert_eq!(100.0, host.height());
+}
+
+#[test]
+fn inherits_transform_applies_the_scale_of_each_axis_with_popup_host() {
+    inherits_transform_applies_the_scale_of_each_axis(true);
+}
+
+#[test]
+fn inherits_transform_applies_the_scale_of_each_axis_with_overlay_host() {
+    inherits_transform_applies_the_scale_of_each_axis(false);
+}
+
 fn inherits_transform_scales_the_host_with_the_placement_target(use_popup_host: bool) {
     use ferroui_base::media::{ITransform, ScaleTransform};
 

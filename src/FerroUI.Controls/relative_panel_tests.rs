@@ -132,3 +132,65 @@ fn circular_dependency_panics() {
     RelativePanel::set_right_of(&rect1, Some(Control::boxed(&rect2)));
     target.measure(Size::new(400.0, 400.0));
 }
+
+fn left_of_chain(left_height: f64) -> (Ref<RelativePanel>, Ref<Border>) {
+    let child = |height: f64| {
+        let rect = Border::new();
+        rect.set_width(80.0);
+        rect.set_height(height);
+        rect
+    };
+    let (right, middle, left) = (child(40.0), child(40.0), child(left_height));
+    RelativePanel::set_align_right_with_panel(&right, true);
+    RelativePanel::set_left_of(&middle, Some(Control::boxed(&right)));
+    RelativePanel::set_left_of(&left, Some(Control::boxed(&middle)));
+    let target = RelativePanel::new();
+    target.children().add(&right);
+    target.children().add(&middle);
+    target.children().add(&left);
+    (target, left)
+}
+
+#[test]
+fn lays_out_a_chain_from_the_right_edge_inside_another_relative_panel() {
+    let (right, middle, left) = (rect(), rect(), rect());
+    RelativePanel::set_align_right_with_panel(&right, true);
+    RelativePanel::set_left_of(&middle, Some(Control::boxed(&right)));
+    RelativePanel::set_left_of(&left, Some(Control::boxed(&middle)));
+    // Declared the way they read in markup, each one before the child it points at.
+    let target = RelativePanel::new();
+    target.children().add(&left);
+    target.children().add(&middle);
+    target.children().add(&right);
+    let outer = RelativePanel::new();
+    outer.children().add(&target);
+    RelativePanel::set_align_top_with_panel(&target, true);
+
+    outer.measure(Size::new(400.0, 400.0));
+    outer.arrange(Rect::new(0.0, 0.0, 400.0, 400.0));
+
+    assert_eq!(right.bounds().left(), middle.bounds().right());
+    assert_eq!(middle.bounds().left(), left.bounds().right());
+}
+
+#[test]
+fn measures_a_left_of_chain_at_infinite_width() {
+    let (target, left) = left_of_chain(40.0);
+
+    target.measure(Size::new(f64::INFINITY, f64::INFINITY));
+    target.arrange(Rect::from_size(target.desired_size()));
+
+    assert_eq!(target.desired_size(), Size::new(240.0, 40.0));
+    assert_eq!(left.bounds().left(), 0.0);
+}
+
+#[test]
+fn measures_a_left_of_chain_with_a_tall_far_child_at_infinite_width() {
+    let (target, left) = left_of_chain(200.0);
+
+    target.measure(Size::new(f64::INFINITY, f64::INFINITY));
+    target.arrange(Rect::from_size(target.desired_size()));
+
+    assert_eq!(target.desired_size(), Size::new(240.0, 200.0));
+    assert_eq!((left.bounds().left(), left.bounds().top()), (0.0, 0.0));
+}

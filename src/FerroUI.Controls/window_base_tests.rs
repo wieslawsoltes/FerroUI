@@ -103,6 +103,23 @@ fn impl_activate_should_call_raise_activated_event() {
 }
 
 #[test]
+fn is_active_should_be_true_when_activated_is_raised() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let platform_impl = create_mock_window_base_impl();
+    let target = TestWindowBase::with_impl(&platform_impl);
+    let is_active = Rc::new(Cell::new(None));
+    target.activated({
+        let is_active = is_active.clone();
+        let target = target.clone();
+        move || is_active.set(Some(target.is_active()))
+    }).detach();
+
+    activated(&platform_impl);
+
+    assert_eq!(Some(true), is_active.get());
+}
+
+#[test]
 fn impl_deactivate_should_call_raise_deativated_event() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let platform_impl = create_mock_window_base_impl();

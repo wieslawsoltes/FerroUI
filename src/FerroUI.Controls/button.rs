@@ -289,7 +289,7 @@ impl InputElementImpl for Button {
         // Avoid handling Space if the button isn't focused: a child text
         // box might need it for text input.
         if e.key == Key::Space && this.is_focused() {
-            if this.click_mode() == ClickMode::Release {
+            if this.click_mode() == ClickMode::Release && this.is_pressed() {
                 this.on_click();
             }
             this.set_is_pressed(false);

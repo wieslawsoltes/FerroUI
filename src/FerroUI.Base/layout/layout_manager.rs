@@ -248,7 +248,10 @@ impl LayoutManager {
 
         let pending = std::mem::take(&mut *self.to_arrange_after_measure.borrow_mut());
         for control in pending {
-            self.invalidate_arrange(&control);
+            // A control can move to another top level during the pass, and that one arranges it.
+            if self.is_owned_root(&control) {
+                self.invalidate_arrange(&control);
+            }
         }
     }
 

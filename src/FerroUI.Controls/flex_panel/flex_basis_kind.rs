@@ -10,7 +10,7 @@ pub enum FlexBasisKind {
     /// The initial size of the item is set to the `FlexBasis` value.
     Absolute = 1,
 
-    /// Indicates the `FlexBasis` value is a percentage, and the size of the
-    /// flex item is scaled by it.
+    /// Indicates the `FlexBasis` value is a fraction of the main-axis size of the
+    /// container (`0.5` for `50%`).
     Relative = 2,
 }

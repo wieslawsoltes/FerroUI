@@ -213,6 +213,7 @@ pub struct Calendar {
     display_date_is_changing: Cell<bool>,
     is_tap_range_selection_active: Cell<bool>,
     tap_range_start: Cell<Option<DateTime>>,
+    wheel_delta: Cell<f64>,
 
     focus_button: RefCell<Option<Ref<CalendarDayButton>>>,
     focus_calendar_button: RefCell<Option<Ref<CalendarButton>>>,
@@ -287,13 +288,23 @@ impl InputElementImpl for Calendar {
         if !e.handled() {
             let (ctrl, shift) = CalendarExtensions::get_meta_key_state(e.key_modifiers());
 
+            // Touchpads send many small deltas, so only step once they add up to a whole notch.
+            let wheel_delta = this.wheel_delta.get() + e.delta().y;
+            if wheel_delta.abs() < 1.0 {
+                this.wheel_delta.set(wheel_delta);
+                e.set_handled(true);
+                return;
+            }
+            let up = wheel_delta > 0.0;
+            this.wheel_delta.set(0.0);
+
             if !ctrl {
-                if e.delta().y > 0.0 {
+                if up {
                     this.process_page_up_key(false);
                 } else {
                     this.process_page_down_key(false);
                 }
-            } else if e.delta().y > 0.0 {
+            } else if up {
                 this.process_down_key(ctrl, shift);
             } else {
                 this.process_up_key(ctrl, shift);
@@ -526,6 +537,7 @@ impl Calendar {
             display_date_is_changing: Cell::new(false),
             is_tap_range_selection_active: Cell::new(false),
             tap_range_start: Cell::new(None),
+            wheel_delta: Cell::new(0.0),
             focus_button: RefCell::new(None),
             focus_calendar_button: RefCell::new(None),
             root: RefCell::new(None),
