@@ -17,9 +17,11 @@ use ferroui_base::interactivity::{
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::styling::{ISetterValue, Setter};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::utilities::ReleaseAtRest;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AnyValue, BoxedValue,
-    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Nullable, Rect,
+    FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, IntoRef, Nullable,
+    PropertyChangeHandler, Rect,
     Ref, Size, StyledElement, StyledElementImpl, StyledProperty, Visual, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs,
 };
 use std::cell::{Cell, OnceCell, RefCell};
@@ -53,6 +55,8 @@ struct LoadedQueues {
     /// The queued controls, with their slot in `queue`.
     queued: HashMap<Ref<Control>, usize>,
     processing_queue: VecDeque<Ref<Control>>,
+    /// Whether the table is registered to be released once a burst is over (#836).
+    resting: bool,
 }
 
 impl LoadedQueues {
@@ -86,12 +90,30 @@ impl LoadedQueues {
     /// The queued controls in their order, the queue left empty.
     fn take(&mut self) -> Vec<Ref<Control>> {
         self.queued.clear();
+        // The first show of a large tree queues every control of it: the table is given back to
+        // what an emptied buffer keeps, and released further once the burst is over (#836).
+        if self.queued.release_burst() {
+            ferroui_base::utilities::rest_after_burst(std::cell::Cell::from_mut(&mut self.resting), || {
+                || {
+                    // The table of the thread lives as long as the thread.
+                    let _ = LOADED.try_with(|loaded| {
+                        if let Ok(mut loaded) = loaded.try_borrow_mut() {
+                            loaded.queued.release_at_rest();
+                        }
+                    });
+                    true
+                }
+            });
+        }
         std::mem::take(&mut self.queue).into_iter().flatten().collect()
     }
 }
 
 ferroui_base::ferro_thread_local! {
     static LOADED: RefCell<LoadedQueues> = RefCell::new(LoadedQueues::default());
+    /// How the context menu of a control is opened at the control: what the context menu class
+    /// states when it is initialised ([`Control::set_context_menu_opener`]).
+    static CONTEXT_MENU_OPENER: Cell<Option<fn(&Ref<Control>)>> = const { Cell::new(None) };
 }
 
 /// Base class for controls.
@@ -106,6 +128,17 @@ pub struct Control {
     base: InputElement,
     load_state: Cell<LoadState>,
     data_templates: OnceCell<DataTemplates>,
+    /// What few controls have (`RareState`), made with the first of it.
+    // Not upstream (docs/porting/desktop-performance.md, section 9.68): the four fields were 120
+    // bytes of every control, and an element is kept in the block its size falls into.
+    rare: OnceCell<Box<RareState>>,
+}
+
+/// The state of a control that few controls have: the focus adorner of one that has the keyboard
+/// focus, the handlers of one with a context menu or a context flyout, and the automation peer of
+/// one that was asked for it.
+#[derive(Default)]
+struct RareState {
     focus_adorner: RefCell<Option<Ref<Control>>>,
     context_flyout_handlers: Cell<Option<(RoutedEventHandlerToken, RoutedEventHandlerToken)>>,
     context_menu_handlers: Cell<Option<ContextMenuHandlers>>,
@@ -149,10 +182,20 @@ ferroui_base::ferro_class_info!(Control { new: Control::new });
 ferro_impl_classes!(Control: StyledElementImpl, LayoutableImpl, InteractiveImpl);
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::Control).into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Visual::bounds_property().as_property() {
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::Control;
+        if !change.reaches(HANDLER) {
+            return;
+        }
+
+        if change.is_for(HANDLER, Visual::bounds_property().as_property()) {
             let (old_value, new_value) = change.get_old_and_new_value::<Rect>();
 
             // Bounds is a rect with a position as well as a height and width.
@@ -184,6 +227,12 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for Control {
 } }
 
 impl VisualImpl for Control {
+    /// `render` is the one of the base class, and so is what a new size does to it: a class
+    /// that draws nothing is not drawn again when it is resized (section 9.89).
+    fn resize_changes_drawing(this: &Self, old: ferroui_base::Size, new: ferroui_base::Size) -> bool {
+        Self::parent_resize_changes_drawing(this, old, new)
+    }
+
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         Self::parent_on_attached_to_visual_tree_core(this, e);
 
@@ -211,19 +260,19 @@ impl InputElementImpl for Control {
             && (e.navigation_method == NavigationMethod::Tab || e.navigation_method == NavigationMethod::Directional)
         {
             if let Some(adorner_layer) = AdornerLayer::get_adorner_layer(this) {
-                if this.focus_adorner.borrow().is_none() {
+                if this.focus_adorner_element().is_none() {
                     let template = if this.is_set(Self::focus_adorner_property().as_property()) {
                         this.get_value(Self::focus_adorner_property())
                     } else {
                         adorner_layer.default_focus_adorner()
                     };
 
-                    if let Some(template) = template {
-                        *this.focus_adorner.borrow_mut() = template.build_typed();
+                    if let Some(focus_adorner) = template.and_then(|template| template.build_typed()) {
+                        *this.rare().focus_adorner.borrow_mut() = Some(focus_adorner);
                     }
                 }
 
-                let focus_adorner = this.focus_adorner.borrow().clone();
+                let focus_adorner = this.focus_adorner_element();
                 if let (Some(focus_adorner), Some(target)) = (focus_adorner, this.get_template_focus_target()) {
                     AdornerLayer::set_adorned_element(&focus_adorner, target);
                     adorner_layer.children().add(focus_adorner);
@@ -233,7 +282,7 @@ impl InputElementImpl for Control {
 
         // Reveal focus (winui-materials.md): a glow around the focus visual.
         if this.is_focused() {
-            let target = if this.focus_adorner.borrow().is_some() { this.get_template_focus_target() } else { None };
+            let target = if this.focus_adorner_element().is_some() { this.get_template_focus_target() } else { None };
             crate::media::on_control_got_focus(
                 target.as_ref().map(|target| {
                     let visual: &ferroui_base::Visual = target;
@@ -256,11 +305,12 @@ impl InputElementImpl for Control {
             }),
         );
 
-        let focus_adorner = this.focus_adorner.borrow().clone();
-        if let Some(focus_adorner) = focus_adorner {
+        if let Some(focus_adorner) = this.focus_adorner_element() {
             if let Some(adorner_layer) = focus_adorner.parent().and_then(|parent| parent.cast::<Panel>()) {
                 adorner_layer.children().remove(focus_adorner);
-                *this.focus_adorner.borrow_mut() = None;
+                if let Some(rare) = this.rare.get() {
+                    *rare.focus_adorner.borrow_mut() = None;
+                }
             }
         }
     }
@@ -355,6 +405,10 @@ ferroui_base::ferro_properties! { impl Control {
 } }
 
 impl Control {
+    fn static_constructor() {
+        PropertyChangeHandler::Control.reacts_to(&[Visual::bounds_property().as_property()]);
+    }
+
     ferro_routed_event!(
         /// Event raised when an element wishes to be scrolled into view.
         pub fn request_bring_into_view_event() -> RoutedEvent<RequestBringIntoViewEventArgs> {
@@ -385,17 +439,38 @@ impl Control {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: InputElement::construct(), load_state: Cell::new(LoadState::Unloaded), data_templates: OnceCell::new(), focus_adorner: RefCell::new(None), context_flyout_handlers: Cell::new(None), context_menu_handlers: Cell::new(None), automation_peer: RefCell::new(None) }
+        Self {
+            base: InputElement::construct(),
+            load_state: Cell::new(LoadState::Unloaded),
+            data_templates: OnceCell::new(),
+            rare: OnceCell::new(),
+        }
     }
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
     }
 
+    /// The state few controls have, made when the first of it is set.
+    fn rare(&self) -> &RareState {
+        self.rare.get_or_init(Default::default)
+    }
+
+    /// Whether the control keeps the state few controls have.
+    #[cfg(test)]
+    pub(crate) fn has_rare_state(&self) -> bool {
+        self.rare.get().is_some()
+    }
+
+    /// The focus adorner the control built for itself when it got the keyboard focus.
+    fn focus_adorner_element(&self) -> Option<Ref<Control>> {
+        self.rare.get().and_then(|rare| rare.focus_adorner.borrow().clone())
+    }
+
     /// Gets the automation peer of the control, if it has been created.
     pub(crate) fn get_automation_peer(&self) -> Option<Ref<AutomationPeer>> {
         self.verify_access();
-        self.automation_peer.borrow().clone()
+        self.rare.get().and_then(|rare| rare.automation_peer.borrow().clone())
     }
 
     /// Gets the automation peer of the control, creating it with
@@ -403,12 +478,12 @@ impl Control {
     pub(crate) fn get_or_create_automation_peer(&self) -> Ref<AutomationPeer> {
         self.verify_access();
 
-        if let Some(peer) = self.automation_peer.borrow().clone() {
+        if let Some(peer) = self.rare.get().and_then(|rare| rare.automation_peer.borrow().clone()) {
             return peer;
         }
 
         let peer = self.on_create_automation_peer();
-        *self.automation_peer.borrow_mut() = Some(peer.clone());
+        *self.rare().automation_peer.borrow_mut() = Some(peer.clone());
         peer
     }
 
@@ -443,9 +518,38 @@ impl Control {
         self.set_value(Self::context_menu_property(), value.into().0)
     }
 
-    /// The handlers the context menu support attached to this control.
-    pub(crate) fn context_menu_handlers(&self) -> &Cell<Option<ContextMenuHandlers>> {
-        &self.context_menu_handlers
+    /// States how the context menu of a control is opened at the control. The context menu
+    /// class does when it is initialised, which is before a control can have a context menu.
+    pub(crate) fn set_context_menu_opener(open: fn(&Ref<Control>)) {
+        CONTEXT_MENU_OPENER.set(Some(open));
+    }
+
+    /// Opens the context menu of the control at the control and returns whether the control
+    /// has one. The call goes through what the context menu class stated
+    /// ([`set_context_menu_opener`](Self::set_context_menu_opener)) and names nothing of the
+    /// class, so that what asks for a context menu on behalf of every control (the automation
+    /// peer of a control) does not keep the menu classes in an application without a menu.
+    pub(crate) fn open_context_menu(&self) -> bool {
+        if self.context_menu().is_none() {
+            return false;
+        }
+        match CONTEXT_MENU_OPENER.get() {
+            Some(open) => {
+                open(&self.to_ref());
+                true
+            }
+            None => false,
+        }
+    }
+
+    /// Takes the handlers the context menu support attached to this control.
+    pub(crate) fn take_context_menu_handlers(&self) -> Option<ContextMenuHandlers> {
+        self.rare.get().and_then(|rare| rare.context_menu_handlers.take())
+    }
+
+    /// Keeps the handlers the context menu support attached to this control.
+    pub(crate) fn set_context_menu_handlers(&self, handlers: ContextMenuHandlers) {
+        self.rare().context_menu_handlers.set(Some(handlers));
     }
 
     /// A context flyout to the control.
@@ -457,10 +561,15 @@ impl Control {
         self.set_value(Self::context_flyout_property(), value.into().0)
     }
 
-    /// The handlers the context flyout support attached to this control
+    /// Takes the handlers the context flyout support attached to this control
     /// for its context requested and context canceled events.
-    pub(crate) fn context_flyout_handlers(&self) -> &Cell<Option<(RoutedEventHandlerToken, RoutedEventHandlerToken)>> {
-        &self.context_flyout_handlers
+    pub(crate) fn take_context_flyout_handlers(&self) -> Option<(RoutedEventHandlerToken, RoutedEventHandlerToken)> {
+        self.rare.get().and_then(|rare| rare.context_flyout_handlers.take())
+    }
+
+    /// Keeps the handlers the context flyout support attached to this control.
+    pub(crate) fn set_context_flyout_handlers(&self, handlers: (RoutedEventHandlerToken, RoutedEventHandlerToken)) {
+        self.rare().context_flyout_handlers.set(Some(handlers));
     }
 
     /// Whether the control is fully constructed in the visual tree and both

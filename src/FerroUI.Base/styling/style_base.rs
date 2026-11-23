@@ -75,6 +75,9 @@ impl FerroObjectImpl for StyleBase {}
 
 impl StyleBaseImpl for StyleBase {
     fn set_parent(this: &Self, parent: Option<&Ref<StyleBase>>) {
+        // The style leaves the theme it was nested in; the collection it is added to reports
+        // the change to the theme it joins.
+        this.structure_changed();
         *this.parent.borrow_mut() = parent.map(Ref::downgrade);
     }
 
@@ -235,6 +238,30 @@ impl StyleBase {
         self.children().add(style)
     }
 
+    /// Whether `parent` is the parent style of the style.
+    pub(super) fn is_child_of(&self, parent: &StyleBase) -> bool {
+        self.parent.borrow().as_ref().is_some_and(|weak| weak.points_at(parent))
+    }
+
+    /// The nested styles of the control theme the style is part of changed in what a plan of
+    /// the theme is made from (`theme_candidates`): a collection of nested styles, a selector,
+    /// a parent. A style that is in no theme reports nothing.
+    pub(super) fn structure_changed(&self) {
+        /// More than the depth a plan follows, so every style of a plan reaches its theme.
+        const MAX_ANCESTORS: usize = 64;
+        if let Some(theme) = self.downcast_ref::<super::ControlTheme>() {
+            return theme.plans_changed();
+        }
+        let Some(mut current) = self.parent() else { return };
+        for _ in 0..MAX_ANCESTORS {
+            if let Some(theme) = current.downcast_ref::<super::ControlTheme>() {
+                return theme.plans_changed();
+            }
+            let Some(parent) = current.parent() else { return };
+            current = parent;
+        }
+    }
+
     #[inline]
     pub(crate) fn has_children(&self) -> bool {
         self.children.get().is_some_and(|c| !c.is_empty())
@@ -305,6 +332,7 @@ impl StyleBase {
                 let instance = StyleInstance::new(self.to_ref().downgrade(), activator, type_);
 
                 let setters = self.setters.get().map(FerroList::snapshot).unwrap_or_default();
+                instance.reserve(setters.len());
                 for setter in setters.iter() {
                     let setter_instance = setter.clone().instance(&instance, target);
                     can_share_instance &= setter_instance.is_setter;
@@ -434,6 +462,17 @@ impl IResourceProvider for StyleBaseHandle {
 }
 
 impl IStyle for StyleBaseHandle {
+    fn indexed_style(&self) -> Option<&super::Style> {
+        self.0.downcast_ref::<super::Style>()
+    }
+
+    fn children_for_target<'a>(&self, target: &'a crate::StyledElement) -> super::StyleCandidates<'a> {
+        match self.0.children.get() {
+            Some(children) => children.candidates(target),
+            None => super::StyleCandidates::all(empty_styles()),
+        }
+    }
+
     fn children(&self) -> Rc<Vec<Rc<dyn IStyle>>> {
         match self.0.children.get() {
             Some(children) => children.snapshot(),

@@ -19,7 +19,10 @@ ferroui-opengl.workspace = true
 ferroui-browser.workspace = true
 wasm-bindgen.workspace = true
 ferroui-media-controls = {workspace=true,optional=true}
+ferroui-media-qr = { workspace = true, default-features = false, optional = true }
+serde_json = { workspace = true, optional = true }
 [features]
 controls = ["dep:ferroui-media-controls"]
+qr = ["dep:ferroui-media-qr", "dep:serde_json"]
 [package.metadata.release]
 group = "platforms"

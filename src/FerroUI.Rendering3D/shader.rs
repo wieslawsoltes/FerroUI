@@ -7,14 +7,28 @@
 //! backend; the GL, Metal and Vulkan executors of later steps translate it with naga at build
 //! time. The tests of this module validate it with naga and translate it to GLSL ES 3.00 for
 //! WebGL2.
+//!
+//! The draws of a material layer have one fragment entry point per variant of the brush shader
+//! (step D6, [`fragment_entry`]): a bit of the pipeline key of the executors.
+
+use crate::brush::BrushShader;
 
 /// The WGSL of the 3D executors.
 pub const SCENE3D_WGSL: &str = include_str!("shaders/scene3d.wgsl");
 
 /// The vertex stage of a draw: the world position and normal of a vertex and its clip position.
 pub const VERTEX_ENTRY: &str = "vs_main";
-/// The fragment stage of a draw: the lighting and colour of a material layer.
+/// The fragment stage of a draw: the lighting and colour of a material layer of a solid colour
+/// ([`BrushShader::Solid`]).
 pub const FRAGMENT_ENTRY: &str = "fs_main";
+/// The fragment stage of a draw whose brush is a gradient with its stops inline
+/// ([`BrushShader::Gradient`]).
+pub const GRADIENT_FRAGMENT_ENTRY: &str = "fs_gradient";
+/// The fragment stage of a draw whose brush is a gradient read from its lookup texture
+/// ([`BrushShader::GradientTexture`]).
+pub const GRADIENT_TEXTURE_FRAGMENT_ENTRY: &str = "fs_gradient_texture";
+/// The fragment stage of a draw whose brush is an image ([`BrushShader::Image`]).
+pub const IMAGE_FRAGMENT_ENTRY: &str = "fs_image";
 /// The vertex stage of the resolve: a triangle over the target.
 pub const RESOLVE_VERTEX_ENTRY: &str = "vs_resolve";
 /// The fragment stage of the resolve: the resolved colour with its alpha raised to its largest
@@ -26,8 +40,29 @@ pub const FRAME_GROUP: u32 = 0;
 /// The bind group of the [`DrawUniforms`](crate::uniforms::DrawUniforms) of a draw (binding 0), bound at a
 /// dynamic offset per draw.
 pub const DRAW_GROUP: u32 = 1;
+/// The binding (in group 1) of the [`BrushUniforms`](crate::brush::BrushUniforms) of a draw, bound at
+/// a dynamic offset per draw.
+pub const BRUSH_BINDING: u32 = 1;
+/// The bind group of the texture of a brush (binding 0) and its sampler (binding 1), in the
+/// pipelines of [`BrushShader::GradientTexture`] and [`BrushShader::Image`].
+pub const BRUSH_TEXTURE_GROUP: u32 = 2;
 /// The binding (in group 0 of the resolve's own layout) of the resolved colour `fs_resolve` reads.
 pub const RESOLVED_BINDING: u32 = 1;
+
+/// The fragment entry point of the draws of a brush shader.
+pub fn fragment_entry(shader: BrushShader) -> &'static str {
+    match shader {
+        BrushShader::Solid => FRAGMENT_ENTRY,
+        BrushShader::Gradient => GRADIENT_FRAGMENT_ENTRY,
+        BrushShader::GradientTexture => GRADIENT_TEXTURE_FRAGMENT_ENTRY,
+        BrushShader::Image => IMAGE_FRAGMENT_ENTRY,
+    }
+}
+
+/// Whether the draws of a brush shader sample a texture (and bind [`BRUSH_TEXTURE_GROUP`]).
+pub fn samples_texture(shader: BrushShader) -> bool {
+    matches!(shader, BrushShader::GradientTexture | BrushShader::Image)
+}
 
 /// The bytes of one interleaved vertex: the position (`vec3<f32>`, location 0), the normal
 /// (`vec3<f32>`, location 1) and the texture coordinate (`vec2<f32>`, location 2).

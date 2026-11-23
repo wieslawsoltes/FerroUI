@@ -92,6 +92,44 @@ fn pushed_states_are_popped_in_reverse_order_on_dispose() {
     );
 }
 
+/// The stack of a context holds its first states in the context and the
+/// ones past them on the heap: the order of the pops is the same on both
+/// sides of that border (desktop-performance.md, 9.30).
+#[test]
+fn more_states_than_the_context_stores_in_itself_pop_in_reverse_order() {
+    const DEPTH: usize = 40;
+    let log = DrawingLog::new();
+    let mut platform_impl = quiet(&log);
+    let mut core = PlatformDrawingContext::borrowed(&mut platform_impl);
+    let mut context = DrawingContext::new(&mut core);
+    let mut states = Vec::new();
+    let mut expected = Vec::new();
+    for level in 0..DEPTH {
+        if level % 2 == 0 {
+            states.push(context.push_opacity(0.5));
+            expected.push("PushOpacity 0.5");
+        } else {
+            states.push(context.push_clip(Rect::new(0.0, 0.0, 10.0, 10.0)));
+            expected.push("PushClip 0, 0, 10, 10");
+        }
+    }
+    // Half of them are popped by hand, across the border, the rest by the
+    // disposal.
+    for level in (DEPTH / 4..DEPTH).rev() {
+        context.pop(states.pop().expect("a state per level"));
+        expected.push(if level % 2 == 0 { "PopOpacity" } else { "PopClip" });
+    }
+    let state = context.push_opacity(0.5);
+    expected.push("PushOpacity 0.5");
+    context.pop(state);
+    expected.push("PopOpacity");
+    context.dispose();
+    for level in (0..DEPTH / 4).rev() {
+        expected.push(if level % 2 == 0 { "PopOpacity" } else { "PopClip" });
+    }
+    assert_eq!(log.entries(), expected);
+}
+
 #[test]
 fn borrowed_core_is_not_disposed_and_owned_core_is() {
     let log = DrawingLog::new();
@@ -513,9 +551,12 @@ fn drawing_image_clips_to_the_destination_and_maps_the_source_onto_it() {
         context.draw_image(&*handle, Rect::new(100.0, 100.0, 60.0, 80.0));
         context.dispose();
     }
-    // The drawing's bounds origin is moved to the destination origin, then
-    // everything is scaled by destination size / source size.
-    let transform = Matrix::create_translation(100.0 - 10.0, 100.0 - 20.0) * Matrix::create_scale(2.0, 2.0);
+    // Scale relative to the source origin, then place it in the destination.
+    // The destination translation must not itself be scaled.
+    let transform = Matrix::create_translation(-10.0, -20.0) * Matrix::create_scale(2.0, 2.0)
+        * Matrix::create_translation(100.0, 100.0);
+    assert_eq!(transform.transform(Point::new(10.0, 20.0)), Point::new(100.0, 100.0));
+    assert_eq!(transform.transform(Point::new(40.0, 60.0)), Point::new(160.0, 180.0));
     assert_eq!(
         log.entries(),
         [
@@ -638,9 +679,7 @@ fn render_target_bitmap_renders_a_visual_and_disposes_the_platform_context() {
         [
             "Clear Transparent",
             "PushClip 0, 0, 100, 50",
-            "PushOpacity 1",
             "DrawRectangle Red none 0, 0, 100, 50 shadows=0",
-            "PopOpacity",
             "PopClip",
             "Dispose"
         ]
@@ -875,8 +914,8 @@ fn immediate_renderer_pushes_the_text_options_of_a_visual_first() {
         log.entries().into_iter().filter(|e| e.contains("Options") || e.contains("Opacity")).collect()
     };
 
-    // Default text options are not pushed.
-    assert_eq!(render(&root), ["PushOpacity 1", "PushOpacity 1", "PopOpacity", "PopOpacity"]);
+    // Default text options and fully opaque scopes need no platform state.
+    assert!(render(&root).is_empty());
 
     TextOptions::set_text_rendering_mode(&child, TextRenderingMode::Alias);
     crate::media::RenderOptions::set_edge_mode(&child, crate::media::EdgeMode::Aliased);
@@ -884,16 +923,17 @@ fn immediate_renderer_pushes_the_text_options_of_a_visual_first() {
     assert_eq!(
         render(&root),
         [
-            "PushOpacity 1",
             "PushTextOptions Alias Unspecified Unspecified",
             "PushRenderOptions",
-            "PushOpacity 1",
-            "PopOpacity",
             "PopRenderOptions",
             "PopTextOptions",
-            "PopOpacity",
         ]
     );
+    child.set_opacity(0.5);
+    assert_eq!(render(&root), [
+        "PushTextOptions Alias Unspecified Unspecified", "PushRenderOptions",
+        "PushOpacity 0.5", "PopOpacity", "PopRenderOptions", "PopTextOptions",
+    ]);
 }
 
 #[test]

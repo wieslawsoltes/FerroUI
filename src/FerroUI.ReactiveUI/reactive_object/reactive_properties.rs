@@ -96,7 +96,7 @@ macro_rules! reactive_properties {
             $($fields)*
         }
 
-        $crate::__private::paste! {
+        $crate::__private::ferro_idents! {
             impl $name {
                 $(
                     #[allow(dead_code)]

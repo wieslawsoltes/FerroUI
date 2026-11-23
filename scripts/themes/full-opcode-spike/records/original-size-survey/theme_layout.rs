@@ -1,0 +1,10 @@
+use ferroui_markup_xaml::xaml_il::runtime::compiled::*;
+#[no_mangle] pub static SZ_StyleMember: u64 = std::mem::size_of::<StyleMember>() as u64;
+#[no_mangle] pub static SZ_ThemeSetter: u64 = std::mem::size_of::<ThemeSetter>() as u64;
+#[no_mangle] pub static SZ_ThemeValue: u64 = std::mem::size_of::<ThemeValue>() as u64;
+#[no_mangle] pub static SZ_SelectorStep: u64 = std::mem::size_of::<SelectorStep>() as u64;
+#[no_mangle] pub static SZ_ResourceAliasRow: u64 = std::mem::size_of::<ResourceAliasRow>() as u64;
+#[no_mangle] pub static SZ_LiteralBrushRow: u64 = std::mem::size_of::<LiteralBrushRow>() as u64;
+#[no_mangle] pub static SZ_DynamicBrushRow: u64 = std::mem::size_of::<DynamicBrushRow>() as u64;
+#[no_mangle] pub static SZ_StaticBrushRow: u64 = std::mem::size_of::<StaticBrushRow>() as u64;
+#[no_mangle] pub static SZ_TemplateBindingRow: u64 = std::mem::size_of::<TemplateBindingRow>() as u64;

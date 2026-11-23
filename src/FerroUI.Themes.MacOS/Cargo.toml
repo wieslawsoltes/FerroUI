@@ -29,6 +29,8 @@ path = "lib.rs"
 # members, which exist with this feature (docs/porting/xaml-compiler/HANDOVER.md, section 7, "Cost").
 ferroui-base = { workspace = true, features = ["markup-functions"] }
 ferroui-controls = { workspace = true }
+ferroui-media-video-controls.workspace = true
+ferroui-media-camera-controls.workspace = true
 # The managed dialogs, whose control themes are part of the theme (as for the Fluent theme).
 ferroui-dialogs = { workspace = true }
 ferroui-markup-xaml = { workspace = true }

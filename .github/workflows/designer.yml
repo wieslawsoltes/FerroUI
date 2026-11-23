@@ -2,29 +2,23 @@ name: Visual designer
 
 # The designer crates of #345. The portable job tests the engines on every platform; the native job
 # runs the studio's tests with MCP and the render-smoke suites, which draw with Vello and the WinUI
-# theme, so it also runs when the framework crates the studio is built on change. The schema of
-# the language service is checked by the source conventions of ci.yml.
+# theme. The schema of the language service is checked by the source conventions of ci.yml.
+#
+# A pull request runs it when it changes the designer itself (docs/ci.md). A change of the
+# framework crates the studio is built on (ferroui-base, the controls, the WinUI theme, the markup,
+# Vello, MCP, hot reload) does not: the Linux job of ci.yml tests the designer crates with every
+# change of them, and the nightly run of main runs this workflow.
 on:
   pull_request:
     paths:
       - 'src/FerroUI.Designer*/**'
       - 'docs/designer/samples/**'
       - 'samples/DesignerStudio/**'
-      - 'src/FerroUI.Mcp/**'
-      - 'src/FerroUI.HotReload/**'
-      - 'src/FerroUI.Inspect/**'
-      - 'src/FerroUI.Base/**'
-      - 'src/FerroUI.Controls/**'
-      - 'src/FerroUI.Controls.ColorPicker/**'
-      - 'src/TreeDataGrid/**'
-      - 'src/FerroUI.Themes.WinUI/**'
-      - 'src/Markup/FerroUI.Markup.Xaml/**'
-      - 'src/Markup/FerroUI.Markup.Xaml.Loader/**'
-      - 'external/XamlX/**'
-      - 'src/Vello/**'
       - 'Cargo.toml'
       - 'Cargo.lock'
       - '.github/workflows/designer.yml'
+  schedule:
+    - cron: '5 4 * * *'
   workflow_dispatch:
 
 concurrency:

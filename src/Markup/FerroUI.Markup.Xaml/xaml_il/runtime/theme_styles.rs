@@ -30,8 +30,8 @@ use ferroui_base::data::{BindingBase, BindingPriority};
 use ferroui_base::metadata::{MarkupType, MarkupTyped, MarkupValue};
 use ferroui_base::styling::{ControlTheme, Selector, Selectors, Setter, SetterBase, Style, StyleBase};
 use ferroui_base::{
-    BoxedValue, CornerRadius, FerroObject, FerroProperty, PropertyValue, Ref, StaticType, StyledProperty, Thickness, TypeInfo,
-    UnsetValueType,
+    BoxedValue, CornerRadius, FerroObject, FerroProperty, Ref, StaticType, StyledProperty, Thickness,
+    TypeIdentity, TypeInfo, UnsetValueType,
 };
 
 use super::compiled::{
@@ -72,10 +72,11 @@ pub enum SelectorStep {
     Child,
     /// `Selectors::descendant(previous)` (a space).
     Descendant,
-    /// `Selectors::of_type_info(previous, type)`: exactly the type.
-    OfType(&'static TypeInfo),
-    /// `Selectors::is_type_info(previous, type)` (`:is(Type)`): the type or a derived one.
-    Is(&'static TypeInfo),
+    /// `Selectors::of_type_identity(previous, identity)`: exactly the class.
+    OfType(&'static TypeIdentity),
+    /// `Selectors::is_type_identity(previous, identity)` (`:is(Type)`): the class or a derived
+    /// one.
+    Is(&'static TypeIdentity),
     /// `Selectors::nth_child(previous, step, offset)`.
     NthChild(i32, i32),
     /// `Selectors::nth_last_child(previous, step, offset)`.
@@ -94,35 +95,45 @@ pub enum SelectorStep {
 /// built, in order; `None` for an empty chain (generated code writes no empty chain).
 #[inline(never)]
 pub fn build_selector(steps: &[SelectorStep]) -> Option<Selector> {
-    let mut current: Option<Selector> = None;
-    for step in steps {
-        let next = match *step {
-            SelectorStep::Nesting => Selectors::nesting(current.take()),
-            SelectorStep::Class(name) => Selectors::class(current.take(), name),
-            SelectorStep::Name(name) => Selectors::name(current.take(), name),
-            SelectorStep::Template => Selectors::template(current.take()),
-            SelectorStep::Child => Selectors::child(current.take()),
-            SelectorStep::Descendant => Selectors::descendant(current.take()),
-            SelectorStep::OfType(type_) => Selectors::of_type_info(current.take(), type_),
-            SelectorStep::Is(type_) => Selectors::is_type_info(current.take(), type_),
-            SelectorStep::NthChild(step, offset) => Selectors::nth_child(current.take(), step, offset),
-            SelectorStep::NthLastChild(step, offset) => Selectors::nth_last_child(current.take(), step, offset),
-            SelectorStep::Not { argument } => {
-                let Some(argument) = build_selector(argument) else { continue };
-                Selectors::not(current.take(), argument)
-            }
-            SelectorStep::Or { alternatives } => {
-                Selectors::or(alternatives.iter().filter_map(|alternative| build_selector(alternative)).collect::<Vec<_>>())
-            }
-            SelectorStep::PropertyEquals { property, value } => {
-                let property = property();
-                Selectors::property_equals_untyped(current.take(), property, value())
-            }
-        };
-        current = Some(next);
-    }
-    current
+    steps.iter().fold(None, selector_step)
 }
+
+fn selector_step(current: Option<Selector>, step: &SelectorStep) -> Option<Selector> {
+    match *step {
+        SelectorStep::Not { argument } => match build_selector(argument) {
+            Some(argument) => Some(Selectors::not(current, argument)),
+            None => current,
+        },
+        SelectorStep::Or { alternatives } => Some(Selectors::or(alternatives.iter().filter_map(|steps| build_selector(steps)))),
+        _ => Some(selector_leaf(current, step)),
+    }
+}
+
+/// Both representations call the same leaf operations. A bytecode-only build handles compound
+/// selectors with its operand stack and has no dependency on the native slice interpreter.
+fn selector_leaf(current: Option<Selector>, step: &SelectorStep) -> Selector {
+    match *step {
+        SelectorStep::Nesting => Selectors::nesting(current),
+        SelectorStep::Class(name) => Selectors::class(current, name),
+        SelectorStep::Name(name) => Selectors::name(current, name),
+        SelectorStep::Template => Selectors::template(current),
+        SelectorStep::Child => Selectors::child(current),
+        SelectorStep::Descendant => Selectors::descendant(current),
+        SelectorStep::OfType(identity) => Selectors::of_type_identity(current, identity),
+        SelectorStep::Is(identity) => Selectors::is_type_identity(current, identity),
+        SelectorStep::NthChild(step, offset) => Selectors::nth_child(current, step, offset),
+        SelectorStep::NthLastChild(step, offset) => Selectors::nth_last_child(current, step, offset),
+        SelectorStep::PropertyEquals { property, value } => {
+            let property = property();
+            Selectors::property_equals_untyped(current, property, value())
+        }
+        SelectorStep::Not { .. } | SelectorStep::Or { .. } => unreachable!("compound selector has an operand chain"),
+    }
+}
+
+#[path = "theme_style_program.rs"]
+mod program;
+pub use program::{selector_operand, SelectorImports, SelectorProperty, TypedSelectorProgram, TypedStyleImports, TypedStyleProgram};
 
 // --- control themes -----------------------------------------------------------------------
 
@@ -295,6 +306,7 @@ fn add_member(context: &Rc<XamlIlContext>, style: &Ref<StyleBase>, member: &Styl
             }
             if let Some(steps) = selector {
                 Style::__markup_set_Selector(&nested, build_selector(steps));
+                nested.enable_selector_index();
             }
             for member in members.iter() {
                 add_member(context, nested.upcast_ref::<StyleBase>(), member)?;
@@ -464,7 +476,7 @@ fn untyped_resource_choice(
 /// its errors. The typed setter sets the local value, or the value at `priority` when generated
 /// code set it with a priority (in a template). The choice is one non-generic function; this one
 /// is instantiated once per property value type.
-pub fn assign_resource_value<T: PropertyValue>(
+pub fn assign_resource_value<T: ferroui_base::StyledValue>(
     target: &Ref<FerroObject>,
     property: &'static StyledProperty<T>,
     value: MarkupValue,

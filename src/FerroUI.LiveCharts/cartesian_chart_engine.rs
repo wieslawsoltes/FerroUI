@@ -4,9 +4,10 @@
 use crate::axis::{format_number, Axis, AxisPosition, AxisScale, CARTESIAN_LABELS_PADDING};
 use crate::heat_functions::HeatFunctions;
 use crate::kernel::Coordinate;
+use crate::labelers::ChartPointFormatter;
 use crate::measure::{AxisOrientation, Bounds};
 use crate::scene::*;
-use crate::series::{Series, SeriesKind};
+use crate::series::{DataLabelsPosition, Series, SeriesKind, DATA_LABELS_PADDING};
 use ferroui_base::{media::Color, Point, Rect, Size};
 use std::collections::BTreeMap;
 
@@ -53,6 +54,28 @@ impl Default for CartesianOptions {
     }
 }
 
+/// The properties of a series of a Cartesian chart that [`Series`] does not carry, in the order of
+/// the series ([`CartesianChartEngine::measure_with_series_options`]). It is `non_exhaustive`:
+/// start from `CartesianSeriesOptions::default()` and set the fields.
+#[derive(Clone, Debug, Default, PartialEq)]
+#[non_exhaustive]
+pub struct CartesianSeriesOptions {
+    /// `DataLabelsPosition` of the series; `None` is the default of the family (`Middle` for a
+    /// heat series, the only family that places its labels by it).
+    pub data_labels_position: Option<DataLabelsPosition>,
+    /// `GeometrySvg`: the SVG path data drawn in each cell of a heat series, each marker of a line
+    /// or stacked area series, each scatter point and each bar, fitted to the visual as the source's
+    /// `VariableSVGPathGeometry`; `None` draws the native geometry. Path data the parser rejects
+    /// is an error, where the source throws.
+    pub geometry_svg: Option<String>,
+    /// `YToolTipLabelFormatter`: the text of the value of a point in its tooltip; `None` is the
+    /// label of the value axis ([`tool_tip_texts`]).
+    pub y_tool_tip_label_formatter: Option<ChartPointFormatter>,
+    /// `XToolTipLabelFormatter`: the header of the tooltip of a point; `None` is the label of
+    /// the category axis when it has labels or a labeler of its own, else no header.
+    pub x_tool_tip_label_formatter: Option<ChartPointFormatter>,
+}
+
 /// Calculated axes can also drive crosshairs and zoom/pan without reinterpreting pixels.
 #[derive(Clone, Debug, PartialEq)]
 pub struct CartesianMeasurement {
@@ -71,6 +94,44 @@ pub struct CartesianSeriesBounds {
 
 pub struct CartesianChartEngine;
 impl CartesianChartEngine {
+    /// The scene the first draw of a chart starts from, for the visuals the source seeds away
+    /// from their place: the bars of a financial or OHLC series collapsed at their open (the
+    /// `CoreFinancialSeries` visual starts with its high, close and low at the open and grows to
+    /// them, `OhlcSeriesAnimationTests`); everything else of `scene` is in place. `scene` is the
+    /// measured scene of `series` with the Y scales of its measurement.
+    pub fn first_draw_seed(scene: &Scene, series: &[Series], y_scales: &[AxisScale]) -> Scene {
+        let mut seed = scene.clone();
+        for primitive in &mut seed.primitives {
+            let Some(id) = primitive.id else {
+                continue;
+            };
+            let Some(s) = series.get(id.series) else {
+                continue;
+            };
+            if !matches!(s.kind, SeriesKind::Financial | SeriesKind::Ohlc) {
+                continue;
+            }
+            let (Some(c), Some(scale)) = (s.values.get(id.point), y_scales.get(s.y_axis)) else {
+                continue;
+            };
+            let open = scale.to_pixels(c.tertiary_value);
+            if !open.is_finite() {
+                continue;
+            }
+            match &mut primitive.geometry {
+                Geometry::Line { start, end } => {
+                    start.y = open;
+                    end.y = open;
+                }
+                Geometry::Rectangle { rect, .. } => {
+                    rect.y = open;
+                    rect.height = 0.0;
+                }
+                _ => {}
+            }
+        }
+        seed
+    }
     pub fn measure(
         size: Size,
         series: &[Series],
@@ -97,7 +158,28 @@ impl CartesianChartEngine {
         x_axes: &[Axis],
         y_axes: &[Axis],
         options: &CartesianOptions,
+        measure_text: impl FnMut(&str, f64) -> Size,
+    ) -> Result<CartesianMeasurement, ChartError> {
+        Self::measure_with_series_options(
+            size,
+            series,
+            x_axes,
+            y_axes,
+            options,
+            measure_text,
+            &[],
+        )
+    }
+    /// [`Self::measure_with_axes_and_labels`] with the options of the series, in their order; a
+    /// series without an entry takes the defaults.
+    pub fn measure_with_series_options(
+        size: Size,
+        series: &[Series],
+        x_axes: &[Axis],
+        y_axes: &[Axis],
+        options: &CartesianOptions,
         mut measure_text: impl FnMut(&str, f64) -> Size,
+        series_options: &[CartesianSeriesOptions],
     ) -> Result<CartesianMeasurement, ChartError> {
         validate_size(size)?;
         let defaults = [Axis::default()];
@@ -494,7 +576,26 @@ impl CartesianChartEngine {
                     draw_bars(&mut scene, si, s, series, points, xs, ys, x_axes, y_axes)
                 }
                 SeriesKind::Scatter => draw_scatter(&mut scene, si, s, points, xs, ys),
-                SeriesKind::Heat => draw_heat(&mut scene, si, s, points, xs, ys, x_axes, y_axes)?,
+                SeriesKind::Heat => draw_heat(
+                    &mut scene,
+                    HeatDraw {
+                        index: si,
+                        series: s,
+                        points,
+                        label_position: series_options
+                            .get(si)
+                            .and_then(|o| o.data_labels_position)
+                            .unwrap_or(DataLabelsPosition::Middle),
+                        geometry_svg: series_options
+                            .get(si)
+                            .and_then(|o| o.geometry_svg.as_deref()),
+                    },
+                    xs,
+                    ys,
+                    x_axes,
+                    y_axes,
+                    &mut measure_text,
+                )?,
                 SeriesKind::Financial => draw_financial(&mut scene, si, s, points, xs, ys, x_axes),
                 SeriesKind::Ohlc => draw_ohlc(&mut scene, si, s, points, xs, ys, x_axes),
                 SeriesKind::Box => draw_box(&mut scene, si, s, series, points, xs, ys, x_axes),
@@ -510,6 +611,28 @@ impl CartesianChartEngine {
                     ));
                 }
             }
+        }
+        draw_svg_geometries(&mut scene, series, series_options)?;
+        // The tooltip text of each point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText`).
+        for hit in &mut scene.hits {
+            let Some(s) = series.get(hit.id.series) else {
+                continue;
+            };
+            let (Some(c), Some(x), Some(y)) = (
+                s.values.get(hit.id.point),
+                x_axes.get(s.x_axis),
+                y_axes.get(s.y_axis),
+            ) else {
+                continue;
+            };
+            let (header, value) = tool_tip_texts(s, c, x, y, series_options.get(hit.id.series));
+            // The native tooltip writes a point on one line: the name of the series, the header
+            // and the value, each left out when empty.
+            hit.label = [s.name.as_str(), header.as_str(), value.as_str()]
+                .into_iter()
+                .filter(|part| !part.is_empty())
+                .collect::<Vec<_>>()
+                .join(": ");
         }
         Ok(CartesianMeasurement {
             scene,
@@ -1090,30 +1213,16 @@ fn append_hit(
             text
         ),
     });
-    if s.data_labels {
-        // A heat cell centres its label (the source's `DataLabelsPosition.Middle`) and labels
-        // the primary value, as the default `DataLabelsFormatter` of a source series.
-        let (origin, anchor, text) = if s.kind == SeriesKind::Heat {
-            (
-                Point::new(center.x, center.y - s.data_labels_size * 0.6),
-                TextAnchor::Center,
-                format_number(p.coordinate.primary_value),
-            )
-        } else {
-            (
-                Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
-                TextAnchor::Start,
-                text,
-            )
-        };
+    // A heat series places its labels in its cells (`draw_heat`).
+    if s.data_labels && s.kind != SeriesKind::Heat {
         scene.primitives.push(
             Primitive::new(
                 Geometry::Text {
-                    origin,
+                    origin: Point::new(center.x + 4.0, center.y - s.data_labels_size - 4.0),
                     text,
                     size: s.data_labels_size,
                     rotation: 0.0,
-                    anchor,
+                    anchor: TextAnchor::Start,
                 },
                 PaintStyle::fill(s.data_labels_color.unwrap_or_else(|| s.color(si))),
             )
@@ -1124,6 +1233,116 @@ fn append_hit(
             }),
         );
     }
+}
+
+/// `GeometrySvg` of the line, area, scatter and bar series (the source's series of
+/// `VariableSVGPathGeometry`): the path data is read once and drawn in place of the marker of
+/// each point of a line or stacked area series and each scatter point, and of each bar (a rounded bar
+/// loses its corners, as the source's path replaces the geometry), fitted to the visual as
+/// `Svg.Draw`. A heat series draws its own cells (`draw_heat`); the other families have no SVG
+/// geometry in the source. Path data the parser rejects is an error.
+fn draw_svg_geometries(
+    scene: &mut Scene,
+    series: &[Series],
+    series_options: &[CartesianSeriesOptions],
+) -> Result<(), ChartError> {
+    for (si, s) in series.iter().enumerate().filter(|(_, s)| s.visible) {
+        // `CoreLineSeries` (and the stacked areas over it), `CoreScatterSeries` and `BarSeries`.
+        let markers = matches!(
+            s.kind,
+            SeriesKind::Line | SeriesKind::Area | SeriesKind::StackedArea | SeriesKind::Scatter
+        );
+        let bars = matches!(
+            s.kind,
+            SeriesKind::Column
+                | SeriesKind::Row
+                | SeriesKind::StackedColumn
+                | SeriesKind::StackedRow
+                | SeriesKind::RangeColumn
+                | SeriesKind::RangeRow
+        );
+        if !markers && !bars {
+            continue;
+        }
+        let Some(data) = series_options.get(si).and_then(|o| o.geometry_svg.as_deref()) else {
+            continue;
+        };
+        let commands = crate::svg_path::parse(data)?;
+        let bounds = crate::svg_path::bounds(&commands);
+        for primitive in &mut scene.primitives {
+            if primitive.id.map(|id| id.series) != Some(si) {
+                continue;
+            }
+            let rect = match primitive.geometry {
+                Geometry::Ellipse(rect) if markers => rect,
+                Geometry::Rectangle { rect, .. } if !markers => rect,
+                _ => continue,
+            };
+            primitive.geometry = Geometry::Path(crate::svg_path::fit(&commands, bounds, rect));
+        }
+    }
+    Ok(())
+}
+
+/// The header (`GetSecondaryToolTipText`) and the value (`GetPrimaryToolTipText`) of the tooltip
+/// of a point of a Cartesian series; an empty header is none (`IgnoreToolTipLabel`).
+///
+/// The value is the text of `YToolTipLabelFormatter`, else the label of the value axis (the Y
+/// axis, the X axis of a row series): `<low> → <high>` for a range series (`CoreRangeColumnSeries`,
+/// `CoreRangeRowSeries`, `CoreRangeLineSeries`), the open, high, low and close of a financial
+/// point and the five values of a box, each through the axis, and the weight of a heat cell. The
+/// header is the text of `XToolTipLabelFormatter`, else the label of the category axis when it has
+/// labels or a labeler of its own (`CartesianSeries`), the labels alone for a row series
+/// (`CoreRangeRowSeries`); without them there is no header (`IgnoreToolTipLabel`).
+///
+/// The source writes the value of every series through the Y axis and the header of a row series
+/// through the X axis, which labels the length of a bar by the categories; the native text takes
+/// the value axis of a row as its range rows do. A financial, box or heat point of the source
+/// shows its primary value alone; the native text keeps every value.
+pub fn tool_tip_texts(
+    s: &Series,
+    c: &Coordinate,
+    x: &Axis,
+    y: &Axis,
+    options: Option<&CartesianSeriesOptions>,
+) -> (String, String) {
+    let (category_axis, value_axis) = if s.kind.is_row() { (y, x) } else { (x, y) };
+    let value = |v: f64| value_axis.label(v);
+    let primary = match options.and_then(|o| o.y_tool_tip_label_formatter.as_ref()) {
+        Some(formatter) => formatter.format(c),
+        None => match s.kind {
+            SeriesKind::RangeColumn | SeriesKind::RangeRow | SeriesKind::RangeLine => {
+                format!("{} → {}", value(c.tertiary_value), value(c.primary_value))
+            }
+            SeriesKind::Financial | SeriesKind::Ohlc => format!(
+                "O {} H {} L {} C {}",
+                value(c.tertiary_value),
+                value(c.primary_value),
+                value(c.quinary_value),
+                value(c.quaternary_value)
+            ),
+            SeriesKind::Box => format!(
+                "Min {} Q1 {} Median {} Q3 {} Max {}",
+                value(c.quinary_value),
+                value(c.quaternary_value),
+                value(c.senary_value),
+                value(c.tertiary_value),
+                value(c.primary_value)
+            ),
+            SeriesKind::Heat => format_number(c.tertiary_value),
+            _ => value(c.primary_value),
+        },
+    };
+    let header = match options.and_then(|o| o.x_tool_tip_label_formatter.as_ref()) {
+        Some(formatter) => formatter.format(c),
+        None if !category_axis.labels.is_empty()
+            || (!s.kind.is_row() && category_axis.labeler.is_some()) =>
+        {
+            category_axis.label(c.secondary_value)
+        }
+        None => String::new(),
+    };
+    (header, primary)
 }
 
 pub(crate) fn line_path(points: &[Point], smoothness: f64, step: bool) -> Vec<PathCommand> {
@@ -1568,6 +1787,58 @@ fn draw_scatter(
         draw_errors(scene, si, s, p, x, y, 0.0);
     }
 }
+/// A heat series being drawn: its index, its points and where its labels go.
+struct HeatDraw<'a> {
+    index: usize,
+    series: &'a Series,
+    points: &'a [Option<MeasuredPoint>],
+    label_position: DataLabelsPosition,
+    geometry_svg: Option<&'a str>,
+}
+impl Series {
+    /// The bounds of the weights of a heat series (`WeightBounds` of `CoreHeatSeries`): the
+    /// tertiary values of its valid points, with `min_value` and `max_value` in place of their
+    /// extremes when they are set.
+    pub fn weight_bounds(&self) -> Bounds {
+        let mut weights = Bounds::default();
+        for c in self.values.iter().filter(|c| valid_point(self, c)) {
+            weights.append_value(c.tertiary_value);
+        }
+        if let Some(min) = self.min_value {
+            weights.min = min;
+        }
+        if let Some(max) = self.max_value {
+            weights.max = max;
+        }
+        weights
+    }
+}
+/// `CartesianSeries.GetLabelPosition` for a series whose primary axis is vertical (the heat
+/// series): the centre of a label of `label` size about the rectangle of its point.
+fn data_label_center(
+    rect: Rect,
+    label: Size,
+    position: DataLabelsPosition,
+    greater_than_pivot: bool,
+) -> Point {
+    let middle_x = rect.x + rect.width * 0.5;
+    let middle_y = rect.y + rect.height * 0.5;
+    let top = Point::new(middle_x, rect.y - label.height * 0.5);
+    let bottom = Point::new(middle_x, rect.y + rect.height + label.height * 0.5);
+    match position {
+        DataLabelsPosition::Middle => Point::new(middle_x, middle_y),
+        DataLabelsPosition::Top => top,
+        DataLabelsPosition::Bottom => bottom,
+        DataLabelsPosition::Left => Point::new(rect.x - label.width * 0.5, middle_y),
+        DataLabelsPosition::Right => {
+            Point::new(rect.x + rect.width + label.width * 0.5, middle_y)
+        }
+        DataLabelsPosition::End if greater_than_pivot => top,
+        DataLabelsPosition::End => bottom,
+        DataLabelsPosition::Start if greater_than_pivot => bottom,
+        DataLabelsPosition::Start => top,
+    }
+}
 /// `CoreHeatSeries`: each cell spans the smallest step of the data on each axis (issue 1511;
 /// the axis unit width without one), inset by `PointPadding`, in the colour of its weight
 /// (`HeatFunctions.InterpolateColor`) between the weight bounds (`MinValue` and `MaxValue`, else
@@ -1576,15 +1847,30 @@ fn draw_scatter(
 /// count, is an error where the source throws.
 fn draw_heat(
     scene: &mut Scene,
-    si: usize,
-    s: &Series,
-    points: &[Option<MeasuredPoint>],
+    heat: HeatDraw<'_>,
     x: AxisScale,
     y: AxisScale,
     xa: &[Axis],
     ya: &[Axis],
+    measure_text: &mut dyn FnMut(&str, f64) -> Size,
 ) -> Result<(), ChartError> {
+    let HeatDraw {
+        index: si,
+        series: s,
+        points,
+        label_position,
+        geometry_svg,
+    } = heat;
     let stops = HeatFunctions::build_color_stops(&s.heat_map, s.color_stops.as_deref())?;
+    // `VariableSVGPathGeometry`: the path is read once and fitted to every cell.
+    let svg = match geometry_svg {
+        Some(data) => {
+            let commands = crate::svg_path::parse(data)?;
+            let bounds = crate::svg_path::bounds(&commands);
+            Some((commands, bounds))
+        }
+        None => None,
+    };
     let dx = minimum_delta(
         points
             .iter()
@@ -1594,16 +1880,7 @@ fn draw_heat(
     .unwrap_or(xa[s.x_axis].unit_width);
     let dy = minimum_delta(points.iter().flatten().map(|p| p.coordinate.primary_value))
         .unwrap_or(ya[s.y_axis].unit_width);
-    let mut weights = Bounds::default();
-    for p in points.iter().flatten() {
-        weights.append_value(p.coordinate.tertiary_value);
-    }
-    if let Some(min) = s.min_value {
-        weights.min = min;
-    }
-    if let Some(max) = s.max_value {
-        weights.max = max;
-    }
+    let weights = s.weight_bounds();
     let padding = s.point_padding;
     for p in points.iter().flatten() {
         let c = p.coordinate;
@@ -1634,7 +1911,12 @@ fn draw_heat(
             HeatFunctions::interpolate_color(c.tertiary_value, &weights, &s.heat_map, &stops);
         scene.primitives.push(
             Primitive::new(
-                Geometry::Rectangle { rect, radius: 0.0 },
+                match &svg {
+                    Some((commands, bounds)) => {
+                        Geometry::Path(crate::svg_path::fit(commands, *bounds, rect))
+                    }
+                    None => Geometry::Rectangle { rect, radius: 0.0 },
+                },
                 PaintStyle {
                     opacity: s.opacity,
                     ..PaintStyle::fill(color)
@@ -1654,6 +1936,36 @@ fn draw_heat(
             HitShape::Rectangle(cell),
             Point::new(cell.x + cell.width * 0.5, cell.y + cell.height * 0.5),
         );
+        if s.data_labels {
+            // The label of the primary value (the default `DataLabelsFormatter` of a source
+            // series), measured with its `DataLabelsPadding` and placed about the inset cell
+            // (`GetLabelPosition` with the rectangle of the visual).
+            let id = PointId {
+                series: si,
+                point: p.index,
+            };
+            let text = format_number(c.primary_value);
+            let measured = measure_text(&text, s.data_labels_size);
+            let label = Size::new(
+                measured.width + DATA_LABELS_PADDING.0 * 2.0,
+                measured.height + DATA_LABELS_PADDING.1 * 2.0,
+            );
+            let center = data_label_center(rect, label, label_position, c.primary_value > s.pivot);
+            scene.primitives.push(
+                Primitive::new(
+                    Geometry::Text {
+                        origin: Point::new(center.x, center.y - measured.height * 0.5),
+                        text,
+                        size: s.data_labels_size,
+                        rotation: 0.0,
+                        anchor: TextAnchor::Center,
+                    },
+                    PaintStyle::fill(s.data_labels_color.unwrap_or_else(|| s.color(si))),
+                )
+                .clipped(scene.plot_bounds)
+                .identified(id),
+            );
+        }
     }
     Ok(())
 }

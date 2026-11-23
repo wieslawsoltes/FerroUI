@@ -240,6 +240,23 @@ fn items_control_peer_reports_no_scrolling_without_a_scroll_provider() {
 }
 
 #[test]
+fn the_peer_of_an_items_control_scrolls_with_the_element_of_a_list_box_only() {
+    let _scope = test_scope();
+    // A list box: the element it scrolls its items with (`ListBox.Scroll`), read from the list box.
+    let (_root, list) = list_box();
+    let peer = create_peer(&list).cast::<ItemsControlAutomationPeer>().expect("an items control peer");
+    assert_eq!(peer.scroller().is_some(), list.scroll().is_some_and(|scroll| scroll.cast::<Control>().is_some()));
+
+    // Another items control has no such element (#612: the peer names the list box by identity).
+    let other = ItemsControl::new();
+    let root = TestRoot::new();
+    root.set_child(other.clone());
+    root.execute_initial_layout_pass();
+    let peer = create_peer(&other).cast::<ItemsControlAutomationPeer>().expect("an items control peer");
+    assert!(peer.scroller().is_none());
+}
+
+#[test]
 fn scroll_viewer_peer_scrolls_its_owner() {
     let _scope = test_scope();
     let content = crate::Border::new();

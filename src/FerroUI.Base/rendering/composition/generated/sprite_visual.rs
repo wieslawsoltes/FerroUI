@@ -21,10 +21,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -70,8 +70,8 @@ pub trait SpriteVisualHooks: CompositionContainerVisualHooks {
 pub struct SpriteVisualProps {
     base: CompositionContainerVisualProps,
     changed_fields_of_sprite_visual: Cell<SpriteVisualChangedFields>,
-    brush: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    shadow: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    brush: OptionCell<Rc<dyn ICompositionObject>>,
+    shadow: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for SpriteVisualProps {
@@ -88,8 +88,8 @@ impl SpriteVisualProps {
         Self {
             base: CompositionContainerVisualProps::new(),
             changed_fields_of_sprite_visual: Cell::new(SpriteVisualChangedFields::empty()),
-            brush: RefCell::new(None),
-            shadow: RefCell::new(None),
+            brush: OptionCell::new(),
+            shadow: OptionCell::new(),
         }
     }
 
@@ -112,24 +112,24 @@ impl SpriteVisualProps {
 
     /// `Brush` (FerroUI overlay).
     pub fn brush(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.brush.borrow().clone()
+        self.brush.get()
     }
 
     /// Sets `Brush` (FerroUI overlay).
     pub fn set_brush(&self, host: &dyn SpriteVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.brush.borrow().clone();
+        let old_value = self.brush.get();
         if old_value.differs(&value) {
             SpriteVisualHooks::validate_brush_change(host, &old_value, &value);
             SpriteVisualHooks::on_brush_changing(host);
             changed = true;
             // Update the backing value
-            *self.brush.borrow_mut() = value.clone();
+            self.brush.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_sprite_visual.set(self.changed_fields_of_sprite_visual.get() | SpriteVisualChangedFields::BRUSH);
             host.register_for_serialization();
         }
-        *self.brush.borrow_mut() = value;
+        self.brush.set(value);
         if changed {
             SpriteVisualHooks::on_brush_changed(host);
         }
@@ -137,24 +137,24 @@ impl SpriteVisualProps {
 
     /// `Shadow` (FerroUI overlay).
     pub fn shadow(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.shadow.borrow().clone()
+        self.shadow.get()
     }
 
     /// Sets `Shadow` (FerroUI overlay).
     pub fn set_shadow(&self, host: &dyn SpriteVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.shadow.borrow().clone();
+        let old_value = self.shadow.get();
         if old_value.differs(&value) {
             SpriteVisualHooks::validate_shadow_change(host, &old_value, &value);
             SpriteVisualHooks::on_shadow_changing(host);
             changed = true;
             // Update the backing value
-            *self.shadow.borrow_mut() = value.clone();
+            self.shadow.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_sprite_visual.set(self.changed_fields_of_sprite_visual.get() | SpriteVisualChangedFields::SHADOW);
             host.register_for_serialization();
         }
-        *self.shadow.borrow_mut() = value;
+        self.shadow.set(value);
         if changed {
             SpriteVisualHooks::on_shadow_changed(host);
         }
@@ -180,10 +180,10 @@ impl SpriteVisualProps {
         let changed = self.changed_fields_of_sprite_visual.get();
         writer.write(changed);
         if changed.contains(SpriteVisualChangedFields::BRUSH) {
-            writer.write_server_object(self.brush.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.brush.get().map(|o| o.server()));
         }
         if changed.contains(SpriteVisualChangedFields::SHADOW) {
-            writer.write_server_object(self.shadow.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.shadow.get().map(|o| o.server()));
         }
         self.changed_fields_of_sprite_visual.set(SpriteVisualChangedFields::empty());
     }
@@ -208,8 +208,8 @@ pub trait ServerSpriteVisualHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerSpriteVisual`.
 pub struct ServerSpriteVisualProps {
-    brush: RefCell<Option<Rc<dyn IServerObject>>>,
-    shadow: RefCell<Option<Rc<dyn IServerObject>>>,
+    brush: OptionCell<Rc<dyn IServerObject>>,
+    shadow: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerSpriteVisualProps {
@@ -223,8 +223,8 @@ impl ServerSpriteVisualProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            brush: RefCell::new(None),
-            shadow: RefCell::new(None),
+            brush: OptionCell::new(),
+            shadow: OptionCell::new(),
         }
     }
 
@@ -244,8 +244,8 @@ impl ServerSpriteVisualProps {
             CompositionProperty::register::<ServerSpriteVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Brush",
                 "ServerSpriteVisual",
-                |obj| props_of::<ServerSpriteVisualProps>(obj).brush.borrow().clone(),
-                |obj, v| *props_of::<ServerSpriteVisualProps>(obj).brush.borrow_mut() = v,
+                |obj| props_of::<ServerSpriteVisualProps>(obj).brush.get(),
+                |obj, v| props_of::<ServerSpriteVisualProps>(obj).brush.set(v),
                 None,
                 None,
             )
@@ -254,11 +254,11 @@ impl ServerSpriteVisualProps {
 
     /// `Brush`.
     pub fn brush(&self) -> Option<Rc<dyn IServerObject>> {
-        self.brush.borrow().clone()
+        self.brush.get()
     }
 
     pub fn set_brush(&self, host: &dyn ServerSpriteVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.brush.borrow().clone();
+        let old_value = self.brush.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerSpriteVisualHooks::on_brush_changing(host);
@@ -270,7 +270,7 @@ impl ServerSpriteVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.brush.borrow_mut() = value.clone(),
+                assign: &mut || self.brush.set(value.clone()),
             },
         );
         if changed {
@@ -285,8 +285,8 @@ impl ServerSpriteVisualProps {
             CompositionProperty::register::<ServerSpriteVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Shadow",
                 "ServerSpriteVisual",
-                |obj| props_of::<ServerSpriteVisualProps>(obj).shadow.borrow().clone(),
-                |obj, v| *props_of::<ServerSpriteVisualProps>(obj).shadow.borrow_mut() = v,
+                |obj| props_of::<ServerSpriteVisualProps>(obj).shadow.get(),
+                |obj, v| props_of::<ServerSpriteVisualProps>(obj).shadow.set(v),
                 None,
                 None,
             )
@@ -295,11 +295,11 @@ impl ServerSpriteVisualProps {
 
     /// `Shadow`.
     pub fn shadow(&self) -> Option<Rc<dyn IServerObject>> {
-        self.shadow.borrow().clone()
+        self.shadow.get()
     }
 
     pub fn set_shadow(&self, host: &dyn ServerSpriteVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.shadow.borrow().clone();
+        let old_value = self.shadow.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerSpriteVisualHooks::on_shadow_changing(host);
@@ -311,7 +311,7 @@ impl ServerSpriteVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.shadow.borrow_mut() = value.clone(),
+                assign: &mut || self.shadow.set(value.clone()),
             },
         );
         if changed {

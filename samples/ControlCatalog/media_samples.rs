@@ -19,8 +19,10 @@ use ferroui_controls::{
     WrapPanel,
 };
 use ferroui_media::{MediaError, MediaSubscription};
-use ferroui_media_camera::{CameraCapture, CameraError, CameraFormat, CameraProvider};
-use ferroui_media_camera_controls::{CameraPreview, CameraProviderFactory};
+use ferroui_media_camera::{CameraCapture, CameraError, CameraErrorKind, CameraFormat, CameraProvider};
+use ferroui_media_camera_controls::{
+    CameraCaptureResult, CameraCaptureUI, CameraPreview, CameraProviderFactory, QrPreview,
+};
 use ferroui_media_controls::TextureFrameImporter;
 use ferroui_media_qr::{QrAnalysis, QrAnalysisGate, QrCandidate, QrError};
 use ferroui_media_video::{MediaPlayerProvider, MediaSource};
@@ -55,6 +57,8 @@ pub struct MediaSampleProviders {
     pub qr: Option<Rc<QrRecognizer>>,
 }
 ferroui_base::ferro_thread_local! { static LAST_PAGE: RefCell<Weak<State>> = const { RefCell::new(Weak::new()) }; }
+ferroui_base::ferro_thread_local! { static LAST_CAPTURE: RefCell<Weak<CaptureSmoke>> = const { RefCell::new(Weak::new()) }; }
+ferroui_base::ferro_thread_local! { static CAPTURE_SMOKE: Cell<bool> = const { Cell::new(false) }; }
 ferroui_base::ferro_thread_local! { static PROVIDERS: RefCell<Option<MediaSampleProviders>> = const { RefCell::new(None) }; }
 /// Install on the host UI thread before opening pages. Missing providers are
 /// displayed as unavailable; the offline QR fixture remains usable everywhere.
@@ -73,6 +77,7 @@ struct State {
     budget: FrameBudget,
     video: Ref<MediaPlayerElement>,
     camera: Ref<CameraPreview>,
+    qr_preview: Option<Ref<QrPreview>>,
     status: Ref<TextBlock>,
     photo: Ref<Image>,
     photo_pending: Cell<bool>,
@@ -92,6 +97,9 @@ impl State {
     fn stop(&self) {
         self.epoch.set(self.epoch.get() + 1);
         self.gate.stop();
+        if let Some(preview) = &self.qr_preview {
+            preview.set_detections(&[]);
+        }
         self.qr_source.set(None);
         if let Some(timer) = self.timer.borrow_mut().take() {
             timer.dispose();
@@ -152,7 +160,7 @@ impl State {
             if let Some(s) = weak.upgrade().filter(|s| s.active(epoch)) {
                 match result {
                     Ok(()) => {
-                        s.status("Bundled video ready. Use Play, seek, volume and mute below.")
+                        s.status("Bundled video ready. Use Play to start and More playback controls for additional actions.")
                     }
                     Err(e) => s.status(e.to_string()),
                 }
@@ -214,11 +222,14 @@ impl State {
                     }
                 } else {
                     let mut options = ferroui_media_camera::CameraStartOptions::default();
-                    options.selection.format = Some(CameraFormat {
-                        width: 640,
-                        height: 480,
-                        frames_per_second: 30.,
-                    });
+                    options.enable_analysis = s.mode == Mode::Qr;
+                    if std::env::var("FERROUI_SMOKE_MEDIA_SYNTHETIC_CAMERA").as_deref() != Ok("1") {
+                        options.selection.format = Some(CameraFormat {
+                            width: 640,
+                            height: 480,
+                            frames_per_second: 30.,
+                        });
+                    }
                     s.camera.start(capture, options, importer).await?;
                     if !s.active(epoch) {
                         return Err(cancelled());
@@ -273,12 +284,15 @@ impl State {
                         let result = pending.await;
                         if let Some(s) = weak.upgrade().filter(|s| s.active(epoch)) {
                             match result {
-                                Ok(values) if !values.is_empty() => {
-                                    s.status(format!("Last detected: {}", results_text(&values)))
+                                Ok(values) => {
+                                    if let Some(preview) = &s.qr_preview {
+                                        preview.set_detections(&values);
+                                    }
+                                    if !values.is_empty() {
+                                        s.status(format!("Last detected: {}", results_text(&values)));
+                                    }
                                 }
-                                Ok(_)
-                                | Err(QrError::StaleFrame | QrError::Cancelled | QrError::Busy) => {
-                                }
+                                Err(QrError::StaleFrame | QrError::Cancelled | QrError::Busy) => {}
                                 Err(e) => s.status(format!("QR analysis: {e:?}")),
                             }
                         }
@@ -530,14 +544,20 @@ pub fn camera_page() -> Ref<Page> {
 pub fn qr_page() -> Ref<Page> {
     page(Mode::Qr)
 }
-fn page(mode: Mode) -> Ref<Page> {
+fn page(mode: Mode) -> Ref<Page> { page_named(mode, None) }
+fn page_named(mode: Mode, control_name: Option<&str>) -> Ref<Page> {
     let providers = PROVIDERS.with(|p| p.borrow().clone());
+    let qr_preview = (mode == Mode::Qr).then(QrPreview::new);
+    let camera = qr_preview
+        .as_ref()
+        .map_or_else(CameraPreview::new, |view| view.clone().upcast());
     let state = Rc::new(State {
         mode,
         providers,
         budget: FrameBudget::new(Default::default()),
         video: MediaPlayerElement::new(),
-        camera: CameraPreview::new(),
+        camera,
+        qr_preview,
         status: TextBlock::new(),
         photo: Image::new(),
         photo_pending: Cell::new(false),
@@ -560,7 +580,7 @@ fn page(mode: Mode) -> Ref<Page> {
         Mode::Camera => "Camera",
         Mode::Qr => "QR codes",
     };
-    page.set_header(Some(Rc::new(header.to_owned())));
+    page.set_header(Some(Rc::new(control_name.unwrap_or(header).to_owned())));
     let content = StackPanel::new();
     content.set_spacing(12.);
     content.set_margin(Thickness::uniform(20.));
@@ -568,7 +588,7 @@ fn page(mode: Mode) -> Ref<Page> {
     description.set_text(Some(match mode {
         Mode::Video => "Play the bundled video or open a file/URL. Autoplay is off. Navigating away closes the player.",
         Mode::Camera => "Discover devices without acquiring a camera. Start requests consent; Stop or navigation releases capture. Photos stay in memory.",
-        Mode::Qr => "Decode the bundled two-symbol image offline, or explicitly start live scanning where this host supports it. Results are displayed as text.",
+        Mode::Qr => "Decode the bundled two-symbol image offline, or explicitly start live scanning where this host supports it. Live detections are outlined in the camera preview.",
     }));
     description.set_text_wrapping(TextWrapping::Wrap);
     state.status.set_text_wrapping(TextWrapping::Wrap);
@@ -646,6 +666,10 @@ fn page(mode: Mode) -> Ref<Page> {
                 }
             }));
         content.children().add(&state.video);
+        if let Some(name) = control_name {
+            if name == "MediaTransportControls" { state.video.transport_controls().set_is_compact(true); }
+            content.children().add(transport_options(state.video.transport_controls()));
+        }
         state.status("Choose media, then press Play.");
     } else {
         content.children().add(&actions);
@@ -738,6 +762,77 @@ pub(crate) fn register_types() {
 
 /// Development-only actions used by the desktop's explicitly requested media smoke.
 #[doc(hidden)]
+pub fn smoke_on_frame_presented(
+    callback: impl Fn(&FrameMetadata) + 'static,
+) -> Option<MediaSubscription> {
+    LAST_PAGE.with(|p| {
+        let state = p.borrow().upgrade().filter(|s| s.attached.get())?;
+        Some(state.video.presenter().frame_presented().subscribe(callback))
+    })
+}
+
+#[doc(hidden)]
+pub fn smoke_video_element() -> Option<Ref<MediaPlayerElement>> {
+    LAST_PAGE.with(|page| {
+        page.borrow().upgrade().filter(|page| page.attached.get() && page.mode == Mode::Video)
+            .map(|page| page.video.clone())
+    })
+}
+
+#[doc(hidden)]
+pub fn smoke_load_video_uri(uri: &str) -> bool {
+    LAST_PAGE.with(|page| {
+        let Some(page) = page.borrow().upgrade().filter(|page| page.attached.get() && page.mode == Mode::Video) else {
+            return false;
+        };
+        page.source.set_text(Some(uri));
+        page.load(false);
+        true
+    })
+}
+
+#[doc(hidden)]
+pub fn smoke_transport_item(path: &[&str]) -> bool {
+    use ferroui_controls::{automation::peers::{ButtonAutomationPeer, MenuItemAutomationPeer}, ItemCollection, MenuFlyout, MenuItem};
+    fn find(items: ItemCollection, label: &str) -> Option<Ref<MenuItem>> {
+        (0..items.count()).filter_map(|index| Control::from_boxed(&items.get_at(index)?)?.cast::<MenuItem>())
+            .find(|item| item.header().and_then(|header| header.downcast_ref::<String>().cloned()).as_deref() == Some(label))
+    }
+    let Some(view) = smoke_video_element() else { return false };
+    let transport = view.transport_controls();
+    let part = |name: &str| transport.get_visual_descendants()
+        .find_map(|visual| visual.cast::<Button>().filter(|button| button.name().as_deref() == Some(name)));
+    // WinUI's template has a button for each action (and a menu for the rate and the tracks);
+    // the 0.5.0 template has them in its MediaMore menu.
+    let (button, path) = match path.split_first() {
+        Some((&"Skip back 10 seconds", [])) if part("SkipBackwardButton").is_some() => (part("SkipBackwardButton"), &[][..]),
+        Some((&"Skip forward 30 seconds", [])) if part("SkipForwardButton").is_some() => (part("SkipForwardButton"), &[][..]),
+        Some((&("Zoom to fill" | "Fit video"), [])) if part("ZoomButton").is_some() => (part("ZoomButton"), &[][..]),
+        Some((&"Playback speed", rest)) if part("PlaybackRateButton").is_some() => (part("PlaybackRateButton"), rest),
+        Some((&"Closed captions", rest)) if part("CCSelectionButton").is_some() => (part("CCSelectionButton"), rest),
+        Some((&"Audio tracks", rest)) if part("AudioTracksSelectionButton").is_some() => (part("AudioTracksSelectionButton"), rest),
+        _ => (part("MediaMore"), path),
+    };
+    let Some(button) = button else { return false };
+    if path.is_empty() {
+        return ButtonAutomationPeer::new(&button).invoke().is_ok();
+    }
+    let Some(menu) = button.flyout().and_then(|flyout| flyout.cast::<MenuFlyout>()) else { return false };
+    let result = (|| {
+        ButtonAutomationPeer::new(&button).invoke().ok()?;
+        let (last, parents) = path.split_last()?;
+        let mut items = menu.items();
+        for parent in parents {
+            items = find(items, parent)?.items();
+        }
+        let item = find(items, last)?;
+        MenuItemAutomationPeer::new(&item).invoke().ok()
+    })();
+    menu.hide();
+    result.is_some()
+}
+
+#[doc(hidden)]
 pub fn smoke_action(action: &str) -> bool {
     LAST_PAGE.with(|p| {
         let Some(s) = p.borrow().upgrade().filter(|s| s.attached.get()) else {
@@ -800,4 +895,157 @@ pub fn smoke_snapshot() -> Option<MediaSampleSnapshot> {
             }
         })
     })
+}
+
+#[doc(hidden)]
+pub struct CaptureSmoke {
+    pub control: Ref<CameraCaptureUI>,
+    pub budget: FrameBudget,
+    pub photo: Ref<Image>,
+    pub movie_valid: Cell<bool>,
+    pub error: Cell<Option<CameraErrorKind>>,
+}
+
+#[doc(hidden)]
+pub fn smoke_capture() -> Option<Rc<CaptureSmoke>> {
+    LAST_CAPTURE.with(|p| {
+        p.borrow().upgrade().filter(|s| s.control.is_attached_to_visual_tree())
+    })
+}
+
+#[doc(hidden)]
+pub fn enable_capture_smoke() {
+    CAPTURE_SMOKE.with(|enabled| enabled.set(true));
+}
+
+/// Dedicated control pages reuse the existing video demonstration and its one
+/// player/presenter/transport graph. No additional decoder or polling is created.
+pub fn media_player_element_page() -> Ref<Page> { video_control_page("MediaPlayerElement") }
+pub fn media_player_presenter_page() -> Ref<Page> { video_control_page("MediaPlayerPresenter") }
+pub fn media_transport_controls_page() -> Ref<Page> { video_control_page("MediaTransportControls") }
+fn video_control_page(name: &str) -> Ref<Page> { page_named(Mode::Video, Some(name)) }
+fn transport_options(controls: Ref<ferroui_media_video_controls::MediaTransportControls>) -> Ref<WrapPanel> {
+    let options = WrapPanel::new();
+    for (label, initial, option) in [
+        ("Compact transport", controls.is_compact(), 0),
+        ("Show seek bar", true, 1),
+        ("Show volume", true, 2),
+        ("Show full window", true, 3),
+        ("Show skip actions", true, 4),
+        ("Show zoom", true, 5),
+        ("Show playback speed", true, 6),
+    ] {
+        let check = ferroui_controls::CheckBox::new();
+        check.set_content(Some(Rc::new(label.to_owned())));
+        check.set_is_checked(Some(initial));
+        let weak = controls.downgrade();
+        let weak_check = check.downgrade();
+        check.is_checked_changed(move |_, _| {
+            if let (Some(controls), Some(check)) = (weak.upgrade(), weak_check.upgrade()) {
+                let visible = check.is_checked() == Some(true);
+                match option {
+                    0 => controls.set_is_compact(visible),
+                    1 => controls.set_is_seek_bar_visible(visible),
+                    2 => {
+                        controls.set_is_volume_button_visible(visible);
+                        controls.set_is_volume_slider_visible(visible);
+                    }
+                    3 => controls.set_is_full_window_button_visible(visible),
+                    4 => {
+                        controls.set_is_skip_backward_button_visible(visible);
+                        controls.set_is_skip_forward_button_visible(visible);
+                    }
+                    5 => controls.set_is_zoom_button_visible(visible),
+                    _ => controls.set_is_playback_rate_button_visible(visible),
+                }
+            }
+        });
+        options.children().add(check);
+    }
+    options
+}
+pub fn camera_capture_ui_page() -> Ref<Page> {
+    let page = ContentPage::new(); page.set_header(Some(Rc::new("CameraCaptureUI".to_owned())));
+    let capture = CameraCaptureUI::new();
+    let budget = FrameBudget::new(Default::default());
+    if let Some(providers) = PROVIDERS.with(|slot| slot.borrow().clone()) {
+        let factory_budget = budget.clone();
+        capture.set_provider_factory(
+            Some(Rc::new(move |interop| (providers.camera)(interop, factory_budget.clone()))),
+            budget.clone(),
+        );
+    }
+    let content = StackPanel::new(); content.set_spacing(12.); content.set_margin(Thickness::uniform(20.));
+    let description = TextBlock::new(); description.set_text_wrapping(TextWrapping::Wrap);
+    description.set_text(Some(
+        "Start explicitly to request camera permission. Photos and silent video are owned encoded results. \
+         Recording is enabled only on providers with a native recording profile (60 seconds / 256 MiB at most). \
+         Stop or navigation cancels acquisition and rejects late results.",
+    ));
+    content.children().add(description); content.children().add(&capture);
+    let photo = Image::new(); photo.set_height(200.); photo.set_stretch(Stretch::Uniform);
+    let result = TextBlock::new(); result.set_text_wrapping(TextWrapping::Wrap);
+    let weak_photo = photo.downgrade(); let weak_result = result.downgrade();
+    let subscription = capture.completed().subscribe(move |value| {
+        if let Some(result) = weak_result.upgrade() {
+            match value {
+                CameraCaptureResult::Photo(value) => {
+                    match Bitmap::from_stream(&mut Cursor::new(value.encoded.as_ref())) {
+                        Ok(bitmap) => {
+                            if let Some(photo) = weak_photo.upgrade() {
+                                photo.set_source(Some(Rc::new(bitmap)));
+                            }
+                            result.set_text(Some(&format!(
+                                "{} × {} photo ({:?})",
+                                value.width, value.height, value.origin
+                            )));
+                        }
+                        Err(error) => result.set_text(Some(&error.to_string())),
+                    }
+                }
+                CameraCaptureResult::Video(value) => result.set_text(Some(&format!(
+                    "{} × {} video, {:.2} seconds, {} bytes",
+                    value.width,
+                    value.height,
+                    value.duration.as_secs_f64(),
+                    value.encoded.len()
+                ))),
+            }
+        }
+    });
+    page.detached_from_visual_tree(move |_| { let _ = &subscription; }).detach();
+    if CAPTURE_SMOKE.with(Cell::get) || std::env::var("FERROUI_SMOKE_MEDIA").as_deref() == Ok("1") {
+        let smoke = Rc::new(CaptureSmoke {
+            control: capture.clone(),
+            budget,
+            photo: photo.clone(),
+            movie_valid: Cell::new(false),
+            error: Cell::new(None),
+        });
+        LAST_CAPTURE.with(|last| last.replace(Rc::downgrade(&smoke)));
+        let weak = Rc::downgrade(&smoke);
+        let completed = capture.completed().subscribe(move |result| {
+            if let (Some(smoke), CameraCaptureResult::Video(video)) = (weak.upgrade(), result) {
+                smoke.movie_valid.set(
+                    video.content_type == "video/mp4"
+                        && video.encoded.get(4..8) == Some(b"ftyp")
+                        && video.width > 0
+                        && video.height > 0
+                        && !video.duration.is_zero(),
+                );
+            }
+        });
+        let weak = Rc::downgrade(&smoke);
+        let errors = capture.errors().subscribe(move |error| {
+            if let Some(smoke) = weak.upgrade() {
+                smoke.error.set(Some(error.kind));
+            }
+        });
+        page.detached_from_visual_tree(move |_| {
+            let _ = (&smoke, &completed, &errors);
+        }).detach();
+    }
+    content.children().add(photo); content.children().add(result);
+    page.set_content(Some(Control::boxed(content)));
+    page.upcast()
 }

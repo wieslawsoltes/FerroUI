@@ -3,12 +3,29 @@
 //! Every `unsafe` block of the crate lives here. The wrappers own one
 //! reference to their HarfBuzz object and release it when dropped.
 
+use ferroui_base::media::FontVariation;
 use ferroui_base::utilities::ReadOnlyMemory;
 use harfbuzz_sys as sys;
 use std::ffi::{c_char, c_void};
 use std::os::raw::c_uint;
 
 pub use sys::{hb_feature_t as Feature, hb_glyph_info_t as GlyphInfo, hb_glyph_position_t as GlyphPosition};
+
+/// `HB_BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT` (HarfBuzz 4.0 and later; the generated bindings predate it).
+const BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT: sys::hb_buffer_flags_t = 0x0000_0040;
+/// `HB_GLYPH_FLAG_UNSAFE_TO_BREAK`: cutting the text at the start of the cluster of the glyph and
+/// shaping the two sides apart may give other glyphs.
+pub const GLYPH_FLAG_UNSAFE_TO_BREAK: u32 = 0x0000_0001;
+/// `HB_GLYPH_FLAG_UNSAFE_TO_CONCAT`: changing the text on one side of the start of the cluster of
+/// the glyph may change the shaping of the other side.
+pub const GLYPH_FLAG_UNSAFE_TO_CONCAT: u32 = 0x0000_0002;
+
+/// The flags of a shaped glyph (`hb_glyph_info_get_glyph_flags`): [`GLYPH_FLAG_UNSAFE_TO_BREAK`] and
+/// [`GLYPH_FLAG_UNSAFE_TO_CONCAT`].
+pub fn glyph_flags(info: &GlyphInfo) -> u32 {
+    // SAFETY: reads the mask of a valid glyph info.
+    unsafe { sys::hb_glyph_info_get_glyph_flags(info) as u32 }
+}
 
 /// The direction of a run of text.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -115,6 +132,61 @@ impl Font {
         Self { raw }
     }
 
+    /// Sets the point size of the font (`hb_font_set_ptem`), which selects the tracking of the
+    /// `trak` table of the font; `0` applies no tracking. HarfBuzz stores the value: setting the
+    /// size the font has costs a comparison, and no cache of the font depends on it.
+    pub fn set_ptem(&mut self, ptem: f32) {
+        // SAFETY: valid font; the font is not shared with another thread.
+        unsafe { sys::hb_font_set_ptem(self.raw, ptem) };
+    }
+
+    /// The point size of the font (`hb_font_get_ptem`).
+    #[cfg(test)]
+    pub fn ptem(&self) -> f32 {
+        // SAFETY: valid font.
+        unsafe { sys::hb_font_get_ptem(self.raw) }
+    }
+
+    /// Sets the position of the font in the variation space of a variable font
+    /// (`hb_font_set_variations`): the values of axes in their own units (a weight of 700 for
+    /// `wght`). HarfBuzz normalizes them with the `fvar` and `avar` tables of the font; an axis
+    /// the font does not have is ignored and an axis that is not named keeps its default.
+    pub fn set_variations(&mut self, variations: &[FontVariation]) {
+        let variations: Vec<sys::hb_variation_t> = variations
+            .iter()
+            .map(|variation| sys::hb_variation_t { tag: variation.tag.value(), value: variation.value as f32 })
+            .collect();
+
+        // SAFETY: valid font; `variations` is a slice of `variations.len()` initialized
+        // variations, which HarfBuzz reads before returning.
+        unsafe { sys::hb_font_set_variations(self.raw, variations.as_ptr(), variations.len() as c_uint) };
+
+        // A position at the default of every axis is the default instance (a backend may report
+        // every axis of a font that is not varied): the font then keeps no coordinates, and
+        // HarfBuzz the paths of a font that is not varied.
+        if self.var_coords_normalized().iter().all(|coord| *coord == 0) {
+            // SAFETY: valid font; no variations clear the coordinates.
+            unsafe { sys::hb_font_set_variations(self.raw, std::ptr::null(), 0) };
+        }
+    }
+
+    /// The normalized coordinates of the font in its variation space, one for each axis in the
+    /// order of the `fvar` table (`hb_font_get_var_coords_normalized`), as 2.14 fixed-point
+    /// numbers; empty for the default instance.
+    pub fn var_coords_normalized(&self) -> &[i32] {
+        let mut length = 0;
+        // SAFETY: HarfBuzz returns a pointer to `length` coordinates owned by the font, which
+        // stay valid until the font is changed, which needs `&mut self`.
+        unsafe {
+            let coords = sys::hb_font_get_var_coords_normalized(self.raw, &mut length);
+            if coords.is_null() || length == 0 {
+                &[]
+            } else {
+                std::slice::from_raw_parts(coords, length as usize)
+            }
+        }
+    }
+
     /// The horizontal and vertical scale of the font.
     pub fn scale(&self) -> (i32, i32) {
         let (mut x, mut y) = (0, 0);
@@ -186,6 +258,18 @@ impl Buffer {
     pub fn len(&self) -> usize {
         // SAFETY: valid buffer.
         unsafe { sys::hb_buffer_get_length(self.raw) as usize }
+    }
+
+    /// Asks the shaper to mark the glyphs at which the text may not be changed on one side
+    /// without changing the shaping of the other (`HB_BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT`):
+    /// [`glyph_flags`] then reports [`GLYPH_FLAG_UNSAFE_TO_CONCAT`]. The other flags of the buffer
+    /// are kept; [`reset`](Self::reset) clears them.
+    pub fn produce_unsafe_to_concat(&mut self) {
+        // SAFETY: valid buffer.
+        unsafe {
+            let flags = sys::hb_buffer_get_flags(self.raw);
+            sys::hb_buffer_set_flags(self.raw, flags | BUFFER_FLAG_PRODUCE_UNSAFE_TO_CONCAT);
+        }
     }
 
     /// Sets unset segment properties from the contents of the buffer.

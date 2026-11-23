@@ -3,6 +3,7 @@
 //! published binary has with Graphite) on Ganesh, as the original does.
 
 mod auto_release_pool;
+mod shader_libraries;
 mod skia_metal_external_objects_feature;
 mod skia_metal_gpu;
 

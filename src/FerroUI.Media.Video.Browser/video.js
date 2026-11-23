@@ -74,6 +74,9 @@ export class BrowserVideo {
     }
     pause() { this.video.pause(); }
     audio(volume,muted) { this.video.volume=volume; this.video.muted=muted; }
+    rate(value) { this.video.playbackRate = value; }
+    get canCast() { return /^https?:/.test(this.video.src) && typeof this.video.remote?.prompt === "function"; }
+    cast() { return this.video.remote.prompt(); }
     seek(position) {
         this.seekRequest?.close();
         this.frameValid=false;

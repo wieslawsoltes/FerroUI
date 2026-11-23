@@ -158,8 +158,10 @@ impl Visual {
     /// Releases the shadow visual (the visual casts no shadow any more, or
     /// leaves its compositor).
     pub(super) fn release_theme_shadow_visual(&self) {
+        // Asked of every visual that leaves its compositor: one without extras has no shadow.
         let released = self
-            .with_composition_extras(|extras| extras.theme_shadow.as_mut().and_then(|state| state.visual.take()));
+            .change_composition_extras(|extras| extras.theme_shadow.as_mut().and_then(|state| state.visual.take()))
+            .flatten();
         if let Some(released) = released {
             released.dispose();
         }
@@ -180,7 +182,7 @@ impl Visual {
         let recipe = self.theme_shadow_recipe(elevation);
         let size = self.bounds().size();
         let visible = theme != ThemeShadowTheme::HighContrast
-            && self.composition_visual().is_some_and(|visual| visual.visible());
+            && self.own_composition_visual().is_some_and(|visual| visual.visible());
         shadow_visual.update(&recipe, Vector::new(size.width, size.height), visible);
     }
 

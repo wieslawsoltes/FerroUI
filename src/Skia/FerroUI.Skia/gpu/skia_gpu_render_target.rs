@@ -1,4 +1,4 @@
-use super::{ISkiaGpu, ISkiaGpuRenderTarget, ISkiaGrContext};
+use super::{ISkiaGpu, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaGpuBackend};
 use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
 use crate::skia_options::SkiaOptions;
 use crate::skia_platform::SkiaPlatform;
@@ -7,7 +7,6 @@ use ferroui_base::platform::{
     IDrawingContextImpl, IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties,
     RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
 };
-use ferroui_base::{FerroLocator, LocatorExtensions};
 use skia_safe::{AlphaType, ImageInfo};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -21,6 +20,9 @@ pub struct SkiaGpuRenderTarget {
     /// composition target keeps a layer between frames, whose surface properties are those of
     /// the frame it was created in, and creates it again once they differ.
     frame_text_rendering: Rc<Cell<TextRenderingSettings>>,
+    /// The Skia backend of the context the frames of the target are drawn with, known from the
+    /// first of them on (`clips_regions_per_draw`).
+    backend: Cell<Option<SkiaGpuBackend>>,
 }
 
 impl SkiaGpuRenderTarget {
@@ -91,8 +93,25 @@ impl SkiaGpuRenderTarget {
         render_target: Rc<dyn ISkiaGpuRenderTarget>,
         text_rendering: TextRenderingSource,
     ) -> Self {
-        Self { skia_gpu, render_target, text_rendering, frame_text_rendering: Rc::default() }
+        Self {
+            skia_gpu,
+            render_target,
+            text_rendering,
+            frame_text_rendering: Rc::default(),
+            backend: Cell::new(None),
+        }
     }
+}
+
+/// Whether a context of `backend` applies a clip of several rectangles to every draw under it on
+/// its own. Ganesh does: a region is the path of its boundary to it, which is no rectangle and
+/// not convex, so each draw under it gets a mask of its own size, rasterised on the processor and
+/// uploaded as a texture, or drawn into the stencil buffer (`ClipStack::apply`). A rectangle is
+/// its scissor. Graphite draws the clip with the shader of the draw, and the raster backend has
+/// regions of its own. A backend that is not known yet (before the first frame, which draws the
+/// whole surface) is asked again with the next frame.
+pub(crate) fn clips_regions_per_draw(backend: Option<SkiaGpuBackend>) -> bool {
+    backend == Some(SkiaGpuBackend::Ganesh)
 }
 
 impl IRenderTarget for SkiaGpuRenderTarget {
@@ -131,12 +150,23 @@ impl IRenderTarget for SkiaGpuRenderTarget {
         };
 
         let gr_context = session.gr_context();
+        self.backend.set(Some(gr_context.backend()));
         let mut context = DrawingContextImpl::new(nfo, vec![Box::new(move || session.dispose())]);
         // The programs of the runtime effects are made with the second frame
         // of a GPU context (the first paint is not delayed), not with the
         // frame that first needs them.
         if prewarm_frame(&gr_context) {
             context.prewarm_runtime_effects();
+            // Box shadows use Skia's mask-filter path, not the registered
+            // effect graphs. Compile its pipelines on a separate recorder,
+            // before the first hover or connected animation needs them.
+            if gr_context.backend() == SkiaGpuBackend::Graphite && prewarm_effect_pipelines() {
+                let prewarm_scene = RenderTargetSceneInfo {
+                    size: ferroui_base::PixelSize::new(512, 512),
+                    ..scene_info.clone()
+                };
+                self.prewarm_with(&gr_context, &prewarm_scene, &mut prewarm_animation_pipelines);
+            }
         }
 
         Ok((Box::new(context), RenderTargetDrawingContextProperties::default()))
@@ -144,6 +174,22 @@ impl IRenderTarget for SkiaGpuRenderTarget {
 
     fn platform_render_target_state(&self) -> PlatformRenderTargetState {
         self.render_target.state()
+    }
+
+    /// The frames of a Ganesh context draw one rectangle (desktop-performance.md, section 9.56).
+    fn clips_regions_per_draw(&self) -> bool {
+        clips_regions_per_draw(self.backend.get())
+    }
+
+    /// The layers compare their text rendering with the one of the frame
+    /// (`SurfaceRenderTarget::is_corrupted`), which the drawing context of
+    /// the target sets otherwise; nothing else of a rendering session is
+    /// what a layer draws with. Which layers are drawn ahead is theirs to
+    /// say: those that pipeline their frames.
+    fn prepare_frame_ahead(&self, scene_info: &RenderTargetSceneInfo) -> bool {
+        let text_rendering = self.text_rendering.settings(scene_info.scaling, scene_info.transparency_level);
+        self.frame_text_rendering.set(text_rendering);
+        true
     }
 
     /// Draws `paint` offscreen with the drawing context of the frames, so
@@ -172,16 +218,122 @@ impl IRenderTarget for SkiaGpuRenderTarget {
     }
 }
 
-/// [`SkiaOptions::prewarm_effect_pipelines`] of the options registered on
-/// this thread, else of the ones the backend was initialized with (the
-/// render thread has no services); on by default.
+/// A connected flight scales its shadow nonuniformly when the source and
+/// destination have different aspect ratios. SkCanvas::canAttemptBlurredRRectDraw
+/// rejects that transform: the mask filter uses image-filter blur passes
+/// instead, whose kernel-size buckets select different GPU programs.
+pub(super) fn prewarm_animation_pipelines(context: &mut dyn IDrawingContextImpl) {
+    use ferroui_base::media::imaging::BitmapInterpolationMode;
+    use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+    use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush};
+    use ferroui_base::media::RenderOptions;
+    use ferroui_base::media::{BoxShadow, BoxShadows, Color};
+    use ferroui_base::platform::{
+        AlphaFormat, IGeometryContext, IStreamGeometryBuilder, PixelFormat,
+    };
+    use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
+
+    // A window containing paths uses Graphite's internal MSAA. The same
+    // shaders on a single-sample target don't warm its Metal pipeline states.
+    let mut path = crate::StreamGeometryBuilder::new(None);
+    path.begin_figure(Point::new(8.0, 8.0), true);
+    path.line_to(Point::new(500.0, 8.0), true);
+    path.cubic_bezier_to(
+        Point::new(200.0, 100.0),
+        Point::new(200.0, 400.0),
+        Point::new(500.0, 500.0),
+        true,
+    );
+    path.line_to(Point::new(8.0, 500.0), true);
+    path.end_figure(true);
+    let geometry = path.to_geometry();
+    let gradient = ImmutableLinearGradientBrush::from_stops(&[
+        ImmutableGradientStop::new(0.0, Color::from_rgb(46, 134, 222)),
+        ImmutableGradientStop::new(1.0, Color::from_rgb(63, 158, 90)),
+    ]);
+    context.push_opacity(0.5, None);
+    context.draw_geometry(Some(&gradient), None, &*geometry);
+    context.pop_opacity();
+
+    for (x, y) in [(1.0, 1.0), (1.5, 1.25)] {
+        // Fractional bounds keep the AA geometry in the alpha-mask pass;
+        // integer-aligned rectangles can take a different, unantialiased path.
+        context.set_transform(Matrix::create_translation(0.25, 0.5) * Matrix::create_scale(x, y));
+        for blur in [0.1, 0.5, 1.0, 2.0, 4.0, 8.0, 12.0, 16.0, 24.0] {
+            let shadows = BoxShadows::new(BoxShadow {
+                blur,
+                color: Color::from_argb(102, 0, 0, 0),
+                offset_y: 4.0,
+                ..BoxShadow::default()
+            });
+            context.draw_rectangle(
+                None,
+                None,
+                // Skia emits an additional unclamped interior blur shader
+                // only when its safe interior exceeds 128 * 128 pixels.
+                RoundedRect::from_rect(Rect::new(48.0, 48.0, 240.0, 160.0)),
+                &shadows,
+            );
+        }
+    }
+    // The frozen source and the live destination cross-fade at fractional
+    // offsets/scales. An opaque, unscaled image doesn't warm these programs.
+    let Ok(bitmap) = crate::ImmutableBitmap::from_pixels(
+        PixelSize::new(4, 4),
+        Vector::new(96.0, 96.0),
+        16,
+        PixelFormat::BGRA8888,
+        AlphaFormat::Premul,
+        &[128; 64],
+    ) else {
+        return;
+    };
+    context.set_transform(Matrix::create_translation(0.25, 0.5) * Matrix::create_scale(1.5, 1.25));
+    let fill = ImmutableSolidColorBrush::new(Color::from_rgb(46, 134, 222));
+    for opacity in [1.0, 0.5] {
+        context.push_opacity(opacity, None);
+        context.draw_rectangle(
+            Some(&fill),
+            None,
+            RoundedRect::from_radius(Rect::new(24.0, 24.0, 64.0, 48.0), 12.0),
+            &BoxShadows::default(),
+        );
+        context.pop_opacity();
+    }
+    for interpolation in [
+        BitmapInterpolationMode::None,
+        BitmapInterpolationMode::LowQuality,
+    ] {
+        context.push_render_options(RenderOptions {
+            bitmap_interpolation_mode: interpolation,
+            ..RenderOptions::default()
+        });
+        // Integer-aligned draws use a non-AA render step, distinct from
+        // the fractional cross-fade draws, including at a flight's endpoint.
+        for transform in [
+            Matrix::IDENTITY,
+            Matrix::create_translation(0.25, 0.5) * Matrix::create_scale(1.5, 1.25),
+        ] {
+            context.set_transform(transform);
+            for opacity in [1.0, 0.5] {
+                for source in [Rect::new(0.0, 0.0, 4.0, 4.0), Rect::new(1.0, 1.0, 2.0, 2.0)] {
+                    context.draw_bitmap(
+                        &bitmap,
+                        opacity,
+                        source,
+                        Rect::new(24.0, 24.0, 64.0, 48.0),
+                    );
+                }
+            }
+        }
+        context.pop_render_options();
+    }
+}
+
+/// [`SkiaOptions::prewarm_effect_pipelines`] of the options in force on
+/// this thread ([`SkiaOptions::current`]); on by default.
 fn prewarm_effect_pipelines() -> bool {
-    FerroLocator::current()
-        .get_service::<SkiaOptions>()
-        .map(|options| *options)
-        .or_else(SkiaPlatform::options)
-        .unwrap_or_default()
-        .prewarm_effect_pipelines
+    SkiaOptions::current().prewarm_effect_pipelines
 }
 
 ferroui_base::ferro_thread_local! {
@@ -254,5 +406,15 @@ mod tests {
         // Each context prewarms its own programs.
         assert!(!prewarm_frame(&other));
         assert!(prewarm_frame(&other));
+    }
+
+    /// Section 9.56: only a Ganesh context applies a clip of several rectangles to every draw on
+    /// its own, so only its frames are drawn as one rectangle. Graphite keeps the rectangles of
+    /// the frame, and so does a target whose context is not known yet.
+    #[test]
+    fn only_a_ganesh_context_clips_regions_per_draw() {
+        assert!(clips_regions_per_draw(Some(SkiaGpuBackend::Ganesh)));
+        assert!(!clips_regions_per_draw(Some(SkiaGpuBackend::Graphite)));
+        assert!(!clips_regions_per_draw(None));
     }
 }

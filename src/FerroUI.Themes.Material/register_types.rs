@@ -110,6 +110,8 @@ pub fn register_types() {
     ONCE.call_once(|| {
         ferroui_markup_xaml::register_types();
         ferroui_dialogs::register_types();
+        ferroui_media_camera_controls::register_types();
+        ferroui_media_video_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_table(TYPES);
         crate::rust_paths::register_rust_paths();
@@ -117,6 +119,9 @@ pub fn register_types() {
         ValueTypes::register_global(register_value_types);
         MarkupAssembly::register_table(&ASSEMBLY);
         crate::assets::register();
+        // The embedded Roboto files as assets, unless the application leaves them to the explicit
+        // choice of `with_material_fonts` (#856, the feature `embedded-font-assets`, on by default).
+        #[cfg(feature = "embedded-font-assets")]
         crate::fonts::register();
         FerroXamlLoader::register_compiled_xaml(ASSEMBLY.name, crate::compiled_xaml::try_load);
     });

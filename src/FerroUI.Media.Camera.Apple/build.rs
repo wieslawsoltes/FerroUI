@@ -1,4 +1,5 @@
 fn main() {
+    println!("cargo:rerun-if-changed=native/recording.inc");
     println!("cargo:rerun-if-changed=native/camera.mm");
     if std::env::var("CARGO_CFG_TARGET_VENDOR").as_deref() != Ok("apple") {
         return;
@@ -23,5 +24,8 @@ fn main() {
         "ImageIO",
     ] {
         println!("cargo:rustc-link-lib=framework={framework}");
+    }
+    if std::env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("ios") {
+        println!("cargo:rustc-link-lib=framework=UIKit");
     }
 }

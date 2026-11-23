@@ -3,12 +3,16 @@ import { WebRenderTargetRegistry } from "./webRenderTargetRegistry";
 import { FerroDOM } from "../dom";
 import { BrowserRenderingMode } from "./renderingMode";
 import { FerroExports } from "../ferroExports";
+import { clearViewCanvas, setViewCanvas } from "../pointerPosition";
 
 export class CanvasSurface {
     public targetId: number;
     private sizeParams: [number, number, number];
+    private readonly container: HTMLElement;
+    private readonly stopObservingSize: () => void;
 
     constructor(public canvas: HTMLCanvasElement, container: HTMLElement, modes: BrowserRenderingMode[], topLevelId: number, threadId: number) {
+        this.container = container;
         this.targetId = WebRenderTargetRegistry.create(threadId, canvas, modes);
         const presenter = WebRenderTargetRegistry.presenterOf(this.targetId);
         if (presenter != null) {
@@ -25,13 +29,16 @@ export class CanvasSurface {
         // first ResizeObserver delivery. Start with the CSS content size and the real scale, so
         // initial layout and composition do not use a 1x1 surface at scale 1 on a Retina display.
         this.sizeParams = ResizeHandler.getInitialSize(canvas);
-        ResizeHandler.observeSize(canvas, (width, height, dpr) => {
+        this.stopObservingSize = ResizeHandler.observeSize(canvas, (width, height, dpr) => {
             const changed = this.sizeParams[0] !== width || this.sizeParams[1] !== height;
             this.sizeParams = [width, height, dpr];
             if (changed) { presenter?.resized(width, height); }
 
             FerroExports.CanvasHelper?.OnSizeChanged(topLevelId, width, height, dpr);
         });
+        // Not in the original: the pointer positions of the view are measured on this canvas, at
+        // the size and scaling the framework renders it at (pointerPosition.ts).
+        setViewCanvas(container, this);
     }
 
     public get width() {
@@ -47,6 +54,8 @@ export class CanvasSurface {
     }
 
     public destroy(): void {
+        this.stopObservingSize();
+        clearViewCanvas(this.container, this);
     }
 
     public static create(container: HTMLElement, modes: BrowserRenderingMode[] | Int32Array, topLevelId: number, threadId: number): CanvasSurface {

@@ -144,6 +144,30 @@ ferroui_base::ferro_markup_enum!(PolarLabelsPosition {
     Outer
 });
 
+/// Where the data label of a point of a Cartesian series goes (`DataLabelsPosition`), about the
+/// rectangle of its visual. `End` is the end of the value (above a value greater than the pivot on
+/// a vertical primary axis), `Start` its start. A heat series centres its labels by default.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
+pub enum DataLabelsPosition {
+    #[default]
+    End,
+    Start,
+    Middle,
+    Top,
+    Bottom,
+    Left,
+    Right,
+}
+ferroui_base::ferro_markup_enum!(DataLabelsPosition {
+    End,
+    Start,
+    Middle,
+    Top,
+    Bottom,
+    Left,
+    Right
+});
+
 /// The outline of a box series in the source's light theme.
 pub const BOX_STROKE: Color = Color::from_rgb(30, 30, 30);
 
@@ -164,6 +188,10 @@ pub const DATA_LABELS_COLOR: Color = Color::from_rgb(45, 45, 45);
 /// The default `DataLabelsPadding` of a source series: 6 on the left and right, 8 above and below.
 /// A label measures its text grown by it when it is culled or reserves room.
 pub const DATA_LABELS_PADDING: (f64, f64) = (6.0, 8.0);
+
+/// The default `DataLabelsMaxWidth` of a source series (`MaxTooltipsAndLegendsLabelsWidth` of
+/// the settings): a label of a longer text breaks into lines of this width, its padding included.
+pub const DATA_LABELS_MAX_WIDTH: f64 = 170.0;
 
 #[derive(Clone, Debug, PartialEq)]
 pub struct Series {

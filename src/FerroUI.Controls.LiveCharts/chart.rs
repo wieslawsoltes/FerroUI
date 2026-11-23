@@ -3,9 +3,9 @@
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
 use crate::{
-    Axes, Axis, ChartKind, ChartSeries, ChartSeriesCollection, ChartVisualElement,
-    ChartVisualElements, GeoMarkers, HeatSeries, MapInteractionMode, TooltipPosition,
-    ZoomAndPanMode,
+    Axes, Axis, ChartKind, ChartLegend, ChartSeries, ChartSeriesCollection, ChartVisualElement,
+    ChartVisualElements, GeoMarkers, HeatSeries, LegendPosition, MapInteractionMode,
+    PolarLineSeries, TooltipPosition, ZoomAndPanMode,
 };
 use ferroui_base::collections::FerroList;
 use ferroui_base::input::{
@@ -27,17 +27,43 @@ use ferroui_base::{
 use ferroui_controls::{Control, ControlImpl};
 use ferroui_livecharts::geo_map_chart_engine::shortest_rotation;
 use ferroui_livecharts::{
-    AxisScale, CartesianChartEngine, CartesianOptions, ChartError, DrawnMap, EasingFunctions,
+    AxisScale, CartesianChartEngine, CartesianOptions, CartesianSeriesOptions, ChartError, DrawnMap, EasingFunctions,
     FindingStrategy, GeoLand, GeoMapChartEngine, GeoMapMeasurement, GeoMapOptions,
-    GeographicBounds, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
-    PolarChartEngine, PolarOptions, PolarScale, SankeyChartEngine, SankeyOptions, Scene,
-    TreemapChartEngine, TreemapOptions, ZoomDirection,
+    GeographicBounds, HeatLegendSource, HitRegion, MapViewport, Maps, PieChartEngine, PieOptions, PointId,
+    PolarChartEngine, PolarOptions, PolarScale, PolarToolTipLabelFormatters, SankeyChartEngine,
+    SankeyOptions, SankeySeriesOptions, Scene, TooltipHoverArea, TreemapChartEngine, TreemapOptions,
+    TreemapSeriesOptions, ZoomDirection,
 };
 use std::{
     cell::{Cell, OnceCell, RefCell},
     rc::{Rc, Weak},
     time::Duration,
 };
+
+/// The `GeometrySvg` of a line, stacked area, scatter or bar series (`VariableSVGPathGeometry`).
+fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
+    use crate::series_classes::*;
+    macro_rules! svg {
+        ($($class:ty),*) => {
+            $(if let Some(series) = model.cast::<$class>() {
+                return series.geometry_svg();
+            })*
+        };
+    }
+    svg!(
+        LineSeries,
+        AreaSeries,
+        StackedAreaSeries,
+        ScatterSeries,
+        ColumnSeries,
+        RowSeries,
+        StackedColumnSeries,
+        StackedRowSeries,
+        RangeColumnSeries,
+        RangeRowSeries
+    );
+    None
+}
 
 /// Immutable event data. Handlers may change collections or remove the chart.
 #[derive(Clone, Debug, PartialEq)]
@@ -55,6 +81,9 @@ struct Measurement {
     polar_origin: Option<(Point, f64)>,
     /// The projector, viewport and lands of a geographic map (its scene is `scene`).
     geo: Option<GeoMapMeasurement>,
+    /// The kind, pivot and geometry size of each series, which place the tooltip of its points
+    /// (`CartesianChartEngine::tooltip_hover_area`).
+    tooltip_series: Vec<ferroui_livecharts::Series>,
 }
 
 /// An animation of the map in progress: the rotation of a globe (`RotateTo`, quadratic in and
@@ -110,6 +139,39 @@ pub struct Chart {
     map_timer: RefCell<Option<Rc<DispatcherTimer>>>,
     /// Set while a rotation writes the centre, which otherwise ends the rotation.
     rotating: Cell<bool>,
+    /// The needles of an angular gauge in motion, by their order among the visual elements.
+    needles: RefCell<Vec<NeedleMotion>>,
+    needle_timer: RefCell<Option<Rc<DispatcherTimer>>>,
+    /// Set by a frame of the needles, whose scene only moves a needle.
+    needle_frame: Cell<bool>,
+}
+
+/// The motion of a needle (`BaseNeedleVisual` animates the rotation of its geometry): from the
+/// value it was drawn at to its value over the animations speed of the chart, in the cubic out
+/// easing of the scene transitions.
+#[derive(Clone, Copy, Debug)]
+struct NeedleMotion {
+    from: f64,
+    to: f64,
+    started_ms: f64,
+    duration_ms: f64,
+}
+impl NeedleMotion {
+    fn at(&self, now_ms: f64) -> f64 {
+        let elapsed = now_ms - self.started_ms;
+        if self.duration_ms.is_nan()
+            || self.duration_ms <= 0.0
+            || !elapsed.is_finite()
+            || elapsed >= self.duration_ms
+        {
+            return self.to;
+        }
+        let progress = EasingFunctions::cubic_out((elapsed / self.duration_ms).clamp(0.0, 1.0));
+        self.from + (self.to - self.from) * progress
+    }
+    fn is_moving(&self, now_ms: f64) -> bool {
+        self.duration_ms > 0.0 && now_ms - self.started_ms < self.duration_ms
+    }
 }
 
 ferro_class!(Chart:Control);
@@ -134,6 +196,7 @@ impl FerroObjectImpl for Chart {
             || property == Self::y_axes_property().as_property()
             || property == Self::markers_property().as_property()
             || property == Self::visual_elements_property().as_property()
+            || property == Self::legend_property().as_property()
         {
             this.rebind_sources();
         }
@@ -236,18 +299,15 @@ impl VisualImpl for Chart {
             NativeScene::compile(&overlay).render(context);
         }
         let hovered = this.hover.borrow().clone();
-        if let Some(mut hovered) = hovered {
-            // The tooltip of a land is anchored at its centre (`GeoTooltipPoint.LandCenter`).
-            if this.chart_kind() == ChartKind::GeoMap {
-                if let Some(land) = hovered.points.first() {
-                    hovered.position = land.center;
-                }
-            }
+        if let Some(hovered) = hovered {
             if this.tooltip_position() != TooltipPosition::Hidden && !hovered.points.is_empty() {
+                let (lines, tooltip) = crate::decorations::tooltip_layout(size, &hovered);
+                let origin = this.tooltip_origin(&hovered, tooltip, size);
                 let tooltip = crate::decorations::tooltip_scene(
                     size,
-                    &hovered,
-                    this.tooltip_position(),
+                    &lines,
+                    tooltip,
+                    origin,
                     this.text_color(),
                 );
                 NativeScene::compile(&tooltip).render(context);
@@ -264,6 +324,7 @@ impl VisualImpl for Chart {
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.attached.set(false);
         this.stop_animation();
+        this.stop_needle_timer();
         this.stop_map_animations();
         this.map_click.set(None);
         this.cancel_pointer_gesture();
@@ -485,6 +546,9 @@ impl Chart {
             map_animation: RefCell::new(Vec::new()),
             map_timer: RefCell::new(None),
             rotating: Cell::new(false),
+            needles: RefCell::new(Vec::new()),
+            needle_timer: RefCell::new(None),
+            needle_frame: Cell::new(false),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -633,6 +697,15 @@ impl Chart {
                 }
             })));
         }
+        // The legend object (its padding, width and formatter).
+        if let Some(legend) = self.legend() {
+            let weak = self.to_ref().downgrade();
+            subscriptions.push(Subscription::new(legend.property_changed(move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.invalidate_chart();
+                }
+            })));
+        }
         *self.source_subscriptions.borrow_mut() = subscriptions;
     }
 
@@ -662,10 +735,59 @@ impl Chart {
             .iter()
             .map(|a| a.snapshot())
             .collect();
+        // The heat lands of a map, read once for the map and its heat legend.
+        let heat_lands = if self.chart_kind() == ChartKind::GeoMap {
+            Some(
+                models
+                    .iter()
+                    .zip(&series)
+                    .map(|(model, s)| crate::geo_models::heat_land_series(model, s.clone()))
+                    .collect::<Result<Vec<_>, _>>()?,
+            )
+        } else {
+            None
+        };
+        // A heat legend (`SKHeatLegend`) shows the first heat series of a Cartesian chart or of a
+        // map (`EnumerateHeatLegendSources`); a chart of another kind has none to show.
+        let heat_legend = self
+            .legend()
+            .and_then(|legend| ChartLegend::heat_legend(&legend))
+            .map(|mut legend| {
+                // `LegendTextSize` of the chart; none or a negative size is the theme's.
+                if let Some(size) = self.legend_text_size().filter(|size| *size >= 0.0) {
+                    legend.text_size = size;
+                }
+                let source = match self.chart_kind() {
+                    ChartKind::Cartesian => HeatLegendSource::of_series(&series),
+                    ChartKind::GeoMap => heat_lands
+                        .as_deref()
+                        .and_then(HeatLegendSource::of_heat_lands),
+                    _ => None,
+                };
+                (legend, source)
+            });
+        let legend_room = heat_legend.as_ref().map(|(legend, source)| {
+            let vertical = matches!(
+                self.legend_position(),
+                LegendPosition::Left | LegendPosition::Right
+            );
+            let room = legend.measure(
+                source.as_ref(),
+                vertical,
+                Size::default(),
+                crate::decorations::text_size,
+            );
+            if vertical {
+                room.width
+            } else {
+                room.height
+            }
+        });
         let margin = self.draw_margin().or_else(|| {
             crate::decorations::draw_margin(
                 size,
                 self.legend_position(),
+                legend_room,
                 !self.title().is_empty(),
                 self.chart_kind(),
             )
@@ -685,7 +807,23 @@ impl Chart {
         let mut geo = None;
         let (mut scene, x_scales, y_scales) = match self.chart_kind() {
             ChartKind::Cartesian => {
-                let measured = CartesianChartEngine::measure_with_axes_and_labels(
+                // The data label positions and SVG geometries of the heat series.
+                let series_options: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        let mut options = CartesianSeriesOptions::default();
+                        options.x_tool_tip_label_formatter = model.x_tool_tip_label_formatter();
+                        options.y_tool_tip_label_formatter = model.y_tool_tip_label_formatter();
+                        if let Some(heat) = model.cast::<HeatSeries>() {
+                            options.data_labels_position = Some(heat.data_labels_position());
+                            options.geometry_svg = heat.geometry_svg();
+                        } else {
+                            options.geometry_svg = series_geometry_svg(model);
+                        }
+                        options
+                    })
+                    .collect();
+                let measured = CartesianChartEngine::measure_with_series_options(
                     size,
                     &series,
                     &xs,
@@ -695,6 +833,7 @@ impl Chart {
                         sections: self.sections(),
                     },
                     crate::decorations::text_size,
+                    &series_options,
                 )?;
                 (measured.scene, measured.x_scales, measured.y_scales)
             }
@@ -709,12 +848,7 @@ impl Chart {
                         min_value: self.min_value(),
                         max_value: self.max_value(),
                         clockwise: self.clockwise(),
-                        visual_elements: self
-                            .visual_elements()
-                            .to_vec()
-                            .iter()
-                            .filter_map(ChartVisualElement::snapshot)
-                            .collect(),
+                        visual_elements: self.pie_visuals(),
                     },
                     crate::decorations::text_size,
                 )?,
@@ -727,7 +861,21 @@ impl Chart {
                 // engine measures the viewport and the scene moves into it; an explicit
                 // drawing margin keeps control coordinates.
                 let local = self.draw_margin().is_none();
-                let mut measured = PolarChartEngine::measure_with_axes_and_labels(
+                let formatters: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        model
+                            .cast::<PolarLineSeries>()
+                            .map(|polar| PolarToolTipLabelFormatters {
+                                angle_tool_tip_label_formatter: polar
+                                    .angle_tool_tip_label_formatter(),
+                                radius_tool_tip_label_formatter: polar
+                                    .radius_tool_tip_label_formatter(),
+                            })
+                            .unwrap_or_default()
+                    })
+                    .collect();
+                let mut measured = PolarChartEngine::measure_with_tool_tip_label_formatters(
                     if local { viewport.size() } else { size },
                     &series,
                     &xs,
@@ -740,6 +888,7 @@ impl Chart {
                         fit_to_bounds: self.fit_to_bounds(),
                     },
                     crate::decorations::text_size,
+                    &formatters,
                 )?;
                 if local {
                     let offset = Point::new(viewport.x, viewport.y);
@@ -761,14 +910,28 @@ impl Chart {
                     .zip(&series)
                     .map(|(model, s)| crate::node_models::sankey_series(model, s.clone()))
                     .collect::<Result<Vec<_>, _>>()?;
+                // The `DataLabelsMaxWidth` of each series.
+                let sankey_options: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        let mut options = SankeySeriesOptions::default();
+                        let sankey = model.cast::<crate::SankeySeries>();
+                        options.data_labels_max_width =
+                            sankey.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            sankey.and_then(|s| s.tool_tip_label_formatter());
+                        options
+                    })
+                    .collect();
                 (
-                    SankeyChartEngine::measure_with_labels(
+                    SankeyChartEngine::measure_with_series_options(
                         size,
                         &sankey,
                         &SankeyOptions {
                             draw_margin: margin,
                         },
                         crate::decorations::text_size,
+                        &sankey_options,
                     )?,
                     Vec::new(),
                     Vec::new(),
@@ -780,14 +943,27 @@ impl Chart {
                     .zip(&series)
                     .map(|(model, s)| crate::node_models::treemap_series(model, s.clone()))
                     .collect::<Result<Vec<_>, _>>()?;
+                let treemap_options: Vec<_> = models
+                    .iter()
+                    .map(|model| {
+                        let mut options = TreemapSeriesOptions::default();
+                        let treemap = model.cast::<crate::TreemapSeries>();
+                        options.data_labels_max_width =
+                            treemap.as_ref().map(|s| s.data_labels_max_width());
+                        options.tool_tip_label_formatter =
+                            treemap.and_then(|s| s.tool_tip_label_formatter());
+                        options
+                    })
+                    .collect();
                 (
-                    TreemapChartEngine::measure_with_labels(
+                    TreemapChartEngine::measure_with_series_options(
                         size,
                         &treemap,
                         &TreemapOptions {
                             draw_margin: margin,
                         },
                         crate::decorations::text_size,
+                        &treemap_options,
                     )?,
                     Vec::new(),
                     Vec::new(),
@@ -796,11 +972,7 @@ impl Chart {
             // A map has no axes; its series are heat land series over the active map (the
             // bundled world map without one).
             ChartKind::GeoMap => {
-                let heat = models
-                    .iter()
-                    .zip(&series)
-                    .map(|(model, s)| crate::geo_models::heat_land_series(model, s.clone()))
-                    .collect::<Result<Vec<_>, _>>()?;
+                let heat = heat_lands.unwrap_or_default();
                 let markers: Vec<_> = self
                     .markers()
                     .to_vec()
@@ -809,24 +981,50 @@ impl Chart {
                     .collect();
                 let active = self.active_map();
                 let map: &DrawnMap = active.as_deref().unwrap_or_else(|| Maps::world_map());
-                let mut measured = GeoMapChartEngine::measure(
+                // The `TooltipFormatter` of the map writes the value lines of its tooltips.
+                let tooltip_formatter = self.tooltip_formatter();
+                let mut measured = GeoMapChartEngine::measure_with_tooltip_formatter(
                     size,
                     map,
                     &heat,
                     &markers,
                     &self.geo_options(margin),
+                    tooltip_formatter.as_ref(),
                 )?;
                 let scene = std::mem::replace(&mut measured.scene, Scene::new(size, viewport));
                 geo = Some(measured);
                 (scene, Vec::new(), Vec::new())
             }
         };
+        // `DataLabelsMaxWidth` of the Cartesian, pie and polar series (the Sankey and treemap
+        // engines break their labels themselves): a label above a Cartesian point keeps its last
+        // line in place, the centred labels of the heat cells, slices and polar points their middle.
+        if matches!(
+            self.chart_kind(),
+            ChartKind::Cartesian | ChartKind::Pie | ChartKind::Polar
+        ) {
+            let widths: Vec<_> = models.iter().map(|m| m.data_labels_max_width()).collect();
+            let cartesian = self.chart_kind() == ChartKind::Cartesian;
+            ferroui_livecharts::label_lines::wrap_data_labels(
+                &mut scene,
+                &widths,
+                crate::decorations::text_size,
+                |id| {
+                    !cartesian
+                        || series
+                            .get(id.series)
+                            .is_some_and(|s| s.kind == ferroui_livecharts::SeriesKind::Heat)
+                },
+            );
+        }
         crate::decorations::decorate(
             &mut scene,
             &self.title(),
             self.title_size(),
             self.text_color(),
             self.legend_position(),
+            heat_legend.as_ref().map(|(legend, source)| (legend, source.as_ref())),
+            self.legend_background_paint(),
         );
         {
             for (series_index, model) in models.iter().enumerate() {
@@ -860,7 +1058,39 @@ impl Chart {
         }
         let scene = Rc::new(scene);
         let previous = self.measurement.borrow().as_ref().map(|m| m.scene.clone());
-        self.start_transition(previous, scene.clone());
+        // A frame of the needles only moves them: a transition in progress keeps its clock and
+        // takes the new scene as its end. A scene equal to the one before has nothing to move.
+        if self.needle_frame.take() {
+            let mut transition = self.transition.borrow_mut();
+            if let Some(current) = transition.as_mut() {
+                *current = current.retarget(scene.clone());
+            }
+        } else {
+            // The first draw of a Cartesian chart takes the heat cells in from transparent and
+            // grows its financial and OHLC bars from their open.
+            let financial = series.iter().any(|s| {
+                use ferroui_livecharts::SeriesKind::{Financial, Ohlc};
+                matches!(s.kind, Financial | Ohlc)
+            });
+            let previous = previous
+                .or_else(|| self.heat_first_draw(&models, &scene))
+                .or_else(|| {
+                    (self.chart_kind() == ChartKind::Cartesian && financial)
+                        .then(|| Rc::new(CartesianChartEngine::first_draw_seed(&scene, &series, &y_scales)))
+                });
+            if previous.as_deref() != Some(&*scene) {
+                self.start_transition(previous, scene.clone());
+            }
+        }
+        let tooltip_series = series
+            .iter()
+            .map(|s| {
+                let mut light = ferroui_livecharts::Series::new(s.kind);
+                light.pivot = s.pivot;
+                light.geometry_size = s.geometry_size;
+                light
+            })
+            .collect();
         *self.measurement.borrow_mut() = Some(Measurement {
             revision,
             scene: scene.clone(),
@@ -868,6 +1098,7 @@ impl Chart {
             y_scales,
             polar_origin,
             geo,
+            tooltip_series,
         });
         self.last_error.borrow_mut().take();
         self.native_scene.borrow_mut().take();
@@ -877,6 +1108,40 @@ impl Chart {
         Ok(scene)
     }
 
+    /// The top left corner of the tooltip of the found points (`GetTooltipLocation` over their
+    /// hover areas, `SKDefaultGeoTooltip` about the centre of a land), kept inside the control.
+    fn tooltip_origin(&self, hovered: &ChartPointerEventArgs, tooltip: Size, size: Size) -> Point {
+        use ferroui_livecharts::tooltips::{geo_tooltip_location, tooltip_location};
+        let position = match self.tooltip_position() {
+            TooltipPosition::Hidden => ferroui_livecharts::tooltips::TooltipPosition::Hidden,
+            TooltipPosition::Auto => ferroui_livecharts::tooltips::TooltipPosition::Auto,
+            TooltipPosition::Top => ferroui_livecharts::tooltips::TooltipPosition::Top,
+            TooltipPosition::Bottom => ferroui_livecharts::tooltips::TooltipPosition::Bottom,
+            TooltipPosition::Left => ferroui_livecharts::tooltips::TooltipPosition::Left,
+            TooltipPosition::Right => ferroui_livecharts::tooltips::TooltipPosition::Right,
+            TooltipPosition::Center => ferroui_livecharts::tooltips::TooltipPosition::Center,
+        };
+        let kind = self.chart_kind();
+        if kind == ChartKind::GeoMap {
+            let center = hovered.points.first().map_or(hovered.position, |land| land.center);
+            return geo_tooltip_location(center, tooltip, size, position).origin;
+        }
+        let measurement = self.measurement.borrow();
+        let series = measurement.as_ref().map_or(&[][..], |m| &m.tooltip_series[..]);
+        let areas: Vec<_> = hovered
+            .points
+            .iter()
+            .map(|hit| match kind {
+                ChartKind::Pie => PieChartEngine::tooltip_hover_area(hit),
+                ChartKind::Cartesian => match series.get(hit.id.series) {
+                    Some(s) => CartesianChartEngine::tooltip_hover_area(s, hit, position),
+                    None => TooltipHoverArea::of_region(hit),
+                },
+                _ => TooltipHoverArea::of_region(hit),
+            })
+            .collect();
+        tooltip_location(&areas, tooltip, size, position).origin
+    }
     pub fn find_points(&self, position: Point) -> Vec<HitRegion> {
         let size = self.bounds().size();
         let cached_size = self.measurement.borrow().as_ref().map(|m| m.scene.size);
@@ -885,14 +1150,19 @@ impl Chart {
         } else {
             cached_size.unwrap_or(size)
         };
+        // Only the Cartesian chart finds with its finding strategy (`FindHoveredPointsBy` of
+        // `CartesianChartEngine`). The pie, polar, Sankey and treemap engines of the source
+        // always compare both dimensions (`FindingStrategy.CompareAll`), which is the strategy
+        // their native engines resolve, and a map finds the land under the pointer.
+        let strategy = if self.chart_kind() == ChartKind::Cartesian {
+            self.tooltip_finding_strategy()
+        } else {
+            FindingStrategy::Automatic
+        };
         match self.scene(size) {
             Ok(scene) => self
                 .presentation_scene(Dispatcher::ui_thread().now() as f64, scene)
-                .hit_test(
-                    position,
-                    self.tooltip_finding_strategy(),
-                    self.tooltip_tolerance(),
-                )
+                .hit_test(position, strategy, self.tooltip_tolerance())
                 .into_iter()
                 .cloned()
                 .collect(),
@@ -1293,6 +1563,106 @@ impl Chart {
         ))
     }
 
+    /// The visual elements of a pie chart, each needle at the value it is drawn at now: a needle
+    /// whose value changed turns to it over the animations speed of the chart (its first value is
+    /// drawn at once).
+    fn pie_visuals(&self) -> Vec<ferroui_livecharts::PieVisual> {
+        let now = Dispatcher::ui_thread().now() as f64;
+        let duration = self.animations_speed();
+        let animate = self.attached.get() && duration.is_finite() && duration > 0.0;
+        let mut visuals: Vec<_> = self
+            .visual_elements()
+            .to_vec()
+            .iter()
+            .filter_map(ChartVisualElement::snapshot)
+            .collect();
+        let mut needles = self.needles.borrow_mut();
+        let mut index = 0;
+        let mut moving = false;
+        for visual in &mut visuals {
+            let ferroui_livecharts::PieVisual::Needle(needle) = visual else {
+                continue;
+            };
+            let target = needle.value;
+            if index == needles.len() {
+                needles.push(NeedleMotion {
+                    from: target,
+                    to: target,
+                    started_ms: now,
+                    duration_ms: 0.0,
+                });
+            } else if needles[index].to != target {
+                let from = needles[index].at(now);
+                needles[index] = NeedleMotion {
+                    from,
+                    to: target,
+                    started_ms: now,
+                    duration_ms: if animate { duration } else { 0.0 },
+                };
+            }
+            needle.value = needles[index].at(now);
+            moving |= needles[index].is_moving(now);
+            index += 1;
+        }
+        needles.truncate(index);
+        drop(needles);
+        if moving {
+            self.start_needle_timer();
+        } else {
+            self.stop_needle_timer();
+        }
+        visuals
+    }
+    fn start_needle_timer(&self) {
+        if self.needle_timer.borrow().is_some() {
+            return;
+        }
+        let weak = self.to_ref().downgrade();
+        let timer = DispatcherTimer::with_callback(
+            Duration::from_millis(16),
+            DispatcherPriority::RENDER,
+            move |_| {
+                if let Some(this) = weak.upgrade() {
+                    this.needle_frame.set(true);
+                    this.invalidate_chart();
+                }
+            },
+        );
+        timer.start();
+        *self.needle_timer.borrow_mut() = Some(timer);
+    }
+    fn stop_needle_timer(&self) {
+        let timer = self.needle_timer.borrow_mut().take();
+        if let Some(timer) = timer {
+            timer.stop();
+        }
+    }
+    /// The first draw of a Cartesian chart with heat series (`HeatSeriesAnimationTests`): the
+    /// cells start transparent in their colour (`EnsureVisualForPoint`) and take it as the scene
+    /// transition runs; everything else of the scene is in place from the start.
+    fn heat_first_draw(&self, models: &[Ref<ChartSeries>], scene: &Scene) -> Option<Rc<Scene>> {
+        if self.chart_kind() != ChartKind::Cartesian {
+            return None;
+        }
+        let heat: Vec<usize> = models
+            .iter()
+            .enumerate()
+            .filter(|(_, model)| model.kind() == ferroui_livecharts::SeriesKind::Heat)
+            .map(|(index, _)| index)
+            .collect();
+        if heat.is_empty() {
+            return None;
+        }
+        let mut seed = scene.clone();
+        for primitive in &mut seed.primitives {
+            let cell = primitive.id.is_some_and(|id| heat.contains(&id.series))
+                && !matches!(primitive.geometry, ferroui_livecharts::Geometry::Text { .. });
+            if let (true, Some(color)) = (cell, primitive.style.fill) {
+                primitive.style.fill = Some(Color::from_argb(0, color.r, color.g, color.b));
+            }
+        }
+        Some(Rc::new(seed))
+    }
     fn start_transition(&self, previous: Option<Rc<Scene>>, next: Rc<Scene>) {
         let duration = self.animations_speed();
         // The lands of a map take their colours at once (GeoMapAnimationTests): a map has no
@@ -1306,14 +1676,23 @@ impl Chart {
             return;
         }
         let now = Dispatcher::ui_thread().now() as f64;
+        // The nodes, ribbons and tiles of a Sankey or treemap chart enter and leave as the
+        // source's visuals do, also at the first draw (`SceneTransition::with_node_motion`).
+        let node_motion = matches!(self.chart_kind(), ChartKind::Sankey | ChartKind::Treemap);
         let from = self
             .transition
             .borrow()
             .as_ref()
             .map(|transition| Rc::new(transition.sample(now)))
-            .or(previous);
+            .or(previous)
+            .or_else(|| node_motion.then(|| Rc::new(Scene::new(next.size, next.plot_bounds))));
         if let Some(from) = from {
-            *self.transition.borrow_mut() = Some(SceneTransition::new(from, next, now, duration));
+            let transition = SceneTransition::new(from, next, now, duration);
+            *self.transition.borrow_mut() = Some(if node_motion {
+                transition.with_node_motion()
+            } else {
+                transition
+            });
             let timer = self.animation_timer.borrow().clone();
             if let Some(timer) = timer {
                 timer.start();
@@ -1627,6 +2006,9 @@ impl Drop for Chart {
         if let Some(timer) = self.map_timer.get_mut().take() {
             timer.stop();
         }
+        if let Some(timer) = self.needle_timer.get_mut().take() {
+            timer.stop();
+        }
     }
 }
 
@@ -1641,7 +2023,40 @@ fn series_snapshot(model: &Ref<ChartSeries>) -> ferroui_livecharts::Series {
         series.min_value = heat.min_value();
         series.max_value = heat.max_value();
     }
+    if series.is_gauge {
+        apply_gauge_rules(model, &mut series);
+    }
     series
+}
+
+/// The gauge rules of the source's default (light) theme (`HasRuleForGaugeSeries`,
+/// `HasRuleForGaugeFillSeries` of `ThemesExtensions`): a property of a gauge series that the
+/// series does not set takes the value of the rule, as a theme rule gives way to the properties
+/// a series sets. A gauge has no stroke, centred data labels in (70, 70, 70) and a corner radius
+/// of 8, in the palette colour of the series; its fill series is (30, 30, 30) at alpha 10.
+fn apply_gauge_rules(model: &Ref<ChartSeries>, series: &mut ferroui_livecharts::Series) {
+    let unset = |property: &ferroui_base::FerroProperty| !model.is_set(property);
+    if series.is_fill_series {
+        if unset(ChartSeries::fill_property().as_property()) {
+            series.fill = Some(Color::from_argb(10, 30, 30, 30));
+        }
+        return;
+    }
+    if unset(ChartSeries::stroke_property().as_property()) {
+        series.stroke = None;
+    }
+    if unset(ChartSeries::data_labels_property().as_property()) {
+        series.data_labels = true;
+    }
+    if unset(ChartSeries::polar_labels_position_property().as_property()) {
+        series.polar_labels_position = ferroui_livecharts::PolarLabelsPosition::ChartCenter;
+    }
+    if unset(ChartSeries::data_labels_color_property().as_property()) {
+        series.data_labels_color = Some(Color::from_rgb(70, 70, 70));
+    }
+    if unset(ChartSeries::corner_radius_property().as_property()) {
+        series.corner_radius = 8.0;
+    }
 }
 
 fn observe_list<T: Clone + 'static>(

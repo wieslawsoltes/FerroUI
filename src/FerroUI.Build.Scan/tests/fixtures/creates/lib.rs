@@ -54,8 +54,16 @@ impl Plain {
         format!("{}", "TextFillColorPrimaryBrush")
     }
 
+    /// Functions and a method named after the class they make, as the builders of a declarative
+    /// layer are, one of them in the body of a macro.
+    pub fn built(&self) -> Vec<String> {
+        let first = scroll_viewer().tool_tip("A tip");
+        vec![first, text_block()]
+    }
+
     #[cfg(test)]
     fn test_only(&self) -> Ref<Spacer> {
+        let _ = split_view();
         let _ = "OnlyInTestFunctions";
         Spacer::new()
     }

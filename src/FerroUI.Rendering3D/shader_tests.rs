@@ -1,4 +1,5 @@
 use super::*;
+use crate::brush::{BrushUniforms, BRUSH_WGSL_DECLARATIONS, GRADIENT_TEXTURE_WIDTH, MAX_INLINE_STOPS};
 use crate::uniforms::{DrawUniforms, FrameUniforms, LightUniforms, MAX_LIGHTS, WGSL_DECLARATIONS};
 use ferroui_base::numerics::{Vector2, Vector3};
 use ferroui_base::rendering::scene3d::MeshData;
@@ -65,12 +66,25 @@ fn scene3d_wgsl_is_valid_and_has_its_entry_points() {
     for (name, stage) in [
         (VERTEX_ENTRY, naga::ShaderStage::Vertex),
         (FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
+        (GRADIENT_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
+        (GRADIENT_TEXTURE_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
+        (IMAGE_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
         (RESOLVE_VERTEX_ENTRY, naga::ShaderStage::Vertex),
         (RESOLVE_FRAGMENT_ENTRY, naga::ShaderStage::Fragment),
     ] {
         assert!(stages.contains(&(name, stage)), "{name} is a {stage:?} entry point: {stages:?}");
     }
-    assert_eq!(4, stages.len(), "{stages:?}");
+    assert_eq!(7, stages.len(), "{stages:?}");
+    // One entry point per variant of the brush shader.
+    for (shader, entry) in [
+        (BrushShader::Solid, FRAGMENT_ENTRY),
+        (BrushShader::Gradient, GRADIENT_FRAGMENT_ENTRY),
+        (BrushShader::GradientTexture, GRADIENT_TEXTURE_FRAGMENT_ENTRY),
+        (BrushShader::Image, IMAGE_FRAGMENT_ENTRY),
+    ] {
+        assert_eq!(entry, fragment_entry(shader));
+        assert_eq!(matches!(shader, BrushShader::GradientTexture | BrushShader::Image), samples_texture(shader));
+    }
 }
 
 #[test]
@@ -93,6 +107,20 @@ fn scene3d_wgsl_translates_to_glsl_es_3_for_webgl2() {
     // The uniform blocks are std140, the layout of the Rust structures.
     assert!(fragment.contains("std140"), "{fragment}");
 
+    // The brushes of step D6: the frame, the draw and the brush uniforms; a texture with its
+    // sampler for the lookup texture and the image, sampled at level 0 (no derivatives).
+    let (gradient, gradient_reflection) = glsl(&module, &info, naga::ShaderStage::Fragment, GRADIENT_FRAGMENT_ENTRY);
+    assert_glsl_es(&gradient, true, GRADIENT_FRAGMENT_ENTRY);
+    assert_eq!(3, gradient_reflection.uniforms.len(), "{gradient}");
+    assert!(gradient_reflection.texture_mapping.is_empty(), "{gradient}");
+    for entry in [GRADIENT_TEXTURE_FRAGMENT_ENTRY, IMAGE_FRAGMENT_ENTRY] {
+        let (source, reflection) = glsl(&module, &info, naga::ShaderStage::Fragment, entry);
+        assert_glsl_es(&source, true, entry);
+        assert_eq!(3, reflection.uniforms.len(), "{entry}: {source}");
+        assert_eq!(1, reflection.texture_mapping.len(), "{entry}: {source}");
+        assert!(source.contains("textureLod("), "{entry}: {source}");
+    }
+
     let (resolve_vertex, _) = glsl(&module, &info, naga::ShaderStage::Vertex, RESOLVE_VERTEX_ENTRY);
     assert_glsl_es(&resolve_vertex, false, RESOLVE_VERTEX_ENTRY);
     assert!(resolve_vertex.contains("gl_VertexID"), "{resolve_vertex}");
@@ -112,6 +140,12 @@ fn the_shader_holds_the_uniform_declarations_of_the_cpu_reference() {
         "scene3d.wgsl declares the structures of uniforms.rs (WGSL_DECLARATIONS) unchanged"
     );
     assert!(SCENE3D_WGSL.contains(&format!("const MAX_LIGHTS: u32 = {MAX_LIGHTS}u;")));
+    assert!(
+        SCENE3D_WGSL.contains(BRUSH_WGSL_DECLARATIONS),
+        "scene3d.wgsl declares the brush uniforms of brush.rs (BRUSH_WGSL_DECLARATIONS) unchanged"
+    );
+    assert!(SCENE3D_WGSL.contains(&format!("const MAX_STOPS: u32 = {MAX_INLINE_STOPS}u;")));
+    assert!(SCENE3D_WGSL.contains(&format!("const GRADIENT_TEXTURE_WIDTH: f32 = {GRADIENT_TEXTURE_WIDTH}.0;")));
 }
 
 #[test]
@@ -171,6 +205,22 @@ fn naga_lays_the_uniforms_out_as_the_rust_structures() {
             ("material", offset_of!(DrawUniforms, material)),
         ]),
         draw
+    );
+
+    let (span, brush) = members("BrushUniforms");
+    assert_eq!(size_of::<BrushUniforms>() as u32, span);
+    assert_eq!(
+        owned(&[
+            ("metadata", offset_of!(BrushUniforms, metadata)),
+            ("to_brush_x", offset_of!(BrushUniforms, to_brush_x)),
+            ("to_brush_y", offset_of!(BrushUniforms, to_brush_y)),
+            ("geometry", offset_of!(BrushUniforms, geometry)),
+            ("geometry2", offset_of!(BrushUniforms, geometry2)),
+            ("clip", offset_of!(BrushUniforms, clip)),
+            ("stop_offsets", offset_of!(BrushUniforms, stop_offsets)),
+            ("stop_colors", offset_of!(BrushUniforms, stop_colors)),
+        ]),
+        brush
     );
 }
 

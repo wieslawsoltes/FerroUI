@@ -185,6 +185,21 @@ impl ServerCompositionEffectBrush {
         if opacity <= 0.0 || is_empty(&rect) || self.painting.replace(true) {
             return;
         }
+        // Pointwise graphs never need pixels outside the brush. On a backend whose pushed
+        // layers have the size of its target (`prefers_bounded_effect_targets`) the complete
+        // graph is evaluated in one bounded target, so every nested blend/matrix layer stays
+        // small. Hard-border blurs additionally need a halo around the output; backdrop replay
+        // is rebased into the same temporary target. Every other backend draws the graph in
+        // place: its layers are limited to their bounds already.
+        let already_bounded = opacity == 1.0 && self.can_paint_bounded(root)
+            && crate::rendering::composition::drawing::is_bounded_effect_context(canvas);
+        if !already_bounded
+            && canvas.prefers_bounded_effect_targets()
+            && self.bounded_padding(root).is_some_and(|padding| self.paint_bounded(root, canvas, rect, opacity, padding))
+        {
+            self.painting.set(false);
+            return;
+        }
         if opacity != 1.0 {
             canvas.push_opacity(opacity, Some(rect));
         }
@@ -193,6 +208,98 @@ impl ServerCompositionEffectBrush {
             canvas.pop_opacity();
         }
         self.painting.set(false);
+    }
+
+    pub(crate) fn can_paint_in_isolation(&self) -> bool {
+        self.graph.root.as_ref().is_some_and(|root| self.can_paint_bounded(root))
+    }
+
+    fn can_paint_bounded(&self, node: &EffectNode) -> bool {
+        match &node.kind {
+            EffectNodeKind::GaussianBlur { .. }
+            | EffectNodeKind::Shadow { .. }
+            | EffectNodeKind::ConvolveMatrix { .. } => false,
+            EffectNodeKind::Parameter(name) => self.source(name).is_none_or(|source| {
+                source.as_any().is::<ServerCompositionSurfaceBrush>()
+            }),
+            _ => node.sources().iter().all(|source| self.can_paint_bounded(source)),
+        }
+    }
+
+    fn bounded_padding(&self, node: &EffectNode) -> Option<f64> {
+        match &node.kind {
+            EffectNodeKind::GaussianBlur { amount, hard: true, source } => {
+                let radius = self.painter().blur_radius(amount);
+                let padding = EffectGraphPainter::blur_reach(radius) + self.bounded_padding(source)?;
+                padding.is_finite().then_some(padding)
+            }
+            EffectNodeKind::GaussianBlur { .. } | EffectNodeKind::Shadow { .. }
+            | EffectNodeKind::ConvolveMatrix { .. } => None,
+            EffectNodeKind::Parameter(name) => self.source(name).map_or(Some(0.0), |source| {
+                // Host backdrops intentionally clear the destination window;
+                // ordinary source-over composition of a temporary cannot do it.
+                (source.as_any().is::<ServerCompositionSurfaceBrush>()
+                    || source.as_any().is::<ServerCompositionBackdropBrush>()).then_some(0.0)
+            }),
+            _ => node.sources().iter().try_fold(0.0_f64, |padding, source| {
+                Some(padding.max(self.bounded_padding(source)?))
+            }),
+        }
+    }
+
+    fn paint_bounded(&self, root: &EffectNode, canvas: &mut dyn IDrawingContextImpl, rect: Rect, opacity: f64, padding: f64) -> bool {
+        fn has_intermediates(node: &EffectNode) -> bool {
+            match &node.kind {
+                EffectNodeKind::Border { source, .. } => has_intermediates(source),
+                EffectNodeKind::Composite { mode: BitmapBlendingMode::SourceOver, sources } => sources.iter().any(has_intermediates),
+                _ => !node.sources().is_empty(),
+            }
+        }
+        // Leaves, plain tiling and source-over collections need no scratch target.
+        if !has_intermediates(root) || canvas.as_drawing_context_impl_with_layer_effects().is_none() {
+            return false;
+        }
+        let transform = canvas.transform();
+        if transform.try_invert().is_none() {
+            return false;
+        }
+        let bounds = rect.inflate(padding).transform_to_aabb(transform);
+        let (x, y) = (bounds.x.floor(), bounds.y.floor());
+        let (width, height) = (bounds.right().ceil() - x, bounds.bottom().ceil() - y);
+        if ![x, y, width, height].iter().all(|v| v.is_finite())
+            || width <= 0.0 || height <= 0.0 || width > 16384.0 || height > 16384.0 {
+            return false;
+        }
+        let layer = canvas.create_temporary_layer(PixelSize::new(width as i32, height as i32));
+        {
+            let mut context = layer.create_drawing_context();
+            if context.as_drawing_context_impl_with_layer_effects().is_none() {
+                context.dispose();
+                layer.dispose();
+                return false;
+            }
+            if canvas.as_drawing_context_impl_with_effects().is_some()
+                && context.as_drawing_context_impl_with_effects().is_none() {
+                context.dispose();
+                layer.dispose();
+                return false;
+            }
+            context.clear(crate::media::Colors::TRANSPARENT);
+            context.set_transform(transform * Matrix::create_translation(-x, -y));
+            crate::rendering::composition::server::with_canvas_origin(Vector::new(x, y), || {
+                self.painter().paint_node_isolated(root, &mut *context, rect, true);
+            });
+            context.dispose();
+        }
+        // The target is drawn pixel for pixel and source over, whatever interpolation and blend
+        // mode the caller has pushed for its own drawing.
+        canvas.push_render_options(crate::media::RenderOptions::default());
+        canvas.set_transform(Matrix::IDENTITY);
+        canvas.draw_bitmap(&*layer, opacity, Rect::new(0.0, 0.0, width, height), Rect::new(x, y, width, height));
+        canvas.set_transform(transform);
+        canvas.pop_render_options();
+        layer.dispose();
+        true
     }
 
     /// What a layer visual whose effect is the brush draws before its
@@ -563,6 +670,13 @@ impl<'a> EffectGraphPainter<'a> {
 
     /// Paints `node` over `rect`.
     fn paint_node(&self, node: &EffectNode, canvas: &mut dyn IDrawingContextImpl, rect: Rect) {
+        self.paint_node_isolated(node, canvas, rect, false);
+    }
+
+    /// A fresh transparent layer already isolates its first graph node from
+    /// the destination. Reuse it for composites/masks instead of nesting an
+    /// identical isolation layer. Later siblings must preserve their backdrop.
+    fn paint_node_isolated(&self, node: &EffectNode, canvas: &mut dyn IDrawingContextImpl, rect: Rect, isolated: bool) {
         match &node.kind {
             EffectNodeKind::Parameter(name) => self.host.paint_source(name, canvas, rect),
             EffectNodeKind::GaussianBlur { amount, hard, source } => {
@@ -606,20 +720,20 @@ impl<'a> EffectGraphPainter<'a> {
             }
             EffectNodeKind::Composite { mode, sources } => {
                 if *mode == BitmapBlendingMode::SourceOver {
-                    for source in sources {
-                        self.paint_node(source, canvas, rect);
+                    for (index, source) in sources.iter().enumerate() {
+                        self.paint_node_isolated(source, canvas, rect, isolated && index == 0);
                     }
                     return;
                 }
                 // Each source composed onto what the sources before it made,
                 // in a layer of their own.
-                canvas.push_layer(rect);
+                if !isolated { canvas.push_layer(rect); }
                 for (index, source) in sources.iter().enumerate() {
                     let pushed = index > 0 && Self::push_blend(canvas, rect, *mode);
-                    self.paint_node(source, canvas, rect);
+                    self.paint_node_isolated(source, canvas, rect, index == 0 || pushed);
                     Self::pop_blend(canvas, pushed);
                 }
-                canvas.pop_layer();
+                if !isolated { canvas.pop_layer(); }
             }
             EffectNodeKind::ColorSource(color) => {
                 let color = self.color(color);
@@ -631,28 +745,28 @@ impl<'a> EffectGraphPainter<'a> {
             EffectNodeKind::Blend { mode, background, foreground } => {
                 // The background and the foreground mixed in a layer of their
                 // own, which is drawn source-over.
-                canvas.push_layer(rect);
-                self.paint_node(background, canvas, rect);
+                if !isolated { canvas.push_layer(rect); }
+                self.paint_node_isolated(background, canvas, rect, true);
                 let pushed = Self::push_blend(canvas, rect, *mode);
-                self.paint_node(foreground, canvas, rect);
+                self.paint_node_isolated(foreground, canvas, rect, pushed);
                 Self::pop_blend(canvas, pushed);
-                canvas.pop_layer();
+                if !isolated { canvas.pop_layer(); }
             }
             EffectNodeKind::ColorMatrix { matrix, alpha_mode, source } => {
                 let matrix = self.matrix(matrix);
                 let pushed = Self::push_matrix(canvas, rect, &matrix, *alpha_mode);
-                self.paint_node(source, canvas, rect);
+                self.paint_node_isolated(source, canvas, rect, isolated || pushed);
                 Self::pop_matrix(canvas, pushed);
             }
             EffectNodeKind::AlphaMask { source, mask } => {
-                canvas.push_layer(rect);
-                self.paint_node(source, canvas, rect);
+                if !isolated { canvas.push_layer(rect); }
+                self.paint_node_isolated(source, canvas, rect, true);
                 let pushed = Self::push_blend(canvas, rect, BitmapBlendingMode::DestinationIn);
                 if pushed {
-                    self.paint_node(mask, canvas, rect);
+                    self.paint_node_isolated(mask, canvas, rect, true);
                 }
                 Self::pop_blend(canvas, pushed);
-                canvas.pop_layer();
+                if !isolated { canvas.pop_layer(); }
             }
             EffectNodeKind::Border { tile, source } => {
                 let tiled = match &source.kind {
@@ -666,7 +780,7 @@ impl<'a> EffectGraphPainter<'a> {
             EffectNodeKind::ArithmeticWithColor { multiply, source1, source2, offset, image_is_source1, image, color } => {
                 let matrix = self.arithmetic_matrix(multiply, source1, source2, offset, *image_is_source1, color);
                 let pushed = Self::push_matrix(canvas, rect, &matrix, ColorMatrixAlphaMode::Straight);
-                self.paint_node(image, canvas, rect);
+                self.paint_node_isolated(image, canvas, rect, isolated || pushed);
                 Self::pop_matrix(canvas, pushed);
             }
             EffectNodeKind::Shadow { amount, color, source } => {

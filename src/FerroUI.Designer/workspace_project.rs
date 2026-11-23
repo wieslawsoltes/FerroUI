@@ -179,6 +179,7 @@ impl DesignerWorkspace {
                 tab.preview_uri.clone(),
             )
         };
+        #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
         self.session
             .borrow_mut()
@@ -450,9 +451,7 @@ impl DesignerWorkspace {
                             this.start_project_task(TaskKind::Run { target }, false)
                         }
                         "CancelBuild" => this.cancel_project_task(),
-                        "NativePreview" => {
-                            this.session.borrow_mut().open_native_preview().map(|_| ())
-                        }
+                        "NativePreview" => this.open_preview(),
                         _ => {
                             this.root
                                 .get_control::<Border>("BuildDrawer")
@@ -465,6 +464,54 @@ impl DesignerWorkspace {
             });
         }
     }
+    /// What a preview in the view opens over: the area of the canvas. It is no part of the
+    /// editor chrome, and what a flyout shows is, for the styles, below what it opens at: opened
+    /// at a button of the application bar, the document took the buttons and the text boxes of
+    /// the chrome.
+    pub(crate) fn view_preview_target(&self) -> Ref<Control> {
+        self.root.get_control::<Control>("ArtboardScroll")
+    }
+
+    /// The flyout that shows a preview in the view, for the room `room` of what it opens over.
+    /// Its presenter has a class of its own and none of the editor chrome (`DesignerChrome.xaml`,
+    /// `FlyoutPresenter.designer-preview-flyout`: no limit of the theme on its size, which cut a
+    /// document wider than a menu).
+    pub(crate) fn view_preview_flyout(
+        &self,
+        control: Ref<Control>,
+        room: ferroui_base::Size,
+    ) -> Ref<ferroui_controls::Flyout> {
+        let flyout = ferroui_controls::Flyout::new();
+        flyout.flyout_presenter_classes().add("designer-preview-flyout");
+        flyout.set_placement(ferroui_controls::PlacementMode::Center);
+        flyout.set_content(Some(Control::boxed(self.view_preview_host(control, room))));
+        flyout
+    }
+
+    /// Opens the preview of the document: in a window of the platform, or, where the platform
+    /// shows a single view and has no windows (a browser, a phone), in a flyout of the view.
+    fn open_preview(self: &Rc<Self>) -> Result<(), String> {
+        if DesignerSession::platform_shows_windows() {
+            return self.session.borrow_mut().open_native_preview().map(|_| ());
+        }
+        if self.pending_source.get() {
+            self.apply_source();
+        }
+        // The session is not borrowed while the flyout opens: showing it lays the view out.
+        let control = self.session.borrow_mut().open_view_preview()?;
+        let target = self.view_preview_target();
+        let flyout = self.view_preview_flyout(control, target.bounds().size());
+        // The flyout lives until it is closed, which a click outside it does.
+        let keep = Rc::new(RefCell::new(Some(flyout.clone())));
+        flyout
+            .closed(move || {
+                keep.borrow_mut().take();
+            })
+            .detach();
+        flyout.show_at(&target);
+        Ok(())
+    }
+
     pub(super) fn poll_project(self: &Rc<Self>) {
         let discovery =
             self.project

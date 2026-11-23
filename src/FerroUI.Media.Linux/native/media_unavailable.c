@@ -43,3 +43,17 @@ int ferro_linux_photo_rgb(FerroLinuxFrame *f, uint8_t *rgb, uint64_t capacity) {
     (void)f; (void)rgb; (void)capacity;
     return 0;
 }
+int ferro_linux_can_record(FerroLinuxSession *s) { (void)s; return 0; }
+FerroLinuxRecording *ferro_linux_record(FerroLinuxSession *s) { (void)s; return NULL; }
+void ferro_linux_record_finish(FerroLinuxRecording *r) { (void)r; }
+void ferro_linux_record_cancel(FerroLinuxRecording *r) { (void)r; }
+void ferro_linux_record_release(FerroLinuxRecording *r) { (void)r; }
+int ferro_linux_record_poll(FerroLinuxRecording *r, FerroLinuxRecordingInfo *out) {
+    (void)r;
+    memset(out, 0, sizeof *out);
+    return -2;
+}
+int ferro_linux_record_copy(FerroLinuxRecording *r, uint8_t *bytes, uint64_t length) {
+    (void)r; (void)bytes; (void)length;
+    return 0;
+}

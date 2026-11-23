@@ -3,6 +3,7 @@
 
 use crate::grid::LayoutTimeSizeType;
 use crate::{Control, Grid, GridLength, GridUnitType};
+use ferroui_base::property_store::HotValue;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::utilities::math_utilities::{max as math_max, MathUtilities};
 use ferroui_base::{
@@ -47,6 +48,12 @@ pub struct DefinitionBase {
     /// The shared state object this instance is registered with.
     shared_state: RefCell<Option<Rc<SharedSizeState>>>,
     parent: RefCell<Option<WeakRef<Grid>>>,
+    /// Not upstream: the user size, minimum and maximum, kept while the value store of the
+    /// definition is unchanged. A grid reads the three of every definition in every pass of its
+    /// layout (docs/porting/desktop-performance.md, section 9.28).
+    kept_user_size: HotValue<GridLength>,
+    kept_user_min_size: HotValue<f64>,
+    kept_user_max_size: HotValue<f64>,
 }
 
 ferro_class! {
@@ -147,6 +154,9 @@ impl DefinitionBase {
             offset: Cell::new(0.0),
             shared_state: RefCell::new(None),
             parent: RefCell::new(None),
+            kept_user_size: HotValue::new(GridLength::default()),
+            kept_user_min_size: HotValue::new(0.0),
+            kept_user_max_size: HotValue::new(0.0),
         }
     }
 
@@ -265,20 +275,20 @@ impl DefinitionBase {
         let shared_state = self.shared_state.borrow().clone();
         match shared_state {
             Some(shared_state) => shared_state.user_size(),
-            None => self.user_size_value_cache(),
+            None => self.kept_user_size.get_for(self, || self.user_size_value_cache()),
         }
     }
 
     /// Internal accessor to the user minimum size.
     #[inline]
     pub(crate) fn user_min_size(&self) -> f64 {
-        self.user_min_size_value_cache()
+        self.kept_user_min_size.get_for(self, || self.user_min_size_value_cache())
     }
 
     /// Internal accessor to the user maximum size.
     #[inline]
     pub(crate) fn user_max_size(&self) -> f64 {
-        self.user_max_size_value_cache()
+        self.kept_user_max_size.get_for(self, || self.user_max_size_value_cache())
     }
 
     /// The index of the definition in the parent's collection, or -1.

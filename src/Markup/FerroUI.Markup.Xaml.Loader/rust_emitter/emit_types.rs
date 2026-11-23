@@ -204,6 +204,11 @@ pub trait EmitMarkup {
         // A metadata carrier's own path is NOT the returned model's type.
         Some(format!("::{}", value.trim_start_matches("::")))
     }
+    /// The handle is exactly Option<the constructor result>, including any inner wrappers.
+    fn is_optional_value(&self, key: TypeKey<'_>) -> bool {
+        matches!((key, self.value()), (TypeKey::Text(key), Some(TypeKey::Text(value)))
+            if key.strip_prefix("Option<").and_then(|s| s.strip_suffix('>')) == Some(value))
+    }
     fn is_flags(&self) -> bool;
     fn enum_members(&self) -> Vec<EnumMember<'_>>;
     /// Explicit associated `fn(i32) -> value` for unnamed plain-enum literals.
@@ -213,6 +218,12 @@ pub trait EmitMarkup {
     fn flags_compose(&self, value: i64) -> bool;
     /// `other` is this metadata.
     fn same(&self, other: &dyn EmitMarkup) -> bool;
+    /// The position of the plain property `name` in the list the declaration states it in (the
+    /// static properties when `is_static`), which the run-time metadata has in the same order
+    /// (#603); `None` when the type system does not know it.
+    fn property_index(&self, _name: &str, _is_static: bool) -> Option<usize> {
+        None
+    }
     fn as_any(&self) -> &dyn Any;
 
     /// The first handle.

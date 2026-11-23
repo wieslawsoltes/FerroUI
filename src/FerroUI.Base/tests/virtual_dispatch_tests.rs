@@ -345,3 +345,152 @@ fn slot_is_not_taken_from_a_base_class_that_has_no_such_member() {
     assert!(!__forwards_to_parent::<DispatchRoot, DispatchRootVTable>(Some(&[]), "visit"));
     assert!(__forwards_to_parent::<DispatchRoot, FerroObjectVTable>(Some(&[]), "constructed"));
 }
+
+// A member that follows another one (`follows … else …`): `describes` says something about
+// what `work` does, so a class inherits it only together with the `work` it describes.
+
+#[repr(C)]
+pub struct FollowRoot {
+    base: FerroObject,
+}
+
+ferro_class! {
+    FollowRoot: FerroObject, virtuals FollowRootImpl: FerroObjectImpl {
+        fn work(this) -> String;
+        /// What is known about `work`.
+        fn describes(this, prefix: &str) -> String, follows work else FollowRoot::describes_nothing;
+    }
+}
+
+ferro_impl_classes!(FollowRoot: FerroObjectImpl);
+
+impl FollowRootImpl for FollowRoot {
+    fn work(_this: &Self) -> String {
+        s("root")
+    }
+
+    fn describes(_this: &Self, prefix: &str) -> String {
+        format!("{prefix}root")
+    }
+}
+
+impl FollowRoot {
+    fn construct() -> Self {
+        Self { base: FerroObject::construct() }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+
+    fn describes_nothing(&self, prefix: &str) -> String {
+        format!("{prefix}nothing")
+    }
+}
+
+// Overrides neither and states it: the slot of the base class.
+dispatch_class!(FollowKeeps: FollowRoot);
+ferro_impl_classes!(FollowKeeps: FerroObjectImpl, FollowRootImpl);
+
+// Overrides `work` alone and states it: the fallback.
+dispatch_class!(FollowWorks: FollowRoot);
+ferro_impl_classes!(FollowWorks: FerroObjectImpl);
+ferro_overrides! { impl FollowRootImpl for FollowWorks {
+    fn work(_this: &Self) -> String {
+        s("works")
+    }
+} }
+
+// Overrides `work` alone in a plain `impl`: the fallback.
+dispatch_class!(FollowWorksPlain: FollowRoot);
+ferro_impl_classes!(FollowWorksPlain: FerroObjectImpl);
+impl FollowRootImpl for FollowWorksPlain {
+    fn work(_this: &Self) -> String {
+        s("works plain")
+    }
+}
+
+// A plain `impl` that overrides nothing states nothing: the fallback.
+dispatch_class!(FollowPlain: FollowRoot);
+ferro_impl_classes!(FollowPlain: FerroObjectImpl);
+impl FollowRootImpl for FollowPlain {}
+
+// Overrides both: its own.
+dispatch_class!(FollowBoth: FollowRoot);
+ferro_impl_classes!(FollowBoth: FerroObjectImpl);
+ferro_overrides! { impl FollowRootImpl for FollowBoth {
+    fn work(_this: &Self) -> String {
+        s("both")
+    }
+
+    fn describes(_this: &Self, prefix: &str) -> String {
+        format!("{prefix}both")
+    }
+} }
+
+// Overrides `describes` alone, over the one of the base class.
+dispatch_class!(FollowDescribes: FollowRoot);
+ferro_impl_classes!(FollowDescribes: FerroObjectImpl);
+impl FollowRootImpl for FollowDescribes {
+    fn describes(this: &Self, prefix: &str) -> String {
+        format!("more:{}", Self::parent_describes(this, prefix))
+    }
+}
+
+// Under a class that overrides `work` alone: what that class has, the fallback, by the slot
+// (stated) and by `parent_describes` (an override).
+dispatch_class!(FollowBelowWorks: FollowWorks);
+ferro_impl_classes!(FollowBelowWorks: FerroObjectImpl, FollowRootImpl);
+
+dispatch_class!(FollowDescribesBelowWorks: FollowWorks);
+ferro_impl_classes!(FollowDescribesBelowWorks: FerroObjectImpl);
+ferro_overrides! { impl FollowRootImpl for FollowDescribesBelowWorks {
+    fn describes(this: &Self, prefix: &str) -> String {
+        format!("more:{}", Self::parent_describes(this, prefix))
+    }
+} }
+
+#[test]
+fn member_that_follows_another_is_inherited_only_with_the_member_it_follows() {
+    assert_eq!("a:root", FollowRoot::new().describes("a:"));
+
+    // Neither is overridden, and the class says so: what the base class has, by its slot.
+    let keeps = FollowKeeps::new();
+    assert_eq!("root", keeps.work());
+    assert_eq!("a:root", keeps.describes("a:"));
+    assert_eq!(
+        FollowRoot::vtable().describes as usize,
+        FollowKeeps::vtable().describes as usize,
+        "the slot of the base class itself"
+    );
+
+    // `work` is another one: what the base class knew about its own does not hold.
+    let works = FollowWorks::new();
+    assert_eq!("works", works.work());
+    assert_eq!("a:nothing", works.describes("a:"));
+    assert_eq!("works plain", FollowWorksPlain::new().work());
+    assert_eq!("a:nothing", FollowWorksPlain::new().describes("a:"));
+
+    // A plain `impl` does not say what it overrides.
+    assert_eq!("root", FollowPlain::new().work());
+    assert_eq!("a:nothing", FollowPlain::new().describes("a:"));
+
+    // An override of the member is the member, whatever `work` is.
+    assert_eq!("a:both", FollowBoth::new().describes("a:"));
+    assert_eq!("more:a:root", FollowDescribes::new().describes("a:"));
+
+    // The classes below take what the class above them has.
+    let below = FollowBelowWorks::new();
+    assert_eq!("works", below.work());
+    assert_eq!("a:nothing", below.describes("a:"));
+    assert_eq!(
+        FollowWorks::vtable().describes as usize,
+        FollowBelowWorks::vtable().describes as usize,
+        "the slot of the base class itself"
+    );
+    assert_eq!("more:a:nothing", FollowDescribesBelowWorks::new().describes("a:"));
+
+    // Through the base class the call reaches the same slot.
+    let as_root: Ref<FollowRoot> = FollowWorks::new().upcast();
+    assert_eq!("a:nothing", as_root.describes("a:"));
+}

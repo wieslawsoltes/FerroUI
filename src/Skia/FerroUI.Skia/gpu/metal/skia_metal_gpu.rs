@@ -68,9 +68,18 @@ impl SkiaMetalGpu {
         // SAFETY: the device contract hands out valid `id<MTLDevice>` and
         // `id<MTLCommandQueue>` handles; Skia retains both for the lifetime
         // of the backend context.
+        // Shader libraries made ahead, before the device compiles its first text.
+        super::shader_libraries::install(device.device());
         let backend_context = unsafe { BackendContext::new(device.device(), device.command_queue()) };
 
         let context = context_factory::make_metal(&backend_context, &ordered_recordings_options())
+            .map(|mut context| {
+                // The pipelines of the records are asked for now, on the pipeline pool, while the
+                // application goes on starting (`pipeline_record.rs`).
+                let records = crate::gpu::graphite::pipeline_record::records_to_make_ahead();
+                drop(crate::gpu::graphite::pipeline_record::precompile(&mut context, records));
+                context
+            })
             .and_then(GraphiteGrContext::new)
             .unwrap_or_else(|| panic!("Unable to create a Skia GPU context from the Metal device."));
 
@@ -106,6 +115,8 @@ impl SkiaMetalGpu {
         // `id<MTLCommandQueue>` handles; the backend context retains both
         // until it is dropped, and the direct context takes references of
         // its own.
+        // Shader libraries made ahead, before the device compiles its first text.
+        super::shader_libraries::install(device.device());
         let backend_context = unsafe { mtl::BackendContext::new(device.device() as _, device.command_queue() as _) };
         let mut options = ContextOptions::default();
         options.avoid_stencil_buffers = avoid_stencil_buffers;
@@ -204,6 +215,37 @@ impl ISkiaGpu for SkiaMetalGpu {
         false
     }
 
+    /// A frame layer that can draw a frame while the one before it is
+    /// presented (`gpu/graphite/pipelined_layer.rs`), unless
+    /// [`SkiaOptions::frame_pipelining`](crate::SkiaOptions::frame_pipelining)
+    /// is off; `None` otherwise, which gives the layer a surface of the
+    /// context.
+    ///
+    /// Only the layer a render target context creates carries a session:
+    /// that is the frame layer of the compositor. Every other surface is
+    /// created without one and stays a surface of the context.
+    #[cfg(not(ferro_skia_apple_ganesh))]
+    fn try_create_surface(
+        &self,
+        size: PixelSize,
+        session: Option<&Rc<dyn ISkiaGpuRenderSession>>,
+        surface_props: &skia_safe::SurfaceProps,
+    ) -> Option<Rc<dyn ISkiaSurface>> {
+        session?;
+        let context = self.context.borrow().clone()?;
+        let options = crate::SkiaOptions::current();
+        let layer = crate::gpu::graphite::PipelinedLayerSurface::try_new(
+            &context,
+            self.device.device(),
+            size,
+            surface_props,
+            options.frame_pipelining,
+            options.effective_frame_pipelining_bands(),
+        )?;
+        Some(Rc::new(layer))
+    }
+
+    #[cfg(ferro_skia_apple_ganesh)]
     fn try_create_surface(
         &self,
         _size: PixelSize,
@@ -399,7 +441,7 @@ impl ISkiaGpuRenderSession for SkiaMetalRenderSession {
 /// (`tools/window/GraphiteNativeMetalWindowContext.mm`). The window inserts its recordings in
 /// order already. skia-safe has no setter for the option.
 #[cfg(not(ferro_skia_apple_ganesh))]
-fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
+pub(super) fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
     let mut options = skia_safe::gpu::graphite::ContextOptions::new();
     // SAFETY: `Handle<N>` is `repr(transparent)` over `UnsafeCell<N>`, itself transparent over the
     // native `skgpu::graphite::ContextOptions`, whose `fRequireOrderedRecordings` is a plain bool.
@@ -407,6 +449,57 @@ fn ordered_recordings_options() -> skia_safe::gpu::graphite::ContextOptions {
         let native = &mut *(&mut options as *mut skia_safe::gpu::graphite::ContextOptions)
             .cast::<skia_bindings::skgpu_graphite_ContextOptions>();
         native.fRequireOrderedRecordings = true;
+        native.fExecutor = pipeline_executor().cast();
+        // The pipelines are reported while something records them (`pipeline_record.rs`).
+        let callback = crate::gpu::graphite::pipeline_record::caching_callback();
+        native.fPipelineCachingCallback = std::mem::transmute::<*const std::ffi::c_void, _>(callback);
     }
     options
 }
+
+/// The thread pool the Graphite contexts of the process compile their pipelines on
+/// (`ContextOptions::fExecutor`; desktop-performance.md, section 9.81). Without one Graphite makes
+/// the pipelines of a recording one after another on the thread that snaps it, which for the
+/// first frame of a first start is the UI thread inside the first paint: each waits for Metal to
+/// compile two libraries from source. With one, the pipelines a recording needs are compiled side
+/// by side and the thread waits for the last. Made once and kept: Skia asks that the executor
+/// outlive every context made with it. Null when `FERROUI_PIPELINE_THREADS=0` asks for none.
+#[cfg(not(ferro_skia_apple_ganesh))]
+fn pipeline_executor() -> *mut std::ffi::c_void {
+    unsafe extern "C" {
+        fn ferroui_skia_pipeline_executor_new(threads: std::ffi::c_int) -> *mut std::ffi::c_void;
+    }
+    static EXECUTOR: std::sync::OnceLock<usize> = std::sync::OnceLock::new();
+    *EXECUTOR.get_or_init(|| {
+        let asked = std::env::var("FERROUI_PIPELINE_THREADS").ok();
+        let cores = std::thread::available_parallelism().map_or(2, |cores| cores.get());
+        let threads = pipeline_threads(asked.as_deref(), cores);
+        if threads == 0 {
+            return 0;
+        }
+        // SAFETY: the shim returns an executor it made, or null.
+        unsafe { ferroui_skia_pipeline_executor_new(threads) as usize }
+    }) as *mut std::ffi::c_void
+}
+
+/// Whether the process has a pool for its pipeline compiles (tests).
+#[cfg(all(test, not(ferro_skia_apple_ganesh)))]
+pub(super) fn pipeline_executor_for_tests() -> bool {
+    std::env::var("FERROUI_PIPELINE_THREADS").is_ok_and(|value| value.trim() == "0") != !pipeline_executor().is_null()
+}
+
+/// How many threads compile pipelines: what `FERROUI_PIPELINE_THREADS` asks for (0 for none),
+/// else one for each core, [`PIPELINE_THREADS`] at most.
+#[cfg(not(ferro_skia_apple_ganesh))]
+pub(super) fn pipeline_threads(asked: Option<&str>, cores: usize) -> i32 {
+    match asked.and_then(|value| value.trim().parse::<i32>().ok()) {
+        Some(asked) => asked.clamp(0, 64),
+        None => (cores as i32).clamp(1, PIPELINE_THREADS),
+    }
+}
+
+/// The most threads the pipeline compiles of the process use. Measured on a first start of the
+/// gauntlet (eleven cores): the first frame came after 2.30 s with none, 1.80 s with 2, 1.52 s
+/// with 4, 1.38 s with 8 and 1.50 s with 12. The threads sleep when there is nothing to compile.
+#[cfg(not(ferro_skia_apple_ganesh))]
+const PIPELINE_THREADS: i32 = 8;

@@ -14,10 +14,7 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         metadata.freeze();
         let metadata = Rc::new(metadata);
         let default_metadata = M::generate_type_safe_metadata(&metadata);
-        Self {
-            default_metadata,
-            inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),
-        }
+        Self::from_parts(default_metadata, Some((host_type, metadata)))
     }
 }
 

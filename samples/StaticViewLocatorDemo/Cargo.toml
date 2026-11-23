@@ -29,6 +29,9 @@ ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
 ferroui-view = { workspace = true, features = ["desktop", "reactiveui"] }
 ferroui-themes-winui = { workspace = true }
+# The runtime library of markup: the table of the units of the theme the build writes
+# (`build.rs`) names the type of a unit.
+ferroui-markup-xaml = { workspace = true }
 ferroui-reactiveui = { workspace = true }
 ferroui-reactiveui-controls = { workspace = true }
 ferroui-static-view-locator = { workspace = true, features = ["reactiveui"] }
@@ -39,3 +42,4 @@ ferroui-controls = { workspace = true, features = ["testing"] }
 
 [build-dependencies]
 ferroui-static-view-locator-build = { workspace = true }
+ferroui-build = { workspace = true }

@@ -82,8 +82,27 @@ perf_counters! {
     /// reaches (the object itself and its inheritance descendants, once per
     /// property).
     InheritedValueWalkVisits => "objects visited by inherited value walks",
+    /// `ValueStore::on_inheritance_ancestor_changed`: visits that update the
+    /// nearest inherited-value holder, including stops at local holders.
+    InheritanceAncestorWalkVisits => "objects visited by inheritance ancestor maintenance",
+    /// `ValueStore::on_ancestor_inherited_value_changed`: visits for a change
+    /// to an existing inherited effective value, including local overrides.
+    InheritedEffectiveValueWalkVisits => "objects visited by inherited effective value changes",
 
     // --- tree attachment, styles and resources (design 04) ---
+    /// `ValueStore::end_styling`: completed outermost styling batches.
+    StylingPassesCompleted => "outermost styling batches completed",
+    /// `ValueStore::reevaluate_effective_value`: non-deferred single-property
+    /// reevaluation attempts (including restarts).
+    SingleValueReevaluations => "single property reevaluations",
+    /// `ValueStore::reevaluate_effective_values`: non-deferred full-store
+    /// reevaluation attempts (including restarts).
+    FullValueReevaluations => "full value store reevaluations",
+    /// Existing effective values reset by a full-store reevaluation.
+    ReevaluatedEffectiveValues => "effective values reset by full reevaluations",
+    /// Frame entries visited by a full-store reevaluation, before priority
+    /// and value availability checks.
+    ReevaluatedFrameEntries => "frame entries visited by full reevaluations",
     /// `StyledElement::on_attached_to_logical_tree_core`: an element that
     /// was not in a logical tree enters one.
     LogicalTreeAttachments => "elements attached to a logical tree",
@@ -132,6 +151,23 @@ perf_counters! {
     TemplateBindingExpressionsCreated => "template binding expressions created",
     /// `DynamicResourceExpression::new` (the XAML runtime library).
     DynamicResourceExpressionsCreated => "dynamic resource expressions created",
+    /// `SetterBindingEntry::new`: a style attach made the entry of a setter
+    /// whose value is a binding. The entry creates its binding expression
+    /// when its value is first asked for.
+    SetterBindingEntriesCreated => "setter binding entries created",
+    /// `UntypedBindingExpression::start` of an expression that was not
+    /// running: the expression subscribed to its source.
+    BindingExpressionsStarted => "binding expressions started",
+    /// `DynamicResourceExpression::on_start` (the XAML runtime library): the
+    /// expression found its host, subscribed to it and looked its resource up.
+    DynamicResourceExpressionsStarted => "dynamic resource expressions started",
+    /// `DynamicResourceExpression::publish_value` (the XAML runtime library):
+    /// a dynamic resource looked its resource up and published it.
+    DynamicResourceLookups => "dynamic resource lookups",
+    /// `DynamicResourceExpression` (the XAML runtime library): a notification
+    /// of changed resources that was not newer than the last lookup of the
+    /// expression, which did not look up again.
+    DynamicResourceNotificationsSeen => "dynamic resource notifications already seen",
     /// `UntypedBindingExpressionBase::publish_value` of a running
     /// expression and `TypedBindingExpression::publish_value`.
     BindingValuesPublished => "binding values published",
@@ -139,6 +175,22 @@ perf_counters! {
     // --- text (design 06) ---
     /// `TextLayout::from_text_source`.
     TextLayoutsCreated => "text layouts created",
+    /// `TextFormatterImpl::shape_keeping`: a long text was shaped from the shaping of the text its
+    /// owner had before (step 7 of text-layout-performance.md).
+    TextShapingEditsTried => "text shaping edits tried",
+    /// The edit kept glyphs of the shaping before.
+    TextShapingEditsKept => "text shaping edits kept",
+    /// The break opportunities of the text were made from the table of the text before.
+    TextBreakEditsKept => "text break table edits kept",
+    /// `TextLayoutCache::get_or_create`: the layout of a plain text was the one kept for it.
+    TextLayoutCacheHits => "text layout cache hits",
+    /// `TextLayoutCache::get_or_create`: the layout of a plain text was made and kept.
+    TextLayoutCacheMisses => "text layout cache misses",
+    /// `TextLayoutCache`: a kept layout nothing held was let go for room.
+    TextLayoutCacheEvictions => "text layout cache evictions",
+    /// `TextLayoutCache::get_or_create`: the cache was full and was asked for the text for
+    /// the first time; the layout was made for its caller alone.
+    TextLayoutCacheFirstRequests => "text layout cache: first requests of a text, not kept",
     /// `TextFormatterImpl::format_line_with_cache`: a line was asked for.
     TextLinesFormatted => "text lines formatted",
     /// `TextFormatterImpl::format_line_with_cache`: the shaped runs of the
@@ -147,8 +199,34 @@ perf_counters! {
     /// `TextFormatterImpl::format_line_with_cache`: a cache was given, did
     /// not hold the line, and the shaped runs were added to it.
     TextRunCacheMisses => "text run cache misses",
+    /// `TextRunCache::adopt_line_glyph_runs`: a run of a line took the platform glyph run of
+    /// the same glyphs of the layout before.
+    TextGlyphRunsKept => "text glyph runs kept from the layout before",
     /// `TextShaper::shape_text`: a run was shaped by the platform shaper.
     TextRunsShaped => "text runs shaped",
+    /// `TextBlock::invalidate_text_layout`: a layout was dropped with its shaped runs (the text
+    /// or a property the shaping depends on changed).
+    TextBlockLayoutDropsShaping => "text block layout drops: shaping",
+    /// `TextBlock::invalidate_text_layout_keep_cache`: a layout was dropped and its shaped runs
+    /// kept (a property of the paragraph changed).
+    TextBlockLayoutDropsParagraph => "text block layout drops: paragraph",
+    /// `TextBlock::on_measure_invalidated`: a layout was dropped because the measure of the
+    /// text block was invalidated by something else than its text.
+    TextBlockLayoutDropsMeasureInvalidated => "text block layout drops: measure invalidated",
+    /// `TextBlock::measure_override`: a layout was dropped for the constraint of the measure.
+    TextBlockLayoutDropsMeasureConstraint => "text block layout drops: measure constraint",
+    /// `TextBlock::measure_override`: a layout was dropped because an embedded control was
+    /// measured again.
+    TextBlockLayoutDropsEmbeddedControls => "text block layout drops: embedded controls",
+    /// `TextBlock::arrange_override`: a layout was dropped because the alignment of the arrange
+    /// is not the one it was created with.
+    TextBlockLayoutDropsArrangeAlignment => "text block layout drops: arrange alignment",
+    /// `TextBlock::arrange_override`: a layout was dropped for the constraint of the arrange.
+    TextBlockLayoutDropsArrangeConstraint => "text block layout drops: arrange constraint",
+    /// `TextBlock::measure_override`: the measure created the layout.
+    TextBlockLayoutsCreatedByMeasure => "text block layouts created by measure",
+    /// `TextBlock::arrange_override`: the arrange created the layout.
+    TextBlockLayoutsCreatedByArrange => "text block layouts created by arrange",
 
     // --- containers (the controls crate) ---
     /// `VirtualizingStackPanel::recycle_element`: a container left the
@@ -168,13 +246,120 @@ perf_counters! {
     MeasuresExecuted => "measures executed",
     /// `Layoutable::arrange`: the arrange of an element ran.
     ArrangesExecuted => "arranges executed",
+    /// `Interactive::build_event_route`: a routed event was raised that has no class handler
+    /// and no instance handler on the thread, so its route was left empty without walking the
+    /// ancestors.
+    RoutedEventRoutesSkipped => "routed event routes skipped (nothing listens)",
     /// `LayoutManager::inner_layout_pass`: a round of measure and arrange passes.
     LayoutPassRounds => "layout pass rounds",
+    /// `LayoutManager::invalidate_measure`: the measure of an element was invalidated while a
+    /// layout pass ran (what makes a pass take another round).
+    LayoutMeasureInvalidatedInPass => "measures invalidated during a layout pass",
     /// `CompositingRenderer::update_core`: the drawing of a visual was recorded.
     VisualsRecorded => "visuals recorded",
     /// `CompositingRenderer::update_core`: a recorded drawing was the one the visual had, and
     /// was not sent again.
     VisualsRecordedUnchanged => "visuals recorded unchanged",
+    /// `CompositingRenderer::update_core`: a recorded drawing was given to the render data the
+    /// visual had, whose server-side object was kept.
+    VisualsRecordedInPlace => "visuals recorded into their render data",
+    /// `CompositingRenderer::update_core`: the drawing of a visual without a composition visual
+    /// was recorded as an item of the composition visual above (desktop-performance.md,
+    /// section 9.42).
+    VisualsRecordedAsItems => "visuals recorded as drawing items",
+    /// `Visual::attach_to_compositor_core`: a composition visual was created for a visual that
+    /// entered a visual tree.
+    CompositionVisualsCreated => "composition visuals created",
+    /// `Visual::attach_to_compositor_core`: a visual that entered a visual tree rejoined with
+    /// the composition visual it had when it left one (desktop-performance.md, section 9.32).
+    CompositionVisualsKept => "composition visuals kept",
+    /// `Visual::on_attached_to_visual_tree`: a visual that entered a visual tree is shown again
+    /// by the drawing item it had when it left one (desktop-performance.md, section 9.42).
+    DrawingItemsKept => "drawing items kept",
+    /// `Visual::synchronize_composition_child_visuals`: the child composition visuals and the
+    /// items of the composition visual of a visual with something below it were listed from the
+    /// visual tree (desktop-performance.md, section 9.42).
+    CompositionChildrenListed => "composition children listed",
+    /// `Compositor::commit`: a batch of changes was sent to the render thread.
+    CompositionBatchesCommitted => "composition batches committed",
+    /// `Compositor::commit`: the entries of the object stream of the batches (a server object,
+    /// a marker, a handle that is sent as it is).
+    CompositionBatchObjects => "composition batch objects",
+    /// `Compositor::commit`: the bytes of the value stream of the batches.
+    CompositionBatchValueBytes => "composition batch value bytes",
+    /// `MediaContext::render`: a render pass of the UI thread (callbacks, layout, commit).
+    UiRenderPasses => "ui: render passes",
+
+    // --- the frames of the render thread (counted on the thread that draws) ---
+    /// `ServerCompositionTarget::render_frame`: a frame was drawn.
+    RenderFramesDrawn => "render: frames drawn",
+    /// `ServerCompositionTarget::render_frame`: the pixels of the bounds of the dirty region.
+    RenderDirtyBoundsPixels => "render: pixels of the dirty bounds",
+    /// `ServerCompositionTarget::render_frame`: the pixels of the target.
+    RenderTargetPixels => "render: pixels of the target",
+    /// The update pass (`UpdateContext::pre_subgraph`): a visual was visited.
+    RenderUpdateVisualsVisited => "render: visuals visited by the update pass",
+    /// The update pass (`UpdateContext::post_subgraph`): a visual was dirty for render.
+    RenderVisualsDirty => "render: visuals dirty for render",
+    /// The update pass (`UpdateContext::add_to_dirty_region`): a rectangle was added to the
+    /// dirty region.
+    RenderDirtyRectsAdded => "render: dirty rectangles added",
+    /// The render walk (`ServerCompositionVisual::render`): a visual was visited.
+    RenderVisualsVisited => "render: visuals visited by the render walk",
+    /// The render walk: a visual was drawn (it meets the clip and the dirty region).
+    RenderVisualsRendered => "render: visuals rendered",
+    /// The render walk: a visual with its own transform set the transform of the canvas.
+    RenderVisualTransformsSet => "render: visual transforms set",
+    /// The drawing context of the backend: a transform of the context reached the canvas (a
+    /// transform that is replaced before the canvas is used does not).
+    RenderCanvasTransformsApplied => "render: transforms applied to the canvas",
+    /// The render walk: a visual pushed its clip to bounds.
+    RenderVisualClipsPushed => "render: visual clips to bounds pushed",
+    /// The render walk: a drawing item of a visual was drawn (section 9.42).
+    RenderItemsDrawn => "render: drawing items drawn",
+    /// The render walk: a visual pushed its opacity.
+    RenderVisualOpacitiesPushed => "render: visual opacities pushed",
+    /// The render walk: a visual was drawn from its bitmap cache.
+    RenderCachedVisualsDrawn => "render: visuals drawn from a cache",
+    /// The replay of a drawing (`RenderDataStreamReplay`): a line.
+    RenderLinesDrawn => "render: lines drawn",
+    /// The replay of a drawing: a rectangle.
+    RenderRectanglesDrawn => "render: rectangles drawn",
+    /// The replay of a drawing: an ellipse.
+    RenderEllipsesDrawn => "render: ellipses drawn",
+    /// The replay of a drawing: a geometry.
+    RenderGeometriesDrawn => "render: geometries drawn",
+    /// The replay of a drawing: a glyph run.
+    RenderGlyphRunsDrawn => "render: glyph runs drawn",
+    /// The drawing context of the backend: the glyphs of the glyph runs drawn.
+    RenderGlyphsDrawn => "render: glyphs drawn",
+    /// The drawing context of the backend: a glyph run was drawn for the first time, from its
+    /// glyphs and without a retained blob.
+    RenderGlyphRunsFirstDrawn => "render: glyph runs drawn for the first time",
+    /// The replay of a drawing: a bitmap.
+    RenderBitmapsDrawn => "render: bitmaps drawn",
+    /// The replay of a drawing: a clip was pushed.
+    RenderClipsPushed => "render: clips pushed by drawings",
+    /// The replay of a drawing: a geometry clip was pushed.
+    RenderGeometryClipsPushed => "render: geometry clips pushed by drawings",
+    /// The replay of a drawing: an opacity, a layer, an opacity mask or an effect was pushed.
+    RenderLayersPushed => "render: opacities, layers, masks and effects pushed by drawings",
+    /// The replay of a drawing: a transform was pushed.
+    RenderTransformsPushed => "render: transforms pushed by drawings",
+
+    // --- the pipelined frame layers of the Skia backend (desktop-performance.md, section 9.33) ---
+    /// `PipelinedLayer::begin_frame`: a layer that drew its frames directly began to pipeline
+    /// them.
+    SkiaLayersBeganToPipeline => "skia: layers that began to pipeline their frames",
+    /// `PipelinedLayer::finish_frame`: a frame was handed to the threads of the layer.
+    SkiaFramesPipelined => "skia: frames pipelined",
+    /// `PipelinedLayer::finish_frame`: the bands of the layer were moved to rows of equal cost.
+    SkiaBandsMoved => "skia: bands of pipelined frames moved",
+    /// `PipelinedLayer::finish_frame`: a recorded frame was played on the recorder of the
+    /// context (it had a draw only that recorder draws, or the threads were not there).
+    SkiaPipelinedFramesPlayedDirectly => "skia: recorded frames played on the recorder of the context",
+    /// `PipelinedLayerSurface::surface`: the layer was read while one of its frames was drawn.
+    SkiaPipelinedLayerReadsInFrames => "skia: reads of a pipelined layer while a frame is drawn",
 }
 
 /// The number of counters.
@@ -245,6 +430,14 @@ mod counting {
         });
     }
 
+    #[inline]
+    pub(super) fn add(counter: PerfCounter, amount: u64) {
+        let _ = COUNTS.try_with(|counts| {
+            let cell = &counts[counter as usize];
+            cell.set(cell.get() + amount);
+        });
+    }
+
     pub(super) fn count_virtual_call(member: &'static str) {
         let _ = VIRTUAL_CALLS.try_with(|calls| {
             // The table is never borrowed across a call of the framework;
@@ -295,6 +488,19 @@ pub fn count(counter: PerfCounter) {
 #[cfg(not(feature = "perf-counters"))]
 #[inline(always)]
 pub fn count(_counter: PerfCounter) {}
+
+/// Adds `amount` occurrences of `counter` on this thread.
+#[cfg(feature = "perf-counters")]
+#[inline]
+pub fn add(counter: PerfCounter, amount: u64) {
+    counting::add(counter, amount)
+}
+
+/// Adds `amount` occurrences of `counter` on this thread: nothing, since
+/// the feature `perf-counters` is off.
+#[cfg(not(feature = "perf-counters"))]
+#[inline(always)]
+pub fn add(_counter: PerfCounter, _amount: u64) {}
 
 /// Counts one virtual call of `member` (`"Class::member"`) on this thread.
 /// Call it through [`perf_count_virtual!`](crate::perf_count_virtual).

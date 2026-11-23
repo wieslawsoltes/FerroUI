@@ -27,13 +27,17 @@ pub mod compositor;
 pub mod data;
 pub mod declarative;
 pub mod layout;
+pub mod layout_subsystem;
+pub mod property_subsystem;
 pub mod markup;
 pub mod navigation;
 pub mod rendering;
 pub mod styling;
+pub mod styling_subsystem;
 pub mod text;
 pub mod themes;
 pub mod traversal;
+pub mod trees;
 pub mod utilities;
 pub mod visuals;
 
@@ -51,13 +55,17 @@ pub fn register(registry: &mut Registry) {
     data::register(registry);
     declarative::register(registry);
     layout::register(registry);
+    layout_subsystem::register(registry);
+    property_subsystem::register(registry);
     markup::register(registry);
     navigation::register(registry);
     rendering::register(registry);
     styling::register(registry);
+    styling_subsystem::register(registry);
     text::register(registry);
     themes::register(registry);
     traversal::register(registry);
+    trees::register(registry);
     utilities::register(registry);
     visuals::register(registry);
 }

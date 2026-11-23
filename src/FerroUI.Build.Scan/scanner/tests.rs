@@ -1609,7 +1609,8 @@ fn the_border_of_the_fixture_creates_its_brush() {
 
 /// The names and the string literals of the code (#568, step 4), when asked for: outside test
 /// code, comments and documentation, in the bodies of macros too; names that start with a
-/// lower-case letter are left out.
+/// lower-case letter are left out, except the functions and methods the code calls, which are
+/// names in the case of a type (`text_block()` is `TextBlock`).
 #[test]
 fn source_references_are_the_names_and_strings_of_the_code() {
     let scan = scan_crate(&ScanOptions::new("creates", creates_directory().join("lib.rs")).with_source_references(true));
@@ -1617,11 +1618,36 @@ fn source_references_are_the_names_and_strings_of_the_code() {
     for name in ["Plain", "Item", "Handle", "Spacer", "Unknown", "Thickness", "Control", "Separator", "Glyph"] {
         assert!(references.names.contains(name), "{name}: {:?}", references.names);
     }
+    // A function, a method and a function in the body of a macro; not the call of test code,
+    // nor a name the code does not call (`first`).
+    for name in ["ScrollViewer", "ToolTip", "TextBlock"] {
+        assert!(references.names.contains(name), "{name}: {:?}", references.names);
+    }
+    assert!(!references.names.contains("SplitView") && !references.names.contains("First"), "{:?}", references.names);
     assert!(!references.names.contains("describe") && !references.names.contains("ferroui_base"), "{:?}", references.names);
     for text in ["Item::new()", "TextFillColorPrimaryBrush", "{}"] {
         assert!(references.strings.contains(text), "{text}: {:?}", references.strings);
     }
     for text in ["OnlyInTests", "OnlyInTestFunctions", "DocumentedKey"] {
         assert!(!references.strings.iter().any(|string| string.contains(text)), "{text}: {:?}", references.strings);
+    }
+}
+
+/// Media controls must resolve under the same public namespaces in compiled
+/// markup as they do after runtime register_types().
+#[test]
+fn media_controls_publish_their_public_xaml_namespaces() {
+    let source = Path::new(env!("CARGO_MANIFEST_DIR")).parent().unwrap();
+    for (folder, crate_name, namespace, names) in [
+        ("FerroUI.Media.Controls", "ferroui_media_controls", "FerroUI.Media.Controls", &["TexturePresenter", "RendererHost"][..]),
+        ("FerroUI.Media.Camera.Controls", "ferroui_media_camera_controls", "FerroUI.Media.Camera.Controls", &["CameraPreview"][..]),
+        ("FerroUI.Media.Video.Controls", "ferroui_media_video_controls", "FerroUI.Media.Video.Controls", &["MediaPlayerElement", "MediaTransportControls"][..]),
+    ] {
+        let scan = scan_crate(&ScanOptions::new(crate_name, source.join(folder).join("lib.rs")));
+        for name in names {
+            let expected = format!("{namespace}.{name}");
+            assert!(scan.model.types.iter().any(|ty| ty.full_name() == expected), "{expected} is absent from compiled XAML metadata");
+        }
+        assert!(scan.model.namespaces.iter().any(|(module, name)| module == crate_name && name == namespace));
     }
 }

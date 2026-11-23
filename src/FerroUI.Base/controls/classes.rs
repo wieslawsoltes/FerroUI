@@ -26,7 +26,24 @@ pub struct Classes(Rc<ClassesData>);
 #[derive(Default)]
 struct ClassesData {
     items: FerroList<String>,
-    listeners: HandlerList<dyn Fn()>,
+    listeners: HandlerList<dyn IClassesChangedListener>,
+}
+
+/// Internal interface for listening to changes in [`Classes`] in a more
+/// performant manner than subscribing to the collection changed event: the
+/// listener is the object that listens, with no closure between the two.
+pub(crate) trait IClassesChangedListener {
+    /// Notifies the listener that the classes changed.
+    fn changed(&self);
+}
+
+/// A listener that is a routine ([`Classes::add_listener`]).
+struct RoutineListener(Rc<dyn Fn()>);
+
+impl IClassesChangedListener for RoutineListener {
+    fn changed(&self) {
+        (self.0)()
+    }
 }
 
 impl PartialEq for Classes {
@@ -235,6 +252,13 @@ impl Classes {
     /// Registers a listener invoked whenever the classes change. Returns a
     /// token for [`remove_listener`](Self::remove_listener).
     pub fn add_listener(&self, listener: Rc<dyn Fn()>) -> u64 {
+        self.0.listeners.add(Rc::new(RoutineListener(listener)))
+    }
+
+    /// Registers an object as a listener notified whenever the classes change.
+    /// Returns a token for [`remove_listener`](Self::remove_listener). The
+    /// collection keeps the listener alive until it is removed.
+    pub(crate) fn add_changed_listener(&self, listener: Rc<dyn IClassesChangedListener>) -> u64 {
         self.0.listeners.add(listener)
     }
 
@@ -252,7 +276,7 @@ impl Classes {
             return;
         }
         for (_, listener) in self.0.listeners.snapshot().iter() {
-            listener();
+            listener.changed();
         }
     }
 
@@ -304,7 +328,7 @@ impl dyn IPseudoClasses + '_ {
 #[cfg(test)]
 mod tests {
     use super::*;
-    use std::cell::Cell;
+    use std::cell::{Cell, RefCell};
 
     #[test]
     fn duplicates_should_not_be_added() {
@@ -356,5 +380,40 @@ mod tests {
         target.add("foo");
         target.remove("foo");
         assert_eq!(count.get(), 2);
+    }
+
+    /// An object that listens (`add_changed_listener`) is told as a routine is, in the order
+    /// the two were added, and the classes hold it until its token is removed.
+    #[test]
+    fn an_object_that_listens_is_notified_and_held_until_it_is_removed() {
+        struct Listener {
+            name: &'static str,
+            heard: Rc<RefCell<Vec<&'static str>>>,
+        }
+
+        impl IClassesChangedListener for Listener {
+            fn changed(&self) {
+                self.heard.borrow_mut().push(self.name);
+            }
+        }
+
+        let target = Classes::new();
+        let heard = Rc::new(RefCell::new(Vec::new()));
+        let listener = Rc::new(Listener { name: "object", heard: heard.clone() });
+        let token = target.add_changed_listener(listener.clone());
+        let routine = heard.clone();
+        target.add_listener(Rc::new(move || routine.borrow_mut().push("routine")));
+        assert_ne!(token, 0, "a token is never zero");
+        assert_eq!(target.listener_count(), 2);
+        assert_eq!(Rc::strong_count(&listener), 2);
+
+        target.add("foo");
+        assert_eq!(*heard.borrow(), ["object", "routine"]);
+
+        target.remove_listener(token);
+        assert_eq!(target.listener_count(), 1);
+        assert_eq!(Rc::strong_count(&listener), 1);
+        target.remove("foo");
+        assert_eq!(*heard.borrow(), ["object", "routine", "routine"]);
     }
 }

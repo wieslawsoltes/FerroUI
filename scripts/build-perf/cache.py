@@ -59,7 +59,12 @@ def source_fingerprint(source: Path, excluded: Path) -> str:
             digest.update(subprocess.check_output(["git", "status", "--porcelain=v1", "-z", "--untracked-files=all"], cwd=path))
             digest.update(subprocess.check_output(["git", "diff", "--binary", "HEAD"], cwd=path))
         else:
-            raise RuntimeError(f"Unexpanded tracked directory in source fingerprint: {path}")
+            # A submodule that is not checked out (no build reads it): the commit the index records.
+            recorded = subprocess.run(["git", "rev-parse", "--verify", "--quiet", f":{os.fsdecode(name)}"],
+                                      cwd=source, stdout=subprocess.PIPE, check=False)
+            if recorded.returncode or any(path.iterdir()):
+                raise RuntimeError(f"Unexpanded tracked directory in source fingerprint: {path}")
+            digest.update(b"gitlink\0" + recorded.stdout.strip())
     return digest.hexdigest()
 
 

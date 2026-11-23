@@ -23,6 +23,22 @@ fn main() {
     // Given by the application with `RUSTFLAGS="--cfg ferro_skia_apple_ganesh"`: the manifest then
     // builds Skia with Ganesh on OpenGL and on Metal for Apple targets instead of Graphite.
     println!("cargo:rustc-check-cfg=cfg(ferro_skia_apple_ganesh)");
+    // The patched skia-bindings of the FerroUI repository says that the Skia it built carries the
+    // Graphite Metal ownership fix (#622; `graphite_metal_ownership.rs`). Cargo gives the value to
+    // the direct dependents of the binding, which this crate is on Apple targets with Graphite.
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_graphite_ownership_fixed)");
+    if env::var("DEP_SKIA_GRAPHITE_METAL_OWNERSHIP").as_deref() == Ok("fixed") {
+        println!("cargo:rustc-cfg=ferro_skia_graphite_ownership_fixed");
+    } else if env::var("CARGO_CFG_TARGET_VENDOR").as_deref() == Ok("apple")
+        && env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_err()
+    {
+        // Shown for a build of a path dependency; cargo keeps the warnings of the build scripts
+        // of registry crates to itself, so the platform also logs it at run time.
+        println!(
+            "cargo:warning=skia-bindings without the FerroUI Graphite Metal ownership fix: Metal \
+             pipelines leak (docs/apps.md, \"The Graphite Metal ownership fix\")"
+        );
+    }
 
     // Keep in step with the target tables of the manifest.
     if env::var("CARGO_CFG_TARGET_OS").as_deref() == Ok("emscripten") {
@@ -60,8 +76,26 @@ fn main() {
     if env::var_os("CARGO_FEATURE_NATIVE_FRAME_TESTS").is_some() {
         frame_build.define("FERROUI_NATIVE_FRAME_TESTS", None);
     }
+    // The texture of a pipelined frame layer (Graphite only; the source is small and has no
+    // dependency on Skia, so it is compiled for every Apple configuration).
+    println!("cargo:rerun-if-changed=gpu/graphite/pipelined_layer_texture.m");
+    // The table of shader libraries made ahead, in front of the device's shader compiler.
+    println!("cargo:rerun-if-changed=gpu/metal/shader_libraries.m");
     frame_build.file("gpu/metal/frame_completion.m")
+        .file("gpu/metal/shader_libraries.m")
+        .file("gpu/graphite/pipelined_layer_texture.m")
         .flag("-fobjc-arc").flag("-fblocks").compile("ferroui_frame_completion");
+    // The thread pool of Graphite's pipeline compiles (Graphite only).
+    if env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_err() {
+        println!("cargo:rerun-if-changed=gpu/graphite/pipeline_executor.cpp");
+        println!("cargo:rerun-if-changed=gpu/graphite/pipeline_record.cpp");
+        cc::Build::new()
+            .cpp(true)
+            .std("c++17")
+            .file("gpu/graphite/pipeline_executor.cpp")
+            .file("gpu/graphite/pipeline_record.cpp")
+            .compile("ferroui_pipeline_executor");
+    }
     println!("cargo:rustc-link-lib=framework=Metal");
     println!("cargo:rustc-link-lib=framework=IOSurface");
     println!("cargo:rustc-link-lib=framework=Foundation");

@@ -7,6 +7,8 @@ use crate::media::{
     RenderOptions, TextOptions,
 };
 use crate::platform::{IDrawingContextImpl, IGeometryImpl};
+use crate::media::effects::ImmutableCustomEffect;
+use crate::rendering::composition::effects::{push_custom_effect_graph, pop_custom_effect_graph};
 use crate::rendering::scene3d::Scene3DSnapshot;
 use crate::rendering::scene_graph::ICustomDrawOperation;
 use crate::{Matrix, Point, Rect, Ref, RoundedRect};
@@ -51,19 +53,20 @@ const TRANSFORM_STACK_POOL_LIMIT: usize = 16;
 pub struct PlatformDrawingContext<'a> {
     platform_impl: ImplRef<'a>,
     transforms: Option<Vec<Matrix>>,
+    effects: Vec<Option<(ImmutableCustomEffect, Rect)>>,
 }
 
 impl<'a> PlatformDrawingContext<'a> {
     /// Creates a core that draws to `platform_impl` and disposes it when the
     /// core is disposed (`ownsImpl: true`).
     pub fn new(platform_impl: Box<dyn IDrawingContextImpl + 'a>) -> Self {
-        Self { platform_impl: ImplRef::Owned(platform_impl), transforms: None }
+        Self { platform_impl: ImplRef::Owned(platform_impl), transforms: None, effects: Vec::new() }
     }
 
     /// Creates a core that draws to `platform_impl` without taking ownership
     /// of it (`ownsImpl: false`).
     pub fn borrowed(platform_impl: &'a mut dyn IDrawingContextImpl) -> Self {
-        Self { platform_impl: ImplRef::Borrowed(platform_impl), transforms: None }
+        Self { platform_impl: ImplRef::Borrowed(platform_impl), transforms: None, effects: Vec::new() }
     }
 
     /// The platform drawing context implementation.
@@ -200,9 +203,18 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
     }
 
     fn push_effect_core(&mut self, effect: &Rc<dyn IEffect>, bounds: Rect) {
-        if let Some(effect_impl) = self.platform_impl.get().as_drawing_context_impl_with_effects() {
-            let padding = EffectExtensions::get_effect_output_padding(Some(&**effect));
-            effect_impl.push_effect(Some(bounds.inflate_thickness(padding)), &**effect);
+        let padding = EffectExtensions::get_effect_output_padding(Some(&**effect));
+        let bounds = bounds.inflate_thickness(padding);
+        let canvas = self.platform_impl.get();
+        if let Some(custom) = effect.as_custom_effect() {
+            if push_custom_effect_graph(canvas, custom, bounds) {
+                self.effects.push(Some((custom.clone(), bounds)));
+                return;
+            }
+        }
+        self.effects.push(None);
+        if let Some(effect_impl) = canvas.as_drawing_context_impl_with_effects() {
+            effect_impl.push_effect(Some(bounds), &**effect);
         }
     }
 
@@ -238,6 +250,10 @@ impl IDrawingContextCore for PlatformDrawingContext<'_> {
     }
 
     fn pop_effect_core(&mut self) {
+        if let Some((effect, bounds)) = self.effects.pop().flatten() {
+            pop_custom_effect_graph(self.platform_impl.get(), &effect, bounds);
+            return;
+        }
         if let Some(effect_impl) = self.platform_impl.get().as_drawing_context_impl_with_effects() {
             effect_impl.pop_effect();
         }

@@ -1,5 +1,51 @@
 use super::*;
 
+/// The directories that hold the libraries Cargo built for this test, to find them in and for the compiler to look
+/// for what they depend on: the directory of the test executable where one directory holds every library
+/// (`<profile>/deps`), and the output directory of every package where each package has its own
+/// (`<profile>/build/<package>/<hash>/out`).
+fn library_directories() -> Vec<std::path::PathBuf> {
+    let executable = std::env::current_exe().unwrap();
+    let own = executable.parent().unwrap().to_path_buf();
+    let mut directories = vec![own.clone()];
+    let packages = own
+        .ancestors()
+        .nth(3)
+        .filter(|build| build.file_name().is_some_and(|name| name == "build"));
+    let entries = |directory: &std::path::Path| -> Vec<std::path::PathBuf> {
+        std::fs::read_dir(directory)
+            .into_iter()
+            .flatten()
+            .filter_map(Result::ok)
+            .map(|entry| entry.path())
+            .collect()
+    };
+    for package in packages.map(entries).unwrap_or_default() {
+        for unit in entries(&package) {
+            let output = unit.join("out");
+            if output != own && output.is_dir() {
+                directories.push(output);
+            }
+        }
+    }
+    directories
+}
+
+/// The file of compiler arguments that names `directories` as the places of dependencies, written into
+/// `directory`: there may be more of them than a command line holds.
+fn library_search_arguments(
+    directories: &[std::path::PathBuf],
+    directory: &std::path::Path,
+) -> String {
+    let arguments: String = directories
+        .iter()
+        .map(|directory| format!("-L\ndependency={}\n", directory.display()))
+        .collect();
+    let file = directory.join("libraries.args");
+    std::fs::write(&file, arguments).unwrap();
+    format!("@{}", file.display())
+}
+
 fn catalog(name: &str, content: &str) -> CatalogInput {
     CatalogInput::new(name, content)
 }
@@ -574,15 +620,12 @@ fn generated_providers_and_notification_handles_compile_and_run() {
     let directory = TestDirectory::new();
     let source = directory.0.join("generated.rs");
     std::fs::write(&source, program).unwrap();
-    let deps = std::env::current_exe()
-        .unwrap()
-        .parent()
-        .unwrap()
-        .to_owned();
+    let directories = library_directories();
     let dependency = |crate_name: &str| {
         let prefix = format!("lib{crate_name}-");
-        let mut matches: Vec<_> = std::fs::read_dir(&deps)
-            .unwrap()
+        let mut matches: Vec<_> = directories
+            .iter()
+            .flat_map(|directory| std::fs::read_dir(directory).unwrap())
             .filter_map(Result::ok)
             .map(|entry| entry.path())
             .filter(|path| {
@@ -594,7 +637,7 @@ fn generated_providers_and_notification_handles_compile_and_run() {
         matches.sort_by_key(|path| std::fs::metadata(path).unwrap().modified().unwrap());
         matches
             .pop()
-            .unwrap_or_else(|| panic!("Missing test dependency {crate_name} in {}", deps.display()))
+            .unwrap_or_else(|| panic!("Missing test dependency {crate_name} in {directories:?}"))
     };
     let executable = directory.0.join(if cfg!(windows) {
         "generated.exe"
@@ -608,8 +651,7 @@ fn generated_providers_and_notification_handles_compile_and_run() {
                 "--crate-name=protranslate_generated_validation",
             ])
             .arg(&source)
-            .arg("-L")
-            .arg(format!("dependency={}", deps.display()))
+            .arg(library_search_arguments(&directories, &directory.0))
             .arg("--extern")
             .arg(format!(
                 "ferroui_protranslate_core={}",

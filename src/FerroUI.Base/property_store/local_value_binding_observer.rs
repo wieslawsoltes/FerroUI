@@ -1,7 +1,9 @@
 use crate::data::{BindingError, BindingNotification, BindingValue, BindingValueType};
 use crate::ferro_property::BoxedPayloadSlot;
 use crate::reactive::{IDisposable, IObservable, IObserver, ObservableError, Subscription};
-use crate::{BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, StyledProperty, WeakRef};
+use crate::{
+    BoxedValue, DirectPropertyBase, FerroObject, FerroProperty, PropertyValue, StyledProperty, StyledValue, WeakRef,
+};
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
 
@@ -59,13 +61,13 @@ impl LocalBindingState {
 
 /// Observes a binding source and writes its values to a styled property with
 /// local value priority.
-pub(crate) struct LocalValueBindingObserver<T: PropertyValue> {
+pub(crate) struct LocalValueBindingObserver<T: StyledValue> {
     state: LocalBindingState,
     property: &'static StyledProperty<T>,
     default_value: RefCell<Option<T>>,
 }
 
-impl<T: PropertyValue> LocalValueBindingObserver<T> {
+impl<T: StyledValue> LocalValueBindingObserver<T> {
     pub fn new(owner: &FerroObject, property: &'static StyledProperty<T>) -> Rc<Self> {
         let has_data_validation = property.get_metadata_for(owner).enable_data_validation().unwrap_or(false);
         Rc::new(Self {
@@ -115,15 +117,15 @@ impl<T: PropertyValue> LocalValueBindingObserver<T> {
     }
 }
 
-impl<T: PropertyValue> IDisposable for LocalValueBindingObserver<T> {
+impl<T: StyledValue> IDisposable for LocalValueBindingObserver<T> {
     fn dispose(&self) {
         self.state.detach();
         self.completed();
     }
 }
 
-struct Typed<T: PropertyValue>(Weak<LocalValueBindingObserver<T>>);
-impl<T: PropertyValue> IObserver<T> for Typed<T> {
+struct Typed<T: StyledValue>(Weak<LocalValueBindingObserver<T>>);
+impl<T: StyledValue> IObserver<T> for Typed<T> {
     fn on_next(&self, value: T) {
         if let Some(observer) = self.0.upgrade() {
             observer.next(value)
@@ -141,8 +143,8 @@ impl<T: PropertyValue> IObserver<T> for Typed<T> {
     }
 }
 
-struct Value<T: PropertyValue>(Weak<LocalValueBindingObserver<T>>);
-impl<T: PropertyValue> IObserver<BindingValue<T>> for Value<T> {
+struct Value<T: StyledValue>(Weak<LocalValueBindingObserver<T>>);
+impl<T: StyledValue> IObserver<BindingValue<T>> for Value<T> {
     fn on_next(&self, value: BindingValue<T>) {
         if let Some(observer) = self.0.upgrade() {
             observer.next_value(value)
