@@ -76,6 +76,7 @@ The first preview added the five other names of section 2.2 as placeholders (37 
 
 `ferroui-controls-charts` (`src/FerroUI.Controls.Charts`, Controls and themes; the port of the public contract of WinUI Charts, docs/porting/winui-charts.md) joined with #282. It is an optional part of the facade (`charts`), and its sample `samples/ChartsDemo` is not published.
 `ferroui-controls-inking` (`src/FerroUI.Controls.Inking`, Controls and themes; the port of the inking controls of WinUI with the WinUI styles of the toolbar, docs/porting/winui-inking.md) joined with #283. It compiles its theme documents in its build script (`links = "ferroui_controls_inking_xaml"`) and depends on the WinUI theme, so it is published after it; it is an optional part of the facade (`inking`).
+`ferroui-controls-markdown` (`src/FerroUI.Controls.Markdown`, Controls and themes; the Markdown control on the rich text elements),
 `ferroui-controls-repeater` (`src/FerroUI.Controls.Repeater`, Controls and themes; the port of the Repeater of WinUI, docs/porting/winui-repeater/README.md) joined with #269. It is an optional part of the facade (`repeater`).
 `ferroui-markup-xaml-winui` (`src/Markup/FerroUI.Markup.Xaml.WinUI`, Markup; the WinUI XAML importer and its run-time loading entry points, from #286, W9; its x:Bind property-path adapter was removed in #525, X6, for the x:Bind core of `ferroui-markup-xaml`) joined with the W9 pull request. It exports its type model in its build script (`links = "ferroui_markup_xaml_winui_xaml"`) and is an optional part of the facade (`winui-xaml`).
 
