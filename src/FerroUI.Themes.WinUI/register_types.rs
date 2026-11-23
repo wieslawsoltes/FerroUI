@@ -5,7 +5,7 @@
 use crate::accents::{SystemAccentColors, SystemColors};
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
-use crate::winui_theme::{DensityStyle, WinUITheme};
+use crate::winui_theme::WinUITheme;
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
@@ -35,7 +35,6 @@ const TYPES: &[&TypeInfo] =
     &[WinUITheme::TYPE, SystemAccentColors::TYPE, SystemColors::TYPE, InfoBarPanel::TYPE, TabViewEqualWidthPanel::TYPE];
 
 const MARKUP_TYPES: &[&MarkupType] = &[
-    <DensityStyle as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverter as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverterKind as MarkupTyped>::MARKUP,
 ];
@@ -64,7 +63,6 @@ pub fn register_types() {
 /// What the untyped value conversions must know about the types of this crate: the nullable
 /// forms of the enumerations and of the converter, and the converter as its contract.
 fn register_value_types() {
-    ValueTypes::register_nullable::<DensityStyle>();
     ValueTypes::register_nullable::<CornerRadiusToThicknessConverterKind>();
     ValueTypes::register_nullable::<Rc<CornerRadiusToThicknessConverter>>();
     ValueTypes::register_cast::<Rc<CornerRadiusToThicknessConverter>, Rc<dyn IValueConverter>>(|c| c.clone());

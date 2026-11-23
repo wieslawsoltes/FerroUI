@@ -428,6 +428,7 @@ ferroui_base::ferro_rust_paths! {
         crate::InfoBarClosedEventArgs,
         crate::InfoBarClosingEventArgs,
         crate::InfoBarOpenedEventArgs,
+        crate::DensityStyle,
         crate::InfoBarSeverity,
         crate::InputPaneAwareBehavior,
         crate::ItemClickEventArgs,

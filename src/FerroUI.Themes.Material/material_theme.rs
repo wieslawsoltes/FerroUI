@@ -15,7 +15,7 @@ use ferroui_base::metadata::{from_markup_value, into_markup_value, IServiceProvi
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::{IStyle, Styles, ThemeVariant};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue,
+    ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue,
     DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref,
 };
@@ -29,16 +29,7 @@ ferroui_base::ferro_thread_local! {
     static HIGH_CONTRAST: ThemeVariant = ThemeVariant::new("HighContrast", Some(ThemeVariant::dark()));
 }
 
-/// Layout density. Both modes preserve Material's minimum 48dp touch targets.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
-#[repr(i32)]
-pub enum DensityStyle {
-    #[default]
-    Normal,
-    Compact,
-}
-
-ferro_markup_enum!(DensityStyle { Normal, Compact }, { namespace: "FerroUI.Themes.Material" });
+pub use ferroui_controls::DensityStyle;
 
 /// Includes the Android Material theme in an application.
 #[repr(C)]

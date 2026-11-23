@@ -12,7 +12,6 @@ ferroui_base::ferro_rust_paths! {
         crate::accents::SystemAccentColors,
     ],
     types: [
-        crate::DensityStyle,
     ],
     contracts: [
     ],

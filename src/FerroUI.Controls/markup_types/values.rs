@@ -104,6 +104,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     // WinUI's Symbol, declared next to the type (docs/porting/winui-controls.md).
     <Symbol as MarkupTyped>::MARKUP,
     // The enumerations and the event arguments of WinUI's InfoBar, declared next to the types.
+    <crate::DensityStyle as MarkupTyped>::MARKUP,
     <InfoBarSeverity as MarkupTyped>::MARKUP,
     <InfoBarCloseReason as MarkupTyped>::MARKUP,
     <InfoBarClosingEventArgs as MarkupTyped>::MARKUP,
@@ -170,6 +171,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<TickList>();
     ValueTypes::register_used::<TextLayoutRoundingPlacement>();
     ValueTypes::register_used::<Symbol>();
+    ValueTypes::register_used::<crate::DensityStyle>();
     ValueTypes::register_used::<InfoBarSeverity>();
     ValueTypes::register_used::<crate::ZoomMode>();
     ValueTypes::register_used::<crate::ListViewSelectionMode>();
@@ -229,6 +231,12 @@ impl ferroui_base::data::core::ValueTypeRegistration for TextLayoutRoundingPlace
 impl ferroui_base::data::core::ValueTypeRegistration for Symbol {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<Symbol>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for crate::DensityStyle {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<crate::DensityStyle>();
     }
 }
 

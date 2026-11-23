@@ -41,7 +41,7 @@ in the default XML namespace. The owner approved all four decisions on 2026-11-2
 | # | Names | Where | Live | Decision |
 |---|---|---|---|---|
 | 1 | `OverlayLayer`, `DragPreviewWindow` | Dock against `FerroUI.Controls.Primitives` and the drag and drop behaviors | `OverlayLayer` | Done: the framework keeps the plain name; Dock's are `DockOverlayLayer` and `DockDragPreviewWindow` |
-| 2 | `DensityStyle` | One identical enum in each of the four themes | yes | One shared enum in `ferroui-controls`, re-exported by each theme |
+| 2 | `DensityStyle` | One identical enum in each of the four themes | yes | Done: one shared enum in `ferroui-controls`, re-exported by each theme |
 | 3 | `Chart`, `Axis`, `AreaSeries`, `LineSeries`, `DateTimeAxis`, `ChartSeriesCollection` | Charts against LiveCharts | no | Charts keeps the names; LiveCharts gets `LiveChart`, `LiveAxis` and so on, with a per-URI alias so its old XML namespace keeps the old names |
 | 4 | `InfoBarPanel`, `TabViewEqualWidthPanel`, `CornerRadiusToThicknessConverter`, `CornerRadiusToThicknessConverterKind`, `SystemAccentColors`, `Application`, `ColumnDefinition` | Details of the themes and of the developer tools | no | Move their namespaces to `*.Internal`, which the rule leaves out |
 

@@ -199,6 +199,7 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 ### Migration
 
 - **Dock's `OverlayLayer` and `DragPreviewWindow` are `DockOverlayLayer` and `DockDragPreviewWindow`** (#1279, `ferrodock-ferro`): the framework has types with those names in the default XML namespace. Rename them in Rust and in markup (`<overlays:OverlayLayer>` becomes `<overlays:DockOverlayLayer>`, `{x:Type d:DragPreviewWindow}` becomes `{x:Type d:DockDragPreviewWindow}`).
+- **`DensityStyle` is one enum in `ferroui-controls`** (#1279): the four themes re-export it, so `ferroui_themes_fluent::DensityStyle` and `DensityStyle="Compact"` keep working. Code that matched the enums of two themes as different types uses the one type, and markup that named it with a prefix for a theme namespace (`{x:Static fluent:DensityStyle.Compact}`) names it without one.
 
 ## [0.5.0] - 2026-11-14
 

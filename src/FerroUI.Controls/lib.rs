@@ -306,8 +306,10 @@ mod icon_test_support;
 mod symbol_icon_tests;
 // WinUI's status controls (docs/porting/winui-controls.md).
 mod info_badge;
+mod density_style;
 mod info_bar;
 mod progress_ring;
+pub use density_style::DensityStyle;
 pub use info_badge::InfoBadge;
 pub use info_bar::{
     InfoBar, InfoBarCloseReason, InfoBarClosedEventArgs, InfoBarClosingEventArgs, InfoBarOpenedEventArgs,

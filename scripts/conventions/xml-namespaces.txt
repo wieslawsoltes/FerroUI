@@ -107,7 +107,6 @@ collision ColumnDefinition # decision 4
 collision CornerRadiusToThicknessConverter # decision 4
 collision CornerRadiusToThicknessConverterKind # decision 4
 collision DateTimeAxis # decision 3
-collision DensityStyle # decision 2, live
 collision InfoBarPanel # decision 4
 collision LineSeries # decision 3
 collision SystemAccentColors # decision 4
