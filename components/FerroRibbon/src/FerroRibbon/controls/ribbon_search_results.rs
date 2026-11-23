@@ -24,12 +24,11 @@ use ferroui_base::{
 use ferroui_controls::{
     Application, Border, Button, ColumnDefinitions, Control, Grid, ScrollViewer, StackPanel,
     TextBlock,
-    automation::{
-        AutomationElementIdentifiers, AutomationLiveSetting, AutomationProperties,
-        peers::ControlAutomationPeer,
-    },
+    automation::{AutomationLiveSetting, AutomationProperties},
     primitives::ScrollBarVisibility,
 };
+#[cfg(test)]
+use ferroui_controls::automation::{AutomationElementIdentifiers, peers::ControlAutomationPeer};
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -301,7 +300,6 @@ impl RibbonSearchResultsList {
             Some(path) => format!("{label}, {path}"),
             None => label,
         };
-        let old = AutomationProperties::get_name(&self.root);
         let generation = self.announcement_generation.get().wrapping_add(1);
         self.announcement_generation.set(generation);
         let weak = Rc::downgrade(self);
@@ -315,16 +313,9 @@ impl RibbonSearchResultsList {
                 {
                     return;
                 }
-                // At the pinned SDK, ControlAutomationPeer does not forward
-                // AutomationProperties.Name changes. Use its existing event API;
-                // the native backend turns this live-region event into speech.
+                // The peer reports the change of the name, and the native backend
+                // turns that live-region event into speech.
                 AutomationProperties::set_name(&this.root, Some(&name));
-                ControlAutomationPeer::create_peer_for_element(&this.root)
-                    .raise_property_changed_event(
-                        AutomationElementIdentifiers::name_property(),
-                        old.map(|value| Rc::new(value) as BoxedValue),
-                        Some(Rc::new(name)),
-                    );
             },
             DispatcherPriority::NORMAL,
         );
@@ -501,9 +492,10 @@ mod tests {
             list.move_highlight(-1);
             list.show(&RibbonFixedItems::new(vec![]), Some(&"missing".into()));
             Dispatcher::ui_thread().run_jobs(None);
+            // Clearing the name is reported with the empty name; the pending result is not.
             assert_eq!(
-                messages.borrow().len(),
-                2,
+                &*messages.borrow(),
+                &["Alpha, Home", "Beta", ""],
                 "stale pending result must not be announced"
             );
             assert_eq!(
