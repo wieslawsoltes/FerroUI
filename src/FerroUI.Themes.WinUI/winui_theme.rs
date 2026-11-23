@@ -16,7 +16,7 @@ use ferroui_base::metadata::{from_markup_value, IServiceProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::{IStyle, Styles, ThemeVariant};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue, DirectProperty,
+    ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
 };
 use ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
@@ -33,17 +33,7 @@ ferroui_base::ferro_thread_local! {
     static SYSTEM_HIGH_CONTRAST_USERS: Cell<usize> = const { Cell::new(0) };
 }
 
-/// How much space the controls of the WinUI theme take: the normal density, or the compact one of
-/// WinUI (`compact_themeresources.xaml`).
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
-#[repr(i32)]
-pub enum DensityStyle {
-    #[default]
-    Normal,
-    Compact,
-}
-
-ferro_markup_enum!(DensityStyle { Normal, Compact }, { namespace: "FerroUI.Themes.WinUI" });
+pub use ferroui_controls::DensityStyle;
 
 /// Includes the WinUI theme in an application.
 #[repr(C)]

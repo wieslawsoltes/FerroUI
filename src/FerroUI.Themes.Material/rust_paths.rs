@@ -54,7 +54,6 @@ ferroui_base::ferro_rust_paths! {
         crate::primitives::TabViewEqualWidthPanel,
     ],
     types: [
-        crate::DensityStyle,
         crate::MaterialAppBarScrollBehavior,
         crate::MaterialAppBarSize,
         crate::MaterialChipKind,

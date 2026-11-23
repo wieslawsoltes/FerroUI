@@ -11,7 +11,7 @@ use ferroui_base::metadata::{from_markup_value, IServiceProvider};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::styling::{IStyle, Styles, ThemeVariant};
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_markup_enum, ferro_properties, instantiate, BoxedValue, DirectProperty,
+    ferro_class, ferro_class_info, ferro_properties, instantiate, BoxedValue, DirectProperty,
     FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref,
 };
 use ferroui_markup_xaml::xaml_il::runtime::compiled as rt;
@@ -19,16 +19,7 @@ use ferroui_markup_xaml::XamlLoadError;
 use std::cell::{Cell, OnceCell};
 use std::rc::Rc;
 
-/// How much space the controls of the Fluent theme take.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
-#[repr(i32)]
-pub enum DensityStyle {
-    #[default]
-    Normal,
-    Compact,
-}
-
-ferro_markup_enum!(DensityStyle { Normal, Compact }, { namespace: "FerroUI.Themes.Fluent" });
+pub use ferroui_controls::DensityStyle;
 
 /// Includes the fluent theme in an application.
 #[repr(C)]

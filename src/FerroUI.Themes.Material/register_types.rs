@@ -5,7 +5,7 @@
 use crate::accents::SystemAccentColors;
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
-use crate::material_theme::{DensityStyle, MaterialTheme};
+use crate::material_theme::MaterialTheme;
 use crate::{MaterialBottomSheetHost, MaterialSheetState, MaterialSnackbar, MaterialSnackbarHost};
 use crate::{MaterialTextField, MaterialTextFieldLayout, MaterialTextFieldSlot};
 use crate::MaterialSearchView;
@@ -91,7 +91,6 @@ const MARKUP_TYPES: &[&MarkupType] = &[
     <MaterialTimeSelection as MarkupTyped>::MARKUP,
     <MaterialTimeDisplayMode as MarkupTyped>::MARKUP,
 
-    <DensityStyle as MarkupTyped>::MARKUP,
     <MaterialMotionScheme as MarkupTyped>::MARKUP,
     <MaterialSheetState as MarkupTyped>::MARKUP,
     <MaterialTextFieldSlot as MarkupTyped>::MARKUP,
@@ -136,7 +135,6 @@ fn register_value_types() {
     ValueTypes::register_nullable::<MaterialTimeSelection>();
     ValueTypes::register_nullable::<MaterialTimeDisplayMode>();
 
-    ValueTypes::register_nullable::<DensityStyle>();
     ValueTypes::register_nullable::<MaterialMotionScheme>();
     ValueTypes::register_nullable::<MaterialSheetState>();
     ValueTypes::register_nullable::<MaterialTextFieldSlot>();
