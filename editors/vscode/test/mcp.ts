@@ -199,7 +199,9 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         assert.match((await invoke('designer_hosted_state_group', createState)).content[0]?.text ?? '', /allowWrites/);
         const visualStateDraft = await invoke('designer_hosted_state_group_draft', createState);
         assert.ok(visualStateDraft.isError && !visualStateDraft.content[0]?.text?.includes('allowWrites'));
-        assert.deepEqual(content(await invoke('ferroui_reload_history', { limit: 1 })), { records: [] });
+        // Earlier fixtures can leave completed reload receipts in the shared history.
+        const unrelatedApp = 'browser:00000000-0000-4000-8000-000000000000';
+        assert.deepEqual(content(await invoke('ferroui_reload_history', { app_session: unrelatedApp, limit: 1 })), { records: [] });
         const runtimeEdit = { node: 1, property: 'Text', value: 'Draft', expected_generation: 0, expected_version: 1 };
         assert.match((await invoke('ferroui_runtime_apply_source', runtimeEdit)).content[0]?.text ?? '', /allowWrites/);
         const { designs } = content<{ designs: { uri: string; session: number }[] }>(await invoke('ferroui_designs'));
