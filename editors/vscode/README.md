@@ -92,7 +92,7 @@ For the Android workflow, build Service Review and select a test emulator or dev
 
 For Browser Live App, build and serve the Dispatch Desk debug example. Run `npm test` with `FERROUI_TEST_BROWSER_URL` set to its full loopback URL. The test discovers Chromium or uses `FERROUI_TEST_BROWSER_EXECUTABLE` when provided. It exercises the managed browser and a separate temporary debug profile. [Build and run Dispatch Desk](../../docs/designer/vscode/runtime.md#run-or-attach-a-browser-app)
 
-Run `npm test` with `FERROUI_TEST_BROWSER_BUILD=1` and the browser toolchain active to check managed builds. The test creates an independent Cargo project and saves XAML and Rust from VS Code. It checks compiler and startup failures, superseded pages, state, source reveal, and cleanup in Chromium. Set `CARGO_TARGET_DIR` to reuse a browser build cache. [Managed browser workflow](../../docs/designer/vscode/runtime.md#build-and-reload-a-browser-app-in-vs-code)
+Run `npm test` with `FERROUI_TEST_BROWSER_BUILD=1` and the browser toolchain active to check managed builds. The test creates an independent Cargo project and saves XAML and Rust from VS Code. It checks compiler and startup failures, superseded pages, state, source reveal, and cleanup in Chromium. Set `CARGO_TARGET_DIR` to reuse a browser build cache. Set `FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS` if the acceptance run uses a shared build queue or a slower workspace host. [Managed browser workflow](../../docs/designer/vscode/runtime.md#build-and-reload-a-browser-app-in-vs-code)
 
 Build a platform VSIX from the repository root, then install it using **Extensions: Install from VSIX**. Pass the native output directory of your own toolchain when using a custom Cargo target directory.
 

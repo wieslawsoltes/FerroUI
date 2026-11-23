@@ -25,6 +25,9 @@ async function save(document: vscode.TextDocument, text: string): Promise<void> 
 }
 
 export async function verifyBrowserReload(): Promise<void> {
+    const requestedTimeout = Number(process.env.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS);
+    const buildTimeout = Number.isFinite(requestedTimeout) && requestedTimeout > 0 ? requestedTimeout : 90_000;
+    const initialTimeout = Math.max(360_000, buildTimeout);
     const folder = vscode.workspace.workspaceFolders![0].uri;
     const request = { profile: 'dispatch-check', folder: folder.toString() };
     const [rust, xaml, host] = await Promise.all(['main.rs', 'Instructions.xaml', 'wwwroot/main.js']
@@ -59,7 +62,7 @@ export async function verifyBrowserReload(): Promise<void> {
             const session = await current();
             if (session?.status === label) return session;
         }, label, timeout);
-        const ready = (older: RuntimeSummary | undefined, timeout = 90_000) => waitFor(async () => {
+        const ready = (older: RuntimeSummary | undefined, timeout = buildTimeout) => waitFor(async () => {
             const session = await current();
             if (session?.available && session.generation !== older?.generation) return session;
             if (!older && session?.status === 'Browser launch failed') throw new Error(await output());
@@ -70,7 +73,7 @@ export async function verifyBrowserReload(): Promise<void> {
         const windows = async (app: ReturnType<typeof runtimeApp>) => (await app.result<RuntimeNode[]>('list_windows'))[0];
         const frame = async (app: ReturnType<typeof runtimeApp>) => app.frame((await windows(app)).node_id);
 
-        const initial = await ready(undefined, 360_000);
+        const initial = await ready(undefined, initialTimeout);
         assert.ok(initial.browser?.url && initial.pid);
         const view = () => invoke('ferroui_live_app_view', { runtime });
         await waitFor(async () => {
@@ -91,7 +94,7 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.ok(!(await history()).some(record => record.file.endsWith('notes/src/lib.rs')));
 
         await save(xaml, '<TextBlock');
-        await status('Starting browser candidate', 90_000);
+        await status('Starting browser candidate', buildTimeout);
         assert.deepEqual(await frame(live), accepted, 'Startup retains the accepted frame');
         const startup = await status('Browser update failed');
         assert.equal(startup.generation, initial.generation);
@@ -114,7 +117,7 @@ export async function verifyBrowserReload(): Promise<void> {
             .content[0]?.text ?? '', /connection changed|generation/i);
 
         await save(rust, originalRust + '\nfn invalid_browser_save( {\n');
-        const compile = await status('Browser update failed', 90_000);
+        const compile = await status('Browser update failed', buildTimeout);
         assert.equal(compile.generation, xamlAccepted.generation);
         assert.match(await output(), /error:|mismatched closing delimiter|unclosed delimiter/);
         assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 1');
@@ -123,7 +126,7 @@ export async function verifyBrowserReload(): Promise<void> {
             save(host, 'await new Promise(resolve => setTimeout(resolve, 3500));\n' + originalHost),
             save(rust, originalRust.replace('text: "Dispatch desk"', 'text: "An intermediate page"')),
         ]);
-        await status('Starting browser candidate', 90_000);
+        await status('Starting browser candidate', buildTimeout);
         assert.equal((await current())?.generation, xamlAccepted.generation);
         await Promise.all([
             save(host, originalHost),

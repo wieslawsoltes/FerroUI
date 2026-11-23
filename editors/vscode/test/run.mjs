@@ -54,6 +54,8 @@ try {
             targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-check', label: 'Dispatch Check',
                 build: { application: 'dispatch-check', toolchain: toolkit } }];
             targetEnv = { FERROUI_TEST_BROWSER_BUILD: browserBuild, CARGO_TARGET_DIR: process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo') };
+            const buildTimeout = process.env.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS;
+            if (buildTimeout) targetEnv.FERROUI_TEST_BROWSER_BUILD_TIMEOUT_MS = buildTimeout;
         } else {
             target = toolkit;
             targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-desk', label: 'Dispatch Desk', url: browser }];
