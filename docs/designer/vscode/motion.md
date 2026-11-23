@@ -50,6 +50,19 @@ Use **Reveal transition collection** and the Rust editor for computed expression
 
 [Studio’s Rust transition editor](../images/studio-rsx-property-transitions.png) · [Rust transition fixture](../../../editors/vscode/test/fixtures/RsxPropertyTransitionsWorkbench.rs)
 
+### Edit property transitions in App Preview
+
+1. Open [HostedPreview.xaml](../../../samples/TodoWorkbench/HostedPreview.xaml) with **FerroUI: Open App-Hosted Design** and select the Todo Workbench target with `app-preview` enabled. Use **Source preview** to follow an XAML buffer or the currently selected RSX invocation.
+2. Choose the clock icon labeled **App Preview Property Transitions**. Select an authored control, style, theme, or shared XAML collection. On **ReviewBadge**, choose **Add property transition**, then **Emphasis**. The loaded app registers this property and provides its compatible **DoubleTransition**.
+3. Reopen the picker to edit **Duration**, **Start delay** in XAML, or **Easing**. You can also retarget, reorder, remove, or reveal an authored entry. Click the badge in the native preview to trigger its pointer-over setter and watch the transition.
+4. Use editor Undo to reverse one action. Wait for the current frame after an edit. For a standalone XAML `Transitions` resource, enter its registered target type, such as `app:PreviewBadge`, when adding or retargeting an entry.
+
+The picker follows the open source document and uses the running app's registry. Mapped Rust uses the same inline collection forms as Design. Use source navigation for computed Rust values or shared definitions in another file. Rebuild the app with the current `ferroui-designer-support` if the toolbar icon is unavailable.
+
+![App Preview beside the XAML, with the property picker offering Emphasis and DoubleTransition for the sample’s custom control](../images/vscode-app-preview-property-transitions.png)
+
+[See the applied transition in XAML](../images/vscode-app-preview-transition-edit.png) · [App Preview setup](runtime.md#render-with-your-app-in-app-preview) · [App Preview transition tools](reference.md#edit-app-preview-property-transitions-with-mcp)
+
 ## Edit an animation
 
 1. Open [DesignWorkflows.xaml](../samples/DesignWorkflows.xaml) or an XAML file with an authored animation. Choose **FerroUI: Show Animation Timeline**. In the default VS Code layout, the **FerroUI Timeline** tab opens below the source and design. Drag the Panel divider or use **Maximize Panel** for more space. If you previously moved the view, open its title context menu and choose **Reset Location**.

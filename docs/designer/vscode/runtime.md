@@ -34,6 +34,8 @@ Edit a workspace dictionary or style included by the current view and watch App 
 
 Open **Visual state actions** to edit groups, setters, and transitions in XAML or mapped Rust. XAML state poses and routes resolve bindings and resources in the app’s live scope and sample its registered animators. A compiled Rust fixture uses its ordinary application clock for input and state handlers. [Preview state bindings and resources](motion.md#preview-state-bindings-and-resources)
 
+Use **App Preview Property Transitions** to edit a source-backed XAML or mapped Rust collection with properties and transition classes from the running app. Click inside the accepted native frame to trigger changes on its controls. [Edit and test a transition](motion.md#edit-property-transitions-in-app-preview)
+
 ### Edit a palette in App Preview
 
 1. Open an XAML App Preview with the current `ferroui-designer-support` and choose the **App Preview palette** color icon in the toolbar.

@@ -406,6 +406,15 @@ For an inline Rust collection, use the exact getter path from the `property` fie
 
 [Property transition workflow](motion.md#edit-property-transitions)
 
+### Edit App Preview property transitions with MCP
+
+1. Open the app with `designer_hosted_open`. Read its `generation`, accepted `frame`, and `propertyTransitionOwners` with `designer_hosted_animations`. Use an owner ID from that response.
+2. Call `designer_hosted_property_transitions` with the design `session`, `expected_generation`, `expected_revision`, and `expected_sequence`. Set `arguments` to `{ "owner": 1 }` using the current owner ID. Supply `target_type` in `arguments` if a shared XAML collection needs a target to resolve compatible properties.
+3. Use `designer_hosted_property_transition_draft` with the same fields and add `command` to `arguments`. For example, `"command": { "action": "add", "property": "Emphasis", "type_name": "DoubleTransition", "timing": { "duration": 0.6 } }` plans the edit against Todo Workbench’s live registry. Drafts return checked UTF-16 source patches.
+4. Call `designer_hosted_property_transition` with the same accepted frame and arguments to apply one undoable edit. Use the `timing`, `retarget`, `move`, and `remove` commands with the reported entry IDs. For Rust, take the getter path from the property choice. Read the new frame and collection after each change.
+
+[App Preview transition workflow](motion.md#edit-property-transitions-in-app-preview)
+
 ### Edit and preview behaviors with MCP
 
 1. Open a designer for an XAML view. Use `designer_outline` to find the control and `designer_studio_query` with `tool: "designer_behaviors"` and `arguments: { owner }`. The report includes attached triggers, `actionRows` in source order, UTF-16 ranges, editing capabilities, and the active preview ID.

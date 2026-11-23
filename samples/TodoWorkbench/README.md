@@ -65,6 +65,11 @@ Edit the XAML, or click the preview's text box and use **Send Text**. The app's
 native binding updates the badge. Choose **Loading** or **Ready** in Fixture to
 apply the registered data context. [Preview entry point](app_preview.rs)
 
+Choose **App Preview Property Transitions** and open **ReviewBadge**. Add
+`Emphasis` with a `DoubleTransition` and set its duration. Click the badge to
+animate the font size using the pointer-over setter. The property is registered
+by the sample's own control. [App Preview transition walkthrough](../../docs/designer/vscode/motion.md#edit-property-transitions-in-app-preview)
+
 Choose **Review shadow** in the animation picker, then select the pencil icon to
 edit the `BoxShadow` key at 2 seconds. For example, enter `12 18 30 3 #88244B90`
 and apply it to the XAML buffer. Seek to 2 seconds to see the new native shadow.
