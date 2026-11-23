@@ -137,7 +137,8 @@ impl IDrawingContextLayerImpl for ProGpuLayer {
                 }
                 *inner.scene.borrow_mut() = Some(recording.scene);
             })),
-        ))
+        )
+        .with_target_size(self.inner.size.width.max(1) as u32, self.inner.size.height.max(1) as u32))
     }
 
     fn create_shared_snapshot(&self) -> Arc<SharedBitmapImpl> {

@@ -115,6 +115,8 @@ pub(crate) fn affine(matrix: &Matrix) -> progpu_native_affine_2d {
 
 #[path = "tile_brush.rs"]
 mod tile_brush;
+#[path = "effect_layers.rs"]
+mod effect_layers;
 
 fn identity() -> progpu_native_affine_2d {
     affine(&Matrix::IDENTITY)
@@ -190,6 +192,9 @@ enum LayerEntry {
     /// A group that an image or visual brush masks when it closes: the tile is drawn over the
     /// content and keeps it where it has alpha.
     TileMask(Box<tile_brush::TileMask>),
+    /// A layer with an effect: what is above it in the stack is recorded into a scene of its
+    /// own, and this entry holds the recording it was pushed in.
+    SubScene(Box<effect_layers::SubScene>),
 }
 
 /// The current state of the context (what the next draw's state is made of).
@@ -247,6 +252,11 @@ pub struct ProGpuDrawingContext {
     needs_whole_replay: bool,
     /// The geometries drawn in this frame, by address, with the resource of their first draw.
     path_resources: HashMap<*const PathData, (Arc<PathData>, u32)>,
+    /// The pixel of the target at the top left of the scene being recorded: not zero inside a
+    /// layer with an effect (`effect_layers.rs`), whose scene covers only the layer.
+    origin: (f64, f64),
+    /// The size in pixels of what the scene being recorded is rendered into.
+    target_size: Option<(u32, u32)>,
 }
 
 impl ProGpuDrawingContext {
@@ -266,6 +276,7 @@ impl ProGpuDrawingContext {
         let error = scene.begin_generation().err();
         if let Some(gpu) = &gpu {
             gpu.images().begin_frame();
+            gpu.passes().begin_frame();
         }
         ProGpuDrawingContext {
             scene: Some(scene),
@@ -288,7 +299,16 @@ impl ProGpuDrawingContext {
             damage: None,
             needs_whole_replay: false,
             path_resources: HashMap::new(),
+            origin: (0.0, 0.0),
+            target_size: None,
         }
+    }
+
+    /// Says how large the target of the frame is: what a layer with an effect that has no bounds
+    /// covers, and what cuts the others.
+    pub(crate) fn with_target_size(mut self, width: u32, height: u32) -> Self {
+        self.target_size = Some((width, height));
+        self
     }
 
     /// The recorded scene and the first error of the recording, if any.
@@ -1449,6 +1469,13 @@ impl ProGpuDrawingContext {
 
     fn pop_scene_layer(&mut self) {
         if let Some(entry) = self.layers.pop() {
+            let entry = match entry {
+                LayerEntry::SubScene(layer) => {
+                    self.end_sub_scene(*layer);
+                    return;
+                }
+                other => other,
+            };
             if let LayerEntry::TileMask(mask) = entry {
                 self.apply_tile_mask(*mask);
             }
@@ -1507,7 +1534,10 @@ impl ProGpuDrawingContext {
 
 impl IDrawingContextImpl for ProGpuDrawingContext {
     fn transform(&self) -> Matrix {
-        self.current.transform
+        if self.origin == (0.0, 0.0) {
+            return self.current.transform;
+        }
+        self.current.transform * Matrix::create_translation(self.origin.0, self.origin.1)
     }
 
     fn set_frame_damage(&mut self, damage: Rect) {
@@ -1515,6 +1545,12 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn set_transform(&mut self, value: Matrix) {
+        // Inside a layer with an effect the scene starts at the layer.
+        let value = if self.origin == (0.0, 0.0) {
+            value
+        } else {
+            value * Matrix::create_translation(-self.origin.0, -self.origin.1)
+        };
         if self.current.transform != value {
             self.current.transform = value;
             self.changed();
@@ -1835,6 +1871,18 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         Some(self)
     }
 
+    fn as_drawing_context_impl_with_layer_effects(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextImplWithLayerEffects> {
+        Some(self)
+    }
+
+    fn as_drawing_context_with_acrylic_like_support(
+        &mut self,
+    ) -> Option<&mut dyn ferroui_base::platform::IDrawingContextWithAcrylicLikeSupport> {
+        Some(self)
+    }
+
     fn as_any_mut(&mut self) -> &mut dyn Any {
         self
     }
@@ -1856,6 +1904,16 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
 
 impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
     fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
+        if effect.as_any().is::<ferroui_base::media::ImmutableLuminanceToAlphaEffect>()
+            && self.push_luminance_layer(clip_rect)
+        {
+            return;
+        }
+        if let Some(custom) = effect.as_custom_effect() {
+            if custom.has_shader() && self.push_shader_effect(clip_rect, custom) {
+                return;
+            }
+        }
         let target = clip_rect.map(|clip| transform_bounds(clip, &self.current.transform));
         let chain = if let Some(blur) = effect.as_blur_effect() {
             let sigma = blur_radius_to_sigma(blur.radius());
@@ -1891,6 +1949,10 @@ impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
 
 impl IDrawingContextImplWithFragments for ProGpuDrawingContext {
     fn begin_fragment(&mut self) {
+        // What a layer with an effect holds is in the coordinates of that layer.
+        if self.origin != (0.0, 0.0) {
+            return;
+        }
         self.fragment = Some(FragmentRecorder::new(self.current.transform, self.aliased_text()));
     }
 
@@ -1900,8 +1962,9 @@ impl IDrawingContextImplWithFragments for ProGpuDrawingContext {
     }
 
     fn draw_fragment(&mut self, fragment: &Rc<dyn IDrawingFragment>) -> bool {
-        // Fragments do not nest: what is being kept is drawn from its commands.
-        if self.fragment.is_some() {
+        // Fragments do not nest: what is being kept is drawn from its commands. Their places are
+        // in the coordinates of the target, not of a layer with an effect.
+        if self.fragment.is_some() || self.origin != (0.0, 0.0) {
             return false;
         }
         let Some(fragment) = fragment.as_any().downcast_ref::<ProGpuFragment>() else {

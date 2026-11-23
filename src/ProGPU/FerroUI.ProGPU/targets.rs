@@ -123,7 +123,8 @@ impl IRenderTarget for FramebufferRenderTarget {
                 // A frame that failed is not built upon.
                 frame.texture = if drawn { texture } else { None };
             })),
-        );
+        )
+        .with_target_size(width, height);
         (Box::new(context), RenderTargetDrawingContextProperties { previous_frame_is_retained: retained })
     }
 
@@ -251,7 +252,8 @@ mod metal {
                     crate::perf::window_frame();
                     *slot.borrow_mut() = Some(recording.scene);
                 })),
-            );
+            )
+            .with_target_size(width, height);
             Ok((Box::new(context), RenderTargetDrawingContextProperties { previous_frame_is_retained: false }))
         }
 

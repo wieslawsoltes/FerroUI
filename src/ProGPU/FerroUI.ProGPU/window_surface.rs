@@ -452,7 +452,8 @@ impl IRenderTarget for WindowRenderTarget {
                 crate::perf::window_frame();
                 *slot.borrow_mut() = Some(recording.scene);
             })),
-        );
+        )
+        .with_target_size(size.width as u32, size.height as u32);
         Ok((Box::new(context), RenderTargetDrawingContextProperties { previous_frame_is_retained: false }))
     }
 
