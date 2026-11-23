@@ -4,7 +4,7 @@
     python3 scripts/capi/collect_manifest.py <file or directory>... [--out ferroui.json]
     python3 scripts/capi/collect_manifest.py <file or directory>... --check ferroui.json
 
-Reads C and C++ (`.c .h .cc .cpp .cxx .hpp`), Go (`.go`), Dart (`.dart`) and Osprey (`.osp`) and writes the `ferroui.json` the
+Reads C and C++ (`.c .h .cc .cpp .cxx .hpp`), Go (`.go`), Dart (`.dart`), C# (`.cs`) and Osprey (`.osp`) and writes the `ferroui.json` the
 generators of the bindings and of the library take: the `classes`, `properties` and `events` the
 sources name and the groups of calls (`abi`) they use. With `--check` it writes nothing and fails
 when a manifest leaves out a class, a property, an event or a group the sources use.
@@ -20,6 +20,7 @@ hand. Generated bindings (a `ferroui/` directory) and the outputs of the library
 | C++ | `StackPanel` | `.font_size(`, `Grid::set_row(` | `.on_click(`, `.subscribe_click(` |
 | Go | `NewStackPanel(`, `ferroui.StackPanel` | `.SetFontSize(`, `.FontSize(`, `GridSetRow(` | `.OnClick(` |
 | Dart | `StackPanel(`, `StackPanel.of(` | `.fontSize`, `Grid.setRow(` | `.onClick(` |
+| C# | `StackPanel.Create(`, `As<StackPanel>` | `.FontSize(`, `Grid.SetRow(` | `.OnClick(` |
 | Osprey | `stackPanel(` | `fontSize(`, `getFontSize(` | `onClick(`, `raiseClick(` |
 
 Osprey programs run on its runtime, which uses frames and signals, so a manifest collected from
@@ -43,8 +44,9 @@ C_SUFFIXES = {".c", ".h"}
 CPP_SUFFIXES = {".cc", ".cpp", ".cxx", ".hpp"}
 GO_SUFFIXES = {".go"}
 DART_SUFFIXES = {".dart"}
+CSHARP_SUFFIXES = {".cs"}
 OSPREY_SUFFIXES = {".osp"}
-SKIPPED_DIRECTORIES = {"ferroui", "ferroui-library"}
+SKIPPED_DIRECTORIES = {"ferroui", "ferroui-library", "bin", "obj", ".dart_tool"}
 
 LITERAL = re.compile(r'"((?:[^"\\\n]|\\.)*)"')
 ABI_CALL = re.compile(r"\bferro_[a-z0-9_]+")
@@ -192,6 +194,21 @@ def read_dart(text, spellings, usage):
             usage.events.add(spellings.dart_events[member])
 
 
+def read_csharp(text, spellings, usage):
+    code = LITERAL.sub('""', text)
+    for word in re.findall(r"\b([A-Z]\w*)\.Create\s*\(|\bAs<\s*([A-Z]\w*)\s*>", code):
+        name = word[0] or word[1]
+        if name in spellings.class_names:
+            usage.classes.add(name)
+    for owner, short in re.findall(r"\b([A-Z]\w*)\.(?:Get|Set)([A-Z]\w*)\s*\(", code):
+        if f"{owner}{short}" in spellings.go_attached:
+            usage.properties.add(spellings.go_attached[f"{owner}{short}"])
+    for member in re.findall(r"\.\s*([A-Z]\w*)\s*(?:<[^>()]*>)?\s*\(", code):
+        usage.properties.update(spellings.go_properties.get(member, ()))
+        if member in spellings.go_events:
+            usage.events.add(spellings.go_events[member])
+
+
 def read_osprey(text, spellings, usage):
     usage.osprey = True
     code = LITERAL.sub('""', text)
@@ -233,6 +250,8 @@ def collect(paths, model=None, names=None):
             language, reader = "go", read_go
         elif suffix in DART_SUFFIXES:
             language, reader = "dart", read_dart
+        elif suffix in CSHARP_SUFFIXES:
+            language, reader = "csharp", read_csharp
         elif suffix in OSPREY_SUFFIXES:
             language, reader = "osprey", read_osprey
         else:
@@ -241,7 +260,7 @@ def collect(paths, model=None, names=None):
             reader(strip_comments(file.read(), language), spellings, usage)
         found += 1
     if not found:
-        raise SystemExit("no C, C++, Go, Dart or Osprey source among the paths")
+        raise SystemExit("no C, C++, Go, Dart, C# or Osprey source among the paths")
     return usage.manifest()
 
 

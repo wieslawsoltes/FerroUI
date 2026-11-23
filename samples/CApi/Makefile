@@ -10,6 +10,8 @@
 #   make -C samples/CApi test-go   # the tests of the Go bindings (no window, no display)
 #   make -C samples/CApi run-dart  # the hello world window in Dart (needs a Dart SDK; not on macOS)
 #   make -C samples/CApi test-dart # the tests of the Dart bindings (no window, no display)
+#   make -C samples/CApi run-csharp  # the hello world window in C# (needs a .NET SDK)
+#   make -C samples/CApi test-csharp # the tests of the C# bindings (no window, no display)
 #   make -C samples/CApi bench CARGO_FLAGS="--release --no-default-features --features type-tables" PROFILE=release
 #                                  # the cost of the calls from C (call_overhead.c)
 #
@@ -33,12 +35,13 @@ CFLAGS ?= -std=c11 -O1 -g
 CXXFLAGS ?= -std=c++17 -O1 -g
 GO ?= go
 DART ?= dart
+DOTNET ?= dotnet
 LIBRARY_FILE := $(LIBDIR)/$(if $(filter Darwin,$(shell uname -s)),libferroui_capi.dylib,libferroui_capi.so)
 GO_ENV = CGO_ENABLED=1 CGO_CFLAGS="-I$(INCLUDE)" CGO_LDFLAGS="-L$(LIBDIR) -lferroui_capi -Wl,-rpath,$(LIBDIR) -lpthread"
 WARNINGS := -Wall -Wextra -Werror
 LIBS := -L$(LIBDIR) -lferroui_capi -Wl,-rpath,$(LIBDIR) -lpthread
 
-.PHONY: all library run run-gauge run-cpp run-go run-dart test test-cpp test-go test-dart bench bench-cpp clean
+.PHONY: all library run run-gauge run-cpp run-go run-dart run-csharp test test-cpp test-go test-dart test-csharp bench bench-cpp clean
 
 all: $(OUT)/hello_world $(OUT)/gauge $(OUT)/abi_test
 
@@ -91,6 +94,12 @@ run-dart: library
 
 test-dart: library
 	cd dart/binding_test && $(DART) pub get && FERROUI_LIBRARY=$(LIBRARY_FILE) $(DART) run main.dart
+
+run-csharp: library
+	cd csharp/hello_world && FERROUI_LIBRARY=$(LIBRARY_FILE) $(DOTNET) run
+
+test-csharp: library
+	cd csharp/binding_test && FERROUI_LIBRARY=$(LIBRARY_FILE) $(DOTNET) run
 
 bench-cpp: CXXFLAGS = -std=c++17 -O2
 bench-cpp: $(OUT)/call_overhead_cpp

@@ -39,6 +39,7 @@ OSPREY = load("generate_osprey_bindings")
 CPP = load("generate_cpp_bindings")
 GO = load("generate_go_bindings")
 DART = load("generate_dart_bindings")
+CSHARP = load("generate_csharp_bindings")
 sys.path.insert(0, os.path.join(SCRIPTS, "capi"))
 _collect = importlib.util.spec_from_file_location("collect_manifest", os.path.join(SCRIPTS, "capi", "collect_manifest.py"))
 COLLECT = importlib.util.module_from_spec(_collect)
@@ -318,6 +319,59 @@ class DartTests(unittest.TestCase):
                                  f"{directory} is stale: python3 scripts/generate_dart_bindings.py")
 
 
+class CSharpTests(unittest.TestCase):
+    """What can be checked without a .NET SDK; the job of capi.yml compiles and runs it."""
+
+    @classmethod
+    def setUpClass(cls):
+        with open(CSHARP.MODEL, encoding="utf-8") as file:
+            cls.model = json.load(file)
+        cls.text = CSHARP.generate(cls.model)
+
+    def test_wrappers_and_extensions(self):
+        self.assertIn("public readonly struct Button : IButton", self.text)
+        self.assertIn("public interface IButton : IContentControl { }", self.text)
+        self.assertRegex(self.text, r"public static T Opacity<T>\(this T self, double value\) where T : struct, IVisual")
+        self.assertRegex(self.text, r"public static void SetRow\(IFerroObject target, long value\)")
+        self.assertRegex(self.text, r"public static Subscription OnClick<T>\(this T self, global::System\.Action<T> handler\)")
+
+    def test_only_reads_skip_the_gc_transition(self):
+        # A write can raise an event whose handler is managed code.
+        for line in self.text.split("\n"):
+            if "SuppressGCTransition" in line and "partial" in line:
+                self.assertRegex(line, r"ferro_get_(f64|i64|bool)_or")
+
+    def test_no_call_is_ambiguous(self):
+        # Constraints leave one candidate per name unless a class and its ancestor both have it.
+        bases = dict(re.findall(r"public interface (I\w+) : (I\w+) \{", self.text))
+        signatures = {}
+        pattern = r"public static class (\w+)Extensions\n    \{\n(.*?)\n    \}\n"
+        for name, body in re.findall(pattern, self.text, re.S):
+            found = re.findall(r"public static [\w.:<>]+ (\w+)<T>\(this T self(?:, ([^)]*))?\)", body)
+            signatures["I" + name] = {(method, (parameter or "").rsplit(" ", 1)[0]) for method, parameter in found}
+        for interface, own in signatures.items():
+            base = bases.get(interface)
+            while base:
+                self.assertEqual(own & signatures.get(base, set()), set(), f"{interface} and {base}")
+                base = bases.get(base)
+
+    def test_a_selection_registers_its_classes(self):
+        text = CSHARP.generate(self.model, {"classes": ["Button"]})
+        self.assertIn("ferro_type_button();", text)
+        self.assertIn("public readonly struct ContentControl", text)
+        self.assertNotIn("public readonly struct Grid", text)
+
+    def test_the_generated_files_are_up_to_date(self):
+        for directory, manifest_path in CSHARP.targets():
+            manifest = None
+            if manifest_path:
+                with open(manifest_path, encoding="utf-8") as file:
+                    manifest = json.load(file)
+            with open(os.path.join(directory, CSHARP.FILE), encoding="utf-8") as file:
+                self.assertEqual(file.read(), CSHARP.generate(self.model, manifest),
+                                 f"{directory} is stale: python3 scripts/generate_csharp_bindings.py")
+
+
 class ManifestTests(unittest.TestCase):
     """The lists of properties and events of a manifest, and a manifest collected from sources."""
 
@@ -406,6 +460,17 @@ class ManifestTests(unittest.TestCase):
         self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
         self.assertEqual(found["events"], ["Click"])
 
+    def test_csharp_sources(self):
+        found = self.collect("App.cs", """
+            // Slider in a comment is not a use.
+            var button = Button.Create().FontSize(12).Content("Grid in a text");
+            button.OnClick(sender => { });
+            Grid.SetRow(button, 1);
+        """)
+        self.assertEqual(found["classes"], ["Button"])
+        self.assertEqual(found["properties"], ["Content", "FontSize", "Grid.Row"])
+        self.assertEqual(found["events"], ["Click"])
+
     def test_osprey_sources_keep_every_group(self):
         found = self.collect("app.osp", 'let b = button() |> fontSize(12.0) |> onClick(1)\n')
         self.assertEqual(found["classes"], ["Button"])
@@ -432,6 +497,8 @@ class ManifestTests(unittest.TestCase):
                       os.path.join(samples, "go", "hello_world", "ferroui.json")))
         cases.append(([os.path.join(samples, "dart", "hello_world", "main.dart")],
                       os.path.join(samples, "dart", "hello_world", "ferroui.json")))
+        cases.append(([os.path.join(samples, "csharp", "hello_world", "Program.cs")],
+                      os.path.join(samples, "csharp", "hello_world", "ferroui.json")))
         for manifest in glob.glob(os.path.join(samples, "osprey-bindings", "*", "ferroui.json")):
             cases.append(([os.path.dirname(manifest)], manifest))
         self.assertGreater(len(cases), 5)

@@ -15,7 +15,9 @@ same facts and a new language is one backend:
    header-only library with RAII handles and typed accessors, `samples/CApi/cpp/`); Go is the
    third (`scripts/generate_go_bindings.py`, `bindings/go/`, a cgo package with the UI thread
    locked, `samples/CApi/go/`); Dart is the fourth (`scripts/generate_dart_bindings.py`,
-   `bindings/dart/`, extension types over `dart:ffi`, `samples/CApi/dart/`).
+   `bindings/dart/`, extension types over `dart:ffi`, `samples/CApi/dart/`); C# is the fifth
+   (`scripts/generate_csharp_bindings.py`, `bindings/csharp/`, value-type wrappers with
+   constrained extension methods, `samples/CApi/csharp/`).
 
 ```sh
 python3 scripts/generate_api_model.py          # the model and the ID table of the library
@@ -23,6 +25,7 @@ python3 scripts/generate_osprey_bindings.py    # the Osprey bindings: full, and 
 python3 scripts/generate_cpp_bindings.py       # the C++ bindings: full, and each sample's selection
 python3 scripts/generate_go_bindings.py        # the Go bindings: full, and each sample's selection
 python3 scripts/generate_dart_bindings.py      # the Dart bindings: full, and each sample's selection
+python3 scripts/generate_csharp_bindings.py    # the C# bindings: full, and each sample's selection
 python3 scripts/test_generate_bindings.py      # the tests of both
 ```
 
