@@ -199,6 +199,9 @@ jobs:
       - name: The designer's language schema is up to date
         run: python3 src/FerroUI.Designer.Language/generate_schema.py --check
       # The scoped names of the generator (two public types of one crate with the same name).
+      # The typed resource keys of the themes are written from their documents (#1076).
+      - name: Generated theme keys are up to date
+        run: python3 scripts/generate_theme_keys.py --check
       - name: Tests of the view builder generator
         run: python3 scripts/test_generate_view_builders.py
       # Which jobs of this workflow a pull request runs (docs/ci.md).

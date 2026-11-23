@@ -99,6 +99,17 @@ pub enum PropValue {
     /// A binding of the property system (`Binding`, a path on the data
     /// context, a compiled binding).
     Binding(Rc<dyn BindingBase>),
+    /// A resource: the property follows it (`dynamic`), or takes its first value. Equal to a
+    /// reference of the same key and kind, so that a component that runs again does not start
+    /// it again.
+    Resource {
+        /// The key of the resource.
+        key: ferroui_base::controls::ResourceKey,
+        /// Whether the property follows the resource.
+        dynamic: bool,
+        /// The value of the property from the value of the resource.
+        convert: crate::resources::ResourceValueConverter,
+    },
     /// An element, mounted with its parent, for a property that holds a
     /// control of a class (`context_menu`): `wrap` makes the value of the
     /// property from the control.
@@ -117,6 +128,10 @@ impl PartialEq for PropValue {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
             (PropValue::Value(a), PropValue::Value(b)) => a == b,
+            (
+                PropValue::Resource { key: a, dynamic: dynamic_a, .. },
+                PropValue::Resource { key: b, dynamic: dynamic_b, .. },
+            ) => a == b && dynamic_a == dynamic_b,
             (PropValue::Follows { source: a, .. }, PropValue::Follows { source: b, .. }) => a == b,
             (PropValue::TwoWay { source: Some(a), .. }, PropValue::TwoWay { source: Some(b), .. }) => a == b,
             _ => false,
@@ -133,6 +148,7 @@ impl fmt::Debug for PropValue {
             PropValue::TwoWay { .. } => f.write_str("TwoWay"),
             PropValue::Element(_) => f.write_str("Element"),
             PropValue::Binding(_) => f.write_str("Binding"),
+            PropValue::Resource { key, dynamic, .. } => write!(f, "Resource({key:?}, dynamic: {dynamic})"),
             PropValue::TypedElement { .. } => f.write_str("TypedElement"),
         }
     }

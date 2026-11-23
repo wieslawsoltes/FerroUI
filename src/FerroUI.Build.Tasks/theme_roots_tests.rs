@@ -217,12 +217,27 @@ fn the_sources_root_type_keys_classes_and_keys() {
         names: set(&["CalendarView", "Canvas", "Orientation", "Vertical"]),
         // A key, and strings that are none.
         strings: set(&["CaptionTextBlockStyle", "Hello, World!", "CalendarView"]),
+        ..SourceReferences::default()
     };
     let theme = theme();
     let roots = source_roots(&references, [&theme], &graph);
     assert_eq!(roots, Roots { types: set(&["CalendarView", "Canvas"]), keys: set(&["CaptionTextBlockStyle"]), ..Roots::default() });
     // The calendar view and its buttons, the popup the canvas creates, the caption style.
     assert_eq!(kept_units(&theme, &roots, &graph, false), [0, 1, 2, 3, 4, 7, 8]);
+}
+
+/// A typed key is a root exactly (#1076): a name that merely equals a key is not, unless the code
+/// imports a `keys` module so that its names cannot be told.
+#[test]
+fn typed_keys_are_exact_roots() {
+    let graph = TypeGraph::from_models(&[]);
+    let theme = theme();
+    let by_name = SourceReferences { names: set(&["CaptionTextBlockStyle"]), ..SourceReferences::default() };
+    assert_eq!(source_roots(&by_name, [&theme], &graph).keys, set(&[]), "a name equal to a key is no root");
+    let typed = SourceReferences { key_names: set(&["CaptionTextBlockStyle", "NotAKey"]), ..SourceReferences::default() };
+    assert_eq!(source_roots(&typed, [&theme], &graph).keys, set(&["CaptionTextBlockStyle"]));
+    let glob = SourceReferences { names_may_be_keys: true, ..by_name };
+    assert_eq!(source_roots(&glob, [&theme], &graph).keys, set(&["CaptionTextBlockStyle"]));
 }
 
 /// Not from upstream (#603): compiled bindings are the default; the manifest turns them off for

@@ -19,6 +19,8 @@
 //! requires the native comparison procedure in `docs/porting/macos26-theme.md`.
 //! SF Pro is resolved from the host; Apple fonts and symbols are not bundled.
 
+/// The typed resource keys of the theme (`scripts/generate_theme_keys.py`).
+pub mod keys;
 #[path = "Accents/mod.rs"]
 pub mod accents;
 mod assets;

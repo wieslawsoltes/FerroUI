@@ -2,7 +2,8 @@
 //! component that runs again, under a theme variant it switches, with
 //!
 //! - styles of an element (`styles: [style(of::<Button>().class("accent"))...]`) with a nested style;
-//! - the theme variant and resources of the theme ([`use_theme_variant`], [`use_resource_as`]);
+//! - the theme variant and typed resources of the theme ([`use_theme_variant`], `keys`,
+//!   `dynamic_resource`, [`use_theme_resource`]);
 //! - a transition of a width ([`transition`]);
 //! - a context menu given as an element;
 //! - a view model bound with typed property paths (`#[derive(ViewModel)]`);
@@ -13,7 +14,6 @@
 
 use ferroui_base::data::model::Event;
 use ferroui_base::layout::{Layoutable, Orientation, VerticalAlignment};
-use ferroui_base::media::IBrush;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{BoxedValue, Visual};
 use ferroui_controls::primitives::TemplatedControl;
@@ -22,6 +22,7 @@ use ferroui_controls_treedatagrid::models::TextColumn;
 use ferroui_controls_treedatagrid::TreeDataGridSourceRef;
 use ferroui_treedatagrid_core::models::ColumnRef;
 use ferroui_treedatagrid_core::{Accessor, FlatTreeDataGridSource, Models};
+use ferroui_themes_fluent::keys;
 use ferroui_view::prelude::*;
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -107,8 +108,7 @@ pub fn Gallery(#[prop(default)] start_dark: bool) -> Element {
 #[component(rerender)]
 fn Page(dark: Signal<bool>) -> Element {
     let variant = use_theme_variant();
-    let background = use_resource_as::<Rc<dyn IBrush>>("SystemControlBackgroundAltHighBrush");
-    let accent = use_resource_as::<Rc<dyn IBrush>>("SystemControlHighlightAccentBrush");
+    let accent = use_theme_resource(keys::SystemControlHighlightAccentBrush);
     let accent_name = accent
         .as_ref()
         .and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color().to_string()))
@@ -120,7 +120,8 @@ fn Page(dark: Signal<bool>) -> Element {
     let is_dark = variant.as_ref() == Some(&ThemeVariant::dark());
 
     rsx! {
-        Border { background: background, padding: 16.0,
+        Border { dynamic_resource(ferroui_controls::Border::background_property(), keys::SystemControlBackgroundAltHighBrush),
+            padding: 16.0,
             StackPanel { spacing: 12.0,
                 styles: [
                     style(of::<Button>().class("accent"))

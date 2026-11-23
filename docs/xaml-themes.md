@@ -304,7 +304,9 @@ needs. The build computes the table from the roots:
    or a key of the theme (`Button::new()`, `"AccentButtonStyle"`), and the functions and
    methods the sources call, read as class names (`text_block()` is `TextBlock`,
    `.tool_tip("..")` is `ToolTip`): the builders of the declarative layer are named after the
-   classes they make;
+   classes they make. A typed key of a theme is read exactly, as what follows `keys::` in a path,
+   a `use` item or a macro (`keys::ButtonBackground`, #1076). An identifier that merely equals a
+   key is no root, unless the crate imports `keys::*` or `keys as k`, which hide the names;
 5. the creates edges of the type models: the controls a class's code constructs (`ListBox`
    creates `ListBoxItem`), transitively. An edge into a class that no code constructs on the
    target of the build does not hold there (`Export::not_created_on`, #1002): the host of a window

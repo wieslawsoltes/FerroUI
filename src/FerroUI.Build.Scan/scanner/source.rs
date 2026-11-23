@@ -1050,6 +1050,26 @@ impl<'ast> Visit<'ast> for Code<'_> {
         }
     }
 
+    fn visit_path(&mut self, node: &'ast syn::Path) {
+        if let Some(references) = self.references.as_deref_mut() {
+            let mut after_keys = false;
+            for segment in &node.segments {
+                if after_keys {
+                    references.add_key_name(&segment.ident.to_string());
+                }
+                after_keys = segment.ident == "keys";
+            }
+        }
+        syn::visit::visit_path(self, node);
+    }
+
+    fn visit_item_use(&mut self, node: &'ast syn::ItemUse) {
+        if let Some(references) = self.references.as_deref_mut() {
+            references.add_use_tree(&node.tree, false);
+        }
+        syn::visit::visit_item_use(self, node);
+    }
+
     fn visit_expr_call(&mut self, node: &'ast syn::ExprCall) {
         if let (Some(references), syn::Expr::Path(function)) = (self.references.as_deref_mut(), &*node.func) {
             if let Some(last) = function.path.segments.last() {
@@ -1105,6 +1125,12 @@ impl Code<'_> {
                 TokenTree::Ident(ident) => {
                     if let Some(references) = self.references.as_deref_mut() {
                         references.add_name(&ident.to_string());
+                        // A typed key of a theme: `keys::Name`.
+                        if ident == "keys" && is_path_separator(tokens, index + 1) {
+                            if let Some(TokenTree::Ident(key)) = tokens.get(index + 3) {
+                                references.add_key_name(&key.to_string());
+                            }
+                        }
                         // A call: the name with its arguments in parentheses after it.
                         if tokens.get(index + 1).is_some_and(|next| group_of(next, Delimiter::Parenthesis).is_some()) {
                             references.add_call(&ident.to_string());

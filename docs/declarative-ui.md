@@ -574,8 +574,29 @@ stack_panel().styles([
 | `use_theme_variant()` | The `ActualThemeVariant` of that control: `Light`, `Dark`, or one of the application. |
 | `use_resource(key)` | The resource as that control finds it (its resources, its ancestors', the application's and the theme's, for its theme variant), followed through the resource observable of the port. |
 | `use_resource_as::<T>(key)` | The same, converted from the markup value (`Rc<dyn IBrush>` for a brush of a theme). |
+| `use_theme_resource(keys::Name)` | The same for a typed key of a theme, as the type of the key. |
 
 A `ThemeVariantScope` element (`requested_theme_variant: variant`) switches the variant of a part of the tree; components below it read the new variant and resources.
+
+#### Typed keys and resource references
+
+Each theme crate has a `keys` module, with a constant per key of its dictionaries that carries the type of the value (`scripts/generate_theme_keys.py`):
+
+```rust
+use ferroui_themes_fluent::keys;
+
+border()
+    // Follows the resource through a change of the theme variant, with no component running again.
+    .dynamic_resource(Border::background_property(), keys::CardBackgroundFillColorDefaultBrush)
+    // Takes the first value the control finds.
+    .static_resource(Border::corner_radius_property(), keys::ControlCornerRadius)
+```
+
+- `dynamic_resource(property, key)` is `{DynamicResource}` and `static_resource(property, key)` is `{StaticResource}`, in builders and `rsx!`. Both go through the resource observable of the control. A component that runs again keeps its reference.
+- A key that does not exist does not compile, and neither does a key whose value does not convert to the property. A `Color` key on a brush property is a brush, as in a setter. `use_theme_resource(key)` is the typed form of `use_resource_as`.
+- A key whose definitions have different types, or whose type the generator does not know, is a `ThemeResourceKey<BoxedValue>`: the key is checked and the value is not. It is used through its text, `key.name()`.
+- **Trimming.** A typed key is a root the trimmer reads exactly: what follows `keys::` in a path, a `use` item or a macro. An identifier that merely equals a key is no root. `use keys::*` or `keys as k` hides which keys are named, so every upper-case name of the crate may then root a key.
+- Text keys keep working in all of these, and are the form for a key that comes from data or a custom dictionary. A string literal that equals a key roots it, whatever the code does with it.
 
 ### 10.4 Transitions and animations
 

@@ -1633,6 +1633,33 @@ fn source_references_are_the_names_and_strings_of_the_code() {
     }
 }
 
+/// The typed keys of a theme are read exactly: what follows `keys::`, and no other name.
+#[test]
+fn source_references_read_the_typed_keys_of_a_theme() {
+    let scan = scan_crate(&ScanOptions::new("creates", creates_directory().join("lib.rs")).with_source_references(true));
+    let references = &scan.references;
+    for name in ["PathKey", "MacroKey", "ImportedKey", "RenamedKey"] {
+        assert!(references.key_names.contains(name), "{name}: {:?}", references.key_names);
+    }
+    assert!(!references.key_names.contains("UnrelatedName"), "{:?}", references.key_names);
+    assert!(!references.names_may_be_keys);
+}
+
+/// A `keys` module imported so that its names cannot be told: every name may be a key.
+#[test]
+fn a_glob_or_a_renamed_keys_module_makes_every_name_a_possible_key() {
+    for source in ["use theme::keys::*;", "use theme::keys as k;", "use theme::{keys as k, Other};"] {
+        let mut references = SourceReferences::default();
+        let item: syn::ItemUse = syn::parse_str(source).unwrap();
+        references.add_use_tree(&item.tree, false);
+        assert!(references.names_may_be_keys, "{source}");
+    }
+    let mut references = SourceReferences::default();
+    let item: syn::ItemUse = syn::parse_str("use theme::{keys, other::*};").unwrap();
+    references.add_use_tree(&item.tree, false);
+    assert!(!references.names_may_be_keys, "a glob of another module");
+}
+
 /// Media controls must resolve under the same public namespaces in compiled
 /// markup as they do after runtime register_types().
 #[test]

@@ -416,9 +416,12 @@ impl BuildTarget {
 /// The roots the Rust sources of an application state (#568, step 4): its names that are a type
 /// key of a unit of `themes` or a class of `graph` (`CalendarView::new()`, `Ref<ListBox>`, a
 /// `use` of `CalendarView`), and its string literals that are a key a unit of `themes` defines
-/// (`"AccentButtonStyle"`, `"TextFillColorPrimaryBrush"`). Conservative: a name or a string that
-/// matches roots its units whatever the code does with it. A name the code builds at run time
-/// matches nothing, and needs `theme-roots`.
+/// (`"AccentButtonStyle"`, `"TextFillColorPrimaryBrush"`), and the typed keys it names
+/// (`keys::ButtonBackground`, #1076), read exactly: an identifier elsewhere that happens to equal
+/// a key (`Default`, `Dark`) is no root, unless the code hides what it takes from a `keys` module
+/// (`keys::*`, `keys as k`). Conservative: a name or a string that matches roots its units
+/// whatever the code does with it. A name the code builds at run time matches nothing, and needs
+/// `theme-roots`.
 pub fn source_roots<'t>(references: &SourceReferences, themes: impl IntoIterator<Item = &'t ThemeUnitsModel>, graph: &TypeGraph) -> Roots {
     let mut type_keys: BTreeSet<&str> = BTreeSet::new();
     let mut keys: BTreeSet<&str> = BTreeSet::new();
@@ -430,7 +433,14 @@ pub fn source_roots<'t>(references: &SourceReferences, themes: impl IntoIterator
     }
     Roots {
         types: references.names.iter().filter(|name| type_keys.contains(name.as_str()) || graph.is_class(name)).cloned().collect(),
-        keys: references.strings.iter().filter(|text| keys.contains(text.as_str())).cloned().collect(),
+        keys: references
+            .strings
+            .iter()
+            .chain(&references.key_names)
+            .chain(references.names.iter().filter(|_| references.names_may_be_keys))
+            .filter(|text| keys.contains(text.as_str()))
+            .cloned()
+            .collect(),
         ..Roots::default()
     }
 }

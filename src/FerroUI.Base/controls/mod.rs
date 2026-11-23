@@ -21,6 +21,7 @@ mod resource_provider;
 #[doc(hidden)]
 pub mod resource_preview;
 mod resources_changed_event_args;
+mod theme_resource_key;
 
 pub use child_name_scope::ChildNameScope;
 pub(crate) use classes::IClassesChangedListener;
@@ -39,6 +40,7 @@ pub use resource_dictionary::ResourceDictionary;
 #[cfg(all(debug_assertions, feature = "hot-reload"))]
 pub use resource_dictionary::{ResourceDictionaryChange, ResourceDictionaryOwnership};
 pub use resource_key::{ResourceKey, ResourceKeyObject};
+pub use theme_resource_key::ThemeResourceKey;
 pub use resource_node_extensions::{get_floating_resource_observable, ResourceConverter};
 pub use resource_provider::{ResourceProvider, ResourceProviderImpl, ResourceProviderImplExt, ResourceProviderVTable};
 pub use resources_changed_event_args::ResourcesChangedEventArgs;

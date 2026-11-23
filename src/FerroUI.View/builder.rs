@@ -512,6 +512,32 @@ impl<T> El<T> {
         self
     }
 
+    /// Makes a property follow a resource, as `{DynamicResource}` does: through a change of the
+    /// resource or of the theme variant, with no component running again. `key` is a typed key
+    /// of a theme (`keys::ButtonBackground`), whose value must convert to the property, or text.
+    pub fn dynamic_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: crate::resources::ResourceKeyFor<P::Value>,
+    {
+        let value = PropValue::Resource { key: key.resource_key(), dynamic: true, convert: K::converter() };
+        set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
+    /// Gives a property the value of a resource once, as `{StaticResource}` does: the first
+    /// value the control finds, which later changes do not replace. `key` is a typed key of a
+    /// theme or text.
+    pub fn static_resource<P, K>(mut self, property: &'static P, key: K) -> Self
+    where
+        P: TypedProperty + ?Sized,
+        K: crate::resources::ResourceKeyFor<P::Value>,
+    {
+        let value = PropValue::Resource { key: key.resource_key(), dynamic: false, convert: K::converter() };
+        set_prop(&mut self.element, property.untyped(), value);
+        self
+    }
+
     /// Handles a routed event with the control that handles it.
     pub fn on<A: IRoutedEventArgs + 'static>(
         self,
@@ -621,6 +647,12 @@ impl<T> From<El<T>> for Element {
     fn from(builder: El<T>) -> Self {
         builder.build()
     }
+}
+
+/// Gives a property of an element a value, in place of one it has.
+fn set_prop(element: &mut ControlElement, property: &'static FerroProperty, value: PropValue) {
+    element.props.retain(|entry| !std::ptr::eq(entry.property, property));
+    element.props.push(PropEntry { property, value });
 }
 
 /// The object a property is set on, for the generated code.

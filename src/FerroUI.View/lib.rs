@@ -62,6 +62,7 @@ mod mount;
 mod path_data;
 pub mod reactive;
 mod register_types;
+mod resources;
 pub mod router;
 mod rust_paths;
 mod style;
@@ -97,7 +98,7 @@ pub use element::{rerender, ComponentElement, Element, IntoChild, IntoChildren, 
 pub use component_host::{register_component, ComponentHost, View};
 pub use hooks::{
     use_data_context, use_data_context_value, use_effect, use_effect_with, use_hook, use_memo, use_parent_control,
-    use_parent_property, use_resource, use_resource_as, use_signal, use_theme_variant,
+    use_parent_property, use_resource, use_resource_as, use_signal, use_theme_resource, use_theme_variant,
 };
 pub use animation::{
     animation, ms, transition, transition_eased, transitions, use_animation, AnimationBuilder, KeyFrameBuilder,
@@ -105,6 +106,8 @@ pub use animation::{
 };
 pub use ferroui_base::styling::{Selector, Selectors};
 pub use generated::pseudo_classes::PseudoClassSelectors;
+pub use ferroui_base::controls::ThemeResourceKey;
+pub use resources::{ResourceKeyFor, ResourceValueConverter};
 pub use style::{
     any, any_of, is_type, nesting, of, parse_selector, style, style_of, AnySelector, IntoSelector, StyleBuilder,
     TypedSelector,
@@ -183,6 +186,7 @@ pub mod prelude {
     pub use crate::{path, path_data, PathBuilder, PathData};
     pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty, ViewModel};
     pub use crate::{typed_route, Route, RouteParamError, TypedRoute};
+    pub use crate::{use_theme_resource, ResourceKeyFor, ThemeResourceKey};
     pub use crate::{
         alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
         BoxShadowOptions, KeyCode, KeyGestureModifiers, LinearGradient, Transforms,

@@ -965,6 +965,29 @@ fn start_prop(control: &Ref<Control>, property: &'static FerroProperty, value: &
             let expression = control.bind_binding(property, &**binding);
             on_cleanup(move || expression.dispose());
         }
+        PropValue::Resource { key, dynamic, convert } => {
+            let (dynamic, convert) = (*dynamic, *convert);
+            let weak = control.downgrade();
+            let taken = Cell::new(false);
+            use ferroui_base::reactive::ObservableExt as _;
+            let host = ferroui_base::controls::ResourceHostRef::from(control);
+            let subscription = host.resource_observable(key.clone(), None).subscribe_fn(move |resource: Option<BoxedValue>| {
+                let Some(control) = weak.upgrade() else { return };
+                if taken.get() {
+                    return;
+                }
+                let resource = resource.filter(|resource| !resource.is::<ferroui_base::UnsetValueType>());
+                match convert(&resource) {
+                    Some(value) => {
+                        taken.set(!dynamic);
+                        untrack(|| set_untyped(&control, property, value));
+                    }
+                    None if dynamic => untrack(|| control.clear_value_untyped(property)),
+                    None => {}
+                }
+            });
+            on_cleanup(move || subscription.dispose());
+        }
         PropValue::Value(_) | PropValue::Element(_) | PropValue::TypedElement { .. } => {
             unreachable!("handled by mount_prop")
         }
@@ -1518,6 +1541,8 @@ fn describe(instance: &Instance) -> crate::inspect::InstanceNode {
                 PropValue::TwoWay { .. } => "two-way",
                 PropValue::Element(_) | PropValue::TypedElement { .. } => "element",
                 PropValue::Binding(_) => "binding",
+                PropValue::Resource { dynamic: true, .. } => "dynamic resource",
+                PropValue::Resource { dynamic: false, .. } => "static resource",
             };
             let info = |property: &'static FerroProperty, source: &'static str| {
                 let value = control.control.get_value_untyped(property);
