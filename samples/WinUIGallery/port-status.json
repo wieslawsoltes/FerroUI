@@ -2864,7 +2864,7 @@
         },
         {
           "path": "samples/WinUIGallery/media_samples_tests.rs",
-          "name": "flip_view_pager_and_carousel_selection_synchronize_both_directions_without_wrapping"
+          "name": "flip_view_selection_stops_at_both_ends"
         },
         {
           "path": "samples/WinUIGallery/media_samples_tests.rs",
