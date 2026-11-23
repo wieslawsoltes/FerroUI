@@ -38,17 +38,21 @@ impl MapControlPage {
         map.set_zoom_level(2.0);
 
         let layer = MapElementsLayer::new();
-        layer.add(MapElement::Polygon(MapPolygon::new(vec![
+        let mut area = MapPolygon::new(vec![
             place(40.0, -20.0),
             place(40.0, 30.0),
             place(10.0, 30.0),
             place(10.0, -20.0),
-        ])));
-        layer.add(MapElement::Polyline(MapPolyline::new(vec![
+        ]);
+        area.title = Some("An area".to_owned());
+        layer.add(MapElement::Polygon(area));
+        let mut line = MapPolyline::new(vec![
             place(-20.0, 150.0),
             place(-10.0, 175.0),
             place(5.0, -170.0),
-        ])));
+        ]);
+        line.title = Some("A line across the date line".to_owned());
+        layer.add(MapElement::Polyline(line));
         let mut icon = MapIcon::new(place(25.0, 5.0));
         icon.title = Some("An icon".to_owned());
         layer.add(MapElement::Icon(icon));
