@@ -12,7 +12,9 @@ use ferroui_base::{
     ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Point, Rect, Ref, Size, StaticType,
     StyledElementImpl, TypeInfo, VisualImpl, VisualImplExt,
 };
-use ferroui_controls::primitives::{SelectingItemsControlImpl, TemplatedControl, TemplatedControlImpl};
+use ferroui_controls::primitives::{
+    HeaderedSelectingItemsControlImpl, SelectingItemsControlImpl, TemplatedControl, TemplatedControlImpl,
+};
 use ferroui_controls::{ControlImpl, ItemsControlImpl, MenuItem, MenuItemImpl};
 use std::cell::Cell;
 use std::rc::Rc;
@@ -42,6 +44,7 @@ ferro_impl_classes!(
     TemplatedControlImpl,
     ItemsControlImpl,
     SelectingItemsControlImpl,
+    HeaderedSelectingItemsControlImpl,
     MenuItemImpl
 );
 

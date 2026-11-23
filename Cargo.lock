@@ -1705,6 +1705,15 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-split-menu"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
 name = "ferroui-controls-teaching-tip"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -8018,6 +8027,7 @@ dependencies = [
  "ferroui-controls-livecharts",
  "ferroui-controls-password-box",
  "ferroui-controls-repeater",
+ "ferroui-controls-split-menu",
  "ferroui-controls-teaching-tip",
  "ferroui-desktop",
  "ferroui-harfbuzz",
