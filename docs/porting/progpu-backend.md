@@ -1112,7 +1112,7 @@ The tables go into section 6 and the pull request as each step lands.
 | P7 | ProGPU bindings: `progpu-native-sys`, `progpu-native` with the Rust writer and the differential test, the C ABI additions (font catalog, delta update, span bundles, surface helpers), in the ProGPU repository | merged in ProGPU; the backend on them | in progress: `progpu-native-sys` (the engine built from the sources, wgpu-native linked statically, a C ABI over the scene builder), the Geometry module with its C ABI, analytic drop shadows, owner-thread adoption; the Rust writer and the other C ABI additions are open |
 | P8 | Windows (Direct3D 12) and Linux (Vulkan) surfaces, in the VMs | catalog smoke runs | written (section 2.2), first compiled in CI; the catalog runs and the proof of cooperative resize in the VMs are open |
 | P9 | Browser: the `WebGPU` mode of `ferroui-browser` on the Emscripten build of the engine | the browser catalog on WebGPU | written (section 2.6), first compiled in CI; no browser run yet |
-| P10 | Measurements and size (section 4), the documentation, the NOTICE files | the tables of section 6 | open |
+| P10 | Measurements and size (section 4), the documentation, the NOTICE files | the tables of section 6 | documentation and NOTICE files written (section 7); the tables for this work are measured in the quiet window |
 
 ## 6. Results
 
@@ -1221,7 +1221,13 @@ costs one load of a flag a frame.
 
 ## 7. Licensing
 
-ProGPU is MIT (Copyright (c) 2026 Wiesław Šoltés). The SDK package ships the notices of its
-optional static dependencies (FreeType, ICU) and the browser build those of Emscripten and
-Emdawnwebgpu; the NOTICE files of `ferroui-progpu` and of the browser build carry them. ProGPU's
-Unicode data tables need the Unicode license notice, which is checked in P10.
+ProGPU is MIT (Copyright (c) 2026 Wiesław Šoltés). `src/ProGPU/FerroUI.ProGPU/NOTICE.md` lists what
+an application ships with this backend. Checked in P10 against the sources of the engine:
+
+- The Unicode 17 tables of the text stack need the Unicode license (`LICENSE-UNICODE`). Those
+  generated from the data of HarfBuzz also need its license (`LICENSE-HARFBUZZ`).
+- FreeType and ICU are optional and need an explicit prepared input, which the build of
+  `progpu-native-sys` does not give: they are not in this backend.
+- `wgpu-native` and the `wgpu` crates are MIT or Apache 2.0. The browser module carries the notices
+  of the Emscripten SDK that builds it; which files of that SDK a published module has to ship is
+  settled when a module with this backend is published.
