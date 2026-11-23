@@ -1,5 +1,5 @@
 use super::{markup_members, AccessorListener, IPropertyAccessor, IPropertyAccessorPlugin, PropertyAccessorBase, PropertyError};
-use crate::data::core::{IPropertyInfo, ValueType, ValueTypes, WeakValue};
+use crate::data::core::{is_indexer_change, IPropertyInfo, ValueType, ValueTypes, WeakValue, INDEXER_NAME};
 use crate::data::model::{INotifyPropertyChanged, ModelTypes};
 use crate::data::{BindingError, BindingErrorType, BindingNotification, BindingPriority};
 use crate::reactive::IDisposable;
@@ -171,6 +171,16 @@ impl InpcPropertyAccessor {
         self.base.publish_value(value);
     }
 
+    /// Whether `name` is `Item[]` or `Item[key]` and this accessor reads the indexer. A collection
+    /// reports the same change through its collection event, which `IndexerAccessor` listens to.
+    fn is_indexer_notification(&self, name: &str) -> bool {
+        self.property.name() == INDEXER_NAME
+            && is_indexer_change(name)
+            && !self.reference.upgrade().is_some_and(|o| {
+                ModelTypes::find(&*o).is_some_and(|m| m.as_notify_collection_changed(&*o).is_some())
+            })
+    }
+
     fn remove_handler(&self) {
         if let Some(token) = self.token.take() {
             if let (Some(target), Some(inpc)) = (self.reference.upgrade(), &self.inpc) {
@@ -236,7 +246,7 @@ impl IPropertyAccessor for InpcPropertyAccessor {
                 let weak = self.this.clone();
                 let token = inpc.property_changed().add(Rc::new(move |name: &str| {
                     if let Some(this) = weak.upgrade() {
-                        if name.is_empty() || name == this.property.name() {
+                        if name.is_empty() || name == this.property.name() || this.is_indexer_notification(name) {
                             this.event_raised.set(true);
                             this.send_current_value();
                         }
