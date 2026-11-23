@@ -12,6 +12,7 @@ mod playback;
 mod player;
 mod register_types;
 mod render;
+mod scene;
 mod source;
 mod value;
 
@@ -28,6 +29,7 @@ pub use playback::AnimatedIconAnimationQueueBehavior;
 pub use player::{AnimatedIcon, AnimatedVisualPlayer, PlayCompletion};
 pub use register_types::{register_types, ASSEMBLY};
 pub use render::VisualRenderer;
+pub use scene::CompositionScene;
 pub use source::{
     AnimatedVisualSource, IAnimatedVisualSource, IAnimatedVisualSource2, IDynamicAnimatedVisualSource, ImageLoader,
     LottieDocumentSource, LottieVisualSource,

@@ -5,18 +5,17 @@
 use crate::content::ImageAsset;
 use crate::evaluate::{FrameCommand, FrameCommands, GradientKind, MaskMode, Paint, ShapeDraw, StrokeStyle, TextDraw};
 use crate::model::MatteMode;
-use crate::path::{PathCommand, PathData};
+use crate::path::{build_geometry, PathCommand, PathData};
 use ferroui_base::media::imaging::{Bitmap, BitmapBlendingMode};
 use ferroui_base::media::immutable::{
     ImmutableDashStyle, ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen,
     ImmutableRadialGradientBrush, ImmutableSolidColorBrush,
 };
 use ferroui_base::media::{
-    Color, DrawingContext, FillRule, FlowDirection, FontFamily, FormattedText, Geometry, GradientSpreadMethod, IBrush,
+    Color, DrawingContext, FlowDirection, FontFamily, FormattedText, Geometry, GradientSpreadMethod, IBrush,
     IEffect, IImmutableBrush, IPen, ImmutableLuminanceToAlphaEffect, PenLineCap, PenLineJoin, PushedState,
-    StreamGeometry, Typeface,
+    Typeface,
 };
-use ferroui_base::platform::IGeometryContext;
 use ferroui_base::utilities::Locale;
 use ferroui_base::{Matrix, Point, Rect, Ref, RelativePoint, RelativeScalar, RelativeUnit};
 use std::collections::hash_map::DefaultHasher;
@@ -80,37 +79,6 @@ fn key_of(path: &PathData, even_odd: bool) -> u64 {
         }
     }
     hasher.finish()
-}
-
-fn build_geometry(path: &PathData, even_odd: bool, filled: bool) -> Ref<Geometry> {
-    let geometry = StreamGeometry::new();
-    {
-        let mut context = geometry.open();
-        context.set_fill_rule(if even_odd { FillRule::EvenOdd } else { FillRule::NonZero });
-        let mut open = false;
-        for command in &path.commands {
-            match *command {
-                PathCommand::MoveTo(point) => {
-                    if open {
-                        context.end_figure(false);
-                    }
-                    context.begin_figure(point, filled);
-                    open = true;
-                }
-                PathCommand::LineTo(point) if open => context.line_to(point, true),
-                PathCommand::CubicTo(a, b, c) if open => context.cubic_bezier_to(a, b, c, true),
-                PathCommand::Close if open => {
-                    context.end_figure(true);
-                    open = false;
-                }
-                _ => {}
-            }
-        }
-        if open {
-            context.end_figure(false);
-        }
-    }
-    geometry.upcast()
 }
 
 fn with_opacity(color: Color, opacity: f64) -> Color {

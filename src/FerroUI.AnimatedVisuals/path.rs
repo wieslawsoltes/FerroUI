@@ -1,6 +1,9 @@
 //! Paths of cubic segments: Lottie Bezier shapes, the primitive shapes, their transforms, and trim
 //! paths by arc length.
 
+use ferroui_base::media::{FillRule, Geometry, StreamGeometry};
+use ferroui_base::platform::IGeometryContext;
+use ferroui_base::Ref;
 use ferroui_base::{Matrix, Point};
 use serde_json::Value;
 
@@ -21,6 +24,38 @@ pub struct PathData {
 
 /// The control point distance that makes a cubic Bezier a quarter circle of radius one.
 const CIRCLE: f64 = 0.552_284_749_830_793_6;
+
+/// The platform geometry of `path`.
+pub(crate) fn build_geometry(path: &PathData, even_odd: bool, filled: bool) -> Ref<Geometry> {
+    let geometry = StreamGeometry::new();
+    {
+        let mut context = geometry.open();
+        context.set_fill_rule(if even_odd { FillRule::EvenOdd } else { FillRule::NonZero });
+        let mut open = false;
+        for command in &path.commands {
+            match *command {
+                PathCommand::MoveTo(point) => {
+                    if open {
+                        context.end_figure(false);
+                    }
+                    context.begin_figure(point, filled);
+                    open = true;
+                }
+                PathCommand::LineTo(point) if open => context.line_to(point, true),
+                PathCommand::CubicTo(a, b, c) if open => context.cubic_bezier_to(a, b, c, true),
+                PathCommand::Close if open => {
+                    context.end_figure(true);
+                    open = false;
+                }
+                _ => {}
+            }
+        }
+        if open {
+            context.end_figure(false);
+        }
+    }
+    geometry.upcast()
+}
 
 /// A star or a polygon (`sr`), its corners on circles around `center`.
 #[derive(Clone, Copy, Debug, PartialEq)]

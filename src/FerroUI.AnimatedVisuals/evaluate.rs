@@ -11,7 +11,7 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 /// How deep precompositions nest: a document that refers to itself stops here.
-const MAX_DEPTH: usize = 32;
+pub(crate) const MAX_DEPTH: usize = 32;
 
 /// A kind of gradient.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -120,11 +120,16 @@ fn color(components: Components, opacity: f64) -> Color {
     )
 }
 
+/// The colour of the components of a solid paint, opaque.
+pub(crate) fn solid_color(components: Components) -> Color {
+    color(components, 1.0)
+}
+
 fn scale_of(matrix: Matrix) -> f64 {
     (matrix.m11 * matrix.m22 - matrix.m12 * matrix.m21).abs().sqrt()
 }
 
-fn stroke_style(model: &StrokeModel, frame: f64, scale: f64) -> StrokeStyle {
+pub(crate) fn stroke_style(model: &StrokeModel, frame: f64, scale: f64) -> StrokeStyle {
     let mut dashes = Vec::with_capacity(model.dashes.len());
     let mut dash_offset = 0.0;
     for dash in &model.dashes {
@@ -146,7 +151,7 @@ fn stroke_style(model: &StrokeModel, frame: f64, scale: f64) -> StrokeStyle {
 }
 
 /// The stops at `frame`: the colours, with the opacity stops when the document has them.
-fn gradient_paint(model: &GradientModel, frame: f64, transform: Matrix) -> Paint {
+pub(crate) fn gradient_paint(model: &GradientModel, frame: f64, transform: Matrix) -> Paint {
     let values = model.stops.at(frame);
     let count = model.stops.count;
     let alphas = values.get(count * 4..).unwrap_or(&[]);
@@ -187,7 +192,7 @@ fn gradient_paint(model: &GradientModel, frame: f64, transform: Matrix) -> Paint
     }
 }
 
-fn merged(geometry: &[PathData]) -> PathData {
+pub(crate) fn merged(geometry: &[PathData]) -> PathData {
     let mut path = PathData::default();
     for part in geometry {
         path.append(part);
@@ -197,7 +202,7 @@ fn merged(geometry: &[PathData]) -> PathData {
 
 /// Evaluates the items of a group: geometry gathers in `geometry`, and each paint draws what was
 /// gathered before it. `draws` runs from the top of the stack to the bottom, as the items do.
-fn evaluate_items(
+pub(crate) fn evaluate_items(
     items: &[ShapeItem],
     frame: f64,
     transform: Matrix,
