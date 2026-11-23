@@ -9,7 +9,7 @@
 namespace ferroui;
 
 // apiFingerprint() -> int: the fingerprint of the API model (ferro_api_fingerprint), format 1.
-fn apiFingerprint() = -2034746434256777622
+fn apiFingerprint() = -9012903893089005959
 // selectionFingerprint() -> int: the fingerprint of the selection of these bindings, which a
 // library built for the same manifest returns (ferro_selection_fingerprint); 0 for every class.
 fn selectionFingerprint() = 0
@@ -1557,19 +1557,20 @@ fn windowManagerAddShadowHintPropertyId() = 1026
 fn windowStartupLocationPropertyId() = 1027
 fn windowStatePropertyId() = 1028
 fn wrapPropertyId() = 1029
-fn wrapSelectionPropertyId() = 1030
-fn xPropertyId() = 1031
-fn x11PropertiesNetWmWindowTypePropertyId() = 1032
-fn x11PropertiesWmClassPropertyId() = 1033
-fn xyFocusNavigationModesPropertyId() = 1034
-fn xamlAmbientLightIsTargetPropertyId() = 1035
-fn xamlBindingHelperDataTemplateComponentPropertyId() = 1036
-fn yPropertyId() = 1037
-fn yearFormatPropertyId() = 1038
-fn yearVisiblePropertyId() = 1039
-fn zIndexPropertyId() = 1040
-fn zoomFactorPropertyId() = 1041
-fn zoomModePropertyId() = 1042
+fn wrapModePropertyId() = 1030
+fn wrapSelectionPropertyId() = 1031
+fn xPropertyId() = 1032
+fn x11PropertiesNetWmWindowTypePropertyId() = 1033
+fn x11PropertiesWmClassPropertyId() = 1034
+fn xyFocusNavigationModesPropertyId() = 1035
+fn xamlAmbientLightIsTargetPropertyId() = 1036
+fn xamlBindingHelperDataTemplateComponentPropertyId() = 1037
+fn yPropertyId() = 1038
+fn yearFormatPropertyId() = 1039
+fn yearVisiblePropertyId() = 1040
+fn zIndexPropertyId() = 1041
+fn zoomFactorPropertyId() = 1042
+fn zoomModePropertyId() = 1043
 fn accessKeyEventId() = 1
 fn accessKeyPressedEventId() = 2
 fn backRequestedEventId() = 3
@@ -3066,6 +3067,26 @@ fn penLineJoinName(value) = match value {
     PenLineJoinBevel => "Bevel"
     PenLineJoinMiter => "Miter"
     PenLineJoinRound => "Round"
+}
+
+// When a navigation button of a [`PipsPager`] is shown (WinUI `PipsPagerButtonVisibility`).
+// FerroUI's default is `Visible`, where WinUI's is `Collapsed`: a pager shows its buttons by
+// default, as it did with `IsPreviousButtonVisible` and `IsNextButtonVisible`.
+type PipsPagerButtonVisibility = PipsPagerButtonVisibilityVisible | PipsPagerButtonVisibilityVisibleOnPointerOver | PipsPagerButtonVisibilityCollapsed
+// pipsPagerButtonVisibilityName(value: PipsPagerButtonVisibility) -> string: the name of a member, which the ABI sets by name.
+fn pipsPagerButtonVisibilityName(value) = match value {
+    PipsPagerButtonVisibilityVisible => "Visible"
+    PipsPagerButtonVisibilityVisibleOnPointerOver => "VisibleOnPointerOver"
+    PipsPagerButtonVisibilityCollapsed => "Collapsed"
+}
+
+// What the navigation buttons of a [`PipsPager`] do at the first and last page (WinUI
+// `PipsPagerWrapMode`).
+type PipsPagerWrapMode = PipsPagerWrapModeNone | PipsPagerWrapModeWrap
+// pipsPagerWrapModeName(value: PipsPagerWrapMode) -> string: the name of a member, which the ABI sets by name.
+fn pipsPagerWrapModeName(value) = match value {
+    PipsPagerWrapModeNone => "None"
+    PipsPagerWrapModeWrap => "Wrap"
 }
 
 // Where the focus visual of the headers is drawn (WinUI's `PivotHeaderFocusVisualPlacement`).

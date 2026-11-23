@@ -6647,6 +6647,21 @@ pub trait PipsPagerProps: ElementBuilder {
         self.prop(<ferroui_controls::PipsPager>::is_previous_button_visible_property(), value)
     }
 
+    /// Sets [`PipsPager::previous_button_visibility_property`](ferroui_controls::PipsPager::previous_button_visibility_property).
+    fn previous_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PipsPagerButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PipsPager>::previous_button_visibility_property(), value)
+    }
+
+    /// Sets [`PipsPager::next_button_visibility_property`](ferroui_controls::PipsPager::next_button_visibility_property).
+    fn next_button_visibility<M>(self, value: impl IntoProp<ferroui_controls::PipsPagerButtonVisibility, M>) -> Self {
+        self.prop(<ferroui_controls::PipsPager>::next_button_visibility_property(), value)
+    }
+
+    /// Sets [`PipsPager::wrap_mode_property`](ferroui_controls::PipsPager::wrap_mode_property).
+    fn wrap_mode<M>(self, value: impl IntoProp<ferroui_controls::PipsPagerWrapMode, M>) -> Self {
+        self.prop(<ferroui_controls::PipsPager>::wrap_mode_property(), value)
+    }
+
     /// Sets [`PipsPager::selected_page_index_property`](ferroui_controls::PipsPager::selected_page_index_property).
     fn selected_page_index<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::PipsPager>::selected_page_index_property(), value)

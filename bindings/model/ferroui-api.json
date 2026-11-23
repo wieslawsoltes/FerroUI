@@ -2,7 +2,7 @@
  "format": 1,
  "generated_by": "scripts/generate_api_model.py",
  "abi_version": 1,
- "fingerprint": -2034746434256777622,
+ "fingerprint": -9012903893089005959,
  "naming": "Names are the names of the framework; `words` are their words in lower case, for each backend to apply the casing of its language.",
  "abi": {
   "functions": [
@@ -8587,11 +8587,14 @@
     "IsPreviousButtonVisible",
     "MaxVisiblePips",
     "NextButtonTheme",
+    "NextButtonVisibility",
     "NumberOfPages",
     "Orientation",
     "PreviousButtonTheme",
+    "PreviousButtonVisibility",
     "SelectedPageIndex",
-    "TemplateSettings"
+    "TemplateSettings",
+    "WrapMode"
    ],
    "events": [
     "SelectedIndexChanged"
@@ -31141,6 +31144,19 @@
      "default": "PagerControlButtonVisibility::Visible",
      "read_only": false,
      "doc": "Defines the `NextButtonVisibility` property: when the button to the next page is shown."
+    },
+    {
+     "owner": "PipsPager",
+     "kind": "styled",
+     "value": {
+      "rust": "PipsPagerButtonVisibility",
+      "nullable": false,
+      "kind": "enum",
+      "enum": "PipsPagerButtonVisibility"
+     },
+     "default": "PipsPagerButtonVisibility::Visible",
+     "read_only": false,
+     "doc": "Defines the `NextButtonVisibility` property."
     }
    ]
   },
@@ -33935,6 +33951,19 @@
      "default": "PagerControlButtonVisibility::Visible",
      "read_only": false,
      "doc": "Defines the `PreviousButtonVisibility` property: when the button to the previous page is shown."
+    },
+    {
+     "owner": "PipsPager",
+     "kind": "styled",
+     "value": {
+      "rust": "PipsPagerButtonVisibility",
+      "nullable": false,
+      "kind": "enum",
+      "enum": "PipsPagerButtonVisibility"
+     },
+     "default": "PipsPagerButtonVisibility::Visible",
+     "read_only": false,
+     "doc": "Defines the `PreviousButtonVisibility` property."
     }
    ]
   },
@@ -44343,6 +44372,29 @@
   },
   {
    "id": 1030,
+   "name": "WrapMode",
+   "words": [
+    "wrap",
+    "mode"
+   ],
+   "declarations": [
+    {
+     "owner": "PipsPager",
+     "kind": "styled",
+     "value": {
+      "rust": "PipsPagerWrapMode",
+      "nullable": false,
+      "kind": "enum",
+      "enum": "PipsPagerWrapMode"
+     },
+     "default": "PipsPagerWrapMode::None",
+     "read_only": false,
+     "doc": "Defines the `WrapMode` property."
+    }
+   ]
+  },
+  {
+   "id": 1031,
    "name": "WrapSelection",
    "words": [
     "wrap",
@@ -44364,7 +44416,7 @@
    ]
   },
   {
-   "id": 1031,
+   "id": 1032,
    "name": "X",
    "words": [
     "x"
@@ -44385,7 +44437,7 @@
    ]
   },
   {
-   "id": 1032,
+   "id": 1033,
    "name": "X11Properties.NetWmWindowType",
    "words": [
     "x11",
@@ -44412,7 +44464,7 @@
    ]
   },
   {
-   "id": 1033,
+   "id": 1034,
    "name": "X11Properties.WmClass",
    "words": [
     "x11",
@@ -44436,7 +44488,7 @@
    ]
   },
   {
-   "id": 1034,
+   "id": 1035,
    "name": "XYFocus.NavigationModes",
    "words": [
     "xy",
@@ -44460,7 +44512,7 @@
    ]
   },
   {
-   "id": 1035,
+   "id": 1036,
    "name": "XamlAmbientLight.IsTarget",
    "words": [
     "xaml",
@@ -44485,7 +44537,7 @@
    ]
   },
   {
-   "id": 1036,
+   "id": 1037,
    "name": "XamlBindingHelper.DataTemplateComponent",
    "words": [
     "xaml",
@@ -44511,7 +44563,7 @@
    ]
   },
   {
-   "id": 1037,
+   "id": 1038,
    "name": "Y",
    "words": [
     "y"
@@ -44532,7 +44584,7 @@
    ]
   },
   {
-   "id": 1038,
+   "id": 1039,
    "name": "YearFormat",
    "words": [
     "year",
@@ -44566,7 +44618,7 @@
    ]
   },
   {
-   "id": 1039,
+   "id": 1040,
    "name": "YearVisible",
    "words": [
     "year",
@@ -44600,7 +44652,7 @@
    ]
   },
   {
-   "id": 1040,
+   "id": 1041,
    "name": "ZIndex",
    "words": [
     "z",
@@ -44622,7 +44674,7 @@
    ]
   },
   {
-   "id": 1041,
+   "id": 1042,
    "name": "ZoomFactor",
    "words": [
     "zoom",
@@ -44644,7 +44696,7 @@
    ]
   },
   {
-   "id": 1042,
+   "id": 1043,
    "name": "ZoomMode",
    "words": [
     "zoom",
@@ -51630,6 +51682,75 @@
     }
    ],
    "doc": "Describes the shape that joins two lines."
+  },
+  {
+   "name": "PipsPagerButtonVisibility",
+   "words": [
+    "pips",
+    "pager",
+    "button",
+    "visibility"
+   ],
+   "rust_path": "ferroui_controls::PipsPagerButtonVisibility",
+   "members": [
+    {
+     "name": "Visible",
+     "words": [
+      "visible"
+     ],
+     "value": 0,
+     "doc": "The button is shown."
+    },
+    {
+     "name": "VisibleOnPointerOver",
+     "words": [
+      "visible",
+      "on",
+      "pointer",
+      "over"
+     ],
+     "value": 1,
+     "doc": "The button keeps its place and is shown while the pointer is over the pager or the keyboard focus is on one of its buttons."
+    },
+    {
+     "name": "Collapsed",
+     "words": [
+      "collapsed"
+     ],
+     "value": 2,
+     "doc": "The button takes no place and is not shown."
+    }
+   ],
+   "doc": "When a navigation button of a [`PipsPager`] is shown (WinUI `PipsPagerButtonVisibility`). FerroUI's default is `Visible`, where WinUI's is `Collapsed`: a pager shows its buttons by default, as it did with `IsPreviousButtonVisible` and `IsNextButtonVisible`."
+  },
+  {
+   "name": "PipsPagerWrapMode",
+   "words": [
+    "pips",
+    "pager",
+    "wrap",
+    "mode"
+   ],
+   "rust_path": "ferroui_controls::PipsPagerWrapMode",
+   "members": [
+    {
+     "name": "None",
+     "words": [
+      "none"
+     ],
+     "value": 0,
+     "doc": "The buttons stop at the first and last page."
+    },
+    {
+     "name": "Wrap",
+     "words": [
+      "wrap"
+     ],
+     "value": 1,
+     "doc": "The previous button of the first page goes to the last one, and the next button of the last page to the first one."
+    }
+   ],
+   "doc": "What the navigation buttons of a [`PipsPager`] do at the first and last page (WinUI `PipsPagerWrapMode`)."
   },
   {
    "name": "PivotHeaderFocusVisualPlacement",

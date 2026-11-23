@@ -6161,10 +6161,17 @@ fn nextButtonThemeObject(object, value) = {
     object
 }
 // nextButtonVisibility(object: int, value: PagerControlButtonVisibility) -> int: sets
-// NextButtonVisibility (PagerControl). Defines the `NextButtonVisibility` property: when the
-// button to the next page is shown.
+// NextButtonVisibility (PagerControl, PipsPager). Defines the `NextButtonVisibility` property:
+// when the button to the next page is shown.
 fn nextButtonVisibility(object, value) = {
     let _ = ferro_set_str(object: object, property: 579, text: pagerControlButtonVisibilityName(value: value), length: -1)
+    object
+}
+// nextButtonVisibilityPipsPagerButtonVisibility(object: int, value: PipsPagerButtonVisibility)
+// -> int: sets NextButtonVisibility (PagerControl, PipsPager). Defines the
+// `NextButtonVisibility` property: when the button to the next page is shown.
+fn nextButtonVisibilityPipsPagerButtonVisibility(object, value) = {
+    let _ = ferro_set_str(object: object, property: 579, text: pipsPagerButtonVisibilityName(value: value), length: -1)
     object
 }
 // notificationCardCloseOnClick(object: int, value: bool) -> int: sets
@@ -6812,10 +6819,18 @@ fn previousButtonThemeObject(object, value) = {
     object
 }
 // previousButtonVisibility(object: int, value: PagerControlButtonVisibility) -> int: sets
-// PreviousButtonVisibility (PagerControl). Defines the `PreviousButtonVisibility` property:
-// when the button to the previous page is shown.
+// PreviousButtonVisibility (PagerControl, PipsPager). Defines the `PreviousButtonVisibility`
+// property: when the button to the previous page is shown.
 fn previousButtonVisibility(object, value) = {
     let _ = ferro_set_str(object: object, property: 666, text: pagerControlButtonVisibilityName(value: value), length: -1)
+    object
+}
+// previousButtonVisibilityPipsPagerButtonVisibility(object: int, value:
+// PipsPagerButtonVisibility) -> int: sets PreviousButtonVisibility (PagerControl, PipsPager).
+// Defines the `PreviousButtonVisibility` property: when the button to the previous page is
+// shown.
+fn previousButtonVisibilityPipsPagerButtonVisibility(object, value) = {
+    let _ = ferro_set_str(object: object, property: 666, text: pipsPagerButtonVisibilityName(value: value), length: -1)
     object
 }
 // primaryCommands(object: int, value: string) -> int: sets PrimaryCommands (CommandBar).
@@ -9876,101 +9891,107 @@ fn wrap(object, value) = {
     let _ = ferro_set_str(object: object, property: 1029, text: flexWrapName(value: value), length: -1)
     object
 }
+// wrapMode(object: int, value: PipsPagerWrapMode) -> int: sets WrapMode (PipsPager). Defines
+// the `WrapMode` property.
+fn wrapMode(object, value) = {
+    let _ = ferro_set_str(object: object, property: 1030, text: pipsPagerWrapModeName(value: value), length: -1)
+    object
+}
 // wrapSelection(object: int, value: bool) -> int: sets WrapSelection (SelectingItemsControl).
 // Defines the `WrapSelection` property.
 fn wrapSelection(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 1030, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 1031, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getWrapSelection(object: int) -> bool: reads WrapSelection (SelectingItemsControl); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getWrapSelection(object) = ferro_get_bool_or(object: object, property: 1030, fallback: toInt8(0)) != toInt8(0)
+fn getWrapSelection(object) = ferro_get_bool_or(object: object, property: 1031, fallback: toInt8(0)) != toInt8(0)
 // x(object: int, value: float) -> int: sets X (TranslateTransform).
 fn x(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 1031, value: value)
+    let _ = ferro_set_f64(object: object, property: 1032, value: value)
     object
 }
 // getX(object: int) -> float: reads X (TranslateTransform); the fallback of its kind when the
 // read fails (`failure()` tells): a plain value, no Result.
-fn getX(object) = ferro_get_f64_or(object: object, property: 1031, fallback: 0.0)
+fn getX(object) = ferro_get_f64_or(object: object, property: 1032, fallback: 0.0)
 // x11PropertiesNetWmWindowType(object: int, value: X11NetWmWindowType) -> int: sets
 // X11Properties.NetWmWindowType (X11Properties). Defines the `NetWmWindowType` attached
 // property: the window type hint of the window.
 fn x11PropertiesNetWmWindowType(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1032, text: x11NetWmWindowTypeName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1033, text: x11NetWmWindowTypeName(value: value), length: -1)
     object
 }
 // x11PropertiesWmClass(object: int, value: string) -> int: sets X11Properties.WmClass
 // (X11Properties). Defines the `WmClass` attached property: the window class of the window.
 fn x11PropertiesWmClass(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1033, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 1034, text: value, length: -1)
     object
 }
 // getX11PropertiesWmClass(object: int) -> string: reads X11Properties.WmClass (X11Properties);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getX11PropertiesWmClass(object) = "${ferro_get_cstr_or(object: object, property: 1033, fallback: "")}"
+fn getX11PropertiesWmClass(object) = "${ferro_get_cstr_or(object: object, property: 1034, fallback: "")}"
 // xyFocusNavigationModes(object: int, value: string) -> int: sets XYFocus.NavigationModes
 // (XYFocus). Defines the XY focus navigation modes that are enabled for the element.
 fn xyFocusNavigationModes(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1034, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 1035, text: value, length: -1)
     object
 }
 // getXyFocusNavigationModes(object: int) -> string: reads XYFocus.NavigationModes (XYFocus);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getXyFocusNavigationModes(object) = "${ferro_get_cstr_or(object: object, property: 1034, fallback: "")}"
+fn getXyFocusNavigationModes(object) = "${ferro_get_cstr_or(object: object, property: 1035, fallback: "")}"
 // xamlAmbientLightIsTarget(object: int, value: bool) -> int: sets XamlAmbientLight.IsTarget
 // (XamlAmbientLight). `IsTarget` (attached): the ambient lights light the element or brush it
 // is set on.
 fn xamlAmbientLightIsTarget(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 1035, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 1036, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getXamlAmbientLightIsTarget(object: int) -> bool: reads XamlAmbientLight.IsTarget
 // (XamlAmbientLight); the fallback of its kind when the read fails (`failure()` tells): a
 // plain value, no Result.
-fn getXamlAmbientLightIsTarget(object) = ferro_get_bool_or(object: object, property: 1035, fallback: toInt8(0)) != toInt8(0)
+fn getXamlAmbientLightIsTarget(object) = ferro_get_bool_or(object: object, property: 1036, fallback: toInt8(0)) != toInt8(0)
 // y(object: int, value: float) -> int: sets Y (TranslateTransform).
 fn y(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 1037, value: value)
+    let _ = ferro_set_f64(object: object, property: 1038, value: value)
     object
 }
 // getY(object: int) -> float: reads Y (TranslateTransform); the fallback of its kind when the
 // read fails (`failure()` tells): a plain value, no Result.
-fn getY(object) = ferro_get_f64_or(object: object, property: 1037, fallback: 0.0)
+fn getY(object) = ferro_get_f64_or(object: object, property: 1038, fallback: 0.0)
 // yearFormat(object: int, value: string) -> int: sets YearFormat (DatePicker,
 // DatePickerPresenter). Defines the `YearFormat` property.
 fn yearFormat(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1038, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 1039, text: value, length: -1)
     object
 }
 // getYearFormat(object: int) -> string: reads YearFormat (DatePicker, DatePickerPresenter);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getYearFormat(object) = "${ferro_get_cstr_or(object: object, property: 1038, fallback: "")}"
+fn getYearFormat(object) = "${ferro_get_cstr_or(object: object, property: 1039, fallback: "")}"
 // yearVisible(object: int, value: bool) -> int: sets YearVisible (DatePicker,
 // DatePickerPresenter). Defines the `YearVisible` property.
 fn yearVisible(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 1039, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 1040, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getYearVisible(object: int) -> bool: reads YearVisible (DatePicker, DatePickerPresenter);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getYearVisible(object) = ferro_get_bool_or(object: object, property: 1039, fallback: toInt8(0)) != toInt8(0)
+fn getYearVisible(object) = ferro_get_bool_or(object: object, property: 1040, fallback: toInt8(0)) != toInt8(0)
 // zIndex(object: int, value: int) -> int: sets ZIndex (Visual). Defines the `ZIndex` property.
 fn zIndex(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 1040, value: value)
+    let _ = ferro_set_i64(object: object, property: 1041, value: value)
     object
 }
 // getZIndex(object: int) -> int: reads ZIndex (Visual); the fallback of its kind when the read
 // fails (`failure()` tells): a plain value, no Result.
-fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1040, fallback: 0)
+fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1041, fallback: 0)
 // getZoomFactor(object: int) -> float: reads ZoomFactor (ScrollViewer); the fallback of its
 // kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getZoomFactor(object) = ferro_get_f64_or(object: object, property: 1041, fallback: 0.0)
+fn getZoomFactor(object) = ferro_get_f64_or(object: object, property: 1042, fallback: 0.0)
 // zoomMode(object: int, value: ZoomMode) -> int: sets ZoomMode (ScrollViewer). Defines the
 // `ZoomMode` property (WinUI `ScrollViewer.ZoomMode`, not upstream): whether the user can zoom
 // the content.
 fn zoomMode(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1042, text: zoomModeName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1043, text: zoomModeName(value: value), length: -1)
     object
 }
 
