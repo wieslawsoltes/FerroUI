@@ -56,7 +56,7 @@ impl InputElementImpl for TableViewColumnHeader {
         Self::parent_on_pointer_pressed(this, e);
         let on_resizer = this.resizer.borrow().as_ref().is_some_and(|(resizer, _)| {
             e.source().and_then(|source| source.cast::<Visual>()).is_some_and(|source| {
-                std::ptr::eq::<Visual>(&*source, &***resizer) || resizer.is_visual_ancestor_of(&source)
+                source == resizer.clone().upcast::<Visual>() || resizer.is_visual_ancestor_of(&source)
             })
         });
         let left = e.get_current_point(Some(this)).properties.is_left_button_pressed;
