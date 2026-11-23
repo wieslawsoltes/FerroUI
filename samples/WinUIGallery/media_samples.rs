@@ -1,9 +1,8 @@
 //! Pinned Gallery Image and FlipView examples using existing native controls.
 //!
-//! FlipView maps to Carousel; PageSlide selects the navigation/gesture axis and
-//! PipsPager exposes navigation. Native Carousel also accepts mouse swipes. Its
-//! transitions, focus transfer, RTL behavior and chrome are not asserted to match
-//! WinUI FlipView. The bound example retains the actual page's 36px centered
+//! FlipView is the control of `ferroui-controls-flip-view`, a Carousel with WinUI's
+//! navigation buttons; PageSlide selects the navigation/gesture axis. Its transitions,
+//! focus transfer and RTL behavior are not asserted to match WinUI. The bound example retains the actual page's 36px centered
 //! image and 60px caption row, rather than its different instructional snippet.
 //!
 //! The fixed-size NineGrid examples compose native CroppedBitmap, ImageDrawing,
@@ -11,7 +10,7 @@
 //! Image. SVG decoding and GIF playback remain visible pending features.
 
 use ferroui_base::animation::{PageSlide, SlideAxis, SignedDuration};
-use ferroui_base::layout::{HorizontalAlignment, Orientation, VerticalAlignment};
+use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::imaging::{Bitmap, BitmapInterpolationMode, CroppedBitmap};
 use ferroui_base::media::{
     Brushes, Color, DrawingGroup, DrawingImage, IImage, ImageDrawing, SolidColorBrush, Stretch,
@@ -23,7 +22,7 @@ use ferroui_controls::automation::peers::AutomationControlType;
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
-    Border, Carousel, Control, Grid, Image, ItemsSource, PipsPager, RadioButtons, RowDefinitions,
+    Border, Carousel, Control, Grid, Image, ItemsSource, RadioButtons, RowDefinitions,
     TextBlock,
 };
 use std::rc::Rc;
@@ -289,59 +288,18 @@ fn wire_flips(root: &Ref<Control>) {
         ("BoundFlipView", SlideAxis::Horizontal),
         ("VerticalFlipView", SlideAxis::Vertical),
     ] {
-        wire_pager(root, name, axis);
+        let flip_view = root.get_control::<Carousel>(name);
+        flip_view.set_is_swipe_enabled(true);
+        flip_view.set_wrap_selection(false);
+        flip_view.set_page_transition(Some(Rc::new(PageSlide::with_duration(
+            SignedDuration::from_milliseconds(250.0),
+            axis,
+        ))));
+        flip_view.set_selected_index(0);
+        // The source's AutomationProperties.AutomationControlType.
+        AutomationProperties::set_control_type_override(&flip_view, Some(AutomationControlType::List));
     }
     show_errors(root, "FlipViewLoadError", &errors);
-}
-
-fn wire_pager(root: &Control, name: &str, axis: SlideAxis) {
-    let carousel = root.get_control::<Carousel>(name);
-    carousel.set_is_swipe_enabled(true);
-    carousel.set_wrap_selection(false);
-    carousel.set_page_transition(Some(Rc::new(PageSlide::with_duration(
-        SignedDuration::from_milliseconds(250.0),
-        axis,
-    ))));
-    AutomationProperties::set_control_type_override(&carousel, Some(AutomationControlType::List));
-    let pager = root.get_control::<PipsPager>(&format!("{name}Pager"));
-    pager.set_orientation(if axis == SlideAxis::Vertical {
-        Orientation::Vertical
-    } else {
-        Orientation::Horizontal
-    });
-    pager.set_number_of_pages(carousel.item_count());
-    let output = root.get_control::<TextBlock>(&format!("{name}Selection"));
-    carousel.set_selected_index(0);
-    pager.set_selected_page_index(0);
-    update_selection(&carousel, &output);
-    let weak_carousel = carousel.downgrade();
-    let weak_pager = pager.downgrade();
-    let weak_output = output.downgrade();
-    carousel.selection_changed(move |_, _| {
-        if let (Some(carousel), Some(pager), Some(output)) = (
-            weak_carousel.upgrade(),
-            weak_pager.upgrade(),
-            weak_output.upgrade(),
-        ) {
-            pager.set_selected_page_index(carousel.selected_index().max(0));
-            update_selection(&carousel, &output);
-        }
-    });
-    let weak_carousel = carousel.downgrade();
-    let weak_pager = pager.downgrade();
-    pager.selected_index_changed(move |_, _| {
-        if let (Some(carousel), Some(pager)) = (weak_carousel.upgrade(), weak_pager.upgrade()) {
-            carousel.set_selected_index(pager.selected_page_index());
-        }
-    });
-}
-
-fn update_selection(carousel: &Carousel, output: &TextBlock) {
-    output.set_text(Some(&format!(
-        "{} of {}",
-        carousel.selected_index() + 1,
-        carousel.item_count()
-    )));
 }
 
 fn bound_item(item: &FlipItem) -> Ref<Control> {

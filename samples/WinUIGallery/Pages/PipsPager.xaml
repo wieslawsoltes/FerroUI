@@ -1,15 +1,18 @@
 <!-- Ported from the two pinned PipsPager examples of WinUI Gallery (14061eea) and the code behind
-     of PipsPagerPage.xaml.cs (status_samples.rs); see ../NOTICE.md. FerroUI has no FlipView: the
-     gallery is a Carousel, as on the FlipView page, filled in Rust with the source's Pictures;
+     of PipsPagerPage.xaml.cs (status_samples.rs); see ../NOTICE.md. The gallery is the FlipView of
+     ferroui-controls-flip-view, filled in Rust with the source's Pictures;
      the pager's NumberOfPages is Pictures.Count and its SelectedPageIndex keeps the source's
      TwoWay x:Bind of the gallery's SelectedIndex. The ComboBoxes' Headers are composed above them;
      the announcement of TestPipsPager2_SelectedIndexChanged is a polite live region. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.FlipView/Themes/WinUI/WinUI.xaml" />
+  </StackPanel.Styles>
   <StackPanel x:Name="PipsPagerExample1" Spacing="8">
     <TextBlock Text="PipsPager integrated with a FlipView" FontSize="18" />
     <StackPanel>
-      <Carousel x:Name="Gallery" Height="270" MaxWidth="400" AutomationProperties.Name="Pictures" />
+      <FlipView x:Name="Gallery" Height="270" MaxWidth="400" AutomationProperties.Name="Pictures" />
       <PipsPager x:Name="FlipViewPipsPager"
                  Margin="0,12,0,0"
                  HorizontalAlignment="Center"
