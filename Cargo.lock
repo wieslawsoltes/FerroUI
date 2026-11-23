@@ -1685,6 +1685,14 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-animated-visuals"
+version = "0.5.1-preview.1"
+dependencies = [
+ "ferroui-base",
+ "serde_json",
+]
+
+[[package]]
 name = "ferroui-base"
 version = "0.5.1-preview.1"
 dependencies = [

@@ -1,0 +1,22 @@
+[package]
+name = "ferroui-animated-visuals"
+description = "An animated-visual runtime for FerroUI: Lottie documents evaluated into scenes drawn on the GPU of every backend"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+serde_json.workspace = true
+
+[package.metadata.release]
+group = "controls"
