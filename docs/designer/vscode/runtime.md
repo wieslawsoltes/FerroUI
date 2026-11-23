@@ -36,6 +36,21 @@ Open **Visual state actions** to edit groups, setters, and transitions in XAML o
 
 Use **App Preview Property Transitions** to edit a source-backed XAML or mapped Rust collection with properties and transition classes from the running app. Click inside the accepted native frame to trigger changes on its controls. [Edit and test a transition](motion.md#edit-property-transitions-in-app-preview)
 
+### Interact with App Preview from an agent
+
+1. Enable `ferroui.mcp.allowWrites` in User Settings. In a trusted workspace, open the design and its App Preview with
+   `designer_open` and `designer_hosted_open`. Use the design’s `session` for the following calls.
+2. Read `designer_hosted_image` and pass its generation, revision, and sequence as
+   `expected_generation`, `expected_revision`, and `expected_sequence` to `designer_hosted_input`.
+   Use `input.type` set to `click` or `scroll` with `x` and `y` between 0 and 1. A scroll also takes
+   a signed wheel `delta`.
+3. Click a native text field, read the current frame, then send `input` with `type: "text"` and the
+   text to enter. Read the next image to inspect the result. Each input receipt identifies the
+   frame that accepted the gesture. If the preview reports a changed frame, recapture it before sending input.
+
+These gestures use the app’s native input path and keep the authored source buffer intact.
+[MCP reference](reference.md#drive-an-editor-workflow)
+
 ### Edit a palette in App Preview
 
 1. Open an XAML App Preview with the current `ferroui-designer-support` and choose the **App Preview palette** color icon in the toolbar.

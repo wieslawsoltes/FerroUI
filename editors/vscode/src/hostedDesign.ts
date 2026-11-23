@@ -21,7 +21,7 @@ import { chooseHostedClipEdit } from './hostedClipActions';
 import { chooseHostedStateAction } from './hostedStateActions';
 import { chooseHostedKeyframe } from './hostedKeyframes';
 import { prepareHostedKeyframeGroup } from './hostedKeyframeGroup';
-import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, ToHosted } from './hostedProtocol';
+import type { FromHosted, HostedAnimationSample, HostedFixtureCatalog, HostedFrame, HostedGesture, ToHosted } from './hostedProtocol';
 import { applyHostedSourcePatches } from './hostedSourceEdit';
 import { editHostedStateRoute } from './hostedStateRoutes';
 import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
@@ -123,6 +123,12 @@ export class HostedDesign implements vscode.Disposable {
         if (!frame) throw new Error('Wait for the current application preview.');
         const { image: { png, width, height }, revision, sequence } = frame;
         return { mimeType: 'image/png', data: png, width, height, revision, sequence, generation: session.generation, uri: uri.toString() };
+    }
+
+    input(uri: vscode.Uri, generation: number, frame: HostedAnimationFrame, gesture: HostedGesture, signal: AbortSignal) {
+        const session = this.session(uri);
+        if (session.generation !== generation) throw new Error('Read the current application preview generation.');
+        return session.input(frame, gesture, signal);
     }
 
     async palette(uri: vscode.Uri, target: HostedPaletteTarget | undefined, signal: AbortSignal) {
@@ -504,6 +510,18 @@ class HostedSession {
 
     get currentFrame(): HostedFrame | undefined {
         if (this.client && this.frame?.revision === this.revision) return this.frame;
+    }
+
+    async input(frame: HostedAnimationFrame, gesture: HostedGesture, signal: AbortSignal) {
+        signal.throwIfAborted();
+        const client = this.client;
+        const current = this.currentFrame;
+        if (!client || current?.revision !== frame.revision || current.sequence !== frame.sequence) {
+            throw new Error('The application preview frame changed. Read the current frame before sending input.');
+        }
+        const event = gesture.type === 'text' ? { ...gesture, x: .5, y: .5 } : gesture;
+        await client.hostedInput({ ...event, ...frame });
+        return { generation: this.generation, frame };
     }
 
     paletteFrame(): HostedAnimationFrame {
@@ -952,8 +970,10 @@ class HostedSession {
             return;
         }
         if (!('revision' in message) || message.revision !== this.revision || message.sequence !== this.frame?.sequence) return;
-        try { await this.client?.hostedInput(message); }
-        catch (error) { this.report(errorMessage(error)); }
+        try {
+            const { revision, sequence, ...gesture } = message;
+            await this.input({ revision, sequence }, gesture, this.lifetime.signal);
+        } catch (error) { this.report(errorMessage(error)); }
     }
 
     private async receivePalette({ frame, request, command }: FromHostedPalette): Promise<void> {

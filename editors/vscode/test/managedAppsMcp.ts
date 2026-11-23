@@ -6,6 +6,7 @@ import { RuntimeClient } from '../src/runtimeClient';
 import type { RuntimeNode } from '../src/runtimeProtocol';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import { withManagedAppFixture } from './managedAppFixture';
+import { verifyHostedInputMcp } from './hostedInputMcp';
 import type { McpFixture } from './mcp';
 import { until } from './wait';
 
@@ -134,6 +135,7 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             const remaining = await clientFor(labels[1]);
             clients.push(remaining);
             assert.ok(await remaining.supports('list_windows'));
+            await verifyHostedInputMcp({ invoke, content }, files[0], targets[0]);
             console.log('Two native apps isolated their Live App tabs, inspectors, reload failures, and stops. Shared dependency saves rebuilt both scoped targets');
         } finally {
             clients.forEach(client => client.dispose());

@@ -57,8 +57,11 @@ export interface HostedFixtureCatalog {
     pending: boolean;
 }
 
-export type HostedInput = { revision: number; sequence: number; x: number; y: number } & (
-    { type: 'click' } | { type: 'scroll'; delta: number } | { type: 'text'; text: string });
+type HostedPoint = { x: number; y: number };
+export type HostedGesture = (HostedPoint & ({ type: 'click' } | { type: 'scroll'; delta: number }))
+    | { type: 'text'; text: string };
+
+export type HostedInput = HostedAnimationFrame & HostedPoint & HostedGesture;
 
 export type FromHosted = HostedInput | FromHostedPalette | FromHostedStyles | { type: 'ready' | 'refresh' }
     | { type: 'templates'; frame: HostedAnimationFrame }

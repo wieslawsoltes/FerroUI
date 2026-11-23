@@ -1,4 +1,4 @@
-import { choice, integer, object, text, tool, truth } from './agentSchema';
+import { choice, integer, object, text, tool, truth, type Schema } from './agentSchema';
 import { hostedPaletteCatalog } from './hostedPaletteCatalog';
 import { hostedStylesCatalog } from './hostedStylesCatalog';
 import { hostedTemplateCatalog } from './hostedTemplateCatalog';
@@ -49,6 +49,15 @@ const guideEdit = { type: 'object', additionalProperties: false, required: ['act
         properties: { id: node, axis: guideAxis, position: guidePosition } } },
 } };
 const wheel = { type: 'number', minimum: -64, maximum: 64 };
+const hostedPoint = { x: unit, y: unit };
+const hostedGesture: Schema = { oneOf: [
+    { type: 'object', additionalProperties: false, required: ['type', 'x', 'y'],
+        properties: { type: choice('click'), ...hostedPoint } },
+    { type: 'object', additionalProperties: false, required: ['type', 'x', 'y', 'delta'],
+        properties: { type: choice('scroll'), ...hostedPoint, delta: wheel } },
+    { type: 'object', additionalProperties: false, required: ['type', 'text'],
+        properties: { type: choice('text'), text: { type: 'string', maxLength: 8192 } } },
+] };
 const time = { type: 'number', minimum: 0 };
 const previewRange = { type: 'object', additionalProperties: false, required: ['start', 'end', 'loop'],
     properties: { start: time, end: time, loop: truth } };
@@ -201,7 +210,10 @@ export const agentCatalog = {
         ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, frame, elapsed time, and named markers.', session, ['session']),
-    designer_hosted_image: tool('Capture the current app-hosted preview frame as PNG with its revision and sequence.', session, ['session']),
+    designer_hosted_image: tool('Capture the current App Preview frame as PNG with its app generation, source revision, and frame sequence.', session, ['session']),
+    designer_hosted_input: tool('Interact with the current App Preview. Click or scroll at normalized x and y, or send text to the focused native control. Pass the current app generation, revision, and frame sequence.',
+        { ...frame, expected_generation: integer(1), expected_sequence: integer(1), input: hostedGesture },
+        ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'input'], true, false),
     designer_hosted_animation: tool('Control native clips or a Rust state route on the app’s elapsed clock. Play range takes start, end and loop. Marker actions set, remove, or seek by name. Omit program for the shared elapsed ruler. Use the current app generation, revision and frame sequence.', {
         ...frame, expected_generation: integer(1), expected_sequence: integer(1), arguments: { type: 'object', additionalProperties: false,
             required: ['action'], properties: { action: choice('select', 'seek', 'play', 'play_range', 'scrub_all', 'play_all', 'pause', 'stop', 'targets', 'reveal', 'reveal_issue', 'marker'), program: node,

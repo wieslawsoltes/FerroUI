@@ -1,0 +1,105 @@
+import { strict as assert } from 'node:assert';
+import { writeFile } from 'node:fs/promises';
+import * as path from 'node:path';
+import * as vscode from 'vscode';
+import type { HostedGesture } from '../src/hostedProtocol';
+import type { McpFixture } from './mcp';
+import { until } from './wait';
+
+const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design"
+    Width="380" Height="280" Background="#F2F6FB">
+    <Grid Margin="20" RowDefinitions="40,44,46,*">
+        <TextBlock Text="Order note" FontSize="25" Foreground="#162C4A"/>
+        <TextBox Grid.Row="1" Name="Note" FontSize="17" Watermark="Enter a note"/>
+        <app:PreviewBadge Grid.Row="2" Text="{Binding #Note.Text}" FontSize="16" Foreground="#194779"/>
+        <ScrollViewer Grid.Row="3">
+            <StackPanel Spacing="8">
+                <Border Background="#E2EAF6" Padding="12"><TextBlock Text="Order received"/></Border>
+                <Border Background="#D6E8DC" Padding="12"><TextBlock Text="Payment confirmed"/></Border>
+                <Border Background="#E0E6F5" Padding="12"><TextBlock Text="Packing in progress"/></Border>
+                <Border Background="#EBDFFF" Padding="12"><TextBlock Text="Ready for pickup"/></Border>
+                <Border Background="#D3E7F8" Padding="12"><TextBlock Text="Delivery scheduled"/></Border>
+            </StackPanel>
+        </ScrollViewer>
+    </Grid>
+</Window>`;
+
+interface Capture {
+    generation: number;
+    revision: number;
+    sequence: number;
+    pixels: string;
+}
+
+export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibling: string, target: object) {
+    const file = path.join(path.dirname(sibling), 'PreviewInput.xaml');
+    await writeFile(file, preview);
+    const uri = vscode.Uri.file(file);
+    const document = await vscode.workspace.openTextDocument(uri);
+    const original = document.getText();
+    const version = document.version;
+    const { session } = content<{ session: number }>(await invoke('designer_open', {
+        path: vscode.workspace.asRelativePath(uri, false),
+    }));
+    const config = vscode.workspace.getConfiguration('ferroui.hostedPreview', uri);
+    const originalAssembly = config.inspect<string>('assembly')?.workspaceValue;
+    try {
+        await config.update('assembly', 'todo-workbench', vscode.ConfigurationTarget.Workspace);
+        const { generation } = content<{ generation: number }>(await invoke('designer_hosted_open', { session, ...target }));
+        const image = async (previous?: Capture): Promise<Capture> => {
+            let accepted: Capture | undefined;
+            await until(async () => {
+                const result = await invoke('designer_hosted_image', { session });
+                if (result.isError) return false;
+                const frame = content<Omit<Capture, 'pixels'>>(result);
+                const pixels = result.content.find(item => item.type === 'image')!.data!;
+                if (previous && (frame.sequence <= previous.sequence || pixels === previous.pixels)) return false;
+                assert.equal(frame.generation, generation);
+                accepted = { ...frame, pixels };
+                return true;
+            });
+            return accepted!;
+        };
+        const input = ({ generation, revision, sequence }: Capture, gesture: HostedGesture) =>
+            invoke('designer_hosted_input', { session, expected_generation: generation,
+                expected_revision: revision, expected_sequence: sequence, input: gesture });
+        const start = await image();
+        const click = { type: 'click', x: .34, y: .30 } as const;
+        const rejected = await input({ ...start, generation: generation + 1 }, click);
+        assert.match(rejected.content[0]?.text ?? '', /current application preview generation/);
+        const outside = await input(start, { ...click, x: 1.25 });
+        assert.match(outside.content[0]?.text ?? '', /matching input form/);
+        assert.match((await input({ ...start, revision: start.revision + 1 }, click)).content[0]?.text ?? '', /frame changed/i);
+        assert.deepEqual(content(await input(start, click)), { generation,
+            frame: { revision: start.revision, sequence: start.sequence } });
+        const focused = await image(start);
+        assert.match((await input(start, click)).content[0]?.text ?? '', /frame changed/i);
+        const send = async (gesture: HostedGesture) => {
+            let before: Capture | undefined;
+            await until(async () => {
+                const frame = await image();
+                const result = await input(frame, gesture);
+                if (result.isError && /frame changed/i.test(result.content[0]?.text ?? '')) return false;
+                content(result);
+                before = frame;
+                return true;
+            });
+            return image(before);
+        };
+        const typed = await send({ type: 'text', text: 'Leave at reception' });
+        assert.notEqual(typed.pixels, focused.pixels);
+        const scrolled = await send({ type: 'scroll', x: .60, y: .78, delta: -8 });
+        assert.notEqual(scrolled.pixels, typed.pixels);
+        assert.equal(document.version, version);
+        assert.equal(document.getText(), original);
+        console.log('VS Code MCP focused, typed, and scrolled the native App Preview while fencing stale frame and generation requests');
+    } finally {
+        try {
+            const tabs = vscode.window.tabGroups.all.flatMap(group => group.tabs).filter(tab =>
+                tab.label.endsWith(' · PreviewInput.xaml') || (tab.input instanceof vscode.TabInputText && tab.input.uri.toString() === uri.toString()));
+            await vscode.window.tabGroups.close(tabs);
+        } finally {
+            await config.update('assembly', originalAssembly, vscode.ConfigurationTarget.Workspace);
+        }
+    }
+}

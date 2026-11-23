@@ -22,6 +22,7 @@ import type { HotReload } from './hotReload';
 import type { HostedDesign } from './hostedDesign';
 import type { HostedAnimationAction, HostedClipDraft, HostedClipEdit, HostedCurveQuery, HostedKeyframeDraft, HostedKeyframeGroupDraft, HostedStateDraft } from './hostedAnimationProtocol';
 import type { HostedPalettePresentation, HostedPaletteTarget } from './hostedPaletteProtocol';
+import type { HostedGesture } from './hostedProtocol';
 import type { HostedStyleEdit, HostedStylePresentation, HostedStyleRead, HostedStyleTarget } from './hostedStylesProtocol';
 import type { TransitionEdit, TransitionOwner } from './propertyTransitionProtocol';
 import { filterOutline } from './outlineFilter';
@@ -129,7 +130,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_epoch?: number;
     expected_frame?: number;
     debug_configuration?: string;
-    input?: CanvasInteraction | PrototypeInput | StageContact | StageInput;
+    input?: CanvasInteraction | PrototypeInput | StageContact | StageInput | HostedGesture;
     kind?: string;
     language?: 'xaml' | 'rsx';
     fixture?: string;
@@ -281,6 +282,9 @@ export class AgentTools {
                 return this.hosted.curve(document.uri, args.expected_generation, { revision: args.expected_revision, sequence: args.expected_sequence },
                     args.arguments as HostedCurveQuery, signal);
             case 'designer_hosted_image': return this.hosted.image(document.uri);
+            case 'designer_hosted_input':
+                return this.hosted.input(document.uri, args.expected_generation,
+                    { revision: args.expected_revision, sequence: args.expected_sequence }, args.input as HostedGesture, signal);
             case 'designer_hosted_palette':
                 return this.hosted.palette(document.uri, (args.arguments as { target?: HostedPaletteTarget } | undefined)?.target, signal);
             case 'designer_hosted_palette_edit_draft':
