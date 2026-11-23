@@ -2161,6 +2161,7 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ScrollViewer::zoom_factor_property()), "ferroui_controls::ScrollViewer::zoom_factor_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ScrollViewer::zoom_mode_property()), "ferroui_controls::ScrollViewer::zoom_mode_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::SelectableTextBlock::can_copy_property()), "ferroui_controls::SelectableTextBlock::can_copy_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::SelectableTextBlock::is_text_selection_enabled_property()), "ferroui_controls::SelectableTextBlock::is_text_selection_enabled_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::SelectableTextBlock::selected_text_property()), "ferroui_controls::SelectableTextBlock::selected_text_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::SelectableTextBlock::selection_brush_property()), "ferroui_controls::SelectableTextBlock::selection_brush_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::SelectableTextBlock::selection_end_property()), "ferroui_controls::SelectableTextBlock::selection_end_property"),

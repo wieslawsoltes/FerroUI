@@ -5151,14 +5151,15 @@ fn isTextSearchEnabled(object, value) = {
 // plain value, no Result.
 fn getIsTextSearchEnabled(object) = ferro_get_bool_or(object: object, property: 446, fallback: toInt8(0)) != toInt8(0)
 // isTextSelectionEnabled(object: int, value: bool) -> int: sets IsTextSelectionEnabled
-// (RichEditBox, RichTextBlock).
+// (RichEditBox, RichTextBlock, SelectableTextBlock). Defines the `IsTextSelectionEnabled`
+// property (WinUI's `TextBlock.IsTextSelectionEnabled`).
 fn isTextSelectionEnabled(object, value) = {
     let _ = ferro_set_bool(object: object, property: 447, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getIsTextSelectionEnabled(object: int) -> bool: reads IsTextSelectionEnabled (RichEditBox,
-// RichTextBlock); the fallback of its kind when the read fails (`failure()` tells): a plain
-// value, no Result.
+// RichTextBlock, SelectableTextBlock); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
 fn getIsTextSelectionEnabled(object) = ferro_get_bool_or(object: object, property: 447, fallback: toInt8(0)) != toInt8(0)
 // getIsTextTrimmed(object: int) -> bool: reads IsTextTrimmed (RichTextBlock); the fallback of
 // its kind when the read fails (`failure()` tells): a plain value, no Result.

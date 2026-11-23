@@ -1842,7 +1842,7 @@ fn isTextPredictionEnabled(value) = AttrBool { attrBoolProperty: 445, attrBoolVa
 // (SelectingItemsControl).
 fn isTextSearchEnabled(value) = AttrBool { attrBoolProperty: 446, attrBoolValue: value }
 // isTextSelectionEnabled(value: bool) -> Attr<M>: sets IsTextSelectionEnabled (RichEditBox,
-// RichTextBlock).
+// RichTextBlock, SelectableTextBlock).
 fn isTextSelectionEnabled(value) = AttrBool { attrBoolProperty: 447, attrBoolValue: value }
 // isThreeState(value: bool) -> Attr<M>: sets IsThreeState (ToggleButton).
 fn isThreeState(value) = AttrBool { attrBoolProperty: 449, attrBoolValue: value }

@@ -8273,6 +8273,11 @@ pub trait SelectableTextBlockProps: ElementBuilder {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_end_property(), value)
     }
 
+    /// Sets [`SelectableTextBlock::is_text_selection_enabled_property`](ferroui_controls::SelectableTextBlock::is_text_selection_enabled_property).
+    fn is_text_selection_enabled<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::SelectableTextBlock>::is_text_selection_enabled_property(), value)
+    }
+
     /// Sets [`SelectableTextBlock::selection_brush_property`](ferroui_controls::SelectableTextBlock::selection_brush_property).
     fn selection_brush<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::SelectableTextBlock>::selection_brush_property(), value)

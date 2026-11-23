@@ -21504,6 +21504,16 @@
         "values": [],
         "attached": false
       },
+      "IsTextSelectionEnabled": {
+        "name": "IsTextSelectionEnabled",
+        "type_name": "bool",
+        "documentation": "SelectableTextBlock.IsTextSelectionEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "SelectionBrush": {
         "name": "SelectionBrush",
         "type_name": "Option<Rc<dyn IBrush>>",

@@ -10589,6 +10589,7 @@
    "children": "none",
    "properties": [
     "CanCopy",
+    "IsTextSelectionEnabled",
     "SelectedText",
     "SelectionBrush",
     "SelectionEnd",
@@ -27277,6 +27278,18 @@
      "default": "true",
      "read_only": false,
      "doc": ""
+    },
+    {
+     "owner": "SelectableTextBlock",
+     "kind": "styled",
+     "value": {
+      "rust": "bool",
+      "nullable": false,
+      "kind": "bool"
+     },
+     "default": "true",
+     "read_only": false,
+     "doc": "Defines the `IsTextSelectionEnabled` property (WinUI's `TextBlock.IsTextSelectionEnabled`)."
     }
    ]
   },
