@@ -527,6 +527,8 @@ For `CornerRadius::uniform`, `CornerRadius::top_bottom`, `Thickness::uniform`, a
 shorthand while its fields can represent the edit and expands to the same type's `new` constructor
 when the fields become independent. The change preserves existing operand comments and takes one Undo.
 
+![VS Code shows the Top right corner edited at 0.6 seconds, the original Rust imports, and the updated native card](../images/vscode-timeline-rust-imports.png)
+
 1. Seek to a time and choose **Add keyframe at playhead**, or double-click an empty part of a property track. The isolated designer samples the track at that time and adds a Rust `.key_frame(...)`. An empty mapped clip starts with Opacity.
 2. Select one or more keys and open **Keyframe Actions**. **Duplicate at Offset…** copies their values and easing. Use the same menu to [copy, paste, and mirror keys](#copy-paste-and-mirror-keyframes). **Delete** removes the selected setters. With a key focused, use Ctrl+D or Command+D to duplicate at the current snap interval, or press Delete or Backspace.
 3. When a cue has several setters, deleting one key preserves the other setters and their easing. Deleting the final key leaves the animation available for another key. One Undo restores the source for each edit.

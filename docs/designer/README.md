@@ -657,12 +657,15 @@ rsx! {
 }
 ```
 
-Studio and the VS Code designer map fully qualified FerroUI builders in the active `rsx!` invocation.
+Studio and the VS Code designer resolve FerroUI builders in the active `rsx!` invocation, including
+named imports, aliases, and `style`, `animation`, and `ms` from the FerroUI prelude.
 They support literal selectors, millisecond duration and delay, fill, iteration count, and
 named easing. Keyframes can use scalar values and supported native geometry constructors.
+Editing an individual corner or side expands a uniform or paired constructor when needed.
+The edited key keeps the type alias, unchanged operands, and comments.
 When several setters share a Rust keyframe, the designer can edit each value. Select all the
 setters on that cue to move them together. Edit a shared easing in Rust. Use the warning icon in Timeline or App Preview
-to see an explanation for each unsupported clip and open its declaration.
+to see an explanation for each unsupported clip and open its declaration. [Mapped Rust clips guide](vscode/motion.md#edit-mapped-rust-clips-and-state-routes)
 
 Open a `.rs` file in Studio and use the **RSX view** picker in the source pane to switch
 invocations. The canvas renders the selected projection. The editor, Save, and Undo operate
