@@ -95,6 +95,9 @@ mod conformance_tests;
 mod acceptance_tests;
 
 #[cfg(test)]
+mod default_xml_namespace_tests;
+
+#[cfg(test)]
 mod view_manager_acceptance_tests;
 
 #[cfg(test)]
