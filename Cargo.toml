@@ -143,6 +143,7 @@ members = [
     "src/Linux/FerroUI.LinuxFramebuffer",
     "src/Windows/FerroUI.WinUI",
     "src/FerroUI.Fonts.Inter",
+    "src/FerroUI.Fonts.Web.Core",
     "src/FerroUI.Dialogs",
     "src/FerroUI.Diagnostics",
     "src/FerroUI.Inspect",
@@ -407,6 +408,7 @@ ferroui-vulkan = { version = "=0.6.0-preview.1", path = "src/FerroUI.Vulkan" }
 ferroui-linuxframebuffer = { version = "=0.6.0-preview.1", path = "src/Linux/FerroUI.LinuxFramebuffer" }
 ferroui-winui = { version = "=0.6.0-preview.1", path = "src/Windows/FerroUI.WinUI" }
 ferroui-fonts-inter = { version = "=0.6.0-preview.1", path = "src/FerroUI.Fonts.Inter" }
+ferroui-fonts-web-core = { version = "=0.6.0-preview.1", path = "src/FerroUI.Fonts.Web.Core" }
 ferroui-dialogs = { version = "=0.6.0-preview.1", path = "src/FerroUI.Dialogs" }
 ferroui-diagnostics = { version = "=0.6.0-preview.1", path = "src/FerroUI.Diagnostics" }
 ferroui-xaml-interactivity = { version = "=0.6.0-preview.1", path = "src/Behaviors/FerroUI.Xaml.Interactivity" }

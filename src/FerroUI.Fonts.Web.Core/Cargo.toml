@@ -1,0 +1,19 @@
+[package]
+name = "ferroui-fonts-web-core"
+description = "The standards of web fonts for FerroUI: @font-face, font matching, WOFF, WOFF2 and sanitizing"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"
