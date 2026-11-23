@@ -83,8 +83,12 @@ fn the_typed_values_example() {
         .effect(blur(2.0));
     let _save = button().hot_key(ctrl(KeyCode::S)).content("Save");
     let _ = path_data().move_to(0.0, 0.0).line_to(10.0, 0.0).close();
-    let _ = path!("M8 3v5H3v2h5v5h2V10h5V8h-5V3z");
-    let _ = Colors::BLACK;
+}
+
+/// Compiled and not run: a geometry needs the render interface of an application.
+#[allow(dead_code)]
+fn the_icon_of_the_typed_values_example() -> Element {
+    path().data(path!("M8 3v5H3v2h5v5h2V10h5V8h-5V3z")).fill(Colors::BLACK).into()
 }
 
 #[test]
