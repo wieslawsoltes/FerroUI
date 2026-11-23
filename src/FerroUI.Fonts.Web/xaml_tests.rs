@@ -7,6 +7,8 @@ use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, UnitTestDispatcherScope};
 use ferroui_base::{FerroLocator, Ref};
 use ferroui_controls::{Border, Control};
+use ferroui_markup_xaml::RuntimeXamlLoaderConfiguration;
+use ferroui_markup_xaml_loader::rust_emitter::compile_documents;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::rc::Rc;
 
@@ -38,8 +40,8 @@ impl Drop for Scope {
     }
 }
 
-const DOCUMENT: &str = r#"<Border xmlns="https://github.com/ferroui" xmlns:fonts="using:FerroUI.Fonts.Web">
-  <fonts:WebFonts.StyleSheet>
+const DOCUMENT: &str = r#"<Border xmlns="https://github.com/ferroui">
+  <WebFonts.StyleSheet>
     @font-face {
       font-family: Inter;
       src: url(https://example.test/Inter.woff2) format(woff2);
@@ -48,7 +50,7 @@ const DOCUMENT: &str = r#"<Border xmlns="https://github.com/ferroui" xmlns:fonts
     }
     @font-face { font-family: Second; src: url(https://example.test/Second.woff2) }
     @font-face { font-family: NoSource }
-  </fonts:WebFonts.StyleSheet>
+  </WebFonts.StyleSheet>
 </Border>"#;
 
 #[test]
@@ -64,10 +66,51 @@ fn faces_are_declared_in_xaml() {
 #[test]
 fn an_attribute_works_too() {
     let _scope = scope();
-    let document = r#"<Border xmlns="https://github.com/ferroui" xmlns:fonts="using:FerroUI.Fonts.Web"
-        fonts:WebFonts.StyleSheet="@font-face { font-family: A; src: url(https://example.test/a.woff2) }" />"#;
+    let document = r#"<Border xmlns="https://github.com/ferroui"
+        WebFonts.StyleSheet="@font-face { font-family: A; src: url(https://example.test/a.woff2) }" />"#;
     FerroRuntimeXamlLoader::parse_as::<Ref<Border>>(document, None).expect("the document loads");
     assert_eq!(WebFontCollection::current().count(), 1);
+}
+
+#[test]
+fn the_markup_compiler_resolves_it_without_a_prefix() {
+    let _scope = scope();
+    let compiled = compile_documents(
+        &[("Fonts.xaml", DOCUMENT)],
+        Some("ferres://App/"),
+        &RuntimeXamlLoaderConfiguration::default(),
+        &[],
+    );
+    let source = compiled[0].source.clone().unwrap_or_else(|reason| panic!("not eligible: {reason}"));
+    assert!(source.contains("WebFonts"), "{source}");
+    assert!(source.contains("@font-face"), "{source}");
+}
+
+#[test]
+fn the_type_is_in_the_xml_namespace_of_the_framework() {
+    let definition = crate::ASSEMBLY.xmlns_definitions.first().expect("a mapping");
+    assert_eq!(definition.xml_namespace, ferroui_base::metadata::FERRO_XML_NAMESPACE);
+    assert_eq!(definition.namespace, "FerroUI.Fonts.Web");
+}
+
+/// What keeps an application without this crate from linking it: no crate of the framework and
+/// no hello world sample depends on it.
+#[test]
+fn nothing_in_the_framework_depends_on_this_crate() {
+    let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../..");
+    let workspace = std::fs::read_to_string(root.join("Cargo.toml")).unwrap();
+    let members = workspace.split("members = [").nth(1).unwrap().split(']').next().unwrap();
+    let mut checked = 0;
+    for member in members.lines().filter_map(|line| line.trim().strip_prefix('"')?.strip_suffix("\",")) {
+        let framework = member.starts_with("src/") || member.starts_with("samples/HelloWorld");
+        if !framework || member.starts_with("src/FerroUI.Fonts.Web") {
+            continue;
+        }
+        let manifest = std::fs::read_to_string(root.join(member).join("Cargo.toml")).unwrap();
+        assert!(!manifest.contains("ferroui-fonts-web"), "{member} depends on the web fonts");
+        checked += 1;
+    }
+    assert!(checked > 50, "only {checked} manifests were read");
 }
 
 #[test]
