@@ -12,6 +12,7 @@ pub mod ferro_object_get_value_inherited;
 pub mod ferro_object_initialization_benchmark;
 pub mod ferro_object_set_value;
 pub mod properties;
+pub mod routed_events;
 pub mod styled_property_benchmark;
 
 pub fn register(registry: &mut Registry) {
@@ -24,5 +25,6 @@ pub fn register(registry: &mut Registry) {
     ferro_object_initialization_benchmark::register(registry);
     ferro_object_set_value::register(registry);
     properties::register(registry);
+    routed_events::register(registry);
     styled_property_benchmark::register(registry);
 }
