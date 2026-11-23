@@ -39,6 +39,17 @@ pub struct ProGpuLayer {
     inner: Rc<Inner>,
 }
 
+impl Drop for Inner {
+    /// What the engine keeps of the scene of the layer goes with the layer.
+    fn drop(&mut self) {
+        if let (Some(gpu), Some(scene)) = (&self.gpu, self.scene.get_mut()) {
+            if let Some(engine) = gpu.offscreen() {
+                engine.release_scene(scene.scene_id());
+            }
+        }
+    }
+}
+
 impl ProGpuLayer {
     /// A layer of `size` pixels on the device of `gpu`. Without a device the layer records and
     /// draws nothing.
