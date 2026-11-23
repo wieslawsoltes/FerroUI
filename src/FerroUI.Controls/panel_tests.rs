@@ -1,5 +1,7 @@
 use crate::{Control, Panel};
 use ferroui_base::{Ref, StyledElement, Visual};
+use std::cell::RefCell;
+use std::rc::Rc;
 
 fn logical(children: &[&Ref<Control>]) -> Vec<Ref<StyledElement>> {
     children.iter().map(|c| (*c).clone().upcast()).collect()
@@ -88,6 +90,47 @@ fn removing_child_control_should_remove_from_panel_logical_and_visual_children()
     assert!(panel.visual_children().is_empty());
 }
 
+/// Not from the reference: the panel removes a child at its index in the lists that mirror its
+/// children, and reports each removal as the reference does (desktop-performance.md, 9.80).
+#[test]
+fn children_removed_one_at_a_time_and_as_a_range_leave_the_lists_in_step() {
+    let panel = Panel::new();
+    let children: Vec<Ref<Control>> = (0..6).map(|_| Control::new()).collect();
+    panel.children().add_range(children.iter().cloned());
+    let removals = Rc::new(RefCell::new(Vec::new()));
+    let seen = removals.clone();
+    panel.visual_children().add_collection_changed(Rc::new(move |e| {
+        seen.borrow_mut().push((e.old_starting_index, e.old_items.len()));
+    }));
+
+    panel.children().remove_at(4);
+    panel.children().remove(&children[1]);
+    panel.children().remove_range(1, 2);
+
+    let left = [&children[0], &children[5]];
+    assert_eq!(panel.logical_children().to_vec(), logical(&left));
+    assert_eq!(panel.visual_children().to_vec(), visual(&left));
+    assert_eq!(*removals.borrow(), [(4, 1), (1, 1), (1, 2)]);
+    assert!(children[4].parent().is_none() && children[4].visual_parent().is_none());
+}
+
+/// A list that does not have the children where the panel has them (a derived panel that keeps
+/// a visual of its own in front of them) still loses the child, wherever it is.
+#[test]
+fn a_child_is_removed_from_a_list_that_has_it_at_another_index() {
+    let panel = Panel::new();
+    let children: Vec<Ref<Control>> = (0..3).map(|_| Control::new()).collect();
+    panel.children().add_range(children.iter().cloned());
+    let own = Control::new();
+    panel.visual_children().insert(0, own.clone().upcast::<Visual>());
+
+    panel.children().remove_at(1);
+    panel.children().remove_at(1);
+
+    assert_eq!(panel.logical_children().to_vec(), logical(&[&children[0]]));
+    assert_eq!(panel.visual_children().to_vec(), visual(&[&own, &children[0]]));
+}
+
 #[test]
 fn moving_panel_children_should_reoder_logical_and_visual_children() {
     let panel = Panel::new();
@@ -152,3 +195,78 @@ fn child_index_provider_reports_children_and_changes() {
     panel.children().clear();
     assert_eq!(actions.borrow().len(), 4);
 }
+
+/// Section 9.89: a visual that draws nothing of its size is not drawn again when it is resized.
+/// A panel, a border and a content presenter without a background, a border or a shadow draw
+/// nothing; a shape draws its geometry. With something to draw as large as they are, they are
+/// drawn again.
+#[test]
+fn a_visual_that_draws_nothing_of_its_size_is_not_drawn_again_when_it_is_resized() {
+    use crate::presenters::ContentPresenter;
+    use crate::shapes::{Polyline, Rectangle};
+    use crate::test_support::{MarkingRenderer, TestRoot};
+    use crate::{Border, Decorator, Grid, StackPanel};
+    use ferroui_base::media::{Brushes, Points};
+    use ferroui_base::{Point, Thickness};
+
+    let _scope = crate::test_support::test_scope();
+    let _app = crate::test_support_shapes::MockRenderInterfaceScope::install();
+
+    let plain_panel = Grid::new();
+    let filled_panel = Grid::new();
+    filled_panel.set_background(Some(Brushes::white()));
+    let plain_border = Border::new();
+    let framed_border = Border::new();
+    framed_border.set_border_brush(Some(Brushes::black()));
+    framed_border.set_border_thickness(Thickness::uniform(1.0));
+    let decorator = Decorator::new();
+    let presenter = ContentPresenter::new();
+    let rectangle = Rectangle::new();
+    rectangle.set_fill(Some(Brushes::red()));
+    rectangle.set_height(4.0);
+    let polyline = Polyline::new();
+    polyline.set_stroke(Some(Brushes::red()));
+    polyline.set_points(Some(Points::from_items([Point::new(0.0, 0.0), Point::new(10.0, 5.0)])));
+
+    let stack = StackPanel::new();
+    let children: Vec<(&str, ferroui_base::Ref<Control>)> = vec![
+        ("a panel without a background", plain_panel.upcast()),
+        ("a panel with a background", filled_panel.upcast()),
+        ("a border that draws nothing", plain_border.upcast()),
+        ("a border with a border", framed_border.upcast()),
+        ("a decorator", decorator.upcast()),
+        ("a content presenter that draws nothing", presenter.upcast()),
+        ("a rectangle", rectangle.upcast()),
+        ("a polyline", polyline.upcast()),
+    ];
+    for (_, child) in &children {
+        child.set_min_height(4.0);
+        stack.children().add(child);
+    }
+    let host = Border::new();
+    host.set_child(&stack);
+    host.set_width(400.0);
+    let root = TestRoot::with_child(&host);
+    let renderer = Rc::new(MarkingRenderer::default());
+    root.set_renderer(renderer.clone());
+    root.execute_initial_layout_pass();
+    for (_, child) in &children {
+        let visual: &Visual = child;
+        renderer.take(visual);
+    }
+
+    host.set_width(360.0);
+    root.layout_manager().execute_layout_pass();
+    let mut drawn_again = Vec::new();
+    for (name, child) in &children {
+        let visual: &Visual = child;
+        assert_eq!(child.bounds().width, 360.0, "{name}");
+        if renderer.take(visual).0 > 0 {
+            drawn_again.push(*name);
+        }
+    }
+    // The rectangle's geometry is made of its size: the shape is measured again for it, which
+    // records it again (a layout invalidation, not one of the visual), and it is not in the list.
+    assert_eq!(drawn_again, ["a panel with a background", "a border with a border"]);
+}
+

@@ -60,10 +60,22 @@ struct Node {
     kind: Kind,
     /// `Rc<RefCell<T>>` of a signal, `Rc<RefCell<Option<T>>>` of a memo.
     value: Option<Rc<dyn Any>>,
-    /// The memos and effects that read the node.
+    /// The memos and effects that read the node. A long list also holds what left it since it
+    /// was last swept (`stale`): see [`Runtime::leave`].
     subscribers: Vec<NodeId>,
-    /// The signals and memos the node read when it last ran.
+    /// `subscribers` holds entries of nodes that follow the node no more.
+    stale: bool,
+    /// Some of those nodes may be alive (they stopped reading the node): only a look at what
+    /// each subscriber follows tells them from the others.
+    stale_followers: bool,
+    /// The signals and memos the node read when it last ran; while it runs, those it has read
+    /// in this run.
     sources: Vec<NodeId>,
+    /// While the node runs: what it read in the run before. The first `kept` of them it has read
+    /// again (they are in `sources` too); the rest it still follows, until the run ends without
+    /// reading them. Empty between runs.
+    previous: Vec<NodeId>,
+    kept: usize,
     dirty: bool,
     owner: Option<NodeId>,
     owned: Vec<NodeId>,
@@ -104,7 +116,11 @@ impl Runtime {
             kind,
             value,
             subscribers: Vec::new(),
+            stale: false,
+            stale_followers: false,
             sources: Vec::new(),
+            previous: Vec::new(),
+            kept: 0,
             dirty: false,
             owner,
             owned: Vec::new(),
@@ -125,11 +141,120 @@ impl Runtime {
             }
         };
         if let Some(owner) = owner {
-            if let Some(owner) = Self::node_mut(&mut nodes, owner) {
-                owner.owned.push(id);
-            }
+            Self::own(&mut nodes, owner, id);
         }
         id
+    }
+
+    /// Adds `id` to what `owner` owns. A long list keeps the nodes that were disposed one by
+    /// one (see [`dispose`](Self::dispose)); they are taken out here before the list would grow,
+    /// so the list is never longer than twice what is alive in it and what it had room for.
+    #[inline]
+    fn own(nodes: &mut [Node], owner: NodeId, id: NodeId) {
+        let Some(node) = Self::node_mut(nodes, owner) else { return };
+        if node.owned.len() == node.owned.capacity() && node.owned.len() > Self::SHORT_LIST {
+            Self::sweep_owned(nodes, owner);
+            let Some(node) = Self::node_mut(nodes, owner) else { return };
+            node.owned.push(id);
+            return;
+        }
+        node.owned.push(id);
+    }
+
+    /// Takes the disposed nodes out of what `owner` owns.
+    #[cold]
+    #[inline(never)]
+    fn sweep_owned(nodes: &mut [Node], owner: NodeId) {
+        let Some(node) = Self::node_mut(nodes, owner) else { return };
+        let mut owned = std::mem::take(&mut node.owned);
+        owned.retain(|owned| Self::node_mut(nodes, *owned).is_some());
+        if let Some(node) = Self::node_mut(nodes, owner) {
+            node.owned = owned;
+        }
+    }
+
+    /// A list up to this long is searched for the entry that leaves it; a longer one keeps the
+    /// entry until it is swept.
+    const SHORT_LIST: usize = 16;
+
+    /// `subscriber` follows `source` no more: it stopped reading it (`alive`), or it is being
+    /// disposed.
+    ///
+    /// A list of a few subscribers is searched and the entry taken out. A signal every element of
+    /// a screen reads has thousands, and a search for each one that leaves costs the size of the
+    /// screen for each element that goes: a screen that is disposed, or a list whose rows leave,
+    /// cost the square of its size. The entry of a long list stays where it is and the list is
+    /// marked: [`swept`](Self::sweep) before the source notifies, before a subscriber is added to
+    /// a full list, and before a subscriber that may have an entry in it follows it again. A
+    /// disposed node is told from the others by its generation, a node that stopped reading by
+    /// what it follows, so nothing is recorded for an entry.
+    #[inline]
+    fn leave(nodes: &mut [Node], source: NodeId, subscriber: NodeId, alive: bool) {
+        let Some(node) = Self::node_mut(nodes, source) else { return };
+        if node.subscribers.len() <= Self::SHORT_LIST {
+            node.subscribers.retain(|known| *known != subscriber);
+        } else {
+            node.stale = true;
+            node.stale_followers |= alive;
+        }
+    }
+
+    /// Takes out of the subscribers of `source` the entries of what left it ([`leave`](Self::leave)),
+    /// and every entry of `adding`, a node that is about to be added: an entry it has is one it
+    /// left, whatever it follows by now.
+    #[cold]
+    #[inline(never)]
+    fn sweep(nodes: &mut [Node], source: NodeId, adding: Option<NodeId>) {
+        let Some(node) = Self::node_mut(nodes, source) else { return };
+        let followers = std::mem::take(&mut node.stale_followers);
+        node.stale = false;
+        let mut subscribers = std::mem::take(&mut node.subscribers);
+        subscribers.retain(|subscriber| {
+            let Some(node) = nodes.get(subscriber.index as usize) else { return false };
+            if !node.alive || node.generation != subscriber.generation || Some(*subscriber) == adding {
+                return false;
+            }
+            // While a node runs, what it has not read again yet is followed still.
+            let unread = node.previous.get(node.kept..);
+            !followers || node.sources.contains(&source) || unread.is_some_and(|unread| unread.contains(&source))
+        });
+        if let Some(node) = Self::node_mut(nodes, source) {
+            node.subscribers = subscribers;
+        }
+    }
+
+    /// Adds `subscriber`, which did not follow `source` until now, to the subscribers of
+    /// `source`.
+    #[inline]
+    fn subscribe(nodes: &mut [Node], source: NodeId, subscriber: NodeId) {
+        let Some(node) = Self::node_mut(nodes, source) else { return };
+        // An entry of the subscriber itself may be among what left, and a full list is swept
+        // before it grows.
+        if node.stale && (node.stale_followers || node.subscribers.len() == node.subscribers.capacity()) {
+            Self::sweep(nodes, source, Some(subscriber));
+            let Some(node) = Self::node_mut(nodes, source) else { return };
+            node.subscribers.push(subscriber);
+            return;
+        }
+        node.subscribers.push(subscriber);
+    }
+
+    /// [`subscribers_of`](Self::subscribers_of) as a call: marking an effect dirty, which is
+    /// done for every subscriber of a write, does not carry the code of a memo.
+    #[inline(never)]
+    fn subscribers_of_memo(nodes: &mut [Node], id: NodeId) -> Vec<NodeId> {
+        Self::subscribers_of(nodes, id)
+    }
+
+    /// The subscribers of `id` to notify: without what left it.
+    #[inline]
+    fn subscribers_of(nodes: &mut [Node], id: NodeId) -> Vec<NodeId> {
+        let Some(node) = Self::node_mut(nodes, id) else { return Vec::new() };
+        if node.stale {
+            Self::sweep(nodes, id, None);
+            return Self::node_mut(nodes, id).map(|node| node.subscribers.clone()).unwrap_or_default();
+        }
+        node.subscribers.clone()
     }
 
     fn node_mut(nodes: &mut [Node], id: NodeId) -> Option<&mut Node> {
@@ -152,27 +277,80 @@ impl Runtime {
     }
 
     /// Records that the running memo or effect read `source`.
+    ///
+    /// A node is among the subscribers of exactly what it has as a source (in `sources`, or in
+    /// what is left of `previous` while it runs), so whether it follows `source` already is a
+    /// question to its own few sources and never to the subscribers of `source`, which for a
+    /// signal every element of a screen reads are thousands. A run that reads what the run
+    /// before read, in the same order, touches no list of subscribers at all.
     fn track(&self, source: NodeId) {
         let Some(observer) = self.observer.get() else { return };
         let mut nodes = self.nodes.borrow_mut();
-        let Some(node) = Self::node_mut(&mut nodes, source) else { return };
-        if !node.subscribers.contains(&observer) {
-            node.subscribers.push(observer);
+        if Self::node_mut(&mut nodes, source).is_none() {
+            return;
         }
-        if let Some(observer) = Self::node_mut(&mut nodes, observer) {
-            if !observer.sources.contains(&source) {
-                observer.sources.push(source);
+        let Some(node) = Self::node_mut(&mut nodes, observer) else { return };
+        if node.sources.contains(&source) {
+            return;
+        }
+        // Read in the run before: the node follows it already. The next of them in the order of
+        // that run is the usual case; any other is moved there.
+        let followed = match node.previous[node.kept..].iter().position(|previous| *previous == source) {
+            Some(offset) => {
+                let kept = node.kept;
+                node.previous.swap(kept, kept + offset);
+                node.kept += 1;
+                true
             }
+            None => false,
+        };
+        node.sources.push(source);
+        if !followed {
+            Self::subscribe(&mut nodes, source, observer);
+        }
+    }
+
+    /// The beginning of a run of `id`: what it read before becomes what it may read again.
+    fn begin_tracking(&self, id: NodeId) {
+        let mut nodes = self.nodes.borrow_mut();
+        let Some(node) = Self::node_mut(&mut nodes, id) else { return };
+        // What the run before left in `previous` is nothing, unless it did not end (a panic
+        // unwound through it): then it is what that run had not read again, which is followed
+        // still. The two lists change places, so a run fills the list of two runs ago and no
+        // run of an effect that reads what it read before asks for memory.
+        let kept = std::mem::take(&mut node.kept);
+        let read = kept.min(node.previous.len());
+        node.previous.drain(..read);
+        std::mem::swap(&mut node.previous, &mut node.sources);
+        let Node { previous, sources, .. } = node;
+        previous.append(sources);
+    }
+
+    /// The end of a run of `id`: what the run did not read again is followed no more.
+    fn end_tracking(&self, id: NodeId) {
+        let mut nodes = self.nodes.borrow_mut();
+        let Some(node) = Self::node_mut(&mut nodes, id) else { return };
+        let kept = std::mem::take(&mut node.kept);
+        let mut unread = std::mem::take(&mut node.previous);
+        if kept == unread.len() {
+            // Every source read again: the list is kept for the next run, emptied.
+            unread.clear();
+            node.previous = unread;
+            return;
+        }
+        for source in unread.drain(kept..) {
+            Self::leave(&mut nodes, source, id, true);
+        }
+        unread.clear();
+        if let Some(node) = Self::node_mut(&mut nodes, id) {
+            node.previous = unread;
         }
     }
 
     /// Marks what reads `id` as dirty and runs the effects that are, unless
     /// a batch or a run is in progress.
     fn notify(&self, id: NodeId) {
-        let subscribers = {
-            let mut nodes = self.nodes.borrow_mut();
-            Self::node_mut(&mut nodes, id).map(|node| node.subscribers.clone()).unwrap_or_default()
-        };
+        let subscribers = Self::subscribers_of(&mut self.nodes.borrow_mut(), id);
         for subscriber in subscribers {
             self.mark_dirty(subscriber);
         }
@@ -189,7 +367,7 @@ impl Runtime {
             node.dirty = true;
             match node.kind {
                 Kind::Effect(_) => (true, Vec::new()),
-                Kind::Memo(_) => (false, node.subscribers.clone()),
+                Kind::Memo(_) => (false, Self::subscribers_of_memo(&mut nodes, id)),
                 _ => (false, Vec::new()),
             }
         };
@@ -225,7 +403,7 @@ impl Runtime {
     /// it is the observer and the owner while it runs.
     fn run(&self, id: NodeId) -> bool {
         self.dispose_owned(id);
-        self.clear_sources(id);
+        self.begin_tracking(id);
         let kind = {
             let mut nodes = self.nodes.borrow_mut();
             let Some(node) = Self::node_mut(&mut nodes, id) else { return false };
@@ -247,19 +425,24 @@ impl Runtime {
         };
         self.observer.set(previous.0);
         self.owner.set(previous.1);
+        self.end_tracking(id);
         changed
     }
 
     fn clear_sources(&self, id: NodeId) {
         let mut nodes = self.nodes.borrow_mut();
         let sources = match Self::node_mut(&mut nodes, id) {
-            Some(node) => std::mem::take(&mut node.sources),
+            Some(node) => {
+                // A node disposed while it runs also follows what it has not read again yet.
+                let kept = std::mem::take(&mut node.kept);
+                let mut sources = std::mem::take(&mut node.sources);
+                sources.extend(std::mem::take(&mut node.previous).into_iter().skip(kept));
+                sources
+            }
             None => return,
         };
         for source in sources {
-            if let Some(source) = Self::node_mut(&mut nodes, source) {
-                source.subscribers.retain(|subscriber| *subscriber != id);
-            }
+            Self::leave(&mut nodes, source, id, false);
         }
     }
 
@@ -295,13 +478,24 @@ impl Runtime {
         };
         {
             let mut nodes = self.nodes.borrow_mut();
-            // An owner that lives on forgets the node.
+            // An owner that lives on forgets the node. An owner of many (a list of rows) keeps
+            // the entry, which is of no node once this one is disposed, until the list would
+            // grow (`own`): rows that leave one by one do not each cost the number of rows.
             if let Some(owner) = owner.and_then(|owner| Self::node_mut(&mut nodes, owner)) {
-                owner.owned.retain(|owned| *owned != id);
+                if owner.owned.len() <= Self::SHORT_LIST {
+                    owner.owned.retain(|owned| *owned != id);
+                }
             }
             for subscriber in subscribers {
                 if let Some(subscriber) = Self::node_mut(&mut nodes, subscriber) {
                     subscriber.sources.retain(|source| *source != id);
+                    // A subscriber that is running may have the node among what it read before.
+                    if let Some(index) = subscriber.previous.iter().position(|source| *source == id) {
+                        subscriber.previous.remove(index);
+                        if index < subscriber.kept {
+                            subscriber.kept -= 1;
+                        }
+                    }
                 }
             }
         }
@@ -309,6 +503,65 @@ impl Runtime {
         drop(value);
         self.free.borrow_mut().push(id.index);
     }
+}
+
+/// How many memos and effects follow `signal` (tests).
+#[cfg(test)]
+pub(crate) fn subscriber_count<T>(signal: &Signal<T>) -> usize {
+    with_runtime(|runtime| {
+        let mut nodes = runtime.nodes.borrow_mut();
+        Runtime::subscribers_of(&mut nodes, signal.id).len()
+    })
+}
+
+/// How many nodes of the runtime of the thread are alive: its signals, memos, effects and owners
+/// (tests).
+#[cfg(test)]
+pub(crate) fn live_nodes() -> usize {
+    with_runtime(|runtime| runtime.nodes.borrow().iter().filter(|node| node.alive).count())
+}
+
+/// The size of a node of the runtime, which every signal, memo, effect and owner is (tests).
+#[cfg(test)]
+pub(crate) fn node_size() -> usize {
+    std::mem::size_of::<Node>()
+}
+
+/// How many entries the list of subscribers of `signal` holds, with those of what left it and
+/// was not taken out yet (tests).
+#[cfg(test)]
+pub(crate) fn subscriber_entries<T>(signal: &Signal<T>) -> usize {
+    with_runtime(|runtime| {
+        let mut nodes = runtime.nodes.borrow_mut();
+        Runtime::node_mut(&mut nodes, signal.id).map_or(0, |node| node.subscribers.len())
+    })
+}
+
+/// How many entries the list of what `owner` owns holds, with those of nodes that were disposed
+/// and not taken out yet (tests).
+#[cfg(test)]
+pub(crate) fn owned_entries(owner: &Owner) -> usize {
+    with_runtime(|runtime| {
+        let mut nodes = runtime.nodes.borrow_mut();
+        Runtime::node_mut(&mut nodes, owner.id).map_or(0, |node| node.owned.len())
+    })
+}
+
+/// Where the two lists of sources of each memo and effect that follows `signal` are in memory:
+/// the list of what it read in its last run, and the list its next run fills (tests).
+#[cfg(test)]
+pub(crate) fn tracking_lists<T>(signal: &Signal<T>) -> Vec<(usize, usize)> {
+    with_runtime(|runtime| {
+        let mut nodes = runtime.nodes.borrow_mut();
+        let subscribers = Runtime::subscribers_of(&mut nodes, signal.id);
+        subscribers
+            .into_iter()
+            .filter_map(|subscriber| {
+                let node = Runtime::node_mut(&mut nodes, subscriber)?;
+                Some((node.sources.as_ptr() as usize, node.previous.as_ptr() as usize))
+            })
+            .collect()
+    })
 }
 
 /// A value that the reactive closures reading it follow. `Copy`: a `move`

@@ -432,6 +432,19 @@
     <Setter Property="CornerRadius" Value="8" />
     <Setter Property="Padding" Value="12" />
   </Style>
+  <!-- The preview of a document in the view: the frame of the editor around the document, which
+       is laid out at the size of its artboard and scaled to the canvas area by its host. -->
+  <Style Selector="FlyoutPresenter.designer-preview-flyout">
+    <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
+    <Setter Property="BorderBrush" Value="{DynamicResource DesignerBorderBrush}" />
+    <Setter Property="BorderThickness" Value="1" />
+    <Setter Property="CornerRadius" Value="8" />
+    <Setter Property="Padding" Value="8" />
+    <Setter Property="MaxWidth" Value="100000" />
+    <Setter Property="MaxHeight" Value="100000" />
+    <Setter Property="ScrollViewer.HorizontalScrollBarVisibility" Value="Disabled" />
+    <Setter Property="ScrollViewer.VerticalScrollBarVisibility" Value="Disabled" />
+  </Style>
   <Style Selector="FlyoutPresenter.designer-property-transfer-flyout">
     <Setter Property="Background" Value="{DynamicResource DesignerPanelBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource DesignerTextBrush}" />

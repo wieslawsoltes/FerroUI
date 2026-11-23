@@ -413,6 +413,12 @@ impl ReactiveUIBuilder {
         self
     }
 
+    /// The handler of the errors that no `thrown_exceptions` subscriber handles that the
+    /// builder was given, if any.
+    pub fn exception_handler(&self) -> Option<Rc<dyn IObserver<ObservableError>>> {
+        self.state.exception_handler.borrow().clone()
+    }
+
     /// Sets a suspension host, which becomes the one of `RxSuspension` when the application is
     /// built (`WithSuspensionHost()`).
     pub fn with_suspension_host(&self) -> &Self {

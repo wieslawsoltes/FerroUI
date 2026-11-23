@@ -7,7 +7,7 @@ use crate::data::{
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::property_store::ImmediateValueFrame;
 use crate::reactive::{Disposable, IDisposable, IObservable, IObserver};
-use crate::utilities::CultureInfo;
+use crate::utilities::{CultureInfo, OptionCell};
 use crate::{BoxedValue, FerroObject, FerroProperty, Ref, StyledElement, UnsetValueType, WeakRef};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -26,21 +26,31 @@ pub struct UntypedBindingExpressionBase {
     default_priority: BindingPriority,
     priority: Cell<BindingPriority>,
     target_property: Cell<Option<&'static FerroProperty>>,
-    target_type: Cell<ValueType>,
     is_data_validation_enabled: Cell<bool>,
-    default_value: RefCell<Option<Option<BoxedValue>>>,
-    error: RefCell<Option<ExpressionError>>,
-    frame: RefCell<Option<Weak<ImmediateValueFrame>>>,
+    /// What few expressions have (`RareState`): made with the first of them.
+    rare: OptionCell<Box<RareState>>,
+    frame: OptionCell<Weak<ImmediateValueFrame>>,
     is_running: Cell<bool>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     reload_paused: Cell<bool>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     reload_pending: Cell<(bool, bool)>,
     produce_value: Cell<bool>,
-    sink: RefCell<Option<SinkRef>>,
-    observable: RefCell<Weak<ObservableSink>>,
-    target: RefCell<Option<WeakRef<FerroObject>>>,
-    value: RefCell<Option<BoxedValue>>,
+    sink: OptionCell<SinkRef>,
+    target: OptionCell<WeakRef<FerroObject>>,
+    /// The value; a null value is a cell that holds nothing.
+    value: OptionCell<BoxedValue>,
+}
+
+/// The state of an expression that few expressions have: the default value of the target
+/// property, read when the expression has no value; an error; and the adapter of an
+/// expression that is observed instead of bound. An expression without any of them, which
+/// is nearly every expression of a template, keeps one empty cell for the three.
+#[derive(Default)]
+struct RareState {
+    default_value: Option<Option<BoxedValue>>,
+    error: Option<ExpressionError>,
+    observable: Weak<ObservableSink>,
 }
 
 fn is_unset(value: &Option<BoxedValue>) -> bool {
@@ -56,27 +66,65 @@ impl UntypedBindingExpressionBase {
         is_data_validation_enabled: bool,
     ) -> Self {
         crate::perf_count!(BindingExpressionsCreated);
+        let value = OptionCell::new();
+        value.set(Some(FerroProperty::unset_value()));
         Self {
             this,
             default_priority,
             priority: Cell::new(default_priority),
             target_property: Cell::new(target_property),
-            target_type: Cell::new(target_property.map_or_else(ValueType::object, property_value_type)),
             is_data_validation_enabled: Cell::new(is_data_validation_enabled),
-            default_value: RefCell::new(None),
-            error: RefCell::new(None),
-            frame: RefCell::new(None),
+            rare: OptionCell::new(),
+            frame: OptionCell::new(),
             is_running: Cell::new(false),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
             reload_paused: Cell::new(false),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
             reload_pending: Cell::new((false, false)),
             produce_value: Cell::new(true),
-            sink: RefCell::new(None),
-            observable: RefCell::new(Weak::new()),
-            target: RefCell::new(None),
-            value: RefCell::new(Some(FerroProperty::unset_value())),
+            sink: OptionCell::new(),
+            target: OptionCell::new(),
+            value,
         }
+    }
+
+    /// Reads the rare state, if the expression has it. `read` must not read it again.
+    fn read_rare<R>(&self, read: impl FnOnce(Option<&RareState>) -> R) -> R {
+        self.rare.with(|rare| read(rare.map(|rare| &**rare)))
+    }
+
+    /// Writes the rare state, which is made if the expression has none. What `write` returns
+    /// (a value it replaced) is dropped by the caller, after the state is back in its cell.
+    fn write_rare<R>(&self, write: impl FnOnce(&mut RareState) -> R) -> R {
+        let mut rare = self.rare.take().unwrap_or_default();
+        let result = write(&mut rare);
+        self.rare.set(Some(rare));
+        result
+    }
+
+    fn current_value(&self) -> Option<BoxedValue> {
+        self.value.get()
+    }
+
+    fn set_value(&self, value: Option<BoxedValue>) {
+        self.value.set(value);
+    }
+
+    /// Whether the expression has made the state few expressions have.
+    #[cfg(test)]
+    pub(crate) fn has_rare_state(&self) -> bool {
+        self.rare.is_some()
+    }
+
+    fn has_error(&self) -> bool {
+        self.read_rare(|rare| rare.is_some_and(|rare| rare.error.is_some()))
+    }
+
+    fn set_error(&self, error: Option<ExpressionError>) {
+        if error.is_none() && !self.has_error() {
+            return;
+        }
+        drop(self.write_rare(|rare| std::mem::replace(&mut rare.error, error)));
     }
 
     pub fn priority(&self) -> BindingPriority {
@@ -97,11 +145,12 @@ impl UntypedBindingExpressionBase {
 
     /// The current error state of the binding expression.
     pub fn error_type(&self) -> BindingErrorType {
-        self.error.borrow().as_ref().map_or(BindingErrorType::None, |e| e.error_type)
+        self.read_rare(|rare| rare.and_then(|rare| rare.error.as_ref()).map(|error| error.error_type))
+            .unwrap_or(BindingErrorType::None)
     }
 
     pub(crate) fn error(&self) -> Option<ExpressionError> {
-        self.error.borrow().clone()
+        self.read_rare(|rare| rare.and_then(|rare| rare.error.clone()))
     }
 
     /// Whether the binding expression is currently running.
@@ -140,16 +189,20 @@ impl UntypedBindingExpressionBase {
             if !value_changed && !error_changed {
                 break;
             }
-            let sink = self.sink.borrow().clone();
+            let sink = self.sink.get();
             if let (Some(sink), Some(this)) = (sink, self.this.upgrade()) {
                 sink.on_changed(&this, value_changed, error_changed);
             }
         }
     }
 
-    /// The type that values produced by the expression are converted to.
+    /// The type that values produced by the expression are converted to: that of the target
+    /// property, or `object` where there is none.
+    // Read from the property, not kept (docs/porting/desktop-performance.md, section 9.72): the
+    // copy was 32 bytes of every binding expression, and a template makes one for every binding
+    // of every control it builds.
     pub fn target_type(&self) -> ValueType {
-        self.target_type.get()
+        self.target_property.get().map_or_else(ValueType::object, property_value_type)
     }
 
     /// The current value of the binding expression, or the unset marker if
@@ -159,7 +212,7 @@ impl UntypedBindingExpressionBase {
         if !self.is_running() {
             panic!("BindingExpression has not been started.");
         }
-        self.value.borrow().clone()
+        self.current_value()
     }
 
     /// The current value of the binding expression or the default value of
@@ -174,14 +227,14 @@ impl UntypedBindingExpressionBase {
     }
 
     fn get_cached_default_value(&self) -> Option<BoxedValue> {
-        if let Some(value) = &*self.default_value.borrow() {
-            return value.clone();
+        if let Some(value) = self.read_rare(|rare| rare.and_then(|rare| rare.default_value.clone())) {
+            return value;
         }
         if let (Some(property), Some(target)) = (self.target_property(), self.try_get_target()) {
             // The unset value of a direct property, the default value of a
             // styled property.
             let value = Some(property.routes().route_get_default_value(target.get_type()));
-            self.default_value.replace(Some(value.clone()));
+            drop(self.write_rare(|rare| rare.default_value.replace(value.clone())));
             return value;
         }
         Some(FerroProperty::unset_value())
@@ -192,7 +245,7 @@ impl UntypedBindingExpressionBase {
         if !self.is_data_validation_enabled() {
             return None;
         }
-        Some(match &*self.error.borrow() {
+        Some(match self.error() {
             Some(error) => (
                 match error.error_type {
                     BindingErrorType::Error => BindingValueType::BINDING_ERROR,
@@ -214,7 +267,7 @@ impl UntypedBindingExpressionBase {
         target_property: Option<&'static FerroProperty>,
         priority: BindingPriority,
     ) {
-        if self.sink.borrow().is_some() {
+        if self.sink.is_some() {
             panic!("BindingExpression was already attached.");
         }
         if let (Some(existing), Some(new)) = (self.target_property(), target_property) {
@@ -222,17 +275,16 @@ impl UntypedBindingExpressionBase {
                 panic!("BindingExpression was already attached to a different property.");
             }
         }
-        self.sink.replace(Some(sink));
-        self.frame.replace(frame);
-        self.target.replace(Some(target.to_weak()));
+        self.sink.set(Some(sink));
+        self.frame.set(frame);
+        self.target.set(Some(target.to_weak()));
         self.target_property.set(target_property);
-        self.target_type.set(target_property.map_or_else(ValueType::object, property_value_type));
         self.priority.set(priority);
     }
 
     /// The target of the binding expression, if it is attached and alive.
     pub fn try_get_target(&self) -> Option<Ref<FerroObject>> {
-        self.target.borrow().as_ref().and_then(WeakRef::upgrade)
+        self.target.upgrade()
     }
 
     /// Converts a value using a value converter, logging a warning if the
@@ -345,17 +397,17 @@ impl UntypedBindingExpressionBase {
         let has_value_changed = match &value {
             Publish::Unchanged => force_update,
             Publish::Value(v) => {
-                force_update || !ValueTypes::identity_equals(v.as_ref(), self.value.borrow().as_ref())
+                force_update || !self.value.with(|current| ValueTypes::identity_equals(v.as_ref(), current))
             }
         };
-        let has_error_changed = error.is_some() || self.error.borrow().is_some();
+        let has_error_changed = error.is_some() || self.has_error();
 
         if has_value_changed {
             if let Publish::Value(v) = value {
-                self.value.replace(v);
+                self.set_value(v);
             }
         }
-        self.error.replace(error);
+        self.set_error(error);
 
         if !self.produce_value.get() {
             return;
@@ -366,7 +418,7 @@ impl UntypedBindingExpressionBase {
             self.reload_pending.set((value || has_value_changed, error || has_error_changed));
             return;
         }
-        let sink = self.sink.borrow().clone();
+        let sink = self.sink.get();
         let (Some(sink), Some(this)) = (sink, self.this.upgrade()) else { return };
 
         // Expressions, their sources and their targets belong to one thread,
@@ -412,6 +464,14 @@ pub trait UntypedBindingExpression: 'static {
 
     fn update_target_core(&self) {}
 
+    /// The templated parent of the target changed: the store of the target
+    /// tells each of its binding expressions (`ValueStore::templated_parent_changed`),
+    /// so that an expression that reads the templated parent does not observe
+    /// every property change of its target to see it. An expression that
+    /// holds the expressions of other bindings on its target (a multi-binding)
+    /// tells them.
+    fn templated_parent_changed(&self) {}
+
     /// Starts the binding expression.
     fn start(&self, produce_value: bool) {
         let base = self.base();
@@ -419,6 +479,7 @@ pub trait UntypedBindingExpression: 'static {
             return;
         }
         base.is_running.set(true);
+        crate::perf_count!(BindingExpressionsStarted);
         base.produce_value.set(produce_value);
         self.start_core();
         base.produce_value.set(true);
@@ -432,18 +493,18 @@ pub trait UntypedBindingExpression: 'static {
         }
         self.stop_core();
         base.is_running.set(false);
-        base.value.replace(Some(FerroProperty::unset_value()));
+        base.set_value(Some(FerroProperty::unset_value()));
     }
 
     /// Terminates the binding.
     fn dispose_expression(&self) {
         let base = self.base();
-        if base.sink.borrow().is_none() {
+        if !base.sink.is_some() {
             return;
         }
         self.stop();
-        let sink = base.sink.borrow_mut().take();
-        let frame = base.frame.borrow_mut().take();
+        let sink = base.sink.take();
+        let frame = base.frame.take();
         let this = base.this.upgrade();
         if let (Some(sink), Some(this)) = (sink, &this) {
             sink.on_completed(this);
@@ -531,6 +592,10 @@ macro_rules! impl_untyped_binding_expression {
                 self: ::std::rc::Rc<Self>,
             ) -> ::std::option::Option<::std::rc::Rc<dyn $crate::data::BindingExpressionBase>> {
                 ::std::option::Option::Some(self)
+            }
+
+            fn templated_parent_changed(&self) {
+                $crate::data::core::UntypedBindingExpression::templated_parent_changed(self)
             }
         }
 
@@ -644,10 +709,10 @@ impl ObservableSink {
     /// object.
     pub fn create<E: UntypedBindingExpression>(expression: &Rc<E>, target: Option<&FerroObject>) -> Rc<ObservableSink> {
         let base = expression.base();
-        if let Some(existing) = base.observable.borrow().upgrade() {
+        if let Some(existing) = base.read_rare(|rare| rare.and_then(|rare| rare.observable.upgrade())) {
             return existing;
         }
-        if base.sink.borrow().is_some() {
+        if base.sink.is_some() {
             panic!(
                 "Cannot observe a binding expression which is already instantiated on an object."
             );
@@ -661,9 +726,9 @@ impl ObservableSink {
             next_id: Cell::new(0),
         });
         let weak: Weak<dyn IBindingExpressionSink> = Rc::downgrade(&sink) as Weak<dyn IBindingExpressionSink>;
-        base.sink.replace(Some(SinkRef::Other(weak)));
-        base.observable.replace(Rc::downgrade(&sink));
-        base.target.replace(target.map(FerroObject::to_weak));
+        base.sink.set(Some(SinkRef::Other(weak)));
+        drop(base.write_rare(|rare| std::mem::replace(&mut rare.observable, Rc::downgrade(&sink))));
+        base.target.set(target.map(FerroObject::to_weak));
         sink
     }
 

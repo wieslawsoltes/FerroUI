@@ -31,6 +31,7 @@ mod browser_insets_manager;
 mod browser_input_pane;
 mod browser_mouse_device;
 mod browser_native_control_host;
+mod browser_navigation_history;
 mod browser_platform_settings;
 mod browser_runtime_platform;
 mod browser_screens;
@@ -58,6 +59,7 @@ pub use browser_app_builder::{
 pub use browser_input_handler::BrowserInputHandler;
 pub use browser_insets_manager::BrowserInsetsManager;
 pub use browser_input_pane::BrowserInputPane;
+pub use browser_navigation_history::BrowserNavigationHistory;
 pub use browser_platform_settings::BrowserPlatformSettings;
 pub use browser_runtime_platform::{BrowserRuntimePlatform, BrowserRuntimePlatformServices};
 pub use browser_screens::{BrowserScreen, BrowserScreenKey, BrowserScreens};

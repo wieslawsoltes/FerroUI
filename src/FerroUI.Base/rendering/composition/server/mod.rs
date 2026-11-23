@@ -31,6 +31,8 @@ mod server_composition_visual_collection;
 mod server_composition_visual_surface;
 mod server_compositor_animations;
 mod server_custom_composition_visual;
+mod server_draw_items;
+pub(crate) mod unchanged_drawings;
 mod server_drop_shadow;
 mod server_layer_visual;
 mod server_redirect_visual;
@@ -67,9 +69,9 @@ pub use dirty_rects::{
 pub use fps_counter::FpsCounter;
 pub use frame_time_graph::FrameTimeGraph;
 pub use i_server_clock_item::IServerClockItem;
-pub use readback_indices::{ReadbackIndices, ReadbackWriteScope};
+pub use readback_indices::{ReadbackIndices, ReadbackWriteScope, WrittenList};
 pub use render_scope::{brush_light_ids, draw_backdrop, painting_visual, MAX_BACKDROP_DEPTH};
-pub(crate) use render_scope::{is_self_or_ancestor, take_backdrop_regions, with_brush_light_ids};
+pub(crate) use render_scope::{is_self_or_ancestor, take_backdrop_regions, with_brush_light_ids, with_canvas_origin};
 pub(crate) use server_composition_simple_brush::server_simple_brush;
 pub use server_composition_simple_brush::{
     ServerCompositionSimpleBrush, ServerCompositionSimpleConicGradientBrush, ServerCompositionSimpleGradientBrush,
@@ -81,7 +83,9 @@ pub use server_composition_simple_geometry::ServerCompositionSimpleGeometry;
 // upstream; they belong to this namespace.
 pub use super::brushes::{ServerCompositionSimpleContentBrush, ServerCompositionSimpleImageBrush};
 pub use server_composition_simple_transform::ServerCompositionSimpleTransform;
-pub(crate) use server_compositor::OBJECT_END_MAGIC;
+pub(crate) use server_compositor::{ReadbackQueueEntry, OBJECT_END_MAGIC};
+#[cfg(test)]
+pub(crate) use server_compositor::DRAW_AHEAD_TICKS;
 pub use server_compositor::{BatchQueue, CompositorClock, ServerCompositor};
 pub use server_list::ServerList;
 pub use composition_target_overlays::CompositionTargetOverlays;
@@ -111,6 +115,8 @@ pub use server_composition_visual::{
     ServerCompositionVisualCache, TreeWalkerFrame, VisualReadback,
 };
 pub use server_composition_visual_collection::ServerCompositionVisualCollection;
+#[cfg(test)]
+pub(crate) use server_composition_visual_collection::{set_without_children_tables, take_children_left_out};
 pub use server_composition_clip::{
     composition_transform, inset_rect, CompositionClipShape, ServerGeometricClip, ServerInsetClip, ServerRectangleClip,
 };
@@ -153,6 +159,9 @@ pub use super::brushes::{
 };
 pub use server_compositor_animations::ServerCompositorAnimations;
 pub use server_custom_composition_visual::ServerCompositionCustomVisual;
+pub use server_draw_items::{ServerDrawItem, ServerDrawItems};
+pub(crate) use server_composition_draw_list_visual::{DRAW_LIST_ITEMS, DRAW_LIST_NEW, DRAW_LIST_REDRAWN};
+pub(crate) use server_draw_items::{DRAW_ITEM_CLIP, DRAW_ITEM_CONTENT, DRAW_ITEM_OFFSET, DRAW_ITEM_REDRAWN};
 pub use server_object::{
     impl_animated_server_object, IAnimatedServerObject, IServerObject, ServerExpressionObject, ServerObject, ServerObjectId,
 };

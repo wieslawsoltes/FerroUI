@@ -12,7 +12,7 @@
 //! [`RowStatement`]: the statement as the emitter wrote it, kept in the body, and the row that
 //! replaces it.
 //!
-//! When the statements of a body are complete, [`row_runs`] replaces each run of consecutive
+//! When the statements of a body are complete, [`row_runs_with_backend`] replaces each run of consecutive
 //! row statements of one shape and one dictionary by one call of the builder of the shape over a
 //! table of the rows. A run ends at any other statement, including a statement of another
 //! shape, so the order of the additions is kept, and where the unit of the theme the statements
@@ -20,12 +20,49 @@
 //! keeps its rows. A run shorter than the minimum of its shape
 //! ([`RowKind::min_run`]) stays as it was written; everything that is not recognised stays as it
 //! was written. The build functions of the deferred rows of a run are then no longer emitted.
+//! The typed bytecode backend instead emits a `TypedResourceProgram` for every recognized
+//! run, including singleton values, with the same unit boundaries and declaration order.
 
+use std::cell::Cell;
 use std::collections::{HashMap, HashSet};
+
+#[path = "theme_row_program.rs"]
+mod bytecode;
 
 use super::super::emit_types::{EmitTypes, FrameworkType};
 use super::theme_units::unit_marker;
 use super::{absolute, identifiers, is_identifier, is_string_literal, static_resource_alias};
+
+/// Whether the build and the reference tests of the themes write the runs of the deferred
+/// shapes as packed tables (#855, `rt::PackedRows`). On by default: the measurement kept it (the
+/// stripped executables are smaller and start-up is not slower, docs/xaml-themes.md). Turning it
+/// off ([`with_packed_theme_rows`]) gives the slices of row structs of before.
+pub const DEFAULT_PACKED_THEME_ROWS: bool = true;
+
+ferroui_base::ferro_thread_local! {
+    /// The choice [`with_packed_theme_rows`] made for the emission on this thread.
+    static PACKED: Cell<Option<bool>> = const { Cell::new(None) };
+}
+
+/// Whether the emission on this thread writes packed tables (#855): the choice of
+/// [`with_packed_theme_rows`], else [`DEFAULT_PACKED_THEME_ROWS`].
+pub fn packed_theme_rows() -> bool {
+    PACKED.with(Cell::get).unwrap_or(DEFAULT_PACKED_THEME_ROWS)
+}
+
+/// Runs `emit` with packed tables of theme rows on or off (#855) on this thread, and restores the
+/// choice before it afterwards, also when `emit` panics.
+pub fn with_packed_theme_rows<R>(packed: bool, emit: impl FnOnce() -> R) -> R {
+    struct Restore(Option<bool>);
+    impl Drop for Restore {
+        fn drop(&mut self) {
+            let before = self.0;
+            PACKED.with(|packed| packed.set(before));
+        }
+    }
+    let _restore = Restore(PACKED.with(|current| current.replace(Some(packed))));
+    emit()
+}
 
 /// The shortest run of plain values that is written as a row table. A deferred row is written
 /// as a row even alone, since its row replaces a build function of its own; a single plain value
@@ -56,6 +93,10 @@ pub(super) enum RowKind {
 }
 
 impl RowKind {
+    pub(super) fn program_call(self) -> (u8, &'static str, bool) {
+        (bytecode::opcode(self), bytecode::method(self), self.is_deferred())
+    }
+
     /// The Rust type of a row of the shape.
     fn row_type(self) -> &'static str {
         match self {
@@ -97,6 +138,17 @@ impl RowKind {
             Self::CornerRadius => "The corner radii",
             Self::Color => "The colours",
             Self::Text => "The texts",
+        }
+    }
+
+    /// The builder of a packed table of the shape in `rt` (#855), for the deferred shapes.
+    fn packed_builder(self) -> Option<&'static str> {
+        match self {
+            Self::ResourceAlias => Some("rt::add_packed_resource_aliases"),
+            Self::LiteralBrush => Some("rt::add_packed_literal_brushes"),
+            Self::DynamicBrush => Some("rt::add_packed_dynamic_brushes"),
+            Self::StaticBrush => Some("rt::add_packed_static_brushes"),
+            _ => None,
         }
     }
 
@@ -167,11 +219,153 @@ pub(super) struct RowStatement {
     pub(super) dictionary: String,
     /// The row, as a Rust struct literal of the row type of the shape.
     pub(super) row: String,
+    /// Resolved operands and declaration locations for the bytecode backend.
+    encoded: bytecode::OperandRow,
     /// The statement that must precede the statement, and the local it declares, which the row
     /// replaces as well (the local of a colour).
     pub(super) prefix: Option<(String, String)>,
     /// The slot of the build function of a deferred row, which is not emitted when the row is.
     pub(super) slot: Option<usize>,
+    /// The fields of a deferred row, for a packed table (#855).
+    pub(super) fields: Option<RowFields>,
+}
+
+/// The fields of a deferred row as values (#855): the key, the target or colour key (or the
+/// ARGB value of a literal brush), the namespace table of the declaration and the positions.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub(super) struct RowFields {
+    key: String,
+    operand: Operand,
+    namespaces: Option<String>,
+    positions: [i32; 4],
+}
+
+/// The operand of a deferred row: a string (target or colour key) or an ARGB value.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum Operand {
+    Text(String),
+    Argb(u32),
+}
+
+/// The text of the Rust string literal `literal` as [`super::rust_string_literal`] writes it,
+/// or `None` for any other form.
+fn string_value(literal: &str) -> Option<String> {
+    let inner = literal.strip_prefix('"')?.strip_suffix('"')?;
+    let mut text = String::with_capacity(inner.len());
+    let mut characters = inner.chars();
+    while let Some(character) = characters.next() {
+        if character != '\\' {
+            text.push(character);
+            continue;
+        }
+        match characters.next()? {
+            '"' => text.push('"'),
+            '\\' => text.push('\\'),
+            'n' => text.push('\n'),
+            'r' => text.push('\r'),
+            't' => text.push('\t'),
+            '0' => text.push('\0'),
+            'u' => {
+                let rest: String = characters.by_ref().take_while(|&c| c != '}').collect();
+                let digits = rest.strip_prefix('{')?;
+                text.push(char::from_u32(u32::from_str_radix(digits, 16).ok()?)?);
+            }
+            _ => return None,
+        }
+    }
+    Some(text)
+}
+
+/// The fields of the deferred row `row` added as `addition`, if its key and operand are literals
+/// the emitter writes.
+fn row_fields(addition: &DeferredAddition<'_>, row: &DeferredRow) -> Option<RowFields> {
+    let operand = match row.kind {
+        RowKind::LiteralBrush => Operand::Argb(row.operand.strip_suffix("_u32")?.parse().ok()?),
+        _ => Operand::Text(string_value(&row.operand)?),
+    };
+    let (line, position) = addition.position;
+    let (value_line, value_position) = row.value_position;
+    Some(RowFields {
+        key: string_value(addition.key)?,
+        operand,
+        namespaces: row.namespaces.clone(),
+        positions: [line, position, value_line, value_position],
+    })
+}
+
+/// The packed table of the rows `fields` of the shape `kind` (#855), as the initializer of an
+/// `rt::PackedRows`: one pool of the strings of the table, each written once (a string that is
+/// part of one already in the pool is found there), the namespace tables the rows name, and one
+/// record of 16-bit fields for each row. `None` when a row has no fields, when an offset, a
+/// length, a position or the number of namespace tables does not fit 16 bits, or when a position
+/// is negative: the run keeps its slice of rows.
+fn packed_table(kind: RowKind, fields: &[&RowFields]) -> Option<String> {
+    packed_table_in(kind, fields, &mut String::new(), None)
+}
+
+/// [`packed_table`] over the pool `pool`, which the strings of the rows are found in or added to:
+/// the pool of the table, written as its literal (`pool_name` none), or the pool of the unit of
+/// the theme the table is of, named `pool_name` and written once for all the tables of the unit
+/// ([`row_tables_in`]). `None` leaves `pool` as it may have grown: the caller passes a copy.
+fn packed_table_in(kind: RowKind, fields: &[&RowFields], pool: &mut String, pool_name: Option<&str>) -> Option<String> {
+    let mut namespaces: Vec<&str> = Vec::new();
+    let mut records: Vec<String> = Vec::with_capacity(fields.len());
+    let narrow = |value: usize| u16::try_from(value).ok();
+    let intern = |pool: &mut String, text: &str| -> Option<[u16; 2]> {
+        let offset = match pool.find(text) {
+            Some(offset) if !text.is_empty() => offset,
+            _ => {
+                pool.push_str(text);
+                pool.len() - text.len()
+            }
+        };
+        Some([narrow(offset)?, narrow(text.len())?])
+    };
+    for row in fields {
+        let mut record: Vec<u16> = Vec::with_capacity(9);
+        record.extend(intern(&mut *pool, &row.key)?);
+        match (&row.operand, kind) {
+            (Operand::Argb(argb), RowKind::LiteralBrush) => {
+                record.extend([(*argb & 0xFFFF) as u16, (*argb >> 16) as u16]);
+            }
+            (Operand::Text(text), RowKind::ResourceAlias | RowKind::DynamicBrush | RowKind::StaticBrush) => {
+                record.extend(intern(&mut *pool, text)?);
+            }
+            _ => return None,
+        }
+        record.push(match &row.namespaces {
+            None => 0,
+            Some(table) => match namespaces.iter().position(|known| *known == table.as_str()) {
+                Some(index) => narrow(index + 1)?,
+                None => {
+                    namespaces.push(table.as_str());
+                    narrow(namespaces.len())?
+                }
+            },
+        });
+        let positions = match kind {
+            RowKind::LiteralBrush => &row.positions[..2],
+            _ => &row.positions[..],
+        };
+        for position in positions {
+            record.push(u16::try_from(*position).ok()?);
+        }
+        records.push(record.iter().map(u16::to_string).collect::<Vec<_>>().join(", "));
+    }
+    // The pool is read by byte offsets: it must fit them as a whole.
+    narrow(pool.len())?;
+    let mut text = String::from("rt::PackedRows {\n");
+    match pool_name {
+        Some(name) => text.push_str(&format!("    strings: {name},\n")),
+        None => text.push_str(&format!("    strings: {},\n", super::rust_string_literal(pool))),
+    }
+    text.push_str(&format!("    namespaces: &[{}],\n", namespaces.join(", ")));
+    text.push_str("    records: &[\n");
+    for record in &records {
+        text.push_str(&format!("        {record},\n"));
+    }
+    text.push_str("    ],\n}");
+    Some(text)
 }
 
 /// The statements of a body without the indentation and the position markers.
@@ -186,7 +380,7 @@ fn position_of(text: &str) -> Option<(i32, i32)> {
 }
 
 /// The Rust string literal at the start of `text` and the text after it.
-fn split_string_literal(text: &str) -> Option<(&str, &str)> {
+pub(super) fn split_string_literal(text: &str) -> Option<(&str, &str)> {
     if !text.starts_with('"') {
         return None;
     }
@@ -370,7 +564,19 @@ pub(super) fn deferred_row_statement(addition: &DeferredAddition<'_>, row: &Defe
             kind.row_type()
         ),
     };
-    RowStatement { kind: row.kind, dictionary: dictionary.to_string(), row: text, prefix: None, slot: Some(slot) }
+    let fields = row_fields(addition, row);
+    RowStatement {
+        kind: row.kind,
+        dictionary: dictionary.to_string(),
+        row: text,
+        prefix: None,
+        slot: Some(slot),
+        fields,
+        encoded: bytecode::OperandRow {
+            key: key.to_string(), value: operand.clone(), declaration: (*line, *position),
+            value_position: row.value_position, namespaces: row.namespaces.clone(),
+        },
+    }
 }
 
 /// The local of the dictionary that `call`, a call of `IDictionary.Add` the emitter wrote,
@@ -422,9 +628,13 @@ pub(super) fn value_row_statement(paths: &RowPaths, call: &str, previous: Option
     Some(RowStatement {
         kind,
         dictionary: dictionary.to_string(),
+        encoded: bytecode::OperandRow {
+            key: key.to_string(), value: value.clone(), declaration: (line, position), value_position: (line, position), namespaces: None,
+        },
         row: format!("rt::ValueRow {{ key: {key}, value: {value}, line: {line}, position: {position} }}"),
         prefix,
         slot: None,
+        fields: None,
     })
 }
 
@@ -435,6 +645,15 @@ pub(super) struct RowRun {
     pub(super) rows: Vec<String>,
     /// The slots of the build functions the rows replace.
     pub(super) slots: Vec<usize>,
+    /// The initializer of the packed table of the run (#855), when it is written as one (the
+    /// native backend only).
+    pub(super) packed: Option<String>,
+    /// The fields of the rows of a packed table, for the pool of its unit ([`row_tables_in`]).
+    pub(super) fields: Option<Vec<RowFields>>,
+    /// The unit of the theme the rows are entries of (#568).
+    pub(super) unit: Option<u32>,
+    /// The program of the run, with the typed bytecode backend.
+    program: Option<bytecode::Program>,
 }
 
 /// A row statement found in a body: the index of its first line (its position markers), of
@@ -485,10 +704,11 @@ fn flush(
     tables: &mut Vec<(String, RowRun)>,
     document: &str,
     table_name: &mut dyn FnMut() -> String,
+    typed: bool,
 ) {
     let Some(first) = run.first() else { return };
     let kind = first.entry.kind;
-    if run.len() < kind.min_run() {
+    if !typed && run.len() < kind.min_run() {
         for found in run.iter() {
             body.extend(lines[found.start..=found.statement].iter().cloned());
         }
@@ -500,14 +720,40 @@ fn flush(
     let name = table_name();
     body.extend(lines[first.start..first.code].iter().cloned());
     let dictionary = &first.entry.dictionary;
-    body.push(match kind.is_deferred() {
-        true => format!("{indent}{}(&{dictionary}, &context, &{document}, {name})?;", kind.builder()),
-        false => format!("{indent}{}(&{dictionary}, {name})?;", kind.builder()),
-    });
-    let rows = run.iter().map(|found| found.entry.row.clone()).collect();
+    // The typed backend encodes the run as a program; otherwise a packed table (#855) when the
+    // experiment is on and every row of the run fits one. A run is encoded by one of them only.
+    let program = typed.then(|| bytecode::Program::encode(kind, run.iter().map(|found| &found.entry.encoded)));
+    let fields: Option<Vec<&RowFields>> = match (program.is_none() && packed_theme_rows(), kind.packed_builder()) {
+        (true, Some(_)) => run.iter().map(|found| found.entry.fields.as_ref()).collect(),
+        _ => None,
+    };
+    let packed = fields.as_ref().and_then(|fields| packed_table(kind, fields));
+    let fields = packed.as_ref().and(fields).map(|fields| fields.into_iter().cloned().collect());
+    let unit = first.unit;
+    if program.is_some() {
+        let arguments = if kind.is_deferred() { format!("&{dictionary}, &context, &{document}") } else { format!("&{dictionary}") };
+        body.push(format!("{indent}{name}.{}({arguments})?;", bytecode::method(kind)));
+    } else {
+        body.push(match (kind.is_deferred(), &packed, kind.packed_builder()) {
+            (true, Some(_), Some(builder)) => format!("{indent}{builder}(&{dictionary}, &context, &{document}, &{name})?;"),
+            (true, _, _) => format!("{indent}{}(&{dictionary}, &context, &{document}, {name})?;", kind.builder()),
+            (false, _, _) => format!("{indent}{}(&{dictionary}, {name})?;", kind.builder()),
+        });
+    }
+    let rows = if typed { Vec::new() } else { run.iter().map(|found| found.entry.row.clone()).collect() };
     let slots = run.iter().filter_map(|found| found.entry.slot).collect();
-    tables.push((name, RowRun { kind, rows, slots }));
+    tables.push((name, RowRun { kind, rows, slots, packed, fields, unit, program }));
     run.clear();
+}
+
+#[cfg(test)]
+pub(super) fn row_runs(
+    lines: Vec<String>,
+    statements: &HashMap<String, RowStatement>,
+    document: &str,
+    table_name: impl FnMut() -> String,
+) -> (Vec<String>, Vec<(String, RowRun)>) {
+    row_runs_with_backend(lines, statements, document, table_name, false)
 }
 
 /// `lines`, a body the emitter wrote (each line indented), with each run of consecutive row
@@ -516,11 +762,12 @@ fn flush(
 /// the shape over a table. `statements` are the row statements recorded for the body, by their
 /// text; `document` names the `rt::DocumentInfo` of the document; `table_name` gives the name of
 /// the next table. Returns the body and the tables, in the order of the calls.
-pub(super) fn row_runs(
+pub(super) fn row_runs_with_backend(
     lines: Vec<String>,
     statements: &HashMap<String, RowStatement>,
     document: &str,
     mut table_name: impl FnMut() -> String,
+    typed: bool,
 ) -> (Vec<String>, Vec<(String, RowRun)>) {
     if statements.is_empty() {
         return (lines, Vec::new());
@@ -556,12 +803,12 @@ pub(super) fn row_runs(
             index += 1;
         }
         if index == lines.len() {
-            flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name);
+            flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name, typed);
             body.extend(lines[start..].iter().cloned());
             break;
         }
         let Some(mut found) = found_at(&lines, statements, &uses, start, index) else {
-            flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name);
+            flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name, typed);
             body.extend(lines[start..=index].iter().cloned());
             index += 1;
             continue;
@@ -574,17 +821,92 @@ pub(super) fn row_runs(
                 && indentation(&lines[first.code]) == indentation(&lines[found.code])
         });
         if !continues {
-            flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name);
+            flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name, typed);
         }
         index = found.statement + 1;
         run.push(found);
     }
-    flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name);
+    flush(&mut run, &lines, &mut body, &mut tables, document, &mut table_name, typed);
     (body, tables)
 }
 
+/// The static of the packed table `name` of the shape `kind` with the initializer `packed`.
+fn packed_static(name: &str, document_text: &str, kind: RowKind, packed: &str) -> String {
+    let builder = kind.packed_builder().unwrap_or_default();
+    format!(
+        "/// {} of a run of `{document_text}`, packed, added in order by `{builder}` (#855).\n\
+         static {name}: rt::PackedRows = {packed};\n",
+        kind.description()
+    )
+}
+
+/// The texts of the tables `tables` (`(name, document text, run)`, in the order of the calls) of
+/// the function `prefix` (upper case) of a document (#855): the packed tables of one unit of a
+/// theme, when it has two or more, share one pool of strings, the constant
+/// `{prefix}_UNIT_{unit}_STRINGS` written before the first of them. The tables of the theme
+/// dictionaries of a unit name the same keys and targets, which a pool for each table repeated;
+/// a pool for each unit, not one for the theme, leaves the strings of a trimmed unit out with it.
+/// A table whose rows do not fit the 16-bit offsets of the pool keeps a pool of its own, as does
+/// every other table.
+pub(super) fn row_tables_in(prefix: &str, tables: &[(String, String, RowRun)], image: &super::BytecodeImage) -> Vec<String> {
+    let mut by_unit: std::collections::BTreeMap<u32, Vec<usize>> = std::collections::BTreeMap::new();
+    for (index, (_, _, run)) in tables.iter().enumerate() {
+        if let (Some(unit), Some(_), Some(_), None) = (run.unit, &run.packed, &run.fields, &run.program) {
+            by_unit.entry(unit).or_default().push(index);
+        }
+    }
+    let mut shared: HashMap<usize, String> = HashMap::new();
+    let mut pools: HashMap<usize, (u32, String)> = HashMap::new();
+    for (unit, indices) in by_unit.into_iter().filter(|(_, indices)| indices.len() >= 2) {
+        let pool_name = format!("{prefix}_UNIT_{unit}_STRINGS");
+        let mut pool = String::new();
+        let mut members = Vec::new();
+        for index in indices {
+            let run = &tables[index].2;
+            let Some(fields) = &run.fields else { continue };
+            let fields: Vec<&RowFields> = fields.iter().collect();
+            let mut trial = pool.clone();
+            if let Some(packed) = packed_table_in(run.kind, &fields, &mut trial, Some(&pool_name)) {
+                pool = trial;
+                members.push((index, packed));
+            }
+        }
+        if members.len() < 2 {
+            continue;
+        }
+        pools.insert(members[0].0, (unit, pool));
+        shared.extend(members);
+    }
+    let mut texts = Vec::with_capacity(tables.len());
+    for (index, (name, document_text, run)) in tables.iter().enumerate() {
+        if let Some((unit, pool)) = pools.get(&index) {
+            texts.push(format!(
+                "/// The keys and targets of the packed tables of the unit {unit} of `{document_text}`, each once (#855).\n\
+                 const {prefix}_UNIT_{unit}_STRINGS: &str = {};\n",
+                super::rust_string_literal(pool)
+            ));
+        }
+        texts.push(match shared.get(&index) {
+            Some(packed) => packed_static(name, document_text, run.kind, packed),
+            None => row_table_in(name, document_text, run, image),
+        });
+    }
+    texts
+}
+
 /// The text of the static table `name` of the rows of `run`, of the document `document_text`.
+#[cfg(test)]
 pub(super) fn row_table(name: &str, document_text: &str, run: &RowRun) -> String {
+    row_table_in(name, document_text, run, &Default::default())
+}
+
+pub(super) fn row_table_in(name: &str, document_text: &str, run: &RowRun, image: &super::BytecodeImage) -> String {
+    if let Some(program) = &run.program {
+        return program.source(name, run.kind, image);
+    }
+    if let (Some(packed), Some(_)) = (&run.packed, run.kind.packed_builder()) {
+        return packed_static(name, document_text, run.kind, packed);
+    }
     let mut text = format!(
         "/// {} of a run of `{document_text}`, added in order by `{}` (#568).\n",
         run.kind.description(),

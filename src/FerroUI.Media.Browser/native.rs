@@ -22,16 +22,36 @@ extern "C" {
     pub fn is_video_source(source: &JsValue) -> bool;
     #[wasm_bindgen(js_namespace=SharedGlFrames,js_name=canTransfer)]
     pub fn can_transfer() -> bool;
-    #[wasm_bindgen(catch,js_namespace=SharedGlFrames,js_name=transfer)]
-    fn transfer_image(source: &JsValue, width: u32, height: u32) -> Result<u32, JsValue>;
+    #[wasm_bindgen(catch,js_namespace=SharedGlFrames,js_name=beginTransfer)]
+    fn transfer_image(
+        source: &JsValue,
+        width: u32,
+        height: u32,
+        analysis: bool,
+    ) -> Result<TransferRequest, JsValue>;
+    type TransferRequest;
+    #[wasm_bindgen(method, getter)]
+    fn id(this: &TransferRequest) -> u32;
+    #[wasm_bindgen(method, getter)]
+    fn ready(this: &TransferRequest) -> JsValue;
     #[wasm_bindgen(js_namespace=SharedGlFrames,js_name=discard)]
-    fn discard(frame: u32);
+    fn discard(frame: u32) -> JsValue;
+    #[cfg(feature = "qr")]
+    #[wasm_bindgen(catch,js_namespace=SharedGlFrames,js_name=recognize)]
+    pub fn recognize(
+        frame: u32,
+        transferred: bool,
+        width: u32,
+        height: u32,
+    ) -> Result<JsValue, JsValue>;
 }
 /// A browser media frame transferred to the render worker (#601): the number the page's script
 /// gave it. The frame lives on the worker until the compositor imports it; a lease dropped
 /// before that discards it, on whichever thread the last lease goes.
 pub struct TransferredFrame {
     id: u32,
+    retirement: Option<FrameRetirement>,
+    thread: ThreadId,
 }
 impl TransferredFrame {
     pub fn id(&self) -> u32 {
@@ -40,13 +60,42 @@ impl TransferredFrame {
 }
 impl Drop for TransferredFrame {
     fn drop(&mut self) {
-        discard(self.id);
+        let id = self.id;
+        let retirement = self.retirement.take().unwrap();
+        let release = move || {
+            let pending = ferroui_browser::interop::completion_helper::await_promise(&discard(id));
+            ferroui_base::threading::Dispatcher::ui_thread().spawn_local(async move {
+                if pending.await.is_err() {
+                    retirement.quarantine();
+                }
+            });
+        };
+        if self.thread == thread::current().id() {
+            release();
+        } else {
+            ferroui_base::threading::Dispatcher::ui_thread()
+                .post(release, ferroui_base::threading::DispatcherPriority::NORMAL);
+        }
     }
 }
 /// Wraps the current image of the media element as a WebCodecs frame and transfers it to the
 /// render worker.
-pub fn transfer(source: &JsValue, width: u32, height: u32) -> Result<TransferredFrame, MediaError> {
-    transfer_image(source, width, height).map(|id| TransferredFrame { id }).map_err(error)
+pub fn transfer(
+    source: &JsValue,
+    width: u32,
+    height: u32,
+    analysis: bool,
+    retirement: FrameRetirement,
+) -> Result<(TransferredFrame, JsValue), MediaError> {
+    let request = transfer_image(source, width, height, analysis).map_err(error)?;
+    Ok((
+        TransferredFrame {
+            id: request.id(),
+            retirement: Some(retirement),
+            thread: thread::current().id(),
+        },
+        request.ready(),
+    ))
 }
 pub fn current(context: i32, expected: u64) -> bool {
     u64::from(generation(context)) == expected && !lost(context)

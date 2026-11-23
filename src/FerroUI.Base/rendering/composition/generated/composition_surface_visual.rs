@@ -19,10 +19,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -63,7 +63,7 @@ pub trait CompositionSurfaceVisualHooks: CompositionContainerVisualHooks {
 pub struct CompositionSurfaceVisualProps {
     base: CompositionContainerVisualProps,
     changed_fields_of_composition_surface_visual: Cell<CompositionSurfaceVisualChangedFields>,
-    surface: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    surface: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for CompositionSurfaceVisualProps {
@@ -80,7 +80,7 @@ impl CompositionSurfaceVisualProps {
         Self {
             base: CompositionContainerVisualProps::new(),
             changed_fields_of_composition_surface_visual: Cell::new(CompositionSurfaceVisualChangedFields::empty()),
-            surface: RefCell::new(None),
+            surface: OptionCell::new(),
         }
     }
 
@@ -103,24 +103,24 @@ impl CompositionSurfaceVisualProps {
 
     /// `Surface`.
     pub fn surface(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.surface.borrow().clone()
+        self.surface.get()
     }
 
     /// Sets `Surface`.
     pub fn set_surface(&self, host: &dyn CompositionSurfaceVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.surface.borrow().clone();
+        let old_value = self.surface.get();
         if old_value.differs(&value) {
             CompositionSurfaceVisualHooks::validate_surface_change(host, &old_value, &value);
             CompositionSurfaceVisualHooks::on_surface_changing(host);
             changed = true;
             // Update the backing value
-            *self.surface.borrow_mut() = value.clone();
+            self.surface.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_surface_visual.set(self.changed_fields_of_composition_surface_visual.get() | CompositionSurfaceVisualChangedFields::SURFACE);
             host.register_for_serialization();
         }
-        *self.surface.borrow_mut() = value;
+        self.surface.set(value);
         if changed {
             CompositionSurfaceVisualHooks::on_surface_changed(host);
         }
@@ -146,7 +146,7 @@ impl CompositionSurfaceVisualProps {
         let changed = self.changed_fields_of_composition_surface_visual.get();
         writer.write(changed);
         if changed.contains(CompositionSurfaceVisualChangedFields::SURFACE) {
-            writer.write_server_object(self.surface.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.surface.get().map(|o| o.server()));
         }
         self.changed_fields_of_composition_surface_visual.set(CompositionSurfaceVisualChangedFields::empty());
     }
@@ -168,7 +168,7 @@ pub trait ServerCompositionSurfaceVisualHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerCompositionSurfaceVisual`.
 pub struct ServerCompositionSurfaceVisualProps {
-    surface: RefCell<Option<Rc<dyn IServerObject>>>,
+    surface: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerCompositionSurfaceVisualProps {
@@ -182,7 +182,7 @@ impl ServerCompositionSurfaceVisualProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            surface: RefCell::new(None),
+            surface: OptionCell::new(),
         }
     }
 
@@ -202,8 +202,8 @@ impl ServerCompositionSurfaceVisualProps {
             CompositionProperty::register::<ServerCompositionSurfaceVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Surface",
                 "ServerCompositionSurfaceVisual",
-                |obj| props_of::<ServerCompositionSurfaceVisualProps>(obj).surface.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSurfaceVisualProps>(obj).surface.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSurfaceVisualProps>(obj).surface.get(),
+                |obj, v| props_of::<ServerCompositionSurfaceVisualProps>(obj).surface.set(v),
                 None,
                 None,
             )
@@ -212,11 +212,11 @@ impl ServerCompositionSurfaceVisualProps {
 
     /// `Surface`.
     pub fn surface(&self) -> Option<Rc<dyn IServerObject>> {
-        self.surface.borrow().clone()
+        self.surface.get()
     }
 
     pub fn set_surface(&self, host: &dyn ServerCompositionSurfaceVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.surface.borrow().clone();
+        let old_value = self.surface.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSurfaceVisualHooks::on_surface_changing(host);
@@ -228,7 +228,7 @@ impl ServerCompositionSurfaceVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.surface.borrow_mut() = value.clone(),
+                assign: &mut || self.surface.set(value.clone()),
             },
         );
         if changed {

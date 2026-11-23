@@ -24,7 +24,11 @@ impl NewApplication for App {
 impl ApplicationImpl for App {
     fn initialize(this: &Self) {
         crate::register_types();
-        this.styles().add(WinUITheme::new().as_style());
+        // The units of the theme the sample needs: the table the build wrote (`build.rs`).
+        this.styles().add(
+            WinUITheme::with_parts(None, crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME)
+                .as_style(),
+        );
     }
 
     fn on_framework_initialization_completed(this: &Self) {

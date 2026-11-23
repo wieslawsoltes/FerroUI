@@ -39,3 +39,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `IMetalDevice.cs` | `i_metal_device.rs` | present | 4/4 | 8/8 |  |
 | `IMetalExternalObjectsFeature.cs` | `i_metal_external_objects_feature.rs` | present | 3/3 | 13/13 |  |
+
+## Rust-only files
+
+Rust sources of this crate that no upstream file maps to. Give each a reason in `docs/porting/data/path-overrides.toml` (`[[rust_only]]`), or map upstream files to it (`[[map]]`).
+
+| Rust file | Reason | Types defined |
+|---|---|---|
+| `offscreen.rs` | **unmapped** | `Nothing`, `OffscreenFramePresentation`, `OffscreenMetalDevice`, `OffscreenMetalGraphics`, `OffscreenMetalRenderTarget`, `OffscreenMetalSession`, `OffscreenMetalSurface`, `OffscreenMetalSurfaceView`, `SurfaceState` |

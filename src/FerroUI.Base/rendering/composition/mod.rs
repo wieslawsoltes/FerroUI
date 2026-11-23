@@ -65,6 +65,7 @@ mod composition_cache_mode;
 mod composition_clip;
 mod composition_custom_visual;
 mod composition_custom_visual_handler;
+mod composition_draw_item;
 mod composition_draw_list_visual;
 mod composition_drawing_surface;
 mod composition_external_memory;
@@ -96,6 +97,7 @@ mod compositor_factories;
 mod container_visual;
 mod drop_shadow;
 mod i_composition_surface;
+mod kept_composition_visuals;
 mod loaded_image_surface;
 mod shape_visual;
 mod sprite_visual;
@@ -177,7 +179,11 @@ pub use composition_solid_color_visual::CompositionSolidColorVisual;
 pub use composition_surface::CompositionSurface;
 pub use composition_surface_visual::CompositionSurfaceVisual;
 pub use composition_target::CompositionTarget;
+pub(crate) use composition_target::{holder_passes, CompositionHitTarget, HitFilters};
 pub use compositing_renderer::CompositingRenderer;
+pub(crate) use composition_draw_item::{CompositionDrawItem, CompositionEntry, DrawItemList};
+pub(crate) use kept_composition_visuals::{release_kept_composition_visuals, KeptComposition, KeptCompositionVisual};
+pub use kept_composition_visuals::KeptCompositionVisuals;
 pub use container_visual::CompositionContainerVisual;
 pub use element_composition_preview::ElementComposition;
 pub use theme_shadow_visual::ThemeShadowVisual;
@@ -215,6 +221,8 @@ pub use animations::{
 
 #[cfg(test)]
 mod composition_property_set_tests;
+#[cfg(test)]
+mod object_size_tests;
 #[cfg(test)]
 mod composition_batch_tests;
 #[cfg(test)]

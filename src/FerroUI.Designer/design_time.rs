@@ -848,4 +848,4 @@ fn escape(value: &str) -> String {
 
 #[cfg(test)]
 #[path = "design_time_tests.rs"]
-mod tests;
+pub(crate) mod tests;

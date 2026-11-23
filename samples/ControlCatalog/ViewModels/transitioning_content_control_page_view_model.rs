@@ -1,7 +1,7 @@
 //! Port of `ViewModels/TransitioningContentControlPageViewModel.cs`.
 
 use ferroui_base::animation::{
-    Animation, AnimationTask, CompositePageTransition, CrossFade, Cue, IPageTransition, KeyFrame, PageSlide, SlideAxis,
+    Animation, AnimationTask, CompositePageTransition, CrossFade, Cue, FillMode, IPageTransition, KeyFrame, PageSlide, SlideAxis,
     SignedDuration,
 };
 use ferroui_base::data::model::{BindableList, Event, INotifyPropertyChanged};
@@ -19,12 +19,18 @@ use std::cell::{Cell, RefCell};
 use std::fmt;
 use std::rc::Rc;
 
+const PHOTOS: [(&str, &str); 3] = [
+    ("delicate-arch-896885_640.jpg", "Delicate Arch"),
+    ("hirsch-899118_640.jpg", "Red deer"),
+    ("maple-leaf-888807_640.jpg", "Maple leaf"),
+];
+
 /// The view model of the page of the transitioning content control.
 pub struct TransitioningContentControlPageViewModel {
     base: ViewModelBase,
     page_transitions: Rc<BindableList<Rc<PageTransition>>>,
     images: Vec<Rc<Bitmap>>,
-    selected_image: RefCell<Rc<Bitmap>>,
+    selected_index: Cell<usize>,
     reversed: Cell<bool>,
     selected_transition: RefCell<Rc<PageTransition>>,
     clip_to_bounds: Cell<bool>,
@@ -48,11 +54,9 @@ impl TransitioningContentControlPageViewModel {
     /// Panics if an image of the page cannot be opened or decoded (an
     /// exception of the constructor in the managed original).
     pub fn new() -> Rc<TransitioningContentControlPageViewModel> {
-        let images = ["delicate-arch-896885_640.jpg", "hirsch-899118_640.jpg", "maple-leaf-888807_640.jpg"];
-
-        let images: Vec<Rc<Bitmap>> = images
-            .into_iter()
-            .map(|image| {
+        let images = PHOTOS
+            .iter()
+            .map(|(image, _)| {
                 let path = format!("ferres://ControlCatalog/Assets/{image}");
                 let uri = UriRef::parse(&path).unwrap_or_else(|e| panic!("{e}"));
                 let mut stream = AssetLoader::open(&uri, None).unwrap_or_else(|e| panic!("{e}"));
@@ -70,13 +74,12 @@ impl TransitioningContentControlPageViewModel {
         Self::setup_transitions_of(&page_transitions, duration);
 
         let selected_transition = page_transitions.items().get(1);
-        let selected_image = images[0].clone();
 
         Rc::new(Self {
             base: ViewModelBase::new(),
             page_transitions,
             images,
-            selected_image: RefCell::new(selected_image),
+            selected_index: Cell::new(0),
             reversed: Cell::new(false),
             selected_transition: RefCell::new(selected_transition),
             clip_to_bounds: Cell::new(false),
@@ -88,19 +91,20 @@ impl TransitioningContentControlPageViewModel {
         self.page_transitions.clone()
     }
 
-    pub fn images(&self) -> Vec<Rc<Bitmap>> {
-        self.images.clone()
-    }
-
     /// The selected image.
     pub fn selected_image(&self) -> Rc<Bitmap> {
-        self.selected_image.borrow().clone()
+        self.images[self.selected_index.get()].clone()
     }
 
-    pub fn set_selected_image(&self, value: Rc<Bitmap>) {
-        if !Rc::ptr_eq(&self.selected_image.borrow(), &value) {
-            *self.selected_image.borrow_mut() = value;
+    fn selected_image_caption(&self) -> String {
+        let index = self.selected_index.get();
+        format!("{} · {} of {}", PHOTOS[index].1, index + 1, self.images.len())
+    }
+
+    fn set_selected_index(&self, index: usize) {
+        if self.selected_index.replace(index) != index {
             self.base.raise_property_changed("SelectedImage");
+            self.base.raise_property_changed("SelectedImageCaption");
         }
     }
 
@@ -159,7 +163,10 @@ impl TransitioningContentControlPageViewModel {
         }
 
         let duration = SignedDuration::from_milliseconds(f64::from(duration));
-        let cross_fade: Rc<dyn IPageTransition> = Rc::new(CrossFade::with_duration(duration));
+        let cross_fade = CrossFade::with_duration(duration);
+        // The preview reuses both presenters, including for transitions that do not animate opacity.
+        cross_fade.set_fill_mode(FillMode::None);
+        let cross_fade: Rc<dyn IPageTransition> = Rc::new(cross_fade);
         let slide_horizontally: Rc<dyn IPageTransition> =
             Rc::new(PageSlide::with_duration(duration, SlideAxis::Horizontal));
         let slide_vertically: Rc<dyn IPageTransition> = Rc::new(PageSlide::with_duration(duration, SlideAxis::Vertical));
@@ -176,31 +183,15 @@ impl TransitioningContentControlPageViewModel {
         page_transitions.get(5).set_transition(Some(Rc::new(CustomTransition::with_duration(duration))));
     }
 
-    fn index_of_selected_image(&self) -> i32 {
-        let selected = self.selected_image();
-        self.images.iter().position(|image| Rc::ptr_eq(image, &selected)).map_or(-1, |index| index as i32)
-    }
-
     pub fn next_image(&self) {
         self.set_reversed(false);
-        let mut index = self.index_of_selected_image() + 1;
-
-        if index >= self.images.len() as i32 {
-            index = 0;
-        }
-
-        self.set_selected_image(self.images[index as usize].clone());
+        self.set_selected_index((self.selected_index.get() + 1) % self.images.len());
     }
 
     pub fn prev_image(&self) {
         self.set_reversed(true);
-        let mut index = self.index_of_selected_image() - 1;
-
-        if index < 0 {
-            index = self.images.len() as i32 - 1;
-        }
-
-        self.set_selected_image(self.images[index as usize].clone());
+        let count = self.images.len();
+        self.set_selected_index((self.selected_index.get() + count - 1) % count);
     }
 }
 
@@ -221,6 +212,9 @@ ferro_markup_type!(class TransitioningContentControlPageViewModel {
         // cannot be the type of a declared property.
         SelectedImage: Rc<dyn IImage> {
             get: |this: &Rc<TransitioningContentControlPageViewModel>| this.selected_image() as Rc<dyn IImage>
+        },
+        SelectedImageCaption: String {
+            get: |this: &Rc<TransitioningContentControlPageViewModel>| this.selected_image_caption()
         },
         SelectedTransition: Rc<PageTransition> {
             get: |this: &Rc<TransitioningContentControlPageViewModel>| this.selected_transition(),

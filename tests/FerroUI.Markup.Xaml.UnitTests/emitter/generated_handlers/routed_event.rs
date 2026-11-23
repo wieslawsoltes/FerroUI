@@ -44,7 +44,7 @@ pub fn populate_handlers_routedevent_xaml(
     rt::add_handler_with_context(&context, &root, &::ferroui_controls::Button::__markup_field_ClickEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyButton::__markup_OnClick_0(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
     // Handlers/RoutedEvent.xaml(1,2) Tapped
     rt::add_handler_with_context(&context, &root, &::ferroui_base::input::InputElement::__markup_field_TappedEvent(), rt::method_delegate(&context, 2, |this, arguments| { crate::support::xaml::event_tests::MyButton::__markup_OnTapped_1(this, arguments.next()?, arguments.next()?); ::core::result::Result::Ok(::core::option::Option::None) }));
-    rt::invoked(root.try_end_init(), 1, 2)?;
+    rt::end_init(&root, 1, 2)?;
     rt::complete_root_name_scope(::core::option::Option::Some(&root), name_scope.as_ref(), 1, 2)?;
     ::core::result::Result::Ok(())
 }

@@ -13,6 +13,40 @@ use crate::rendering::composition::effects::BlendEffectMode;
 use crate::rendering::composition::server::{LightColor, LightMap, LightSource, LightingMaterial};
 use crate::{Matrix, PixelSize, Point, Rect};
 
+/// The visible device-pixel area of an effect, with the mapping from its cropped
+/// texture back to the effect's logical coordinates. Shared by native and
+/// portable GPU backends so clipping, translation and DPI use the same bounds.
+#[derive(Clone, Copy, Debug)]
+pub struct EffectRasterRegion {
+    pub origin: crate::PixelPoint,
+    pub size: PixelSize,
+    pub to_local: Matrix,
+}
+impl EffectRasterRegion {
+    pub fn new(bounds: Rect, transform: Matrix, viewport: PixelSize) -> Option<Self> {
+        if bounds.width <= 0. || bounds.height <= 0. || viewport.width <= 0 || viewport.height <= 0 {
+            return None;
+        }
+        let inverse = transform.try_invert()?;
+        let mapped = bounds.transform_to_aabb(transform);
+        if ![mapped.x, mapped.y, mapped.right(), mapped.bottom()].iter().all(|v| v.is_finite()) {
+            return None;
+        }
+        let x = mapped.x.floor().max(0.);
+        let y = mapped.y.floor().max(0.);
+        let right = mapped.right().ceil().min(viewport.width as f64);
+        let bottom = mapped.bottom().ceil().min(viewport.height as f64);
+        if right <= x || bottom <= y {
+            return None;
+        }
+        Some(Self {
+            origin: crate::PixelPoint::new(x as i32, y as i32),
+            size: PixelSize::new((right - x) as i32, (bottom - y) as i32),
+            to_local: Matrix::create_translation(x, y) * inverse,
+        })
+    }
+}
+
 /// A point or spot light with the transform from the coordinates of the
 /// drawing context (those of the lit visual) to those of its coordinate
 /// space.
@@ -208,4 +242,21 @@ mod tests {
         map.add(point_light(100.0), Matrix::IDENTITY);
         assert!(!LightingParameters::new(&map, LightingMaterial::VISUAL).fits_a_drawing_context());
     }
+    #[test]
+    fn effect_raster_regions_clip_round_outwards_and_keep_logical_coordinates() {
+        for scale in [1.,1.25,1.5,2.] {
+            let transform=Matrix::create_scale(scale,scale)*Matrix::create_translation(-5.,7.);
+            let region=EffectRasterRegion::new(Rect::new(0.,0.,24.,16.),transform,PixelSize::new(40,40)).unwrap();
+            assert_eq!(region.origin.x,0);
+            assert_eq!(region.origin.y,7);
+            let local=region.to_local.transform(Point::new(0.5,0.5));
+            let expected=transform.try_invert().unwrap().transform(Point::new(region.origin.x as f64+0.5,region.origin.y as f64+0.5));
+            assert!((local.x-expected.x).abs()<1e-12&&(local.y-expected.y).abs()<1e-12);
+            assert!(region.size.width<=40&&region.size.height<=40);
+        }
+        assert!(EffectRasterRegion::new(Rect::new(100.,100.,10.,10.),Matrix::IDENTITY,PixelSize::new(40,40)).is_none());
+        assert!(EffectRasterRegion::new(Rect::new(0.,0.,10.,10.),Matrix::create_scale(0.,1.),PixelSize::new(40,40)).is_none());
+        assert!(EffectRasterRegion::new(Rect::new(0.5,0.5,0.,10.),Matrix::IDENTITY,PixelSize::new(40,40)).is_none());
+    }
+
 }

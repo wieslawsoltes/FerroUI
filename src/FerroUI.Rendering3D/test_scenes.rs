@@ -118,3 +118,171 @@ pub(crate) fn white_ambient() -> Scene3DLight {
 
 /// The square size of the tests.
 pub(crate) const SIZE: PixelSize = PixelSize::new(100, 100);
+
+/// A layer of `kind` that paints with `brush` (the material's `Color` white).
+pub(crate) fn brush_layer(kind: Scene3DMaterialKind, brush: &dyn ferroui_base::media::IBrush) -> Scene3DMaterialLayer {
+    Scene3DMaterialLayer { brush: SharedBrush::from_brush(brush), ..layer(kind, Color::from_argb(255, 255, 255, 255)) }
+}
+
+/// A bitmap of pixels in memory, readable through its framebuffer, whose version the tests bump.
+pub(crate) struct PixelBitmap {
+    size: PixelSize,
+    format: ferroui_base::platform::PixelFormat,
+    alpha: ferroui_base::platform::AlphaFormat,
+    pixels: std::sync::Mutex<Vec<u8>>,
+    version: std::sync::atomic::AtomicI32,
+}
+
+impl PixelBitmap {
+    /// A bitmap of `width` by `height` premultiplied RGBA pixels.
+    pub(crate) fn rgba(width: i32, height: i32, pixels: Vec<u8>) -> Arc<PixelBitmap> {
+        PixelBitmap::with_format(
+            width,
+            height,
+            pixels,
+            ferroui_base::platform::PixelFormat::RGBA8888,
+            ferroui_base::platform::AlphaFormat::Premul,
+        )
+    }
+
+    /// A bitmap of `width` by `height` pixels of `format` and `alpha`.
+    pub(crate) fn with_format(
+        width: i32,
+        height: i32,
+        pixels: Vec<u8>,
+        format: ferroui_base::platform::PixelFormat,
+        alpha: ferroui_base::platform::AlphaFormat,
+    ) -> Arc<PixelBitmap> {
+        assert_eq!(pixels.len(), (width * height * 4) as usize);
+        Arc::new(PixelBitmap {
+            size: PixelSize::new(width, height),
+            format,
+            alpha,
+            pixels: std::sync::Mutex::new(pixels),
+            version: std::sync::atomic::AtomicI32::new(0),
+        })
+    }
+
+    /// Replaces the pixels and bumps the version.
+    pub(crate) fn set_pixels(&self, pixels: Vec<u8>) {
+        *self.pixels.lock().unwrap() = pixels;
+        self.version.fetch_add(1, std::sync::atomic::Ordering::SeqCst);
+    }
+}
+
+impl ferroui_base::platform::IBitmapImpl for PixelBitmap {
+    fn dpi(&self) -> ferroui_base::Vector {
+        ferroui_base::Vector::new(96.0, 96.0)
+    }
+
+    fn pixel_size(&self) -> PixelSize {
+        self.size
+    }
+
+    fn version(&self) -> i32 {
+        self.version.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    fn save(
+        &self,
+        _stream: &mut dyn std::io::Write,
+        _options: &ferroui_base::media::imaging::BitmapEncoderOptions,
+    ) -> std::io::Result<()> {
+        Err(std::io::Error::new(std::io::ErrorKind::Unsupported, "a test bitmap is not saved"))
+    }
+
+    fn dispose(&self) {}
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+
+    fn as_readable_bitmap(&self) -> Option<&dyn ferroui_base::platform::IReadableBitmapImpl> {
+        Some(self)
+    }
+}
+
+impl ferroui_base::platform::IReadableBitmapImpl for PixelBitmap {
+    fn format(&self) -> Option<ferroui_base::platform::PixelFormat> {
+        Some(self.format)
+    }
+
+    fn alpha_format(&self) -> Option<ferroui_base::platform::AlphaFormat> {
+        Some(self.alpha)
+    }
+
+    fn lock(&self) -> std::rc::Rc<dyn ferroui_base::platform::ILockedFramebuffer> {
+        std::rc::Rc::new(PixelFramebuffer {
+            data: std::cell::RefCell::new(self.pixels.lock().unwrap().clone()),
+            size: self.size,
+            format: self.format,
+            alpha: self.alpha,
+        })
+    }
+}
+
+/// A copy of the pixels of a [`PixelBitmap`].
+struct PixelFramebuffer {
+    data: std::cell::RefCell<Vec<u8>>,
+    size: PixelSize,
+    format: ferroui_base::platform::PixelFormat,
+    alpha: ferroui_base::platform::AlphaFormat,
+}
+
+impl ferroui_base::platform::ILockedFramebuffer for PixelFramebuffer {
+    fn address(&self) -> *mut u8 {
+        self.data.borrow_mut().as_mut_ptr()
+    }
+
+    fn with_data(&self, access: &mut dyn FnMut(&mut [u8])) {
+        access(&mut self.data.borrow_mut());
+    }
+
+    fn size(&self) -> PixelSize {
+        self.size
+    }
+
+    fn row_bytes(&self) -> i32 {
+        self.size.width * 4
+    }
+
+    fn dpi(&self) -> ferroui_base::Vector {
+        ferroui_base::Vector::new(96.0, 96.0)
+    }
+
+    fn format(&self) -> ferroui_base::platform::PixelFormat {
+        self.format
+    }
+
+    fn alpha_format(&self) -> ferroui_base::platform::AlphaFormat {
+        self.alpha
+    }
+
+    fn dispose(&self) {}
+}
+
+/// An image brush of `bitmap` stretched by `stretch` with `tile_mode` over `destination`, its
+/// viewbox `source` (both relative to their boxes).
+pub(crate) fn image_brush(
+    bitmap: &Arc<PixelBitmap>,
+    stretch: ferroui_base::media::Stretch,
+    tile_mode: ferroui_base::media::TileMode,
+    destination: ferroui_base::RelativeRect,
+    source: ferroui_base::RelativeRect,
+) -> ferroui_base::media::immutable::ImmutableImageBrush {
+    let shared: Arc<ferroui_base::platform::SharedBitmapImpl> = bitmap.clone();
+    let bitmap = std::rc::Rc::new(ferroui_base::media::imaging::Bitmap::from_impl(shared));
+    ferroui_base::media::immutable::ImmutableImageBrush::new(
+        Some(bitmap),
+        ferroui_base::media::AlignmentX::Center,
+        ferroui_base::media::AlignmentY::Center,
+        Some(destination),
+        1.0,
+        None,
+        ferroui_base::RelativePoint::TOP_LEFT,
+        Some(source),
+        stretch,
+        tile_mode,
+        None,
+    )
+}

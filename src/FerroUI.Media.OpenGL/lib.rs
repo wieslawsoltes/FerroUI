@@ -178,86 +178,136 @@ impl NativeGlFrameProducer {
         producer_owner: T,
         draw: impl FnOnce(&Rc<dyn IGlContext>, u32) -> Result<(), MediaError> + Send + 'static,
     ) -> MediaFuture<Option<ReadyGlFrame>> {
-        if metadata.device != Some(self.device())
-            || metadata.device_generation != self.generation
-            || metadata.format != FrameFormat::Rgba8
-            || metadata.alpha == FrameAlpha::Straight
-        {
-            return Box::pin(async { Err(unsupported("Incompatible native GL frame metadata")) });
-        }
-        if self.budget.limits().frames == 0 || metadata.retained_bytes > self.budget.limits().bytes
-        {
-            return Box::pin(async {
-                Err(unsupported("Frame exceeds the configured storage budget"))
-            });
-        }
-        let reservation = match self.budget.reserve(metadata.clone()) {
-            Ok(value) => value,
-            Err(FrameError::BudgetExceeded) => return Box::pin(async { Ok(None) }),
-            Err(error) => return Box::pin(async move { Err(unsupported(error.to_string())) }),
-        };
+        let reservation =
+            match reserve_frame(&self.budget, self.device(), self.generation, &metadata) {
+                Ok(Some(reservation)) => reservation,
+                Ok(None) => return Box::pin(async { Ok(None) }),
+                Err(error) => return Box::pin(async move { Err(error) }),
+            };
         let wake = self.wake.clone();
         self.invoke(move |context| {
-            let queue = context
-                .shared_frame_retirement_queue()
-                .ok_or_else(|| unsupported("No owning-context texture retirement"))?;
-            let wake = queue.register_wakeup(wake);
-            let gl = context.gl_interface();
-            let old_texture = gl.get_integerv(0x8069); // TEXTURE_BINDING_2D
-            let old_unpack = gl.get_integerv(0x88EF); // PIXEL_UNPACK_BUFFER_BINDING
-            let mut texture = 0;
-            // SAFETY: current GL context, one output integer, and null initial
-            // storage with the unpack buffer explicitly unbound (no CPU input).
-            unsafe {
-                gl.gen_textures(1, &mut texture);
-            }
-            if texture == 0 {
-                return Err(unsupported("Native GL texture allocation failed"));
-            }
-            let owner = queue.owner(texture as u32, reservation.retirement(), wake);
-            gl.bind_buffer(0x88EC, 0);
-            gl.bind_texture(0x0DE1, texture);
-            gl.tex_parameteri(0x0DE1, 0x2801, 0x2601);
-            gl.tex_parameteri(0x0DE1, 0x2800, 0x2601);
-            gl.tex_parameteri(0x0DE1, 0x2802, 0x812F);
-            gl.tex_parameteri(0x0DE1, 0x2803, 0x812F);
-            unsafe {
-                gl.tex_image_2d(
-                    0x0DE1,
-                    0,
-                    0x8058,
-                    metadata.width as i32,
-                    metadata.height as i32,
-                    0,
-                    0x1908,
-                    0x1401,
-                    std::ptr::null(),
-                );
-            }
-            gl.bind_texture(0x0DE1, old_texture);
-            gl.bind_buffer(0x88EC, old_unpack);
-            if gl.get_error() != 0 {
-                return Err(unsupported("Native RGBA storage allocation failed"));
-            }
-            let frame = reservation.lease(unsafe {
-                SharedFrameTexture::new(
-                    context.shared_frame_context_id().unwrap(),
-                    metadata.device_generation,
-                    texture as u32,
-                    (owner, producer_owner),
-                )
-            });
-            let completion = GpuCompletion::new();
-            completion
-                .retain(frame.clone())
-                .map_err(|e| unsupported(e.to_string()))?;
-            let result = draw(context, texture as u32);
-            // Even an unsuccessful draw may have submitted writes.
-            context.schedule_frame_completion(completion.clone());
-            result?;
-            Ok(Some(ReadyGlFrame { frame, completion }))
+            draw_frame(context, metadata, reservation, producer_owner, wake, draw).map(Some)
         })
     }
+
+    /// Runs `prepare` (for example the acquisition of a source image) and the
+    /// draw it returns in one render job. `prepare` returning None queues no
+    /// draw. As in `produce_owned`, storage is reserved before allocation and
+    /// `producer_owner` is retained until the producer fence completes.
+    pub fn produce_prepared_owned<O, D>(
+        &self,
+        producer_owner: O,
+        prepare: impl FnOnce() -> Result<Option<(FrameMetadata, D)>, MediaError> + Send + 'static,
+    ) -> MediaFuture<Option<ReadyGlFrame>>
+    where
+        O: std::any::Any + Send + Sync,
+        D: FnOnce(&Rc<dyn IGlContext>, u32) -> Result<(), MediaError> + Send + 'static,
+    {
+        let budget = self.budget.clone();
+        let device = self.device();
+        let generation = self.generation;
+        let wake = self.wake.clone();
+        self.invoke(move |context| {
+            let Some((metadata, draw)) = prepare()? else {
+                return Ok(None);
+            };
+            let Some(reservation) = reserve_frame(&budget, device, generation, &metadata)? else {
+                return Ok(None);
+            };
+            draw_frame(context, metadata, reservation, producer_owner, wake, draw).map(Some)
+        })
+    }
+}
+
+fn reserve_frame(
+    budget: &FrameBudget,
+    device: DeviceIdentity,
+    generation: u64,
+    metadata: &FrameMetadata,
+) -> Result<Option<FrameReservation>, MediaError> {
+    if metadata.device != Some(device)
+        || metadata.device_generation != generation
+        || metadata.format != FrameFormat::Rgba8
+        || metadata.alpha == FrameAlpha::Straight
+    {
+        return Err(unsupported("Incompatible native GL frame metadata"));
+    }
+    if budget.limits().frames == 0 || metadata.retained_bytes > budget.limits().bytes {
+        return Err(unsupported("Frame exceeds the configured storage budget"));
+    }
+    match budget.reserve(metadata.clone()) {
+        Ok(value) => Ok(Some(value)),
+        Err(FrameError::BudgetExceeded) => Ok(None),
+        Err(error) => Err(unsupported(error.to_string())),
+    }
+}
+
+fn draw_frame(
+    context: &Rc<dyn IGlContext>,
+    metadata: FrameMetadata,
+    reservation: FrameReservation,
+    producer_owner: impl std::any::Any + Send + Sync,
+    wake: Arc<dyn Fn() + Send + Sync>,
+    draw: impl FnOnce(&Rc<dyn IGlContext>, u32) -> Result<(), MediaError>,
+) -> Result<ReadyGlFrame, MediaError> {
+    let queue = context
+        .shared_frame_retirement_queue()
+        .ok_or_else(|| unsupported("No owning-context texture retirement"))?;
+    let wake = queue.register_wakeup(wake);
+    let gl = context.gl_interface();
+    let old_texture = gl.get_integerv(0x8069); // TEXTURE_BINDING_2D
+    let old_unpack = gl.get_integerv(0x88EF); // PIXEL_UNPACK_BUFFER_BINDING
+    let mut texture = 0;
+    // SAFETY: current GL context, one output integer, and null initial
+    // storage with the unpack buffer explicitly unbound (no CPU input).
+    unsafe {
+        gl.gen_textures(1, &mut texture);
+    }
+    if texture == 0 {
+        return Err(unsupported("Native GL texture allocation failed"));
+    }
+    let owner = queue.owner(texture as u32, reservation.retirement(), wake);
+    gl.bind_buffer(0x88EC, 0);
+    gl.bind_texture(0x0DE1, texture);
+    gl.tex_parameteri(0x0DE1, 0x2801, 0x2601);
+    gl.tex_parameteri(0x0DE1, 0x2800, 0x2601);
+    gl.tex_parameteri(0x0DE1, 0x2802, 0x812F);
+    gl.tex_parameteri(0x0DE1, 0x2803, 0x812F);
+    unsafe {
+        gl.tex_image_2d(
+            0x0DE1,
+            0,
+            0x8058,
+            metadata.width as i32,
+            metadata.height as i32,
+            0,
+            0x1908,
+            0x1401,
+            std::ptr::null(),
+        );
+    }
+    gl.bind_texture(0x0DE1, old_texture);
+    gl.bind_buffer(0x88EC, old_unpack);
+    if gl.get_error() != 0 {
+        return Err(unsupported("Native RGBA storage allocation failed"));
+    }
+    let frame = reservation.lease(unsafe {
+        SharedFrameTexture::new(
+            context.shared_frame_context_id().unwrap(),
+            metadata.device_generation,
+            texture as u32,
+            (owner, producer_owner),
+        )
+    });
+    let completion = GpuCompletion::new();
+    completion
+        .retain(frame.clone())
+        .map_err(|e| unsupported(e.to_string()))?;
+    let result = draw(context, texture as u32);
+    // Even an unsuccessful draw may have submitted writes.
+    context.schedule_frame_completion(completion.clone());
+    result?;
+    Ok(ReadyGlFrame { frame, completion })
 }
 /// A submitted frame becomes publishable only after its producer fence.
 pub struct ReadyGlFrame {

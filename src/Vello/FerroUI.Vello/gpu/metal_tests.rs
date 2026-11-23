@@ -758,16 +758,20 @@ fn a_shared_frame_is_converted_once_on_the_device_and_its_storage_given_back_aft
     let modes: Vec<VelloRenderingMode> =
         window_modes(probe.device()).into_iter().filter(|mode| *mode != VelloRenderingMode::Cpu).collect();
     assert!(!modes.is_empty(), "a GPU mode");
+    use ferroui_base::platform::IPlatformRenderInterfaceContext;
+    let cpu = crate::vello_backend_context::VelloContext::with_gpu(probe, vec![VelloRenderingMode::Cpu]);
+    assert!(cpu.public_features().is_empty(), "CPU rendering must not advertise texture import");
 
     for mode in modes {
         for color in [FrameColor::Srgb, FrameColor::Rec709Full] {
             let window = Window::new(&device, mode, PixelSize::new(32, 32), 1.0);
-            let feature = window
-                .gpu
-                .try_get_feature(TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>())
+            let context = crate::vello_backend_context::VelloContext::with_gpu(window.gpu.clone(), vec![mode]);
+            let feature = context
+                .public_features()
+                .remove(&TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>())
                 .and_then(|feature| feature.downcast::<Rc<dyn IExternalObjectsRenderInterfaceContextFeature>>().ok())
                 .map(|feature| (*feature).clone())
-                .expect("the external objects feature of the GPU");
+                .expect("composition can discover the external objects feature of the GPU");
             let imported = feature.import_image(
                 Rc::new(TestHandle),
                 PlatformGraphicsExternalImageProperties {

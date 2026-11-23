@@ -10,7 +10,7 @@ import { build, treeDigest, verifyBuild } from "../build-webapp.mjs";
 import { CompressionCache } from "../compression-cache.mjs";
 
 const scripts = path.resolve(path.dirname(fileURLToPath(import.meta.url)), "..");
-const emitted = ["ferroui.js", "ferroui.js.map", "storage.js", "storage.js.map", "ferroui-sw.js", "ferroui-sw.js.map"];
+const emitted = ["ferroui.js", "ferroui.js.map", "storage.js", "storage.js.map", "ferroui-sw.js", "ferroui-sw.js.map", "qr-worker.js", "qr-worker.js.map", "qr-worker.LICENSE.txt"];
 
 // These fixtures exercise the supported clean tool environment. Dedicated negative controls
 // below cover external module search/preloads rather than inheriting the test runner's setup.

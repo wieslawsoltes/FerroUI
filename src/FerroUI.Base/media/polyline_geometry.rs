@@ -34,13 +34,13 @@ impl GeometryImpl for PolylineGeometry {
         let mut builder = factory.create_stream_geometry_builder(None);
 
         builder.set_fill_rule(this.fill_rule);
-        let points = this.points().to_vec();
+        // The points as they are now, read once: the figure is given to the backend as one run
+        // of lines (section 9.95).
+        let points = this.points().list().snapshot();
         let is_filled = this.is_filled();
-        if !points.is_empty() {
-            builder.begin_figure(points[0], is_filled);
-            for point in &points[1..] {
-                builder.line_to(*point, true);
-            }
+        if let Some((first, rest)) = points.split_first() {
+            builder.begin_figure(*first, is_filled);
+            builder.lines_to(rest, true);
             builder.end_figure(is_filled);
         }
 
@@ -106,6 +106,15 @@ impl PolylineGeometry {
         fill_rule: FillRule,
     ) -> Ref<Self> {
         let result = instantiate(Self::construct_with(Points::from_items(points), fill_rule));
+        result.set_is_filled(is_filled);
+        result
+    }
+
+    /// Creates a polyline geometry of a collection of points, which it follows: what a shape
+    /// makes of its own points, without a copy of them that it would let go at once.
+    pub fn of_points(points: Points, is_filled: bool, fill_rule: FillRule) -> Ref<Self> {
+        let result = instantiate(Self::construct_with(points.clone(), fill_rule));
+        result.on_points_changed(Some(points));
         result.set_is_filled(is_filled);
         result
     }

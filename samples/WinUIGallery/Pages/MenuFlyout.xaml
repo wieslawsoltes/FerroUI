@@ -1,4 +1,152 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Button Content="Open a menu"><Button.Flyout><MenuFlyout><MenuItem Header="Open"/><MenuItem Header="Save"/><Separator/><MenuItem Header="Show details" ToggleType="CheckBox" IsChecked="True"/><MenuItem Header="More"><MenuItem Header="Settings"/></MenuItem></MenuFlyout></Button.Flyout></Button>
+<!-- Ported from the seven pinned MenuFlyout examples of WinUI Gallery (14061eea) and the handlers
+     of MenuFlyoutPage.xaml.cs (menu_samples.rs); see ../NOTICE.md. WinUI's MenuFlyoutItem,
+     MenuFlyoutSubItem and MenuFlyoutSeparator are FerroUI's MenuItem (Text is Header), a MenuItem
+     with items and Separator; ToggleMenuFlyoutItem and RadioMenuFlyoutItem are MenuItems with the
+     ToggleType CheckBox and Radio. A KeyboardAccelerator is the item's HotKey, shown as its
+     InputGesture. The AppBarButton is a CommandBarButton. The fifth example's Segoe UI (the
+     font of its ControlExample) is the font of its button. FerroUI has no SplitMenuFlyoutItem: Save
+     and Share are MenuItems whose items are the source's, so only the items raise
+     SplitMenuFlyoutItem_Click and the primary parts are not clickable. The glyphs need the symbol
+     font of the platform (Segoe Fluent Icons on Windows). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="MenuFlyoutExample1" Spacing="8">
+    <TextBlock Text="An AppBarButton with a MenuFlyout." FontSize="18" />
+    <StackPanel x:Name="Control1" Orientation="Horizontal">
+      <CommandBarButton x:Name="SortButton" AutomationProperties.Name="Sort" IsCompact="True"
+                        ToolTip.Tip="Sort">
+        <CommandBarButton.Icon><SymbolIcon Symbol="Sort" /></CommandBarButton.Icon>
+        <CommandBarButton.Flyout>
+          <MenuFlyout>
+            <MenuItem x:Name="SortByRating" Header="By rating" Tag="rating" />
+            <MenuItem x:Name="SortByMatch" Header="By match" Tag="match" />
+            <MenuItem x:Name="SortByDistance" Header="By distance" Tag="distance" />
+          </MenuFlyout>
+        </CommandBarButton.Flyout>
+      </CommandBarButton>
+      <TextBlock x:Name="Control1Output" Margin="8,0,0,0" VerticalAlignment="Center" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuFlyoutExample2" Spacing="8">
+    <TextBlock Text="A MenuFlyout with ToggleMenuFlyoutItems and MenuFlyoutSeparator." FontSize="18" />
+    <Button x:Name="Control2" Content="Options">
+      <Button.Flyout>
+        <MenuFlyout>
+          <MenuItem Header="Reset" />
+          <Separator />
+          <MenuItem x:Name="RepeatToggleMenuFlyoutItem" Header="Repeat" ToggleType="CheckBox" IsChecked="True" />
+          <MenuItem x:Name="ShuffleToggleMenuFlyoutItem" Header="Shuffle" ToggleType="CheckBox" IsChecked="True" />
+        </MenuFlyout>
+      </Button.Flyout>
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuFlyoutExample3" Spacing="8">
+    <TextBlock Text="A MenuFlyout with cascading menus." FontSize="18" />
+    <Button x:Name="Control3" Content="File Options">
+      <Button.Flyout>
+        <MenuFlyout>
+          <MenuItem Header="Open" />
+          <MenuItem x:Name="SendToSubItem" Header="Send to">
+            <MenuItem Header="Bluetooth" />
+            <MenuItem Header="Desktop (shortcut)" />
+            <MenuItem x:Name="CompressedFileSubItem" Header="Compressed file">
+              <MenuItem Header="Compress and email" />
+              <MenuItem Header="Compress to .7z" />
+              <MenuItem Header="Compress to .zip" />
+            </MenuItem>
+          </MenuItem>
+        </MenuFlyout>
+      </Button.Flyout>
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuFlyoutExample3b" Spacing="8">
+    <TextBlock Text="A MenuFlyout with SplitMenuFlyoutItems." FontSize="18" />
+    <StackPanel x:Name="Control3b" Orientation="Horizontal">
+      <Button Content="File Options">
+        <Button.Flyout>
+          <MenuFlyout>
+            <MenuItem x:Name="SaveSplitItem" Header="Save">
+              <MenuItem.Icon><FontIcon Glyph="&#xE74E;" /></MenuItem.Icon>
+              <MenuItem x:Name="SaveAsDocx" Header="Save as .docx" />
+              <MenuItem x:Name="SaveAsPdf" Header="Save as .pdf" />
+              <MenuItem x:Name="SaveAsTxt" Header="Save as .txt" />
+            </MenuItem>
+            <MenuItem x:Name="ShareSplitItem" Header="Share">
+              <MenuItem.Icon><SymbolIcon Symbol="Share" /></MenuItem.Icon>
+              <MenuItem x:Name="ShareViaEmail" Header="Share via email" />
+              <MenuItem x:Name="ShareViaLink" Header="Share via link" />
+            </MenuItem>
+          </MenuFlyout>
+        </Button.Flyout>
+      </Button>
+      <TextBlock x:Name="Control3bOutput" Margin="8,0,0,0" VerticalAlignment="Center" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuFlyoutExample4" Spacing="8">
+    <TextBlock Text="A MenuFlyout with icons." FontSize="18" />
+    <Button x:Name="Control4" Content="Edit Options">
+      <Button.Flyout>
+        <MenuFlyout>
+          <MenuItem Header="Share">
+            <MenuItem.Icon><FontIcon Glyph="&#xE72D;" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Copy">
+            <MenuItem.Icon><SymbolIcon Symbol="Copy" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem Header="Delete">
+            <MenuItem.Icon><SymbolIcon Symbol="Delete" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="Rename" />
+          <MenuItem Header="Select" />
+        </MenuFlyout>
+      </Button.Flyout>
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuFlyoutExample5" Spacing="8">
+    <TextBlock Text="A MenuFlyout with icons and Keyboard Accelerators." FontSize="18" />
+    <Button x:Name="Control5" Content="Edit Options" FontFamily="Segoe UI">
+      <Button.Flyout>
+        <MenuFlyout>
+          <MenuItem x:Name="ShareAcceleratorItem" Header="Share" HotKey="Ctrl+S" InputGesture="Ctrl+S">
+            <MenuItem.Icon><FontIcon Glyph="&#xE72D;" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem x:Name="CopyAcceleratorItem" FontFamily="Consolas" Header="Copy" HotKey="Ctrl+C"
+                    InputGesture="Ctrl+C">
+            <MenuItem.Icon><SymbolIcon Symbol="Copy" /></MenuItem.Icon>
+          </MenuItem>
+          <MenuItem x:Name="DeleteAcceleratorItem" FontFamily="Segoe UI" Header="Delete" HotKey="Delete"
+                    InputGesture="Delete">
+            <MenuItem.Icon><SymbolIcon Symbol="Delete" /></MenuItem.Icon>
+          </MenuItem>
+          <Separator />
+          <MenuItem Header="Rename" />
+          <MenuItem Header="Select" />
+        </MenuFlyout>
+      </Button.Flyout>
+    </Button>
+  </StackPanel>
+
+  <StackPanel x:Name="MenuFlyoutExample6" Spacing="8">
+    <TextBlock Text="A MenuFlyout with RadioMenuFlyoutItems" FontSize="18" />
+    <Button x:Name="Control6" Content="Options">
+      <Button.Flyout>
+        <MenuFlyout>
+          <MenuItem x:Name="LandscapeItem" GroupName="OrientationGroup" Header="Landscape" ToggleType="Radio" />
+          <MenuItem x:Name="PortraitItem" GroupName="OrientationGroup" Header="Portrait" ToggleType="Radio"
+                    IsChecked="True" />
+          <Separator />
+          <MenuItem x:Name="SmallIconsItem" GroupName="SizeGroup" Header="Small icons" ToggleType="Radio" />
+          <MenuItem x:Name="MediumIconsItem" GroupName="SizeGroup" Header="Medium icons" ToggleType="Radio"
+                    IsChecked="True" />
+          <MenuItem x:Name="LargeIconsItem" GroupName="SizeGroup" Header="Large icons" ToggleType="Radio" />
+        </MenuFlyout>
+      </Button.Flyout>
+    </Button>
+  </StackPanel>
 </StackPanel>

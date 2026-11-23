@@ -13,6 +13,9 @@ import androidx.media3.common.Format;
 import androidx.media3.common.MediaItem;
 import androidx.media3.common.PlaybackException;
 import androidx.media3.common.Player;
+import androidx.media3.common.Tracks;
+import androidx.media3.common.TrackSelectionOverride;
+import androidx.media3.common.text.CueGroup;
 import androidx.media3.common.VideoSize;
 import androidx.media3.exoplayer.ExoPlayer;
 import androidx.media3.exoplayer.SeekParameters;
@@ -31,6 +34,7 @@ public final class VideoPlayer {
     private String clockDiagnostics() {synchronized(clock){StringBuilder value=new StringBuilder("state="+snapshotState+" position="+snapshotPosition+" seek="+appliedRequest+"/"+completedRequest+" surface="+lastSurfaceTimestamp+" mapped="+clockMatches+" misses="+clockMisses+" epoch="+epoch+" count="+count);
         for(int i=1;i<=Math.min(4,count);i++){int at=(head-i+releases.length)%releases.length;value.append(" [").append(releases[at]).append(',').append(times[at]).append(',').append(epochs[at]).append(']');}return value.toString();}}
     private ExoPlayer player;
+    private final PlaybackTracks tracks = new PlaybackTracks();
     private final Mp4Geometry geometry=new Mp4Geometry();
     private final Mp4Geometry.Info[] frameGeometry=new Mp4Geometry.Info[32];
     private volatile int naturalWidth,naturalHeight;
@@ -46,7 +50,7 @@ public final class VideoPlayer {
     private final Handler worker;
     private final Object commands=new Object();
     private boolean drainQueued,wantedPlaying,wantedMuted;
-    private float wantedVolume=1;
+    private float wantedVolume=1,wantedRate=1;
     private long wantedSeek,appliedRequest;
     private volatile String error="";
     private long request;
@@ -76,8 +80,12 @@ public final class VideoPlayer {
             player.setAudioAttributes(new AudioAttributes.Builder().setUsage(C.USAGE_MEDIA)
                 .setContentType(C.AUDIO_CONTENT_TYPE_MOVIE).build(),true);
             player.setSeekParameters(SeekParameters.EXACT);
+            player.setTrackSelectionParameters(player.getTrackSelectionParameters().buildUpon()
+                .setTrackTypeDisabled(C.TRACK_TYPE_TEXT, true).build());
             player.setVideoSurface(surfaceFrames.surface());
             player.addListener(new Player.Listener(){
+                @Override public void onTracksChanged(Tracks current) { tracks.update(current); }
+                @Override public void onCues(CueGroup current) { tracks.updateCues(current); }
                 @Override public void onPlayerError(PlaybackException failure) {error=failure.toString();}
                 @Override public void onPlaybackStateChanged(int state) {
                     if(state==Player.STATE_READY) {prepared=true;updateSnapshot();completedRequest=appliedRequest;}
@@ -175,8 +183,8 @@ public final class VideoPlayer {
     private void scheduleDrain() {
         synchronized(commands) {if(closed || drainQueued) return;drainQueued=true;}
         worker.post(()->{
-            boolean playing,muted;float volume;long seek,number;
-            synchronized(commands) {drainQueued=false;playing=wantedPlaying;muted=wantedMuted;volume=wantedVolume;seek=wantedSeek;number=request;}
+            boolean playing,muted;float volume,rate;long seek,number;
+            synchronized(commands) {drainQueued=false;playing=wantedPlaying;muted=wantedMuted;volume=wantedVolume;rate=wantedRate;seek=wantedSeek;number=request;}
             if(closed || player==null) return;
             try {
                 // Stop/paused seeks must pause the native clock before the
@@ -187,6 +195,7 @@ public final class VideoPlayer {
                     appliedRequest=number;player.seekTo(Math.max(0,seek));
                 }
                 player.setVolume(muted ? 0 : volume);
+                if (player.getPlaybackParameters().speed != rate) player.setPlaybackSpeed(rate);
                 if(playing) player.play();
                 updateSnapshot();
                 if(player.getPlaybackState()==Player.STATE_READY) completedRequest=appliedRequest;
@@ -202,6 +211,25 @@ public final class VideoPlayer {
     }
     public long completedSeek() {return completedRequest;}
     public void audio(float volume,boolean muted) {requireUi();synchronized(commands){wantedVolume=volume;wantedMuted=muted;}scheduleDrain();}
+    public void rate(float value) {requireUi();synchronized(commands){wantedRate=value;}scheduleDrain();}
+    public String tracks(int kind) { return tracks.list(kind); }
+    public String captions() { return tracks.captions(); }
+    public boolean selectTrack(int kind, int id) {
+        requireUi();
+        if (closed || (id < 0 && kind != 1) || (id >= 0 && tracks.override(kind, id) == null)) return false;
+        worker.post(() -> {
+            if (closed || player == null) return;
+            TrackSelectionOverride selected = tracks.override(kind, id);
+            if (id >= 0 && selected == null) return;
+            int type = PlaybackTracks.type(kind);
+            androidx.media3.common.TrackSelectionParameters.Builder params = player.getTrackSelectionParameters()
+                .buildUpon().clearOverridesOfType(type).setTrackTypeDisabled(type, selected == null);
+            if (selected != null) params.setOverrideForType(selected);
+            if (kind == 1) tracks.clearCues();
+            player.setTrackSelectionParameters(params.build());
+        });
+        return true;
+    }
     public void close() {
         requireUi();if(closed) return;closed=true;
         synchronized(clock) {epoch++;head=0;count=0;}

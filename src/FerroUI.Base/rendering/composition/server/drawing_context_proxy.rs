@@ -278,6 +278,14 @@ impl IDrawingContextImpl for CompositorDrawingContextProxy {
         self.inner.create_layer(size)
     }
 
+    fn create_temporary_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
+        self.inner.create_temporary_layer(size)
+    }
+
+    fn prefers_bounded_effect_targets(&self) -> bool {
+        self.inner.prefers_bounded_effect_targets()
+    }
+
     fn push_clip(&mut self, clip: Rect) {
         self.add_command(PendingCommand::PushClip(clip));
     }

@@ -1,0 +1,25 @@
+[package]
+name = "ferroui-frame-benchmarks-ios"
+description = "The iOS entry point of FerroUI's frame benchmarks: a scene in the main view of an application, for the window suite of the performance gate in a simulator"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+publish = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[[bin]]
+name = "frame-benchmarks-ios"
+path = "main.rs"
+test = false
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+# By its path and with its default features, of which Skia is one: the feature is not named, so
+# the host also builds in a base of the gate from before the crate had the choice.
+ferroui-ios = { path = "../../src/iOS/FerroUI.iOS" }
+ferroui-frame-benchmarks = { path = "../FerroUI.FrameBenchmarks", default-features = false }

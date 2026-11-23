@@ -11,9 +11,9 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Crate | `ferroui-designer-support` |
 | Phase / priority | 4 - tooling / P3 |
 | Files | 9/9 (100.0%) |
-| Types | 18/18 (100.0%) |
-| Members | 174/176 (2 waived) (100.0%) |
-| Contracts (interfaces) | 1/1 |
+| Types | 17/18 (94.4%) |
+| Members | 173/176 (2 waived) (99.4%) |
+| Contracts (interfaces) | 0/1 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
 
@@ -23,7 +23,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 | Interface | Access | Upstream file | Members | Status |
 |---|---|---|---|---|
-| `Avalonia.DesignerSupport.Remote.ITransportWithEnforcedMethod` | internal | `Remote/FileWatcherTransport.cs` | 1/1 | present |
+| `Avalonia.DesignerSupport.Remote.ITransportWithEnforcedMethod` | internal | `Remote/FileWatcherTransport.cs` | 0/1 | missing |
 
 ## Files
 
@@ -33,16 +33,22 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 |---|---|---|---|---|---|
 | `DesignWindowLoader.cs` | `design_window_loader.rs` | present | 1/1 | 2/2 |  |
 
-### `Remote` - files 6/6, types 12/12, members 146/147 (1 waived)
+### `Remote` - files 6/6, types 11/12, members 145/147 (1 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
 | `DetachableTransportConnection.cs` | `remote/detachable_transport_connection.rs` | present | 1/1 | 7/7 |  |
-| `FileWatcherTransport.cs` | `remote/file_watcher_transport.rs` | present | 2/2 | 8/8 |  |
+| `FileWatcherTransport.cs` | `remote/file_watcher_transport.rs` | partial | 1/2 | 7/8 |  |
 | `PreviewerWindowImpl.cs` | `remote/previewer_window_impl.rs` | present | 1/1 | 39/40 (1 waived) |  |
 | `PreviewerWindowingPlatform.cs` | `remote/previewer_windowing_platform.rs` | present | 1/1 | 7/7 |  |
 | `RemoteDesignerEntryPoint.cs` | `remote/remote_designer_entry_point.rs` | present | 2/2 | 4/4 |  |
 | `Stubs.cs` | `remote/stubs.rs` | present | 5/5 | 81/81 |  |
+
+<details><summary><code>FileWatcherTransport.cs</code> - 2 missing</summary>
+
+- `ITransportWithEnforcedMethod` (interface, internal): **type missing** (1 members)
+
+</details>
 
 ### `Remote/HtmlTransport` - files 2/2, types 5/5, members 26/27 (1 waived)
 

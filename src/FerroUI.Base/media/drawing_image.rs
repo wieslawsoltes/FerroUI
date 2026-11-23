@@ -157,12 +157,12 @@ impl DrawingImage {
 
         let scale = Matrix::create_scale(dest_rect.width / source_rect.width, dest_rect.height / source_rect.height);
         let translate = Matrix::create_translation(
-            -source_rect.x + dest_rect.x - bounds.x,
-            -source_rect.y + dest_rect.y - bounds.y,
+            -source_rect.x - bounds.x,
+            -source_rect.y - bounds.y,
         );
 
         let clip = context.push_clip(dest_rect);
-        let transform = context.push_transform(translate * scale);
+        let transform = context.push_transform(translate * scale * Matrix::create_translation(dest_rect.x, dest_rect.y));
         drawing.draw(context);
         context.pop(transform);
         context.pop(clip);

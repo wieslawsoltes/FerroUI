@@ -46,8 +46,11 @@ impl OwnedResources {
         self.ownership.application_resource(key, theme)
     }
     pub(crate) fn preview_resource(&self, candidate: &ResourceDictionary, key: &ResourceKey, theme: Option<&ThemeVariant>) -> Option<ResourceValue> {
-        self.ownership.preview_resource(candidate, key, theme)
-            .unwrap_or_else(|error| std::panic::panic_any(ReloadError::RestartRequired(error)))
+        // A dictionary the application replaced fails the reload (#567): the key is not found.
+        self.ownership.preview_resource(candidate, key, theme).unwrap_or_else(|error| {
+            crate::raise_reload_error(ReloadError::RestartRequired(error));
+            None
+        })
     }
     pub(crate) fn prepare(
         &self,

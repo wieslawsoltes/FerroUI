@@ -29,8 +29,7 @@ ferroui-desktop = { path = "../../src/FerroUI.Desktop", default-features = false
 # `--vnc`: the catalog on the headless platform, seen and driven through a VNC viewer.
 ferroui-headless-vnc = { path = "../../src/Headless/FerroUI.Headless.Vnc", default-features = false }
 control-catalog = { path = "../ControlCatalog" }
-# DevTools on F12 in debug builds.
-ferroui-diagnostics = { workspace = true }
+ferroui-diagnostics = { workspace = true, optional = true }
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
 
 # The options of a smoke run on Windows (`FERROUI_SMOKE_RENDERING`).
@@ -39,7 +38,8 @@ ferroui-media-windows = {workspace=true,features=["controls"]}
 ferroui-media-video-windows.workspace=true
 ferroui-media-camera-windows.workspace=true
 ferroui-media-opengl.workspace=true
-ferroui-win32 = { workspace = true, features = ["angle"] }
+ferroui-win32 = { workspace = true, default-features = false }
+ferroui-direct2d = { workspace = true, optional = true, features = ["media-controls"] }
 
 # The options of a smoke run on macOS (`FERROUI_SMOKE_RENDERING`).
 [target.'cfg(target_os = "macos")'.dependencies]
@@ -63,17 +63,26 @@ ferroui-wayland = { workspace = true }
 ferroui-linuxframebuffer = { workspace = true }
 
 [features]
+# Native startup/animation measurements; no instrumentation in default builds.
+animation-probe = []
+startup-probe-allocations = ["animation-probe"]
 default = ["skia"]
 skia = ["ferroui-desktop/skia", "ferroui-headless-vnc/harfbuzz"]
+direct2d = ["ferroui-desktop/direct2d", "dep:ferroui-direct2d", "ferroui-media-windows/direct2d"]
+direct2d-media-test-fixtures = ["direct2d", "synthetic-camera"]
+direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
 quartz = ["ferroui-desktop/quartz"]
 quartz-metal = ["quartz", "ferroui-desktop/quartz-metal", "dep:ferroui-quartz", "ferroui-quartz/metal", "ferroui-quartz/runtime-shaders"]
 quartz-media-test-fixtures = ["quartz-metal", "dep:ferroui-quartz", "ferroui-quartz/media-test-fixtures"]
+synthetic-camera = ["ferroui-media-camera-windows/synthetic-camera"]
 # The Simple and Fluent themes of the original beside the WinUI theme (`FERROUI_CATALOG_THEME`, the
 # settings page); off by default (docs/binary-size.md).
 classic-themes = ["control-catalog/classic-themes"]
 macos-theme = ["control-catalog/macos-theme"]
 material-theme = ["control-catalog/material-theme"]
 hot-reload = ["control-catalog/hot-reload"]
+# In-process F12 inspector for development and diagnostics smoke runs.
+diagnostics = ["dep:ferroui-diagnostics"]
 mcp = ["dep:ferroui-mcp", "dep:ferroui-headless"]
 # Explicit opt-in to the local CDP endpoint; FERROUI_CDP_PORT starts it.
 cdp = ["dep:ferroui-devtools"]

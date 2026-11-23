@@ -2657,6 +2657,136 @@ mod effects_and_brushes {
         assert!(dug.pixel(25, 50).3 < 12, "the material replaced the background: {:?}", dug.pixel(25, 50));
         assert_eq!(RED, dug.pixel(75, 50));
     }
+
+    // -----------------------------------------------------------------------
+    // The kept fill paint (desktop-performance.md, section 9.31)
+    // -----------------------------------------------------------------------
+
+    /// Something drawn into the 50 pixel wide column at `x`.
+    type ColumnDraw = (&'static str, fn(&mut DrawingContextImpl, f64));
+
+    fn column(x: f64) -> Rect {
+        Rect::new(x + 5.0, 5.0, 40.0, 90.0)
+    }
+
+    fn translucent_solid(context: &mut DrawingContextImpl, x: f64) {
+        let brush = solid(Color::from_argb(128, 0, 255, 0));
+        context.draw_rectangle(Some(&brush), None, RoundedRect::from_radius(column(x), 12.0), &no_shadows());
+    }
+
+    fn aliased_solid(context: &mut DrawingContextImpl, x: f64) {
+        context.push_render_options(aliased());
+        context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(x + 5.5, 5.5, 40.0, 90.0), &no_shadows());
+        context.pop_render_options();
+    }
+
+    fn solid_under_opacity(context: &mut DrawingContextImpl, x: f64) {
+        context.push_opacity(0.5, None);
+        context.draw_ellipse(Some(&solid(Colors::BLUE)), None, column(x));
+        context.pop_opacity();
+    }
+
+    fn gradient(context: &mut DrawingContextImpl, x: f64) {
+        let brush = linear_brush(
+            Colors::RED,
+            Color::from_argb(64, 0, 0, 255),
+            GradientSpreadMethod::Pad,
+            RelativePoint::new(1.0, 1.0, RelativeUnit::Relative),
+        );
+        context.draw_rectangle(Some(&brush), None, RoundedRect::from_radius(column(x), 8.0), &no_shadows());
+    }
+
+    fn solid_with_stroke(context: &mut DrawingContextImpl, x: f64) {
+        let brush = solid(Color::from_argb(200, 255, 255, 0));
+        context.draw_rectangle(Some(&brush), Some(&pen(Colors::BLUE, 5.0)), rect(x + 8.0, 8.0, 34.0, 84.0), &no_shadows());
+    }
+
+    fn digging_material(context: &mut DrawingContextImpl, x: f64) {
+        let material = Material {
+            background_source: AcrylicBackgroundSource::Digger,
+            tint_color: Color::from_argb(96, 0, 0, 255),
+            material_color: Color::from_argb(128, 255, 0, 0),
+        };
+        context.draw_rectangle_with_material(&material, RoundedRect::from_radius(column(x), 10.0));
+    }
+
+    const COLUMN_DRAWS: [ColumnDraw; 6] = [
+        ("translucent solid", translucent_solid),
+        ("aliased solid", aliased_solid),
+        ("solid under opacity", solid_under_opacity),
+        ("gradient", gradient),
+        ("solid with stroke", solid_with_stroke),
+        ("digging material", digging_material),
+    ];
+
+    /// The right column of the target, every pixel of every fourth row.
+    fn right_column(target: &Target) -> Vec<(u8, u8, u8, u8)> {
+        let framebuffer = target.bitmap.lock();
+        let pixels = (0..100)
+            .step_by(4)
+            .flat_map(|y| (50..100).map(move |x| (x, y)))
+            .map(|(x, y)| read_framebuffer_pixel(&*framebuffer, x, y))
+            .collect();
+        framebuffer.dispose();
+        pixels
+    }
+
+    /// The paint of a solid colour fill goes to the next fill as it is
+    /// (section 9.31). Whatever is drawn next draws as it does first in a
+    /// context, and a solid fill draws the same after anything.
+    #[test]
+    fn a_fill_draws_the_same_after_any_other_fill() {
+        for (second_name, second) in COLUMN_DRAWS {
+            let alone = Target::new();
+            draw(&alone, |context| {
+                context.clear(Colors::WHITE);
+                second(context, 50.0);
+            });
+            let expected = right_column(&alone);
+            assert!(expected.iter().any(|pixel| *pixel != (255, 255, 255, 255)), "{second_name} draws something");
+
+            for (first_name, first) in COLUMN_DRAWS {
+                let target = Target::new();
+                draw(&target, |context| {
+                    context.clear(Colors::WHITE);
+                    first(context, 0.0);
+                    second(context, 50.0);
+                });
+                assert!(right_column(&target) == expected, "{second_name} after {first_name}");
+            }
+        }
+    }
+
+    /// The colour, the opacity and the anti-aliasing of a solid fill are set
+    /// for every fill, also when the paint comes from the fill before.
+    #[test]
+    fn consecutive_solid_fills_each_have_their_colour_opacity_and_edge_mode() {
+        let target = Target::new();
+        draw(&target, |context| {
+            context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(0.5, 0.0, 19.0, 100.0), &no_shadows());
+            context.push_opacity(0.5, None);
+            context.draw_rectangle(Some(&solid(Colors::BLUE)), None, rect(20.0, 0.0, 20.0, 100.0), &no_shadows());
+            context.pop_opacity();
+            context.push_render_options(aliased());
+            context.draw_rectangle(Some(&solid(Colors::RED)), None, rect(40.5, 0.0, 19.0, 100.0), &no_shadows());
+            context.pop_render_options();
+            context.draw_rectangle(Some(&solid(Colors::BLUE)), None, rect(60.5, 0.0, 19.0, 100.0), &no_shadows());
+        });
+
+        // Anti-aliased: the half covered edge pixel is half transparent.
+        assert_eq!(RED, target.pixel(10, 50));
+        let edge = target.pixel(0, 50).3;
+        assert!((edge as i32 - 128).abs() < 8, "the first edge is anti-aliased: {edge}");
+        // The opacity of the second fill, and not of the third or fourth.
+        assert_eq!((0, 0, 127), { let (r, g, _, a) = target.pixel(30, 50); (r, g, a) });
+        // Aliased: the edge pixel is covered or not.
+        assert_eq!(RED, target.pixel(50, 50));
+        assert!(matches!(target.pixel(40, 50).3, 0 | 255), "the third edge is aliased: {:?}", target.pixel(40, 50));
+        // Anti-aliased again.
+        assert_eq!(BLUE, target.pixel(70, 50));
+        let edge = target.pixel(60, 50).3;
+        assert!((edge as i32 - 128).abs() < 8, "the fourth edge is anti-aliased: {edge}");
+    }
 }
 
 /// The custom effects FerroUI ships drawn as their graphs (#455, E2 and E3):

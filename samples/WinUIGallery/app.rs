@@ -7,6 +7,8 @@ use ferroui_base::{
 use ferroui_controls::{
     Application, ApplicationImpl, ApplicationImplExt, NewApplication, TextBlock, Window,
 };
+use ferroui_markup_xaml::styling::StyleInclude;
+use ferroui_markup_xaml::XamlLoadError;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -14,6 +16,9 @@ use std::rc::Rc;
 pub struct App {
     base: Application,
     gallery: RefCell<Option<GalleryView>>,
+    /// The include of the WinUI styles of the inking controls, which [`App::try_load_styles`]
+    /// loads ahead of the first style lookup.
+    inking_styles: RefCell<Option<Rc<StyleInclude>>>,
 }
 
 ferro_class!(App: Application);
@@ -28,14 +33,20 @@ impl NewApplication for App {
 
 impl ApplicationImpl for App {
     fn initialize(this: &Self) {
+        #[cfg(feature = "desktop")]
+        crate::playback_samples::install_desktop();
         ferroui_markup_xaml::register_types();
         ferroui_themes_winui::register_types();
         this.styles()
             .add(ferroui_themes_winui::WinUITheme::new().as_style());
         // The control themes of the InkToolbar (InkCanvas page) are in the inking crate, after the
-        // WinUI theme whose resources they use.
-        let inking = ferroui_markup_xaml::styling::StyleInclude::new(None);
-        inking.set_source(ferroui_base::utilities::UriRef::parse("ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml").ok());
+        // WinUI theme whose resources they use. The crate registers its compiled markup and its
+        // assets before the include is added: the first style lookup loads the document, and
+        // that can come before any native example registers the crate (#630).
+        ferroui_controls_inking::register_types();
+        let inking = StyleInclude::new(None);
+        inking.set_source(ferroui_base::utilities::UriRef::parse(INKING_STYLES).ok());
+        *this.inking_styles.borrow_mut() = Some(inking.clone());
         this.styles()
             .add(inking as Rc<dyn ferroui_base::styling::IStyle>);
     }
@@ -77,14 +88,35 @@ impl ApplicationImpl for App {
     }
 }
 
+/// The WinUI styles of the inking controls, which the application includes after the WinUI theme.
+const INKING_STYLES: &str = "ferres://FerroUI.Controls.Inking/Themes/WinUI.xaml";
+
 impl App {
     pub fn construct() -> Self {
         Self {
             base: Application::construct(),
             gallery: RefCell::new(None),
+            inking_styles: RefCell::new(None),
         }
     }
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    /// The application of the gallery, once the framework has created it.
+    pub fn current() -> Option<Ref<App>> {
+        Application::current().and_then(|application| application.cast::<App>())
+    }
+
+    /// Loads the style documents the application includes, after `initialize()`. A document that
+    /// cannot be loaded is an error here; the first style lookup would panic on it instead, as
+    /// a member without an error channel does. Loading twice is free: an include keeps what it
+    /// loaded.
+    pub fn try_load_styles(&self) -> Result<(), XamlLoadError> {
+        let include = self.inking_styles.borrow().clone();
+        let include = include.ok_or_else(|| {
+            XamlLoadError::with_message("The styles of the gallery are added by initialize().")
+        })?;
+        include.try_loaded().map(drop)
     }
 }

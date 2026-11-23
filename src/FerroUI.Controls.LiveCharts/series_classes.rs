@@ -5,7 +5,10 @@ use ferroui_base::{
     ferro_class, ferro_class_info, ferro_properties, instantiate, FerroObjectImpl,
     FerroObjectImplExt, FerroProperty, Ref, StyledProperty, Thickness,
 };
-use ferroui_livecharts::{SankeyLabelPosition, SankeyLayoutKind, SeriesKind};
+use ferroui_livecharts::{
+    ChartPointFormatter, DataLabelsPosition, NodeTooltipFormatter, SankeyLabelPosition,
+    SankeyLayoutKind, SeriesKind,
+};
 
 #[repr(C)]
 pub struct LineSeries {
@@ -869,6 +872,9 @@ ferro_properties! { impl SankeySeries {
     pub fn link_fill_property() -> StyledProperty<Option<Color>> {
         FerroProperty::register::<SankeySeries, _>("LinkFill", None)
     }
+    pub fn tool_tip_label_formatter_property() -> StyledProperty<Option<NodeTooltipFormatter>> {
+        FerroProperty::register::<SankeySeries, _>("ToolTipLabelFormatter", None)
+    }
 } }
 impl SankeySeries {
     pub fn nodes(&self) -> SankeyNodes {
@@ -931,11 +937,20 @@ impl SankeySeries {
     pub fn set_link_fill(&self, value: Option<Color>) {
         self.set_value(Self::link_fill_property(), value);
     }
+    pub fn tool_tip_label_formatter(&self) -> Option<NodeTooltipFormatter> {
+        self.get_value(Self::tool_tip_label_formatter_property())
+    }
+    pub fn set_tool_tip_label_formatter(&self, value: Option<NodeTooltipFormatter>) {
+        self.set_value(Self::tool_tip_label_formatter_property(), value);
+    }
 }
 
 ferro_properties! { impl TreemapSeries {
     pub fn nodes_property() -> StyledProperty<TreemapNodes> {
         FerroProperty::register::<TreemapSeries, _>("Nodes", TreemapNodes::new())
+    }
+    pub fn tool_tip_label_formatter_property() -> StyledProperty<Option<NodeTooltipFormatter>> {
+        FerroProperty::register::<TreemapSeries, _>("ToolTipLabelFormatter", None)
     }
 } }
 impl TreemapSeries {
@@ -944,6 +959,12 @@ impl TreemapSeries {
     }
     pub fn set_nodes(&self, value: TreemapNodes) {
         self.set_value(Self::nodes_property(), value);
+    }
+    pub fn tool_tip_label_formatter(&self) -> Option<NodeTooltipFormatter> {
+        self.get_value(Self::tool_tip_label_formatter_property())
+    }
+    pub fn set_tool_tip_label_formatter(&self, value: Option<NodeTooltipFormatter>) {
+        self.set_value(Self::tool_tip_label_formatter_property(), value);
     }
 }
 
@@ -1001,6 +1022,12 @@ ferro_properties! { impl HeatSeries {
     pub fn max_value_property() -> StyledProperty<Option<f64>> {
         FerroProperty::register::<HeatSeries, _>("MaxValue", None)
     }
+    pub fn data_labels_position_property() -> StyledProperty<DataLabelsPosition> {
+        FerroProperty::register::<HeatSeries, _>("DataLabelsPosition", DataLabelsPosition::Middle)
+    }
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<HeatSeries, _>("GeometrySvg", None)
+    }
 } }
 impl HeatSeries {
     pub fn color_stops(&self) -> Option<Vec<f64>> {
@@ -1026,5 +1053,180 @@ impl HeatSeries {
     }
     pub fn set_max_value(&self, value: Option<f64>) {
         self.set_value(Self::max_value_property(), value);
+    }
+    pub fn data_labels_position(&self) -> DataLabelsPosition {
+        self.get_value(Self::data_labels_position_property())
+    }
+    pub fn set_data_labels_position(&self, value: DataLabelsPosition) {
+        self.set_value(Self::data_labels_position_property(), value);
+    }
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl LineSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<LineSeries, _>("GeometrySvg", None)
+    }
+} }
+impl LineSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl AreaSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<AreaSeries, _>("GeometrySvg", None)
+    }
+} }
+impl AreaSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl StackedAreaSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<StackedAreaSeries, _>("GeometrySvg", None)
+    }
+} }
+impl StackedAreaSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl ScatterSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<ScatterSeries, _>("GeometrySvg", None)
+    }
+} }
+impl ScatterSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl ColumnSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<ColumnSeries, _>("GeometrySvg", None)
+    }
+} }
+impl ColumnSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl RowSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<RowSeries, _>("GeometrySvg", None)
+    }
+} }
+impl RowSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl StackedColumnSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<StackedColumnSeries, _>("GeometrySvg", None)
+    }
+} }
+impl StackedColumnSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl StackedRowSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<StackedRowSeries, _>("GeometrySvg", None)
+    }
+} }
+impl StackedRowSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl RangeColumnSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<RangeColumnSeries, _>("GeometrySvg", None)
+    }
+} }
+impl RangeColumnSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl RangeRowSeries {
+    pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
+        FerroProperty::register::<RangeRowSeries, _>("GeometrySvg", None)
+    }
+} }
+impl RangeRowSeries {
+    pub fn geometry_svg(&self) -> Option<String> {
+        self.get_value(Self::geometry_svg_property())
+    }
+    pub fn set_geometry_svg(&self, value: Option<String>) {
+        self.set_value(Self::geometry_svg_property(), value);
+    }
+}
+
+ferro_properties! { impl PolarLineSeries {
+    pub fn angle_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
+        FerroProperty::register::<PolarLineSeries, _>("AngleToolTipLabelFormatter", None)
+    }
+    pub fn radius_tool_tip_label_formatter_property() -> StyledProperty<Option<ChartPointFormatter>> {
+        FerroProperty::register::<PolarLineSeries, _>("RadiusToolTipLabelFormatter", None)
+    }
+} }
+impl PolarLineSeries {
+    pub fn angle_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
+        self.get_value(Self::angle_tool_tip_label_formatter_property())
+    }
+    pub fn set_angle_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
+        self.set_value(Self::angle_tool_tip_label_formatter_property(), value);
+    }
+    pub fn radius_tool_tip_label_formatter(&self) -> Option<ChartPointFormatter> {
+        self.get_value(Self::radius_tool_tip_label_formatter_property())
+    }
+    pub fn set_radius_tool_tip_label_formatter(&self, value: Option<ChartPointFormatter>) {
+        self.set_value(Self::radius_tool_tip_label_formatter_property(), value);
     }
 }

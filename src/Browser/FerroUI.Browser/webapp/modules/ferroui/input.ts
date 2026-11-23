@@ -2,6 +2,7 @@ import { CaretHelper } from "./caretHelper";
 import { FerroExports } from "./ferroExports";
 import { StorageItem } from "../storage/storageItem";
 import { applyTextInputOptions } from "./inputOptions";
+import { ViewBox, viewBoxOf, viewPoint } from "./pointerPosition";
 import { setTextInputState as writeTextInputState, subscribeTextInput, TextInputElement } from "./textInput";
 
 enum RawInputModifiers {
@@ -85,6 +86,9 @@ type ReadableDataValue = {
 // draws, and a frame that takes long made a moving finger look as if it had stopped.
 const eventAge = (args: Event): number => performance.now() - args.timeStamp;
 
+// The box a pointer move was measured on, for its coalesced points (getCoalescedEvents).
+const moveBoxes = new WeakMap<PointerEvent, ViewBox>();
+
 // Not in the original: the hidden textarea of a client of the exact-edit connection (dom.ts).
 const textInputElementClass = "ferroui-text-input-element";
 const isTextInputElement = (target: EventTarget | null): boolean =>
@@ -126,7 +130,10 @@ export class InputHelper {
     }
 
     public static isClipboardFormatSupported(format: string): boolean {
-        const supports = (ClipboardItem as any).supports as ((type: string) => boolean) | undefined;
+        // Some browsers have no ClipboardItem (Firefox before 127): the formats below are assumed.
+        const supports = typeof ClipboardItem === "undefined"
+            ? undefined
+            : (ClipboardItem as any).supports as ((type: string) => boolean) | undefined;
         if (supports) {
             return supports.call(ClipboardItem, format);
         }
@@ -643,12 +650,20 @@ export class InputHelper {
             return nativeHost !== null && nativeHost !== target && element.contains(nativeHost);
         };
 
+        // Differs from the original, which passes `offsetX` and `offsetY`: those are relative to the
+        // target of the event, and the target changes with the capture of the pointer. Every
+        // position is measured on the canvas instead (pointerPosition.ts).
+        const positionOf = (args: MouseEvent) => viewPoint(viewBoxOf(element), args.clientX, args.clientY);
+
         const pointerMoveHandler = (args: PointerEvent) => {
             if (isForNativeControl(args)) {
                 return;
             }
+            const box = viewBoxOf(element);
+            moveBoxes.set(args, box);
+            const [x, y] = viewPoint(box, args.clientX, args.clientY);
             FerroExports.InputHelper?.OnPointerMove(
-                topLevelId, args.pointerType, args.pointerId, args.offsetX, args.offsetY,
+                topLevelId, args.pointerType, args.pointerId, x, y,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args), eventAge(args), args);
             args.preventDefault();
         };
@@ -657,8 +672,9 @@ export class InputHelper {
             if (isForNativeControl(args)) {
                 return;
             }
+            const [x, y] = positionOf(args);
             FerroExports.InputHelper?.OnPointerDown(
-                topLevelId, args.pointerType, args.pointerId, args.button, args.offsetX, args.offsetY,
+                topLevelId, args.pointerType, args.pointerId, args.button, x, y,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args), eventAge(args));
             args.preventDefault();
         };
@@ -667,8 +683,9 @@ export class InputHelper {
             if (isForNativeControl(args)) {
                 return;
             }
+            const [x, y] = positionOf(args);
             FerroExports.InputHelper?.OnPointerUp(
-                topLevelId, args.pointerType, args.pointerId, args.button, args.offsetX, args.offsetY,
+                topLevelId, args.pointerType, args.pointerId, args.button, x, y,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args), eventAge(args));
             args.preventDefault();
         };
@@ -677,8 +694,9 @@ export class InputHelper {
             if (isForNativeControl(args)) {
                 return;
             }
+            const [x, y] = positionOf(args);
             FerroExports.InputHelper?.OnPointerCancel(
-                topLevelId, args.pointerType, args.pointerId, args.offsetX, args.offsetY,
+                topLevelId, args.pointerType, args.pointerId, x, y,
                 args.pressure, args.tiltX, args.tiltY, args.twist ?? 0, this.getModifiers(args), eventAge(args));
         };
 
@@ -688,8 +706,9 @@ export class InputHelper {
             if (isForNativeControl(args)) {
                 return;
             }
+            const [x, y] = positionOf(args);
             FerroExports.InputHelper?.OnWheel(
-                topLevelId, args.offsetX, args.offsetY, args.deltaX, args.deltaY, args.deltaMode, this.getModifiers(args));
+                topLevelId, x, y, args.deltaX, args.deltaY, args.deltaMode, this.getModifiers(args));
             args.preventDefault();
         };
 
@@ -753,7 +772,9 @@ export class InputHelper {
             const items: ReadableDataItem[] =
                 this.getDataTransferItems(dataTransfer).map((item) => ({ type: "dataTransferItem", value: item, dataTransfer }));
 
-            FerroExports.InputHelper?.OnDragDrop(topLevelId, args.type, args.offsetX, args.offsetY, this.getModifiers(args), dataTransfer, items);
+            // Measured on the canvas, as the pointer events are (pointerPosition.ts).
+            const [x, y] = viewPoint(viewBoxOf(element), args.clientX, args.clientY);
+            FerroExports.InputHelper?.OnDragDrop(topLevelId, args.type, x, y, this.getModifiers(args), dataTransfer, items);
         };
         const overAndDropHandler = (args: DragEvent) => {
             args.preventDefault();
@@ -772,9 +793,15 @@ export class InputHelper {
         };
     }
 
+    // Differs from the original, which passes `offsetX` and `offsetY` (see subscribePointerEvents):
+    // the points are measured on the box the move itself was measured on.
     public static getCoalescedEvents(pointerEvent: PointerEvent): number[] {
+        const box = moveBoxes.get(pointerEvent);
         return pointerEvent.getCoalescedEvents()
-            .flatMap(e => [e.offsetX, e.offsetY, e.pressure, e.tiltX, e.tiltY, e.twist ?? 0]);
+            .flatMap(e => {
+                const [x, y] = box != null ? viewPoint(box, e.clientX, e.clientY) : [e.offsetX, e.offsetY];
+                return [x, y, e.pressure, e.tiltX, e.tiltY, e.twist ?? 0];
+            });
     }
 
     public static subscribeKeyboardGeometryChange(

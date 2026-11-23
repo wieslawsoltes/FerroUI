@@ -1342,4 +1342,25 @@ mod tests {
         assert!((needle.x - (center.x + angle.cos() * 270.0)).abs() < 1e-9);
         assert!((needle.y - (center.y + angle.sin() * 270.0)).abs() < 1e-9);
     }
+    /// SeriesTests/SeriesHitTests.Pie_HitsInsideSlice and Pie_OutsideRadius_Misses: four slices of
+    /// 100 on a 400 by 400 chart, found by both dimensions (the strategy of the pie finder) at 45
+    /// degrees and a radius of 80 from the centre, and missed in the corner.
+    #[test]
+    fn source_pie_hits_inside_slice_and_misses_outside_radius() {
+        let scene = PieChartEngine::measure(
+            Size::new(400.0, 400.0),
+            &[series(100.0), series(100.0), series(100.0), series(100.0)],
+            &PieOptions::default(),
+        )
+        .unwrap();
+        assert_eq!(scene.automatic_finding_strategy, FindingStrategy::CompareAll);
+        let angle = 45.0_f64.to_radians();
+        let inside = Point::new(200.0 + 80.0 * angle.cos(), 200.0 + 80.0 * angle.sin());
+        assert!(!scene
+            .hit_test(inside, FindingStrategy::CompareAll, 0.0)
+            .is_empty());
+        assert!(scene
+            .hit_test(Point::new(395.0, 395.0), FindingStrategy::CompareAll, 0.0)
+            .is_empty());
+    }
 }

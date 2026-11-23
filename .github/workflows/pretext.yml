@@ -1,18 +1,13 @@
 name: Pretext port
 
 on:
+  # A pull request runs it when it changes the port itself (docs/ci.md); a push to main also
+  # when the facade crate, the text services of ferroui-base that ferroui-pretext-media uses or
+  # the headless platform change (the Linux job of ci.yml tests the crates of the port with every
+  # change of them).
   pull_request:
     paths:
       - 'src/Pretext/**'
-      - 'src/FerroUI/Cargo.toml'
-      - 'src/FerroUI/lib.rs'
-      # The text services of ferroui-base that ferroui-pretext-media uses.
-      - 'src/FerroUI.Base/media/text_formatting/**'
-      - 'src/FerroUI.Base/media/font*.rs'
-      - 'src/FerroUI.Base/media/glyph_run.rs'
-      - 'src/FerroUI.Base/platform/i_font_manager_impl.rs'
-      - 'src/FerroUI.Base/platform/i_text_shaper_impl.rs'
-      - 'src/Headless/FerroUI.Headless/**'
       - 'docs/porting/pretext.md'
       - 'scripts/pretext/**'
       - 'Cargo.toml'
@@ -24,6 +19,7 @@ on:
       - 'src/Pretext/**'
       - 'src/FerroUI/Cargo.toml'
       - 'src/FerroUI/lib.rs'
+      # The text services of ferroui-base that ferroui-pretext-media uses.
       - 'src/FerroUI.Base/media/text_formatting/**'
       - 'src/FerroUI.Base/media/font*.rs'
       - 'src/FerroUI.Base/media/glyph_run.rs'

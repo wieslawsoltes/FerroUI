@@ -311,6 +311,9 @@ const CLASSES: &[&TypeInfo] = types![
     crate::Visual3D,
     crate::ModelVisual3D,
     crate::Viewport3DVisual,
+    crate::UIElement3D,
+    crate::ModelUIElement3D,
+    crate::ContainerUIElement3D,
     // FerroUI.Controls
     crate::Viewport3D,
 ];

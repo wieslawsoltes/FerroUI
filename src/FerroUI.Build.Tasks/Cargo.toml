@@ -30,6 +30,10 @@ shader-effects = ["dep:naga"]
 
 [dependencies]
 serde_json = "1"
+# The manifest of the crate (`[package.metadata.ferroui]`, `theme_roots`), read as TOML (#850). The
+# version the build script of `skia-bindings` already uses; this crate is a build dependency, so the
+# parser runs in build scripts and is linked into no application.
+toml = "1.1.6"
 roxmltree.workspace = true
 # `MarkupAssembly`, and the attributes of the type model the build-time type system projects.
 ferroui-base = { workspace = true }

@@ -1,6 +1,7 @@
 use super::render_data_drawing_context::RecordedResource;
 use super::{RenderDataStream, ServerCompositionRenderData};
 use crate::media::{Geometry, IntersectionResult};
+use crate::platform::LtrbRect;
 use crate::rendering::composition::server::ServerObjectId;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::{Compositor, ICompositorSerializable};
@@ -43,6 +44,41 @@ impl CompositionRenderData {
             && self.stream.borrow().same_recording(stream)
     }
 
+    /// Takes a new recording in place of the one the render data holds, and returns the stream
+    /// it held, emptied for another recording. The server-side render data stays: it receives
+    /// the recording with the next batch, as it received the first one, where a new render data
+    /// would be created for the recording and this one disposed (FerroUI addition,
+    /// desktop-performance.md, section 9.28). The caller registers the render data for
+    /// serialization and has the visual drawn again.
+    pub(crate) fn replace_recording(
+        &self,
+        stream: RenderDataStream,
+        resources: Vec<RecordedResource>,
+    ) -> RenderDataStream {
+        let mut old_stream = self.stream.replace(stream);
+        // As in `dispose`: a stream that was sent is released by the server-side render data,
+        // which resets itself when it reads the new one.
+        if !self.items_sent.get() {
+            old_stream.dispose_resources();
+        }
+        self.items_sent.set(false);
+        // The new recording took its references while it was recorded, so a resource of both
+        // recordings stays referenced while those of the old one are released.
+        let old_resources = self.resources.replace(resources);
+        if let Some(compositor) = self.compositor.upgrade() {
+            for resource in old_resources {
+                resource.with_resource(|r| r.release_on_compositor(&compositor));
+            }
+        }
+        old_stream.recycle();
+        old_stream
+    }
+
+    /// Whether the render data was made for `compositor`.
+    pub(crate) fn is_of(&self, compositor: &Rc<Compositor>) -> bool {
+        std::ptr::eq(self.compositor.as_ptr(), Rc::as_ptr(compositor))
+    }
+
     /// The id of the server-side render data.
     pub fn server(&self) -> ServerObjectId {
         self.server
@@ -66,6 +102,14 @@ impl CompositionRenderData {
         if let Some(compositor) = compositor {
             compositor.dispose_on_next_batch(self.server);
         }
+    }
+
+    /// The bounds of what is drawn, rounded outwards to whole units as the server-side render
+    /// data rounds them; `None` if nothing is drawn. They are calculated from the recording
+    /// each time.
+    pub(crate) fn bounds(&self) -> Option<LtrbRect> {
+        let bounds = self.stream.borrow().calculate_bounds();
+        ServerCompositionRenderData::apply_render_bounds_rounding(bounds.map(LtrbRect::from_rect))
     }
 
     /// Whether anything drawn is hit at a point.

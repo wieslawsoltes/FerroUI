@@ -2,8 +2,9 @@ use crate::{ControlImpl, Decorator};
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutHelper, Layoutable, LayoutableImpl};
-use crate::utils::BorderRenderHelper;
+use crate::utils::LazyBorderRenderHelper;
 use ferroui_base::media::{BackgroundSizing, BoxShadows, DrawingContext, IBrush};
+use ferroui_base::property_store::HotValue;
 use ferroui_base::utilities::MathUtilities;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, CornerRadius, FerroObjectImpl, FerroObjectImplExt,
@@ -19,8 +20,21 @@ pub struct Border {
     base: Decorator,
     layout_thickness: Cell<Option<Thickness>>,
     scale: Cell<f64>,
-    border_render_helper: RefCell<BorderRenderHelper>,
+    border_render_helper: LazyBorderRenderHelper,
     border_visual: RefCell<Option<crate::border_visual::CompositionBorderVisual>>,
+    /// Not upstream: the value properties layout and rendering read, kept while the value store
+    /// of the border is unchanged (docs/porting/desktop-performance.md, section 9.28).
+    kept: HotValue<KeptBorderValues>,
+}
+
+/// The properties of a border that are plain values and do not inherit.
+#[derive(Clone, Copy, Default)]
+struct KeptBorderValues {
+    border_thickness: Thickness,
+    corner_radius: CornerRadius,
+    background_sizing: BackgroundSizing,
+    /// Whether the border has something to draw: a background, a border brush or a shadow.
+    draws: bool,
 }
 
 ferro_class!(Border: Decorator);
@@ -29,7 +43,7 @@ ferro_impl_classes!(Border: StyledElementImpl, InteractiveImpl, InputElementImpl
 
 impl VisualImpl for Border {
     fn render(this: &Self, context: &mut DrawingContext) {
-        this.border_render_helper.borrow_mut().render(
+        this.border_render_helper.render(
             context,
             this.bounds().size(),
             this.layout_thickness(),
@@ -41,10 +55,24 @@ impl VisualImpl for Border {
         );
     }
 
+    /// A border draws its background, its border and its shadows, each as large as it is: one
+    /// that has none of them draws nothing, at any size (desktop-performance.md, section 9.89).
+    fn resize_changes_drawing(this: &Self, _old: ferroui_base::Size, _new: ferroui_base::Size) -> bool {
+        // Asked for every new size: the answer is kept with the other values of the border.
+        this.kept_values().draws
+    }
+
     // The rounded clip of the immediate renderer (`IVisualWithRoundRectClip`
     // upstream).
     fn clip_to_bounds_radius(this: &Self) -> Option<CornerRadius> {
         Some(this.corner_radius())
+    }
+
+    // A border that clips to its bounds clips with its corner radius, which is what its
+    // composition visual does: its drawing is not an item of the composition visual above
+    // (docs/porting/desktop-performance.md, section 9.42).
+    fn requires_composition_visual(this: &Self) -> bool {
+        this.clip_to_bounds()
     }
 
     fn create_composition_visual(
@@ -60,6 +88,11 @@ impl VisualImpl for Border {
 }
 
 ferroui_base::ferro_overrides! { impl FerroObjectImpl for Border {
+    // The names the handler below matches. A name added to the handler is added here.
+    inherited_reactions: ferroui_base::InheritedReactions::to(|property| {
+        matches!(property.name(), "UseLayoutRounding" | "BorderThickness" | "CornerRadius").into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
         match change.property().name() {
@@ -168,11 +201,38 @@ impl Border {
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
-        Self { base: Decorator::construct(), layout_thickness: Cell::new(None), scale: Cell::new(0.0), border_render_helper: RefCell::new(BorderRenderHelper::new()), border_visual: RefCell::new(None) }
+        Self {
+            base: Decorator::construct(),
+            layout_thickness: Cell::new(None),
+            scale: Cell::new(0.0),
+            border_render_helper: LazyBorderRenderHelper::default(),
+            border_visual: RefCell::new(None),
+            kept: HotValue::default(),
+        }
     }
 
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+
+    #[inline]
+    fn kept_values(&self) -> KeptBorderValues {
+        self.kept.get_for(self, || self.read_kept_values())
+    }
+
+    /// The values `kept_values` keeps, read from the value store. Not part of the readers: they
+    /// are asked on every measure, arrange and new size, and find the kept values there.
+    #[cold]
+    #[inline(never)]
+    fn read_kept_values(&self) -> KeptBorderValues {
+        KeptBorderValues {
+            border_thickness: self.get_value(Self::border_thickness_property()),
+            corner_radius: self.get_value(Self::corner_radius_property()),
+            background_sizing: self.get_value(Self::background_sizing_property()),
+            draws: self.with_value(Self::background_property(), Option::is_some)
+                || self.with_value(Self::border_brush_property(), Option::is_some)
+                || self.with_value(Self::box_shadow_property(), |shadows| shadows.count() > 0),
+        }
     }
 
     /// A brush with which to paint the background.
@@ -184,9 +244,15 @@ impl Border {
         self.set_value(Self::background_property(), value)
     }
 
+    /// Whether a render of the border made its renderer.
+    #[cfg(test)]
+    pub(crate) fn has_border_renderer(&self) -> bool {
+        self.border_render_helper.is_made()
+    }
+
     /// How the background is drawn relative to the border.
     pub fn background_sizing(&self) -> BackgroundSizing {
-        self.get_value(Self::background_sizing_property())
+        self.kept_values().background_sizing
     }
 
     pub fn set_background_sizing(&self, value: BackgroundSizing) {
@@ -204,7 +270,7 @@ impl Border {
 
     /// The thickness of the border.
     pub fn border_thickness(&self) -> Thickness {
-        self.get_value(Self::border_thickness_property())
+        self.kept_values().border_thickness
     }
 
     pub fn set_border_thickness(&self, value: Thickness) {
@@ -213,7 +279,7 @@ impl Border {
 
     /// The radius of the border rounded corners.
     pub fn corner_radius(&self) -> CornerRadius {
-        self.get_value(Self::corner_radius_property())
+        self.kept_values().corner_radius
     }
 
     pub fn set_corner_radius(&self, value: CornerRadius) {

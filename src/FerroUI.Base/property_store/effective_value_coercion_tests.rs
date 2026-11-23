@@ -2,6 +2,8 @@
 //! Compare user-observable operations instead of assuming a cleanup order.
 
 use super::*;
+#[allow(unused_imports)]
+use crate::{PropertyValue, StyledProperty};
 use crate::ferro_property_metadata::PropertyMetadata;
 use crate::{FerroPropertyMetadata, StyledPropertyOptions, WeakRef};
 use std::panic::{catch_unwind, AssertUnwindSafe};
@@ -94,6 +96,8 @@ struct Tracked {
     trace: Rc<Trace>,
 }
 
+crate::styled_value!(Tracked);
+
 impl Clone for Tracked {
     fn clone(&self) -> Self {
         self.trace.record(Operation::Clone, format!("{}={}", self.serial, self.number));
@@ -161,7 +165,7 @@ fn run(original: bool, same_priority: bool, matches: (bool, bool), injection: Op
     // The real store owns the entry. Configure both animation/base branches
     // directly, without adding observer handles that could mask a drop.
     typed.value.replace(trace.value(if matches.0 { 14 } else { 10 }));
-    typed.base_value.replace(Some(trace.value(if matches.1 { if same_priority { 23 } else { 24 } } else { 20 })));
+    typed.set_base_value(trace.value(if matches.1 { if same_priority { 23 } else { 24 } } else { 20 }));
     uncommon.uncoerced_value.replace(trace.value(13));
     uncommon.uncoerced_base_value.replace(trace.value(23));
     typed.state.priority.set(if same_priority { BindingPriority::LocalValue } else { BindingPriority::Animation });
@@ -177,7 +181,7 @@ fn run(original: bool, same_priority: bool, matches: (bool, bool), injection: Op
     // Reads of fields make no additional value clones or equality calls.
     let values = (
         typed.value.borrow().number,
-        typed.base_value.borrow().as_ref().map(|value| value.number),
+        typed.with_base_value(|base| base.map(|value| value.number)),
         uncommon.uncoerced_value.borrow().number,
         uncommon.uncoerced_base_value.borrow().number,
     );
@@ -381,8 +385,9 @@ fn recoercion_keeps_nan_equality() {
     }
 }
 
-// Copied from 4622c95a: only the two oracle method names and their call differ.
-impl<T: PropertyValue> EffectiveValue<T> {
+// Copied from 4622c95a: only the two oracle method names and their call differ, and the base value is read and
+// written as the value keeps it (once, where it is the value).
+impl<T: crate::StyledValue> EffectiveValue<T> {
     fn original_coerce_value(&self, owner: &FerroObject) {
         let Some(uncommon) = &self.uncommon else { return };
         let value = uncommon.uncoerced_value.borrow().clone();
@@ -415,15 +420,19 @@ impl<T: PropertyValue> EffectiveValue<T> {
         }
 
         if !value_equals(&*self.value.borrow(), &v) {
-            self.value.replace(v.clone());
+            self.set_value_alone(v.clone());
             value_changed = true;
             if let Some(uncommon) = &self.uncommon {
                 uncommon.uncoerced_value.replace(value);
             }
         }
 
-        if !self.base_value.borrow().as_ref().is_some_and(|base| value_equals(base, &bv)) {
-            self.base_value.replace(Some(v));
+        if !self.with_base_value(|base| base.is_some_and(|base| value_equals(base, &bv))) {
+            if value_changed {
+                self.set_base_to_value();
+            } else {
+                self.set_base_value(v);
+            }
             base_value_changed = true;
             if let Some(uncommon) = &self.uncommon {
                 uncommon.uncoerced_value.replace(base_value);
@@ -487,7 +496,7 @@ mod end_reevaluation_tests {
         let uncommon = typed.uncommon.as_ref().unwrap();
         let values = (
             typed.value.borrow().number,
-            typed.base_value.borrow().as_ref().map(|value| value.number),
+            typed.with_base_value(|base| base.map(|value| value.number)),
             uncommon.uncoerced_value.borrow().number,
             uncommon.uncoerced_base_value.borrow().number,
         );
@@ -550,7 +559,7 @@ mod end_reevaluation_tests {
             let property = FerroProperty::register_with::<FerroObject, _>(
                 &unique_name(), StyledPropertyOptions::new(f64::NAN).coerce(|_, value| value),
             );
-            let effective = EffectiveValue::new(&owner, property, None);
+            let effective = EffectiveValue::new(property.as_property(), property.get_metadata_for(&owner), None);
             if original { effective.original_end_reevaluation(&owner); }
             else { EffectiveValueDyn::end_reevaluation(&effective, &owner); }
             assert!(effective.value().is_nan());
@@ -559,7 +568,7 @@ mod end_reevaluation_tests {
             let property = FerroProperty::register_with::<FerroObject, _>(
                 &unique_name(), StyledPropertyOptions::new(1_i32).coerce(|_, _| panic!("metadata callback used")),
             );
-            let mut effective = EffectiveValue::new(&owner, property, None);
+            let mut effective = EffectiveValue::new(property.as_property(), property.get_metadata_for(&owner), None);
             // The algorithm must still call the callback retained in uncommon,
             // even though metadata supplies the demand-rooted dispatch entry.
             effective.uncommon.as_mut().unwrap().coerce = Rc::new(|_, value| value + 5);
@@ -570,7 +579,7 @@ mod end_reevaluation_tests {
     }
 
     // Copied from bbff5971; only the oracle method name differs.
-    impl<T: PropertyValue> EffectiveValue<T> {
+    impl<T: crate::StyledValue> EffectiveValue<T> {
         fn original_end_reevaluation(&self, owner: &FerroObject) {
             if self.state.priority.get() == BindingPriority::Unset {
                 if let Some(uncommon) = &self.uncommon {

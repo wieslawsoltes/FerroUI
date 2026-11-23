@@ -129,6 +129,10 @@ impl CompositionGradientStopProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_gradient_stop.get().contains(CompositionGradientStopChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_composition_gradient_stop.set(self.changed_fields_of_composition_gradient_stop.get() & !CompositionGradientStopChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -170,6 +174,10 @@ impl CompositionGradientStopProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Offset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_gradient_stop.get().contains(CompositionGradientStopChangedFields::OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_gradient_stop.set(self.changed_fields_of_composition_gradient_stop.get() & !CompositionGradientStopChangedFields::OFFSET);
+                }
             }
         }
         self.offset.set(value);
@@ -210,15 +218,17 @@ impl CompositionGradientStopProps {
     pub fn serialize_changes_core(&self, host: &dyn CompositionGradientStopHooks, writer: &mut BatchStreamWriter<'_>) {
         let changed = self.changed_fields_of_composition_gradient_stop.get();
         writer.write(changed);
+        if changed.contains(CompositionGradientStopChangedFields::COLOR) {
+            writer.write(self.color.get());
+        }
         if changed.contains(CompositionGradientStopChangedFields::COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionGradientStopProps::id_of_color_property().base()));
-        } else if changed.contains(CompositionGradientStopChangedFields::COLOR) {
-            writer.write(self.color.get());
+        }
+        if changed.contains(CompositionGradientStopChangedFields::OFFSET) {
+            writer.write(self.offset.get());
         }
         if changed.contains(CompositionGradientStopChangedFields::OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionGradientStopProps::id_of_offset_property().base()));
-        } else if changed.contains(CompositionGradientStopChangedFields::OFFSET) {
-            writer.write(self.offset.get());
         }
         self.changed_fields_of_composition_gradient_stop.set(CompositionGradientStopChangedFields::empty());
     }
@@ -322,6 +332,10 @@ impl ServerCompositionGradientStopProps {
     ) {
         ServerCompositionGradientStopHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionGradientStopChangedFields>();
+        if changed.contains(CompositionGradientStopChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
+        }
         if changed.contains(CompositionGradientStopChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
@@ -332,9 +346,10 @@ impl ServerCompositionGradientStopProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionGradientStopChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
+        }
+        if changed.contains(CompositionGradientStopChangedFields::OFFSET) {
+            let value = reader.read::<f64>();
+            self.set_offset(host, value);
         }
         if changed.contains(CompositionGradientStopChangedFields::OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -346,9 +361,6 @@ impl ServerCompositionGradientStopProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionGradientStopChangedFields::OFFSET) {
-            let value = reader.read::<f64>();
-            self.set_offset(host, value);
         }
         ServerCompositionGradientStopHooks::on_fields_deserialized(host, changed);
     }

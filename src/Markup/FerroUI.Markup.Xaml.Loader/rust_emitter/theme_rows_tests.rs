@@ -277,10 +277,10 @@ fn runs_of_one_shape_and_one_dictionary_become_one_call_over_a_table() {
         ("build_t_deferred_2", 2, alias("Z")),
     ]);
     let mut count = 0;
-    let (written, tables) = row_runs(lines, &statements, "BUILD_T_DOCUMENT", || {
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "BUILD_T_DOCUMENT", || {
         count += 1;
         format!("BUILD_T_ROWS_{}", count - 1)
-    });
+    }));
     assert_eq!(written, body(&[
         "// t.xaml(1,8) Content (resource)",
         "rt::add_resource_aliases(&resource_dictionary_1, &context, &BUILD_T_DOCUMENT, BUILD_T_ROWS_0)?;",
@@ -326,10 +326,10 @@ fn a_run_ends_at_another_dictionary_and_at_any_other_statement() {
     ]);
     let statements = recorded(&lines, &[]);
     let mut count = 0;
-    let (written, tables) = row_runs(lines, &statements, "D", || {
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "D", || {
         count += 1;
         format!("ROWS_{count}")
-    });
+    }));
     assert_eq!(written, body(&[
         "rt::add_double_resources(&resource_dictionary_1, ROWS_1)?;",
         "rt::add_double_resources(&resource_dictionary_2, ROWS_2)?;",
@@ -365,10 +365,10 @@ fn a_run_ends_where_the_unit_of_the_theme_changes() {
     ]);
     let statements = recorded(&lines, &[]);
     let mut count = 0;
-    let (written, tables) = row_runs(lines, &statements, "D", || {
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "D", || {
         count += 1;
         format!("ROWS_{count}")
-    });
+    }));
     assert_eq!(written, body(&[
         first,
         "rt::add_double_resources(&resource_dictionary_1, ROWS_1)?;",
@@ -391,7 +391,7 @@ fn a_colour_whose_local_is_named_elsewhere_stays_a_statement() {
         "use_colour(&value_1);",
     ]);
     let statements = recorded(&lines, &[]);
-    let (written, tables) = row_runs(lines.clone(), &statements, "D", || "ROWS".to_string());
+    let (written, tables) = with_packed_theme_rows(false, || row_runs(lines.clone(), &statements, "D", || "ROWS".to_string()));
     // The first colour is a run of one, the second keeps its local: nothing is written as rows.
     assert_eq!(written, lines);
     assert!(tables.is_empty());
@@ -406,6 +406,10 @@ fn a_table_lists_its_rows_in_order() {
             "rt::ValueRow { key: \"B\", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 3, position: 4 }".to_string(),
         ],
         slots: Vec::new(),
+        packed: None,
+        fields: None,
+        unit: None,
+        program: None,
     };
     assert_eq!(
         row_table("POPULATE_X_ROWS_0", "x.xaml", &run),
@@ -415,4 +419,183 @@ fn a_table_lists_its_rows_in_order() {
          rt::ValueRow { key: \"B\", value: [0.0_f64, 0.0_f64, 0.0_f64, 0.0_f64], line: 3, position: 4 },\n\
          ];\n"
     );
+}
+
+/// #855: packed tables are on by default (kept by their measurement); the emission of a closure can
+/// turn them off.
+#[test]
+fn packed_tables_are_on_by_default() {
+    assert!(DEFAULT_PACKED_THEME_ROWS);
+    assert!(packed_theme_rows());
+    assert!(!with_packed_theme_rows(false, packed_theme_rows));
+    assert!(packed_theme_rows());
+}
+
+/// The fused additions of the deferred rows `rows` (key, build, line, row), in a body.
+fn packed_body(rows: &[(&str, &str, i32)]) -> Vec<String> {
+    let mut statements = Vec::new();
+    for (key, build, line) in rows {
+        statements.push(format!("// t.xaml({line},8) Content (resource)"));
+        statements.push(deferred_add("resource_dictionary_1", key, build, *line));
+    }
+    statements.iter().map(|statement| format!("    {statement}")).collect()
+}
+
+/// #855: with packed tables, a run of a deferred shape is one call of the packed builder over an
+/// `rt::PackedRows` whose pool holds each string once (a string inside another is found there),
+/// whose namespace tables are numbered from one, and whose records are the fields of the rows.
+#[test]
+fn a_run_of_a_deferred_shape_is_a_packed_table() {
+    let lines = packed_body(&[("AccentBrush", "build_t_deferred_0", 1), ("Accent", "build_t_deferred_1", 2), ("Other", "build_t_deferred_2", 3)]);
+    let scoped = DeferredRow { namespaces: Some("T_XML_NAMESPACES_1".to_string()), ..alias("AccentBrush") };
+    let statements = recorded(&lines, &[
+        ("build_t_deferred_0", 0, alias("Accent")),
+        ("build_t_deferred_1", 1, alias("SystemAccent")),
+        ("build_t_deferred_2", 2, scoped),
+    ]);
+    let (written, tables) =
+        with_packed_theme_rows(true, || row_runs(lines, &statements, "BUILD_T_DOCUMENT", || "BUILD_T_ROWS_0".to_string()));
+    assert_eq!(written, body(&[
+        "// t.xaml(1,8) Content (resource)",
+        "rt::add_packed_resource_aliases(&resource_dictionary_1, &context, &BUILD_T_DOCUMENT, &BUILD_T_ROWS_0)?;",
+    ]));
+    let (name, run) = &tables[0];
+    assert_eq!(run.slots, [0, 1, 2]);
+    // The pool: "AccentBrush", then "SystemAccent"; "Accent" and "Other" are found or added.
+    assert_eq!(
+        run.packed.as_deref(),
+        Some(
+            "rt::PackedRows {\n    strings: \"AccentBrushSystemAccentOther\",\n    namespaces: &[T_XML_NAMESPACES_1],\n    records: &[\n        \
+             0, 11, 0, 6, 0, 1, 8, 9, 9,\n        \
+             0, 6, 11, 12, 0, 2, 8, 9, 9,\n        \
+             23, 5, 0, 11, 1, 3, 8, 9, 9,\n    ],\n}"
+        )
+    );
+    let table = row_table(name, "t.xaml", run);
+    assert!(table.starts_with(
+        "/// The resource aliases of a run of `t.xaml`, packed, added in order by `rt::add_packed_resource_aliases` (#855).\n\
+         static BUILD_T_ROWS_0: rt::PackedRows = rt::PackedRows {\n"
+    ), "{table}");
+    // Without packed tables the run is the slice of rows it always was.
+    let lines = packed_body(&[("A", "build_t_deferred_0", 1)]);
+    let statements = recorded(&lines, &[("build_t_deferred_0", 0, alias("X"))]);
+    let (_, tables) = with_packed_theme_rows(false, || row_runs(lines, &statements, "D", || "ROWS".to_string()));
+    assert!(tables[0].1.packed.is_none());
+    assert!(row_table("ROWS", "t.xaml", &tables[0].1).contains("static ROWS: &[rt::ResourceAliasRow] = &["));
+}
+
+/// #855: with the typed bytecode backend a run is its program, also with packed tables on: a run
+/// is encoded by one representation only, and packed tables are of the native backend.
+#[test]
+fn the_typed_backend_encodes_a_run_without_a_packed_table() {
+    let lines = packed_body(&[("AccentBrush", "build_t_deferred_0", 1), ("Accent", "build_t_deferred_1", 2)]);
+    let statements = recorded(&lines, &[("build_t_deferred_0", 0, alias("Accent")), ("build_t_deferred_1", 1, alias("SystemAccent"))]);
+    let (written, tables) = with_packed_theme_rows(true, || {
+        row_runs_with_backend(lines, &statements, "BUILD_T_DOCUMENT", || "BUILD_T_ROWS_0".to_string(), true)
+    });
+    let (name, run) = &tables[0];
+    assert!(run.packed.is_none() && run.program.is_some(), "{run:?}");
+    assert!(!written.iter().any(|line| line.contains("rt::add_packed_")), "{written:?}");
+    assert!(!row_table(name, "t.xaml", run).contains("rt::PackedRows"));
+}
+
+/// #855: the literal brush record splits its colour into halves; a key with escapes is
+/// unescaped into the pool and written back as a literal.
+#[test]
+fn a_literal_brush_and_an_escaped_key_are_packed() {
+    let lines = body(&[&deferred_add("resource_dictionary_1", "Quoted\\\"Brush\\u{e9}", "build_t_deferred_0", 4)]);
+    let row = DeferredRow { kind: RowKind::LiteralBrush, operand: "4281545523_u32".to_string(), value_position: (0, 0), namespaces: None };
+    let statements = recorded(&lines, &[("build_t_deferred_0", 0, row)]);
+    let (written, tables) = with_packed_theme_rows(true, || row_runs(lines, &statements, "D", || "ROWS".to_string()));
+    assert_eq!(written, body(&["rt::add_packed_literal_brushes(&resource_dictionary_1, &context, &D, &ROWS)?;"]));
+    // 4281545523 is 0xFF33_3333: low 0x3333 (13107), high 0xFF33 (65331); the key has 14 bytes.
+    assert_eq!(
+        tables[0].1.packed.as_deref(),
+        Some("rt::PackedRows {\n    strings: \"Quoted\\\"Brush\\u{e9}\",\n    namespaces: &[],\n    records: &[\n        0, 14, 13107, 65331, 0, 4, 8,\n    ],\n}")
+    );
+}
+
+/// #855: a position beyond 16 bits keeps the slice of rows (the escape of a packed table).
+#[test]
+fn a_position_beyond_sixteen_bits_keeps_the_slice_of_rows() {
+    let lines = packed_body(&[("A", "build_t_deferred_0", 70_000)]);
+    let statements = recorded(&lines, &[("build_t_deferred_0", 0, alias("X"))]);
+    let (written, tables) = with_packed_theme_rows(true, || row_runs(lines, &statements, "D", || "ROWS".to_string()));
+    assert!(written[1].contains("rt::add_resource_aliases(&resource_dictionary_1, &context, &D, ROWS)?;"), "{written:?}");
+    assert!(tables[0].1.packed.is_none());
+}
+
+/// #855: the strings of rows are read back from the literals the emitter writes.
+#[test]
+fn string_literals_are_read_back() {
+    for text in ["", "Plain", "Quote\"Back\\slash", "Tab\tNew\nLine\r\0", "\u{e9}\u{1f600}"] {
+        assert_eq!(string_value(&crate::rust_emitter::rust_string_literal(text)).as_deref(), Some(text));
+    }
+    assert_eq!(string_value("\"bad\\q\""), None);
+    assert_eq!(string_value("not a literal"), None);
+}
+
+#[test]
+fn typed_resource_runs_keep_units_local_and_encode_singleton_values_and_scopes() {
+    use super::super::theme_units::{begin_marker, END_MARKER};
+    let lines = body(&[
+        begin_marker(1).trim_start(),
+        &deferred_add("dictionary", "Alias", "build_alias", 6),
+        END_MARKER,
+        begin_marker(2).trim_start(),
+        &format!("{};", value_call("dictionary", "NegativeZero", "rt::to_object(-0.0_f64)", 3, 4)),
+        END_MARKER,
+    ]);
+    let scoped = DeferredRow {
+        kind: RowKind::ResourceAlias, operand: "\"Target\"".into(),
+        value_position: (7, 9), namespaces: Some("SCOPED".into()),
+    };
+    let statements = recorded(&lines, &[("build_alias", 0, scoped)]);
+    let mut next = 0;
+    let (body, tables) = row_runs_with_backend(lines, &statements, "DOC", || {
+        next += 1;
+        format!("BLOCK_{next}")
+    }, true);
+    assert_eq!(tables.len(), 2);
+    assert_eq!(tables[0].1.slots, [0]);
+    assert!(body.iter().any(|line| line.contains("BLOCK_1.add_resource_aliases(&dictionary, &context, &DOC)?;")));
+    assert!(body.iter().any(|line| line.contains("BLOCK_2.add_double_resources(&dictionary)?;")));
+    let alias = row_table("BLOCK_1", "test.xaml", &tables[0].1);
+    assert!(alias.contains(r#"b"\x01\x01\x01\x00\x0c\x10\x01\x02\x02\x01", &["Alias", "Target"], &[SCOPED]"#), "{alias}");
+    assert!(!alias.contains("NegativeZero"));
+    let number = row_table("BLOCK_2", "test.xaml", &tables[1].1);
+    assert!(number.contains(r#"b"\x01\x05\x01\x00\x06\x08\xff\x00\x00\x00\x00\x00\x00\x00\x80", &["NegativeZero"], &[]"#), "{number}");
+    assert!(!number.contains("SCOPED"));
+}
+
+/// #855: the packed tables of one unit of a theme share one pool of strings, written once before
+/// the first of them, while a table of no unit, or the only table of its unit, keeps its own.
+#[test]
+fn the_packed_tables_of_a_unit_share_one_pool() {
+    let packed = |rows: &[(&str, &str, i32)], targets: &[&str], name: &str, unit: Option<u32>| {
+        let lines = packed_body(rows);
+        let rows: Vec<(&str, usize, DeferredRow)> =
+            rows.iter().zip(targets).enumerate().map(|(slot, ((_, build, _), target))| (*build, slot, alias(target))).collect();
+        let statements = recorded(&lines, &rows);
+        let (_, mut tables) =
+            with_packed_theme_rows(true, || row_runs(lines, &statements, "BUILD_T_DOCUMENT", || name.to_string()));
+        let (name, mut run) = tables.remove(0);
+        run.unit = unit;
+        (name, "t.xaml".to_string(), run)
+    };
+    let light = packed(&[("AccentBrush", "build_t_deferred_0", 1), ("OtherBrush", "build_t_deferred_1", 2)], &["Accent", "Other"], "BUILD_T_ROWS_0", Some(3));
+    let dark = packed(&[("AccentBrush", "build_t_deferred_2", 3), ("OtherBrush", "build_t_deferred_3", 4)], &["Accent", "Dark"], "BUILD_T_ROWS_1", Some(3));
+    let alone = packed(&[("AccentBrush", "build_t_deferred_4", 5), ("OtherBrush", "build_t_deferred_5", 6)], &["Accent", "Other"], "BUILD_T_ROWS_2", None);
+    let texts = row_tables_in("BUILD_T", &[light, dark, alone], &Default::default());
+    assert_eq!(texts.len(), 4, "{texts:#?}");
+    assert_eq!(
+        texts[0],
+        "/// The keys and targets of the packed tables of the unit 3 of `t.xaml`, each once (#855).\n\
+         const BUILD_T_UNIT_3_STRINGS: &str = \"AccentBrushOtherBrushDark\";\n"
+    );
+    assert!(texts[1].contains("static BUILD_T_ROWS_0: rt::PackedRows = rt::PackedRows {\n    strings: BUILD_T_UNIT_3_STRINGS,\n"), "{}", texts[1]);
+    // The table of the dark theme finds the keys and the shared target in the pool.
+    assert!(texts[2].contains("    strings: BUILD_T_UNIT_3_STRINGS,\n    namespaces: &[],\n    records: &[\n        0, 11, 0, 6, 0, 3, 8, 9, 9,\n        11, 10, 21, 4, 0, 4, 8, 9, 9,\n"), "{}", texts[2]);
+    // A table of no unit keeps its own pool.
+    assert!(texts[3].contains("    strings: \"AccentBrushOtherBrush\",\n"), "{}", texts[3]);
 }

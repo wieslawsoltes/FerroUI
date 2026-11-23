@@ -1,7 +1,8 @@
-/* System GStreamer only. No CPU video map, conversion, or upload is admitted. */
+/* System GStreamer. Preview admits no CPU video map, conversion, or upload. */
 #define _GNU_SOURCE
 #include "media.h"
 #include <gst/app/gstappsink.h>
+#include <gst/app/gstappsrc.h>
 #include <gst/allocators/gstdmabuf.h>
 #include <gst/video/video.h>
 #include <gst/video/video-info-dma.h>
@@ -20,6 +21,7 @@
 #define DRM_XBGR 0x34324258
 static gint native_active = 0;
 struct FerroLinuxFrame { GstSample *sample; FerroLinuxFrameInfo info; };
+#include "recording.inc"
 struct FerroLinuxSession {
     gint refs, closed;
     GMutex lock;
@@ -33,16 +35,23 @@ struct FerroLinuxSession {
     FerroLinuxState state;
     GstElement *pipeline, *sink;
     FerroLinuxFrame *latest;
+    gboolean recording_available;
+    GstCaps *recording_camera_caps, *recording_input_caps;
+    FerroLinuxRecording *recording;
 };
 static void unref_session(FerroLinuxSession *s) {
     if (!g_atomic_int_dec_and_test(&s->refs)) return;
     if (s->latest) ferro_linux_frame_release(s->latest);
+    unref_recording(s->recording);
+    gst_clear_caps(&s->recording_camera_caps);
+    gst_clear_caps(&s->recording_input_caps);
     if (s->remote_fd >= 0) close(s->remote_fd);
     g_free(s->source); g_free(s->caps); g_mutex_clear(&s->lock); g_free(s);
 }
 static void fail(FerroLinuxSession *s, int kind, const char *message) {
     g_mutex_lock(&s->lock);
     s->state.state = 5; s->state.error_kind = kind;
+    ferro_linux_record_cancel(s->recording);
     g_strlcpy(s->state.error, message, sizeof(s->state.error));
     g_mutex_unlock(&s->lock);
 }
@@ -138,6 +147,16 @@ static GstFlowReturn receive(FerroLinuxSession *s, GstSample *sample) {
     g_mutex_lock(&s->lock);
     if (s->segment_epoch != s->epoch || g_atomic_int_get(&s->closed)) { g_mutex_unlock(&s->lock); ferro_linux_frame_release(f); return GST_FLOW_OK; }
     f->info.epoch = s->epoch; f->info.sequence = ++s->sequence;
+    if (s->recording_available) {
+        if (!s->recording_camera_caps || !gst_caps_is_equal(s->recording_camera_caps, caps)) {
+            ferro_linux_record_cancel(s->recording);
+            gst_caps_replace(&s->recording_camera_caps, caps);
+            gst_clear_caps(&s->recording_input_caps);
+            s->recording_input_caps = recording_caps(caps);
+        }
+        if (s->recording && !g_atomic_int_get(&s->recording->worker_done))
+            recording_enqueue(s->recording, gst_sample_get_buffer(f->sample));
+    }
     FerroLinuxFrame *old = s->latest; s->latest = f;
     s->state.width = f->info.width; s->state.height = f->info.height;
     s->state.fps_n = n; s->state.fps_d = d;
@@ -193,6 +212,7 @@ static gpointer worker(gpointer data) {
         if (!s->pipeline) { fail(s, 1, "System GStreamer playbin3 is unavailable"); goto done; }
         g_object_set(s->pipeline, "uri", s->source, "video-sink", s->sink, "flags", 3u, NULL); /* native video + audio; no subtitles */
     } else {
+        s->recording_available = recording_plugins_available();
         s->pipeline = gst_pipeline_new(NULL);
         GstElement *source = gst_element_factory_make(s->profile == 1 ? "pipewiresrc" : "v4l2src", NULL);
         if (!source) { fail(s, 1, "System camera source plugin unavailable"); goto done; }
@@ -237,7 +257,10 @@ static gpointer worker(gpointer data) {
                     GError *e = NULL; char *debug = NULL; gst_message_parse_error(message, &e, &debug);
                     fail(s, 0, e ? e->message : "Native pipeline failed"); g_clear_error(&e); g_free(debug); break;
                 }
-                case GST_MESSAGE_EOS: g_mutex_lock(&s->lock); s->state.state = 4; g_mutex_unlock(&s->lock); break;
+                case GST_MESSAGE_EOS:
+                    if (s->profile) fail(s, 3, "Native camera stream ended");
+                    else { g_mutex_lock(&s->lock); s->state.state = 4; g_mutex_unlock(&s->lock); }
+                    break;
                 case GST_MESSAGE_BUFFERING: {
                     int percent; gst_message_parse_buffering(message, &percent);
                     g_mutex_lock(&s->lock); s->state.buffering = percent < 100; g_mutex_unlock(&s->lock); break;
@@ -270,6 +293,9 @@ static gpointer worker(gpointer data) {
     gst_object_unref(bus);
 done:
     g_atomic_int_set(&s->closed, 1);
+    g_mutex_lock(&s->lock);
+    ferro_linux_record_cancel(s->recording);
+    g_mutex_unlock(&s->lock);
     if (s->pipeline) { gst_element_set_state(s->pipeline, GST_STATE_NULL); gst_object_unref(s->pipeline); }
     if (s->sink) gst_object_unref(s->sink);
     s->pipeline = s->sink = NULL;
@@ -292,7 +318,48 @@ FerroLinuxSession *ferro_linux_open(const char *source, const char *caps, int pr
     GThread *thread = g_thread_new("ferroui-media", worker, s); g_thread_unref(thread);
     return s;
 }
-void ferro_linux_close(FerroLinuxSession *s) { g_atomic_int_set(&s->closed, 1); unref_session(s); }
+void ferro_linux_close(FerroLinuxSession *s) {
+    g_mutex_lock(&s->lock);
+    g_atomic_int_set(&s->closed, 1);
+    ferro_linux_record_cancel(s->recording);
+    g_mutex_unlock(&s->lock);
+    unref_session(s);
+}
+static gboolean can_record(FerroLinuxSession *s) {
+    return !g_atomic_int_get(&s->closed) && s->state.state == 2 && s->recording_input_caps;
+}
+int ferro_linux_can_record(FerroLinuxSession *s) {
+    g_mutex_lock(&s->lock);
+    gboolean supported = can_record(s);
+    g_mutex_unlock(&s->lock);
+    return supported;
+}
+FerroLinuxRecording *ferro_linux_record(FerroLinuxSession *s) {
+    g_mutex_lock(&s->lock);
+    if (!can_record(s) || (s->recording && !g_atomic_int_get(&s->recording->worker_done))) {
+        g_mutex_unlock(&s->lock);
+        return NULL;
+    }
+    FerroLinuxRecording *r = g_new0(FerroLinuxRecording, 1);
+    r->refs = 1;
+    g_mutex_init(&r->lock);
+    r->input_caps = gst_caps_ref(s->recording_input_caps);
+    r->info.width = s->state.width;
+    r->info.height = s->state.height;
+    r->frame_duration = gst_util_uint64_scale(GST_SECOND, s->state.fps_d, s->state.fps_n);
+    GThread *thread = g_thread_try_new("ferroui-recording", recording_worker, ref_recording(r), NULL);
+    if (!thread) {
+        unref_recording(r);
+        unref_recording(r);
+        g_mutex_unlock(&s->lock);
+        return NULL;
+    }
+    unref_recording(s->recording);
+    s->recording = ref_recording(r);
+    g_thread_unref(thread);
+    g_mutex_unlock(&s->lock);
+    return r;
+}
 void ferro_linux_state(FerroLinuxSession *s, FerroLinuxState *state) { g_mutex_lock(&s->lock); *state = s->state; g_mutex_unlock(&s->lock); }
 void ferro_linux_intent(FerroLinuxSession *s, int intent) {
     g_mutex_lock(&s->lock); s->intent = intent;
