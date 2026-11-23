@@ -633,6 +633,94 @@
       "notes": "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button, with the source's FontIcon glyphs on the button and on the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows).",
       "examples": []
     },
+    "EasingFunction": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/EasingFunction.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/motion_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "each_easing_example_runs_its_storyboard_to_the_other_end_and_back"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "the_exponents_follow_their_number_boxes"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "the_fourth_example_takes_the_function_and_the_mode_of_its_options"
+        }
+      ],
+      "notes": "All examples of the page use native Storyboard, DoubleAnimation and the eleven easing functions, with the handlers of EasingFunctionPage.xaml.cs in Rust (motion_samples.rs). The fourth example of the page, which has no catalog sample definition, takes its function and mode from its options.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/EasingFunction/StandardEasingFunction.txt",
+          "source_sha256": "8dcd53671222bb3794f6284cbe7b95ab919afb33782a3828052a6d14c493a04a",
+          "status": "ported",
+          "target_control": "Example1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_easing_example_runs_its_storyboard_to_the_other_end_and_back"
+            }
+          ],
+          "notes": "The Storyboard, DoubleAnimation and CircleEase of the source, with Button1_Click in Rust."
+        },
+        {
+          "source": "WinUIGallery/Samples/EasingFunction/AccelerateEasingFunction.txt",
+          "source_sha256": "450834e7ac94a89038303207d4682346d6d57a071b651e194f9e626694e3bd9f",
+          "status": "ported",
+          "target_control": "Example2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_easing_example_runs_its_storyboard_to_the_other_end_and_back"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "the_exponents_follow_their_number_boxes"
+            }
+          ],
+          "notes": "ExponentialEase in EaseIn, with its exponent following the NumberBox as the x:Bind of the source does."
+        },
+        {
+          "source": "WinUIGallery/Samples/EasingFunction/DecelerateEasingFunction.txt",
+          "source_sha256": "f906880617c78af2021159f3c94f9823374ad1104b9dc8e036c7c7241cc375c7",
+          "status": "ported",
+          "target_control": "Example3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_easing_example_runs_its_storyboard_to_the_other_end_and_back"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "the_exponents_follow_their_number_boxes"
+            }
+          ],
+          "notes": "ExponentialEase in EaseOut, with its exponent following the NumberBox as the x:Bind of the source does."
+        }
+      ]
+    },
     "Expander": {
       "status": "ported",
       "implementation": [
