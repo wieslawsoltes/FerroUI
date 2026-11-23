@@ -25,6 +25,10 @@ progpu-native-sys.workspace = true
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-metal.workspace = true
 
+# The connection to the X server the surfaces of windows are made with.
+[target.'cfg(target_os = "linux")'.dependencies]
+x11-dl.workspace = true
+
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }

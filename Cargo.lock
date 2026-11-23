@@ -2623,6 +2623,7 @@ dependencies = [
  "objc2",
  "objc2-metal",
  "progpu-native-sys",
+ "x11-dl",
 ]
 
 [[package]]
@@ -7616,7 +7617,7 @@ dependencies = [
 [[package]]
 name = "wgpu-native"
 version = "0.0.0"
-source = "git+https://github.com/FerroUI/wgpu-native?rev=309bf22#309bf22fac7e5505b1024ceda0bbdc9aabc6e586"
+source = "git+https://github.com/FerroUI/wgpu-native?rev=1e4c948#1e4c948e84ee76c615a02ffd25be5f6a445e306d"
 dependencies = [
  "bindgen",
  "bitflags 2.13.2",
