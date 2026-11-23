@@ -287,8 +287,18 @@ check("without the service worker none is registered, and the polyfill saves thr
 // The worker of the platform is registered for the directory of the site, and a file saved through
 // the polyfill reaches the download as a response the worker streams.
 async function expectStreamedSave(page) {
-    const registration = JSON.parse(await page.evaluate(`navigator.serviceWorker.ready.then((r) => JSON.stringify({
-        scope: r.scope, script: r.active && r.active.scriptURL, state: r.active && r.active.state }))`));
+    // `ready` resolves as soon as the registration has an active worker, which may still be
+    // activating. The wait is bounded, so a worker that never activates fails the check below.
+    const registration = JSON.parse(await page.evaluate(`navigator.serviceWorker.ready.then(async (r) => {
+        const worker = r.active;
+        if (worker && worker.state === "activating") {
+            await Promise.race([
+                new Promise((resolve) => worker.addEventListener("statechange", resolve, { once: true })),
+                new Promise((resolve) => setTimeout(resolve, 10000))
+            ]);
+        }
+        return JSON.stringify({ scope: r.scope, script: worker && worker.scriptURL, state: worker && worker.state });
+    })`));
     const origin = await page.evaluate("location.origin");
     expect(registration.scope, `${origin}/`, "scope");
     expect(registration.script, `${origin}/${SERVICE_WORKER}`, "script");
