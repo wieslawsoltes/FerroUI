@@ -4160,6 +4160,78 @@
       ],
       "notes": "The seven two-dimensional UI sound actions play application-owned PCM cues through the native portable MediaPlayer. The toggle and volume operate that player. SpatialAudioMode is explicitly not applicable: it is a Windows UI service without a portable provider contract.",
       "examples": []
+    },
+    "SelectorBar": {
+      "status": "ported",
+      "source_page": {
+        "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml",
+        "sha256": "67ddcf85ebdea7c19a461c013150cbf1bc4f679632fa223566e766eab7f322f4"
+      },
+      "source_code_behind": {
+        "path": "WinUIGallery/Samples/SelectorBar/SelectorBarPage.xaml.cs",
+        "sha256": "90e414e9b03e4ab58d8abebf83361f64dfb1e5fbe4f454d53538fb17d230fde5"
+      },
+      "implementation": [
+        "samples/WinUIGallery/Pages/SelectorBar.xaml",
+        "samples/WinUIGallery/selector_bar_samples.rs",
+        "src/FerroUI.Controls/selector_bar.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/selector_bar_samples_tests.rs",
+          "name": "selector_bar_basic_example_has_its_items_and_icons"
+        },
+        {
+          "path": "samples/WinUIGallery/selector_bar_samples_tests.rs",
+          "name": "selector_bar_navigates_the_frame_with_a_slide_in_its_direction"
+        },
+        {
+          "path": "samples/WinUIGallery/selector_bar_samples_tests.rs",
+          "name": "selector_bar_shows_the_collection_of_the_selected_item"
+        }
+      ],
+      "notes": "All three source examples use the native SelectorBar with the code behind of SelectorBarPage.xaml.cs in Rust (selector_bar_samples.rs): the items with their text and icons, SelectorBar2_SelectionChanged navigating a Frame with a slide in the direction of the selection, and SelectorBar3_SelectionChanged with PopulateColorCollections. The icons are property elements. The third example's ItemsView is an ItemsControl with a horizontal panel and the source's coloured tiles.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/SelectorBar/BasicSelectorbar.txt",
+          "source_sha256": "cf8472c72f11d5cb878f8409bb43654f6c5059c327f14a1b917071b5673955bd",
+          "status": "ported",
+          "target_control": "SelectorBarExample1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/selector_bar_samples_tests.rs",
+              "name": "selector_bar_basic_example_has_its_items_and_icons"
+            }
+          ],
+          "notes": "The three items with their text and symbol icons."
+        },
+        {
+          "source": "WinUIGallery/Samples/SelectorBar/SelectorbarFrameSlideTransitions.txt",
+          "source_sha256": "610a41fb24d4160c38b0503795ef7d2207271791895e2fb0b8864819fb109027",
+          "status": "ported",
+          "target_control": "SelectorBarExample2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/selector_bar_samples_tests.rs",
+              "name": "selector_bar_navigates_the_frame_with_a_slide_in_its_direction"
+            }
+          ],
+          "notes": "SelectorBar2_SelectionChanged navigates a Frame without a navigation stack, with a slide from the right going forward and from the left otherwise."
+        },
+        {
+          "source": "WinUIGallery/Samples/SelectorBar/SelectorbarDisplayingDifferentCollections.txt",
+          "source_sha256": "de6e4e76db440874b7186bff898006726fca59bf5ca249076752259ec810b681",
+          "status": "ported",
+          "target_control": "SelectorBarExample3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/selector_bar_samples_tests.rs",
+              "name": "selector_bar_shows_the_collection_of_the_selected_item"
+            }
+          ],
+          "notes": "The source's five pink, seven plum and four powder blue tiles; ItemsView is an ItemsControl with a horizontal panel."
+        }
+      ]
     }
   }
 }

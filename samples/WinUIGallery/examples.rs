@@ -43,6 +43,7 @@ macro_rules! page {
 }
 
 pub static ADAPTATIONS: &[PageAdaptation] = &[
+    page!(ported "SelectorBar", "All three source examples use the native SelectorBar with the code behind of SelectorBarPage.xaml.cs in Rust (selector_bar_samples.rs): the items with their text and icons, SelectorBar2_SelectionChanged navigating a Frame with a slide in the direction of the selection, and SelectorBar3_SelectionChanged with PopulateColorCollections. The icons are property elements. The third example's ItemsView is an ItemsControl with a horizontal panel and the source's coloured tiles."),
     page!(ported "MediaPlayerElement", "Both compositions use the existing portable MediaPlayerElement. The shared bundled H.264/AAC Sintel excerpt replaces unbundled WMV assets. Open File uses the host storage picker; AutoPlay, poster, stretch, transport options and full-window use native controls. Platform acceptance is recorded separately in docs/media/ISSUE-561.md."),
     page!(ported "CaptureElementPreview", "Explicit camera start/stop uses CameraPreview and the existing native camera providers, independently of video playback. CameraCaptureUI demonstrates owned photos and optional native silent video recording. Record is enabled only when the provider advertises it; no microphone is requested."),
     page!(ported "Sound", "The two-dimensional sounds are short application-owned PCM cues played through the portable native MediaPlayer, with sound/volume controls and seven named sound actions. WinUI ElementSoundPlayer.SpatialAudioMode is Windows-specific and unavailable on the portable provider contract; the spatial example is explicitly not applicable and disabled."),
@@ -166,6 +167,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     let root = FerroRuntimeXamlLoader::parse_as::<Ref<Control>>(sample.xaml, None)?;
     crate::frame_sample::wire(&root)?;
     crate::navigation_view_samples::wire(&root)?;
+    crate::selector_bar_samples::wire(&root)?;
     crate::sizing_sample::wire(&root)?;
     crate::platform_samples::wire(&root);
     crate::input_samples::wire(&root);

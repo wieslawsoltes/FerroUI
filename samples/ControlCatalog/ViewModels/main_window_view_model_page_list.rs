@@ -129,6 +129,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/SplitViewPage.xaml", "SplitView", Icons::SPLIT, "A collapsible pane beside content");
             s.add("/Pages/TabbedDemoPage.xaml", "TabbedPage", Icons::TAB, "Tab-based page navigation");
             s.add("/Pages/TabControlPage.xaml", "TabControl", Icons::TAB, "Switch between tabbed content views");
+            // Not from upstream: SelectorBar of WinUI (docs/porting/winui-controls.md, G2).
+            s.add("/Pages/SelectorBarPage.xaml", "SelectorBar", Icons::HORIZONTAL_DOTS, "A strip of items of which one can be selected");
             s.add("/Pages/TabStripPage.xaml", "TabStrip", Icons::TAB, "A standalone strip of selectable tabs");
         }),
         section("Layout", Icons::LAYOUTS, &mut unavailable, |s| {
