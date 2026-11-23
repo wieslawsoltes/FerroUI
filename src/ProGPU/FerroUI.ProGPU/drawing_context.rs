@@ -749,11 +749,12 @@ impl ProGpuDrawingContext {
         self.record(result)
     }
 
-    fn box_shadows(&mut self, brush: Option<&dyn IBrush>, rect: &RoundedRect, shadows: &BoxShadows) {
+    /// The outer shadows of a rectangle, which are under it, or its inset shadows, over it.
+    fn box_shadows(&mut self, brush: Option<&dyn IBrush>, rect: &RoundedRect, shadows: &BoxShadows, inset: bool) {
         let uniform = rect.is_uniform() && rect.radii_top_left.x == rect.radii_top_left.y;
         let opaque = Self::opaque(brush);
         for shadow in shadows.iter() {
-            if shadow.color.a == 0 {
+            if shadow.color.a == 0 || shadow.is_inset != inset {
                 continue;
             }
             let sigma = blur_radius_to_sigma(shadow.blur);
@@ -807,6 +808,41 @@ impl ProGpuDrawingContext {
             if self.current.mask != saved.mask {
                 self.current = saved;
                 self.changed();
+            }
+        }
+    }
+
+    /// The fill and the stroke of a rectangle.
+    fn rectangle_shape(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, rect: &RoundedRect) {
+        let uniform = rect.is_uniform() && rect.radii_top_left.x == rect.radii_top_left.y;
+        let local = rect.rect;
+        let bounds = transform_bounds(local, &self.current.transform);
+        if uniform {
+            let radius = rect.radii_top_left.x;
+            let kind = if radius > 0.0 { PROGPU_NATIVE_PRIMITIVE_ROUNDED_RECTANGLE } else { PROGPU_NATIVE_PRIMITIVE_RECTANGLE } as u32;
+            if let Some(brush) = brush {
+                if let Some(index) = self.brush(brush, local) {
+                    self.analytic(Self::primitive(kind, local, radius, 0.0), index, bounds);
+                }
+            }
+            if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0 && pen.dash_style().is_none()) {
+                if let Some(stroke_brush) = pen.brush() {
+                    if let Some(index) = self.brush(stroke_brush.as_ref(), local) {
+                        let half = pen.thickness() / 2.0;
+                        let outer = transform_bounds(Rect::new(local.x - half, local.y - half, local.width + pen.thickness(), local.height + pen.thickness()), &self.current.transform);
+                        self.analytic(Self::primitive(kind, local, radius, pen.thickness()), index, outer);
+                    }
+                }
+                return;
+            }
+        } else if let Some(brush) = brush {
+            self.fill_path(&Self::rounded_rect_path(rect), brush);
+        }
+        // Dashed strokes and the strokes of rectangles with different radii: the widened outline.
+        if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0) {
+            if let Some(stroke_brush) = pen.brush() {
+                let outline = Self::rounded_rect_path(rect).widen(pen);
+                self.fill_path(&outline, stroke_brush.as_ref());
             }
         }
     }
@@ -1308,39 +1344,13 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
     }
 
     fn draw_rectangle(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, rect: RoundedRect, box_shadows: &BoxShadows) {
-        if box_shadows.count() != 0 {
-            self.box_shadows(brush, &rect, box_shadows);
+        let shadowed = box_shadows.count() != 0;
+        if shadowed {
+            self.box_shadows(brush, &rect, box_shadows, false);
         }
-        let uniform = rect.is_uniform() && rect.radii_top_left.x == rect.radii_top_left.y;
-        let local = rect.rect;
-        let bounds = transform_bounds(local, &self.current.transform);
-        if uniform {
-            let radius = rect.radii_top_left.x;
-            let kind = if radius > 0.0 { PROGPU_NATIVE_PRIMITIVE_ROUNDED_RECTANGLE } else { PROGPU_NATIVE_PRIMITIVE_RECTANGLE } as u32;
-            if let Some(brush) = brush {
-                if let Some(index) = self.brush(brush, local) {
-                    self.analytic(Self::primitive(kind, local, radius, 0.0), index, bounds);
-                }
-            }
-            if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0 && pen.dash_style().is_none()) {
-                if let Some(stroke_brush) = pen.brush() {
-                    if let Some(index) = self.brush(stroke_brush.as_ref(), local) {
-                        let half = pen.thickness() / 2.0;
-                        let outer = transform_bounds(Rect::new(local.x - half, local.y - half, local.width + pen.thickness(), local.height + pen.thickness()), &self.current.transform);
-                        self.analytic(Self::primitive(kind, local, radius, pen.thickness()), index, outer);
-                    }
-                }
-                return;
-            }
-        } else if let Some(brush) = brush {
-            self.fill_path(&Self::rounded_rect_path(&rect), brush);
-        }
-        // Dashed strokes and the strokes of rectangles with different radii: the widened outline.
-        if let Some(pen) = pen.filter(|pen| pen.thickness() > 0.0) {
-            if let Some(stroke_brush) = pen.brush() {
-                let outline = Self::rounded_rect_path(&rect).widen(pen);
-                self.fill_path(&outline, stroke_brush.as_ref());
-            }
+        self.rectangle_shape(brush, pen, &rect);
+        if shadowed {
+            self.box_shadows(brush, &rect, box_shadows, true);
         }
     }
 
