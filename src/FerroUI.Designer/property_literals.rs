@@ -98,7 +98,7 @@ pub(crate) fn registered_type(document: &Document, node: NodeId, token: &str) ->
     crate::native_types::registered_xml_type(uri, name)
 }
 
-fn element_type(document: &Document, node: NodeId) -> Option<&'static TypeInfo> {
+pub(crate) fn element_type(document: &Document, node: NodeId) -> Option<&'static TypeInfo> {
     let element = document.ast().node(node)?;
     if let Some(class) = element.attributes.iter().find(|attribute| {
         attribute.namespace_uri.as_deref() == Some(XAML)

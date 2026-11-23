@@ -3,6 +3,12 @@
         Name="AccountCard" Background="#F4F8F6" Padding="26">
   <Border.Resources>
     <CubicEaseOut x:Key="CardEasing"/>
+    <Transitions x:Key="SharedFade">
+      <DoubleTransition Property="{x:Static Visual.OpacityProperty}" Duration="0:0:0.25"/>
+    </Transitions>
+    <ControlTheme x:Key="AccountTheme" TargetType="Border">
+      <Setter Property="CornerRadius" Value="8"/>
+    </ControlTheme>
   </Border.Resources>
   <Border.Transitions>
     <Transitions>
@@ -15,9 +21,16 @@
     <Style Selector="Border#AccountCard:pointerover">
       <Setter Property="Opacity" Value="0.6"/>
     </Style>
+    <Style Selector="Border#SummaryCard">
+      <Setter Property="Background" Value="#E7F0E9"/>
+    </Style>
   </Border.Styles>
   <StackPanel Spacing="6">
     <TextBlock Text="Account activity" Foreground="#172E26" FontSize="24" FontWeight="SemiBold"/>
     <TextBlock Text="Latest renewals and customer requests" Foreground="#51675D"/>
+    <Border Name="SummaryCard" Theme="{StaticResource AccountTheme}" Padding="12"
+            Transitions="{StaticResource SharedFade}">
+      <TextBlock Text="Renewal scheduled"/>
+    </Border>
   </StackPanel>
 </Border>

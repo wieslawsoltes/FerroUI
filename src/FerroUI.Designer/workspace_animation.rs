@@ -25,6 +25,8 @@ pub(super) struct AuthoringUi {
     rust_route: Option<(Option<String>, String)>,
     behavior: Option<NodeId>,
     behavior_action: Option<NodeId>,
+    property_transition: Option<NodeId>,
+    property_transition_target: Option<(String, NodeId, String)>,
 }
 struct AuthoringField {
     row: Ref<Grid>,

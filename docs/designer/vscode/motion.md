@@ -10,13 +10,16 @@ Open the source with **FerroUI: Open Designer** first. The animation and stage t
 A transition animates a property when its effective value changes. Use the [property transitions workbench](../../../editors/vscode/test/fixtures/PropertyTransitionsWorkbench.xaml) to try the Opacity and Background transitions on the account card.
 
 1. Select the card in the XAML designer. In VS Code, expand **Property Transitions** in **Studio**, or run **FerroUI: Edit Property Transitions**. In Designer Studio, use the clock icon beside **Definition**.
-2. Choose a property and edit **Duration**, **Start delay**, or **Easing**. Enter times in seconds. Easing accepts a native name such as `CubicEaseOut`, four Bézier coordinates, or `Spring(mass,stiffness,damping,velocity)`. Studio applies the edited fields together when you choose the check icon. VS Code applies each confirmed field in one Undo step.
-3. Choose **Reveal transition in source** to open its declaration. The editor exposes literal timing fields. Resource-backed easing and object values remain available in source.
-4. In Studio, switch the artboard to **Interact** and move the pointer onto or off the account card to trigger its opacity change. In source, the example changes Opacity through the `:pointerover` selector.
+2. Choose **Add property transition** and pick a registered property such as **Margin**. The editor offers the transition classes that can animate its type. In Designer Studio, choose the property first, then use the add icon. A control, style, or control theme can start a new collection.
+3. Select an entry to edit **Duration**, **Start delay**, or **Easing**. Enter times in seconds. Easing accepts a native name such as `CubicEaseOut`, four Bézier coordinates, or `Spring(mass,stiffness,damping,velocity)`. Studio applies the edited fields together when you choose the check icon. VS Code applies each confirmed field in one Undo step.
+4. Use **Retarget transition** to change the property and its transition class while keeping the timing and easing. Use the arrows to move an entry earlier or later, **Remove transition** to delete it, and the source icon to open its declaration. When two applicable entries target the same property, the last entry takes precedence. Each collection action takes one Undo step.
+5. In Studio, switch the artboard to **Interact** and move the pointer onto or off the account card to trigger its opacity change. In source, the example changes Opacity through the `:pointerover` selector.
 
-![The VS Code property transition picker shows duration, start delay, and easing beside the authored XAML and native canvas.](../images/vscode-property-transitions.png)
+To edit a shared transition, select its `Transitions` declaration in the Outline. For add or retarget, supply its registered target type, such as `Border`, so the editor can resolve the property and write a static property reference. Open a bound collection or resource-backed easing at its owning declaration to edit the shared value.
 
-[Studio timing editor](../images/studio-property-transitions.png) · [Property transitions through MCP](reference.md#edit-property-transitions-with-mcp)
+![The VS Code Quick Pick offers a native thickness transition for Margin beside the XAML and design canvas.](../images/vscode-property-transition-collection.png)
+
+[Studio collection editor](../images/studio-property-transition-collection.png) · [VS Code timing editor](../images/vscode-property-transitions.png) · [Property transitions through MCP](reference.md#edit-property-transitions-with-mcp)
 
 ## Edit an animation
 

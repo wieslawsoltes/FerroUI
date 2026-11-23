@@ -111,15 +111,19 @@ fn validate_total_time(
         ticks(timing.duration, "Duration"),
         ticks(timing.delay, "Delay"),
     ) {
-        require(
-            duration + delay <= i64::MAX as u64,
-            "Transition delay and duration exceed the native clock range",
-        )?;
+        validate_clock_range(duration, delay)?;
     }
     Ok(())
 }
 
-fn easing_edits(document: &Document, node: &Node, easing: &Easing) -> Result<Vec<Edit>> {
+pub(super) fn validate_clock_range(duration: u64, delay: u64) -> Result<()> {
+    require(
+        duration + delay <= i64::MAX as u64,
+        "Transition delay and duration exceed the native clock range",
+    )
+}
+
+pub(super) fn spring_markup(easing: &Easing) -> Option<String> {
     let Easing::Spring {
         mass,
         stiffness,
@@ -127,12 +131,19 @@ fn easing_edits(document: &Document, node: &Node, easing: &Easing) -> Result<Vec
         initial_velocity,
     } = easing
     else {
+        return None;
+    };
+    Some(format!(
+        "<SpringEasing Mass=\"{mass}\" Stiffness=\"{stiffness}\" Damping=\"{damping}\" InitialVelocity=\"{initial_velocity}\"/>"
+    ))
+}
+
+fn easing_edits(document: &Document, node: &Node, easing: &Easing) -> Result<Vec<Edit>> {
+    let Some(spring) = spring_markup(easing) else {
         return Ok(vec![set(node.id, "Easing", easing.to_xaml())]);
     };
     let property = format!("{}.Easing", node.name);
-    let spring = native_fragment(document, node.id, &format!(
-        "<SpringEasing Mass=\"{mass}\" Stiffness=\"{stiffness}\" Damping=\"{damping}\" InitialVelocity=\"{initial_velocity}\"/>"
-    ))?;
+    let spring = native_fragment(document, node.id, &spring)?;
     let mut edits = Vec::new();
     if node.attribute("Easing").is_some() {
         edits.push(Edit::RemoveAttribute {

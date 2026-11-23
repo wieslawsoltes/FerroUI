@@ -555,7 +555,7 @@ The keyframe view and **Compare animation clips** keep their own marker lists. T
 
 ### Edit property transitions
 
-Select a control in XAML Design and choose the clock icon next to **Definition**. Edit the duration, delay, and easing of a literal transition. Choose the check icon to apply the timing or the source icon to reveal the declaration. Switch the artboard to **Interact** and trigger the property change to verify its native behavior. [Property transition example](vscode/motion.md#edit-property-transitions)
+Select a control in XAML Design and choose the clock icon next to **Definition**. Choose a registered target property and use the add icon to create a transition. With an entry selected, use the target icon to change its property, the arrows to move it, or the minus icon to remove it. Edit literal duration, delay, and easing, and choose the check icon to apply them. Use the source icon to reveal the declaration. Switch the artboard to **Interact** and trigger the property change to verify its native behavior. [Property transition example](vscode/motion.md#edit-property-transitions) · [Studio collection editor](images/studio-property-transition-collection.png)
 
 ### Edit tracks and keyframes
 

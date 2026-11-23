@@ -500,7 +500,7 @@ fn source_action(tool: &str, action: Option<&str>) -> bool {
         "designer_behavior" => matches!(action, Some(
             "upsert" | "remove" | "source" | "set_trigger" | "append_action" | "set_action" | "move_action" | "remove_action"
         )),
-        "designer_property_transition_edit" => action == Some("timing"),
+        "designer_property_transition_edit" => matches!(action, Some("timing" | "add" | "retarget" | "move" | "remove")),
         "designer_design_data_edit" => {
             matches!(action, Some("set_value" | "set_object" | "sample_items"))
         }

@@ -396,9 +396,11 @@ In Designer Studio, `designer_preview_checks` reads the current canvas. `designe
 
 ### Edit property transitions with MCP
 
-From the current XAML canvas, read `designer_property_transitions` through `designer_studio_query` in VS Code. Pass the design `session` and `arguments: {"owner": 1}` using the selected control's node ID. Studio calls `designer_property_transitions` directly. The response contains the transition `id`, authored ranges and values, and `editableTiming` fields for each row.
+From the current XAML canvas, read `designer_property_transitions` through `designer_studio_query` in VS Code. Pass the design `session` and `arguments: {"owner": 1}` using the node ID of the selected control, style, theme, or authored collection. Studio calls `designer_property_transitions` directly. The response contains the transition `id`, authored ranges and values, `editableTiming`, and `canRetarget` for each row. Pass a registered `target_type` when `requiresTarget` is true and you need the compatible `properties` for a shared collection.
 
 Call `designer_property_transition_edit` with `action: "timing"`, the same `owner`, the chosen `transition` ID, and a `timing` object. A single call can pass `{"duration": 0.55, "delay": 0.1, "easing": {"kind": "Named", "value": "CubicEaseOut"}}`. Omitted fields keep their authored values. Studio also takes the current `expected_revision`. In VS Code, pass the fields as `arguments` to `designer_studio_edit`, with the design `session` and `expected_revision` from the current outline at the outer level. Use one Undo to restore all fields from that call.
+
+To add an entry, pass `action: "add"` and the chosen `property` and `type_name` from `properties`, with optional `timing`. For `action: "retarget"`, pass the same choice and the selected `transition` ID. Include `target_type` in either call when the collection requires it. Move an entry with `action: "move"`, a `transition` ID, and a zero-based destination `index`. Use `action: "remove"` and a `transition` ID to delete it. Read the accepted revision and collection again before planning another edit.
 
 [Property transition workflow](motion.md#edit-property-transitions)
 

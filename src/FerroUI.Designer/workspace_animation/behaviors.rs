@@ -349,7 +349,7 @@ fn edit_trigger(panel: &StackPanel, scope: &BehaviorScope, trigger: &BehaviorTri
     }
 }
 
-fn add_picker<T>(
+pub(super) fn add_picker<T>(
     panel: &StackPanel,
     workspace: &Rc<DesignerWorkspace>,
     label: &str,
@@ -373,7 +373,7 @@ fn add_picker<T>(
     panel.children().add(control.upcast::<Control>());
 }
 
-fn buttons(panel: &StackPanel) -> Ref<StackPanel> {
+pub(super) fn buttons(panel: &StackPanel) -> Ref<StackPanel> {
     let row = StackPanel::new();
     row.set_orientation(Orientation::Horizontal);
     row.set_spacing(3.0);

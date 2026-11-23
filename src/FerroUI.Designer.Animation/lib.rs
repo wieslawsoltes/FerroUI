@@ -58,7 +58,10 @@ pub use programs::{
     AnimationCodecRegistry, AnimationProgram, AnimationProgramIdentity, AnimationPrograms,
     NativeAnimationCodec,
 };
-pub use property_transitions::{AuthoredPropertyTransition, PropertyTransitionList, PropertyTransitionTiming};
+pub use property_transitions::{
+    AuthoredPropertyTransition, PropertyTransitionCollectionEdit, PropertyTransitionList,
+    PropertyTransitionTiming, XamlTransitionTarget,
+};
 pub use states::{
     StateGroupEdit, StatePreviewGroup, StatePreviewRoute,
     resolve_state_target, rewrite_design_metadata, state_value, ProjectedStateGroup,

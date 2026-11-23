@@ -13,22 +13,54 @@ interface TransitionEntry {
     delaySeconds: number | null;
     easing: string | null;
     editableTiming: string[];
+    canRetarget?: boolean;
     range: Range;
+}
+
+interface TransitionProperty {
+    property: string;
+    label: string;
+    typeName: string;
 }
 
 interface TransitionList {
     owner: number;
     canEdit: boolean;
+    canEditCollection?: boolean;
+    canAdd?: boolean;
+    requiresTarget?: boolean;
+    properties?: TransitionProperty[];
     range: Range | null;
     entries: TransitionEntry[];
 }
 
-async function readTransitions(context: StudioContext): Promise<TransitionList> {
+function readTransitions(context: StudioContext, targetType?: string): Promise<TransitionList> {
     if (!context.writable || context.node === undefined) throw new Error('Select a control in the current XAML design.');
-    return await context.read<TransitionList>(PROPERTY_TRANSITIONS, { owner: context.node });
+    return context.read<TransitionList>(PROPERTY_TRANSITIONS, {
+        owner: context.node, ...(targetType === undefined ? {} : { target_type: targetType }),
+    });
 }
 
-function timingActions(context: StudioContext, list: TransitionList, entry: TransitionEntry): StudioItem[] {
+async function chooseProperty(
+    context: StudioContext, list: TransitionList, title: string,
+): Promise<{ property: string; type_name: string; target_type?: string } | undefined> {
+    let targetType: string | undefined;
+    if (list.requiresTarget) {
+        targetType = (await editText('Registered XAML target type for this transition resource', 'Border',
+            value => value.trim() ? undefined : 'Enter a registered target type.'))?.trim();
+        if (targetType === undefined) return;
+        list = await readTransitions(context, targetType);
+    }
+    const selected = await choose(title, (list.properties ?? []).map(property => ({
+        label: property.label, description: property.typeName, property,
+    })));
+    if (selected) return {
+        property: selected.property.property, type_name: selected.property.typeName,
+        ...(targetType === undefined ? {} : { target_type: targetType }),
+    };
+}
+
+function entryActions(context: StudioContext, list: TransitionList, entry: TransitionEntry, index: number): StudioItem[] {
     const id = `transition:${entry.id}`;
     const actions = [action(`${id}:source`, 'Reveal transition in source', () => context.revealRange(entry.range), 'go-to-file')];
     if (!list.canEdit) return actions;
@@ -60,21 +92,43 @@ function timingActions(context: StudioContext, list: TransitionList, entry: Tran
             }
         },
     });
+    if (!list.canEditCollection) return actions;
+    const edit = (action: string, args: object = {}) => context.edit(EDIT_TRANSITION, {
+        action, owner: list.owner, transition: entry.id, ...args,
+    });
+    if (entry.canRetarget && (list.requiresTarget || list.properties?.length)) {
+        actions.push(action(`${id}:retarget`, 'Retarget transition', async () => {
+            const property = await chooseProperty(context, list, 'Retarget transition');
+            if (property) await edit('retarget', property);
+        }, 'target'));
+    }
+    if (index > 0) actions.push(action(`${id}:up`, 'Move transition earlier',
+        () => edit('move', { index: index - 1 }), 'arrow-up'));
+    if (index + 1 < list.entries.length) actions.push(action(`${id}:down`, 'Move transition later',
+        () => edit('move', { index: index + 1 }), 'arrow-down'));
+    actions.push(action(`${id}:remove`, 'Remove transition', () => edit('remove'), 'trash'));
     return actions;
 }
 
 export async function propertyTransitionItems(context: StudioContext): Promise<StudioItem[]> {
     const list = await readTransitions(context);
-    if (!list.entries.length) {
+    const items: StudioItem[] = list.entries.map((entry, index) => ({
+        id: `transition:${entry.id}`, label: entry.property ?? entry.typeName,
+        description: entry.durationSeconds === null ? entry.typeName : `${entry.durationSeconds} s`,
+        icon: 'watch', children: async () => entryActions(context, list, entry, index),
+    }));
+    if (list.canAdd || (list.requiresTarget && list.canEditCollection)) {
+        items.push(action('transitions:add', 'Add property transition', async () => {
+            const property = await chooseProperty(context, list, 'Add property transition');
+            if (property) await context.edit(EDIT_TRANSITION, { action: 'add', owner: list.owner, ...property });
+        }, 'add'));
+    }
+    if (!items.length) {
         const range = list.range;
         return range ? [action('transitions:source', 'Reveal transition collection', () => context.revealRange(range), 'go-to-file')]
             : [{ id: 'transitions:empty', label: 'No authored transitions on this control' }];
     }
-    return list.entries.map(entry => ({
-        id: `transition:${entry.id}`, label: entry.property ?? entry.typeName,
-        description: entry.durationSeconds === null ? entry.typeName : `${entry.durationSeconds} s`,
-        icon: 'watch', children: async () => timingActions(context, list, entry),
-    }));
+    return items;
 }
 
 export async function choosePropertyTransition(context: StudioContext): Promise<void> {
