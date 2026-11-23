@@ -1,14 +1,14 @@
 //! Components that run again: the reconciler and the hooks.
 
 use crate::generated::builders::*;
-use crate::reactive::{batch, on_cleanup, signal, Owner};
+use crate::reactive::{batch, live_nodes, on_cleanup, signal, subscriber_count, Owner};
 use crate::{
     component, for_each, provide_context, rerender, rsx, use_context, use_effect, use_effect_with, use_hook, use_memo,
     use_signal, Element, IntoElement,
 };
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::{Button, Control, ListBox, StackPanel, TextBlock};
+use ferroui_controls::{Border, Button, Control, ListBox, StackPanel, TextBlock};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -428,5 +428,166 @@ fn an_element_of_another_name_is_another_control() {
     assert_eq!(texts(&panel), vec!["Ready"]);
     named.set("Ready");
     assert!(second.ptr_eq(&children(&panel)[0]), "the same name keeps the control");
+    owner.dispose();
+}
+
+/// An element that starts nothing (values, no handler, no hook) has no owner of its own
+/// (docs/porting/desktop-performance.md, section 9.100): a tree of such elements makes no node of
+/// the runtime, and what is below one of them, and what a patch starts for it later, is taken out
+/// with it.
+#[test]
+fn an_element_that_starts_nothing_has_no_owner_and_takes_out_what_is_below_it() {
+    let owner = Owner::new_root();
+    let nodes = live_nodes();
+    let wall = owner.with(|| {
+        stack_panel()
+            .children((0..10).map(|i| border().width(8.0).child(text_block().text(format!("tile {i}")))).collect::<Vec<_>>())
+            .into_element()
+            .mount()
+    });
+    assert_eq!(children(&wall).len(), 10);
+    assert_eq!(live_nodes(), nodes, "twenty-one elements that start nothing make no node of the runtime");
+
+    let (shown, level, follows, panel) = owner.with(|| {
+        let (shown, level, follows) = (signal(vec![1, 2]), signal(1.0_f64), signal(false));
+        let panel = stack_panel()
+            .child(rerender(move || {
+                let follows = follows.get();
+                let rows = shown.get().into_iter().map(|id| {
+                    // A border that starts nothing over a text that follows `level`; once
+                    // `follows` is set, a patch makes the border follow it as well.
+                    let row = border().key(id).child(text_block().text("row").opacity(level));
+                    match follows {
+                        true => row.opacity(level).into(),
+                        false => row.into(),
+                    }
+                });
+                rows.collect::<Vec<Element>>()
+            }))
+            .into_element()
+            .mount();
+        (shown, level, follows, panel)
+    });
+    let opacities = |panel: &Ref<Control>| -> Vec<(f64, f64)> {
+        let rows = children(panel).into_iter();
+        let rows = rows.map(|row| {
+            let border = row.cast::<Border>().expect("a border");
+            let text = border.child().expect("its text");
+            (border.opacity(), text.opacity())
+        });
+        rows.collect()
+    };
+    assert_eq!((subscriber_count(&level), opacities(&panel)), (2, vec![(1.0, 1.0), (1.0, 1.0)]));
+    follows.set(true);
+    level.set(0.5);
+    assert_eq!((subscriber_count(&level), opacities(&panel)), (4, vec![(0.5, 0.5), (0.5, 0.5)]));
+
+    // A row that goes takes the effect of its text and the one the patch started for it.
+    shown.set(vec![2]);
+    assert_eq!((subscriber_count(&level), children(&panel).len()), (2, 1));
+    shown.set(Vec::new());
+    assert_eq!((subscriber_count(&level), children(&panel).len()), (0, 0));
+    owner.dispose();
+}
+
+#[test]
+fn an_element_mounted_once_keeps_only_what_its_values_started() {
+    use crate::{mounted_trees, InstanceKind, InstanceNode};
+    let owner = Owner::new_root();
+    let (level, wall) = owner.with(|| {
+        let level = signal(1.0_f64);
+        let wall = stack_panel()
+            .children(
+                (0..10)
+                    .map(|i| {
+                        let text = text_block().text(format!("tile {i}")).opacity(level);
+                        border().width(8.0).height(4.0).child(text)
+                    })
+                    .collect::<Vec<_>>(),
+            )
+            .into_element()
+            .mount();
+        (level, wall)
+    });
+    // Ten borders of two values and ten texts of a value and one that follows `level`: the
+    // thirty plain values are listed, none of them kept.
+    assert_eq!(crate::mount::kept_descriptions(), (0, 40));
+    level.set(0.5);
+    let text = |row: &Ref<Control>| row.cast::<Border>().and_then(|border| border.child()).expect("a text");
+    assert!(children(&wall).iter().all(|row| text(row).opacity() == 0.5));
+
+    // The inspector reads the values from the controls.
+    fn find<'a>(node: &'a InstanceNode, test: &dyn Fn(&InstanceNode) -> bool) -> Option<&'a InstanceNode> {
+        if test(node) {
+            return Some(node);
+        }
+        node.children.iter().find_map(|child| find(child, test))
+    }
+    let trees = mounted_trees();
+    let block = trees
+        .iter()
+        .flat_map(|tree| tree.roots.iter())
+        .find_map(|root| {
+            find(root, &|node| matches!(&node.kind, InstanceKind::Control { class, .. } if class == "TextBlock"))
+        })
+        .expect("a text");
+    let InstanceKind::Control { properties, .. } = &block.kind else { unreachable!() };
+    let shown: Vec<(&str, &str, &str)> =
+        properties.iter().map(|p| (p.name.as_str(), p.value.as_str(), p.source)).collect();
+    assert_eq!(shown, vec![("Text", "\"tile 0\"", "value"), ("Opacity", "0.5", "follows state")]);
+    owner.dispose();
+    assert_eq!(crate::mount::kept_descriptions(), (0, 0));
+
+    // What a component that runs again rendered keeps its description for the next run, and a
+    // patch compares with it.
+    let owner = Owner::new_root();
+    let width = owner.with(|| {
+        let width = signal(8.0_f64);
+        let _ = rerender(move || border().width(width.get()).height(4.0)).into_element().mount();
+        width
+    });
+    assert_eq!(crate::mount::kept_descriptions(), (2, 0));
+    width.set(10.0);
+    assert_eq!(crate::mount::kept_descriptions(), (2, 0));
+    owner.dispose();
+}
+
+#[test]
+fn the_items_of_a_dynamic_list_are_patched_only_where_the_list_is() {
+    let owner = Owner::new_root();
+    let (shown, panel) = owner.with(|| {
+        let shown = signal(vec![1, 2]);
+        let panel = stack_panel()
+            .child(for_each(move || shown.get(), |id| *id, |id| text_block().key(id).text(format!("row {id}"))))
+            .into_element()
+            .mount();
+        (shown, panel)
+    });
+    // A list mounted once is never given a new closure: its items are made and taken out, never
+    // patched, and keep no description.
+    assert_eq!(crate::mount::kept_descriptions(), (0, 2));
+    shown.set(vec![2, 3]);
+    assert_eq!(texts(&panel), vec![String::from("row 2"), String::from("row 3")]);
+    assert_eq!(crate::mount::kept_descriptions(), (0, 2));
+    owner.dispose();
+
+    // In a component that runs again the list is given a new closure on each run, and its items
+    // are patched.
+    let owner = Owner::new_root();
+    let (version, panel) = owner.with(|| {
+        let version = signal(0);
+        let panel = stack_panel()
+            .child(rerender(move || {
+                let version = version.get();
+                let row = move |id: i32| text_block().key(id).text(format!("row {id} at {version}"));
+                for_each(move || vec![1, 2], |id| *id, row)
+            }))
+            .into_element()
+            .mount();
+        (version, panel)
+    });
+    assert_eq!(crate::mount::kept_descriptions(), (2, 0));
+    version.set(1);
+    assert_eq!(texts(&panel), vec![String::from("row 1 at 1"), String::from("row 2 at 1")]);
     owner.dispose();
 }

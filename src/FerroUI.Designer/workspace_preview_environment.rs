@@ -4,7 +4,8 @@ use crate::{PreviewEnvironment, PreviewEnvironmentEditor, PreviewFlowDirection, 
 use ferroui_base::Visual;
 use ferroui_base::media::{FlowDirection, SolidColorBrush};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_controls::{Flyout, ThemeVariantScope};
+use ferroui_base::media::{Stretch, StretchDirection};
+use ferroui_controls::{Border, Flyout, ThemeVariantScope, Viewbox};
 use std::rc::Weak;
 
 #[derive(Default)]
@@ -125,6 +126,9 @@ impl Drop for PreviewEnvironmentUpdate {
     }
 }
 
+/// What a preview in the view leaves free of the room it opens over, on each axis.
+const VIEW_PREVIEW_MARGIN: f64 = 48.0;
+
 impl DesignerWorkspace {
     pub fn preview_environment(&self) -> PreviewEnvironment {
         let (width, height) = self.artboard_size();
@@ -193,6 +197,42 @@ impl DesignerWorkspace {
             invalidation.changed();
         }
         Ok(())
+    }
+
+    /// Hosts a preview that is shown outside the artboard under the conditions of the artboard:
+    /// its theme, its flow direction, its backing and its size. Without them the preview takes
+    /// the theme of the editor chrome around it and the size of what shows it, which are not
+    /// what the document is designed in. Where `room`, what the preview opens over, is smaller
+    /// than the artboard, the preview is scaled down to fit it, never up (a room without a size
+    /// yet limits nothing).
+    pub(crate) fn view_preview_host(&self, control: Ref<Control>, room: ferroui_base::Size) -> Ref<Control> {
+        let artboard = self
+            .root
+            .get_control::<ThemeVariantScope>("PreviewThemeScope");
+        let scope = ThemeVariantScope::new();
+        // The theme the artboard has now, which for "App theme" is the one it inherits.
+        scope.set_requested_theme_variant(artboard.actual_theme_variant());
+        if artboard.is_set(Visual::flow_direction_property()) {
+            scope.set_flow_direction(artboard.flow_direction());
+        }
+        let backing = Border::new();
+        backing.set_background(self.artboard.background());
+        let (width, height) = self.artboard_size();
+        backing.set_width(width);
+        backing.set_height(height);
+        backing.set_child(Some(control));
+        scope.set_child(Some(backing.upcast()));
+        let fit = Viewbox::new();
+        fit.set_stretch(Stretch::Uniform);
+        fit.set_stretch_direction(StretchDirection::DownOnly);
+        // The presenter of a flyout gives its content all the room it asks for, so the box has
+        // its limit from the room, less a margin for the frame of the presenter.
+        if room.width > 0.0 && room.height > 0.0 {
+            fit.set_max_width((room.width - VIEW_PREVIEW_MARGIN).max(VIEW_PREVIEW_MARGIN));
+            fit.set_max_height((room.height - VIEW_PREVIEW_MARGIN).max(VIEW_PREVIEW_MARGIN));
+        }
+        fit.set_child(Some(scope.upcast::<Control>()));
+        fit.upcast()
     }
 
     pub fn rotate_preview(&self) -> Result<(), String> {

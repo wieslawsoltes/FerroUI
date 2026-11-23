@@ -375,11 +375,69 @@ fn a_backdrop_outside_a_render_is_empty() {
 }
 
 #[test]
+fn bounded_backdrop_replay_preserves_device_dependencies_through_nested_targets() {
+    use crate::media::{EffectExtensions, IEffect, ImmutableBlurEffect};
+    use crate::platform::IDrawingContextImpl;
+    use crate::rendering::composition::effects::{blur_amount_to_radius, EffectBorderMode};
+    use crate::{Matrix, Rect, Vector3D};
+    let s = CompositorCanvas::new();
+    let factory = s.compositor.create_effect_factory(GaussianBlurEffect {
+        blur_amount: 10.0, border_mode: EffectBorderMode::Hard,
+        source: parameter("backdrop"), ..Default::default()
+    });
+    let brush = factory.create_brush();
+    brush.set_source_parameter("backdrop", Some((*s.compositor.create_backdrop_brush()).clone()));
+    let other = factory.create_brush();
+    other.set_source_parameter("backdrop", Some((*s.compositor.create_backdrop_brush()).clone()));
+    let container = s.compositor.create_container_visual();
+    container.set_size(Vector::new(900.0, 700.0));
+    let background = s.compositor.create_sprite_visual();
+    background.set_size(Vector::new(900.0, 700.0));
+    background.set_brush(Some((*s.compositor.create_color_brush_with_color(Colors::RED)).clone()));
+    container.children().insert_at_top((*background).clone());
+    let first = sprite_with(&s, brush.brush());
+    first.set_offset(Vector3D::new(150.25, 70.5, 0.0));
+    let second = sprite_with(&s, other.brush());
+    second.set_offset(Vector3D::new(170.25, 90.5, 0.0));
+    container.children().insert_at_top((*first).clone());
+    container.children().insert_at_top((*second).clone());
+    show(&s, &container);
+    let log = DrawingLog::new();
+    let mut context = MockDrawingContextImpl::new(log.clone());
+    context.supports_effects = true;
+    context.supports_layer_effects = true;
+    context.bounded_effect_targets = true;
+    let transform = Matrix::create_scale(1.75, 1.75) * Matrix::create_translation(30.0, 40.0);
+    context.set_transform(transform);
+    crate::rendering::composition::server::take_backdrop_regions();
+    s.server_object(container.server()).render(&mut context, LtrbRect::INFINITE, None, true, false, false);
+    let regions = crate::rendering::composition::server::take_backdrop_regions();
+    let reach = EffectExtensions::get_effect_output_padding(Some(&ImmutableBlurEffect::new(
+        blur_amount_to_radius(10.0)) as &dyn IEffect)).left;
+    for (sprite, x, y) in [(&first, 150.25, 70.5), (&second, 170.25, 90.5)] {
+        let visual = s.server_object(sprite.server());
+        let actual = regions.iter().find(|(v, _)| v.upgrade().is_some_and(|v| Rc::ptr_eq(&v, &visual)))
+            .unwrap_or_else(|| panic!("Missing backdrop dependency at {x},{y}; regions={regions:?}; drawing={:?}", log.entries())).1;
+        let expected = Rect::new(x, y, 100.0, 50.0).inflate(reach).transform_to_aabb(transform);
+        assert_eq!(actual, LtrbRect::new(expected.x.floor(), expected.y.floor(),
+            expected.right().ceil(), expected.bottom().ceil()), "{regions:?}");
+    }
+    assert!(log.count("CreateLayer") >= 3, "nested backdrops must use bounded targets");
+    assert!(log.count("DrawRectangle Red") >= 3, "the scene must be replayed inside both backdrops");
+    assert_eq!(context.transform(), transform);
+    assert_eq!(log.count("PushClip"), log.count("PopClip"));
+}
+
+#[test]
 fn a_dirty_rectangle_under_a_backdrop_redraws_all_of_it() {
     let s = CompositorCanvas::new();
     let log = s.render_interface.log().clone();
     let under = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
     s.canvas.add(&under);
+    // Under the backdrop as well, and away from the change.
+    let beside = TestBorder::filled(150.0, 50.0, 10.0, 10.0);
+    beside.set_background(Some(crate::media::Brushes::green()));
+    s.canvas.add(&beside);
     let sprite = s.compositor.create_sprite_visual();
     sprite.set_size(Vector::new(200.0, 100.0));
     sprite.set_brush(Some((*s.compositor.create_backdrop_brush()).clone()));
@@ -389,12 +447,89 @@ fn a_dirty_rectangle_under_a_backdrop_redraws_all_of_it() {
     under.set_background(Some(crate::media::Brushes::blue()));
     s.run_jobs();
     let entries = log.entries();
+    // The area of the frame is the backdrop, not the rectangle that changed: what lies
+    // under the backdrop away from the change is drawn for itself and for the backdrop.
+    assert_eq!(log.count("DrawRectangle Green"), 2, "{entries:?}");
     // The clip of the dirty area covers the whole backdrop.
     let covers = entries.iter().filter_map(|entry| entry.strip_prefix("PushClip ")).any(|rect| {
         let values: Vec<f64> = rect.split(", ").filter_map(|value| value.parse().ok()).collect();
         values.len() == 4 && values[0] <= 0.0 && values[1] <= 0.0 && values[0] + values[2] >= 200.0 && values[1] + values[3] >= 100.0
     });
     assert!(covers, "the whole backdrop is drawn again: {entries:?}");
+}
+
+#[test]
+fn a_dirty_rectangle_away_from_a_backdrop_leaves_the_backdrop_as_it_is() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let away = TestBorder::filled(600.0, 600.0, 10.0, 10.0);
+    s.canvas.add(&away);
+    let sprite = s.compositor.create_sprite_visual();
+    sprite.set_size(Vector::new(200.0, 100.0));
+    sprite.set_brush(Some((*s.compositor.create_backdrop_brush()).clone()));
+    show(&s, &sprite);
+    log.clear();
+    // The frame before this one drew the whole surface. What it drew says
+    // nothing of this frame, which draws the rectangle that changed.
+    away.set_background(Some(crate::media::Brushes::blue()));
+    s.run_jobs();
+    let entries = log.entries();
+    assert_eq!(log.count("DrawRectangle"), 1, "{entries:?}");
+    assert_eq!(log.count("DrawRectangle Blue none 0, 0, 10, 10"), 1, "{entries:?}");
+    // Nothing of the backdrop: no clip of its own, and no layer.
+    assert_eq!(log.count("PushClip "), 0, "{entries:?}");
+    assert_eq!(log.count("CreateLayer"), 0, "{entries:?}");
+}
+
+#[test]
+fn a_frame_drawn_one_rectangle_at_a_time_draws_a_backdrop_in_its_dirty_area_in_one_rectangle() {
+    let s = CompositorCanvas::new();
+    let log = s.render_interface.log().clone();
+    let under = TestBorder::filled(0.0, 0.0, 10.0, 10.0);
+    s.canvas.add(&under);
+    let away = TestBorder::filled(600.0, 600.0, 10.0, 10.0);
+    s.canvas.add(&away);
+    let apart = TestBorder::filled(800.0, 100.0, 10.0, 10.0);
+    s.canvas.add(&apart);
+    let sprite = s.compositor.create_sprite_visual();
+    sprite.set_size(Vector::new(200.0, 100.0));
+    sprite.set_brush(Some((*s.compositor.create_backdrop_brush()).clone()));
+    show(&s, &sprite);
+    // A target that is given the dirty rectangles one at a time
+    // (desktop-performance.md, section 9.56).
+    log.clip_regions_per_draw(true);
+    let clips = |entries: &[String]| -> Vec<Vec<f64>> {
+        entries
+            .iter()
+            .filter_map(|entry| entry.strip_prefix("PushClip "))
+            .map(|rect| rect.split(", ").filter_map(|value| value.parse().ok()).collect())
+            .collect()
+    };
+
+    // Two changes away from the backdrop: a pass for each, and nothing of
+    // the backdrop.
+    log.clear();
+    away.set_background(Some(crate::media::Brushes::blue()));
+    apart.set_background(Some(crate::media::Brushes::blue()));
+    s.run_jobs();
+    let entries = log.entries();
+    assert_eq!(clips(&entries), vec![vec![599.0, 599.0, 12.0, 12.0], vec![799.0, 99.0, 12.0, 12.0]], "{entries:?}");
+    assert_eq!(log.count("CreateLayer"), 0, "{entries:?}");
+
+    // A change under the backdrop and one away from it. The backdrop reads
+    // what the frame drew under it, so it is not drawn in a pass of its
+    // own: the frame is one rectangle that holds the backdrop and the
+    // change away from it.
+    log.clear();
+    under.set_background(Some(crate::media::Brushes::green()));
+    away.set_background(Some(crate::media::Brushes::green()));
+    s.run_jobs();
+    let entries = log.entries();
+    let clips = clips(&entries);
+    let holds_both =
+        |c: &Vec<f64>| c.len() == 4 && c[0] <= 0.0 && c[1] <= 0.0 && c[0] + c[2] >= 610.0 && c[1] + c[3] >= 610.0;
+    assert!(clips.iter().any(holds_both), "{entries:?}");
+    assert!(!clips.iter().any(|c| c.len() == 4 && c[0] >= 590.0), "{entries:?}");
 }
 
 #[test]
@@ -480,7 +615,8 @@ fn acrylic_draws_its_recipe_and_falls_back_with_the_policy() {
     context.supports_effects = true;
     context.log_effects = true;
     context.supports_layer_effects = true;
-    s.server_object(element.composition_visual().unwrap().server()).render(
+    assert!(!element.has_composition_visual(), "what the element draws is shown by the visual above it");
+    s.server_visual(&s.root).render(
         &mut context,
         LtrbRect::INFINITE,
         None,
@@ -713,7 +849,8 @@ fn host_backdrop_acrylic_shows_what_is_behind_the_window_and_falls_back_while_in
     let log = DrawingLog::new();
     let mut context = MockDrawingContextImpl::new(log.clone());
     context.supports_layer_effects = true;
-    s.server_object(element.composition_visual().unwrap().server()).render(
+    assert!(!element.has_composition_visual(), "what the element draws is shown by the visual above it");
+    s.server_visual(&s.root).render(
         &mut context,
         LtrbRect::INFINITE,
         None,

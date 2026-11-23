@@ -239,6 +239,14 @@ macro_rules! ferro_markup_type {
                 };
                 &MARKUP
             };
+
+            // Compiled in the crate that declares the type, which is where the static above
+            // is: a crate that asks for the metadata calls this function and does not name
+            // the static of another crate (`MarkupTyped::__markup`).
+            #[inline(never)]
+            fn __markup() -> &'static $crate::metadata::MarkupType {
+                <Self as $crate::metadata::MarkupTyped>::MARKUP
+            }
         }
     };
     // Finds the `this:` part, wherever it is written; the declared type is
@@ -300,10 +308,16 @@ macro_rules! __ferro_value_types {
 /// The members of a plain enumeration are its variants (their numeric value
 /// is the discriminant); the members of a flags type are constants with a
 /// `bits()` method. The untyped form of a member is a value of the type
-/// itself. Implements [`MarkupTyped`](super::MarkupTyped).
+/// itself. Implements [`MarkupTyped`](super::MarkupTyped) and
+/// [`StyledValue`](crate::StyledValue): the property store keeps a member of a plain enumeration
+/// as an [`EnumValue`](crate::EnumValue) (the members are then listed exhaustively) and a set of
+/// flags as it is.
 #[macro_export]
 macro_rules! ferro_markup_enum {
     ($type_:ident { $($member:ident $(= $variant:ident)?),* $(,)? } $(, { $($body:tt)* })?) => {
+        // The property store keeps the members of every enumeration in one form.
+        $crate::__styled_enum!($type_ { $($member $(= $variant)?),* });
+
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
                 static MARKUP: $crate::metadata::MarkupType = {
@@ -345,9 +359,21 @@ macro_rules! ferro_markup_enum {
                 };
                 &MARKUP
             };
+
+            // Compiled in the crate that declares the type, which is where the static above
+            // is: a crate that asks for the metadata calls this function and does not name
+            // the static of another crate (`MarkupTyped::__markup`).
+            #[inline(never)]
+            fn __markup() -> &'static $crate::metadata::MarkupType {
+                <Self as $crate::metadata::MarkupTyped>::MARKUP
+            }
         }
     };
     (flags $type_:ident { $($member:ident = $value:expr),* $(,)? } $(, { $($body:tt)* })?) => {
+        // A set of flags is kept as it is: a value may hold bits no member names, which only the
+        // type itself keeps.
+        $crate::styled_value!($type_);
+
         impl $crate::metadata::MarkupTyped for $type_ {
             const MARKUP: &'static $crate::metadata::MarkupType = {
                 static MARKUP: $crate::metadata::MarkupType = {
@@ -395,6 +421,14 @@ macro_rules! ferro_markup_enum {
                 };
                 &MARKUP
             };
+
+            // Compiled in the crate that declares the type, which is where the static above
+            // is: a crate that asks for the metadata calls this function and does not name
+            // the static of another crate (`MarkupTyped::__markup`).
+            #[inline(never)]
+            fn __markup() -> &'static $crate::metadata::MarkupType {
+                <Self as $crate::metadata::MarkupTyped>::MARKUP
+            }
         }
 
         $crate::__ferro_markup_functions!(impl $type_ {
@@ -2057,7 +2091,7 @@ macro_rules! __ferro_compiler_metadata {
 /// definition is chosen by the features of this crate, wherever the declaration is.
 #[doc(hidden)]
 #[macro_export]
-#[cfg(not(any(feature = "type-tables", test)))]
+#[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
 macro_rules! __ferro_value_markup {
     ($type_:ty) => {
         || {
@@ -2070,7 +2104,7 @@ macro_rules! __ferro_value_markup {
 
 #[doc(hidden)]
 #[macro_export]
-#[cfg(any(feature = "type-tables", test))]
+#[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
 macro_rules! __ferro_value_markup {
     ($type_:ty) => {
         || ::std::option::Option::None

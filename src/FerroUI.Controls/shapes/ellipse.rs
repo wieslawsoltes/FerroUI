@@ -26,6 +26,13 @@ impl ShapeImpl for Ellipse {
         let rect = Rect::from_size(this.bounds().size()).deflate(this.stroke_thickness() / 2.0);
         Some(EllipseGeometry::with_rect(rect).upcast())
     }
+
+    /// The ellipse geometry takes the rectangle the shape has now.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        let Some(geometry) = geometry.cast::<EllipseGeometry>() else { return false };
+        geometry.set_rect(Rect::from_size(this.bounds().size()).deflate(this.stroke_thickness() / 2.0));
+        true
+    }
 }
 
 impl LayoutableImpl for Ellipse {

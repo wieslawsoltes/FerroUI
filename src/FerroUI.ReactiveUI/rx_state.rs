@@ -13,7 +13,7 @@ ferroui_system::ferro_thread_local! {
 }
 
 /// The message of the exception of the default handler.
-const UNHANDLED_ERROR_MESSAGE: &str = "An object implementing IHandleObservableErrors (often a ReactiveCommand or ObservableAsPropertyHelper) has errored, thereby breaking its observable pipeline. To prevent this, ensure the pipeline does not error, or Subscribe to the ThrownExceptions property of the object in question to handle the erroneous case.";
+pub(crate) const UNHANDLED_ERROR_MESSAGE: &str = "An object implementing IHandleObservableErrors (often a ReactiveCommand or ObservableAsPropertyHelper) has errored, thereby breaking its observable pipeline. To prevent this, ensure the pipeline does not error, or Subscribe to the ThrownExceptions property of the object in question to handle the erroneous case.";
 
 /// The state of ReactiveUI that its objects share (`RxState`): the handler of the errors that no
 /// `thrown_exceptions` subscriber handles.
@@ -60,10 +60,12 @@ impl RxState {
         let handler = Observer::create(|exception: ObservableError| {
             // Upstream breaks into an attached debugger first (`Debugger.Break`); there is no
             // such call here.
-            let unhandled = UnhandledError::with_inner(UNHANDLED_ERROR_MESSAGE, &*exception);
+            let unhandled = UnhandledError::of_broken_pipeline(&*exception);
             let _ = RxSchedulers::main_thread_scheduler().schedule_action(move || {
                 // Boundary (#567): an error nobody handled is raised on the main thread on
-                // purpose, as the reference throws `UnhandledErrorException` there.
+                // purpose, as the reference throws `UnhandledErrorException` there. A FerroUI
+                // application (`with_ferro`) replaces this handler with one that raises the error
+                // on its dispatcher without a panic.
                 std::panic::panic_any(unhandled);
             });
         });

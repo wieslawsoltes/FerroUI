@@ -8,8 +8,9 @@ use ferroui_base::media::{
 };
 use ferroui_base::{
     ferro_properties, ferro_static_type, AttachedProperty, FerroObject, FerroProperty, Ref,
-    StyledPropertyOptions,
+    StyledPropertyOptions, TypeInfo,
 };
+use std::cell::Cell;
 
 /// Selects named OpenType features through inherited attached properties.
 ///
@@ -21,19 +22,37 @@ pub struct Typography;
 
 ferro_static_type!(Typography);
 
+/// What gives the effective font features of a text element from its inherited typography.
+type Resolve = fn(&FerroObject) -> Option<FontFeatureCollection>;
+
 ferroui_base::ferro_thread_local! {
-    /// Whether a typography property changed on this thread. Until one does, the
-    /// effective font features of a text element are its `FontFeatures`, read
-    /// without the 43 inherited typography values.
-    static TYPOGRAPHY_IN_USE: std::cell::Cell<bool> = const { std::cell::Cell::new(false) };
+    /// How the typography of an element is resolved, once a typography property changed on
+    /// this thread. Until one does, the effective font features of a text element are its
+    /// `FontFeatures`, read without the 43 inherited typography values.
+    ///
+    /// It is the function and not a flag so that what asks for the font features of every
+    /// text (`effective_font_features`) does not name the resolution: an application that
+    /// sets no typography property keeps neither it nor the 43 properties (docs/binary-size.md,
+    /// 4.21).
+    static TYPOGRAPHY_IN_USE: Cell<Option<Resolve>> = const { Cell::new(None) };
+    /// The type that owns the typography properties, once one of them is registered on this
+    /// thread: what `is_property` compares, for the same reason.
+    static TYPOGRAPHY_TYPE: Cell<Option<&'static TypeInfo>> = const { Cell::new(None) };
 }
 
 /// The options of an inherited typography property, which marks typography in use
 /// when its value changes.
-fn options<T: ferroui_base::PropertyValue>(default_value: T) -> StyledPropertyOptions<T> {
+fn options<T: ferroui_base::StyledValue>(default_value: T) -> StyledPropertyOptions<T> {
+    // A property is registered before it can change on an element.
+    TYPOGRAPHY_TYPE.with(|type_| type_.set(Some(Typography::TYPE)));
     StyledPropertyOptions::new(default_value)
         .inherits(true)
-        .notifying(|_, _| TYPOGRAPHY_IN_USE.with(|in_use| in_use.set(true)))
+        .notifying(|_, _| TYPOGRAPHY_IN_USE.with(|in_use| in_use.set(Some(resolve))))
+}
+
+/// The effective font features of `element` with its inherited typography.
+fn resolve(element: &FerroObject) -> Option<FontFeatureCollection> {
+    TypographyFormat::effective(element).with_font_features(element.get_value(TextElement::font_features_property()))
 }
 
 ferro_properties! {
@@ -691,21 +710,22 @@ impl Typography {
 
     /// Whether a typography property changed on this thread (see `TYPOGRAPHY_IN_USE`).
     pub(crate) fn is_in_use() -> bool {
-        TYPOGRAPHY_IN_USE.with(|in_use| in_use.get())
+        TYPOGRAPHY_IN_USE.with(|in_use| in_use.get().is_some())
     }
 
+    /// Whether `property` is a typography property. Before one is registered none is, and the
+    /// type of the properties is not named here (see `TYPOGRAPHY_TYPE`).
     pub(crate) fn is_property(property: &FerroProperty) -> bool {
-        property.owner_type() == Self::TYPE
+        TYPOGRAPHY_TYPE.with(|type_| type_.get()).is_some_and(|type_| property.owner_type() == type_)
     }
 
     /// Resolves inherited typography before appending explicit font features.
     /// The assigned collection is not modified or retained by a derived collection.
     pub fn effective_font_features(element: &FerroObject) -> Option<FontFeatureCollection> {
-        if !TYPOGRAPHY_IN_USE.with(|in_use| in_use.get()) {
-            return element.get_value(TextElement::font_features_property());
+        match TYPOGRAPHY_IN_USE.with(|in_use| in_use.get()) {
+            None => element.get_value(TextElement::font_features_property()),
+            Some(resolve) => resolve(element),
         }
-        TypographyFormat::effective(element)
-            .with_font_features(element.get_value(TextElement::font_features_property()))
     }
 }
 

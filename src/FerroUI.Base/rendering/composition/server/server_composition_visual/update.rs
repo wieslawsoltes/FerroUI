@@ -89,7 +89,8 @@ impl UpdateContext {
             (Some(bounds), None) => node.transformed_sub_tree_bounds.set(Some(bounds)),
         }
 
-        node.enqueue_for_readback_update();
+        // The bounds are final: the readback takes them from here.
+        node.snapshot_for_readback_update();
     }
 
     fn add_to_dirty_region(&self, bounds: Option<LtrbRect>) {
@@ -103,6 +104,7 @@ impl UpdateContext {
             return;
         }
 
+        crate::perf_count!(RenderDirtyRectsAdded);
         self.dirty_region.add_rect(transformed);
     }
 
@@ -134,6 +136,10 @@ impl UpdateContext {
 
 impl IServerTreeVisitor for UpdateContext {
     fn pre_subgraph(&mut self, node: &Rc<ServerCompositionVisual>) -> bool {
+        crate::perf_count!(RenderUpdateVisualsVisited);
+        if node.is_dirty_for_render.get() {
+            crate::perf_count!(RenderVisualsDirty);
+        }
         let visit_children = node.is_dirty_for_render_in_subgraph.get() || node.needs_bounding_box_update.get();
 
         // If this node has an alpha mask an we caused its inner bounds to change
@@ -193,10 +199,23 @@ impl IServerTreeVisitor for UpdateContext {
         visit_children
     }
 
+    fn next_child(&mut self, container: &Rc<ServerCompositionVisual>, from: usize, _count: usize) -> usize {
+        // A child without a flag has nothing for the pass: neither it nor the pass changes by a
+        // visit, but for the bounds of the child united into those of the container, which
+        // `post_subgraph` of the container takes from the table.
+        container.children().map_or(from, |children| children.next_dirty_child(from))
+    }
+
     fn post_subgraph(&mut self, node: &Rc<ServerCompositionVisual>) {
         let parent = node.parent();
 
-        if node.needs_bounding_box_update.get() {
+        let bounds_updated = node.needs_bounding_box_update.get();
+        if bounds_updated {
+            // The children the table left out (not from upstream; section 9.48): their bounds
+            // are united as those of the visited ones were.
+            if let Some(bounds) = node.children().and_then(|children| children.bounds_of_children()) {
+                node.sub_tree_bounds.set(LtrbRect::full_union(node.sub_tree_bounds.get(), bounds));
+            }
             //
             // If pNode's bbox got recomputed it is at this point still in inner
             // space. We need to apply the clip and transform.
@@ -213,6 +232,10 @@ impl IServerTreeVisitor for UpdateContext {
                     .sub_tree_bounds
                     .set(LtrbRect::full_union(parent.sub_tree_bounds.get(), node.transformed_sub_tree_bounds.get()));
             }
+            // The table of the parent's children: the pass was here, and the bounds are these.
+            if let Some(children) = parent.children() {
+                children.child_is_updated(node, bounds_updated.then(|| node.transformed_sub_tree_bounds.get()));
+            }
         }
 
         //
@@ -222,6 +245,20 @@ impl IServerTreeVisitor for UpdateContext {
         //
         if node.needs_to_add_extra_dirty_rect_to_dirty_region.get() {
             self.add_to_dirty_region(Some(node.extra_dirty_rect.get()));
+        }
+
+        // The drawing items that changed (not from upstream; section 9.42): where each was
+        // and is, in the space of the node as the extra dirty rect. A node that is dirty for
+        // render has its bounds in the region already; its items only forget their changes.
+        if node.take_draw_items_dirty() {
+            if let Some(items) = node.content.draw_items() {
+                let add = node.needs_to_add_extra_dirty_rect_to_dirty_region.get();
+                items.drain_dirty_rects(&mut |rect| {
+                    if add {
+                        self.add_to_dirty_region(Some(rect));
+                    }
+                });
+            }
         }
 
         // If we pushed transforms here, we need to pop them again.  If we're handling a cache we need

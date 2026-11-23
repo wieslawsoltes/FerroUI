@@ -491,6 +491,50 @@ fn geo_map_hover_transitions_report_each_land() {
     assert!(events[2].is_empty());
 }
 
+/// GeoMapTests.GeoMap_TooltipFormatter_IsAppliedToEachValue through the chart: the custom tooltip
+/// of the source records the point it is shown; here a handler of `hover_changed` with the native
+/// tooltip hidden (`TooltipPosition::Hidden`) does. Hovering France with two series and the
+/// code-only `TooltipFormatter` of the map gives the formatted line of each value.
+#[test]
+fn geo_map_tooltip_formatter_writes_each_value_of_the_hovered_land() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = crate::GeoMap::new().upcast::<Chart>();
+    chart.set_map_projection(ferroui_livecharts::MapProjection::Mercator);
+    for (name, value) in [("Pop", 67.5), ("GDP", 2937.0)] {
+        let series = crate::HeatLandSeries::new();
+        series.set_name(name.into());
+        series
+            .lands()
+            .add(crate::HeatLand::with_value("fra", value));
+        chart.series().add(series.upcast());
+    }
+    chart.set_tooltip_position(TooltipPosition::Hidden);
+    chart.set_tooltip_formatter(Some(crate::GeoTooltipFormatter::new(|value| {
+        format!("[{}] {:.1}", value.series_name, value.value)
+    })));
+    let _window = attach(&chart);
+    let shown = Rc::new(RefCell::new(Vec::new()));
+    let sink = shown.clone();
+    let _subscription = Subscription::new(chart.hover_changed(move |args| {
+        sink.borrow_mut().push(
+            args.points
+                .iter()
+                .map(|p| p.label.clone())
+                .collect::<Vec<_>>(),
+        )
+    }));
+    let paris = chart.project(2.35, 48.85).unwrap().unwrap();
+    moved(&chart, &mouse(), paris);
+    let shown = shown.borrow();
+    assert_eq!(shown.len(), 1);
+    assert_eq!(
+        shown[0],
+        vec!["France\n[Pop] 67.5\n[GDP] 2937.0".to_owned()]
+    );
+    let land = chart.find_land_at(paris).unwrap();
+    assert_eq!(land.values.len(), 2);
+}
+
 /// GeoMapAnimationTests.GeoMap_FirstDraw_LandColorsAppearAtFinalGradient and
 /// GeoMap_DataChange_LandColorsJumpToNewGradientPositions: the lands of a map take their colours
 /// at once; a map has no scene transition.
@@ -602,4 +646,165 @@ fn geo_map_wheel_zoom_and_drag_pan_follow_the_interaction_mode() {
     assert!((chart.zoom_level() - 0.8).abs() < 1e-9);
     chart.bounce_back();
     assert_eq!(chart.map_animation.borrow().len(), 1);
+}
+
+/// `BaseNeedleVisual` animates the rotation of its needle: a needle whose value changes turns to
+/// it over the animations speed of the chart, the long way round when the range asks for it
+/// (from 10 to 90 of a gauge of 270 degrees), with the cubic out easing of the transitions; the
+/// first value is drawn at once, and the needle stops at its value.
+#[test]
+fn a_needle_turns_to_its_new_value() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_chart_kind(ChartKind::Pie);
+    chart.set_animations_speed(1000.0);
+    chart.set_initial_rotation(-225.0);
+    chart.set_max_angle(270.0);
+    chart.set_min_value(0.0);
+    chart.set_max_value(Some(100.0));
+    let needle = crate::NeedleVisual::new();
+    needle.set_numeric_value(10.0);
+    chart.visual_elements().add(needle.clone().upcast());
+    let _window = attach(&chart);
+    let tip = |scene: &Scene| {
+        scene
+            .primitives
+            .iter()
+            .find_map(|p| match &p.geometry {
+                ferroui_livecharts::Geometry::Polygon(points) => Some(points[0]),
+                _ => None,
+            })
+            .expect("the needle")
+    };
+    let size = chart.bounds().size();
+    let at_ten = tip(&chart.scene(size).unwrap());
+    assert!(
+        chart.needle_timer.borrow().is_none(),
+        "the first value is drawn at once"
+    );
+    needle.set_numeric_value(90.0);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(tip(&scene), at_ten, "the needle starts where it was");
+    assert!(chart.needle_timer.borrow().is_some());
+    let motion = chart.needles.borrow()[0];
+    assert_eq!(
+        (motion.from, motion.to, motion.duration_ms),
+        (10.0, 90.0, 1000.0)
+    );
+    let half = motion.at(motion.started_ms + 500.0);
+    assert!((half - (10.0 + 80.0 * EasingFunctions::cubic_out(0.5))).abs() < 1e-9);
+    // The animation is over: the needle is drawn at its value and the frames stop.
+    chart.needles.borrow_mut()[0].started_ms -= 10_000.0;
+    chart.invalidate_chart();
+    let at_ninety = tip(&chart.scene(size).unwrap());
+    assert_ne!(at_ninety, at_ten);
+    assert!(chart.needle_timer.borrow().is_none());
+}
+
+/// HeatSeriesAnimationTests.HeatSeries_FirstDraw_CellColorsInterpolateAcrossGradient: the four
+/// cells of the source, with axes from -0.5 to 1.5, keep their rectangles
+/// while their colours come in from transparent at the first draw, and end at distinct colours
+/// of the gradient.
+#[test]
+fn heat_cells_take_their_colours_at_the_first_draw() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = Chart::new();
+    chart.set_animations_speed(1000.0);
+    let series = crate::HeatSeries::new();
+    series.set_coordinates([
+        ferroui_livecharts::kernel::Coordinate::weighted(0.0, 0.0, 1.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(1.0, 0.0, 5.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(0.0, 1.0, 3.0),
+        ferroui_livecharts::kernel::Coordinate::weighted(1.0, 1.0, 9.0),
+    ]);
+    chart.series().add(series.upcast());
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_min_limit(Some(-0.5));
+        axes.get(0).set_max_limit(Some(1.5));
+    }
+    let start = Dispatcher::ui_thread().now() as f64;
+    let _window = attach(&chart);
+    let target = chart.scene(chart.bounds().size()).unwrap();
+    let cells = |scene: &Scene| -> Vec<(Rect, Color)> {
+        scene
+            .primitives
+            .iter()
+            .filter_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Rectangle { rect, .. }, Some(id))
+                    if id.series == 0 =>
+                {
+                    Some((*rect, p.style.fill.unwrap()))
+                }
+                _ => None,
+            })
+            .collect()
+    };
+    let end = cells(&target);
+    assert_eq!(end.len(), 4);
+    let middle = cells(&chart.presentation_scene(start + 500.0, target.clone()));
+    assert_eq!(middle.len(), 4);
+    for ((rect, color), (end_rect, end_color)) in middle.iter().zip(&end) {
+        assert_eq!(rect, end_rect, "the cells do not move");
+        assert!(
+            color.a > 0 && color.a < end_color.a,
+            "the colour comes in: {color:?}"
+        );
+    }
+    assert_ne!(
+        end[0].1, end[3].1,
+        "the lowest and highest weights take distinct colours"
+    );
+}
+
+/// The tooltip goes where the source places it (`GetTooltipLocation` over the hover areas of the
+/// found points), not beside the pointer: above the top of the middle column of five with
+/// `TooltipPosition::Top`, below it with `Bottom`, and above the centre of a land of a map.
+#[test]
+fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(300.0, 300.0);
+    let chart = Chart::new();
+    chart.set_animations_speed(0.0);
+    let series = ChartSeries::new();
+    series.set_kind(SeriesKind::Column);
+    series.set_numeric_values([1.0, 2.0, 3.0, 4.0, 5.0]);
+    series.set_data_padding(Point::new(0.0, 0.0));
+    chart.series().add(series);
+    for axes in [chart.x_axes(), chart.y_axes()] {
+        axes.add(Axis::new());
+        axes.get(0).set_visible(false);
+    }
+    let scene = chart.scene(size).unwrap();
+    let pointer = Point::new(150.0, 150.0);
+    let found = scene.hit_test(pointer, FindingStrategy::Automatic, 0.0);
+    assert_eq!(found.len(), 1);
+    let bar = found[0].shape.hover_bounds();
+    let hovered = ChartPointerEventArgs {
+        position: pointer,
+        points: found.into_iter().cloned().collect(),
+    };
+    let (_, tooltip) = crate::decorations::tooltip_layout(size, &hovered);
+    chart.set_tooltip_position(TooltipPosition::Top);
+    let top = chart.tooltip_origin(&hovered, tooltip, size);
+    assert!((top.x + tooltip.width * 0.5 - (bar.x + bar.width * 0.5)).abs() < 1e-6);
+    assert!((top.y + tooltip.height - bar.y).abs() < 1e-6);
+    chart.set_tooltip_position(TooltipPosition::Bottom);
+    let bottom = chart.tooltip_origin(&hovered, tooltip, size);
+    assert!((bottom.y - bar.y).abs() < 1e-6, "the source anchors at the end of the bar");
+    // A map anchors at the centre of the land.
+    let map = Chart::new();
+    map.set_chart_kind(ChartKind::GeoMap);
+    map.set_tooltip_position(TooltipPosition::Auto);
+    let land = HitRegion {
+        center: Point::new(150.0, 200.0),
+        ..hovered.points[0].clone()
+    };
+    let hovered = ChartPointerEventArgs {
+        position: Point::new(10.0, 10.0),
+        points: vec![land],
+    };
+    let at = map.tooltip_origin(&hovered, tooltip, size);
+    assert!((at.x - (150.0 - tooltip.width * 0.5)).abs() < 1e-6);
+    assert!((at.y - (200.0 - tooltip.height)).abs() < 1e-6);
 }

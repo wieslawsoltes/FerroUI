@@ -21,10 +21,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
 use std::time::Duration;
@@ -70,8 +70,8 @@ pub trait LayerVisualHooks: CompositionContainerVisualHooks {
 pub struct LayerVisualProps {
     base: CompositionContainerVisualProps,
     changed_fields_of_layer_visual: Cell<LayerVisualChangedFields>,
-    shadow: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    effect_brush: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    shadow: OptionCell<Rc<dyn ICompositionObject>>,
+    effect_brush: OptionCell<Rc<dyn ICompositionObject>>,
 }
 
 impl Default for LayerVisualProps {
@@ -88,8 +88,8 @@ impl LayerVisualProps {
         Self {
             base: CompositionContainerVisualProps::new(),
             changed_fields_of_layer_visual: Cell::new(LayerVisualChangedFields::empty()),
-            shadow: RefCell::new(None),
-            effect_brush: RefCell::new(None),
+            shadow: OptionCell::new(),
+            effect_brush: OptionCell::new(),
         }
     }
 
@@ -112,24 +112,24 @@ impl LayerVisualProps {
 
     /// `Shadow` (FerroUI overlay).
     pub fn shadow(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.shadow.borrow().clone()
+        self.shadow.get()
     }
 
     /// Sets `Shadow` (FerroUI overlay).
     pub fn set_shadow(&self, host: &dyn LayerVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.shadow.borrow().clone();
+        let old_value = self.shadow.get();
         if old_value.differs(&value) {
             LayerVisualHooks::validate_shadow_change(host, &old_value, &value);
             LayerVisualHooks::on_shadow_changing(host);
             changed = true;
             // Update the backing value
-            *self.shadow.borrow_mut() = value.clone();
+            self.shadow.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_layer_visual.set(self.changed_fields_of_layer_visual.get() | LayerVisualChangedFields::SHADOW);
             host.register_for_serialization();
         }
-        *self.shadow.borrow_mut() = value;
+        self.shadow.set(value);
         if changed {
             LayerVisualHooks::on_shadow_changed(host);
         }
@@ -137,24 +137,24 @@ impl LayerVisualProps {
 
     /// `EffectBrush` (FerroUI overlay).
     pub fn effect_brush(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.effect_brush.borrow().clone()
+        self.effect_brush.get()
     }
 
     /// Sets `EffectBrush` (FerroUI overlay).
     pub fn set_effect_brush(&self, host: &dyn LayerVisualHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.effect_brush.borrow().clone();
+        let old_value = self.effect_brush.get();
         if old_value.differs(&value) {
             LayerVisualHooks::validate_effect_brush_change(host, &old_value, &value);
             LayerVisualHooks::on_effect_brush_changing(host);
             changed = true;
             // Update the backing value
-            *self.effect_brush.borrow_mut() = value.clone();
+            self.effect_brush.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_layer_visual.set(self.changed_fields_of_layer_visual.get() | LayerVisualChangedFields::EFFECT_BRUSH);
             host.register_for_serialization();
         }
-        *self.effect_brush.borrow_mut() = value;
+        self.effect_brush.set(value);
         if changed {
             LayerVisualHooks::on_effect_brush_changed(host);
         }
@@ -180,10 +180,10 @@ impl LayerVisualProps {
         let changed = self.changed_fields_of_layer_visual.get();
         writer.write(changed);
         if changed.contains(LayerVisualChangedFields::SHADOW) {
-            writer.write_server_object(self.shadow.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.shadow.get().map(|o| o.server()));
         }
         if changed.contains(LayerVisualChangedFields::EFFECT_BRUSH) {
-            writer.write_server_object(self.effect_brush.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.effect_brush.get().map(|o| o.server()));
         }
         self.changed_fields_of_layer_visual.set(LayerVisualChangedFields::empty());
     }
@@ -208,8 +208,8 @@ pub trait ServerLayerVisualHooks: IServerAnimatedPropertyHost {
 
 /// The server-side properties of `ServerLayerVisual`.
 pub struct ServerLayerVisualProps {
-    shadow: RefCell<Option<Rc<dyn IServerObject>>>,
-    effect_brush: RefCell<Option<Rc<dyn IServerObject>>>,
+    shadow: OptionCell<Rc<dyn IServerObject>>,
+    effect_brush: OptionCell<Rc<dyn IServerObject>>,
 }
 
 impl Default for ServerLayerVisualProps {
@@ -223,8 +223,8 @@ impl ServerLayerVisualProps {
     /// values of the UI thread arrive with the first batch.
     pub fn new() -> Self {
         Self {
-            shadow: RefCell::new(None),
-            effect_brush: RefCell::new(None),
+            shadow: OptionCell::new(),
+            effect_brush: OptionCell::new(),
         }
     }
 
@@ -244,8 +244,8 @@ impl ServerLayerVisualProps {
             CompositionProperty::register::<ServerLayerVisualProps, Option<Rc<dyn IServerObject>>>(
                 "Shadow",
                 "ServerLayerVisual",
-                |obj| props_of::<ServerLayerVisualProps>(obj).shadow.borrow().clone(),
-                |obj, v| *props_of::<ServerLayerVisualProps>(obj).shadow.borrow_mut() = v,
+                |obj| props_of::<ServerLayerVisualProps>(obj).shadow.get(),
+                |obj, v| props_of::<ServerLayerVisualProps>(obj).shadow.set(v),
                 None,
                 None,
             )
@@ -254,11 +254,11 @@ impl ServerLayerVisualProps {
 
     /// `Shadow`.
     pub fn shadow(&self) -> Option<Rc<dyn IServerObject>> {
-        self.shadow.borrow().clone()
+        self.shadow.get()
     }
 
     pub fn set_shadow(&self, host: &dyn ServerLayerVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.shadow.borrow().clone();
+        let old_value = self.shadow.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerLayerVisualHooks::on_shadow_changing(host);
@@ -270,7 +270,7 @@ impl ServerLayerVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.shadow.borrow_mut() = value.clone(),
+                assign: &mut || self.shadow.set(value.clone()),
             },
         );
         if changed {
@@ -285,8 +285,8 @@ impl ServerLayerVisualProps {
             CompositionProperty::register::<ServerLayerVisualProps, Option<Rc<dyn IServerObject>>>(
                 "EffectBrush",
                 "ServerLayerVisual",
-                |obj| props_of::<ServerLayerVisualProps>(obj).effect_brush.borrow().clone(),
-                |obj, v| *props_of::<ServerLayerVisualProps>(obj).effect_brush.borrow_mut() = v,
+                |obj| props_of::<ServerLayerVisualProps>(obj).effect_brush.get(),
+                |obj, v| props_of::<ServerLayerVisualProps>(obj).effect_brush.set(v),
                 None,
                 None,
             )
@@ -295,11 +295,11 @@ impl ServerLayerVisualProps {
 
     /// `EffectBrush`.
     pub fn effect_brush(&self) -> Option<Rc<dyn IServerObject>> {
-        self.effect_brush.borrow().clone()
+        self.effect_brush.get()
     }
 
     pub fn set_effect_brush(&self, host: &dyn ServerLayerVisualHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.effect_brush.borrow().clone();
+        let old_value = self.effect_brush.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerLayerVisualHooks::on_effect_brush_changing(host);
@@ -311,7 +311,7 @@ impl ServerLayerVisualProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.effect_brush.borrow_mut() = value.clone(),
+                assign: &mut || self.effect_brush.set(value.clone()),
             },
         );
         if changed {

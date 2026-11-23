@@ -82,8 +82,10 @@ fn templated_controls() -> Vec<&'static TypeInfo> {
     let mut templated_controls: Vec<&'static TypeInfo> = Vec::new();
     // WindowDrawnDecorations is the only StyleElement that is not Control but has ControlTheme
     templated_controls.push(WindowDrawnDecorations::TYPE);
+    // The crates whose controls the theme has control themes for.
+    let crates = ["ferroui_controls", "ferroui_dialogs", "ferroui_media_video_controls", "ferroui_media_camera_controls"];
     for type_ in TypeInfo::registered_types() {
-        if !(type_.module_path().starts_with("ferroui_controls") || type_.module_path().starts_with("ferroui_dialogs"))
+        if !crates.iter().any(|crate_| type_.module_path().starts_with(crate_))
             || type_.module_path().contains("::testing")
             || !TemplatedControl::TYPE.is_assignable_from(type_)
             || type_.default_constructor().is_none()
@@ -326,4 +328,68 @@ fn should_not_define_setters_with_hardcoded_brushes_or_colors() {
             }
         }
     }
+}
+
+#[test]
+fn media_transport_template_keeps_native_actions_accessible_at_narrow_widths() {
+    use ferroui_base::{Point, Rect, Size};
+    use ferroui_controls::{automation::AutomationProperties, Button, Slider};
+    use ferroui_media_video_controls::{MediaPlayerElement, MediaTransportControls};
+    let _app = super::support::start_themed_application();
+    let view = MediaPlayerElement::new();
+    view.set_are_transport_controls_enabled(true);
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(view.clone())));
+    window.show();
+    let transport = view.transport_controls();
+    transport.apply_template();
+    let button = |name| {
+        let parts = transport.get_visual_descendants();
+        parts.into_iter().find_map(|v| v.cast::<Button>().filter(|b| b.name().as_deref() == Some(name))).unwrap()
+    };
+    let slider = |name| {
+        let parts = transport.get_visual_descendants();
+        parts.into_iter().find_map(|v| v.cast::<Slider>().filter(|s| s.name().as_deref() == Some(name))).unwrap()
+    };
+    // The parts of WinUI's template, by their names.
+    let commands = [
+        "VolumeMuteButton", "CCSelectionButton", "AudioTracksSelectionButton", "StopButton", "SkipBackwardButton",
+        "PreviousTrackButton", "RewindButton", "PlayPauseButton", "FastForwardButton", "NextTrackButton",
+        "SkipForwardButton", "PlaybackRateButton", "RepeatButton", "ZoomButton", "CastButton", "FullWindowButton",
+    ];
+    for name in commands {
+        button(name);
+    }
+    // MinWidth and MaxWidth of the source (MediaTransportControlsMinWidth, MaxWidth).
+    for width in [296., 320., 480., 640., 720.] {
+        transport.measure(Size::new(width, 180.));
+        transport.arrange(Rect::new(0., 0., width, transport.desired_size().height));
+        let mut centers = Vec::new();
+        for name in commands {
+            let part = button(name);
+            if !part.is_visible() {
+                continue;
+            }
+            let origin = part.translate_point(Point::new(0., 0.), &transport).unwrap();
+            assert!(origin.x >= 0. && origin.x + part.bounds().width <= width + 0.5, "{name}, width {width}");
+            assert!(AutomationProperties::get_name(&part).is_some(), "{name}");
+            centers.push(origin.y + part.bounds().height / 2.);
+        }
+        // The actions that are shown are in one row: at least play, volume and zoom.
+        assert!(centers.len() >= 3, "width {width}: {} actions", centers.len());
+        assert!(centers.iter().all(|y| (*y - centers[0]).abs() < 0.01), "width {width}: {centers:?}");
+        let seek = slider("ProgressSlider");
+        assert!(seek.is_visible() && seek.bounds().width <= width);
+    }
+    assert!(button("PlayPauseButton").is_visible());
+    assert!(!button("RepeatButton").is_visible());
+    transport.set_is_compact(true);
+    assert!(transport.pseudo_classes().contains(MediaTransportControls::PC_COMPACT_MODE));
+    transport.measure(Size::new(480., 180.));
+    assert!(!button("PlayPauseButton").is_visible());
+    assert!(button("PlayPauseButtonOnLeft").is_visible());
+    transport.set_is_seek_bar_visible(false);
+    transport.set_is_full_window_button_visible(false);
+    assert!(!slider("ProgressSlider").is_visible());
+    assert!(!button("FullWindowButton").is_visible());
 }

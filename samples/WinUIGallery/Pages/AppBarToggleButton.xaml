@@ -1,7 +1,52 @@
-<!-- Adapted from ThreeStateAppbartogglebuttonPath.txt in the pinned Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <CommandBarToggleButton x:Name="Primary" Label="PathIcon" IsThreeState="True" HorizontalAlignment="Left">
-    <CommandBarToggleButton.Icon><PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24"/></CommandBarToggleButton.Icon>
-  </CommandBarToggleButton>
-  <TextBlock x:Name="Output" Text="Unchecked"/>
+<!-- Ported from the four pinned AppBarToggleButton examples of WinUI Gallery (14061eea) and
+     AppBarButton_Click of AppBarToggleButtonPage.xaml.cs (command_samples.rs); see ../NOTICE.md.
+     WinUI's AppBarToggleButton is FerroUI's CommandBarToggleButton. Icon="Shuffle" is a
+     SymbolIcon; the source's AppBarToggleButton.Content of the path icon is the Icon (the template
+     presents the Icon). FerroUI has no BitmapIcon: the bitmap icon is an Image of the source's
+     Slices2.png, set by the code behind, which is not drawn in the foreground's single color as a
+     BitmapIcon is. The glyph of the symbol icon needs the symbol font of the platform. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="AppBarToggleButtonExample1" Spacing="8">
+    <TextBlock Text="An AppBarToggleButton with a symbol icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarToggleButton x:Name="Button1" Label="SymbolIcon">
+        <CommandBarToggleButton.Icon><SymbolIcon Symbol="Shuffle" /></CommandBarToggleButton.Icon>
+      </CommandBarToggleButton>
+      <TextBlock x:Name="Control1Output" Margin="8,0,0,0" VerticalAlignment="Center" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarToggleButtonExample2" Spacing="8">
+    <TextBlock Text="An AppBarToggleButton with a bitmap icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarToggleButton x:Name="Button2" Label="BitmapIcon">
+        <CommandBarToggleButton.Icon><Image x:Name="Button2Icon" /></CommandBarToggleButton.Icon>
+      </CommandBarToggleButton>
+      <TextBlock x:Name="Control2Output" Margin="8,0,0,0" VerticalAlignment="Center" />
+    </StackPanel>
+    <TextBlock x:Name="Button2IconError" IsVisible="False" TextWrapping="Wrap" />
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarToggleButtonExample3" Spacing="8">
+    <TextBlock Text="An AppBarToggleButton with a font icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarToggleButton x:Name="Button3" Label="FontIcon">
+        <CommandBarToggleButton.Icon><FontIcon FontFamily="Candara" Glyph="&#x03A3;" /></CommandBarToggleButton.Icon>
+      </CommandBarToggleButton>
+      <TextBlock x:Name="Control3Output" Margin="8,0,0,0" VerticalAlignment="Center" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="AppBarToggleButtonExample4" Spacing="8">
+    <TextBlock Text="A three-state AppBarToggleButton with a path icon." FontSize="18" />
+    <StackPanel Orientation="Horizontal">
+      <CommandBarToggleButton x:Name="Button4" IsThreeState="True" Label="PathIcon">
+        <CommandBarToggleButton.Icon>
+          <Viewbox><PathIcon Data="F1 M 20,20L 24,10L 24,24L 5,24" /></Viewbox>
+        </CommandBarToggleButton.Icon>
+      </CommandBarToggleButton>
+      <TextBlock x:Name="Control4Output" Margin="8,0,0,0" VerticalAlignment="Center" />
+    </StackPanel>
+  </StackPanel>
 </StackPanel>

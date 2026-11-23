@@ -5,7 +5,7 @@
 
 use super::ServerCompositionVisual;
 use crate::platform::{IDrawingContextImpl, LtrbRect};
-use crate::{Matrix, Rect};
+use crate::{Matrix, Rect, Vector};
 use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
@@ -23,6 +23,8 @@ pub(crate) struct RenderRoot {
     pub(crate) transform: Matrix,
     /// The clip of the render, in device pixels.
     pub(crate) clip: LtrbRect,
+    /// Origin of this target in the original render's device coordinates.
+    pub(crate) device_origin: Vector,
     pub(crate) skip_root_visual_transform: bool,
     pub(crate) rendering_to_bitmap_cache: bool,
 }
@@ -49,6 +51,18 @@ pub(crate) fn with_render_root<R>(root: RenderRoot, f: impl FnOnce() -> R) -> R 
     let result = f();
     RENDER_ROOTS.with(|roots| roots.borrow_mut().pop());
     result
+}
+
+/// Rebase backdrop replay into a bounded temporary target. Its dependencies
+/// must still be recorded in the original target's device coordinates.
+pub(crate) fn with_canvas_origin<R>(origin: Vector, f: impl FnOnce() -> R) -> R {
+    let root = RENDER_ROOTS.with(|roots| roots.borrow().last().cloned());
+    let Some(mut root) = root else { return f() };
+    root.transform = root.transform * Matrix::create_translation(-origin.x, -origin.y);
+    root.clip = LtrbRect::new(root.clip.left - origin.x, root.clip.top - origin.y,
+        root.clip.right - origin.x, root.clip.bottom - origin.y);
+    root.device_origin += origin;
+    with_render_root(root, f)
 }
 
 /// Runs `f` while the own content of `visual` is drawn.
@@ -144,7 +158,9 @@ pub fn draw_backdrop(canvas: &mut dyn IDrawingContextImpl, rect: Rect) -> bool {
     BACKDROP_REGIONS.with(|regions| {
         let mut regions = regions.borrow_mut();
         regions.retain(|(existing, _)| existing.upgrade().is_some_and(|existing| !Rc::ptr_eq(&existing, &visual)));
-        regions.push((Rc::downgrade(&visual), device));
+        let origin = root.device_origin;
+        regions.push((Rc::downgrade(&visual), LtrbRect::new(device.left + origin.x, device.top + origin.y,
+            device.right + origin.x, device.bottom + origin.y)));
     });
 
     canvas.push_clip(rect);
@@ -157,6 +173,7 @@ pub fn draw_backdrop(canvas: &mut dyn IDrawingContextImpl, rect: Rect) -> bool {
         &visual,
         root.skip_root_visual_transform,
         root.rendering_to_bitmap_cache,
+        root.device_origin,
     );
     BACKDROP_DEPTH.with(|value| value.set(depth));
     canvas.set_transform(saved);

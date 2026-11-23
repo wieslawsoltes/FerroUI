@@ -130,6 +130,10 @@ impl CompositionSolidColorVisualProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Color", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_solid_color_visual.get().contains(CompositionSolidColorVisualChangedFields::COLOR_ANIMATED) {
+                    self.changed_fields_of_composition_solid_color_visual.set(self.changed_fields_of_composition_solid_color_visual.get() & !CompositionSolidColorVisualChangedFields::COLOR);
+                }
             }
         }
         self.color.set(value);
@@ -164,10 +168,11 @@ impl CompositionSolidColorVisualProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_solid_color_visual.get();
         writer.write(changed);
+        if changed.contains(CompositionSolidColorVisualChangedFields::COLOR) {
+            writer.write(self.color.get());
+        }
         if changed.contains(CompositionSolidColorVisualChangedFields::COLOR_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSolidColorVisualProps::id_of_color_property().base()));
-        } else if changed.contains(CompositionSolidColorVisualChangedFields::COLOR) {
-            writer.write(self.color.get());
         }
         self.changed_fields_of_composition_solid_color_visual.set(CompositionSolidColorVisualChangedFields::empty());
     }
@@ -249,6 +254,10 @@ impl ServerCompositionSolidColorVisualProps {
         ServerCompositionSolidColorVisualHooks::base_deserialize_changes_core(host, reader, committed_at);
         ServerCompositionSolidColorVisualHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionSolidColorVisualChangedFields>();
+        if changed.contains(CompositionSolidColorVisualChangedFields::COLOR) {
+            let value = reader.read::<Color>();
+            self.set_color(host, value);
+        }
         if changed.contains(CompositionSolidColorVisualChangedFields::COLOR_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Color` without an animation instance");
@@ -259,9 +268,6 @@ impl ServerCompositionSolidColorVisualProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSolidColorVisualChangedFields::COLOR) {
-            let value = reader.read::<Color>();
-            self.set_color(host, value);
         }
         ServerCompositionSolidColorVisualHooks::on_fields_deserialized(host, changed);
     }

@@ -16,6 +16,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct WriteableBitmapRef(pub Rc<WriteableBitmap>);
 
+ferroui_base::styled_value!(WriteableBitmapRef);
+
 impl WriteableBitmapRef {
     /// The handle of `bitmap`.
     pub fn new(bitmap: WriteableBitmap) -> Self {

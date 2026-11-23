@@ -1260,18 +1260,15 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
             return false;
         }
         let transform = self.device_transform();
-        let (width, height) = (f64::from(self.scene().width()), f64::from(self.scene().height()));
-        let area = (transform * rect_path(rect)).bounding_box().intersect(kurbo::Rect::new(0.0, 0.0, width, height));
-        let (x0, y0) = (area.x0.floor().max(0.0), area.y0.floor().max(0.0));
-        let (x1, y1) = (area.x1.ceil().min(width), area.y1.ceil().min(height));
-        if x1 <= x0 || y1 <= y0 {
-            // Nothing of the area is on the scene.
-            return true;
-        }
+        let m=transform.as_coeffs();
+        let matrix=ferroui_base::Matrix::new(m[0],m[1],m[2],m[3],m[4],m[5]);
+        let viewport=PixelSize::new(self.scene().width() as i32,self.scene().height() as i32);
+        let Some(region)=ferroui_base::platform::EffectRasterRegion::new(rect,matrix,viewport) else {return true;};
+        let (x0,y0)=(region.origin.x as f64,region.origin.y as f64);
         let Some(texture) = crate::gpu::effect_passes::lighting_texture(
             &device,
-            (x1 - x0) as u32,
-            (y1 - y0) as u32,
+            region.size.width as u32,
+            region.size.height as u32,
             (x0 as u32, y0 as u32),
             transform.inverse(),
             lighting,

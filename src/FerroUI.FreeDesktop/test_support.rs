@@ -63,12 +63,12 @@ pub(crate) fn signal<B>(
     body: &B,
 ) -> zbus::Message
 where
-    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
+    B: zbus::export::serde::ser::Serialize + zbus::DynamicType,
 {
-    let builder = zbus::Message::signal(path, interface, name).unwrap();
+    let builder = zbus::Message::signal(path, interface, name);
     match connection.unique_name() {
-        Some(own) => builder.sender(own.as_str()).unwrap(),
-        None => builder.sender(sender).unwrap(),
+        Some(own) => builder.sender(own.as_str()),
+        None => builder.sender(sender),
     }
     .build(body)
     .unwrap()
@@ -82,7 +82,7 @@ pub(crate) async fn emit_from_service<B>(
     name: &str,
     body: &B,
 ) where
-    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
+    B: zbus::export::serde::ser::Serialize + zbus::DynamicType,
 {
     connection.send(&signal(connection, SERVICE_UNIQUE_NAME, path, interface, name, body)).await.unwrap();
 }
@@ -112,13 +112,13 @@ pub(crate) fn on_session_bus() -> bool {
 }
 
 /// The builder of the connection the doubles are served on.
-pub(crate) type ServiceBuilder = zbus::blocking::connection::Builder<'static>;
+pub(crate) type ServiceBuilder = zbus::connection::Builder<'static>;
 
 /// Two connections: the one the code under test uses, and the one of the
 /// doubles.
 pub(crate) struct TestConnections {
     pub(crate) client: zbus::Connection,
-    pub(crate) service: zbus::blocking::Connection,
+    pub(crate) service: zbus::Connection,
     /// The owners the double of the bus answers with; `None` on a real bus.
     owners: Option<Arc<Mutex<HashMap<String, String>>>>,
     /// The path of an object of the doubles, for the round trip of `settle`.
@@ -132,7 +132,7 @@ impl TestConnections {
     /// answer calls now and then. `ping_path` is the path of one of them.
     pub(crate) fn new(
         ping_path: &str,
-        serve: impl FnOnce(ServiceBuilder) -> zbus::Result<ServiceBuilder> + Send + 'static,
+        serve: impl FnOnce(ServiceBuilder) -> ServiceBuilder + Send + 'static,
     ) -> TestConnections {
         Self::new_with(ping_path, true, serve)
     }
@@ -144,22 +144,19 @@ impl TestConnections {
     pub(crate) fn new_with(
         ping_path: &str,
         client_object_server: bool,
-        serve: impl FnOnce(ServiceBuilder) -> zbus::Result<ServiceBuilder> + Send + 'static,
+        serve: impl FnOnce(ServiceBuilder) -> ServiceBuilder + Send + 'static,
     ) -> TestConnections {
         let with_object_server = move |builder: ServiceBuilder| {
             if client_object_server {
                 DBusHelper::with_object_server(builder)
             } else {
-                Ok(builder)
+                builder
             }
         };
         let (client, service, owners) = if on_session_bus() {
-            let client = with_object_server(zbus::blocking::connection::Builder::session().unwrap())
-                .unwrap()
-                .build()
-                .expect("a session bus")
-                .into_inner();
-            let service = serve(zbus::blocking::connection::Builder::session().unwrap()).unwrap().build().unwrap();
+            let client = zbus::block_on(with_object_server(zbus::connection::Builder::session()).build())
+                .expect("a session bus");
+            let service = zbus::block_on(serve(zbus::connection::Builder::session()).build()).unwrap();
             (client, service, None)
         } else {
             let (client_end, service_end) = std::os::unix::net::UnixStream::pair().unwrap();
@@ -170,20 +167,16 @@ impl TestConnections {
             let service = {
                 let owners = owners.clone();
                 std::thread::spawn(move || {
-                    let builder = zbus::blocking::connection::Builder::async_io_unix_stream(service_end)
+                    let builder = zbus::connection::Builder::unix_stream(service_end)
                         .server(guid)
-                        .unwrap()
                         .p2p()
-                        .serve_at("/org/freedesktop/DBus", FakeBus { owners })
-                        .unwrap();
-                    serve(builder).unwrap().build().unwrap()
+                        .serve_at("/org/freedesktop/DBus", FakeBus { owners });
+                    zbus::block_on(serve(builder).build()).unwrap()
                 })
             };
-            let client = with_object_server(zbus::blocking::connection::Builder::async_io_unix_stream(client_end).p2p())
-                .unwrap()
-            .build()
-            .unwrap()
-            .into_inner();
+            let client =
+                zbus::block_on(with_object_server(zbus::connection::Builder::unix_stream(client_end).p2p()).build())
+                    .unwrap();
             let service = service.join().unwrap();
             (client, service, Some(owners))
         };
@@ -198,7 +191,7 @@ impl TestConnections {
                 owners.lock().unwrap().insert(name.to_string(), SERVICE_UNIQUE_NAME.to_string());
                 self.name_owner_changed(&(name, "", SERVICE_UNIQUE_NAME));
             }
-            None => self.service.request_name(name).unwrap(),
+            None => zbus::block_on(self.service.request_name(name)).unwrap(),
         }
     }
 
@@ -210,7 +203,7 @@ impl TestConnections {
                 self.name_owner_changed(&(name, SERVICE_UNIQUE_NAME, ""));
             }
             None => {
-                self.service.release_name(name).unwrap();
+                zbus::block_on(self.service.release_name(name)).unwrap();
             }
         }
     }
@@ -218,9 +211,10 @@ impl TestConnections {
     /// Emits a signal of a double.
     pub(crate) fn emit<B>(&self, path: &str, interface: &str, name: &str, body: &B)
     where
-        B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
+        B: zbus::export::serde::ser::Serialize + zbus::DynamicType,
     {
-        self.service.send(&signal(self.service.inner(), SERVICE_UNIQUE_NAME, path, interface, name, body)).unwrap();
+        zbus::block_on(self.service.send(&signal(&self.service, SERVICE_UNIQUE_NAME, path, interface, name, body)))
+            .unwrap();
     }
 
     /// Another connection (`new_owner`, a unique name) takes `name` over, without the name being
@@ -238,16 +232,15 @@ impl TestConnections {
     /// Emits a signal of a double as the connection `sender` (a unique name) sends it.
     pub(crate) fn emit_as<B>(&self, sender: &str, path: &str, interface: &str, name: &str, body: &B)
     where
-        B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType,
+        B: zbus::export::serde::ser::Serialize + zbus::DynamicType,
     {
-        self.service.send(&signal(self.service.inner(), sender, path, interface, name, body)).unwrap();
+        zbus::block_on(self.service.send(&signal(&self.service, sender, path, interface, name, body))).unwrap();
     }
 
     /// The signal of the double of the bus that the owner of a name changed.
     fn name_owner_changed(&self, body: &(&str, &str, &str)) {
-        let message =
-            signal(self.service.inner(), BUS_NAME, "/org/freedesktop/DBus", BUS_NAME, "NameOwnerChanged", body);
-        self.service.send(&message).unwrap();
+        let message = signal(&self.service, BUS_NAME, "/org/freedesktop/DBus", BUS_NAME, "NameOwnerChanged", body);
+        zbus::block_on(self.service.send(&message)).unwrap();
     }
 
     /// Lets what is in flight arrive: a round trip to the service and
@@ -263,9 +256,7 @@ impl TestConnections {
                 async move {
                     let peer = zbus::fdo::PeerProxy::builder(&client)
                         .destination(service_name.unwrap_or_else(|| BUS_NAME.to_string()))
-                        .unwrap()
                         .path(ping_path)
-                        .unwrap()
                         .build()
                         .await
                         .unwrap();
@@ -292,13 +283,19 @@ pub(crate) fn peer_call<B>(
     body: B,
 ) -> zbus::Result<zbus::Message>
 where
-    B: zbus::export::serde::ser::Serialize + zbus::zvariant::DynamicType + Send + 'static,
+    B: zbus::export::serde::ser::Serialize + zbus::DynamicType + Send + 'static,
 {
     let service = connections.service.clone();
     let destination = connections.client.unique_name().map(|name| name.to_string());
     let (path, interface, method) = (path.to_string(), interface.to_string(), method.to_string());
     let worker = std::thread::spawn(move || {
-        service.call_method(destination.as_deref(), path.as_str(), Some(interface.as_str()), method.as_str(), &body)
+        zbus::block_on(service.call_method(
+            destination.as_deref(),
+            path.as_str(),
+            Some(interface.as_str()),
+            method.as_str(),
+            &body,
+        ))
     });
     pump_until(|| worker.is_finished());
     worker.join().unwrap()
@@ -309,25 +306,25 @@ where
 pub(crate) fn peer_property(connections: &TestConnections, path: &str, interface: &str, name: &str) -> Option<String> {
     let body = (interface.to_string(), name.to_string());
     let reply = peer_call(connections, path, "org.freedesktop.DBus.Properties", "Get", body).ok()?;
-    let value: zbus::zvariant::OwnedValue = reply.body().deserialize().ok()?;
+    let value: zbus::OwnedVariant = reply.body().deserialize().ok()?;
     Some(show(&value))
 }
 
 /// A value as text: variants unwrapped, the entries of a dictionary
 /// sorted by key.
-pub(crate) fn show(value: &zbus::zvariant::Value<'_>) -> String {
-    use zbus::zvariant::Value;
+pub(crate) fn show(value: &zbus::Variant<'_>) -> String {
+    use zbus::Variant;
     match value {
-        Value::Value(inner) => show(inner),
-        Value::Str(text) => text.to_string(),
-        Value::ObjectPath(path) => path.to_string(),
-        Value::Bool(flag) => flag.to_string(),
-        Value::U8(number) => number.to_string(),
-        Value::I32(number) => number.to_string(),
-        Value::U32(number) => number.to_string(),
-        Value::Array(items) => format!("[{}]", items.iter().map(show).collect::<Vec<_>>().join(",")),
-        Value::Structure(fields) => format!("({})", fields.fields().iter().map(show).collect::<Vec<_>>().join(",")),
-        Value::Dict(entries) => {
+        Variant::Variant(inner) => show(inner),
+        Variant::Str(text) => text.to_string(),
+        Variant::ObjectPath(path) => path.to_string(),
+        Variant::Bool(flag) => flag.to_string(),
+        Variant::U8(number) => number.to_string(),
+        Variant::I32(number) => number.to_string(),
+        Variant::U32(number) => number.to_string(),
+        Variant::Array(items) => format!("[{}]", items.iter().map(show).collect::<Vec<_>>().join(",")),
+        Variant::Structure(fields) => format!("({})", fields.fields().iter().map(show).collect::<Vec<_>>().join(",")),
+        Variant::Dict(entries) => {
             let mut entries: Vec<String> =
                 entries.iter().map(|(key, value)| format!("{}={}", show(key), show(value))).collect();
             entries.sort();

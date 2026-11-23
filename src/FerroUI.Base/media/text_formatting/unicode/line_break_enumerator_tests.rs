@@ -122,3 +122,60 @@ fn get_breaks(mut line_breaker: LineBreakEnumerator<'_>) -> Vec<LineBreak> {
 
     breaks
 }
+
+/// The first break of `text` the enumerator gives as required.
+fn first_required_enumerated(text: &[u16]) -> Option<LineBreak> {
+    LineBreakEnumerator::new(text).find(|line_break| line_break.required())
+}
+
+#[test]
+fn the_characters_of_a_required_break_are_those_of_the_hard_break_classes() {
+    for value in (0..=0x10FFFF_u32).filter(|value| !(0xD800..=0xDFFF).contains(value)) {
+        let class = Codepoint::new(value).line_break_class();
+        let hard = matches!(
+            class,
+            LineBreakClass::MandatoryBreak
+                | LineBreakClass::CarriageReturn
+                | LineBreakClass::LineFeed
+                | LineBreakClass::NextLine
+        );
+        let text = utf16_from_code_points(&[value]);
+        assert_eq!(LineBreakEnumerator::first_required(&text).is_some(), hard, "U+{value:04X}");
+    }
+}
+
+#[test]
+fn the_first_required_break_is_the_one_the_enumerator_gives() {
+    const PIECES: [&str; 24] = [
+        "a", "word", " ", "  ", "\n", "\r", "\r\n", "\u{0B}", "\u{0C}", "\u{85}", "\u{2028}", "\u{2029}", "\u{301}",
+        "\u{200D}", "\u{200B}", "\u{A0}", "\t", "-", "1", "\u{4E2D}", "\u{1F1F5}\u{1F1F1}", "\u{1F44D}\u{1F3FD}", ")",
+        "\u{3000}",
+    ];
+    let mut seed = 0x9E37_79B9_7F4A_7C15_u64;
+    let mut next = |below: usize| {
+        seed ^= seed << 13;
+        seed ^= seed >> 7;
+        seed ^= seed << 17;
+        (seed % below as u64) as usize
+    };
+    let mut required = 0;
+    for case in 0..40_000 {
+        let pieces = next(14);
+        // Half of the texts have their hard breaks late, behind a run of other characters.
+        let hard_from = if case % 2 == 0 { 0 } else { pieces / 2 };
+        let text: String = (0..pieces)
+            .map(|piece| loop {
+                let chosen = PIECES[next(PIECES.len())];
+                let hard = chosen.chars().any(|c| matches!(c, '\n'..='\r' | '\u{85}' | '\u{2028}' | '\u{2029}'));
+                if !hard || piece >= hard_from {
+                    break chosen;
+                }
+            })
+            .collect();
+        let text = utf16(&text);
+        let expected = first_required_enumerated(&text);
+        required += usize::from(expected.is_some());
+        assert_eq!(LineBreakEnumerator::first_required(&text), expected, "case {case}: {text:04X?}");
+    }
+    assert!(required > 10_000, "{required} texts have a required break");
+}

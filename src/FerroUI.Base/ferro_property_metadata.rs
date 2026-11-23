@@ -1,7 +1,9 @@
 use crate::data::BindingMode;
-use crate::property_store::{EffectiveValue, UncommonFields};
-use crate::{FerroObject, TypeInfo};
-use std::cell::RefCell;
+use crate::property_store::{cast_effective_value, EffectiveValue, EffectiveValueDyn, UncommonFields};
+use crate::{FerroObject, StyledValue, TypeInfo};
+use std::any::Any;
+use std::cell::{OnceCell, RefCell};
+use std::marker::PhantomData;
 use std::rc::Rc;
 
 /// Metadata common to all property kinds.
@@ -74,11 +76,11 @@ pub(crate) struct DefaultCoercionOperations<T> {
     pub(crate) set_default: fn(&EffectiveValue<T>, &FerroObject, T),
 }
 
-/// The factory borrows the store, owner and typed property. Keeping that
-/// PropertyValue-specific construction outside the algorithm lets public
-/// Clone-only metadata retain its existing bounds.
+/// The factory borrows the store, owner and property. Keeping that
+/// construction outside the algorithm lets public Clone-only metadata retain
+/// its existing bounds. The value it makes is an `EffectiveValue<T>`.
 pub(crate) trait DefaultEffectiveValueFactory<T> {
-    fn create_and_add(&self) -> Rc<EffectiveValue<T>>;
+    fn create_and_add(&self) -> Rc<dyn EffectiveValueDyn>;
 }
 
 // Requests contain only borrows and function pointers: no owned T, Rc or
@@ -109,6 +111,7 @@ enum CoercionRequest<'a, T> {
     InitializeUncommon {
         callback: &'a CoerceValueCallback<T>,
         value: &'a T,
+        operations: CoercionOperations<T>,
         result: &'a mut Option<UncommonFields<T>>,
     },
 }
@@ -163,13 +166,14 @@ impl<T> Coercion<T> {
         result.expect("coercion dispatch returns type-safe metadata")
     }
 
-    pub(crate) fn initialize_uncommon(&self, value: &T) -> UncommonFields<T> {
+    pub(crate) fn initialize_uncommon(&self, value: &T, operations: CoercionOperations<T>) -> UncommonFields<T> {
         let mut result = None;
         // Borrow the callback here. Its original Rc clone belongs inside the
         // initializer, before either value clone, including partial unwind.
         (self.apply)(CoercionRequest::InitializeUncommon {
             callback: &self.callback,
             value,
+            operations,
             result: &mut result,
         });
         result.expect("coercion dispatch initializes uncommon fields")
@@ -195,8 +199,8 @@ impl<T: Clone + 'static> Coercion<T> {
                 // frame; only explicit coercer construction roots this call.
                 *result = Some(StyledPropertyMetadata::generate_type_safe_metadata(metadata));
             }
-            CoercionRequest::InitializeUncommon { callback, value, result } => {
-                *result = Some(UncommonFields::new(callback, value));
+            CoercionRequest::InitializeUncommon { callback, value, operations, result } => {
+                *result = Some(UncommonFields::new(callback, value, operations));
             }
         }
     }
@@ -220,7 +224,7 @@ impl<T: Clone + 'static> Coercion<T> {
         // Construction reloads current metadata, as it originally did after
         // a potentially reentrant coercer/equality implementation.
         let effective = factory.create_and_add();
-        (operations.set_default)(&effective, owner, coerced);
+        (operations.set_default)(cast_effective_value::<T>(&*effective), owner, coerced);
     }
 }
 
@@ -299,11 +303,28 @@ pub struct StyledPropertyMetadata<T> {
     base: FerroPropertyMetadata,
     default_value: Option<T>,
     coerce: Option<Coercion<T>>,
+    /// The metadata of the storage type of a value type that is not its own storage type
+    /// ([`StyledValue::Storage`]): what the property store reads, made the first time it is
+    /// asked for (`for_storage`). Empty for a type that is its own storage type.
+    storage: OnceCell<StorageMetadata>,
+}
+
+/// The metadata of the storage type of a value type: the one of an enumeration named as what it
+/// is, so that the store reads it with no call to find its type (the check of the type is decided
+/// when `for_storage` is compiled), any other as a value of any type.
+enum StorageMetadata {
+    Enumeration(Rc<StyledPropertyMetadata<crate::EnumValue>>),
+    Other(Rc<dyn Any>),
 }
 
 impl<T: Clone> Clone for StyledPropertyMetadata<T> {
     fn clone(&self) -> Self {
-        Self { base: self.base.clone(), default_value: self.default_value.clone(), coerce: self.coerce.clone() }
+        Self {
+            base: self.base.clone(),
+            default_value: self.default_value.clone(),
+            coerce: self.coerce.clone(),
+            storage: OnceCell::new(),
+        }
     }
 }
 
@@ -322,6 +343,7 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
             base: FerroPropertyMetadata::new(BindingMode::Default, Some(false)),
             default_value,
             coerce: None,
+            storage: OnceCell::new(),
         }
     }
 
@@ -363,6 +385,59 @@ impl<T: Clone + 'static> StyledPropertyMetadata<T> {
 
     pub(crate) fn coercion(&self) -> Option<&Coercion<T>> {
         self.coerce.as_ref()
+    }
+}
+
+impl<T: StyledValue> StyledPropertyMetadata<T> {
+    /// The metadata as the property store reads it, of the storage type of `T`: this metadata
+    /// itself for a type that is its own storage type, else a copy with the default value
+    /// converted and the coercion callback wrapped once, made the first time it is asked for.
+    #[inline]
+    pub(crate) fn for_storage(self: Rc<Self>) -> Rc<StyledPropertyMetadata<T::Storage>> {
+        // Decided when the function is compiled: the two types are the same or not.
+        if std::any::TypeId::of::<T>() == std::any::TypeId::of::<T::Storage>() {
+            let this: Rc<dyn Any> = self;
+            return match this.downcast::<StyledPropertyMetadata<T::Storage>>() {
+                Ok(same) => same,
+                Err(_) => unreachable!("a type that is its own storage type"),
+            };
+        }
+        let copy = match self.storage.get() {
+            Some(copy) => copy,
+            None => self.make_storage_copy(),
+        };
+        let copy = match copy {
+            // Of a type known here: the downcast is decided when the function is compiled.
+            StorageMetadata::Enumeration(copy) => (copy.clone() as Rc<dyn Any>).downcast(),
+            StorageMetadata::Other(copy) => copy.clone().downcast(),
+        };
+        match copy {
+            Ok(copy) => copy,
+            Err(_) => unreachable!("the storage metadata has the storage type"),
+        }
+    }
+
+    #[cold]
+    #[inline(never)]
+    fn make_storage_copy(&self) -> &StorageMetadata {
+        self.storage.get_or_init(|| {
+            let coerce = self.coerce.as_ref().map(|coerce| {
+                let callback = coerce.callback().clone();
+                let wrapped: CoerceValueCallback<T::Storage> =
+                    Rc::new(move |owner, value| T::into_storage(callback(owner, T::from_storage(value))));
+                Coercion::new(wrapped)
+            });
+            let copy = Rc::new(StyledPropertyMetadata::<T::Storage> {
+                base: self.base.clone(),
+                default_value: self.default_value.clone().map(T::into_storage),
+                coerce,
+                storage: OnceCell::new(),
+            }) as Rc<dyn Any>;
+            match copy.downcast() {
+                Ok(enumeration) => StorageMetadata::Enumeration(enumeration),
+                Err(other) => StorageMetadata::Other(other),
+            }
+        })
     }
 }
 
@@ -492,23 +567,124 @@ impl<T: Clone + 'static> PropertyMetadata for DirectPropertyMetadata<T> {
 /// queried type wins, falling back to the type-safe default metadata.
 pub(crate) struct MetadataTable<M> {
     default_metadata: Rc<M>,
-    inner: RefCell<MetadataEntries<M>>,
+    inner: RefCell<MetadataEntries>,
+    /// The table owns an `Rc<M>` for each value in `inner`.
+    values: PhantomData<Rc<M>>,
 }
+
+/// A value of a table as the code all tables share holds it: the pointer `Rc::into_raw` gives
+/// for an `Rc<M>` the table owns. Only the table knows `M` and turns the pointer back.
+///
+/// The registrations do not depend on the type of the metadata. With the values typed, adding
+/// and removing one was compiled once for every value type of a property (`override_metadata`
+/// and `unregister`, the second of which nothing but the table of virtual functions of a property
+/// names): docs/binary-size.md, section 4.22.
+type RawValue = *const ();
 
 // The normal property has only its registration. Do not allocate the host
 // index or cache until a second host actually provides different metadata.
 // The cache of the metadata of every type it was asked for is a hash table by
 // the address of the type, as the reference's `_metadataCache` dictionary
 // (DEVIATIONS.md, corrected divergences); its hierarchy traversal is shared by
-// every metadata type and only the cached values stay typed.
-enum MetadataEntries<M> {
-    Single(Option<(&'static TypeInfo, Rc<M>)>),
-    Multiple(Box<MetadataOverrides<M>>),
+// every metadata type.
+enum MetadataEntries {
+    Single(Option<(&'static TypeInfo, RawValue)>),
+    Multiple(Box<MetadataOverrides>),
 }
 
-struct MetadataOverrides<M> {
+struct MetadataOverrides {
     hosts: MetadataHosts,
-    values: Vec<Rc<M>>,
+    values: Vec<RawValue>,
+}
+
+impl MetadataEntries {
+    /// Whether `type_` itself has a registration.
+    fn has(entries: &RefCell<Self>, type_: &'static TypeInfo) -> bool {
+        match &*entries.borrow() {
+            MetadataEntries::Single(existing) => existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)),
+            MetadataEntries::Multiple(table) => host_index(&table.hosts.owners, type_).is_some(),
+        }
+    }
+
+    /// Adds the registration of `type_`, which has none.
+    #[inline(never)]
+    fn insert(entries: &RefCell<Self>, type_: &'static TypeInfo, value: RawValue) {
+        let mut inner = entries.borrow_mut();
+        match &mut *inner {
+            MetadataEntries::Single(existing) => {
+                if let Some((host, original)) = existing.take() {
+                    *inner = MetadataEntries::Multiple(Box::new(MetadataOverrides {
+                        hosts: MetadataHosts::new(host, type_),
+                        values: vec![original, value],
+                    }));
+                } else {
+                    *existing = Some((type_, value));
+                }
+            }
+            MetadataEntries::Multiple(table) => {
+                table.hosts.owners.push(type_);
+                table.values.push(value);
+                table.hosts.invalidate();
+            }
+        }
+    }
+
+    /// Removes the registration of `type_` and gives its value up with `release`, the function
+    /// of the table for a value that left its entries.
+    #[inline(never)]
+    fn remove(entries: &RefCell<Self>, type_: &'static TypeInfo, release: unsafe fn(RawValue)) {
+        crate::property_store::advance_metadata_generation();
+        let removed = {
+            let mut inner = entries.borrow_mut();
+            match &mut *inner {
+                MetadataEntries::Single(existing) => {
+                    if existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)) {
+                        existing.take().map(|(_, value)| value)
+                    } else {
+                        None
+                    }
+                }
+                MetadataEntries::Multiple(table) => match host_index(&table.hosts.owners, type_) {
+                    Some(i) => {
+                        table.hosts.owners.swap_remove(i);
+                        let removed = table.values.swap_remove(i);
+                        // Descendants may have cached the removed override.
+                        table.hosts.invalidate();
+                        if table.hosts.owners.len() == 1 {
+                            let metadata = table.values.pop().expect("one registration remains");
+                            *inner = MetadataEntries::Single(Some((table.hosts.owners[0], metadata)));
+                        }
+                        Some(removed)
+                    }
+                    None => None,
+                },
+            }
+        };
+        if let Some(removed) = removed {
+            // SAFETY: the value left the entries above, and `release` is the function of the
+            // table these entries belong to.
+            unsafe { release(removed) };
+        }
+    }
+
+    /// Gives every value up with `release`: what a table that goes away does.
+    #[inline(never)]
+    fn clear(&mut self, release: unsafe fn(RawValue)) {
+        let values = match std::mem::replace(self, MetadataEntries::Single(None)) {
+            MetadataEntries::Single(existing) => existing.into_iter().map(|(_, value)| value).collect(),
+            MetadataEntries::Multiple(table) => table.values,
+        };
+        for value in values {
+            // SAFETY: as in `remove`.
+            unsafe { release(value) };
+        }
+    }
+}
+
+#[cold]
+#[inline(never)]
+fn metadata_already_set(property_name: &str, type_: &'static TypeInfo) -> ! {
+    panic!("Metadata is already set for {property_name} on {type_}.");
 }
 
 // Slots are stable until a registration changes. All metadata types share the
@@ -601,6 +777,53 @@ fn inherited_metadata_index(hosts: &[&'static TypeInfo], host: &'static TypeInfo
     None
 }
 
+impl<M> MetadataTable<M> {
+    /// A table with the default metadata and at most one registration.
+    fn from_parts(default_metadata: Rc<M>, registration: Option<(&'static TypeInfo, Rc<M>)>) -> Self {
+        let registration = registration.map(|(host, value)| (host, Self::into_raw(value)));
+        Self { default_metadata, inner: RefCell::new(MetadataEntries::Single(registration)), values: PhantomData }
+    }
+
+    /// Hands `value` to the entries of the table.
+    #[inline]
+    fn into_raw(value: Rc<M>) -> RawValue {
+        Rc::into_raw(value).cast()
+    }
+
+    /// Another handle to a value the entries hold.
+    ///
+    /// # Safety
+    ///
+    /// `raw` is a value in the entries of this table, which `into_raw` put there and nothing
+    /// has taken out since.
+    #[inline]
+    unsafe fn share(raw: RawValue) -> Rc<M> {
+        // SAFETY: by the contract `raw` is the pointer of a live `Rc<M>`, whose count the
+        // entries keep at one or more; the new handle has a count of its own.
+        unsafe {
+            Rc::increment_strong_count(raw.cast::<M>());
+            Rc::from_raw(raw.cast::<M>())
+        }
+    }
+
+    /// Drops the handle the entries held for a value that left them.
+    ///
+    /// # Safety
+    ///
+    /// `raw` came from `into_raw` of this table and is in its entries no more.
+    unsafe fn release(raw: RawValue) {
+        // SAFETY: by the contract this is the one handle `into_raw` gave up.
+        drop(unsafe { Rc::from_raw(raw.cast::<M>()) });
+    }
+}
+
+impl<M> Drop for MetadataTable<M> {
+    #[inline]
+    fn drop(&mut self) {
+        self.inner.get_mut().clear(Self::release);
+    }
+}
+
 impl<M: PropertyMetadata> MetadataTable<M> {
     pub fn new(host_type: &'static TypeInfo, mut metadata: M) -> Self
     where
@@ -609,19 +832,13 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         metadata.freeze();
         let metadata = Rc::new(metadata);
         let default_metadata = M::generate_frozen_type_safe_metadata(&metadata);
-        Self {
-            default_metadata,
-            inner: RefCell::new(MetadataEntries::Single(Some((host_type, metadata)))),
-        }
+        Self::from_parts(default_metadata, Some((host_type, metadata)))
     }
 
     /// A table for a property that shares its identity with `source` (added
     /// owner) and optionally carries metadata for the new owner.
     pub fn for_added_owner(source: &Self, owner_type: &'static TypeInfo, metadata: Option<M>) -> Self {
-        Self {
-            default_metadata: source.default_metadata.clone(),
-            inner: RefCell::new(MetadataEntries::Single(metadata.map(|m| (owner_type, Rc::new(m))))),
-        }
+        Self::from_parts(source.default_metadata.clone(), metadata.map(|m| (owner_type, Rc::new(m))))
     }
 
     #[inline]
@@ -629,12 +846,18 @@ impl<M: PropertyMetadata> MetadataTable<M> {
         &self.default_metadata
     }
 
+    // The look-up stays with the metadata type, as it was: it runs for every read of a default
+    // value and of the metadata of a property, and one call more for it (to code all tables
+    // share) cost the styling and the propagation benchmarks up to a tenth of their time. Only
+    // the values are read as the pointers the entries hold (docs/binary-size.md, section 4.22).
     pub fn get(&self, type_: &'static TypeInfo) -> Rc<M> {
         let mut inner = self.inner.borrow_mut();
         let table = match &mut *inner {
             MetadataEntries::Single(Some((host, value))) => {
-                return if Rc::ptr_eq(value, &self.default_metadata) || host.is_assignable_from(type_) {
-                    value.clone()
+                let default: RawValue = Rc::as_ptr(&self.default_metadata).cast();
+                return if std::ptr::eq(*value, default) || host.is_assignable_from(type_) {
+                    // SAFETY: a value of the entries of this table.
+                    unsafe { Self::share(*value) }
                 } else {
                     self.default_metadata.clone()
                 };
@@ -643,64 +866,27 @@ impl<M: PropertyMetadata> MetadataTable<M> {
             MetadataEntries::Multiple(table) => table,
         };
         let slot = table.hosts.resolve(type_);
-        table.values.get(slot).unwrap_or(&self.default_metadata).clone()
+        match table.values.get(slot) {
+            // SAFETY: a value of the entries of this table.
+            Some(value) => unsafe { Self::share(*value) },
+            None => self.default_metadata.clone(),
+        }
     }
 
     pub fn override_metadata(&self, property_name: &str, type_: &'static TypeInfo, mut metadata: M) {
         crate::property_store::advance_metadata_generation();
-        let exists = match &*self.inner.borrow() {
-            MetadataEntries::Single(existing) => existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)),
-            MetadataEntries::Multiple(table) => host_index(&table.hosts.owners, type_).is_some(),
-        };
-        if exists {
-            panic!("Metadata is already set for {property_name} on {type_}.");
+        if MetadataEntries::has(&self.inner, type_) {
+            metadata_already_set(property_name, type_);
         }
         let base = self.get(type_);
         metadata.merge(&base);
         metadata.freeze();
-        let value = Rc::new(metadata);
-        let mut inner = self.inner.borrow_mut();
-        match &mut *inner {
-            MetadataEntries::Single(existing) => {
-                if let Some((host, original)) = existing.take() {
-                    *inner = MetadataEntries::Multiple(Box::new(MetadataOverrides {
-                        hosts: MetadataHosts::new(host, type_),
-                        values: vec![original, value],
-                    }));
-                } else {
-                    *existing = Some((type_, value));
-                }
-            }
-            MetadataEntries::Multiple(table) => {
-                table.hosts.owners.push(type_);
-                table.values.push(value);
-                table.hosts.invalidate();
-            }
-        }
+        MetadataEntries::insert(&self.inner, type_, Self::into_raw(Rc::new(metadata)));
     }
 
+    #[inline]
     pub fn unregister(&self, type_: &'static TypeInfo) {
-        crate::property_store::advance_metadata_generation();
-        let mut inner = self.inner.borrow_mut();
-        match &mut *inner {
-            MetadataEntries::Single(existing) => {
-                if existing.as_ref().is_some_and(|(t, _)| std::ptr::eq(*t, type_)) {
-                    *existing = None;
-                }
-            }
-            MetadataEntries::Multiple(table) => {
-                if let Some(i) = host_index(&table.hosts.owners, type_) {
-                    table.hosts.owners.swap_remove(i);
-                    table.values.swap_remove(i);
-                    // Descendants may have cached the removed override.
-                    table.hosts.invalidate();
-                    if table.hosts.owners.len() == 1 {
-                        let metadata = table.values.pop().expect("one registration remains");
-                        *inner = MetadataEntries::Single(Some((table.hosts.owners[0], metadata)));
-                    }
-                }
-            }
-        }
+        MetadataEntries::remove(&self.inner, type_, Self::release);
     }
 }
 
@@ -732,6 +918,41 @@ mod metadata_table_tests {
         for (i, host) in TYPES.iter().enumerate().rev() {
             assert_eq!(*table.get(host).default_value(), if i == 0 { 3 } else { 4 });
         }
+    }
+
+    // The entries hold the values as pointers the code of all tables shares; the table gives a
+    // value up when it leaves the entries and when the table goes.
+    #[test]
+    fn a_table_gives_up_a_value_that_leaves_it_and_every_value_when_it_goes() {
+        let table = MetadataTable::new(&ROOT, StyledPropertyMetadata::new(Some(1)));
+        table.override_metadata("Number", &CHILD, StyledPropertyMetadata::new(Some(2)));
+        table.override_metadata("Number", &SIBLING, StyledPropertyMetadata::new(Some(3)));
+        let root = Rc::downgrade(&table.get(&ROOT));
+        let child = Rc::downgrade(&table.get(&CHILD));
+        let sibling = Rc::downgrade(&table.get(&SIBLING));
+
+        // A handle the table hands out has a count of its own beside the one of the table.
+        let held = table.get(&LEAF);
+        assert_eq!(*held.default_value(), 2);
+        assert_eq!(Rc::strong_count(&held), 2);
+        table.unregister(&CHILD);
+        assert_eq!(Rc::strong_count(&held), 1);
+        drop(held);
+        assert!(child.upgrade().is_none());
+        assert!(root.upgrade().is_some() && sibling.upgrade().is_some());
+
+        // One registration is left after the next, and none after the last.
+        table.unregister(&SIBLING);
+        assert!(sibling.upgrade().is_none());
+        assert_eq!(*table.get(&SIBLING).default_value(), 1);
+        drop(table);
+        assert!(root.upgrade().is_none());
+
+        let table = MetadataTable::new(&ROOT, StyledPropertyMetadata::new(Some(1)));
+        table.override_metadata("Number", &CHILD, StyledPropertyMetadata::new(Some(2)));
+        let (root, child) = (Rc::downgrade(&table.get(&ROOT)), Rc::downgrade(&table.get(&CHILD)));
+        drop(table);
+        assert!(root.upgrade().is_none() && child.upgrade().is_none());
     }
 
     #[test]

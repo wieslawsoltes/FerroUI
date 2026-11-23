@@ -73,6 +73,8 @@ impl TestVisual {
 #[derive(Default)]
 struct RecordingRenderer {
     dirty: RefCell<Vec<Ref<Visual>>>,
+    /// The visuals invalidated with their layout (desktop-performance.md, section 9.53).
+    layout_dirty: RefCell<Vec<Ref<Visual>>>,
     recalculated: RefCell<Vec<Ref<Visual>>>,
 }
 
@@ -97,6 +99,7 @@ impl RecordingRenderer {
     /// `renderer.Invocations.Clear()`.
     fn clear_invocations(&self) {
         self.dirty.borrow_mut().clear();
+        self.layout_dirty.borrow_mut().clear();
         self.recalculated.borrow_mut().clear();
     }
 }
@@ -113,6 +116,9 @@ impl IRenderer for RecordingRenderer {
     }
     fn add_dirty(&self, visual: &Visual) {
         self.dirty.borrow_mut().push(visual.to_ref());
+    }
+    fn add_dirty_for_layout(&self, visual: &Visual) {
+        self.layout_dirty.borrow_mut().push(visual.to_ref());
     }
     fn recalculate_children(&self, visual: &Visual) {
         self.recalculated.borrow_mut().push(visual.to_ref());
@@ -366,6 +372,38 @@ fn attaching_to_visual_tree_should_invalidate_visual() {
     root.set_child(child.clone());
 
     renderer.verify_add_dirty(&child);
+}
+
+/// A FerroUI addition (docs/porting/desktop-performance.md, section 9.53): a visual whose
+/// layout is invalidated says so to the renderer, which then draws its area again only when
+/// it draws something else than it drew.
+#[test]
+fn invalidating_the_layout_invalidates_the_visual_for_its_layout() {
+    let _scope = test_scope();
+    let renderer = RecordingRenderer::new();
+    let child = Decorator::new();
+    let root = TestRoot::new();
+    root.set_renderer(renderer.clone());
+    root.set_child(child.clone());
+    let invalidated = |list: &RefCell<Vec<Ref<Visual>>>| list.borrow().iter().any(|visual| *visual == v(&child));
+
+    child.measure(Size::new(100.0, 100.0));
+    child.arrange(Rect::new(0.0, 0.0, 100.0, 100.0));
+    renderer.clear_invocations();
+    child.invalidate_measure();
+    assert!(invalidated(&renderer.layout_dirty));
+    assert!(!invalidated(&renderer.dirty));
+
+    child.measure(Size::new(100.0, 100.0));
+    child.arrange(Rect::new(0.0, 0.0, 100.0, 100.0));
+    renderer.clear_invocations();
+    child.invalidate_arrange();
+    assert!(invalidated(&renderer.layout_dirty));
+    assert!(!invalidated(&renderer.dirty));
+
+    // Invalidated itself, its area is drawn again whatever it draws.
+    child.invalidate_visual();
+    assert!(invalidated(&renderer.dirty));
 }
 
 #[test]

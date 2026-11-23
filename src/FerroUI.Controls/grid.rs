@@ -278,7 +278,10 @@ pub struct Grid {
     base: Panel,
     /// The extended data instantiated on demand, for the handling of the
     /// non-trivial case only.
-    ext_data: OnceCell<ExtendedData>,
+    // In a box, as upstream has it in an object of its own
+    // (docs/porting/desktop-performance.md, section 9.70): inline it was 168 bytes of every grid,
+    // also of one without definitions, which never makes it.
+    ext_data: OnceCell<Box<ExtendedData>>,
     /// The grid validity / property caches dirtiness flags.
     flags: Cell<u32>,
     /// Keeps track of definition indices.
@@ -295,24 +298,39 @@ ferro_impl_classes!(Grid: StyledElementImpl, VisualImpl, InteractiveImpl, InputE
 
 ferroui_base::ferro_impl_classes!(Grid: FerroObjectImpl);
 
+/// What the hold of a cell in one of several star columns gives up on each side, in the units of
+/// the cell: the share of a star column is a product and a quotient of rounded numbers, and may
+/// differ from the exact one in its last digits. Far more than that, and far less than anything a
+/// layout can see.
+const STAR_SHARE_SLACK: f64 = 1.0 / 65536.0;
+
 impl LayoutableImpl for Grid {
     /// Content measurement.
     /// The measure hold of a grid (desktop-performance.md section 9.15), in two shapes:
     ///
     /// - without definitions every child gets the grid's constraint: the intersection of the
     ///   visible children's holds;
-    /// - with one star column (without minimum, maximum or shared size), rows that are auto or
+    /// - with star columns (without minimum, maximum or shared size), rows that are auto or
     ///   pixel sized (or any rows at an infinite height, where star rows size to their content),
     ///   no shared sizes and no spans, at a finite width: a cell of an auto or pixel
-    ///   column, or of any row, gets a constraint the grid's does not change, and a cell of the star
-    ///   column gets the grid's width less a fixed amount `F` (the other columns and the spacing),
-    ///   so its hold moves by `F` (less a rounding step on each side when the layout is rounded).
+    ///   column, or of any row, gets a constraint the grid's does not change, and a cell of a star
+    ///   column of weight `w` gets its share `w / W` of the grid's width less a fixed amount `F`
+    ///   (the other columns and the spacing; `W` is the weight of all star columns). The star
+    ///   columns are resolved before any of their cells is measured, with no minimum to give way
+    ///   to, so the share is exact, and the hold of the cell maps back as `hold * W / w + F`
+    ///   (less a rounding step of the cell on each side when the layout is rounded, and with
+    ///   several star columns less what the division may round away);
+    /// - the same with one row that is a star row, at a finite height (a grid without row
+    ///   definitions in a box of a set height), at that height alone: the row is the height of
+    ///   the grid, so at the same height every cell gets the height it got (section 9.86).
+    ///   Several rows of which some are star rows hold nothing at a finite height, as before:
+    ///   the walk of the cells below would be paid by every measure of a grid of many rows.
     ///
     /// Any other grid holds nothing.
     fn measure_hold_override(this: &Self, constraint: Size) -> Option<ferroui_base::layout::MeasureHold> {
         use ferroui_base::layout::MeasureHold;
         let children = this.children().snapshot();
-        if this.ext_data.get().is_none() {
+        if !this.is_measured_with_definitions() {
             let mut hold = MeasureHold::ANY;
             for child in children.iter().filter(|child| child.is_visible()) {
                 hold = hold.intersect(child.measure_hold()?)?;
@@ -323,47 +341,92 @@ impl LayoutableImpl for Grid {
             return None;
         }
         let (definitions_u, definitions_v) = (this.definitions_u(), this.definitions_v());
-        let mut star = None;
+        // The star columns: how many, their weight, and the last of them (the only one, with one).
+        let (mut star_columns, mut star_weight, mut star) = (0, 0.0, 0);
         for index in 0..definitions_u.count() {
             let definition = &definitions_u[index];
             if definition.is_shared() {
                 return None;
             }
-            if definition.user_size().is_star() {
-                if star.is_some() || definition.user_min_size() != 0.0 || definition.user_max_size() != f64::INFINITY {
+            let size = definition.user_size();
+            if size.is_star() {
+                let weight = size.value();
+                if definition.user_min_size() != 0.0
+                    || definition.user_max_size() != f64::INFINITY
+                    || !(weight > 0.0 && weight.is_finite())
+                {
                     return None;
                 }
-                star = Some(index);
+                star_columns += 1;
+                star_weight += weight;
+                star = index;
             }
         }
+        if !star_weight.is_finite() {
+            return None;
+        }
         // Star rows share a finite height; at an infinite height they size to their content as
-        // auto rows do.
+        // auto rows do. One star row alone is the height of the grid: the grid then holds at
+        // that height.
+        let mut rows_share_the_height = false;
         for index in 0..definitions_v.count() {
             let definition = &definitions_v[index];
-            if definition.is_shared() || (definition.user_size().is_star() && constraint.height.is_finite()) {
+            if definition.is_shared() {
                 return None;
+            }
+            if definition.user_size().is_star() && constraint.height.is_finite() {
+                if definitions_v.count() != 1 {
+                    return None;
+                }
+                rows_share_the_height = true;
             }
         }
         let step = if this.use_layout_rounding() { 1.0 / LayoutHelper::get_layout_scale(this) } else { 0.0 };
         let last_column = definitions_u.count() as i32 - 1;
         // A finite width stays finite and an infinite height infinite: the grid sizes to its
         // content along an infinite axis.
-        let height = if constraint.height.is_finite() { (f64::NEG_INFINITY, f64::MAX) } else { (f64::INFINITY, f64::INFINITY) };
+        let height = if rows_share_the_height {
+            (constraint.height, constraint.height.next_up())
+        } else if constraint.height.is_finite() {
+            (f64::NEG_INFINITY, f64::MAX)
+        } else {
+            (f64::INFINITY, f64::INFINITY)
+        };
         let mut hold = MeasureHold::new((f64::NEG_INFINITY, f64::MAX), height);
         for child in children.iter().filter(|child| child.is_visible()) {
             if Grid::get_column_span(child) != 1 || Grid::get_row_span(child) != 1 {
                 return None;
             }
             let child_hold = child.measure_hold()?.any_height();
-            if star != Some(Grid::get_column(child).clamp(0, last_column.max(0)) as usize) {
+            // Which column a cell is in matters only for a star column, and the length of a
+            // column is read only where it may be one of several.
+            if star_columns == 0 {
                 continue;
             }
+            let column = Grid::get_column(child).clamp(0, last_column.max(0)) as usize;
+            let weight = if star_columns == 1 {
+                if column != star {
+                    continue;
+                }
+                star_weight
+            } else {
+                let size = definitions_u[column].user_size();
+                if !size.is_star() {
+                    continue;
+                }
+                size.value()
+            };
             let measured = child.previous_measure()?.width;
             if !(measured > 0.0 && measured.is_finite()) {
                 return None;
             }
-            let fixed = constraint.width - measured;
-            let width = (child_hold.width.0 + fixed + step, child_hold.width.1 + fixed - step);
+            // The width of the grid for a width of the cell: `cell * ratio + fixed`. One star
+            // column has the whole of what is left, with no division.
+            let (ratio, slack) =
+                if star_columns == 1 { (1.0, 0.0) } else { (star_weight / weight, STAR_SHARE_SLACK) };
+            let fixed = constraint.width - measured * ratio;
+            let margin = (step + slack) * ratio;
+            let width = (child_hold.width.0 * ratio + fixed + margin, child_hold.width.1 * ratio + fixed - margin);
             hold = hold.intersect(MeasureHold::new(width, MeasureHold::ANY.height))?;
         }
         hold.contains(constraint).then_some(hold)
@@ -680,7 +743,9 @@ impl LayoutableImpl for Grid {
         this.set_flags(true, FLAG_ARRANGE_OVERRIDE_IN_PROGRESS);
         let _in_progress = FlagGuard(this, FLAG_ARRANGE_OVERRIDE_IN_PROGRESS);
 
-        if this.ext_data.get().is_none() {
+        // Arranged as it was measured: a grid whose definitions were first asked for after its
+        // measure was measured as a trivial grid (`is_measured_with_definitions`).
+        if !this.is_measured_with_definitions() {
             let children = this.children().snapshot();
 
             for child in children.iter() {
@@ -1115,9 +1180,15 @@ impl Grid {
         self.row_definitions().set_is_dirty(value)
     }
 
+    /// Whether the grid made its extended data.
+    #[cfg(test)]
+    pub(crate) fn has_extended_data(&self) -> bool {
+        self.ext_data.get().is_some()
+    }
+
     /// The extended data, created on demand.
     fn ext(&self) -> &ExtendedData {
-        self.ext_data.get_or_init(ExtendedData::new)
+        self.ext_data.get_or_init(|| Box::new(ExtendedData::new()))
     }
 
     /// Lays out cells according to rows and columns, and creates lookup
@@ -2661,6 +2732,18 @@ impl Grid {
                 grid.set_cells_structure_dirty(true);
             }
         }
+    }
+
+    /// Whether the last measure of the grid ran with its definitions. It did not for a trivial
+    /// grid (one without extended data), nor for a grid whose extended data was made after that
+    /// measure: `column_definitions` and `row_definitions` make it when they are first read, and
+    /// a read invalidates nothing, so the measure that holds is the trivial one and the arrange
+    /// and the measure hold follow it. Not upstream, whose `ArrangeOverride` reads definitions
+    /// that are not there in that case (FerroUI deviation, DEVIATIONS.md, "Grid").
+    fn is_measured_with_definitions(&self) -> bool {
+        self.ext_data
+            .get()
+            .is_some_and(|ext_data| ext_data.definitions_u.borrow().is_some() && ext_data.definitions_v.borrow().is_some())
     }
 
     /// The array of column definitions used during the calculations.

@@ -32,6 +32,14 @@ impl ShapeImpl for Line {
     fn create_defining_geometry(this: &Self) -> Option<Ref<Geometry>> {
         Some(LineGeometry::with_points(this.start_point(), this.end_point()).upcast())
     }
+
+    /// The line geometry takes the two points the shape has now.
+    fn update_defining_geometry(this: &Self, geometry: &Ref<Geometry>) -> bool {
+        let Some(geometry) = geometry.cast::<LineGeometry>() else { return false };
+        geometry.set_start_point(this.start_point());
+        geometry.set_end_point(this.end_point());
+        true
+    }
 }
 
 ferroui_base::ferro_properties! { impl Line {

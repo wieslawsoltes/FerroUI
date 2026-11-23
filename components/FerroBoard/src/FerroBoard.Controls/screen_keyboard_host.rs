@@ -61,6 +61,8 @@ impl ferroui_base::animation::ICustomAnimator for HostDoubleAnimator {
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 #[repr(transparent)]
 pub struct KeyboardVisibilityMode(pub i32);
+
+ferroui_base::styled_value!(KeyboardVisibilityMode);
 #[allow(non_upper_case_globals)]
 impl KeyboardVisibilityMode {
     pub const Auto: Self = Self(0);

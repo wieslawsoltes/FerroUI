@@ -62,7 +62,11 @@ impl BoxedLocalValueBindingObserver {
             _ => Some(boxed_binding_default(self.property, &owner, &self.default_value)),
         };
         if let Some(v) = value {
-            self.property.routes().route_set_local_value(&owner, v);
+            // A styled property's value is written by its codec directly (one call).
+            match self.property.styled_codec_if_any() {
+                Some(codec) => codec.set_local_boxed(&owner, v),
+                None => self.property.routes().route_set_local_value(&owner, v),
+            }
         }
         self.state.validate(&owner, self.property, kind, error);
     }

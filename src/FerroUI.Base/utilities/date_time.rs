@@ -560,9 +560,10 @@ impl DateTime {
     ///
     /// Everything else is rejected, and has not been compared with .NET
     /// beyond the recorded rows: other time zone names than `GMT`
-    /// and `Z` (.NET rejects `UTC` too), era names, a two-number date that is only valid in the
-    /// order the culture does not use, and the inflected (genitive) month
-    /// names of cultures that have them, which .NET accepts.
+    /// and `Z` (.NET rejects `UTC` too), era names, and a two-number date that is only valid in the
+    /// order the culture does not use. The genitive month names of a culture
+    /// that has them ([`DateTimeFormatInfo::month_genitive_names`]) are read
+    /// beside the plain ones, as in .NET.
     pub fn parse(text: &str, provider: &(impl DateTimeFormatProvider + ?Sized)) -> Result<DateTime, FormatError> {
         Self::parse_with_styles(text, provider, DateTimeStyles::NONE)
     }

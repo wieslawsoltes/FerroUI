@@ -133,6 +133,9 @@ struct FormatContext<'a> {
     year: i32,
     month: i32,
     day: i32,
+    /// Whether the month names are written in their genitive forms: the
+    /// culture has them and the pattern has a day number.
+    genitive_month: bool,
 }
 
 impl FormatContext<'_> {
@@ -159,7 +162,11 @@ impl FormatContext<'_> {
             },
             b'M' => match count {
                 1 | 2 => push_number(out, self.month as i64, count),
+                3 if self.genitive_month => {
+                    out.push_str(&info.abbreviated_month_genitive_names()[(self.month - 1) as usize])
+                }
                 3 => out.push_str(info.get_abbreviated_month_name(self.month)),
+                _ if self.genitive_month => out.push_str(&info.month_genitive_names()[(self.month - 1) as usize]),
                 _ => out.push_str(info.get_month_name(self.month)),
             },
             b'y' => match count {
@@ -228,6 +235,43 @@ fn is_repeatable(byte: u8) -> bool {
     matches!(byte, b'd' | b'M' | b'y' | b'g' | b'h' | b'H' | b'm' | b's' | b'f' | b'F' | b't' | b'z')
 }
 
+/// Whether the pattern has a day number (`d`, `dd` or `%d`), which is what
+/// selects the genitive month names of a culture that has them. Quoted and
+/// escaped text and the names of the days (`ddd`, `dddd`) do not.
+///
+/// .NET decides it for each month specifier from the nearest run of `d`
+/// before it, then after it, and counts a `d` inside quoted text, so
+/// `MMMM 'de' yyyy` takes the genitive name there and the plain name here.
+fn has_numeric_day(pattern: &str) -> Result<bool, FormatError> {
+    let bytes = pattern.as_bytes();
+    let mut index = 0;
+    while index < bytes.len() {
+        match bytes[index] {
+            b'\'' | b'"' => index = find_quote_end(pattern, index)? + 1,
+            b'\\' => {
+                let next = pattern[index + 1..].chars().next().ok_or_else(bad_format)?;
+                index += 1 + next.len_utf8();
+            }
+            b'%' => {
+                let next = pattern[index + 1..].chars().next().ok_or_else(bad_format)?;
+                if next == 'd' {
+                    return Ok(true);
+                }
+                index += 1 + next.len_utf8();
+            }
+            b'd' => {
+                let count = run_length(bytes, index);
+                if count <= 2 {
+                    return Ok(true);
+                }
+                index += count;
+            }
+            _ => index += pattern[index..].chars().next().unwrap().len_utf8(),
+        }
+    }
+    Ok(false)
+}
+
 fn format_custom(
     value: DateTime,
     offset: Option<SignedDuration>,
@@ -235,7 +279,9 @@ fn format_custom(
     info: &DateTimeFormatInfo,
 ) -> Result<String, FormatError> {
     let (year, month, day, _) = value.date_parts();
-    let context = FormatContext { value, offset, info, year, month, day };
+    // Only a culture with genitive month names has its pattern read twice.
+    let genitive_month = info.has_genitive_month_names() && has_numeric_day(pattern)?;
+    let context = FormatContext { value, offset, info, year, month, day, genitive_month };
     let bytes = pattern.as_bytes();
     let mut out = String::with_capacity(pattern.len() + 8);
     let mut index = 0;
@@ -686,13 +732,17 @@ fn parse_specifier(
         },
         b'M' => match count {
             1 | 2 => set(&mut fields.month, number(cursor, count)?.0).ok()?,
+            // Either form of a name is read, the longest match first (as in
+            // .NET): the plain names, then the genitive ones when set.
             3 => {
-                let index = cursor.name(info.abbreviated_month_names().iter().map(String::as_str))?;
-                set(&mut fields.month, index as i32 + 1).ok()?;
+                let genitive = info.abbreviated_month_genitive_names_if_set().into_iter().flatten();
+                let index = cursor.name(info.abbreviated_month_names().iter().chain(genitive).map(String::as_str))?;
+                set(&mut fields.month, (index % 13) as i32 + 1).ok()?;
             }
             _ => {
-                let index = cursor.name(info.month_names().iter().map(String::as_str))?;
-                set(&mut fields.month, index as i32 + 1).ok()?;
+                let genitive = info.month_genitive_names_if_set().into_iter().flatten();
+                let index = cursor.name(info.month_names().iter().chain(genitive).map(String::as_str))?;
+                set(&mut fields.month, (index % 13) as i32 + 1).ok()?;
             }
         },
         b'y' => {
@@ -1001,17 +1051,26 @@ fn parse_name_of(
     numbers_before_month_name: &mut usize,
 ) -> Option<()> {
     // Candidates: 0..12 month names, 12..24 abbreviated month names, 24..31
-    // day names, 31..38 abbreviated day names, 38 and 39 the designators.
+    // day names, 31..38 abbreviated day names, 38 and 39 the designators,
+    // and from 40 the genitive month names that were set, twelve full ones
+    // and twelve abbreviated ones.
     let abbreviation = |name: &'_ String| name.strip_suffix('.').unwrap_or(name).to_owned();
     let month_abbreviations: Vec<String> = info.abbreviated_month_names()[..12].iter().map(abbreviation).collect();
     let day_abbreviations: Vec<String> = info.abbreviated_day_names().iter().map(abbreviation).collect();
+    let genitive_names: &[String] = info.month_genitive_names_if_set().map_or(&[], |names| &names[..12]);
+    let genitive_abbreviations: Vec<String> = info
+        .abbreviated_month_genitive_names_if_set()
+        .map(|names| names[..12].iter().map(abbreviation).collect())
+        .unwrap_or_default();
     let candidates = info.month_names()[..12]
         .iter()
         .chain(month_abbreviations.iter())
         .chain(info.day_names().iter())
         .chain(day_abbreviations.iter())
         .map(String::as_str)
-        .chain([info.am_designator(), info.pm_designator()]);
+        .chain([info.am_designator(), info.pm_designator()])
+        .chain(genitive_names.iter().map(String::as_str))
+        .chain(genitive_abbreviations.iter().map(String::as_str));
 
     let start = cursor.position;
     let index = cursor.name(candidates)?;
@@ -1022,11 +1081,14 @@ fn parse_name_of(
     }
 
     match index {
-        0..=23 => {
+        0..=23 | 40.. => {
             if *month_from_name {
                 return None;
             }
-            set(&mut fields.month, (index % 12) as i32 + 1).ok()?;
+            // Each group of month names has twelve entries, and 40 is not a
+            // multiple of twelve.
+            let month = if index >= 40 { (index - 40) % 12 } else { index % 12 };
+            set(&mut fields.month, month as i32 + 1).ok()?;
             *month_from_name = true;
             *numbers_before_month_name = numbers.len();
             cursor.eat('.');
@@ -1124,4 +1186,131 @@ fn resolve_date(
         _ => return None,
     }
     Some(())
+}
+
+#[cfg(test)]
+mod genitive_month_tests {
+    use super::*;
+
+    /// A culture whose first two months have genitive forms.
+    fn info_with_genitive_names() -> DateTimeFormatInfo {
+        let mut info = DateTimeFormatInfo::new();
+        let mut full = info.month_names().clone();
+        full[0] = "styczeń".into();
+        full[1] = "luty".into();
+        info.set_month_names(full);
+        let mut abbreviated = info.abbreviated_month_names().clone();
+        abbreviated[0] = "sty".into();
+        abbreviated[1] = "lut".into();
+        info.set_abbreviated_month_names(abbreviated);
+        let mut full = info.month_names().clone();
+        full[0] = "stycznia".into();
+        full[1] = "lutego".into();
+        info.set_month_genitive_names(full);
+        let mut abbreviated = info.abbreviated_month_names().clone();
+        abbreviated[0] = "sty.".into();
+        info.set_abbreviated_month_genitive_names(abbreviated);
+        info
+    }
+
+    #[test]
+    fn a_day_number_selects_the_genitive_month_names_but_literals_and_day_names_do_not() {
+        let info = info_with_genitive_names();
+        let value = DateTime::new(2026, 1, 7);
+        for (pattern, expected) in [
+            ("d MMM yyyy", "7 sty. 2026"),
+            ("MMM dd", "sty. 07"),
+            ("MMMM d", "stycznia 7"),
+            ("dddd, d MMMM yyyy", "Wednesday, 7 stycznia 2026"),
+            ("%d MMM", "7 sty."),
+            ("MMM yyyy", "sty 2026"),
+            ("MMMM yyyy", "styczeń 2026"),
+            ("ddd MMM", "Wed sty"),
+            ("dddd MMMM", "Wednesday styczeń"),
+            ("'dd' MMM", "dd sty"),
+            ("\"dd\" MMM", "dd sty"),
+            (r"\d MMM", "d sty"),
+            ("MMM 'd'", "sty d"),
+            ("MMMM 'de' yyyy", "styczeń de 2026"),
+        ] {
+            assert_eq!(format(value, None, pattern, &info).unwrap(), expected, "{pattern}");
+        }
+    }
+
+    #[test]
+    fn a_culture_without_genitive_names_writes_its_plain_names() {
+        let mut info = DateTimeFormatInfo::new();
+        assert!(!info.has_genitive_month_names());
+        assert_eq!(info.month_genitive_names(), info.month_names());
+        assert_eq!(info.abbreviated_month_genitive_names(), info.abbreviated_month_names());
+
+        let mut names = info.abbreviated_month_names().clone();
+        names[0] = "custom".into();
+        info.set_abbreviated_month_names(names);
+        let value = DateTime::new(2026, 1, 7);
+        assert_eq!(format(value, None, "d MMM", &info).unwrap(), "7 custom");
+        assert_eq!(info.abbreviated_month_genitive_names()[0], "custom");
+    }
+
+    #[test]
+    fn only_one_kind_of_genitive_names_can_be_set() {
+        let mut info = DateTimeFormatInfo::new();
+        let mut full = info.month_names().clone();
+        full[0] = "of January".into();
+        info.set_month_genitive_names(full);
+        let value = DateTime::new(2026, 1, 7);
+        assert_eq!(format(value, None, "d MMMM", &info).unwrap(), "7 of January");
+        assert_eq!(format(value, None, "d MMM", &info).unwrap(), "7 Jan");
+        assert_eq!(format(value, None, "MMMM", &info).unwrap(), "January");
+    }
+
+    #[test]
+    fn a_pattern_that_is_not_valid_is_an_error_with_and_without_genitive_names() {
+        let value = DateTime::new(2026, 1, 7);
+        for info in [DateTimeFormatInfo::new(), info_with_genitive_names()] {
+            for pattern in ["d MMM 'open", "d MMM \\", "d MMM %"] {
+                assert!(format(value, None, pattern, &info).is_err(), "{pattern}");
+            }
+        }
+    }
+
+    #[test]
+    fn parse_exact_reads_the_plain_and_the_genitive_names() {
+        let info = info_with_genitive_names();
+        let parsed = |text: &str, pattern: &str| {
+            parse_exact(text, pattern, &info, DateTimeStyles::NONE).map(|parsed| parsed.date_time).ok()
+        };
+        assert_eq!(parsed("7 stycznia 2026", "d MMMM yyyy"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("7 styczeń 2026", "d MMMM yyyy"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("styczeń 2026", "MMMM yyyy"), Some(DateTime::new(2026, 1, 1)));
+        assert_eq!(parsed("3 lutego 2026", "d MMMM yyyy"), Some(DateTime::new(2026, 2, 3)));
+        assert_eq!(parsed("3 LUTEGO 2026", "d MMMM yyyy"), Some(DateTime::new(2026, 2, 3)));
+        assert_eq!(parsed("7 sty. 2026", "d MMM yyyy"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("7 sty 2026", "d MMM yyyy"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("7 March 2026", "d MMMM yyyy"), Some(DateTime::new(2026, 3, 7)));
+        assert_eq!(parsed("7 marca 2026", "d MMMM yyyy"), None);
+
+        // What a format writes is read back.
+        let value = DateTime::new(2026, 2, 3);
+        for pattern in ["d MMMM yyyy", "MMMM d, yyyy", "d MMM yyyy", "yyyy MMMM d"] {
+            let text = format(value, None, pattern, &info).unwrap();
+            assert_eq!(parsed(&text, pattern), Some(value), "{pattern}: {text}");
+        }
+    }
+
+    #[test]
+    fn parse_reads_the_plain_and_the_genitive_names() {
+        let info = info_with_genitive_names();
+        let parsed = |text: &str| parse(text, &info, DateTimeStyles::NONE).map(|parsed| parsed.date_time).ok();
+        assert_eq!(parsed("7 stycznia 2026"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("7 styczeń 2026"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("3 lutego 2026"), Some(DateTime::new(2026, 2, 3)));
+        assert_eq!(parsed("7 sty. 2026"), Some(DateTime::new(2026, 1, 7)));
+        assert_eq!(parsed("7 March 2026"), Some(DateTime::new(2026, 3, 7)));
+        assert_eq!(parsed("7 marca 2026"), None);
+
+        // Without genitive names the names of another culture are not read.
+        let plain = DateTimeFormatInfo::new();
+        assert!(parse("7 stycznia 2026", &plain, DateTimeStyles::NONE).is_err());
+    }
 }

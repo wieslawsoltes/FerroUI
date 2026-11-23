@@ -6,7 +6,9 @@ use ferroui_media_camera::*;
 use ferroui_media_opengl::NativeGlFrameProducer;
 #[cfg(feature = "controls")]
 pub use ferroui_media_windows::NativeGlTextureImporter;
-use ferroui_media_windows::{poll_native, NativeDevice, NativeSession, WindowsFrameStream};
+use ferroui_media_windows::{
+    poll_native, NativeRecording, NativeSession, WindowsFrameProducer, WindowsFrameStream,
+};
 use std::{
     cell::{Cell, RefCell},
     rc::Rc,
@@ -17,14 +19,14 @@ use std::{
     task::Poll,
     time::Duration,
 };
-pub struct WindowsCameraProvider {
-    pub frames: NativeGlFrameProducer,
+pub struct WindowsCameraProvider<P = NativeGlFrameProducer> {
+    pub frames: P,
     permission: Rc<Cell<CameraPermission>>,
     #[cfg(feature = "synthetic-camera")]
     synthetic: bool,
 }
-impl WindowsCameraProvider {
-    pub fn new(frames: NativeGlFrameProducer) -> Self {
+impl<P: Clone + Into<WindowsFrameProducer> + 'static> WindowsCameraProvider<P> {
+    pub fn new(frames: P) -> Self {
         Self {
             frames,
             permission: Rc::new(Cell::new(CameraPermission::NotDetermined)),
@@ -35,7 +37,7 @@ impl WindowsCameraProvider {
     /// Explicit in-process MF/D3D11 test source. It is not an OS device or a
     /// fallback, and its permission state does not describe Windows privacy.
     #[cfg(feature = "synthetic-camera")]
-    pub fn synthetic(frames: NativeGlFrameProducer) -> Self {
+    pub fn synthetic(frames: P) -> Self {
         Self {
             synthetic: true,
             ..Self::new(frames)
@@ -120,7 +122,7 @@ fn discovery() -> CameraFuture<Vec<CameraDevice>> {
         .map_err(native)
     })
 }
-impl CameraProvider for WindowsCameraProvider {
+impl<P: Clone + Into<WindowsFrameProducer> + 'static> CameraProvider for WindowsCameraProvider<P> {
     fn devices(&self) -> CameraFuture<Vec<CameraDevice>> {
         self.discover()
     }
@@ -134,7 +136,8 @@ impl CameraProvider for WindowsCameraProvider {
         generation: u64,
         budget: FrameBudget,
     ) -> CameraFuture<Rc<dyn NativeCameraSession>> {
-        let frames = self.frames.with_budget(budget.clone());
+        let frames: WindowsFrameProducer = self.frames.clone().into();
+        let frames = frames.with_budget(budget.clone());
         let permission = self.permission.clone();
         let devices = self.discover();
         Box::pin(async move {
@@ -173,7 +176,7 @@ impl CameraProvider for WindowsCameraProvider {
                     Ok((f.width, f.height, n as u32, 1000))
                 })
                 .transpose()?;
-            let d3d = NativeDevice::from_renderer(&frames).await.map_err(native)?;
+            let d3d = frames.native_device().await.map_err(native)?;
             let session =
                 NativeSession::open(&d3d, &device.id, true, false, size).map_err(native)?;
             let mut prepared = Some(session);
@@ -243,6 +246,28 @@ impl Drop for PhotoSlot {
     }
 }
 impl NativeCameraSession for Camera {
+    fn supports_video_recording(&self) -> bool {
+        self.stream
+            .borrow()
+            .as_ref()
+            .is_some_and(|s| s.native.supports_recording())
+    }
+
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        let recording = self
+            .stream
+            .borrow()
+            .as_ref()
+            .ok_or_else(|| error(CameraErrorKind::Cancelled, "Camera stopped"))
+            .and_then(|s| s.native.record().map_err(native));
+        Box::pin(async move {
+            let recording = Rc::new(recording?);
+            let poll = recording.clone();
+            poll_native(move || poll.started()).await.map_err(native)?;
+            Ok(Rc::new(WindowsCameraRecording(recording)) as Rc<dyn NativeCameraRecording>)
+        })
+    }
+
     fn settings(&self) -> CameraSettings {
         let mut settings = self.settings.clone();
         if let Some(s) = self
@@ -363,5 +388,29 @@ impl NativeCameraSession for Camera {
 impl Drop for Camera {
     fn drop(&mut self) {
         self.stream.get_mut().take();
+    }
+}
+
+struct WindowsCameraRecording(Rc<NativeRecording>);
+impl NativeCameraRecording for WindowsCameraRecording {
+    fn finish(&self) -> CameraFuture<CameraVideo> {
+        self.0.finish();
+        let recording = self.0.clone();
+        Box::pin(async move {
+            let output = poll_native(move || recording.encoded())
+                .await
+                .map_err(native)?;
+            Ok(CameraVideo {
+                encoded: output.bytes,
+                content_type: "video/mp4".into(),
+                width: output.width,
+                height: output.height,
+                duration: output.duration,
+            })
+        })
+    }
+
+    fn cancel(&self) {
+        self.0.cancel();
     }
 }

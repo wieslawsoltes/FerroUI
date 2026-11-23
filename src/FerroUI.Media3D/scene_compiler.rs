@@ -5,12 +5,12 @@
 
 use crate::material::WHITE;
 use crate::transform_3d::{transform_rect, value_of};
+use crate::visual_3d::visual_parts;
 use crate::{
     AmbientLight, Camera, DiffuseMaterial, DirectionalLight, EmissiveMaterial, GeometryModel3D, Light, Material,
-    MaterialGroup, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, ModelVisual3D, PerspectiveCamera, Point3D,
+    MaterialGroup, Matrix3D, MeshGeometry3D, Model3D, Model3DGroup, PerspectiveCamera, Point3D,
     PointLight, ProjectionCamera, Rect3D, SpecularMaterial, SpotLight, Vector3D, Visual3D, Visual3DCollection,
 };
-use ferroui_base::media::shared_brush_of;
 use ferroui_base::numerics::{Matrix4x4, Vector3};
 use ferroui_base::rendering::scene3d::{
     Scene3DBounds, Scene3DCamera, Scene3DCameraKind, Scene3DLight, Scene3DMaterialKind, Scene3DMaterialLayer,
@@ -69,11 +69,11 @@ impl Compiler {
             return;
         }
         let world = value_of(visual.transform().as_ref()) * *parent;
-        let Some(model_visual) = visual.cast::<ModelVisual3D>() else { return };
-        if let Some(content) = model_visual.content() {
+        let (content, children) = visual_parts(visual);
+        if let Some(content) = content {
             self.visit_model(&content, &world, visual, depth + 1);
         }
-        for child in model_visual.children().iter() {
+        for child in children.iter().flat_map(|children| children.iter()) {
             self.visit_visual(&child, &world, depth + 1);
         }
     }
@@ -143,7 +143,7 @@ fn collect_layers(material: &Ref<Material>, layers: &mut Vec<Scene3DMaterialLaye
                 color: diffuse.color(),
                 ambient_color: diffuse.ambient_color(),
                 specular_power: 0.0,
-                brush: shared_brush_of(&*brush),
+                brush: material.layer_brush(&brush),
             });
         }
     } else if let Some(specular) = material.cast::<SpecularMaterial>() {
@@ -153,7 +153,7 @@ fn collect_layers(material: &Ref<Material>, layers: &mut Vec<Scene3DMaterialLaye
                 color: specular.color(),
                 ambient_color: WHITE,
                 specular_power: specular.specular_power() as f32,
-                brush: shared_brush_of(&*brush),
+                brush: material.layer_brush(&brush),
             });
         }
     } else if let Some(emissive) = material.cast::<EmissiveMaterial>() {
@@ -163,7 +163,7 @@ fn collect_layers(material: &Ref<Material>, layers: &mut Vec<Scene3DMaterialLaye
                 color: emissive.color(),
                 ambient_color: WHITE,
                 specular_power: 0.0,
-                brush: shared_brush_of(&*brush),
+                brush: material.layer_brush(&brush),
             });
         }
     }

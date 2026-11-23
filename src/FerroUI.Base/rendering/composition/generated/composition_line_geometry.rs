@@ -141,6 +141,10 @@ impl CompositionLineGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "Start", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_line_geometry.get().contains(CompositionLineGeometryChangedFields::START_ANIMATED) {
+                    self.changed_fields_of_composition_line_geometry.set(self.changed_fields_of_composition_line_geometry.get() & !CompositionLineGeometryChangedFields::START);
+                }
             }
         }
         self.start.set(value);
@@ -182,6 +186,10 @@ impl CompositionLineGeometryProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "End", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_line_geometry.get().contains(CompositionLineGeometryChangedFields::END_ANIMATED) {
+                    self.changed_fields_of_composition_line_geometry.set(self.changed_fields_of_composition_line_geometry.get() & !CompositionLineGeometryChangedFields::END);
+                }
             }
         }
         self.end.set(value);
@@ -223,15 +231,17 @@ impl CompositionLineGeometryProps {
         self.base.serialize_changes_core(host, writer);
         let changed = self.changed_fields_of_composition_line_geometry.get();
         writer.write(changed);
+        if changed.contains(CompositionLineGeometryChangedFields::START) {
+            writer.write(self.start.get());
+        }
         if changed.contains(CompositionLineGeometryChangedFields::START_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLineGeometryProps::id_of_start_property().base()));
-        } else if changed.contains(CompositionLineGeometryChangedFields::START) {
-            writer.write(self.start.get());
+        }
+        if changed.contains(CompositionLineGeometryChangedFields::END) {
+            writer.write(self.end.get());
         }
         if changed.contains(CompositionLineGeometryChangedFields::END_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionLineGeometryProps::id_of_end_property().base()));
-        } else if changed.contains(CompositionLineGeometryChangedFields::END) {
-            writer.write(self.end.get());
         }
         self.changed_fields_of_composition_line_geometry.set(CompositionLineGeometryChangedFields::empty());
     }
@@ -343,6 +353,10 @@ impl ServerCompositionLineGeometryProps {
         self.base.deserialize_changes_core(host, reader, committed_at);
         ServerCompositionLineGeometryHooks::deserialize_changes_extra(host, reader);
         let changed = reader.read::<CompositionLineGeometryChangedFields>();
+        if changed.contains(CompositionLineGeometryChangedFields::START) {
+            let value = reader.read::<Vector>();
+            self.set_start(host, value);
+        }
         if changed.contains(CompositionLineGeometryChangedFields::START_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `Start` without an animation instance");
@@ -353,9 +367,10 @@ impl ServerCompositionLineGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLineGeometryChangedFields::START) {
+        }
+        if changed.contains(CompositionLineGeometryChangedFields::END) {
             let value = reader.read::<Vector>();
-            self.set_start(host, value);
+            self.set_end(host, value);
         }
         if changed.contains(CompositionLineGeometryChangedFields::END_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -367,9 +382,6 @@ impl ServerCompositionLineGeometryProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionLineGeometryChangedFields::END) {
-            let value = reader.read::<Vector>();
-            self.set_end(host, value);
         }
         ServerCompositionLineGeometryHooks::on_fields_deserialized(host, changed);
     }

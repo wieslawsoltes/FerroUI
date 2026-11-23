@@ -9,7 +9,7 @@ use super::dbus::descriptions::ACCESSIBLE;
 use super::dbus::interface::{args, reply, CallResult, DBusError, DBusInterface, InterfaceDescription};
 use super::dbus::types::{AtSpiAttributeSet, AtSpiObjectReference, AtSpiRelationEntry};
 use std::rc::{Rc, Weak};
-use zbus::zvariant::Value;
+use zbus::Variant;
 
 pub(crate) struct ApplicationAccessibleHandler {
     server: Weak<AtSpiServer>,
@@ -131,16 +131,16 @@ impl DBusInterface for ApplicationAccessibleHandler {
         }
     }
 
-    fn get_property(&self, name: &str) -> Option<Value<'static>> {
+    fn get_property(&self, name: &str) -> Option<Variant<'static>> {
         Some(match name {
-            "version" => Value::from(self.version()),
-            "Name" => Value::from(self.name()),
-            "Description" => Value::from(self.description()),
-            "AccessibleId" => Value::from(self.accessible_id()),
-            "HelpText" => Value::from(self.help_text()),
+            "version" => Variant::from(self.version()),
+            "Name" => Variant::from(self.name()),
+            "Description" => Variant::from(self.description()),
+            "AccessibleId" => Variant::from(self.accessible_id()),
+            "HelpText" => Variant::from(self.help_text()),
             "Parent" => self.parent().to_dbus_struct(),
-            "ChildCount" => Value::from(self.child_count()),
-            "Locale" => Value::from(self.locale()),
+            "ChildCount" => Variant::from(self.child_count()),
+            "Locale" => Variant::from(self.locale()),
             _ => return None,
         })
     }

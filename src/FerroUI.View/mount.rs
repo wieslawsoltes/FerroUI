@@ -27,13 +27,38 @@
 use crate::element::{AnyValueEq, ComponentElement, ControlElement, DynamicChildren, Element, ElementClass, Key, PropValue};
 use crate::reactive::{effect, on_cleanup, signal, untrack, Owner, Signal};
 use ferroui_base::data::BindingPriority;
-use ferroui_base::{BoxedValue, FerroProperty, Ref};
+use ferroui_base::{BoxedValue, FerroProperty, Ref, WeakRef};
 use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::{ContentControl, Control, Decorator, ItemsControl, Panel, TextBlock};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::{Rc, Weak};
+
+ferroui_base::ferro_thread_local! {
+    /// Whether what is mounted now can be patched later: it is in what a component that runs
+    /// again rendered, or an item of a dynamic list that can be given a new closure. Outside
+    /// those (a tree mounted once, a component that runs once) no reconciler reaches an
+    /// instance again, and it keeps no description of its element (`mount_control`).
+    static PATCHED: Cell<bool> = const { Cell::new(false) };
+}
+
+/// Sets whether what is mounted until it is dropped can be patched later; the value before is
+/// set again then.
+struct Patched(bool);
+
+impl Patched {
+    fn now(patched: bool) -> Patched {
+        Patched(PATCHED.replace(patched))
+    }
+}
+
+impl Drop for Patched {
+    fn drop(&mut self) {
+        // The table is not there any more while the thread is torn down.
+        let _ = PATCHED.try_with(|cell| cell.set(self.0));
+    }
+}
 
 /// What holds the children of a control.
 pub(crate) enum Host {
@@ -510,7 +535,7 @@ impl Instance {
     /// effects and detaches its handlers.
     fn dispose(&self) {
         match self {
-            Instance::Control(control) => control.owner.dispose(),
+            Instance::Control(control) => control.dispose(),
             Instance::Dynamic(dynamic) => dynamic.owner.dispose(),
             Instance::Component(component) => component.owner.dispose(),
             Instance::Text(_) | Instance::Existing(..) => {}
@@ -557,11 +582,20 @@ struct ControlState {
     name: Option<String>,
     classes: Vec<String>,
     props: Vec<MountedProp>,
-    handlers: Owner,
+    /// What owns the attached handlers: nothing for a control without handlers, which is most
+    /// of a tree (docs/porting/desktop-performance.md, section 9.91).
+    handlers: Option<Owner>,
     /// The handlers attached: their identities and cells, which a patch
     /// with the same identities swaps the closures into.
     attached: Vec<(usize, Rc<dyn Any>, fn(&dyn Any, &dyn Any))>,
     children: Option<Children>,
+    /// An instance that no reconciler reaches again keeps of its values only what they started
+    /// (`props` holds the values that follow state, bindings and elements) and, for the
+    /// inspector, the properties its element gave values, in order: the boxes of the plain
+    /// values and their entries are let go once they are set (docs/porting/desktop-performance.md,
+    /// the description of #811). Empty for an instance that can be patched, whose `props` are all
+    /// of them.
+    listed: Box<[&'static FerroProperty]>,
 }
 
 struct MountedProp {
@@ -578,9 +612,47 @@ pub(crate) struct ControlInstance {
     class: ElementClass,
     key: Option<Key>,
     control: Ref<Control>,
-    owner: Owner,
+    /// What owns what the element started when it was mounted: the effects of its reactive
+    /// values, its handlers, what its mount hooks registered, and the owners of what is below
+    /// it. An element that starts nothing (values, no handler, no hook) has none: what is below
+    /// it, and what a later patch starts for it, belongs to the nearest owner above, and is
+    /// taken out with the instance. Most elements of a tree are of this kind
+    /// (docs/porting/desktop-performance.md, section 9.100).
+    owner: Option<Owner>,
     slot: Rc<Slot>,
     state: RefCell<ControlState>,
+}
+
+impl ControlInstance {
+    /// Runs `f` with the owner of the instance as the current one; an instance without an
+    /// owner leaves the current one, the nearest above, as it is.
+    fn owned<R>(&self, f: impl FnOnce() -> R) -> R {
+        match self.owner {
+            Some(owner) => owner.with(f),
+            None => f(),
+        }
+    }
+
+    /// Takes the instance out: its owner is disposed, which stops its effects, detaches its
+    /// handlers and takes out what is below it. An instance without an owner takes out what
+    /// its values and handlers started and the instances below it one by one.
+    fn dispose(&self) {
+        match self.owner {
+            Some(owner) => owner.dispose(),
+            None => {
+                let state = self.state.borrow();
+                for prop in &state.props {
+                    stop_prop(prop);
+                }
+                if let Some(handlers) = state.handlers {
+                    handlers.dispose();
+                }
+                if let Some(children) = &state.children {
+                    children.dispose();
+                }
+            }
+        }
+    }
 }
 
 pub(crate) struct TextInstance {
@@ -598,6 +670,9 @@ pub(crate) struct DynamicInstance {
     /// render now.
     version: Signal<u64>,
     refresh: Cell<bool>,
+    /// Whether the list can be patched (given a new closure): its items can then, and only then
+    /// (`PATCHED`).
+    patched: bool,
     /// The items in order, for the inspector.
     items: RefCell<Vec<(Option<Key>, Vec<Instance>)>>,
 }
@@ -641,6 +716,10 @@ pub(crate) struct ComponentInstance {
 
 /// Elements in a list, with fragments taken apart and nothing left out.
 pub(crate) fn flatten(children: Vec<Element>) -> Vec<Element> {
+    // The children of most elements are elements already: the list is the one given.
+    if !children.iter().any(|child| matches!(child, Element::Fragment(_) | Element::List(_) | Element::Empty)) {
+        return children;
+    }
     let mut flat = Vec::with_capacity(children.len());
     for child in children {
         match child {
@@ -744,8 +823,16 @@ pub(crate) fn mount_root(element: Element) -> Ref<Control> {
 }
 
 fn mount_control(element: ControlElement, host: &Rc<Host>) -> Rc<ControlInstance> {
-    let owner = Owner::new();
-    owner.with(|| {
+    // An owner for an element that starts something: a value that follows state or holds an
+    // element, a handler, a mount hook.
+    let starts = !element.handlers.is_empty()
+        || !element.on_mount.is_empty()
+        || element.props.iter().any(|entry| !matches!(entry.value, PropValue::Value(_)));
+    let owner = starts.then(Owner::new);
+    // Whether a reconciler can reach the instance again: only then is the description of the
+    // element (its values, its handlers' cells) kept for the comparison of a patch.
+    let patched = PATCHED.get();
+    let mount = || {
         let control = (element.class.create)();
         // As the XAML loader does: the control is told that it is being
         // initialised while it gets its values and children, so that what it
@@ -761,15 +848,35 @@ fn mount_control(element: ControlElement, host: &Rc<Host>) -> Rc<ControlInstance
                 classes.add(class);
             }
         }
-        let props = element.props.into_iter().map(|entry| mount_prop(&control, entry.property, entry.value)).collect();
-        let handlers = Owner::new();
-        handlers.with(|| {
-            for handler in &element.handlers {
-                (handler.attach)(&control);
-            }
+        let (props, listed) = if patched {
+            let props =
+                element.props.into_iter().map(|entry| mount_prop(&control, entry.property, entry.value)).collect();
+            (props, Box::default())
+        } else {
+            let listed = element.props.iter().map(|entry| entry.property).collect();
+            let props = element
+                .props
+                .into_iter()
+                .map(|entry| mount_prop(&control, entry.property, entry.value))
+                .filter(|prop| prop.owner.is_some() || prop.element.is_some())
+                .collect();
+            (props, listed)
+        };
+        let handlers = (!element.handlers.is_empty()).then(|| {
+            let handlers = Owner::new();
+            handlers.with(|| {
+                for handler in &element.handlers {
+                    (handler.attach)(&control);
+                }
+            });
+            handlers
         });
         count(|stats| stats.handler_attachments += element.handlers.len() as u64);
-        let attached = element.handlers.iter().map(|h| (h.identity, h.cell.clone(), h.swap)).collect();
+        // The cells a patch swaps closures into; the trampolines hold their own.
+        let attached = match patched {
+            true => element.handlers.iter().map(|h| (h.identity, h.cell.clone(), h.swap)).collect(),
+            false => Vec::new(),
+        };
         let children = flatten(element.children);
         let children = (!children.is_empty()).then(|| Children::mount(Host::of_control(&control), children));
         control.end_init();
@@ -783,11 +890,26 @@ fn mount_control(element: ControlElement, host: &Rc<Host>) -> Rc<ControlInstance
             control,
             owner,
             slot,
-            state: RefCell::new(ControlState { name: element.name, classes: element.classes, props, handlers, attached, children }),
+            state: RefCell::new(ControlState {
+                name: element.name,
+                classes: element.classes,
+                props,
+                handlers,
+                attached,
+                children,
+                listed,
+            }),
         });
-        keep_alive(instance.clone());
+        // What holds the instances of a tree holds this one; an owner keeps its own as well.
+        if owner.is_some() {
+            keep_alive(instance.clone());
+        }
         instance
-    })
+    };
+    match owner {
+        Some(owner) => owner.with(mount),
+        None => mount(),
+    }
 }
 
 fn mount_prop(control: &Ref<Control>, property: &'static FerroProperty, value: PropValue) -> MountedProp {
@@ -825,23 +947,13 @@ fn start_prop(control: &Ref<Control>, property: &'static FerroProperty, value: &
         PropValue::Dynamic(compute) | PropValue::Follows { compute, .. } => {
             let compute = compute.clone();
             let weak = control.downgrade();
-            effect(move || {
-                let value = compute();
-                if let Some(control) = weak.upgrade() {
-                    untrack(|| set_untyped(&control, property, value));
-                }
-            });
+            effect(move || follow(&weak, property, &*compute));
         }
         PropValue::TwoWay { get, set, .. } => {
             let get = get.clone();
             let set = set.clone();
             let weak = control.downgrade();
-            effect(move || {
-                let value = get();
-                if let Some(control) = weak.upgrade() {
-                    untrack(|| set_untyped(&control, property, value));
-                }
-            });
+            effect(move || follow(&weak, property, &*get));
             let subscription = control.property_changed(move |e| {
                 if std::ptr::eq(e.property(), property) {
                     set(e.new_value());
@@ -855,6 +967,22 @@ fn start_prop(control: &Ref<Control>, property: &'static FerroProperty, value: &
         }
         PropValue::Value(_) | PropValue::Element(_) | PropValue::TypedElement { .. } => {
             unreachable!("handled by mount_prop")
+        }
+    }
+}
+
+/// A run of the effect of a property that follows a closure: the closure computes the value (and
+/// reads what the effect follows), and a closure of the builders sets the property with it,
+/// typed (`builder::compute_into`); the value of any other closure is set untyped.
+fn follow(control: &WeakRef<Control>, property: &'static FerroProperty, compute: &dyn Fn() -> BoxedValue) {
+    match control.upgrade() {
+        Some(control) => {
+            if let Some((control, value)) = crate::builder::compute_into(control, property, compute) {
+                untrack(|| set_untyped(&control, property, value));
+            }
+        }
+        None => {
+            compute();
         }
     }
 }
@@ -877,6 +1005,7 @@ fn mount_dynamic(dynamic: DynamicChildren, host: &Rc<Host>) -> Rc<DynamicInstanc
             render: RefCell::new(dynamic),
             version: signal(0),
             refresh: Cell::new(false),
+            patched: PATCHED.get(),
             items: RefCell::new(Vec::new()),
         })
     });
@@ -889,7 +1018,10 @@ fn mount_dynamic(dynamic: DynamicChildren, host: &Rc<Host>) -> Rc<DynamicInstanc
             state.version.get();
             let render = state.render.borrow().render.clone();
             let entries = render();
-            untrack(|| update_dynamic(&state, &host, &mounted, &unkeyed, entries));
+            untrack(|| {
+                let _patched = Patched::now(state.patched);
+                update_dynamic(&state, &host, &mounted, &unkeyed, entries);
+            });
         })
     });
     instance
@@ -1060,7 +1192,10 @@ fn mount_component(element: ComponentElement, host: &Rc<Host>) -> Rc<ComponentIn
             };
             untrack(|| {
                 let old = std::mem::take(&mut *state.instances.borrow_mut());
+                // What a component that runs again renders is patched by its next run.
+                let patched = Patched::now(true);
                 let next = state.tree.with(|| reconcile_list(&state.host, &state.slot, old, vec![element]));
+                drop(patched);
                 *state.instances.borrow_mut() = next;
                 for f in after {
                     f();
@@ -1193,7 +1328,7 @@ fn patch_control(instance: &ControlInstance, element: ControlElement) {
     // Properties: the old values by property; what is equal stays.
     let mut old: Vec<Option<MountedProp>> = std::mem::take(&mut state.props).into_iter().map(Some).collect();
     let mut props = Vec::with_capacity(element.props.len());
-    instance.owner.with(|| {
+    instance.owned(|| {
         for entry in element.props {
             let previous = old.iter_mut().rev().find(|prop| prop.as_ref().is_some_and(|prop| std::ptr::eq(prop.property, entry.property)));
             let previous = previous.and_then(Option::take);
@@ -1237,20 +1372,25 @@ fn patch_control(instance: &ControlInstance, element: ControlElement) {
             swap(&**old, &*handler.cell);
         }
     } else {
-        let handlers = instance.owner.with(Owner::new);
-        handlers.with(|| {
-            for handler in &element.handlers {
-                (handler.attach)(control);
-            }
+        let handlers = (!element.handlers.is_empty()).then(|| {
+            let handlers = instance.owned(Owner::new);
+            handlers.with(|| {
+                for handler in &element.handlers {
+                    (handler.attach)(control);
+                }
+            });
+            handlers
         });
-        std::mem::replace(&mut state.handlers, handlers).dispose();
+        if let Some(replaced) = std::mem::replace(&mut state.handlers, handlers) {
+            replaced.dispose();
+        }
         count(|stats| stats.handler_attachments += element.handlers.len() as u64);
         state.attached = element.handlers.iter().map(|h| (h.identity, h.cell.clone(), h.swap)).collect();
     }
 
     // Children.
     let children = flatten(element.children);
-    instance.owner.with(|| match &mut state.children {
+    instance.owned(|| match &mut state.children {
         Some(mounted) => mounted.reconcile(children),
         None if children.is_empty() => {}
         None => state.children = Some(Children::mount(Host::of_control(control), children)),
@@ -1324,30 +1464,83 @@ pub(crate) fn snapshot() -> Vec<(&'static str, Vec<crate::inspect::InstanceNode>
     roots.into_iter().map(|(label, root)| (label, root.borrow().iter().map(describe).collect())).collect()
 }
 
+/// The plain values (`PropValue::Value`) the mounted control instances of the thread keep, and
+/// the properties they list instead of keeping them (the tests of #811).
+#[cfg(test)]
+pub(crate) fn kept_descriptions() -> (usize, usize) {
+    fn walk(instance: &Instance, kept: &mut (usize, usize)) {
+        match instance {
+            Instance::Control(control) => {
+                let state = control.state.borrow();
+                kept.0 += state.props.iter().filter(|prop| matches!(prop.value, PropValue::Value(_))).count();
+                kept.1 += state.listed.len();
+                let held = state.props.iter().filter_map(|prop| prop.element.as_ref());
+                for children in state.children.iter().chain(held) {
+                    for instance in children.instances.borrow().iter() {
+                        walk(instance, kept);
+                    }
+                }
+            }
+            Instance::Dynamic(dynamic) => {
+                for (_, instances) in dynamic.items.borrow().iter() {
+                    for instance in instances {
+                        walk(instance, kept);
+                    }
+                }
+            }
+            Instance::Component(component) => {
+                for instance in component.instances.borrow().iter() {
+                    walk(instance, kept);
+                }
+            }
+            Instance::Text(_) | Instance::Existing(..) => {}
+        }
+    }
+    let roots: Vec<Rc<RefCell<Vec<Instance>>>> =
+        ROOTS.with(|roots| roots.borrow().iter().filter_map(|(_, root)| root.upgrade()).collect());
+    let mut kept = (0, 0);
+    for root in roots {
+        for instance in root.borrow().iter() {
+            walk(instance, &mut kept);
+        }
+    }
+    kept
+}
+
 fn describe(instance: &Instance) -> crate::inspect::InstanceNode {
     use crate::inspect::{InstanceKind, InstanceNode, PropertyInfo};
     match instance {
         Instance::Control(control) => {
             let state = control.state.borrow();
-            let properties = state
-                .props
-                .iter()
-                .map(|prop| {
-                    let source = match &prop.value {
-                        PropValue::Value(_) => "value",
-                        PropValue::Dynamic(_) | PropValue::Follows { .. } => "follows state",
-                        PropValue::TwoWay { .. } => "two-way",
-                        PropValue::Element(_) | PropValue::TypedElement { .. } => "element",
-                        PropValue::Binding(_) => "binding",
-                    };
-                    let value = control.control.get_value_untyped(prop.property);
-                    PropertyInfo {
-                        name: prop.property.name().to_string(),
-                        value: display_value(&value),
-                        source,
-                    }
-                })
-                .collect();
+            let source_of = |value: &PropValue| match value {
+                PropValue::Value(_) => "value",
+                PropValue::Dynamic(_) | PropValue::Follows { .. } => "follows state",
+                PropValue::TwoWay { .. } => "two-way",
+                PropValue::Element(_) | PropValue::TypedElement { .. } => "element",
+                PropValue::Binding(_) => "binding",
+            };
+            let info = |property: &'static FerroProperty, source: &'static str| {
+                let value = control.control.get_value_untyped(property);
+                PropertyInfo { name: property.name().to_string(), value: display_value(&value), source }
+            };
+            let properties = if state.listed.is_empty() {
+                state.props.iter().map(|prop| info(prop.property, source_of(&prop.value))).collect()
+            } else {
+                // An instance that kept only what its values started: the others were plain values.
+                let mut started = state.props.iter();
+                let mut next = started.next();
+                state
+                    .listed
+                    .iter()
+                    .map(|&property| match next {
+                        Some(prop) if std::ptr::eq(prop.property, property) => {
+                            next = started.next();
+                            info(property, source_of(&prop.value))
+                        }
+                        _ => info(property, "value"),
+                    })
+                    .collect()
+            };
             let children = state.children.as_ref().map(|children| children.instances.borrow().iter().map(describe).collect()).unwrap_or_default();
             InstanceNode {
                 kind: InstanceKind::Control {

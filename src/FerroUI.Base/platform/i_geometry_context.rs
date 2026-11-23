@@ -34,6 +34,16 @@ pub trait IGeometryContext {
     /// Draws a line to the specified point.
     fn line_to(&mut self, point: Point, is_stroked: bool);
 
+    /// Draws a line to each of `points` in turn, as [`line_to`](Self::line_to) for every point
+    /// does. A backend that can take a run of points in one step does (a FerroUI addition,
+    /// docs/porting/desktop-performance.md, section 9.95): a figure of many points, a polyline
+    /// or a polygon, then crosses into the backend once and not once a point.
+    fn lines_to(&mut self, points: &[Point], is_stroked: bool) {
+        for point in points {
+            self.line_to(*point, is_stroked);
+        }
+    }
+
     /// Ends the figure started by [`begin_figure`](Self::begin_figure).
     fn end_figure(&mut self, is_closed: bool);
 

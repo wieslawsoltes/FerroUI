@@ -1546,6 +1546,7 @@ impl TextBox {
     );
 
     fn static_constructor() {
+        crate::visual_state::state_mappers::register::<TextBox>(crate::visual_state::state_mappers::text_box);
         InputElement::focusable_property().override_default_value::<TextBox>(true);
         // Not ported: the `Auto` default of `PlatformFeedback.FeedbackType` (waits for `PlatformFeedback`).
         InputElement::text_input_method_client_requested_event().add_class_handler::<TextBox>(|tb, e| {
@@ -2194,7 +2195,7 @@ impl TextBox {
         self.add_handler(Self::text_changing_event(), handler)
     }
 
-    fn presenter(&self) -> Option<Ref<TextPresenter>> {
+    pub(crate) fn presenter(&self) -> Option<Ref<TextPresenter>> {
         self.presenter.borrow().clone()
     }
 

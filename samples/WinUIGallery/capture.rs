@@ -5,8 +5,8 @@ use ferroui_base::media::imaging::PngBitmapEncoderOptions;
 use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Rect, Ref};
 use ferroui_controls::{
-    AppBuilder, Application, AutoSuggestBox, Carousel, ComboBox, Control, Frame, Image,
-    ScrollViewer, TextBlock, Window,
+    AppBuilder, AutoSuggestBox, Carousel, ComboBox, Control, Frame, Image, ScrollViewer,
+    TextBlock, Window,
 };
 use ferroui_harfbuzz::HarfBuzzApplicationExtensions;
 use ferroui_headless::{
@@ -75,13 +75,16 @@ fn main() -> Result<(), Box<dyn Error>> {
             ..FerroHeadlessPlatformOptions::default()
         })
         .setup_without_starting();
-    Application::current()
-        .expect("application initialized")
-        .set_requested_theme_variant(Some(if dark {
-            ThemeVariant::dark()
-        } else {
-            ThemeVariant::light()
-        }));
+    let app = App::current().ok_or("The gallery application was not initialized.")?;
+    // The style documents are loaded before the theme variant is set, which looks styles up: a
+    // document the tool cannot load is the error of the tool and not a panic of that lookup.
+    app.try_load_styles()
+        .map_err(|error| format!("The styles of the gallery could not be loaded: {error}"))?;
+    app.set_requested_theme_variant(Some(if dark {
+        ThemeVariant::dark()
+    } else {
+        ThemeVariant::light()
+    }));
     let gallery = GalleryView::with_preview_options(
         ferroui_markup_xaml_winui::WinUIXamlOptions::for_winui_theme(),
     )?;

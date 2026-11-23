@@ -12,7 +12,7 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Phase / priority | 4 - tooling / P3 |
 | Files | 14/14 (100.0%) |
 | Types | 54/55 (1 waived) (100.0%) |
-| Members | 198/202 (4 waived) (100.0%) |
+| Members | 195/202 (4 waived) (98.5%) |
 | Contracts (interfaces) | 4/4 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -30,7 +30,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 14/14, types 54/55 (1 waived), members 198/202 (4 waived)
+### `(project root)` - files 14/14, types 54/55 (1 waived), members 195/202 (4 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -43,11 +43,23 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `IMessageTypeResolver.cs` | `i_message_type_resolver.rs` | present | 1/1 | 2/2 |  |
 | `ITransport.cs` | `i_transport.rs` | present | 1/1 | 4/4 |  |
 | `InputMessages.cs` | `input_messages.rs` | present | 10/10 | 23/23 |  |
-| `MetsysBson.cs` | `metsys_bson.rs` | present | 22/23 (1 waived) | 103/106 (3 waived) |  |
+| `MetsysBson.cs` | `metsys_bson.rs` | partial | 22/23 (1 waived) | 100/106 (3 waived) |  |
 | `TcpTransportBase.cs` | `tcp_transport_base.rs` | present | 1/1 | 3/4 (1 waived) |  |
 | `TransportConnectionWrapper.cs` | `transport_connection_wrapper.rs` | present | 1/1 | 6/6 |  |
 | `TransportMessages.cs` | `transport_messages.rs` | present | 1/1 | 1/1 |  |
 | `ViewportMessages.cs` | `viewport_messages.rs` | present | 8/8 | 24/24 |  |
+
+<details><summary><code>MetsysBson.cs</code> - 3 missing</summary>
+
+- `TypeHelper` (class): complete
+  - waived (of the three overloads, the one by name is `TypeHelper::find_property` and the one by class and name `TypeHelper::find_property_info`; the third walks an expression tree (`x =&gt; x.Name`) to the name of a member, which the port has no use for: a property is named by its declared name (see `ExpressionHelper`)): `FindProperty`
+- `ExpressionHelper` (class): waived - walks an expression tree (`x =&gt; x.Name`) to the name of a member: a property is named by its declared name here (`ITypeConfiguration::use_alias("Name", ..)`), so there is nothing to walk
+- `BsonException` (class): 3 missing
+  - `BsonException()`
+  - `BsonException(string message)`
+  - `BsonException(string message, Exception innerException)`
+
+</details>
 
 ## Rust-only files
 
@@ -60,6 +72,6 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `guid.rs` | `System.Guid` of the runtime library: the text forms and the byte layout (`ToByteArray`) the header of a message carries | `Guid` |
 | `input/key.rs` | **unmapped** | `Key`, `ParseKeyError` |
 | `input/physical_key.rs` | **unmapped** | `ParsePhysicalKeyError`, `PhysicalKey` |
-| `task.rs` | `Task` and `TaskCompletionSource` of the runtime library, as far as `Send` of a connection uses them: the library has no asynchronous runtime (DEVIATIONS.md, Remote protocol) | `Task`, `TaskCompletionSource`, `TaskState` |
+| `task.rs` | `Task` and `TaskCompletionSource` of the runtime library, as far as `Send` of a connection uses them: the library has no asynchronous runtime (DEVIATIONS.md, Remote protocol) | `Task`, `TaskCompletionSource` |
 
 Tests, examples and build scripts (not scanned): `metsys_bson_tests.rs`, `tests/remote_protocol_tests.rs`.

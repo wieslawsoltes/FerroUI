@@ -23,10 +23,10 @@ use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::transport::BatchStreamWriter;
 use crate::rendering::composition::transport::BatchValue;
 use crate::rendering::composition::transport::BatchValueReader;
+use crate::utilities::OptionCell;
 use std::any::Any;
 use std::any::TypeId;
 use std::cell::Cell;
-use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
 use std::sync::OnceLock;
@@ -128,11 +128,11 @@ pub trait CompositionSpriteShapeHooks: CompositionShapeHooks {
 pub struct CompositionSpriteShapeProps {
     base: CompositionShapeProps,
     changed_fields_of_composition_sprite_shape: Cell<CompositionSpriteShapeChangedFields>,
-    fill_brush: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    geometry: RefCell<Option<Rc<dyn ICompositionObject>>>,
+    fill_brush: OptionCell<Rc<dyn ICompositionObject>>,
+    geometry: OptionCell<Rc<dyn ICompositionObject>>,
     is_stroke_non_scaling: Cell<bool>,
-    stroke_brush: RefCell<Option<Rc<dyn ICompositionObject>>>,
-    stroke_dash_array: RefCell<Option<Arc<Vec<f32>>>>,
+    stroke_brush: OptionCell<Rc<dyn ICompositionObject>>,
+    stroke_dash_array: OptionCell<Arc<Vec<f32>>>,
     stroke_dash_cap: Cell<CompositionStrokeCap>,
     stroke_dash_offset: Cell<f32>,
     stroke_end_cap: Cell<CompositionStrokeCap>,
@@ -156,11 +156,11 @@ impl CompositionSpriteShapeProps {
         Self {
             base: CompositionShapeProps::new(),
             changed_fields_of_composition_sprite_shape: Cell::new(CompositionSpriteShapeChangedFields::empty()),
-            fill_brush: RefCell::new(None),
-            geometry: RefCell::new(None),
+            fill_brush: OptionCell::new(),
+            geometry: OptionCell::new(),
             is_stroke_non_scaling: Cell::new(Default::default()),
-            stroke_brush: RefCell::new(None),
-            stroke_dash_array: RefCell::new(None),
+            stroke_brush: OptionCell::new(),
+            stroke_dash_array: OptionCell::new(),
             stroke_dash_cap: Cell::new(Default::default()),
             stroke_dash_offset: Cell::new(Default::default()),
             stroke_end_cap: Cell::new(Default::default()),
@@ -192,24 +192,24 @@ impl CompositionSpriteShapeProps {
 
     /// `FillBrush` (FerroUI overlay).
     pub fn fill_brush(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.fill_brush.borrow().clone()
+        self.fill_brush.get()
     }
 
     /// Sets `FillBrush` (FerroUI overlay).
     pub fn set_fill_brush(&self, host: &dyn CompositionSpriteShapeHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.fill_brush.borrow().clone();
+        let old_value = self.fill_brush.get();
         if old_value.differs(&value) {
             CompositionSpriteShapeHooks::validate_fill_brush_change(host, &old_value, &value);
             CompositionSpriteShapeHooks::on_fill_brush_changing(host);
             changed = true;
             // Update the backing value
-            *self.fill_brush.borrow_mut() = value.clone();
+            self.fill_brush.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() | CompositionSpriteShapeChangedFields::FILL_BRUSH);
             host.register_for_serialization();
         }
-        *self.fill_brush.borrow_mut() = value;
+        self.fill_brush.set(value);
         if changed {
             CompositionSpriteShapeHooks::on_fill_brush_changed(host);
         }
@@ -217,24 +217,24 @@ impl CompositionSpriteShapeProps {
 
     /// `Geometry` (FerroUI overlay).
     pub fn geometry(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.geometry.borrow().clone()
+        self.geometry.get()
     }
 
     /// Sets `Geometry` (FerroUI overlay).
     pub fn set_geometry(&self, host: &dyn CompositionSpriteShapeHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.geometry.borrow().clone();
+        let old_value = self.geometry.get();
         if old_value.differs(&value) {
             CompositionSpriteShapeHooks::validate_geometry_change(host, &old_value, &value);
             CompositionSpriteShapeHooks::on_geometry_changing(host);
             changed = true;
             // Update the backing value
-            *self.geometry.borrow_mut() = value.clone();
+            self.geometry.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() | CompositionSpriteShapeChangedFields::GEOMETRY);
             host.register_for_serialization();
         }
-        *self.geometry.borrow_mut() = value;
+        self.geometry.set(value);
         if changed {
             CompositionSpriteShapeHooks::on_geometry_changed(host);
         }
@@ -267,24 +267,24 @@ impl CompositionSpriteShapeProps {
 
     /// `StrokeBrush` (FerroUI overlay).
     pub fn stroke_brush(&self) -> Option<Rc<dyn ICompositionObject>> {
-        self.stroke_brush.borrow().clone()
+        self.stroke_brush.get()
     }
 
     /// Sets `StrokeBrush` (FerroUI overlay).
     pub fn set_stroke_brush(&self, host: &dyn CompositionSpriteShapeHooks, value: Option<Rc<dyn ICompositionObject>>) {
         let mut changed = false;
-        let old_value = self.stroke_brush.borrow().clone();
+        let old_value = self.stroke_brush.get();
         if old_value.differs(&value) {
             CompositionSpriteShapeHooks::validate_stroke_brush_change(host, &old_value, &value);
             CompositionSpriteShapeHooks::on_stroke_brush_changing(host);
             changed = true;
             // Update the backing value
-            *self.stroke_brush.borrow_mut() = value.clone();
+            self.stroke_brush.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() | CompositionSpriteShapeChangedFields::STROKE_BRUSH);
             host.register_for_serialization();
         }
-        *self.stroke_brush.borrow_mut() = value;
+        self.stroke_brush.set(value);
         if changed {
             CompositionSpriteShapeHooks::on_stroke_brush_changed(host);
         }
@@ -292,24 +292,24 @@ impl CompositionSpriteShapeProps {
 
     /// `StrokeDashArray` (FerroUI overlay).
     pub fn stroke_dash_array(&self) -> Option<Arc<Vec<f32>>> {
-        self.stroke_dash_array.borrow().clone()
+        self.stroke_dash_array.get()
     }
 
     /// Sets `StrokeDashArray` (FerroUI overlay).
     pub fn set_stroke_dash_array(&self, host: &dyn CompositionSpriteShapeHooks, value: Option<Arc<Vec<f32>>>) {
         let mut changed = false;
-        let old_value = self.stroke_dash_array.borrow().clone();
+        let old_value = self.stroke_dash_array.get();
         if old_value.differs(&value) {
             CompositionSpriteShapeHooks::validate_stroke_dash_array_change(host, &old_value, &value);
             CompositionSpriteShapeHooks::on_stroke_dash_array_changing(host);
             changed = true;
             // Update the backing value
-            *self.stroke_dash_array.borrow_mut() = value.clone();
+            self.stroke_dash_array.set(value.clone());
             // Register object for serialization in the next batch
             self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() | CompositionSpriteShapeChangedFields::STROKE_DASH_ARRAY);
             host.register_for_serialization();
         }
-        *self.stroke_dash_array.borrow_mut() = value;
+        self.stroke_dash_array.set(value);
         if changed {
             CompositionSpriteShapeHooks::on_stroke_dash_array_changed(host);
         }
@@ -373,6 +373,10 @@ impl CompositionSpriteShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StrokeDashOffset", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_sprite_shape.get().contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET_ANIMATED) {
+                    self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() & !CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET);
+                }
             }
         }
         self.stroke_dash_offset.set(value);
@@ -464,6 +468,10 @@ impl CompositionSpriteShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StrokeMiterLimit", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_sprite_shape.get().contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT_ANIMATED) {
+                    self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() & !CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT);
+                }
             }
         }
         self.stroke_miter_limit.set(value);
@@ -530,6 +538,10 @@ impl CompositionSpriteShapeProps {
                 }
                 // Animation is triggered by the current field, but does not necessary affects it
                 host.start_animation_group(&animation, "StrokeThickness", ExpressionVariant::create(value));
+                // The implicit animation starts from the value the server has.
+                if self.changed_fields_of_composition_sprite_shape.get().contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS_ANIMATED) {
+                    self.changed_fields_of_composition_sprite_shape.set(self.changed_fields_of_composition_sprite_shape.get() & !CompositionSpriteShapeChangedFields::STROKE_THICKNESS);
+                }
             }
         }
         self.stroke_thickness.set(value);
@@ -579,27 +591,28 @@ impl CompositionSpriteShapeProps {
         let changed = self.changed_fields_of_composition_sprite_shape.get();
         writer.write(changed);
         if changed.contains(CompositionSpriteShapeChangedFields::FILL_BRUSH) {
-            writer.write_server_object(self.fill_brush.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.fill_brush.get().map(|o| o.server()));
         }
         if changed.contains(CompositionSpriteShapeChangedFields::GEOMETRY) {
-            writer.write_server_object(self.geometry.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.geometry.get().map(|o| o.server()));
         }
         if changed.contains(CompositionSpriteShapeChangedFields::IS_STROKE_NON_SCALING) {
             writer.write(self.is_stroke_non_scaling.get());
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_BRUSH) {
-            writer.write_server_object(self.stroke_brush.borrow().clone().map(|o| o.server()));
+            writer.write_server_object(self.stroke_brush.get().map(|o| o.server()));
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_ARRAY) {
-            writer.write_value(self.stroke_dash_array.borrow().clone());
+            writer.write_value(self.stroke_dash_array.get());
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_CAP) {
             writer.write(self.stroke_dash_cap.get());
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
+            writer.write(self.stroke_dash_offset.get());
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSpriteShapeProps::id_of_stroke_dash_offset_property().base()));
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
-            writer.write(self.stroke_dash_offset.get());
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_END_CAP) {
             writer.write(self.stroke_end_cap.get());
@@ -607,18 +620,20 @@ impl CompositionSpriteShapeProps {
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_LINE_JOIN) {
             writer.write(self.stroke_line_join.get());
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
+            writer.write(self.stroke_miter_limit.get());
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSpriteShapeProps::id_of_stroke_miter_limit_property().base()));
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
-            writer.write(self.stroke_miter_limit.get());
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_START_CAP) {
             writer.write(self.stroke_start_cap.get());
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
+            writer.write(self.stroke_thickness.get());
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS_ANIMATED) {
             writer.write_value(host.pending_animations().get_and_remove(ServerCompositionSpriteShapeProps::id_of_stroke_thickness_property().base()));
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
-            writer.write(self.stroke_thickness.get());
         }
         self.changed_fields_of_composition_sprite_shape.set(CompositionSpriteShapeChangedFields::empty());
     }
@@ -661,11 +676,11 @@ pub trait ServerCompositionSpriteShapeHooks: ServerCompositionShapeHooks {
 /// The server-side properties of `ServerCompositionSpriteShape`.
 pub struct ServerCompositionSpriteShapeProps {
     base: ServerCompositionShapeProps,
-    fill_brush: RefCell<Option<Rc<dyn IServerObject>>>,
-    geometry: RefCell<Option<Rc<dyn IServerObject>>>,
+    fill_brush: OptionCell<Rc<dyn IServerObject>>,
+    geometry: OptionCell<Rc<dyn IServerObject>>,
     is_stroke_non_scaling: Cell<bool>,
-    stroke_brush: RefCell<Option<Rc<dyn IServerObject>>>,
-    stroke_dash_array: RefCell<Option<Arc<Vec<f32>>>>,
+    stroke_brush: OptionCell<Rc<dyn IServerObject>>,
+    stroke_dash_array: OptionCell<Arc<Vec<f32>>>,
     stroke_dash_cap: Cell<CompositionStrokeCap>,
     stroke_dash_offset: Cell<f32>,
     stroke_end_cap: Cell<CompositionStrokeCap>,
@@ -687,11 +702,11 @@ impl ServerCompositionSpriteShapeProps {
     pub fn new() -> Self {
         Self {
             base: ServerCompositionShapeProps::new(),
-            fill_brush: RefCell::new(None),
-            geometry: RefCell::new(None),
+            fill_brush: OptionCell::new(),
+            geometry: OptionCell::new(),
             is_stroke_non_scaling: Cell::new(Default::default()),
-            stroke_brush: RefCell::new(None),
-            stroke_dash_array: RefCell::new(None),
+            stroke_brush: OptionCell::new(),
+            stroke_dash_array: OptionCell::new(),
             stroke_dash_cap: Cell::new(Default::default()),
             stroke_dash_offset: Cell::new(Default::default()),
             stroke_end_cap: Cell::new(Default::default()),
@@ -723,8 +738,8 @@ impl ServerCompositionSpriteShapeProps {
             CompositionProperty::register::<ServerCompositionSpriteShapeProps, Option<Rc<dyn IServerObject>>>(
                 "FillBrush",
                 "ServerCompositionSpriteShape",
-                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).fill_brush.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSpriteShapeProps>(obj).fill_brush.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).fill_brush.get(),
+                |obj, v| props_of::<ServerCompositionSpriteShapeProps>(obj).fill_brush.set(v),
                 None,
                 None,
             )
@@ -733,11 +748,11 @@ impl ServerCompositionSpriteShapeProps {
 
     /// `FillBrush`.
     pub fn fill_brush(&self) -> Option<Rc<dyn IServerObject>> {
-        self.fill_brush.borrow().clone()
+        self.fill_brush.get()
     }
 
     pub fn set_fill_brush(&self, host: &dyn ServerCompositionSpriteShapeHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.fill_brush.borrow().clone();
+        let old_value = self.fill_brush.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSpriteShapeHooks::on_fill_brush_changing(host);
@@ -749,7 +764,7 @@ impl ServerCompositionSpriteShapeProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.fill_brush.borrow_mut() = value.clone(),
+                assign: &mut || self.fill_brush.set(value.clone()),
             },
         );
         if changed {
@@ -764,8 +779,8 @@ impl ServerCompositionSpriteShapeProps {
             CompositionProperty::register::<ServerCompositionSpriteShapeProps, Option<Rc<dyn IServerObject>>>(
                 "Geometry",
                 "ServerCompositionSpriteShape",
-                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).geometry.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSpriteShapeProps>(obj).geometry.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).geometry.get(),
+                |obj, v| props_of::<ServerCompositionSpriteShapeProps>(obj).geometry.set(v),
                 None,
                 None,
             )
@@ -774,11 +789,11 @@ impl ServerCompositionSpriteShapeProps {
 
     /// `Geometry`.
     pub fn geometry(&self) -> Option<Rc<dyn IServerObject>> {
-        self.geometry.borrow().clone()
+        self.geometry.get()
     }
 
     pub fn set_geometry(&self, host: &dyn ServerCompositionSpriteShapeHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.geometry.borrow().clone();
+        let old_value = self.geometry.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSpriteShapeHooks::on_geometry_changing(host);
@@ -790,7 +805,7 @@ impl ServerCompositionSpriteShapeProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.geometry.borrow_mut() = value.clone(),
+                assign: &mut || self.geometry.set(value.clone()),
             },
         );
         if changed {
@@ -846,8 +861,8 @@ impl ServerCompositionSpriteShapeProps {
             CompositionProperty::register::<ServerCompositionSpriteShapeProps, Option<Rc<dyn IServerObject>>>(
                 "StrokeBrush",
                 "ServerCompositionSpriteShape",
-                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_brush.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_brush.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_brush.get(),
+                |obj, v| props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_brush.set(v),
                 None,
                 None,
             )
@@ -856,11 +871,11 @@ impl ServerCompositionSpriteShapeProps {
 
     /// `StrokeBrush`.
     pub fn stroke_brush(&self) -> Option<Rc<dyn IServerObject>> {
-        self.stroke_brush.borrow().clone()
+        self.stroke_brush.get()
     }
 
     pub fn set_stroke_brush(&self, host: &dyn ServerCompositionSpriteShapeHooks, value: Option<Rc<dyn IServerObject>>) {
-        let old_value = self.stroke_brush.borrow().clone();
+        let old_value = self.stroke_brush.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSpriteShapeHooks::on_stroke_brush_changing(host);
@@ -872,7 +887,7 @@ impl ServerCompositionSpriteShapeProps {
                 equal: old_value.default_equals(&value),
                 old_resource: old_value.as_server_render_resource(),
                 new_resource: value.as_server_render_resource(),
-                assign: &mut || *self.stroke_brush.borrow_mut() = value.clone(),
+                assign: &mut || self.stroke_brush.set(value.clone()),
             },
         );
         if changed {
@@ -887,8 +902,8 @@ impl ServerCompositionSpriteShapeProps {
             CompositionProperty::register::<ServerCompositionSpriteShapeProps, Option<Arc<Vec<f32>>>>(
                 "StrokeDashArray",
                 "ServerCompositionSpriteShape",
-                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_dash_array.borrow().clone(),
-                |obj, v| *props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_dash_array.borrow_mut() = v,
+                |obj| props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_dash_array.get(),
+                |obj, v| props_of::<ServerCompositionSpriteShapeProps>(obj).stroke_dash_array.set(v),
                 None,
                 None,
             )
@@ -897,11 +912,11 @@ impl ServerCompositionSpriteShapeProps {
 
     /// `StrokeDashArray`.
     pub fn stroke_dash_array(&self) -> Option<Arc<Vec<f32>>> {
-        self.stroke_dash_array.borrow().clone()
+        self.stroke_dash_array.get()
     }
 
     pub fn set_stroke_dash_array(&self, host: &dyn ServerCompositionSpriteShapeHooks, value: Option<Arc<Vec<f32>>>) {
-        let old_value = self.stroke_dash_array.borrow().clone();
+        let old_value = self.stroke_dash_array.get();
         let mut changed = false;
         if old_value.differs(&value) {
             ServerCompositionSpriteShapeHooks::on_stroke_dash_array_changing(host);
@@ -913,7 +928,7 @@ impl ServerCompositionSpriteShapeProps {
                 equal: old_value.default_equals(&value),
                 old_resource: None,
                 new_resource: None,
-                assign: &mut || *self.stroke_dash_array.borrow_mut() = value.clone(),
+                assign: &mut || self.stroke_dash_array.set(value.clone()),
             },
         );
         if changed {
@@ -1196,6 +1211,10 @@ impl ServerCompositionSpriteShapeProps {
             let value = reader.read::<CompositionStrokeCap>();
             self.set_stroke_dash_cap(host, value);
         }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
+            let value = reader.read::<f32>();
+            self.set_stroke_dash_offset(host, value);
+        }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
                 panic!("a batch starts an animation of `StrokeDashOffset` without an animation instance");
@@ -1206,9 +1225,6 @@ impl ServerCompositionSpriteShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_DASH_OFFSET) {
-            let value = reader.read::<f32>();
-            self.set_stroke_dash_offset(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_END_CAP) {
             let value = reader.read::<CompositionStrokeCap>();
@@ -1217,6 +1233,10 @@ impl ServerCompositionSpriteShapeProps {
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_LINE_JOIN) {
             let value = reader.read::<CompositionStrokeLineJoin>();
             self.set_stroke_line_join(host, value);
+        }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
+            let value = reader.read::<f32>();
+            self.set_stroke_miter_limit(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1228,13 +1248,14 @@ impl ServerCompositionSpriteShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_MITER_LIMIT) {
-            let value = reader.read::<f32>();
-            self.set_stroke_miter_limit(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_START_CAP) {
             let value = reader.read::<CompositionStrokeCap>();
             self.set_stroke_start_cap(host, value);
+        }
+        if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
+            let value = reader.read::<f32>();
+            self.set_stroke_thickness(host, value);
         }
         if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS_ANIMATED) {
             let Some(animation) = reader.read_value::<AnimationInstanceFactory>().map(AnimationInstanceFactory::create) else {
@@ -1246,9 +1267,6 @@ impl ServerCompositionSpriteShapeProps {
                 committed_at,
                 animation,
             );
-        } else if changed.contains(CompositionSpriteShapeChangedFields::STROKE_THICKNESS) {
-            let value = reader.read::<f32>();
-            self.set_stroke_thickness(host, value);
         }
         ServerCompositionSpriteShapeHooks::on_fields_deserialized(host, changed);
     }

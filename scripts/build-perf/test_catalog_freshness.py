@@ -197,6 +197,26 @@ class AcknowledgedOutputChangeTests(unittest.TestCase):
             result = catalog.compare_evidence(base, cand, catalog.first_of_revision([base, cand], "candidate"))
             self.assertFalse(result["same_units_features_profiles"])
 
+    def test_an_acknowledged_added_unit_is_compared_within_its_revision(self):
+        # A pull request that gives the catalog a dependency builds more units: accepted with the
+        # acknowledgement while the units of both revisions keep their profiles and each pair of
+        # the revision repeats the graph of the revision's first pair.
+        with tempfile.TemporaryDirectory() as directory:
+            base = self.pair(directory, "baseline", {"a.rs": ["1"]})
+            more = record()
+            more["units"].append({"package": "registry+source#added@1.0.0", "name": "added", "kind": ["lib"],
+                                  "features": [], "profile": {"opt_level": "0"}, "fresh": True})
+            cand = self.pair(directory, "candidate", {"a.rs": ["1"]}, more)
+            first = catalog.first_of_revision([base, cand], "candidate")
+            self.assertTrue(catalog.compare_evidence(base, cand, first)["same_units_features_profiles"])
+            self.assertEqual(catalog.unit_changes(base["population"], cand["population"]),
+                             {"added": ["registry+source#added@1.0.0 added lib"], "removed": []})
+            # A later pair of the revision without the unit does not repeat the revision's graph.
+            again = self.pair(directory, "candidate", {"a.rs": ["1"]})
+            self.assertFalse(catalog.compare_evidence(base, again, first)["same_units_features_profiles"])
+            # Without the acknowledgement the added unit fails.
+            self.assertFalse(catalog.compare_evidence(base, cand)["same_units_features_profiles"])
+
     def test_an_acknowledged_feature_change_is_compared_within_its_revision(self):
         # A pull request that removes a feature of the catalog builds its units with other
         # features: accepted with the acknowledgement, as long as each pair of the revision

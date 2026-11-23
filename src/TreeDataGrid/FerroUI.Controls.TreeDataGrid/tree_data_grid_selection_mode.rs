@@ -5,6 +5,8 @@
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 pub struct TreeDataGridSelectionMode(pub u32);
 
+ferroui_base::styled_value!(TreeDataGridSelectionMode);
+
 impl TreeDataGridSelectionMode {
     /// Rows are selected.
     pub const ROW: TreeDataGridSelectionMode = TreeDataGridSelectionMode(0x01);

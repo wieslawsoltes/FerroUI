@@ -38,10 +38,50 @@ impl DesignSurface {
 
     /// Current selection's panel features in panel coordinates with an artboard transform.
     pub fn layout_helper_snapshot(&self) -> Option<LayoutHelperSnapshot> {
-        if !self.helpers_visible.get() || self.interactive.get() {
-            return None;
+        self.layout_helper_snapshot_with(true).flatten()
+    }
+
+    /// The snapshot for a render: the kept one, never a new one. Making a snapshot reads the
+    /// live controls of the preview (their properties, their definitions), and a read may make
+    /// what it reads (a collection made on first use), which changes the control: in a render
+    /// pass that is an invalidation the renderer refuses. A render that finds none kept draws
+    /// without the helpers, and the snapshot is made after the pass and the surface drawn
+    /// again with it.
+    pub(super) fn layout_helper_snapshot_for_render(&self) -> Option<LayoutHelperSnapshot> {
+        match self.layout_helper_snapshot_with(false) {
+            Some(snapshot) => snapshot,
+            None => {
+                if !self.helper_refresh_queued.replace(true) {
+                    let weak = self.to_ref().downgrade();
+                    ferroui_base::threading::Dispatcher::ui_thread().post_local(
+                        move || {
+                            if let Some(this) = weak.upgrade() {
+                                this.helper_refresh_queued.set(false);
+                                // Draw again only if the snapshot is kept now: what keeps it
+                                // from being made (a session that is borrowed) would otherwise
+                                // ask for a render after every render.
+                                if this.layout_helper_snapshot_with(true).is_some() {
+                                    this.invalidate_visual();
+                                }
+                            }
+                        },
+                        ferroui_base::threading::DispatcherPriority::NORMAL,
+                    );
+                }
+                None
+            }
         }
-        let session = self.session()?;
+    }
+
+    /// The snapshot of the layout helpers: `Some(None)` where the surface shows none, `None`
+    /// where one is due and `make` is false or it cannot be made now.
+    fn layout_helper_snapshot_with(&self, make: bool) -> Option<Option<LayoutHelperSnapshot>> {
+        if !self.helpers_visible.get() || self.interactive.get() {
+            return Some(None);
+        }
+        let Some(session) = self.session() else {
+            return Some(None);
+        };
         let session = session.try_borrow().ok()?;
         if !session.can_manipulate()
             || session
@@ -49,7 +89,7 @@ impl DesignSurface {
                 .iter()
                 .any(|node| session.ensure_layer_manipulable(*node).is_err())
         {
-            return None;
+            return Some(None);
         }
         let registry = session.layout_tools().revision();
         let epoch = self.helper_epoch.get();
@@ -62,8 +102,11 @@ impl DesignSurface {
                 && cache.selection == session.selection()
                 && std::ptr::eq(cache.syntax.as_ref(), session.document().ast())
             {
-                return cache.snapshot.clone();
+                return Some(cache.snapshot.clone());
             }
+        }
+        if !make {
+            return None;
         }
         let snapshot = session.selection_layout_helpers();
         *self.helper_cache.borrow_mut() = Some(HelperCache {
@@ -76,7 +119,7 @@ impl DesignSurface {
             selection: session.selection().to_vec(),
             snapshot: snapshot.clone(),
         });
-        snapshot
+        Some(snapshot)
     }
 
     /// The currently displayed drop/handle proposal, useful to hosts and native UI tests.
@@ -177,9 +220,9 @@ impl DesignSurface {
             preview
                 .as_ref()
                 .map(|preview| preview.helpers.clone())
-                .or_else(|| self.layout_helper_snapshot())
+                .or_else(|| self.layout_helper_snapshot_for_render())
         } else {
-            self.layout_helper_snapshot()
+            self.layout_helper_snapshot_for_render()
         };
         if let Some(snapshot) = snapshot {
             let active = self

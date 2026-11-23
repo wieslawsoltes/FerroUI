@@ -25,18 +25,6 @@ impl PropertyInfoAccessorFactory {
         InpcPropertyAccessor::new(target.clone(), property)
     }
 
-    /// An accessor for a registered property, given through the property
-    /// description contract.
-    ///
-    /// # Panics
-    /// Panics if `property` is not a registered property (the invalid cast
-    /// of the managed original). Use
-    /// [`try_create_ferro_property_accessor`](Self::try_create_ferro_property_accessor)
-    /// to handle it.
-    pub fn create_ferro_property_accessor(target: &WeakValue, property: Rc<dyn IPropertyInfo>) -> Rc<dyn IPropertyAccessor> {
-        crate::throw(Self::try_create_ferro_property_accessor(target, property))
-    }
-
     /// [`create_ferro_property_accessor`](Self::create_ferro_property_accessor)
     /// without the panic: a property that is not a registered property is
     /// an error.

@@ -19,6 +19,8 @@ pub enum Win32RenderingMode {
     /// The toolkit would try to use native Windows Vulkan with GPU
     /// rendering.
     Vulkan = 4,
+    /// A native D3D11 renderer owns its device and HWND swapchain. ANGLE is not initialized.
+    Direct3D11 = 5,
 }
 
 /// Represents the DPI Awareness for the application.
@@ -120,7 +122,11 @@ impl Default for Win32PlatformOptions {
     fn default() -> Self {
         Self {
             overlay_popups: false,
-            rendering_mode: vec![Win32RenderingMode::AngleEgl, Win32RenderingMode::Software],
+            rendering_mode: if cfg!(feature = "native-d3d11") {
+                vec![Win32RenderingMode::Direct3D11]
+            } else {
+                vec![Win32RenderingMode::AngleEgl, Win32RenderingMode::Software]
+            },
             composition_mode: vec![
                 Win32CompositionMode::WinUIComposition,
                 Win32CompositionMode::DirectComposition,
@@ -152,7 +158,11 @@ mod tests {
     fn the_defaults_are_those_of_the_reference() {
         let options = Win32PlatformOptions::default();
         assert!(!options.overlay_popups);
-        assert_eq!(options.rendering_mode, [Win32RenderingMode::AngleEgl, Win32RenderingMode::Software]);
+        if cfg!(feature = "native-d3d11") {
+            assert_eq!(options.rendering_mode, [Win32RenderingMode::Direct3D11]);
+        } else {
+            assert_eq!(options.rendering_mode, [Win32RenderingMode::AngleEgl, Win32RenderingMode::Software]);
+        }
         assert_eq!(
             options.composition_mode,
             [

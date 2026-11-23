@@ -1,0 +1,30 @@
+[package]
+name = "ferroui-resource-benchmarks"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+publish = false
+autotests = false
+
+[[bin]]
+name = "ferroui-resource-benchmarks"
+path = "program.rs"
+# A measurement program without unit tests: the workspace test run does not build it as a test.
+test = false
+
+[[bin]]
+name = "ferroui-selector-benchmarks"
+path = "selectors.rs"
+test = false
+
+[features]
+count-allocations = []
+perf-counters = ["ferroui-base/perf-counters"]
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-markup-xaml.workspace = true
+ferroui-themes-winui.workspace = true
+serde_json.workspace = true

@@ -9,6 +9,7 @@
 
 use crate::axis::{format_number, Axis, AxisScale, POLAR_LABELS_BACKGROUND, POLAR_LABELS_PADDING};
 use crate::kernel::line_spline_math::control_points;
+use crate::labelers::ChartPointFormatter;
 use crate::measure::AxisTick;
 use crate::scene::*;
 use crate::series::{PolarLabelsPosition, Series};
@@ -39,6 +40,14 @@ impl Default for PolarOptions {
             fit_to_bounds: false,
         }
     }
+}
+
+/// The tooltip label formatters of a polar line series (`AngleToolTipLabelFormatter` and
+/// `RadiusToolTipLabelFormatter` of `CorePolarLineSeries`); `None` takes the text of the axis.
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct PolarToolTipLabelFormatters {
+    pub angle_tool_tip_label_formatter: Option<ChartPointFormatter>,
+    pub radius_tool_tip_label_formatter: Option<ChartPointFormatter>,
 }
 
 /// One resolved pair of polar axes. All distances use FerroUI logical pixels.
@@ -140,7 +149,28 @@ impl PolarChartEngine {
         angle_axes: &[Axis],
         radius_axes: &[Axis],
         options: &PolarOptions,
+        measure_text: impl FnMut(&str, f64) -> Size,
+    ) -> Result<PolarMeasurement, ChartError> {
+        Self::measure_with_tool_tip_label_formatters(
+            size,
+            series,
+            angle_axes,
+            radius_axes,
+            options,
+            measure_text,
+            &[],
+        )
+    }
+    /// [`Self::measure_with_axes_and_labels`] with the tooltip label formatters of the series,
+    /// in their order; a series without an entry has none.
+    pub fn measure_with_tool_tip_label_formatters(
+        size: Size,
+        series: &[Series],
+        angle_axes: &[Axis],
+        radius_axes: &[Axis],
+        options: &PolarOptions,
         mut measure_text: impl FnMut(&str, f64) -> Size,
+        formatters: &[PolarToolTipLabelFormatters],
     ) -> Result<PolarMeasurement, ChartError> {
         validate_size(size)?;
         validate_options(options)?;
@@ -383,12 +413,22 @@ impl PolarChartEngine {
                     );
                 }
                 let hover_size = s.geometry_size.max(16.0);
-                let angular_label = if angle_axes[ai].labels.is_empty() {
-                    String::new()
-                } else {
-                    angle_axes[ai].label(c.secondary_value)
+                // GetSecondaryToolTipText and GetPrimaryToolTipText of CorePolarLineSeries: the
+                // formatter of the series, else the label of the axis. The source leaves the angle
+                // out (IgnoreToolTipLabel) when its axis has neither labels nor a labeler.
+                let own = formatters.get(si);
+                let angle_axis = &angle_axes[ai];
+                let angular_label = match own.and_then(|f| f.angle_tool_tip_label_formatter.as_ref()) {
+                    Some(formatter) => formatter.format(c),
+                    None if !angle_axis.labels.is_empty() || angle_axis.labeler.is_some() => {
+                        angle_axis.label(c.secondary_value)
+                    }
+                    None => String::new(),
                 };
-                let radial_label = radius_axes[ri].label(c.primary_value);
+                let radial_label = match own.and_then(|f| f.radius_tool_tip_label_formatter.as_ref()) {
+                    Some(formatter) => formatter.format(c),
+                    None => radius_axes[ri].label(c.primary_value),
+                };
                 let label = [
                     s.name.as_str(),
                     angular_label.as_str(),
@@ -966,7 +1006,7 @@ fn polar_line_path(points: &[Point], smoothness: f64, closed: bool) -> Vec<PathC
 #[cfg(test)]
 mod tests {
     use super::*;
-    use crate::{kernel::Coordinate, SeriesKind};
+    use crate::{kernel::Coordinate, Labeler, SeriesKind};
     #[test]
     fn named_radar_categories_have_distinct_positions() {
         let axis = Axis {
@@ -1527,5 +1567,78 @@ mod tests {
             .unwrap();
         assert_eq!(marker.style.fill, Some(Color::from_rgb(250, 250, 250)));
         assert_eq!(marker.style.stroke, Some(Color::from_rgb(1, 2, 3)));
+    }
+    /// SeriesTests/SeriesHitTests.PolarLine_CompareAll_HitsAtPointCenter: the source series of three
+    /// values with a geometry of 20 on a 600 by 600 chart; by both dimensions (the strategy of the
+    /// polar finder) the centre of the hover area of the second point finds it alone.
+    #[test]
+    fn source_polar_line_compare_all_hits_at_point_center() {
+        let mut s = Series::from_values(SeriesKind::PolarLine, [10.0, 20.0, 30.0]);
+        s.geometry_size = 20.0;
+        let scene = PolarChartEngine::measure(
+            Size::new(600.0, 600.0),
+            &[s],
+            &Axis::default(),
+            &Axis::default(),
+            &PolarOptions::default(),
+        )
+        .unwrap();
+        assert_eq!(scene.automatic_finding_strategy, FindingStrategy::CompareAll);
+        let center = scene.hits[1].shape.hover_center();
+        let hits = scene.hit_test(center, FindingStrategy::CompareAll, 0.0);
+        assert_eq!(hits.len(), 1);
+        assert_eq!(hits[0].id.point, 1);
+    }
+    /// GetPrimaryToolTipText and GetSecondaryToolTipText of CorePolarLineSeries: the radius text
+    /// always, the angle text when the angle axis has labels or a labeler of its own (the source
+    /// ignores it otherwise), and the tooltip label formatters of the series over both.
+    #[test]
+    fn tooltip_texts_follow_the_axes_and_the_formatters_of_the_series() {
+        let mut s = Series::new(SeriesKind::PolarLine);
+        s.name = "Wind".into();
+        s.values = vec![Coordinate::new(1.0, 5.0)];
+        let label = |angle: &Axis, formatters: &[PolarToolTipLabelFormatters]| {
+            PolarChartEngine::measure_with_tool_tip_label_formatters(
+                Size::new(300.0, 300.0),
+                std::slice::from_ref(&s),
+                std::slice::from_ref(angle),
+                &[hidden_axis(0.0, 10.0)],
+                &full_options(),
+                |text, size| Size::new(text.chars().count() as f64 * size * 0.6, size * 1.2),
+                formatters,
+            )
+            .unwrap()
+            .scene
+            .hits[0]
+            .label
+            .clone()
+        };
+        let plain = hidden_axis(0.0, 4.0);
+        assert_eq!(label(&plain, &[]), "Wind: 5");
+        let named = Axis {
+            labels: vec!["N".into(), "E".into(), "S".into(), "W".into()],
+            ..plain.clone()
+        };
+        assert_eq!(label(&named, &[]), "Wind: E: 5");
+        let labeled = Axis {
+            labeler: Some(Labeler::new(|value| format!("{value} rad"))),
+            ..plain.clone()
+        };
+        assert_eq!(label(&labeled, &[]), "Wind: 1 rad: 5");
+        let formatters = PolarToolTipLabelFormatters {
+            angle_tool_tip_label_formatter: Some(ChartPointFormatter::new(|point| {
+                format!("at {}", point.secondary_value)
+            })),
+            radius_tool_tip_label_formatter: Some(ChartPointFormatter::new(|point| {
+                format!("{} km/h", point.primary_value)
+            })),
+        };
+        assert_eq!(label(&plain, std::slice::from_ref(&formatters)), "Wind: at 1: 5 km/h");
+        let radius_only = PolarToolTipLabelFormatters {
+            radius_tool_tip_label_formatter: formatters.radius_tool_tip_label_formatter.clone(),
+            ..PolarToolTipLabelFormatters::default()
+        };
+        assert_eq!(label(&named, &[radius_only.clone()]), "Wind: E: 5 km/h");
+        assert_eq!(label(&plain, &[radius_only]), "Wind: 5 km/h");
     }
 }

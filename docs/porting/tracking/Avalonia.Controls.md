@@ -12,7 +12,7 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Phase / priority | 1 - controls / P0 |
 | Files | 540/540 (100.0%), 1 not applicable |
 | Types | 623/630 (7 waived) (100.0%) |
-| Members | 6262/6412 (150 waived) (100.0%) |
+| Members | 6262/6412 (148 waived) (100.0%) |
 | Contracts (interfaces) | 84/84 |
 | Property registrations | 939/939 |
 | Routed events | 67/67 |
@@ -110,7 +110,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 
 ## Files
 
-### `(project root)` - files 147/147, types 175/178 (3 waived), members 2233/2295 (62 waived)
+### `(project root)` - files 147/147, types 175/178 (3 waived), members 2235/2295 (60 waived)
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -169,7 +169,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `InputPaneAwareDecorator.cs` | `input_pane_aware_decorator.rs` | present | 1/1 | 8/8 |  |
 | `ItemCollection.cs` | `item_collection.rs` | present | 1/1 | 13/14 (1 waived) |  |
 | `ItemsControl.cs` | `items_control.rs` | present | 1/1 | 56/58 (2 waived) |  |
-| `ItemsSourceView.cs` | `items_source_view.rs` | present | 2/2 | 29/43 (14 waived) |  |
+| `ItemsSourceView.cs` | `items_source_view.rs` | present | 2/2 | 31/43 (12 waived) |  |
 | `Label.cs` | `label.rs` | present | 1/1 | 7/7 |  |
 | `LayoutTransformControl.cs` | `layout_transform_control.rs` | present | 1/1 | 10/10 |  |
 | `ListBox.cs` | `list_box.rs` | present | 1/1 | 13/16 (3 waived) |  |
@@ -302,7 +302,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `PopulatedEventArgs.cs` | `auto_complete_box/populated_event_args.rs` | present | 1/1 | 2/2 |  |
 | `PopulatingEventArgs.cs` | `auto_complete_box/populating_event_args.rs` | present | 1/1 | 2/2 |  |
 
-### `Automation` - files 15/15, types 16/16, members 115/115
+### `Automation` - files 15/15, types 16/16, members 113/115
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
@@ -311,7 +311,7 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `AutomationProperties.cs` | `automation/automation_properties.rs` | present | 2/2 | 69/69 |  |
 | `AutomationProperty.cs` | `automation/automation_property.rs` | present | 1/1 | 1/1 |  |
 | `AutomationPropertyChangedEventArgs.cs` | `automation/automation_property_changed_event_args.rs` | present | 1/1 | 4/4 |  |
-| `ElementNotEnabledException.cs` | `automation/element_not_enabled_exception.rs` | present | 1/1 | 2/2 |  |
+| `ElementNotEnabledException.cs` | `automation/element_not_enabled_exception.rs` | partial | 1/1 | 0/2 |  |
 | `ExpandCollapsePatternIdentifiers.cs` | `automation/expand_collapse_pattern_identifiers.rs` | present | 1/1 | 1/1 |  |
 | `ExpandCollapseState.cs` | `automation/expand_collapse_state.rs` | present | 1/1 | 4/4 |  |
 | `IsOffscreenBehavior.cs` | `automation/is_offscreen_behavior.rs` | present | 1/1 | 4/4 |  |
@@ -321,6 +321,14 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `SelectionPatternIdentifiers.cs` | `automation/selection_pattern_identifiers.rs` | present | 1/1 | 3/3 |  |
 | `TogglePatternIdentifiers.cs` | `automation/toggle_pattern_identifiers.rs` | present | 1/1 | 1/1 |  |
 | `ValuePatternIdentifiers.cs` | `automation/value_pattern_identifiers.rs` | present | 1/1 | 2/2 |  |
+
+<details><summary><code>ElementNotEnabledException.cs</code> - 2 missing</summary>
+
+- `ElementNotEnabledException` (class): 2 missing
+  - `ElementNotEnabledException()`
+  - `ElementNotEnabledException(string message)`
+
+</details>
 
 ### `Automation/Peers` - files 52/52, types 54/54, members 514/522 (8 waived)
 
@@ -864,12 +872,66 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 |---|---|---|
 | `animation/connected_animation_flight.rs` | **unmapped** | `ConnectedAnimationComponent`, `ConnectedAnimationFlight`, `ElementInfo`, `FlightEnd`, `FlightState` |
 | `assigned_binding.rs` | a binding held as the value of a property that is assigned a binding rather than bound with it; equality is identity, as of the object reference upstream | `AssignedBinding` |
+| `auto_complete_box/query_submitted_event_args.rs` | **unmapped** | `AutoCompleteBoxQuerySubmittedEventArgs` |
+| `auto_suggest_box.rs` | **unmapped** | `AutoSuggestBox`, `AutoSuggestBoxQuerySubmittedEventArgs`, `AutoSuggestBoxSuggestionChosenEventArgs`, `AutoSuggestBoxTextChangedEventArgs`, `AutoSuggestionBoxTextChangeReason`, `Parts`, `Restore` |
+| `automation/automation_error.rs` | **unmapped** | `AutomationError` |
+| `automation/i_automation_event_sink.rs` | **unmapped** | `IAutomationEventSink` |
+| `automation/peers/auto_suggest_box_automation_peer.rs` | **unmapped** | `AutoSuggestBoxAutomationPeer` |
+| `automation/peers/hyperlink_automation_peer.rs` | **unmapped** | `HyperlinkAutomationPeer` |
+| `automation/peers/info_bar_automation_peer.rs` | **unmapped** | `InfoBarAutomationPeer` |
+| `automation/peers/navigation_view_automation_peer.rs` | **unmapped** | `NavigationViewAutomationPeer` |
+| `automation/peers/navigation_view_item_automation_peer.rs` | **unmapped** | `NavigationViewItemAutomationPeer` |
+| `automation/peers/number_box_automation_peer.rs` | **unmapped** | `NumberBoxAutomationPeer` |
+| `automation/peers/pager_control_automation_peer.rs` | **unmapped** | `PagerControlAutomationPeer` |
+| `automation/peers/person_picture_automation_peer.rs` | **unmapped** | `PersonPictureAutomationPeer` |
+| `automation/peers/progress_ring_automation_peer.rs` | **unmapped** | `ProgressRingAutomationPeer` |
+| `automation/peers/radio_buttons_automation_peer.rs` | **unmapped** | `RadioButtonsAutomationPeer` |
+| `automation/peers/rating_control_automation_peer.rs` | **unmapped** | `RatingControlAutomationPeer` |
+| `automation/peers/rich_edit_box_automation_peer.rs` | **unmapped** | `RichEditBoxAutomationPeer` |
+| `automation/peers/rich_edit_box_text_presenter_automation_peer.rs` | **unmapped** | `RichEditBoxTextPresenterAutomationPeer` |
+| `automation/peers/rich_text_block_automation_peer.rs` | **unmapped** | `RichTextBlockAutomationPeer` |
+| `automation/peers/title_bar_automation_peer.rs` | **unmapped** | `TitleBarAutomationPeer` |
+| `automation/provider/i_text_child_provider.rs` | **unmapped** | `ITextChildProvider` |
+| `automation/provider/i_text_edit_provider.rs` | **unmapped** | `ITextEditProvider`, `TextEditChangeType`, `TextEditTextChangedEventArgs` |
+| `automation/provider/i_text_provider.rs` | **unmapped** | `ITextProvider`, `SupportedTextSelection` |
+| `automation/provider/i_text_provider2.rs` | **unmapped** | `ITextProvider2`, `TextCaretRange` |
+| `automation/provider/i_text_range_provider.rs` | **unmapped** | `ITextRangeProvider`, `TextAttribute`, `TextAttributeValue`, `TextPatternRangeEndpoint`, `TextProviderError`, `TextUnit` |
+| `automation/provider/rich_text_automation.rs` | **unmapped** | `DocumentChild`, `FormatSpan`, `RichTextAutomationHost`, `RichTextAutomationPeer`, `RichTextAutomationRange`, `RichTextAutomationState`, `TextChildEntry`, `TextChildOwner`, `TextChildrenCache`, `TextContext`, `ViewGeometry` |
 | `command_bar/command_bar_tests_keyboard.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `AppScope`, `VisibilityChangingCommandBarButton` |
 | `command_bar/command_bar_tests_overflow.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `contact.rs` | **unmapped** | `Contact` |
+| `context_menu_event_args.rs` | **unmapped** | `ContextMenuEventArgs`, `ContextMenuOpeningRoutedEvent` |
+| `documents/block.rs` | **unmapped** | `Block`, `BlockImpl`, `LineStackingStrategy` |
+| `documents/block_collection.rs` | **unmapped** | `BlockCollection`, `BlockCollectionData`, `BlockCollectionUpdate`, `BlockInlineHost` |
+| `documents/character_format.rs` | **unmapped** | `CharacterFormat`, `ParagraphFormat` |
+| `documents/document_delta.rs` | **unmapped** | `BlockJournal`, `ChangedBlocks`, `DocumentDelta`, `Fields`, `JournalFrame`, `Journaling` |
+| `documents/document_link_field.rs` | **unmapped** | `DocumentLinkField`, `Segment` |
+| `documents/document_snapshot.rs` | **unmapped** | `DocumentSnapshot`, `InlineSnapshot`, `InlineSnapshotKind`, `ParagraphSnapshot` |
+| `documents/hyperlink.rs` | **unmapped** | `Hyperlink`, `HyperlinkBehavior`, `HyperlinkClickEventArgs`, `UnderlineStyle` |
+| `documents/line_spacing_rule.rs` | **unmapped** | `LineSpacingRule` |
+| `documents/paragraph.rs` | **unmapped** | `Paragraph`, `ParagraphAddChild` |
+| `documents/rich_text_document.rs` | **unmapped** | `BlockReplacement`, `ContentPool`, `DocumentChangeKind`, `DocumentChangedEventArgs`, `DocumentEditBatch`, `DocumentError`, `DocumentTextChange`, `InlineEntry`, `ParagraphAlignmentSource`, `ParagraphChange`, `ParagraphEdit`, `ParagraphEntry`, ... (24 total) |
+| `documents/text_highlight_merge.rs` | **unmapped** | `TextHighlightMerge`, `TextHighlightRegion` |
+| `documents/text_highlight_range.rs` | **unmapped** | `TextHighlightError`, `TextHighlightRange`, `TextRangeCollection` |
+| `documents/text_highlighter.rs` | **unmapped** | `HighlighterAddChild`, `TextHighlighter` |
+| `documents/text_highlighter_collection.rs` | **unmapped** | `HighlighterCollectionData`, `TextHighlighterCollection`, `WeakTextHighlighterCollection` |
+| `documents/text_language.rs` | **unmapped** |  |
+| `documents/text_position.rs` | **unmapped** | `TextGravity`, `TextPointer`, `TextPointerData`, `TextPosition`, `TextRange` |
+| `documents/typography.rs` | **unmapped** | `Typography` |
+| `documents/typography_format.rs` | **unmapped** | `TypographyFormat` |
+| `font_icon.rs` | **unmapped** | `FontIcon` |
+| `frame.rs` | **unmapped** | `Frame`, `NavigationGuard`, `PageFactory` |
+| `frame_page.rs` | **unmapped** | `FramePage`, `FramePageImpl` |
 | `grid_mocks.rs` | helpers shared by the grid tests (`GridMocks.cs` of the upstream test project) | `GridAssert`, `GridMock` |
 | `hosting/element_composition_preview.rs` | **unmapped** | `ElementCompositionPreview`, `PointerTracker` |
 | `i_clickable_control.rs` | the registry of the classes that implement `IClickableControl`: a class cannot implement the trait itself, an interface cast upstream | `Adapter` |
 | `i_command_source.rs` | the registry of the classes that implement `ICommandSource`: a class cannot implement the trait itself, an interface cast upstream | `Adapter` |
+| `i_key_index_mapping.rs` | **unmapped** | `IKeyIndexMapping` |
+| `icon_source.rs` | **unmapped** | `FontIconSource`, `IconSource`, `IconSourceImpl`, `PathIconSource`, `SymbolIconSource` |
+| `icon_test_support.rs` | **unmapped** |  |
+| `info_badge.rs` | **unmapped** | `InfoBadge` |
+| `info_bar.rs` | **unmapped** | `InfoBar`, `InfoBarCloseReason`, `InfoBarClosedEventArgs`, `InfoBarClosingEventArgs`, `InfoBarOpenedEventArgs`, `InfoBarSeverity` |
+| `input_test_support.rs` | **unmapped** |  |
 | `keyboard_navigation_tests_tab.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `keyboard_navigation_tests_xy.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `layout_test_control.rs` | the port of `LayoutTestControl.cs` and `LayoutTestRoot.cs` of the base library's test project: they derive from controls, so the layout tests that use them live with the controls | `LayoutOverride`, `LayoutTestControl`, `LayoutTestRoot` |
@@ -883,10 +945,21 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `markup_types/lists.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
 | `markup_types/plain.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with | `FerroListOf` |
 | `markup_types/values.rs` | the markup metadata of the types of the crate (content property, plain properties, constructors, methods, events, enums, converters, typed lists), most of it generated by scripts/generate_markup_types.py: takes the place of the attributes and the reflection upstream reads them with |  |
+| `media/reveal_brush.rs` | **unmapped** | `ApplicationTheme`, `RevealBackgroundBrush`, `RevealBorderBrush`, `RevealBrush`, `RevealBrushState`, `RevealState` |
+| `media/reveal_focus.rs` | **unmapped** | `FocusVisualKind`, `RevealFocus`, `RevealFocusDirection`, `RevealFocusLights`, `ShownGlow` |
+| `media/reveal_lights.rs` | **unmapped** | `BorderDesc`, `BorderResources`, `BorderState`, `Easing`, `Frame`, `HoverResources`, `HoverState`, `LightEvent`, `LightState`, `RevealBorderLight`, `RevealHoverLight`, `RevealPressLight`, ... (15 total) |
+| `media/system_backdrop.rs` | **unmapped** | `ControllerEntry`, `DesktopAcrylicBackdrop`, `ElementBackdropTarget`, `ElementSystemBackdrop`, `MicaBackdrop`, `PerTargetConfiguration`, `SystemBackdrop`, `SystemBackdropHostBrush`, `SystemBackdropImpl`, `TopLevelBackdropTarget` |
 | `metadata/pseudo_classes_attribute.rs` | the constant a control declares its pseudo-classes with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/PseudoClassesAttribute.cs` of Avalonia.Base) | `PseudoClassesAttribute` |
 | `metadata/template_part_attribute.rs` | the constant a control declares its template parts with in Rust code; the attribute markup reads is mapped in the base crate (`Controls/Metadata/TemplatePartAttribute.cs` of Avalonia.Base) | `TemplatePartAttribute` |
 | `mouse_test_helper.rs` | the port of `MouseTestHelper` of the upstream test projects | `MouseTestHelper` |
 | `navigable_containers.rs` | views a panel as the `INavigableContainer` it implements: an interface cast upstream | `ContainerCast` |
+| `navigation.rs` | **unmapped** | `FrameNavigationOptions`, `NavigatingCancelEventArgs`, `NavigationCacheMode`, `NavigationError`, `NavigationEventArgs`, `NavigationFailedEventArgs`, `NavigationMode`, `NavigationStack`, `NavigationStackData` |
+| `navigation/page_stack_entry.rs` | **unmapped** | `PageStackEntry` |
+| `navigation_test_support.rs` | **unmapped** | `BoundsHitTester`, `Scene`, `TestGlobalClock` |
+| `navigation_view.rs` | **unmapped** | `AppliedTheme`, `Entry`, `NavigationView`, `Parts`, `VisualStateDisplayMode` |
+| `navigation_view_events.rs` | **unmapped** | `NavigationViewBackButtonVisible`, `NavigationViewBackRequestedEventArgs`, `NavigationViewDisplayMode`, `NavigationViewDisplayModeChangedEventArgs`, `NavigationViewItemCollapsedEventArgs`, `NavigationViewItemExpandingEventArgs`, `NavigationViewItemInvokedEventArgs`, `NavigationViewPaneClosingEventArgs`, `NavigationViewPaneDisplayMode`, `NavigationViewSelectionChangedEventArgs`, `NavigationViewSelectionFollowsFocus` |
+| `navigation_view_item.rs` | **unmapped** | `NavigationViewItem`, `NavigationViewItemBase`, `NavigationViewItemHeader`, `NavigationViewItemSeparator`, `Parts` |
+| `number_box.rs` | **unmapped** | `INumberBoxNumberFormatter`, `InvariantNumberBoxNumberFormatter`, `NumberBox`, `NumberBoxSpinButtonPlacementMode`, `NumberBoxValidationMode`, `NumberBoxValueChangedEventArgs`, `Parts`, `Reset` |
 | `page/carousel_page_tests_interaction.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `DataItem`, `Hosted`, `MockGlobalClock`, `SwipeReady`, `TrackingPage` |
 | `page/drawer_page_tests_lifecycle.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `page/drawer_page_tests_templates.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `Created` |
@@ -894,6 +967,9 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `page/navigation_page_tests_navigating.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `page/navigation_page_tests_stack.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `BackButtonParts` |
 | `page/tabbed_page_tests_data_template.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `DataItem`, `Hosted` |
+| `page_type.rs` | **unmapped** | `Form`, `PageType` |
+| `pager_control.rs` | **unmapped** | `NavigationButton`, `PagerControl`, `PagerControlButtonVisibility`, `PagerControlDisplayMode`, `PagerControlSelectedIndexChangedEventArgs`, `Parts`, `State` |
+| `person_picture.rs` | **unmapped** | `BadgeState`, `CommonState`, `Parts`, `PersonPicture` |
 | `platform/i_platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too. The two traits have diverged: the one of the controls crate has `as_native_control_host_destroyable_control_handle`, the port's form of upstream's cast to `INativeControlHostDestroyableControlHandle`, which names a type the base crate cannot name. Not merged; the difference, the users of each and what one declaration would cost are in `docs/porting/decisions/2026-10-open-differences.md`, section 1, for a decision | `IPlatformHandle` |
 | `platform/platform_handle.rs` | `IPlatformHandle` and `PlatformHandle` declared a second time: upstream has them once, in `Platform/` of Avalonia.Base, and the base crate ports them there too. The two traits have diverged: the one of the controls crate has `as_native_control_host_destroyable_control_handle`, the port's form of upstream's cast to `INativeControlHostDestroyableControlHandle`, which names a type the base crate cannot name. Not merged; the difference, the users of each and what one declaration would cost are in `docs/porting/decisions/2026-10-open-differences.md`, section 1, for a decision | `PlatformHandle` |
 | `pointer_tests_base.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `MockHitTester`, `MockPointer`, `MockPointerDevice` |
@@ -903,20 +979,82 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `presenters/content_presenter_tests_standalone.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `MockHostParent`, `MockParent` |
 | `presenters/content_presenter_tests_unrooted.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `presenters/scroll_content_presenter_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
+| `presenters/text_presenter_paragraphs.rs` | **unmapped** |  |
+| `presenters/text_presenter_styles.rs` | **unmapped** | `Span` |
+| `primitives/info_badge_template_settings.rs` | **unmapped** | `InfoBadgeTemplateSettings` |
+| `primitives/info_bar_panel.rs` | **unmapped** | `InfoBarPanel` |
+| `primitives/info_bar_template_settings.rs` | **unmapped** | `InfoBarTemplateSettings` |
+| `primitives/navigation_view_template_settings.rs` | **unmapped** | `NavigationViewTemplateSettings` |
+| `primitives/pager_control_template_settings.rs` | **unmapped** | `PagerControlTemplateSettings` |
+| `primitives/person_picture_template_settings.rs` | **unmapped** | `PersonPictureTemplateSettings` |
 | `primitives/popup_tests_items_control.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `PopupItemsControl` |
+| `primitives/progress_ring_template_settings.rs` | **unmapped** | `ProgressRingTemplateSettings` |
+| `primitives/radio_buttons_panel.rs` | **unmapped** | `RadioButtonsPanel` |
 | `primitives/selecting_items_control_tests_auto_select.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `AlwaysSelectedTestSelectorDisablingFirstContainers`, `AlwaysSelectedTestSelectorHidingFirstContainers`, `ResetOnAdd`, `TestSelector` |
 | `primitives/selecting_items_control_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ItemViewModel`, `ItemsViewModel`, `OldDataContextViewModel`, `Options`, `Target`, `TestContainer`, `TestSelector`, `TestSelectorWithContainers` |
 | `primitives/selecting_items_control_tests_selected_value.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestClass` |
+| `primitives/title_bar_template_settings.rs` | **unmapped** | `TitleBarTemplateSettings` |
+| `progress_ring.rs` | **unmapped** | `ProgressRing`, `ResetOnDrop` |
+| `radio_buttons.rs` | **unmapped** | `RadioButtons` |
+| `rating_control.rs` | **unmapped** | `ItemVisual`, `Parts`, `RatingControl` |
+| `rating_item_info.rs` | **unmapped** | `RatingItemFontInfo`, `RatingItemImageInfo`, `RatingItemInfo`, `RatingItemState` |
 | `register_types.rs` | the type table of the crate (porting guide, Classes): its namespaces, its classes and what it states about itself for markup; takes the place of the assembly metadata the upstream compiler and loader reflect over |  |
 | `remote/ui_thread_handle.rs` | How a handler on the reader thread of a connection reaches an object of the UI thread: a number registered on that thread and its dispatcher, in place of the `this` a delegate of the original captures (DEVIATIONS.md, Remote rendering) | `Entry`, `UiThreadHandle` |
 | `render_tests_culling.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TestControl` |
+| `rich_edit_box.rs` | **unmapped** | `CompositionOperation`, `DisabledFormattingAccelerators`, `RichEditBox`, `RichEditBoxSelectionChangingEventArgs`, `RichEditBoxSelectionChangingRoutedEvent`, `RichEditBoxTextChangingEventArgs`, `RichEditBoxTextChangingRoutedEvent`, `RichEditCharacterCasing`, `RichEditCompositionEventArgs`, `RichEditCompositionRoutedEvent` |
+| `rich_edit_box_format_commands.rs` | **unmapped** | `FormattingRun`, `FormattingState` |
+| `rich_edit_box_text_input_method_client.rs` | **unmapped** | `InputMethodRevision`, `RichEditBoxTextInputMethodClient`, `RichInputMethodState` |
+| `rich_edit_box_text_presenter.rs` | **unmapped** | `RichEditBoxTextPresenter` |
+| `rich_edit_context_menu.rs` | **unmapped** |  |
+| `rich_edit_fragment_filter.rs` | **unmapped** | `OffsetMap` |
+| `rich_edit_input_range_geometry.rs` | **unmapped** | `GeometrySnapshot`, `PageSnapshot` |
+| `rich_text/rich_edit_text_case.rs` | **unmapped** | `LetterCase` |
+| `rich_text/rich_edit_text_clipboard.rs` | **unmapped** | `PendingRange`, `RetrievedTransfer` |
+| `rich_text/rich_edit_text_document.rs` | **unmapped** | `FindOptions`, `RangeData`, `RichEditTextDocument`, `RichEditTextRange`, `RichEditTextSelection`, `SubstringMatches`, `TextFindOptions`, `TextFormatValue`, `TextGetOptions`, `TextOperationError`, `TextRangeUnit`, `TextSetOptions`, ... (13 total) |
+| `rich_text/rich_edit_text_field_story.rs` | **unmapped** | `Endpoint`, `FieldInstructionBoundary`, `Projection`, `RangeData`, `RichEditTextFieldRange`, `RichEditTextFieldStory`, `TextFieldError` |
+| `rich_text/rich_edit_text_paragraph_typing_native_cases.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_range_gravity.rs` | **unmapped** | `RangeGravity` |
+| `rich_text/rich_edit_text_range_gravity_native_cases.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_range_operations.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_range_tracking.rs` | **unmapped** | `RangePosition` |
+| `rich_text/rich_edit_text_range_tracking_native_cases.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_selection_gravity.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_selection_gravity_native_cases.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_selection_movement.rs` | **unmapped** | `PublishedSelection` |
+| `rich_text/rich_edit_text_selection_navigation.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_selection_options.rs` | **unmapped** | `SelectionOptions`, `SelectionType` |
+| `rich_text/rich_edit_text_selection_options_native_cases.rs` | **unmapped** |  |
+| `rich_text/rich_edit_text_stream.rs` | **unmapped** | `TextStreamEncoding`, `TextStreamOptions` |
+| `rich_text/rich_edit_text_units.rs` | **unmapped** | `DisplayLine`, `TextUnits` |
+| `rich_text/rich_text_editor.rs` | **unmapped** | `Composition`, `CompositionCommitResult`, `EditError`, `EditKind`, `EditorSelection`, `EditorSnapshot`, `EditorState`, `ExactComposition`, `History`, `NavigationAffinity`, `Operation`, `RecordStart`, ... (16 total) |
+| `rich_text/rich_text_editor_gravity.rs` | **unmapped** | `SelectionFormatCheckpoint` |
+| `rich_text/rich_text_editor_selection.rs` | **unmapped** |  |
+| `rich_text/rich_text_exact_edit.rs` | **unmapped** | `Visible` |
+| `rich_text/rich_text_field_story.rs` | **unmapped** | `FieldLocation`, `FieldStory`, `FieldStoryData`, `FieldStoryError`, `FieldStoryOffset`, `FieldStoryRange`, `InstructionBoundary`, `LinkArgument`, `LinkField`, `LinkFieldId`, `ProjectedField`, `Segment`, ... (15 total) |
+| `rich_text/rich_text_link.rs` | **unmapped** | `LinkFieldChange`, `LinkLookup`, `LinkMutation`, `ParsedArgument` |
+| `rich_text/rich_text_link_native_cases.rs` | **unmapped** | `NativeLinkCase`, `NativeLinkSnapshot` |
+| `rich_text/rich_text_transfer.rs` | **unmapped** | `RichEditClipboardFormat`, `RichTextPasteFormat`, `RichTextTransfer`, `RichTextTransferContent` |
+| `rich_text/rtf.rs` | **unmapped** | `Decoder`, `DestinationText`, `Encoder`, `FontEntry`, `HyperlinkTarget`, `Node`, `Parser`, `RtfError`, `RtfLimits`, `RtfReader`, `RtfWriter`, `State` |
+| `rich_text/rtf_encoding.rs` | **unmapped** | `EncodedText` |
+| `rich_text/rtf_link_fields.rs` | **unmapped** | `Field`, `FieldEncoder` |
+| `rich_text/rtf_styles.rs` | **unmapped** | `StyleControl`, `StyleDefinition`, `StyleKind`, `StyleTable` |
+| `rich_text_block.rs` | **unmapped** | `RichBlockInlineHost`, `RichTextBlock`, `RichTextBlockImpl`, `RichTextSelectionChangedEventArgs` |
+| `rich_text_block_overflow.rs` | **unmapped** | `RichTextBlockOverflow` |
+| `rich_text_context_menu.rs` | **unmapped** | `ContextMenuKeyRequest`, `ContextMenuKeyRequestScope` |
+| `rich_text_layout.rs` | **unmapped** | `CachedParagraphLine`, `HostedParagraphSource`, `LineSourceSpan`, `LineStackingMetrics`, `ParagraphLines`, `ParagraphLinesKey`, `RichParagraphSource`, `RichTextBreak`, `RichTextLayout`, `RichTextLine`, `RichTextLineMetrics`, `RichTextSource`, ... (14 total) |
+| `rich_text_overflow_links.rs` | **unmapped** | `OverflowLinkState`, `OverflowReset` |
 | `rust_paths.rs` | generated by scripts/generate_markup_types.py: the public Rust paths of the registered types of the crate, which the emitter of the XAML compiler writes into generated code |  |
 | `scroll_viewer_tests_i_logical_scrollable.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `selection/selection_model_tests_multiple.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ResettingList`, `Target` |
 | `selection/selection_model_tests_single.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `MockBinding`, `Target` |
+| `selection_indicator.rs` | **unmapped** | `IndicatorState`, `SelectionIndicator`, `ServerIndicator` |
+| `selection_indicator_animation.rs` | **unmapped** | `Indicator`, `Running`, `SelectionIndicatorAnimation`, `State` |
+| `selection_indicator_animation/tests.rs` | the unit tests of the module | `ReducedMotion` |
 | `size_to_content.rs` | the enum `SizeToContent`, declared in `Window.cs` upstream | `SizeToContent` |
 | `styled_element_tests_resources.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file |  |
 | `styled_element_tests_theming.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ThemedControl`, `ThemedControl2` |
+| `symbol_icon.rs` | **unmapped** | `Symbol`, `SymbolIcon` |
+| `templates/i_data_template_component.rs` | **unmapped** | `IDataTemplateComponent`, `XamlBindingHelper` |
 | `templates/template_result.rs` | port of `Controls/Templates/TemplateResult.cs` and `ITemplateResult.cs` of Avalonia.Base, in the crate of their only user | `TemplateResult` |
 | `test_command.rs` | classes, services and a command shared by the tests of the crate | `Handlers`, `TestCommand` |
 | `test_support.rs` | classes, services and a command shared by the tests of the crate | `NullHitTester`, `TestRenderer`, `TestRoot`, `TestScope`, `TestSource`, `TestTextBlock` |
@@ -942,12 +1080,25 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 | `testing/test_theme_pull_to_refresh.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `RefreshVisualizerContentTemplate` |
 | `testing/test_theme_split_view.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
 | `testing/unit_test_application.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) | `ScopeState`, `UnitTestApplication`, `UnitTestApplicationScope` |
+| `testing/winui_only.rs` | test support shared by the test suites of this crate and of the crates built on it: mocks, test services, fixtures and helpers, among them the ports of the ones of the upstream test projects (`tests/Avalonia.UnitTests` and the helpers next to the suites) |  |
+| `text_box_history.rs` | **unmapped** | `UndoRedoState` |
 | `text_box_tests_data_validation.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `ExceptionTest`, `IndeiStringTest`, `InvalidOperationError` |
 | `text_box_tests_input.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `TouchTestHelper` |
 | `text_layout_rounding_placement.rs` | **unmapped** | `TextLayoutRoundingPlacement` |
+| `title_bar.rs` | **unmapped** | `Parts`, `TitleBar` |
 | `top_level_tests_platform_features.rs` | a part of an upstream test suite (`&lt;Suite&gt;Tests_&lt;Part&gt;.cs` or `&lt;Suite&gt;Tests.&lt;Part&gt;.cs`): the scanner takes only `*_tests.rs` for a test file | `Pending`, `PendingFuture`, `TestPlatformBehaviorInhibition`, `TestSystemNavigationManager` |
 | `utils/debug_display.rs` | port of `Diagnostics/DebugDisplayHelper.cs` of Avalonia.Base and of the base levels of `BuildDebugDisplay`, next to the levels the controls add |  |
+| `utils/initials_generator.rs` | **unmapped** | `CharacterType` |
 | `utils/masked_text_provider.rs` | derived from .NET `System.ComponentModel.MaskedTextProvider`, which `MaskedTextBox` uses from the runtime library upstream | `CaseConversion`, `CharDescriptor`, `CharType`, `MaskSeparators`, `MaskedTextProvider`, `MaskedTextProviderError`, `MaskedTextResultHint` |
+| `utils/number_expression.rs` | **unmapped** | `ExpressionNumber`, `NumberExpressionError`, `NumberExpressionErrorKind`, `Token` |
+| `visual_state/applied_setters.rs` | **unmapped** | `AppliedSetters`, `Names` |
+| `visual_state/state_trigger_base.rs` | **unmapped** | `AdaptiveTrigger`, `StateTrigger`, `StateTriggerBase`, `TriggerRank` |
+| `visual_state/state_triggers.rs` | **unmapped** | `StateTriggerHosts`, `TriggerHost`, `TriggerHostRef` |
+| `visual_state/visual_state.rs` | **unmapped** | `VisualState` |
+| `visual_state/visual_state_changed_event_args.rs` | **unmapped** | `VisualStateChangedEventArgs` |
+| `visual_state/visual_state_group.rs` | **unmapped** | `StateChangedHandler`, `VisualStateGroup` |
+| `visual_state/visual_state_manager.rs` | **unmapped** | `VisualStateGroupCollection`, `VisualStateManager`, `VisualStateManagerImpl` |
 | `window_decorations.rs` | the enum `WindowDecorations`, declared in `Window.cs` upstream | `WindowDecorations` |
+| `zoom_mode.rs` | **unmapped** | `ZoomMode` |
 
-Tests, examples and build scripts (not scanned): `animation/connected_animation_flight_tests.rs`, `animation/connected_animation_tests.rs`, `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `arrange_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `build.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `classes_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `compositor_hit_testing_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `drawing_image_propagation_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `gestures_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hosting/element_composition_preview_tests.rs`, `hotkey_manager_tests.rs`, `image_tests.rs`, `input_element_focus_tests.rs`, `input_element_gesture_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_manager_tests.rs`, `layout_transform_control_tests.rs`, `layoutable_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `logging_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `measure_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `mixins/selectable_mixin_tests.rs`, `mouse_device_tests.rs`, `name_scope_tests.rs`, `native_control_host_tests.rs`, `native_menu_item_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/drawer_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_lifetime_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `panel_tests.rs`, `pips_pager/pips_pager_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform/wayland_properties_tests.rs`, `platform_feedback_items_tests.rs`, `pointer_over_tests.rs`, `popup_moving_target_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/table_view_layout_helper_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/text_selection_canvas_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `pull_to_refresh/refresh_container_tests.rs`, `pull_to_refresh/refresh_info_provider_tests.rs`, `pull_to_refresh/refresh_visualizer_tests.rs`, `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter_tests.rs`, `pull_to_refresh/scrollable_pull_gesture_recognizer_tests.rs`, `radio_button_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `remote/remote_tests.rs`, `routed_event_registry_tests.rs`, `scroll_viewer_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `setter_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `styled_element_tests.rs`, `tab_control_tests.rs`, `table_view_column_header_tests.rs`, `table_view_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_selection_notification_tests.rs`, `text_box_tests.rs`, `text_layout_rounding_placement_tests.rs`, `text_line_bounds_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/ancestor_finder_tests.rs`, `utils/binding_evaluator_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `visual_extensions_get_transformed_bounds_tests.rs`, `visual_extensions_get_visuals_at_tests.rs`, `visual_extensions_tests.rs`, `visual_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.
+Tests, examples and build scripts (not scanned): `animation/connected_animation_flight_tests.rs`, `animation/connected_animation_tests.rs`, `app_builder_tests.rs`, `application_lifetimes/classic_desktop_style_application_lifetime_tests.rs`, `application_tests.rs`, `arrange_tests.rs`, `auto_complete_box/auto_complete_box_tests.rs`, `auto_suggest_box_tests.rs`, `automation/automation_properties_tests.rs`, `automation/peers/automation_peer_text_edit_tests.rs`, `automation/peers/calendar_day_button_automation_peer_tests.rs`, `automation/peers/combo_box_automation_peer_tests.rs`, `automation/peers/complex_control_automation_peer_tests.rs`, `automation/peers/control_automation_peer_tests.rs`, `automation/peers/embeddable_control_root_automation_peer_tests.rs`, `automation/peers/foundation_automation_peer_tests.rs`, `automation/peers/items_automation_peer_tests.rs`, `automation/peers/menu_item_automation_peer_tests.rs`, `automation/peers/native_menu_bar_automation_peer_tests.rs`, `automation/peers/page_automation_peer_tests.rs`, `automation/peers/split_button_automation_peer_tests.rs`, `automation/peers/window_automation_peer_tests.rs`, `automation/provider/rich_text_automation_tests.rs`, `border_tests.rs`, `bring_into_view_tests.rs`, `build.rs`, `button_flyout_tests.rs`, `button_tests.rs`, `button_text_tests.rs`, `calendar/calendar_tests.rs`, `calendar_date_picker/calendar_date_picker_tests.rs`, `canvas_tests.rs`, `carousel_tests.rs`, `classes_tests.rs`, `combo_box_tests.rs`, `command_bar/command_bar_tests.rs`, `compositor_hit_testing_tests.rs`, `content_control_tests.rs`, `context_menu_tests.rs`, `control_focus_adorner_tests.rs`, `converters/converters_tests.rs`, `data_validation_errors_tests.rs`, `date_time_pickers/date_picker_tests.rs`, `date_time_pickers/time_picker_tests.rs`, `decorator_tests.rs`, `design_tests.rs`, `dock_panel_tests.rs`, `documents/inline_tests.rs`, `documents/rich_language_tests.rs`, `documents/rich_paragraph_tabs_tests.rs`, `documents/rich_paragraph_tests.rs`, `documents/rich_presentation_invalidation_tests.rs`, `documents/rich_text_document_tests.rs`, `documents/rich_text_pointer_tests.rs`, `documents/rich_text_structural_edit_tests.rs`, `documents/text_element_namescope_tests.rs`, `documents/text_highlighter_tests.rs`, `documents/typography_layout_tests.rs`, `documents/typography_tests.rs`, `drawing_image_propagation_tests.rs`, `element_ref_tests.rs`, `expander_tests.rs`, `experimental_acrylic_border_tests.rs`, `flex_panel/flex_basis_tests.rs`, `flex_panel/flex_panel_tests.rs`, `flyouts/flyout_tests.rs`, `flyouts/popup_flyout_request_tests.rs`, `font_icon_tests.rs`, `frame_tests.rs`, `gestures_tests.rs`, `grid_length_tests.rs`, `grid_splitter_tests.rs`, `grid_tests.rs`, `hosting/element_composition_preview_tests.rs`, `hotkey_manager_tests.rs`, `icon_source_tests.rs`, `image_tests.rs`, `info_badge_tests.rs`, `info_bar_tests.rs`, `input_element_focus_tests.rs`, `input_element_gesture_tests.rs`, `items_control_tests.rs`, `items_source_view_tests.rs`, `kept_value_tests.rs`, `label_tests.rs`, `label_text_tests.rs`, `layout_manager_tests.rs`, `layout_transform_control_tests.rs`, `layoutable_tests.rs`, `list_box_tests.rs`, `list_box_virtualization_issue_tests.rs`, `loaded_tests.rs`, `logging_tests.rs`, `markup_types/markup_types_tests.rs`, `masked_text_box_tests.rs`, `measure_hold_tests.rs`, `measure_tests.rs`, `media/media_tests.rs`, `menu_item_tests.rs`, `mixins/pressed_mixin_tests.rs`, `mixins/selectable_mixin_tests.rs`, `mouse_device_tests.rs`, `name_scope_tests.rs`, `native_control_host_tests.rs`, `native_menu_item_tests.rs`, `native_menu_tests.rs`, `navigation_tests.rs`, `navigation_view_item_tests.rs`, `navigation_view_tests.rs`, `notifications/notifications_tests.rs`, `notifications/reversible_stack_panel_tests.rs`, `number_box_tests.rs`, `numeric_up_down/numeric_up_down_tests.rs`, `page/carousel_page_tests.rs`, `page/content_page_tests.rs`, `page/drawer_page_tests.rs`, `page/navigation_event_args_tests.rs`, `page/navigation_page_tests.rs`, `page/page_lifetime_tests.rs`, `page/page_navigation_host_tests.rs`, `page/tabbed_page_tests.rs`, `pager_control_tests.rs`, `panel_tests.rs`, `person_picture_tests.rs`, `pips_pager/pips_pager_tests.rs`, `platform/default_menu_interaction_handler_tests.rs`, `platform/i_screen_impl_tests.rs`, `platform/input_pane_tests.rs`, `platform/platform_manager_tests.rs`, `platform/wayland_properties_tests.rs`, `platform_feedback_items_tests.rs`, `pointer_over_tests.rs`, `popup_moving_target_tests.rs`, `presentation_source/presentation_source_tests.rs`, `presenters/content_presenter_text_tests.rs`, `presenters/items_presenter_tests.rs`, `presenters/scroll_content_presenter_tests.rs`, `presenters/table_view_layout_helper_tests.rs`, `presenters/text_presenter_paragraph_tests.rs`, `presenters/text_presenter_tests.rs`, `primitives/access_text_tests.rs`, `primitives/adorner_layer_composition_tests.rs`, `primitives/headered_content_control_tests.rs`, `primitives/headered_items_control_tests.rs`, `primitives/info_bar_panel_tests.rs`, `primitives/popup_positioning/managed_popup_positioner_tests.rs`, `primitives/popup_root_tests.rs`, `primitives/popup_tests.rs`, `primitives/range_base_tests.rs`, `primitives/scroll_bar_tests.rs`, `primitives/selecting_items_control_tests.rs`, `primitives/tab_strip_tests.rs`, `primitives/templated_control_tests.rs`, `primitives/templated_control_text_tests.rs`, `primitives/text_selection_canvas_tests.rs`, `primitives/thumb_tests.rs`, `primitives/toggle_button_tests.rs`, `primitives/track_tests.rs`, `primitives/uniform_grid_tests.rs`, `primitives/visual_layer_manager_tests.rs`, `progress_bar_tests.rs`, `progress_ring_tests.rs`, `property_defaults_tests.rs`, `pull_to_refresh/refresh_container_tests.rs`, `pull_to_refresh/refresh_info_provider_tests.rs`, `pull_to_refresh/refresh_visualizer_tests.rs`, `pull_to_refresh/scroll_viewer_i_refresh_info_provider_adapter_tests.rs`, `pull_to_refresh/scrollable_pull_gesture_recognizer_tests.rs`, `radio_button_tests.rs`, `radio_buttons_tests.rs`, `rating_control_tests.rs`, `reference_semantics_tests.rs`, `relative_panel_tests.rs`, `remote/remote_tests.rs`, `rich_edit_box_tests.rs`, `rich_edit_clipboard_tests.rs`, `rich_edit_composition_event_tests.rs`, `rich_edit_composition_start_tests.rs`, `rich_edit_context_menu_tests.rs`, `rich_edit_exact_input_tests.rs`, `rich_edit_format_command_tests.rs`, `rich_edit_input_focus_tests.rs`, `rich_edit_input_method_tests.rs`, `rich_edit_input_options_tests.rs`, `rich_edit_input_range_geometry_tests.rs`, `rich_text/rich_edit_text_case_tests.rs`, `rich_text/rich_edit_text_clipboard_tests.rs`, `rich_text/rich_edit_text_document_tests.rs`, `rich_text/rich_edit_text_empty_fragment_tests.rs`, `rich_text/rich_edit_text_field_installation_tests.rs`, `rich_text/rich_edit_text_field_story_tests.rs`, `rich_text/rich_edit_text_range_gravity_tests.rs`, `rich_text/rich_edit_text_range_operations_tests.rs`, `rich_text/rich_edit_text_range_tracking_tests.rs`, `rich_text/rich_edit_text_selection_geometry_tests.rs`, `rich_text/rich_edit_text_selection_gravity_tests.rs`, `rich_text/rich_edit_text_selection_horizontal_tests.rs`, `rich_text/rich_edit_text_selection_movement_tests.rs`, `rich_text/rich_edit_text_selection_navigation_tests.rs`, `rich_text/rich_edit_text_selection_options_tests.rs`, `rich_text/rich_edit_text_stream_tests.rs`, `rich_text/rich_edit_text_units_tests.rs`, `rich_text/rich_text_composition_tests.rs`, `rich_text/rich_text_editor_paragraph_typing_tests.rs`, `rich_text/rich_text_link_tests.rs`, `rich_text/rich_text_link_transfer_tests.rs`, `rich_text/rich_text_undo_tests.rs`, `rich_text/rtf_encoding_tests.rs`, `rich_text/rtf_field_tests.rs`, `rich_text/rtf_formatting_tests.rs`, `rich_text/rtf_styles_tests.rs`, `rich_text_block_tests.rs`, `rich_text_context_menu_tests.rs`, `rich_text_fallback_scale_tests.rs`, `rich_text_family_metrics_tests.rs`, `rich_text_hosted_object_tests.rs`, `rich_text_line_bounds_tests.rs`, `rich_text_line_stacking_tests.rs`, `rich_text_overflow_master_tests.rs`, `rich_text_reuse_tests.rs`, `rich_text_selection_overlay_tests.rs`, `routed_event_registry_tests.rs`, `scroll_viewer_tests.rs`, `scroll_viewer_zoom_tests.rs`, `selectable_text_block_tests.rs`, `selection/internal_selection_model_tests.rs`, `setter_tests.rs`, `shapes/ellipse_tests.rs`, `shapes/path_tests.rs`, `shapes/polygon_tests.rs`, `shapes/polyline_tests.rs`, `shapes/rectangle_tests.rs`, `shapes/shape_tests.rs`, `slider_tests.rs`, `split_button/split_button_tests.rs`, `split_view/split_view_tests.rs`, `stack_panel_tests.rs`, `storage_misc_tests.rs`, `styled_element_tests.rs`, `symbol_icon_tests.rs`, `tab_control_tests.rs`, `table_view_column_header_tests.rs`, `table_view_tests.rs`, `templates/templates_tests.rs`, `text_block_tests.rs`, `text_box_history_tests.rs`, `text_box_selection_notification_tests.rs`, `text_box_tests.rs`, `text_layout_rounding_placement_tests.rs`, `text_line_bounds_tests.rs`, `theme_variant_tests.rs`, `tick_bar_tests.rs`, `timer_interval_tests.rs`, `title_bar_tests.rs`, `toggle_switch_tests.rs`, `tool_tip_tests.rs`, `top_level_tests.rs`, `transitioning_content_control_tests.rs`, `tray_icon_tests.rs`, `tree_view_bring_into_view_tests.rs`, `tree_view_tests.rs`, `user_control_tests.rs`, `utils/ancestor_finder_tests.rs`, `utils/binding_evaluator_tests.rs`, `utils/collection_changed_event_manager_tests.rs`, `utils/number_expression_tests.rs`, `viewbox_tests.rs`, `virtualizing_carousel_panel_tests.rs`, `virtualizing_stack_panel_tests.rs`, `visual_extensions_get_transformed_bounds_tests.rs`, `visual_extensions_get_visuals_at_tests.rs`, `visual_extensions_tests.rs`, `visual_state/state_trigger_tests.rs`, `visual_state/visual_state_manager_tests.rs`, `visual_tests.rs`, `window_base_tests.rs`, `window_decorations_tests.rs`, `window_tests.rs`, `wrap_panel_tests.rs`.

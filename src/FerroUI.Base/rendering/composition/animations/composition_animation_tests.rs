@@ -612,6 +612,98 @@ fn stop_animation_of_a_subchannel() {
     assert_eq!(server.offset(), Vector3D::new(7.0, 8.0, 9.0));
 }
 
+/// Not from upstream: a value assigned before a sub-channel animation is
+/// started, in the same frame, reaches the server ahead of the animation:
+/// the components the animation leaves alone are the assigned ones.
+#[test]
+fn a_value_assigned_before_a_subchannel_animation_reaches_the_server() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_offset(Vector3D::new(1.0, 2.0, 3.0));
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    visual.set_offset(Vector3D::new(4.0, 5.0, 6.0));
+    visual.start_animation("Offset.X", &*scalar_animation(&fixture, 10.0, Duration::from_millis(50)));
+    fixture.run_jobs();
+    assert_eq!((server.offset().y, server.offset().z), (5.0, 6.0));
+    run_for(&fixture, Duration::from_millis(150));
+    assert_eq!(server.offset(), Vector3D::new(10.0, 5.0, 6.0));
+
+    // The same for a value that is assigned again unchanged, while the
+    // server holds what an animation left: the assignment resets it.
+    visual.set_offset(Vector3D::new(4.0, 5.0, 6.0));
+    visual.start_animation("Offset.Y", &*scalar_animation(&fixture, 20.0, Duration::from_millis(50)));
+    fixture.run_jobs();
+    assert_eq!((server.offset().x, server.offset().z), (4.0, 6.0));
+    run_for(&fixture, Duration::from_millis(150));
+    assert_eq!(server.offset(), Vector3D::new(4.0, 20.0, 6.0));
+}
+
+/// Not from upstream: an animation started after an assignment of its
+/// property, in the same frame, starts from the assigned value.
+#[test]
+fn an_animation_starts_from_the_value_assigned_in_its_frame() {
+    let fixture = Fixture::new();
+    let visual = fixture.compositor.create_solid_color_visual();
+    visual.set_opacity(0.2);
+    fixture.run_jobs();
+    let server = fixture.server(&visual);
+    server.activate();
+
+    visual.set_opacity(0.8);
+    visual.start_animation("Opacity", &*scalar_animation(&fixture, 1.0, Duration::from_secs(30)));
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(30));
+    let value = server.opacity();
+    assert!((0.8..0.9).contains(&value), "{value}");
+
+    // An assignment after the start drops the animation.
+    visual.start_animation("Opacity", &*scalar_animation(&fixture, 1.0, Duration::from_secs(30)));
+    visual.set_opacity(0.4);
+    fixture.run_jobs();
+    run_for(&fixture, Duration::from_millis(30));
+    assert_eq!(server.opacity(), 0.4);
+}
+
+/// Not from upstream: an implicit animation of the assigned property, on
+/// its own or in a group, starts from the value the server has, not from
+/// the assigned one.
+#[test]
+fn an_implicit_animation_starts_from_the_value_of_the_server() {
+    let fixture = Fixture::new();
+    let compositor = &fixture.compositor;
+    for in_group in [false, true] {
+        let visual = compositor.create_solid_color_visual();
+        visual.set_opacity(0.2);
+        fixture.run_jobs();
+        let server = fixture.server(&visual);
+        server.activate();
+
+        let opacity = compositor.create_scalar_key_frame_animation();
+        opacity.set_target(Some("Opacity".to_owned()));
+        opacity.insert_expression_key_frame(1.0, "this.FinalValue", None);
+        opacity.set_duration(Duration::from_secs(30));
+        let implicit = compositor.create_implicit_animation_collection();
+        if in_group {
+            let group = compositor.create_animation_group();
+            group.add(opacity.clone());
+            implicit.set("Opacity", group);
+        } else {
+            implicit.set("Opacity", opacity.clone());
+        }
+        visual.set_implicit_animations(Some(implicit));
+
+        visual.set_opacity(0.8);
+        assert_eq!(visual.opacity(), 0.8);
+        fixture.run_jobs();
+        run_for(&fixture, Duration::from_millis(30));
+        let value = server.opacity();
+        assert!((0.2..0.3).contains(&value), "in a group: {in_group}, {value}");
+    }
+}
+
 /// Not from upstream: a sub-channel target with components that are not
 /// X, Y, Z or W is rejected.
 #[test]

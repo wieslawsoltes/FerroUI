@@ -535,3 +535,53 @@ fn a_viewport_draws_its_scene_over_its_bounds_and_clips_to_them() {
     assert_eq!(viewport.viewport_3d_visual().camera_generation(), scene.camera_generation);
     assert_eq!(viewport.desired_size(), Size::new(0.0, 0.0), "a viewport has no size of its own");
 }
+
+/// The recorded content of the brush of the first layer of the first model.
+fn first_content(snapshot: &Scene3DSnapshot) -> Option<(u64, u64)> {
+    let brush = snapshot.models.first()?.front.first()?.brush.as_ref()?;
+    brush.scene_content().map(|content| (content.id(), content.generation()))
+}
+
+#[test]
+fn a_drawing_brush_is_recorded_again_only_when_its_content_changes() {
+    use ferroui_base::media::{DrawingBrush, GeometryDrawing, RectangleGeometry};
+    use ferroui_base::rendering::testing::MockPlatformRenderInterface;
+    let (_scope, _) = MockPlatformRenderInterface::install();
+    let drawing = GeometryDrawing::new();
+    drawing.set_brush(Some(Brushes::red()));
+    drawing.set_geometry(RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 10.0, 10.0)).upcast::<Geometry>());
+    let brush = DrawingBrush::new();
+    brush.set_drawing(&drawing);
+    let handle: Rc<dyn IBrush> = brush.clone().into();
+    let material = DiffuseMaterial::with_brush(Some(handle));
+    let model = GeometryModel3D::with_geometry_and_material(cube().upcast(), material.clone().upcast());
+    let camera = camera_at(5.0);
+    let visual = scene(model.upcast(), camera.clone().upcast());
+
+    let first = visual.snapshot();
+    let (id, generation) = first_content(&first).expect("the drawing brush as its recorded content");
+
+    // A new snapshot for the camera takes the kept recording.
+    camera.set_position(Point3D::new(0.0, 0.0, 6.0));
+    let moved = visual.snapshot();
+    assert_eq!(Some((id, generation)), first_content(&moved));
+    assert_eq!(first.record_generation, moved.record_generation);
+
+    // A change of what the drawing draws: a record, and a new generation of the same content.
+    drawing.set_brush(Some(Brushes::blue()));
+    let changed = visual.snapshot();
+    assert!(changed.record_generation > moved.record_generation);
+    assert_eq!(first.structure_generation, changed.structure_generation);
+    assert_eq!(Some((id, generation + 1)), first_content(&changed));
+
+    // Another brush: another content.
+    let second_drawing = GeometryDrawing::new();
+    second_drawing.set_brush(Some(Brushes::green()));
+    second_drawing.set_geometry(RectangleGeometry::with_rect(Rect::new(0.0, 0.0, 5.0, 5.0)).upcast::<Geometry>());
+    let replaced = DrawingBrush::new();
+    replaced.set_drawing(&second_drawing);
+    material.set_brush(Some(replaced.into()));
+    let third = visual.snapshot();
+    let (third_id, _) = first_content(&third).expect("the new brush recorded");
+    assert_ne!(id, third_id);
+}

@@ -111,10 +111,11 @@ fn find<T: ObjectType>(root: &Ref<Control>, name: &str) -> Option<Ref<T>> {
 }
 
 fn wire_progress_rings(root: &Ref<Control>) {
-    let Some(value) = find::<NumberBox>(root, "ProgressValue") else {
+    // The ProgressBar page has a NumberBox of the same name: the ring identifies the page.
+    let Some(ring) = find::<ProgressRing>(root, "ProgressRing2") else {
         return;
     };
-    let ring = root.get_control::<ProgressRing>("ProgressRing2");
+    let value = root.get_control::<NumberBox>("ProgressValue");
     let weak_ring = ring.downgrade();
     let weak_value = value.downgrade();
     value.value_changed(move |_| {

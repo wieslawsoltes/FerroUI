@@ -123,6 +123,38 @@ impl BidiAlgorithm {
         self.paragraph_embedding_level as i32
     }
 
+    /// The first code unit of a character whose class is right-to-left (R, AL), an Arabic number
+    /// (AN) or an explicit embedding, override or isolate control: U+0590, the start of the Hebrew
+    /// block. The classes below it are L, EN, ES, ET, CS, NSM, BN, B, S, WS and ON.
+    pub const FIRST_RIGHT_TO_LEFT: u16 = 0x0590;
+
+    /// Whether every code unit of `text` is below [`Self::FIRST_RIGHT_TO_LEFT`]: in a paragraph
+    /// whose embedding level is 0 every level of such a text is 0. No character opens an
+    /// embedding (X1-X8), the start of the one level run is L, so every European number has an L
+    /// or the start before it and becomes L (W7), with the separators and terminators next to it
+    /// (W4, W5); what is left is neutral and takes the embedding direction (W6, N0-N2), and L
+    /// keeps the even level (I1).
+    pub fn is_left_to_right_text(text: &[u16]) -> bool {
+        // Chunks, so that the comparison of a chunk is vectorized and a long text stops early.
+        let highest = |chunk: &[u16]| chunk.iter().fold(0, |highest, &unit| highest.max(unit));
+        text.chunks(64).all(|chunk| highest(chunk) < Self::FIRST_RIGHT_TO_LEFT)
+    }
+
+    /// The result of [`Self::process`] for a paragraph of `length` code units whose embedding
+    /// level is 0 and of whose text [`Self::is_left_to_right_text`] holds: every resolved level
+    /// is 0, and so is the resolved embedding level. The classes are not looked up and no rule is
+    /// run (step 7 of docs/porting/text-layout-performance.md).
+    pub fn process_left_to_right(&mut self, length: usize) {
+        self.reset();
+
+        if length == 0 {
+            return;
+        }
+
+        self.has_clean_state = false;
+        self.resolved_levels.resize(length, 0);
+    }
+
     /// Process data from a BiDiData instance
     ///
     /// * `data` - The BiDi Unicode data.
@@ -615,21 +647,21 @@ impl BidiAlgorithm {
     }
 
     /// Given a character index, find the level run that starts at that position
+    /// and is not part of an isolating run sequence yet
     ///
     /// * `index` - The index into the original (unmapped) data
     ///
     /// Returns the index of the run that starts at that index
     fn find_run_for_index(&self, index: usize) -> usize {
-        for i in 0..self.level_runs.len() {
-            // Passed index is for the original non-x9 filtered data, however
-            // the level run ranges are for the x9 filtered data.  Convert before
-            // comparing
-            if self.map_x9(self.level_runs[i].start) == index {
-                return i;
-            }
+        // Passed index is for the original non-x9 filtered data, however
+        // the level run ranges are for the x9 filtered data.  Convert before
+        // comparing.  The runs are in the order of the text and the x9 map
+        // only grows, so the run is found by halving rather than by reading
+        // every run, which made a text of many isolates quadratic.
+        match self.level_runs.binary_search_by_key(&index, |run| self.map_x9(run.start)) {
+            Ok(i) if !self.level_runs[i].taken => i,
+            _ => panic!("Internal error"),
         }
-
-        panic!("Internal error");
     }
 
     /// Determine and the process all isolated run sequences
@@ -649,19 +681,29 @@ impl BidiAlgorithm {
         // form an complete run.  That full run mapping
         // will be placed in isolated_run_mapping and then
         // processed by process_isolated_run_sequence().
-        while !self.level_runs.is_empty() {
+        //
+        // A run that is part of a sequence is marked as taken and stays in
+        // the list: removing it moved every run after it, which made a text
+        // of many level runs quadratic.  The sequences are still formed in
+        // the order of the first run of each.
+        for first_run_index in 0..self.level_runs.len() {
+            if self.level_runs[first_run_index].taken {
+                continue;
+            }
+
             // Clear the mapping
             self.isolated_run_mapping.clear();
 
             // Combine mappings from this run and all runs that continue on from it
-            let mut run_index = 0;
+            let mut run_index = first_run_index;
             let mut eos;
-            let sos = self.level_runs[0].sos;
-            let level = self.level_runs[0].level;
+            let sos = self.level_runs[first_run_index].sos;
+            let level = self.level_runs[first_run_index].level;
             loop {
                 // Get the run
-                // Remove this run as we've now processed it
-                let r = self.level_runs.remove(run_index);
+                // Mark this run as we've now processed it
+                self.level_runs[run_index].taken = true;
+                let r = self.level_runs[run_index];
 
                 // The eos of the isolating run is the eos of the
                 // last level run that comprises it.
@@ -698,6 +740,8 @@ impl BidiAlgorithm {
                 resolved_levels,
             );
         }
+
+        self.level_runs.clear();
     }
 
     /// Process a single isolated run sequence, where the character sequence
@@ -774,26 +818,33 @@ impl BidiAlgorithm {
         let has_et = (w_rules & (1u32 << BidiClass::EuropeanTerminator as i32)) != 0;
 
         // Rule W2
-        if has_en {
+        //
+        // The rule looks backward from each European number for the first strong
+        // class (L, R, AL or sos) and makes the number Arabic when that class is
+        // AL. One forward pass that remembers the last strong class reads the same
+        // classes in the same state: the rule only writes AN, which is not strong,
+        // and sos is L or R, never AL. A search from each number would walk back to
+        // the start of the run in text that has no strong character before its
+        // numbers (digits and spaces), which is quadratic in the length of the run.
+        // Without an Arabic letter in the run no number changes.
+        if has_en && has_al {
+            let mut previous_strong_is_arabic_letter = false;
+
             for i in 0..run_length {
-                if run.resolved_class(i) != BidiClass::EuropeanNumber {
-                    continue;
-                }
-
-                for j in (0..i).rev() {
-                    let resolved_class = run.resolved_class(j);
-
-                    match resolved_class {
-                        BidiClass::LeftToRight | BidiClass::RightToLeft | BidiClass::ArabicLetter => {
-                            if resolved_class == BidiClass::ArabicLetter {
-                                run.set_resolved_class(i, BidiClass::ArabicNumber);
-                                has_an = true;
-                            }
-
-                            break;
+                match run.resolved_class(i) {
+                    BidiClass::EuropeanNumber => {
+                        if previous_strong_is_arabic_letter {
+                            run.set_resolved_class(i, BidiClass::ArabicNumber);
+                            has_an = true;
                         }
-                        _ => {}
                     }
+                    BidiClass::LeftToRight | BidiClass::RightToLeft => {
+                        previous_strong_is_arabic_letter = false;
+                    }
+                    BidiClass::ArabicLetter => {
+                        previous_strong_is_arabic_letter = true;
+                    }
+                    _ => {}
                 }
             }
         }
@@ -1471,11 +1522,13 @@ struct LevelRun {
     level: i32,
     sos: BidiClass,
     eos: BidiClass,
+    /// Whether the run is part of an isolating run sequence already.
+    taken: bool,
 }
 
 impl LevelRun {
     #[inline]
     fn new(start: usize, length: usize, level: i32, sos: BidiClass, eos: BidiClass) -> Self {
-        Self { start, length, level, sos, eos }
+        Self { start, length, level, sos, eos, taken: false }
     }
 }
