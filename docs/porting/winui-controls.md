@@ -455,6 +455,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
 | ComboBox | 2 ported, 1 partial: no TextSubmitted, no ContentDialog | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| ContentDialog | 2 of 2 | ported | `content_dialog_samples.rs` | `content_dialog_samples_tests.rs` |
 | Border | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | Canvas | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | Grid | 1 of 1 | ported | `Pages/Grid.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |

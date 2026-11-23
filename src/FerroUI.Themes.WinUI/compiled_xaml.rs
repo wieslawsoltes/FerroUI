@@ -24327,7 +24327,7 @@ fn build_controls_winuicontrols_xaml_unit_63(
     let deferred_168 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_299, 221, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooser as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_168) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 221, 4)?;
     // Controls/WinUIControls.xaml(435,4) Content (resource)
-    rt::add_deferred_resource(&resource_dictionary_0, "DefaultContentDialogStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_304, 435, 4)?;
+    rt::add_deferred_resource(&resource_dictionary_0, "ManagedFileChooserPromptStyle", ::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_304, 435, 4)?;
     // Controls/WinUIControls.xaml(542,4) Content (resource)
     let deferred_170 = rt::defer(::ferroui_base::data::core::ValueType::object(), &context, build_controls_winuicontrols_xaml_deferred_306, 542, 4)?;
     rt::invoked(::ferroui_base::controls::ResourceDictionary::__markup_AddDeferred_1(&resource_dictionary_0, rt::boxed(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE), ::core::clone::Clone::clone(&deferred_170) as ::std::rc::Rc<dyn ::ferroui_base::controls::IDeferredContent>), 542, 4)?;
@@ -38659,7 +38659,7 @@ static BUILD_CONTROLS_WINUICONTROLS_XAML_DEFERRED_306_THEME: rt::ControlThemeTab
     parent: true,
     members: &[
         rt::StyleMember::TargetType(<::ferroui_dialogs::ManagedFileChooserOverwritePrompt as ::ferroui_base::StaticType>::TYPE),
-        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("DefaultContentDialogStyle"), line: 542, position: 131 },
+        rt::StyleMember::BasedOn { key: rt::ThemeKey::Text("ManagedFileChooserPromptStyle"), line: 542, position: 131 },
     ],
 };
 

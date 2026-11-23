@@ -61,6 +61,8 @@ fn a_dialog_needs_a_window_and_a_window_shows_one_at_a_time() {
     first.hide();
     assert_eq!(operation.result(), Some(ContentDialogResult::None));
     assert!(!first.is_open());
+    let overlay = crate::primitives::OverlayLayer::get_overlay_layer(&window).unwrap();
+    assert!(overlay.children().snapshot().is_empty(), "without a clock it leaves the overlay at once");
     assert!(dialog().show_async(&window).is_ok());
     window.close();
 }

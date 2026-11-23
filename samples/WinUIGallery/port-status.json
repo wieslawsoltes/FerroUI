@@ -4232,6 +4232,66 @@
           "notes": "The source's five pink, seven plum and four powder blue tiles; ItemsView is an ItemsControl with a horizontal panel."
         }
       ]
+    },
+    "ContentDialog": {
+      "status": "ported",
+      "source_page": {
+        "path": "WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml",
+        "sha256": "e4c03a0a35d3548e8de12948910c43a349112d501a495d0155e094d4cc78e113"
+      },
+      "source_code_behind": {
+        "path": "WinUIGallery/Samples/ContentDialog/ContentDialogPage.xaml.cs",
+        "sha256": "036751109b55bd2067b95224d37cff3cc9aa339f0b28c21c85e00f589c2711c9"
+      },
+      "implementation": [
+        "samples/WinUIGallery/Pages/ContentDialog.xaml",
+        "samples/WinUIGallery/content_dialog_samples.rs",
+        "src/FerroUI.Controls/content_dialog.rs",
+        "src/FerroUI.Themes.WinUI/Controls/ContentDialog.xaml"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/content_dialog_samples_tests.rs",
+          "name": "content_dialog_examples_keep_the_source_texts_and_default_buttons"
+        },
+        {
+          "path": "samples/WinUIGallery/content_dialog_samples_tests.rs",
+          "name": "content_dialog_opens_in_the_overlay_and_reports_its_result"
+        }
+      ],
+      "notes": "Both source examples use the native ContentDialog with ShowDialog_Click and ShowDialogNoDefault_Click of ContentDialogPage.xaml.cs in Rust (content_dialog_samples.rs): the title, the three buttons, the default button, the content of ContentDialogContent.xaml, the requested theme of the page and the result text in a polite live region. ShowAsync takes the element whose window hosts the dialog (the source's XamlRoot).",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ContentDialog/BasicContentDialogContent.txt",
+          "source_sha256": "da4bf578d96705e724ff283fd8378cc5d5e0a4f1696e0906709efd889c293c88",
+          "status": "ported",
+          "target_control": "ContentDialogExample1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/content_dialog_samples_tests.rs",
+              "name": "content_dialog_examples_keep_the_source_texts_and_default_buttons"
+            },
+            {
+              "path": "samples/WinUIGallery/content_dialog_samples_tests.rs",
+              "name": "content_dialog_opens_in_the_overlay_and_reports_its_result"
+            }
+          ],
+          "notes": "Save your work? with Save as the default button, and the result text of each button."
+        },
+        {
+          "source": "WinUIGallery/Samples/ContentDialog/ContentDialogWithoutDefault.txt",
+          "source_sha256": "32938a3c1eef57f208843bf69ccc079263d4e51b316433b2e93175a419319e7f",
+          "status": "ported",
+          "target_control": "ContentDialogExample2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/content_dialog_samples_tests.rs",
+              "name": "content_dialog_examples_keep_the_source_texts_and_default_buttons"
+            }
+          ],
+          "notes": "Replace file? without a default button, and the result text of each button."
+        }
+      ]
     }
   }
 }

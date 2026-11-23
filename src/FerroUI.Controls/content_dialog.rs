@@ -23,7 +23,7 @@ use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::ScaleTransform;
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::styling::Setter;
-use ferroui_base::threading::{CancellationToken, Dispatcher};
+use ferroui_base::threading::{CancellationToken, Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, FerroLocator,
@@ -36,6 +36,7 @@ use std::future::Future;
 use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
+use std::time::Duration;
 
 /// `ControlNormalAnimationDuration`: the scale of the dialog when it opens.
 const SHOW_SCALE_MS: f64 = 250.0;
@@ -314,6 +315,7 @@ pub struct ContentDialog {
     hide_in_progress: Cell<bool>,
     click_in_progress: Cell<bool>,
     previous_focus: RefCell<Option<WeakRef<InputElement>>>,
+    fade_timer: RefCell<Option<Subscription>>,
     opened: Rc<HandlerList<dyn Fn()>>,
     closing: Handlers<ContentDialogClosingEventArgs>,
     closed: Handlers<ContentDialogClosedEventArgs>,
@@ -531,6 +533,7 @@ impl ContentDialog {
             hide_in_progress: Cell::new(false),
             click_in_progress: Cell::new(false),
             previous_focus: RefCell::new(None),
+            fade_timer: RefCell::new(None),
             opened: Rc::new(HandlerList::new()),
             closing: Rc::new(HandlerList::new()),
             closed: Rc::new(HandlerList::new()),
@@ -765,7 +768,11 @@ impl ContentDialog {
         self.hide_in_progress.set(false);
         self.click_in_progress.set(false);
         self.pseudo_classes().set(":showing", true);
-        overlay.children().add(self.to_ref().upcast::<Control>());
+        self.set_is_hit_test_visible(true);
+        // A dialog shown again while it fades out is still in the overlay.
+        if self.get_visual_parent().is_none() {
+            overlay.children().add(self.to_ref().upcast::<Control>());
+        }
         self.update_visual_state();
         top_level.update_layout();
         self.set_initial_focus();
@@ -795,37 +802,45 @@ impl ContentDialog {
                 if args.cancel() {
                     this.hide_in_progress.set(false);
                 } else {
-                    this.play_hide(result);
+                    this.finish_closing(result);
                 }
             }
         });
     }
 
-    fn play_hide(&self, result: ContentDialogResult) {
-        let weak = self.to_ref().downgrade();
-        self.play_transition(false, move || {
-            if let Some(this) = weak.upgrade() {
-                this.finish_closing(result);
-            }
-        });
-    }
-
-    /// `OnFinishedClosing`: out of the overlay, the focus back, the result and `Closed`.
+    /// `OnFinishedClosing`: the focus back, the result and `Closed`. These do not wait for the
+    /// closing transition, whose clock may be stopped (a minimized window); the dialog only takes
+    /// no more input while it fades, and then leaves the overlay.
     fn finish_closing(&self, result: ContentDialogResult) {
         let Some(state) = self.operation.borrow_mut().take() else {
             return;
         };
-        self.pseudo_classes().set(":showing", false);
         self.hide_in_progress.set(false);
-        if let Some(overlay) = self.get_visual_parent().and_then(|parent| parent.cast::<OverlayLayer>()) {
-            overlay.children().remove(&self.to_ref().upcast::<Control>());
-        }
+        self.set_is_hit_test_visible(false);
         let previous = self.previous_focus.borrow_mut().take();
         if let Some(previous) = previous.and_then(|previous| previous.upgrade()) {
             previous.focus();
         }
+        let weak = self.to_ref().downgrade();
+        self.play_transition(false, move || {
+            if let Some(this) = weak.upgrade() {
+                this.leave_overlay();
+            }
+        });
         state.complete(result);
         Self::raise(&self.closed, &ContentDialogClosedEventArgs { result });
+    }
+
+    /// Takes the closed dialog out of the overlay, unless it was shown again while it faded.
+    fn leave_overlay(&self) {
+        if self.is_open() {
+            return;
+        }
+        self.pseudo_classes().set(":showing", false);
+        self.set_is_hit_test_visible(true);
+        if let Some(overlay) = self.get_visual_parent().and_then(|parent| parent.cast::<OverlayLayer>()) {
+            overlay.children().remove(&self.to_ref().upcast::<Control>());
+        }
     }
 
     /// `OnCommandButtonClicked`: the click event, then the command and the closing.
@@ -990,10 +1005,25 @@ impl ContentDialog {
             scale.children().add(KeyFrame::with_cue(Cue::new(cue), setters));
         }
         let task = scale.run_async_with_clock(&target, None, CancellationToken::new());
+        // The end of the animation or, when its clock is stopped, a timer of the same length.
+        let done: Rc<RefCell<Option<Box<dyn FnOnce()>>>> = Rc::new(RefCell::new(Some(Box::new(done))));
+        let finish = move || {
+            let done = done.borrow_mut().take();
+            if let Some(done) = done {
+                done();
+            }
+        };
+        let after_timer = finish.clone();
+        // Kept by the dialog: dropping the subscription would stop the timer.
+        *self.fade_timer.borrow_mut() = Some(DispatcherTimer::run_once(
+            after_timer,
+            Duration::from_millis(scale_ms as u64),
+            DispatcherPriority::DEFAULT,
+        ));
         drop(Dispatcher::ui_thread().spawn_local(async move {
-            // A transition that cannot run must not keep the dialog from closing.
+            // A transition that cannot run must not keep the dialog in the overlay.
             drop(task.await);
-            done();
+            finish();
         }));
     }
 }
