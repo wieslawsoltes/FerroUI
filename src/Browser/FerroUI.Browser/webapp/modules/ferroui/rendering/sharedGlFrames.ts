@@ -1,3 +1,4 @@
+import { QrScanner } from "./qrScanner";
 import { FerroExports } from "../ferroExports";
 import { FrameGlContext, WebGlRenderTarget } from "./webGlRenderTarget";
 import { WebRenderTargetRegistry } from "./webRenderTargetRegistry";
@@ -10,7 +11,12 @@ export class SharedGlFrames {
     // #601. On the render worker: the media frames the page transferred, by their number, until
     // the compositor imports them (`importTransferred`) or the page discards them. On the page:
     // the next number.
-    private static readonly transferred = new Map<number, VideoFrame>();
+    private static readonly transferred = new Map<number, { frame?: VideoFrame; receipt?: MessagePort }>();
+    private static readonly sent = new Map<number, {
+        analysis?: VideoFrame;
+        dispose: () => Promise<void>;
+    }>();
+
     private static nextTransfer = 1;
 
     public static graphics(handle: number): number {
@@ -104,43 +110,142 @@ export class SharedGlFrames {
      * transfer. The frame stays GPU-backed; no pixel array is made.
      */
     public static transfer(source: HTMLVideoElement, width: number, height: number): number {
+        return SharedGlFrames.beginTransfer(source, width, height, false).id;
+    }
+
+    /** Receipt, not postMessage, makes a frame importable by a shared-memory render batch. */
+    public static beginTransfer(source: HTMLVideoElement, width: number, height: number, analyze: boolean): { id: number; ready: Promise<void> } {
         if (!(source instanceof HTMLVideoElement)) { throw new Error("Only a native video source is admitted"); }
-        if (typeof VideoFrame !== "function") {
-            throw new Error("Media frames on the render worker need WebCodecs VideoFrame, which this browser lacks");
-        }
-        if (source.videoWidth !== width || source.videoHeight !== height) { throw new Error("Native source dimensions changed or require an unsupported pixel-aspect transform"); }
+        if (typeof VideoFrame !== "function") { throw new Error("The render worker needs WebCodecs VideoFrame"); }
+        if (source.videoWidth !== width || source.videoHeight !== height) { throw new Error("Native source dimensions changed"); }
         const worker = WebRenderTargetRegistry.renderWorker();
         if (!worker) { throw new Error("The render worker has not started"); }
         const frame = new VideoFrame(source, { timestamp: Math.round(source.currentTime * 1e6) });
-        const id = SharedGlFrames.nextTransfer;
-        SharedGlFrames.nextTransfer = id >= 0x7fffffff ? 1 : id + 1;
+        let id: number;
+        do {
+            id = SharedGlFrames.nextTransfer;
+            SharedGlFrames.nextTransfer = id === 0x7fffffff ? 1 : id + 1;
+        } while (SharedGlFrames.sent.has(id));
+        let channel: MessageChannel;
+        let analysis: VideoFrame | undefined;
         try {
-            worker.postMessage({ ferrouiCmd: "mediaFrame", id, frame }, [frame as unknown as Transferable]);
+            analysis = analyze ? frame.clone() : undefined;
+            channel = new MessageChannel();
         } catch (error) {
-            frame.close();
-            throw error;
+            frame.close(); analysis?.close(); throw error;
         }
-        return id;
+        let accept!: () => void; let rejectReady!: (error: Error) => void;
+        let release!: () => void; let rejectRetired!: (error: Error) => void;
+        const ready = new Promise<void>((resolve, reject) => { accept = resolve; rejectReady = reject; });
+        const retired = new Promise<void>((resolve, reject) => { release = resolve; rejectRetired = reject; });
+        // The lease may be cancelled before a Rust future starts tracking these promises.
+        void ready.catch(() => {}); void retired.catch(() => {});
+        let disposing = false; let failed: Error | undefined;
+        let timer: ReturnType<typeof setTimeout>;
+        const cleanup = () => {
+            clearTimeout(timer); channel.port1.close(); analysis?.close();
+            worker.removeEventListener("error", onError);
+        };
+        const fail = (error: Error) => {
+            failed = error; cleanup(); rejectReady(error); rejectRetired(error);
+            if (disposing) { SharedGlFrames.sent.delete(id); }
+            // The receipt port is closed now, so a worker that is slow rather than gone would keep
+            // the frame for good. Its messages arrive in order: the frame first, then this.
+            try { worker.postMessage({ ferrouiCmd: "discardMediaFrame", id }); } catch { /* The worker is gone. */ }
+        };
+        const onError = () => fail(new Error("The media render worker failed"));
+        worker.addEventListener("error", onError);
+        channel.port1.onmessage = event => {
+            if (event.data === "received" && !disposing) { clearTimeout(timer); accept(); }
+            if (event.data === "retired") {
+                cleanup(); SharedGlFrames.sent.delete(id);
+                rejectReady(new DOMException("The frame was retired before receipt", "AbortError")); release();
+            }
+        };
+        channel.port1.onmessageerror = () => fail(new Error("Invalid media transfer receipt"));
+        const dispose = async () => {
+            if (!disposing) {
+                disposing = true;
+                rejectReady(new DOMException("Media transfer cancelled", "AbortError"));
+                if (failed) { SharedGlFrames.sent.delete(id); return await retired; }
+                clearTimeout(timer);
+                // A port buffers this even when the worker has not received the frame yet.
+                try {
+                    channel.port1.postMessage("retire");
+                    timer = setTimeout(() => fail(new Error("Media frame retirement timed out")), 15000);
+                } catch (error) { fail(error instanceof Error ? error : new Error(String(error))); }
+            }
+            return await retired;
+        };
+        SharedGlFrames.sent.set(id, { analysis, dispose });
+        timer = setTimeout(() => fail(new Error("Media frame receipt timed out")), 15000);
+        try {
+            worker.postMessage({ ferrouiCmd: "mediaFrame", id, frame, receipt: channel.port2 },
+                [frame as unknown as Transferable, channel.port2]);
+        } catch (error) {
+            frame.close(); channel.port2.close(); cleanup(); SharedGlFrames.sent.delete(id);
+            rejectReady(error as Error); release(); throw error;
+        }
+        return { id, ready };
     }
 
-    /** Render worker (#601): keeps a frame the page transferred until it is imported or discarded. */
-    public static receive(id: number, frame: VideoFrame): void {
-        SharedGlFrames.transferred.get(id)?.close();
-        SharedGlFrames.transferred.set(id, frame);
+    /** The worker records ownership before acknowledging a frame to the producer. */
+    public static receive(id: number, frame: VideoFrame, receipt?: MessagePort): void {
+        const entry = { frame: frame as VideoFrame | undefined, receipt };
+        SharedGlFrames.transferred.set(id, entry);
+        if (receipt) {
+            receipt.onmessage = event => { if (event.data === "retire") { SharedGlFrames.retireReceived(id); } };
+            receipt.postMessage("received");
+        }
     }
 
-    /**
-     * Either side (#601): the frame `id` is not needed. On the render worker it is closed; on the
-     * page the worker is told. A frame that was imported already is gone, and nothing happens.
-     */
-    public static discard(id: number): void {
-        const frame = SharedGlFrames.transferred.get(id);
-        if (frame) {
-            SharedGlFrames.transferred.delete(id);
-            frame.close();
-            return;
-        }
-        WebRenderTargetRegistry.renderWorker()?.postMessage({ ferrouiCmd: "discardMediaFrame", id });
+    private static retireReceived(id: number): void {
+        const entry = SharedGlFrames.transferred.get(id);
+        if (!entry) { return; }
+        SharedGlFrames.transferred.delete(id);
+        entry.frame?.close(); entry.receipt?.postMessage("retired"); entry.receipt?.close();
+    }
+
+    /** Completes only after the worker releases its native image, including a cancelled transfer. */
+    public static async discard(id: number): Promise<void> {
+        const entry = SharedGlFrames.sent.get(id);
+        if (entry) { return await entry.dispose(); }
+        SharedGlFrames.retireReceived(id);
+    }
+
+    /** Explicit analysis of the immutable published frame, never a preview fallback. */
+    public static async recognize(id: number, transferred: boolean, width: number, height: number): Promise<string> {
+        return await QrScanner.scan(width, height, () => {
+            if (transferred) {
+                const frame = SharedGlFrames.sent.get(id)?.analysis;
+                if (!frame) { throw new Error("The frame has no retained analysis image"); }
+                return frame.clone();
+            }
+            const entry = SharedGlFrames.textures.get(id);
+            if (!entry || entry.context.isContextLost()) { throw new Error("QR frame was retired or lost"); }
+            const gl = entry.context;
+            const previous = gl.getParameter(gl.READ_FRAMEBUFFER_BINDING);
+            const buffer = gl.getParameter(gl.PIXEL_PACK_BUFFER_BINDING);
+            const parameters = [gl.PACK_ALIGNMENT, gl.PACK_ROW_LENGTH, gl.PACK_SKIP_ROWS, gl.PACK_SKIP_PIXELS];
+            const values = parameters.map(p => gl.getParameter(p));
+            const fbo = gl.createFramebuffer();
+            if (!fbo) { throw new Error("QR readback framebuffer is unavailable"); }
+            try {
+                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, fbo);
+                gl.framebufferTexture2D(gl.READ_FRAMEBUFFER, gl.COLOR_ATTACHMENT0, gl.TEXTURE_2D, entry.texture, 0);
+                if (gl.checkFramebufferStatus(gl.READ_FRAMEBUFFER) !== gl.FRAMEBUFFER_COMPLETE) { throw new Error("QR framebuffer is incomplete"); }
+                gl.bindBuffer(gl.PIXEL_PACK_BUFFER, null);
+                for (const parameter of parameters) { gl.pixelStorei(parameter, parameter === gl.PACK_ALIGNMENT ? 1 : 0); }
+                const pixels = new Uint8ClampedArray(width * height * 4);
+                gl.readPixels(0, 0, width, height, gl.RGBA, gl.UNSIGNED_BYTE, pixels);
+                if (gl.getError() !== gl.NO_ERROR) { throw new Error("QR frame readback failed"); }
+                return pixels;
+            } finally {
+                gl.bindFramebuffer(gl.READ_FRAMEBUFFER, previous); gl.deleteFramebuffer(fbo);
+                gl.bindBuffer(gl.PIXEL_PACK_BUFFER, buffer);
+                parameters.forEach((p, i) => gl.pixelStorei(p, values[i]));
+            }
+        });
     }
 
     /**
@@ -148,9 +253,11 @@ export class SharedGlFrames {
      * `handle` and closes the frame; returns the name of the texture, which `release` deletes.
      */
     public static importTransferred(handle: number, generation: number, id: number, width: number, height: number): number {
-        const frame = SharedGlFrames.transferred.get(id);
-        if (!frame) { throw new Error("The transferred media frame is not on the render worker (retired, or not arrived)"); }
-        SharedGlFrames.transferred.delete(id);
+        const entry = SharedGlFrames.transferred.get(id);
+        const frame = entry?.frame;
+        if (!entry || !frame) { throw new Error("The transferred media frame is not on the render worker (retired, or not arrived)"); }
+        entry.frame = undefined;
+        if (!entry.receipt) { SharedGlFrames.transferred.delete(id); }
         try {
             if (frame.displayWidth !== width || frame.displayHeight !== height) {
                 throw new Error("The transferred media frame has other dimensions than its metadata");

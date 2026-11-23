@@ -65,8 +65,14 @@ impl ApplicationImpl for App {
     fn initialize(this: &Self) {
         Self::parent_initialize(this);
         ferroui_media_video_controls::register_types();
-        this.styles()
-            .add(ferroui_themes_fluent::FluentTheme::new().as_style());
+        // The units of the theme the sample needs: the table the build wrote (`build.rs`).
+        this.styles().add(
+            ferroui_themes_winui::WinUITheme::with_parts(
+                None,
+                crate::compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME,
+            )
+            .as_style(),
+        );
     }
     fn on_framework_initialization_completed(this: &Self) {
         if let Some(lifetime) = this

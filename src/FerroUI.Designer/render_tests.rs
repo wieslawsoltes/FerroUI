@@ -450,8 +450,11 @@ fn native_workspace_renders_design_manipulation_and_animation() {
         .control()
         .get_control::<Button>("CloseAuthoring")
         .raise_event(&RoutedEventArgs::with_event(Button::click_event()));
-    workspace.show_sharing();
-    capture(&workspace, &clock, &directory.join("designer-sharing.png"));
+    #[cfg(feature = "collaboration-client")]
+    {
+        workspace.show_sharing();
+        capture(&workspace, &clock, &directory.join("designer-sharing.png"));
+    }
     println!("Designer native render evidence: {}", directory.display());
     window.close();
     drop(window);

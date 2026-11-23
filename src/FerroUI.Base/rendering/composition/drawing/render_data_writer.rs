@@ -80,4 +80,19 @@ impl RenderDataWriter {
         self.buffer = None;
         self.length = 0;
     }
+
+    /// The capacity up to which [`Self::recycle`] keeps the buffer: a recording of a control is a
+    /// few hundred bytes, and a large one is not held for the recordings that follow. The buffer
+    /// a recorder kept is the one the next recording is stored with, so this is also the most
+    /// that the buffer of a stored recording is larger than a buffer grown for it would be.
+    const KEPT_CAPACITY: usize = 512;
+
+    /// Empties the writer for another recording and keeps its buffer, unless it grew large
+    /// (FerroUI addition, desktop-performance.md, section 9.28).
+    pub(crate) fn recycle(&mut self) {
+        if self.buffer.as_ref().is_some_and(|buffer| buffer.capacity() > Self::KEPT_CAPACITY) {
+            self.buffer = None;
+        }
+        self.length = 0;
+    }
 }

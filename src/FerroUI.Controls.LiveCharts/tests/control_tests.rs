@@ -971,3 +971,559 @@ fn heat_series_release_their_points() {
     };
     assert!(survivors.iter().all(|alive| !alive()));
 }
+
+/// `FindHoveredPointsBy` of `PolarChartEngine` and `PieChartEngine`: the polar and pie charts
+/// find hovered points with `FindingStrategy.CompareAll` whatever the finding strategy of the
+/// chart, while a Cartesian chart finds with its strategy.
+#[test]
+fn polar_and_pie_charts_find_by_both_dimensions_whatever_the_strategy() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let polar = PolarChart::new();
+    polar.set_animations_speed(0.0);
+    polar.set_tooltip_tolerance(0.0);
+    let series = PolarLineSeries::new();
+    series.set_numeric_values([10.0, 20.0, 30.0]);
+    polar.series().add(series.upcast());
+    let scene = polar.scene(size).unwrap();
+    let point = scene.hits[2].center;
+    let center = polar.polar_scale(0, 0).unwrap().unwrap().center;
+    // Thirty pixels from the point towards the centre, in its column but off its hover area.
+    let probe = ferroui_base::Point::new(point.x, point.y + 30.0_f64.copysign(center.y - point.y));
+    assert!(!scene
+        .hit_test(probe, FindingStrategy::CompareOnlyX, 0.0)
+        .is_empty());
+    assert!(scene
+        .hit_test(probe, FindingStrategy::CompareAll, 0.0)
+        .is_empty());
+    polar.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
+    assert!(polar.find_points(probe).is_empty());
+    assert_eq!(polar.find_points(point).len(), 1);
+
+    let pie = PieChart::new();
+    pie.set_animations_speed(0.0);
+    pie.set_tooltip_tolerance(0.0);
+    for _ in 0..4 {
+        let slice = PieSeries::new();
+        slice.set_numeric_values([100.0]);
+        pie.series().add(slice.upcast());
+    }
+    let scene = pie.scene(size).unwrap();
+    let inside = scene.hits[0].shape.hover_center();
+    assert!(
+        scene
+            .hit_test(inside, FindingStrategy::CompareOnlyX, 0.0)
+            .len()
+            > 1
+    );
+    pie.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
+    let hits = pie.find_points(inside);
+    assert_eq!(hits.len(), 1);
+    assert_eq!(hits[0].id, scene.hits[0].id);
+
+    // A Cartesian chart keeps its strategy: the column of a point finds it off its marker.
+    let cartesian = CartesianChart::new();
+    cartesian.set_animations_speed(0.0);
+    cartesian.set_tooltip_tolerance(0.0);
+    cartesian.series().add(line().upcast());
+    let scene = cartesian.scene(size).unwrap();
+    let top = scene.hits[1].center;
+    let below = ferroui_base::Point::new(top.x, top.y + 60.0);
+    cartesian.set_tooltip_finding_strategy(FindingStrategy::CompareAll);
+    assert!(cartesian.find_points(below).is_empty());
+    cartesian.set_tooltip_finding_strategy(FindingStrategy::CompareOnlyX);
+    assert_eq!(cartesian.find_points(below).len(), 1);
+}
+
+/// The tooltip text of a polar point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText` of
+/// `CorePolarLineSeries`): the angle when its axis has labels, and the code-only
+/// `RadiusToolTipLabelFormatter` and `AngleToolTipLabelFormatter` of `PolarLineSeries`.
+#[test]
+fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let chart = PolarChart::new();
+    chart.set_animations_speed(0.0);
+    let series = PolarLineSeries::new();
+    series.set_name("Wind".into());
+    series.set_coordinates([Coordinate::new(1.0, 5.0)]);
+    chart.series().add(series.clone().upcast());
+    let label = |chart: &PolarChart| chart.scene(size).unwrap().hits[0].label.clone();
+    assert_eq!(label(&chart), "Wind: 5");
+    let angles = Axis::new();
+    angles.set_labels(vec!["N".into(), "E".into(), "S".into(), "W".into()]);
+    chart.x_axes().add(angles);
+    assert_eq!(label(&chart), "Wind: E: 5");
+    let revision = chart.revision();
+    series.set_radius_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} km/h", point.primary_value)
+    })));
+    assert!(chart.revision() > revision);
+    assert_eq!(label(&chart), "Wind: E: 5 km/h");
+    series.set_angle_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} degrees", point.secondary_value * 90.0)
+    })));
+    assert_eq!(label(&chart), "Wind: 90 degrees: 5 km/h");
+}
+
+/// The tooltip text of a Cartesian point (`GetPrimaryToolTipText`, `GetSecondaryToolTipText` of
+/// `CartesianSeries`): the label of its category when the X axis has labels, and the code-only
+/// `XToolTipLabelFormatter` and `YToolTipLabelFormatter` of the series, which the chart observes.
+#[test]
+fn cartesian_tooltip_text_takes_the_category_labels_and_the_formatters_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 400.0);
+    let chart = CartesianChart::new();
+    chart.set_animations_speed(0.0);
+    let series = ColumnSeries::new();
+    series.set_name("Sales".into());
+    series.set_numeric_values([5.0]);
+    chart.series().add(series.clone().upcast());
+    let label = |chart: &CartesianChart| chart.scene(size).unwrap().hits[0].label.clone();
+    assert_eq!(label(&chart), "Sales: 5");
+    let months = Axis::new();
+    months.set_labels(vec!["Jan".into()]);
+    chart.x_axes().add(months);
+    assert_eq!(label(&chart), "Sales: Jan: 5");
+    let revision = chart.revision();
+    series.set_y_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("{} units", point.primary_value)
+    })));
+    assert!(chart.revision() > revision);
+    assert_eq!(label(&chart), "Sales: Jan: 5 units");
+    series.set_x_tool_tip_label_formatter(Some(ChartPointFormatter::new(|point| {
+        format!("month {}", point.secondary_value + 1.0)
+    })));
+    assert_eq!(label(&chart), "Sales: month 1: 5 units");
+}
+
+/// `GeometrySvg` of the scatter and column series from markup: each point is drawn as the path,
+/// which the chart observes.
+#[test]
+fn scatter_and_column_series_draw_their_geometry_svg_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:ScatterSeries GeometrySvg="M0,0 L10,0 L5,10 Z">
+            <lc:ChartPoint X="0" Y="1" />
+            <lc:ChartPoint X="1" Y="2" />
+          </lc:ScatterSeries>
+          <lc:ColumnSeries>
+            <lc:ChartPoint X="0" Y="3" />
+          </lc:ColumnSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let size = Size::new(400.0, 400.0);
+    let paths = |chart: &CartesianChart, series: usize| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some_and(|id| id.series == series)
+                    && matches!(p.geometry, ferroui_livecharts::Geometry::Path(_))
+            })
+            .count()
+    };
+    assert_eq!(paths(&chart, 0), 2);
+    assert_eq!(paths(&chart, 1), 0);
+    let column = chart.series().get(1).cast::<ColumnSeries>().unwrap();
+    let revision = chart.revision();
+    column.set_geometry_svg(Some("M0,0 L10,0 L10,10 Z".into()));
+    assert!(chart.revision() > revision);
+    assert_eq!(paths(&chart, 1), 1);
+}
+
+/// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
+/// `CoreTreemapSeries`): `<label>: <value>`, and the code-only `ToolTipLabelFormatter` of
+/// `SankeySeries` and `TreemapSeries`, which the chart observes.
+#[test]
+fn node_tooltip_text_takes_the_tool_tip_label_formatter_of_the_series() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let size = Size::new(600.0, 600.0);
+    let labels = |chart: &Chart| {
+        let mut labels: Vec<_> = chart
+            .scene(size)
+            .unwrap()
+            .hits
+            .iter()
+            .map(|h| h.label.clone())
+            .collect();
+        labels.sort();
+        labels
+    };
+    let formatter = NodeTooltipFormatter::new(|point| {
+        format!("{} ({}) {}", point.label, point.index, point.value)
+    });
+    let sankey = SankeyChart::new();
+    sankey.set_animations_speed(0.0);
+    let (series, _) = sankey_fixture();
+    sankey.series().add(series.clone().upcast());
+    assert_eq!(labels(&sankey), ["A: 6", "B: 6", "X: 4", "Y: 8"]);
+    let revision = sankey.revision();
+    series.set_tool_tip_label_formatter(Some(formatter.clone()));
+    assert!(sankey.revision() > revision);
+    assert_eq!(labels(&sankey), ["A (0) 6", "B (1) 6", "X (2) 4", "Y (3) 8"]);
+    let treemap = TreemapChart::new();
+    treemap.set_animations_speed(0.0);
+    let series = TreemapSeries::new();
+    series.set_nodes(TreemapNodes::from_items([
+        TreemapNode::with_value(3.0, "Lisbon"),
+        TreemapNode::with_value(2.0, "Porto"),
+    ]));
+    treemap.series().add(series.clone().upcast());
+    assert_eq!(labels(&treemap), ["Lisbon: 3", "Porto: 2"]);
+    let revision = treemap.revision();
+    series.set_tool_tip_label_formatter(Some(formatter));
+    assert!(treemap.revision() > revision);
+    assert_eq!(labels(&treemap), ["Lisbon (0) 3", "Porto (1) 2"]);
+}
+
+/// The gradient bar of a `HeatLegend` (`Legend` of a chart, the source's `SKHeatLegend`).
+fn heat_legend_bar(scene: &ferroui_livecharts::Scene) -> ferroui_base::Rect {
+    scene
+        .primitives
+        .iter()
+        .find_map(|p| match p.geometry {
+            ferroui_livecharts::Geometry::Rectangle { rect, .. }
+                if p.id.is_none() && p.style.fill_brush.is_some() =>
+            {
+                Some(rect)
+            }
+            _ => None,
+        })
+        .expect("the gradient bar of the heat legend")
+}
+
+fn has_text(scene: &ferroui_livecharts::Scene, wanted: &str) -> bool {
+    scene.primitives.iter().any(|p| {
+        matches!(&p.geometry, ferroui_livecharts::Geometry::Text { text, .. } if text == wanted)
+    })
+}
+
+/// `LegendTextSize` and `LegendBackgroundPaint` of a chart (`IChartView`), from markup: the heat
+/// legend writes its labels at the text size and fills its whole room with the background under
+/// its bar; without them the labels take the theme's 16 and nothing is under the bar.
+#[test]
+fn heat_legend_takes_the_legend_text_size_and_background_of_the_chart() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts" LegendPosition="Right"
+              LegendTextSize="24" LegendBackgroundPaint="#FFEEEEEE">
+          <lc:CartesianChart.Legend>
+            <lc:HeatLegend />
+          </lc:CartesianChart.Legend>
+          <lc:HeatSeries>
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="10" />
+            <lc:ChartPoint X="1" Y="0" TertiaryValue="40" />
+          </lc:HeatSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    assert_eq!(chart.legend_text_size(), Some(24.0));
+    let size = Size::new(400.0, 400.0);
+    let text_sizes = |scene: &ferroui_livecharts::Scene| -> Vec<f64> {
+        scene
+            .primitives
+            .iter()
+            .filter_map(|p| match &p.geometry {
+                ferroui_livecharts::Geometry::Text { text, size, .. }
+                    if text == "10" || text == "40" =>
+                {
+                    Some(*size)
+                }
+                _ => None,
+            })
+            .collect()
+    };
+    let background = Some(ferroui_base::media::Color::from_rgb(0xEE, 0xEE, 0xEE));
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(text_sizes(&scene), [24.0, 24.0]);
+    let bar = heat_legend_bar(&scene);
+    let fill = scene
+        .primitives
+        .iter()
+        .position(|p| p.id.is_none() && p.style.fill == background)
+        .expect("the background of the legend");
+    let ferroui_livecharts::Geometry::Rectangle { rect, .. } = scene.primitives[fill].geometry else {
+        panic!("a rectangle")
+    };
+    // The room of the legend, the bar padded by 10 on every side, at the right of the control.
+    assert!((rect.x + rect.width - 400.0).abs() < 1e-6);
+    assert!((rect.x + 10.0 - bar.x).abs() < 1e-6 && (rect.y + 10.0 - bar.y).abs() < 1e-6);
+    let bar_index = scene
+        .primitives
+        .iter()
+        .position(|p| p.style.fill_brush.is_some() && p.id.is_none())
+        .unwrap();
+    assert!(fill < bar_index, "the background is under the bar");
+    chart.set_legend_text_size(None);
+    chart.set_legend_background_paint(None);
+    let scene = chart.scene(size).unwrap();
+    assert_eq!(text_sizes(&scene), [16.0, 16.0]);
+    assert!(!scene
+        .primitives
+        .iter()
+        .any(|p| p.id.is_none() && p.style.fill == background));
+}
+
+/// SKChartingVisualsTests.SKHeatLegend_IsDrawnWhenAttachedToCartesianChartWithHeatSeries and
+/// SKHeatLegend_HorizontalPositionExercisesBottomBranch, from markup: a `HeatLegend` at the right
+/// of a 400 by 400 chart draws the gradient of its heat series beside the plot with its lowest
+/// and highest weights, and at the bottom with a `BadgeWidth` of 25 a bar 25 high under it; the
+/// legend object is observed. A heat series places its data labels by `DataLabelsPosition`.
+#[test]
+fn heat_legend_and_heat_data_label_positions_load_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts" LegendPosition="Right">
+          <lc:CartesianChart.Legend>
+            <lc:HeatLegend />
+          </lc:CartesianChart.Legend>
+          <lc:HeatSeries DataLabels="True" DataLabelsPosition="Top">
+            <lc:ChartPoint X="0" Y="0" TertiaryValue="10" />
+            <lc:ChartPoint X="0" Y="1" TertiaryValue="20" />
+            <lc:ChartPoint X="1" Y="0" TertiaryValue="30" />
+            <lc:ChartPoint X="1" Y="1" TertiaryValue="40" />
+          </lc:HeatSeries>
+        </lc:CartesianChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let legend = chart.legend().unwrap().cast::<HeatLegend>().unwrap();
+    assert_eq!(
+        legend.badge_padding(),
+        ferroui_base::Thickness::uniform(10.0)
+    );
+    let heat = chart.series().get(0).cast::<HeatSeries>().unwrap();
+    assert_eq!(heat.data_labels_position(), DataLabelsPosition::Top);
+    assert_eq!(
+        HeatSeries::new().data_labels_position(),
+        DataLabelsPosition::Middle
+    );
+    let size = Size::new(400.0, 400.0);
+    let scene = chart.scene(size).unwrap();
+    let bar = heat_legend_bar(&scene);
+    let plot = scene.plot_bounds;
+    assert!(bar.x >= plot.x + plot.width, "the bar is right of the plot");
+    assert!(bar.x + bar.width < 400.0);
+    assert!((bar.height - (plot.height - 20.0)).abs() < 1e-6);
+    assert!(has_text(&scene, "10") && has_text(&scene, "40"));
+    // The label of each cell is above it.
+    let cell = |point: usize| {
+        scene
+            .primitives
+            .iter()
+            .find_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Rectangle { rect, .. }, Some(id))
+                    if id.point == point =>
+                {
+                    Some(*rect)
+                }
+                _ => None,
+            })
+            .unwrap()
+    };
+    let label_y = |point: usize| {
+        scene
+            .primitives
+            .iter()
+            .find_map(|p| match (&p.geometry, p.id) {
+                (ferroui_livecharts::Geometry::Text { origin, .. }, Some(id))
+                    if id.point == point =>
+                {
+                    Some(origin.y)
+                }
+                _ => None,
+            })
+            .unwrap()
+    };
+    for point in 0..4 {
+        assert!(
+            label_y(point) < cell(point).y,
+            "the label of {point} is above its cell"
+        );
+    }
+    // At the bottom with a badge width of 25.
+    chart.set_legend_position(LegendPosition::Bottom);
+    let revision = chart.revision();
+    legend.set_badge_width(Some(25.0));
+    assert!(chart.revision() > revision);
+    let scene = chart.scene(size).unwrap();
+    let bar = heat_legend_bar(&scene);
+    let plot = scene.plot_bounds;
+    assert_eq!(bar.height, 25.0);
+    assert!(bar.y >= plot.y + plot.height, "the bar is under the plot");
+    // Without a legend object the chart lists its series again.
+    chart.set_legend(None);
+    let scene = chart.scene(size).unwrap();
+    assert!(!scene
+        .primitives
+        .iter()
+        .any(|p| p.id.is_none() && p.style.fill_brush.is_some()));
+}
+
+/// GeoMapTests.GeoMap_HeatLegendRight_ReducesDrawMarginWidth: a heat legend at the right of an
+/// 800 by 600 map takes its width from the map and draws the gradient of the heat land series.
+#[test]
+fn geo_map_heat_legend_right_reduces_the_draw_margin_width() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let chart = GeoMap::new();
+    chart.set_animations_speed(0.0);
+    let series = HeatLandSeries::new();
+    heat_lands(&series, &[("rus", 1.0), ("usa", 9.0)]);
+    chart.series().add(series.upcast());
+    chart.set_legend_position(LegendPosition::Right);
+    chart.set_legend(Some(HeatLegend::new().upcast()));
+    let scene = chart.scene(Size::new(800.0, 600.0)).unwrap();
+    let plot = scene.plot_bounds;
+    assert!(plot.x + plot.width < 800.0);
+    let bar = heat_legend_bar(&scene);
+    assert!(bar.x >= plot.x + plot.width);
+    assert!(has_text(&scene, "1") && has_text(&scene, "9"));
+}
+
+/// `DataLabelsMaxWidth` of the Sankey and treemap series (the source's 170 by default) from
+/// markup: a treemap label that fits its tile of 120 only when broken at the width is drawn on
+/// two lines, and a width of 400 leaves it on one line, which the tile culls.
+#[test]
+fn sankey_and_treemap_data_labels_max_width_load_from_markup() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    register_types();
+    assert_eq!(SankeySeries::new().data_labels_max_width(), 170.0);
+    assert_eq!(TreemapSeries::new().data_labels_max_width(), 170.0);
+    let loaded = FerroRuntimeXamlLoader::parse(
+        r##"<lc:TreemapChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:TreemapSeries Padding="0" DataLabels="True" DataLabelsMaxWidth="100">
+            <lc:TreemapSeries.Nodes>
+              <lc:TreemapNode Name="United States of America" Value="10" />
+            </lc:TreemapSeries.Nodes>
+          </lc:TreemapSeries>
+        </lc:TreemapChart>"##,
+        Some(&ASSEMBLY),
+    )
+    .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+    let chart = from_markup_value::<Ref<TreemapChart>>(&Some(loaded)).unwrap();
+    chart.set_animations_speed(0.0);
+    let series = chart.series().get(0).cast::<TreemapSeries>().unwrap();
+    assert_eq!(series.data_labels_max_width(), 100.0);
+    let size = Size::new(120.0, 300.0);
+    let texts = |chart: &TreemapChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some() && matches!(p.geometry, ferroui_livecharts::Geometry::Text { .. })
+            })
+            .count()
+    };
+    assert!(texts(&chart) >= 2, "the label breaks into lines");
+    let revision = chart.revision();
+    series.set_data_labels_max_width(400.0);
+    assert!(chart.revision() > revision);
+    assert_eq!(texts(&chart), 0, "one line is wider than the tile");
+}
+
+/// `GaugeGenerator.BuildSolidGauge` and `BuildAngularGaugeSections` with `GaugeItem`, and the
+/// theme's gauge rules: a ring of each value among empty values (solid) or one value relative to
+/// the minimum (angular), the fill series of a zero for each item styled by the background item,
+/// and the rules of the theme for what a series does not set (centred data labels, no stroke,
+/// the corner radius of 8) while what it sets stays.
+#[test]
+fn gauge_generator_builds_solid_and_angular_gauges_with_the_theme_rules() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let solid = GaugeGenerator::build_solid_gauge(&[
+        GaugeItem::new(30.0).with_builder(|s| s.set_name("Vanessa".into())),
+        GaugeItem::new(50.0),
+        GaugeItem::new(GaugeItem::BACKGROUND).with_builder(|s| s.set_inner_radius(20.0)),
+    ]);
+    assert_eq!(solid.len(), 3);
+    assert_eq!(solid[0].name(), "Vanessa");
+    let rings: Vec<_> = solid[1]
+        .values()
+        .to_vec()
+        .iter()
+        .map(|p| (p.is_empty(), p.y()))
+        .collect();
+    assert_eq!(rings, vec![(true, 0.0), (false, 50.0)]);
+    assert!(solid[2].is_fill_series() && solid[2].is_gauge());
+    assert_eq!(solid[2].values().count(), 2);
+    assert_eq!(solid[2].inner_radius(), 20.0);
+    // `AsSeries` clears the hover push-out of every gauge series; the fill series of a solid
+    // gauge keeps the default of the source (only the angular one clears it).
+    assert!(solid[..2].iter().all(|s| s.hover_push_out() == 0.0));
+    assert_eq!(solid[2].hover_push_out(), 20.0);
+    let angular = GaugeGenerator::build_angular_gauge_sections(&[
+        GaugeItem::new(60.0),
+        GaugeItem::new(30.0),
+        GaugeItem::new(10.0),
+    ]);
+    assert_eq!(angular.len(), 4, "a fill series is added");
+    assert!(angular[..3]
+        .iter()
+        .all(|s| s.is_relative_to_min_value() && !s.data_labels() && s.values().count() == 1));
+    // The theme's rules through the chart: the solid gauge has its data labels, centred, without
+    // a stroke; the corner radius set on a series stays.
+    solid[1].set_corner_radius(2.0);
+    let chart = PieChart::new();
+    chart.set_animations_speed(0.0);
+    chart.set_max_value(Some(100.0));
+    for series in &solid {
+        chart.series().add(series.clone().upcast());
+    }
+    let scene = chart.scene(Size::new(400.0, 400.0)).unwrap();
+    assert!(scene.primitives.iter().any(|p| matches!(
+        &p.geometry,
+        ferroui_livecharts::Geometry::Text { text, .. } if text == "30"
+    )));
+    assert!(scene
+        .primitives
+        .iter()
+        .filter(|p| p.id.is_some_and(|id| id.series < 2))
+        .all(|p| p.style.stroke.is_none()));
+}
+
+/// `DataLabelsMaxWidth` of every series (170 by default, as the source): the data label of a box
+/// point ("Min ... Max ...") breaks into lines at a width of 60 and stays on one line at 1000.
+#[test]
+fn data_labels_of_every_series_break_at_their_max_width() {
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    assert_eq!(LineSeries::new().data_labels_max_width(), 170.0);
+    let chart = CartesianChart::new();
+    chart.set_animations_speed(0.0);
+    let series = BoxSeries::new();
+    series.set_coordinates([Coordinate::box_value(0.0, 10.0, 7.0, 3.0, 1.0, 5.0)]);
+    series.set_data_labels(true);
+    chart.series().add(series.clone().upcast());
+    let size = Size::new(600.0, 400.0);
+    let labels = |chart: &CartesianChart| {
+        chart
+            .scene(size)
+            .unwrap()
+            .primitives
+            .iter()
+            .filter(|p| {
+                p.id.is_some() && matches!(p.geometry, ferroui_livecharts::Geometry::Text { .. })
+            })
+            .count()
+    };
+    series.set_data_labels_max_width(1000.0);
+    assert_eq!(labels(&chart), 1);
+    series.set_data_labels_max_width(60.0);
+    assert!(labels(&chart) > 1, "the label breaks into lines");
+}

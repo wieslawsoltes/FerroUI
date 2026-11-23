@@ -989,7 +989,7 @@ impl PopupFlyoutBase {
         let (old_value, new_value) = args.get_old_and_new_value::<Option<Ref<FlyoutBase>>>();
 
         if old_value.is_some() {
-            if let Some((context_requested, context_canceled)) = c.context_flyout_handlers().take() {
+            if let Some((context_requested, context_canceled)) = c.take_context_flyout_handlers() {
                 c.remove_handler(InputElement::context_requested_event(), context_requested);
                 c.remove_handler(InputElement::context_canceled_event(), context_canceled);
             }
@@ -999,7 +999,7 @@ impl PopupFlyoutBase {
                 c.add_handler(InputElement::context_requested_event(), Self::on_control_context_requested);
             let context_canceled =
                 c.add_handler(InputElement::context_canceled_event(), Self::on_control_context_canceled);
-            c.context_flyout_handlers().set(Some((context_requested, context_canceled)));
+            c.set_context_flyout_handlers((context_requested, context_canceled));
         }
     }
 

@@ -8,6 +8,7 @@ ferroui_base::ferro_rust_paths! {
     classes: [
         crate::WinUITheme,
         crate::accents::SystemAccentColors,
+        crate::accents::SystemColors,
         crate::primitives::InfoBarPanel,
         crate::primitives::TabViewEqualWidthPanel,
     ],

@@ -15,7 +15,12 @@ categories.workspace = true
 path = "lib.rs"
 
 [features]
-default = []
+default = ["collaboration-client"]
+# The client of the collaboration host (sharing a document in a room: `sharing`, the Share panel of the
+# workspace). It brings the HTTPS client of the host crate, whose TLS has no random source for the
+# browser target (wasm32-unknown-emscripten): a browser host turns the default features off, and the
+# workspace then hides its Share button.
+collaboration-client = ["ferroui-designer-collaboration-host/client"]
 mcp = ["dep:ferroui-mcp", "dep:base64"]
 render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes-winui"]
 
@@ -23,7 +28,7 @@ render-smoke = ["dep:ferroui-vello", "dep:ferroui-harfbuzz", "dep:ferroui-themes
 base64 = { version = "0.22", optional = true }
 ferroui-designer-project.workspace = true
 ferroui-designer-language.workspace = true
-ferroui-designer-collaboration-host = { workspace = true, features = ["client", "server"] }
+ferroui-designer-collaboration-host = { workspace = true, features = ["server"] }
 ferroui-xaml-interactivity.workspace = true
 ferroui-xaml-interactions.workspace = true
 ferroui-xaml-interactions-custom.workspace = true

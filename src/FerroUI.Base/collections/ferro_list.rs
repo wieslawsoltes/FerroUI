@@ -135,8 +135,8 @@ impl<T: Clone> FerroList<T> {
     pub fn new() -> Self {
         Self(Rc::new(FerroListData {
             items: RefCell::new(Rc::new(Vec::new())),
-            collection_changed: HandlerList::with_ordered_ids(),
-            untyped_collection_changed: Event::with_ordered_ids(),
+            collection_changed: HandlerList::new(),
+            untyped_collection_changed: Event::new(),
             property_changed: Event::new(),
             validator: RefCell::new(None),
             reset_behavior: Cell::new(ResetBehavior::Reset),
@@ -342,17 +342,31 @@ impl<T: Clone> FerroList<T> {
 
     /// Inserts multiple items at the specified index.
     pub fn insert_range(&self, index: usize, items: impl IntoIterator<Item = T>) {
-        let added: Vec<T> = items.into_iter().collect();
+        let items = items.into_iter();
+        // A few items, as the children of most elements are, are not worth a list of their own
+        // on the heap (desktop-performance.md, section 9.75); a long range is collected as it
+        // always was.
+        if items.size_hint().1.is_some_and(|most| most <= 4) {
+            let added: smallvec::SmallVec<[T; 4]> = items.collect();
+            self.insert_items(index, &added);
+        } else {
+            let added: Vec<T> = items.collect();
+            self.insert_items(index, &added);
+        }
+    }
+
+    /// Inserts the items of `added` at `index` and tells the handlers once.
+    fn insert_items(&self, index: usize, added: &[T]) {
         if added.is_empty() {
             return;
         }
-        for item in &added {
+        for item in added {
             self.validate_item(item);
         }
         self.modify(|list| {
             list.splice(index..index, added.iter().cloned());
         });
-        self.notify_add(&added, index);
+        self.notify_add(added, index);
     }
 
     /// Moves an item to a new index.
@@ -600,6 +614,25 @@ impl<T: Clone + PartialEq> FerroList<T> {
         }
     }
 
+    /// Where `items` are, in order, a run of the list that no item of `items` precedes or follows
+    /// (`None` when they are not, or are too few to be worth looking for).
+    fn contiguous_run(&self, items: &[T]) -> Option<usize> {
+        if items.len() < 8 {
+            return None;
+        }
+        let list = self.0.items.borrow();
+        let start = list.iter().position(|item| *item == items[0])?;
+        let end = start + items.len();
+        if end > list.len() || list[start..end] != *items {
+            return None;
+        }
+        let outside = |index: usize| !items.contains(&list[index]);
+        if (start > 0 && !outside(start - 1)) || (end < list.len() && !outside(end)) {
+            return None;
+        }
+        Some(start)
+    }
+
     /// Removes multiple items from the collection.
     ///
     /// Each run of adjacent items that are removed is notified as one
@@ -610,6 +643,14 @@ impl<T: Clone + PartialEq> FerroList<T> {
         // ported and membership is a linear search by equality, which keeps
         // the behaviour without a `Hash` bound.
         let h_items: Vec<T> = items.into_iter().collect();
+        // An addition (FerroUI deviation, desktop-performance.md section 9.21): items that are one
+        // run of the list (a panel cleared, a range removed) are removed as that run, which the
+        // search below notifies as one removal too, without searching the items for every item
+        // of the list (quadratic in their number).
+        if let Some(start) = self.contiguous_run(&h_items) {
+            self.remove_range(start, h_items.len());
+            return;
+        }
         let mut counter = 0;
 
         let mut i = self.count();
@@ -698,6 +739,34 @@ mod tests {
             l.borrow_mut().push((e.action, e.old_starting_index, e.old_items.to_vec()));
         }));
         log
+    }
+
+    // Not from the reference tests: a few items are collected without a list on the heap and
+    // many as before (desktop-performance.md, section 9.75); the handlers are told the same.
+    #[test]
+    fn a_range_is_one_change_whether_it_has_a_few_items_or_many() {
+        for count in [1, 4, 5, 64] {
+            let list = FerroList::from_items([-1, -2]);
+            let range: Vec<i32> = (0..count).collect();
+            // An iterator that does not know how long it is at most is collected as a long range.
+            for unknown_length in [false, true] {
+                let mut source = range.clone().into_iter();
+                let items: Box<dyn Iterator<Item = i32>> = if unknown_length {
+                    Box::new(std::iter::from_fn(move || source.next()))
+                } else {
+                    Box::new(source)
+                };
+                assert_event(
+                    &list,
+                    || list.insert_range(1, items),
+                    &[(NotifyCollectionChangedAction::Add, range.clone(), vec![], 1, -1)],
+                );
+                assert_eq!(list.to_vec()[1..1 + range.len()], range[..]);
+                list.remove_range(1, range.len());
+            }
+            list.insert_range(0, std::iter::empty());
+            assert_eq!(list.to_vec(), vec![-1, -2]);
+        }
     }
 
     #[test]

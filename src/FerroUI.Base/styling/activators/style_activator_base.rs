@@ -1,11 +1,12 @@
 use super::{IStyleActivator, IStyleActivatorSink};
-use std::cell::{Cell, RefCell};
+use crate::utilities::OptionCell;
+use std::cell::Cell;
 use std::rc::Weak;
 
 /// The state shared by all style activators.
 #[derive(Default)]
 pub(crate) struct StyleActivatorBase {
-    sink: RefCell<Option<Weak<dyn IStyleActivatorSink>>>,
+    sink: OptionCell<Weak<dyn IStyleActivatorSink>>,
     value: Cell<Option<bool>>,
 }
 
@@ -16,7 +17,7 @@ impl StyleActivatorBase {
 
     #[inline]
     pub fn is_subscribed(&self) -> bool {
-        self.sink.borrow().is_some()
+        self.sink.is_some()
     }
 }
 
@@ -57,7 +58,7 @@ pub(crate) trait StyleActivator: 'static {
         let base = self.base();
         if Some(value) != base.value.get() {
             base.value.set(Some(value));
-            let sink = base.sink.borrow().clone();
+            let sink = base.sink.get();
             if let Some(sink) = sink.and_then(|s| s.upgrade()) {
                 sink.on_next(value);
             }
@@ -81,23 +82,25 @@ impl<T: StyleActivator> IStyleActivator for T {
             panic!("StyleActivator is already subscribed.");
         }
         self.initialize();
-        *self.base().sink.borrow_mut() = Some(sink);
+        self.base().sink.set(Some(sink));
     }
 
     fn unsubscribe(&self, sink: &Weak<dyn IStyleActivatorSink>) {
-        {
-            let current = self.base().sink.borrow();
-            let Some(current) = &*current else { return };
-            if !std::ptr::addr_eq(current.as_ptr(), sink.as_ptr()) {
-                panic!("StyleActivatorSink is not subscribed.");
-            }
+        // `None` without a sink, and otherwise whether the sink is the one given.
+        let is_subscribed = self.base().sink.with(|current| {
+            current.map(|current| std::ptr::addr_eq(current.as_ptr(), sink.as_ptr()))
+        });
+        match is_subscribed {
+            None => return,
+            Some(false) => panic!("StyleActivatorSink is not subscribed."),
+            Some(true) => {}
         }
-        *self.base().sink.borrow_mut() = None;
+        self.base().sink.set(None);
         self.deinitialize();
     }
 
     fn dispose(&self) {
-        *self.base().sink.borrow_mut() = None;
+        self.base().sink.set(None);
         self.deinitialize();
     }
 }

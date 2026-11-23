@@ -129,6 +129,16 @@ impl IRenderTimer for ThreadProxyRenderTimer {
     fn runs_in_background(&self) -> bool {
         true
     }
+
+    /// Wakes the timer thread as a tick of the inner timer does. A request
+    /// made while the thread is in a tick is served right after that tick;
+    /// requests and inner ticks that arrive before the thread wakes are one
+    /// tick. Nothing while the timer is stopped.
+    fn request_tick_out_of_turn(&self) {
+        if self.active.load(Ordering::SeqCst) {
+            self.shared.auto_reset_event.set();
+        }
+    }
 }
 
 impl Drop for ThreadProxyRenderTimer {
@@ -226,5 +236,36 @@ mod tests {
         })));
         inner.trigger_tick();
         assert_eq!(receiver.recv_timeout(Duration::from_secs(10)).unwrap(), first_thread);
+    }
+
+    #[test]
+    fn ticks_out_of_turn_on_its_own_thread_while_started() {
+        let inner = Arc::new(ManualRenderTimer::default());
+        let proxy = ThreadProxyRenderTimer::new(inner.clone());
+
+        // Not started: nothing to tick.
+        proxy.request_tick_out_of_turn();
+
+        let (sender, receiver) = mpsc::channel::<ThreadId>();
+        let sender = Mutex::new(sender);
+        proxy.set_tick(Some(Arc::new(move |_| {
+            let _ = sender.lock().unwrap().send(thread::current().id());
+        })));
+        assert!(matches!(receiver.recv_timeout(Duration::from_millis(50)), Err(mpsc::RecvTimeoutError::Timeout)));
+
+        // Without a tick of the inner timer.
+        proxy.request_tick_out_of_turn();
+        let thread = receiver.recv_timeout(Duration::from_secs(10)).unwrap();
+        assert_ne!(thread, thread::current().id());
+        inner.trigger_tick();
+        assert_eq!(receiver.recv_timeout(Duration::from_secs(10)).unwrap(), thread);
+
+        // Stopped: a request is dropped.
+        proxy.set_tick(None);
+        proxy.request_tick_out_of_turn();
+        assert!(matches!(
+            receiver.recv_timeout(Duration::from_millis(50)),
+            Err(mpsc::RecvTimeoutError::Disconnected | mpsc::RecvTimeoutError::Timeout)
+        ));
     }
 }

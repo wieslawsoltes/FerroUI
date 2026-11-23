@@ -44,6 +44,11 @@ impl PageSlide {
 
     /// Creates a slide with the given duration and axis.
     pub fn with_duration(duration: SignedDuration, orientation: SlideAxis) -> Self {
+        // The casts of the transition to `IPageTransition` (its `ValueTypeRegistration`), which
+        // compiled markup needs before it sets a transition, are registered with the first one
+        // made (#612): every transition of the type is made here.
+        static CASTS: std::sync::Once = std::sync::Once::new();
+        CASTS.call_once(crate::data::core::ValueTypes::register_used::<Self>);
         Self {
             duration: Cell::new(duration),
             orientation: Cell::new(orientation),

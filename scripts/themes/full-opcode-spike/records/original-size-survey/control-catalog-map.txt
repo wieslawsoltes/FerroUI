@@ -1,0 +1,25 @@
+text 51347192 accounted 51214740 symbols 147088
+[('ferroui_base', 21190432), ('control_catalog_desktop-7180a62a0b59504c.control_catalog_desktop.f38127a91fcaa69f-cgu.0.rcgu.o', 9234012), ('ferroui_controls', 4814408), ('core', 3317244), ('libskia_bindings-c593b6404c9e0a9c.rlib', 3088136), ('ferroui_treedatagrid_core', 1188132), ('ferroui_markup_xaml', 965952), ('ferroui_themes_winui', 801936), ('alloc', 788284), ('ferroui_controls_color_picker', 780484), ('std', 742940), ('ferroui_controls_treedatagrid', 663276), ('libharfbuzz_sys-d689cf489c8d71eb.rlib', 605668), ('ferroui_controls_inking', 459444), ('ferroui_controls_repeater', 424468), ('ferroui_system', 288852), ('ferroui_controls_livecharts', 267544), ('ferroui_native', 239836), ('hashbrown', 219276), ('libferro_native_osx.a', 211568), ('ferroui_skia', 199064), ('ferroui_livecharts', 161744), ('ferroui_dialogs', 121664), ('ferroui_headless_vnc', 105152), ('ferroui_media_video_controls', 58896), ('ferroui_opengl', 38320)]
+Counter({'::property_store::': 2871276, '::styled_property::': 1430560, '::direct_property::': 635004}) Counter({'::property_store::': 9809, '::styled_property::': 5869, '::direct_property::': 3364})
+688852 1568 ferroui_base::data::core::value_type::nullable_operation::
+58668 149 ferroui_base::metadata::markup_type::from_markup_value::
+56756 19 ferroui_base::media::effects::custom_effect_graph::load_custom_effect_graph::
+53136 218 ferroui_base::type_system::instantiate::
+35660 19 ferroui_base::media::effects::custom_effect_shader::load_custom_effect_shader::
+31108 1 ferroui_base::data::core::value_type::register_defaults
+20424 1 ferroui_base::media::effects::library::register_library_effects::{closure#0}
+15664 19 ferroui_base::media::effects::custom_effect_registry::parse_registered::
+14052 1 ferroui_base::input::text_input::input_method_manager::is_input_options_property
+12536 1 ferroui_base::utilities::number_format::format_decimal
+10908 9 ferroui_base::data::converters::func_value_converter::cast_value::
+9944 32 ferroui_base::metadata::markup_type::markup_result::
+9440 1 ferroui_base::rendering::composition::effects::effect_graph::build_node
+8504 1 ferroui_base::rendering::composition::brushes::server_composition_surface_brush::paint_composition_brush
+7724 102 ferroui_base::ferro_property::value_equals::
+6988 1 ferroui_base::utilities::date_time_format::parse
+6316 8 ferroui_base::rendering::composition::composition_object::start_animation_core::
+6160 1 ferroui_base::ferro_property::copy_converted_property_value
+6128 1 ferroui_base::markup_types::register_value_types
+6020 1 ferroui_base::rendering::composition::expressions::expression_parser::parse_till_terminator
+5932 1 ferroui_base::data::converters::composite_format::number_to_string_format
+5660 1 ferroui_base::media::text_formatting::text_tab_layout::resolve_tabs

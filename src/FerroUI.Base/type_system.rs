@@ -59,6 +59,18 @@ impl TypeIdentity {
         Self { name }
     }
 
+    /// The class with this identity, once it is known: after its initialisation on any thread
+    /// or its registration with a table of types ([`TypeInfo::register`]). `None` before, when
+    /// no object of the class exists. Reading it does not keep the class in the executable.
+    ///
+    /// It is looked up among the known types of the name; the identity itself stays constant
+    /// data, which a constant may refer to.
+    pub fn registered_type(&'static self) -> Option<&'static TypeInfo> {
+        let registry = read_registry();
+        let known = registry.by_name.get(self.name)?;
+        known.iter().copied().find(|type_| type_.identity.is_some_and(|own| std::ptr::eq(own, self)))
+    }
+
     /// The name of the class, for diagnostics.
     pub const fn name(&self) -> &'static str {
         self.name
@@ -85,12 +97,130 @@ pub struct TypeInfo {
     class_init: Option<fn()>,
     /// The default constructor, kept only with the type tables
     /// ([`with_constructor`](Self::with_constructor)).
-    #[cfg(feature = "type-tables")]
+    #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
     constructor: Option<fn() -> Ref<FerroObject>>,
     handles: Option<fn() -> [TypeId; 2]>,
     handle_registration: Option<fn()>,
     interfaces: &'static [TypeOf],
     markup: Option<&'static MarkupType>,
+    /// What the change handlers of the class itself do with an inherited value
+    /// ([`ChangeHandlerLayer`]).
+    change_handlers: ChangeHandlerLayer,
+}
+
+/// What the change handlers of one class (`on_property_changed` and
+/// `on_property_changed_core` of its [`FerroObjectImpl`](crate::FerroObjectImpl), not those of
+/// its base classes) do with a change of an inherited value that reaches an object from an
+/// ancestor. An addition (FerroUI deviation, desktop-performance.md section 9.101): where no
+/// class of an object reacts and nothing listens, the change is not raised on the object.
+#[doc(hidden)]
+#[derive(Clone, Copy)]
+pub enum ChangeHandlerLayer {
+    /// The class overrides neither member.
+    Absent,
+    /// The class states what its handlers react to.
+    Stated(InheritedReactions),
+    /// Nothing is known of the handlers: they may react to any change.
+    Unknown,
+}
+
+/// What the change handlers of a class react to among the inherited values that reach its
+/// objects from an ancestor: stated in the block of
+/// [`ferro_overrides!`](crate::ferro_overrides) that holds the handlers.
+///
+/// ```ignore
+/// ferro_overrides! { impl FerroObjectImpl for Border {
+///     inherited_reactions: InheritedReactions::to(|property| (property.name() == "UseLayoutRounding").into());
+///
+///     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
+///         // ..
+///     }
+/// } }
+/// ```
+///
+/// The statement is a promise: for a property it answers [`InheritedReaction::Never`] to, the
+/// handlers of the class do nothing but call those of the base class, and for one it answers
+/// [`InheritedReaction::While`] to, they do nothing else for an object the question is `false`
+/// for. A class that states nothing is taken to react to every property.
+#[derive(Clone, Copy)]
+pub struct InheritedReactions {
+    property: fn(&'static FerroProperty) -> InheritedReaction,
+}
+
+/// What the change handlers of a class do with a change of one inherited property
+/// ([`InheritedReactions`]).
+#[derive(Clone, Copy)]
+pub enum InheritedReaction {
+    /// Nothing but calling the handlers of the base class.
+    Never,
+    /// They react, or may.
+    Always,
+    /// They react for an object only while the question is `true` for it: a state of the object
+    /// (the transitions of an animatable, the listeners of an event). The question is only
+    /// asked for objects of the class that states it and of classes derived from it.
+    While(fn(&FerroObject) -> bool),
+}
+
+impl From<bool> for InheritedReaction {
+    fn from(reacts: bool) -> Self {
+        if reacts {
+            Self::Always
+        } else {
+            Self::Never
+        }
+    }
+}
+
+impl InheritedReactions {
+    /// The reaction of the handlers to each inherited property. The answer for a property
+    /// never changes.
+    pub const fn to(property: fn(&'static FerroProperty) -> InheritedReaction) -> Self {
+        Self { property }
+    }
+
+    #[inline]
+    pub(crate) fn reaction_to(&self, property: &'static FerroProperty) -> InheritedReaction {
+        (self.property)(property)
+    }
+}
+
+/// The layer of class `T`, from what its implementation of
+/// [`FerroObjectImpl`](crate::FerroObjectImpl) states: which members it overrides and what
+/// they react to. A constant function: the type information of the class evaluates it when
+/// the class is compiled.
+#[doc(hidden)]
+pub const fn __change_handler_layer<T: crate::FerroObjectImpl>() -> ChangeHandlerLayer {
+    let overrides = match T::__OVERRIDES {
+        Some(overrides) => overrides,
+        None => return ChangeHandlerLayer::Unknown,
+    };
+    if !__names(overrides, "on_property_changed") && !__names(overrides, "on_property_changed_core") {
+        return ChangeHandlerLayer::Absent;
+    }
+    match T::__INHERITED_REACTIONS {
+        Some(reactions) => ChangeHandlerLayer::Stated(reactions),
+        None => ChangeHandlerLayer::Unknown,
+    }
+}
+
+/// Whether `member` is one of `names`.
+const fn __names(names: &[&str], member: &str) -> bool {
+    let member = member.as_bytes();
+    let mut index = 0;
+    while index < names.len() {
+        let name = names[index].as_bytes();
+        if name.len() == member.len() {
+            let mut at = 0;
+            while at < name.len() && name[at] == member[at] {
+                at += 1;
+            }
+            if at == name.len() {
+                return true;
+            }
+        }
+        index += 1;
+    }
+    false
 }
 
 impl TypeInfo {
@@ -101,12 +231,13 @@ impl TypeInfo {
             identity: None,
             module_path: "",
             class_init: None,
-            #[cfg(feature = "type-tables")]
+            #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
             constructor: None,
             handles: None,
             handle_registration: None,
             interfaces: &[],
             markup: None,
+            change_handlers: ChangeHandlerLayer::Unknown,
         }
     }
 
@@ -129,6 +260,19 @@ impl TypeInfo {
     /// [`is_assignable_from`](Self::is_assignable_from) with `T::TYPE`, does not
     /// keep the initialisation, the constructor and the markup metadata of `T`
     /// in the executable (#612).
+    /// Whether this type or a type it derives from is named `name`: the type check of a
+    /// selector that knows a class by its name alone.
+    pub fn is_or_derives_from_named(&self, name: &str) -> bool {
+        let mut current = Some(self);
+        while let Some(type_) = current {
+            if type_.name == name {
+                return true;
+            }
+            current = type_.base;
+        }
+        false
+    }
+
     #[inline]
     pub fn derives_from(&self, identity: &'static TypeIdentity) -> bool {
         let mut current = Some(self);
@@ -177,7 +321,7 @@ impl TypeInfo {
     /// it statically ([`DefaultConstructible`]), or makes its constructor
     /// reachable by reflection with
     /// [`register_constructor`](Self::register_constructor).
-    #[cfg(feature = "type-tables")]
+    #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
     pub const fn with_constructor(mut self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
         self.constructor = constructor;
         self
@@ -185,7 +329,7 @@ impl TypeInfo {
 
     /// Without the tables of types the constructor is not kept; see the
     /// other definition.
-    #[cfg(not(feature = "type-tables"))]
+    #[cfg(not(all(feature = "type-tables", not(ferroui_bounded_reflection))))]
     pub const fn with_constructor(self, constructor: Option<fn() -> Ref<FerroObject>>) -> Self {
         let _ = constructor;
         self
@@ -225,6 +369,20 @@ impl TypeInfo {
     pub const fn with_markup(mut self, markup: Option<&'static MarkupType>) -> Self {
         self.markup = markup;
         self
+    }
+
+    /// States what the change handlers of the class itself do with an inherited value
+    /// ([`ChangeHandlerLayer`]). Set by [`ferro_class!`] for every class, from the
+    /// implementation of its `FerroObjectImpl`.
+    #[doc(hidden)]
+    pub const fn with_change_handler_layer(mut self, layer: ChangeHandlerLayer) -> Self {
+        self.change_handlers = layer;
+        self
+    }
+
+    #[inline]
+    pub(crate) fn change_handler_layer(&self) -> ChangeHandlerLayer {
+        self.change_handlers
     }
 
     /// The class name, without namespace.
@@ -348,21 +506,32 @@ impl TypeInfo {
             T::new_instance().upcast::<FerroObject>()
         }
         let type_ = T::TYPE;
-        if type_.stored_constructor().is_none() {
-            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(construct::<T>);
-        }
+        Self::register_constructor_of(type_, construct::<T>);
         type_
+    }
+
+    /// Makes `constructor` the default constructor of `type_`, as
+    /// [`register_constructor`](Self::register_constructor) does for a class it
+    /// names statically: for a type made at run time (a class another language
+    /// registers through the C ABI), whose constructor is a function of its
+    /// own. Without the tables of types the type carries no constructor, so
+    /// this is what [`create_instance`](Self::create_instance) finds. A type
+    /// that carries one (with the tables), or one registered before, keeps it.
+    pub fn register_constructor_of(type_: &'static TypeInfo, constructor: fn() -> Ref<FerroObject>) {
+        if type_.stored_constructor().is_none() {
+            write_registry().constructors.entry(type_ as *const TypeInfo as usize).or_insert(constructor);
+        }
     }
 
     /// The default constructor the type carries: the declared one with the
     /// tables of types, none without them.
     #[inline]
     fn stored_constructor(&self) -> Option<fn() -> Ref<FerroObject>> {
-        #[cfg(feature = "type-tables")]
+        #[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
         {
             self.constructor
         }
-        #[cfg(not(feature = "type-tables"))]
+        #[cfg(not(all(feature = "type-tables", not(ferroui_bounded_reflection))))]
         {
             None
         }
@@ -469,14 +638,14 @@ impl TypeInfo {
     /// the table reaches is left out of the binary. An application registers
     /// its own types with [`register_all`](Self::register_all), which always
     /// registers.
-    #[cfg(any(feature = "type-tables", test))]
+    #[cfg(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         Self::register_all_tables(types);
     }
 
     /// Trimmed (without `type-tables`): the table is not kept.
-    #[cfg(not(any(feature = "type-tables", test)))]
+    #[cfg(not(any(all(feature = "type-tables", not(ferroui_bounded_reflection)), test)))]
     #[inline(always)]
     pub fn register_table(types: &[&'static TypeInfo]) {
         let _ = types;
@@ -1015,6 +1184,18 @@ impl<T: ObjectType> Ref<T> {
         }
     }
 
+    /// Borrows the existing handle as class `U` if its runtime type derives from `U`.
+    #[inline]
+    pub fn cast_ref<U: ObjectType>(&self) -> Option<&Ref<U>> {
+        if self.is::<U>() {
+            // SAFETY: Ref is transparent over the same Rc for every marker type.
+            // The dynamic class check establishes the target invariant for this borrow.
+            Some(unsafe { &*(self as *const Ref<T> as *const Ref<U>) })
+        } else {
+            None
+        }
+    }
+
     /// Whether the object is of class `U` or a class derived from it.
     #[inline]
     pub fn is<U: ObjectType>(&self) -> bool {
@@ -1274,8 +1455,46 @@ pub fn instantiate<T: ObjectType>(value: T) -> Ref<T> {
 ///
 /// The declaring class must implement every member itself; these are the
 /// base implementations.
+///
+/// A member that describes the implementation of another member is
+/// declared as following it:
+///
+/// ```ignore
+/// fn measure_hold_override(this, constraint: Size) -> Option<MeasureHold>,
+///     follows measure_override else Layoutable::holds_nothing;
+/// ```
+///
+/// Such a member is inherited only together with the member it follows. An
+/// implementation that states what it overrides, and overrides neither of
+/// the two, takes the slot of its base class; one that overrides the
+/// followed member alone gets the function named after `else`, which is
+/// also the default of the member in the `Impl` trait, so an implementation
+/// written as a plain `impl` (which states nothing) never inherits it
+/// either. The function takes what the member takes, with a reference to
+/// the declaring class first.
 #[macro_export]
 macro_rules! ferro_class {
+    // The default of a member in the `Impl` trait: the call of the base
+    // class, or of the fallback of a member that follows another.
+    (@member_default [] [$($parent:tt)*] [$($arguments:tt)*]) => { $($parent)* };
+    (@member_default [$fallback:path] [$($parent:tt)*] [$($arguments:tt)*]) => { $fallback($($arguments)*) };
+
+    // The slot of a member in the table of an implementation: the slot of
+    // the base class where the implementation states it does not override
+    // the member (`$forwards`), else its own function. A member that follows
+    // another takes the slot of the base class only where the followed
+    // member is not overridden either (`$with`), and the fallback otherwise.
+    (@member_slot [] $forwards:expr, $parent:expr, $own:expr) => {
+        if $forwards { $parent } else { $own }
+    };
+    (@member_slot [$with:expr, $fallback:path] $forwards:expr, $parent:expr, $own:expr) => {
+        if $forwards {
+            if $with { $parent } else { $fallback }
+        } else {
+            $own
+        }
+    };
+
     // What the type declares, in the order of a static initialisation:
     // interface casts, properties (field initialisers), static constructor.
     // Inherent items of the type win over the `ClassDefaults` fallbacks.
@@ -1370,7 +1589,8 @@ macro_rules! ferro_class {
                     #[allow(unused_imports)]
                     use $crate::ClassDefaults as _;
                     <$name>::__MARKUP
-                });
+                })
+                .with_change_handler_layer($crate::__change_handler_layer::<$name>());
                 &TYPE
             };
         }
@@ -1427,7 +1647,8 @@ macro_rules! ferro_class {
         $name:ident : $base:ident, virtuals $impl_trait:ident : $parent_impl:path {
             $(
                 $(#[$meta:meta])*
-                fn $method:ident(this $(, $arg:ident : $arg_ty:ty)* $(,)?) $(-> $ret:ty)?;
+                fn $method:ident(this $(, $arg:ident : $arg_ty:ty)* $(,)?) $(-> $ret:ty)?
+                    $(, follows $followed:ident else $fallback:path)?;
             )*
         }
     ) => {
@@ -1475,7 +1696,11 @@ macro_rules! ferro_class {
                     $(#[$meta])*
                     #[allow(unused_variables)]
                     fn $method(this: &Self $(, $arg: $arg_ty)*) $(-> $ret)? {
-                        <Self as [<$impl_trait Ext>]>::[<parent_ $method>](this $(, $arg)*)
+                        $crate::ferro_class!(@member_default
+                            [$($fallback)?]
+                            [<Self as [<$impl_trait Ext>]>::[<parent_ $method>](this $(, $arg)*)]
+                            [$crate::Upcast::<$name>::upcast(this) $(, $arg)*]
+                        )
                     }
                 )*
             }
@@ -1504,19 +1729,26 @@ macro_rules! ferro_class {
                         // A member `T` states it does not override is the
                         // default, which calls this slot of the parent
                         // table: the slot itself is taken.
-                        $method: if $crate::__forwards_to_parent::<T, [<$name VTable>]>(
-                            <T as $impl_trait>::__OVERRIDES,
-                            ::std::stringify!($method),
-                        ) {
+                        $method: $crate::ferro_class!(@member_slot
+                            [$(
+                                $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                                    <T as $impl_trait>::__OVERRIDES,
+                                    ::std::stringify!($followed),
+                                ),
+                                $fallback
+                            )?]
+                            $crate::__forwards_to_parent::<T, [<$name VTable>]>(
+                                <T as $impl_trait>::__OVERRIDES,
+                                ::std::stringify!($method),
+                            ),
                             // SAFETY: the parent of `T` is `$name` or derives
                             // from it (`__forwards_to_parent` checked it), so
                             // its table starts with this one.
-                            unsafe { $crate::__parent_vtable_part::<T, [<$name VTable>]>() }.$method
-                        } else {
+                            unsafe { $crate::__parent_vtable_part::<T, [<$name VTable>]>() }.$method,
                             // SAFETY: this table is only attached to objects
                             // whose most-derived class is `T`.
                             |this $(, $arg)*| T::$method(unsafe { $crate::cast_this::<$name, T>(this) } $(, $arg)*)
-                        },
+                        ),
                     )*
                 };
             }
@@ -1773,11 +2005,15 @@ macro_rules! ferro_impl_classes {
 /// differ from them.
 ///
 /// The block holds functions only, each with its attributes and
-/// documentation, as the members of an `Impl` trait are.
+/// documentation, as the members of an `Impl` trait are. Before them, the block of a
+/// `FerroObjectImpl` may state what its change handlers react to among inherited values
+/// (`inherited_reactions: <InheritedReactions>;`, see
+/// [`InheritedReactions`](crate::InheritedReactions)).
 #[macro_export]
 macro_rules! ferro_overrides {
     (
         impl $trait_:ident for $name:ident {
+            $(inherited_reactions: $reactions:expr;)?
             $(
                 $(#[$meta:meta])*
                 fn $method:ident ( $($params:tt)* ) $(-> $ret:ty)? $body:block
@@ -1787,6 +2023,10 @@ macro_rules! ferro_overrides {
         impl $trait_ for $name {
             const __OVERRIDES: ::std::option::Option<&'static [&'static str]> =
                 ::std::option::Option::Some(&[$(::std::stringify!($method)),*]);
+            $(
+                const __INHERITED_REACTIONS: ::std::option::Option<$crate::InheritedReactions> =
+                    ::std::option::Option::Some($reactions);
+            )?
 
             $(
                 $(#[$meta])*

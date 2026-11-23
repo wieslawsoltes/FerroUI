@@ -68,9 +68,11 @@ fn date_time_format_info_matches() {
             "DayNames" => info.day_names().join("|"),
             "AbbreviatedDayNames" => info.abbreviated_day_names().join("|"),
             "ShortestDayNames" => info.shortest_day_names().join("|"),
-            // The genitive names equal the plain ones in these cultures; they are not modelled.
-            "MonthNames" | "MonthGenitiveNames" => info.month_names().join("|"),
-            "AbbreviatedMonthNames" | "AbbreviatedMonthGenitiveNames" => info.abbreviated_month_names().join("|"),
+            "MonthNames" => info.month_names().join("|"),
+            "AbbreviatedMonthNames" => info.abbreviated_month_names().join("|"),
+            // The genitive names equal the plain ones in these cultures.
+            "MonthGenitiveNames" => info.month_genitive_names().join("|"),
+            "AbbreviatedMonthGenitiveNames" => info.abbreviated_month_genitive_names().join("|"),
             "RFC1123Pattern" => info.rfc1123_pattern().to_owned(),
             "SortableDateTimePattern" => info.sortable_date_time_pattern().to_owned(),
             "UniversalSortableDateTimePattern" => info.universal_sortable_date_time_pattern().to_owned(),

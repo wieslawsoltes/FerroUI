@@ -212,6 +212,60 @@ impl NativeMediaSession for AndroidSession {
         );
         self.check()
     }
+    fn supports_playback_rate(&self) -> bool {
+        true
+    }
+    fn set_playback_rate(&self, rate: f64) -> Result<(), MediaError> {
+        self.check()?;
+        call_void(&self.java, "rate", "(F)V", &[JavaValue::Float(rate as f32)]);
+        Ok(())
+    }
+    fn tracks(&self, kind: MediaTrackKind) -> Vec<MediaTrack> {
+        let Some(list) = call_object(
+            &self.java,
+            "tracks",
+            "(I)Ljava/lang/String;",
+            &[track_kind(kind)],
+        ) else {
+            return Vec::new();
+        };
+        serde_json::from_str::<Vec<serde_json::Value>>(&string_of(&list))
+            .unwrap_or_default()
+            .into_iter()
+            .filter_map(|value| {
+                Some(MediaTrack {
+                    id: value["id"].as_u64()?.try_into().ok()?,
+                    label: value["label"].as_str()?.to_owned(),
+                    selected: value["selected"].as_bool()?,
+                })
+            })
+            .collect()
+    }
+    fn select_track(&self, kind: MediaTrackKind, id: Option<u32>) -> Result<(), MediaError> {
+        self.check()?;
+        let id = id
+            .map(|id| i32::try_from(id))
+            .transpose()
+            .map_err(|_| MediaError::new(MediaErrorKind::InvalidSource, "Invalid track ID"))?
+            .unwrap_or(-1);
+        if call_boolean(
+            &self.java,
+            "selectTrack",
+            "(II)Z",
+            &[track_kind(kind), JavaValue::Int(id)],
+        ) {
+            Ok(())
+        } else {
+            Err(MediaError::new(
+                MediaErrorKind::InvalidSource,
+                "The selected track is unavailable",
+            ))
+        }
+    }
+    fn caption_text(&self) -> Option<String> {
+        let captions = text(&self.java, "captions");
+        (!captions.is_empty()).then_some(captions)
+    }
     fn take_frame(&self) -> Result<Option<FrameLease>, MediaError> {
         self.check()?;
         if self.seek.get() > call_long(&self.java, "completedSeek", "()J", &[]) {
@@ -222,4 +276,11 @@ impl NativeMediaSession for AndroidSession {
             call_int(&self.java, "height", "()I", &[]).max(0) as u32,
         )
     }
+}
+
+fn track_kind(kind: MediaTrackKind) -> JavaValue<'static> {
+    JavaValue::Int(match kind {
+        MediaTrackKind::Audio => 0,
+        MediaTrackKind::Captions => 1,
+    })
 }

@@ -11,10 +11,11 @@ use crate::reactive::{Disposable, IDisposable, Subscription};
 use crate::rendering::composition::server::IServerObject;
 use crate::rendering::{IRenderLoop, IRenderLoopTask};
 use crate::threading::{Dispatcher, DispatcherPriority};
-use crate::utilities::HandlerList;
+use crate::utilities::{HandlerList, ReleaseAtRest};
+use rustc_hash::FxHashSet;
 use crate::{FerroLocator, LocatorExtensions};
 use std::cell::{Cell, RefCell};
-use std::collections::{HashMap, HashSet, VecDeque};
+use std::collections::{HashMap, VecDeque};
 use std::rc::{Rc, Weak};
 use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
 use std::sync::{Arc, Mutex};
@@ -72,7 +73,7 @@ pub struct Compositor {
     clock: CompositorClock,
     next_commit: RefCell<Option<Arc<CompositionBatch>>>,
     object_serialization_queue: RefCell<VecDeque<Rc<dyn ICompositorSerializable>>>,
-    object_serialization_hash_set: RefCell<HashSet<*const ()>>,
+    object_serialization_hash_set: RefCell<FxHashSet<*const ()>>,
     invoke_before_commit_write: RefCell<VecDeque<Box<dyn FnOnce()>>>,
     invoke_before_commit_read: RefCell<VecDeque<Box<dyn FnOnce()>>>,
     dispose_on_next_batch: RefCell<Vec<PendingDisposal>>,
@@ -101,6 +102,9 @@ pub struct Compositor {
     /// The open scoped batches and the batch of the current frame (WinUI
     /// `CompositionScopedBatch` and `CompositionCommitBatch`).
     animation_batches: super::composition_batch::CompositorBatches,
+    /// Whether the compositor is registered to have its buffers released once a burst is over
+    /// (#836).
+    resting: Cell<bool>,
 }
 
 /// The render loop task of a compositor. The loop may tick on any thread;
@@ -194,11 +198,23 @@ impl IRenderLoopTask for RenderThreadLoopTask {
         // The request is read inside the lock: the compositor sets it before
         // it enters the lock to take its handles back, so a frame either
         // ends before that or does not start.
-        let rendered = self
-            .server
-            .try_with(|server| (!self.release_requested.load(Ordering::SeqCst)).then(|| server.render()));
+        let rendered = self.server.try_with(|server| {
+            (!self.release_requested.load(Ordering::SeqCst))
+                .then(|| (server.render(), server.take_late_batch_tick_request()))
+        });
         match rendered {
-            Some(Some(wants_next_tick)) => wants_next_tick,
+            Some(Some((wants_next_tick, late_batch))) => {
+                // A batch came while the tick presented the frame before it:
+                // the batch is drawn now, not a display frame later
+                // (desktop-performance.md, section 9.51). The request made
+                // inside the tick is served right after it.
+                if late_batch {
+                    if let Some(render_loop) = self.render_loop.upgrade().filter(|l| l.runs_in_background()) {
+                        render_loop.request_frame_out_of_turn();
+                    }
+                }
+                wants_next_tick
+            }
             Some(None) => {
                 // The last job of the render thread: the graph, and with it
                 // every render target and the graphics context, is dropped
@@ -419,7 +435,7 @@ impl Compositor {
             clock,
             next_commit: RefCell::new(None),
             object_serialization_queue: RefCell::new(VecDeque::new()),
-            object_serialization_hash_set: RefCell::new(HashSet::new()),
+            object_serialization_hash_set: RefCell::new(FxHashSet::default()),
             invoke_before_commit_write: RefCell::new(VecDeque::new()),
             invoke_before_commit_read: RefCell::new(VecDeque::new()),
             dispose_on_next_batch: RefCell::new(Vec::new()),
@@ -437,6 +453,7 @@ impl Compositor {
             render_context_changed: HandlerList::new(),
             default_easing: Rc::new(SplineEasing::with_key_spline(KeySpline::with_points(0.25, 0.1, 0.25, 1.0))),
             animation_batches: super::composition_batch::CompositorBatches::new(),
+            resting: Cell::new(false),
         });
         COMPOSITORS.with(|compositors| {
             let mut compositors = compositors.borrow_mut();
@@ -530,7 +547,39 @@ impl Compositor {
             !self.is_confined_to_render_thread(),
             "a compositor that is confined to its render thread is not rendered by the thread of the compositor"
         );
-        self.server.with(|server| server.render())
+        self.server.with(|server| {
+            let another_tick = server.render();
+            // A frame a layer holds back is presented here: the caller is
+            // at a synchronous point, and expects what it committed on
+            // screen when this returns (section 9.33 of
+            // desktop-performance.md).
+            if server.has_pending_frames() {
+                server.render()
+            } else {
+                another_tick
+            }
+        })
+    }
+
+    /// Makes the context of the render interface now, on this thread and under the compositor
+    /// lock, where the first frame would make it otherwise. Not from upstream: a backend that
+    /// has work to do as soon as its context exists (the pipelines of a record, compiled on
+    /// threads while the application builds its first screen) is given that head start
+    /// (desktop-performance.md, section 9.83). Returns whether a context exists afterwards;
+    /// nothing is made when the platform graphics are not ready yet or when only the render
+    /// thread may touch the context.
+    pub fn prepare_render_interface(&self) -> bool {
+        if self.is_confined_to_render_thread() {
+            return false;
+        }
+        self.server.with(|server| {
+            let render_interface = server.render_interface();
+            if !render_interface.is_ready() {
+                return false;
+            }
+            render_interface.ensure_valid_backend_context();
+            true
+        })
     }
 
     /// Whether the thread that ticks the render loop renders the frames,
@@ -606,13 +655,24 @@ impl Compositor {
         let next_commit = CompositionBatch::new();
         *self.next_commit.borrow_mut() = Some(next_commit.clone());
         let pending = self.pending_batch.lock().unwrap_or_else(|e| e.into_inner()).clone();
-        match pending {
+        // Upstream holds the request back until the batch before is
+        // processed. Here it is held back until the render thread accepts
+        // that batch, which is the signal the media context starts its next
+        // render pass on: the changes of that pass ask for their commit in
+        // the pass, and the pass commits them. Held back until the batch
+        // was processed, the request reached the scheduler after the pass,
+        // and a second pass, with a second animation frame, was needed to
+        // commit what the first one changed (desktop-performance.md,
+        // section 9.46). The signal is read here, not only followed by a
+        // continuation: the order in which the continuations of a batch run
+        // does not decide which pass commits.
+        match pending.filter(|pending| !pending.accepted().is_completed()) {
             Some(pending) => {
-                // The previous batch has not been processed yet: ask for
-                // the commit once it has been.
+                // The render thread has not taken the previous batch yet:
+                // ask for the commit once it has.
                 let key = self.key;
                 let dispatcher = self.dispatcher.clone();
-                pending.processed().on_completed(move || {
+                pending.accepted().on_completed(move || {
                     dispatcher.post(
                         move || {
                             if let Some(compositor) = find_compositor(key) {
@@ -633,12 +693,45 @@ impl Compositor {
         self.request_composition_batch_commit_async()
     }
 
+    /// Asks for a commit unless one is requested already: what the callers
+    /// that do not need the batch use, since every change of a composition
+    /// object asks (not from upstream: no handle to the batch is taken and
+    /// released per change; desktop-performance.md, section 9.28).
+    #[inline]
+    pub(crate) fn ensure_commit_requested(&self) {
+        self.dispatcher.verify_access();
+        if self.next_commit.borrow().is_none() {
+            self.request_composition_batch_commit_async();
+        }
+    }
+
+    /// After the commit of the first frame of a large tree: what it filled (the queue of the
+    /// objects to serialize, its set, the pooled streams) is released once the burst is over
+    /// (#836, `utilities::resting`); the compositor is registered with the job of its thread the
+    /// first time.
+    fn rest_after_burst(&self) {
+        crate::utilities::rest_after_burst(&self.resting, || {
+            let weak = self.this.clone();
+            move || {
+                let Some(compositor) = weak.upgrade() else { return false };
+                if let Ok(mut queue) = compositor.object_serialization_queue.try_borrow_mut() {
+                    queue.release_at_rest();
+                }
+                if let Ok(mut queued) = compositor.object_serialization_hash_set.try_borrow_mut() {
+                    queued.release_at_rest();
+                }
+                let _ = compositor.batches.release_pool_at_rest();
+                true
+            }
+        });
+    }
+
     /// Serializes the pending changes into a batch and hands it to the
     /// server compositor.
     pub fn commit(&self) -> Arc<CompositionBatch> {
         let result = self.commit_core();
         if !self.invoke_before_commit_write.borrow().is_empty() {
-            self.request_commit_async();
+            self.ensure_commit_requested();
         }
         if !self.after_commit.is_empty() {
             for (_, handler) in self.after_commit.snapshot().iter() {
@@ -695,7 +788,20 @@ impl Compositor {
                 serialized.push(object);
             }
             let _ = objects_written;
-            self.object_serialization_hash_set.borrow_mut().clear();
+            {
+                // Both are empty here. They keep their storage for the next
+                // commit, up to what an emptied buffer keeps: the commit of
+                // the first frame of a large tree serializes every object of
+                // it.
+                let mut burst = self.object_serialization_queue.borrow_mut().release_burst();
+                let mut queued = self.object_serialization_hash_set.borrow_mut();
+                queued.clear();
+                burst |= queued.release_burst();
+                drop(queued);
+                if burst {
+                    self.rest_after_burst();
+                }
+            }
             drop(serialized);
 
             disposed = std::mem::take(&mut *self.dispose_on_next_batch.borrow_mut());
@@ -735,12 +841,21 @@ impl Compositor {
             }
         }
 
+        crate::perf_count!(CompositionBatchesCommitted);
+        crate::diagnostics::perf_counters::add(
+            crate::diagnostics::perf_counters::PerfCounter::CompositionBatchObjects,
+            changes.objects.len() as u64,
+        );
+        crate::diagnostics::perf_counters::add(
+            crate::diagnostics::perf_counters::PerfCounter::CompositionBatchValueBytes,
+            changes.structs.len() as u64,
+        );
         self.enqueue_batch(CommittedBatch { batch: commit.clone(), changes, committed_at: self.clock_elapsed() });
 
         *self.pending_batch.lock().unwrap_or_else(|e| e.into_inner()) = Some(commit.clone());
         let pending_batch = self.pending_batch.clone();
         let sequence_id = commit.sequence_id();
-        commit.processed().on_completed(move || {
+        commit.accepted().on_completed(move || {
             let mut pending = pending_batch.lock().unwrap_or_else(|e| e.into_inner());
             if pending.as_ref().is_some_and(|p| p.sequence_id() == sequence_id) {
                 *pending = None;
@@ -790,8 +905,15 @@ impl Compositor {
     }
 
     fn enqueue_batch(&self, batch: CommittedBatch) {
-        self.batches.enqueue(batch);
+        let late = self.batches.enqueue(batch);
         self.render_loop.wakeup();
+        // The tick of this display frame has come and gone with nothing to
+        // draw: a render thread draws the batch now, not a display frame
+        // later (desktop-performance.md, section 9.33). One tick out of turn
+        // at most per such tick, so no display frame gets a second frame.
+        if late && self.render_thread && self.render_loop.runs_in_background() {
+            self.render_loop.request_frame_out_of_turn();
+        }
     }
 
     /// Disposes a server object in a batch of its own, outside of the
@@ -865,7 +987,7 @@ impl Compositor {
         };
         self.server_object_id_in_use.borrow_mut()[id.index()] = true;
         self.pending_creations.borrow_mut().push((id, Box::new(factory)));
-        self.request_commit_async();
+        self.ensure_commit_requested();
         id
     }
 
@@ -876,14 +998,14 @@ impl Compositor {
         if self.object_serialization_hash_set.borrow_mut().insert(key) {
             self.object_serialization_queue.borrow_mut().push_back(composition_object);
         }
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// Disposes a server object with the next batch, and releases it: the
     /// server compositor drops it and its id can be reused.
     pub fn dispose_on_next_batch(&self, obj: ServerObjectId) {
         if self.queue_disposal(obj, true, true) {
-            self.request_commit_async();
+            self.ensure_commit_requested();
         }
     }
 
@@ -895,7 +1017,7 @@ impl Compositor {
     /// server object.
     pub(crate) fn dispose_and_keep_on_next_batch(&self, obj: ServerObjectId) {
         if self.queue_disposal(obj, true, false) {
-            self.request_commit_async();
+            self.ensure_commit_requested();
         }
     }
 
@@ -955,7 +1077,7 @@ impl Compositor {
     pub fn request_composition_update(&self, action: impl FnOnce() + 'static) {
         self.dispatcher.verify_access();
         self.invoke_before_commit_write.borrow_mut().push_back(Box::new(action));
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// Posts a job that runs on the render thread with the next batch:
@@ -969,7 +1091,7 @@ impl Compositor {
             &self.pending_server_compositor_jobs
         };
         list.borrow_mut().push(PendingServerJob::Job(Box::new(job)));
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// Posts a job that runs on the render thread with the next batch and
@@ -990,7 +1112,7 @@ impl Compositor {
             &self.pending_server_compositor_jobs
         };
         list.borrow_mut().push(PendingServerJob::ObjectJob(target, Box::new(job)));
-        self.request_commit_async();
+        self.ensure_commit_requested();
     }
 
     /// [`invoke_server_job_async`](Self::invoke_server_job_async) with a job
@@ -1469,3 +1591,7 @@ impl<T: Send + 'static> std::future::Future for ServerJobResult<T> {
         std::task::Poll::Pending
     }
 }
+
+#[cfg(test)]
+#[path = "pending_disposals_tests.rs"]
+mod pending_disposals_tests;

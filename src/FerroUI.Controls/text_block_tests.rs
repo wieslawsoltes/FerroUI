@@ -268,6 +268,174 @@ fn a_layout_that_left_no_line_out_is_kept_for_a_taller_height() {
     assert_eq!(text_layout.text_lines().len(), block.text_layout().text_lines().len());
 }
 
+fn line_ranges(layout: &ferroui_base::media::text_formatting::TextLayout) -> Vec<(i32, i32)> {
+    layout.text_lines().iter().map(|line| (line.first_text_source_index(), line.length())).collect()
+}
+
+/// Not in the reference tests (desktop-performance.md section 9.27): trimming and a line limit
+/// that changed nothing do not stop a wrapped layout from being kept inside its width hold. A
+/// text measured at an unrounded width and arranged at the rounded one is laid out once.
+#[test]
+fn a_trimmed_limited_layout_that_left_nothing_out_is_kept_at_a_width_it_holds() {
+    let _scope = test_scope();
+    let make = || {
+        let block = text_block("Lorem ipsum dolor sit amet elit");
+        block.set_text_wrapping(TextWrapping::Wrap);
+        block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        block.set_max_lines(8);
+        block
+    };
+    let block = make();
+
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(text_layout.text_lines().len() > 1);
+    assert!(!text_layout.has_collapsed_lines() && !text_layout.is_truncated_by_max_lines());
+    assert!(text_layout.width_hold().is_some());
+    let hold = <TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(119.763, f64::INFINITY))
+        .expect("a measure hold");
+    assert!(hold.contains(Size::new(120.0, f64::INFINITY)));
+
+    for width in [120.0, 119.5, 121.25] {
+        block.arrange(Rect::from_size(Size::new(width, block.desired_size().height)));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept when arranged at {width}");
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept when measured at {width}");
+        let fresh = make();
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(line_ranges(&fresh.text_layout()), line_ranges(&text_layout), "same lines at {width}");
+        assert_eq!(fresh.desired_size(), block.desired_size(), "same size at {width}");
+    }
+}
+
+/// Not in the reference tests (section 9.27): a layout that left text out for the line limit has
+/// no width hold, with or without trimming, and is made again for another width.
+#[test]
+fn a_layout_that_left_text_out_for_the_line_limit_is_created_again() {
+    let _scope = test_scope();
+    for trimming in [<dyn TextTrimming>::character_ellipsis(), <dyn TextTrimming>::none()] {
+        let block = text_block("Lorem ipsum dolor sit amet elit");
+        block.set_text_wrapping(TextWrapping::Wrap);
+        block.set_text_trimming(trimming);
+        block.set_max_lines(1);
+
+        block.measure(Size::new(119.763, f64::INFINITY));
+        let text_layout = block.text_layout();
+        assert_eq!(1, text_layout.text_lines().len());
+        assert!(text_layout.is_truncated_by_max_lines());
+        assert_eq!(None, text_layout.width_hold());
+
+        block.measure(Size::new(121.25, f64::INFINITY));
+        assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+    }
+
+    // A line limit the text reaches without leaving anything out is no truncation.
+    let block = text_block("Lorem ipsum dolor sit amet elit");
+    block.set_text_wrapping(TextWrapping::Wrap);
+    block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    block.set_max_lines(2);
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert_eq!(2, text_layout.text_lines().len());
+    assert!(!text_layout.is_truncated_by_max_lines() && !text_layout.has_collapsed_lines());
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(Rc::ptr_eq(&text_layout, &block.text_layout()));
+}
+
+/// Not in the reference tests (section 9.27): text that does not wrap and that trimming left
+/// whole has the same line at any width it fits; a trimmed one is made again.
+#[test]
+fn an_unwrapped_layout_that_was_not_trimmed_is_kept_at_any_width_it_fits() {
+    let _scope = test_scope();
+    let make = |text: &str| {
+        let block = text_block(text);
+        block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        block.set_max_lines(1);
+        block
+    };
+
+    let block = make("Hello world");
+    block.measure(Size::new(99.613, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(!text_layout.has_collapsed_lines());
+    let text_width = text_layout.width_including_trailing_whitespace();
+    let hold = <TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(99.613, f64::INFINITY))
+        .expect("a measure hold");
+    assert!(hold.contains(Size::new(text_width + 0.5, f64::INFINITY)) && hold.contains(Size::new(5000.0, f64::INFINITY)));
+    assert!(!hold.contains(Size::new(text_width - 1.0, f64::INFINITY)));
+    for width in [99.5, 150.0, text_width + 0.5, f64::INFINITY] {
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept at {width}");
+        let fresh = make("Hello world");
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(line_ranges(&fresh.text_layout()), line_ranges(&text_layout));
+        assert!(!fresh.text_layout().has_collapsed_lines());
+        assert_eq!(fresh.desired_size(), block.desired_size());
+    }
+    // Narrower than the text: it is trimmed, a new layout.
+    block.measure(Size::new(text_width - 10.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+    assert!(block.text_layout().has_collapsed_lines());
+
+    // A trimmed layout is made again for a wider width: more of the text fits.
+    let block = make("Lorem ipsum dolor sit amet elit");
+    block.measure(Size::new(99.613, f64::INFINITY));
+    let trimmed = block.text_layout();
+    assert!(trimmed.has_collapsed_lines());
+    assert!(<TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(99.613, f64::INFINITY))
+        .is_none_or(|hold| !hold.contains(Size::new(120.0, f64::INFINITY))));
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&trimmed, &block.text_layout()));
+}
+
+/// Not in the reference tests (section 9.27): inlines without a control among them are kept
+/// the way a text is; with a control they are laid out again for every constraint.
+#[test]
+fn inlines_without_a_control_are_kept_the_way_a_text_is() {
+    let _scope = test_scope();
+    let make = |with_control: bool| {
+        let block = TextBlock::new();
+        block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+        block.set_max_lines(1);
+        let inlines = block.inlines().unwrap();
+        inlines.add(Run::with_text(Some("by ")));
+        inlines.add(Run::with_text(Some("author")));
+        inlines.add(Run::with_text(Some(" - ")));
+        inlines.add(Run::with_text(Some("tag")));
+        if with_control {
+            inlines.add(InlineUIContainer::with_child(Border::new()));
+        }
+        block
+    };
+
+    let block = make(false);
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(!text_layout.has_collapsed_lines());
+    for width in [120.0, 119.5, 200.0] {
+        block.measure(Size::new(width, f64::INFINITY));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept at {width}");
+        block.arrange(Rect::from_size(Size::new(width, block.desired_size().height)));
+        assert!(Rc::ptr_eq(&text_layout, &block.text_layout()), "kept when arranged at {width}");
+        let fresh = make(false);
+        fresh.measure(Size::new(width, f64::INFINITY));
+        assert_eq!(line_ranges(&fresh.text_layout()), line_ranges(&text_layout));
+        assert_eq!(fresh.desired_size(), block.desired_size());
+    }
+
+    // A changed inline makes new runs and a new layout.
+    block.inlines().unwrap().add(Run::with_text(Some("!")));
+    block.measure(Size::new(200.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+
+    let block = make(true);
+    block.measure(Size::new(119.763, f64::INFINITY));
+    let text_layout = block.text_layout();
+    assert!(<TextBlock as ferroui_base::layout::LayoutableImpl>::measure_hold_override(&block, Size::new(119.763, f64::INFINITY)).is_none());
+    block.measure(Size::new(120.0, f64::INFINITY));
+    assert!(!Rc::ptr_eq(&text_layout, &block.text_layout()));
+}
+
 /// Not in the reference tests: arranging at the measured constraint keeps
 /// the layout created by the measure pass.
 #[test]
@@ -1094,6 +1262,27 @@ const LONG_LOREM_TEXT: &str = concat!(
 const LONG_ARABIC_TEXT: &str =
     "مرحبا بكم في اختبار التخطيط للنصوص الطويلة التي تلتف عبر عدة أسطر للتحقق من سلوك علامة الحذف عند الاقتصاص.";
 
+/// Not in the reference: the collection of inlines is made by the first read (section 9.21 of
+/// desktop-performance.md), and that read invalidates nothing. A tool that lists the properties
+/// of a text block from a render read it there, and the invalidation it caused was one in the
+/// render pass.
+#[test]
+fn the_first_read_of_the_inlines_invalidates_nothing() {
+    let _scope = test_scope();
+    let target = text_block("Hello");
+    target.measure(infinity());
+    target.arrange(Rect::from_size(target.desired_size()));
+    assert!(target.is_measure_valid() && target.is_arrange_valid());
+
+    let inlines = target.inlines().expect("the collection is made by the read");
+
+    assert!(target.is_measure_valid() && target.is_arrange_valid());
+    assert_eq!(inlines.count(), 0);
+    // The collection is connected all the same: what is added to it is laid out.
+    inlines.add(Run::with_text(Some("World")));
+    assert!(!target.is_measure_valid());
+}
+
 #[test]
 fn should_shape_inlines_when_text_layout_is_created_before_measure() {
     let _scope = test_scope();
@@ -1517,4 +1706,238 @@ fn a_kept_layouts_run_properties_follow_the_font_size() {
     // A new constraint alone keeps the properties: the layout has the doubled size still.
     block.measure(Size::new(180.0, 100.0));
     assert_eq!(large, block.text_layout().height());
+}
+
+#[test]
+fn inherited_values_reach_through_every_owner_and_leave_with_their_holder() {
+    // The inheriting font size is held by a panel through `TextElement`'s property and read by a
+    // text block through its own owner of the same property; once the panel is gone, nothing
+    // holds a value and the default is read again.
+    let _app = crate::testing::UnitTestApplication::start(crate::testing::TestServices::styled_window());
+    let default_size = TextBlock::new().font_size();
+    let reader = TextBlock::new();
+    {
+        let panel = crate::StackPanel::new();
+        crate::documents::TextElement::set_font_size_on(&panel, default_size + 7.0);
+        panel.children().add(&reader);
+        assert_eq!(default_size + 7.0, reader.font_size());
+        panel.children().clear();
+    }
+    assert_eq!(default_size, reader.font_size());
+    let other = TextBlock::new();
+    assert_eq!(default_size, other.font_size());
+}
+
+/// Not in the reference tests: text blocks that show the same plain text the same way have one
+/// layout (desktop-performance.md, section 9.29).
+#[test]
+fn text_blocks_that_show_the_same_text_the_same_way_share_a_layout() {
+    let _scope = test_scope();
+    let first = text_block("12.34");
+    let second = text_block("12.34");
+
+    first.measure(Size::new(200.0, 100.0));
+    second.measure(Size::new(200.0, 100.0));
+
+    let layout = first.text_layout();
+    assert!(layout.is_shared());
+    assert!(Rc::ptr_eq(&layout, &second.text_layout()));
+
+    // Another text, size, brush object or constraint is another layout.
+    let other_text = text_block("12.35");
+    other_text.measure(Size::new(200.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_text.text_layout()));
+
+    let other_size = text_block("12.34");
+    other_size.set_font_size(other_size.font_size() + 1.0);
+    other_size.measure(Size::new(200.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_size.text_layout()));
+
+    let other_brush = text_block("12.34");
+    other_brush.set_foreground(Some(Brushes::red()));
+    other_brush.measure(Size::new(200.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_brush.text_layout()));
+
+    let other_constraint = text_block("12.34");
+    other_constraint.measure(Size::new(201.0, 100.0));
+    assert!(!Rc::ptr_eq(&layout, &other_constraint.text_layout()));
+
+    // And the brush a block gets later is the one its text is drawn with.
+    second.set_foreground(Some(Brushes::red()));
+    second.measure(Size::new(200.0, 100.0));
+    assert!(Rc::ptr_eq(&other_brush.text_layout(), &second.text_layout()));
+    assert!(Rc::ptr_eq(&layout, &first.text_layout()));
+}
+
+/// Not in the reference tests: a text that comes back finds the layout it had
+/// (desktop-performance.md, section 9.29).
+#[test]
+fn a_text_that_comes_back_has_the_layout_it_had() {
+    let _scope = test_scope();
+    let block = text_block("12.34");
+    block.measure(Size::new(200.0, 100.0));
+    let layout = block.text_layout();
+    let width = layout.width();
+
+    block.set_text(Some("9.5"));
+    block.measure(Size::new(200.0, 100.0));
+    let other = block.text_layout();
+    assert!(!Rc::ptr_eq(&layout, &other));
+    assert_eq!(3.0 * 6.0, other.width());
+    assert_eq!("9.5", other.text_lines()[0].text_runs()[0].text().to_string_lossy());
+
+    block.set_text(Some("12.34"));
+    block.measure(Size::new(200.0, 100.0));
+    assert!(Rc::ptr_eq(&layout, &block.text_layout()));
+    assert_eq!(width, block.text_layout().width());
+    assert_eq!(5.0 * 6.0, block.desired_size().width);
+}
+
+/// Not in the reference tests: a block that lets a shared layout go leaves it whole for the
+/// blocks that still show it (desktop-performance.md, section 9.29).
+#[test]
+fn a_shared_layout_outlives_a_block_that_lets_it_go() {
+    let _scope = test_scope();
+    let panel = StackPanel::new();
+    let first = text_block("Hello World");
+    let second = text_block("Hello World");
+    panel.children().add(&first);
+    panel.children().add(&second);
+    let root = TestRoot::with_child(panel.clone());
+
+    root.measure(infinity());
+    root.arrange(Rect::from_size(root.desired_size()));
+
+    let layout = second.text_layout();
+    assert!(Rc::ptr_eq(&first.text_layout(), &layout));
+
+    panel.children().remove(&first);
+    assert!(!first.has_text_layout());
+    assert!(second.has_text_layout());
+
+    first.set_text(Some("Other"));
+
+    assert!(Rc::ptr_eq(&layout, &second.text_layout()));
+    assert_eq!("Hello World", layout.text_lines()[0].text_runs()[0].text().to_string_lossy());
+    // The position of a character is read from the shaped runs.
+    assert_eq!(5.0 * 6.0, layout.hit_test_text_position(5).x);
+}
+
+/// Not in the reference tests: a text with inlines, a decorated text and the text blocks that
+/// make their own layout keep a layout of their own (desktop-performance.md, section 9.29).
+#[test]
+fn a_layout_made_of_more_than_a_plain_text_is_not_shared() {
+    let _scope = test_scope();
+
+    let decorated = text_block("Hello World");
+    decorated.set_text_decorations(Some(TextDecorations::underline()));
+    decorated.measure(Size::new(200.0, 100.0));
+    assert!(!decorated.text_layout().is_shared());
+
+    let with_inlines = TextBlock::new();
+    with_inlines.set_inlines(Some(inlines_of([Run::with_text(Some("Hello World")).upcast()])));
+    with_inlines.measure(Size::new(200.0, 100.0));
+    assert!(!with_inlines.text_layout().is_shared());
+
+    let selectable = crate::SelectableTextBlock::new();
+    selectable.set_text(Some("Hello World"));
+    selectable.measure(Size::new(200.0, 100.0));
+    assert!(!selectable.text_layout().is_shared());
+}
+
+/// Section 9.87: a text block that is given another size and keeps its layout is not drawn
+/// again; one that has a background, that is lower than its text, or that gets a new layout is.
+#[test]
+fn a_text_block_that_is_resized_and_keeps_its_layout_is_not_drawn_again() {
+    let _scope = test_scope();
+    let block = text_block("Hello World");
+    let filled = text_block("Hello World");
+    filled.set_background(Some(Brushes::white()));
+    let wrapped = text_block("Hello World, and some more words to wrap");
+    wrapped.set_text_wrapping(TextWrapping::Wrap);
+    let stack = StackPanel::new();
+    for child in [&block, &filled, &wrapped] {
+        stack.children().add(child);
+    }
+    let host = Border::new();
+    host.set_child(&stack);
+    let root = TestRoot::with_child(&host);
+    let renderer = Rc::new(crate::test_support::MarkingRenderer::default());
+    root.set_renderer(renderer.clone());
+    host.set_width(400.0);
+    root.execute_initial_layout_pass();
+    let layout = |width: f64| {
+        host.set_width(width);
+        root.layout_manager().execute_layout_pass();
+    };
+    assert_eq!(block.bounds().width, 400.0);
+    for child in [&block, &filled, &wrapped] {
+        renderer.take(child);
+    }
+    let layout_of = |child: &Ref<TextBlock>| child.text_layout();
+    let (block_layout, wrapped_layout) = (layout_of(&block), layout_of(&wrapped));
+
+    // Narrower, and every text still fits its line: the blocks are as wide as the stack.
+    layout(360.0);
+    assert_eq!(block.bounds().width, 360.0);
+    assert!(Rc::ptr_eq(&block_layout, &layout_of(&block)));
+    assert_eq!(renderer.take(&block), (0, 1), "a new size alone: its properties, not its drawing");
+    assert_eq!(renderer.take(&filled).0, 1, "a background is as large as the block");
+    assert!(Rc::ptr_eq(&wrapped_layout, &layout_of(&wrapped)));
+    assert_eq!(renderer.take(&wrapped), (0, 1));
+
+    // Narrow enough for the wrapped text to break another way: a new layout is a new drawing.
+    layout(120.0);
+    assert!(!Rc::ptr_eq(&wrapped_layout, &layout_of(&wrapped)));
+    assert!(renderer.take(&wrapped).0 >= 1);
+    assert_eq!(renderer.take(&block), (0, 1));
+
+    // Lower than its text, the vertical alignment moves the text: drawn again.
+    block.set_vertical_alignment(VerticalAlignment::Center);
+    renderer.take(&block);
+    block.set_height(6.0);
+    root.layout_manager().execute_layout_pass();
+    assert!(block.bounds().height < block.text_layout().height());
+    assert!(renderer.take(&block).0 >= 1);
+}
+
+
+/// Not in the reference tests: text blocks of the same typeface, size and foreground brush share
+/// their default run properties; another size, another brush (even of the same colour) or
+/// decorations make properties of their own (desktop-performance.md, the run properties of #811).
+#[test]
+fn text_blocks_of_the_same_font_and_brush_share_their_run_properties() {
+    let _scope = test_scope();
+    let same = |a: &Rc<dyn ferroui_base::media::text_formatting::TextRunProperties>,
+                b: &Rc<dyn ferroui_base::media::text_formatting::TextRunProperties>| Rc::ptr_eq(a, b);
+    let (first, second) = (text_block("first"), text_block("second"));
+    let brush = Brushes::red();
+    first.set_foreground(Some(brush.clone()));
+    second.set_foreground(Some(brush.clone()));
+    assert!(same(&first.default_run_properties(), &second.default_run_properties()));
+
+    let larger = text_block("larger");
+    larger.set_foreground(Some(brush.clone()));
+    larger.set_font_size(first.font_size() * 2.0);
+    assert!(!same(&first.default_run_properties(), &larger.default_run_properties()));
+
+    // An equal brush that is another object: the text of each block follows its own brush.
+    let other_brush = text_block("other brush");
+    let red = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(ferroui_base::media::Colors::RED);
+    other_brush.set_foreground(Some(Rc::new(red)));
+    assert!(!same(&first.default_run_properties(), &other_brush.default_run_properties()));
+
+    let decorated = text_block("decorated");
+    decorated.set_foreground(Some(brush.clone()));
+    decorated.set_text_decorations(Some(TextDecorations::underline()));
+    let decorated_again = text_block("decorated again");
+    decorated_again.set_foreground(Some(brush));
+    decorated_again.set_text_decorations(Some(TextDecorations::underline()));
+    assert!(!same(&decorated.default_run_properties(), &decorated_again.default_run_properties()));
+
+    // A property they are made of changes: the block makes or finds others, the other keeps its own.
+    let before = second.default_run_properties();
+    second.set_font_size(first.font_size() * 2.0);
+    assert!(same(&second.default_run_properties(), &larger.default_run_properties()));
+    assert!(same(&first.default_run_properties(), &before));
 }

@@ -8,7 +8,9 @@ use ferroui_media::{frames::*, MediaError, MediaErrorKind};
 use ferroui_media_camera::*;
 #[cfg(feature = "controls")]
 pub use ferroui_media_linux::NativeGlTextureImporter;
-use ferroui_media_linux::{admitted_caps, poll_native, LinuxFrameStream, NativeSession};
+use ferroui_media_linux::{
+    admitted_caps, poll_native, LinuxFrameStream, NativeRecording, NativeSession,
+};
 use ferroui_media_opengl::NativeGlFrameProducer;
 use native::PortalAccess;
 use std::{
@@ -260,6 +262,28 @@ impl Drop for PhotoSlot {
     }
 }
 impl NativeCameraSession for Camera {
+    fn supports_video_recording(&self) -> bool {
+        self.stream
+            .borrow()
+            .as_ref()
+            .is_some_and(|s| s.native.supports_recording())
+    }
+
+    fn start_recording(&self) -> CameraFuture<Rc<dyn NativeCameraRecording>> {
+        let recording = self
+            .stream
+            .borrow()
+            .as_ref()
+            .ok_or_else(|| error(CameraErrorKind::Cancelled, "Camera stopped"))
+            .and_then(|s| s.native.record().map_err(native));
+        Box::pin(async move {
+            let recording = Rc::new(recording?);
+            let poll = recording.clone();
+            poll_native(move || poll.started()).await.map_err(native)?;
+            Ok(Rc::new(LinuxCameraRecording(recording)) as Rc<dyn NativeCameraRecording>)
+        })
+    }
+
     fn settings(&self) -> CameraSettings {
         let mut settings = self.settings.clone();
         if let Some(s) = self
@@ -378,5 +402,29 @@ impl NativeCameraSession for Camera {
 impl Drop for Camera {
     fn drop(&mut self) {
         self.stream.get_mut().take();
+    }
+}
+
+struct LinuxCameraRecording(Rc<NativeRecording>);
+impl NativeCameraRecording for LinuxCameraRecording {
+    fn finish(&self) -> CameraFuture<CameraVideo> {
+        self.0.finish();
+        let recording = self.0.clone();
+        Box::pin(async move {
+            let output = poll_native(move || recording.encoded())
+                .await
+                .map_err(native)?;
+            Ok(CameraVideo {
+                encoded: output.bytes,
+                content_type: "video/mp4".into(),
+                width: output.width,
+                height: output.height,
+                duration: output.duration,
+            })
+        })
+    }
+
+    fn cancel(&self) {
+        self.0.cancel();
     }
 }

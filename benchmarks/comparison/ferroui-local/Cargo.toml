@@ -1,0 +1,53 @@
+# The FerroUI application of the framework comparison (`../upstream`, a submodule), built from the
+# FerroUI sources of this checkout instead of the published crates.
+#
+# The sources are the comparison's own, unchanged: the program is
+# `upstream/benchmarks/compose-vs-cranpose/ferro-app/src/main.rs` and its data crate is
+# `upstream/benchmarks/compose-vs-cranpose/perf-data`. Only where FerroUI comes from differs:
+# the comparison's own manifest (`ferro-app/Cargo.toml`) names the published version, this one
+# names the crates of this checkout. `../compare.py` builds both and runs the comparison's
+# harness on each (see `../README.md`).
+[package]
+name = "perf-compare-ferro-local"
+version = "0.0.0"
+edition = "2024"
+rust-version = "1.89"
+description = "The FerroUI application of the framework comparison, built from the FerroUI sources of this checkout"
+license = "MIT"
+repository = "https://github.com/wieslawsoltes/FerroUI"
+publish = false
+autobins = false
+autotests = false
+autobenches = false
+autoexamples = false
+
+[[bin]]
+name = "perf-compare-ferro-local"
+path = "../upstream/benchmarks/compose-vs-cranpose/ferro-app/src/main.rs"
+test = false
+
+# What the comparison's manifest depends on, by path.
+[dependencies]
+ferroui-view = { path = "../../../src/FerroUI.View", features = ["desktop"] }
+ferroui-base = { path = "../../../src/FerroUI.Base" }
+ferroui-controls = { path = "../../../src/FerroUI.Controls" }
+ferroui-themes-simple = { path = "../../../src/FerroUI.Themes.Simple" }
+log = "0.4"
+perf-data = { path = "../upstream/benchmarks/compose-vs-cranpose/perf-data" }
+url = "2.5.8"
+gif = "0.14.2"
+
+# A workspace of its own, as the comparison's application is: the root manifest lists this
+# directory in its `exclude`. No lock file is committed: the first build writes it. Skia is the
+# published binding, as an application built from the published crates has it, so the two builds
+# differ in FerroUI alone.
+[workspace]
+
+# The profile of the comparison's manifest.
+[profile.release]
+opt-level = 3
+lto = "fat"
+codegen-units = 1
+panic = "abort"
+strip = true
+debug = 0

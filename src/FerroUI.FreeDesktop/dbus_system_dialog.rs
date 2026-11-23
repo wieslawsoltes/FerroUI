@@ -16,26 +16,26 @@ use std::collections::HashMap;
 use std::rc::Rc;
 use std::sync::atomic::{AtomicU64, Ordering};
 use zbus::proxy::CacheProperties;
-use zbus::zvariant::{OwnedObjectPath, OwnedValue, Value};
+use zbus::{OwnedObjectPath, OwnedVariant, Variant};
 use zbus::Connection;
 
 /// `org.freedesktop.portal.FileChooser` (the proxy the reference
 /// generates from `DBusXml/org.freedesktop.portal.FileChooser.xml`), with
 /// the members that are called.
-#[zbus::proxy(interface = "org.freedesktop.portal.FileChooser", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.freedesktop.portal.FileChooser", assume_defaults = false)]
 pub trait FileChooser {
     fn open_file(
         &self,
         parent_window: &str,
         title: &str,
-        options: HashMap<&str, Value<'_>>,
+        options: HashMap<&str, Variant<'_>>,
     ) -> zbus::Result<OwnedObjectPath>;
 
     fn save_file(
         &self,
         parent_window: &str,
         title: &str,
-        options: HashMap<&str, Value<'_>>,
+        options: HashMap<&str, Variant<'_>>,
     ) -> zbus::Result<OwnedObjectPath>;
 
     #[zbus(property, name = "version")]
@@ -44,10 +44,10 @@ pub trait FileChooser {
 
 /// `org.freedesktop.portal.Request`: the object a portal call answers
 /// through.
-#[zbus::proxy(interface = "org.freedesktop.portal.Request", gen_blocking = false, assume_defaults = false)]
+#[zbus::proxy(interface = "org.freedesktop.portal.Request", assume_defaults = false)]
 pub trait Request {
     #[zbus(signal)]
-    fn response(&self, response: u32, results: HashMap<String, OwnedValue>) -> zbus::Result<()>;
+    fn response(&self, response: u32, results: HashMap<String, OwnedVariant>) -> zbus::Result<()>;
 }
 
 const PORTAL_NAME: &str = "org.freedesktop.portal.Desktop";
@@ -99,30 +99,30 @@ pub(crate) fn try_parse_filters(
 }
 
 /// The filter the user chose, from the results of a response.
-pub(crate) fn parse_current_filter(value: &Value<'_>) -> Option<PortalFilter> {
-    fn unwrap<'a, 'v>(mut value: &'a Value<'v>) -> &'a Value<'v> {
-        while let Value::Value(inner) = value {
+pub(crate) fn parse_current_filter(value: &Variant<'_>) -> Option<PortalFilter> {
+    fn unwrap<'a, 'v>(mut value: &'a Variant<'v>) -> &'a Variant<'v> {
+        while let Variant::Variant(inner) = value {
             value = inner;
         }
         value
     }
 
-    let Value::Structure(filter) = unwrap(value) else {
+    let Variant::Structure(filter) = unwrap(value) else {
         return None;
     };
-    let Some(Value::Str(name)) = filter.fields().first().map(unwrap) else {
+    let Some(Variant::Str(name)) = filter.fields().first().map(unwrap) else {
         return None;
     };
-    let Some(Value::Array(types)) = filter.fields().get(1).map(unwrap) else {
+    let Some(Variant::Array(types)) = filter.fields().get(1).map(unwrap) else {
         return None;
     };
     let mut extensions = Vec::new();
     for t in types.iter() {
-        let Value::Structure(t) = unwrap(t) else {
+        let Variant::Structure(t) = unwrap(t) else {
             return None;
         };
         match (t.fields().first().map(unwrap), t.fields().get(1).map(unwrap)) {
-            (Some(Value::U32(style)), Some(Value::Str(pattern))) => extensions.push((*style, pattern.as_str().to_string())),
+            (Some(Variant::U32(style)), Some(Variant::Str(pattern))) => extensions.push((*style, pattern.as_str().to_string())),
             _ => return None,
         }
     }
@@ -164,11 +164,11 @@ pub(crate) fn selected_file_type(
 
 /// The local paths of the `uris` of the results of a response; none when
 /// the results have none (the dialog was canceled).
-pub(crate) fn paths_of_results(results: &HashMap<String, OwnedValue>) -> Vec<String> {
+pub(crate) fn paths_of_results(results: &HashMap<String, OwnedVariant>) -> Vec<String> {
     let Some(uris) = results.get("uris") else {
         return Vec::new();
     };
-    let Ok(uris) = <Vec<String>>::try_from(uris.try_clone().unwrap_or_else(|_| OwnedValue::from(0u32))) else {
+    let Ok(uris) = <Vec<String>>::try_from(uris.try_clone().unwrap_or_else(|_| OwnedVariant::from(0u32))) else {
         return Vec::new();
     };
     uris.iter().filter_map(|uri| url::Url::parse(uri).ok()).map(|url| StorageProviderHelpers::local_path(&url)).collect()
@@ -237,9 +237,7 @@ impl DBusSystemDialog {
     ) -> Option<Rc<DBusSystemDialog>> {
         let dbus_file_chooser = FileChooserProxy::builder(&conn)
             .destination(PORTAL_NAME)
-            .ok()?
             .path(PORTAL_PATH)
-            .ok()?
             .cache_properties(CacheProperties::No)
             .build()
             .await
@@ -284,16 +282,14 @@ impl DBusSystemDialog {
         show: Show,
         parent_window: String,
         title: String,
-        mut chooser_options: HashMap<&'static str, Value<'static>>,
-    ) -> std::io::Result<HashMap<String, OwnedValue>> {
+        mut chooser_options: HashMap<&'static str, Variant<'static>>,
+    ) -> std::io::Result<HashMap<String, OwnedVariant>> {
         let (expected_path, token) = Self::create_request_token(&connection);
-        chooser_options.insert("handle_token", Value::from(token));
+        chooser_options.insert("handle_token", Variant::from(token));
 
         let request = RequestProxy::builder(&connection)
             .destination(PORTAL_NAME)
-            .map_err(dbus_failure)?
             .path(expected_path.clone())
-            .map_err(dbus_failure)?
             .cache_properties(CacheProperties::No)
             .build()
             .await
@@ -339,23 +335,23 @@ impl DBusSystemDialog {
         };
         let parent_window = parent_lease.as_ref().map(|lease| lease.handle()).unwrap_or_default();
 
-        let mut chooser_options: HashMap<&'static str, Value<'static>> = HashMap::new();
+        let mut chooser_options: HashMap<&'static str, Variant<'static>> = HashMap::new();
 
         if let Some((filters, current_filter)) = try_parse_filters(file_types.as_deref(), suggested_file_type.as_ref()) {
-            chooser_options.insert("filters", Value::from(filters));
+            chooser_options.insert("filters", Variant::from(filters));
             if let Some(filter) = current_filter {
-                chooser_options.insert("current_filter", Value::from(zbus::zvariant::Structure::from(filter)));
+                chooser_options.insert("current_filter", Variant::from(zbus::Structure::from(filter)));
             }
         }
 
         if let Some(suggested_file_name) = suggested_file_name {
-            chooser_options.insert("current_name", Value::from(suggested_file_name));
+            chooser_options.insert("current_name", Variant::from(suggested_file_name));
         }
         if let Some(folder_path) = suggested_start_location.as_ref().and_then(local_path) {
-            chooser_options.insert("current_folder", Value::from(format!("{folder_path}\0").into_bytes()));
+            chooser_options.insert("current_folder", Variant::from(format!("{folder_path}\0").into_bytes()));
         }
         if let Some(allow_multiple) = allow_multiple {
-            chooser_options.insert("multiple", Value::from(allow_multiple));
+            chooser_options.insert("multiple", Variant::from(allow_multiple));
         }
 
         let results =
@@ -466,15 +462,15 @@ impl BclStorageProvider for DBusSystemDialog {
             };
             let parent_window = parent_lease.as_ref().map(|lease| lease.handle()).unwrap_or_default();
 
-            let mut chooser_options: HashMap<&'static str, Value<'static>> = HashMap::new();
-            chooser_options.insert("directory", Value::from(true));
-            chooser_options.insert("multiple", Value::from(options.allow_multiple()));
+            let mut chooser_options: HashMap<&'static str, Variant<'static>> = HashMap::new();
+            chooser_options.insert("directory", Variant::from(true));
+            chooser_options.insert("multiple", Variant::from(options.allow_multiple()));
 
             if let Some(current_name) = options.suggested_file_name() {
-                chooser_options.insert("current_name", Value::from(current_name.to_string()));
+                chooser_options.insert("current_name", Variant::from(current_name.to_string()));
             }
             if let Some(folder_path) = options.suggested_start_location().and_then(local_path) {
-                chooser_options.insert("current_folder", Value::from(format!("{folder_path}\0").into_bytes()));
+                chooser_options.insert("current_folder", Variant::from(format!("{folder_path}\0").into_bytes()));
             }
 
             let results = Self::call_and_await_response(

@@ -3,8 +3,10 @@ use super::ServerCompositionVisual;
 use crate::media::{RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
 use crate::rendering::composition::effects::{pop_custom_effect_graph_with, push_custom_effect_graph_with};
-use crate::rendering::composition::server::{render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerVisualRenderContext};
-use crate::Matrix;
+use crate::rendering::composition::server::{
+    render_scope, CompositorPools, IDirtyRectTracker, LitContent, ServerDrawItems, ServerVisualRenderContext,
+};
+use crate::{Matrix, Vector};
 use std::rc::Rc;
 
 pub(super) struct RenderContext<'a> {
@@ -29,6 +31,9 @@ pub(super) struct RenderContext<'a> {
     stop_at: Option<*const ServerCompositionVisual>,
     /// Whether the render reached `stop_at`.
     stopped: bool,
+    /// Whether the compositor has lights at all, asked once for the walk
+    /// (not from upstream): without lights no visual looks for its light map.
+    lights_registered: bool,
 }
 
 impl<'a> RenderContext<'a> {
@@ -53,12 +58,15 @@ impl<'a> RenderContext<'a> {
             clip = clip.intersect_or_empty(dirty_clip);
         }
 
+        let lights_registered = root_visual.compositor().is_some_and(|compositor| compositor.has_registered_lights());
+
         Self {
             canvas,
             dirty_rects,
             pools,
             render_children,
             root_visual,
+            lights_registered,
             walk_context: TreeWalkContext::new(pools, matrix, clip),
             opacity: 1.0,
             opacity_stack: pools.double_stack_pool.rent(),
@@ -113,6 +121,7 @@ impl<'a> RenderContext<'a> {
         if visual_opacity != 1.0 {
             self.opacity_stack.push(self.opacity);
             self.opacity = effective_opacity;
+            crate::perf_count!(RenderVisualOpacitiesPushed);
             self.canvas.push_opacity(visual_opacity, Some(transformed_sub_tree_bounds.to_rect()));
         }
 
@@ -120,6 +129,7 @@ impl<'a> RenderContext<'a> {
 
         if visual.own_transform.get().is_some() {
             self.walk_context.push_set_transform(effective_new_transform); // Reuse one computed before
+            crate::perf_count!(RenderVisualTransformsSet);
             self.canvas.set_transform(effective_new_transform);
         }
 
@@ -128,6 +138,7 @@ impl<'a> RenderContext<'a> {
         }
 
         if visual.clip_to_bounds() {
+            crate::perf_count!(RenderVisualClipsPushed);
             visual.content.push_clip_to_bounds(visual, self.canvas);
         }
 
@@ -144,6 +155,34 @@ impl<'a> RenderContext<'a> {
         true
     }
 
+    /// Draws the drawing items `range` of `holder`, in its space (section 9.42).
+    fn render_draw_items(
+        &mut self,
+        holder: &Rc<ServerCompositionVisual>,
+        items: &ServerDrawItems,
+        range: std::ops::Range<usize>,
+    ) {
+        if range.is_empty() {
+            return;
+        }
+        let transform = self.walk_context.transform;
+        let clip = self.walk_context.clip;
+        // The lights that reach the content reach its items.
+        let lit = if self.lights_registered { LitContent::begin(holder, self.canvas) } else { None };
+        let canvas = &mut *self.canvas;
+        let dirty_rects = self.dirty_rects.as_deref();
+        let moved = render_scope::with_painting_visual(holder, || {
+            items.render(range, canvas, transform, clip, dirty_rects)
+        });
+        if moved {
+            crate::perf_count!(RenderVisualTransformsSet);
+            self.canvas.set_transform(transform);
+        }
+        if let Some(lit) = lit {
+            lit.end(self.canvas);
+        }
+    }
+
     fn dispose(mut self) {
         let pools = self.pools;
         self.adorner_helper_dispose();
@@ -152,7 +191,83 @@ impl<'a> RenderContext<'a> {
     }
 }
 
+/// The part `from..to` of the world on one axis in the space of a walk whose transform has `scale`
+/// and `offset` on that axis, wider by more than the arithmetic of the two directions can differ.
+/// `None` for one that is no part of the axis.
+fn span_in_walk_space(from: f64, to: f64, scale: f64, offset: f64) -> Option<(f64, f64)> {
+    let end = |value: f64| -> Option<(f64, f64)> {
+        let at = (value - offset) / scale;
+        if at.is_nan() {
+            return None;
+        }
+        if at.is_infinite() {
+            return Some((at, at));
+        }
+        let off = ((value.abs() + offset.abs() + 1.0) / scale.abs() * 1e-9).max(at.abs() * 1e-12);
+        Some((at - off, at + off))
+    };
+    let (from, to) = (end(from)?, end(to)?);
+    Some((from.0.min(to.0), from.1.max(to.1)))
+}
+
+impl RenderContext<'_> {
+    /// The clip of the walk and the origin of the world, in the space the walk is in and each a
+    /// little larger than it is (section 9.48). `None` with a transform that turns or skews: the
+    /// bounds of a child in the world are then not those of its bounds here.
+    fn clip_and_origin_in_walk_space(&self) -> Option<(LtrbRect, LtrbRect)> {
+        let m = self.walk_context.transform;
+        let straight = m.m12 == 0.0 && m.m21 == 0.0 && !m.contains_perspective();
+        if !straight || m.m11 == 0.0 || m.m22 == 0.0 || !(m.m11 + m.m22 + m.m31 + m.m32).is_finite() {
+            return None;
+        }
+        let clip = self.walk_context.clip;
+        let (left, right) = span_in_walk_space(clip.left, clip.right, m.m11, m.m31)?;
+        let (top, bottom) = span_in_walk_space(clip.top, clip.bottom, m.m22, m.m32)?;
+        let (origin_left, origin_right) = span_in_walk_space(0.0, 0.0, m.m11, m.m31)?;
+        let (origin_top, origin_bottom) = span_in_walk_space(0.0, 0.0, m.m22, m.m32)?;
+        Some((
+            LtrbRect::new(left, top, right, bottom),
+            LtrbRect::new(origin_left, origin_top, origin_right, origin_bottom),
+        ))
+    }
+}
+
 impl IServerTreeVisitor for RenderContext<'_> {
+    fn next_child(&mut self, container: &Rc<ServerCompositionVisual>, from: usize, _count: usize) -> usize {
+        // A child whose bounds in the world do not meet the clip of the walk is counted and left
+        // (`handle_pre_graph_transform_clip_opacity`): the clip of the child is within the clip
+        // of the walk, or it is the empty rectangle at the origin of the world, which only bounds
+        // around that origin meet. The table has the bounds of every child, and tells the
+        // children that are left without a look at them. A render that stops at a visual, or
+        // whose next visual is drawn without its transform, looks at every visual.
+        if self.stop_at.is_some() || self.skip_next_visual_transform {
+            return from;
+        }
+        let Some(children) = container.children() else { return from };
+        let Some((clip, origin)) = self.clip_and_origin_in_walk_space() else { return from };
+        let next = children.next_child_in(from, clip, origin);
+        if next > from {
+            self.visited_visuals += (next - from) as i32;
+            if container.has_draw_items() {
+                // The drawing items before a child that is left are drawn as before a child
+                // that is visited.
+                for index in from..next {
+                    self.before_child(container, index);
+                }
+            }
+        }
+        next
+    }
+
+    fn before_child(&mut self, container: &Rc<ServerCompositionVisual>, index: usize) {
+        if !container.has_draw_items() || self.stopped {
+            return;
+        }
+        if let Some(items) = container.content.draw_items() {
+            self.render_draw_items(container, items, items.range_before_child(index));
+        }
+    }
+
     fn pre_subgraph(&mut self, visual: &Rc<ServerCompositionVisual>) -> bool {
         // A backdrop render stops at the visual that paints the backdrop
         // (winui-materials.md).
@@ -180,6 +295,7 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
             // If caching is enabled, draw from cache and skip rendering
             if let Some(cache) = visual.cache() {
+                crate::perf_count!(RenderCachedVisualsDrawn);
                 let (visited, rendered) = cache.draw(self.canvas);
                 self.visited_visuals += visited;
                 self.rendered_visuals += rendered;
@@ -219,7 +335,7 @@ impl IServerTreeVisitor for RenderContext<'_> {
         let clip = self.walk_context.clip;
         // The WinUI lights that reach the content (not from upstream): the
         // content is drawn into a layer and the light map over it.
-        let lit = LitContent::begin(visual, self.canvas);
+        let lit = if self.lights_registered { LitContent::begin(visual, self.canvas) } else { None };
         // The brushes the content paints learn which visual paints them
         // (backdrops, scene lighting).
         let canvas = &mut *self.canvas;
@@ -243,6 +359,16 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
         // If we've used cache, those never got pushed in PreSubgraph
         if !self.used_cache {
+            // The drawing items after the last child (not from upstream; section 9.42): all
+            // of them for a visual without children. A render without the children leaves
+            // them out, as what is below the visual; one that stopped has drawn what it shows.
+            if visual.has_draw_items() && self.render_children && !self.stopped {
+                if let Some(items) = visual.content.draw_items() {
+                    let children = visual.children().map_or(0, |children| children.count());
+                    self.render_draw_items(visual, items, items.range_after_children(children));
+                }
+            }
+
             // What the content pushed for its children (not from upstream).
             let canvas = &mut *self.canvas;
             render_scope::with_painting_visual(visual, || {
@@ -302,6 +428,7 @@ impl IServerTreeVisitor for RenderContext<'_> {
 
             if visual.own_transform.get().is_some() {
                 self.walk_context.pop_transform();
+                crate::perf_count!(RenderVisualTransformsSet);
                 self.canvas.set_transform(self.walk_context.transform);
             }
 
@@ -333,6 +460,7 @@ impl ServerCompositionVisual {
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
             None,
+            Vector::ZERO,
         )
     }
 
@@ -347,6 +475,7 @@ impl ServerCompositionVisual {
         stop_at: &Rc<ServerCompositionVisual>,
         skip_root_visual_transform: bool,
         rendering_to_bitmap_cache: bool,
+        device_origin: Vector,
     ) {
         self.render_with_stop(
             canvas,
@@ -356,6 +485,7 @@ impl ServerCompositionVisual {
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
             Some(Rc::as_ptr(stop_at)),
+            device_origin,
         );
     }
 
@@ -369,6 +499,7 @@ impl ServerCompositionVisual {
         skip_root_visual_transform: bool,
         rendering_to_bitmap_cache: bool,
         stop_at: Option<*const ServerCompositionVisual>,
+        device_origin: Vector,
     ) -> (i32, i32) {
         let Some(compositor) = self.compositor() else { return (0, 0) };
         let pools = compositor.pools();
@@ -377,6 +508,7 @@ impl ServerCompositionVisual {
             visual: self.clone(),
             transform,
             clip,
+            device_origin,
             skip_root_visual_transform,
             rendering_to_bitmap_cache,
         };
@@ -395,6 +527,11 @@ impl ServerCompositionVisual {
             render_context.stop_at = stop_at;
             walk(&mut render_context, self, pools);
             let result = (render_context.visited_visuals, render_context.rendered_visuals);
+            {
+                use crate::diagnostics::perf_counters::{add, PerfCounter};
+                add(PerfCounter::RenderVisualsVisited, result.0.max(0) as u64);
+                add(PerfCounter::RenderVisualsRendered, result.1.max(0) as u64);
+            }
             render_context.dispose();
             result
         })

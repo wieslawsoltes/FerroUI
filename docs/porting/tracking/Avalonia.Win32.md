@@ -12,7 +12,7 @@ Generated from upstream commit `66b7273b9a2b5ba8416feb4376b9cdc3078b8573`. Back 
 | Phase / priority | 1 - desktop (Windows) / P0 |
 | Files | 94/94 (100.0%), 1 not applicable |
 | Types | 251/275 (24 waived) (100.0%) |
-| Members | 2349/2603 (254 waived) (100.0%) |
+| Members | 2350/2603 (253 waived) (100.0%) |
 | Contracts (interfaces) | 7/7 |
 | Property registrations | 0/0 |
 | Routed events | 0/0 |
@@ -156,11 +156,11 @@ Every interface of the project. Each becomes a `pub trait` with the same name (t
 | `VulkanNativeInterop.cs` | `vulkan/vulkan_native_interop.rs` | present | 2/2 | 3/8 (5 waived) |  |
 | `VulkanSupport.cs` | `vulkan/vulkan_support.rs` | present | 2/2 | 3/3 |  |
 
-### `WinRT` - files 5/5, types 10/10, members 83/84 (1 waived)
+### `WinRT` - files 5/5, types 10/10, members 84/84
 
 | Upstream file | Rust file | Status | Types | Members | Notes |
 |---|---|---|---|---|---|
-| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | present | 6/6 | 22/23 (1 waived) |  |
+| `NativeWinRTMethods.cs` | `win_rt/native_win_rt_methods.rs` | present | 6/6 | 23/23 |  |
 | `WinRTApiInformation.cs` | `win_rt/win_rt_api_information.rs` | present | 1/1 | 10/10 |  |
 | `WinRTColor.cs` | `win_rt/win_rt_color.rs` | present | 1/1 | 6/6 |  |
 | `WinRTInspectable.cs` | `win_rt/win_rt_inspectable.rs` | present | 1/1 | 3/3 |  |
@@ -184,9 +184,12 @@ Rust sources of this crate that no upstream file maps to. Give each a reason in 
 
 | Rust file | Reason | Types defined |
 |---|---|---|
+| `input/imm32_context.rs` | **unmapped** | `ImmContext`, `ImmWindowContext`, `OwnedImmContext` |
+| `input/imm32_input_options.rs` | **unmapped** | `ApplyingGuard`, `ImmInputOptions`, `ScopeTarget`, `ScopeWindow` |
+| `open_gl/angle/angle_display_lifetime.rs` | **unmapped** | `DisplayCache`, `Lease`, `SharedDisplay` |
 | `sync_root.rs` | The monitor a composition mode shares between its threads (the `SyncRoot` object of the reference, whose lock the runtime provides) and a COM pointer shared between threads (docs/porting/win32-platform.md, section 6.4) | `SharedCom`, `State`, `SyncRoot`, `SyncRootGuard` |
 | `win32_text_rendering.rs` | **unmapped** | `CompositedTextRenderingSurface`, `DWriteCreateFactory`, `IDWriteFactoryVTable`, `IDWriteRenderingParamsVTable`, `SystemTextSettings` |
 | `win_rt/numerics.rs` | The vector, quaternion and matrix values the interfaces of `winrt.idl` pass, by their layout: upstream maps the names to the types of the numerics library of its runtime | `Matrix4x4`, `Quaternion`, `Vector2`, `Vector3` |
 | `wnd_proc_guard.rs` | Keeps a panic from unwinding out of a window procedure through the frames of the system: caught, kept, and raised again by the message loop (docs/porting/win32-platform.md, section 5) |  |
 
-Tests, examples and build scripts (not scanned): `build.rs`, `d_composition/d_composition_tests.rs`, `examples/win32_window.rs`, `examples/win32_window/a11y.rs`, `ole_tests.rs`, `win_rt/composition/win_ui_composition_tests.rs`, `win_rt/win_rt_tests.rs`.
+Tests, examples and build scripts (not scanned): `build.rs`, `d_composition/d_composition_tests.rs`, `examples/win32_window.rs`, `examples/win32_window/a11y.rs`, `input/imm32_context_tests.rs`, `input/imm32_input_options_tests.rs`, `input/imm32_rich_text_tests.rs`, `ole_tests.rs`, `win_rt/composition/win_ui_composition_tests.rs`, `win_rt/win_rt_tests.rs`.

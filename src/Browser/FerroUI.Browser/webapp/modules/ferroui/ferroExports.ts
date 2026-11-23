@@ -174,7 +174,8 @@ export class FerroExports {
 
     public static get NavigationHelper() {
         return FerroExports.group("NavigationHelper", {
-            OnBackRequested: "NavigationHelper_OnBackRequested"
+            OnBackRequested: "NavigationHelper_OnBackRequested",
+            OnHistoryTraversed: "NavigationHelper_OnHistoryTraversed"
         });
     }
 

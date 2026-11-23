@@ -270,7 +270,7 @@ pub use super::testing::try_attach;
 
 /// Records the values a styled property takes on an object, starting with
 /// its current value.
-pub fn record_values<T: PropertyValue>(
+pub fn record_values<T: crate::StyledValue>(
     target: &FerroObject,
     property: &'static StyledProperty<T>,
 ) -> Rc<RefCell<Vec<T>>> {

@@ -22,7 +22,7 @@ Build the browser backend as `src/Browser/FerroUI.Browser`, a single-threaded ba
 | Render timer | A perpetual `requestAnimationFrame` loop. One shared render loop and one compositor per surface, running on the UI thread. |
 | Threads | Optional (`WasmEnableThreads`): UI thread on a worker with the managed blocking dispatcher, a separate render worker with `OffscreenCanvas`, raw input grouped and queued across threads. |
 | Input | Pointer events on the host element, `wheel`, key events, composition events on the hidden input, drag events, `navigator.virtualKeyboard` geometry. |
-| Services | Clipboard (async Clipboard API with a paste-event fallback), storage provider (File System Access API or polyfill, bookmarks in IndexedDB), launcher (`window.open`), screens (`window.screen`, `getScreenDetails`), insets (CSS `env(safe-area-inset-*)`, fullscreen), platform settings (`prefers-color-scheme`, `prefers-contrast`, `navigator.language`), activation (`visibilitychange`), back navigation (`history.pushState`/`popstate`), CSS cursors, DOM native control host. |
+| Services | Clipboard (async Clipboard API with a paste-event fallback), storage provider (File System Access API or polyfill, bookmarks in IndexedDB), launcher (`window.open`), screens (`window.screen`, `getScreenDetails`), insets (CSS `env(safe-area-inset-*)`, fullscreen), platform settings (`prefers-color-scheme`, `prefers-contrast`, `forced-colors` with the CSS system colours of the page while it is active (#560), `navigator.language`), activation (`visibilitychange`), back navigation (`history.pushState`/`popstate`), CSS cursors, DOM native control host. |
 | Not present | No `Avalonia.Browser.Blazor` project in this checkout. No accessibility bridge. No window icon (stub loader). |
 
 ## 3. Target triple (question 1)
@@ -194,6 +194,26 @@ Threads: upstream's multithreaded mode moves the UI to a worker with a blocking 
 | Cursors | Cursor factory producing CSS cursor strings; custom cursors as `url(data:...) x y, fallback`. Set on the host style | 2 |
 | Context menu, browser gestures | `oncontextmenu` returns false; `touch-action: none` | 1 |
 
+**Pointer positions.** Not as upstream, which passes `offsetX` and `offsetY` of each event and
+takes them for logical units. Those are relative to the padding corner of the target of the event,
+which is the canvas while the pointer is free and the element of the view while it is captured,
+and they are in CSS pixels, while the view is laid out in `pixels / dpr` units over the canvas.
+Every position (pointer down, move, up and cancel, the coalesced points of a move, the wheel and
+the drag events) is computed by one helper, `pointerPosition.ts`: the client coordinates of the
+event, less the bounding rectangle of the canvas, divided by the scale of a transform or `zoom`
+of an ancestor (rectangle size over border-box size), less the canvas's border and padding, times
+the logical units per CSS pixel of the content box (backing width over the scaling, over the CSS
+content width; per axis). The backing size and the scaling are the ones the framework last got
+from the resize observer, so the position follows what is drawn even where the browser's
+`devicePixelRatio` and its device-pixel box of the canvas disagree, and it never depends on which
+element the browser hit. The rectangle and the style are read at each event, not cached. Where
+the two agree, the result equals `offsetX` on the canvas to within the rounding of the backing
+size (less than a device pixel across the view). Written for issue #534 (an offset between the
+pointer and the view in Firefox under Wayland with fractional scaling), which was not reproduced
+on that system; `webapp/tests/pointer-position.test.mjs` checks the conversion at 1x, 1.25x,
+1.5x, 1.75x and 2x, at fractional corners, with a border and padding, `border-box`, a transform,
+and a scaling that differs from the ratio of the backing size.
+
 ## 9. Fonts and text (question 7)
 
 There are no system fonts. Upstream uses the Skia font manager as it exists in the WASM build and returns `SKTypeface.Default.FamilyName` as the default family; applications add fonts as embedded resources through font collections. What the SkiaSharp WASM binary embeds as its default typeface is **[U]**; with `skia-safe` on Emscripten assume **no usable default font**.
@@ -220,6 +240,12 @@ Decisions:
 | System navigation | Back button through the history API | Phase 3 |
 | Accessibility | None. The canvas is opaque to assistive technology | Later, and not a port: it needs a design (an ARIA mirror tree built from automation peers). Keep the automation-peer layer platform-neutral so this stays possible |
 | Tray icon, window icon, z-order | Unsupported or stubbed | Stubs in Phase 1 |
+
+### Browser Back and Forward
+
+Opt in with `ferroui_browser::BrowserNavigationHistory::new(initial_route, on_traversed)` on the page's main thread. Keep the handle with the app's router and call `push(route)` when opening a new route. In the traversal callback, render the destination route directly. The callback receives the signed distance traveled in the app's history, including when the user jumps several entries at once. Navigating to a new route after Back clears the previous Forward entries.
+
+The browser holds route identifiers in `history.state` for this router instance, and the address bar keeps the document URL. The router takes ownership of the current entry's state when initialized. When that entry already holds a route of the page (the page was reloaded on it, or a router was dropped and created again), the app history goes on from it: Back and Forward still reach the routes around it, and the initial route replaces the route of the current entry. Entries outside its history follow normal browser navigation. Choose one history owner for the page. Apps using `BrowserNavigationHistory` opt out of the legacy `add_back_handler` bridge to `TopLevel::BackRequested`: while a router is active `add_back_handler` has no effect, and a router cannot be created once that bridge is installed. The bridge is installed once; a second call has no effect.
 
 ## 11. Layout, tooling and phases (question 9)
 
@@ -248,7 +274,7 @@ Tooling:
 - **Emscripten configuration**: plain `cargo build --target wasm32-unknown-emscripten` plus a repository script (`scripts/build-browser.sh` or an `xtask`) that runs esbuild, builds, and assembles `wwwroot` + `.js` + `.wasm` into a `dist` directory served by any static server. No trunk and no wasm-pack (wasm-pack has an open request for this target; trunk support **[U]**).
 - Link settings (in `.cargo/config.toml` for the target) **[M]**: `linker = "em++"` (Skia needs the C++ runtime), `-sWASM_BINDGEN`, `-sMODULARIZE`, `-sEXPORT_ES6`, `-sENVIRONMENT=web` (the script of the module leaves out Node.js and worker support), `-sMAX_WEBGL_VERSION=2`, `-sALLOW_MEMORY_GROWTH=1`, `-sEXPORTED_RUNTIME_METHODS=GL,HEAPU8` (the JS side must reach Emscripten's `GL` object and the module memory), `-sINVOKE_RUN=0` (the host page starts the application; without it `main` also runs twice), `-sSTACK_SIZE=8MB` (the default stack of 64 KB is too small for layout and markup loading), `-sGL_ENABLE_GET_PROC_ADDRESS=1` (the OpenGL entry points of a context are resolved by name), and `EMCC_CFLAGS="-s ERROR_ON_UNDEFINED_SYMBOLS=0"` as rust-skia requires. No `-Cpanic=abort` and no `-Crelocation-model=static`. The backend imports its script module by a relative specifier, so there are no `wasm-bindgen` snippets to copy: `scripts/build-browser.sh <application>` assembles the site from the host page, `ferroui.js` and the `.js`/`.wasm` pair of the application: an example of the browser crate (`target/wasm32-unknown-emscripten/<profile>/examples/`) or a binary package of the workspace with its host page in the `wwwroot/` of the package (`target/wasm32-unknown-emscripten/<profile>/`, where the module of a binary is named after the target with `-` replaced by `_`), built with the `browser` profile of the workspace (section 18), plus the files that build scripts of the application leave in `$OUT_DIR/browser-site/` (asset bundles).
 - **Browser scripts** (`scripts/browser/`): `setup.sh` installs the pinned toolchain (locally and, through the composite action `.github/actions/browser-toolchain`, in CI); `harness.mjs` serves a site and drives headless Chrome over the DevTools protocol (real pointer, wheel and key events, resize, screenshots, the console and the error log); the tests under `tests/` use it: `themed_view.test.mjs` (the input matrix and the services of the backend), `storage_view.test.mjs` (the storage provider) and `control_catalog.test.mjs` (the ControlCatalog site: start-up, WebGL2 and 2D-canvas rendering, resize, console errors, no upstream brand asset, and the drawer, navigation, a button click and typing into a text box driven with real events, and at the viewport of a phone a touch drag, a touch flick and a text box focused by touch at scale 1; run by the `browser` job of CI and before every Pages deployment); `capture.mjs` takes a screenshot of a site; `capture-catalog.mjs` captures a tour of pages of the ControlCatalog built with threads on the render thread and on one thread and reports the pixels that differ per page, and `catalog-pages.mjs` holds the tour and the functions that drive the catalog through the exports of its host (`browser-render-worker.md`, "B2.7"); `first-frame.mjs` measures the time from navigation to the first frame of a site (module downloaded, first draw, frame on screen, splash screen closed) over several loads with a fresh profile each, can write a CPU profile, emulate a network (`--throttle <Mbit/s>,<ms>`) and report the phases of a load (`--phases`: every file downloaded, module compiled and instantiated, the performance marks of the page; section 19); `scroll-profile.mjs` opens a page of the ControlCatalog site, scrolls it with wheel events and reports the processor time of the scrolling, with a CPU profile (section 18, "Run-time speed of the framework crates"); `wasm-size-report.py` attributes the bytes of a WebAssembly module to sections, embedded files, crates and generic families (section 18); `module-sizes.mjs` prints the raw, gzip and brotli sizes of the files of a site (and, with `--github-output`, the sizes of its WebAssembly module as step outputs); `combine-site.mjs` composes the site with both modules, the one built without threads and the one built with them, that `scripts/build-browser.sh <application> --both` builds, and `tests/site_loader.test.mjs` tests which module the page of such a site loads (section 21, "The site with both modules"); `render-placeholder-assets.mjs` draws the placeholder artwork of the published catalog.
-- **Publication**: `.github/workflows/pages.yml` builds the ControlCatalog site, tests it and deploys it to GitHub Pages on pushes to `main` and on manual runs. Since B2.8 of `browser-render-worker.md` the site is the one with both modules (`scripts/build-browser.sh control-catalog-browser --both`): the workflow tests the module without threads, the module with threads and the page that chooses between them, and the budget below is applied to each of the two modules, of which a visitor downloads one. It deploys only while the WebAssembly module stays within the gzip budget `PUBLISHED_MODULE_GZIP_BUDGET_MB` of the workflow (14 MB: raised from 12 MB when the themes moved to compiled markup, stage E4 of the XAML compiler, which brought the catalog module to 11.42 MB with gzip; the budget is that size with about 15 % headroom, rounded up); above it the size budget step of the deploy job fails before the deployment, and the raw and gzip sizes are in the summaries of the run. Only `main` is deployed (a manual run from another branch builds and tests only), and only the deploy job has `pages: write` and `id-token: write`. Every action of the workflows is pinned to a commit. The toolchain steps are shared with CI through the composite action `.github/actions/browser-toolchain`. GitHub Pages compresses responses itself (gzip, including `application/wasm`; no brotli was offered for `Accept-Encoding: br, gzip` when measured on 2026-10-05) and does not serve precompressed files, so the site carries none.
+- **Publication**: `.github/workflows/pages.yml` builds the ControlCatalog site, tests it and deploys it to GitHub Pages on pushes to `main` and on manual runs. Since B2.8 of `browser-render-worker.md` the site is the one with both modules (`scripts/build-browser.sh control-catalog-browser --both`): the workflow tests the module without threads, the module with threads and the page that chooses between them, and the budget below is applied to each of the two modules, of which a visitor downloads one. It deploys only while the WebAssembly module stays within the gzip budget `PUBLISHED_MODULE_GZIP_BUDGET_MB` of the workflow (16 MB; its history is in section 18: 12 MB, 14 MB from stage E4 of the XAML compiler, 16 MB from the WinUI 3 theme, 17 MB from the rich text controls, 16 MB again since 2026-11-18; each budget is the size of the module then with about 15 % headroom, rounded up); above it the size budget step of the deploy job fails before the deployment, and the raw and gzip sizes are in the summaries of the run. Only `main` is deployed (a manual run from another branch builds and tests only), and only the deploy job has `pages: write` and `id-token: write`. Every action of the workflows is pinned to a commit. The toolchain steps are shared with CI through the composite action `.github/actions/browser-toolchain`. GitHub Pages compresses responses itself (gzip, including `application/wasm`; no brotli was offered for `Accept-Encoding: br, gzip` when measured on 2026-10-05) and does not serve precompressed files, so the site carries none.
 - **`wasm32-unknown-unknown` configuration**: trunk, with the same `webapp` bundle.
 - TypeScript: keep upstream's esbuild script and ESLint configuration; three bundles as upstream. Asset fingerprinting and import maps are not needed initially.
 
@@ -553,7 +579,7 @@ Known gaps inside the finished stages are listed in the stage READMEs of the del
 
 ## 18. Module size (2026-10-05, measured again 2026-10-06)
 
-The ControlCatalog site is published only while its WebAssembly module is within a gzip budget, 12 MB when this section was written, 14 MB since the themes load from compiled markup (stage E4 of the XAML compiler: the catalog module is then 43.85 MB raw and 11.42 MB with gzip, against 31.87 MB and 9.45 MB below), and 16 MB since the catalog carries the WinUI 3 theme as its first theme (2026-10-17: the module without threads 14.94 MB with gzip, the one with threads 14.90 MB; every deploy from the merge of the theme on was refused at 14 MB, so the published site stayed at the build before it). This section records what the modules are made of, what was changed to bring them down, and what each change saved. Everything here is **[M]**: measured on Linux with Rust 1.90.0, Emscripten 6.0.10 and wasm-bindgen 0.2.129. Sizes are in MB of 1,000,000 bytes; gzip is level 9 of Node's zlib, as `scripts/browser/module-sizes.mjs` of the Pages budget computes it (GitHub Pages compresses with gzip); the attribution tables use Python's zlib, which differs by less than 1 %. How it was measured: sizes of the files of a site with `scripts/browser/module-sizes.mjs`; the attribution with `scripts/browser/wasm-size-report.py`; start-up with `scripts/browser/first-frame.mjs` (headless Chromium 141 with WebGL on SwiftShader, local server, 4-core container, five loads per rendering mode with a fresh browser profile each; the figure is the time from navigation to the first frame on screen, WebGL2 / Software2D); behaviour with the tests of `scripts/browser/tests/`, which drive the page through `scripts/browser/harness.mjs`. The step-by-step measurements of 2026-10-05 were taken with the end-to-end test of the catalog host as it was then (the time from navigation until the splash screen closed and the view had its canvas, two loads per mode) and with a first-frame CPU profile; they are comparable with each other, not with the figures of 2026-10-06, which come from a different container.
+The ControlCatalog site is published only while its WebAssembly module is within a gzip budget, 12 MB when this section was written, 14 MB since the themes load from compiled markup (stage E4 of the XAML compiler: the catalog module is then 43.85 MB raw and 11.42 MB with gzip, against 31.87 MB and 9.45 MB below), and 16 MB since the catalog carries the WinUI 3 theme as its first theme (2026-10-17: the module without threads 14.94 MB with gzip, the one with threads 14.90 MB; every deploy from the merge of the theme on was refused at 14 MB, so the published site stayed at the build before it), 17 MB from 2026-10-31 (the rich text controls took the module without threads to about 16.3 MB; 16.81 MB at its largest, on 2026-11-03), and 16 MB again since 2026-11-18, when the size work of 0.5 had brought the modules to 13.87 MB and 13.81 MB with gzip (#441; "Size since the WinUI theme" below). This section records what the modules are made of, what was changed to bring them down, and what each change saved. Everything here is **[M]**: measured on Linux with Rust 1.90.0, Emscripten 6.0.10 and wasm-bindgen 0.2.129. Sizes are in MB of 1,000,000 bytes; gzip is level 9 of Node's zlib, as `scripts/browser/module-sizes.mjs` of the Pages budget computes it (GitHub Pages compresses with gzip); the attribution tables use Python's zlib, which differs by less than 1 %. How it was measured: sizes of the files of a site with `scripts/browser/module-sizes.mjs`; the attribution with `scripts/browser/wasm-size-report.py`; start-up with `scripts/browser/first-frame.mjs` (headless Chromium 141 with WebGL on SwiftShader, local server, 4-core container, five loads per rendering mode with a fresh browser profile each; the figure is the time from navigation to the first frame on screen, WebGL2 / Software2D); behaviour with the tests of `scripts/browser/tests/`, which drive the page through `scripts/browser/harness.mjs`. The step-by-step measurements of 2026-10-05 were taken with the end-to-end test of the catalog host as it was then (the time from navigation until the splash screen closed and the view had its canvas, two loads per mode) and with a first-frame CPU profile; they are comparable with each other, not with the figures of 2026-10-06, which come from a different container.
 
 ### What the module is made of
 
@@ -698,6 +724,93 @@ The profile of the same scrolling with the names of the functions (`scripts/brow
 Scrolling is `scripts/browser/scroll-profile.mjs`: 60 wheel events of 120 pixels on the TableView page, 30 down and 30 up, headless Chrome 154 with WebGL on SwiftShader, Apple M3 Pro, the machine shared with other work; the first two rows are medians of five runs of the sites as `scripts/build-browser.sh` writes them, measured alternately, the last two medians of four runs of modules linked with their name section against 527 and 557 ms for the module as before linked the same way (their sizes are without the name section; gzip is level 9 of Python's zlib). The time to the first frame is unchanged (2.85 s against 2.91 s, medians of five loads). The module stays within the gzip budget of the Pages workflow (14 MB).
 
 Level "s" for the two crates is what the profile has now: most of what level 3 gives for a third of its growth with gzip. Level 3 everywhere is the upper bound of what the build settings can give, about a quarter; what is left is the cost of the work itself.
+
+### Size since the WinUI theme (2026-11-18, #441)
+
+The module of the catalog without threads, as the Pages workflow measured it before each deploy
+(`module-sizes.mjs`, gzip -9 of Node's zlib; the run of `pages.yml` in parentheses). The budget
+went to 17 MB on 2026-10-31 and back to 16 MB with #441.
+
+| `main` at | Raw | gzip | Brotli | What changed |
+|---|---:|---:|---:|---|
+| 7cb3eea09, 2026-10-30 (41071664115) | | 15.86 MB | | the last deploy within 16 MB (figure of #441) |
+| 6a5cd95bf, 2026-11-01 (41303798376) | 58.38 MB | 16.55 MB | 10.17 MB | the rich text controls, LiveCharts2 |
+| 00ce74acc, 2026-11-03 (41600286347) | 59.26 MB | 16.81 MB | 10.33 MB | the largest module |
+| 53c16bf13, 2026-11-06 (42175089252) | 53.86 MB | 16.65 MB | 10.39 MB | property core (#571) and the merges before it |
+| 5779caf32, 2026-11-06 (42293399787) | 51.34 MB | 16.23 MB | 10.24 MB | handle conversions derived, class vtables constant (#584, #587) |
+| 0c0ea2a72, 2026-11-07 (42408421940) | 47.92 MB | 15.98 MB | 10.51 MB | theme trimming and its roots (#596 to #616), after a spike to 29.51 MB on be6f642af |
+| acadf51ed, 2026-11-08 (42433989501) | 39.46 MB | 13.78 MB | 9.17 MB | `panic = "abort"` in `release` and so in `browser` (#627) |
+| 6e8907d00, 2026-11-08 (42463195794) | 39.15 MB | 13.69 MB | 9.12 MB | registrations rooted on demand (#635) |
+| 87c21343c, 2026-11-18 (44297405816) | 39.63 MB | 13.87 MB | 9.25 MB | ten days of features: +0.48 MB raw, +0.18 MB gzip |
+
+The module with threads follows within 0.1 MB (13.81 MB on 87c21343c). The step that took most
+off the transfer is the end of unwinding: without landing pads and their cleanup code the module
+lost 8.5 MB raw and 2.2 MB with gzip. What the module is made of now is in the next section.
+
+### What the module is made of (2026-11-18, #441)
+
+Run 44320313956 of `browser.yml` with the input `size-report`, on `main` at eb4bfd6b5 with the
+tooling of #441: the published module is 39.65 MB raw, 13.88 MB with gzip -9 and 9.26 MB with
+Brotli -11 (`module-sizes.mjs` on the site of the run). The attribution is of the same build
+linked again with its function names (`--profiling-funcs`, no change of code) and the link map of
+wasm-ld, by `wasm-size-report.py --map` on the artifact of the run; its gzip columns are Python's
+zlib, and "saved" is how much smaller the gzip of the whole code section is without the row.
+
+| Section of the module | MB | MB gzip |
+|---|---:|---:|
+| code | 30.70 | 9.24 |
+| data (constants and embedded files) | 8.50 | 3.43 |
+| function table (element section) | 0.30 | 0.24 |
+
+Code by origin (the crate of the name of a function; a generic function instantiated for a type of
+another crate counts for the crate that defines it):
+
+| Origin | MB | MB gzip (alone) | MB gzip saved |
+|---|---:|---:|---:|
+| `ferroui_base` | 9.63 | 2.51 | 2.52 |
+| `control_catalog` (the compiled pages and the code of the sample) | 4.56 | 1.15 | 1.15 |
+| Skia with FreeType (C++) | 3.37 | 1.27 | 1.28 |
+| `ferroui_controls` | 3.08 | 1.11 | 1.13 |
+| `ferroui_themes_winui` | 1.28 | 0.31 | 0.31 |
+| `core`, `alloc`, `std`, `hashbrown` | 1.46 | 0.45 | 0.48 |
+| `ferroui_treedatagrid_core`, `ferroui_controls_treedatagrid`, `treedatagrid_demo` | 1.25 | 0.31 | 0.32 |
+| `ferroui_markup_xaml` (the runtime library of compiled markup) | 0.55 | 0.13 | 0.15 |
+| `ferroboard_core`, `ferroboard_core_ferro`, `ferroboard_controls` | 0.83 | 0.27 | 0.28 |
+| `ferroui_controls_color_picker` | 0.37 | 0.09 | 0.09 |
+| HarfBuzz, the image codecs of Skia and zlib, the C and C++ runtime | 0.79 | 0.27 | 0.28 |
+
+The largest mechanisms: closures (`FnOnce::call_once`, 14,424 functions, 5.60 MB, 1.45 MB saved
+with gzip), of which the 203 build closures of the compiled pages of the catalog are 3.29 MB
+(0.79 MB with gzip alone), the type and markup metadata closures 0.49 MB and the class vtables
+0.29 MB; the deferred control themes of the WinUI theme 1.03 MB; drop glue 0.45 MB; the property
+code per value type (`set_and_raise_core`, `update_source`, the routes of `StyledProperty<T>`,
+`any_value_*`) a few tenths of a MB per family, as in `binary-size.md`, section 5.5.
+
+Constant data by crate, from the link map (8.90 MB, sizes of the link before wasm-opt):
+
+| Origin | MB | What |
+|---|---:|---|
+| `ferroui_fonts_inter` | 1.88 | the six Inter fonts (0.93 MB with gzip), the default family of the browser |
+| `ferroboard_core` | 1.51 | the 206 resources of the keyboard: JSON layouts (0.60 MB, 0.05 MB with gzip) and gzip files, the English dictionary and the emoji lists of seven languages (0.63 MB, incompressible) |
+| `control_catalog` | 0.84 | strings and tables of the pages |
+| `ferroui_base` | 0.78 | the Unicode tries of text formatting (0.29 MB), strings, tables |
+| `ferroui_themes_winui` | 0.75 | the rows of the compiled theme |
+| `ferroui_controls` | 0.65 | strings and tables |
+| `ferroui_livecharts`, `ferroui_dialogs` | 0.37 | the world map of the GeoMap page (0.18 MB) and the font of the About dialog (0.17 MB) |
+
+What else the attribution found, each measured as the gzip of the code section without it:
+
+| Candidate | MB raw | MB gzip saved | Why it is not changed here |
+|---|---:|---:|---|
+| The Inter fonts as files of the site, fetched with the start-up files as the catalog's own fonts are | 1.88 | 0.93 | Moves bytes out of the module without making the site smaller; needs a start-up file list in the script of the platform for a crate other than the application |
+| The gzip resources of the keyboard fetched on demand | 0.63 | 0.63 | A change of how FerroBoard loads its resources |
+| The Simple theme of the colour picker (`ferroui_controls_color_picker::compiled_xaml::*simple*`), which the catalog does not use | 0.16 | 0.04 | Its document is public, and the loader table of the crate answers its URI, which keeps it linked (`xaml-themes.md`, section 4.1); a document loaded at run time can include it by URI (the tests of the catalog do) |
+| `image`, `png`, `fdeflate` and `miniz_oxide` 0.8, a second PNG decoder for the bundled QR image of the QR page | 0.08 | 0.04 | Small; the framework's decoder needs the render interface on the thread of the page and in the unit test of the sample |
+| `ferroui-markup-xaml` at `opt-level = "s"` instead of 3 | at most 0.55 | at most 0.15 for the whole crate | It runs at the construction of the theme and of every page |
+| `unicode-normalization` replaced by the NFKD of `icu_normalizer`, which `url` already links | 0.10 | less than 0.05 | Small; the NFKD data of ICU would be added |
+
+The `browser` profile already has every cold crate at `opt-level = "z"`: only the property system
+and the controls (`"s"`, scrolling) and the markup crates (3, start-up) are faster.
 
 ### Not done, and why
 
@@ -1293,6 +1406,22 @@ The fixed 512 MB is 1.77 times the peak of one pass, and a page that is visited 
 - **Memory outside the module**, above.
 - **The Home page in WebGL2 under the software rasteriser on a quiet machine**: the load rose during that series.
 - **Why** the software rasteriser withholds animation frames, and what the GPU process does during the 2 s of the first frame: only that the threads of the page wait.
+
+## 23. What a page switch uploads, and its gate (2026-11-13)
+
+The WebGL surface is drawn with Skia's Ganesh, and Ganesh pays for a clip that is not a rectangle with every draw under it: the clip becomes a path, its coverage is rasterised on the processor into a mask of one channel, and the mask is uploaded as a texture. When the dirty area of a frame became the rectangles that changed instead of the window (`desktop-performance.md`, sections 9.53 and 9.54), a switch between pages of the catalog was drawn under a clip of a region and uploaded a mask for nearly every draw: 190 on the first visit of the Buttons page where the site before uploaded 34, with twenty times the pixels. The desktop, drawn with Graphite, showed nothing of it, and the published site was slower to show every page.
+
+A render target now says whether its backend clips a region for every draw (`IRenderTarget::clips_regions_per_draw`; a Ganesh context does), and the frames of such a target are drawn one dirty rectangle at a time, each under a clip that is its rectangle (section 9.56 of `desktop-performance.md`, with the numbers).
+
+The gate counts instead of timing, because the time of a switch in headless Chrome does not tell the two apart on a fast processor:
+
+| File | What it does |
+|---|---|
+| `scripts/browser/gl-work.mjs` | An init script that counts the WebGL calls of the thread of the page: programs linked, draw calls, textures and their pixels, those of one channel (the masks), framebuffer binds and clears. |
+| `scripts/browser/navigation-cost.mjs <folder or address>` | Walks Buttons, CheckBox and Home of the catalog three times and prints what each switch cost, first visit and shown again; `--gate` fails over the budget of a page (`BUDGET`), `--json` is what `scripts/perf/gate.py --only browser` reads. |
+| `scripts/browser/tests/navigation_cost.test.mjs [folder or address]` | The regression test: every switch within the budget of its page, the frames drawn with WebGL on the thread of the page, a page shown again links no program. |
+
+The test runs in the browser job of every pull request (`ci.yml`), for both modules in `browser.yml`, and in `pages.yml` before the site is published: a site over its budget is not deployed. A module built with threads is measured with its frames drawn on the thread of the page (`RenderThread=false`), since the probe does not see the context of a worker. After a deployment the published site is checked with the same test and its address (`...?Threads=false`).
 
 ## Owner decision (2026-10-04)
 

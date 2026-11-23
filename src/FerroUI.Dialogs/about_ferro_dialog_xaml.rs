@@ -88,6 +88,8 @@ impl AboutFerroDialog {
     /// managed original).
     pub fn new() -> Ref<Self> {
         crate::register_types();
+        // The font of the document and the loader table of the crate: made known with the first dialog.
+        crate::register_types::register_compiled_markup();
         let this = instantiate(Self::construct());
         if let Err(error) = crate::compiled_about_ferro_dialog::populate(None, &this) {
             panic!("{}: {error}", Self::DOCUMENT_URI);

@@ -8,20 +8,94 @@ use crate::platform::{
 use crate::{Matrix, PixelSize, Rect, RoundedRect, Vector};
 use std::any::{Any, TypeId};
 use std::rc::Rc;
+use std::sync::atomic::{AtomicBool, AtomicU32, Ordering};
 
 /// The shared record of what was drawn on mock drawing contexts, one line
 /// per call, in call order.
 #[derive(Clone, Default)]
-pub struct DrawingLog(std::sync::Arc<std::sync::Mutex<Vec<String>>>);
+pub struct DrawingLog(
+    std::sync::Arc<std::sync::Mutex<Vec<String>>>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+    std::sync::Arc<std::sync::Mutex<Option<EntryHook>>>,
+    std::sync::Arc<std::sync::atomic::AtomicBool>,
+);
+
+/// What [`DrawingLog::on_entry`] runs, and the start of the entries it runs
+/// for.
+type EntryHook = (String, std::sync::Arc<dyn Fn() + Send + Sync>);
 
 impl DrawingLog {
     pub fn new() -> Self {
         Self::default()
     }
 
+    /// Makes the mock layers that record to this log hold a frame back
+    /// ([`IDrawingContextLayerImpl::has_pending_frame`]): a blit shows the
+    /// frame before the one drawn last, until the pending frame is
+    /// completed. Such a layer logs `Blit frame <shown> of <drawn>` and
+    /// `CompletePendingFrame`.
+    pub fn hold_layer_frames_back(&self, hold: bool) {
+        self.1.store(hold, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    fn layers_hold_frames_back(&self) -> bool {
+        self.1.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Makes the mock render targets that record to this log allow a frame
+    /// whose layer is drawn before their drawing context is created
+    /// ([`IRenderTarget::prepare_frame_ahead`](crate::platform::IRenderTarget::prepare_frame_ahead)),
+    /// and the mock layers that hold frames back ask for it
+    /// ([`IDrawingContextLayerImpl::draws_ahead_of_target`]). Such a target
+    /// logs `TargetContext` for every drawing context it creates.
+    pub fn draw_layers_ahead(&self, ahead: bool) {
+        self.2.store(ahead, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    pub(crate) fn layers_draw_ahead(&self) -> bool {
+        self.2.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Makes the mock render targets that record to this log answer that
+    /// they apply a clip of several rectangles to every draw on its own
+    /// ([`IRenderTarget::clips_regions_per_draw`](crate::platform::IRenderTarget::clips_regions_per_draw)).
+    pub fn clip_regions_per_draw(&self, per_draw: bool) {
+        self.5.store(per_draw, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    pub(crate) fn targets_clip_regions_per_draw(&self) -> bool {
+        self.5.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Makes the mock render targets that record to this log answer that
+    /// they are not ready when a drawing context is asked of them
+    /// ([`IRenderTarget::try_create_drawing_context`](crate::platform::IRenderTarget::try_create_drawing_context)).
+    /// Such a target logs `TargetNotReady`.
+    pub fn leave_targets_not_ready(&self, not_ready: bool) {
+        self.3.store(not_ready, std::sync::atomic::Ordering::SeqCst);
+    }
+
+    pub(crate) fn targets_are_not_ready(&self) -> bool {
+        self.3.load(std::sync::atomic::Ordering::SeqCst)
+    }
+
+    /// Runs `hook` after every entry that starts with `prefix`, on the
+    /// thread that records the entry: a test stops the thread that renders
+    /// at a known point of a frame with it.
+    pub fn on_entry(&self, prefix: &str, hook: impl Fn() + Send + Sync + 'static) {
+        *self.4.lock().unwrap() = Some((prefix.to_owned(), std::sync::Arc::new(hook)));
+    }
+
     /// Appends an entry.
     pub fn push(&self, entry: impl Into<String>) {
-        self.0.lock().unwrap().push(entry.into());
+        let entry = entry.into();
+        let hook = self.4.lock().unwrap().as_ref().filter(|(prefix, _)| entry.starts_with(prefix)).map(|(_, hook)| hook.clone());
+        self.0.lock().unwrap().push(entry);
+        if let Some(hook) = hook {
+            hook();
+        }
     }
 
     /// A copy of the entries recorded so far.
@@ -107,6 +181,11 @@ pub struct MockDrawingContextImpl {
     /// `PushPixelOperation <bounds> <operation>` / `NextPixelOperationSource`
     /// / `PopPixelOperation`), as a GPU backend does. Off by default.
     pub supports_gpu_effects: bool,
+    /// Whether the context asks for the graph of an effect brush in a scratch
+    /// target of the size of the brush (`prefers_bounded_effect_targets`), as
+    /// a backend whose layers have the size of its target does. Off by
+    /// default: the graph is drawn in place.
+    pub bounded_effect_targets: bool,
     /// Whether pushed render options are recorded with their values
     /// (`PushRenderOptions <text> <interpolation> <edge> <blending>
     /// <full opacity>`) rather than as `PushRenderOptions`. Off by default.
@@ -134,6 +213,7 @@ impl MockDrawingContextImpl {
             supports_acrylic: false,
             supports_layer_effects: false,
             supports_gpu_effects: false,
+            bounded_effect_targets: false,
             log_render_options: false,
             log_matrices: false,
             supports_scene_3d: false,
@@ -222,7 +302,17 @@ impl IDrawingContextImpl for MockDrawingContextImpl {
 
     fn create_layer(&mut self, size: PixelSize) -> Rc<dyn IDrawingContextLayerImpl> {
         self.log.push(format!("CreateLayer {size}"));
-        Rc::new(MockDrawingContextLayerImpl::new(self.log.clone(), size))
+        let mut layer = MockDrawingContextLayerImpl::new(self.log.clone(), size);
+        layer.supports_layer_effects = self.supports_layer_effects;
+        layer.supports_gpu_effects = self.supports_gpu_effects;
+        layer.bounded_effect_targets = self.bounded_effect_targets;
+        layer.supports_effects = self.supports_effects;
+        layer.log_effects = self.log_effects;
+        Rc::new(layer)
+    }
+
+    fn prefers_bounded_effect_targets(&self) -> bool {
+        self.bounded_effect_targets
     }
 
     fn push_clip(&mut self, clip: Rect) {
@@ -504,11 +594,34 @@ impl IDrawingContextWithAcrylicLikeSupport for MockDrawingContextImpl {
 pub struct MockDrawingContextLayerImpl {
     log: DrawingLog,
     size: PixelSize,
+    supports_layer_effects: bool,
+    supports_gpu_effects: bool,
+    bounded_effect_targets: bool,
+    supports_effects: bool,
+    log_effects: bool,
+    /// For a layer that holds frames back
+    /// ([`DrawingLog::hold_layer_frames_back`]): the number of frames drawn
+    /// into the layer, and the number of the frame a blit shows.
+    drawn: AtomicU32,
+    shown: AtomicU32,
+    /// Whether a frame was drawn since the last blit.
+    drew_since_blit: AtomicBool,
 }
 
 impl MockDrawingContextLayerImpl {
     pub fn new(log: DrawingLog, size: PixelSize) -> Self {
-        Self { log, size }
+        Self {
+            log,
+            size,
+            supports_layer_effects: false,
+            supports_gpu_effects: false,
+            bounded_effect_targets: false,
+            supports_effects: false,
+            log_effects: false,
+            drawn: AtomicU32::new(0),
+            shown: AtomicU32::new(0),
+            drew_since_blit: AtomicBool::new(false),
+        }
     }
 }
 
@@ -542,7 +655,19 @@ impl IBitmapImpl for MockDrawingContextLayerImpl {
 
 impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
     fn blit(&self, _context: &mut dyn IDrawingContextImpl) {
-        self.log.push("Blit");
+        if !self.log.layers_hold_frames_back() {
+            self.log.push("Blit");
+            return;
+        }
+        // A tick that drew a frame presents the one before it.
+        if self.drew_since_blit.swap(false, Ordering::SeqCst) {
+            self.shown.store(self.drawn.load(Ordering::SeqCst) - 1, Ordering::SeqCst);
+        }
+        self.log.push(format!(
+            "Blit frame {} of {}",
+            self.shown.load(Ordering::SeqCst),
+            self.drawn.load(Ordering::SeqCst)
+        ));
     }
 
     fn can_blit(&self) -> bool {
@@ -554,7 +679,33 @@ impl IDrawingContextLayerImpl for MockDrawingContextLayerImpl {
     }
 
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
-        Box::new(MockDrawingContextImpl::new(self.log.clone()))
+        if self.log.layers_hold_frames_back() {
+            self.drawn.fetch_add(1, Ordering::SeqCst);
+            self.drew_since_blit.store(true, Ordering::SeqCst);
+        }
+        let mut context = MockDrawingContextImpl::new(self.log.clone());
+        context.supports_layer_effects = self.supports_layer_effects;
+        context.supports_gpu_effects = self.supports_gpu_effects;
+        context.bounded_effect_targets = self.bounded_effect_targets;
+        context.supports_effects = self.supports_effects;
+        context.log_effects = self.log_effects;
+        Box::new(context)
+    }
+
+    fn has_pending_frame(&self) -> bool {
+        self.log.layers_hold_frames_back() && self.shown.load(Ordering::SeqCst) < self.drawn.load(Ordering::SeqCst)
+    }
+
+    fn complete_pending_frame(&self) {
+        if self.log.layers_hold_frames_back() {
+            self.log.push("CompletePendingFrame");
+            self.shown.store(self.drawn.load(Ordering::SeqCst), Ordering::SeqCst);
+            self.drew_since_blit.store(false, Ordering::SeqCst);
+        }
+    }
+
+    fn draws_ahead_of_target(&self) -> bool {
+        self.log.layers_hold_frames_back() && self.log.layers_draw_ahead()
     }
 
     fn create_shared_snapshot(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl> {

@@ -57,6 +57,7 @@ mod resource_editor;
 mod runtime;
 mod selection_layout;
 mod session;
+#[cfg(feature = "collaboration-client")]
 pub mod sharing;
 mod surface;
 mod timeline_lane;

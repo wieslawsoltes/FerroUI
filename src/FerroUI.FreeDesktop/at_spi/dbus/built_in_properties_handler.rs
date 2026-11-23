@@ -8,7 +8,7 @@ use super::interface::{
 };
 use std::collections::HashMap;
 use std::rc::Rc;
-use zbus::zvariant::{OwnedValue, Value};
+use zbus::{OwnedVariant, Variant};
 
 use super::interface::DBusInterface;
 
@@ -37,12 +37,12 @@ pub(crate) fn handle(table: &ObjectTable, path: &str, member: &str, body: &zbus:
                 return Err(DBusError::new(ERROR_INVALID_ARGS, "Invalid GetAll arguments."));
             };
             let handler = find(table, path, &interface)?;
-            let all: HashMap<String, Value<'static>> =
+            let all: HashMap<String, Variant<'static>> =
                 handler.get_all_properties().into_iter().map(|(name, value)| (name.to_string(), value)).collect();
             reply((all,))
         }
         "Set" => {
-            let Ok((interface, property, value)) = body.deserialize::<(String, String, OwnedValue)>() else {
+            let Ok((interface, property, value)) = body.deserialize::<(String, String, OwnedVariant)>() else {
                 return Err(DBusError::new(ERROR_INVALID_ARGS, "Invalid Set arguments."));
             };
             let handler = find(table, path, &interface)?;

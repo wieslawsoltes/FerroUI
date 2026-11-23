@@ -93,13 +93,16 @@ export function serve(siteDirectory, { isolated = false, port = 0 } = {}) {
     return new Promise((resolve) => server.listen(port, "127.0.0.1", () => resolve(server)));
 }
 
-// Decodes an 8-bit RGB or RGBA, non-interlaced PNG (what the screenshots are).
+// Decodes an 8-bit grayscale, RGB or RGBA non-interlaced PNG (screenshots and fixtures).
 export function decodePng(buffer) {
     let offset = 8; let width = 0; let height = 0; let channels = 4; const idat = [];
     while (offset < buffer.length) {
         const length = buffer.readUInt32BE(offset); const type = buffer.toString("latin1", offset + 4, offset + 8);
         const body = buffer.subarray(offset + 8, offset + 8 + length);
-        if (type === "IHDR") { width = body.readUInt32BE(0); height = body.readUInt32BE(4); channels = body[9] === 6 ? 4 : 3; }
+        if (type === "IHDR") {
+            if (body[8] !== 8 || ![0, 2, 6].includes(body[9]) || body[12] !== 0) throw new Error("Unsupported PNG format");
+            width = body.readUInt32BE(0); height = body.readUInt32BE(4); channels = body[9] === 0 ? 1 : body[9] === 6 ? 4 : 3;
+        }
         if (type === "IDAT") { idat.push(body); }
         offset += 12 + length;
     }
@@ -122,7 +125,8 @@ export function decodePng(buffer) {
     return {
         width,
         height,
-        pixel: (x, y) => Array.from(pixels.subarray(y * stride + x * channels, y * stride + x * channels + 3))
+        pixel: (x, y) => channels === 1 ? Array(3).fill(pixels[y * stride + x])
+            : Array.from(pixels.subarray(y * stride + x * channels, y * stride + x * channels + 3))
     };
 }
 

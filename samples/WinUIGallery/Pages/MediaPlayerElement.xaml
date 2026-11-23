@@ -1,0 +1,21 @@
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+            xmlns:video="using:FerroUI.Media.Video.Controls" Spacing="12">
+  <TextBlock Text="A MediaPlayerElement with transport controls" FontSize="18" />
+  <Border Background="Black" MaxWidth="640" Height="300" HorizontalAlignment="Stretch">
+    <video:MediaPlayerElement x:Name="GalleryPlayer" AutoPlay="False" AreTransportControlsEnabled="True" />
+  </Border>
+  <WrapPanel>
+    <Button x:Name="LoadGalleryVideo" Content="Load bundled video" />
+    <Button x:Name="OpenGalleryVideo" Content="Open file…" />
+    <CheckBox x:Name="GalleryCompact" Content="Compact transport" />
+    <CheckBox x:Name="GalleryFullWindow" Content="Full window" />
+  </WrapPanel>
+  <TextBlock Text="A MediaPlayerElement that autoplays the selected video" FontSize="18" />
+  <Border Background="Black" MaxWidth="400" Height="225" HorizontalAlignment="Stretch">
+    <video:MediaPlayerElement x:Name="GalleryAutoPlayer" AutoPlay="True" AreTransportControlsEnabled="True" />
+  </Border>
+  <Button x:Name="LoadGalleryAutoVideo" Content="Load and autoplay" />
+  <TextBlock x:Name="GalleryMediaStatus" TextWrapping="Wrap" />
+  <TextBlock Text="Sintel © Blender Foundation · CC BY 3.0. Excerpt trimmed and re-encoded. https://www.sintel.org · https://creativecommons.org/licenses/by/3.0/"
+             TextWrapping="Wrap" />
+</StackPanel>

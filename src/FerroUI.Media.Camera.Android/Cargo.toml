@@ -1,6 +1,6 @@
 [package]
 name = "ferroui-media-camera-android"
-description = "CameraX capture and native JPEG with shared Android GPU preview"
+description = "CameraX photo and silent video capture with shared Android GPU preview"
 version.workspace = true
 edition.workspace = true
 rust-version.workspace = true

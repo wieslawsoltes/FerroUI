@@ -1050,6 +1050,22 @@ impl<'ast> Visit<'ast> for Code<'_> {
         }
     }
 
+    fn visit_expr_call(&mut self, node: &'ast syn::ExprCall) {
+        if let (Some(references), syn::Expr::Path(function)) = (self.references.as_deref_mut(), &*node.func) {
+            if let Some(last) = function.path.segments.last() {
+                references.add_call(&last.ident.to_string());
+            }
+        }
+        syn::visit::visit_expr_call(self, node);
+    }
+
+    fn visit_expr_method_call(&mut self, node: &'ast syn::ExprMethodCall) {
+        if let Some(references) = self.references.as_deref_mut() {
+            references.add_call(&node.method.to_string());
+        }
+        syn::visit::visit_expr_method_call(self, node);
+    }
+
     fn visit_lit_str(&mut self, node: &'ast syn::LitStr) {
         if let Some(references) = self.references.as_deref_mut() {
             references.add_string(&node.value());
@@ -1089,6 +1105,10 @@ impl Code<'_> {
                 TokenTree::Ident(ident) => {
                     if let Some(references) = self.references.as_deref_mut() {
                         references.add_name(&ident.to_string());
+                        // A call: the name with its arguments in parentheses after it.
+                        if tokens.get(index + 1).is_some_and(|next| group_of(next, Delimiter::Parenthesis).is_some()) {
+                            references.add_call(&ident.to_string());
+                        }
                     }
                     // A path starts here unless a segment and `::` are before it; after a `::`
                     // alone it is a path from the root.

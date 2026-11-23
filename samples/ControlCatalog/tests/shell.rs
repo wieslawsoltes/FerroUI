@@ -371,10 +371,10 @@ fn assert_cards(section_control: &Ref<SectionControl>, section: &Rc<HomeSection>
     }
 }
 
-/// The home page shows, under the title of each section, the cards of the pages of the
-/// section.
+/// The home page realizes sections as they scroll into view, with the cards of
+/// each section under its title.
 #[test]
-fn the_home_page_shows_the_cards_of_every_section() {
+fn the_home_page_realizes_each_section_as_it_scrolls() {
     for (width, height) in SIZES {
         let context = format!("{width}x{height}");
         let shell = Shell::start(width, height);
@@ -383,24 +383,106 @@ fn the_home_page_shows_the_cards_of_every_section() {
 
         let sections = shell.view_model.home_sections();
         let section_controls = descendants::<SectionControl>(&page);
-        assert_eq!(sections.len(), section_controls.len(), "{context}: a section control for each section");
-        for (section_control, section) in section_controls.iter().zip(sections.iter()) {
-            // The title is the text block before the section control in the template of the section.
-            let template_root = section_control.get_visual_parent().expect("the panel of the section");
-            let title = descendants::<TextBlock>(&template_root).into_iter().next().and_then(|title| title.text());
-            assert_eq!(Some(section.title()), title, "{context}: the title above the cards");
-            assert_cards(section_control, section, &context);
-        }
+        assert!(section_controls.len() < sections.len(), "{context}: off-screen sections are virtualized");
 
         // The first card is in the viewport and takes the input at its middle.
-        let first = cards(&section_controls[0]).into_iter().next().expect("the first card");
+        let first_section = section_controls.first().expect("the first section is realized");
+        let first = cards(first_section).into_iter().next().expect("the first card");
         let bounds = shell.bounds_of(&first);
         assert!(
             Rect::new(0.0, 0.0, width, height).contains_rect(bounds),
             "{context}: the first card at {bounds:?} is in the window",
         );
         assert!(shell.is_hit(&first, bounds.center()), "{context}: the first card is hit at its middle");
+
+        let scroller = descendants::<ScrollViewer>(&page).into_iter().next().expect("the home page scroller");
+        let mut next_section = 0;
+        for _ in 0..100 {
+            for section_control in descendants::<SectionControl>(&page) {
+                let Some(section) = sections.get(next_section) else { break };
+                if from_markup_value::<Rc<HomeSection>>(&section_control.data_context())
+                    .is_some_and(|current| Rc::ptr_eq(&current, section))
+                {
+                    let template_root = section_control.get_visual_parent().expect("the panel of the section");
+                    let title = descendants::<TextBlock>(&template_root).into_iter().next().and_then(|title| title.text());
+                    assert_eq!(Some(section.title()), title, "{context}: the title above the cards");
+                    assert_cards(&section_control, section, &context);
+                    next_section += 1;
+                }
+            }
+            if next_section == sections.len() {
+                break;
+            }
+            let offset = scroller.offset();
+            scroller.set_offset(ferroui_base::Vector::new(0.0, offset.y + scroller.viewport().height / 2.0));
+            shell.settle();
+            assert!(scroller.offset().y > offset.y, "{context}: the page scrolls to the next section");
+        }
+        assert_eq!(sections.len(), next_section, "{context}: every section can be reached by scrolling");
         assert_eq!(Vec::<String>::new(), shell.binding_log(), "{context}: no binding of the home page reports");
+    }
+}
+
+/// Tab moves the focus from card to card through every section of the home page, and Shift+Tab
+/// back: the panel of the sections realizes the section beside the first or the last one of its
+/// viewport while that one has the focus (its focus trail), so the focus does not leave the page at
+/// the last card of a realized section.
+#[test]
+fn tab_moves_through_the_cards_of_every_section_of_the_home_page() {
+    use ferroui_base::input::raw::{RawKeyEventArgs, RawKeyEventType};
+    use ferroui_base::input::{Key, KeyDeviceType, PhysicalKey};
+
+    for (width, height) in SIZES {
+        let context = format!("{width}x{height}");
+        let shell = Shell::start(width, height);
+        let tab = |modifiers: RawInputModifiers| {
+            let input = ferroui_controls::platform::ITopLevelImpl::input(&*shell.window_impl)
+                .expect("the window handles input");
+            for type_ in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
+                input(Rc::new(RawKeyEventArgs::new(
+                    shell.keyboard.clone() as Rc<dyn IInputDevice>,
+                    0,
+                    shell.input_root(),
+                    type_,
+                    Key::Tab,
+                    modifiers,
+                    PhysicalKey::Tab,
+                    None,
+                    KeyDeviceType::Keyboard,
+                )));
+            }
+            shell.settle();
+        };
+        // The page of the card with the focus.
+        let focused = || -> Option<Rc<PageItem>> {
+            let element = shell.window.focus_manager().get_focused_element()?;
+            from_markup_value::<Rc<PageItem>>(&element.cast::<Button>()?.data_context())
+        };
+        let assert_focused = |item: &Rc<PageItem>, key: &str| {
+            let current = focused();
+            assert!(
+                current.as_ref().is_some_and(|current| Rc::ptr_eq(current, item)),
+                "{context}: after {key} the card {} has the focus, not {:?}",
+                item.header(),
+                current.map(|current| current.header()),
+            );
+        };
+
+        let expected: Vec<Rc<PageItem>> =
+            shell.view_model.home_sections().iter().flat_map(|section| items(section)).collect();
+        let page = shell.page();
+        let first_section = descendants::<SectionControl>(&page).into_iter().next().expect("the first section");
+        let first = cards(&first_section).into_iter().next().expect("the first card");
+        assert!(first.focus(), "{context}: the first card takes the focus");
+        assert_focused(&expected[0], "the focus of the first card");
+        for item in &expected[1..] {
+            tab(RawInputModifiers::NONE);
+            assert_focused(item, "Tab");
+        }
+        for item in expected.iter().rev().skip(1) {
+            tab(RawInputModifiers::SHIFT);
+            assert_focused(item, "Shift+Tab");
+        }
     }
 }
 
@@ -717,6 +799,32 @@ fn the_pane_toggles_and_the_back_button_follows_the_journal() {
     assert!(shell.page().cast::<HomePage>().is_some());
     assert_eq!(vec![text("Home")], selected_entries(&shell), "the selection follows the journal");
     assert!(!navigation.is_back_enabled(), "nothing before the home page");
+}
+
+/// Not from upstream (#560): in the high contrast variant of the WinUI theme a card takes the
+/// system colours of `CustomThemes.xaml` (its border the window text colour on the window colour),
+/// not the dark card the variant inherited before.
+#[test]
+fn a_card_takes_the_system_colours_in_high_contrast() {
+    use ferroui_base::media::{Color, IBrush};
+
+    let shell = Shell::start(1400.0, 900.0);
+    shell.window.set_requested_theme_variant(Some(ferroui_themes_winui::WinUITheme::high_contrast()));
+    shell.settle();
+    let page = shell.page();
+    let section_control = descendants::<SectionControl>(&page).into_iter().next().expect("the first section");
+    let card = cards(&section_control).into_iter().next().expect("the first card");
+    let presenter = card.presenter().expect("the content presenter of the template of the card");
+    let colour = |brush: Option<Rc<dyn IBrush>>| -> Option<Color> {
+        brush.and_then(|brush| brush.as_solid_color_brush().map(|brush| brush.color()))
+    };
+    let border = colour(presenter.border_brush()).expect("a solid border");
+    let background = colour(card.background()).expect("a solid background");
+    for (name, catalog) in [("light", "#E5E5EA"), ("dark", "#3A3A45")] {
+        assert_ne!(Color::parse(catalog).ok(), Some(border), "not the border of the {name} catalog");
+    }
+    assert_ne!(Color::parse("#2B2B33").ok(), Some(background), "not the dark card");
+    assert_ne!(border, background, "the border stands out from the card (text colour on window colour)");
 }
 
 /// A card under the pointer has the border of the hovered card, and a pressed one is dimmed.

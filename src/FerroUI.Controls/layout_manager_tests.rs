@@ -3,10 +3,10 @@
 
 use crate::layout_test_control::{LayoutTestControl, LayoutTestRoot};
 use crate::test_support::test_scope;
-use crate::{Border, Decorator, StackPanel};
+use crate::{Border, Canvas, Decorator, StackPanel};
 use ferroui_base::layout::Layoutable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-use ferroui_base::{Ref, Size};
+use ferroui_base::{Rect, Ref, Size};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -617,4 +617,90 @@ fn great_grandparent_can_invalidate_grandparent_measure_during_arrange() {
     assert!(great_grandparent.is_arrange_valid());
     assert!(root.is_measure_valid());
     assert!(root.is_arrange_valid());
+}
+
+// The four tests below are not from the reference tests: an element that is arranged at another
+// place with the size it had keeps the arrangement of its inside (desktop-performance.md,
+// section 9.74).
+
+/// A root with a canvas with `moved`, a hundred by fifty, which holds `inner`; laid out.
+fn moved_and_inner() -> (Ref<LayoutTestRoot>, Ref<LayoutTestControl>, Ref<LayoutTestControl>) {
+    let inner = LayoutTestControl::new();
+    let moved = LayoutTestControl::new();
+    moved.set_child(&inner);
+    moved.set_width(100.0);
+    moved.set_height(50.0);
+    let canvas = Canvas::new();
+    canvas.children().add(&moved);
+    let root = LayoutTestRoot::new();
+    root.set_child(&canvas);
+    root.layout_manager().execute_initial_layout_pass();
+    assert_eq!(moved.bounds(), Rect::new(0.0, 0.0, 100.0, 50.0));
+    moved.set_arranged(false);
+    inner.set_arranged(false);
+    (root, moved, inner)
+}
+
+#[test]
+fn an_element_that_only_moves_keeps_the_arrangement_of_its_inside() {
+    let _scope = test_scope();
+    let (root, moved, inner) = moved_and_inner();
+    let inside = inner.bounds();
+
+    Canvas::set_left(&moved, 30.0);
+    Canvas::set_top(&moved, 7.0);
+    root.layout_manager().execute_layout_pass();
+
+    assert_eq!(moved.bounds(), Rect::new(30.0, 7.0, 100.0, 50.0));
+    assert!(!moved.arranged(), "the inside of an element that only moves is not arranged again");
+    assert!(!inner.arranged());
+    assert_eq!(inner.bounds(), inside);
+    assert!(moved.is_arrange_valid() && inner.is_arrange_valid());
+}
+
+#[test]
+fn an_invalid_element_below_one_that_only_moves_is_arranged_in_the_pass() {
+    let _scope = test_scope();
+    let (root, moved, inner) = moved_and_inner();
+
+    inner.invalidate_arrange();
+    Canvas::set_left(&moved, 30.0);
+    root.layout_manager().execute_layout_pass();
+
+    assert_eq!(moved.bounds(), Rect::new(30.0, 0.0, 100.0, 50.0));
+    assert!(!moved.arranged());
+    assert!(inner.arranged(), "the layout manager arranges what was invalid below the element");
+    assert!(inner.is_arrange_valid());
+}
+
+#[test]
+fn an_element_that_moves_and_changes_its_size_arranges_its_inside() {
+    let _scope = test_scope();
+    let (root, moved, inner) = moved_and_inner();
+
+    Canvas::set_left(&moved, 30.0);
+    moved.set_width(120.0);
+    root.layout_manager().execute_layout_pass();
+
+    assert_eq!(moved.bounds(), Rect::new(30.0, 0.0, 120.0, 50.0));
+    assert!(moved.arranged());
+    assert_eq!(inner.bounds().size(), Size::new(120.0, 50.0));
+}
+
+#[test]
+fn an_element_in_no_tree_that_moves_arranges_its_inside() {
+    let _scope = test_scope();
+    // Measured and arranged by hand: no layout manager arranges what is invalid below it.
+    let inner = LayoutTestControl::new();
+    let moved = LayoutTestControl::new();
+    moved.set_child(&inner);
+    moved.measure(Size::new(100.0, 50.0));
+    moved.arrange(Rect::new(0.0, 0.0, 100.0, 50.0));
+    moved.set_arranged(false);
+    inner.invalidate_arrange();
+
+    moved.arrange(Rect::new(10.0, 0.0, 100.0, 50.0));
+
+    assert!(moved.arranged());
+    assert!(inner.is_arrange_valid());
 }

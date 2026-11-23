@@ -25,6 +25,7 @@ impl DesignerWorkspace {
         let uri = super::project::document_identity(&uri)?;
         self.capture_tab();
         self.pending_source.set(false);
+        #[cfg(feature = "collaboration-client")]
         self.disconnect_sharing();
         self.session
             .borrow_mut()

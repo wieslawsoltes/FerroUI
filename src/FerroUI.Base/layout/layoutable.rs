@@ -1,14 +1,14 @@
 use super::{EffectiveViewportChangedEventArgs, ILayoutManager, LayoutHelper, MinMax};
 use crate::reactive::{Disposable, Subscription};
 use crate::styling::{Container, ContainerSizing};
-use crate::utilities::{HandlerList, MathUtilities};
+use crate::utilities::{HandlerList, MathUtilities, OptionCell};
 use crate::{
     ferro_class, ferro_property, instantiate, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, ObjectType, Point, Rect, Ref, Size, StyledElementImpl, StyledElementImplExt,
-    StyledProperty, StyledPropertyOptions, Thickness, Upcast, Visual, VisualImpl, VisualImplExt,
+    FerroPropertyChangedEventArgs, ObjectType, Point, PropertyChangeHandler, Rect, Ref, Size, StyledElementImpl,
+    StyledElementImplExt, StyledProperty, StyledPropertyOptions, Thickness, Upcast, Visual, VisualImpl, VisualImplExt,
     VisualTreeAttachmentEventArgs,
 };
-use std::cell::{Cell, RefCell};
+use std::cell::Cell;
 use std::rc::Rc;
 
 /// Defines how a control aligns itself horizontally in its parent control.
@@ -48,8 +48,17 @@ pub struct Layoutable {
     /// (desktop-performance.md, section 9.9).
     hot_sizes: HotSizes,
     is_measure_valid: Cell<bool>,
+    /// Whether the measure of this element and of every layoutable element below it is invalid
+    /// (`LayoutHelper::invalidate_self_and_children_measure`): set by that walk, cleared when
+    /// this element or one below it is measured. An addition (FerroUI deviation,
+    /// desktop-performance.md section 9.21).
+    pub(crate) subtree_measure_invalid: Cell<bool>,
     is_arrange_valid: Cell<bool>,
     measuring: Cell<bool>,
+    /// Set for the arrange of an element that was arranged, is still valid and is given the
+    /// size it had at another place: its arrangement inside is what it was (`arrange`). An
+    /// addition (FerroUI deviation, desktop-performance.md section 9.74).
+    arrange_moved_only: Cell<bool>,
     previous_measure: Cell<Option<Size>>,
     /// The available sizes over which the last measure holds (section 9.15).
     measure_hold: Cell<Option<crate::layout::MeasureHold>>,
@@ -57,7 +66,8 @@ pub struct Layoutable {
     is_attaching_to_visual_tree: Cell<bool>,
     effective_viewport_changed: HandlerList<dyn Fn(&EffectiveViewportChangedEventArgs)>,
     layout_updated: HandlerList<dyn Fn()>,
-    layout_updated_subscription: RefCell<Option<(Rc<dyn ILayoutManager>, u64)>>,
+    // Behind a word: an element is subscribed while it has handlers of `layout_updated`, which few have.
+    layout_updated_subscription: OptionCell<Box<(Rc<dyn ILayoutManager>, u64)>>,
 }
 
 ferro_class! {
@@ -75,10 +85,20 @@ ferro_class! {
         /// pass. Returns the size the control would like to be.
         fn measure_override(this, available_size: Size) -> Size;
         /// The range of constraints, around the one `measure_override` was just given, over which
-        /// it returns the same size and leaves the descendants as they are, or `None` (the
-        /// default) when only that constraint is known to. An addition (desktop-performance.md
-        /// section 9.15): an element is not measured again at an available size inside the hold.
-        fn measure_hold_override(this, constraint: Size) -> Option<crate::layout::MeasureHold>;
+        /// it returns the same size and leaves the descendants as they are, or `None` when only
+        /// that constraint is known to. An addition (desktop-performance.md section 9.15): an
+        /// element is not measured again at an available size inside the hold.
+        ///
+        /// A hold describes one `measure_override`, and is inherited only with it (section
+        /// 9.57): a class that overrides `measure_override` and not this member holds nothing,
+        /// whatever its base class holds, and so does a class whose implementation is a plain
+        /// `impl` without this member. A class that states it overrides neither
+        /// (`ferro_impl_classes!`, `ferro_overrides!`) has the hold of its base class; where
+        /// that is the measure of `Layoutable` itself, which gives every visual child the
+        /// constraint and returns the largest desired size, it is what all the visible
+        /// children hold.
+        fn measure_hold_override(this, constraint: Size) -> Option<crate::layout::MeasureHold>,
+            follows measure_override else Layoutable::holds_nothing;
         /// The default implementation of the control's arrange pass.
         ///
         /// This calculates the final bounds taking into account the control's
@@ -96,10 +116,20 @@ ferro_class! {
 crate::ferro_class_info!(Layoutable { new: Layoutable::new });
 
 crate::ferro_overrides! { impl FerroObjectImpl for Layoutable {
+    // The handler leaves where the property is not one it named (`reacts_to`).
+    inherited_reactions: crate::InheritedReactions::to(|property| {
+        property.has_change_handler(PropertyChangeHandler::Layoutable).into()
+    });
+
     fn on_property_changed(this: &Self, change: &FerroPropertyChangedEventArgs<'_>) {
         Self::parent_on_property_changed(this, change);
 
-        if change.property() == Visual::is_visible_property().as_property() {
+        const HANDLER: PropertyChangeHandler = PropertyChangeHandler::Layoutable;
+        if !change.reaches(HANDLER) {
+            return;
+        }
+
+        if change.is_for(HANDLER, Visual::is_visible_property().as_property()) {
             this.set_desired_size(Size::default());
 
             // All changes to visibility cause the parent element to be notified.
@@ -149,6 +179,12 @@ impl StyledElementImpl for Layoutable {
 }
 
 impl VisualImpl for Layoutable {
+    /// `render` is the one of the base class, and so is what a new size does to it: a class
+    /// that draws nothing is not drawn again when it is resized (section 9.89).
+    fn resize_changes_drawing(this: &Self, old: Size, new: Size) -> bool {
+        Self::parent_resize_changes_drawing(this, old, new)
+    }
+
     fn on_attached_to_visual_tree_core(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.is_attaching_to_visual_tree.set(true);
         Self::parent_on_attached_to_visual_tree_core(this, e);
@@ -206,9 +242,11 @@ impl LayoutableImpl for Layoutable {
         let constrained_size = LayoutHelper::apply_layout_constraints_min_max(min_max, available_size.deflate(margin));
 
         let mut container_sizing = ContainerSizing::Normal;
-        if let Some(query_provider) = Container::get_query_provider(this) {
-            let sizing = Container::get_sizing(this);
-            if sizing != ContainerSizing::Normal {
+        // Only a container that is queried has a provider to tell its size: the sizing is asked
+        // first, which is kept, and the provider only of such a container.
+        let sizing = this.container_sizing();
+        if sizing != ContainerSizing::Normal {
+            if let Some(query_provider) = Container::get_query_provider(this) {
                 container_sizing = sizing;
                 query_provider.set_size(constrained_size.width, constrained_size.height, container_sizing);
             }
@@ -254,10 +292,16 @@ impl LayoutableImpl for Layoutable {
         // The hold of the constraint, in the space of the available size (section 9.15).
         if let Some(hold) = hold {
             let valid = min_max.min_width <= min_max.max_width && min_max.min_height <= min_max.max_height;
-            let width_range = crate::layout::measure_hold::map_axis(
-                hold.width, margin.left + margin.right, min_max.min_width, min_max.max_width, width, available_size.width);
-            let height_range = crate::layout::measure_hold::map_axis(
-                hold.height, margin.top + margin.bottom, min_max.min_height, min_max.max_height, height, available_size.height);
+            // An axis whose desired size is cut to the available size holds at that available
+            // size, and the other axis over its range (section 9.86).
+            use crate::layout::measure_hold::map_axis_or_its_size;
+            let (across, along) = (margin.left + margin.right, margin.top + margin.bottom);
+            let width_range = map_axis_or_its_size(
+                hold.width, across, min_max.min_width, min_max.max_width, width, available_size.width,
+                constrained_size.width);
+            let height_range = map_axis_or_its_size(
+                hold.height, along, min_max.min_height, min_max.max_height, height, available_size.height,
+                constrained_size.height);
             if let (true, Some(width_range), Some(height_range)) = (valid, width_range, height_range) {
                 this.measure_hold.set(Some(crate::layout::MeasureHold::new(width_range, height_range)));
             }
@@ -279,8 +323,22 @@ impl LayoutableImpl for Layoutable {
         Size::new(width, height)
     }
 
-    fn measure_hold_override(_this: &Self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
-        None
+    /// The hold of the measure below: every visual child gets the constraint, and the result is
+    /// the largest desired size, so the measure holds wherever all the visible children do (and
+    /// everywhere without one). A child that is not visible has no desired size at any
+    /// constraint.
+    fn measure_hold_override(this: &Self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
+        let mut hold = crate::layout::MeasureHold::ANY;
+        if let Some(children) = this.visual_children_snapshot() {
+            for visual in children.iter() {
+                if let Some(layoutable) = visual.downcast_ref::<Layoutable>() {
+                    if layoutable.is_visible() {
+                        hold = hold.intersect(layoutable.measure_hold()?)?;
+                    }
+                }
+            }
+        }
+        Some(hold)
     }
 
     fn measure_override(this: &Self, available_size: Size) -> Size {
@@ -347,7 +405,17 @@ impl LayoutableImpl for Layoutable {
             available_size_minus_margins = LayoutHelper::round_layout_size_up(available_size_minus_margins, scale);
         }
 
-        size = this.arrange_override(size).constrain(size);
+        // Deviation (DEVIATIONS.md, Layout): upstream arranges the inside of an element again
+        // whenever its rectangle changes. An element that only moves is given the size it was
+        // given before, and nothing that the arrangement of its inside reads has changed since,
+        // or the element would not be valid: the size it took then is the size it takes now, and
+        // its children are where they were. A scroll moves a content of a thousand rows without
+        // a visit to one of them (section 9.74).
+        size = if this.arrange_moved_only.get() {
+            this.bounds().size()
+        } else {
+            this.arrange_override(size).constrain(size)
+        };
 
         match horizontal_alignment {
             HorizontalAlignment::Center | HorizontalAlignment::Stretch => {
@@ -492,7 +560,14 @@ crate::ferro_properties! { impl Layoutable {
 } }
 
 impl Layoutable {
+    /// The hold of a class that overrides `measure_override` and not `measure_hold_override`:
+    /// none, whatever its base class holds (the fallback of the member in the class declaration).
+    pub(crate) fn holds_nothing(&self, _constraint: Size) -> Option<crate::layout::MeasureHold> {
+        None
+    }
+
     fn static_constructor() {
+        PropertyChangeHandler::Layoutable.reacts_to(&[Visual::is_visible_property().as_property()]);
         Self::affects_measure::<Layoutable>(&[
             Self::width_property().as_property(),
             Self::height_property().as_property(),
@@ -527,13 +602,17 @@ impl Layoutable {
     }
 
     /// Creates the class data; see [`crate::FerroObject::construct`].
+    // Inlined into `Interactive::construct`, its one caller outside tests (see there).
+    #[inline]
     pub fn construct() -> Self {
         Self {
             base: Visual::construct(),
             desired_size: Cell::new(Size::default()),
             hot_sizes: HotSizes::default(),
             is_measure_valid: Cell::new(false),
+            subtree_measure_invalid: Cell::new(false),
             is_arrange_valid: Cell::new(false),
+            arrange_moved_only: Cell::new(false),
             measuring: Cell::new(false),
             previous_measure: Cell::new(None),
             measure_hold: Cell::new(None),
@@ -541,7 +620,7 @@ impl Layoutable {
             is_attaching_to_visual_tree: Cell::new(false),
             effective_viewport_changed: HandlerList::new(),
             layout_updated: HandlerList::new(),
-            layout_updated_subscription: RefCell::new(None),
+            layout_updated_subscription: OptionCell::new(),
         }
     }
 
@@ -595,7 +674,7 @@ impl Layoutable {
     }
 
     fn subscribe_layout_updated(&self, manager: Rc<dyn ILayoutManager>) {
-        if self.layout_updated_subscription.borrow().is_some() {
+        if self.layout_updated_subscription.is_some() {
             return;
         }
         let weak = self.to_ref().downgrade();
@@ -608,11 +687,12 @@ impl Layoutable {
                 }
             }
         }));
-        *self.layout_updated_subscription.borrow_mut() = Some((manager, token));
+        self.layout_updated_subscription.set(Some(Box::new((manager, token))));
     }
 
     fn unsubscribe_layout_updated(&self) {
-        if let Some((manager, token)) = self.layout_updated_subscription.take() {
+        if let Some(subscription) = self.layout_updated_subscription.take() {
+            let (manager, token) = *subscription;
             manager.remove_layout_updated(token);
         }
     }
@@ -639,7 +719,7 @@ impl Layoutable {
 
     /// The width of the element.
     pub fn width(&self) -> f64 {
-        self.hot_sizes.width.get(self.values().value_generation(), || self.get_value(Self::width_property()))
+        self.hot(HotSizes::WIDTH, &self.hot_sizes.width, || self.get_value(Self::width_property()))
     }
 
     pub fn set_width(&self, value: f64) {
@@ -648,7 +728,7 @@ impl Layoutable {
 
     /// The height of the element.
     pub fn height(&self) -> f64 {
-        self.hot_sizes.height.get(self.values().value_generation(), || self.get_value(Self::height_property()))
+        self.hot(HotSizes::HEIGHT, &self.hot_sizes.height, || self.get_value(Self::height_property()))
     }
 
     pub fn set_height(&self, value: f64) {
@@ -657,7 +737,7 @@ impl Layoutable {
 
     /// The minimum width of the element.
     pub fn min_width(&self) -> f64 {
-        self.hot_sizes.min_width.get(self.values().value_generation(), || self.get_value(Self::min_width_property()))
+        self.hot(HotSizes::MIN_WIDTH, &self.hot_sizes.min_width, || self.get_value(Self::min_width_property()))
     }
 
     pub fn set_min_width(&self, value: f64) {
@@ -666,7 +746,7 @@ impl Layoutable {
 
     /// The maximum width of the element.
     pub fn max_width(&self) -> f64 {
-        self.hot_sizes.max_width.get(self.values().value_generation(), || self.get_value(Self::max_width_property()))
+        self.hot(HotSizes::MAX_WIDTH, &self.hot_sizes.max_width, || self.get_value(Self::max_width_property()))
     }
 
     pub fn set_max_width(&self, value: f64) {
@@ -675,7 +755,7 @@ impl Layoutable {
 
     /// The minimum height of the element.
     pub fn min_height(&self) -> f64 {
-        self.hot_sizes.min_height.get(self.values().value_generation(), || self.get_value(Self::min_height_property()))
+        self.hot(HotSizes::MIN_HEIGHT, &self.hot_sizes.min_height, || self.get_value(Self::min_height_property()))
     }
 
     pub fn set_min_height(&self, value: f64) {
@@ -684,7 +764,7 @@ impl Layoutable {
 
     /// The maximum height of the element.
     pub fn max_height(&self) -> f64 {
-        self.hot_sizes.max_height.get(self.values().value_generation(), || self.get_value(Self::max_height_property()))
+        self.hot(HotSizes::MAX_HEIGHT, &self.hot_sizes.max_height, || self.get_value(Self::max_height_property()))
     }
 
     pub fn set_max_height(&self, value: f64) {
@@ -693,7 +773,7 @@ impl Layoutable {
 
     /// The margin around the element.
     pub fn margin(&self) -> Thickness {
-        self.hot_sizes.margin.get(self.values().value_generation(), || self.get_value(Self::margin_property()))
+        self.hot(HotSizes::MARGIN, &self.hot_sizes.margin, || self.get_value(Self::margin_property()))
     }
 
     pub fn set_margin(&self, value: Thickness) {
@@ -702,7 +782,9 @@ impl Layoutable {
 
     /// The element's preferred horizontal alignment in its parent.
     pub fn horizontal_alignment(&self) -> HorizontalAlignment {
-        self.get_value(Self::horizontal_alignment_property())
+        self.hot(HotSizes::HORIZONTAL_ALIGNMENT, &self.hot_sizes.horizontal_alignment, || {
+            self.get_value(Self::horizontal_alignment_property())
+        })
     }
 
     pub fn set_horizontal_alignment(&self, value: HorizontalAlignment) {
@@ -711,7 +793,9 @@ impl Layoutable {
 
     /// The element's preferred vertical alignment in its parent.
     pub fn vertical_alignment(&self) -> VerticalAlignment {
-        self.get_value(Self::vertical_alignment_property())
+        self.hot(HotSizes::VERTICAL_ALIGNMENT, &self.hot_sizes.vertical_alignment, || {
+            self.get_value(Self::vertical_alignment_property())
+        })
     }
 
     pub fn set_vertical_alignment(&self, value: VerticalAlignment) {
@@ -726,6 +810,11 @@ impl Layoutable {
     }
 
     fn set_desired_size(&self, value: Size) {
+        // A layout pass sets this for every child, mostly to what it is: an unchanged size does
+        // not read the property, whose accessor may be a call (it depends on the inlining).
+        if self.desired_size.get() == value {
+            return;
+        }
         self.set_and_raise_cell(Self::desired_size_property(), &self.desired_size, value);
     }
 
@@ -757,11 +846,32 @@ impl Layoutable {
 
     /// Whether the control's layout should be snapped to pixel boundaries.
     pub fn use_layout_rounding(&self) -> bool {
-        self.get_value(Self::use_layout_rounding_property())
+        let property = Self::use_layout_rounding_property();
+        // The property inherits: its value changes with the store of an ancestor, which the
+        // generation of this store does not tell. While no store holds a value of it the value
+        // is the default of the class, which only its metadata changes, and that is kept
+        // (section 9.36).
+        if property.as_property().holders() != 0 {
+            return self.get_value(property);
+        }
+        self.hot(HotSizes::USE_LAYOUT_ROUNDING, &self.hot_sizes.use_layout_rounding, || self.get_value(property))
     }
 
     pub fn set_use_layout_rounding(&self, value: bool) {
         self.set_value(Self::use_layout_rounding_property(), value)
+    }
+
+    /// How the element is queried as a container (`Container.Sizing`), which the measure of
+    /// every element asks for.
+    pub(crate) fn container_sizing(&self) -> ContainerSizing {
+        self.hot(HotSizes::CONTAINER_SIZING, &self.hot_sizes.container_sizing, || Container::get_sizing(self))
+    }
+
+    /// The kept copy of a property of the element that does not inherit: `value`, the cell of
+    /// the kept values `bit` stands for.
+    #[inline]
+    fn hot<T: Copy>(&self, bit: u16, value: &Cell<T>, read: impl FnOnce() -> T) -> T {
+        self.hot_sizes.stamp.get(self.values().value_generation(), bit, value, read)
     }
 
     /// The available size passed in the previous layout pass, if any.
@@ -777,44 +887,59 @@ impl Layoutable {
     // --- layout -----------------------------------------------------------
 
     /// Carries out a measure of the control.
+    ///
+    /// What most measures of a pass are, an element offered the size it was measured at or one
+    /// inside its hold, is the test below and nothing more, where the element is measured from;
+    /// the measure itself is out of line (`measure_at`), as the arrangement is. Which of the two
+    /// a caller gets is said here and not left to where a build puts its code (section 9.80).
+    #[inline]
     pub fn measure(&self, available_size: Size) {
+        if self.is_measure_valid.get() {
+            // The size it was measured at: nothing to do, and nothing to ask a hold.
+            let previous = self.previous_measure.get();
+            if previous == Some(available_size) {
+                return;
+            }
+            if previous.is_some() && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size)) {
+                // The measure holds at this size (section 9.15): nothing to do.
+                self.previous_measure.set(Some(available_size));
+                return;
+            }
+        }
+        self.measure_at(available_size);
+    }
+
+    /// Measures the element at `available_size`: its measure is invalid, or the size is neither
+    /// the one it was measured at nor inside its hold. (A size that is not a number is neither.)
+    #[inline(never)]
+    fn measure_at(&self, available_size: Size) {
         if available_size.width.is_nan() || available_size.height.is_nan() {
             panic!("Cannot call Measure using a size with NaN values.");
         }
 
-        if self.is_measure_valid.get()
-            && self.previous_measure.get().is_some()
-            && self.measure_hold.get().is_some_and(|hold| hold.contains(available_size))
-        {
-            // The measure holds at this size (section 9.15): nothing to do.
-            self.previous_measure.set(Some(available_size));
-            return;
+        let previous_desired_size = self.desired_size();
+        self.measure_hold.set(None);
+        crate::perf_count!(MeasuresExecuted);
+
+        self.is_measure_valid.set(true);
+        self.clear_subtree_measure_invalid();
+
+        self.measuring.set(true);
+        let guard = MeasuringGuard(&self.measuring);
+        let desired_size = self.measure_core(available_size);
+        drop(guard);
+
+        if Self::is_invalid_size(desired_size) {
+            panic!("Invalid size returned for Measure.");
         }
 
-        if !self.is_measure_valid.get() || self.previous_measure.get() != Some(available_size) {
-            let previous_desired_size = self.desired_size();
-            self.measure_hold.set(None);
-            crate::perf_count!(MeasuresExecuted);
+        self.set_desired_size(desired_size);
+        self.previous_measure.set(Some(available_size));
 
-            self.is_measure_valid.set(true);
-
-            self.measuring.set(true);
-            let guard = MeasuringGuard(&self.measuring);
-            let desired_size = self.measure_core(available_size);
-            drop(guard);
-
-            if Self::is_invalid_size(desired_size) {
-                panic!("Invalid size returned for Measure.");
-            }
-
-            self.set_desired_size(desired_size);
-            self.previous_measure.set(Some(available_size));
-
-            if self.desired_size() != previous_desired_size {
-                if let Some(parent) = self.visual_parent() {
-                    if let Some(parent) = parent.downcast_ref::<Layoutable>() {
-                        parent.child_desired_size_changed(self);
-                    }
+        if self.desired_size() != previous_desired_size {
+            if let Some(parent) = self.visual_parent() {
+                if let Some(parent) = parent.downcast_ref::<Layoutable>() {
+                    parent.child_desired_size_changed(self);
                 }
             }
         }
@@ -828,7 +953,23 @@ impl Layoutable {
     }
 
     /// Arranges the control and its children.
+    ///
+    /// For an element that stays where it is, which most are in a pass, this is the test below
+    /// and nothing more, where the element is arranged from; everything else is out of line
+    /// (`arrange_at`), as with `measure`. A rectangle that is not one was never the rectangle an
+    /// element was arranged at, so it is told there.
+    #[inline]
     pub fn arrange(&self, rect: Rect) {
+        if self.is_measure_valid.get() && self.is_arrange_valid.get() && self.previous_arrange.get() == Some(rect) {
+            return;
+        }
+        self.arrange_at(rect);
+    }
+
+    /// Arranges the element at `rect`: its measure or its arrangement is invalid, or `rect` is
+    /// not the rectangle it was arranged at.
+    #[inline(never)]
+    fn arrange_at(&self, rect: Rect) {
         if Self::is_invalid_rect(rect) {
             panic!("Invalid Arrange rectangle.");
         }
@@ -837,11 +978,45 @@ impl Layoutable {
             self.measure(self.previous_measure.get().unwrap_or(rect.size()));
         }
 
-        if !self.is_arrange_valid.get() || self.previous_arrange.get() != Some(rect) {
-            self.is_arrange_valid.set(true);
-            crate::perf_count!(ArrangesExecuted);
+        // Measured again, and still where it was.
+        if self.is_arrange_valid.get() && self.previous_arrange.get() == Some(rect) {
+            return;
+        }
+
+        let valid = self.is_arrange_valid.get();
+        self.is_arrange_valid.set(true);
+        crate::perf_count!(ArrangesExecuted);
+        // See `arrange_moved_only`. An element that is not in a tree has no layout manager that
+        // arranges what is invalid below it: the arrangement of its inside is the visit that
+        // finds it (a tree measured and arranged by hand). One that was not visible when it was
+        // arranged last is invalid: it invalidates itself when it is shown.
+        if valid
+            && self.previous_arrange.get().is_some_and(|previous| previous.size() == rect.size())
+            && self.is_attached_to_visual_tree()
+        {
+            self.arrange_moved_only.set(true);
             self.arrange_core(rect);
-            self.previous_arrange.set(Some(rect));
+            self.arrange_moved_only.set(false);
+        } else {
+            self.arrange_core(rect);
+        }
+        self.previous_arrange.set(Some(rect));
+    }
+
+    /// Clears `subtree_measure_invalid` of this element and of the ancestors that have it: one
+    /// of their descendants is measured. The flagged elements are closed downwards (the
+    /// descendants of a flagged element are flagged), so the first ancestor without it ends the
+    /// walk; in a layout pass that is the parent, measured first.
+    fn clear_subtree_measure_invalid(&self) {
+        self.subtree_measure_invalid.set(false);
+        let mut parent = self.get_visual_parent();
+        while let Some(visual) = parent {
+            if let Some(layoutable) = visual.downcast_ref::<Layoutable>() {
+                if !layoutable.subtree_measure_invalid.replace(false) {
+                    break;
+                }
+            }
+            parent = visual.get_visual_parent();
         }
     }
 
@@ -856,7 +1031,7 @@ impl Layoutable {
                 if let Some(manager) = self.get_layout_manager() {
                     manager.invalidate_measure(self);
                 }
-                self.invalidate_visual();
+                self.invalidate_visual_for_layout();
             }
             self.on_measure_invalidated();
         }
@@ -870,7 +1045,7 @@ impl Layoutable {
             if let Some(manager) = self.get_layout_manager() {
                 manager.invalidate_arrange(self);
             }
-            self.invalidate_visual();
+            self.invalidate_visual_for_layout();
         }
     }
 
@@ -886,12 +1061,13 @@ impl Layoutable {
     /// `invalidate_measure` is called on it.
     pub fn affects_measure<T: ObjectType + Upcast<Layoutable>>(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<T>() {
+            property
+                .changed()
+                .add_class_handler::<T>(|sender, _| {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_measure();
-                }
-            }).detach();
+                })
+                .detach();
         }
     }
 
@@ -900,12 +1076,13 @@ impl Layoutable {
     /// `invalidate_arrange` is called on it.
     pub fn affects_arrange<T: ObjectType + Upcast<Layoutable>>(properties: &[&'static FerroProperty]) {
         for property in properties {
-            property.changed().subscribe(|e| {
-                if let Some(sender) = e.sender().downcast_ref::<T>() {
+            property
+                .changed()
+                .add_class_handler::<T>(|sender, _| {
                     let layoutable: &Layoutable = sender.upcast();
                     layoutable.invalidate_arrange();
-                }
-            }).detach();
+                })
+                .detach();
         }
     }
 
@@ -952,14 +1129,43 @@ impl Drop for MeasuringGuard<'_> {
     }
 }
 
-/// The kept values of the size and margin properties of a layoutable.
+/// The kept values of the properties of a layoutable its measure and arrange read: the sizes,
+/// the margin, the alignments, the layout rounding and the container sizing, beside the one
+/// stamp they share.
+///
+/// In the order of the declaration: the stamp and the sizes, which every measure reads, are
+/// the first sixty-four bytes.
 #[derive(Default)]
+#[repr(C)]
 struct HotSizes {
-    width: crate::property_store::HotValue<f64>,
-    height: crate::property_store::HotValue<f64>,
-    min_width: crate::property_store::HotValue<f64>,
-    max_width: crate::property_store::HotValue<f64>,
-    min_height: crate::property_store::HotValue<f64>,
-    max_height: crate::property_store::HotValue<f64>,
-    margin: crate::property_store::HotValue<Thickness>,
+    stamp: crate::property_store::HotStamp,
+    width: Cell<f64>,
+    height: Cell<f64>,
+    min_width: Cell<f64>,
+    max_width: Cell<f64>,
+    min_height: Cell<f64>,
+    max_height: Cell<f64>,
+    margin: Cell<Thickness>,
+    horizontal_alignment: Cell<HorizontalAlignment>,
+    vertical_alignment: Cell<VerticalAlignment>,
+    use_layout_rounding: Cell<bool>,
+    container_sizing: Cell<ContainerSizing>,
 }
+
+impl HotSizes {
+    const WIDTH: u16 = 1 << 0;
+    const HEIGHT: u16 = 1 << 1;
+    const MIN_WIDTH: u16 = 1 << 2;
+    const MAX_WIDTH: u16 = 1 << 3;
+    const MIN_HEIGHT: u16 = 1 << 4;
+    const MAX_HEIGHT: u16 = 1 << 5;
+    const MARGIN: u16 = 1 << 6;
+    const HORIZONTAL_ALIGNMENT: u16 = 1 << 7;
+    const VERTICAL_ALIGNMENT: u16 = 1 << 8;
+    const USE_LAYOUT_ROUNDING: u16 = 1 << 9;
+    const CONTAINER_SIZING: u16 = 1 << 10;
+}
+
+#[cfg(test)]
+#[path = "unchanged_layout_value_tests.rs"]
+mod unchanged_layout_value_tests;

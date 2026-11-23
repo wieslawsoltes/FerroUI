@@ -64,7 +64,10 @@ pub struct CompositionVisual {
     object: CompositionObject,
     pub(super) kind: CompositionVisualKind,
     children: Rc<CompositionVisualCollection>,
-    pub(super) hit_test_children: RefCell<Option<CompositionHitTestAabbTree>>,
+    /// The index of the children for hit testing, which a visual with fewer
+    /// than `HIT_TEST_AABB_TREE_THRESHOLD` children does not have: boxed, so
+    /// that such a visual (nearly every visual) is not the larger for it.
+    pub(super) hit_test_children: RefCell<Option<Box<CompositionHitTestAabbTree>>>,
     opacity_mask: RefCell<Option<Rc<dyn IBrush>>>,
     pub(super) custom_hit_test_count_in_sub_tree: Cell<i32>,
     tag: RefCell<Option<Rc<dyn Any>>>,
@@ -229,6 +232,28 @@ impl CompositionVisual {
     // --- generated reference properties, typed --------------------------------
 
     /// The composition target the visual is attached to.
+    /// Whether the visual is the composition visual kept for a visual that left its visual tree
+    /// (docs/porting/desktop-performance.md, section 9.32).
+    pub(crate) fn is_departed(&self) -> bool {
+        matches!(&self.kind, CompositionVisualKind::DrawList(data) if data.is_departed())
+    }
+
+    /// Whether a hit test passes through the visual to its children, in the coordinates of its
+    /// parent (docs/porting/desktop-performance.md, section 9.41): it was created for a visual
+    /// that was shown without a composition visual, and no frame was rendered with it yet. A
+    /// hit test reads where the composition visuals were in the last frame, and in that frame
+    /// what is under this one was a child of the one above it.
+    pub(crate) fn hit_tests_through(&self) -> bool {
+        self.root().is_some() && self.is_shown_through_unread()
+    }
+
+    /// Whether the visual was created for a visual that was shown without a composition
+    /// visual and no frame that a hit test reads was rendered with it (section 9.41).
+    pub(crate) fn is_shown_through_unread(&self) -> bool {
+        matches!(&self.kind, CompositionVisualKind::DrawList(data) if data.is_shown_through())
+            && self.readback_revision(self.compositor().readback().read_revision()).is_none()
+    }
+
     pub fn root(&self) -> Option<Rc<CompositionTarget>> {
         self.visual_props().root().and_then(|o| o.into_any_rc().downcast::<CompositionTarget>().ok())
     }
@@ -336,6 +361,12 @@ impl CompositionVisual {
     /// section 9.6).
     pub(crate) fn readback_revision(&self, read_revision: u64) -> Option<u64> {
         self.readback.readback_revision(read_revision)
+    }
+
+    /// The [`VisualReadback::key`] of the readback of this visual: what the readback pass lists
+    /// the visual by when it writes it.
+    pub(crate) fn readback_key(&self) -> usize {
+        self.readback.key()
     }
 
     /// The data the server wrote back for this visual, if it is valid for

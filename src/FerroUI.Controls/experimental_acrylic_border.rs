@@ -94,6 +94,12 @@ impl VisualImpl for ExperimentalAcrylicBorder {
         drop(this.subscription.take());
     }
 
+    /// The material is drawn by the composition visual, not by a recorded drawing: the border
+    /// has its composition visual from the moment it is in a tree.
+    fn requires_composition_visual(_this: &Self) -> bool {
+        true
+    }
+
     fn create_composition_visual(this: &Self, compositor: &Rc<Compositor>) -> CompositionDrawListVisual {
         let v = CompositionExperimentalAcrylicVisual::new(compositor, this);
         this.sync_material(Some(v.as_draw_list_visual().clone()));

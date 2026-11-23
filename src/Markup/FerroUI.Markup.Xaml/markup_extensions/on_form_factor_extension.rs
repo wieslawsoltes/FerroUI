@@ -59,20 +59,6 @@ impl<TReturn: Clone> OnFormFactorExtensionBase<TReturn> {
         self.clone()
     }
 
-    /// Whether the branch for `option` is the one to provide: whether the
-    /// runtime platform service of `service_provider` reports that form
-    /// factor.
-    ///
-    /// # Panics
-    /// Panics if `service_provider` is a root service provider and no
-    /// runtime platform was registered (the service lookup of the managed
-    /// original throws). Use
-    /// [`try_should_provide_option`](Self::try_should_provide_option) to
-    /// handle it.
-    pub fn should_provide_option(service_provider: &Rc<dyn IServiceProvider>, option: FormFactorType) -> bool {
-        crate::throw(Self::try_should_provide_option(service_provider, option))
-    }
-
     /// [`should_provide_option`](Self::should_provide_option) without the
     /// panic.
     pub fn try_should_provide_option(

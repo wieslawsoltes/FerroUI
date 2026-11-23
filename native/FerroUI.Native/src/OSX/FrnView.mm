@@ -21,6 +21,12 @@
     NSMutableArray* _accessibilityChildren;
     NSString* _keyboardInputSourceId;
     bool _keyboardInputSourceComposes;
+    // `updateLayer` is inside the paint of the top level.
+    bool _painting;
+    // The paint in progress has set a render target, which had begun this many
+    // frames on the main thread by then.
+    bool _renderTargetSetInPaint;
+    uint64_t _framesAtRenderTargetSet;
 }
 
 @synthesize contentType = _contentType;
@@ -38,12 +44,23 @@
     return _lastMouseDownEvent;
 }
 
+- (void) resizeRenderTarget
+{
+    FrnPixelSize size { MAX(_lastPixelSize.Width, 1), MAX(_lastPixelSize.Height, 1) };
+    [_currentRenderTarget resize:size withScale:static_cast<float>([[self window] backingScaleFactor])];
+}
+
+- (void) requestDisplay
+{
+    [_currentRenderTarget setNeedsDisplay];
+    [self setNeedsDisplayInRect:[self frame]];
+}
+
 - (void) updateRenderTarget
 {
     if(_currentRenderTarget) {
-        FrnPixelSize size { MAX(_lastPixelSize.Width, 1), MAX(_lastPixelSize.Height, 1) };
-        [_currentRenderTarget resize:size withScale:static_cast<float>([[self window] backingScaleFactor])];
-        [self setNeedsDisplayInRect:[self frame]];
+        [self resizeRenderTarget];
+        [self requestDisplay];
     }
 }
 
@@ -59,7 +76,20 @@
     [self setLayer: layer];
     [layer setDelegate: self];
     layer.needsDisplayOnBoundsChange = YES;
-    [self updateRenderTarget];
+    [self resizeRenderTarget];
+    if(_painting)
+    {
+        // A render target that a paint creates is drawn by that paint, at the
+        // size it has just been given: a display asked for here would draw the
+        // same frame once more in the same transaction. The paint asks for it
+        // at its end, if no frame of the target has begun by then.
+        _renderTargetSetInPaint = true;
+        _framesAtRenderTargetSet = [target mainThreadFrames];
+    }
+    else
+    {
+        [self requestDisplay];
+    }
 }
 
 -(void)displayLayer: (CALayer*)layer
@@ -174,7 +204,19 @@
         return;
     }
 
+    bool wasPainting = _painting;
+    _painting = true;
     parent->TopLevelEvents->Paint();
+    _painting = wasPainting;
+
+    if(!wasPainting && _renderTargetSetInPaint)
+    {
+        _renderTargetSetInPaint = false;
+        if(_currentRenderTarget != nil && [_currentRenderTarget mainThreadFrames] == _framesAtRenderTargetSet)
+        {
+            [self requestDisplay];
+        }
+    }
 }
 
 - (void)drawRect:(NSRect)dirtyRect

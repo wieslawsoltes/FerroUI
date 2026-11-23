@@ -26,12 +26,13 @@
                    Width="{Binding #Size.Value}"
                    Height="{Binding #Size.Value}" />
 
-    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Initials, glyph badges and placeholders</TextBlock>
-    <StackPanel Margin="2" Orientation="Horizontal" Spacing="16">
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Photo, initials, glyph badge and placeholders</TextBlock>
+    <WrapPanel Margin="2" ItemSpacing="16" LineSpacing="12">
+      <PersonPicture DisplayName="Maya Reed" ProfilePicture="/Assets/person-picture-portrait.jpg" Width="64" Height="64" />
       <PersonPicture Initials="SB" Width="64" Height="64" />
-      <PersonPicture DisplayName="Ada Lovelace (Analytical)" BadgeGlyph="&#xE765;" BadgeText="Skype" Width="64" Height="64" />
+      <PersonPicture DisplayName="Ada Lovelace (Analytical)" BadgeGlyph="&#xE765;" BadgeText="Keyboard" Width="64" Height="64" />
       <PersonPicture Width="64" Height="64" />
       <PersonPicture IsGroup="True" BadgeNumber="120" Width="64" Height="64" />
-    </StackPanel>
+    </WrapPanel>
   </StackPanel>
 </ContentPage>

@@ -1,0 +1,80 @@
+<ContentPage Theme="{StaticResource ScrollPage}" xmlns="https://github.com/ferroui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             Header="GridView"
+             x:Class="ControlCatalog.Pages.GridViewPage">
+  <!-- Not from upstream: WinUI's GridView (docs/porting/winui-calculator-gaps.md, LV-2). Its
+       template and DefaultGridViewItemStyle are in the WinUI theme. The ItemsWrapGrid does not
+       virtualize (decision D5). -->
+  <StackPanel Orientation="Vertical" Spacing="4" MaxWidth="800">
+    <TextBlock Margin="2" Classes="h2" TextWrapping="Wrap">A GridView shows its items in a grid of cells of one size, in rows that wrap at the edge (or after MaximumRowsOrColumns items), with the selection modes and item clicks of ListView.</TextBlock>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Single selection, wrapping rows</TextBlock>
+    <GridView Width="400" Height="220" HorizontalAlignment="Left" Margin="2">
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FF0078D4">
+          <TextBlock Text="1" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FF107C10">
+          <TextBlock Text="2" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FFD13438">
+          <TextBlock Text="3" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FFFFB900">
+          <TextBlock Text="4" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FF8764B8">
+          <TextBlock Text="5" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FF00B7C3">
+          <TextBlock Text="6" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FFE3008C">
+          <TextBlock Text="7" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FF4A5459">
+          <TextBlock Text="8" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FFCA5010">
+          <TextBlock Text="9" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+      <GridViewItem>
+        <Border Width="80" Height="80" Background="#FF038387">
+          <TextBlock Text="10" Foreground="White" HorizontalAlignment="Center" VerticalAlignment="Center" />
+        </Border>
+      </GridViewItem>
+    </GridView>
+
+    <TextBlock Margin="2,12,2,2" FontSize="14" FontWeight="Bold">Multiple selection, three cells to a row</TextBlock>
+    <GridView Width="400" Height="220" HorizontalAlignment="Left" Margin="2" SelectionMode="Multiple">
+      <GridView.ItemsPanel>
+        <ItemsPanelTemplate>
+          <ItemsWrapGrid Orientation="Horizontal" MaximumRowsOrColumns="3" />
+        </ItemsPanelTemplate>
+      </GridView.ItemsPanel>
+      <GridViewItem Content="Photo 1" Width="100" Height="60" />
+      <GridViewItem Content="Photo 2" Width="100" Height="60" />
+      <GridViewItem Content="Photo 3" Width="100" Height="60" />
+      <GridViewItem Content="Photo 4" Width="100" Height="60" />
+      <GridViewItem Content="Photo 5" Width="100" Height="60" />
+      <GridViewItem Content="Photo 6" Width="100" Height="60" />
+    </GridView>
+  </StackPanel>
+</ContentPage>

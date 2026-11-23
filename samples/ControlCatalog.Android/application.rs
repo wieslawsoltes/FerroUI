@@ -51,6 +51,9 @@ ferroui_android::android_application!(application::build);
 #[cfg(target_os = "android")]
 mod embed_sample_android;
 
+#[cfg(all(target_os = "android", feature = "native-media"))]
+mod media_samples;
+
 #[cfg(target_os = "android")]
 mod application {
     use crate::embed_sample_android::EmbedSampleAndroid;
@@ -109,7 +112,11 @@ mod application {
             .with(Rc::new(options))
             .use_android()
             .log_to_delegate(|line| log::write(LogPriority::Warn, TAG, line), LogEventLevel::Warning, &[])
-            .after_setup(|_| smoke_run())
+            .after_setup(|_| {
+                #[cfg(feature = "native-media")]
+                crate::media_samples::install();
+                smoke_run();
+            })
     }
 
     /// The view model of the main view, once the main activity shows it.
@@ -210,6 +217,29 @@ mod application {
                     };
                     let Some(activity) = FerroActivity::current_main_activity() else { return true };
                     note("The main view is shown");
+
+                    #[cfg(feature = "native-media")]
+                    if let Some(source) = activity.intent_string_extra("FERROUI_SMOKE_MEDIA_TRACKS") {
+                        if let Some(page) = pages(&view_model).into_iter().find(|page| page.header() == "MediaTransportControls") {
+                            view_model.navigate_to_item(&page);
+                            crate::media_samples::smoke_tracks(source);
+                        } else {
+                            note("CATALOG_TRACKS_FAILED MediaTransportControls page missing");
+                        }
+                        return false;
+                    }
+
+                    #[cfg(feature = "native-media")]
+                    if activity.intent_string_extra("FERROUI_SMOKE_MEDIA_CAMERA").as_deref() == Some("1") {
+                        control_catalog::media_samples::enable_capture_smoke();
+                        if let Some(page) = pages(&view_model).into_iter().find(|page| page.header() == "CameraCaptureUI") {
+                            view_model.navigate_to_item(&page);
+                            crate::media_samples::smoke_camera();
+                        } else {
+                            note("CATALOG_CAMERA_FAILED CameraCaptureUI page missing");
+                        }
+                        return false;
+                    }
 
                     let exit = extra_milliseconds(&activity, "FERROUI_SMOKE_EXIT_MS");
                     let Some(page_ms) = extra_milliseconds(&activity, "FERROUI_SMOKE_PAGES") else {

@@ -290,6 +290,12 @@ factories and portable layout adapters. The source buffer is available through
 The facade also exposes `ferroui::designer` with its `designer` feature; `designer-mcp` adds the
 optional MCP adapter. Neither feature selects a windowing or rendering backend.
 
+Sharing a document through the collaboration host (`ferroui_designer::sharing` and the Share panel
+of the workspace) is the default feature `collaboration-client` of `ferroui-designer`, which the
+facade and Designer Studio (its feature `collaboration`) turn on. A browser host builds without it:
+the HTTPS client of the host has no TLS random source on `wasm32-unknown-emscripten`. Without the
+feature the sharing module does not exist and the workspace hides its Share button.
+
 ## Source, syntax and preview are separate states
 
 There are three relevant values:

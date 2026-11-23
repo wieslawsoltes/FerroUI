@@ -1,0 +1,161 @@
+diff --git a/native/FerroUI.Native/inc/rendertarget.h b/native/FerroUI.Native/inc/rendertarget.h
+index e6674ae58..2489e224f 100644
+--- a/native/FerroUI.Native/inc/rendertarget.h
++++ b/native/FerroUI.Native/inc/rendertarget.h
+@@ -8,6 +8,13 @@
+ 
+ -(void) resize: (FrnPixelSize) size withScale: (float) scale;
+ -(CALayer*) layer;
++// Asks for the layer to be displayed again, where the view's own request does
++// not reach it.
++-(void) setNeedsDisplay;
++// The frames the target has begun on the main thread so far, each of the size
++// and the scale of the last `resize:withScale:` before it and shown with the
++// transaction it was drawn in; 0 for a target that does not count them.
++-(uint64_t) mainThreadFrames;
+ 
+ @end
+ 
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.mm b/native/FerroUI.Native/src/OSX/FrnView.mm
+index c37a42156..01ce3c8c3 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.mm
++++ b/native/FerroUI.Native/src/OSX/FrnView.mm
+@@ -21,6 +21,12 @@
+     NSMutableArray* _accessibilityChildren;
+     NSString* _keyboardInputSourceId;
+     bool _keyboardInputSourceComposes;
++    // `updateLayer` is inside the paint of the top level.
++    bool _painting;
++    // The paint in progress has set a render target, which had begun this many
++    // frames on the main thread by then.
++    bool _renderTargetSetInPaint;
++    uint64_t _framesAtRenderTargetSet;
+ }
+ 
+ @synthesize contentType = _contentType;
+@@ -38,12 +44,23 @@
+     return _lastMouseDownEvent;
+ }
+ 
++- (void) resizeRenderTarget
++{
++    FrnPixelSize size { MAX(_lastPixelSize.Width, 1), MAX(_lastPixelSize.Height, 1) };
++    [_currentRenderTarget resize:size withScale:static_cast<float>([[self window] backingScaleFactor])];
++}
++
++- (void) requestDisplay
++{
++    [_currentRenderTarget setNeedsDisplay];
++    [self setNeedsDisplayInRect:[self frame]];
++}
++
+ - (void) updateRenderTarget
+ {
+     if(_currentRenderTarget) {
+-        FrnPixelSize size { MAX(_lastPixelSize.Width, 1), MAX(_lastPixelSize.Height, 1) };
+-        [_currentRenderTarget resize:size withScale:static_cast<float>([[self window] backingScaleFactor])];
+-        [self setNeedsDisplayInRect:[self frame]];
++        [self resizeRenderTarget];
++        [self requestDisplay];
+     }
+ }
+ 
+@@ -59,7 +76,20 @@
+     [self setLayer: layer];
+     [layer setDelegate: self];
+     layer.needsDisplayOnBoundsChange = YES;
+-    [self updateRenderTarget];
++    [self resizeRenderTarget];
++    if(_painting)
++    {
++        // A render target that a paint creates is drawn by that paint, at the
++        // size it has just been given: a display asked for here would draw the
++        // same frame once more in the same transaction. The paint asks for it
++        // at its end, if no frame of the target has begun by then.
++        _renderTargetSetInPaint = true;
++        _framesAtRenderTargetSet = [target mainThreadFrames];
++    }
++    else
++    {
++        [self requestDisplay];
++    }
+ }
+ 
+ -(void)displayLayer: (CALayer*)layer
+@@ -174,7 +204,19 @@
+         return;
+     }
+ 
++    bool wasPainting = _painting;
++    _painting = true;
+     parent->TopLevelEvents->Paint();
++    _painting = wasPainting;
++
++    if(!wasPainting && _renderTargetSetInPaint)
++    {
++        _renderTargetSetInPaint = false;
++        if(_currentRenderTarget != nil && [_currentRenderTarget mainThreadFrames] == _framesAtRenderTargetSet)
++        {
++            [self requestDisplay];
++        }
++    }
+ }
+ 
+ - (void)drawRect:(NSRect)dirtyRect
+diff --git a/native/FerroUI.Native/src/OSX/metal.mm b/native/FerroUI.Native/src/OSX/metal.mm
+index 2d84b1685..238cbdb76 100644
+--- a/native/FerroUI.Native/src/OSX/metal.mm
++++ b/native/FerroUI.Native/src/OSX/metal.mm
+@@ -233,6 +233,8 @@ class FrnMetalRenderTarget : public ComSingleObject<IFrnMetalRenderTarget, &IID_
+ public:
+     double PendingScaling = 1;
+     FrnPixelSize PendingSize = {1,1};
++    // The frames begun on the main thread: read and written by that thread alone.
++    uint64_t MainThreadFrames = 0;
+     FORWARD_IUNKNOWN()
+     FrnMetalRenderTarget(CAMetalLayer* layer, ComPtr<FrnMetalDevice> device)
+     {
+@@ -267,6 +269,8 @@ public:
+             *ret = nullptr;
+             return E_FAIL;
+         }
++        if(onMainThread)
++            MainThreadFrames++;
+         *ret = new FrnMetalRenderSession(_device, _layer, drawable, _size, _scaling, onMainThread);
+         return 0;
+     }
+@@ -303,9 +307,16 @@ public:
+     CGSize layerSize = {(CGFloat)size.Width, (CGFloat)size.Height};
+     _target->PendingScaling = scale;
+     _target->PendingSize = size;
++}
++
++- (void)setNeedsDisplay {
+     [_layer setNeedsDisplay];
+ }
+ 
++- (uint64_t)mainThreadFrames {
++    return _target->MainThreadFrames;
++}
++
+ - (CALayer *)layer {
+     return _layer;
+ }
+diff --git a/native/FerroUI.Native/src/OSX/rendertarget.mm b/native/FerroUI.Native/src/OSX/rendertarget.mm
+index 1d184cd56..0db90570e 100644
+--- a/native/FerroUI.Native/src/OSX/rendertarget.mm
++++ b/native/FerroUI.Native/src/OSX/rendertarget.mm
+@@ -187,6 +187,13 @@ public:
+     }
+ }
+ 
++- (void)setNeedsDisplay {
++}
++
++- (uint64_t)mainThreadFrames {
++    return 0;
++}
++
+ - (void)setSurfaceInUiThreadContext: (IOSurfaceHolder*) surface
+ {
+     [CATransaction begin];

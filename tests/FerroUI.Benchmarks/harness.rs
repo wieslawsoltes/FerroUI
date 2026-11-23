@@ -19,6 +19,7 @@
 //! | `[Benchmark(OperationsPerInvoke = n)]` | [`Descriptor::operations_per_invoke`] |
 //! | `[MinIterationTime(ms)]` | [`Class::min_iteration_time`] |
 //! | `[MemoryDiagnoser]` | the feature `count-allocations` (bytes and blocks an operation) |
+//! | the hardware counters diagnoser | the instructions and cycles of an operation ([`processor`]) |
 //!
 //! Every benchmark runs on a thread of its own: the property system, the
 //! dispatcher and the services of the framework belong to a thread, so a
@@ -32,6 +33,10 @@
 //! - `FERROUI_BENCH_FILTER`: parts of benchmark names separated by commas; a
 //!   benchmark runs when its full name (`category::Class.name[parameters]`)
 //!   contains one of them. Without it every benchmark runs.
+//! - `FERROUI_BENCH_CLASS`: a class (`category::Class`); of the benchmarks
+//!   the filter selects, those of that class run. A runner that wants a
+//!   process per class (the local performance gate) lists the names and
+//!   starts one run per class with it.
 //! - `FERROUI_BENCH_LIST`: when set, the names are printed and nothing runs.
 //! - `FERROUI_BENCH_ITERATIONS` (15): the measured iterations of a benchmark.
 //! - `FERROUI_BENCH_WARMUP` (3): the iterations before them.
@@ -42,6 +47,12 @@
 //! the least time of an iteration; a benchmark with an iteration setup
 //! invokes it once. The time of an operation is the time of the iteration
 //! over its invocations and the operations of an invocation.
+//!
+//! Beside the time, an iteration reads what the processor did
+//! ([`processor`]): the instructions of an operation do not depend on where
+//! the build put the code and the data or on what else the machine does, as
+//! its time does, so a time that changed with the same instructions is not
+//! a change of the work. The table has both, and the cycles.
 //!
 //! # Smoke tests
 //!
@@ -254,6 +265,9 @@ impl Class<'_> {
 #[derive(Clone, Debug)]
 pub struct Options {
     pub filter: Vec<String>,
+    /// The one class (`category::Class`) whose benchmarks run, of those the
+    /// filter selects.
+    pub class: Option<String>,
     pub list: bool,
     pub iterations: usize,
     pub warmup: usize,
@@ -274,6 +288,10 @@ impl Options {
             .unwrap_or_default();
         Self {
             filter,
+            class: std::env::var("FERROUI_BENCH_CLASS")
+                .ok()
+                .map(|class| class.trim().to_string())
+                .filter(|class| !class.is_empty()),
             list: std::env::var_os("FERROUI_BENCH_LIST").is_some(),
             iterations: number("FERROUI_BENCH_ITERATIONS").map_or(15, |value| value.max(1) as usize),
             warmup: number("FERROUI_BENCH_WARMUP").map_or(3, |value| value as usize),
@@ -281,9 +299,17 @@ impl Options {
         }
     }
 
-    /// Whether the filter selects `descriptor` (every benchmark without a
-    /// filter).
+    /// Whether the filter and the class select `descriptor` (every benchmark
+    /// without either).
     pub fn matches(&self, descriptor: &Descriptor) -> bool {
+        if let Some(class) = &self.class {
+            let of_class = class
+                .split_once("::")
+                .is_some_and(|(category, class)| category == descriptor.category && class == descriptor.class);
+            if !of_class {
+                return false;
+            }
+        }
         if self.filter.is_empty() {
             return true;
         }
@@ -305,6 +331,12 @@ pub struct Measurement {
     /// The blocks an operation allocated, with the feature
     /// `count-allocations`.
     pub allocations: Option<f64>,
+    /// The instructions the processor retired for an operation (the median
+    /// of the iterations), where the system counts them ([`processor`]).
+    pub instructions: Option<f64>,
+    /// The cycles the processor took for an operation (the median of the
+    /// iterations), where the system counts them.
+    pub cycles: Option<f64>,
 }
 
 impl Measurement {
@@ -313,14 +345,7 @@ impl Measurement {
     }
 
     pub fn median(&self) -> f64 {
-        let mut sorted = self.nanoseconds.clone();
-        sorted.sort_by(|a, b| a.total_cmp(b));
-        let middle = sorted.len() / 2;
-        if sorted.len() % 2 == 0 {
-            (sorted[middle - 1] + sorted[middle]) / 2.0
-        } else {
-            sorted[middle]
-        }
+        median_of(&self.nanoseconds)
     }
 
     pub fn min(&self) -> f64 {
@@ -337,6 +362,18 @@ impl Measurement {
     }
 }
 
+/// The median of `values`, which are not empty.
+fn median_of(values: &[f64]) -> f64 {
+    let mut sorted = values.to_vec();
+    sorted.sort_by(|a, b| a.total_cmp(b));
+    let middle = sorted.len() / 2;
+    if sorted.len() % 2 == 0 {
+        (sorted[middle - 1] + sorted[middle]) / 2.0
+    } else {
+        sorted[middle]
+    }
+}
+
 /// Runs the setup, the iteration setup and one invocation of the benchmark,
 /// then drops its state.
 fn run_once(entry: &Entry) {
@@ -345,18 +382,30 @@ fn run_once(entry: &Entry) {
     instance.invoke();
 }
 
-/// Times `invocations` invocations of the body.
-fn time_iteration(instance: &mut dyn Instance, invocations: u64, single: bool) -> (Duration, allocations::Counts) {
+/// What one iteration took.
+struct Iteration {
+    elapsed: Duration,
+    allocated: allocations::Counts,
+    processor: Option<processor::Counts>,
+}
+
+/// Times `invocations` invocations of the body. The clock is read inside the
+/// two readings of the allocator and of the processor, so neither reading is
+/// in the time.
+fn time_iteration(instance: &mut dyn Instance, invocations: u64, single: bool) -> Iteration {
     if single {
         instance.iteration_setup();
     }
+    let processor = processor::snapshot();
     let allocated = allocations::snapshot();
     let start = Instant::now();
     for _ in 0..invocations {
         instance.invoke();
     }
     let elapsed = start.elapsed();
-    (elapsed, allocations::snapshot().since(&allocated))
+    let allocated = allocations::snapshot().since(&allocated);
+    let processor = processor.and_then(|earlier| Some(processor::snapshot()?.since(&earlier).without_the_reading()));
+    Iteration { elapsed, allocated, processor }
 }
 
 fn measure(entry: &Entry, options: &Options) -> Measurement {
@@ -370,7 +419,7 @@ fn measure(entry: &Entry, options: &Options) -> Measurement {
     let mut invocations = 1_u64;
     if !single {
         loop {
-            let (elapsed, _) = time_iteration(instance.as_mut(), invocations, false);
+            let elapsed = time_iteration(instance.as_mut(), invocations, false).elapsed;
             if elapsed >= min_iteration_time || invocations >= 1 << 40 {
                 break;
             }
@@ -391,18 +440,28 @@ fn measure(entry: &Entry, options: &Options) -> Measurement {
     let operations = (invocations * u64::from(descriptor.operations_per_invoke)) as f64;
     let mut nanoseconds = Vec::with_capacity(options.iterations);
     let mut allocated = allocations::Counts::default();
+    let mut instructions = Vec::with_capacity(options.iterations);
+    let mut cycles = Vec::with_capacity(options.iterations);
     for _ in 0..options.iterations {
-        let (elapsed, counts) = time_iteration(instance.as_mut(), invocations, single);
-        nanoseconds.push(elapsed.as_secs_f64() * 1e9 / operations);
-        allocated.add(&counts);
+        let iteration = time_iteration(instance.as_mut(), invocations, single);
+        nanoseconds.push(iteration.elapsed.as_secs_f64() * 1e9 / operations);
+        allocated.add(&iteration.allocated);
+        if let Some(counts) = iteration.processor {
+            instructions.push(counts.instructions as f64 / operations);
+            cycles.push(counts.cycles as f64 / operations);
+        }
     }
 
+    // A count of some iterations only is none: the system stopped answering in between.
+    let counted = instructions.len() == nanoseconds.len();
     let all_operations = operations * options.iterations as f64;
     Measurement {
         invocations,
         nanoseconds,
         allocated_bytes: allocations::ENABLED.then(|| allocated.bytes as f64 / all_operations),
         allocations: allocations::ENABLED.then(|| allocated.allocations as f64 / all_operations),
+        instructions: counted.then(|| median_of(&instructions)),
+        cycles: counted.then(|| median_of(&cycles)),
     }
 }
 
@@ -586,10 +645,33 @@ pub fn format_bytes(bytes: f64) -> String {
     }
 }
 
+/// A count an operation (instructions, cycles) as the tables print it: the
+/// digits alone, with a decimal while the count is small enough for one to
+/// say something.
+pub fn format_count(count: f64) -> String {
+    if count < 100_000.0 {
+        format!("{count:.1}")
+    } else {
+        format!("{count:.0}")
+    }
+}
+
 /// The table of the results: one block per class, with the ratio to the
 /// baseline of the class (for the same parameters) when it has one.
 fn format_table(descriptors: &[Descriptor], results: &[(usize, Result<Measurement, String>)]) -> String {
-    let header = ["Benchmark", "Parameters", "Mean", "Median", "Min", "StdDev", "Ratio", "Allocated", "Blocks"];
+    let header = [
+        "Benchmark",
+        "Parameters",
+        "Mean",
+        "Median",
+        "Min",
+        "StdDev",
+        "Ratio",
+        "Allocated",
+        "Blocks",
+        "Instructions",
+        "Cycles",
+    ];
     let mut out = String::new();
     let mut position = 0;
     while position < results.len() {
@@ -603,10 +685,10 @@ fn format_table(descriptors: &[Descriptor], results: &[(usize, Result<Measuremen
         }
         let block = &results[position..end];
 
-        let mut rows: Vec<[String; 9]> = Vec::with_capacity(block.len());
+        let mut rows: Vec<[String; 11]> = Vec::with_capacity(block.len());
         for (index, result) in block {
             let descriptor = &descriptors[*index];
-            let mut row: [String; 9] = Default::default();
+            let mut row: [String; 11] = Default::default();
             row[0] = descriptor.name.to_string();
             row[1] = descriptor.parameters.clone();
             match result {
@@ -632,6 +714,12 @@ fn format_table(descriptors: &[Descriptor], results: &[(usize, Result<Measuremen
                     }
                     if let Some(blocks) = measurement.allocations {
                         row[8] = format!("{blocks:.1}");
+                    }
+                    if let Some(instructions) = measurement.instructions {
+                        row[9] = format_count(instructions);
+                    }
+                    if let Some(cycles) = measurement.cycles {
+                        row[10] = format_count(cycles);
                     }
                 }
                 Err(message) => row[2] = format!("FAILED: {message}"),
@@ -674,6 +762,118 @@ fn format_table(descriptors: &[Descriptor], results: &[(usize, Result<Measuremen
         position = end;
     }
     out
+}
+
+/// What the processor did in a measured loop: the instructions it retired
+/// and the cycles it took, as the system counts them for the process.
+///
+/// The time of an operation moves with things that are not its work: where
+/// the linker and the allocator put the code and the data (a loop that
+/// crosses a boundary of the cache or of the branch predictor in one build
+/// and not in the next), the core the thread runs on and its frequency, and
+/// what else the machine does. The instructions do not: two runs of the same
+/// program count the same to a hundredth of a percent, and two builds of the
+/// same source to a few tenths. A change of the work shows in them; a change
+/// of the time alone is one of the placement or of the machine. The cycles
+/// are the time without the waits and the changes of frequency, and move
+/// with the caches as the time does.
+///
+/// The counts are those of the whole process. A benchmark runs on a thread
+/// of its own while the thread that started it waits, so they are those of
+/// the benchmark unless it starts threads, whose work then counts too.
+///
+/// macOS counts them (`proc_pid_rusage`, the fields `ri_instructions` and
+/// `ri_cycles`, which Apple silicon fills); elsewhere [`snapshot`] answers
+/// with nothing and the table has no such columns.
+///
+/// [`snapshot`]: processor::snapshot
+pub mod processor {
+    /// The instructions and the cycles of the process up to a moment.
+    #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+    pub struct Counts {
+        pub instructions: u64,
+        pub cycles: u64,
+    }
+
+    impl Counts {
+        /// The counts since `earlier`.
+        pub fn since(&self, earlier: &Counts) -> Counts {
+            Counts {
+                instructions: self.instructions.saturating_sub(earlier.instructions),
+                cycles: self.cycles.saturating_sub(earlier.cycles),
+            }
+        }
+
+        /// These counts, of a stretch between two readings, less what the
+        /// readings themselves count between them (the return of the first
+        /// and the call of the second: [`reading`]).
+        pub fn without_the_reading(&self) -> Counts {
+            self.since(&reading())
+        }
+    }
+
+    /// The counts of the process now, or nothing where the system does not
+    /// count them.
+    pub fn snapshot() -> Option<Counts> {
+        system::snapshot().filter(|counts| counts.instructions != 0)
+    }
+
+    /// What two readings that follow each other count between them: the
+    /// least of sixteen pairs, read once a process.
+    pub fn reading() -> Counts {
+        static READING: std::sync::OnceLock<Counts> = std::sync::OnceLock::new();
+        *READING.get_or_init(|| {
+            let mut least: Option<Counts> = None;
+            for _ in 0..16 {
+                let (Some(first), Some(second)) = (snapshot(), snapshot()) else { return Counts::default() };
+                let between = second.since(&first);
+                least = Some(least.map_or(between, |least| Counts {
+                    instructions: least.instructions.min(between.instructions),
+                    cycles: least.cycles.min(between.cycles),
+                }));
+            }
+            least.unwrap_or_default()
+        })
+    }
+
+    #[cfg(target_os = "macos")]
+    mod system {
+        use super::Counts;
+
+        /// `RUSAGE_INFO_V4` of `<sys/resource.h>`: the first version of the
+        /// structure with the two counts.
+        const FLAVOR: i32 = 4;
+        /// `rusage_info_v4` is a 16-byte identifier and then 64-bit fields:
+        /// `ri_instructions` and `ri_cycles` are the thirtieth and the
+        /// thirty-first of them.
+        const INSTRUCTIONS: usize = 2 + 29;
+        const CYCLES: usize = 2 + 30;
+        /// The structure is 37 words long; later versions are longer, and
+        /// the system writes the one that was asked for.
+        const WORDS: usize = 64;
+
+        extern "C" {
+            fn proc_pid_rusage(pid: i32, flavor: i32, buffer: *mut u64) -> i32;
+            fn getpid() -> i32;
+        }
+
+        pub(super) fn snapshot() -> Option<Counts> {
+            let mut buffer = [0_u64; WORDS];
+            // SAFETY: the buffer is longer than the structure of the flavor asked for, and aligned
+            // as its 64-bit fields are; the call writes that structure and nothing else.
+            let status = unsafe { proc_pid_rusage(getpid(), FLAVOR, buffer.as_mut_ptr()) };
+            (status == 0).then(|| Counts { instructions: buffer[INSTRUCTIONS], cycles: buffer[CYCLES] })
+        }
+    }
+
+    #[cfg(not(target_os = "macos"))]
+    mod system {
+        use super::Counts;
+
+        pub(super) fn snapshot() -> Option<Counts> {
+            None
+        }
+    }
 }
 
 /// The allocations of a measured loop: with the feature `count-allocations`
@@ -819,6 +1019,7 @@ mod tests {
     fn a_measurement_has_one_value_per_iteration() {
         let options = Options {
             filter: vec!["Sample.".to_string()],
+            class: None,
             list: false,
             iterations: 3,
             warmup: 1,
@@ -831,7 +1032,64 @@ mod tests {
             assert_eq!(measurement.nanoseconds.len(), 3);
             assert!(measurement.invocations >= 1);
             assert!(measurement.min() <= measurement.median());
+            // Where the system counts them, an operation has instructions and cycles; elsewhere
+            // neither. (How many is not asserted here: the counts are those of the process, and
+            // the tests beside this one run on its other threads.)
+            assert_eq!(measurement.instructions.is_some(), processor::snapshot().is_some());
+            assert_eq!(measurement.cycles.is_some(), measurement.instructions.is_some());
         }
+    }
+
+    #[test]
+    fn a_class_selects_its_benchmarks_of_those_the_filter_selects() {
+        fn two_classes(registry: &mut Registry) {
+            register(registry);
+            let mut class = registry.class("harness", "Sample2");
+            class.benchmark("add", "", || 1_u64, |state| *state + 1);
+        }
+        let options = |filter: &[&str], class: Option<&str>| Options {
+            filter: filter.iter().map(|part| part.to_string()).collect(),
+            class: class.map(str::to_string),
+            list: false,
+            iterations: 1,
+            warmup: 0,
+            min_iteration_time: None,
+        };
+        let selected = |options: Options| -> Vec<String> {
+            descriptors_of(two_classes)
+                .iter()
+                .filter(|descriptor| options.matches(descriptor))
+                .map(Descriptor::full_name)
+                .collect()
+        };
+        assert_eq!(selected(options(&[], None)).len(), 4);
+        // The whole name of the class, not a part of it: `Sample` is not `Sample2`.
+        assert_eq!(
+            selected(options(&[], Some("harness::Sample"))),
+            ["harness::Sample.add", "harness::Sample.add[N=2]", "harness::Sample.reset"]
+        );
+        assert_eq!(selected(options(&[], Some("harness::Sample2"))), ["harness::Sample2.add"]);
+        assert_eq!(
+            selected(options(&["add"], Some("harness::Sample"))),
+            ["harness::Sample.add", "harness::Sample.add[N=2]"]
+        );
+        assert!(selected(options(&["reset"], Some("harness::Sample2"))).is_empty());
+        assert!(selected(options(&[], Some("Sample"))).is_empty());
+    }
+
+    #[test]
+    fn the_counts_of_the_processor_grow_with_the_work() {
+        let Some(start) = processor::snapshot() else { return };
+        let mut sum = 0_u64;
+        for value in 0..200_000_u64 {
+            sum = black_box(sum.wrapping_add(value));
+        }
+        let counts = processor::snapshot().expect("the system answered once").since(&start).without_the_reading();
+        // A loop of 200,000 additions is at least as many instructions, and what the reading
+        // itself counts is far less than that.
+        assert!(counts.instructions >= 200_000, "{counts:?}");
+        assert!(counts.cycles > 0, "{counts:?}");
+        assert!(processor::reading().instructions < 200_000, "{:?}", processor::reading());
     }
 
     #[test]
@@ -855,11 +1113,32 @@ mod tests {
             nanoseconds: vec![nanoseconds],
             allocated_bytes: None,
             allocations: None,
+            instructions: None,
+            cycles: None,
         };
         let results = vec![(0, Ok(measurement(100.0))), (2, Ok(measurement(250.0)))];
         let table = format_table(&descriptors, &results);
         assert!(table.contains("harness::Sample"), "{table}");
         assert!(table.contains("2.50"), "{table}");
         assert!(!table.contains("Allocated"), "{table}");
+        assert!(!table.contains("Instructions"), "{table}");
+    }
+
+    #[test]
+    fn the_table_has_the_counts_of_the_processor_when_they_were_read() {
+        let descriptors = descriptors_of(register);
+        let measurement = Measurement {
+            invocations: 1,
+            nanoseconds: vec![100.0],
+            allocated_bytes: None,
+            allocations: None,
+            instructions: Some(152_210.4),
+            cycles: Some(48.25),
+        };
+        let table = format_table(&descriptors, &[(0, Ok(measurement))]);
+        let header = table.lines().nth(1).expect("the header");
+        assert!(header.ends_with("| Instructions | Cycles |"), "{table}");
+        let row = table.lines().nth(3).expect("the row");
+        assert!(row.ends_with("|       152210 |   48.2 |") || row.ends_with("|       152210 |   48.3 |"), "{table}");
     }
 }

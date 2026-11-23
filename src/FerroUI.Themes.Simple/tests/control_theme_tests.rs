@@ -323,3 +323,15 @@ fn should_not_define_setters_with_hardcoded_brushes_or_colors() {
         }
     }
 }
+
+#[test]
+fn portable_media_templates_belong_to_the_winui_family_only() {
+    let _app = start_application();
+    ferroui_media_video_controls::register_types();
+    ferroui_media_camera_controls::register_types();
+    let theme = create_attached_theme();
+    let themed = default_control_themes(&theme);
+    for (control, _) in ferroui_media_video_controls::WINUI_ONLY_CONTROLS.iter().chain(ferroui_media_camera_controls::WINUI_ONLY_CONTROLS) {
+        assert!(!themed.iter().any(|(key, _)| matches!(key, ResourceKey::Type(candidate) if std::ptr::eq(*candidate, *control))), "{} is WinUI-only", control.name());
+    }
+}
