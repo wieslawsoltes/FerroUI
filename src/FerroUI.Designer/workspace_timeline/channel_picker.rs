@@ -4,13 +4,13 @@ use ferroui_base::layout::VerticalAlignment;
 impl DesignerWorkspace {
     pub(in crate::workspace::timeline) fn timeline_curve_channel(
         &self,
-        track: &Track,
+        track: &CurveTrack,
         choices: &[TrackCurveChannel],
     ) -> Option<TrackCurveChannel> {
         self.timeline_ui
             .borrow()
             .curve_channels
-            .get(&(track.target, track.property.clone()))
+            .get(track)
             .filter(|channel| choices.contains(channel))
             .or_else(|| choices.first())
             .cloned()
@@ -23,7 +23,7 @@ impl DesignerWorkspace {
         track: &Track,
         context: &TimelineContext,
         (metric, channel): &(CurveMetric, TrackCurveChannel),
-        choices: Vec<TrackCurveChannel>,
+        (curve_track, choices): (CurveTrack, Vec<TrackCurveChannel>),
     ) -> Ref<Control> {
         let picker = ComboBox::new();
         picker.set_width(match channel {
@@ -63,7 +63,7 @@ impl DesignerWorkspace {
                     .timeline_ui
                     .borrow_mut()
                     .curve_channels
-                    .insert((track.target, track.property.clone()), channel.clone());
+                    .insert(curve_track.clone(), channel.clone());
                 workspace.attach_timeline_curve(&lane, &track, &context, metric, channel.clone());
             }
         });

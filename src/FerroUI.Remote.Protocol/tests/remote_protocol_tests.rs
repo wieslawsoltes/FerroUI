@@ -18,7 +18,7 @@ use ferroui_remote_protocol::designer::{
     DesignAnimationCatalogMessage, DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationRequestMessage,
     DesignAnimationClip, DesignAnimationClipBinding,
     DesignAnimationResultMessage, DesignAnimationSourcePatch, DesignAnimationTarget, DesignAnimationTrack,
-    DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
+    DesignKeyframeComponent, DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult,
     DesignPropertyTransitionsRequest, DesignPropertyTransitionsResult, DesignTransitionProperty,
     DesignTemplateCatalogMessage, DesignTemplateSource, DesignTemplateUse,
     DesignIncludedSource, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
@@ -205,6 +205,7 @@ fn entities() -> Vec<Message> {
                         keys: vec![DesignAnimationKeyframe {
                             time: 1.25, value: "16".into(), easing: "Linear".into(),
                             value_kind: "CornerRadius".into(),
+                            curve_values: Some(vec![DesignKeyframeComponent { channel: "top_left".into(), value: 16.0 }]),
                         }],
                         curve_channels: None,
                         can_sample: Some(true),
@@ -212,7 +213,7 @@ fn entities() -> Vec<Message> {
                 }),
                 curve_tracks: Some(vec![DesignAnimationTrack {
                     target: 12, property: "RenderTransformOrigin".into(),
-                    keys: vec![DesignAnimationKeyframe { time: 1.0, value: "50%,20%".into(), value_kind: "RelativePoint".into(), easing: "Linear".into() }],
+                    keys: vec![DesignAnimationKeyframe { time: 1.0, value: "50%,20%".into(), value_kind: "RelativePoint".into(), easing: "Linear".into(), curve_values: None }],
                     curve_channels: Some(vec!["percent_x".into(), "percent_y".into()]),
                     can_sample: None,
                 }]),
@@ -239,13 +240,20 @@ fn entities() -> Vec<Message> {
         }),
         Arc::new(DesignAnimationAuthoringRequest {
             revision: 40, request: 32, program: 6, target: 12, property: "CornerRadius".into(),
-            time: 1.0, sample: Some(true), sample_target: Some(14), ..Default::default()
+            previous: Some(1.25), time: 1.25, easing: "Linear".into(), sample: Some(true), sample_target: Some(14),
+            component: Some(DesignKeyframeComponent { channel: "top_left".into(), value: 18.0 }),
+            ..Default::default()
         }),
         Arc::new(DesignAnimationAuthoringResult {
             revision: 40, request: 32, samples: vec![0.0, 0.5, 1.0], value_kind: "CornerRadius".into(),
             patch: Some(DesignAnimationSourcePatch { start: 62, end: 64, expected: "16".into(), replacement: "18".into() }),
             sampled_key: Some(DesignAnimationKeyframe {
                 time: 1.0, value: "8,8,8,8".into(), easing: "LinearEasing".into(), value_kind: "CornerRadius".into(),
+                curve_values: None,
+            }),
+            resolved_key: Some(DesignAnimationKeyframe {
+                time: 1.25, value: "18,16,16,16".into(), easing: "LinearEasing".into(),
+                value_kind: "CornerRadius".into(), curve_values: None,
             }),
             error: None,
         }),

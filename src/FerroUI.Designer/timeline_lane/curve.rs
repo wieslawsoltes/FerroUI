@@ -19,11 +19,11 @@ pub(super) struct Plot {
 
 impl Plot {
     fn edits_values(&self) -> bool {
-        self.metric == CurveMetric::Value && self.channel.is_scalar()
+        self.metric == CurveMetric::Value && !self.keys.is_empty()
     }
 
     fn height(&self, height: f64) -> f64 {
-        if self.edits_values() {
+        if self.metric == CurveMetric::Value && self.channel.is_scalar() {
             height
         } else {
             height - KEY_ROW
@@ -82,14 +82,14 @@ pub(super) struct ValueDrag {
     origin: f64,
     pub(super) current: f64,
     scale: Scale,
+    height: f64,
+    normalized: bool,
 }
 
 impl ValueDrag {
-    pub(super) fn update(&mut self, offset: f64, height: f64) {
+    pub(super) fn update(&mut self, offset: f64) {
         self.current = if offset.abs() > 2.0 {
-            self.scale
-                .shift(self.origin, offset, height)
-                .unwrap_or(self.origin)
+            self.shift(offset)
         } else {
             self.origin
         };
@@ -97,6 +97,11 @@ impl ValueDrag {
 
     pub(super) fn changed(&self) -> bool {
         self.origin != self.current
+    }
+
+    fn shift(&self, offset: f64) -> f64 {
+        let value = self.scale.shift(self.origin, offset, self.height).unwrap_or(self.origin);
+        if self.normalized { value.clamp(0.0, 1.0) } else { value }
     }
 }
 
@@ -137,11 +142,11 @@ impl TimelineLane {
         let help = match &result {
             Ok(_) if plot.metric == CurveMetric::Velocity => "Velocity in property units per authored second. Drag the bottom markers to retime keys. Edit incoming easing to shape the rate of change.".into(),
             Ok(_) if !plot.edits_values() => "Read the selected property component. Drag a marker to retime its key or select it to edit the full value and easing.".into(),
-            Ok(_) => "Drag a key to edit time and value together. Select a key to edit its time, value, and easing in the inspector. Alt+Left or Right selects adjacent keys. Ctrl+wheel zooms and Shift+wheel pans.".into(),
+            Ok(_) => "Drag a graph key to edit its component and time. Alt+Up or Down adjusts the selected value. Alt+Left or Right selects adjacent keys.".into(),
             Err(error) => error.clone(),
         };
         plot.samples = result.unwrap_or_default();
-        let color_value = plot.metric == CurveMetric::Value && plot.channel.component().is_color() && !plot.samples.is_empty();
+        let color_value = plot.metric == CurveMetric::Value && plot.channel.uses_normalized_values() && !plot.samples.is_empty();
         plot.scale = Scale::from_values(
             plot.samples
                 .iter()
@@ -173,20 +178,19 @@ impl TimelineLane {
     }
 
     pub(super) fn curve_y(&self, value: f64) -> Option<f64> {
-        Some(
-            self.curve
-                .borrow()
-                .as_ref()?
-                .scale?
-                .y(value, self.bounds().height),
-        )
+        let curve = self.curve.borrow();
+        let plot = curve.as_ref()?;
+        Some(plot.scale?.y(value, plot.height(self.bounds().height)))
     }
 
     pub(super) fn key_y(&self, time: f64) -> Option<f64> {
-        if !self.curve.borrow().as_ref()?.edits_values() {
-            return Some(self.bounds().height - KEY_ROW * 0.5);
+        let editable = self.curve.borrow().as_ref()?.edits_values();
+        if editable {
+            if let Some(y) = self.curve_value(time).and_then(|value| self.curve_y(value)) {
+                return Some(y);
+            }
         }
-        self.curve_y(self.curve_value(time)?)
+        Some(self.bounds().height - KEY_ROW * 0.5)
     }
 
     pub(super) fn key_at_position(&self, position: Point) -> Option<f64> {
@@ -238,6 +242,8 @@ impl TimelineLane {
             origin,
             current: origin,
             scale: plot.scale?,
+            height: plot.height(self.bounds().height),
+            normalized: plot.channel.uses_normalized_values(),
         })
     }
 
@@ -246,6 +252,17 @@ impl TimelineLane {
         if let Some(edit) = edit {
             edit(from, time, value);
         }
+    }
+
+    pub(super) fn nudge_curve_key(&self, up: bool) -> bool {
+        let Some(time) = self.selected.get() else { return false };
+        let Some(handle) = self.start_curve_drag(time) else { return false };
+        let offset = plot_height(handle.height) * if up { -0.01 } else { 0.01 };
+        let value = handle.shift(offset);
+        if value != handle.origin {
+            self.commit_curve_drag(time, time, value);
+        }
+        true
     }
 
     pub(super) fn draw_curve(&self, context: &mut DrawingContext, bounds: Rect) -> bool {

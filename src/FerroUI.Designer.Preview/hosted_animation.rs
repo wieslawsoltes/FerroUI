@@ -1,5 +1,5 @@
 use crate::hosted_relay::Frame;
-use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeSelection, StateGroupEdit, TrackCurveChannel};
+use ferroui_designer_animation::{AnimationClipEdit, ClipClock, CurveChannel, CurveMetric, CurveWindow, KeyframeComponentEdit, KeyframeSelection, StateGroupEdit, TrackCurveChannel};
 use ferroui_designer_core::TextPatch;
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationClipBinding,
@@ -69,6 +69,7 @@ pub(crate) struct KeyframeDraft {
     pub(crate) time: f64,
     pub(crate) value: Option<String>,
     pub(crate) easing: Option<String>,
+    pub(crate) component: Option<KeyframeComponentEdit>,
     pub(crate) sample: Option<bool>,
     #[serde(rename = "previewTarget")]
     pub(crate) preview_target: Option<i64>,
@@ -126,6 +127,8 @@ fn tracks(tracks: Vec<DesignAnimationTrack>) -> Vec<Value> {
         }),
         "keyframes": track.keys.into_iter().map(|key| json!({
             "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
+            "curve_values": key.curve_values.map(|values| values.into_iter().map(|value|
+                json!({"channel":value.channel,"value":value.value})).collect::<Vec<_>>()),
         })).collect::<Vec<_>>(),
     })).collect()
 }
@@ -136,6 +139,9 @@ pub(crate) fn keyframe_plan(result: DesignAnimationAuthoringResult) -> Value {
         "valueKind": result.value_kind,
         "patch": result.patch.map(source_patch),
         "sampledKey": result.sampled_key.map(|key| json!({
+            "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
+        })),
+        "resolvedKey": result.resolved_key.map(|key| json!({
             "time": key.time, "value_text": key.value, "easing_text": key.easing, "value_kind": key.value_kind,
         })),
     })

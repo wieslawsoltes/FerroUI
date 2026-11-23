@@ -38,7 +38,7 @@ use ferroui_remote_protocol::designer::{
     DESIGN_ANIMATION_CURVE_QUERY, DESIGN_ANIMATION_EFFECTS_QUERY, DESIGN_ANIMATION_EFFECT_OBJECTS_QUERY,
     DESIGN_ANIMATION_QUERY, DESIGN_ANIMATION_REGISTERED_EFFECTS_QUERY, DESIGN_ANIMATION_TRANSFORM_LISTS_QUERY, DESIGN_ANIMATION_VERSION,
     DESIGN_CLIP_AUTHORING_QUERY, DESIGN_STATE_AUTHORING_QUERY, DESIGN_STATE_ROUTES_QUERY,
-    DESIGN_KEYFRAME_SAMPLING_QUERY,
+    DESIGN_KEYFRAME_SAMPLING_QUERY, DESIGN_KEYFRAME_COMPONENTS_QUERY,
     DESIGN_PROPERTY_TRANSITIONS_QUERY,
 };
 use std::cell::{Cell, RefCell};
@@ -51,6 +51,7 @@ ferroui_base::ferro_thread_local! {
     static AUTHORING: Cell<bool> = const { Cell::new(false) };
     static KEYFRAME_SELECTION: Cell<bool> = const { Cell::new(false) };
     static KEYFRAME_SAMPLING: Cell<bool> = const { Cell::new(false) };
+    static KEYFRAME_COMPONENTS: Cell<bool> = const { Cell::new(false) };
     static CURVES: Cell<bool> = const { Cell::new(false) };
     static CURVE_CHANNELS: Cell<bool> = const { Cell::new(false) };
     static EFFECTS: Cell<bool> = const { Cell::new(false) };
@@ -77,6 +78,7 @@ pub(super) fn configure(transport: Option<&Url>, remote: bool) {
     AUTHORING.set(enabled && requested(DESIGN_ANIMATION_AUTHORING_QUERY));
     KEYFRAME_SELECTION.set(AUTHORING.get() && requested(DESIGN_KEYFRAME_SELECTION_QUERY));
     KEYFRAME_SAMPLING.set(AUTHORING.get() && requested(DESIGN_KEYFRAME_SAMPLING_QUERY));
+    KEYFRAME_COMPONENTS.set(AUTHORING.get() && requested(DESIGN_KEYFRAME_COMPONENTS_QUERY));
     CURVES.set(enabled && requested(DESIGN_ANIMATION_CURVE_QUERY));
     CURVE_CHANNELS.set(CURVES.get() && requested(DESIGN_ANIMATION_CURVE_CHANNELS_QUERY));
     EFFECTS.set(enabled && requested(DESIGN_ANIMATION_EFFECTS_QUERY));
@@ -188,6 +190,9 @@ pub(super) fn sample(
 
 pub(super) fn plan_keyframe(request: &DesignAnimationAuthoringRequest) -> DesignAnimationAuthoringResult {
     let plan = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        if request.component.is_some() && !KEYFRAME_COMPONENTS.get() {
+            return Err("The application preview did not negotiate component keyframe editing".into());
+        }
         ACTIVE.with(|active| {
             let mut active = active.borrow_mut();
             let host = active.as_mut().ok_or("Open an app-hosted animation preview first")?;
@@ -317,6 +322,7 @@ impl HostedAnimations {
                     curves,
                     curve_channels: CURVE_CHANNELS.get(),
                     sampling: KEYFRAME_SAMPLING.get(),
+                    components: KEYFRAME_COMPONENTS.get(),
                     effects: EFFECTS.get(),
                     effect_objects: EFFECT_OBJECTS.get(),
                     registered_effects: REGISTERED_EFFECTS.get(),

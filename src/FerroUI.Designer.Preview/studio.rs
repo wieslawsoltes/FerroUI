@@ -223,7 +223,7 @@ pub(crate) fn query(stage: &Stage, query: &Query) -> Result<Value, String> {
         return stage.sources.run(|| stage.studio.wrap_query(&query.arguments, rsx));
     }
     if let Some(rsx) = stage.authored_rsx.as_ref().filter(|_| query.name == "designer_keyframe_draft") {
-        rsx.validate_keyframe_draft(&query.arguments)?;
+        rsx.validate_keyframe_draft(&stage.session.borrow(), &query.arguments)?;
     }
     let mut result = stage.sources.run(|| stage.studio.call(&query.name, &query.arguments, Permissions::default()))?;
     if let Some(owners) = &stage.rsx_spacing {

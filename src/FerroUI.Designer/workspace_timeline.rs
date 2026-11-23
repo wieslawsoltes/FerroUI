@@ -23,6 +23,7 @@ use ferroui_designer_animation::{
 };
 
 const TRACK_HEADER: f64 = 240.0;
+type CurveTrack = (String, String, usize);
 #[derive(Default)]
 pub(super) struct TimelineUi {
     document: String,
@@ -34,7 +35,7 @@ pub(super) struct TimelineUi {
     snap_picker: Option<WeakRef<ComboBox>>,
     view: Option<(f64, f64)>,
     curves: Option<CurveMetric>,
-    curve_channels: std::collections::BTreeMap<(NodeId, String), TrackCurveChannel>,
+    curve_channels: std::collections::BTreeMap<CurveTrack, TrackCurveChannel>,
     keyframe_paste: Option<Ref<Flyout>>,
     compare_clips: bool,
     clip_scope: Option<(String, Option<usize>)>,
@@ -326,6 +327,7 @@ impl DesignerWorkspace {
             label.set_text_wrapping(ferroui_base::media::TextWrapping::Wrap);
             self.tracks.children().add(label.upcast::<Control>());
         }
+        let mut curve_tracks = std::collections::BTreeMap::new();
         for track in &tracks {
             let target_name = self
                 .session
@@ -397,14 +399,18 @@ impl DesignerWorkspace {
                     .map(|key| key.time),
             );
             let choices = curves.map_or_else(Vec::new, |_| TrackCurveChannel::for_track(track, authored_duration, fill));
-            let curve = curves.and_then(|metric| self.timeline_curve_channel(track, &choices).map(|channel| (metric, channel)));
+            let group = (target_name.clone(), track.property.clone());
+            let occurrence = curve_tracks.entry(group.clone()).or_insert(0);
+            let curve_track = (group.0, group.1, *occurrence);
+            *occurrence += 1;
+            let curve = curves.and_then(|metric| self.timeline_curve_channel(&curve_track, &choices).map(|channel| (metric, channel)));
             if let Some((metric, channel)) = &curve {
                 self.attach_timeline_curve(&lane, track, &context, *metric, channel.clone());
                 title.set_height(lane.height());
             }
             plot.children().add(match &curve {
                 Some(active) if choices.len() > 1 || matches!(active.1, TrackCurveChannel::EffectParameter { .. }) =>
-                    self.timeline_curve_title(title, &lane, track, &context, active, choices),
+                    self.timeline_curve_title(title, &lane, track, &context, active, (curve_track, choices)),
                 _ => title.upcast::<Control>(),
             });
             AutomationProperties::set_name(

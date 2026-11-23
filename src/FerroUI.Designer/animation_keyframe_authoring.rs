@@ -1,6 +1,7 @@
 use crate::DesignerSession;
 use ferroui_designer_animation::{
-    AnimationError, AnimationValue, KeyframeEdit, KeyframeGroupEdit, KeyframeLocation, Timeline,
+    AnimationError, AnimationValue, KeyframeComponentEdit, KeyframeEdit, KeyframeGroupEdit,
+    KeyframeLocation, Timeline,
 };
 use ferroui_designer_core::NodeId;
 
@@ -28,6 +29,21 @@ impl SampledKeyframe {
 }
 
 impl DesignerSession {
+    pub fn program_keyframe_component(
+        &self,
+        program: NodeId,
+        target: NodeId,
+        property: &str,
+        previous: f64,
+        edit: &KeyframeComponentEdit,
+    ) -> Result<String, String> {
+        self.animation_programs().iter().find(|candidate| candidate.id == program)
+            .ok_or("Unknown animation program")?
+            .keyframe_component(target, property, previous, edit)
+            .map(|value| value.to_xaml())
+            .map_err(|error| error.to_string())
+    }
+
     pub(crate) fn edit_program_keyframes(
         &mut self,
         id: NodeId,

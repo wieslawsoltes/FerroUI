@@ -11,7 +11,7 @@ use std::rc::{Rc, Weak};
 
 #[path = "mcp_authoring.rs"]
 mod authoring;
-pub use authoring::property_value;
+pub use authoring::{keyframe_value, property_value};
 #[path = "mcp_behaviors.rs"]
 mod behaviors;
 #[path = "mcp_binding.rs"]

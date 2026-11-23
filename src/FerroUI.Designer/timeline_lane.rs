@@ -577,7 +577,7 @@ impl InputElementImpl for TimelineLane {
                 }) => {
                     *to = this.dragged_time(*from, *start, position, event.key_modifiers());
                     if let Some(value) = value {
-                        value.update(position.y - start.y, this.bounds().height);
+                        value.update(position.y - start.y);
                     }
                     false
                 }
@@ -630,7 +630,7 @@ impl InputElementImpl for TimelineLane {
                 let position = event.get_position(Some(this));
                 let to = this.dragged_time(from, start, position, event.key_modifiers());
                 if let Some(value) = &mut value {
-                    value.update(position.y - start.y, this.bounds().height);
+                    value.update(position.y - start.y);
                 }
                 if let Some(value) =
                     value.filter(|value| value.changed() || (to - from).abs() > MIN_DURATION)
@@ -718,6 +718,12 @@ impl InputElementImpl for TimelineLane {
             Key::Delete | Key::Back => {
                 event.set_handled(true);
                 this.remove_selected();
+            }
+            Key::Up | Key::Down
+                if event.key_modifiers.contains(KeyModifiers::ALT)
+                    && this.nudge_curve_key(event.key == Key::Up) =>
+            {
+                event.set_handled(true);
             }
             Key::Left | Key::Right => {
                 event.set_handled(true);

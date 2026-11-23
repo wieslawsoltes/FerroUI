@@ -3,7 +3,7 @@ mod channel_picker;
 
 use super::*;
 use ferroui_controls::{MenuFlyout, MenuItem, MenuItemToggleType};
-use ferroui_designer_animation::{AnimationValue, CurvePoint, KeyframeEdit};
+use ferroui_designer_animation::{CurvePoint, KeyframeComponentEdit, KeyframeEdit};
 
 impl DesignerWorkspace {
     pub(in crate::workspace) fn connect_timeline_curves(self: &Rc<Self>) {
@@ -82,13 +82,8 @@ impl DesignerWorkspace {
         let keys: Vec<_> = track
             .keyframes
             .iter()
-            .filter_map(|key| {
-                if let AnimationValue::Number(value) = key.value {
-                    Some(CurvePoint::new(key.time, value))
-                } else {
-                    None
-                }
-            })
+            .filter_map(|key| channel.authored_key_value(&key.value)
+                .map(|value| CurvePoint::new(key.time, value)))
             .collect();
         let target = track.target;
         let query = Rc::downgrade(self);
@@ -97,6 +92,7 @@ impl DesignerWorkspace {
         let owner = Rc::downgrade(self);
         let context = context.clone();
         let property = track.property.clone();
+        let edit_channel = channel.clone();
         lane.configure_curve(
             metric,
             channel.clone(),
@@ -122,7 +118,9 @@ impl DesignerWorkspace {
                         time: from,
                     };
                     let result = workspace
-                        .apply_curve_drag(&context, &selection, time, value)
+                        .apply_curve_drag(&context, &selection, time, &KeyframeComponentEdit {
+                            channel: edit_channel.clone(), value,
+                        })
                         .and_then(|time| workspace.session.borrow_mut().seek(time));
                     if result.is_ok() || context.check(&workspace).is_err() {
                         workspace.refresh(true);
@@ -138,21 +136,23 @@ impl DesignerWorkspace {
         context: &TimelineContext,
         selected: &SelectedKey,
         time: f64,
-        value: f64,
+        edit: &KeyframeComponentEdit,
     ) -> Result<f64, String> {
         context.check(self)?;
         let session = self.session.borrow();
         if !session.can_manipulate() {
             return Err("Wait for the current editable animation preview".into());
         }
+        let program = context.program.ok_or("Choose an animation")?;
         let easing = session
             .timeline()
             .track(selected.target, &selected.property)
             .and_then(|track| track.keyframes.iter().find(|key| key.time == selected.time))
             .map(|key| key.easing.to_xaml())
             .ok_or("Choose an authored curve key")?;
+        let value = session.program_keyframe_component(program, selected.target, &selected.property, selected.time, edit)?;
         drop(session);
-        self.apply_timeline_keyframe(context, selected, time, &value.to_string(), &easing)
+        self.apply_timeline_keyframe(context, selected, time, &value, &easing)
     }
 
     pub(super) fn apply_timeline_keyframe(

@@ -68,6 +68,7 @@ struct Events {
     keyframe_selection_result: Option<DesignKeyframeSelectionResult>,
     property_transitions: bool,
     property_transition_result: Option<DesignPropertyTransitionsResult>,
+    component_keys: bool,
     curve_result: Option<DesignAnimationCurveResult>,
     authorable: BTreeSet<i64>,
     sampleable_keys: BTreeSet<(i64, i64, String)>,
@@ -232,6 +233,10 @@ impl Relay {
                     state.animation_supported = true;
                     state.keyframe_selection = catalog.keyframe_selection == Some(true);
                     state.property_transitions = catalog.property_transition_owners.is_some();
+                    state.component_keys = catalog.programs.iter().any(|program| {
+                        program.authoring.as_ref().is_some_and(|authoring| authoring.tracks.iter()
+                            .any(|track| track.keys.iter().any(|key| key.curve_values.is_some())))
+                    });
                     state.curve_programs = catalog.programs.iter().filter(|program| program.curve_tracks.is_some())
                         .map(|program| program.id).collect();
                     state.animation_catalog = Some(catalog.clone());

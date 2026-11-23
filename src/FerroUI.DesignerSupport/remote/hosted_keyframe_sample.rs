@@ -73,6 +73,7 @@ impl HostedAnimations {
             value: value.to_xaml(),
             easing: Easing::Linear.to_xaml(),
             value_kind,
+            curve_values: None,
         })
     }
 }

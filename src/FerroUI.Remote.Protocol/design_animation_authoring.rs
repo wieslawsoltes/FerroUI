@@ -5,6 +5,8 @@ use crate::{bson_class, ferro_remote_message_guid};
 pub const DESIGN_ANIMATION_AUTHORING_QUERY: &str = "ferroui-design-keyframes";
 /// Allow authoring requests to capture a value from the native track sampler.
 pub const DESIGN_KEYFRAME_SAMPLING_QUERY: &str = "ferroui-design-keyframe-sampling";
+/// Use authored component handles and component drafts on the accepted frame.
+pub const DESIGN_KEYFRAME_COMPONENTS_QUERY: &str = "ferroui-design-keyframe-components";
 
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct DesignAnimationAuthoring {
@@ -40,6 +42,7 @@ pub struct DesignAnimationKeyframe {
     pub value: String,
     pub easing: String,
     pub value_kind: String,
+    pub curve_values: Option<Vec<DesignKeyframeComponent>>,
 }
 
 bson_class!(DesignAnimationKeyframe as "DesignAnimationKeyframe" {
@@ -47,6 +50,18 @@ bson_class!(DesignAnimationKeyframe as "DesignAnimationKeyframe" {
     "Value" => value: String,
     "Easing" => easing: String,
     "ValueKind" => value_kind: String,
+    "CurveValues" => curve_values: Option<Vec<DesignKeyframeComponent>>,
+});
+
+#[derive(Clone, Debug, Default, PartialEq)]
+pub struct DesignKeyframeComponent {
+    pub channel: String,
+    pub value: f64,
+}
+
+bson_class!(DesignKeyframeComponent as "DesignKeyframeComponent" {
+    "Channel" => channel: String,
+    "Value" => value: f64,
 });
 
 /// Plan a draft against the application build's registered codec. This request
@@ -64,6 +79,7 @@ pub struct DesignAnimationAuthoringRequest {
     pub easing: String,
     pub sample: Option<bool>,
     pub sample_target: Option<i64>,
+    pub component: Option<DesignKeyframeComponent>,
 }
 
 ferro_remote_message_guid!(
@@ -82,6 +98,7 @@ bson_class!(DesignAnimationAuthoringRequest as "DesignAnimationAuthoringRequest"
     "Easing" => easing: String,
     "Sample" => sample: Option<bool>,
     "SampleTarget" => sample_target: Option<i64>,
+    "Component" => component: Option<DesignKeyframeComponent>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]
@@ -92,6 +109,7 @@ pub struct DesignAnimationAuthoringResult {
     pub samples: Vec<f64>,
     pub value_kind: String,
     pub sampled_key: Option<DesignAnimationKeyframe>,
+    pub resolved_key: Option<DesignAnimationKeyframe>,
     pub error: Option<String>,
 }
 
@@ -106,6 +124,7 @@ bson_class!(DesignAnimationAuthoringResult as "DesignAnimationAuthoringResult" {
     "Samples" => samples: Vec<f64>,
     "ValueKind" => value_kind: String,
     "SampledKey" => sampled_key: Option<DesignAnimationKeyframe>,
+    "ResolvedKey" => resolved_key: Option<DesignAnimationKeyframe>,
     "Error" => error: Option<String>,
 });
 

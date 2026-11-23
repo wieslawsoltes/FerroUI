@@ -164,6 +164,40 @@ fn value_curve_uses_the_ruler_and_commits_both_coordinates_on_release() {
 }
 
 #[test]
+fn component_curve_drag_and_keyboard_edit_only_authored_handles() {
+    use ferroui_designer_animation::{CurveMetric, CurvePoint, TrackCurveChannel};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let lane = TimelineLane::new();
+    lane.configure(2.0, vec![0.5, 1.5]);
+    let commits = Rc::new(RefCell::new(Vec::new()));
+    let observed = commits.clone();
+    lane.configure_curve(
+        CurveMetric::Value,
+        "gradient/radius_y/percent".parse::<TrackCurveChannel>().unwrap(),
+        vec![CurvePoint::new(0.5, 50.0)],
+        |window| Ok(vec![CurvePoint::new(window.start, 20.0), CurvePoint::new(window.end, 65.0)]),
+        move |from, to, value| observed.borrow_mut().push((from, to, value)),
+    );
+    let driver = PointerDriver::new(lane.clone());
+    let on_curve = Point::new(lane.x(0.5), lane.key_y(0.5).unwrap());
+    assert!(lane.key_y(1.5).unwrap() > on_curve.y);
+    driver.press_at(on_curve, 1, KeyModifiers::NONE);
+    driver.release_at(Point::new(on_curve.x, on_curve.y - 10.0));
+    assert_eq!(commits.borrow().len(), 1);
+    assert_eq!((commits.borrow()[0].0, commits.borrow()[0].1), (0.5, 0.5));
+    assert!(commits.borrow()[0].2 > 50.0);
+
+    lane.set_selected_keys(vec![0.5], Some(0.5));
+    key(&lane, Key::Down, KeyModifiers::ALT);
+    assert_eq!(commits.borrow().len(), 2);
+    assert!(commits.borrow()[1].2 < 50.0);
+    lane.set_selected_keys(vec![1.5], Some(1.5));
+    key(&lane, Key::Down, KeyModifiers::ALT);
+    assert_eq!(commits.borrow().len(), 2);
+}
+
+#[test]
 fn velocity_curve_markers_retime_keys_without_editing_their_values() {
     use ferroui_designer_animation::{CurveChannel, CurveMetric, CurvePoint};
 

@@ -33,13 +33,14 @@ pub(crate) fn keyframe_edit(tool: &str, action: Option<&str>) -> bool {
 }
 
 impl AuthoredRsxFrame {
-    pub(crate) fn validate_keyframe_draft(&self, args: &Value) -> Result<(), String> {
+    pub(crate) fn validate_keyframe_draft(&self, session: &DesignerSession, args: &Value) -> Result<(), String> {
         let clip = self.clip(node(args, "program")?)?;
+        let value = ferroui_designer::mcp::keyframe_value(session, args)?;
         clip.author_keyframe(
             &self.source,
             &self.catalog,
             string(args, "property")?,
-            draft(args)?,
+            draft(args, &value)?,
         )?;
         Ok(())
     }
@@ -92,9 +93,13 @@ impl AuthoredRsxFrame {
         let target = node(args, "target")?;
         let property = string(args, "property")?;
         let sample;
+        let value;
         let mut pose = None;
         let edit = match action {
-            "upsert_keyframe" => draft(args)?,
+            "upsert_keyframe" => {
+                value = ferroui_designer::mcp::keyframe_value(session, args)?;
+                draft(args, &value)?
+            }
             "remove_keyframe" => KeyframeEdit::Remove(number(args, "time")?),
             "record_keyframe" => {
                 sample =
@@ -116,11 +121,11 @@ impl AuthoredRsxFrame {
     }
 }
 
-fn draft(args: &Value) -> Result<KeyframeEdit<'_>, String> {
+fn draft<'a>(args: &'a Value, value: &'a str) -> Result<KeyframeEdit<'a>, String> {
     Ok(KeyframeEdit::Upsert {
         previous: args["previous"].as_f64(),
         time: number(args, "time")?,
-        value: string(args, "value")?,
+        value,
         easing: string(args, "easing")?,
     })
 }

@@ -1,6 +1,6 @@
 use super::{hosted_animation, send, Relay, FRAME_TIMEOUT};
 use ferroui_designer_animation::KeyframeEdit;
-use ferroui_remote_protocol::designer::DesignAnimationAuthoringRequest;
+use ferroui_remote_protocol::designer::{DesignAnimationAuthoringRequest, DesignKeyframeComponent};
 use std::sync::Arc;
 
 impl Relay {
@@ -10,9 +10,14 @@ impl Relay {
     ) -> Result<serde_json::Value, String> {
         let connection = self.animation_connection(draft.revision, draft.sequence)?;
         let recording = draft.sample == Some(true);
-        let (value, easing) = match (recording, draft.value, draft.easing) {
-            (true, None, None) if draft.previous.is_none() => (String::new(), String::new()),
-            (false, Some(value), Some(easing)) if draft.preview_target.is_none() => (value, easing),
+        let (value, easing, component) = match (recording, draft.value, draft.easing, draft.component) {
+            (true, None, None, None) if draft.previous.is_none() => (String::new(), String::new(), None),
+            (false, Some(value), Some(easing), None) if draft.preview_target.is_none() => (value, easing, None),
+            (false, None, Some(easing), Some(component)) if draft.previous.is_some() && draft.preview_target.is_none() => {
+                let channel = serde_json::from_value(serde_json::to_value(component.channel).map_err(|error| error.to_string())?)
+                    .map_err(|error| error.to_string())?;
+                (String::new(), easing, Some(DesignKeyframeComponent { channel, value: component.value }))
+            }
             _ => {
                 return Err(
                     "Choose a new sampled keyframe or supply an explicit keyframe draft".into(),
@@ -32,6 +37,7 @@ impl Relay {
             easing,
             sample: recording.then_some(true),
             sample_target: draft.preview_target,
+            component,
         });
         {
             let mut state = self.events.0.lock().unwrap();
@@ -39,6 +45,9 @@ impl Relay {
                 return Err(
                     "Choose an editable animation in the current application preview".into(),
                 );
+            }
+            if command.component.is_some() && !state.component_keys {
+                return Err("Use an application preview with component keyframe authoring".into());
             }
             if recording
                 && !state.sampleable_keys.contains(&(
@@ -71,11 +80,9 @@ impl Relay {
         if let Some(error) = result.error.take() {
             return Err(error);
         }
-        let (time, value, easing) = if recording {
-            let sampled = result
-                .sampled_key
-                .as_ref()
-                .ok_or("The application did not return the sampled keyframe")?;
+        let (time, value, easing) = if recording || command.component.is_some() {
+            let sampled = if recording { result.sampled_key.as_ref() } else { result.resolved_key.as_ref() }
+                .ok_or("The application did not return the planned keyframe value")?;
             (
                 sampled.time,
                 sampled.value.as_str(),

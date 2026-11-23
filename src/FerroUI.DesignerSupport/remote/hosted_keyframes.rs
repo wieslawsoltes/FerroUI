@@ -8,13 +8,14 @@ use ferroui_base::{Ref, StyledElement};
 use ferroui_designer_animation::native::{native_keyframe_options_for_target, NativeProgramIndex};
 use ferroui_designer_animation::{
     animation_fragment, compose_animation_edit, AnimationError, AnimationProgram, AnimationValue,
-    CurveChannel, ImportOptions, KeyframeEdit, KeyframeLocation, TrackCurveChannel, ValueKind,
+    CurveChannel, ImportOptions, KeyframeComponentEdit, KeyframeEdit, KeyframeLocation,
+    TrackCurveChannel, ValueKind,
 };
 use ferroui_designer_core::{Document, NodeId, TextPatch};
 use ferroui_remote_protocol::designer::{
     DesignAnimationAuthoring, DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult,
     DesignAnimationKeyframe, DesignAnimationProgram, DesignAnimationSourcePatch,
-    DesignAnimationTrack,
+    DesignAnimationTrack, DesignKeyframeComponent,
 };
 use std::collections::BTreeMap;
 use std::rc::Rc;
@@ -29,6 +30,7 @@ pub(super) struct HostedKeyframeCapabilities {
     pub(super) curves: bool,
     pub(super) curve_channels: bool,
     pub(super) sampling: bool,
+    pub(super) components: bool,
     pub(super) effects: bool,
     pub(super) effect_objects: bool,
     pub(super) registered_effects: bool,
@@ -74,7 +76,7 @@ impl HostedKeyframes {
                 with_codecs(|codecs| {
                     codecs.decode(&mut program, &source, &options)
                 });
-                tracks(&program)
+                tracks(&program, capabilities.components)
             }));
             let Ok(Some(mut tracks)) = decoded else { continue };
             tracks.retain(|track| track.keys.iter().all(|key| {
@@ -164,8 +166,20 @@ impl HostedKeyframes {
         let target =
             NodeId::try_from(request.target).map_err(|_| "Choose an authored animation track")?;
         let property = &request.property;
+        let component_value = request.component.as_ref().map(|component| {
+            if sampled.is_some() || !request.value.is_empty() {
+                return Err("Supply a component or a complete keyframe value".into());
+            }
+            let previous = request.previous.ok_or("Choose an existing authored keyframe")?;
+            let edit = KeyframeComponentEdit {
+                channel: component.channel.parse().map_err(|error: AnimationError| error.to_string())?,
+                value: component.value,
+            };
+            program.keyframe_component(target, property, previous, &edit)
+                .map(|value| value.to_xaml()).map_err(|error| error.to_string())
+        }).transpose()?;
         let (time, value, easing) = sampled.as_ref().map_or(
-            (request.time, request.value.as_str(), request.easing.as_str()),
+            (request.time, component_value.as_deref().unwrap_or(&request.value), request.easing.as_str()),
             |key| (key.time, key.value.as_str(), key.easing.as_str()),
         );
         let edit = KeyframeEdit::Upsert {
@@ -220,6 +234,10 @@ impl HostedKeyframes {
             .inspect_keyframe(target, property, location.time)
             .map_err(|error| error.to_string())?;
         let patch = self.source_patch(program.id, &source)?;
+        let resolved_key = round_trip.filter(|_| component_value.is_some()).map(|key| DesignAnimationKeyframe {
+            time: key.time, value: key.value.to_xaml(), easing: key.easing.to_xaml(),
+            value_kind: format!("{:?}", key.value.kind()), curve_values: None,
+        });
         Ok(DesignAnimationAuthoringResult {
             revision: request.revision,
             request: request.request,
@@ -230,6 +248,7 @@ impl HostedKeyframes {
                 key.time = location.time;
                 key
             }),
+            resolved_key,
             error: None,
         })
     }
@@ -248,7 +267,7 @@ impl HostedKeyframes {
     }
 }
 
-fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
+fn tracks(program: &AnimationProgram, components: bool) -> Option<Vec<DesignAnimationTrack>> {
     let timeline = program.timeline.as_ref()?;
     timeline.validate().ok()?;
     let tracks = timeline
@@ -256,11 +275,17 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
         .iter()
         .filter_map(|track| {
             let kind = track.keyframes.first()?.value.kind();
-            let curve_channels = matches!(kind,
+            let specialized = matches!(kind,
                 ValueKind::RelativePoint | ValueKind::RelativeScalar | ValueKind::Effect | ValueKind::BoxShadows | ValueKind::TransformList | ValueKind::Brush)
-                .then(|| TrackCurveChannel::for_track(track, timeline.duration, timeline.fill))
-                .and_then(|channels| serde_json::to_value(channels).ok())
-                .and_then(|channels| serde_json::from_value(channels).ok());
+                ;
+            let channels = if specialized || components {
+                TrackCurveChannel::for_track(track, timeline.duration, timeline.fill)
+            } else {
+                Vec::new()
+            };
+            let curve_channels = specialized.then(|| {
+                serde_json::to_value(&channels).ok().and_then(|channels| serde_json::from_value(channels).ok())
+            }).flatten();
             Some(DesignAnimationTrack {
                 target: i64::try_from(track.target).ok()?,
                 property: track.property.clone(),
@@ -274,6 +299,15 @@ fn tracks(program: &AnimationProgram) -> Option<Vec<DesignAnimationTrack>> {
                         value: key.value.to_xaml(),
                         easing: key.easing.to_xaml(),
                         value_kind: format!("{:?}", key.value.kind()),
+                        curve_values: components.then(|| {
+                            TrackCurveChannel::key_components(&channels, &key.value).into_iter().filter_map(|value| {
+                                let channel = serde_json::to_value(value.channel).ok()?;
+                                Some(DesignKeyframeComponent {
+                                    channel: channel.as_str()?.to_owned(),
+                                    value: value.value,
+                                })
+                            }).collect()
+                        }),
                     })
                     .collect(),
             })

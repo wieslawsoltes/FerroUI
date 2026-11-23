@@ -46,8 +46,9 @@ pub(super) fn tools() -> Vec<Value> {
     };
     let property_value = || json!({"anyOf":[s::string(),s::number(),{"type":"boolean"},s::animation_value()]});
     let keyframe_draft = || json!({"program":s::id(),"target":s::id(),"property":s::string(),"previous":s::time(),
-        "time":s::time(),"value":s::string(),"easing":s::string()});
-    let draft_required = &["program","target","property","time","value","easing"];
+        "time":s::time(),"value":s::string(),"easing":s::string(),
+        "component":s::object(json!({"channel":s::string(),"value":s::number()}), &["channel","value"])});
+    let draft_required = &["program","target","property","time","easing"];
     vec![
         s::tool("designer_rsx_views", "List the Rust file's rsx! invocations and the active source range.",
             s::object(json!({}), &[]), false),
@@ -60,7 +61,7 @@ pub(super) fn tools() -> Vec<Value> {
                 "channel":s::string(),
                 "window":s::object(json!({"start":s::time(),"end":s::time()}), &["start","end"])}),
                 &["program","target","property","window"]), false),
-        s::tool("designer_keyframe_draft", "Validate an animation keyframe's time, typed value and easing against the current program and source codec. Returns the sampled easing preview.",
+        s::tool("designer_keyframe_draft", "Validate a keyframe's time, value and easing against the current source codec. Supply value text or a component with channel and numeric value from an existing keyframe. Component edits require previous. Returns the sampled easing preview.",
             s::object(keyframe_draft(), draft_required), false),
         s::tool("designer_keyframe_clipboard", "Copy selected typed keys and relative times for paste into compatible tracks. Returns portable clipboard data.",
             s::object(json!({"program":s::id(),"keyframes":keys(),"expected_revision":s::revision()}), &["program","keyframes"]), false),
@@ -145,9 +146,13 @@ pub(super) fn call(
             let map = session.rust_map().ok_or("Open a Rust file with a valid RSX invocation")?;
             return Ok(json!({"document":state(session),"active":map.invocation,"invocations":map.blocks}));
         }
-        "designer_keyframe_draft" => return session.preview_program_keyframe(
-            node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?, keyframe_draft(args)?,
-        ),
+        "designer_keyframe_draft" => {
+            let value = keyframe_value(session, args)?;
+            return session.preview_program_keyframe(
+                node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
+                keyframe_draft(args, &value)?,
+            );
+        }
         "designer_keyframe_clipboard" => {
             let keys: Vec<KeyframeLocation> = decode(args, "keyframes")?;
             let clipboard = session.copy_program_keyframes(node_id(args, "program")?, &keys)?;
@@ -211,10 +216,13 @@ pub(super) fn call(
                 "place_clips" => session.place_animation_clips(
                     &decode::<Vec<u64>>(args, "programs")?, args["start"].as_f64(), args["gap"].as_f64().unwrap_or(0.0),
                 )?,
-                "upsert_keyframe" => session.edit_program_keyframe(
-                    node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
-                    keyframe_draft(args)?,
-                )?,
+                "upsert_keyframe" => {
+                    let value = keyframe_value(session, args)?;
+                    session.edit_program_keyframe(
+                        node_id(args, "program")?, node_id(args, "target")?, &text(args, "property")?,
+                        keyframe_draft(args, &value)?,
+                    )?;
+                }
                 "record_keyframe" => {
                     let program = node_id(args, "program")?;
                     let target = node_id(args, "target")?;
@@ -489,13 +497,18 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
         if let Some(timeline) = &program.timeline {
             for (track, authored) in timeline.tracks.iter().enumerate() {
                 let track_model = &mut model["timeline"]["tracks"][track];
-                track_model["curve_channels"] = json!(TrackCurveChannel::for_track(authored, timeline.duration, timeline.fill));
+                let channels = TrackCurveChannel::for_track(authored, timeline.duration, timeline.fill);
+                track_model["curve_channels"] = json!(channels);
                 if args["include_keyframe_text"] == true {
                     for (key, authored) in authored.keyframes.iter().enumerate() {
                         let model = &mut track_model["keyframes"][key];
                         model["value_text"] = json!(authored.value.to_xaml());
                         model["value_kind"] = json!(authored.value.kind());
                         model["easing_text"] = json!(authored.easing.to_xaml());
+                        let values = TrackCurveChannel::key_components(&channels, &authored.value);
+                        if !values.is_empty() {
+                            model["curve_values"] = json!(values);
+                        }
                     }
                 }
             }
@@ -514,11 +527,31 @@ fn animation_programs(session: &DesignerSession, args: &Value) -> Result<Vec<Val
     }).collect()
 }
 
-fn keyframe_draft(args: &Value) -> Result<KeyframeEdit<'_>, String> {
+pub fn keyframe_value<'a>(
+    session: &DesignerSession,
+    args: &'a Value,
+) -> Result<std::borrow::Cow<'a, str>, String> {
+    if args["component"].is_null() {
+        return args["value"].as_str().map(std::borrow::Cow::Borrowed)
+            .ok_or_else(|| "Supply a typed keyframe value".into());
+    }
+    if !args["value"].is_null() {
+        return Err("Choose a complete keyframe value or a component".into());
+    }
+    session.program_keyframe_component(
+        node_id(args, "program")?,
+        node_id(args, "target")?,
+        &text(args, "property")?,
+        number(args, "previous")?,
+        &decode(args, "component")?,
+    ).map(std::borrow::Cow::Owned)
+}
+
+fn keyframe_draft<'a>(args: &'a Value, value: &'a str) -> Result<KeyframeEdit<'a>, String> {
     Ok(KeyframeEdit::Upsert {
         previous: args["previous"].as_f64(),
         time: number(args, "time")?,
-        value: args["value"].as_str().ok_or("Supply a typed keyframe value")?,
+        value,
         easing: args["easing"].as_str().ok_or("Supply a keyframe easing")?,
     })
 }
