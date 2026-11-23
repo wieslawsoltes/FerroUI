@@ -10,8 +10,7 @@ use std::{
 
 const MAX_ASSET_BYTES: u64 = 64 * 1024 * 1024;
 const OTHER_FORMATS: &[&str] = &[
-    "svg", "ttf", "otf", "woff", "woff2", "wav", "mp3", "ogg", "mp4", "webm", "xaml", "axaml",
-    "fxaml",
+    "svg", "ttf", "otf", "woff", "woff2", "wav", "mp3", "ogg", "mp4", "webm", "xaml", "fxaml",
 ];
 
 pub struct Asset {
