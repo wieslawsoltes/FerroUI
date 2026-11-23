@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (85 done, 28 planned) | 113 |
+| `port` (87 done, 26 planned) | 113 |
 | `already` | 17 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -196,7 +196,7 @@ left out only with a recorded performance or better-code reason.
 | `9b3e9c881b` | #22499 | 2026-10-19 | rendering | `port` | rendering | Compositor output rotation through `RenderTargetProperties`. |
 | `be0c42891f` | #22522 | 2026-10-19 | build | `not-applicable` |  | Upstream repository workflow. |
 | `b515c3ae17` | #22523 | 2026-10-20 | controls | `port` (done) | controls2 | Per-area log verbosity for `log_to_trace` and `log_to_delegate`. |
-| `ba4fedb31e` | #22529 | 2026-10-20 | platform-ios | `port` | ios | Keyboard stays up when focus moves between text boxes. |
+| `ba4fedb31e` | #22529 | 2026-10-20 | platform-ios | `port` (done) | platforms2 | Keyboard stays up when focus moves between text boxes. |
 | `ae55790316` | #22526 | 2026-10-20 | platform-ios | `port` | ios | Touches in progress are cancelled when the view leaves its window. |
 | `45693b1713` | #22196 | 2026-10-20 | build | `not-applicable` |  | .NET 11 SDK and .NET WebAssembly runtime. |
 | `fa6d6f069e` | #22532 | 2026-10-20 | platform-macos | `port` (done) | macos | `automation.mm`: AXFocused settable only on keyboard-focusable elements. |
@@ -279,7 +279,7 @@ left out only with a recorded performance or better-code reason.
 | `dfee7f224b` | #22185 | 2026-10-30 | text | `deferred` |  | Variable fonts: `FontVariations` property, markup and animation. |
 | `37279ab420` | #22650 | 2026-10-30 | themes | `deferred` |  | Fluent 2 embedded root; follows the Fluent 2 decision. |
 | `432480ae82` | #22574 | 2026-10-30 | controls | `port` (done) | controls2 | `TabStripItem.Icon` and `IconTemplate`; icon presenter in the Fluent tab templates (two more elements per tab: start-up check owed). |
-| `5b36bbe0ad` | #22683 | 2026-11-03 | platform-ios | `port` | ios | Accessibility traversal skips interop peers. |
+| `5b36bbe0ad` | #22683 | 2026-11-03 | platform-ios | `port` (done) | platforms2 | Accessibility traversal skips interop peers. |
 | `99b0962977` | #22686 | 2026-11-03 | rendering | `already` |  | `immutable_bitmap.rs` returns an error from `Codec::from_data` on null. |
 | `0a53cc4730` | #22687 | 2026-11-03 | platform-linux | `port` (done) | linux | AT-SPI: X11 window id attribute. |
 | `c3b6f5cf61` | #22710 | 2026-11-05 | markup | `port` | markup | XamlX update: inline generics in `x:Type` and `x:Static`; compare with the FerroUI compiler. |

@@ -170,8 +170,8 @@
    "area": "platform-ios",
    "class": "port",
    "note": "Keyboard stays up when focus moves between text boxes.",
-   "part": "ios",
-   "state": "planned"
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "ae55790316720c4d81dcbb5a371720cbcbde558f",
@@ -926,8 +926,8 @@
    "area": "platform-ios",
    "class": "port",
    "note": "Accessibility traversal skips interop peers.",
-   "part": "ios",
-   "state": "planned"
+   "part": "platforms2",
+   "state": "done"
   },
   {
    "hash": "99b0962977b65fef3c355d225900ebdb299cf5ab",
