@@ -9,9 +9,9 @@ use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{AcrylicBrush, Color};
 use ferroui_base::rendering::composition::system_backdrops::MicaKind;
 use ferroui_base::{CornerRadius, Ref};
-use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop, SystemBackdropElement};
+use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop};
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, StackPanel, TextBlock};
+use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, StackPanel, SystemBackdropElement, TextBlock};
 
 fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap()

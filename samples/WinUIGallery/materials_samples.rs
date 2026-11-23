@@ -6,10 +6,10 @@ use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{AcrylicBrush, Color};
 use ferroui_base::rendering::composition::system_backdrops::MicaKind;
 use ferroui_base::{BoxedValue, CornerRadius, ObjectType, Ref, Vector3D};
-use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop, SystemBackdrop, SystemBackdropElement};
+use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop, SystemBackdrop};
 use ferroui_controls::primitives::{RangeBase, SelectingItemsControl};
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, TextBlock};
+use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, SystemBackdropElement, TextBlock};
 use std::rc::Rc;
 
 pub(crate) fn wire(root: &Ref<Control>) {

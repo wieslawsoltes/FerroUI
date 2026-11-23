@@ -1206,10 +1206,9 @@ fn symbolIcon() = ferro_create(typeId: 401)
 // (WinUI's `SymbolIconSource`).
 fn symbolIconSource() = ferro_create(typeId: 402)
 // systemBackdropElement() -> int: creates a SystemBackdropElement. An element that hosts a
-// system backdrop (WinUI `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). The backdrop is
-// connected while the element is in a window, and its brush is the element's background. WinUI
-// derives the class from `FrameworkElement`; here it is a templated control without a
-// template, which has the background and corner radius the backdrop target uses.
+// system backdrop (WinUI `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). It has no
+// template. The backdrop is connected while the element is in a window, and the element draws
+// its brush.
 fn systemBackdropElement() = ferro_create(typeId: 404)
 // tabControl() -> int: creates a TabControl. A tab control that displays a tab strip along
 // with the content of the selected tab.
@@ -2908,15 +2907,15 @@ fn contextMenuObject(object, value) = {
     object
 }
 // cornerRadius(object: int, value: string) -> int: sets CornerRadius (Border,
-// ContentPresenter, ExperimentalAcrylicBorder, TemplatedControl). Defines the `CornerRadius`
-// property.
+// ContentPresenter, ExperimentalAcrylicBorder, SystemBackdropElement, TemplatedControl).
+// Defines the `CornerRadius` property.
 fn cornerRadius(object, value) = {
     let _ = ferro_set_str(object: object, property: 174, text: value, length: -1)
     object
 }
 // getCornerRadius(object: int) -> string: reads CornerRadius (Border, ContentPresenter,
-// ExperimentalAcrylicBorder, TemplatedControl); the fallback of its kind when the read fails
-// (`failure()` tells): a plain value, no Result.
+// ExperimentalAcrylicBorder, SystemBackdropElement, TemplatedControl); the fallback of its
+// kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getCornerRadius(object) = "${ferro_get_cstr_or(object: object, property: 174, fallback: "")}"
 // culture(object: int, value: string) -> int: sets Culture (MaskedTextBox). Defines the
 // `Culture` property.

@@ -6,7 +6,6 @@ mod reveal_brush;
 mod reveal_focus;
 mod reveal_lights;
 mod system_backdrop;
-mod system_backdrop_element;
 
 pub use reveal_brush::{
     connected_reveal_brushes, reveal_border_effect, reveal_hover_effect, ApplicationTheme, RevealBackgroundBrush,
@@ -19,7 +18,6 @@ pub use system_backdrop::{
     ElementBackdropTarget, TopLevelBackdropTarget,
 };
 pub(crate) use system_backdrop::ElementSystemBackdrop;
-pub use system_backdrop_element::SystemBackdropElement;
 pub use reveal_focus::{
     direction_from, glow_inset, is_traveling_focus_enabled, spot_light_duration, spot_light_path, FocusVisualKind,
     RevealFocus, RevealFocusDirection, REVEAL_FOCUS_GLOW_PNG,

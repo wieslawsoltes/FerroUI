@@ -11391,17 +11391,18 @@
     "backdrop",
     "element"
    ],
-   "base": "TemplatedControl",
-   "rust_path": "ferroui_controls::media::SystemBackdropElement",
+   "base": "Control",
+   "rust_path": "ferroui_controls::SystemBackdropElement",
    "entry": "ferro_type_system_backdrop_element",
    "creatable": true,
    "control": true,
    "children": "none",
    "properties": [
+    "CornerRadius",
     "SystemBackdrop"
    ],
    "events": [],
-   "doc": "An element that hosts a system backdrop (WinUI `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). The backdrop is connected while the element is in a window, and its brush is the element's background. WinUI derives the class from `FrameworkElement`; here it is a templated control without a template, which has the background and corner radius the backdrop target uses."
+   "doc": "An element that hosts a system backdrop (WinUI `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). It has no template. The backdrop is connected while the element is in a window, and the element draws its brush."
   },
   {
    "id": 405,
@@ -18836,6 +18837,18 @@
     },
     {
      "owner": "ExperimentalAcrylicBorder",
+     "kind": "styled",
+     "value": {
+      "rust": "CornerRadius",
+      "nullable": false,
+      "kind": "parsed"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": "Defines the `CornerRadius` property."
+    },
+    {
+     "owner": "SystemBackdropElement",
      "kind": "styled",
      "value": {
       "rust": "CornerRadius",

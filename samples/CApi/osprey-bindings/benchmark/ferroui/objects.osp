@@ -201,15 +201,15 @@ fn contextMenuObject(object, value) = {
     object
 }
 // cornerRadius(object: int, value: string) -> int: sets CornerRadius (Border,
-// ContentPresenter, ExperimentalAcrylicBorder, TemplatedControl). Defines the `CornerRadius`
-// property.
+// ContentPresenter, ExperimentalAcrylicBorder, SystemBackdropElement, TemplatedControl).
+// Defines the `CornerRadius` property.
 fn cornerRadius(object, value) = {
     let _ = ferro_set_str(object: object, property: 174, text: value, length: -1)
     object
 }
 // getCornerRadius(object: int) -> string: reads CornerRadius (Border, ContentPresenter,
-// ExperimentalAcrylicBorder, TemplatedControl); the fallback of its kind when the read fails
-// (`failure()` tells): a plain value, no Result.
+// ExperimentalAcrylicBorder, SystemBackdropElement, TemplatedControl); the fallback of its
+// kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getCornerRadius(object) = "${ferro_get_cstr_or(object: object, property: 174, fallback: "")}"
 // dataContext(object: int, value: string) -> int: sets DataContext (Application,
 // StyledElement). Defines the `DataContext` property.

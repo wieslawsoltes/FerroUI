@@ -4100,7 +4100,7 @@
         "samples/WinUIGallery/Pages/SystemBackdropElement.xaml",
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/materials_samples.rs",
-        "src/FerroUI.Controls/media/system_backdrop_element.rs"
+        "src/FerroUI.Controls/system_backdrop_element.rs"
       ],
       "tests": [
         {

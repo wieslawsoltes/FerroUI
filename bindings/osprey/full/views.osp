@@ -802,10 +802,8 @@ fn swipeControl(attrs, children) = Element { elementType: 397, elementAttrs: att
 fn symbolIcon(attrs) = Element { elementType: 401, elementAttrs: attrs, elementChildren: [] }
 // systemBackdropElement(attrs: List<Attr<M>>) -> Element<M>: an element of the class
 // SystemBackdropElement. An element that hosts a system backdrop (WinUI
-// `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). The backdrop is connected while the
-// element is in a window, and its brush is the element's background. WinUI derives the class
-// from `FrameworkElement`; here it is a templated control without a template, which has the
-// background and corner radius the backdrop target uses.
+// `Microsoft.UI.Xaml.Controls.SystemBackdropElement`). It has no template. The backdrop is
+// connected while the element is in a window, and the element draws its brush.
 fn systemBackdropElement(attrs) = Element { elementType: 404, elementAttrs: attrs, elementChildren: [] }
 // tabControl(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class TabControl. A tab control that displays a tab strip along with the content of the
@@ -1330,7 +1328,7 @@ fn containerWidth(value) = AttrNumber { attrNumberProperty: 166, attrNumberValue
 // ContentPresenter, DrawerPage, Flyout, NavigationPage, TitleBar).
 fn content(value) = AttrText { attrTextProperty: 167, attrTextValue: value }
 // cornerRadius(value: string) -> Attr<M>: sets CornerRadius (Border, ContentPresenter,
-// ExperimentalAcrylicBorder, TemplatedControl).
+// ExperimentalAcrylicBorder, SystemBackdropElement, TemplatedControl).
 fn cornerRadius(value) = AttrText { attrTextProperty: 174, attrTextValue: value }
 // culture(value: string) -> Attr<M>: sets Culture (MaskedTextBox).
 fn culture(value) = AttrText { attrTextProperty: 175, attrTextValue: value }

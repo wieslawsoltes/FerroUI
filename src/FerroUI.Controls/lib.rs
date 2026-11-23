@@ -114,6 +114,8 @@ pub use window_resized_event_args::{WindowResizeReason, WindowResizedEventArgs};
 pub use window_startup_location::WindowStartupLocation;
 pub use window_state::WindowState;
 pub use window_transparency_level::{WindowTransparencyLevel, WindowTransparencyLevelCollection};
+mod system_backdrop_element;
+pub use system_backdrop_element::SystemBackdropElement;
 pub use wrap_panel::{WrapPanel, WrapPanelItemsAlignment};
 
 mod button;

@@ -148,14 +148,14 @@ impl ICompositionSupportsSystemBackdrop for TopLevelBackdropTarget {
 /// popup of the window (an overlay) it shows the material as in-app acrylic
 /// of the window behind it (winui-materials.md).
 pub struct ElementBackdropTarget {
-    element: WeakRef<crate::primitives::TemplatedControl>,
+    element: WeakRef<crate::Control>,
     brush: RefCell<Option<Rc<CompositionBrush>>>,
     host_brush: Ref<SystemBackdropHostBrush>,
     background: RefCell<Option<Subscription>>,
 }
 
 impl ElementBackdropTarget {
-    pub(crate) fn new(element: &crate::primitives::TemplatedControl) -> Rc<ElementBackdropTarget> {
+    pub(crate) fn new(element: &crate::Control) -> Rc<ElementBackdropTarget> {
         Rc::new(ElementBackdropTarget {
             element: element.to_ref().downgrade(),
             brush: RefCell::new(None),
@@ -177,6 +177,13 @@ impl ICompositionSupportsSystemBackdrop for ElementBackdropTarget {
             previous.dispose();
         }
         let Some(element) = self.element.upgrade() else { return };
+        // An element without a template draws the brush itself.
+        if let Some(backdrop_element) = element.cast::<crate::SystemBackdropElement>() {
+            let host: Option<Rc<dyn IBrush>> = brush.is_some().then(|| self.host_brush.clone().into());
+            backdrop_element.set_backdrop_brush(host);
+            return;
+        }
+        let Some(element) = element.cast::<crate::primitives::TemplatedControl>() else { return };
         if brush.is_some() {
             let host: Rc<dyn IBrush> = self.host_brush.clone().into();
             *self.background.borrow_mut() = element.set_value_with_priority(
@@ -211,7 +218,7 @@ impl ICompositionSupportsSystemBackdrop for ElementBackdropTarget {
 /// window (the system backdrop of a menu flyout presenter, of a popup in a
 /// window).
 pub(crate) fn connect_element_backdrop(
-    element: &crate::primitives::TemplatedControl,
+    element: &crate::Control,
     backdrop: &Ref<SystemBackdrop>,
     target: &Rc<ElementBackdropTarget>,
 ) -> bool {
@@ -239,7 +246,7 @@ pub(crate) struct ElementSystemBackdrop {
 impl ElementSystemBackdrop {
     /// Connects `backdrop` to `element` (after disconnecting the backdrop
     /// it was connected to).
-    pub(crate) fn connect(&self, element: &crate::primitives::TemplatedControl, backdrop: Option<Ref<SystemBackdrop>>) {
+    pub(crate) fn connect(&self, element: &crate::Control, backdrop: Option<Ref<SystemBackdrop>>) {
         self.disconnect();
         let Some(backdrop) = backdrop else { return };
         let target = self.target.borrow_mut().get_or_insert_with(|| ElementBackdropTarget::new(element)).clone();

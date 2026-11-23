@@ -23875,8 +23875,8 @@
   {
     "name": "SystemBackdropElement",
     "namespace": "https://github.com/ferroui",
-    "documentation": "ferroui_controls::media::SystemBackdropElement",
-    "base": "TemplatedControl",
+    "documentation": "ferroui_controls::SystemBackdropElement",
+    "base": "Control",
     "constructible": true,
     "properties": {
       "SystemBackdrop": {
@@ -23885,11 +23885,18 @@
         "documentation": "SystemBackdropElement.SystemBackdrop: Option<Ref<SystemBackdrop>>",
         "values": [],
         "attached": false
+      },
+      "CornerRadius": {
+        "name": "CornerRadius",
+        "type_name": "CornerRadius",
+        "documentation": "SystemBackdropElement.CornerRadius: CornerRadius",
+        "values": [],
+        "attached": false
       }
     },
     "namespace_aliases": [
-      "using:FerroUI.Media",
-      "clr-namespace:FerroUI.Media;assembly=FerroUI.Controls"
+      "using:FerroUI.Controls",
+      "clr-namespace:FerroUI.Controls;assembly=FerroUI.Controls"
     ]
   },
   {
