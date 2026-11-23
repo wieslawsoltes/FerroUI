@@ -15,11 +15,15 @@
 //! the GPU programs.
 
 use super::custom_effect::normalize_identifier;
-use super::{CustomEffect, ImmutableCustomEffect};
+use super::{CustomEffect, EffectParameterValue, ImmutableCustomEffect};
 use crate::utilities::FormatError;
+use invocation::{Argument, Invocation};
 use std::any::TypeId;
 use std::fmt;
 use std::sync::RwLock;
+
+#[path = "custom_effect_invocation.rs"]
+mod invocation;
 
 /// The names of the built-in effects, normalized: a custom effect cannot
 /// take them.
@@ -27,7 +31,7 @@ const RESERVED_NAMES: [&str; 2] = ["blur", "dropshadow"];
 
 /// Parses the arguments of an effect string into a value of one registered
 /// type; the error is the reason, for the message of the parse error.
-type ParseFn = fn(&[(String, String)]) -> Result<ImmutableCustomEffect, String>;
+type ParseFn = fn(&[Argument<'_>]) -> Result<ImmutableCustomEffect, String>;
 
 struct Registration {
     name: &'static str,
@@ -115,7 +119,7 @@ impl CustomEffectRegistry {
     /// The name in a custom-effect invocation, without resolving it in this process.
     /// A designer can forward an invocation to the application that owns its registry.
     pub fn invocation_name(s: &str) -> Option<&str> {
-        let (name, _) = parse_invocation(s)?;
+        let name = Invocation::parse(s)?.name;
         let key = normalize_identifier(name);
         (!key.is_empty() && !RESERVED_NAMES.contains(&key.as_str())).then_some(name)
     }
@@ -126,10 +130,50 @@ impl CustomEffectRegistry {
     /// invariant format of [`EffectParameterValue`](super::EffectParameterValue).
     /// `None` when `s` is not of that form or names no registered effect.
     pub fn parse(s: &str) -> Option<Result<ImmutableCustomEffect, FormatError>> {
-        let (name, arguments) = parse_invocation(s)?;
-        let key = normalize_identifier(name);
+        Self::parse_invocation(s, &Invocation::parse(s)?)
+    }
+
+    /// Edit one registered parameter in an effect literal. Unchanged arguments,
+    /// spelling, and whitespace stay in place. A changed default is written
+    /// explicitly. The registry validates the resulting value and its siblings.
+    pub fn edit_literal_parameter(
+        source: &str,
+        parameter: &str,
+        edit: impl FnOnce(EffectParameterValue) -> Result<EffectParameterValue, FormatError>,
+    ) -> Result<String, FormatError> {
+        let invalid = || FormatError::new("Use a literal for a registered effect");
+        let invocation = Invocation::parse(source).ok_or_else(invalid)?;
+        let before = Self::parse_invocation(source, &invocation).ok_or_else(invalid)??;
+        let name = normalize_identifier(parameter);
+        let parameters = before.parameters();
+        let (declared, original) = parameters.iter()
+            .find(|(candidate, _)| normalize_identifier(candidate) == name)
+            .ok_or_else(|| FormatError::from_string(format!("The effect has no parameter '{parameter}'")))?;
+        let value = edit(original.clone())?;
+        if std::mem::discriminant(original) != std::mem::discriminant(&value) {
+            return Err(FormatError::new("Keep the registered parameter type"));
+        }
+        if *original == value {
+            return Ok(source.to_owned());
+        }
+        let updated = invocation.replace_argument(source, declared, &value.to_string());
+        let after = Self::parse(&updated).ok_or_else(invalid)??;
+        let following = after.parameters();
+        if parameters.len() != following.len() || parameters.iter().any(|(name, previous)| {
+            let expected = if name == declared { &value } else { previous };
+            !following.iter().any(|(candidate, value)| candidate == name && value == expected)
+        }) {
+            return Err(FormatError::new(
+                "This effect cannot preserve the requested parameter value and its siblings",
+            ));
+        }
+        Ok(updated)
+    }
+
+    fn parse_invocation(s: &str, invocation: &Invocation<'_>) -> Option<Result<ImmutableCustomEffect, FormatError>> {
+        let key = normalize_identifier(invocation.name);
         let parse = Self::registry().iter().find(|registration| registration.key == key)?.parse;
-        Some(parse(&arguments).map_err(|reason| FormatError::from_string(format!("Unable to parse effect: {s} ({reason})"))))
+        Some(parse(&invocation.arguments).map_err(|reason| FormatError::from_string(format!("Unable to parse effect: {s} ({reason})"))))
     }
 
     /// The registrations, the effects of the library among them.
@@ -140,9 +184,9 @@ impl CustomEffectRegistry {
 }
 
 /// Makes a `T` from its default and the named arguments.
-fn parse_registered<T: CustomEffect>(arguments: &[(String, String)]) -> Result<ImmutableCustomEffect, String> {
+fn parse_registered<T: CustomEffect>(arguments: &[Argument<'_>]) -> Result<ImmutableCustomEffect, String> {
     let mut value = T::default();
-    for (argument, text) in arguments {
+    for Argument { name: argument, value: text, .. } in arguments {
         let key = normalize_identifier(argument);
         let mut declared = None;
         CustomEffect::for_each_parameter(&value, &mut |name, current| {
@@ -161,141 +205,4 @@ fn parse_registered<T: CustomEffect>(arguments: &[(String, String)]) -> Result<I
         }
     }
     Ok(ImmutableCustomEffect::new(value))
-}
-
-/// Splits `name(argument=value, ...)` into the name and the arguments.
-///
-/// Arguments are separated by `,` or `;` outside parentheses, brackets,
-/// braces and quotes. A piece without `=` continues the value before it, so
-/// that `offset=10,20` is one argument.
-fn parse_invocation(s: &str) -> Option<(&str, Vec<(String, String)>)> {
-    let trimmed = s.trim();
-    let open = trimmed.find('(')?;
-    let inner = trimmed.strip_suffix(')')?.get(open + 1..)?.trim();
-    let name = trimmed[..open].trim();
-    if name.is_empty() || !name.chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_') {
-        return None;
-    }
-    let mut arguments: Vec<(String, String)> = Vec::new();
-    if inner.is_empty() {
-        return Some((name, arguments));
-    }
-    for piece in split_top_level(inner)? {
-        let piece = piece.trim();
-        if piece.is_empty() {
-            return None;
-        }
-        match find_top_level(piece, '=') {
-            Some(equals) => {
-                let argument = piece[..equals].trim();
-                let value = piece[equals + 1..].trim();
-                if argument.is_empty() || value.is_empty() {
-                    return None;
-                }
-                arguments.push((argument.to_string(), value.to_string()));
-            }
-            None => {
-                let (_, value) = arguments.last_mut()?;
-                value.push(',');
-                value.push_str(piece);
-            }
-        }
-    }
-    Some((name, arguments))
-}
-
-/// The pieces of `s` between the separators (`,` and `;`) that are outside
-/// parentheses, brackets, braces and quotes; `None` when those do not
-/// balance.
-fn split_top_level(s: &str) -> Option<Vec<&str>> {
-    let mut pieces = Vec::new();
-    let mut start = 0;
-    let mut depth = 0usize;
-    let mut quote = None;
-    for (index, c) in s.char_indices() {
-        if let Some(open) = quote {
-            if c == open {
-                quote = None;
-            }
-            continue;
-        }
-        match c {
-            '"' | '\'' => quote = Some(c),
-            '(' | '[' | '{' => depth += 1,
-            ')' | ']' | '}' => depth = depth.checked_sub(1)?,
-            ',' | ';' if depth == 0 => {
-                pieces.push(&s[start..index]);
-                start = index + c.len_utf8();
-            }
-            _ => {}
-        }
-    }
-    if depth != 0 || quote.is_some() {
-        return None;
-    }
-    pieces.push(&s[start..]);
-    Some(pieces)
-}
-
-/// The offset of the first `target` outside parentheses, brackets, braces
-/// and quotes.
-fn find_top_level(s: &str, target: char) -> Option<usize> {
-    let mut depth = 0usize;
-    let mut quote = None;
-    for (index, c) in s.char_indices() {
-        if let Some(open) = quote {
-            if c == open {
-                quote = None;
-            }
-            continue;
-        }
-        match c {
-            '"' | '\'' => quote = Some(c),
-            '(' | '[' | '{' => depth += 1,
-            ')' | ']' | '}' => depth = depth.saturating_sub(1),
-            _ if c == target && depth == 0 => return Some(index),
-            _ => {}
-        }
-    }
-    None
-}
-
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn an_invocation_splits_into_its_name_and_arguments() {
-        let (name, arguments) = parse_invocation(" tint ( color = #0F9D8E , strength=0.55 ) ").unwrap();
-        assert_eq!("tint", name);
-        assert_eq!(
-            vec![("color".to_string(), "#0F9D8E".to_string()), ("strength".to_string(), "0.55".to_string())],
-            arguments
-        );
-    }
-
-    #[test]
-    fn values_with_commas_stay_one_argument() {
-        let (_, arguments) = parse_invocation("glow(color=rgba(1, 2, 3, 0.5), offset=10,20; label='a, b')").unwrap();
-        assert_eq!(
-            vec![
-                ("color".to_string(), "rgba(1, 2, 3, 0.5)".to_string()),
-                ("offset".to_string(), "10,20".to_string()),
-                ("label".to_string(), "'a, b'".to_string()),
-            ],
-            arguments
-        );
-    }
-
-    #[test]
-    fn an_invocation_without_arguments_has_none() {
-        assert_eq!(Some(("invert", Vec::new())), parse_invocation("invert()"));
-    }
-
-    #[test]
-    fn malformed_invocations_are_rejected() {
-        for s in ["", "tint", "tint(", "(a=1)", "tint(a=1", "tint(a=)", "tint(=1)", "tint(1)", "tint(a=(1)", "ti nt(a=1)", "tint(a=1,)"] {
-            assert!(parse_invocation(s).is_none(), "{s}");
-        }
-    }
 }

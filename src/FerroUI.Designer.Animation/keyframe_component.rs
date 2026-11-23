@@ -11,6 +11,41 @@ use crate::{
 };
 use serde::{Deserialize, Serialize};
 
+#[cfg(feature = "native-values")]
+use crate::value::registered_effect;
+
+#[derive(Clone, Copy, Debug, PartialEq, Eq, Serialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CurveStep {
+    Boolean,
+    Integer,
+}
+
+impl CurveStep {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::Boolean => "boolean",
+            Self::Integer => "integer",
+        }
+    }
+
+    pub fn snap(self, value: f64) -> f64 {
+        let (low, high) = match self {
+            Self::Boolean => (0.0, 1.0),
+            Self::Integer => (f64::from(i32::MIN), f64::from(i32::MAX)),
+        };
+        value.round().clamp(low, high)
+    }
+}
+
+#[derive(Clone, Debug, Serialize)]
+pub struct KeyframeCurveValue {
+    pub channel: TrackCurveChannel,
+    pub value: f64,
+    #[serde(skip_serializing_if = "Option::is_none")]
+    pub step: Option<CurveStep>,
+}
+
 #[derive(Clone, Debug, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct KeyframeComponentEdit {
@@ -41,8 +76,16 @@ impl AnimationProgram {
 
 impl TrackCurveChannel {
     pub fn authored_key_value(&self, value: &AnimationValue) -> Option<f64> {
-        let component = slot(self, &mut value.clone())?.get();
-        component.is_finite().then_some(component)
+        Some(self.authored_key_component(value)?.value)
+    }
+
+    pub fn authored_key_component(&self, value: &AnimationValue) -> Option<KeyframeCurveValue> {
+        #[cfg(feature = "native-values")]
+        if matches!(self, Self::EffectParameter { .. }) {
+            let effect = registered_effect::parse_literal(value)?;
+            return self.registered_key_component(&effect);
+        }
+        self.built_in_key_component(&mut value.clone())
     }
 
     pub fn uses_normalized_values(&self) -> bool {
@@ -65,21 +108,32 @@ impl TrackCurveChannel {
 
     /// Values of authored handles only. A missing component or a derived
     /// channel remains available for sampling and horizontal retiming.
-    pub fn key_components(channels: &[Self], value: &AnimationValue) -> Vec<KeyframeComponentEdit> {
+    pub fn key_components(channels: &[Self], value: &AnimationValue) -> Vec<KeyframeCurveValue> {
         if channels.is_empty() {
             return Vec::new();
+        }
+        #[cfg(feature = "native-values")]
+        if let Some(effect) = registered_effect::parse_literal(value) {
+            return channels.iter().filter_map(|channel| channel.registered_key_component(&effect)).collect();
         }
         let mut value = value.clone();
         channels
             .iter()
-            .filter_map(|channel| {
-                let component = slot(channel, &mut value)?.get();
-                component.is_finite().then(|| KeyframeComponentEdit {
-                    channel: channel.clone(),
-                    value: component,
-                })
-            })
+            .filter_map(|channel| channel.built_in_key_component(&mut value))
             .collect()
+    }
+
+    #[cfg(feature = "native-values")]
+    fn registered_key_component(&self, effect: &ferroui_base::media::ImmutableCustomEffect) -> Option<KeyframeCurveValue> {
+        let (value, step) = registered_effect::authored_component(effect, self)?;
+        Some(KeyframeCurveValue { channel: self.clone(), value, step })
+    }
+
+    fn built_in_key_component(&self, value: &mut AnimationValue) -> Option<KeyframeCurveValue> {
+        let component = slot(self, value)?.get();
+        component.is_finite().then(|| KeyframeCurveValue {
+            channel: self.clone(), value: component, step: None,
+        })
     }
 
     pub fn replace_key_component(
@@ -88,6 +142,10 @@ impl TrackCurveChannel {
         next: f64,
     ) -> Result<AnimationValue> {
         require(next.is_finite(), "Enter a finite curve value")?;
+        #[cfg(feature = "native-values")]
+        if matches!(self, Self::EffectParameter { .. }) {
+            return registered_effect::replace_component(value, self, next);
+        }
         let mut edited = value.clone();
         let component = slot(self, &mut edited).ok_or_else(|| {
             AnimationError("This channel has no editable component on the authored keyframe".into())

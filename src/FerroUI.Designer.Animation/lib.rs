@@ -45,7 +45,7 @@ pub use easing::{keyframe_easing_presets, Easing, KeyframeEasingPreset};
 pub use interactions::{
     BehaviorAction, BehaviorActionSource, BehaviorEdit, BehaviorModel, BehaviorSource, BehaviorTrigger,
 };
-pub use keyframe_component::KeyframeComponentEdit;
+pub use keyframe_component::{CurveStep, KeyframeComponentEdit, KeyframeCurveValue};
 pub use keyframe_draft::{KeyframeDraftPreview, KeyframeEdit};
 pub use keyframe_edits::{KeyframeGroupEdit, KeyframeLocation};
 pub use keyframe_clipboard::{CopiedKeyframeTrack, KeyframeClipboard, KeyframeDestination, KeyframePaste};

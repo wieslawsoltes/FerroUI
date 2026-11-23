@@ -36,7 +36,7 @@ impl AnimationEffect {
         let native = Effect::parse(source).map_err(|error| AnimationError(error.to_string()))?;
         if let Some(custom) = native.as_custom_effect() {
             crate::value::registered_effect::validate_parameters(custom)?;
-            return Ok(Self::Registered { source: source.trim().to_owned() });
+            return Ok(Self::Registered { source: source.to_owned() });
         }
         let value = Self::from_native(&*native)
             .ok_or_else(|| AnimationError("Choose a supported effect literal".into()))?;
@@ -53,7 +53,7 @@ impl AnimationEffect {
     pub fn parse_for_project_host(source: &str) -> Result<Self> {
         if let Some(name) = CustomEffectRegistry::invocation_name(source) {
             if !CustomEffectRegistry::is_registered(name) {
-                return Ok(Self::Registered { source: source.trim().to_owned() });
+                return Ok(Self::Registered { source: source.to_owned() });
             }
         }
         Self::parse_native(source)

@@ -142,7 +142,7 @@ impl AnimationEffect {
                 source.split_once('(').is_some_and(|(name, _)| {
                     !name.trim().is_empty()
                         && name.trim().chars().all(|c| c.is_alphanumeric() || c == '-' || c == '_')
-                }) && source.ends_with(')'),
+                }) && source.trim_end().ends_with(')'),
                 "A registered effect requires a named invocation",
             ),
         }
