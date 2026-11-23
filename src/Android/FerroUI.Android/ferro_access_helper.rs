@@ -931,10 +931,10 @@ mod tests {
         assert_eq!(ACCESSIBILITY_LIVE_REGION_POLITE, node.live_region);
         assert!(node.has_action(ACTION_SET_TEXT));
 
-        // The text of the action is appended to the value, as in the reference.
+        // The text of the action replaces the value.
         let arguments = NodeActionArguments { set_text_char_sequence: Some("cd".to_string()) };
         assert!(fixture.helper.perform_action(id, ACTION_SET_TEXT, Some(&arguments)));
-        assert_eq!(Some("ab\u{1F600}cd".to_string()), text_box.text());
+        assert_eq!(Some("cd".to_string()), text_box.text());
 
         // A change of the value is sent as a change of the text of the virtual view.
         assert!(fixture.host.content_changes.borrow().contains(&(id, CONTENT_CHANGE_TYPE_TEXT)));
