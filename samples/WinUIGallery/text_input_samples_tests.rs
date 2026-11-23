@@ -55,13 +55,10 @@ fn text_block_examples_keep_the_source_style_properties_and_inlines() {
 fn selectable_text_follows_the_selection_switch() {
     let _application = start();
     let root = page("TextBlock");
-    let text = root.get_control::<RichTextBlock>("SelectableTextBlock");
+    let text = root.get_control::<ferroui_controls::SelectableTextBlock>("SelectableTextBlock");
     // The source's OneWay x:Bind of the switch, off at first.
     assert!(!text.is_text_selection_enabled());
-    assert_eq!(
-        color(text.selection_highlight_color()),
-        Some(Colors::DARK_ORANGE)
-    );
+    assert_eq!(color(text.selection_brush()), Some(Colors::DARK_ORANGE));
     let switch = root.get_control::<ToggleSwitch>("SelectionEnabledSwitch");
     switch.set_is_checked(Some(true));
     assert!(text.is_text_selection_enabled());

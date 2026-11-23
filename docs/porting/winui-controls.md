@@ -459,7 +459,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | Grid | 1 of 1 | ported | `Pages/Grid.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
 | StackPanel | 1 of 1 | ported | `layout_samples.rs` | `layout_samples_tests.rs` |
 | RelativePanel | 1 of 1 | ported | `Pages/RelativePanel.xaml` (no code-behind upstream) | `layout_samples_tests.rs` |
-| TextBlock | 4 ported, 1 partial: no IsTextSelectionEnabled on TextBlock (a RichTextBlock) | partial | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
+| TextBlock | 5 of 5; the selectable text is a `SelectableTextBlock` with `IsTextSelectionEnabled` | ported | `Pages/TextBlock.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
 | TextBox | 3 ported, 1 partial: no IsSpellCheckEnabled | partial | `Pages/TextBox.xaml` (no code-behind upstream) | `text_input_samples_tests.rs` |
 | PasswordBox | 3 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `input_samples.rs` | `tests.rs`, `text_input_samples_tests.rs` |
 | NumberBox | 3 of 3 | ported | `text_input_samples.rs` | `text_input_samples_tests.rs` |

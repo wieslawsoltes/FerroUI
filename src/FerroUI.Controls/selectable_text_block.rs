@@ -22,7 +22,7 @@ use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::{ReadOnlyMemory, ValueSpan};
 use ferroui_base::{
     ferro_class, ferro_property, ferro_routed_event, instantiate, DirectProperty, FerroObjectImpl,
-    FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, PixelRect, Point, Ref, StyledElementImpl,
+    FerroObject, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Matrix, PixelRect, Point, Ref, StyledElementImpl,
     StyledProperty, StyledPropertyMetadata, Visual, VisualImpl,
 };
 use std::cell::{Cell, RefCell};
@@ -103,9 +103,19 @@ impl FerroObjectImpl for SelectableTextBlock {
             }
         } else if change.property() == TextBlock::text_property().as_property() {
             this.on_text_or_inlines_changed();
+        } else if change.property() == Self::is_text_selection_enabled_property().as_property() {
+            this.coerce_value(InputElement::focusable_property().as_property());
+            if !this.is_text_selection_enabled() {
+                this.clear_selection();
+            }
         } else if change.property() == Self::selection_start_property().as_property()
             || change.property() == Self::selection_end_property().as_property()
         {
+            // No selection exists while selection is off, whatever set it.
+            if !this.is_text_selection_enabled() && this.selection_start() != this.selection_end() {
+                this.clear_selection();
+                return;
+            }
             this.raise_direct_property_changed(Self::selected_text_property(), &String::new(), &String::new());
             this.update_command_states();
             this.invalidate_text_layout();
@@ -137,6 +147,10 @@ impl InputElementImpl for SelectableTextBlock {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         Self::parent_on_key_down(this, e);
 
+        if !this.is_text_selection_enabled() {
+            return;
+        }
+
         let mut handled = false;
         let keymap = Application::current()
             .expect("the application")
@@ -159,6 +173,10 @@ impl InputElementImpl for SelectableTextBlock {
 
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
+
+        if !this.is_text_selection_enabled() {
+            return;
+        }
 
         this.selection_at_pointer_press.set(this.get_selection_range());
 
@@ -494,6 +512,13 @@ ferroui_base::ferro_properties! { impl SelectableTextBlock {
     );
 
     ferro_property!(
+        /// Defines the `IsTextSelectionEnabled` property (WinUI's `TextBlock.IsTextSelectionEnabled`).
+        pub fn is_text_selection_enabled_property() -> StyledProperty<bool> {
+            FerroProperty::register::<SelectableTextBlock, _>("IsTextSelectionEnabled", true)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `SelectedText` property.
         pub fn selected_text_property() -> DirectProperty<SelectableTextBlock, String> {
             FerroProperty::register_direct::<SelectableTextBlock, _>(
@@ -536,12 +561,22 @@ impl SelectableTextBlock {
     );
 
     fn static_constructor() {
-        InputElement::focusable_property().override_default_value::<SelectableTextBlock>(true);
+        InputElement::focusable_property().override_metadata::<SelectableTextBlock>(
+            StyledPropertyMetadata::new(Some(true)).with_coerce(Self::coerce_focusable),
+        );
         Visual::affects_render::<SelectableTextBlock>(&[
             Self::selection_start_property().as_property(),
             Self::selection_end_property().as_property(),
             Self::selection_brush_property().as_property(),
         ]);
+    }
+
+    /// A text block whose selection is off takes no focus.
+    fn coerce_focusable(sender: &FerroObject, base_value: bool) -> bool {
+        base_value
+            && sender
+                .downcast_ref::<SelectableTextBlock>()
+                .is_none_or(SelectableTextBlock::is_text_selection_enabled)
     }
 
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
@@ -568,6 +603,16 @@ impl SelectableTextBlock {
         handler: impl Fn(&Interactive, &RoutedEventArgs) + 'static,
     ) -> RoutedEventHandlerToken {
         self.add_handler(Self::copying_to_clipboard_event(), handler)
+    }
+
+    /// Whether the text can be selected. The default is `true`; turning it off clears the
+    /// selection, and the block then takes no focus and leaves pointer and keys alone.
+    pub fn is_text_selection_enabled(&self) -> bool {
+        self.get_value(Self::is_text_selection_enabled_property())
+    }
+
+    pub fn set_is_text_selection_enabled(&self, value: bool) {
+        self.set_value(Self::is_text_selection_enabled_property(), value);
     }
 
     /// The brush that highlights selected text.
