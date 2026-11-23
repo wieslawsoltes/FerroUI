@@ -188,23 +188,42 @@ The values that have a text form also have a short typed one, which setters take
 
 ### 4.4 Typed bindings to a view model
 
-Signals are the default for state a component owns. A view model that already raises `INotifyPropertyChanged` is bound through a typed property, a constant with the accessors of the model:
+Signals are the default for state a component owns. A view model, state that lives outside of a component and notifies its changes, is declared with `#[derive(ViewModel)]`:
 
 ```rust
-const NAME: ModelProperty<Person, String> = ModelProperty::new("Name", Person::name, Person::set_name);
-const GREETING: ReadOnlyModelProperty<Person, String> = ReadOnlyModelProperty::new("Greeting", Person::greeting);
+#[derive(ViewModel)]
+#[computed(greeting: String, depends_on(name))]
+struct Person {
+    #[property] name: RefCell<String>,
+    #[property] age: Cell<f64>,
+    property_changed: Event<str>,
+}
+
+impl Person {
+    fn greeting(&self) -> String { format!("Hello, {}", self.name()) }
+}
 
 stack_panel()
     .data_context(person as BoxedValue)
-    .child(text_box().text(NAME.two_way()))
-    .child(text_block().text(GREETING.one_way()))
+    .child(text_box().text(Person::NAME.two_way()))
+    .child(text_block().text(Person::GREETING.one_way()))
 ```
 
+- One declaration gives the getter (`name()`), a setter that raises the change when the value differs (`set_name(..)`), and the typed property (`Person::NAME`). The name of the change comes from the field, so the setter and the binding cannot disagree.
+- A `#[computed]` property has its getter written by hand and is raised with the properties in its `depends_on`, which must be `#[property]` fields.
 - `one_way`, `two_way`, `one_time` and `one_way_to_source` make the binding, and a setter takes it, in builders and `rsx!`. A read-only property has no `two_way`.
-- A misspelled accessor, a value of another type, or a two-way binding of a read-only property does not compile. A property of type `V` takes a binding of `V`, and a property of type `Option<V>` too.
+- A misspelled property, a dependency that does not exist, a value of another type, or a two-way binding of a read-only property does not compile. A property of type `V` takes a binding of `V`, and a property of type `Option<V>` too.
 - The result is the existing `CompiledBinding` with one typed path element, which reads and writes without boxing when the types are the same. There is no reflection and no path text.
-- The name is the text the model raises its change with. It is the one part the compiler cannot check: a model that raises another name leaves the control with its first value.
 - A path through several objects, a converter or a fallback value is still written with `CompiledBindingPathBuilder` and `.bind(property, binding)`.
+
+**A model with setters of its own.** A model that already implements `INotifyPropertyChanged` raises names the compiler cannot see, so it names them by hand:
+
+```rust
+const TITLE: ModelProperty<Existing, String> =
+    ModelProperty::with_raised_name("Title", Existing::title, Existing::set_title);
+```
+
+The accessors are checked, and **the name is not**: a name that differs from what the model raises compiles, shows the first value, and then does not update. Use this form only for a model that cannot be declared with the derive.
 
 ## 5. The macros
 

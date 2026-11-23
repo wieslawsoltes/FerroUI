@@ -138,7 +138,13 @@ pub use reactive::{
 #[cfg(feature = "desktop")]
 pub use app::{launch, launch_themed, launch_with, mount_window, open_window};
 
-pub use ferroui_view_macros::{component, path, rsx, Route};
+pub use ferroui_view_macros::{component, path, rsx, Route, ViewModel};
+
+/// What the expansion of `#[derive(ViewModel)]` names.
+#[doc(hidden)]
+pub mod __model {
+    pub use ferroui_base::data::model::{Event, INotifyPropertyChanged};
+}
 
 /// What the expansion of [`path!`] names.
 #[doc(hidden)]
@@ -175,7 +181,7 @@ pub mod prelude {
     };
     pub use crate::{auto, px, star, GridDefinitionSizes, GridLength, GridLengths, IntoGridLengths};
     pub use crate::{path, path_data, PathBuilder, PathData};
-    pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty};
+    pub use crate::{ModelBinding, ModelProperty, ReadOnlyModelProperty, ViewModel};
     pub use crate::{typed_route, Route, RouteParamError, TypedRoute};
     pub use crate::{
         alt, argb, blur, ctrl, drop_shadow, linear_gradient, meta, rgb, rotate, scale, shadow, shift, skew, translate,
