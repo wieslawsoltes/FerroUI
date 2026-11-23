@@ -15,7 +15,7 @@ use crate::test_support::{string_of, test_scope, TestRoot};
 use crate::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use crate::{
     reference_equals, AssignedBinding, Border, Control, Dock, DockPanel, GridLength, GridUnitType, ItemsControl,
-    ItemsSource, Panel, ScrollViewer, TableView, TableViewCell, TableViewColumn, TableViewColumnHeader, TableViewRow,
+    ItemsSource, Panel, ScrollViewer, SortDirection, TableViewSortCycle, TableView, TableViewCell, TableViewColumn, TableViewColumnHeader, TableViewRow,
     TextBlock,
 };
 use ferroui_base::collections::FerroList;
@@ -977,4 +977,162 @@ fn additional_columns_assigned_through_the_untyped_path_replace_the_subscription
     layout(&target);
     assert!(added.table_view() == Some(target.clone()));
     assert_eq!(get_column_headers_presenter(&target).children().count(), 2);
+}
+
+// ---------------------------------------------------------------------------
+// Sorting (WinUI's TableView_Sort.cpp, the part the gallery page uses)
+// ---------------------------------------------------------------------------
+
+fn names(target: &TableView) -> Vec<String> {
+    let view = target.items_view();
+    (0..view.count())
+        .map(|index| {
+            let item = view.get_at(index).expect("an item");
+            item.downcast_ref::<Person>().map_or_else(
+                || item.downcast_ref::<String>().cloned().unwrap_or_default(),
+                |person| person.name.clone(),
+            )
+        })
+        .collect()
+}
+
+fn sortable_target() -> (Ref<TableView>, Ref<TableViewColumn>) {
+    let (a, b, c) = (Person::new("bob", None), Person::new("Alice", None), Person::new("carol", None));
+    let target = create_target(people(&[&a, &b, &c]));
+    let column = column();
+    column.set_binding(binding("Name"));
+    target.columns().add(column.clone());
+    (target, column)
+}
+
+#[test]
+fn sort_by_column_orders_the_rows_and_leaves_the_source() {
+    let _app = start();
+    let (target, column) = sortable_target();
+    let source = target.items_source().expect("the source");
+    let _root = prepare(&target);
+
+    assert!(target.sort_by_column(&column, SortDirection::Ascending));
+    assert_eq!(vec!["Alice", "bob", "carol"], names(&target));
+    assert_eq!(SortDirection::Ascending, column.sort_direction());
+    assert!(target.items_source().is_some_and(|current| current.ptr_eq(&source)));
+
+    assert!(target.sort_by_column(&column, SortDirection::Descending));
+    assert_eq!(vec!["carol", "bob", "Alice"], names(&target));
+
+    assert!(target.sort_by_column(&column, SortDirection::None));
+    assert_eq!(vec!["bob", "Alice", "carol"], names(&target));
+    assert_eq!(SortDirection::None, column.sort_direction());
+}
+
+#[test]
+fn sorting_by_a_column_clears_the_direction_of_the_others() {
+    let _app = start();
+    let (target, first) = sortable_target();
+    let second = column();
+    second.set_binding(binding("Name"));
+    target.columns().add(second.clone());
+    let _root = prepare(&target);
+
+    target.sort_by_column(&first, SortDirection::Ascending);
+    target.sort_by_column(&second, SortDirection::Descending);
+
+    assert_eq!(SortDirection::None, first.sort_direction());
+    assert_eq!(SortDirection::Descending, second.sort_direction());
+}
+
+#[test]
+fn a_column_that_cannot_sort_is_refused() {
+    let _app = start();
+    let (target, column) = sortable_target();
+    let without_values = self::column();
+    target.columns().add(without_values.clone());
+    let _root = prepare(&target);
+
+    assert!(!target.sort_by_column(&without_values, SortDirection::Ascending));
+    column.set_can_sort(false);
+    assert!(!target.sort_by_column(&column, SortDirection::Ascending));
+    assert_eq!(vec!["bob", "Alice", "carol"], names(&target));
+}
+
+#[test]
+fn a_header_click_sorts_only_when_the_table_allows_it() {
+    let _app = start();
+    let (target, column) = sortable_target();
+    column.set_sort_cycle(TableViewSortCycle::DescendingAscendingNone);
+    let _root = prepare(&target);
+
+    assert!(!target.toggle_sort_from_header(&column));
+    assert_eq!(SortDirection::None, column.sort_direction());
+
+    target.set_can_user_sort_columns(true);
+    for expected in [SortDirection::Descending, SortDirection::Ascending, SortDirection::None] {
+        assert!(target.toggle_sort_from_header(&column));
+        assert_eq!(expected, column.sort_direction());
+    }
+}
+
+#[test]
+fn the_sort_cycles_go_through_their_directions() {
+    use SortDirection::{Ascending as A, Descending as D, None as N};
+    let walk = |cycle: TableViewSortCycle| {
+        let mut current = N;
+        [(); 4].map(|_| {
+            current = cycle.next(current);
+            current
+        })
+    };
+    assert_eq!([A, D, A, D], walk(TableViewSortCycle::AscendingDescending));
+    assert_eq!([A, D, N, A], walk(TableViewSortCycle::AscendingDescendingNone));
+    assert_eq!([D, A, D, A], walk(TableViewSortCycle::DescendingAscending));
+    assert_eq!([D, A, N, D], walk(TableViewSortCycle::DescendingAscendingNone));
+}
+
+#[test]
+fn the_selected_item_stays_selected_after_a_sort() {
+    let _app = start();
+    let (target, column) = sortable_target();
+    let _root = prepare(&target);
+    target.set_selected_index(0);
+    let selected = target.selected_item();
+
+    target.sort_by_column(&column, SortDirection::Ascending);
+
+    assert!(reference_equals(&target.selected_item(), &selected));
+    assert_eq!(1, target.selected_index());
+}
+
+#[test]
+fn a_sorted_table_follows_the_changes_of_its_source() {
+    let _app = start();
+    let list = FerroList::<String>::new();
+    for value in ["b", "c", "a"] {
+        list.add(value.to_string());
+    }
+    let target = create_target(Rc::new(list.clone()).into());
+    let column = column();
+    column.set_custom_sort_comparer(Some(Rc::new(|a, b| crate::table_view_sort::compare_values(a, b))));
+    target.columns().add(column.clone());
+    let _root = prepare(&target);
+
+    target.sort_by_column(&column, SortDirection::Ascending);
+    assert_eq!(vec!["a", "b", "c"], names(&target));
+
+    list.add("0".to_string());
+    assert_eq!(vec!["0", "a", "b", "c"], names(&target));
+    assert_eq!(4, list.count());
+}
+
+#[test]
+fn values_compare_by_kind_with_no_value_first() {
+    use crate::table_view_sort::compare_values;
+    use std::cmp::Ordering::{Equal, Greater, Less};
+    let boxed = |value: BoxedValue| Some(value);
+    let text = |value: &str| boxed(Rc::new(value.to_string()));
+
+    assert_eq!(Less, compare_values(&None, &text("a")));
+    assert_eq!(Less, compare_values(&boxed(Rc::new(2_i32)), &boxed(Rc::new(10_i32))));
+    assert_eq!(Greater, compare_values(&boxed(Rc::new(2.5_f64)), &boxed(Rc::new(2_i32))));
+    assert_eq!(Less, compare_values(&text("apple"), &text("Banana")));
+    assert_eq!(Equal, compare_values(&text("same"), &boxed(Rc::new(1_i32))));
 }

@@ -888,10 +888,12 @@ mod table_view_cell;
 mod table_view_column;
 mod table_view_column_header;
 mod table_view_row;
+mod table_view_sort;
 pub use table_view::TableView;
 pub use table_view_cell::TableViewCell;
 pub use table_view_column::TableViewColumn;
 pub use table_view_column_header::TableViewColumnHeader;
+pub use table_view_sort::{SortDirection, TableViewSortComparer, TableViewSortCycle};
 pub use table_view_row::TableViewRow;
 // WinUI's visual state manager (docs/porting/winui-calculator-gaps.md).
 pub mod visual_state;

@@ -1165,7 +1165,7 @@
           "keys": ["TableViewColumnHeaderResizerStyle"],
           "type_keys": ["TableViewColumnHeader"],
           "references": ["ResizeGripperSeparatorBrush", "ResizeGripperSeparatorThickness", "TableViewColumnHeaderResizerStyle", "TableViewHeaderCellPadding", "TableViewHeaderFontSize", "TableViewHeaderFontWeight", "TableViewResizeGripperWidth", "TableViewRowMinHeight", "TabularSurfaceGridLineBrush"],
-          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "ResourceDictionary", "Setter", "Style", "TableViewColumnHeader", "Thumb"]
+          "types": ["Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "Path", "ResourceDictionary", "Setter", "Style", "TableViewColumnHeader", "Thumb"]
         },
         {
           "name": "Controls/TableViewRow.xaml",

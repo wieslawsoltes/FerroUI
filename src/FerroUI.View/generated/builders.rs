@@ -8924,6 +8924,11 @@ pub trait TableViewProps: ElementBuilder {
     fn can_user_resize_columns<M>(self, value: impl IntoProp<bool, M>) -> Self {
         self.prop(<ferroui_controls::TableView>::can_user_resize_columns_property(), value)
     }
+
+    /// Sets [`TableView::can_user_sort_columns_property`](ferroui_controls::TableView::can_user_sort_columns_property).
+    fn can_user_sort_columns<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TableView>::can_user_sort_columns_property(), value)
+    }
 }
 impl<T: ObjectType + Upcast<ferroui_controls::TableView>> TableViewProps for El<T> {}
 
@@ -8967,6 +8972,16 @@ pub trait TableViewColumnProps: ElementBuilder {
     /// Sets [`TableViewColumn::can_user_resize_property`](ferroui_controls::TableViewColumn::can_user_resize_property).
     fn can_user_resize<M>(self, value: impl IntoProp<Option<bool>, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::can_user_resize_property(), value)
+    }
+
+    /// Sets [`TableViewColumn::can_sort_property`](ferroui_controls::TableViewColumn::can_sort_property).
+    fn can_sort<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::TableViewColumn>::can_sort_property(), value)
+    }
+
+    /// Sets [`TableViewColumn::sort_cycle_property`](ferroui_controls::TableViewColumn::sort_cycle_property).
+    fn sort_cycle<M>(self, value: impl IntoProp<ferroui_controls::TableViewSortCycle, M>) -> Self {
+        self.prop(<ferroui_controls::TableViewColumn>::sort_cycle_property(), value)
     }
 
     /// Sets [`TableViewColumn::horizontal_content_alignment_property`](ferroui_controls::TableViewColumn::horizontal_content_alignment_property).

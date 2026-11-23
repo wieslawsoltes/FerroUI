@@ -17,8 +17,11 @@
   Resources/ResizeGripper_themeresources.xaml (TableView.xaml).
   Translation notes (docs/porting/winui-theme.md, section 4):
   - The PointerOver and Pressed fills of a header (TabularSurfaceHeader*PointerOver/Pressed) are
-    the states of a header WinUI's TableView can sort by; FerroUI's TableView does not sort, so a
-    header has only the Normal state, as a header of a column WinUI does not sort by.
+    the states of a header WinUI's TableView can sort by. They are not ported: a header has only
+    the Normal state, also when its column can be sorted.
+  - WinUI's SortIndicator control is a chevron here, a Path named SortIndicator at the trailing
+    edge, shown by the pseudoclasses :sort-ascending and :sort-descending of the header. It does
+    not depend on the symbol font.
   - The ResizeGripper is the keyed Thumb theme TableViewColumnHeaderResizerStyle: its separator
     (ResizeGripperSeparatorBrush, ResizeGripperSeparatorThickness) shows on pointer over and press
     (the states PointerOver and Pressed of the source).
@@ -26,7 +29,7 @@
     presenter (BorderThickness 0,0,1,0), which the last header draws without a brush; the
     presenter honours the background, the border, the corner radius and the padding of the header
     as the Fluent template of FerroUI does.
-  - The sort indicator, the tool tip of the header and the automation view are left out.
+  - The tool tip of the header and the automation view are left out.
 -->
 <ResourceDictionary xmlns="https://github.com/ferroui"
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
@@ -96,6 +99,17 @@
                             Padding="{TemplateBinding Padding}"
                             HorizontalContentAlignment="{TemplateBinding HorizontalContentAlignment}"
                             VerticalContentAlignment="{TemplateBinding VerticalContentAlignment}" />
+          <Path x:Name="SortIndicator"
+                Width="10"
+                Height="5"
+                Margin="0,0,10,0"
+                HorizontalAlignment="Right"
+                VerticalAlignment="Center"
+                IsHitTestVisible="False"
+                IsVisible="False"
+                Stretch="None"
+                Stroke="{TemplateBinding Foreground}"
+                StrokeThickness="1" />
           <Thumb x:Name="PART_Resizer"
                  Theme="{StaticResource TableViewColumnHeaderResizerStyle}"
                  Width="{DynamicResource TableViewResizeGripperWidth}"
@@ -105,6 +119,16 @@
         </Panel>
       </ControlTemplate>
     </Setter>
+
+    <!-- The direction the table is sorted in by this column. -->
+    <Style Selector="^:sort-ascending /template/ Path#SortIndicator">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Data" Value="M0.5,4.5 L5,0.5 L9.5,4.5" />
+    </Style>
+    <Style Selector="^:sort-descending /template/ Path#SortIndicator">
+      <Setter Property="IsVisible" Value="True" />
+      <Setter Property="Data" Value="M0.5,0.5 L5,4.5 L9.5,0.5" />
+    </Style>
 
     <!-- The last header meets the border of the table: its grid line keeps its width without a
          brush. -->

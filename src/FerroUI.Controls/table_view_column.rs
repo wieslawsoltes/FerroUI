@@ -2,7 +2,10 @@ use crate::i_headered::{register_headered, IHeadered};
 use crate::primitives::HeaderedContentControl;
 use crate::templates::IDataTemplate;
 use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
-use crate::{AssignedBinding, ContentControl, GridLength, GridUnitType, TableView};
+use crate::{
+    AssignedBinding, ContentControl, GridLength, GridUnitType, SortDirection, TableView, TableViewSortComparer,
+    TableViewSortCycle,
+};
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{
@@ -22,6 +25,8 @@ pub struct TableViewColumn {
     table_view: RefCell<Option<WeakRef<TableView>>>,
     actual_width: Cell<f64>,
     can_user_effectively_resize: Cell<bool>,
+    sort_direction: Cell<SortDirection>,
+    custom_sort_comparer: RefCell<Option<TableViewSortComparer>>,
 }
 
 ferro_class!(TableViewColumn: StyledElement);
@@ -116,6 +121,26 @@ ferro_properties! {
             FerroProperty::register::<TableViewColumn, _>("CanUserResize", None)
         }
 
+        /// Defines the `CanSort` property.
+        pub fn can_sort_property() -> StyledProperty<bool> {
+            FerroProperty::register::<TableViewColumn, _>("CanSort", true)
+        }
+
+        /// Defines the `SortCycle` property.
+        pub fn sort_cycle_property() -> StyledProperty<TableViewSortCycle> {
+            FerroProperty::register::<TableViewColumn, _>("SortCycle", TableViewSortCycle::AscendingDescending)
+        }
+
+        /// Defines the `SortDirection` property.
+        pub fn sort_direction_property() -> DirectProperty<TableViewColumn, SortDirection> {
+            FerroProperty::register_direct::<TableViewColumn, _>(
+                "SortDirection",
+                |o| o.sort_direction(),
+                None,
+                SortDirection::None,
+            )
+        }
+
         /// Defines the `HorizontalContentAlignment` property.
         pub fn horizontal_content_alignment_property() -> StyledProperty<HorizontalAlignment> {
             ContentControl::horizontal_content_alignment_property()
@@ -159,6 +184,8 @@ impl TableViewColumn {
             table_view: RefCell::new(None),
             actual_width: Cell::new(f64::NAN),
             can_user_effectively_resize: Cell::new(false),
+            sort_direction: Cell::new(SortDirection::None),
+            custom_sort_comparer: RefCell::new(None),
         }
     }
 
@@ -256,6 +283,51 @@ impl TableViewColumn {
 
     pub fn set_can_user_resize(&self, value: Option<bool>) {
         self.set_value(Self::can_user_resize_property(), value)
+    }
+
+    /// Gets or sets whether a click on the header sorts by this column, when
+    /// [`TableView::can_user_sort_columns`] is on. The default is true.
+    pub fn can_sort(&self) -> bool {
+        self.get_value(Self::can_sort_property())
+    }
+
+    pub fn set_can_sort(&self, value: bool) {
+        self.set_value(Self::can_sort_property(), value)
+    }
+
+    /// Gets or sets the directions a click on the header goes through.
+    pub fn sort_cycle(&self) -> TableViewSortCycle {
+        self.get_value(Self::sort_cycle_property())
+    }
+
+    pub fn set_sort_cycle(&self, value: TableViewSortCycle) {
+        self.set_value(Self::sort_cycle_property(), value)
+    }
+
+    /// Gets the direction the table is sorted in by this column.
+    pub fn sort_direction(&self) -> SortDirection {
+        self.sort_direction.get()
+    }
+
+    pub(crate) fn set_sort_direction(&self, value: SortDirection) {
+        self.set_and_raise_cell(Self::sort_direction_property(), &self.sort_direction, value);
+    }
+
+    /// Gets the comparer of the row items of this column, if any.
+    pub fn custom_sort_comparer(&self) -> Option<TableViewSortComparer> {
+        self.custom_sort_comparer.borrow().clone()
+    }
+
+    /// Sets the comparer of the row items, which goes before the values of
+    /// [`binding`](Self::binding). A column with a cell template and no binding needs one to
+    /// be sorted.
+    pub fn set_custom_sort_comparer(&self, value: Option<TableViewSortComparer>) {
+        *self.custom_sort_comparer.borrow_mut() = value;
+    }
+
+    /// Whether the column has what a sort needs: a comparer or a binding.
+    pub(crate) fn is_sortable(&self) -> bool {
+        self.can_sort() && (self.custom_sort_comparer.borrow().is_some() || self.binding().is_some())
     }
 
     /// Gets or sets the horizontal alignment of the content within a cell.

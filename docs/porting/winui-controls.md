@@ -545,3 +545,29 @@ The workflow `winui-gallery-scan.yml` checks out the pins (microsoft-ui-xaml spa
 | The plural forms of the localized badge strings (`BadgeItemPlural1` to `BadgeItemPlural7`). | The English strings ("item", "items"). | As the other WinUI controls. |
 | The number of the badge is 0.6 of the badge high for every text, so the three characters of "99+" are wider than the circle they are on. | "99+" is 0.42 of the badge high; a number up to 99 is 0.6, as in WinUI. The size is set when the badge changes as well as when the control is resized. | The text of a badge is inside its circle. |
 | `UpdateBadge` shows the first of the image, the number and the glyph that is set, and leaves the glyph of the icon as it was: a control whose `BadgeGlyph` was shown and that then gets a `BadgeNumber` or a `BadgeImageSource` draws the glyph under the number or over the image. | The glyph of the icon is empty while the badge shows a number or an image, and the text of the number is empty while it shows an image; the properties keep their values, so the glyph is shown again when the number is 0 and the image is gone. | One badge at a time, which is what the order of `UpdateBadge` says. |
+
+### 10.11 TableView (#558)
+
+The gallery's `TableView` page uses the tabular control of WinUI (`controls/dev/TableView`, about 30,000 lines). FerroUI already has a `TableView` from its upstream framework, so the page is built on that control: only the major gaps are added, the existing behaviour stays, and the WinUI names are additions.
+
+| Example | Needs | State | Decision |
+|---|---|---|---|
+| BasicTable | Sort by header (`CanUserSortColumns`, `CanSort`, `SortCycle`, `Sorted`) | **Added** | In `TableView` |
+| BasicTable | Resize (`CanUserResizeColumns`, per column `CanUserResize`) | Exists | WinUI's `CanResize` is `CanUserResize` |
+| BasicTable | Single selection, `SelectionChanged` | Exists | From `ListBox` |
+| BasicTable | Frozen first column (`FrozenEdge`) | Gap | In `TableView`, needs the row and header panels to pin a column while scrolling |
+| CustomColumnsTable | Text and template columns | Exists | `Binding` and `CellTemplate` of `TableViewColumn` |
+| CustomColumnsTable | Sort a template column (`SortMemberPath`) | **Added differently** | `set_custom_sort_comparer`: FerroUI's compiled bindings have no property path to read at run time |
+| EditingCellsTable | In-place editing, validation | Gap | Not started; the largest remaining part |
+| FilteringGroupingTable | `TableViewSource` filter, group, expand and collapse | Gap | Not started; the sorted view is the place a filter would join |
+| PresentationTable | `GridLinesVisibility`, `Density`, `AlternatingRowBackground`, empty state | Gap | Next, in `TableView` and its themes |
+
+Sorting works on a view of the items source (`SortedItems`): the application's source is never reordered or replaced, `ItemsSource` still returns it, a change of the source sorts again, and the selected items stay selected.
+
+Deviations from WinUI:
+
+- `CanUserSortColumns` is off by default, where WinUI's is on: a FerroUI table does not start sorting on a click after an update.
+- There is no `Sorting` event to cancel a sort, and no live shaping.
+- A header can be sorted with the pointer only: WinUI's keyboard sort and its automation peer are not ported.
+- The sort indicator is drawn by the WinUI theme only. The other themes sort without showing the direction.
+- The pointer-over and pressed fills of a sortable header are not ported.
