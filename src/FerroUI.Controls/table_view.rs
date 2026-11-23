@@ -3,9 +3,9 @@ use crate::presenters::table_view_layout_helper::TableViewLayoutHelper;
 use crate::presenters::TableViewColumnHeadersPresenter;
 use crate::primitives::{SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::table_view_sort::SortedItems;
+use crate::{ItemsSource, SortDirection};
 use crate::templates::IDataTemplate;
 use crate::{
-    SortDirection,
     AssignedBinding, Control, ControlImpl, ItemsControl, ItemsControlImpl, ItemsControlImplExt, ListBox, TableViewColumn, TableViewRow,
 };
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction, ResetBehavior};
