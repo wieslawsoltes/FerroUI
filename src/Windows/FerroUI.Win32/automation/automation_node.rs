@@ -443,7 +443,8 @@ impl AutomationNode {
             UiaPropertyId::LabeledBy => {
                 let labeled_by =
                     self.invoke_sync(|peer| Self::get_or_create(peer.get_labeled_by().as_ref()).map(SendProvider))?;
-                return Ok(labeled_by.and_then(|node| node.into_inner().cast::<IUnknown>().ok()).map(VariantValue::Unknown));
+                let labeled_by = labeled_by.and_then(|node| node.into_inner().cast::<IUnknown>().ok());
+                return Ok(labeled_by.map(VariantValue::Unknown));
             }
             _ => {}
         }
