@@ -7,7 +7,7 @@ fn main() {
 
 #[cfg(target_os = "ios")]
 fn main() {
-    ferroui_ios::run_application_with(std::rc::Rc::new(app::Delegate))
+    ferroui_ios::run_application_with(std::rc::Rc::new(app::SimulatorInspectorDelegate))
 }
 
 #[cfg(target_os = "ios")]
@@ -24,9 +24,9 @@ mod app {
     use std::cell::RefCell;
     use std::rc::Rc;
 
-    pub struct Delegate;
+    pub struct SimulatorInspectorDelegate;
 
-    impl FerroApplicationDelegate for Delegate {
+    impl FerroApplicationDelegate for SimulatorInspectorDelegate {
         fn create_app_builder(&self, delegate: Rc<dyn IFerroAppDelegate>) -> AppBuilder {
             AppBuilder::configure::<App>().use_ios_with_delegate(delegate)
         }
