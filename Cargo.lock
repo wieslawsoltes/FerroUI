@@ -1689,6 +1689,16 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-webview"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+ "ferroui-system",
+]
+
+[[package]]
 name = "ferroui-dependency-injection"
 version = "0.6.0-preview.1"
 dependencies = [
