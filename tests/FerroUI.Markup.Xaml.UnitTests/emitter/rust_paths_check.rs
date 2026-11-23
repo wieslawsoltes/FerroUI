@@ -1988,6 +1988,8 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBar::orientation_property()), "ferroui_controls::ProgressBar::orientation_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBar::percentage_property()), "ferroui_controls::ProgressBar::percentage_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBar::progress_text_format_property()), "ferroui_controls::ProgressBar::progress_text_format_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBar::show_error_property()), "ferroui_controls::ProgressBar::show_error_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBar::show_paused_property()), "ferroui_controls::ProgressBar::show_paused_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBar::show_progress_text_property()), "ferroui_controls::ProgressBar::show_progress_text_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBarTemplateSettings::container2_animation_end_position_property()), "ferroui_controls::ProgressBarTemplateSettings::container2_animation_end_position_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::ProgressBarTemplateSettings::container2_animation_start_position_property()), "ferroui_controls::ProgressBarTemplateSettings::container2_animation_start_position_property"),
