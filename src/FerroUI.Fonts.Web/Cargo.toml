@@ -1,0 +1,31 @@
+[package]
+name = "ferroui-fonts-web"
+description = "Web fonts for FerroUI: @font-face, the CSS Font Loading API, WOFF and WOFF2"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[features]
+# WOFF2, which needs a Brotli decoder. Off by default: its static dictionary is the largest part
+# of what this feature adds to an application.
+woff2 = ["dep:brotli-decompressor"]
+
+[dependencies]
+ferroui-fonts-web-core.workspace = true
+brotli-decompressor = { workspace = true, optional = true }
+
+[dev-dependencies]
+ferroui-fonts-web-core = { workspace = true, features = ["testing"] }
+
+# The group of the crate in the table of the README (docs/release.md).
+[package.metadata.release]
+group = "controls"

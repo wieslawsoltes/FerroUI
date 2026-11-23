@@ -18,6 +18,10 @@ path = "lib.rs"
 # Inflates the tables of WOFF 1 (pure Rust, `miniz_oxide`).
 flate2.workspace = true
 
+[features]
+# The encoder of WOFF2 test files, for the tests of this crate and of `ferroui-fonts-web`.
+testing = []
+
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
 group = "controls"
