@@ -4,6 +4,7 @@ import type { OutlineNode } from '../src/protocol';
 import { asRange } from '../src/textDocument';
 import type { CurvePoint, KeyframeLocation, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
+import { verifyRsxTrackMcp } from './timelineTrackMcp';
 import { until } from './wait';
 
 export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promise<unknown> {
@@ -33,6 +34,7 @@ export async function verifyRsxAnimation({ invoke, content }: McpFixture): Promi
     const target = frame.nodes.find(node => node.name === 'Forecast')!;
     assert.ok(target.bounds && program.targets.includes(target.id));
     assert.match(document.getText(asRange(target.nameRange)), /^Border$/);
+    await verifyRsxTrackMcp({ invoke, content }, session, document);
     const tools = content<{ edits: { name: string; inputSchema: { properties: { action?: { enum?: string[] } } } }[] }>(
         await invoke('designer_studio_tools', { session }));
     assert.deepEqual(tools.edits.find(tool => tool.name === 'designer_program')?.inputSchema.properties.action?.enum,

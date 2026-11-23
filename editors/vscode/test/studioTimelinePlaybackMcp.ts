@@ -4,14 +4,15 @@ import type { OutlineNode } from '../src/protocol';
 import type { TimelineMarker, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
+import { verifyTimelineTrackMcp } from './timelineTrackMcp';
 import { until } from './wait';
 
 const scene = `<Canvas xmlns="https://github.com/ferroui">
   <Canvas.Styles>
     <Style Selector="Button#Lead"><Style.Animations>
       <Animation Duration="0:0:2" IterationCount="3" PlaybackDirection="Alternate" FillMode="Both">
-        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0"/></KeyFrame>
-        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/></KeyFrame>
+        <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0"/><Setter Property="BorderThickness" Value="1,2,3,4"/></KeyFrame>
+        <KeyFrame Cue="100%"><Setter Property="Opacity" Value="1"/><Setter Property="BorderThickness" Value="4,5,6,7"/></KeyFrame>
       </Animation>
     </Style.Animations></Style>
     <Style Selector="Button#Peer"><Style.Animations>
@@ -40,6 +41,7 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     let frame = await wait();
     await verifyTimelineGraphMcp({ invoke, content }, session, document);
     await verifyTimelineLayoutMcp({ invoke, content }, session, document);
+    await verifyTimelineTrackMcp({ invoke, content }, session, document);
     let program = (await programs()).find(item => item.selector === 'Button#Lead')!.id;
     const present = async (action: string, fields: object = {}) => {
         content(await invoke('designer_studio_present', { session, expected_revision: frame.revision, tool: 'designer_program',

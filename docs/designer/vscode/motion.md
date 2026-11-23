@@ -75,6 +75,27 @@ The picker follows the open source document and uses the running app's registry.
 
 Escape dismisses the filter popup when it has focus.
 
+### Control Timeline tracks from an agent
+
+Read `designer_timeline_view` while the Timeline shows an animation. The `track_view` reports the program ID, properties, and the target for each track. In VS Code it also reports the active filter and each target group's visibility, expansion, and lock state.
+
+Use `designer_timeline_track_action` with the design `session` and the returned `revision` as `expected_revision`. Include the reported `program` in the `track` argument.
+
+| Action | Fields in `track` | Effect |
+| --- | --- | --- |
+| `filter` | `query` and `selectedOnly` | Uses **Filter tracks**. The query matches property or target names. Set `selectedOnly` to limit matches to the canvas selection. An empty query and `selectedOnly: false` clear the filter. Matching groups temporarily expand while the filter is active. |
+| `collapse` | `target` and `collapsed` | Changes the disclosure of the target group when `canCollapse` is true. Clear the filter before changing disclosure. |
+| `lock` | `target` and `locked` | Uses the target's lock when `canLock` is true. Locking preserves the rendered tracks and restricts key editing, paste, and recording through the Timeline. |
+| `channel` | `target`, `property`, and `channel` | Chooses a listed curve component when the property track reports `canChooseChannel`. Open Value or Velocity curves to see available components. |
+
+In App Preview, choose Value or Velocity curves and read `designer_hosted_timeline_view`. The `tracks` list includes live targets with eligible properties. The plotted property is marked `visible` and returned as `selected`. Call `designer_hosted_timeline_track_action` with the design session. Pass the reported `generation`, `revision`, and `sequence` as `expected_generation`, `expected_revision`, and `expected_sequence`. Set `track.action` to `select` and include the current `program`, `target`, and `property`. Select a property before using `channel` to choose its component.
+
+Designer Studio supports `select` and `channel` on its track header and component picker. Pass `expected_uri` and `expected_revision` from `designer_timeline_view`. Include the program when reported. Selecting a track uses the closest key at the current playhead. The presentation commands require write permission and preserve source and Undo history. [MCP permissions and tools](reference.md#use-ferroui-with-vs-code-agents)
+
+![The Timeline shows the Overview filter, a locked group, and the Top right component beside its design.](../images/vscode-timeline-mcp-tracks.png)
+
+[App Preview with the selected CornerRadius track and Top right curve](../images/vscode-hosted-mcp-tracks.png)
+
 ### Set the visible Timeline range from an agent
 
 1. Open the Timeline with an animation selected. In App Preview, choose a Value or Velocity curve, or open **Compare animation clips**. In Designer Studio, open the Timeline.

@@ -1,6 +1,6 @@
 import type { AnimationGraphMessage, AnimationGraphMode } from './animationGraph';
 import type { TimelineLayout, TimelineLayoutMessage } from './timelineLayout';
-import type { TimelineViewportReply, TimelineViewportRequest } from './timelineViewportProtocol';
+import type { TimelinePresentationReply, TimelinePresentationRequest } from './timelinePresentationProtocol';
 import type { FrameTarget, Range } from './protocol';
 import type { StateTransitionControl, StateTransitionPosition } from './stateTransitionProtocol';
 
@@ -144,7 +144,7 @@ export type TimelineControl = TimelineTransportControl
 export type FromTimeline =
     | { type: 'ready' }
     | AnimationGraphMessage | TimelineLayoutMessage
-    | TimelineViewportReply
+    | TimelinePresentationReply
     | { type: 'timelineDisplayReady'; graph: AnimationGraphMode; layout: TimelineLayout }
     | { type: 'control'; frame: FrameTarget; control: TimelineControl }
     | { type: 'transitionControl'; frame: FrameTarget; control: StateTransitionControl }
@@ -161,7 +161,7 @@ export type FromTimeline =
     | { type: 'keyframe'; frame: FrameTarget; program: number; track: number; time: number };
 
 export type ToTimeline = AnimationGraphMessage | TimelineLayoutMessage | { type: 'position'; position?: TimelinePosition; frame?: FrameTarget }
-    | TimelineViewportRequest<FrameTarget>
+    | TimelinePresentationRequest<FrameTarget>
     | { type: 'clipsPlaced'; before: FrameTarget }
     | { type: 'keyframesEdited'; keys?: KeyframeLocation[]; before: FrameTarget }
     | TimelineKeyframeResponse

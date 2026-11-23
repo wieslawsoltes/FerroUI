@@ -157,6 +157,76 @@ fn studio_mcp_viewport_uses_the_native_ruler_and_keeps_source_history() {
 }
 
 #[test]
+fn studio_mcp_track_controls_use_the_native_header_and_component_picker() {
+    use ferroui_controls::{automation::AutomationProperties, ComboBox};
+
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let source = include_str!("../../docs/designer/samples/ClipSequence.xaml")
+        .replacen(
+            r#"<Setter Property="Opacity" Value="0.2" />"#,
+            r#"<Setter Property="Opacity" Value="0.2" /><Setter Property="CornerRadius" Value="8,10,12,14" />"#,
+            1,
+        )
+        .replacen(
+            r#"<Setter Property="Opacity" Value="1" />"#,
+            r#"<Setter Property="Opacity" Value="1" /><Setter Property="CornerRadius" Value="18,20,22,24" />"#,
+            1,
+        );
+    let workspace = DesignerWorkspace::new(&source).unwrap();
+    let owner = workspace.session();
+    let programs = owner.borrow().animation_programs().to_vec();
+    owner.borrow_mut().select_animation_program(programs[0].id).unwrap();
+    workspace.set_timeline_visible(true);
+    workspace.set_timeline_curves(Some(ferroui_designer_animation::CurveMetric::Value));
+    let provider = DesignerMcp::with_workspace(&workspace);
+    let read = || provider.call("designer_timeline_view", &json!({}), Permissions::default()).unwrap();
+    let before = read();
+    let revision = before["revision"].as_u64().unwrap();
+    let component_track = |state: &Value| {
+        state["track_view"]["tracks"].as_array().unwrap().iter()
+            .find(|track| track["property"] == "CornerRadius").unwrap().clone()
+    };
+    let track = component_track(&before);
+    assert_eq!(track["canChooseChannel"], true);
+    let set = |revision, track: &Value, permissions| provider.call("designer_timeline_track_action", &json!({
+        "expected_uri":before["uri"], "expected_revision":revision, "track":track,
+    }), permissions);
+    let mut select = json!({
+        "action":"select", "program":programs[0].id, "target":track["target"], "property":"CornerRadius",
+    });
+    assert!(set(revision, &select, Permissions::default()).is_err());
+    assert!(set(revision + 1, &select, write()).is_err());
+    select["program"] = json!(programs[1].id);
+    assert!(set(revision, &select, write()).unwrap_err().contains("current program"));
+    assert_eq!(read(), before);
+    select["program"] = json!(programs[0].id);
+    let playhead = owner.borrow().time();
+    let selected = set(revision, &select, write()).unwrap();
+    assert_eq!(selected["track_view"]["selected"]["property"], "CornerRadius");
+    assert_eq!(owner.borrow().time(), playhead);
+
+    select["action"] = json!("channel");
+    select["channel"] = json!("red");
+    assert!(set(revision, &select, write()).unwrap_err().contains("component from the visible curve"));
+    select["channel"] = json!("bottom_right");
+    let updated = set(revision, &select, write()).unwrap();
+    assert_eq!(component_track(&updated)["channel"], "bottom_right");
+    let picker = workspace.control().get_logical_descendants().filter_map(|item| item.cast::<ComboBox>())
+        .find(|picker| AutomationProperties::get_name(picker).as_deref() == Some("CornerRadius curve channel"))
+        .unwrap();
+    assert_eq!(picker.selected_index(), 2);
+    picker.set_selected_index(1);
+    assert_eq!(component_track(&read())["channel"], "top_right");
+    workspace.set_clip_comparison(true);
+    assert!(read()["track_view"].is_null());
+    assert!(set(revision, &select, write()).is_err());
+    let session = owner.borrow();
+    assert_eq!(session.authored_source(), source);
+    assert_eq!(session.document().revision(), revision);
+    assert!(!session.can_undo());
+}
+
+#[test]
 fn studio_marker_tools_keep_scopes_and_reject_retired_frames() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let original = include_str!("../../docs/designer/samples/ClipSequence.xaml");

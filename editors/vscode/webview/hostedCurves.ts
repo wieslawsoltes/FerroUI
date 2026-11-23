@@ -2,10 +2,11 @@ import type { AnimationGraphMode } from '../src/animationGraph';
 import type { HostedAnimationFrame, HostedAnimationProgram, HostedAnimationTarget, HostedKeyframeSelection } from '../src/hostedAnimationProtocol';
 import type { FromHosted, ToHosted } from '../src/hostedProtocol';
 import type { CurveChannel, CurveMetric, KeyframeComponent, TimelineTrack } from '../src/timelineProtocol';
+import type { TimelineTrackCommand, TimelineTrackView } from '../src/timelineTrackProtocol';
 import { AnimationGraphMenu } from './animationGraphMenu';
 import { create, element } from './dom';
 import { editorFrame, type HostedKeyframeEditor } from './hostedKeyframes';
-import { TimelineCurvePlot } from './timelineCurves';
+import { curveChannels, TimelineCurvePlot } from './timelineCurves';
 import { curveEditValue, dragKeyframe, renderKeyframe } from './timelineKeyDrag';
 import { clamp, fitKeyTimes, fitTimeline, panTimeline, timelinePercent, visibleTime, zoomTimeline } from './timelineViewport';
 import type { TimelineRulerView } from './timelineViewportRequest';
@@ -40,7 +41,7 @@ export class HostedCurves {
     private request = 0;
 
     constructor(private readonly send: (message: FromHosted) => void, private readonly editor: HostedKeyframeEditor) {
-        this.select.onchange = () => { this.selected = undefined; this.editor.close(); this.buildPlot(); };
+        this.select.onchange = () => this.changeTrack();
         element('hosted-curve-out').onclick = () => this.zoom(0.8);
         element('hosted-curve-in').onclick = () => this.zoom(1.25);
         element('hosted-curve-fit').onclick = () => this.setView(fitTimeline(this.view.duration));
@@ -69,6 +70,33 @@ export class HostedCurves {
         return { ruler: 'curve', program: this.program.id, range: this.view,
             selectedKeys: this.selected === undefined || this.fitKey.disabled ? undefined : [this.selected],
             apply: range => this.setView(range) };
+    }
+
+    trackView(): TimelineTrackView | undefined {
+        if (this.panel.hidden || !this.program || !this.plot) return;
+        const active = this.choices[this.select.selectedIndex];
+        if (!active) return;
+        return { program: this.program.id, selected: { target: active.target.id, property: active.track.property },
+            tracks: this.choices.map(choice => ({ target: choice.target.id, name: choice.target.label,
+                property: choice.track.property, visible: choice === active, channels: curveChannels(choice.track),
+                channel: choice === active ? this.plot?.channel : undefined,
+                canChooseChannel: choice === active && this.plot?.canChooseChannel })) };
+    }
+
+    applyTrack(command: TimelineTrackCommand): void {
+        if (this.panel.hidden || !this.program || !this.plot || this.program.id !== command.program) {
+            throw new Error('Read the current App Preview curve and program again.');
+        }
+        if (command.action !== 'select' && command.action !== 'channel') throw new Error('Choose an App Preview property or curve component.');
+        const index = this.choices.findIndex(choice => choice.target.id === command.target && choice.track.property === command.property);
+        if (index < 0) throw new Error('Choose a property and live target from the visible App Preview curve choices.');
+        if (command.action === 'channel') {
+            if (index !== this.select.selectedIndex) throw new Error('Select that property before choosing a component.');
+            this.plot.chooseChannel(command.channel);
+        } else if (index !== this.select.selectedIndex) {
+            this.select.selectedIndex = index;
+            this.changeTrack();
+        }
     }
 
     follow(program: HostedAnimationProgram | undefined, targets: HostedAnimationTarget[], frame: HostedAnimationFrame | undefined,
@@ -105,6 +133,12 @@ export class HostedCurves {
             this.plot?.receive(key, metric, channel, reply);
         }
         this.paint();
+    }
+
+    private changeTrack(): void {
+        this.selected = undefined;
+        this.editor.close();
+        this.buildPlot();
     }
 
     private zoom(factor: number, time = this.view.start + this.view.span / 2) {

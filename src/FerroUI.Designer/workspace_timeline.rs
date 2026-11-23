@@ -14,6 +14,9 @@ mod markers;
 #[path = "workspace_timeline/range.rs"]
 mod range;
 #[cfg(feature = "mcp")]
+#[path = "workspace_timeline/track_controls.rs"]
+mod track_controls;
+#[cfg(feature = "mcp")]
 #[path = "workspace_timeline/viewport.rs"]
 mod viewport;
 
@@ -41,6 +44,8 @@ pub(super) struct TimelineUi {
     view: Option<(f64, f64)>,
     curves: Option<CurveMetric>,
     curve_channels: std::collections::BTreeMap<CurveTrack, TrackCurveChannel>,
+    #[cfg(feature = "mcp")]
+    curve_pickers: Vec<track_controls::CurvePicker>,
     keyframe_paste: Option<Ref<Flyout>>,
     compare_clips: bool,
     clip_scope: Option<(String, Option<usize>)>,
@@ -117,7 +122,12 @@ impl DesignerWorkspace {
         self.root
             .get_control::<ContentControl>("TimelineInspectorHost")
             .set_content(None);
-        self.timeline_ui.borrow_mut().marker_editor = None;
+        {
+            let mut ui = self.timeline_ui.borrow_mut();
+            ui.marker_editor = None;
+            #[cfg(feature = "mcp")]
+            ui.curve_pickers.clear();
+        }
         self.timeline_lanes.borrow_mut().clear();
         if self.comparing_animation_clips() {
             self.rebuild_clip_tracks(focus_was_ruler);
@@ -336,18 +346,7 @@ impl DesignerWorkspace {
         }
         let mut curve_tracks = std::collections::BTreeMap::new();
         for track in &tracks {
-            let target_name = self
-                .session
-                .borrow()
-                .document()
-                .ast()
-                .node(track.target)
-                .map(|node| {
-                    node.xaml_name()
-                        .unwrap_or_else(|| node.local_name())
-                        .to_owned()
-                })
-                .unwrap_or_else(|| "Missing target".into());
+            let target_name = timeline_target_name(&context.syntax, track.target);
             let is_selected = selection_keys.iter().any(|selected| {
                 selected.target == track.target && selected.property == track.property
             });
@@ -381,7 +380,7 @@ impl DesignerWorkspace {
             title.click(move |_, _| {
                 if let Some(this) = weak.upgrade() {
                     let time = this.session.borrow().time();
-                    this.activate_timeline_key(target, &property, time);
+                    this.report(this.activate_timeline_key(target, &property, time));
                 }
             });
             let lane = TimelineLane::new();
@@ -437,7 +436,7 @@ impl DesignerWorkspace {
             let property = track.property.clone();
             lane.on_activate(move |time| {
                 if let Some(this) = weak.upgrade() {
-                    this.activate_timeline_key(target, &property, time);
+                    this.report(this.activate_timeline_key(target, &property, time));
                 }
             });
             let weak = Rc::downgrade(self);
@@ -661,7 +660,7 @@ impl DesignerWorkspace {
             lane.set_view(start, end);
         }
     }
-    fn activate_timeline_key(self: &Rc<Self>, target: NodeId, property: &str, time: f64) {
+    fn activate_timeline_key(self: &Rc<Self>, target: NodeId, property: &str, time: f64) -> Result<(), String> {
         let selection = self
             .session
             .borrow()
@@ -677,7 +676,7 @@ impl DesignerWorkspace {
         self.session.borrow_mut().select([target]);
         let result = self.session.borrow_mut().seek(time);
         self.refresh(true);
-        self.report(result);
+        result
     }
     /// Selects an authored keyframe, seeks its time, and displays its contextual editor.
     pub fn select_keyframe(
@@ -1174,6 +1173,12 @@ fn nearest_key(track: &Track, time: f64) -> Option<SelectedKey> {
             time: key.time,
         })
 }
+fn timeline_target_name(syntax: &ferroui_designer_core::Ast, target: NodeId) -> String {
+    syntax.node(target)
+        .map(|node| node.xaml_name().unwrap_or_else(|| node.local_name()).to_owned())
+        .unwrap_or_else(|| "Missing target".into())
+}
+
 fn timeline_icon(path: &str, color: u32) -> Ref<PathIcon> {
     let icon = crate::icons::vector_icon(path, 14.0);
     icon.set_foreground(Some(SolidColorBrush::from_uint32(color).into()));

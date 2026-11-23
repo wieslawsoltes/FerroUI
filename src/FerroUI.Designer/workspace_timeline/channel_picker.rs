@@ -44,6 +44,16 @@ impl DesignerWorkspace {
         if let Some(index) = choices.iter().position(|choice| choice == channel) {
             picker.set_selected_index(index as i32);
         }
+        #[cfg(feature = "mcp")]
+        self.timeline_ui.borrow_mut().curve_pickers.push(
+            super::super::track_controls::CurvePicker {
+                target: track.target,
+                property: track.property.clone(),
+                context: context.clone(),
+                choices: choices.clone(),
+                picker: picker.downgrade(),
+            },
+        );
         let workspace = Rc::downgrade(self);
         let lane = lane.downgrade();
         let weak_picker = picker.downgrade();

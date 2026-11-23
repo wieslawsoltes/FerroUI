@@ -11,7 +11,7 @@ import { HostedKeyLanes } from './hostedKeyLanes';
 import { clipRulerExtent, TimelineClips } from './timelineClips';
 import { TimelineMarkerView } from './timelineMarkerView';
 import { fitTimeline } from './timelineViewport';
-import { answerTimelineViewport } from './timelineViewportRequest';
+import { answerTimelinePresentation } from './timelinePresentation';
 import { TimelineWorkArea } from './timelineWorkArea';
 
 export class HostedAnimationView {
@@ -175,16 +175,23 @@ export class HostedAnimationView {
         if (this.clips.applyLayout(layout)) this.showTimelineLayout();
     }
 
-    timelineViewport(request: Extract<ToHosted, { type: 'timelineViewportRequest' }>): void {
+    timelinePresentation(request: Extract<ToHosted, { type: 'timelinePresentationRequest' }>): void {
         const { revision, sequence } = request.frame;
         // The ruler is derived from the accepted catalog. Image decoding gates
         // native input and authored edits, which also depend on the canvas.
         if (this.state.frame?.revision !== revision || this.state.frame.sequence !== sequence) {
-            this.send({ type: 'timelineViewportReply', request: request.request,
+            this.send({ type: 'timelinePresentationReply', request: request.request,
                 error: 'Wait for the current App Preview frame and read the Timeline view again.' });
             return;
         }
-        this.send(answerTimelineViewport(request, this.clips.rulerView() ?? this.curves.rulerView()));
+        this.send(answerTimelinePresentation(request, {
+            ruler: () => this.clips.rulerView() ?? this.curves.rulerView(),
+            tracks: () => this.clips.visible ? undefined : this.curves.trackView(),
+            changeTracks: command => {
+                if (this.clips.visible) throw new Error('Open an App Preview property curve first.');
+                this.curves.applyTrack(command);
+            },
+        }));
     }
 
     private showTimelineLayout(): void {

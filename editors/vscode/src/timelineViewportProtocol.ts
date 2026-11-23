@@ -17,13 +17,3 @@ export interface TimelineViewportChange {
     start?: number;
     end?: number;
 }
-
-export interface TimelineViewportRequest<Frame> {
-    type: 'timelineViewportRequest';
-    request: number;
-    frame: Frame;
-    change?: TimelineViewportChange;
-}
-
-export type TimelineViewportReply = { type: 'timelineViewportReply'; request: number } &
-    ({ viewport?: TimelineViewportState } | { error: string });

@@ -9,16 +9,17 @@ const READ: &str = "designer_timeline_view";
 const SET_GRAPH: &str = "designer_timeline_set_graph";
 const SET_LAYOUT: &str = "designer_timeline_set_layout";
 const SET_VIEWPORT: &str = "designer_timeline_set_viewport";
+const SET_TRACK: &str = "designer_timeline_track_action";
 const MODES: [&str; 3] = ["keys", "value", "velocity"];
 const LAYOUTS: [&str; 2] = ["tracks", "clips"];
 
 pub(super) fn handles(name: &str) -> bool {
-    matches!(name, READ | SET_GRAPH | SET_LAYOUT | SET_VIEWPORT)
+    matches!(name, READ | SET_GRAPH | SET_LAYOUT | SET_VIEWPORT | SET_TRACK)
 }
 
-pub(super) fn tools() -> [Value; 4] {
+pub(super) fn tools() -> [Value; 5] {
     [
-        s::tool(READ, "Read Studio's Timeline layout, graph preference, document identity and visible ruler viewport.",
+        s::tool(READ, "Read Studio's Timeline layout, graph preference, document identity, ruler viewport and property tracks.",
             s::object(json!({}), &[]), false),
         presentation_tool(SET_GRAPH, "Open Studio's Timeline and choose Keys, Value, or Velocity. Pass the document URI and revision from designer_timeline_view.",
             "graph_mode", &MODES),
@@ -28,6 +29,11 @@ pub(super) fn tools() -> [Value; 4] {
             "viewport", s::object(json!({"ruler":{"enum":LAYOUTS}, "program":s::revision(),
                 "action":{"enum":["window","fit","fit_selection"]}, "start":{"type":"number","minimum":0}, "end":{"type":"number","minimum":0}}),
                 &["ruler","action"])),
+        presentation_tool_with_schema(SET_TRACK, "Select a visible Studio track at the current playhead or choose its curve component. Pass the program if present, URI and revision from designer_timeline_view.",
+            "track", json!({"oneOf":[
+                s::action("select", json!({"program":s::id(),"target":s::id(),"property":s::string()}), &["target","property"], false),
+                s::action("channel", json!({"program":s::id(),"target":s::id(),"property":s::string(),"channel":s::string()}), &["target","property","channel"], false),
+            ]})),
     ]
 }
 
@@ -53,15 +59,19 @@ pub(super) fn call(workspace: &Rc<DesignerWorkspace>, name: &str, args: &Value) 
                 return Err("Read the Timeline view of the current Studio document first".into());
             }
         }
-        if name == SET_GRAPH {
-            let metric = if args["graph_mode"] == "keys" { None } else { Some(decode(args, "graph_mode")?) };
-            workspace.set_timeline_visible(true);
-            workspace.set_timeline_curves(metric);
-        } else if name == SET_LAYOUT {
-            workspace.set_timeline_visible(true);
-            workspace.set_clip_comparison(args["layout"] == "clips");
-        } else {
-            workspace.change_timeline_viewport(decode(args, "viewport")?)?;
+        match name {
+            SET_GRAPH => {
+                let metric = if args["graph_mode"] == "keys" { None } else { Some(decode(args, "graph_mode")?) };
+                workspace.set_timeline_visible(true);
+                workspace.set_timeline_curves(metric);
+            }
+            SET_LAYOUT => {
+                workspace.set_timeline_visible(true);
+                workspace.set_clip_comparison(args["layout"] == "clips");
+            }
+            SET_VIEWPORT => workspace.change_timeline_viewport(decode(args, "viewport")?)?,
+            SET_TRACK => workspace.change_timeline_tracks(decode(args, "track")?)?,
+            _ => return Err("Unknown Studio Timeline tool.".into()),
         }
     }
     let session = owner.borrow();
@@ -72,5 +82,6 @@ pub(super) fn call(workspace: &Rc<DesignerWorkspace>, name: &str, args: &Value) 
     };
     let layout = if workspace.comparing_animation_clips() { "clips" } else { "tracks" };
     Ok(json!({"mode":mode, "layout":layout, "available_modes":MODES, "visible":workspace.timeline_visible(),
-        "uri":session.document_uri(), "revision":session.document().revision(), "viewport":workspace.timeline_viewport()}))
+        "uri":session.document_uri(), "revision":session.document().revision(), "viewport":workspace.timeline_viewport(),
+        "track_view":workspace.timeline_track_view()}))
 }

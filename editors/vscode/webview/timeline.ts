@@ -1,6 +1,7 @@
 import type { AnimationGraphMode } from '../src/animationGraph';
 import type { FrameTarget } from '../src/protocol';
 import type { FromTimeline, KeyframeLocation, TimelineControl, TimelineKeyAction, TimelineProgram, TimelineState, ToTimeline } from '../src/timelineProtocol';
+import type { TimelineTrackCommand, TimelineTrackView } from '../src/timelineTrackProtocol';
 import { TimelineClips } from './timelineClips';
 import { canPreviewProgram, canPreviewRange, previewClock } from '../src/timelinePrograms';
 import { AnimationGraphMenu } from './animationGraphMenu';
@@ -17,7 +18,8 @@ import { keyframeId, TimelineSelection } from './timelineSelection';
 import { TimelineStateTransition } from './timelineStateTransition';
 import { TimelineTrackFilter } from './timelineTrackFilter';
 import { clamp } from './timelineViewport';
-import { answerTimelineViewport, type TimelineRulerView } from './timelineViewportRequest';
+import { answerTimelinePresentation } from './timelinePresentation';
+import type { TimelineRulerView } from './timelineViewportRequest';
 import { TimelineViewportView } from './timelineViewportView';
 import { TimelineWorkArea } from './timelineWorkArea';
 
@@ -235,10 +237,12 @@ window.addEventListener('message', event => {
         if (graph.apply(message.mode)) { saveTimeline(); showCurves(); }
     } else if (message.type === 'timelineLayout') {
         if (clips.applyLayout(message.layout)) showTimelineLayout();
-    } else if (message.type === 'timelineViewportRequest') {
+    } else if (message.type === 'timelinePresentationRequest') {
         const frame = model.frame;
         const matchingFrame = frame?.session === message.frame.session && frame.token === message.frame.token;
-        vscode.postMessage(answerTimelineViewport(message, matchingFrame ? timelineRuler() : undefined));
+        vscode.postMessage(answerTimelinePresentation(message, matchingFrame ? {
+            ruler: timelineRuler, tracks: timelineTrackView, changeTracks: changeTimelineTracks,
+        } : undefined));
     } else if (message.type === 'position') {
         model.position = message.position;
         model.frame = message.frame;
@@ -492,6 +496,29 @@ function timelineRuler(): TimelineRulerView | undefined {
     if (!selected?.timeline) return;
     return { ruler: 'tracks', program: selected.id, range: viewport.range, apply: range => viewport.apply(range),
         selectedKeys: fitKeys.hidden ? undefined : selection.keys.map(key => key.time) };
+}
+
+function displayedTrackProgram(): number | undefined {
+    const selected = current();
+    if (!model.transition && !clips.visible && selected?.timeline?.tracks.length) return selected.id;
+}
+
+function timelineTrackView(): TimelineTrackView | undefined {
+    const program = displayedTrackProgram();
+    if (program === undefined) return;
+    const { groups, tracks } = channels.view();
+    return { program, filter: trackFilter.state, groups, tracks: curves.trackPresentation(tracks) };
+}
+
+function changeTimelineTracks(command: TimelineTrackCommand): void {
+    if (command.program !== displayedTrackProgram()) throw new Error('Read the visible Timeline tracks and current program again.');
+    switch (command.action) {
+        case 'filter': trackFilter.setFilter(command); return;
+        case 'collapse': channels.setCollapsed(command.target, command.collapsed); return;
+        case 'lock': channels.setLocked(command.target, command.locked); return;
+        case 'channel': curves.chooseChannel(command, command.channel); return;
+        default: throw new Error('Choose a track filter, target group, or curve component.');
+    }
 }
 
 function showCurves(): void {

@@ -1,16 +1,19 @@
 import type { TimelineTrack } from '../src/timelineProtocol';
+import type { TimelineTrackGroup, TimelineTrackInfo } from '../src/timelineTrackProtocol';
 import { create, element, icon, iconButton, labelButton } from './dom';
 import { timelinePercent, visibleTime, type TimelineViewport } from './timelineViewport';
 
 interface PropertyRow {
     element: HTMLLIElement;
     index: number;
+    property: string;
     searchLabel: string;
     times: number[];
 }
 
 interface Channel {
     target: number;
+    name: string;
     element: HTMLLIElement;
     toggle: HTMLButtonElement;
     lock: HTMLButtonElement;
@@ -47,6 +50,7 @@ export class TimelineChannels {
             channel.rows = group.map(({ track, index }) => ({
                 element: renderTrack(track, index, name),
                 index,
+                property: track.property,
                 searchLabel: `${name} ${track.property}`.toLocaleLowerCase(),
                 times: track.keyframes.map(key => key.time),
             }));
@@ -59,6 +63,32 @@ export class TimelineChannels {
     isLocked(target: number): boolean { return this.locked.has(target); }
 
     get hasLocks(): boolean { return this.channels.some(({ target }) => this.isLocked(target)); }
+
+    view(): { groups: TimelineTrackGroup[]; tracks: TimelineTrackInfo[] } {
+        const groups: TimelineTrackGroup[] = [];
+        const tracks: TimelineTrackInfo[] = [];
+        for (const group of this.channels) {
+            const { target, name, element, properties, rows } = group;
+            const visible = !element.hidden;
+            groups.push({ target, name, visible, expanded: !properties.hidden, locked: this.isLocked(target),
+                canCollapse: this.canCollapse(group), canLock: this.canLock(group) });
+            for (const row of rows) tracks.push({ target, name, property: row.property,
+                visible: visible && !properties.hidden && !row.element.hidden });
+        }
+        return { groups, tracks };
+    }
+
+    setCollapsed(target: number, collapsed: boolean): void {
+        const group = this.channels.find(group => group.target === target);
+        if (!group || !this.canCollapse(group)) throw new Error('Choose a visible target group with the track filter cleared.');
+        this.collapse(group, collapsed);
+    }
+
+    setLocked(target: number, locked: boolean): void {
+        const group = this.channels.find(group => group.target === target);
+        if (!group || !this.canLock(group)) throw new Error('The visible target group cannot be locked or unlocked now.');
+        this.lock(group, locked);
+    }
 
     editableTracks(): number[] {
         return this.channels.flatMap(({ target, properties, rows }) => this.isLocked(target) || properties.hidden
@@ -105,6 +135,37 @@ export class TimelineChannels {
         }
     }
 
+    private canCollapse(group: Channel): boolean {
+        return !group.element.hidden && group.toggle.getAttribute('aria-disabled') !== 'true';
+    }
+
+    private canLock(group: Channel): boolean {
+        return !group.element.hidden && !group.lock.hidden && !group.lock.disabled;
+    }
+
+    private collapse(group: Channel, collapsed: boolean): void {
+        if (collapsed === this.collapsed.has(group.target)) return;
+        if (collapsed) this.collapsed.add(group.target);
+        else this.collapsed.delete(group.target);
+        this.update();
+    }
+
+    private lock(group: Channel, locked: boolean): void {
+        if (locked === this.locked.has(group.target)) return;
+        if (locked) this.locked.add(group.target);
+        else this.locked.delete(group.target);
+        this.showLock(group);
+        this.update();
+    }
+
+    private showLock(group: Channel): void {
+        const { element, lock, name, target } = group;
+        const locked = this.isLocked(target);
+        element.toggleAttribute('data-locked', locked);
+        lock.setAttribute('aria-pressed', String(locked));
+        labelButton(lock, `${locked ? 'Unlock' : 'Lock'} ${name} tracks`, locked ? 'lock' : 'unlock');
+    }
+
     private channel(target: number, name: string): Channel {
         const row = create('li');
         row.className = 'timeline-channel';
@@ -119,24 +180,8 @@ export class TimelineChannels {
         toggle.title = name;
         toggle.setAttribute('aria-controls', properties.id);
         toggle.append(icon('chevron-right'), create('span', name));
-        toggle.onclick = () => {
-            if (toggle.getAttribute('aria-disabled') === 'true') return;
-            if (!this.collapsed.delete(target)) this.collapsed.add(target);
-            this.update();
-        };
-        const lock = iconButton('unlock', `Lock ${name} tracks`, () => {
-            if (!this.locked.delete(target)) this.locked.add(target);
-            updateLock();
-            this.update();
-        });
+        const lock = iconButton('unlock', `Lock ${name} tracks`);
         lock.classList.add('timeline-channel-lock');
-        const updateLock = () => {
-            const locked = this.isLocked(target);
-            row.toggleAttribute('data-locked', locked);
-            lock.setAttribute('aria-pressed', String(locked));
-            labelButton(lock, `${locked ? 'Unlock' : 'Lock'} ${name} tracks`, locked ? 'lock' : 'unlock');
-        };
-        updateLock();
         const controls = create('div');
         controls.className = 'timeline-channel-controls';
         controls.append(toggle, lock);
@@ -145,6 +190,14 @@ export class TimelineChannels {
         summary.setAttribute('aria-hidden', 'true');
         header.append(controls, summary);
         row.append(header, properties);
-        return { target, element: row, toggle, lock, properties, rows: [], summary, timeMarks: new Map() };
+        const group = { target, name, element: row, toggle, lock, properties, rows: [], summary, timeMarks: new Map() };
+        toggle.onclick = () => {
+            if (this.canCollapse(group)) this.collapse(group, !this.collapsed.has(target));
+        };
+        lock.onclick = () => {
+            if (this.canLock(group)) this.lock(group, !this.isLocked(target));
+        };
+        this.showLock(group);
+        return group;
     }
 }

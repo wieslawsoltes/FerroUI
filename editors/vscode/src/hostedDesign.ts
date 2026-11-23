@@ -36,8 +36,8 @@ import { chooseTransitionAction } from './studioPropertyTransitions';
 import { asPosition, asRange, languageOf, offsetAfterChanges, sourceOf } from './textDocument';
 import { writeTimelineClipboard } from './timelineKeyframeClipboard';
 import { isTimelineLayout, type TimelineLayout } from './timelineLayout';
-import type { TimelineViewportChange } from './timelineViewportProtocol';
-import { TimelineViewportRequests } from './timelineViewportRequests';
+import type { TimelinePresentationChange } from './timelinePresentationProtocol';
+import { TimelinePresentationRequests } from './timelinePresentationRequests';
 import { hostedHtml, webviewOptions } from './view';
 import { isInside, isWorkspaceFile } from './workspacePaths';
 import type { PaletteEdit } from './stylesProtocol';
@@ -147,8 +147,11 @@ export class HostedDesign implements vscode.Disposable {
         return session.timelineDisplay();
     }
 
-    setTimelineViewport(uri: vscode.Uri, generation: number, revision: number, change: TimelineViewportChange, signal: AbortSignal) {
-        return this.timelineSession(uri, generation, revision).setTimelineViewport(change, signal);
+    changeTimelinePresentation(uri: vscode.Uri, generation: number, revision: number, change: TimelinePresentationChange,
+        signal: AbortSignal, sequence?: number) {
+        const session = this.timelineSession(uri, generation, revision);
+        if (sequence !== undefined && session.currentFrame?.sequence !== sequence) throw new Error('Read the current App Preview frame sequence.');
+        return session.changeTimelinePresentation(change, signal);
     }
 
     private timelineSession(uri: vscode.Uri, generation: number, revision: number): HostedSession {
@@ -401,7 +404,7 @@ class HostedSession {
     private status = 'Building the selected Cargo target…';
     private graphMode: AnimationGraphMode = 'keys';
     private timelineLayout?: TimelineLayout;
-    private readonly timelineViewport = new TimelineViewportRequests<HostedAnimationFrame>(message =>
+    private readonly timelinePresentation = new TimelinePresentationRequests<HostedAnimationFrame>(message =>
         this.panel.visible ? this.post(message) : undefined);
     private displayPosition?: HostedAnimationState['position'];
 
@@ -498,29 +501,29 @@ class HostedSession {
     timelineDisplay() {
         const { programs } = this.animations.state;
         return { mode: this.graphMode, layout: this.timelineLayout ?? 'tracks', generation: this.generation, revision: this.revision,
+            sequence: this.currentFrame?.sequence,
             available_modes: availableGraphModes(programs.some(program => Boolean(program.curveTracks?.length)),
                 Boolean(this.client?.capabilities.timelineCurveVelocity)) };
     }
 
     async readTimelineDisplay(signal: AbortSignal) {
-        const viewport = this.panel.visible && this.currentFrame ? await this.requestTimelineViewport(signal) : undefined;
-        return { ...this.timelineDisplay(), viewport };
+        const presentation = this.panel.visible && this.currentFrame ? await this.requestTimelinePresentation(signal) : undefined;
+        return { ...this.timelineDisplay(), ...presentation };
     }
 
-    async setTimelineViewport(change: TimelineViewportChange, signal: AbortSignal) {
+    async changeTimelinePresentation(change: TimelinePresentationChange, signal: AbortSignal) {
         this.panel.reveal(this.panel.viewColumn, true);
-        const viewport = await this.requestTimelineViewport(signal, change);
-        if (!viewport) throw new Error('Show an App Preview curve or clip ruler first.');
-        return { ...this.timelineDisplay(), viewport };
+        const presentation = await this.requestTimelinePresentation(signal, change);
+        return { ...this.timelineDisplay(), ...presentation };
     }
 
-    private requestTimelineViewport(signal: AbortSignal, change?: TimelineViewportChange) {
+    private requestTimelinePresentation(signal: AbortSignal, change?: TimelinePresentationChange) {
         const accepted = this.currentFrame;
         if (!accepted) throw new Error('Wait for the current application preview.');
         const { revision, sequence } = accepted;
         const current = () => this.currentFrame?.revision === revision && this.currentFrame.sequence === sequence && !this.disposed;
         const frame = { revision, sequence };
-        return change ? this.timelineViewport.request(frame, current, signal, change) : this.timelineViewport.read(frame, current, signal);
+        return change ? this.timelinePresentation.request(frame, current, signal, change) : this.timelinePresentation.read(frame, current, signal);
     }
 
     setGraphMode(mode: AnimationGraphMode): void {
@@ -969,7 +972,7 @@ class HostedSession {
     }
 
     private async receive(message: FromHosted): Promise<void> {
-        if (message.type === 'timelineViewportReply') { this.timelineViewport.receive(message); return; }
+        if (message.type === 'timelinePresentationReply') { this.timelinePresentation.receive(message); return; }
         if (message.type === 'ready') {
             this.ready = true;
             if (!this.timelineLayout && isTimelineLayout(message.layout)) this.timelineLayout = message.layout;

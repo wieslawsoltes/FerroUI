@@ -6,6 +6,7 @@ import type { HostedAnimationAction, HostedAnimationState } from '../src/hostedA
 import type { HostedGesture } from '../src/hostedProtocol';
 import type { McpFixture } from './mcp';
 import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
+import { verifyHostedTrackMcp } from './timelineTrackMcp';
 import { until } from './wait';
 
 const preview = `<Window xmlns="https://github.com/ferroui" xmlns:app="using:TodoWorkbench.Design"
@@ -31,8 +32,8 @@ const motion = `<Window xmlns="https://github.com/ferroui" Width="420" Height="2
         <Style Selector="Border#Ticket"><Style.Animations>
             <Animation Duration="0:0:2" FillMode="Both">
                 <!--ferroui-designer-program:5469636b65742072657665616c-->
-                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25"/></KeyFrame>
-                <KeyFrame Cue="100%" KeySpline="0.25,0.2,0.7,1.4"><Setter Property="Opacity" Value="1"/></KeyFrame>
+                <KeyFrame Cue="0%"><Setter Property="Opacity" Value="0.25"/><Setter Property="CornerRadius" Value="8,10,12,14"/></KeyFrame>
+                <KeyFrame Cue="100%" KeySpline="0.25,0.2,0.7,1.4"><Setter Property="Opacity" Value="1"/><Setter Property="CornerRadius" Value="18,20,22,24"/></KeyFrame>
             </Animation>
         </Style.Animations></Style>
         <Style Selector="Border#Receipt"><Style.Animations>
@@ -140,6 +141,7 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
             await image(refreshed);
             await verifyTimelineGraphMcp({ invoke, content }, session, document, generation);
             await verifyTimelineLayoutMcp({ invoke, content }, session, document, generation);
+            await verifyHostedTrackMcp({ invoke, content }, session, document);
             await verifyLayoutPlayback({ invoke, content }, session, generation);
         } finally {
             content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));

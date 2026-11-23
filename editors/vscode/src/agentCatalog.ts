@@ -2,6 +2,7 @@ import { choice, integer, object, text, tool, truth, type Schema } from './agent
 import { animationGraphModes } from './animationGraph';
 import { timelineLayouts } from './timelineLayout';
 import { timelineRulers } from './timelineViewportProtocol';
+import { hostedTimelineTrackAction, timelineTrackAction } from './timelineTrackSchema';
 import { hostedPaletteCatalog } from './hostedPaletteCatalog';
 import { hostedStylesCatalog } from './hostedStylesCatalog';
 import { hostedTemplateCatalog } from './hostedTemplateCatalog';
@@ -219,13 +220,16 @@ export const agentCatalog = {
         ...frame, expected_generation: integer(1), fixture: { type: 'string', maxLength: 128 },
     }, ['session', 'expected_generation', 'expected_revision'], true, false),
     designer_hosted_animations: tool('Read the application preview’s native clips and mapped Rust state routes, compatible controls, frame, elapsed time, and named markers.', session, ['session']),
-    designer_hosted_timeline_view: tool('Read the App Preview layout, graph preference, available modes, generation, revision, and visible curve or clip viewport.', session, ['session']),
+    designer_hosted_timeline_view: tool('Read the App Preview layout, graph preference, generation, revision, and visible ruler or property curve choices.', session, ['session']),
     designer_hosted_timeline_set_graph: tool('Choose Keys, Value, or Velocity for the visible App Preview graph. Use the generation and revision from designer_hosted_timeline_view.',
         { ...frame, expected_generation: integer(1), graph_mode: graphMode }, ['session', 'expected_generation', 'expected_revision', 'graph_mode'], true, false),
     designer_hosted_timeline_set_layout: tool('Switch App Preview between property tracks and clip comparison. Use the generation and revision from designer_hosted_timeline_view.',
         { ...frame, expected_generation: integer(1), layout: timelineLayout }, ['session', 'expected_generation', 'expected_revision', 'layout'], true, false),
     designer_hosted_timeline_set_viewport: tool('Set the visible App Preview curve or clip viewport. Use ruler, program if present, generation and revision from designer_hosted_timeline_view. Window takes start and end in seconds. Fit and fit_selection use the corresponding view controls.',
         { ...frame, expected_generation: integer(1), viewport: timelineViewport }, ['session', 'expected_generation', 'expected_revision', 'viewport'], true, false),
+    designer_hosted_timeline_track_action: tool('Select a visible App Preview property curve or choose its component. Pass the program, live target ID, property, generation, revision and frame sequence from designer_hosted_timeline_view.',
+        { ...frame, expected_generation: integer(1), expected_sequence: integer(1), track: hostedTimelineTrackAction },
+        ['session', 'expected_generation', 'expected_revision', 'expected_sequence', 'track'], true, false),
     designer_hosted_image: tool('Capture the current App Preview frame as PNG with its app generation, source revision, and frame sequence.', session, ['session']),
     designer_hosted_input: tool('Interact with the current App Preview. Click or scroll at normalized x and y, or send text to the focused native control. Pass the current app generation, revision, and frame sequence.',
         { ...frame, expected_generation: integer(1), expected_sequence: integer(1), input: hostedGesture },
@@ -356,13 +360,15 @@ export const agentCatalog = {
             properties: { action: choice('seek', 'scrub_all', 'play', 'play_range', 'play_all', 'pause', 'stop', 'record'), program: node, enabled: truth, time,
                 range: previewRange } } },
         ['session', 'expected_revision', 'arguments'], true, false),
-    designer_timeline_view: tool('Read the Timeline layout, graph preference, available modes, current designer revision, and visible ruler viewport.', session, ['session']),
+    designer_timeline_view: tool('Read the Timeline layout, graph preference, current designer revision, ruler viewport, and property track presentation.', session, ['session']),
     designer_timeline_set_graph: tool('Open the Timeline and choose Keys, Value, or Velocity. Use the current designer revision.',
         { ...frame, graph_mode: graphMode }, ['session', 'expected_revision', 'graph_mode'], true, false),
     designer_timeline_set_layout: tool('Open the Timeline and switch between property tracks and clip comparison. Use the current designer revision.',
         { ...frame, layout: timelineLayout }, ['session', 'expected_revision', 'layout'], true, false),
     designer_timeline_set_viewport: tool('Open the Timeline and set the visible ruler viewport. Use ruler, program if present, and revision from designer_timeline_view. Window takes start and end in seconds. Fit and fit_selection use the corresponding view controls.',
         { ...frame, viewport: timelineViewport }, ['session', 'expected_revision', 'viewport'], true, false),
+    designer_timeline_track_action: tool('Set the Timeline filter, collapse or lock a target group, or choose a visible curve component. Pass the program and revision from designer_timeline_view.',
+        { ...frame, track: timelineTrackAction }, ['session', 'expected_revision', 'track'], true, false),
     designer_timeline_markers: tool('List the named preview markers for a typed Timeline clip or the shared ruler. Use the current designer revision and supply program or set all to true.',
         { ...frame, program: node, all: truth }, ['session', 'expected_revision']),
     designer_timeline_marker_edit: tool('Set, remove, or seek to a session-local Timeline marker by name. Supply program for authored seconds or set all to true for elapsed seconds.',

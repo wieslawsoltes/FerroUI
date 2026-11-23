@@ -1,14 +1,14 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import type { TimelineViewportChange, TimelineViewportReply, TimelineViewportRequest, TimelineViewportState } from './timelineViewportProtocol';
+import type { TimelinePresentation, TimelinePresentationChange, TimelinePresentationReply, TimelinePresentationRequest } from './timelinePresentationProtocol';
 
-/** Requests the ruler's actual state from the visible webview, including gestures made there. */
-export class TimelineViewportRequests<Frame> {
+/** Reports what the visible webview accepted, including changes made through its controls. */
+export class TimelinePresentationRequests<Frame> {
     private next = 0;
-    private readonly listeners = new Map<number, (reply: TimelineViewportReply) => void>();
+    private readonly listeners = new Map<number, (reply: TimelinePresentationReply) => void>();
 
-    constructor(private readonly post: (request: TimelineViewportRequest<Frame>) => Thenable<boolean> | undefined) {}
+    constructor(private readonly post: (request: TimelinePresentationRequest<Frame>) => Thenable<boolean> | undefined) {}
 
-    receive(reply: TimelineViewportReply): void {
+    receive(reply: TimelinePresentationReply): void {
         this.listeners.get(reply.request)?.(reply);
     }
 
@@ -21,26 +21,26 @@ export class TimelineViewportRequests<Frame> {
         }
     }
 
-    async request(frame: Frame, current: () => boolean, signal: AbortSignal, change?: TimelineViewportChange) {
+    async request(frame: Frame, current: () => boolean, signal: AbortSignal, change?: TimelinePresentationChange) {
         const timeout = AbortSignal.any([signal, AbortSignal.timeout(change ? 5_000 : 750)]);
         const request = ++this.next;
-        const message: TimelineViewportRequest<Frame> = { type: 'timelineViewportRequest', request, frame, change };
+        const message: TimelinePresentationRequest<Frame> = { type: 'timelinePresentationRequest', request, frame, change };
         const check = () => {
             timeout.throwIfAborted();
             if (!current()) throw new Error('Read the current Timeline revision again.');
         };
-        let resolveReply!: (viewport?: TimelineViewportState) => void;
+        let resolveReply!: (presentation: TimelinePresentation) => void;
         let rejectReply!: (error: unknown) => void;
-        const reply = new Promise<TimelineViewportState | undefined>((resolve, reject) => {
+        const reply = new Promise<TimelinePresentation>((resolve, reject) => {
             resolveReply = resolve;
             rejectReply = reject;
         });
         // Start listening before posting. A fast webview can reply before postMessage resolves.
         this.listeners.set(request, result => {
             if ('error' in result) rejectReply(new Error(result.error));
-            else resolveReply(result.viewport);
+            else resolveReply(result.presentation);
         });
-        const cancel = () => rejectReply(signal.aborted ? signal.reason : new Error('The Timeline ruler did not respond.'));
+        const cancel = () => rejectReply(signal.aborted ? signal.reason : new Error('The Timeline did not respond.'));
         timeout.addEventListener('abort', cancel, { once: true });
         // The reply can reject while the webview is becoming available.
         void reply.catch(() => {});
@@ -54,11 +54,11 @@ export class TimelineViewportRequests<Frame> {
                 posted = this.post(message);
             }
             void posted.then(sent => {
-                if (!sent) rejectReply(new Error('Open the Timeline to show its current ruler.'));
+                if (!sent) rejectReply(new Error('Open the Timeline to show its current controls.'));
             }, rejectReply);
-            const viewport = await reply;
+            const presentation = await reply;
             check();
-            return viewport;
+            return presentation;
         } finally {
             timeout.removeEventListener('abort', cancel);
             this.listeners.delete(request);

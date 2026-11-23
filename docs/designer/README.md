@@ -542,6 +542,12 @@ pan in authored seconds on the track ruler or elapsed seconds on the clip ruler.
 or the selected curve keys with the corresponding action.
 [Viewport workflow](vscode/motion.md#set-the-visible-timeline-range-from-an-agent)
 
+With the property tracks visible, select a track header to open the key nearest the playhead.
+In Value or Velocity curves, choose a component in the track header when the property offers
+separate channels. MCP shares both controls through `designer_timeline_track_action`. Read
+`designer_timeline_view` for the current program, track, and available components.
+[MCP track workflow](vscode/motion.md#control-timeline-tracks-from-an-agent)
+
 App Preview uses the same placement rules with the selected binary’s registered animators and
 resolved timing. It samples the combined pose before displaying a compatible source replacement.
 [App Preview clip workflow](vscode/motion.md#compare-clips-in-app-preview)

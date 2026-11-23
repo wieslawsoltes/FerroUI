@@ -1,5 +1,6 @@
 import type { FrameTarget } from '../src/protocol';
 import type { CurveChannel, CurveMetric, CurvePoint, TimelineCurveRequest, TimelineCurveResponse, TimelineKeyframe, TimelineTrack } from '../src/timelineProtocol';
+import type { TimelineTrackIdentity, TimelineTrackInfo } from '../src/timelineTrackProtocol';
 import { create } from './dom';
 import { CurveScale } from './timelineCurveScale';
 import { curveKeyPosition, snapCurveInteger, type CurveHandle, type RenderedKeyframe } from './timelineKeyDrag';
@@ -63,6 +64,10 @@ export function curveChannels(track: TimelineTrack): readonly CurveChannel[] {
     return track.curve_channels ?? (track.keyframes[0]?.value_kind === 'Number' ? ['value'] : []);
 }
 
+function trackKey({ target, property }: TimelineTrackIdentity): string {
+    return JSON.stringify([target, property]);
+}
+
 /** Uses the Timeline's existing focusable key buttons as the curve's handles. */
 export class TimelineCurvePlot {
     private readonly svg = document.createElementNS('http://www.w3.org/2000/svg', 'svg');
@@ -82,7 +87,7 @@ export class TimelineCurvePlot {
     visible = false;
 
     constructor(readonly lane: HTMLElement, label: HTMLElement, readonly track: TimelineTrack,
-        preferred: CurveChannel | undefined, changed: (channel: CurveChannel) => void) {
+        preferred: CurveChannel | undefined, private readonly changed: (channel: CurveChannel) => void) {
         this.svg.classList.add('timeline-curve-plot');
         this.svg.setAttribute('aria-hidden', 'true');
         this.svg.setAttribute('viewBox', '0 0 100 100');
@@ -109,13 +114,25 @@ export class TimelineCurvePlot {
             select.hidden = true;
             select.append(...choices.map(channel => new Option(channelLabel(channel), channel)));
             if (preferred && choices.includes(preferred)) select.value = preferred;
-            select.onchange = () => changed(this.channel);
+            select.onchange = () => this.changed(this.channel);
             label.append(select);
         }
     }
 
     get channel(): CurveChannel { return (this.channelPicker?.value as CurveChannel | undefined) ?? curveChannels(this.track)[0] ?? 'value'; }
+    get canChooseChannel(): boolean {
+        return Boolean(this.channelPicker && !this.channelPicker.hidden && !this.channelPicker.disabled && !this.lane.closest('[hidden]'));
+    }
     has(key: string): boolean { return this.accepted?.key === key; }
+
+    chooseChannel(channel: CurveChannel): void {
+        const picker = this.channelPicker;
+        if (!picker || !this.canChooseChannel) throw new Error('Show the track and its curve component picker first.');
+        if (!curveChannels(this.track).includes(channel)) throw new Error('Choose a component from the visible curve.');
+        if (picker.value === channel) return;
+        picker.value = channel;
+        this.changed(channel);
+    }
 
     handle(keyframe: TimelineKeyframe, current: string | undefined): CurveHandle | undefined {
         const value = this.value(keyframe);
@@ -248,6 +265,22 @@ export class TimelineCurves {
     clear(): void {
         this.observer.disconnect();
         this.plots.clear();
+    }
+
+    trackPresentation(tracks: TimelineTrackInfo[]): TimelineTrackInfo[] {
+        if (!this.metric) return tracks;
+        const plots = new Map([...this.plots.values()].map(plot => [trackKey(plot.track), plot]));
+        return tracks.map(track => {
+            const plot = plots.get(trackKey(track));
+            return plot ? { ...track, channel: plot.channel, channels: curveChannels(plot.track), canChooseChannel: plot.canChooseChannel } : track;
+        });
+    }
+
+    chooseChannel(track: TimelineTrackIdentity, channel: CurveChannel): void {
+        const plot = [...this.plots.values()].find(({ track: candidate }) =>
+            candidate.target === track.target && candidate.property === track.property);
+        if (!plot) throw new Error('Choose a visible curve track.');
+        plot.chooseChannel(channel);
     }
 
     follow(metric: CurveMetric | undefined, range: TimelineViewport, frame?: CurveSnapshot): void {
