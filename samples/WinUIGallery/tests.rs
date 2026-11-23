@@ -158,6 +158,18 @@ fn all_reviewed_native_adaptations_load_real_controls() {
 }
 
 #[test]
+fn web_view2_example_uses_the_native_control_with_the_source_address() {
+    let _application = start();
+    let root = examples::create(examples::find("WebView2").unwrap()).unwrap();
+    let view = root.get_control::<ferroui_controls_webview::WebView2>("MyWebView2");
+    assert_eq!(
+        view.source().as_deref(),
+        Some("https://learn.microsoft.com/windows/apps/winui/winui3/")
+    );
+    assert!(view.core_web_view2().is_none(), "no engine starts before the page is shown");
+}
+
+#[test]
 fn adaptation_port_states_match_port_status() {
     // `port-status.json` is written with an indent of two spaces: a page is a key of `pages` and
     // its status is the first member of its entry.
