@@ -3,7 +3,7 @@ use crate::{bitmap::Bitmap, ffi};
 use ferroui_base::platform::{
     IExternalObjectsRenderInterfaceContextFeature, IPlatformHandle,
     IPlatformRenderInterfaceImportedImage, IPlatformRenderInterfaceImportedObject,
-    IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsExternalImageFormat,
+    IPlatformRenderInterfaceImportedSemaphore, PlatformGraphicsContextLostError, PlatformGraphicsExternalImageFormat,
     PlatformGraphicsExternalImageProperties, SharedBitmapImpl,
 };
 use ferroui_base::rendering::composition::frames::{
@@ -267,22 +267,32 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
         signal: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
         signal_value: u64,
     ) -> Arc<SharedBitmapImpl> {
-        assert!(
-            !self.device.is_lost() && unsafe { ffi::qm_is_lost(self.backend_generation) == 0 },
-            "The Metal device has been lost"
-        );
-        let wait = wait
-            .as_any()
-            .downcast_ref::<ImportedSemaphore>()
-            .expect("Timeline event must be imported by Quartz Metal");
-        let signal = signal
-            .as_any()
-            .downcast_ref::<ImportedSemaphore>()
-            .expect("Timeline event must be imported by Quartz Metal");
-        let bitmap = Bitmap::new(
+        self.try_snapshot_with_timeline_semaphores(wait, wait_value, signal, signal_value)
+            .expect("The Metal device has been lost, or the texture or the shared event is invalid")
+    }
+
+    /// A lost device or a failed copy is an error of the frame, not a panic.
+    fn try_snapshot_with_timeline_semaphores(
+        &self,
+        wait: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
+        wait_value: u64,
+        signal: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
+        signal_value: u64,
+    ) -> Result<Arc<SharedBitmapImpl>, PlatformGraphicsContextLostError> {
+        if self.device.is_lost() || unsafe { ffi::qm_is_lost(self.backend_generation) } != 0 {
+            return Err(PlatformGraphicsContextLostError);
+        }
+        let (Some(wait), Some(signal)) = (
+            wait.as_any().downcast_ref::<ImportedSemaphore>(),
+            signal.as_any().downcast_ref::<ImportedSemaphore>(),
+        ) else {
+            return Err(PlatformGraphicsContextLostError);
+        };
+        let bitmap = Bitmap::try_new(
             ferroui_base::PixelSize::new(self.properties.width, self.properties.height),
             ferroui_base::Vector::new(96., 96.),
-        );
+        )
+        .map_err(|_| PlatformGraphicsContextLostError)?;
         let copied = bitmap.context(|p| unsafe {
             ffi::qm_snapshot_external(
                 p,
@@ -294,8 +304,10 @@ impl IPlatformRenderInterfaceImportedImage for ImportedImage {
                 signal_value,
             )
         });
-        assert_ne!(copied, 0, "Invalid Metal texture or shared event");
-        Arc::new(bitmap)
+        if copied == 0 {
+            return Err(PlatformGraphicsContextLostError);
+        }
+        Ok(Arc::new(bitmap))
     }
 
     /// # Panics

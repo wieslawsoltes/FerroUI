@@ -193,15 +193,16 @@ impl ServerCompositionDrawingSurface {
             if !wait.is_usable(&compositor) || !signal.is_usable(&compositor) {
                 return Err(context_lost());
             }
-            self.update(
-                image.image().snapshot_with_timeline_semaphores(
+            let snapshot = image
+                .image()
+                .try_snapshot_with_timeline_semaphores(
                     &wait.semaphore(),
                     wait_for_value,
                     &signal.semaphore(),
                     signal_value,
-                ),
-                image.context().clone(),
-            );
+                )
+                .map_err(|_| context_lost())?;
+            self.update(snapshot, image.context().clone());
             Ok(())
         })
     }

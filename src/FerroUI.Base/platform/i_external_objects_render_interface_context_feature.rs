@@ -134,6 +134,19 @@ pub trait IPlatformRenderInterfaceImportedImage: IPlatformRenderInterfaceImporte
         signal_value: u64,
     ) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 
+    /// [`snapshot_with_timeline_semaphores`](Self::snapshot_with_timeline_semaphores), for a
+    /// backend that can report a lost device or a failed copy instead of panicking. The default
+    /// takes the snapshot as that method does.
+    fn try_snapshot_with_timeline_semaphores(
+        &self,
+        wait_for_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
+        wait_for_value: u64,
+        signal_semaphore: &Rc<dyn IPlatformRenderInterfaceImportedSemaphore>,
+        signal_value: u64,
+    ) -> Result<std::sync::Arc<crate::platform::SharedBitmapImpl>, crate::platform::PlatformGraphicsContextLostError> {
+        Ok(self.snapshot_with_timeline_semaphores(wait_for_semaphore, wait_for_value, signal_semaphore, signal_value))
+    }
+
     fn snapshot_with_automatic_sync(&self) -> std::sync::Arc<crate::platform::SharedBitmapImpl>;
 }
 

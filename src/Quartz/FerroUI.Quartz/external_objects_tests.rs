@@ -375,6 +375,9 @@ fn timeline_snapshot_waits_for_producer_then_signals_after_an_independent_gpu_co
     let b: Rc<dyn IPlatformRenderInterfaceImportedSemaphore> = Rc::new(ImportedSemaphore {
         event: Rc::new(Event(signal.clone())),
     });
+    // A semaphore of another backend is an error of the frame, not a panic.
+    let foreign: Rc<dyn IPlatformRenderInterfaceImportedSemaphore> = Rc::new(ForeignSemaphore);
+    assert!(imported.try_snapshot_with_timeline_semaphores(&foreign, 3, &b, 4).is_err());
     let snapshot = imported.snapshot_with_timeline_semaphores(&a, 3, &b, 4);
     assert_eq!(
         signal.signaledValue(),
@@ -474,6 +477,16 @@ fn renderer_queue_faults_invalidate_generations_and_recover_without_releasing_ol
     draw.dispose();
     assert_eq!(&b.pixels()[..4], &[0, 0, 255, 255]);
     assert_eq!(unsafe { ffi::qm_is_lost(new) }, 0);
+}
+
+struct ForeignSemaphore;
+impl ferroui_base::platform::IPlatformRenderInterfaceImportedObject for ForeignSemaphore {
+    fn dispose(&self) {}
+}
+impl IPlatformRenderInterfaceImportedSemaphore for ForeignSemaphore {
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
 }
 
 struct IdentityFeature;
