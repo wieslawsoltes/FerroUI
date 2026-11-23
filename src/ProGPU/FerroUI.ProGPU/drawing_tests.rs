@@ -4,7 +4,7 @@ use crate::geometry::{PathData, ProGpuGeometry};
 use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, SceneBuilder, TargetFormat};
 use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::{BoxShadow, BoxShadows, Color, GradientSpreadMethod, IBrush, PenLineCap, PenLineJoin};
-use ferroui_base::platform::IDrawingContextImpl;
+use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithFragments, IDrawingFragment};
 use ferroui_base::{Matrix, Point, Rect, RelativePoint, RelativeUnit, RoundedRect, Vector};
 use std::rc::Rc;
 
@@ -229,4 +229,118 @@ fn the_relative_transform_of_a_brush_acts_on_the_unit_square() {
     let (left, right) = (pixel(&pixels, 20, 32), pixel(&pixels, 76, 32));
     assert!(is_bluish(left), "the left of the mirrored gradient: {left:?}");
     assert!(is_reddish(right), "the right of the mirrored gradient: {right:?}");
+}
+
+/// The content of the fragment tests: shapes, a gradient path, a clip and a group, under the
+/// transform in force.
+fn fragment_content(context: &mut ProGpuDrawingContext) {
+    let red = solid(210, 40, 30);
+    let blue = solid(30, 60, 200);
+    let red: &dyn IBrush = &*red;
+    let blue: &dyn IBrush = &*blue;
+    context.draw_rectangle(Some(red), None, RoundedRect::from_rect(Rect::new(4.0, 4.0, 30.0, 20.0)), &BoxShadows::default());
+    context.draw_ellipse(Some(blue), None, Rect::new(10.0, 12.0, 24.0, 18.0));
+    context.push_clip(Rect::new(6.0, 26.0, 16.0, 10.0));
+    context.draw_rectangle(Some(blue), None, RoundedRect::from_rect(Rect::new(0.0, 20.0, 40.0, 30.0)), &BoxShadows::default());
+    context.pop_clip();
+    context.push_opacity(0.5, Some(Rect::new(20.0, 24.0, 20.0, 16.0)));
+    context.draw_rectangle(Some(red), None, RoundedRect::from_rect(Rect::new(22.0, 26.0, 14.0, 10.0)), &BoxShadows::default());
+    context.pop_opacity();
+    let outline = ProGpuGeometry::new(PathData::ellipse(Rect::new(2.0, 34.0, 18.0, 10.0)));
+    context.draw_geometry(Some(blue), None, outline.as_ref());
+}
+
+fn kept_fragment(engine: &ProGpuEngine, transform: Matrix) -> Rc<dyn IDrawingFragment> {
+    let mut kept = None;
+    render(engine, |context| {
+        context.set_transform(transform);
+        context.begin_fragment();
+        fragment_content(context);
+        kept = context.end_fragment();
+    });
+    kept.expect("the content can be kept")
+}
+
+#[test]
+fn a_fragment_draws_what_its_commands_draw_in_place_and_moved_by_whole_pixels() {
+    let Some(engine) = device() else { return };
+    let transform = Matrix::create_scale(1.5, 1.5) * Matrix::create_translation(8.0, 6.0);
+    let fragment = kept_fragment(&engine, transform);
+    for (x, y) in [(0.0, 0.0), (7.0, 5.0), (-3.0, 12.0)] {
+        let at = transform * Matrix::create_translation(x, y);
+        let expected = render(&engine, |context| {
+            context.set_transform(at);
+            fragment_content(context);
+        });
+        let actual = render(&engine, |context| {
+            context.set_transform(at);
+            assert!(context.draw_fragment(&fragment), "moved by ({x}, {y})");
+        });
+        assert!(expected == actual, "moved by ({x}, {y}): the pixels differ");
+    }
+}
+
+#[test]
+fn a_fragment_takes_the_clip_in_force_where_it_is_drawn() {
+    let Some(engine) = device() else { return };
+    let transform = Matrix::create_translation(10.0, 10.0);
+    let fragment = kept_fragment(&engine, transform);
+    let clip = Rect::new(16.0, 12.0, 30.0, 22.0);
+    let expected = render(&engine, |context| {
+        context.push_clip(clip);
+        context.set_transform(transform);
+        fragment_content(context);
+        context.set_transform(Matrix::IDENTITY);
+        context.pop_clip();
+    });
+    let actual = render(&engine, |context| {
+        context.push_clip(clip);
+        context.set_transform(transform);
+        assert!(context.draw_fragment(&fragment));
+        context.set_transform(Matrix::IDENTITY);
+        context.pop_clip();
+    });
+    assert!(expected == actual, "the pixels differ under the clip");
+}
+
+#[test]
+fn a_fragment_is_refused_where_its_pixels_would_differ() {
+    let Some(engine) = device() else { return };
+    let transform = Matrix::create_translation(10.0, 10.0);
+    let fragment = kept_fragment(&engine, transform);
+    render(&engine, |context| {
+        context.set_transform(transform * Matrix::create_translation(0.5, 0.0));
+        assert!(!context.draw_fragment(&fragment), "a move by a fraction of a pixel");
+        context.set_transform(Matrix::create_scale(2.0, 2.0) * transform);
+        assert!(!context.draw_fragment(&fragment), "another scale");
+        context.set_transform(Matrix::create_rotation(0.2) * transform);
+        assert!(!context.draw_fragment(&fragment), "a rotation");
+        context.set_transform(transform);
+        context.begin_fragment();
+        assert!(!context.draw_fragment(&fragment), "inside a fragment being recorded");
+        context.end_fragment();
+    });
+}
+
+#[test]
+fn what_cannot_be_drawn_again_makes_no_fragment() {
+    let Some(engine) = device() else { return };
+    let blue = solid(30, 60, 200);
+    let blue: &dyn IBrush = &*blue;
+    render(&engine, |context| {
+        context.begin_fragment();
+        context.clear(Color::from_rgb(0, 0, 0));
+        assert!(context.end_fragment().is_none(), "a clear");
+
+        context.begin_fragment();
+        context.push_clip_rounded(RoundedRect::from_radius(Rect::new(0.0, 0.0, 20.0, 20.0), 4.0));
+        context.draw_rectangle(Some(blue), None, RoundedRect::from_rect(Rect::new(0.0, 0.0, 30.0, 30.0)), &BoxShadows::default());
+        context.pop_clip();
+        assert!(context.end_fragment().is_none(), "a rounded clip");
+
+        context.push_clip(Rect::new(0.0, 0.0, 40.0, 40.0));
+        context.begin_fragment();
+        context.pop_clip();
+        assert!(context.end_fragment().is_none(), "the pop of a clip opened before the fragment");
+    });
 }
