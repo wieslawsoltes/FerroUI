@@ -341,6 +341,32 @@ pub(crate) fn texture_allocations() -> u64 {
     ALLOCATIONS.with(Cell::get)
 }
 
+/// What the texture pools of this thread hold, for the message of a test that found a steady
+/// frame allocating: per device and size the textures, how many something still holds besides
+/// the pool, and whether the device is lost.
+#[cfg(test)]
+pub(crate) fn texture_pool_report() -> String {
+    let mut lines = Vec::new();
+    POOL.with(|pool| {
+        for ((device, width, height), entries) in pool.borrow().iter() {
+            let held = entries.iter().filter(|entry| Arc::strong_count(&entry.texture) > 1).count();
+            let lost = entries.first().is_some_and(|entry| entry.texture.device().is_lost());
+            let count = entries.len();
+            lines.push(format!("lighting {device:#x} {width}x{height}: {count} textures, {held} held, lost {lost}"));
+        }
+    });
+    LAYER_POOL.with(|pool| {
+        for ((device, width, height), entries) in pool.borrow().iter() {
+            let held = entries.iter().filter(|texture| Arc::strong_count(texture) > 1).count();
+            let lost = entries.first().is_some_and(|texture| texture.device().is_lost());
+            let count = entries.len();
+            lines.push(format!("layer {device:#x} {width}x{height}: {count} textures, {held} held, lost {lost}"));
+        }
+    });
+    lines.sort();
+    lines.join("; ")
+}
+
 fn with_pipeline<R>(device: &Arc<VelloWgpuDevice>, f: impl FnOnce(&Pipeline) -> R) -> R {
     PIPELINES.with(|pipelines| {
         let mut pipelines = pipelines.borrow_mut();
