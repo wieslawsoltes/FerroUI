@@ -1524,7 +1524,9 @@ impl SelectingItemsControl {
 
         self.update_container_selection();
 
-        if self.selected_index() != -1 {
+        // During initialization `selected_index` is the pending index, which the model does not
+        // hold yet: it is applied, and its change raised, when the update ends.
+        if model.selected_index() != -1 {
             self.raise_event(&SelectionChangedEventArgs::new(
                 Some(Self::selection_changed_event()),
                 Vec::new(),

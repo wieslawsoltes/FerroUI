@@ -304,14 +304,28 @@ fn applies_absolute_flex_basis_properties() {
 fn applies_relative_flex_basis_properties() {
     let target = FlexPanel::new();
     target.set_width(50.0);
-    target.children().add(border_with_basis(FlexBasis::new(50.0, FlexBasisKind::Relative)));
-    target.children().add(border_with_basis(FlexBasis::new(50.0, FlexBasisKind::Relative)));
+    target.children().add(border_with_basis(FlexBasis::new(0.5, FlexBasisKind::Relative)));
+    target.children().add(border_with_basis(FlexBasis::new(0.5, FlexBasisKind::Relative)));
 
     measure_and_arrange(&target);
 
     assert_eq!(target.bounds().size(), Size::new(50.0, 15.0));
     assert_eq!(bounds(&target, 0), Rect::new(0.0, 0.0, 25.0, 15.0));
     assert_eq!(bounds(&target, 1), Rect::new(25.0, 0.0, 25.0, 15.0));
+}
+
+#[test]
+fn applies_parsed_percentage_flex_basis_properties() {
+    let target = FlexPanel::new();
+    target.set_width(100.0);
+    target.children().add(border_with_basis(FlexBasis::parse("25%").unwrap()));
+    target.children().add(border_with_basis(FlexBasis::parse("75%").unwrap()));
+
+    measure_and_arrange(&target);
+
+    assert_eq!(target.bounds().size(), Size::new(100.0, 15.0));
+    assert_eq!(bounds(&target, 0), Rect::new(0.0, 0.0, 25.0, 15.0));
+    assert_eq!(bounds(&target, 1), Rect::new(25.0, 0.0, 75.0, 15.0));
 }
 
 #[test]

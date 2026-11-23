@@ -822,6 +822,10 @@ mod additional {
     }
 
     fn wheel(calendar: &Ref<Calendar>, delta_y: f64, modifiers: KeyModifiers) -> bool {
+        wheel_by(calendar, Vector::new(0.0, delta_y), modifiers)
+    }
+
+    fn wheel_by(calendar: &Ref<Calendar>, delta: Vector, modifiers: KeyModifiers) -> bool {
         let pointer: Rc<dyn IPointer> = Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true);
         let e = PointerWheelEventArgs::new(
             calendar.clone(),
@@ -831,10 +835,59 @@ mod additional {
             0,
             PointerPointProperties::new(RawInputModifiers::NONE, PointerUpdateKind::Other),
             modifiers,
-            Vector::new(0.0, delta_y),
+            delta,
         );
         calendar.raise_event(&e);
         e.handled()
+    }
+
+    #[test]
+    fn wheel_notch_up_should_show_previous_month() {
+        let _scope = test_scope();
+        let calendar = Calendar::new();
+        calendar.set_display_date(DateTime::new(2026, 7, 15));
+
+        wheel(&calendar, 1.0, KeyModifiers::NONE);
+
+        assert_eq!(DateTime::new(2026, 6, 1), calendar.display_date());
+    }
+
+    #[test]
+    fn fractional_wheel_deltas_below_a_notch_should_not_change_display_date() {
+        let _scope = test_scope();
+        let calendar = Calendar::new();
+        calendar.set_display_date(DateTime::new(2026, 7, 15));
+
+        // Forty deltas from a short touchpad gesture add up to less than one notch.
+        for _ in 0..40 {
+            wheel(&calendar, -0.02, KeyModifiers::NONE);
+        }
+
+        assert_eq!(DateTime::new(2026, 7, 15), calendar.display_date());
+    }
+
+    #[test]
+    fn fractional_wheel_deltas_adding_up_to_a_notch_should_show_next_month() {
+        let _scope = test_scope();
+        let calendar = Calendar::new();
+        calendar.set_display_date(DateTime::new(2026, 7, 15));
+
+        for _ in 0..4 {
+            wheel(&calendar, -0.25, KeyModifiers::NONE);
+        }
+
+        assert_eq!(DateTime::new(2026, 8, 1), calendar.display_date());
+    }
+
+    #[test]
+    fn horizontal_wheel_should_not_change_display_date() {
+        let _scope = test_scope();
+        let calendar = Calendar::new();
+        calendar.set_display_date(DateTime::new(2026, 7, 15));
+
+        wheel_by(&calendar, Vector::new(1.0, 0.0), KeyModifiers::NONE);
+
+        assert_eq!(DateTime::new(2026, 7, 15), calendar.display_date());
     }
 
     fn text_of(content: Option<BoxedValue>) -> String {

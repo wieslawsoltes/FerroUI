@@ -1155,7 +1155,7 @@ impl Popup {
 
         if let Some(m) = matrix {
             scale_x = (m.m11 * m.m11 + m.m12 * m.m12).sqrt();
-            scale_y = (m.m11 * m.m11 + m.m12 * m.m12).sqrt();
+            scale_y = (m.m21 * m.m21 + m.m22 * m.m22).sqrt();
 
             // Ideally we'd only assign a ScaleTransform here when the scale != 1, but there's
             // an issue with LayoutTransformControl in that it sets its LayoutTransform property

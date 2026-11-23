@@ -477,6 +477,8 @@ impl WindowBase {
     }
 
     fn handle_activated(&self) {
+        self.set_is_active(true);
+
         for (_, handler) in self.activated.snapshot().iter() {
             handler();
         }
@@ -484,8 +486,6 @@ impl WindowBase {
         if self.is_focus_scope() {
             self.focus_manager().set_focus_scope(&self.to_ref().upcast());
         }
-
-        self.set_is_active(true);
     }
 
     fn handle_deactivated(&self) {

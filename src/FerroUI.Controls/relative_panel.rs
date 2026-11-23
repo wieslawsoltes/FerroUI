@@ -723,7 +723,11 @@ impl Graph {
             }
         }
 
-        let mut available_height = available_size.height - node.top - node.bottom;
+        let mut available_height = if available_size.height.is_infinite() {
+            available_size.height
+        } else {
+            available_size.height - node.top - node.bottom
+        };
         if available_height.is_nan() {
             available_height = available_size.height;
 
@@ -734,7 +738,11 @@ impl Graph {
             }
         }
 
-        let mut available_width = available_size.width - node.left - node.right;
+        let mut available_width = if available_size.width.is_infinite() {
+            available_size.width
+        } else {
+            available_size.width - node.left - node.right
+        };
         if available_width.is_nan() {
             available_width = available_size.width;
 
