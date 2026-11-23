@@ -1976,6 +1976,21 @@ fn command_element<This: Clone + 'static>(
     builder.command_untyped(name, execute, can_execute, depends_on_properties, declaring.notify_property_changed)
 }
 
+/// The delegate of a named handler of an event with a remover: the descriptor of the
+/// declared method, whose target and method the remover compares. The root object is held
+/// weakly, as [`method_delegate`] holds it.
+pub fn declared_method_handler(
+    context: &Rc<XamlIlContext>, markup: &'static MarkupType,
+    name: &str, overload: usize, location: (i32, i32),
+) -> Result<ferroui_base::metadata::MarkupDelegate, XamlLoadError> {
+    let method = markup.find_methods(name).nth(overload).ok_or_else(|| {
+        at("MissingMethodException", format!("{}.{}: overload {overload} is absent from metadata", markup.full_name(), name), location.0, location.1)
+    })?;
+    if method.is_static { return Ok(ferroui_base::metadata::MarkupDelegate::for_method(None, markup, method)); }
+    let owner = context.root_object_field().ok_or_else(|| at("InvalidOperationException", "A method handler needs a root object", location.0, location.1))?;
+    Ok(ferroui_base::metadata::MarkupDelegate::for_method_of_source(&owner, markup, method))
+}
+
 /// A declared method as a binding value. The compiler records the overload's
 /// ordinal among equally named methods; no arity-only overload guess is made.
 /// Binding-source targets follow the native weak-owner convention.
