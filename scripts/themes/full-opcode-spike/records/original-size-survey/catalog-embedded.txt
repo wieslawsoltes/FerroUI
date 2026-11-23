@@ -1,0 +1,18 @@
+Distinct source payloads with exact byte matches 230 nonoverlapping bytes 3799711
+Source path groups [('samples/ControlCatalog', 2551808), ('components/FerroBoard', 643109), ('samples/BehaviorsGallery', 426096), ('src/FerroUI.Dialogs', 170012), ('src/FerroUI.Controls', 4254), ('src/FerroUI.Base', 3241), ('samples/TreeDataGridDemo', 1191)]
+Largest individual payloads
+423728 samples/ControlCatalog/Media/sintel-sample.mp4
+390437 samples/ControlCatalog/Assets/banner-bg.png
+293516 samples/ControlCatalog/Assets/Fonts/SourceSansPro-Regular.ttf
+290916 samples/ControlCatalog/Assets/Fonts/SourceSansPro-Bold.ttf
+216662 samples/BehaviorsGallery/Assets/hirsch-899118_640.jpg samples/ControlCatalog/Assets/hirsch-899118_640.jpg
+170012 src/FerroUI.Dialogs/Assets/Roboto-Light.ttf
+113622 samples/BehaviorsGallery/Assets/maple-leaf-888807_640.jpg samples/ControlCatalog/Assets/maple-leaf-888807_640.jpg
+109665 samples/ControlCatalog/Assets/image6.jpg
+103828 samples/ControlCatalog/Assets/Fonts/SourceSansPro-Italic.ttf
+103200 samples/ControlCatalog/Assets/Fonts/SourceSansPro-BoldItalic.ttf
+97298 samples/ControlCatalog/Assets/image4.jpg
+95812 samples/BehaviorsGallery/Assets/delicate-arch-896885_640.jpg samples/ControlCatalog/Assets/delicate-arch-896885_640.jpg
+71581 samples/ControlCatalog/Assets/image1.jpg
+69100 samples/ControlCatalog/Assets/image5.jpg
+62904 samples/ControlCatalog/Assets/logo1.png

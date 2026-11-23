@@ -1,0 +1,379 @@
+// 7GUIs task 5, CRUD, in Osprey through the C ABI of FerroUI (ferroui-capi): a list of people
+// filtered by the prefix of their surname, two text fields for a name and a surname, and buttons
+// that create a person from the fields, update the selected one with them and delete it. The same
+// task as samples/SevenGuis/Builders/Crud. The people are an Osprey list in a file-scope cell;
+// the list box shows the filtered ones as items (ferro_add_child, ferro_remove_child), and the
+// selection is read back from it (ferro_get_i64_or of SelectedIndex).
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program runs the steps of the scenario of the Rust tests and
+// prints what the controls show.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+// @linkdir: target/debug
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_get_i64_or(object: int, property: int, fallback: int) -> int
+extern fn ferro_get_bool_or(object: int, property: int, fallback: int8) -> int8
+extern fn ferro_set_i64(object: int, property: int, value: int) -> int32
+extern fn ferro_clear(object: int, property: int) -> int32
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_remove_child(parent: int, child: int) -> int32
+extern fn ferro_release(object: int) -> int32
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn getInt(object: int, name: string, fallback: int) -> int =
+    ferro_get_i64_or(object: object, property: prop(name: name), fallback: fallback)
+
+fn getFlag(object: int, name: string) -> bool =
+    ferro_get_bool_or(object: object, property: prop(name: name), fallback: toInt8(0)) == toInt8(1)
+
+fn setInt(object: int, name: string, value: int) -> Unit =
+    check(what: name, status: ferro_set_i64(object: object, property: prop(name: name), value: value))
+
+fn clear(object: int, name: string) -> Unit = check(what: name, status: ferro_clear(object: object, property: prop(name: name)))
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- state -----------------------------------------------------------------------------------
+
+type Person = { id: int, name: string, surname: string }
+
+type Ui = { prefix: int, list: int, name: int, surname: int, create: int, update: int, delete: int }
+
+effect State {
+    people: fn(List<Person>) -> Unit
+    shown: fn(List<Person>) -> Unit
+    items: fn(List<int>) -> Unit
+    nextId: fn(int) -> Unit
+    ui: fn(Ui) -> Unit
+}
+
+mut people = [
+    Person { id: 0, name: "Hans", surname: "Emil" },
+    Person { id: 1, name: "Max", surname: "Mustermann" },
+    Person { id: 2, name: "Roman", surname: "Tisch" }
+]
+// The people the list box shows, in its order, and the handles of its items.
+mut shown = [Person { id: 0, name: "", surname: "" }]
+mut items = [0]
+mut nextId = 3
+mut ui = Ui { prefix: 0, list: 0, name: 0, surname: 0, create: 0, update: 0, delete: 0 }
+
+fn setPeople(value: List<Person>) -> Unit = {
+    handle State { people v => { people = v } }
+    perform State.people(value)
+}
+
+fn setShown(value: List<Person>) -> Unit = {
+    handle State { shown v => { shown = v } }
+    perform State.shown(value)
+}
+
+fn setItems(value: List<int>) -> Unit = {
+    handle State { items v => { items = v } }
+    perform State.items(value)
+}
+
+fn setNextId(value: int) -> Unit = {
+    handle State { nextId v => { nextId = v } }
+    perform State.nextId(value)
+}
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+// ---- the task --------------------------------------------------------------------------------
+
+fn label(person: Person) -> string = "${person.surname}, ${person.name}"
+
+fn removeItem(item: int) -> Unit = {
+    check(what: "remove item", status: ferro_remove_child(parent: ui.list, child: item))
+    check(what: "release item", status: ferro_release(object: item))
+}
+
+fn addItem(person: Person) -> int = {
+    let item = make(name: "ListBoxItem")
+    setText(object: item, name: "Content", text: label(person: person))
+    add(parent: ui.list, child: item)
+    item
+}
+
+// The list box shows the people whose surname starts with the prefix (ignoring case).
+fn refill() -> Unit = {
+    forEachList(items, removeItem)
+    let prefix = toLowerCase(getText(object: ui.prefix, name: "Text"))
+    let filtered = filterList(people, fn(person) => startsWith(toLowerCase(person.surname), prefix))
+    setShown(value: filtered)
+    setItems(value: mapList(filtered, addItem))
+    selectionChanged()
+}
+
+fn selectedIndex() -> int = getInt(object: ui.list, name: "SelectedIndex", fallback: 0 - 1)
+
+// Selecting a person shows it in the fields; Update and Delete need a selected person.
+fn selectionChanged() -> Unit = match listGet(shown, selectedIndex()) {
+    Success { value } => {
+        setText(object: ui.name, name: "Text", text: value.name)
+        setText(object: ui.surname, name: "Text", text: value.surname)
+        enableEditing(on: true)
+    }
+    Error { message } => enableEditing(on: false)
+}
+
+fn enableEditing(on: bool) -> Unit = {
+    setFlag(object: ui.update, name: "IsEnabled", value: on)
+    setFlag(object: ui.delete, name: "IsEnabled", value: on)
+}
+
+fn onPrefixChanged(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    refill()
+    0
+}
+
+fn onSelectionChanged(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    selectionChanged()
+    0
+}
+
+fn onCreate(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let person = Person { id: nextId, name: getText(object: ui.name, name: "Text"), surname: getText(object: ui.surname, name: "Text") }
+    setNextId(value: nextId + 1)
+    setPeople(value: listAppend(people, person))
+    refill()
+    0
+}
+
+fn onUpdate(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let index = selectedIndex()
+    match listGet(shown, index) {
+        Success { value } => {
+            let name = getText(object: ui.name, name: "Text")
+            let surname = getText(object: ui.surname, name: "Text")
+            let id = value.id
+            setPeople(value: mapList(people, fn(person) => person.id == id ? person { name: name, surname: surname } : person))
+            refill()
+            setInt(object: ui.list, name: "SelectedIndex", value: index)
+        }
+        Error { message } => nothing()
+    }
+    0
+}
+
+fn onDelete(token: int, sender: int, arg: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    match listGet(shown, selectedIndex()) {
+        Success { value } => {
+            let id = value.id
+            setPeople(value: filterList(people, fn(person) => person.id != id))
+            refill()
+        }
+        Error { message } => nothing()
+    }
+    0
+}
+
+fn text(content: string, row: int, column: int) -> int = {
+    let block = make(name: "TextBlock")
+    setText(object: block, name: "Text", text: content)
+    setText(object: block, name: "VerticalAlignment", text: "Center")
+    setInt(object: block, name: "Grid.Row", value: row)
+    setInt(object: block, name: "Grid.Column", value: column)
+    block
+}
+
+fn field(name: string, row: int) -> int = {
+    let box = make(name: "TextBox")
+    setText(object: box, name: "Name", text: name)
+    setInt(object: box, name: "Grid.Row", value: row)
+    setInt(object: box, name: "Grid.Column", value: 1)
+    box
+}
+
+fn button(name: string) -> int = {
+    let button = make(name: "Button")
+    setText(object: button, name: "Name", text: name)
+    setText(object: button, name: "Content", text: name)
+    button
+}
+
+// The callbacks are named functions written at each ferro_subscribe: Osprey passes a function to C
+// only when it is known where it is passed, not a parameter.
+
+fn onStart(token: int) -> int = {
+    handle Arith {
+        overflow op lhs rhs wrapped => wrapped
+        divideByZero op lhs => 0.0
+        remainderByZero lhs => 0
+    }
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "CRUD")
+    setNumber(object: window, name: "Width", value: 600.0)
+    setNumber(object: window, name: "Height", value: 400.0)
+    let grid = make(name: "Grid")
+    setText(object: grid, name: "RowDefinitions", text: "Auto,*,Auto")
+    setText(object: grid, name: "ColumnDefinitions", text: "*,*")
+    setText(object: grid, name: "Margin", text: "16")
+    // The filter.
+    let top = make(name: "StackPanel")
+    setText(object: top, name: "Orientation", text: "Horizontal")
+    setNumber(object: top, name: "Spacing", value: 8.0)
+    setText(object: top, name: "Margin", text: "0,0,0,8")
+    let prefix = make(name: "TextBox")
+    setText(object: prefix, name: "Name", text: "Prefix")
+    setNumber(object: prefix, name: "Width", value: 120.0)
+    add(parent: top, child: text(content: "Filter prefix:", row: 0, column: 0))
+    add(parent: top, child: prefix)
+    // The people.
+    let list = make(name: "ListBox")
+    setText(object: list, name: "Name", text: "People")
+    setInt(object: list, name: "Grid.Row", value: 1)
+    // The fields.
+    let fields = make(name: "Grid")
+    setInt(object: fields, name: "Grid.Row", value: 1)
+    setInt(object: fields, name: "Grid.Column", value: 1)
+    setText(object: fields, name: "Margin", text: "8,0,0,0")
+    setText(object: fields, name: "RowDefinitions", text: "Auto,Auto")
+    setText(object: fields, name: "ColumnDefinitions", text: "Auto,*")
+    let name = field(name: "Name", row: 0)
+    let surname = field(name: "Surname", row: 1)
+    add(parent: fields, child: text(content: "Name:", row: 0, column: 0))
+    add(parent: fields, child: name)
+    add(parent: fields, child: text(content: "Surname:", row: 1, column: 0))
+    add(parent: fields, child: surname)
+    // The buttons.
+    let buttons = make(name: "StackPanel")
+    setInt(object: buttons, name: "Grid.Row", value: 2)
+    setText(object: buttons, name: "Orientation", text: "Horizontal")
+    setNumber(object: buttons, name: "Spacing", value: 8.0)
+    setText(object: buttons, name: "Margin", text: "0,8,0,0")
+    let update = button(name: "Update")
+    let _update = ferro_subscribe(object: update, event: ferro_event_id(name: "Click", length: 0 - 1), function: onUpdate, token: 0)
+    let delete = button(name: "Delete")
+    let _delete = ferro_subscribe(object: delete, event: ferro_event_id(name: "Click", length: 0 - 1), function: onDelete, token: 0)
+    let create = button(name: "Create")
+    let _create = ferro_subscribe(object: create, event: ferro_event_id(name: "Click", length: 0 - 1), function: onCreate, token: 0)
+    add(parent: buttons, child: create)
+    add(parent: buttons, child: update)
+    add(parent: buttons, child: delete)
+    add(parent: grid, child: top)
+    add(parent: grid, child: list)
+    add(parent: grid, child: fields)
+    add(parent: grid, child: buttons)
+    add(parent: window, child: grid)
+    setUi(value: Ui { prefix: prefix, list: list, name: name, surname: surname, create: create, update: update, delete: delete })
+    setItems(value: List())
+    refill()
+    let _p = ferro_subscribe(object: prefix, event: ferro_event_id(name: "TextChanging", length: 0 - 1), function: onPrefixChanged, token: 0)
+    let _l = ferro_subscribe(object: list, event: ferro_event_id(name: "SelectionChanged", length: 0 - 1), function: onSelectionChanged, token: 0)
+    check(what: "show", status: ferro_show(window: window))
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script() } else { nothing() }
+    0
+}
+
+// ---- the scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs) ---------------------
+
+fn expect(what: string, ok: bool) -> Unit = print("script: ${what}: ${ok ? "ok" : "FAILED"}")
+
+fn count() -> int = getInt(object: ui.list, name: "ItemCount", fallback: 0 - 1)
+
+fn click(object: int) -> Unit = check(what: "raise", status: ferro_raise(object: object, event: ferro_event_id(name: "Click", length: 0 - 1)))
+
+fn firstLabel() -> string = match listGet(items, 0) {
+    Success { value } => getText(object: value, name: "Content")
+    Error { message } => ""
+}
+
+fn script() -> Unit = {
+    expect(what: "3 people", ok: count() == 3)
+    expect(what: "Update and Delete are disabled", ok: !getFlag(object: ui.update, name: "IsEnabled") && !getFlag(object: ui.delete, name: "IsEnabled"))
+    setText(object: ui.prefix, name: "Text", text: "M")
+    expect(what: "the prefix M leaves 1", ok: count() == 1)
+    setInt(object: ui.list, name: "SelectedIndex", value: 0)
+    expect(what: "the fields show Max Mustermann", ok: getText(object: ui.name, name: "Text") == "Max" && getText(object: ui.surname, name: "Text") == "Mustermann")
+    setText(object: ui.surname, name: "Text", text: "Muster")
+    click(object: ui.update)
+    expect(what: "1 item after Update", ok: count() == 1)
+    expect(what: "the item shows 'Muster, Max' ('${firstLabel()}')", ok: firstLabel() == "Muster, Max")
+    click(object: ui.delete)
+    expect(what: "no item after Delete", ok: count() == 0)
+    setText(object: ui.prefix, name: "Text", text: "")
+    expect(what: "2 people without a prefix", ok: count() == 2)
+    setText(object: ui.name, name: "Text", text: "Anna")
+    setText(object: ui.surname, name: "Text", text: "Zimmer")
+    click(object: ui.create)
+    expect(what: "3 people after Create", ok: count() == 3)
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}

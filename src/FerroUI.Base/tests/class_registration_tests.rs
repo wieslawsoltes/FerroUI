@@ -528,7 +528,7 @@ fn a_type_becomes_known_by_name_when_it_is_initialised() {
 
 /// With the tables of types (`type-tables`) the runtime type of a class carries the constructor of
 /// its `new` (#612, B3).
-#[cfg(feature = "type-tables")]
+#[cfg(all(feature = "type-tables", not(ferroui_bounded_reflection)))]
 #[test]
 fn the_default_constructor_creates_an_instance_of_the_class() {
     let constructor = RegShape::TYPE.default_constructor().expect("declared constructor");
@@ -548,7 +548,7 @@ fn the_default_constructor_creates_an_instance_of_the_class() {
 /// Without the tables of types the runtime type of a class names no constructor, so the linker
 /// drops the constructor of a class nothing creates (#612, B3); the class is still created
 /// statically through `DefaultConstructible`.
-#[cfg(not(feature = "type-tables"))]
+#[cfg(not(all(feature = "type-tables", not(ferroui_bounded_reflection))))]
 #[test]
 fn without_the_type_tables_a_runtime_type_names_no_constructor() {
     assert!(RegShape::TYPE.default_constructor().is_none());
@@ -597,11 +597,11 @@ fn a_type_found_by_name_can_be_inspected_and_instantiated_without_naming_the_cla
     // constructor, and the class is created statically.
     let object = match type_.create_instance() {
         Some(object) => {
-            assert!(cfg!(feature = "type-tables"));
+            assert!(cfg!(all(feature = "type-tables", not(ferroui_bounded_reflection))));
             object
         }
         None => {
-            assert!(!cfg!(feature = "type-tables"));
+            assert!(!cfg!(all(feature = "type-tables", not(ferroui_bounded_reflection))));
             <RegBase as DefaultConstructible>::new_instance().upcast::<FerroObject>()
         }
     };

@@ -62,13 +62,28 @@ units of the build's own output.
 | Plain resources: brushes with a literal colour or a resource colour, `x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`, `{StaticResource}` aliases | Static row tables, one shared builder per shape (`rt::add_literal_brushes`, `rt::add_double_resources`, ...) | Added at load. A value row (`x:Double`, `Thickness`, `CornerRadius`, `Color`, `x:String`) is added as its value; a brush or alias row is built on its first lookup (section 2.2) |
 | Other resources | One deferred build function per resource (`rt::add_deferred_resource`) | On first lookup |
 | Control themes | One static table per theme, interpreted by `rt::build_control_theme`; selector chains are static slices, shared when identical | Once per theme, on first use of the control type |
-| Control templates | Native code | Every time a control applies its template |
+| Control templates | Native code; what every element repeats (the parent stack, the end of the initialisation, the name, a `{CompiledBinding}` bound to a property) is a call of a shared helper of `rt` (`docs/porting/xaml.md`, 9.3.7) | Every time a control applies its template |
 | Template bindings in a template | Runs of (target, source) pairs, applied by `rt::bind_template_bindings` | With the template |
+| Dynamic resources in a template | Runs on one object of (property, key) pairs, bound by `rt::bind_dynamic_resources`; one alone is a call of `rt::bind_dynamic_resource` | With the template |
 | Units | `THEME_UNIT_<n>` statics and the table `THEME_UNITS` | See section 3 |
 
 A control theme whose content the table cannot express keeps native code for that theme only.
 Today that means one with animations, a resource dictionary of its own, or a use of the name
 scope.
+
+**Template bindings whose setter is chosen at run time (#854, an experiment, off).** A property
+with several setters (`ContentPresenter.Content`, of type `object`) whose value is
+`{TemplateBinding Content}` is written as the choice of the setter when the template runs: the
+binding, its provided value, a test of the value, the binding branch and a branch that sets the
+value with the template priority. The provided value of a template binding is the binding
+itself, never null, so the binding branch is the one that runs. With
+`DEFAULT_RESOLVED_TEMPLATE_BINDINGS = true` (`rust_emitter/theme_styles.rs`; or
+`with_resolved_template_bindings` for the emission of a closure) the nine statements are
+`rt::bind_template_binding(..)`, the statement of a property with one setter, and they join the
+runs of template bindings of their object. The WinUI theme has 141 of these choices, Fluent 88,
+Simple 82, macOS 134. A choice whose locals are named elsewhere, or of any other shape, stays
+as it was. `scripts/themes/repeated_sequences.py` counts the repeated sequences of the template
+functions in the source and in a linked executable, for the next shared sequences.
 
 ### 2.2 Lazy resource rows: indexed deferred groups
 
@@ -116,6 +131,35 @@ runs as a step of its own.
 
 A group is an implementation detail of the markup runtime. Application code adds lazy resources
 with `ResourceDictionary::add_deferred` or `add_deferred_fn`.
+
+**Packed tables (#855, on by default).** A row of the four deferred shapes is a struct of
+sized strings, an optional namespace slice and 32-bit positions: 64 bytes for an alias and for
+the brushes bound to a resource, 48 for a literal brush, each string a pointer the loader
+relocates. With `DEFAULT_PACKED_THEME_ROWS` (`rust_emitter/theme_rows.rs`, on;
+`with_packed_theme_rows(false, ..)` turns it off for the emission of a closure) a run of one of
+these shapes is written as an `rt::PackedRows` instead: one pool of the strings of the table, each written once (a
+string inside one already in the pool is found there), the namespace tables the rows name, and
+one record of 16-bit fields for each row (key offset and length, target or colour key offset and
+length or the two halves of the colour, the namespace table as its index plus one, the
+positions). `rt::add_packed_resource_aliases`, `add_packed_literal_brushes`,
+`add_packed_dynamic_brushes` and `add_packed_static_brushes` decode a record when its row is
+added or built and do what the builders of the slices do, in the same order, with the same
+errors at the same positions. A run with an offset, a length or a position beyond 16 bits, a
+negative position or a key in a form the emitter does not write keeps its slice of rows. A
+record that does not decode is the error of its table, not a panic. The packed tables of one
+unit of a theme share one pool when the unit has two or more of them (`row_tables_in`): the
+constant `{DOCUMENT}_UNIT_{n}_STRINGS`, written before the first table of the unit, which each
+table names in place of its own literal. The tables of the theme dictionaries of a unit (light,
+dark, high contrast) name the same keys and targets, which a pool for each table repeated;
+counted on the WinUI theme, the pools of all its tables are 266,234 bytes with one pool for each
+table and 102,833 with one for each unit, and those of the 15 units hello world keeps 55,257
+and 18,339 (one pool for the whole theme would be 69,411, kept whole by every application). The
+pool is the unit's, so a trimmed unit takes its strings with it; a table whose offsets do not fit
+16 bits in the pool of its unit keeps a pool of its own. The helpers of the slices stay for the plain values.
+It is on because the measurement kept it: on macOS the stripped executables were smaller in
+every measured application (release: hello world 20.44 to 20.40 MB, the WinUI gallery 34.25 to
+34.15 MB, the catalog 77.04 to 76.92 MB; dist alike), and start-up was not slower. The
+typed backend encodes the same runs as its programs; with it no packed table is written.
 
 ### 2.3 Applying styles: a batch reevaluates only when it changed something
 
@@ -215,13 +259,28 @@ use, and nothing that is remembered is dropped for it.
 The deviation from upstream, which matches every child style against every element, is recorded
 in [docs/porting/desktop-performance.md](porting/desktop-performance.md), section 9.26.
 
+### 2.5 Typed construction programs (opt-in)
+
+`Build::xaml_backend` (or `FERROUI_XAML_BACKEND` read by `Build::from_env`) selects how the
+operations the compiler resolved are emitted. `native`, the default, is the generated code of
+section 2.1. `theme-bytecode` encodes resource runs and recognised control styles as instruction
+streams; `bytecode` also encodes construction, resolved calls, staged setters, the extracted
+theme unit runs and compiled binding paths of pages and templates. The streams are constant
+arrays of the generated Rust (a Cargo build packs a module's streams in `OUT_DIR` and embeds them
+with `include_bytes!`); the typed imports they call are what the linker reaches, so units and
+trimming (section 3) are unchanged, and a shape the encoder does not recognise stays native. The
+checked-in references of section 2 are native output: with another backend their comparison
+tests fail by design. Design, coverage and measurements:
+[docs/porting/typed-xaml.md](porting/typed-xaml.md).
+
 ## 3. Units and theme trimming
 
 **Units.** The documents a theme merges (`MergeResourceInclude`) are each a unit, such as
 `Controls/Button.xaml` and `Resources/Button_themeresources.xaml`. One more unit, the ambient
 unit (index 0), holds what is always needed:
 - the class document;
-- the host documents (`Window`, `PopupRoot`, overlay and adorner hosts);
+- the host documents (`Window`, the adorner and embedding hosts, the theme variant scope); the
+  hosts of popups are units of their own, kept where a popup is live (#994);
 - documents with entries no key can name.
 
 The `.xamlmeta` records each unit's unit graph: the keys and type keys it defines, the keys it
@@ -236,18 +295,28 @@ needs. The build computes the table from the roots:
    base classes;
 2. the keys and key-like tokens of those documents;
 3. the types and keys the compiled documents of its dependencies name (a control library's
-   templates);
+   templates); for the document of an ordinary class of a dependency (a dialog, a window), only
+   when the class is live in the application: the application names it (`AboutFerroDialog::new()`,
+   the builder `about_ferro_dialog()`), or a live class or document constructs it (#1002). A crate
+   whose own code constructs such a class states it (`XamlGroup::constructed_by_its_crate`), and
+   its documents then root the themes whenever the crate is linked;
 4. the class names and string literals in the application's Rust sources that match a type key
    or a key of the theme (`Button::new()`, `"AccentButtonStyle"`), and the functions and
    methods the sources call, read as class names (`text_block()` is `TextBlock`,
    `.tool_tip("..")` is `ToolTip`): the builders of the declarative layer are named after the
    classes they make;
 5. the creates edges of the type models: the controls a class's code constructs (`ListBox`
-   creates `ListBoxItem`), transitively;
+   creates `ListBoxItem`), transitively. An edge into a class that no code constructs on the
+   target of the build does not hold there (`Export::not_created_on`, #1002): the host of a window
+   creates its drawn decorations (`WindowDrawnDecorations`, with the caption buttons and the title
+   bar resources they need) everywhere but on macOS, iOS, Android and the browser, so applications
+   for those targets keep that theme only when they name it;
 6. the names in `[package.metadata.ferroui] theme-roots = [..]`.
 
 From the roots, the closure follows the unit graph. The kept units are listed in
-`$OUT_DIR/xaml/theme_parts.txt`.
+`$OUT_DIR/xaml/theme_parts.txt`. `$OUT_DIR/xaml/theme_parts_why.txt` (#852) explains each one: its
+first reason, whether that reason is conservative or exact, and how many of its keys are live.
+See docs/porting/theme-trimming.md, section 19.
 
 **Which classes are constructed from units (#849).** Partitioning a class into units and
 constructing it from some of them are two separate things. Any class whose document merges
@@ -297,11 +366,17 @@ use compiled_markup::THEME_PARTS_FERROUI_THEMES_WINUI_WINUITHEME as THEME_PARTS;
 launch_themed(|| WinUITheme::with_parts(None, THEME_PARTS).as_style(), view, |_| {});
 ```
 
+Since #847 the build reads every binary of the package as well as its library: the explicit
+`[[bin]]` targets and, unless `autobins = false`, the discovered ones (`src/main.rs`, `src/bin`).
+`$OUT_DIR/xaml/theme_roots.txt` says which target rooted which types and keys. A library whose code
+makes controls that no document names states them with `Build::theme_roots`, and the build exports
+them to the applications that depend on it. The documents of a class group that the class never
+includes root nothing.
+
 The roots are the ones of the list above without the documents: what the sources name and call
 (4), what the code of the live classes creates (5), and `theme-roots` (6). The build reads the
 sources from the root file of the crate (`src/lib.rs`, else `lib.rs`, else `src/main.rs`) and
-the modules it declares: an application with a library and a binary keeps its interface in the
-library, or names in `theme-roots` the controls only the binary makes. The table is named after
+the modules it declares, and from the root file of each binary of the package (#847). The table is named after
 the full name of the class of the theme, in upper case. With `theme-trimming = false` it holds
 every unit, so the code is the same either way. The three declarative versions of hello world
 (`samples/HelloWorld.Builders`, `.Macros`, `.Hooks`) are built this way, and keep the 16 units of
@@ -317,6 +392,29 @@ application trims takes the classes its paths name with it (#612, root D: hello 
 links NavigationView, RichEditBox, InfoBar, NavigationPage and DrawerPage). The theme tests check
 that no table naming classes is reachable from code outside the units.
 
+**A library that constructs a theme (#846).** A library document with `<WinUITheme />` constructs
+the theme with the wider of its own table and the table the application registers
+(`rt::wider_theme_parts`). The application writes and registers a table for every theme the
+documents of a direct dependency construct, so its controls keep their templates whichever crate
+constructs the theme. The theme crate must be a direct dependency of the application; otherwise the
+library keeps its own table. See docs/porting/theme-trimming.md, section 20.
+
+**Themes used together, and types of one name (#848).** An application that uses several themes
+closes over all of them together: a key one theme references and another defines, or a type one
+constructs and another styles, keeps the providing unit. Types of one local name in two assemblies
+keep their own base classes and creates edges. See docs/porting/theme-trimming.md, section 21.
+
+**How the build reads its inputs (#850).**
+- The includes that make up the group of a document are found by the XML parser of the compiler,
+  so entities are decoded and CDATA and comments are skipped. The build and the run-time loader use
+  the same rules.
+- The `[package.metadata.ferroui]` table is read as TOML, so dotted keys, inline tables and string
+  escapes all work.
+- A document consumed by a class (merged into it as well) is not embedded again by
+  `Build::embed_assets`.
+
+Details are in docs/porting/theme-trimming.md, section 22.
+
 **Turning trimming down or off:**
 - `theme-roots = "all"` keeps every unit, for comparison.
 - `theme-trimming = false` turns trimming off.
@@ -324,9 +422,72 @@ that no table naming classes is reachable from code outside the units.
   These are the run-time XAML loader, hot reload, the designer, DevTools, Inspect and
   Diagnostics. Looking types up by name (`type-tables`) does not keep every unit:
   `ferroui-view` and the behaviors only need the lookup, and their applications are trimmed.
+- The tables of types themselves keep every class of the framework they register, units or not.
+  Bounded reflection (#851, an experiment) builds with `--cfg ferroui_bounded_reflection` in
+  `RUSTFLAGS`: `type-tables` then registers no table of the framework and keeps no default
+  constructor, as without the feature, and the application registers what its dynamic use needs
+  one by one (`TypeInfo::register_all` for a type found by name, such as the owner of an
+  attached property a behavior names; `TypeInfo::register_constructor` for a class created by
+  reflection; `MarkupType::register_all`). The members a behavior finds by name on a value
+  (`find_markup_property`, `find_markup_methods`, `find_markup_event`) come from the markup
+  metadata of the value's own type and need no table.
+
+**What the registration of a crate keeps (#857).** `compiled_markup::register()` registers the
+loader table of the crate and its embedded assets. Without a plan the loader table answers
+every public document of every exported group and the asset table holds every embedded asset,
+so a load by URI keeps every build function and every payload. A crate that loads a known set
+of documents by URI and reads a known set of assets states it in its build script:
+
+```rust
+ferroui_build::Build::from_env()
+    .export_plan(
+        ferroui_build::ExportPlan::closed()
+            .document("ferres://myapp/Views/Settings.xaml")
+            .asset("/Assets/logo.png"),
+    )
+    .run();
+```
+
+The loader table then answers only the listed documents, each through its own build function
+(or the loader of its class), after the checked-in tables, with the same comparison without
+regard to case and the same root service provider; the asset table holds only the listed
+assets. A listed URI that is not a public document of an exported group, and a listed asset the
+crate does not embed, fail the build. Code that names a document's build function or class
+still links it. A library whose documents others load by URI keeps the default
+(`ExportPlan::all()`). Either way the build writes `$OUT_DIR/xaml/exports.txt`: every compiled
+document with its build or populate path, whether it is public and whether the loader table
+answers it, and every embedded asset with its size and whether it is registered.
 
 **When a unit is missing.** A debug build logs it once ("... was trimmed") with the control's
 name, the first time the control looks for its theme. Release builds do not check.
+
+**How a build applies its runs.** The function of a document that merges units calls
+`rt::apply_theme_unit(active_theme_units(), unit, run, ..)` where the entries of a run were:
+the call looks the active table up and searches it for the unit, and a unit the application
+trimmed adds nothing. The WinUI theme has 347 such calls in its two population functions, and
+hello world keeps 16 of its 166 units. An experiment of #853 changes two things, each with a
+switch of `ThemeUnitPlan` (`rust_emitter`), both off: the generated files are what they were.
+
+- `keys_in_runs`: every merged `*_themeresources.xaml` assigns the key of its theme dictionary
+  (`<ResourceDictionary x:Key="Default">`) to the theme dictionary of the theme it was merged
+  into. The merge joins only dictionaries with equal keys, so after the first assignment, which
+  is outside every unit, the others write the value the dictionary has. With the switch they
+  are entries of the unit of their document: they go into its run, and a trimmed unit takes
+  them with it. Without it they stay in the population function, one between each two calls.
+  Since #994 the merge leaves these repeated assignments out (an equal `Key` is not assigned
+  again; docs/porting/xaml.md, deviation 28), so the switch has almost nothing left to move:
+  each theme variant assigns its key once, before its first run.
+- `regions`: calls of runs that add to one dictionary, with only comments between them, are
+  one call of `rt::apply_theme_region(active_theme_units(), &[(unit, run), ..], ..)`. It
+  applies the same runs in the same order and stops at the same failure; the units of a region
+  ascend, and it walks the table once. A region needs its indices in 16 bits, else its calls
+  stay. A call alone stays a call of `rt::apply_theme_unit`.
+
+Turning it on: `DEFAULT_THEME_UNIT_PLAN = ThemeUnitPlan::ON` in
+`rust_emitter/theme_units.rs`, then the checked-in generated files are regenerated (section 2,
+and `tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs` where it changes). Whether it
+stays on is decided by the size of the stripped hello world and of a larger sample, and by the
+start (`docs/binary-size.md`).
 
 ## 4. Rules for theme markup
 
@@ -368,6 +529,12 @@ name, the first time the control looks for its theme. Release builds do not chec
   rooted. If code must look a key up, write it as a string literal, or add it to `theme-roots`.
 - Define a geometry once as a keyed resource and refer to it, instead of repeating the same path
   data inline in several templates.
+- Colours the system reports (the accent, the system colours of high contrast) come from a
+  resource provider of the theme's Rust code (`Accents/SystemAccentColors`,
+  `Accents/SystemColors` of the WinUI theme), merged into the theme's dictionary, never from a
+  theme dictionary: theme dictionaries are searched before merged dictionaries, so a fixed value
+  there would hide the provider. Reference them with `{DynamicResource}`; the provider raises a
+  change only when its colours change.
 
 ### 4.3 Control themes
 
@@ -437,6 +604,10 @@ name, the first time the control looks for its theme. Release builds do not chec
   record the creates edge (4.4).
 - No `thread_local!` (use `ferro_thread_local!`), no panics for markup errors: return
   `XamlLoadError` (the move to `panic = "abort"` in `dist`).
+- A theme with a high contrast variant sets it with `ThemeVariant::set_high_contrast_variant`
+  while it is in use (the WinUI theme does so with `UseSystemHighContrast`); the theme variant
+  roots then resolve to it while the platform asks for high contrast. A theme without one sets
+  nothing, and the contrast setting selects nothing for it.
 
 ## 5. Compiled bindings in applications
 
@@ -462,6 +633,48 @@ Documents loaded at run time bind the way the built application does (#604):
   states `False` in its metadata as well, for the previewer to follow it.
 - A configuration made with `RuntimeXamlLoaderConfiguration::new()` keeps upstream's default
   (reflection bindings), for documents that belong to no application.
+
+### 5.1 Property lookups by name in compiled themes (#603)
+
+Two run-time helpers of compiled markup still find a declared (plain) property by its name:
+
+- `rt::clr_property_info`: the provide-value target of a nested markup extension, such as
+  `TemplateBinding.Converter` with a `{StaticResource}`, or `MultiBinding.Bindings` and `Converter`.
+- `rt::path_property`: a plain property in a compiled binding path, such as
+  `ProgressBar.TemplateSettings`, `CommandBar.VisiblePrimaryCommands` or the view models of the
+  managed file chooser.
+
+`python3 scripts/themes/by_name_lookups.py` counts the calls in the checked-in compiled themes;
+`--by-property` breaks them down by owner and property. On the branch of the change the counts were:
+
+| Theme | `rt::clr_property_info` | `rt::path_property` |
+|---|---:|---:|
+| WinUI | 70 | 59 |
+| Fluent | 65 | 53 |
+| Simple | 36 | 43 |
+| macOS | 67 | 43 |
+| All four | 238 | 198 |
+
+**Resolving the property at compile time.** The emitter can resolve the declared property at compile
+time wherever the type system knows the declaring type. It then writes
+`rt::declared_clr_property_info` and `rt::declared_path_property`, which take the position of the
+property in its declaration. At run time these helpers take the property at that position and do not
+search the declaration by name. If the declaration changed since the compilation and another
+property is at that position, they still find the property by name. Both forms give the same
+description, which is cached once per property and thread.
+
+**Off by default.** The option is off by default, because it changes the generated files. To turn it
+on:
+
+- in a build script, call `Build::compile_time_declared_properties(true)`;
+- in a host of the emitter, call `rust_emitter::set_compile_time_declared_properties(true)` around a
+  compilation.
+
+Turning it on for the themes means regenerating their checked-in `compiled_xaml.rs` (with the
+regeneration of each theme's `compiled_xaml_tests`) and the emitter corpus
+(`tests/FerroUI.Markup.Xaml.UnitTests/emitter/generated.rs`). The typed accessors that would also
+drop the untyped accessors of the declaration are a further step (the next row of the table in
+section 9).
 
 ## 6. Porting a theme from upstream
 
@@ -504,27 +717,35 @@ Documents loaded at run time bind the way the built application does (#604):
 | Part | Issue / PR | State |
 |---|---|---|
 | Tables of types trimmed by default | #566 | On `main` |
+| Bounded reflection: `type-tables` without the tables of the framework (`--cfg ferroui_bounded_reflection`, an experiment) | #851 | In review, to be measured |
 | Resource and constant rows (step 1) | #568 | On `main` |
 | Units and the unit graph, all four checked-in themes (step 2) | #568 | On `main` |
 | Root tables, `with_parts`, debug diagnostic (step 3) | #568, #598 | On `main` |
-| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | In review |
+| The runs of a build as regions, key assignments of merged theme dictionaries in their units (`ThemeUnitPlan`, off) | #853 | In review, to be measured |
+| `with_parts` only for a class that has it (the capability in its type model); one allocator for generated names | #849 | On `main` |
+| Includes found by the XML parser; the manifest table read as TOML; consumed documents not embedded again | #850 | In review |
 | Roots from code: creates edges, source names and literals (step 4) | #568, #600 | On `main` |
+| A closed export plan of the documents and assets a crate registers (`Build::export_plan`, opt-in); `exports.txt` | #857 | In review, to be measured |
 | Roots from the dependencies' documents; `full-themes` as the keep-all switch | #602 | On `main` |
 | Theme trimming on by default (`theme-trimming = false` to turn off) | #602 | On `main` |
 | Control theme tables, selector slices, StaticResource setter helper, template binding runs (step 5) | #568, #607 | On `main` |
+| Template bindings whose setter is chosen at run time resolved (`DEFAULT_RESOLVED_TEMPLATE_BINDINGS`, off); the count of repeated template sequences | #854 | In review, to be measured |
 | Namespace tables of reflection-binding paths per unit (root D) | #612 | On `main` |
 | Constructors only with `type-tables`; compiled `{x:Type}` of a page registers its constructor (B3) | #612 | In review |
 | Units for the Material theme (step 6): `MaterialTheme::with_parts`, control documents as units | #568 | In review |
+| Material: the packed installer of the compatibility palette (`PACKED_INSTALLER`, off); the embedded font assets as the feature `embedded-font-assets` (on) | #856 | In review, to be measured |
 | `MergeResourceInclude` inside an inline dictionary; the Material theme's inherited resource documents as units | #633 | In review |
 | Compiled bindings in all themes | #603 | In review |
 | Compiled bindings as the build's default; `compile-bindings` manifest key | #603 | In review |
 | Samples, sample apps and component samples on compiled bindings; no explicit `default_compile_bindings(true)`; hot reload and the previewer follow the application's setting | #604 | In review |
 | Templates on compiled bindings | FerroUI/templates#2 | Planned |
 | Relative-source paths of the themes resolved at compile time (no `ReflectionBinding.RelativeSource` targets) | #603 | In review |
+| `rt::clr_property_info` and `rt::path_property` counted (`scripts/themes/by_name_lookups.py`); declared properties resolved at compile time behind `Build::compile_time_declared_properties` (off by default) | #603 follow-up | In review |
 | `rt::clr_property_info` of plain properties (nested markup extension targets, plain path elements) resolved to typed accessors | #603 follow-up | Planned |
 | Path data converted at compile time instead of at load | #603 | In review |
 | `panic = "abort"` in `dist` | #595 | On `main` |
 | `panic = "abort"` in `release`, `release-unwind` | #567 | Planned |
 | Theme crates at `opt-level = "z"` in `dist` | #581 | In review |
 | Brush and alias rows as indexed deferred groups (section 2.2); styling batches reevaluate only when they changed something (section 2.3) | #670 | In review |
+| Packed tables of the deferred rows (section 2.2, `DEFAULT_PACKED_THEME_ROWS`, on by default) | #855 | Kept by its measurement, on by default |
 | Selector candidate index for the nested styles of compiled control themes (section 2.4) | #671 | In review |

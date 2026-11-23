@@ -1,6 +1,6 @@
 use crate::data::{BindingError, BindingNotification, BindingPriority, BindingValue, BindingValueType};
 use crate::ferro_property::{
-    convert_property_value, copy_converted_property_value, take_boxed_value, unpack_binding_value, BoxedPayloadSlot,
+    copy_converted_property_value, take_boxed_value, unpack_binding_value, BoxedPayloadSlot,
     FerroPropertyInit, NotifyingCallback, PayloadSlot, PropertyRoutes,
 };
 use crate::ferro_property_metadata::MetadataTable;
@@ -8,10 +8,11 @@ use crate::property_store::{EffectiveValueDyn, IValueEntry};
 use crate::reactive::{IDisposable, IObservable};
 use crate::{
     BoxedValue, ObjectType, DoNothingType, FerroObject, FerroProperty, FerroPropertyMetadata,
-    FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, TypeInfo, UnsetValueType,
+    EnumValue, FerroPropertyRegistry, PropertyValue, StyledPropertyMetadata, StyledValue, TypeInfo,
+    UnsetValueType,
 };
-use std::any::Any;
-use std::cell::RefCell;
+use std::any::{Any, TypeId};
+use std::cell::{OnceCell, RefCell};
 use std::ops::Deref;
 use std::rc::Rc;
 
@@ -20,6 +21,8 @@ use std::rc::Rc;
 /// inheritance, resolved by priority.
 pub struct StyledProperty<T: PropertyValue> {
     base: FerroProperty,
+    /// The routes of the property, shared code for every value type.
+    routes: StyledRoutes,
     metadata: MetadataTable<StyledPropertyMetadata<T>>,
     /// For performance, the default value is cached while there is only one,
     /// avoiding a metadata lookup that may walk the class hierarchy.
@@ -46,11 +49,12 @@ impl<T: PropertyValue> StyledProperty<T> {
         validate: Option<Box<dyn Fn(&T) -> bool>>,
         notifying: Option<NotifyingCallback>,
         is_attached: bool,
+        members: &'static [(i64, &'static dyn Any)],
     ) -> Self {
         let default_value = metadata.default_value().clone();
         if let Some(validate) = &validate {
             if !validate(&default_value) {
-                panic!("default value is not valid for property '{name}'");
+                default_not_valid(name);
             }
         }
         Self {
@@ -59,29 +63,14 @@ impl<T: PropertyValue> StyledProperty<T> {
                 owner_type,
                 FerroPropertyInit { inherits, is_attached, is_direct: false, is_read_only: false },
                 notifying,
-            ),
+            )
+            .with_members(members)
+            .with_validation(validate.is_some()),
+            routes: StyledRoutes::new(),
             metadata: MetadataTable::new(host_type, metadata),
             single_default_value: RefCell::new(Some(default_value)),
             validate,
         }
-    }
-
-    #[allow(clippy::too_many_arguments)]
-    pub(crate) fn create(
-        name: &str,
-        owner_type: &'static TypeInfo,
-        host_type: &'static TypeInfo,
-        metadata: StyledPropertyMetadata<T>,
-        inherits: bool,
-        validate: Option<Box<dyn Fn(&T) -> bool>>,
-        notifying: Option<NotifyingCallback>,
-        is_attached: bool,
-    ) -> &'static Self {
-        let property: &'static Self = Box::leak(Box::new(Self::new(
-            name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached,
-        )));
-        property.base.set_routes(property);
-        property
     }
 
     /// The untyped base of the property.
@@ -139,7 +128,10 @@ impl<T: PropertyValue> StyledProperty<T> {
         self.default_for(|| owner.get_type())
     }
 
-    #[inline]
+    // Inlined into every read of a value: an unset property is the common case of the reads of a
+    // layout pass, per child. With `#[inline]` alone it became a call of its own when the typed
+    // read of the codec added a caller (`PanelMeasureArrange`, +3 % instructions, #997).
+    #[inline(always)]
     fn default_for(&self, host: impl FnOnce() -> &'static TypeInfo) -> T {
         if let Some(value) = &*self.single_default_value.borrow() {
             return value.clone();
@@ -188,7 +180,7 @@ impl<T: PropertyValue> StyledProperty<T> {
     /// Overrides the metadata for the property on the specified type.
     pub fn override_metadata_for(&self, type_: &'static TypeInfo, metadata: StyledPropertyMetadata<T>) {
         if metadata.has_default_value() && !self.is_valid(metadata.default_value()) {
-            panic!("default value is not valid for property '{}'", self.name());
+            default_not_valid(self.name());
         }
         let new_default = metadata.has_default_value().then(|| metadata.default_value().clone());
         self.metadata.override_metadata(self.name(), type_, metadata);
@@ -204,6 +196,21 @@ impl<T: PropertyValue> StyledProperty<T> {
     pub fn unregister(&self, type_: &'static TypeInfo) {
         self.metadata.unregister(type_);
     }
+}
+
+// The failures of the registration of a property, compiled once instead of once for each value
+// type.
+
+#[cold]
+#[inline(never)]
+fn default_not_valid(name: &str) -> ! {
+    panic!("default value is not valid for property '{name}'")
+}
+
+#[cold]
+#[inline(never)]
+fn routes_already_set() -> ! {
+    panic!("property routes are already set")
 }
 
 /// Interprets a value of an untyped binding of a styled property: a value of
@@ -249,33 +256,286 @@ fn resolve_untyped_binding(
     }
 }
 
-impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
-    fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
-        let this = self;
-        o.values().create_effective_value(o, this)
+impl<T: StyledValue> StyledProperty<T> {
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn create(
+        name: &str,
+        owner_type: &'static TypeInfo,
+        host_type: &'static TypeInfo,
+        metadata: StyledPropertyMetadata<T>,
+        inherits: bool,
+        validate: Option<Box<dyn Fn(&T) -> bool>>,
+        notifying: Option<NotifyingCallback>,
+        is_attached: bool,
+    ) -> &'static Self {
+        let property: &'static Self = Box::leak(Box::new(Self::new(
+            name, owner_type, host_type, metadata, inherits, validate, notifying, is_attached, T::MEMBERS,
+        )));
+        property.install_routes();
+        property
     }
 
-    fn route_clear_value(&'static self, o: &FerroObject) {
-        o.clear_value(self);
+    /// Gives the property its routes and its codec, once it has its address.
+    #[inline]
+    pub(crate) fn install_routes(&'static self) {
+        install_styled_routes(&self.base, &self.routes, self);
+    }
+}
+
+/// [`StyledProperty::install_routes`], compiled once.
+#[inline(never)]
+fn install_styled_routes(base: &'static FerroProperty, routes: &'static StyledRoutes, codec: &'static dyn StyledCodec) {
+    if routes.property.set(base).is_err() {
+        routes_already_set();
+    }
+    base.set_styled_codec(codec);
+    base.set_routes(routes);
+}
+
+/// A stored value of a property whose value type is `T`, as a `T`.
+#[inline]
+fn stored_value<T: StyledValue>(value: &dyn Any) -> T {
+    match value.downcast_ref::<T::Storage>() {
+        Some(value) => T::from_storage(value.clone()),
+        None => panic!("a stored value of a property is not of its storage type"),
+    }
+}
+
+/// The operations of the routes of a styled property that depend on its value type: implemented
+/// by `StyledProperty<T>`, one table for each value type. Everything else the routes do is in
+/// [`StyledRoutes`], compiled once (#997).
+pub(crate) trait StyledCodec {
+    // The untyped write and read of a value of the value type are typed, as the routes of each
+    // value type were: a shared route cost an untyped write or read of an enumeration 7 to 8 %
+    // more instructions (docs/binary-size.md, section 4.27).
+
+    /// The write of `value`, a value of the value type, with `priority`; `None` for a value of
+    /// another type.
+    fn set_value(
+        &'static self,
+        o: &FerroObject,
+        value: &dyn Any,
+        priority: BindingPriority,
+    ) -> Option<Rc<dyn IDisposable>>;
+    /// `value`, of the value type, as the [`EnumValue`] the store keeps it as; `None` for a value
+    /// type that is not kept as one (decided when the function is compiled) and for a value of
+    /// another type. One check of the type, where `copy_value` has two.
+    fn enum_storage(&'static self, value: &dyn Any) -> Option<EnumValue>;
+    /// The current value from `value`, a value of the value type; whether it was one.
+    fn set_current_value(&'static self, o: &FerroObject, value: &dyn Any) -> bool;
+    /// The value of the property on `o` in a box of its own.
+    fn get_value_boxed(&'static self, o: &FerroObject) -> BoxedValue;
+    /// The local value from a box of a value of the value type (the value of a binding).
+    fn set_local_boxed(&'static self, o: &FerroObject, value: BoxedValue);
+    /// A new effective value of the property on `o`.
+    fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
+    /// Coerces the default value of the property on `o`.
+    fn coerce_default_value(&'static self, o: &FerroObject);
+    /// The default value of the property on `type_`, boxed.
+    fn default_value_boxed(&'static self, type_: &'static TypeInfo) -> BoxedValue;
+    /// The base metadata of the property on `type_`.
+    fn metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata;
+    /// Removes the metadata of the property for `type_`.
+    fn unregister(&'static self, type_: &'static TypeInfo);
+    /// Whether `value` is of the value type and accepted by the validation of the property.
+    fn is_valid_value(&'static self, value: &dyn Any) -> bool;
+    /// [`PropertyRoutes::route_copy_value`].
+    fn copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool;
+    /// [`PropertyRoutes::route_box_value`].
+    fn box_value(&'static self, value: &dyn Any) -> Option<BoxedValue>;
+    /// [`PropertyRoutes::route_with_values`].
+    fn with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    );
+    /// [`PropertyRoutes::route_enable_data_validation`].
+    fn enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool>;
+    /// [`PropertyRoutes::route_unpack_binding_value`].
+    fn unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>>;
+    /// The typed property, for downcasting.
+    fn typed(&'static self) -> &'static dyn Any;
+}
+
+impl<T: StyledValue> StyledCodec for StyledProperty<T> {
+    fn set_value(
+        &'static self,
+        o: &FerroObject,
+        value: &dyn Any,
+        priority: BindingPriority,
+    ) -> Option<Rc<dyn IDisposable>> {
+        match value.downcast_ref::<T>() {
+            Some(value) => o.set_value_with_priority(self, value.clone(), priority),
+            None => set_other_styled_value(&self.base, self, o, value, priority),
+        }
     }
 
-    fn route_coerce_default_value(&'static self, o: &FerroObject) {
-        o.values().coerce_default_value(o, self);
+    fn enum_storage(&'static self, value: &dyn Any) -> Option<EnumValue> {
+        if TypeId::of::<T::Storage>() != TypeId::of::<EnumValue>() {
+            return None;
+        }
+        let stored = value.downcast_ref::<T>()?.clone().into_storage();
+        (&stored as &dyn Any).downcast_ref::<EnumValue>().cloned()
     }
 
-    fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue {
+    fn set_current_value(&'static self, o: &FerroObject, value: &dyn Any) -> bool {
+        match value.downcast_ref::<T>() {
+            Some(value) => {
+                o.set_current_value(self, value.clone());
+                true
+            }
+            None => false,
+        }
+    }
+
+    fn get_value_boxed(&'static self, o: &FerroObject) -> BoxedValue {
         Rc::new(o.get_value(self))
     }
 
+    fn set_local_boxed(&'static self, o: &FerroObject, value: BoxedValue) {
+        if let Some(value) = take_boxed_value::<T>(value) {
+            o.values().set_local_value(o, self, value);
+        }
+    }
+
+    fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
+        o.values().create_effective_value(o, self)
+    }
+
+    fn coerce_default_value(&'static self, o: &FerroObject) {
+        o.values().coerce_default_value(o, self);
+    }
+
+    fn default_value_boxed(&'static self, type_: &'static TypeInfo) -> BoxedValue {
+        Rc::new(self.get_default_value(type_))
+    }
+
+    fn metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata {
+        let metadata = self.get_metadata(type_);
+        let base: &FerroPropertyMetadata = &metadata;
+        base.clone()
+    }
+
+    fn unregister(&'static self, type_: &'static TypeInfo) {
+        StyledProperty::unregister(self, type_)
+    }
+
+    fn is_valid_value(&'static self, value: &dyn Any) -> bool {
+        match value.downcast_ref::<T>() {
+            Some(v) => self.is_valid(v),
+            None => false,
+        }
+    }
+
+    fn copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool {
+        match (value.downcast_ref::<T>(), out.downcast_mut::<Option<T::Storage>>()) {
+            (Some(value), Some(out)) => {
+                *out = Some(value.clone().into_storage());
+                true
+            }
+            _ => false,
+        }
+    }
+
+    fn box_value(&'static self, value: &dyn Any) -> Option<BoxedValue> {
+        value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
+    }
+
+    fn with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    ) {
+        // A type that is its own storage type is never asked (`with_values`): its codec stays the
+        // one line it needs (decided when the function is compiled).
+        if !T::Storage::SHARED_STORAGE {
+            return f(old, new);
+        }
+        let new = stored_value::<T>(new);
+        match old {
+            Some(old) => {
+                let old = stored_value::<T>(old);
+                f(Some(&old), &new);
+            }
+            None => f(None, &new),
+        }
+    }
+
+    fn enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool> {
+        self.get_metadata_for(owner).enable_data_validation()
+    }
+
+    fn unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
+        unpack_binding_value::<T>(value)
+    }
+
+    fn typed(&'static self) -> &'static dyn Any {
+        self
+    }
+}
+
+/// The routes of a styled (or attached) property, the same code for every value type: the
+/// untyped paths read and write the store through its untyped interface (the effective values
+/// and their entries) and ask the codec of the property ([`StyledCodec`]) only for what depends
+/// on the value type (#997). Kept in the property, which it names.
+pub(crate) struct StyledRoutes {
+    property: OnceCell<&'static FerroProperty>,
+}
+
+impl StyledRoutes {
+    fn new() -> Self {
+        Self { property: OnceCell::new() }
+    }
+
+    #[inline]
+    fn property(&self) -> &'static FerroProperty {
+        self.property.get().expect("the routes of a styled property know it")
+    }
+
+    #[inline]
+    fn codec(&self) -> &'static dyn StyledCodec {
+        self.property().styled_codec()
+    }
+}
+
+impl StyledRoutes {
+    /// `value`, of another type, converted to the value type of the property (`TryConvert` of
+    /// the property) and copied into a box of its own: the temporary of the conversion is released
+    /// before the value is validated, coerced or published, as the typed routes released it.
+    /// Panics as they did for a value that does not convert.
+    fn converted(&self, value: &dyn Any) -> BoxedValue {
+        converted_value(self.property(), self.codec(), value)
+    }
+}
+
+impl PropertyRoutes for StyledRoutes {
+    fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn> {
+        self.codec().create_effective_value(o)
+    }
+
+    fn route_clear_value(&'static self, o: &FerroObject) {
+        o.values().clear_value(o, self.property());
+    }
+
+    fn route_coerce_default_value(&'static self, o: &FerroObject) {
+        self.codec().coerce_default_value(o);
+    }
+
+    fn route_get_value(&'static self, o: &FerroObject) -> BoxedValue {
+        self.codec().get_value_boxed(o)
+    }
+
     fn route_get_base_value(&'static self, o: &FerroObject) -> BoxedValue {
-        match o.get_base_value(self) {
-            Some(v) => Rc::new(v),
+        match o.values().get_effective_value(self.property()).and_then(|effective| effective.boxed_base_value()) {
+            Some(value) => value,
             None => FerroProperty::unset_value(),
         }
     }
 
     fn route_get_default_value(&'static self, type_: &'static TypeInfo) -> BoxedValue {
-        Rc::new(self.get_default_value(type_))
+        self.codec().default_value_boxed(type_)
     }
 
     fn route_set_value(
@@ -284,34 +544,25 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         value: &dyn Any,
         priority: BindingPriority,
     ) -> Option<Rc<dyn IDisposable>> {
-        let this = self;
-        if value.is::<UnsetValueType>() {
-            if priority == BindingPriority::LocalValue {
-                o.clear_value(this);
-            }
-            None
-        } else if value.is::<DoNothingType>() {
-            None
-        } else if let Some(v) = value.downcast_ref::<T>() {
-            o.set_value_with_priority(this, v.clone(), priority)
-        } else if let Some(v) = convert_property_value::<T>(self, value) {
-            o.set_value_with_priority(this, v, priority)
-        } else {
-            self.invalid_value_type();
-        }
+        self.codec().set_value(o, value, priority)
     }
 
     fn route_set_current_value(&'static self, o: &FerroObject, value: &dyn Any) {
-        let this = self;
-        if value.is::<UnsetValueType>() {
-            o.clear_value(this);
-        } else if value.is::<DoNothingType>() {
-        } else if let Some(v) = value.downcast_ref::<T>() {
-            o.set_current_value(this, v.clone());
-        } else if let Some(v) = convert_property_value::<T>(self, value) {
-            o.set_current_value(this, v);
-        } else {
-            self.invalid_value_type();
+        let property = self.property();
+        let type_id = value.type_id();
+        if type_id != property.property_type() {
+            if type_id == TypeId::of::<UnsetValueType>() {
+                o.values().clear_value(o, property);
+                return;
+            }
+            if type_id == TypeId::of::<DoNothingType>() {
+                return;
+            }
+            let converted = self.converted(value);
+            return self.route_set_current_value(o, converted.as_any());
+        }
+        if !self.codec().set_current_value(o, value) {
+            property.invalid_value_type();
         }
     }
 
@@ -325,60 +576,90 @@ impl<T: PropertyValue> PropertyRoutes for StyledProperty<T> {
         source: Rc<dyn IObservable<BoxedValue>>,
         priority: BindingPriority,
     ) -> Rc<dyn IDisposable> {
-        o.bind_untyped(self, source, priority)
+        FerroObject::validate_priority(priority);
+        o.values().add_boxed_binding(o, self.property(), source, priority)
     }
 
     fn route_get_metadata(&'static self, type_: &'static TypeInfo) -> FerroPropertyMetadata {
-        let metadata = self.get_metadata(type_);
-        let base: &FerroPropertyMetadata = &metadata;
-        base.clone()
+        self.codec().metadata(type_)
     }
 
     fn route_unregister(&'static self, type_: &'static TypeInfo) {
-        self.unregister(type_)
+        self.codec().unregister(type_)
     }
 
     fn route_is_valid_value(&'static self, value: &dyn Any) -> bool {
-        match value.downcast_ref::<T>() {
-            Some(v) => self.is_valid(v),
-            None => false,
-        }
+        self.codec().is_valid_value(value)
     }
 
     fn as_any(&'static self) -> &'static dyn Any {
-        self
+        self.codec().typed()
     }
 
     fn route_copy_value(&'static self, value: &dyn Any, out: &mut dyn Any) -> bool {
-        match (value.downcast_ref::<T>(), out.downcast_mut::<Option<T>>()) {
-            (Some(value), Some(out)) => {
-                *out = Some(value.clone());
-                true
-            }
-            _ => false,
-        }
+        self.codec().copy_value(value, out)
+    }
+
+    fn route_with_values(
+        &'static self,
+        old: Option<&dyn Any>,
+        new: &dyn Any,
+        f: &mut dyn FnMut(Option<&dyn Any>, &dyn Any),
+    ) {
+        self.codec().with_values(old, new, f)
     }
 
     fn route_box_value(&'static self, value: &dyn Any) -> Option<BoxedValue> {
-        value.downcast_ref::<T>().map(|value| Rc::new(value.clone()) as BoxedValue)
+        self.codec().box_value(value)
     }
 
     fn route_enable_data_validation(&'static self, owner: &FerroObject) -> Option<bool> {
-        self.get_metadata_for(owner).enable_data_validation()
+        self.codec().enable_data_validation(owner)
     }
 
     fn route_unpack_binding_value(&'static self, value: &dyn Any) -> Option<BindingValue<BoxedValue>> {
-        unpack_binding_value::<T>(value)
+        self.codec().unpack_binding_value(value)
     }
 
     fn route_set_local_value(&'static self, o: &FerroObject, value: BoxedValue) {
-        if let Some(value) = take_boxed_value::<T>(value) {
-            o.values().set_local_value(o, self, value);
-        }
+        self.codec().set_local_boxed(o, value);
     }
 }
 
-impl<T: PropertyValue> StyledProperty<T> {
+/// The untyped write of a value that is not of the value type: a marker, or a value to convert.
+/// Compiled once, and out of the way of the write of a value of the value type.
+#[cold]
+#[inline(never)]
+fn set_other_styled_value(
+    property: &'static FerroProperty,
+    codec: &'static dyn StyledCodec,
+    o: &FerroObject,
+    value: &dyn Any,
+    priority: BindingPriority,
+) -> Option<Rc<dyn IDisposable>> {
+    let type_id = value.type_id();
+    if type_id == TypeId::of::<UnsetValueType>() {
+        if priority == BindingPriority::LocalValue {
+            o.values().clear_value(o, property);
+        }
+        return None;
+    }
+    if type_id == TypeId::of::<DoNothingType>() {
+        return None;
+    }
+    let converted = converted_value(property, codec, value);
+    codec.set_value(o, converted.as_any(), priority)
+}
+
+/// [`StyledRoutes::converted`] of `property`.
+fn converted_value(property: &'static FerroProperty, codec: &'static dyn StyledCodec, value: &dyn Any) -> BoxedValue {
+    let converted = crate::data::core::ValueTypes::try_convert_implicit(value, property.property_type());
+    let copy = converted.as_ref().and_then(|converted| codec.box_value(converted.as_any()));
+    drop(converted);
+    match copy {
+        Some(copy) => copy,
+        None => property.invalid_value_type(),
+    }
 }
 
 /// An attached property: a styled property that is defined by one class and
@@ -395,7 +676,7 @@ impl<T: PropertyValue> Deref for AttachedProperty<T> {
     }
 }
 
-impl<T: PropertyValue> AttachedProperty<T> {
+impl<T: StyledValue> AttachedProperty<T> {
     pub(crate) fn create(
         name: &str,
         owner_type: &'static TypeInfo,
@@ -406,12 +687,16 @@ impl<T: PropertyValue> AttachedProperty<T> {
         notifying: Option<NotifyingCallback>,
     ) -> &'static Self {
         let property: &'static Self = Box::leak(Box::new(Self {
-            base: StyledProperty::new(name, owner_type, host_type, metadata, inherits, validate, notifying, true),
+            base: StyledProperty::new(
+                name, owner_type, host_type, metadata, inherits, validate, notifying, true, T::MEMBERS,
+            ),
         }));
-        property.base.base.set_routes(&property.base);
+        property.base.install_routes();
         property
     }
+}
 
+impl<T: PropertyValue> AttachedProperty<T> {
     /// Attaches the property as a non-attached property on class `TOwner`.
     pub fn add_owner<TOwner: ObjectType>(&'static self) -> &'static Self {
         FerroPropertyRegistry::instance().register(TOwner::TYPE, &self.base);

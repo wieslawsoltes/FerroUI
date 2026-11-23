@@ -22,6 +22,8 @@ macro_rules! collection_type {
         #[derive(Clone, PartialEq)]
         pub struct $name(MediaCollection<$item>);
 
+        ferroui_base::styled_value!($name);
+
         impl Deref for $name {
             type Target = MediaCollection<$item>;
             #[inline]

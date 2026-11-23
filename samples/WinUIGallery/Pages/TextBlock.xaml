@@ -1,4 +1,61 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <TextBlock Text="I am a TextBlock"/><TextBlock Text="I am a styled TextBlock" FontStyle="Italic" FontSize="24"/><TextBlock Width="360" HorizontalAlignment="Left" TextWrapping="Wrap" Text="This TextBlock wraps its content to the available width. Text is laid out and rendered by FerroUI."/><TextBlock><Run Text="Inline "/><Run Text="bold" FontWeight="Bold"/><Run Text=" and "/><Run Text="italic" FontStyle="Italic"/><Run Text=" text."/></TextBlock>
+<!-- Ported from the five pinned TextBlock examples of WinUI Gallery (14061eea); see ../NOTICE.md.
+     The page has no code-behind upstream. The source's keyed Style is a keyed ControlTheme set
+     with Theme. WinUI's CharacterSpacing is in thousandths of an em: 200 at a font size of 24 is
+     a LetterSpacing of 4.8. WinUI's WrapWholeWords is WrapWithOverflow. FerroUI's TextBlock has
+     no IsTextSelectionEnabled or SelectionHighlightColor (its selectable text is
+     SelectableTextBlock, whose selection cannot be switched off): the selectable text is a
+     RichTextBlock, which has both, with the source's OneWay x:Bind of the switch. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Resources>
+    <ControlTheme x:Key="CustomTextBlockStyle" TargetType="TextBlock">
+      <Setter Property="FontFamily" Value="Comic Sans MS" />
+      <Setter Property="FontStyle" Value="Italic" />
+    </ControlTheme>
+  </StackPanel.Resources>
+
+  <StackPanel x:Name="TextBlockExample1" Spacing="8">
+    <TextBlock Text="A simple TextBlock." FontSize="18" />
+    <TextBlock x:Name="SimpleTextBlock" Text="I am a TextBlock." />
+  </StackPanel>
+
+  <StackPanel x:Name="TextBlockExample2" Spacing="8">
+    <TextBlock Text="A TextBlock with a style applied." FontSize="18" />
+    <TextBlock x:Name="StyledTextBlock" Theme="{StaticResource CustomTextBlockStyle}"
+               Text="I am a styled TextBlock." />
+  </StackPanel>
+
+  <StackPanel x:Name="TextBlockExample3" Spacing="8">
+    <TextBlock Text="A TextBlock with various properties set." FontSize="18" />
+    <TextBlock x:Name="CustomizedTextBlock"
+               LetterSpacing="4.8"
+               FontFamily="Arial"
+               FontSize="24"
+               FontStyle="Italic"
+               Foreground="CornflowerBlue"
+               Text="I am super excited to be here!"
+               TextWrapping="WrapWithOverflow" />
+  </StackPanel>
+
+  <StackPanel x:Name="TextBlockExample4" Spacing="8">
+    <TextBlock Text="A TextBlock with inline text elements." FontSize="18" />
+    <TextBlock x:Name="InlineTextBlock">
+      <Run FontFamily="Times New Roman" Foreground="DarkGray"
+           Text="Text in a TextBlock doesn't have to be a simple string." />
+      <LineBreak />
+      <Span><Run Text="Text can be " /><Bold><Run Text="bold" /></Bold><Run Text=", " /><Italic><Run Text="italic" /></Italic><Run Text=", or " /><Underline><Run Text="underlined" /></Underline><Run Text="." /></Span>
+    </TextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="TextBlockExample5" Spacing="8">
+    <TextBlock Text="A selectable TextBlock" FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <RichTextBlock x:Name="SelectableTextBlock"
+                     IsTextSelectionEnabled="{x:Bind SelectionEnabledSwitch.IsChecked, Mode=OneWay}"
+                     SelectionHighlightColor="DarkOrange">
+        <Paragraph><Run Text="I am a selectable TextBlock with custom SelectionHighlightColor." /></Paragraph>
+      </RichTextBlock>
+      <ToggleSwitch x:Name="SelectionEnabledSwitch" Grid.Column="1" Content="IsTextSelectionEnabled" />
+    </Grid>
+  </StackPanel>
 </StackPanel>

@@ -7,9 +7,9 @@ to change the algorithms (not to tune the current ones). Part of #644. The measu
 ## 1. The case
 
 The gauntlet (`samples/GauntletBenchmark`) lays out about 5,100 texts a frame and changes the
-content width in every frame, so every wrapped text wraps again. Cranpose and egui draw it at 55
-and 53 frames a second on the same machine; FerroUI at about 20. Text layout is about 20 % of the
-UI thread there, and making and drawing glyph runs a large part of the render thread.
+content width in every frame, so every wrapped text wraps again. The comparison and egui draw it
+at 55 and 53 frames a second on the same machine; FerroUI at about 20. Text layout is about 20 % of
+the UI thread there, and making and drawing glyph runs a large part of the render thread.
 
 ## 2. The stages, measured
 
@@ -63,7 +63,7 @@ again at every new width.
 
 ## 3. How the others do it
 
-### Cranpose (`crates/cranpose-text`, `crates/cranpose-ui`)
+### The comparison
 
 Its own engine on HarfRust, `icu_segmenter` and `unicode-bidi`. It wins mostly by not doing the
 work when the width changes.
@@ -151,11 +151,20 @@ changes behavior upstream defines.
 4. **Cache fixes.** `SelectableTextBlock` passes no run cache (it shapes on every layout);
    `TextBlock` drops its shaped runs on a foreground or decoration change, which do not change
    shaping.
+
+   Done for the first: a `SelectableTextBlock` gives its layouts the run cache of the text block
+   (`TextBlock::text_run_cache`), which a change of the text, of the selection or of the brush of
+   the selection invalidates, as every property the shaping is made of does; a layout with the
+   foreground of a selection shapes without the cache, so no kept shaping holds those runs. Left:
+   the second. The shaped runs hold their run properties, and the drawing takes the foreground
+   and the decorations from there (also of the runs a font fallback made, which copy them), so
+   keeping the runs across a foreground or decoration change needs the kept runs given the new
+   properties, a change of the run cache of its own.
 5. **Stable glyph runs.** Lines cut at the same range of the same shaped run reuse their glyph
    runs, so the renderer's caches keyed by a run's identity keep hitting while the width moves.
 6. **A shared text service.** The prepared paragraphs and their caches (key: text, properties
    and paragraph properties; admission of a changed text on its second use; ageing by layout
-   pass) as a service any control or application uses, as Cranpose's layout cache is.
+   pass) as a service any control or application uses, as the comparison's layout cache is.
 
 7. **Edits.** A text that is set again with a small change (a word of a paragraph replaced, a
    message that grows as it streams) is laid out again whole: one frame of the `paragraph` scene

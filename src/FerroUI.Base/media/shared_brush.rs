@@ -19,6 +19,7 @@ use crate::media::{
     ISolidColorBrush, ITileBrush, ITransform, PenLineCap, PenLineJoin, Stretch, TileMode,
 };
 use crate::platform::SharedBitmapImpl;
+use crate::rendering::scene3d::Scene3DBrushContent;
 use crate::utilities::RefCounted;
 use crate::{Matrix, RelativePoint, RelativeRect, RelativeScalar};
 use std::any::Any;
@@ -38,6 +39,8 @@ enum Kind {
     },
     Conic { gradient: Gradient, center: RelativePoint, angle: f64 },
     Image { tile: Tile, bitmap: Option<RefCounted<SharedBitmapImpl>> },
+    /// The recorded content of a visual or drawing brush of a 3D material (#608).
+    Content { tile: Tile, content: Scene3DBrushContent },
 }
 
 struct Gradient {
@@ -120,6 +123,40 @@ impl SharedBrush {
         })))
     }
 
+    /// The shared form of a scene brush (a `VisualBrush` or a `DrawingBrush`) of a 3D material:
+    /// the tile settings, opacity and transforms of `brush` over its recorded `content`, which the
+    /// 3D renderers render offscreen (`docs/porting/media3d.md`, section 3.18). The 2D backends do
+    /// not draw this form (their scene brushes are composition resources). `None` when `brush` is
+    /// not a tile brush.
+    pub fn from_scene_content(brush: &dyn IBrush, content: Scene3DBrushContent) -> Option<SharedBrush> {
+        let tile = brush.as_tile_brush()?;
+        Some(SharedBrush(Arc::new(BrushValues {
+            opacity: brush.opacity(),
+            transform: brush.transform().map(|transform| transform.value()),
+            transform_origin: brush.transform_origin(),
+            relative_transform: brush.relative_transform().map(|transform| transform.value()),
+            kind: Kind::Content {
+                tile: Tile {
+                    alignment_x: tile.alignment_x(),
+                    alignment_y: tile.alignment_y(),
+                    destination_rect: tile.destination_rect(),
+                    source_rect: tile.source_rect(),
+                    stretch: tile.stretch(),
+                    tile_mode: tile.tile_mode(),
+                },
+                content,
+            },
+        })))
+    }
+
+    /// The recorded content of a scene brush made by [`from_scene_content`](Self::from_scene_content).
+    pub fn scene_content(&self) -> Option<&Scene3DBrushContent> {
+        match &self.0.kind {
+            Kind::Content { content, .. } => Some(content),
+            _ => None,
+        }
+    }
+
     fn gradient(&self) -> Option<&Gradient> {
         match &self.0.kind {
             Kind::Linear { gradient, .. } | Kind::Radial { gradient, .. } | Kind::Conic { gradient, .. } => {
@@ -131,8 +168,8 @@ impl SharedBrush {
 
     fn tile(&self) -> &Tile {
         match &self.0.kind {
-            Kind::Image { tile, .. } => tile,
-            _ => unreachable!("the tile view is given for an image only"),
+            Kind::Image { tile, .. } | Kind::Content { tile, .. } => tile,
+            _ => unreachable!("the tile view is given for an image or a scene content only"),
         }
     }
 }
@@ -183,7 +220,7 @@ impl IBrush for SharedBrush {
     }
 
     fn as_tile_brush(&self) -> Option<&dyn ITileBrush> {
-        matches!(self.0.kind, Kind::Image { .. }).then_some(self as &dyn ITileBrush)
+        matches!(self.0.kind, Kind::Image { .. } | Kind::Content { .. }).then_some(self as &dyn ITileBrush)
     }
 
     fn as_image_brush(&self) -> Option<&dyn IImageBrush> {

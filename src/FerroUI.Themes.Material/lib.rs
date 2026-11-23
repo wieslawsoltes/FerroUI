@@ -11,6 +11,10 @@
 //! ```
 
 mod color_scheme;
+/// The packed installer of the compatibility resources (#856): used by `color_scheme.rs` when
+/// the generator writes it packed (`PACKED_INSTALLER` of `scripts/material-theme/generate.py`).
+#[allow(dead_code)]
+mod compatibility_rows;
 mod dynamic_color;
 mod android_colors;
 pub use android_colors::{MaterialAndroidColorError, MaterialAndroidColorSource};

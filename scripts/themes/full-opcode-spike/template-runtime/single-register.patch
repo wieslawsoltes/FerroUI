@@ -1,0 +1,658 @@
+diff --git a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs
+--- a/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs
++++ b/src/Markup/FerroUI.Markup.Xaml/xaml_il/runtime/construction.rs
+@@ -198,6 +198,30 @@
+     }
+ }
+ 
++/// Generated programs with one result can keep it in their caller's stack frame.
++enum RegisterStorage<'a> {
++    Single(&'a mut Option<ConstructionRegister>),
++    Multiple(&'a mut Vec<ConstructionRegister>),
++}
++
++impl RegisterStorage<'_> {
++    fn as_slice(&self) -> &[ConstructionRegister] {
++        match self {
++            Self::Single(slot) => slot.as_slice(),
++            Self::Multiple(items) => items,
++        }
++    }
++
++    fn push(&mut self, value: ConstructionRegister) -> Result<(), XamlLoadError> {
++        match self {
++            Self::Single(slot) if slot.is_none() => **slot = Some(value),
++            Self::Single(_) => return Err(invalid()),
++            Self::Multiple(items) => items.push(value),
++        }
++        Ok(())
++    }
++}
++
+ /// A program's internal locals stay alive until the enclosing Rust scope ends, with the
+ /// same reverse declaration-order destruction as native XAML construction.
+ pub struct ConstructionObjects(Vec<ConstructionRegister>);
+@@ -260,6 +284,19 @@
+         self.hold(inputs, scope, context).map(drop)
+     }
+ 
++    /// Execute a construction region known to produce exactly one register.
++    #[inline(never)]
++    pub fn single(
++        &self,
++        inputs: &[ConstructionInput<'_>],
++        scope: Option<&Rc<dyn INameScope>>,
++        context: Option<&Rc<XamlIlContext>>,
++    ) -> Result<ConstructionRegister, XamlLoadError> {
++        let mut slot = None;
++        self.execute(inputs, scope, context, RegisterStorage::Single(&mut slot))?;
++        slot.ok_or_else(invalid)
++    }
++
+     /// External registers borrow their native bindings. Even indices name external registers
+     /// and odd indices name constructed objects, in construction order.
+     #[inline(never)]
+@@ -269,289 +306,297 @@
+         scope: Option<&Rc<dyn INameScope>>,
+         context: Option<&Rc<XamlIlContext>>,
+     ) -> Result<Vec<ConstructionRegister>, XamlLoadError> {
++        let mut created = Vec::new();
++        if let Err(error) = self.execute(inputs, scope, context, RegisterStorage::Multiple(&mut created)) {
++            while created.pop().is_some() {}
++            return Err(error);
++        }
++        Ok(created)
++    }
++
++    #[inline(never)]
++    fn execute(
++        &self,
++        inputs: &[ConstructionInput<'_>],
++        scope: Option<&Rc<dyn INameScope>>,
++        context: Option<&Rc<XamlIlContext>>,
++        mut created: RegisterStorage<'_>,
++    ) -> Result<(), XamlLoadError> {
+         use ConstructionImport as Import;
+         let mut code = self.code;
+-        let mut created = Vec::new();
+         let import = |code: &mut &[u8]| {
+             self.imports
+                 .get(integer(code)? as usize)
+                 .ok_or_else(invalid)
+         };
+-        let result = (|| {
+-            while let Some((&opcode, rest)) = code.split_first() {
++        while let Some((&opcode, rest)) = code.split_first() {
++            code = rest;
++            if opcode == op::NEW_BINDING {
++                let path = value::<CompiledBindingPath>(inputs, created.as_slice(), &mut code)?;
++                created.push(ConstructionRegister::Value(Box::new(
++                    CompiledBindingExtension::with_path(path.clone()),
++                )))?;
++                continue;
++            }
++            if opcode == op::DEFER {
++                let Import::DeferredType(result_type) = import(&mut code)? else {
++                    return Err(invalid());
++                };
++                let Import::Deferred(build) = import(&mut code)? else {
++                    return Err(invalid());
++                };
++                let line = integer(&mut code)? as i32;
++                let column = integer(&mut code)? as i32;
++                let deferred = super::compiled::defer(
++                    result_type(),
++                    context.ok_or_else(invalid)?,
++                    *build,
++                    line,
++                    column,
++                )?;
++                created.push(ConstructionRegister::Value(Box::new(deferred)))?;
++                continue;
++            }
++            if opcode == op::BUILD_SELECTOR {
++                let Import::Selector(program) = import(&mut code)? else { return Err(invalid()) };
++                created.push(ConstructionRegister::Value(Box::new(program.build_selector()?)))?;
++                continue;
++            }
++            if opcode == op::NEW {
++                let Import::New(make) = import(&mut code)? else {
++                    return Err(invalid());
++                };
++                created.push(ConstructionRegister::Object(make()))?;
++                continue;
++            }
++            if opcode == op::POP_PARENT {
++                context.ok_or_else(invalid)?.pop_parent();
++                continue;
++            }
++            if matches!(opcode, op::CALL | op::CALL_RESULT | op::BUILD_PATH) {
++                let operation = import(&mut code)?;
++                let line = integer(&mut code)? as i32;
++                let column = integer(&mut code)? as i32;
++                let length = integer(&mut code)? as usize;
++                let (encoded, rest) = code.split_at_checked(length).ok_or_else(invalid)?;
+                 code = rest;
+-                if opcode == op::NEW_BINDING {
+-                    let path = value::<CompiledBindingPath>(inputs, &created, &mut code)?;
+-                    created.push(ConstructionRegister::Value(Box::new(
+-                        CompiledBindingExtension::with_path(path.clone()),
+-                    )));
+-                    continue;
+-                }
+-                if opcode == op::DEFER {
+-                    let Import::DeferredType(result_type) = import(&mut code)? else {
+-                        return Err(invalid());
+-                    };
+-                    let Import::Deferred(build) = import(&mut code)? else {
++                let mut args = ConstructionArguments {
++                    encoded,
++                    imports: self.imports,
++                    inputs,
++                    created: created.as_slice(),
++                    context,
++                    line,
++                    column,
++                };
++                let value = match (opcode, operation) {
++                    (op::BUILD_PATH, Import::Path(path)) => {
++                        let mut captures = Vec::new();
++                        while !args.encoded.is_empty() {
++                            captures
++                                .push(args.value::<ferroui_base::data::CompiledBindingPath>()?);
++                        }
++                        Some(ConstructionRegister::Value(Box::new(
++                            path.build(scope, &captures, line, column)?,
++                        )))
++                    }
++                    (op::CALL | op::CALL_RESULT, Import::Call(call)) => call(&mut args)?,
++                    _ => return Err(invalid()),
++                };
++                if !args.encoded.is_empty() {
++                    return Err(invalid());
++                }
++                if opcode != op::CALL {
++                    created.push(value.ok_or_else(invalid)?)?;
++                }
++                continue;
++            }
++            if opcode == op::COMPLETE_PLAIN_SCOPE {
++                super::compiled::complete_root_name_scope(
++                    None,
++                    scope,
++                    integer(&mut code)? as i32,
++                    integer(&mut code)? as i32,
++                )?;
++                continue;
++            }
++            let target = object(inputs, created.as_slice(), &mut code)?;
++            match opcode {
++                op::STATIC_RESOURCE => {
++                    use super::compiled as rt;
++                    use crate::markup_extensions::StaticResourceExtension;
++                    let Import::Text(key) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let Import::Property(property) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let Import::ResourceSetter(set) = import(&mut code)? else {
+                         return Err(invalid());
+                     };
+                     let line = integer(&mut code)? as i32;
+                     let column = integer(&mut code)? as i32;
+-                    let deferred = super::compiled::defer(
+-                        result_type(),
++                    let extension =
++                        StaticResourceExtension::with_resource_key(rt::string_object(key));
++                    let provided = rt::provide_value_invoked(
+                         context.ok_or_else(invalid)?,
+-                        *build,
++                        rt::property_value(property()),
++                        &extension,
++                        StaticResourceExtension::__markup_ProvideValue_0,
+                         line,
+                         column,
+                     )?;
+-                    created.push(ConstructionRegister::Value(Box::new(deferred)));
+-                    continue;
+-                }
+-                if opcode == op::BUILD_SELECTOR {
+-                    let Import::Selector(program) = import(&mut code)? else { return Err(invalid()) };
+-                    created.push(ConstructionRegister::Value(Box::new(program.build_selector()?)));
+-                    continue;
+-                }
+-                if opcode == op::NEW {
+-                    let Import::New(make) = import(&mut code)? else {
+-                        return Err(invalid());
+-                    };
+-                    created.push(ConstructionRegister::Object(make()));
+-                    continue;
+-                }
+-                if opcode == op::POP_PARENT {
+-                    context.ok_or_else(invalid)?.pop_parent();
+-                    continue;
+-                }
+-                if matches!(opcode, op::CALL | op::CALL_RESULT | op::BUILD_PATH) {
+-                    let operation = import(&mut code)?;
++                    set(target, rt::to_value(provided), line, column)?;
++                    // Native construction keeps the extension and its key in scope until return.
++                    created.push(ConstructionRegister::Value(Box::new(extension)))?;
++                }
++                op::PROVIDE_BINDING => {
++                    let extension =
++                        value::<Rc<CompiledBindingExtension>>(inputs, created.as_slice(), &mut code)?;
++                    let Import::Property(property) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
+                     let line = integer(&mut code)? as i32;
+                     let column = integer(&mut code)? as i32;
+-                    let length = integer(&mut code)? as usize;
+-                    let (encoded, rest) = code.split_at_checked(length).ok_or_else(invalid)?;
+-                    code = rest;
+-                    let mut args = ConstructionArguments {
+-                        encoded,
+-                        imports: self.imports,
+-                        inputs,
+-                        created: &created,
+-                        context,
+-                        line,
+-                        column,
+-                    };
+-                    let value = match (opcode, operation) {
+-                        (op::BUILD_PATH, Import::Path(path)) => {
+-                            let mut captures = Vec::new();
+-                            while !args.encoded.is_empty() {
+-                                captures
+-                                    .push(args.value::<ferroui_base::data::CompiledBindingPath>()?);
+-                            }
+-                            Some(ConstructionRegister::Value(Box::new(
+-                                path.build(scope, &captures, line, column)?,
+-                            )))
+-                        }
+-                        (op::CALL | op::CALL_RESULT, Import::Call(call)) => call(&mut args)?,
+-                        _ => return Err(invalid()),
+-                    };
+-                    if !args.encoded.is_empty() {
+-                        return Err(invalid());
+-                    }
+-                    if opcode != op::CALL {
+-                        created.push(value.ok_or_else(invalid)?);
+-                    }
+-                    continue;
+-                }
+-                if opcode == op::COMPLETE_PLAIN_SCOPE {
++                    let context = context.ok_or_else(invalid)?;
++                    context.set_target_property(super::compiled::property_value(property()));
++                    let provided = extension
++                        .provide_value(Some(&super::compiled::service_provider(context)));
++                    context.set_target_property(None);
++                    super::compiled::bind(target, property(), provided, line, column)?;
++                }
++                op::COMPLETE_SCOPE => {
++                    let styled = target.cast::<StyledElement>().ok_or_else(invalid)?;
+                     super::compiled::complete_root_name_scope(
+-                        None,
++                        Some(&styled),
+                         scope,
+                         integer(&mut code)? as i32,
+                         integer(&mut code)? as i32,
+                     )?;
+-                    continue;
+-                }
+-                let target = object(inputs, &created, &mut code)?;
+-                match opcode {
+-                    op::STATIC_RESOURCE => {
+-                        use super::compiled as rt;
+-                        use crate::markup_extensions::StaticResourceExtension;
+-                        let Import::Text(key) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::Property(property) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::ResourceSetter(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let line = integer(&mut code)? as i32;
+-                        let column = integer(&mut code)? as i32;
+-                        let extension =
+-                            StaticResourceExtension::with_resource_key(rt::string_object(key));
+-                        let provided = rt::provide_value_invoked(
+-                            context.ok_or_else(invalid)?,
+-                            rt::property_value(property()),
+-                            &extension,
+-                            StaticResourceExtension::__markup_ProvideValue_0,
+-                            line,
+-                            column,
+-                        )?;
+-                        set(target, rt::to_value(provided), line, column)?;
+-                        // Native construction keeps the extension and its key in scope until return.
+-                        created.push(ConstructionRegister::Value(Box::new(extension)));
++                }
++                op::BEGIN_INIT => target
++                    .cast::<StyledElement>()
++                    .ok_or_else(invalid)?
++                    .begin_init(),
++                op::END_INIT => {
++                    let line = integer(&mut code)? as i32;
++                    let column = integer(&mut code)? as i32;
++                    invoked(
++                        target
++                            .cast::<StyledElement>()
++                            .ok_or_else(invalid)?
++                            .try_end_init(),
++                        line,
++                        column,
++                    )?;
++                }
++                op::DYNAMIC_RESOURCE => {
++                    let Import::Property(property) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let Import::Text(key) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let line = integer(&mut code)? as i32;
++                    let column = integer(&mut code)? as i32;
++                    bind_dynamic_resource(
++                        context.ok_or_else(invalid)?,
++                        target,
++                        property(),
++                        key,
++                        line,
++                        column,
++                    )?;
++                }
++                op::PUSH_PARENT | op::INTERMEDIATE_ROOT => {
++                    let Import::Markup(value) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let context = context.ok_or_else(invalid)?;
++                    if opcode == op::PUSH_PARENT {
++                        context.push_parent(value(target)?);
++                    } else {
++                        context.set_intermediate_root_object(value(target)?);
+                     }
+-                    op::PROVIDE_BINDING => {
+-                        let extension =
+-                            value::<Rc<CompiledBindingExtension>>(inputs, &created, &mut code)?;
+-                        let Import::Property(property) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let line = integer(&mut code)? as i32;
+-                        let column = integer(&mut code)? as i32;
+-                        let context = context.ok_or_else(invalid)?;
+-                        context.set_target_property(super::compiled::property_value(property()));
+-                        let provided = extension
+-                            .provide_value(Some(&super::compiled::service_provider(context)));
+-                        context.set_target_property(None);
+-                        super::compiled::bind(target, property(), provided, line, column)?;
++                }
++                op::TEMPLATE_BIND => {
++                    let Import::Property(property) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let Import::Property(source) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let line = integer(&mut code)? as i32;
++                    let column = integer(&mut code)? as i32;
++                    bind_template_binding(target, property(), source(), line, column)?;
++                }
++                op::REGISTER_NAME => {
++                    let Import::Text(name) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let Import::BoxObject(box_object) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let line = integer(&mut code)? as i32;
++                    let column = integer(&mut code)? as i32;
++                    register_name_value(scope, name, box_object(target)?, line, column)?;
++                }
++                op::SET_INT => {
++                    let Import::Int(set) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    set(
++                        target,
++                        ferroui_markup::compiled_operands::read_signed(&mut code)
++                            .map_err(|_| invalid())?,
++                    );
++                }
++                op::SET_FOUR => {
++                    let Import::Four(set) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let mut values = [0.; 4];
++                    for value in &mut values {
++                        *value = ferroui_markup::compiled_operands::read_number(&mut code)
++                            .map_err(|_| invalid())?;
+                     }
+-                    op::COMPLETE_SCOPE => {
+-                        let styled = target.cast::<StyledElement>().ok_or_else(invalid)?;
+-                        super::compiled::complete_root_name_scope(
+-                            Some(&styled),
+-                            scope,
+-                            integer(&mut code)? as i32,
+-                            integer(&mut code)? as i32,
+-                        )?;
+-                    }
+-                    op::BEGIN_INIT => target
+-                        .cast::<StyledElement>()
+-                        .ok_or_else(invalid)?
+-                        .begin_init(),
+-                    op::END_INIT => {
+-                        let line = integer(&mut code)? as i32;
+-                        let column = integer(&mut code)? as i32;
+-                        invoked(
+-                            target
+-                                .cast::<StyledElement>()
+-                                .ok_or_else(invalid)?
+-                                .try_end_init(),
+-                            line,
+-                            column,
+-                        )?;
+-                    }
+-                    op::DYNAMIC_RESOURCE => {
+-                        let Import::Property(property) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::Text(key) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let line = integer(&mut code)? as i32;
+-                        let column = integer(&mut code)? as i32;
+-                        bind_dynamic_resource(
+-                            context.ok_or_else(invalid)?,
+-                            target,
+-                            property(),
+-                            key,
+-                            line,
+-                            column,
+-                        )?;
+-                    }
+-                    op::PUSH_PARENT | op::INTERMEDIATE_ROOT => {
+-                        let Import::Markup(value) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let context = context.ok_or_else(invalid)?;
+-                        if opcode == op::PUSH_PARENT {
+-                            context.push_parent(value(target)?);
+-                        } else {
+-                            context.set_intermediate_root_object(value(target)?);
+-                        }
+-                    }
+-                    op::TEMPLATE_BIND => {
+-                        let Import::Property(property) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::Property(source) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let line = integer(&mut code)? as i32;
+-                        let column = integer(&mut code)? as i32;
+-                        bind_template_binding(target, property(), source(), line, column)?;
+-                    }
+-                    op::REGISTER_NAME => {
+-                        let Import::Text(name) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::BoxObject(box_object) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let line = integer(&mut code)? as i32;
+-                        let column = integer(&mut code)? as i32;
+-                        register_name_value(scope, name, box_object(target)?, line, column)?;
+-                    }
+-                    op::SET_INT => {
+-                        let Import::Int(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        set(
+-                            target,
+-                            ferroui_markup::compiled_operands::read_signed(&mut code)
+-                                .map_err(|_| invalid())?,
+-                        );
+-                    }
+-                    op::SET_FOUR => {
+-                        let Import::Four(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let mut values = [0.; 4];
+-                        for value in &mut values {
+-                            *value = ferroui_markup::compiled_operands::read_number(&mut code)
+-                                .map_err(|_| invalid())?;
+-                        }
+-                        set(target, values);
+-                    }
+-                    op::SET_F64 => {
+-                        let Import::Float(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        set(
+-                            target,
+-                            ferroui_markup::compiled_operands::read_number(&mut code)
+-                                .map_err(|_| invalid())?,
+-                        );
+-                    }
+-                    op::SET_STRING => {
+-                        let Import::String(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        let Import::Text(text) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        set(target, text);
+-                    }
+-                    op::SET_CONSTANT => {
+-                        let Import::Constant(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        set(target);
+-                    }
+-                    op::SET_OBJECT => {
+-                        let Import::Object(set) = import(&mut code)? else {
+-                            return Err(invalid());
+-                        };
+-                        set(target, object(inputs, &created, &mut code)?)?;
+-                    }
+-                    _ => return Err(invalid()),
+-                }
+-            }
+-            Ok(())
+-        })();
+-        if let Err(error) = result {
+-            while created.pop().is_some() {}
+-            return Err(error);
+-        }
+-        Ok(created)
++                    set(target, values);
++                }
++                op::SET_F64 => {
++                    let Import::Float(set) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    set(
++                        target,
++                        ferroui_markup::compiled_operands::read_number(&mut code)
++                            .map_err(|_| invalid())?,
++                    );
++                }
++                op::SET_STRING => {
++                    let Import::String(set) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    let Import::Text(text) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    set(target, text);
++                }
++                op::SET_CONSTANT => {
++                    let Import::Constant(set) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    set(target);
++                }
++                op::SET_OBJECT => {
++                    let Import::Object(set) = import(&mut code)? else {
++                        return Err(invalid());
++                    };
++                    set(target, object(inputs, created.as_slice(), &mut code)?)?;
++                }
++                _ => return Err(invalid()),
++            }
++        }
++        Ok(())
+     }
+ }
+ 
+@@ -634,6 +679,29 @@
+     }
+ 
+     #[test]
++    fn single_register_is_checked_and_released_on_errors() {
++        let empty = ConstructionProgram { code: &[], imports: &[] };
++        assert!(empty.single(&[], None, None).is_err());
++        static ONE: ConstructionProgram = ConstructionProgram {
++            code: &[op::NEW, 0, op::BEGIN_INIT, 1, op::END_INIT, 1, 1, 1],
++            imports: &[ConstructionImport::New(|| Border::new().upcast())],
++        };
++        assert!(ONE.single(&[], None, None).unwrap().into_object::<Border>().is_ok());
++        thread_local! { static ORDER: std::cell::RefCell<Vec<i32>> = const { std::cell::RefCell::new(Vec::new()) }; }
++        struct Witness(i32);
++        impl Drop for Witness { fn drop(&mut self) { ORDER.with(|o| o.borrow_mut().push(self.0)); } }
++        static TWO: ConstructionProgram = ConstructionProgram {
++            code: &[op::CALL_RESULT, 0, 0, 0, 0, op::CALL_RESULT, 1, 0, 0, 0],
++            imports: &[
++                ConstructionImport::Call(|_| Ok(Some(ConstructionRegister::Value(Box::new(Witness(1)))))),
++                ConstructionImport::Call(|_| Ok(Some(ConstructionRegister::Value(Box::new(Witness(2)))))),
++            ],
++        };
++        assert!(TWO.single(&[], None, None).is_err());
++        ORDER.with(|o| assert_eq!(*o.borrow(), [2, 1]));
++    }
++
++    #[test]
+     fn reports_invalid_operands_without_reading_past_program_or_imports() {
+         let root = Button::new();
+         for code in [
+diff --git a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs
+--- a/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs
++++ b/src/Markup/FerroUI.Markup.Xaml.Loader/rust_emitter/construction.rs
+@@ -614,6 +614,14 @@
+         let args = format!("&[{inputs}], {scope}, {context}");
+         if self.locals.is_empty() {
+             output.push(format!("    {program}.apply({args})?;"));
++        } else if let [(name, ty, object)] = self.locals.as_slice() {
++            let run = format!("{program}.single({args})?");
++            if live(name) {
++                let extract = if *object { "into_object" } else { "into_value" };
++                output.push(format!("    let {name} = {run}.{extract}::<{ty}>()?;"));
++            } else {
++                output.push(format!("    let _held_{name} = {run};"));
++            }
+         } else if self.locals.iter().all(|(name, _, _)| !live(name)) {
+             output.push(format!(
+                 "    let _construction_objects = {program}.hold({args})?;"

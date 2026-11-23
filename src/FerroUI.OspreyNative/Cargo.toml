@@ -1,0 +1,37 @@
+[package]
+name = "ferroui-osprey-native"
+description = "An Osprey Native host on FerroUI: an Osprey application compiled as a C library runs unchanged, its regions drawn with FerroUI controls and its scenes with FerroUI's drawing context"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+publish = false
+# Links the Osprey application archive and runtime when `OSPREY_NATIVE_APP_DIR` names them
+# (`build.rs`, README.md); without it the crate builds and tests the host without an application.
+build = "build.rs"
+
+[lib]
+path = "lib.rs"
+
+# The host binary: an application window, or `--smoke` without one. It needs the desktop platform.
+[[bin]]
+name = "ferroui-osprey-native"
+path = "main.rs"
+required-features = ["desktop"]
+test = false
+
+[features]
+default = []
+# The window of the host: the desktop platform of the operating system and the Fluent theme.
+desktop = ["ferroui-view/desktop"]
+
+[dependencies]
+ferroui-base = { workspace = true }
+ferroui-controls = { workspace = true }
+ferroui-view = { workspace = true }
+serde_json = { workspace = true }
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }

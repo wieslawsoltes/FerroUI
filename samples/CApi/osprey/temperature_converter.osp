@@ -1,0 +1,180 @@
+// 7GUIs task 2, Temperature Converter, in Osprey through the C ABI of FerroUI (ferroui-capi):
+// two text fields, degrees Celsius and Fahrenheit; typing a number into one sets the other,
+// typing anything else leaves the other as it is. The same task as
+// samples/SevenGuis/Builders/Temperature. The handler of TextChanging (raised as soon as the
+// text is set; TextChanged follows later, from the dispatcher) reads the text back from the field
+// (ferro_get_cstr); a cell that only an effect handler assigns keeps a field that the other one
+// set from being converted back.
+//
+// With FERROUI_SAMPLE_SCRIPT=1 the program types into the fields itself (the steps of the
+// scenario of the Rust tests) and prints what they show.
+//
+// @link: ferroui_capi
+// @linkdir: target/release
+// @linkdir: target/debug
+
+extern fn ferro_abi_version() -> int32
+extern fn ferro_app_run(options: Ptr, onStart: fn(int) -> int, token: int) -> int32
+extern fn ferro_type_id(name: string, length: int) -> int
+extern fn ferro_property_id(name: string, length: int) -> int
+extern fn ferro_event_id(name: string, length: int) -> int
+extern fn ferro_create(typeId: int) -> int
+extern fn ferro_set_str(object: int, property: int, text: string, length: int) -> int32
+extern fn ferro_set_f64(object: int, property: int, value: float) -> int32
+extern fn ferro_set_bool(object: int, property: int, value: int8) -> int32
+extern fn ferro_get_cstr(object: int, property: int) -> string
+extern fn ferro_add_child(parent: int, child: int) -> int32
+extern fn ferro_show(window: int) -> int32
+extern fn ferro_subscribe(object: int, event: int, function: fn(int, int, int) -> int, token: int) -> int
+extern fn ferro_raise(object: int, event: int) -> int32
+extern fn ferro_last_error() -> string
+extern fn osprey_ffi_null() -> Ptr
+// The address of the value of an environment variable, kept as an integer: 0 when it is not set.
+extern fn getenv(name: string) -> int
+
+// ---- helpers over the ABI --------------------------------------------------------------------
+
+// The value of an arm that does nothing.
+fn nothing() -> Unit = {
+    let _ = 0
+}
+
+fn prop(name: string) -> int = ferro_property_id(name: name, length: 0 - 1)
+
+fn make(name: string) -> int = ferro_create(typeId: ferro_type_id(name: name, length: 0 - 1))
+
+fn check(what: string, status: int32) -> Unit =
+    if status == toInt32(0) { nothing() } else { print("${what}: ${status} ${ferro_last_error()}") }
+
+fn setText(object: int, name: string, text: string) -> Unit =
+    check(what: name, status: ferro_set_str(object: object, property: prop(name: name), text: text, length: 0 - 1))
+
+fn setNumber(object: int, name: string, value: float) -> Unit =
+    check(what: name, status: ferro_set_f64(object: object, property: prop(name: name), value: value))
+
+fn setFlag(object: int, name: string, value: bool) -> Unit =
+    check(what: name, status: ferro_set_bool(object: object, property: prop(name: name), value: value ? toInt8(1) : toInt8(0)))
+
+// The text of a property, copied: the library owns the string it returns until its next call.
+fn getText(object: int, name: string) -> string = ferro_get_cstr(object: object, property: prop(name: name)) + ""
+
+fn add(parent: int, child: int) -> Unit = check(what: "add child", status: ferro_add_child(parent: parent, child: child))
+
+// ---- the conversions (seven_guis_model) -------------------------------------------------------
+
+fn celsiusToFahrenheit(celsius: float) -> float = celsius * 9.0 / 5.0 + 32.0
+
+fn fahrenheitToCelsius(fahrenheit: float) -> float = (fahrenheit - 32.0) * 5.0 / 9.0
+
+// Rounded to whole degrees, halves away from zero (as Rust's `f64::round`).
+fn formatDegrees(value: float) -> string = {
+    let rounded = value < 0.0 ? 0.0 - floor(0.5 - value) : floor(value + 0.5)
+    match floatToInt(rounded) {
+        Success { value } => toString(value)
+        Error { message } => ""
+    }
+}
+
+// ---- state -----------------------------------------------------------------------------------
+
+type Ui = { celsius: int, fahrenheit: int }
+
+effect State { setting: fn(bool) -> Unit  ui: fn(Ui) -> Unit }
+
+// Whether a handler is setting the other field: its TextChanging is not converted back.
+mut setting = false
+mut ui = Ui { celsius: 0, fahrenheit: 0 }
+
+fn setSetting(value: bool) -> Unit = {
+    handle State { setting v => { setting = v } }
+    perform State.setting(value)
+}
+
+fn setUi(value: Ui) -> Unit = {
+    handle State { ui v => { ui = v } }
+    perform State.ui(value)
+}
+
+// ---- the task --------------------------------------------------------------------------------
+
+// The token says which field changed: 1 Celsius, 2 Fahrenheit.
+fn onTextChanging(token: int, sender: int, arg: int) -> int = {
+    if setting { nothing() } else { convert(token: token, sender: sender) }
+    0
+}
+
+fn convert(token: int, sender: int) -> Unit = match parseFloat(trim(getText(object: sender, name: "Text"))) {
+    Success { value } => {
+        let other = token == 1 ? ui.fahrenheit : ui.celsius
+        let converted = token == 1 ? celsiusToFahrenheit(value) : fahrenheitToCelsius(value)
+        setSetting(value: true)
+        setText(object: other, name: "Text", text: formatDegrees(value: converted))
+        setSetting(value: false)
+    }
+    Error { message } => nothing()
+}
+
+fn field(name: string) -> int = {
+    let box = make(name: "TextBox")
+    setText(object: box, name: "Name", text: name)
+    setNumber(object: box, name: "Width", value: 80.0)
+    box
+}
+
+fn label(text: string) -> int = {
+    let block = make(name: "TextBlock")
+    setText(object: block, name: "Text", text: text)
+    setText(object: block, name: "VerticalAlignment", text: "Center")
+    block
+}
+
+fn onStart(token: int) -> int = {
+    let window = make(name: "Window")
+    setText(object: window, name: "Title", text: "Temperature Converter")
+    setNumber(object: window, name: "Width", value: 480.0)
+    setNumber(object: window, name: "Height", value: 110.0)
+    let panel = make(name: "StackPanel")
+    setText(object: panel, name: "Orientation", text: "Horizontal")
+    setText(object: panel, name: "VerticalAlignment", text: "Top")
+    setNumber(object: panel, name: "Spacing", value: 8.0)
+    setText(object: panel, name: "Margin", text: "16")
+    let celsius = field(name: "Celsius")
+    let fahrenheit = field(name: "Fahrenheit")
+    setUi(value: Ui { celsius: celsius, fahrenheit: fahrenheit })
+    let changed = ferro_event_id(name: "TextChanging", length: 0 - 1)
+    let _c = ferro_subscribe(object: celsius, event: changed, function: onTextChanging, token: 1)
+    let _f = ferro_subscribe(object: fahrenheit, event: changed, function: onTextChanging, token: 2)
+    add(parent: panel, child: celsius)
+    add(parent: panel, child: label(text: "Celsius ="))
+    add(parent: panel, child: fahrenheit)
+    add(parent: panel, child: label(text: "Fahrenheit"))
+    add(parent: window, child: panel)
+    check(what: "show", status: ferro_show(window: window))
+    if getenv(name: "FERROUI_SAMPLE_SCRIPT") != 0 { script() } else { nothing() }
+    0
+}
+
+// ---- the scenario of the Rust tests (samples/SevenGuis/Model/scenarios.rs) ---------------------
+
+fn expect(what: string, object: int, expected: string) -> Unit = {
+    let shown = getText(object: object, name: "Text")
+    print("script: ${what} shows '${shown}': ${shown == expected ? "ok" : "FAILED"}")
+}
+
+fn script() -> Unit = {
+    setText(object: ui.celsius, name: "Text", text: "100")
+    expect(what: "Fahrenheit", object: ui.fahrenheit, expected: "212")
+    setText(object: ui.fahrenheit, name: "Text", text: "5")
+    expect(what: "Celsius", object: ui.celsius, expected: "-15")
+    setText(object: ui.celsius, name: "Text", text: "abc")
+    expect(what: "Fahrenheit (text that is no number converts nothing)", object: ui.fahrenheit, expected: "5")
+    setText(object: ui.celsius, name: "Text", text: "1.5")
+    expect(what: "Celsius (a field typed into is not converted back)", object: ui.celsius, expected: "1.5")
+    expect(what: "Fahrenheit", object: ui.fahrenheit, expected: "35")
+}
+
+fn main() = {
+    print("ABI version ${ferro_abi_version()}")
+    let rc = ferro_app_run(options: osprey_ffi_null(), onStart: onStart, token: 0)
+    print("ferro_app_run returned ${rc}")
+}
