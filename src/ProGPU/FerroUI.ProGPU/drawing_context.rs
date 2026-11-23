@@ -18,10 +18,11 @@ use crate::gpu::{Gpu, Recording, SampledTexture};
 use crate::layer::ProGpuLayer;
 use crate::notes;
 use crate::scene::{SceneBuildError, SceneBuilder, NO_INDEX};
+use ferroui_base::media::effects::IEffect;
 use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::{BoxShadows, Color, EdgeMode, GradientSpreadMethod, IBrush, IPen, RenderOptions, TextOptions, TextRenderingMode};
 use ferroui_base::platform::{
-    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
+    AlphaFormat, IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects, IDrawingContextLayerImpl, IGeometryImpl, IGlyphRunImpl,
     IPlatformRenderInterfaceRegion, PixelFormat,
 };
 use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
@@ -51,6 +52,42 @@ fn text_coverage_transfer(color: progpu_native_color) -> u32 {
 /// The steps of the raster scale of text under a transform that is not upright: eight to a
 /// doubling, so a scale that animates does not fill the atlas with a raster per frame.
 const FREE_SCALE_STEPS: f64 = 8.0;
+
+/// The largest sigma the engine takes for a Gaussian, in device pixels.
+const MAX_EFFECT_SIGMA: f32 = 128.0 / 3.0;
+
+/// The blend mode of the engine for a blend mode of the base library.
+fn native_blend_mode(mode: BitmapBlendingMode) -> u32 {
+    (match mode {
+        BitmapBlendingMode::Unspecified | BitmapBlendingMode::SourceOver => PROGPU_NATIVE_BLEND_SRC_OVER,
+        BitmapBlendingMode::Source => PROGPU_NATIVE_BLEND_SRC,
+        BitmapBlendingMode::Destination => PROGPU_NATIVE_BLEND_DST,
+        BitmapBlendingMode::DestinationOver => PROGPU_NATIVE_BLEND_DST_OVER,
+        BitmapBlendingMode::SourceIn => PROGPU_NATIVE_BLEND_SRC_IN,
+        BitmapBlendingMode::DestinationIn => PROGPU_NATIVE_BLEND_DST_IN,
+        BitmapBlendingMode::SourceOut => PROGPU_NATIVE_BLEND_SRC_OUT,
+        BitmapBlendingMode::DestinationOut => PROGPU_NATIVE_BLEND_DST_OUT,
+        BitmapBlendingMode::SourceAtop => PROGPU_NATIVE_BLEND_SRC_ATOP,
+        BitmapBlendingMode::DestinationAtop => PROGPU_NATIVE_BLEND_DST_ATOP,
+        BitmapBlendingMode::Xor => PROGPU_NATIVE_BLEND_XOR,
+        BitmapBlendingMode::Plus => PROGPU_NATIVE_BLEND_PLUS,
+        BitmapBlendingMode::Screen => PROGPU_NATIVE_BLEND_SCREEN,
+        BitmapBlendingMode::Overlay => PROGPU_NATIVE_BLEND_OVERLAY,
+        BitmapBlendingMode::Darken => PROGPU_NATIVE_BLEND_DARKEN,
+        BitmapBlendingMode::Lighten => PROGPU_NATIVE_BLEND_LIGHTEN,
+        BitmapBlendingMode::ColorDodge => PROGPU_NATIVE_BLEND_COLOR_DODGE,
+        BitmapBlendingMode::ColorBurn => PROGPU_NATIVE_BLEND_COLOR_BURN,
+        BitmapBlendingMode::HardLight => PROGPU_NATIVE_BLEND_HARD_LIGHT,
+        BitmapBlendingMode::SoftLight => PROGPU_NATIVE_BLEND_SOFT_LIGHT,
+        BitmapBlendingMode::Difference => PROGPU_NATIVE_BLEND_DIFFERENCE,
+        BitmapBlendingMode::Exclusion => PROGPU_NATIVE_BLEND_EXCLUSION,
+        BitmapBlendingMode::Multiply => PROGPU_NATIVE_BLEND_MULTIPLY,
+        BitmapBlendingMode::Hue => PROGPU_NATIVE_BLEND_HUE,
+        BitmapBlendingMode::Saturation => PROGPU_NATIVE_BLEND_SATURATION,
+        BitmapBlendingMode::Color => PROGPU_NATIVE_BLEND_COLOR,
+        BitmapBlendingMode::Luminosity => PROGPU_NATIVE_BLEND_LUMINOSITY,
+    }) as u32
+}
 
 /// The sigma of a blur radius, as the other backends convert it.
 pub(crate) fn blur_radius_to_sigma(radius: f64) -> f32 {
@@ -391,6 +428,17 @@ impl ProGpuDrawingContext {
             let result = self.scene().add_solid_brush(color, opacity as f32);
             return self.record(result);
         }
+        let (native, stops) = Self::gradient_record(brush, bounds)?;
+        let result = self.scene().add_brush(&native, &stops);
+        self.record(result)
+    }
+
+    /// The record and the stops of a gradient brush over `bounds`. None for another brush.
+    fn gradient_record(
+        brush: &dyn IBrush,
+        bounds: Rect,
+    ) -> Option<(progpu_native_scene_brush, Vec<progpu_native_scene_gradient_stop>)> {
+        let opacity = brush.opacity();
         let gradient = brush.as_gradient_brush()?;
         let mut stops: Vec<progpu_native_scene_gradient_stop> = gradient
             .gradient_stops()
@@ -471,8 +519,7 @@ impl ProGpuDrawingContext {
         let coordinate = brush_transform.try_invert().unwrap_or(Matrix::IDENTITY);
         native.coordinate_transform0 = [coordinate.m11 as f32, coordinate.m21 as f32, coordinate.m31 as f32, 0.0];
         native.coordinate_transform1 = [coordinate.m12 as f32, coordinate.m22 as f32, coordinate.m32 as f32, 0.0];
-        let result = self.scene().add_brush(&native, &stops);
-        self.record(result)
+        Some((native, stops))
     }
 
     fn analytic(&mut self, primitive: progpu_native_analytic_primitive, brush: u32, bounds: Rect) {
@@ -600,13 +647,15 @@ impl ProGpuDrawingContext {
             if shadow.color.a == 0 {
                 continue;
             }
-            if shadow.is_inset || !uniform {
-                // Inset shadows and the shadows of rounded rectangles with different radii: the
-                // group effect (step P5 of the plan).
-                notes::note_once("box-shadow", "inset box shadows and the shadows of rectangles with different corner radii are not drawn by the ProGPU backend yet");
+            let sigma = blur_radius_to_sigma(shadow.blur);
+            if shadow.is_inset {
+                self.inset_shadow(rect, shadow, sigma);
                 continue;
             }
-            let sigma = blur_radius_to_sigma(shadow.blur);
+            if !uniform {
+                self.outer_shadow_of_uneven_corners(rect, shadow, sigma, opaque);
+                continue;
+            }
             let spread = shadow.spread;
             let radius = if rect.radii_top_left.x > 0.0 { (rect.radii_top_left.x + spread).max(0.0) } else { 0.0 };
             let box_rect = Rect::new(
@@ -648,6 +697,209 @@ impl ProGpuDrawingContext {
                 self.changed();
             }
         }
+    }
+
+    /// The rectangle of `rect` grown by `by` on every side, its radii with it (a corner without
+    /// a radius stays square; a radius does not go below zero).
+    fn spread_rect(rect: &RoundedRect, by: f64, x: f64, y: f64) -> RoundedRect {
+        let grown = |radius: Vector| {
+            if radius.x > 0.0 && radius.y > 0.0 {
+                Vector::new((radius.x + by).max(0.0), (radius.y + by).max(0.0))
+            } else {
+                radius
+            }
+        };
+        RoundedRect::new(
+            Rect::new(rect.rect.x - by + x, rect.rect.y - by + y, (rect.rect.width + 2.0 * by).max(0.0), (rect.rect.height + 2.0 * by).max(0.0)),
+            grown(rect.radii_top_left),
+            grown(rect.radii_top_right),
+            grown(rect.radii_bottom_right),
+            grown(rect.radii_bottom_left),
+        )
+    }
+
+    /// A layer whose content is blurred by `sigma` (in the coordinates of the drawing), or a
+    /// plain layer for a sigma of zero.
+    fn push_blur_layer(&mut self, sigma: f32) {
+        let chain = (sigma > 0.0)
+            .then(|| self.effect_chain(PROGPU_NATIVE_GROUP_EFFECT_GAUSSIAN_BLUR as u32, sigma, (0.0, 0.0), [0.0; 4]))
+            .flatten();
+        self.push_effect_layer(None, chain.unwrap_or(NO_INDEX));
+    }
+
+    /// An inset shadow: a frame around the shape with a hole at the shadow's offset, shrunk by
+    /// the spread and blurred, seen through the shape.
+    fn inset_shadow(&mut self, rect: &RoundedRect, shadow: &ferroui_base::media::BoxShadow, sigma: f32) {
+        if !has_area(rect.rect) {
+            return;
+        }
+        let reach = 3.0 * f64::from(sigma) + shadow.offset_x.abs().max(shadow.offset_y.abs()) + shadow.spread.abs() + 1.0;
+        let hole = Self::spread_rect(rect, -shadow.spread, shadow.offset_x, shadow.offset_y);
+        let outer = rect.rect.inflate(reach);
+        let frame = Self::frame_path(outer, &hole);
+        self.push_clip_rounded(*rect);
+        self.push_blur_layer(sigma);
+        let brush = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(shadow.color);
+        self.fill_path(&frame, &brush);
+        self.pop_scene_layer();
+        self.pop_clip();
+    }
+
+    /// The path of `outer` with `hole` cut out of it.
+    fn frame_path(outer: Rect, hole: &RoundedRect) -> PathData {
+        use ferroui_base::media::{FillRule, SweepDirection};
+        use ferroui_base::platform::IGeometryContext;
+        let mut builder = crate::geometry::PathBuilder::default();
+        builder.set_fill_rule(FillRule::EvenOdd);
+        builder.begin_figure(Point::new(outer.x, outer.y), true);
+        builder.line_to(Point::new(outer.x + outer.width, outer.y), true);
+        builder.line_to(Point::new(outer.x + outer.width, outer.y + outer.height), true);
+        builder.line_to(Point::new(outer.x, outer.y + outer.height), true);
+        builder.end_figure(true);
+        if has_area(hole.rect) {
+            let r = hole.rect;
+            let (tl, tr, br, bl) = (hole.radii_top_left, hole.radii_top_right, hole.radii_bottom_right, hole.radii_bottom_left);
+            let arc = |builder: &mut crate::geometry::PathBuilder, to: Point, radius: Vector| {
+                if radius.x > 0.0 && radius.y > 0.0 {
+                    builder.arc_to(to, ferroui_base::Size::new(radius.x, radius.y), 0.0, false, SweepDirection::Clockwise, true);
+                }
+            };
+            builder.begin_figure(Point::new(r.x + tl.x, r.y), true);
+            builder.line_to(Point::new(r.x + r.width - tr.x, r.y), true);
+            arc(&mut builder, Point::new(r.x + r.width, r.y + tr.y), tr);
+            builder.line_to(Point::new(r.x + r.width, r.y + r.height - br.y), true);
+            arc(&mut builder, Point::new(r.x + r.width - br.x, r.y + r.height), br);
+            builder.line_to(Point::new(r.x + bl.x, r.y + r.height), true);
+            arc(&mut builder, Point::new(r.x, r.y + r.height - bl.y), bl);
+            builder.line_to(Point::new(r.x, r.y + tl.y), true);
+            arc(&mut builder, Point::new(r.x + tl.x, r.y), tl);
+            builder.end_figure(true);
+        }
+        builder.finish()
+    }
+
+    /// The outer shadow of a rectangle whose corners differ: its shape blurred in a layer, kept
+    /// out of a shape that is not opaque by a difference mask.
+    fn outer_shadow_of_uneven_corners(&mut self, rect: &RoundedRect, shadow: &ferroui_base::media::BoxShadow, sigma: f32, opaque: bool) {
+        let shape = Self::spread_rect(rect, shadow.spread, shadow.offset_x, shadow.offset_y);
+        if !has_area(shape.rect) {
+            return;
+        }
+        let saved = self.current;
+        if !opaque && self.current.mask == NO_INDEX && has_area(rect.rect) {
+            let element = Self::rounded_rect_path(rect);
+            if let Some(mask) = self.vector_mask(&element, PROGPU_NATIVE_CLIP_DIFFERENCE as u32) {
+                self.current.mask = mask;
+                self.changed();
+            }
+        }
+        self.push_blur_layer(sigma);
+        let brush = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(shadow.color);
+        self.fill_path(&Self::rounded_rect_path(&shape), &brush);
+        self.pop_scene_layer();
+        if self.current.mask != saved.mask {
+            self.current = saved;
+            self.changed();
+        }
+    }
+
+    /// The effect chain of one effect, its sigma and offset in the coordinates of the drawing
+    /// taken to device pixels, or None for an effect the engine refuses.
+    fn effect_chain(&mut self, kind: u32, sigma: f32, offset: (f32, f32), color: [f32; 4]) -> Option<u32> {
+        let m = self.current.transform;
+        let scale = (m.m11 * m.m22 - m.m12 * m.m21).abs().sqrt() as f32;
+        let device_sigma = sigma * scale;
+        if !device_sigma.is_finite() || device_sigma < 0.0 {
+            return None;
+        }
+        if device_sigma > MAX_EFFECT_SIGMA {
+            notes::note_once("effect-sigma", "a blur above the largest sigma of the engine is drawn at that sigma");
+        }
+        let (x, y) = (f64::from(offset.0), f64::from(offset.1));
+        let effect = progpu_native_group_effect {
+            struct_size: std::mem::size_of::<progpu_native_group_effect>() as u32,
+            kind,
+            flags: 0,
+            revision: 1,
+            sigma_x: device_sigma.min(MAX_EFFECT_SIGMA),
+            sigma_y: device_sigma.min(MAX_EFFECT_SIGMA),
+            reserved: 0,
+            reserved2: 0,
+            offset_x: (x * m.m11 + y * m.m21) as f32,
+            offset_y: (x * m.m12 + y * m.m22) as f32,
+            color_r: color[0],
+            color_g: color[1],
+            color_b: color[2],
+            color_a: color[3],
+        };
+        let result = self.scene().add_effect_chain(&[effect], 1);
+        self.record(result)
+    }
+
+    /// A layer through the effect chain `effect` (`NO_INDEX` for a plain layer), with its bounds
+    /// in device pixels.
+    fn push_effect_layer(&mut self, target: Option<Rect>, effect: u32) {
+        self.refuse_fragment();
+        let layer = progpu_native_scene_layer {
+            struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
+            flags: if target.is_some() { PROGPU_NATIVE_SCENE_LAYER_BOUNDS as u32 } else { 0 },
+            bounds: target.map(image_rect).unwrap_or(progpu_native_image_rect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 }),
+            opacity: 1.0,
+            blend_mode: PROGPU_NATIVE_BLEND_SRC_OVER as u32,
+            mask_resource_index: NO_INDEX,
+            effect_resource_index: effect,
+            content_revision: 0,
+            composite_revision: 0,
+            reserved0: 0,
+            reserved1: 0,
+        };
+        let result = self.scene().push_layer(&layer);
+        self.record(result);
+        self.layers.push(LayerEntry::Layer);
+    }
+
+    /// A layer masked by the gradient `mask` over `bounds`. A solid brush is a plain opacity; a
+    /// brush the engine has no mask for leaves the layer without one, with a note.
+    fn push_brush_mask_layer(&mut self, mask: &dyn IBrush, bounds: Rect) {
+        self.refuse_fragment();
+        if let Some(solid) = mask.as_solid_color_brush() {
+            let alpha = f64::from(solid.color().a) / 255.0 * mask.opacity();
+            self.push_scene_layer(Some(bounds), alpha.clamp(0.0, 1.0), PROGPU_NATIVE_BLEND_SRC_OVER as u32);
+            return;
+        }
+        let Some((brush, stops)) = Self::gradient_record(mask, bounds) else {
+            notes::note_once("opacity-mask", "opacity masks of brushes other than solid colours and gradients are not applied by the ProGPU backend yet");
+            self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
+            return;
+        };
+        // SAFETY: an all-zero record is a valid start (the reserved fields stay zero).
+        let mut record: progpu_native_scene_layer_brush_mask = unsafe { std::mem::zeroed() };
+        record.bounds = image_rect(bounds);
+        record.transform = affine(&self.current.transform);
+        record.opacity = 1.0;
+        record.brush = brush;
+        let result = self.scene().add_brush_mask(&record, &stops);
+        let Some(index) = self.record(result) else {
+            self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
+            return;
+        };
+        let target = transform_bounds(bounds, &self.current.transform);
+        let layer = progpu_native_scene_layer {
+            struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
+            flags: PROGPU_NATIVE_SCENE_LAYER_BOUNDS as u32,
+            bounds: image_rect(target),
+            opacity: 1.0,
+            blend_mode: PROGPU_NATIVE_BLEND_SRC_OVER as u32,
+            mask_resource_index: index,
+            effect_resource_index: NO_INDEX,
+            content_revision: 0,
+            composite_revision: 0,
+            reserved0: 0,
+            reserved1: 0,
+        };
+        let result = self.scene().push_layer(&layer);
+        self.record(result);
+        self.layers.push(LayerEntry::Layer);
     }
 
     /// The image resource of the scene for a bitmap: a layer of the same device (sampled from
@@ -898,9 +1150,12 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.record(result);
     }
 
-    fn draw_bitmap_with_mask(&mut self, _source: &dyn IBitmapImpl, _opacity_mask: &dyn IBrush, _opacity_mask_rect: Rect, _dest_rect: Rect) {
-        // Step P5 of the plan.
-        notes::note_once("bitmap-mask", "bitmaps under an opacity mask are not drawn by the ProGPU backend yet");
+    fn draw_bitmap_with_mask(&mut self, source: &dyn IBitmapImpl, opacity_mask: &dyn IBrush, opacity_mask_rect: Rect, dest_rect: Rect) {
+        let size = source.pixel_size();
+        let source_rect = Rect::new(0.0, 0.0, f64::from(size.width), f64::from(size.height));
+        self.push_brush_mask_layer(opacity_mask, opacity_mask_rect);
+        self.draw_bitmap(source, 1.0, source_rect, dest_rect);
+        self.pop_scene_layer();
     }
 
     fn draw_line(&mut self, pen: Option<&dyn IPen>, p1: Point, p2: Point) {
@@ -1093,10 +1348,8 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.pop_scene_layer();
     }
 
-    fn push_opacity_mask(&mut self, _mask: &dyn IBrush, bounds: Rect) {
-        // Opacity masks (a brush layer mask): step P5 of the plan; the layer keeps the stack.
-        notes::note_once("opacity-mask", "opacity masks are not applied by the ProGPU backend yet");
-        self.push_scene_layer(Some(bounds), 1.0, PROGPU_NATIVE_BLEND_SRC_OVER as u32);
+    fn push_opacity_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {
+        self.push_brush_mask_layer(mask, bounds);
     }
 
     fn pop_opacity_mask(&mut self) {
@@ -1136,13 +1389,29 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
         self.text_options.pop();
     }
 
-    fn try_push_compositing_layer(&mut self, _blend: BitmapBlendingMode, _opacity: f64, _bounds: Rect) -> bool {
-        // Blend modes of compositing layers: step P5 of the plan.
-        false
+    fn try_push_compositing_layer(&mut self, blend: BitmapBlendingMode, opacity: f64, bounds: Rect) -> bool {
+        if ![bounds.x, bounds.y, bounds.width, bounds.height, opacity].iter().all(|value| value.is_finite())
+            || bounds.width < 0.0
+            || bounds.height < 0.0
+            || !(0.0..=1.0).contains(&opacity)
+        {
+            return false;
+        }
+        // The bounds are an allocation hint and not a clip: the layer is not cut to them.
+        self.push_scene_layer(None, opacity, native_blend_mode(blend));
+        true
+    }
+
+    fn pop_compositing_layer(&mut self) {
+        self.pop_scene_layer();
     }
 
     fn get_feature(&mut self, _feature_type: TypeId) -> Option<Rc<dyn Any>> {
         None
+    }
+
+    fn as_drawing_context_impl_with_effects(&mut self) -> Option<&mut dyn IDrawingContextImplWithEffects> {
+        Some(self)
     }
 
     fn as_any_mut(&mut self) -> &mut dyn Any {
@@ -1160,5 +1429,40 @@ impl IDrawingContextImpl for ProGpuDrawingContext {
             let images = self.textures.drain(..).map(|(texture, _)| texture).collect();
             complete(Recording { scene, error: self.error.take(), images });
         }
+    }
+}
+
+impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
+    fn push_effect(&mut self, clip_rect: Option<Rect>, effect: &dyn IEffect) {
+        let target = clip_rect.map(|clip| transform_bounds(clip, &self.current.transform));
+        let chain = if let Some(blur) = effect.as_blur_effect() {
+            let sigma = blur_radius_to_sigma(blur.radius());
+            (blur.radius() > 0.0)
+                .then(|| self.effect_chain(PROGPU_NATIVE_GROUP_EFFECT_GAUSSIAN_BLUR as u32, sigma, (0.0, 0.0), [0.0; 4]))
+                .flatten()
+        } else if let Some(shadow) = effect.as_drop_shadow_effect() {
+            let sigma = if shadow.blur_radius() > 0.0 { blur_radius_to_sigma(shadow.blur_radius()) } else { 0.0 };
+            let color = shadow.color();
+            let channels = [
+                f32::from(color.r) / 255.0,
+                f32::from(color.g) / 255.0,
+                f32::from(color.b) / 255.0,
+                ((f64::from(color.a) / 255.0) * shadow.opacity()).clamp(0.0, 1.0) as f32,
+            ];
+            self.effect_chain(
+                PROGPU_NATIVE_GROUP_EFFECT_DROP_SHADOW as u32,
+                sigma,
+                (shadow.offset_x() as f32, shadow.offset_y() as f32),
+                channels,
+            )
+        } else {
+            notes::note_once("effect-kind", "this effect is drawn without it by the ProGPU backend");
+            None
+        };
+        self.push_effect_layer(target, chain.unwrap_or(NO_INDEX));
+    }
+
+    fn pop_effect(&mut self) {
+        self.pop_scene_layer();
     }
 }

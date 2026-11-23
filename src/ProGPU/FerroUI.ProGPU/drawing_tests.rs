@@ -4,7 +4,9 @@ use crate::geometry::{PathData, ProGpuGeometry};
 use crate::{ProGpuDevice, ProGpuDrawingContext, ProGpuEngine, SceneBuilder, TargetFormat};
 use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen, ImmutableSolidColorBrush};
 use ferroui_base::media::{BoxShadow, BoxShadows, Color, GradientSpreadMethod, IBrush, PenLineCap, PenLineJoin};
-use ferroui_base::platform::IDrawingContextImpl;
+use ferroui_base::media::effects::{ImmutableBlurEffect, ImmutableDropShadowEffect};
+use ferroui_base::media::imaging::BitmapBlendingMode;
+use ferroui_base::platform::{IDrawingContextImpl, IDrawingContextImplWithEffects};
 use ferroui_base::{Matrix, Point, Rect, RelativePoint, RelativeUnit, RoundedRect, Vector};
 use std::rc::Rc;
 
@@ -229,4 +231,120 @@ fn the_relative_transform_of_a_brush_acts_on_the_unit_square() {
     let (left, right) = (pixel(&pixels, 20, 32), pixel(&pixels, 76, 32));
     assert!(is_bluish(left), "the left of the mirrored gradient: {left:?}");
     assert!(is_reddish(right), "the right of the mirrored gradient: {right:?}");
+}
+
+fn fill_rect(context: &mut ProGpuDrawingContext, brush: &dyn IBrush, rect: Rect) {
+    context.draw_rectangle(Some(brush), None, RoundedRect::from_rect(rect), &BoxShadows::default());
+}
+
+#[test]
+fn a_blur_spreads_its_content_over_the_edge() {
+    let Some(engine) = device() else { return };
+    let black = solid(0, 0, 0);
+    let pixels = render(&engine, |context| {
+        context.push_effect(None, &ImmutableBlurEffect::new(12.0));
+        fill_rect(context, black.as_ref(), Rect::new(32.0, 32.0, 32.0, 32.0));
+        context.pop_effect();
+    });
+    let center = pixel(&pixels, 48, 48)[0];
+    let edge = pixel(&pixels, 32, 48)[0];
+    let outside = pixel(&pixels, 28, 48)[0];
+    let far = pixel(&pixels, 4, 48)[0];
+    assert!(center < 40, "the middle stays dark: {center}");
+    assert!(edge > 90 && edge < 170, "the edge is about half: {edge}");
+    assert!(outside > edge && outside < 250, "the blur reaches outside: {outside}");
+    assert_eq!(255, far, "nothing far away");
+}
+
+#[test]
+fn a_drop_shadow_falls_at_its_offset_under_its_content() {
+    let Some(engine) = device() else { return };
+    let red = solid(255, 0, 0);
+    let effect = ImmutableDropShadowEffect::new(12.0, 10.0, 0.0, Color::from_rgb(0, 0, 255), 1.0);
+    let pixels = render(&engine, |context| {
+        context.push_effect(None, &effect);
+        fill_rect(context, red.as_ref(), Rect::new(20.0, 20.0, 30.0, 30.0));
+        context.pop_effect();
+    });
+    assert_eq!([255, 0, 0, 255], pixel(&pixels, 30, 30), "the content over its shadow");
+    assert_eq!([0, 0, 255, 255], pixel(&pixels, 56, 56), "the shadow at its offset");
+    assert_eq!([255, 255, 255, 255], pixel(&pixels, 10, 10), "nothing elsewhere");
+}
+
+#[test]
+fn a_compositing_layer_blends_its_content() {
+    let Some(engine) = device() else { return };
+    let (red, gray) = (solid(255, 0, 0), solid(128, 128, 128));
+    let pixels = render(&engine, |context| {
+        fill_rect(context, red.as_ref(), Rect::new(0.0, 0.0, 96.0, 96.0));
+        assert!(context.try_push_compositing_layer(BitmapBlendingMode::Multiply, 1.0, Rect::new(0.0, 0.0, 48.0, 96.0)));
+        fill_rect(context, gray.as_ref(), Rect::new(0.0, 0.0, 48.0, 96.0));
+        context.pop_compositing_layer();
+        assert!(!context.try_push_compositing_layer(BitmapBlendingMode::Multiply, 2.0, Rect::new(0.0, 0.0, 1.0, 1.0)));
+    });
+    let blended = pixel(&pixels, 24, 48);
+    assert!(blended[0].abs_diff(128) <= 1 && blended[1] == 0 && blended[2] == 0, "multiplied: {blended:?}");
+    assert_eq!([255, 0, 0, 255], pixel(&pixels, 72, 48), "outside the content");
+}
+
+#[test]
+fn an_opacity_mask_of_a_gradient_fades_its_content() {
+    let Some(engine) = device() else { return };
+    let black = solid(0, 0, 0);
+    let mask = ImmutableLinearGradientBrush::new(
+        &[
+            ImmutableGradientStop::new(0.0, Color::from_argb(255, 0, 0, 0)),
+            ImmutableGradientStop::new(1.0, Color::from_argb(0, 0, 0, 0)),
+        ],
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        Some(RelativePoint::new(0.0, 0.0, RelativeUnit::Relative)),
+        Some(RelativePoint::new(1.0, 0.0, RelativeUnit::Relative)),
+        None,
+    );
+    let pixels = render(&engine, |context| {
+        context.push_opacity_mask(&mask, Rect::new(0.0, 0.0, 96.0, 96.0));
+        fill_rect(context, black.as_ref(), Rect::new(0.0, 0.0, 96.0, 96.0));
+        context.pop_opacity_mask();
+    });
+    let (left, middle, right) = (pixel(&pixels, 4, 48)[0], pixel(&pixels, 48, 48)[0], pixel(&pixels, 91, 48)[0]);
+    assert!(left < 30, "opaque at the start: {left}");
+    assert!(middle > 100 && middle < 155, "half way: {middle}");
+    assert!(right > 225, "transparent at the end: {right}");
+}
+
+#[test]
+fn an_inset_shadow_darkens_the_inner_edge() {
+    let Some(engine) = device() else { return };
+    let white = solid(255, 255, 255);
+    let shadows = BoxShadows::new(BoxShadow { offset_x: 0.0, offset_y: 0.0, blur: 8.0, spread: 0.0, color: Color::from_rgb(0, 0, 0), is_inset: true });
+    let pixels = render(&engine, |context| {
+        context.draw_rectangle(Some(white.as_ref() as &dyn IBrush), None, RoundedRect::from_rect(Rect::new(16.0, 16.0, 64.0, 64.0)), &shadows);
+    });
+    let (edge, inner, middle, outside) = (pixel(&pixels, 17, 48)[0], pixel(&pixels, 26, 48)[0], pixel(&pixels, 48, 48)[0], pixel(&pixels, 10, 48)[0]);
+    assert!(edge < inner, "darker at the edge: {edge} {inner}");
+    assert!(middle > 240, "the middle is untouched: {middle}");
+    assert_eq!(255, outside, "nothing outside the shape");
+}
+
+#[test]
+fn the_shadow_of_uneven_corners_is_drawn() {
+    let Some(engine) = device() else { return };
+    let white = solid(255, 255, 255);
+    let rect = RoundedRect::new(
+        Rect::new(24.0, 24.0, 48.0, 48.0),
+        Vector::new(12.0, 12.0),
+        Vector::new(0.0, 0.0),
+        Vector::new(6.0, 6.0),
+        Vector::new(0.0, 0.0),
+    );
+    let shadows = BoxShadows::new(BoxShadow { offset_x: 6.0, offset_y: 6.0, blur: 0.0, spread: 0.0, color: Color::from_rgb(0, 0, 0), is_inset: false });
+    let pixels = render(&engine, |context| {
+        context.draw_rectangle(Some(white.as_ref() as &dyn IBrush), None, rect, &shadows);
+    });
+    assert_eq!([0, 0, 0, 255], pixel(&pixels, 75, 50), "the shadow right of the shape");
+    assert_eq!([255, 255, 255, 255], pixel(&pixels, 48, 48), "the shape over it");
+    assert_eq!([255, 255, 255, 255], pixel(&pixels, 12, 12), "nothing else");
 }
