@@ -199,18 +199,21 @@ impl Drop for HostProgram {
 /// The program of a custom effect: its layout in the block of the convention.
 struct ShaderProgram {
     program: HostProgram,
-    offsets: Vec<u32>,
-    size: usize,
+    layout: BlockLayout,
     children: usize,
 }
 
-/// The uniforms of `effect` over `area` as the block of its program; `None` when they are not the
-/// members `offsets` was made from.
-fn shader_block(effect: &ImmutableCustomEffect, offsets: &[u32], size: usize, area: ShaderArea) -> Option<Vec<u8>> {
-    let mut block = vec![0u8; size];
-    let mut members = offsets.iter();
+/// The uniforms of `effect` at `placement` as the block of its program; `None` when they are not
+/// the members `layout` was made from.
+fn shader_block(
+    effect: &ImmutableCustomEffect,
+    layout: &BlockLayout,
+    placement: ShaderPlacement,
+) -> Option<Vec<u8>> {
+    let mut block = vec![0u8; layout.size];
+    let mut members = layout.offsets.iter();
     let mut matches = true;
-    effect.for_each_shader_uniform(area.size, area.scale, &mut |_, value| {
+    effect.for_each_shader_uniform(placement.whole, placement.scale, &mut |_, value| {
         let Some(&offset) = members.next() else {
             matches = false;
             return;
@@ -232,115 +235,110 @@ fn shader_block(effect: &ImmutableCustomEffect, offsets: &[u32], size: usize, ar
     (matches && members.next().is_none()).then_some(block)
 }
 
-/// Where a shader effect is drawn.
+/// Where the output of a custom effect lies on what it is drawn over.
 #[derive(Clone, Copy, Debug, PartialEq)]
-pub(crate) struct ShaderArea {
-    /// The device pixel of the area at the top left texel of the textures (whole pixels).
-    pub(crate) origin: [f32; 2],
-    /// The width and the height of the whole area (`layer_size`).
-    pub(crate) size: [f32; 2],
-    /// Device pixels per device independent pixel (`layer_scale`).
+pub(crate) struct ShaderPlacement {
+    /// How far the first texel of the textures is into the effect, in whole device pixels.
+    pub(crate) first_texel: [f32; 2],
+    /// The whole effect in device pixels: the value of `layer_size`.
+    pub(crate) whole: [f32; 2],
+    /// The value of `layer_scale`.
     pub(crate) scale: f32,
-    /// The part of the textures that holds the area, in pixels.
-    pub(crate) held: (u32, u32),
+    /// The pixels of the textures that are on the target.
+    pub(crate) pixels: (u32, u32),
 }
 
-/// The byte offset of each member of `struct Uniforms` of a program and the size of the block,
-/// when its members are those of the convention (`layout`: names, order and types): the rules of
-/// WGSL for what the convention can hold (`f32`, `i32`, `vec2<f32>`, `vec4<f32>`).
-pub(crate) fn uniform_block_layout(
-    wgsl: &str,
-    layout: &[(String, ShaderUniformType)],
-) -> Result<(Vec<u32>, usize), String> {
-    let source = without_comments(wgsl);
-    let start = find_struct(&source).ok_or("the program has no `struct Uniforms`")?;
-    let body = &source[start..];
-    let open = body.find('{').ok_or("`struct Uniforms` has no body")?;
-    let close = body[open..].find('}').ok_or("`struct Uniforms` is not closed")? + open;
-    let members: Vec<&str> =
-        body[open + 1..close].split(',').map(str::trim).filter(|member| !member.is_empty()).collect();
-    if members.len() != layout.len() {
-        return Err(format!("Uniforms has {} members, the convention has {}", members.len(), layout.len()));
-    }
-    let (mut offsets, mut at, mut largest) = (Vec::with_capacity(layout.len()), 0u32, 4u32);
-    for (member, (name, kind)) in members.iter().zip(layout) {
-        let Some((declared, ty)) = member.split_once(':') else {
-            return Err(format!("the member `{member}` of Uniforms has no type"));
-        };
-        let (declared, ty) = (declared.trim(), ty.split_whitespace().collect::<String>());
-        if declared != name.as_str() {
-            return Err(format!("the member `{declared}` of Uniforms should be `{name}`"));
-        }
-        let (size, same) = match kind {
-            ShaderUniformType::Float => (4, ty == "f32"),
-            ShaderUniformType::Int => (4, ty == "i32"),
-            ShaderUniformType::Float2 => (8, ty == "vec2<f32>" || ty == "vec2f"),
-            ShaderUniformType::Float4 => (16, ty == "vec4<f32>" || ty == "vec4f"),
-            #[allow(unreachable_patterns)]
-            _ => return Err(format!("the convention has a type this backend has no layout for: {name}")),
-        };
-        if !same {
-            return Err(format!("the member `{name}` of Uniforms is not a {}", kind.wgsl()));
-        }
-        at = at.div_ceil(size) * size;
-        offsets.push(at);
-        at += size;
-        largest = largest.max(size);
-    }
-    let span = at.div_ceil(largest) * largest;
-    Ok((offsets, (span as usize).max(16).div_ceil(16) * 16))
-}
-
-/// `source` with its comments replaced by a space.
-fn without_comments(source: &str) -> String {
-    let bytes = source.as_bytes();
-    let (mut out, mut at, mut last) = (String::with_capacity(source.len()), 0, 0);
-    while at + 1 < bytes.len() {
-        if bytes[at] == b'/' && bytes[at + 1] == b'/' {
-            out.push_str(&source[last..at]);
-            out.push(' ');
-            at = source[at..].find('\n').map_or(bytes.len(), |line| at + line);
-            last = at;
-        } else if bytes[at] == b'/' && bytes[at + 1] == b'*' {
-            out.push_str(&source[last..at]);
-            out.push(' ');
-            // Block comments of WGSL nest.
-            let (mut depth, mut inside) = (1, at + 2);
-            while depth > 0 && inside + 1 < bytes.len() {
-                match (bytes[inside], bytes[inside + 1]) {
-                    (b'/', b'*') => (depth, inside) = (depth + 1, inside + 2),
-                    (b'*', b'/') => (depth, inside) = (depth - 1, inside + 2),
-                    _ => inside += 1,
-                }
-            }
-            at = if depth > 0 { bytes.len() } else { inside };
-            last = at;
+/// The tokens of WGSL source without its comments: words, and every other character alone.
+fn wgsl_tokens(source: &str) -> Vec<&str> {
+    let mut tokens = Vec::new();
+    let mut rest = source.trim_start();
+    while let Some(first) = rest.chars().next() {
+        let length = if rest.starts_with("//") {
+            rest.find('\n').unwrap_or(rest.len())
+        } else if rest.starts_with("/*") {
+            block_comment_length(rest)
         } else {
-            at += 1;
-        }
+            let is_word = |c: char| c.is_alphanumeric() || c == '_';
+            let token = if is_word(first) { rest.find(|c| !is_word(c)).unwrap_or(rest.len()) } else { first.len_utf8() };
+            tokens.push(&rest[..token]);
+            token
+        };
+        rest = rest[length..].trim_start();
     }
-    out.push_str(&source[last.min(source.len())..]);
-    out
+    tokens
 }
 
-/// Where the declaration of `struct Uniforms` starts.
-fn find_struct(source: &str) -> Option<usize> {
-    let mut from = 0;
-    while let Some(found) = source[from..].find("struct") {
-        let at = from + found;
-        let before = source[..at].chars().next_back();
-        let rest = &source[at + "struct".len()..];
-        let name = rest.trim_start();
-        let separated = rest.len() != name.len();
-        let ends = name.strip_prefix("Uniforms").is_some_and(|tail| {
-            !tail.chars().next().is_some_and(|next| next.is_alphanumeric() || next == '_')
-        });
-        if separated && ends && !before.is_some_and(|c| c.is_alphanumeric() || c == '_') {
-            return Some(at);
+/// The bytes of the block comment `text` starts with; block comments of WGSL nest.
+fn block_comment_length(text: &str) -> usize {
+    let mut depth = 0usize;
+    let mut at = 0;
+    while at < text.len() {
+        let rest = &text[at..];
+        if rest.starts_with("/*") {
+            depth += 1;
+            at += 2;
+        } else if rest.starts_with("*/") {
+            depth -= 1;
+            at += 2;
+            if depth == 0 {
+                return at;
+            }
+        } else {
+            at += rest.chars().next().map_or(1, char::len_utf8);
         }
-        from = at + "struct".len();
     }
-    None
+    text.len()
+}
+
+/// Where the members of `struct Uniforms` of a program are in its block, by the layout rules of
+/// WGSL for the types the convention can hold.
+#[derive(Debug, PartialEq, Eq)]
+pub(crate) struct BlockLayout {
+    offsets: Vec<u32>,
+    size: usize,
+}
+
+impl BlockLayout {
+    /// The layout of the block of `wgsl`, when its members are the `convention`: its names, in
+    /// its order, of its types.
+    pub(crate) fn of(wgsl: &str, convention: &[(String, ShaderUniformType)]) -> Result<Self, String> {
+        let tokens = wgsl_tokens(wgsl);
+        let opening = ["struct", "Uniforms", "{"];
+        let start = tokens.windows(3).position(|run| run == opening).ok_or("the program has no `struct Uniforms`")?;
+        let body = &tokens[start + opening.len()..];
+        let end = body.iter().position(|token| *token == "}").ok_or("`struct Uniforms` is not closed")?;
+        let declared: Vec<&[&str]> = body[..end].split(|token| *token == ",").filter(|m| !m.is_empty()).collect();
+        if declared.len() != convention.len() {
+            return Err(format!("Uniforms has {} members, the convention has {}", declared.len(), convention.len()));
+        }
+        let mut offsets = Vec::with_capacity(declared.len());
+        let (mut cursor, mut widest) = (0u32, 4u32);
+        for (member, (name, kind)) in declared.iter().zip(convention) {
+            let [member_name, ":", type_tokens @ ..] = member else {
+                return Err(format!("a member of Uniforms is not `name: type`, where `{name}` is expected"));
+            };
+            if member_name != name {
+                return Err(format!("Uniforms has `{member_name}` where the convention has `{name}`"));
+            }
+            let (width, spellings): (u32, &[&str]) = match kind {
+                ShaderUniformType::Float => (4, &["f32"]),
+                ShaderUniformType::Int => (4, &["i32"]),
+                ShaderUniformType::Float2 => (8, &["vec2<f32>", "vec2f"]),
+                ShaderUniformType::Float4 => (16, &["vec4<f32>", "vec4f"]),
+                #[allow(unreachable_patterns)]
+                _ => return Err(format!("no layout is known for the type of `{name}`")),
+            };
+            if !spellings.contains(&type_tokens.concat().as_str()) {
+                return Err(format!("`{name}` of Uniforms is not a {}", kind.wgsl()));
+            }
+            let offset = cursor.next_multiple_of(width);
+            offsets.push(offset);
+            cursor = offset + width;
+            widest = widest.max(width);
+        }
+        let size = cursor.next_multiple_of(widest).next_multiple_of(16).max(16) as usize;
+        Ok(BlockLayout { offsets, size })
+    }
 }
 
 /// A free or used texture of the pool.
@@ -534,13 +532,13 @@ impl EffectPasses {
     fn compile_shader(&self, gpu: &Gpu, effect: &ImmutableCustomEffect) -> Result<ShaderProgram, String> {
         let description = effect.shader().ok_or("the effect is not a shader effect")?;
         effect.check_shader_children()?;
-        let (offsets, size) = uniform_block_layout(&description.wgsl, &effect.shader_uniform_layout())?;
+        let layout = BlockLayout::of(&description.wgsl, &effect.shader_uniform_layout())?;
         let children = description.children.len();
         let effects = self.effects(gpu).ok_or("the engine has no layer effects")?;
         let module = description.wgsl_module();
-        let program = HostProgram::new(effects, gpu.device(), &module, size as u32, children as u32)
+        let program = HostProgram::new(effects, gpu.device(), &module, layout.size as u32, children as u32)
             .ok_or("the device refused its WGSL")?;
-        Ok(ShaderProgram { program, offsets, size, children })
+        Ok(ShaderProgram { program, layout, children })
     }
 
     /// The shader of `effect` over `content` into a texture of the pool of the same size. `None`
@@ -550,7 +548,7 @@ impl EffectPasses {
         gpu: &Gpu,
         content: &Rc<GpuTexture>,
         effect: &ImmutableCustomEffect,
-        area: ShaderArea,
+        placement: ShaderPlacement,
     ) -> Option<Rc<GpuTexture>> {
         if !self.prepare_shader(gpu, effect) {
             return None;
@@ -566,13 +564,14 @@ impl EffectPasses {
             notes::note_once(&key, &format!("the images of the effect {} do not match it", effect.name()));
             return None;
         }
-        let Some(block) = shader_block(effect, &shader.offsets, shader.size, area) else {
+        let Some(block) = shader_block(effect, &shader.layout, placement) else {
             notes::note_once(&key, &format!("the uniforms of the effect {} do not match it", effect.name()));
             return None;
         };
-        let pass = [area.origin[0], area.origin[1], area.held.0 as f32, area.held.1 as f32];
+        let (held_width, held_height) = placement.pixels;
+        let pass = [placement.first_texel[0], placement.first_texel[1], held_width as f32, held_height as f32];
         let output = self.texture(gpu, content.width(), content.height());
-        let target = target_of(&output, [content.view() as usize, 0], area.held);
+        let target = target_of(&output, [content.view() as usize, 0], placement.pixels);
         let views: Vec<usize> = children.iter().map(|child| child.view() as usize).collect();
         // SAFETY: the effects and the program are alive and entered; the block, the views and the
         // records outlive the call.
@@ -641,33 +640,45 @@ impl EffectPasses {
 mod tests {
     use super::*;
 
-    fn layout(members: &[(&str, ShaderUniformType)]) -> Vec<(String, ShaderUniformType)> {
+    fn convention(members: &[(&str, ShaderUniformType)]) -> Vec<(String, ShaderUniformType)> {
         members.iter().map(|(name, kind)| ((*name).to_owned(), *kind)).collect()
     }
 
     #[test]
-    fn the_offsets_of_a_block_follow_the_alignment_of_wgsl() {
+    fn a_block_is_laid_out_by_the_alignment_of_wgsl() {
         let wgsl = "// struct Uniforms { nope: f32 }\n\
-                    struct Uniforms {\n  a: f32, /* one */\n  b: vec2<f32>,\n  c: i32,\n  d: vec4f,\n}\n\
-                    fn effect() {}";
-        let expected = layout(&[
+                    /* a /* nested */ comment */ struct Uniforms {\n  a: f32, /* one */\n  b: vec2<f32>,\n  c: i32,\n\
+                    d: vec4f,\n}\nfn effect() {}";
+        let expected = convention(&[
             ("a", ShaderUniformType::Float),
             ("b", ShaderUniformType::Float2),
             ("c", ShaderUniformType::Int),
             ("d", ShaderUniformType::Float4),
         ]);
-        let (offsets, size) = uniform_block_layout(wgsl, &expected).expect("the layout");
-        assert_eq!(offsets, [0, 8, 16, 32]);
-        assert_eq!(size, 48);
+        let layout = BlockLayout::of(wgsl, &expected).expect("the layout");
+        assert_eq!(layout.offsets, [0, 8, 16, 32]);
+        assert_eq!(layout.size, 48);
     }
 
     #[test]
     fn a_block_that_is_not_the_convention_is_refused() {
-        let expected = layout(&[("a", ShaderUniformType::Float)]);
-        assert!(uniform_block_layout("struct Other { a: f32 }", &expected).is_err());
-        assert!(uniform_block_layout("struct Uniforms { b: f32 }", &expected).is_err());
-        assert!(uniform_block_layout("struct Uniforms { a: i32 }", &expected).is_err());
-        assert!(uniform_block_layout("struct Uniforms { a: f32, b: f32 }", &expected).is_err());
-        assert!(uniform_block_layout("struct MyUniforms { a: f32 }", &expected).is_err());
+        let expected = convention(&[("a", ShaderUniformType::Float)]);
+        for wgsl in [
+            "struct Other { a: f32 }",
+            "struct MyUniforms { a: f32 }",
+            "struct Uniforms { b: f32 }",
+            "struct Uniforms { a: i32 }",
+            "struct Uniforms { a: f32, b: f32 }",
+            "struct Uniforms { @align(16) a: f32 }",
+            "struct Uniforms { a: f32",
+        ] {
+            assert!(BlockLayout::of(wgsl, &expected).is_err(), "{wgsl}");
+        }
+    }
+
+    #[test]
+    fn a_small_block_is_one_vector() {
+        let expected = convention(&[("a", ShaderUniformType::Float)]);
+        assert_eq!(BlockLayout::of("struct Uniforms { a: f32, }", &expected).expect("the layout").size, 16);
     }
 }
