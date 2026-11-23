@@ -605,7 +605,7 @@ use ferroui_themes_fluent::keys;
 
 border()
     // Follows the resource through a change of the theme variant, with no component running again.
-    .dynamic_resource(Border::background_property(), keys::CardBackgroundFillColorDefaultBrush)
+    .dynamic_resource(Border::background_property(), keys::SystemControlBackgroundAltHighBrush)
     // Takes the first value the control finds.
     .static_resource(Border::corner_radius_property(), keys::ControlCornerRadius)
 ```

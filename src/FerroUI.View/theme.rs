@@ -4,7 +4,7 @@
 //! ```ignore
 //! let chip = control_theme::<ToggleButton>()
 //!     .set(TemplatedControl::padding_property(), (12.0, 4.0))
-//!     .dynamic_resource(TemplatedControl::background_property(), keys::ControlFillColorDefaultBrush)
+//!     .dynamic_resource(TemplatedControl::background_property(), keys::SystemControlBackgroundAltHighBrush)
 //!     .template(|| {
 //!         border()
 //!             .name("PART_Border")
@@ -19,7 +19,7 @@
 //!     })
 //!     .nested(
 //!         style(nesting().checked().template().of::<Border>())
-//!             .dynamic_resource(Border::background_property(), keys::AccentFillColorDefaultBrush),
+//!             .dynamic_resource(Border::background_property(), keys::SystemControlHighlightAccentBrush),
 //!     )
 //!     .build();
 //! ```
