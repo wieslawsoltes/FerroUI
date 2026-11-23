@@ -81,7 +81,7 @@ impl InputElementImpl for FlipView {
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_moved(this, e);
         // As WinUI: touch pages by swiping and does not bring the buttons up.
-        if e.pointer().pointer_type() == PointerType::Touch {
+        if e.pointer().type_() == PointerType::Touch {
             this.hide_buttons();
         } else {
             this.show_buttons();

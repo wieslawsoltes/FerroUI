@@ -1,10 +1,11 @@
 //! The navigation buttons of `FlipView`, with its control theme.
 
 use crate::{register_types, FlipView, ASSEMBLY};
-use ferroui_base::animation::{PageSlide, SlideAxis};
+use ferroui_base::animation::{PageSlide, SignedDuration, SlideAxis};
+use ferroui_base::metadata::from_markup_value;
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::styling::{IStyle, Styles};
-use ferroui_base::{Ref, Size};
+use ferroui_base::Ref;
 use ferroui_controls::testing::{TestServices, UnitTestApplication, UnitTestApplicationScope};
 use ferroui_controls::{Application, Border, Button, Control, TextBlock, Window};
 use ferroui_markup_xaml::{RuntimeXamlLoaderConfiguration, RuntimeXamlLoaderDocument};
@@ -15,37 +16,43 @@ fn start() -> UnitTestApplicationScope {
     register_types();
     let services = TestServices::styled_window().with_theme(|| ferroui_themes_winui::WinUITheme::new().as_style());
     let scope = UnitTestApplication::start(services);
-    let document = RuntimeXamlLoaderDocument::from_str(
-        r#"<StyleInclude xmlns="https://github.com/ferroui" Source="ferres://FerroUI.Controls.FlipView/Themes/WinUI/WinUI.xaml" />"#,
-    );
-    let loaded = FerroRuntimeXamlLoader::load(document, RuntimeXamlLoaderConfiguration::default())
-        .expect("the theme of the crate loads");
-    let style = loaded.cast_style().expect("a style");
+    FerroRuntimeXamlLoader::register();
+    let xaml = "<Styles xmlns=\"https://github.com/ferroui\">\
+                  <StyleInclude Source=\"ferres://FerroUI.Controls.FlipView/Themes/WinUI/WinUI.xaml\" />\
+                </Styles>";
+    let mut configuration = RuntimeXamlLoaderConfiguration::new();
+    configuration.local_assembly = Some(&ASSEMBLY);
+    let loaded = FerroRuntimeXamlLoader::load_document(RuntimeXamlLoaderDocument::new(xaml), Some(configuration))
+        .unwrap_or_else(|error| panic!("WinUI.xaml failed to load: {}", error.message()));
+    let styles = from_markup_value::<Ref<Styles>>(&Some(loaded)).expect("a Styles");
+    let style: Rc<dyn IStyle> = styles.into();
     Application::current().expect("the application").styles().add(style);
-    let _ = ASSEMBLY.name;
     scope
 }
 
 fn hosted(items: usize) -> (Ref<Window>, Ref<FlipView>) {
     let target = FlipView::new();
+    target.set_width(400.0);
+    target.set_height(300.0);
     for index in 0..items {
+        let text = TextBlock::new();
+        text.set_text(Some(&format!("page {index}")));
         let page = Border::new();
-        page.set_child(Some(TextBlock::with_text(&format!("page {index}")).upcast::<Control>()));
-        target.items().add(Some(Control::boxed(page)));
+        page.set_child(Some(text.upcast::<Control>()));
+        target.items().add(Some(Control::boxed(&page)));
     }
     let window = Window::new();
-    window.set_content(Some(Rc::new(target.clone().upcast::<Control>())));
+    window.set_content(Some(Control::boxed(&target)));
     window.show();
-    window.measure(Size::new(400.0, 300.0));
-    window.arrange(ferroui_base::Rect::from_size(Size::new(400.0, 300.0)));
+    window.update_layout();
     (window, target)
 }
 
 fn button(target: &FlipView, name: &str) -> Ref<Button> {
     target
-        .get_template_children()
-        .into_iter()
-        .find_map(|child| child.find_descendant_of_type_named::<Button>(name))
+        .get_visual_descendants()
+        .filter_map(|visual| visual.cast::<Button>())
+        .find(|button| button.name().as_deref() == Some(name))
         .unwrap_or_else(|| panic!("the template has {name}"))
 }
 
@@ -96,7 +103,7 @@ fn the_buttons_move_the_selection() {
 fn a_vertical_flip_view_shows_the_vertical_buttons() {
     let _app = start();
     let (_window, target) = hosted(3);
-    target.set_page_transition(Some(Rc::new(PageSlide::new(std::time::Duration::ZERO, SlideAxis::Vertical))));
+    target.set_page_transition(Some(Rc::new(PageSlide::with_duration(SignedDuration::ZERO, SlideAxis::Vertical))));
     target.show_buttons();
 
     assert!(button(&target, "NextButtonVertical").is_visible());
