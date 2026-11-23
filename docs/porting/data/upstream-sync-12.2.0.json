@@ -1379,9 +1379,9 @@
    "date": "2026-11-13",
    "area": "themes",
    "class": "port",
-   "note": "Simple ComboBox and Slider show validation errors.",
-   "part": "themes",
-   "state": "planned"
+   "note": "Simple ComboBox and Slider are wrapped in `DataValidationErrors`. One more element per control in the Simple theme: theme start-up check owed.",
+   "part": "themes2",
+   "state": "done"
   },
   {
    "hash": "d0a30417019e5cba8c0d6253a2126a374022599b",

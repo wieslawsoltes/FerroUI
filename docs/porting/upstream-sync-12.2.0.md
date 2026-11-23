@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (90 done, 22 planned) | 112 |
+| `port` (91 done, 21 planned) | 112 |
 | `already` | 18 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -328,7 +328,7 @@ left out only with a recorded performance or better-code reason.
 | `53e461e07a` | #22466 | 2026-11-13 | controls | `port` (done) | controls2 | Tab strip stays reachable with Tab. |
 | `ab36f90feb` | #22701 | 2026-11-13 | controls | `port` (done) | controls | Grid: debug assertion allows a rounding residual. |
 | `5ea0586b32` | #22699 | 2026-11-13 | themes | `port` (done) | themes2 | Fluent ButtonSpinner outer corner. |
-| `a05d9d0046` | #22812 | 2026-11-13 | themes | `port` | themes | Simple ComboBox and Slider show validation errors. |
+| `a05d9d0046` | #22812 | 2026-11-13 | themes | `port` (done) | themes2 | Simple ComboBox and Slider are wrapped in `DataValidationErrors`. One more element per control in the Simple theme: theme start-up check owed. |
 | `d0a3041701` | #22475 | 2026-11-13 | controls | `port` (done) | controls | RelativePanel chain with infinite available size. |
 | `ad90a07d03` | #22671 | 2026-11-13 | automation | `port` (done) | platforms2 | `LabeledBy` in Windows UI Automation. |
 | `10a2fb0ac5` | #22682 | 2026-11-13 | platform-win32 | `port` (done) | platforms2 | OLE `GetData` retried for 100 ms while another process holds the clipboard, then a timeout error instead of no data. |
