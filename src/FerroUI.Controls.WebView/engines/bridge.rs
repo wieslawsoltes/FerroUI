@@ -38,7 +38,7 @@ pub(crate) fn deliver_script(message_json: &str) -> String {
 
 /// `html` with `script` as its first element: after a doctype, which must stay first for the
 /// page to keep its rendering mode.
-#[cfg_attr(windows, allow(dead_code))]
+#[cfg(any(target_os = "android", target_arch = "wasm32", test))]
 pub(crate) fn with_document_script(html: &str, script: &str) -> String {
     let start = html.len() - html.trim_start().len();
     let rest = &html[start..];
