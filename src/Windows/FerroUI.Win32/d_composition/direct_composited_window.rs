@@ -28,7 +28,7 @@ impl DirectCompositedWindow {
         shared: Arc<DirectCompositionShared>,
     ) -> Result<Arc<DirectCompositedWindow>, HResult> {
         let device = shared.device().cast::<IDCompositionDevice2>()?;
-        let desktop_target = shared.device().create_target_for_hwnd(info.handle(), false)?.ok_or(HResult::POINTER)?;
+        let desktop_target = shared.device().create_target_for_hwnd(info.handle(), 0)?.ok_or(HResult::POINTER)?;
         let target = desktop_target.cast::<IDCompositionTarget>()?;
         let container = shared.device().create_visual()?.ok_or(HResult::POINTER)?;
         target.set_root(Some(&*container))?;

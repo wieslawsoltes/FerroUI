@@ -186,10 +186,16 @@ impl DataTransferToOleDataObjectWrapper {
 
     /// Whether a format can be asked for, and which data format it is; the
     /// result code when it cannot.
-    fn validate_format(&self, format: &FORMATETC) -> Result<(Rc<dyn IDataTransfer>, DataFormat), u32> {
-        if !(format.tymed == TYMED::TYMED_HGLOBAL
-            || (format.tymed == TYMED::TYMED_GDI && format.cf_format == ClipboardFormat::CF_BITMAP))
-        {
+    fn validate_format(&self, format: &FORMATETC) -> Result<(Rc<dyn IDataTransfer>, DataFormat, TYMED), u32> {
+        // The requested tymed is a combination of the media accepted by the caller
+        // (WPF and WinForms ask for HGLOBAL | ISTREAM | GDI): pick the one we can provide.
+        let tymed = if format.cf_format == ClipboardFormat::CF_BITMAP && format.tymed.intersects(TYMED::TYMED_GDI) {
+            TYMED::TYMED_GDI
+        } else {
+            TYMED::TYMED_HGLOBAL
+        };
+
+        if !format.tymed.intersects(tymed) {
             return Err(DV_E_TYMED);
         }
 
@@ -205,7 +211,7 @@ impl DataTransferToOleDataObjectWrapper {
             return Err(DV_E_FORMATETC);
         }
 
-        Ok((data_transfer, ClipboardFormatRegistry::get_or_add_format_from_id(format.cf_format)))
+        Ok((data_transfer, ClipboardFormatRegistry::get_or_add_format_from_id(format.cf_format), tymed))
     }
 
     fn calc_format_ids(&self) -> Rc<[u16]> {
@@ -257,13 +263,13 @@ impl DataTransferToOleDataObjectWrapper {
         }
         // SAFETY: a non-null format of the caller, read for the call.
         let format = unsafe { format.read() };
-        let (data_transfer, data_format) = match self.validate_format(&format) {
+        let (data_transfer, data_format, tymed) = match self.validate_format(&format) {
             Ok(valid) => valid,
             Err(result) => return result,
         };
 
         let mut filled = STGMEDIUM::default();
-        let result = if format.tymed == TYMED::TYMED_GDI {
+        let result = if tymed == TYMED::TYMED_GDI {
             filled.tymed = TYMED::TYMED_GDI;
             ole_data_object_helper::write_data_to_gdi(&*data_transfer, &data_format, &mut filled.unionmember)
         } else {
@@ -282,7 +288,11 @@ impl DataTransferToOleDataObjectWrapper {
         }
         // SAFETY: a non-null format of the caller, read for the call.
         let format = unsafe { format.read() };
-        let (data_transfer, data_format) = match self.validate_format(&format) {
+        // Unlike `get_data`, only one medium can be specified here, and only HGLOBAL is supported.
+        if format.tymed != TYMED::TYMED_HGLOBAL {
+            return DV_E_TYMED;
+        }
+        let (data_transfer, data_format, _) = match self.validate_format(&format) {
             Ok(valid) => valid,
             Err(result) => return result,
         };
