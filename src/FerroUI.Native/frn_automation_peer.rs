@@ -14,9 +14,8 @@ use ferroui_controls::automation::peers::{
 };
 use ferroui_controls::automation::provider::{
     IEmbeddedRootProvider, IExpandCollapseProvider, IInvokeProvider, IRangeValueProvider, IRootProvider,
-    ISelectionItemProvider, ITextProvider, ITextProvider2, ITextRangeProvider, IToggleProvider,
-    IValueProvider, SupportedTextSelection, TextAttribute, TextAttributeRun, TextAttributeValue,
-    TextPatternRangeEndpoint, TextUnit,
+    ISelectionItemProvider, ITextProvider, ITextProvider2, IToggleProvider, IValueProvider, TextSpanOps,
+    TextStyleSpan, TextUnit,
 };
 use ferroui_controls::automation::{
     AutomationElementIdentifiers, AutomationProperty, AutomationPropertyChangedEventArgs,
@@ -125,7 +124,7 @@ impl FrnAutomationPeer {
 
             let span_text = inner
                 .get_provider::<dyn ITextProvider>()
-                .filter(|text| supports_text_spans(text.as_ref()));
+                .filter(|text| text.text_span_ops().is_some_and(|ops| ops.supports_spans(text.as_ref())));
             if let Some(text) = span_text.as_ref() {
                 let weak = this.clone();
                 if let Ok(selection) = text.text_selection_changed(Rc::new(move || {
@@ -193,11 +192,19 @@ impl FrnAutomationPeer {
         self.inner.get_provider::<T>().is_some()
     }
 
-    fn with_text_provider<T>(&self, read: impl FnOnce(&dyn ITextProvider) -> Option<T>) -> Option<T> {
+    /// Reads the text provider through its span operations, which only some providers offer.
+    fn with_text_ops<T>(
+        &self,
+        read: impl FnOnce(&dyn ITextProvider, &'static dyn TextSpanOps) -> Option<T>,
+    ) -> Option<T> {
         if !self.has_text_spans {
             return None;
         }
-        self.guard_live(None, || read(self.inner.get_provider::<dyn ITextProvider>()?.as_ref()))
+        self.guard_live(None, || {
+            let text = self.inner.get_provider::<dyn ITextProvider>()?;
+            let ops = text.text_span_ops()?;
+            read(text.as_ref(), ops)
+        })
     }
 
     fn text_caret_offsets(&self) -> Option<Range<usize>> {
@@ -206,13 +213,9 @@ impl FrnAutomationPeer {
     }
 
     fn text_span_for_unit(&self, offset: i64, unit: TextUnit) -> FrnTextSpan {
-        self.with_text_provider(|text| {
-            let index = usize::try_from(offset).ok()?;
-            let range = text.range_from_offsets(index..index).ok()??;
-            range.expand_to_enclosing_unit(unit).ok()?;
-            let span = text_span(range.as_ref())?;
-            (span.start <= offset && offset < span.end).then_some(span)
-        }).unwrap_or(UNAVAILABLE_TEXT_SPAN)
+        self.with_text_ops(|text, ops| ops.unit_span(text, usize::try_from(offset).ok()?, unit))
+            .and_then(text_span_from_offsets)
+            .unwrap_or(UNAVAILABLE_TEXT_SPAN)
     }
 
     fn on_peer_property_changed(&self, e: &AutomationPropertyChangedEventArgs) {
@@ -639,60 +642,40 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn text_provider_is_multiline(&self) -> bool {
-        self.with_text_provider(|text| Some(text.is_multiline())).unwrap_or(false)
+        self.with_text_ops(|text, _| Some(text.is_multiline())).unwrap_or(false)
     }
 
     fn text_provider_can_select(&self) -> bool {
-        self.with_text_provider(|text| text.supported_text_selection().ok())
-            .is_some_and(|mode| mode != SupportedTextSelection::None)
+        self.with_text_ops(|text, ops| Some(ops.can_select(text))).unwrap_or(false)
     }
 
     fn text_provider_get_document_span(&self) -> FrnTextSpan {
-        self.with_text_provider(|text| text_span(text.document_range().ok()?.as_ref()))
+        self.with_text_ops(|text, ops| ops.document_span(text))
+            .and_then(text_span_from_offsets)
             .unwrap_or(UNAVAILABLE_TEXT_SPAN)
     }
 
     fn text_provider_get_selection(&self) -> Option<ComPtr<IFrnTextSpanArray>> {
-        self.with_text_provider(|text| {
-            let spans: Vec<_> = text.get_selection().ok()?
-                .iter()
-                .filter_map(|range| text_span(range.as_ref()))
-                .collect();
-            let caret = self.text_caret_offsets().and_then(text_span_from_offsets);
-            let primary = caret
-                .and_then(|caret| {
-                    spans.iter().copied().find(|span| span.start <= caret.start && caret.start <= span.end)
-                })
-                .or_else(|| spans.first().copied())
-                .or(caret);
+        self.with_text_ops(|text, ops| {
+            let selection = ops.selection(text, self.text_caret_offsets())?;
+            let spans = selection.spans.into_iter().filter_map(text_span_from_offsets).collect();
+            let primary = selection.primary.and_then(text_span_from_offsets);
             Some(IFrnTextSpanArray::from_impl(TextSpanArray { spans, primary }))
         })
     }
 
     fn text_provider_get_visible_span(&self) -> FrnTextSpan {
-        self.with_text_provider(|text| {
-            text.get_visible_ranges().ok()?
-                .iter()
-                .filter_map(|range| text_span(range.as_ref()))
-                .reduce(|first, second| FrnTextSpan {
-                    start: first.start.min(second.start),
-                    end: first.end.max(second.end),
-                })
-        }).unwrap_or(UNAVAILABLE_TEXT_SPAN)
+        self.with_text_ops(|text, ops| ops.visible_span(text))
+            .and_then(text_span_from_offsets)
+            .unwrap_or(UNAVAILABLE_TEXT_SPAN)
     }
 
     fn text_provider_get_string(&self, span: FrnTextSpan) -> Option<ComPtr<IFrnString>> {
-        self.with_text_provider(|text| {
-            let range = text.range_from_offsets(text_offsets(span)?).ok()??;
-            to_frn_string(Some(&range.get_text(None).ok()?))
-        })
+        self.with_text_ops(|text, ops| to_frn_string(Some(&ops.string(text, text_offsets(span)?)?)))
     }
 
     fn text_provider_get_bounds(&self, span: FrnTextSpan) -> FrnRect {
-        let bounds = self.with_text_provider(|text| {
-            let range = text.range_from_offsets(text_offsets(span)?).ok()??;
-            range.get_bounding_rectangles().ok()?.into_iter().reduce(|a, b| a.union(b))
-        });
+        let bounds = self.with_text_ops(|text, ops| ops.bounds(text, text_offsets(span)?));
         to_frn_rect(bounds.unwrap_or_default())
     }
 
@@ -701,57 +684,44 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn text_provider_get_span_from_point(&self, point: FrnPoint) -> FrnTextSpan {
-        self.with_text_provider(|text| {
-            let point = Point::new(point.x, point.y);
-            let caret = text.range_from_point(point).ok()?;
-            let character = caret.clone_range().ok()?;
-            character.expand_to_enclosing_unit(TextUnit::Character).ok()?;
-            // A hit on the trailing half of a glyph can resolve to its next caret.
-            text_span_at_point(character.as_ref(), point).or_else(|| {
-                let moved = caret
-                    .move_endpoint_by_unit(TextPatternRangeEndpoint::Start, TextUnit::Character, -1)
-                    .ok()?;
-                if moved == -1 { text_span_at_point(caret.as_ref(), point) } else { None }
-            })
-        }).unwrap_or(UNAVAILABLE_TEXT_SPAN)
+        self.with_text_ops(|text, ops| ops.span_from_point(text, Point::new(point.x, point.y)))
+            .and_then(text_span_from_offsets)
+            .unwrap_or(UNAVAILABLE_TEXT_SPAN)
     }
 
     fn text_provider_select(&self, span: FrnTextSpan) {
-        let _ = self.with_text_provider(|text| {
-            if text.supported_text_selection().ok()? == SupportedTextSelection::None {
-                return None;
-            }
-            text.range_from_offsets(text_offsets(span)?).ok()??.select().ok()
+        let _ = self.with_text_ops(|text, ops| {
+            ops.select(text, text_offsets(span)?);
+            Some(())
         });
     }
 
     fn text_provider_has_logical_lines(&self) -> bool {
-        self.with_text_provider(|text| text.logical_line_range(0).ok()?).is_some()
+        self.with_text_ops(|text, ops| Some(ops.has_logical_lines(text))).unwrap_or(false)
     }
 
     fn text_provider_get_line_for_index(&self, offset: i64) -> i64 {
-        self.with_text_provider(|text| {
-            let offset = usize::try_from(offset).ok()?;
-            i64::try_from(text.logical_line_index(offset).ok()??).ok()
-        }).unwrap_or(-1)
+        self.with_text_ops(|text, ops| {
+            i64::try_from(ops.line_for_index(text, usize::try_from(offset).ok()?)?).ok()
+        })
+        .unwrap_or(-1)
     }
 
     fn text_provider_get_range_for_line(&self, index: i64) -> FrnTextSpan {
-        self.with_text_provider(|text| {
-            let index = usize::try_from(index).ok()?;
-            text_span_from_offsets(text.logical_line_range(index).ok()??)
-        }).unwrap_or(UNAVAILABLE_TEXT_SPAN)
+        self.with_text_ops(|text, ops| ops.range_for_line(text, usize::try_from(index).ok()?))
+            .and_then(text_span_from_offsets)
+            .unwrap_or(UNAVAILABLE_TEXT_SPAN)
     }
 
     fn text_provider_get_insertion_point_line(&self) -> i64 {
-        self.with_text_provider(|text| {
-            let caret = self.text_caret_offsets()?.start;
-            i64::try_from(text.logical_line_index(caret).ok()??).ok()
-        }).unwrap_or(-1)
+        self.with_text_ops(|text, ops| {
+            i64::try_from(ops.line_for_index(text, self.text_caret_offsets()?.start)?).ok()
+        })
+        .unwrap_or(-1)
     }
 
     fn text_provider_has_styles(&self) -> bool {
-        self.with_text_provider(|text| text.text_style_runs(0..0).ok()?).is_some()
+        self.with_text_ops(|text, ops| Some(ops.has_styles(text))).unwrap_or(false)
     }
 
     fn text_provider_get_style_span(&self, offset: i64) -> FrnTextSpan {
@@ -759,24 +729,15 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     }
 
     fn text_provider_get_styled_text(&self, span: FrnTextSpan) -> Option<ComPtr<IFrnStyledText>> {
-        self.with_text_provider(|provider| {
-            let offsets = text_offsets(span)?;
-            let runs = provider.text_style_runs(offsets.clone()).ok()??
-                .into_iter()
-                .map(|run| StyledTextRun::within(run, &offsets))
-                .collect::<Option<Vec<_>>>()?;
-            let text = provider.range_from_offsets(offsets).ok()??.get_text(None).ok()?;
-            Some(IFrnStyledText::from_impl(StyledText { text, runs }))
+        self.with_text_ops(|text, ops| {
+            let (string, runs) = ops.styled_text(text, text_offsets(span)?)?;
+            let runs = runs.into_iter().map(StyledTextRun::new).collect::<Option<Vec<_>>>()?;
+            Some(IFrnStyledText::from_impl(StyledText { text: string, runs }))
         })
     }
 }
 
 const UNAVAILABLE_TEXT_SPAN: FrnTextSpan = FrnTextSpan { start: -1, end: -1 };
-
-fn supports_text_spans(text: &dyn ITextProvider) -> bool {
-    text.range_from_offsets(0..0).ok().flatten()
-        .is_some_and(|range| text_span(range.as_ref()).is_some())
-}
 
 fn text_offsets(span: FrnTextSpan) -> Option<Range<usize>> {
     let start = usize::try_from(span.start).ok()?;
@@ -784,20 +745,11 @@ fn text_offsets(span: FrnTextSpan) -> Option<Range<usize>> {
     (start <= end).then_some(start..end)
 }
 
-fn text_span(range: &dyn ITextRangeProvider) -> Option<FrnTextSpan> {
-    text_span_from_offsets(range.text_offsets().ok()??)
-}
-
 fn text_span_from_offsets(offsets: Range<usize>) -> Option<FrnTextSpan> {
     Some(FrnTextSpan {
         start: i64::try_from(offsets.start).ok()?,
         end: i64::try_from(offsets.end).ok()?,
     })
-}
-
-fn text_span_at_point(range: &dyn ITextRangeProvider, point: Point) -> Option<FrnTextSpan> {
-    range.get_bounding_rectangles().ok()?.iter().any(|bounds| bounds.contains_exclusive(point))
-        .then(|| text_span(range)).flatten()
 }
 
 struct TextSpanArray {
@@ -843,38 +795,21 @@ struct StyledTextRun {
 }
 
 impl StyledTextRun {
-    fn within(run: TextAttributeRun, request: &Range<usize>) -> Option<Self> {
-        use TextAttribute as A;
-        use TextAttributeValue as V;
-
-        if run.range.start < request.start || run.range.end > request.end || run.range.is_empty() {
-            return None;
-        }
-        let relative = run.range.start - request.start..run.range.end - request.start;
-        let mut style = FrnTextStyle { span: text_span_from_offsets(relative)?, ..UNAVAILABLE_TEXT_STYLE };
-        let mut font_name = None;
-        for (attribute, value) in run.attributes {
-            match (attribute, value) {
-                (A::FontName, V::String(value)) => font_name = Some(value),
-                (A::FontSize, V::Number(value)) if value.is_finite() && value > 0.0 => style.font_size = value,
-                (A::FontWeight, V::Integer(value)) => style.font_weight = value.clamp(1, 1000),
-                (A::FontStyle, V::String(value)) => style.italic = matches!(value.as_str(), "italic" | "oblique"),
-                (A::ForegroundColor, V::Color(value)) => {
-                    style.foreground = frn_text_color(value);
-                    style.has_foreground = true;
-                }
-                (A::BackgroundColor, V::Color(value)) => {
-                    style.background = frn_text_color(value);
-                    style.has_background = true;
-                }
-                (A::UnderlineStyle, V::Integer(value)) => style.underline = value != 0,
-                (A::StrikethroughStyle, V::Integer(value)) => style.strikethrough = value != 0,
-                (A::IsSuperscript, V::Bool(true)) => style.script = 1,
-                (A::IsSubscript, V::Bool(true)) => style.script = -1,
-                _ => {}
-            }
-        }
-        Some(Self { style, font_name })
+    fn new(run: TextStyleSpan) -> Option<Self> {
+        let style = FrnTextStyle {
+            span: text_span_from_offsets(run.span)?,
+            font_size: run.font_size,
+            font_weight: run.font_weight,
+            script: run.script,
+            italic: run.italic,
+            underline: run.underline,
+            strikethrough: run.strikethrough,
+            has_foreground: run.foreground.is_some(),
+            has_background: run.background.is_some(),
+            foreground: run.foreground.map_or(UNAVAILABLE_TEXT_STYLE.foreground, frn_text_color),
+            background: run.background.map_or(UNAVAILABLE_TEXT_STYLE.background, frn_text_color),
+        };
+        Some(Self { style, font_name: run.font_name })
     }
 }
 
