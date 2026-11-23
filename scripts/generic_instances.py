@@ -5,7 +5,9 @@ A family is the code of one generic function or one method of a generic impl: in
 mangling every instance keeps the path of its definition (the generic parameters of an impl as
 they are written, `<alloc::vec::Vec<T,A> as core::ops::drop::Drop>::drop`) and differs only in its
 hash, so the symbols of one path are the instances of one family. A family with one symbol is not
-generic (or has one instance in this binary).
+generic (or has one instance in this binary). A v0 name (`_R...`) spells out the generic arguments,
+so its family is the path of its definition, read from the name (`V0Path`); the closures of one
+function are separate definitions there, and `drop_in_place` is one family.
 
 Input: an ld64 link map (`-Wl,-map,<file>`), a GNU/LLVM link map (`-Wl,-Map=<file>`), or an
 unstripped Mach-O or ELF binary (sizes from the distance to the next symbol, as
@@ -67,6 +69,200 @@ def symbols_of_binary(path):
     return out
 
 
+class V0Path:
+    """The path of the definition of a symbol mangled with the v0 scheme (`_R...`, RFC 2603).
+
+    A v0 name spells out the generic arguments and the self type of an instance, so the name of
+    an instance is not the name of its family. This walks the grammar and keeps what the instances
+    of one definition share: the path, with `{impl#n}` for an impl (the disambiguator tells the
+    impls of one module apart), and no generic arguments.
+    """
+
+    BASIC_TYPES = set('abcdefhijlmnopstuvxyz')
+
+    def __init__(self, mangled):
+        self.text = mangled
+        self.at = 0
+
+    def peek(self):
+        return self.text[self.at] if self.at < len(self.text) else ''
+
+    def take(self):
+        char = self.peek()
+        if not char:
+            raise ValueError('the name ends early')
+        self.at += 1
+        return char
+
+    def eat(self, char):
+        if self.peek() == char:
+            self.at += 1
+            return True
+        return False
+
+    def base62(self):
+        if self.eat('_'):
+            return 0
+        value = 0
+        while not self.eat('_'):
+            char = self.take()
+            if char.isdigit():
+                digit = ord(char) - ord('0')
+            elif 'a' <= char <= 'z':
+                digit = ord(char) - ord('a') + 10
+            elif 'A' <= char <= 'Z':
+                digit = ord(char) - ord('A') + 36
+            else:
+                raise ValueError('not a base-62 number')
+            value = value * 62 + digit
+        return value + 1
+
+    def disambiguator(self):
+        return self.base62() + 1 if self.eat('s') else 0
+
+    def undisambiguated(self):
+        self.eat('u')
+        start = self.at
+        while self.peek().isdigit():
+            self.at += 1
+        if start == self.at:
+            raise ValueError('not an identifier')
+        length = int(self.text[start:self.at])
+        self.eat('_')
+        name = self.text[self.at:self.at + length]
+        self.at += length
+        return name
+
+    def backref(self, parse):
+        target = self.base62()
+        back = self.at
+        self.at = target
+        value = parse()
+        self.at = back
+        return value
+
+    def path(self):
+        tag = self.take()
+        if tag == 'C':
+            self.disambiguator()
+            return self.undisambiguated()
+        if tag == 'N':
+            namespace = self.take()
+            parent = self.path()
+            index = self.disambiguator()
+            name = self.undisambiguated()
+            if namespace == 'C':
+                return f'{parent}::{{closure#{index}}}'
+            if namespace.isupper():
+                return f'{parent}::{{{namespace}#{index}}}{name}'
+            return f'{parent}::{name}'
+        if tag == 'M':
+            index = self.disambiguator()
+            parent = self.path()
+            self.type()
+            return f'{parent}::{{impl#{index}}}'
+        if tag == 'X':
+            index = self.disambiguator()
+            parent = self.path()
+            self.type()
+            trait = self.path()
+            return f'<{parent}::{{impl#{index}}} as {trait}>'
+        if tag == 'Y':
+            self.type()
+            return f'<_ as {self.path()}>'
+        if tag == 'I':
+            inner = self.path()
+            while not self.eat('E'):
+                self.generic_arg()
+            return inner
+        if tag == 'B':
+            return self.backref(self.path)
+        raise ValueError(f'not a path: {tag}')
+
+    def generic_arg(self):
+        if self.eat('L'):
+            self.base62()
+        elif self.eat('K'):
+            self.const()
+        else:
+            self.type()
+
+    def binder(self):
+        if self.eat('G'):
+            self.base62()
+
+    def type(self):
+        char = self.peek()
+        if char in self.BASIC_TYPES:
+            self.at += 1
+        elif char and char in 'CMXYNI':
+            self.path()
+        elif self.eat('A'):
+            self.type()
+            self.const()
+        elif self.eat('S') or self.eat('P') or self.eat('O'):
+            self.type()
+        elif self.eat('T'):
+            while not self.eat('E'):
+                self.type()
+        elif self.eat('R') or self.eat('Q'):
+            if self.eat('L'):
+                self.base62()
+            self.type()
+        elif self.eat('F'):
+            self.binder()
+            self.eat('U')
+            if self.eat('K') and not self.eat('C'):
+                self.undisambiguated()
+            while not self.eat('E'):
+                self.type()
+            self.type()
+        elif self.eat('D'):
+            self.binder()
+            while not self.eat('E'):
+                self.path()
+                while self.eat('p'):
+                    self.undisambiguated()
+                    self.type()
+            if self.eat('L'):
+                self.base62()
+        elif self.eat('B'):
+            self.backref(self.type)
+        else:
+            raise ValueError(f'not a type: {char}')
+
+    def const(self):
+        if self.eat('p'):
+            return
+        if self.eat('B'):
+            self.backref(self.const)
+        elif self.peek() and self.peek() in 'RQ':
+            self.at += 1
+            self.const()
+        elif self.peek() and self.peek() in 'AT':
+            self.at += 1
+            while not self.eat('E'):
+                self.const()
+        elif self.peek() in self.BASIC_TYPES:
+            self.at += 1
+            self.eat('n')
+            while not self.eat('_'):
+                self.take()
+        else:
+            raise ValueError('a constant this reader does not know')
+
+
+def family_of_v0(symbol):
+    """The path of the definition of a v0 symbol, or None if it cannot be read."""
+    name = symbol.lstrip('_')
+    if not name.startswith('R'):
+        return None
+    try:
+        return V0Path(name[1:]).path()
+    except (ValueError, IndexError, RecursionError):
+        return None
+
+
 def family_of(symbol):
     """The family name of a symbol and its crate, or None for a symbol that is not Rust."""
     decoded = decode_legacy(symbol)
@@ -78,7 +274,11 @@ def family_of(symbol):
         return decoded, crate
     if symbol.lstrip('_').startswith('R'):
         crate = crate_of_v0(symbol)
-        return (symbol, crate) if crate else None
+        if not crate:
+            return None
+        family = family_of_v0(symbol)
+        # A name that cannot be read counts as a family of its own, never as part of another.
+        return (family or symbol, crate)
     return None
 
 
@@ -106,6 +306,7 @@ def main():
     crate_of_family = {}
     total = 0
     other = 0
+    unread = sum(1 for name, _ in symbols if name.lstrip('_').startswith('R') and family_of_v0(name) is None)
     for name, size in symbols:
         total += size
         found = family_of(name)
@@ -131,7 +332,9 @@ def main():
     mb = 1 << 20
     print(f'{args.input}')
     print(f'  symbols {total / mb:8.2f} MB; Rust {rust / mb:8.2f} MB; in families of two or more instances '
-          f'{generic / mb:8.2f} MB ({100 * generic / max(rust, 1):.1f} % of Rust); not Rust {other / mb:8.2f} MB')
+          f'{generic / mb:8.2f} MB ({100 * generic / max(rust, 1):.1f} % of Rust); not Rust {other / mb:8.2f} MB; '
+          f'{len(symbols)} functions, {sum(v[0] for v in families.values())} of them Rust in {len(families)} families, '
+          f'{unread} v0 names not read')
     print()
     print('  crate                                      Rust MB  generic MB  generic %')
     for crate, (size, gen) in sorted(by_crate.items(), key=lambda item: -item[1][1])[:25]:
