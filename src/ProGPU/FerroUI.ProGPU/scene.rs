@@ -169,6 +169,26 @@ impl SceneBuilder {
         self.check("add_analytic_mask_chain", ok).map(|()| index)
     }
 
+    /// Adds an opacity mask of a gradient brush; returns its resource index.
+    pub fn add_brush_mask(
+        &mut self,
+        mask: &progpu_native_scene_layer_brush_mask,
+        stops: &[progpu_native_scene_gradient_stop],
+    ) -> Result<u32, SceneBuildError> {
+        let mut index = 0;
+        // SAFETY: the record and the span are borrowed for the call.
+        let ok = unsafe { progpu_native_scene_builder_add_brush_mask(self.raw, mask, stops.as_ptr(), stops.len(), &mut index) };
+        self.check("add_brush_mask", ok).map(|()| index)
+    }
+
+    /// Adds an effect chain for a layer; returns its resource index.
+    pub fn add_effect_chain(&mut self, effects: &[progpu_native_group_effect], revision: u32) -> Result<u32, SceneBuildError> {
+        let mut index = 0;
+        // SAFETY: the span is borrowed for the call.
+        let ok = unsafe { progpu_native_scene_builder_add_effect_chain(self.raw, effects.as_ptr(), effects.len(), revision, &mut index) };
+        self.check("add_effect_chain", ok).map(|()| index)
+    }
+
     /// Adds a vector clip mask of paths; returns its resource index.
     pub fn add_vector_clip_mask(
         &mut self,
