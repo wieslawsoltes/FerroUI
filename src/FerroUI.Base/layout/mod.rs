@@ -5,6 +5,8 @@ mod effective_viewport_changed_event_args;
 mod i_bring_into_view_layout_manager;
 mod i_layout_manager;
 mod i_layout_root;
+#[cfg(feature = "layout-columns")]
+pub(crate) mod layout_columns;
 mod layout_extensions;
 mod layout_helper;
 mod layout_information;
