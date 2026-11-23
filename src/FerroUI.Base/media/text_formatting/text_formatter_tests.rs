@@ -197,8 +197,9 @@ fn should_format_text_line_with_non_text_text_runs_right_to_left() {
     assert_eq!(runs.len(), 5);
     assert_eq!(text_line.length(), 14);
 
-    assert_eq!(shaped(&runs[0]).text().to_string_lossy(), "Hello");
-    assert!(runs[4].is::<TextEndOfParagraph>());
+    // The paragraph end takes the paragraph level, so it is visually first in a right-to-left line.
+    assert!(runs[0].is::<TextEndOfParagraph>());
+    assert_eq!(shaped(&runs[1]).text().to_string_lossy(), "Hello");
 }
 
 #[test]
