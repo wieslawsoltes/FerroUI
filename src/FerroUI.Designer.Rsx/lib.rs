@@ -71,6 +71,8 @@ mod animation_transform_list_tests;
 #[cfg(test)]
 mod animation_gradient_tests;
 #[cfg(test)]
+mod animation_import_tests;
+#[cfg(test)]
 mod animation_effect_objects_tests;
 #[cfg(test)]
 mod layout_edit_tests;

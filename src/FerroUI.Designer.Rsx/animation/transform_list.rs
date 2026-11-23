@@ -2,7 +2,7 @@ use super::{syntax, text_source::TextSource};
 use crate::blocks::keep_comments;
 use ferroui_designer_animation::AnimationTransformList;
 use ferroui_designer_core::{SourceSpan, TextPatch};
-use syn::{Expr, GenericArgument, PathArguments, Type, TypeParamBound, spanned::Spanned};
+use syn::{Expr, Type, spanned::Spanned};
 
 const PARSE: &[&str] = &["ferroui_base::media::transformation::TransformOperations::parse"];
 const IDENTITY: &str = "ferroui_base::media::transformation::TransformOperations::identity";
@@ -46,7 +46,7 @@ impl TransformListSource {
                 let Expr::Cast(value) = call.args.first()? else {
                     return None;
                 };
-                if !value.attrs.is_empty() || !transform_cast(&value.ty) {
+                if !value.attrs.is_empty() || !transform_cast(&value.ty, resolve) {
                     return None;
                 }
                 value.expr.as_ref()
@@ -106,46 +106,15 @@ impl TransformListSource {
     }
 }
 
-fn transform_cast(ty: &Type) -> bool {
+fn transform_cast(ty: &Type, resolve: &impl Fn(&Expr) -> Option<String>) -> bool {
     if matches!(ty, Type::Infer(_)) {
         return true;
     }
-    let Type::Path(ty) = ty else { return false };
-    let mut path = ty.path.clone();
-    let Some(last) = path.segments.last_mut() else {
-        return false;
-    };
-    let PathArguments::AngleBracketed(arguments) =
-        std::mem::replace(&mut last.arguments, PathArguments::None)
-    else {
-        return false;
-    };
-    let function = Expr::Path(syn::ExprPath {
-        attrs: Vec::new(),
-        qself: ty.qself.clone(),
-        path,
-    });
-    if !matches!(
-        syntax::path(&function).as_deref(),
-        Some("std::rc::Rc" | "alloc::rc::Rc" | "Rc")
-    ) {
-        return false;
-    }
-    let Some(GenericArgument::Type(Type::TraitObject(object))) = arguments.args.first() else {
-        return false;
-    };
-    let Some(TypeParamBound::Trait(bound)) = object.bounds.first() else {
-        return false;
-    };
-    let trait_ = Expr::Path(syn::ExprPath {
-        attrs: Vec::new(),
-        qself: None,
-        path: bound.path.clone(),
-    });
-    arguments.args.len() == 1
-        && object.bounds.len() == 1
-        && matches!(
-            syntax::path(&trait_).as_deref(),
-            Some("ferroui_base::media::ITransform" | "ITransform")
-        )
+    syntax::rc_interface_cast(ty, "ferroui_base::media::ITransform", &|path| {
+        Some(match resolve(path)?.as_str() {
+            "Rc" => "std::rc::Rc".into(),
+            "ITransform" => "ferroui_base::media::ITransform".into(),
+            other => other.into(),
+        })
+    })
 }

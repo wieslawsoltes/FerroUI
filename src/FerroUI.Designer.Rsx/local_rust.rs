@@ -1,10 +1,12 @@
 //! Resolve explicit names and constant initializers in authored Rust sources.
 mod collect;
+mod prelude;
 mod returned_builder;
 
 use crate::animation::syntax as rust;
 use ferroui_designer_core::SourceSpan;
 use ferroui_designer_project::RustModuleSources;
+use prelude::GlobImport;
 use std::collections::BTreeMap;
 use syn::{Expr, ext::IdentExt};
 
@@ -25,6 +27,7 @@ struct Scope {
     file: usize,
     indexed: bool,
     members: BTreeMap<String, Binding>,
+    globs: Vec<GlobImport>,
 }
 
 enum Binding {
@@ -219,6 +222,10 @@ impl LocalRust {
                     let scope = &self.scopes[index];
                     if let Some((name, binding)) = scope.members.get_key_value(first) {
                         return self.binding(index, name, binding, rest, depth + 1);
+                    }
+                    if rest.is_empty() && prelude::is_view_factory(first) && !scope.globs.is_empty() {
+                        return self.view_prelude(index, depth + 1)
+                            .then(|| Resolved::External(format!("ferroui_view::prelude::{first}")));
                     }
                     current = scope.parent;
                 }

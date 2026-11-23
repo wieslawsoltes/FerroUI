@@ -1,14 +1,16 @@
 mod arguments;
 mod operand;
+mod solid;
 mod stops;
 
-use super::{color::ColorSource, syntax, FloatSource};
+use super::syntax;
 use arguments::Arguments;
 use ferroui_designer_animation::{
-    AnimationBrush, AnimationGradient, AnimationValue, BrushForm, GradientShape,
+    AnimationBrush, AnimationGradient, AnimationValue, GradientShape,
 };
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use stops::StopsSource;
+use solid::SolidSource;
 use syn::{Expr, Type};
 
 const IMMUTABLE: &str = "ferroui_base::media::immutable::Immutable";
@@ -16,10 +18,7 @@ const IMMUTABLE: &str = "ferroui_base::media::immutable::Immutable";
 #[derive(Clone, Debug)]
 pub(super) enum BrushSource {
     Gradient(GradientSource),
-    Solid {
-        color: ColorSource,
-        opacity: FloatSource,
-    },
+    Solid(SolidSource),
 }
 
 #[derive(Clone, Debug)]
@@ -65,15 +64,9 @@ impl BrushSource {
         }
         let resolved = resolve(&call.func)?;
         let (class, method) = resolved.strip_prefix(IMMUTABLE)?.rsplit_once("::")?;
-        if (class, method) == ("SolidColorBrush", "with_opacity") && call.args.len() == 2 {
-            let (value, color) = ColorSource::read_with(&call.args[0], false, resolve)?;
-            let opacity = syntax::float(&call.args[1])?;
-            let brush = AnimationBrush::Solid {
-                argb: value.argb8()?,
-                opacity: opacity.value,
-                form: BrushForm::Object,
-            };
-            return Some((AnimationValue::Brush(brush), Self::Solid { color, opacity }));
+        if class == "SolidColorBrush" {
+            let (brush, source) = SolidSource::read(call, method, resolve)?;
+            return Some((AnimationValue::Brush(brush), Self::Solid(source)));
         }
         let shape = GradientShape::defaults(class)?;
         let (values, stops) = StopsSource::read(call.args.first()?, resolve)?;
@@ -116,7 +109,7 @@ impl BrushSource {
         patches: &mut Vec<TextPatch>,
     ) -> Result<(), String> {
         if let (
-            Self::Solid { color, opacity },
+            Self::Solid(source),
             AnimationBrush::Solid { argb: old, .. },
             AnimationBrush::Solid {
                 argb: next,
@@ -125,13 +118,7 @@ impl BrushSource {
             },
         ) = (self, old, new)
         {
-            color.plan(
-                &AnimationValue::from_argb8(*old),
-                &AnimationValue::from_argb8(*next),
-                patches,
-            )?;
-            opacity.plan(*next_opacity, patches);
-            return Ok(());
+            return source.plan(*old, *next, *next_opacity, patches);
         }
         let (Self::Gradient(source), Some(old), Some(new)) =
             (self, old.as_gradient(), new.as_gradient())

@@ -8,6 +8,7 @@ mod effect_constructor;
 mod color_integer;
 mod color_text;
 mod keyframe;
+mod numbers;
 pub(crate) mod program_comment;
 mod relative;
 mod retime;
@@ -16,9 +17,11 @@ pub(crate) mod syntax;
 mod text_source;
 mod transform_list;
 mod value;
+mod variant;
 
 use ferroui_designer_animation::{native_key_time, Easing, KeyframeEdit, ValueKind};
 use ferroui_designer_core::{SourceSpan, TextPatch};
+use std::collections::BTreeMap;
 pub(crate) use keyframe::{BUILTINS as BUILTIN_PROPERTIES, property as view_property};
 pub(crate) use value::{ValueShape, ValueSource, rust_literal};
 
@@ -53,6 +56,7 @@ pub struct RsxAnimation {
     delay: Option<DelaySource>,
     target_type: Option<TargetType>,
     keys: Vec<KeySource>,
+    imports: BTreeMap<String, String>,
     pub(crate) attachment: Option<program_comment::AnimationAttachment>,
 }
 

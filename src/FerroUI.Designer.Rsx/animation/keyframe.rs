@@ -1,4 +1,4 @@
-use super::syntax::{float, method_suffix, path, span};
+use super::syntax::{authored_path, float, method_suffix, path, span};
 use super::{KeySource, Property, TargetType, ValueShape, TRACK_TARGET};
 use crate::RsxCatalog;
 use ferroui_designer_animation::{AnimationBrush, AnimationValue, Timeline, ValueKind, native_key_time};
@@ -13,6 +13,7 @@ pub(super) fn keyframe(
     method: &ExprMethodCall,
     duration: f64,
     catalog: &RsxCatalog,
+    resolve: &impl Fn(&Expr) -> Option<String>,
 ) -> Option<Vec<MappedKey>> {
     if method.args.len() != 2 {
         return None;
@@ -61,8 +62,8 @@ pub(super) fn keyframe(
         if current.method != "set" || current.turbofish.is_some() || current.args.len() != 2 {
             return None;
         }
-        let (getter, property) = read_property(&current.args[0], catalog)?;
-        let value = property.shape.read_keyframe(&current.args[1], catalog.project_effects)?;
+        let (getter, property) = read_property(&current.args[0], catalog, resolve)?;
+        let value = property.shape.read_keyframe(&current.args[1], catalog.project_effects, resolve)?;
         keys.push(MappedKey {
             source: KeySource {
                 property: property.name,
@@ -133,22 +134,25 @@ pub(super) fn record(timeline: &mut Timeline, key: &KeySource) -> Option<()> {
 }
 
 pub(crate) fn property(expr: &Expr, catalog: &RsxCatalog) -> Option<Property> {
-    read_property(expr, catalog).map(|(_, property)| property)
+    read_property(expr, catalog, &path).map(|(_, property)| property)
 }
 
-fn read_property(expr: &Expr, catalog: &RsxCatalog) -> Option<(String, Property)> {
+fn read_property(
+    expr: &Expr,
+    catalog: &RsxCatalog,
+    resolve: &impl Fn(&Expr) -> Option<String>,
+) -> Option<(String, Property)> {
     let Expr::Call(call) = expr else { return None };
-    if !call.args.is_empty() {
+    if !call.attrs.is_empty() || !call.args.is_empty() {
         return None;
     }
-    let getter = path(&call.func)?;
+    let getter = resolve(&call.func)?;
     let property = BUILTINS.iter().find(|(path, _, _)| *path == getter).map(|(_, name, shape)| Property {
         name: (*name).into(),
         shape: *shape,
         owner: None,
     }).or_else(|| catalog.animation_property(&getter).cloned())?;
-    let absolute = matches!(call.func.as_ref(), Expr::Path(expr) if expr.path.leading_colon.is_some());
-    Some((if absolute { format!("::{getter}") } else { getter }, property))
+    Some((authored_path(&call.func)?, property))
 }
 
 pub(crate) const BUILTINS: &[(&str, &str, ValueShape)] = &[

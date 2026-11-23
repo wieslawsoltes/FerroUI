@@ -4,7 +4,7 @@ mod references;
 
 use self::literals::rewrite_literal;
 use self::references::NameReferences;
-use crate::{blocks::blocks, RsxProjection};
+use crate::{blocks::blocks, local_rust::LocalRust, RsxProjection};
 use ferroui_designer_core::TextPatch;
 use ferroui_markup::markup::parsers::selector_grammar::SelectorGrammar;
 use ferroui_view_syntax::Node;
@@ -31,9 +31,10 @@ impl RsxProjection<'_> {
             .ok_or("Open the current RSX invocation")?;
         let nodes =
             ferroui_view_syntax::parse(block.group.stream()).map_err(|error| error.to_string())?;
+        let bindings = LocalRust::parse(self.source, self.invocation.start, self.modules);
         let mut patches = Vec::new();
         for index in indices {
-            patches.extend(self.plan_control_name(&nodes, index, name)?);
+            patches.extend(self.plan_control_name(&nodes, index, name, &bindings)?);
         }
         Ok(patches)
     }
@@ -43,6 +44,7 @@ impl RsxProjection<'_> {
         nodes: &[Node],
         index: usize,
         name: Option<&str>,
+        bindings: &LocalRust,
     ) -> Result<Vec<TextPatch>, String> {
         let node = self.nodes.get(index).ok_or("Choose a mapped RSX control")?;
         if node.expressions.contains_key("Name") {
@@ -66,6 +68,7 @@ impl RsxProjection<'_> {
             declaration,
             previous.as_deref().filter(|name| !name.is_empty()),
             name,
+            bindings,
         );
         references.visit(nodes, 0)?;
         let mut patches = references.into_patches();

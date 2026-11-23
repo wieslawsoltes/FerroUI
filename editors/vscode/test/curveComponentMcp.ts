@@ -17,16 +17,20 @@ const xaml = `<Window xmlns="https://github.com/ferroui" Width="420" Height="260
 </Window>
 `;
 
-const rust = `fn header() { rsx! { TextBlock { text: "Keep this view 🧭" } } }
+const rust = `use ferroui_view::{prelude::*, animation as clip};
+use ferroui_base::{CornerRadius as Radius, animation::FillMode::Both as Hold};
+use ferroui_controls::Border as Card;
+
+fn header() { rsx! { TextBlock { text: "Keep this view 🧭" } } }
 fn view() { rsx! {
     StackPanel {
-        styles: [ferroui_view::style("Border#ReviewCard").animation(
-            ferroui_view::animation(ferroui_view::ms(2000))
-                .key_frame(0.25, |key| key.set(ferroui_controls::Border::corner_radius_property(),
-                    ferroui_base::CornerRadius::new(4.0, /* retain 🧭 */ 8.0f64, 16.0, 24.0)))
-                .key_frame(1.0, |key| key.set(ferroui_controls::Border::corner_radius_property(),
-                    ferroui_base::CornerRadius::new(16.0, 20.0, 28.0, 38.0)))
-                .fill_mode(ferroui_base::animation::FillMode::Both)
+        styles: [style("Border#ReviewCard").animation(
+            clip(ms(2000))
+                .key_frame(0.25, |key| key.set(Card::corner_radius_property(),
+                    Radius::top_bottom(/* retain 🧭 */ 8.0f64, 24.0)))
+                .key_frame(1.0, |key| key.set(Card::corner_radius_property(),
+                    Radius::new(16.0, 20.0, 28.0, 38.0)))
+                .fill_mode(Hold)
         )],
         Border { name: "ReviewCard", width: 270.0, height: 150.0, background: "#305F9C" }
     }
@@ -40,7 +44,7 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
         await vscode.workspace.fs.writeFile(uri, Buffer.from(original));
         const document = await vscode.workspace.openTextDocument(uri);
         const { session } = content<{ session: number }>(await invoke('designer_open', {
-            path, ...(path.endsWith('.rs') ? { line: 1, character: 15 } : {}),
+            path, ...(path.endsWith('.rs') ? { line: document.positionAt(original.lastIndexOf('rsx!') + 6).line, character: 17 } : {}),
         }));
         const frame = async () => {
             assert.equal(content<{ status: string }>(await invoke('designer_wait', { session })).status, 'Ready');
@@ -71,10 +75,13 @@ export async function verifyCurveComponentMcp({ invoke, content }: McpFixture): 
             await frame();
             const edited = (await tracks()).track;
             const next = edited.keyframes[0].curve_values;
-            assert.deepEqual(next?.map(value => value.value), [4, 30, 16, 24]);
+            assert.deepEqual(next?.map(value => value.value), path.endsWith('.rs') ? [8, 30, 24, 24] : [4, 30, 16, 24]);
             assert.deepEqual(edited.keyframes[1].curve_values, track.keyframes[1].curve_values);
             assert.doesNotMatch(document.getText(), /(?<!\r)\n/);
-            if (path.endsWith('.rs')) assert.equal(document.getText(), original.replace('8.0f64', '30.0f64'));
+            if (path.endsWith('.rs')) assert.equal(document.getText(), original.replace(
+                'Radius::top_bottom(/* retain 🧭 */ 8.0f64, 24.0)',
+                'Radius::new(/* retain 🧭 */ 8.0f64, 30.0, 24.0, 24.0)',
+            ));
             else assert.match(document.getText(), /keep the corner review 🧭/u);
             assert.ok((await commit(revision)).isError);
             content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));

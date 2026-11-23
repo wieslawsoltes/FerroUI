@@ -20,6 +20,7 @@ pub(super) fn parse(source: &str, offset: usize, modules: Option<&RustModuleSour
             file: 0,
             indexed: modules.is_some(),
             members: BTreeMap::new(),
+            globs: Vec::new(),
         }],
         files: vec![target.map_or_else(String::new, |file| file.uri.clone())],
         active: modules
@@ -38,6 +39,7 @@ pub(super) fn parse(source: &str, offset: usize, modules: Option<&RustModuleSour
         }
         builder.scopes.truncate(1);
         builder.scopes[0].members.clear();
+        builder.scopes[0].globs.clear();
     }
     LocalRust {
         scopes: builder.scopes,
@@ -88,6 +90,7 @@ impl Collector<'_> {
             file: self.scopes[parent].file,
             indexed: false,
             members: BTreeMap::new(),
+            globs: Vec::new(),
         });
         visit(self);
         self.current = parent;
@@ -127,8 +130,10 @@ impl<'ast> Visit<'ast> for Collector<'_> {
     }
 
     fn visit_item_use(&mut self, item: &'ast syn::ItemUse) {
+        let conditional = conditional(&item.attrs);
+        super::prelude::collect(item, conditional, &mut self.scopes[self.current].globs);
         visit_rust_imports(&item.tree, |name, path| {
-            let binding = if conditional(&item.attrs) {
+            let binding = if conditional {
                 Binding::Opaque
             } else {
                 Binding::Import {
@@ -206,6 +211,7 @@ impl<'ast> Visit<'ast> for Collector<'_> {
             file,
             indexed,
             members: BTreeMap::new(),
+            globs: Vec::new(),
         });
         self.current = module;
         if let Some((_, items)) = &item.content {

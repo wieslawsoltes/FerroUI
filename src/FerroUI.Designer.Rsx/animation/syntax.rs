@@ -5,6 +5,7 @@ use super::{
 use crate::{tree::escape_xml, RsxCatalog};
 use ferroui_designer_animation::{Easing, FillMode, Repeat, Timeline};
 use ferroui_designer_core::SourceSpan;
+use std::{cell::RefCell, collections::BTreeMap};
 use syn::{spanned::Spanned, Expr, ExprCall, ExprMethodCall, ExprPath, Lit, LitInt, UnOp};
 
 pub(crate) fn valid_selector(selector: &str) -> bool {
@@ -16,9 +17,24 @@ pub(crate) fn valid_selector(selector: &str) -> bool {
         }))
 }
 
-pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
+pub(crate) fn clip(
+    expr: &Expr,
+    catalog: &RsxCatalog,
+    resolve: impl Fn(&Expr) -> Option<String>,
+) -> Option<RsxAnimation> {
+    // Structural edits reparse the clip by itself. Retain the imported paths
+    // resolved in this accepted source scope for that detached check.
+    let imports = RefCell::new(BTreeMap::new());
+    let resolve = |expression: &Expr| {
+        let resolved = resolve(expression)?;
+        let written = authored_path(expression)?;
+        if written.trim_start_matches("::") != resolved {
+            imports.borrow_mut().insert(written, resolved.clone());
+        }
+        Some(resolved)
+    };
     let (factory, methods) = chain(expr)?;
-    let duration = milliseconds(view_argument(factory, "animation")?)?;
+    let duration = milliseconds(view_argument_with(factory, "animation", &resolve)?, &resolve)?;
     let mut timeline = Timeline::new(duration).ok()?;
     timeline.fill = FillMode::None;
     let mut keys = Vec::new();
@@ -28,7 +44,7 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
     for method in methods {
         match method.method.to_string().as_str() {
             "key_frame" => {
-                for MappedKey { source: key, owner } in keyframe(method, duration, catalog)? {
+                for MappedKey { source: key, owner } in keyframe(method, duration, catalog, &resolve)? {
                     if let Some(owner) = owner {
                         if target_type.as_ref().is_some_and(|target| *target != owner) {
                             return None;
@@ -39,14 +55,14 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
                     keys.push(key);
                 }
             }
-            "fill_mode" => timeline.fill = fill_mode(argument(method, "fill_mode")?)?,
+            "fill_mode" => timeline.fill = fill_mode(argument(method, "fill_mode")?, &resolve)?,
             "delay" => {
-                let literal = milliseconds_literal(argument(method, "delay")?)?;
+                let literal = milliseconds_literal(argument(method, "delay")?, &resolve)?;
                 let millis = literal.base10_parse().ok()?;
                 timeline.delay = millis as f64 / 1000.0;
                 delay = Some(DelaySource { millis, literal: span(literal), explicit_type: literal.suffix() == "u64" });
             }
-            "iterations" => timeline.repeat = repeat(argument(method, "iterations")?)?,
+            "iterations" => timeline.repeat = repeat(argument(method, "iterations")?, &resolve)?,
             "easing" => timeline.easing = easing(argument(method, "easing")?)?,
             _ => return None,
         }
@@ -64,13 +80,14 @@ pub(crate) fn clip(expr: &Expr, catalog: &RsxCatalog) -> Option<RsxAnimation> {
         delay,
         target_type,
         keys,
+        imports: imports.into_inner(),
         attachment: None,
     })
 }
 
 pub(crate) fn scope_untyped_clip(clip: &mut RsxAnimation, catalog: &RsxCatalog) {
     if clip.target_type.is_none() {
-        if let Some(target) = builtin_target(&clip.keys, catalog) {
+        if let Some(target) = builtin_target(clip, catalog) {
             target.annotate(&mut clip.xaml);
         }
     }
@@ -78,9 +95,9 @@ pub(crate) fn scope_untyped_clip(clip: &mut RsxAnimation, catalog: &RsxCatalog) 
 
 // Rust getters carry their property types even when the selector only names a
 // control. Supply the matching XAML scope for built-in tracks, too.
-fn builtin_target<'a>(keys: &[super::KeySource], catalog: &'a RsxCatalog) -> Option<&'a TargetType> {
-    let owners = keys.iter()
-        .map(|key| catalog.style_field(key.getter.trim_start_matches("::")).map(|field| &field.owner))
+fn builtin_target<'a>(clip: &RsxAnimation, catalog: &'a RsxCatalog) -> Option<&'a TargetType> {
+    let owners = clip.keys.iter()
+        .map(|key| catalog.style_field(clip.resolved_path(&key.getter)).map(|field| &field.owner))
         .collect::<Option<Vec<_>>>()?;
     let schema = crate::catalog::schema();
     let type_of = |owner: &TargetType| schema.type_info(&owner.name, owner.namespace.as_deref());
@@ -88,6 +105,12 @@ fn builtin_target<'a>(keys: &[super::KeySource], catalog: &'a RsxCatalog) -> Opt
         owners.iter().all(|base| owner == base || type_of(owner).zip(type_of(base))
             .is_some_and(|(target, base)| schema.type_assignable_to(target, base)))
     })
+}
+
+impl RsxAnimation {
+    pub(super) fn resolved_path<'a>(&'a self, path: &'a str) -> &'a str {
+        self.imports.get(path).map_or_else(|| path.trim_start_matches("::"), String::as_str)
+    }
 }
 
 impl TargetType {
@@ -108,7 +131,7 @@ impl TargetType {
 pub(crate) fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)> {
     let mut methods = Vec::new();
     while let Expr::MethodCall(method) = expr {
-        if method.turbofish.is_some() {
+        if !method.attrs.is_empty() || method.turbofish.is_some() {
             return None;
         }
         methods.push(method);
@@ -122,8 +145,16 @@ pub(crate) fn chain(mut expr: &Expr) -> Option<(&ExprCall, Vec<&ExprMethodCall>)
 }
 
 pub(crate) fn view_argument<'a>(call: &'a ExprCall, name: &str) -> Option<&'a Expr> {
-    let path = path(call.func.as_ref())?;
-    if call.args.len() != 1
+    view_argument_with(call, name, &path)
+}
+
+pub(crate) fn view_argument_with<'a>(
+    call: &'a ExprCall,
+    name: &str,
+    resolve: &impl Fn(&Expr) -> Option<String>,
+) -> Option<&'a Expr> {
+    let path = resolve(call.func.as_ref())?;
+    if !call.attrs.is_empty() || call.args.len() != 1
         || path != format!("ferroui_view::{name}")
             && path != format!("ferroui_view::prelude::{name}")
     {
@@ -136,8 +167,8 @@ pub(crate) fn argument<'a>(call: &'a ExprMethodCall, name: &str) -> Option<&'a E
     (call.method == name && call.args.len() == 1).then(|| &call.args[0])
 }
 
-fn fill_mode(expr: &Expr) -> Option<FillMode> {
-    match path(expr)?.as_str() {
+fn fill_mode(expr: &Expr, resolve: &impl Fn(&Expr) -> Option<String>) -> Option<FillMode> {
+    match resolve(expr)?.as_str() {
         "ferroui_base::animation::FillMode::None" => Some(FillMode::None),
         "ferroui_base::animation::FillMode::Forward" => Some(FillMode::Forward),
         "ferroui_base::animation::FillMode::Backward" => Some(FillMode::Backward),
@@ -165,13 +196,22 @@ pub(crate) fn path(expr: &Expr) -> Option<String> {
     )
 }
 
-fn milliseconds(expr: &Expr) -> Option<f64> {
-    Some(milliseconds_literal(expr)?.base10_parse::<u64>().ok()? as f64 / 1000.0)
+pub(super) fn authored_path(expr: &Expr) -> Option<String> {
+    let Expr::Path(site) = expr else { return None };
+    if !site.attrs.is_empty() {
+        return None;
+    }
+    let path = path(expr)?;
+    Some(if site.path.leading_colon.is_some() { format!("::{path}") } else { path })
 }
 
-fn milliseconds_literal(expr: &Expr) -> Option<&LitInt> {
+fn milliseconds(expr: &Expr, resolve: &impl Fn(&Expr) -> Option<String>) -> Option<f64> {
+    Some(milliseconds_literal(expr, resolve)?.base10_parse::<u64>().ok()? as f64 / 1000.0)
+}
+
+fn milliseconds_literal<'a>(expr: &'a Expr, resolve: &impl Fn(&Expr) -> Option<String>) -> Option<&'a LitInt> {
     let Expr::Call(call) = expr else { return None };
-    unsigned_literal(view_argument(call, "ms")?)
+    unsigned_literal(view_argument_with(call, "ms", resolve)?)
 }
 
 pub(crate) fn unsigned(expr: &Expr) -> Option<u64> {
@@ -188,12 +228,12 @@ fn unsigned_literal(expr: &Expr) -> Option<&LitInt> {
     matches!(literal.suffix(), "" | "u64").then_some(literal)
 }
 
-fn repeat(expr: &Expr) -> Option<Repeat> {
-    if path(expr).as_deref() == Some("ferroui_base::animation::IterationCount::INFINITE") {
+fn repeat(expr: &Expr, resolve: &impl Fn(&Expr) -> Option<String>) -> Option<Repeat> {
+    if resolve(expr).as_deref() == Some("ferroui_base::animation::IterationCount::INFINITE") {
         return Some(Repeat::Infinite);
     }
     let Expr::Call(call) = expr else { return None };
-    if path(&call.func).as_deref() != Some("ferroui_base::animation::IterationCount::new")
+    if resolve(&call.func).as_deref() != Some("ferroui_base::animation::IterationCount::new")
         || call.args.len() != 1
     {
         return None;

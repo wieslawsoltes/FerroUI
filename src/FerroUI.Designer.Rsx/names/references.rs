@@ -1,7 +1,8 @@
 use super::literals::rewrite_literal;
 use crate::{
-    animation::syntax::{argument, chain, span, view_argument},
+    animation::syntax::{argument, chain, span, view_argument, view_argument_with},
     child_collection::{InlineChildren, control_expression},
+    local_rust::LocalRust,
     tree::MAX_DEPTH,
     RsxCatalog,
 };
@@ -23,6 +24,7 @@ pub(super) struct NameReferences<'a> {
     declaration: Option<SourceSpan>,
     previous: Option<&'a str>,
     next: Option<&'a str>,
+    bindings: &'a LocalRust,
     patches: Vec<TextPatch>,
 }
 
@@ -34,6 +36,7 @@ impl<'a> NameReferences<'a> {
         declaration: Option<SourceSpan>,
         previous: Option<&'a str>,
         next: Option<&'a str>,
+        bindings: &'a LocalRust,
     ) -> Self {
         Self {
             source,
@@ -42,6 +45,7 @@ impl<'a> NameReferences<'a> {
             declaration,
             previous,
             next,
+            bindings,
             patches: Vec::new(),
         }
     }
@@ -158,7 +162,7 @@ impl<'a> NameReferences<'a> {
             return Ok(());
         }
         let (factory, methods) = chain(unwrapped(expression)).ok_or(STYLE_SOURCE)?;
-        let literal = view_argument(factory, "style")
+        let literal = view_argument_with(factory, "style", &|expr| self.bindings.path(expr))
             .and_then(text)
             .ok_or(STYLE_SOURCE)?;
         let value = literal.value();

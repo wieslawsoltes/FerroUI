@@ -1,5 +1,5 @@
 use super::effect_constructor::ConstructorSource;
-use super::syntax::{path, span};
+use super::syntax::{span, unparen};
 use crate::literal::string_literal;
 use ferroui_designer_animation::{AnimationEffect, EffectForm};
 use ferroui_designer_core::{SourceSpan, TextPatch};
@@ -17,20 +17,21 @@ impl EffectSource {
         resolve: &impl Fn(&Expr) -> Option<String>,
         project_effects: bool,
     ) -> Option<(AnimationEffect, Self)> {
+        let expression = unparen(expression);
         let (inner, wrapped) = match expression {
             Expr::Call(call)
                 if call.attrs.is_empty()
                     && call.args.len() == 1
                     && matches!(
-                        path(&call.func)?.as_str(),
-                        "Some" | "std::option::Option::Some" | "core::option::Option::Some"
+                        resolve(&call.func).as_deref(),
+                        Some("Some" | "std::option::Option::Some" | "core::option::Option::Some")
                     ) =>
             {
                 (call.args.first()?, true)
             }
             _ => (expression, false),
         };
-        let Expr::MethodCall(method) = inner else {
+        let Expr::MethodCall(method) = unparen(inner) else {
             let (value, source) = ConstructorSource::read(inner, resolve)?;
             return Some((value, Self::Object(source)));
         };
@@ -43,7 +44,7 @@ impl EffectSource {
         {
             return None;
         }
-        let Expr::Call(call) = method.receiver.as_ref() else {
+        let Expr::Call(call) = unparen(&method.receiver) else {
             return None;
         };
         if !call.attrs.is_empty()

@@ -2,9 +2,10 @@ use super::box_shadows::BoxShadowsSource;
 use super::brush::BrushSource;
 use super::color::{packed_argument, ColorSource};
 use super::effect::EffectSource;
+use super::numbers::Numbers;
 use super::relative::RelativeSource;
 use super::transform_list::TransformListSource;
-use super::{syntax, FloatSource};
+use super::syntax;
 use crate::local_rust::{LocalRust, Value};
 use ferroui_designer_animation::{AnimationValue, ValueKind};
 use ferroui_designer_core::TextPatch;
@@ -24,7 +25,7 @@ pub(crate) struct ValueSource {
 
 #[derive(Clone, Debug)]
 enum ValueSyntax {
-    Numbers(Vec<FloatSource>),
+    Numbers(Numbers),
     Color(ColorSource),
     Relative(RelativeSource),
     Effect(EffectSource),
@@ -92,7 +93,7 @@ impl ValueShape {
                 .map(ValueSource::color);
         }
         if matches!(kind, ValueKind::RelativePoint | ValueKind::RelativeScalar) {
-            let (value, source) = RelativeSource::read(expression, kind)?;
+            let (value, source) = RelativeSource::read(expression, kind, &resolve)?;
             return Some(ValueSource { value, source: ValueSyntax::Relative(source) });
         }
         if kind == ValueKind::Effect {
@@ -112,65 +113,26 @@ impl ValueShape {
                 source: ValueSyntax::TransformList(source),
             });
         }
-        let parts = if kind == ValueKind::Number
-            || matches!(kind, ValueKind::CornerRadius | ValueKind::Thickness)
-                && !matches!(expression, Expr::Call(_))
-        {
-            vec![syntax::float(expression)?]
-        } else {
-            let Expr::Call(call) = expression else {
-                return None;
-            };
-            let path = syntax::path(&call.func)?;
-            let (owner, method) = path.rsplit_once("::")?;
-            let (crate_name, type_name) = owner.split_once("::")?;
-            if crate_name != "ferroui_base"
-                || Self::from_type(&format!("::{owner}"))?.kind != kind
-                || type_name.contains("::")
-            {
-                return None;
-            }
-            let count = match (method, kind) {
-                ("uniform", ValueKind::CornerRadius | ValueKind::Thickness) => 1,
-                ("top_bottom", ValueKind::CornerRadius) => 2,
-                ("new", ValueKind::Point | ValueKind::Vector | ValueKind::Size) => 2,
-                ("new", ValueKind::CornerRadius | ValueKind::Thickness | ValueKind::Rect) => 4,
-                _ => return None,
-            };
-            if call.args.len() != count {
-                return None;
-            }
-            call.args
-                .iter()
-                .map(syntax::float)
-                .collect::<Option<Vec<_>>>()?
-        };
-        let mut values = parts.iter().map(|part| part.value).collect::<Vec<_>>();
-        if let (ValueKind::CornerRadius, [top, bottom]) = (kind, values.as_slice()) {
-            values = vec![*top, *top, *bottom, *bottom];
-        }
-        let text = values
-            .iter()
-            .map(f64::to_string)
-            .collect::<Vec<_>>()
-            .join(",");
-        Some(ValueSource {
-            value: AnimationValue::parse(&text, kind).ok()?,
-            source: ValueSyntax::Numbers(parts),
-        })
+        let (value, source) = Numbers::read(expression, kind, &resolve)?;
+        Some(ValueSource { value, source: ValueSyntax::Numbers(source) })
     }
 
-    pub(super) fn read_keyframe(self, expression: &Expr, project_effects: bool) -> Option<ValueSource> {
+    pub(super) fn read_keyframe(
+        self,
+        expression: &Expr,
+        project_effects: bool,
+        resolve: &impl Fn(&Expr) -> Option<String>,
+    ) -> Option<ValueSource> {
         if self.brush {
-            if let Some((value, source)) = BrushSource::read(expression, &syntax::path) {
+            if let Some((value, source)) = BrushSource::read(expression, resolve) {
                 value.validate().ok()?;
                 return Some(ValueSource { value, source: ValueSyntax::Brush(Box::new(source)) });
             }
         }
         if self.kind == ValueKind::Effect {
-            return self.read_effect(expression, syntax::path, project_effects);
+            return self.read_effect(expression, resolve, project_effects);
         }
-        self.read(expression)
+        self.read_with(expression, resolve)
     }
 
     fn read_effect(self, expression: &Expr, resolve: impl Fn(&Expr) -> Option<String>, project_effects: bool) -> Option<ValueSource> {
@@ -219,50 +181,32 @@ impl ValueSource {
         }
         let kind = self.value.kind();
         let value = AnimationValue::parse_native_literal(text, kind).map_err(|error| error.to_string())?;
-        let parts = match &self.source {
-            ValueSyntax::Color(source) => return source.plan(&self.value, &value, patches),
-            ValueSyntax::Relative(source) => return source.plan(&value, patches),
-            ValueSyntax::Effect(_) => return Err("The key requires an effect".into()),
+        match &self.source {
+            ValueSyntax::Color(source) => source.plan(&self.value, &value, patches),
+            ValueSyntax::Relative(source) => source.plan(&value, patches),
+            ValueSyntax::Effect(_) => Err("The key requires an effect".into()),
             ValueSyntax::BoxShadows(source) => {
                 let (AnimationValue::BoxShadows(previous), AnimationValue::BoxShadows(next)) =
                     (&self.value, value)
                 else {
                     return Err("The key requires box shadows".into());
                 };
-                return source.plan(previous, &next, patches);
+                source.plan(previous, &next, patches)
             }
             ValueSyntax::TransformList(source) => {
                 if self.value != value {
                     source.plan(&value.to_xaml(), patches);
                 }
-                return Ok(());
+                Ok(())
             }
             ValueSyntax::Brush(source) => {
                 let (AnimationValue::Brush(old), AnimationValue::Brush(next)) = (&self.value, value) else {
                     return Err("The key requires a brush".into());
                 };
-                return source.plan(old, &next, patches);
+                source.plan(old, &next, patches)
             }
-            ValueSyntax::Numbers(parts) => parts,
-        };
-        let values = numeric_parts(&value)?;
-        let components = match (parts.len(), values.as_slice()) {
-            (1, [a, b, c, d]) if a == b && a == c && a == d => vec![*a],
-            (2, [a, b, c, d]) if kind == ValueKind::CornerRadius && a == b && c == d => {
-                vec![*a, *c]
-            }
-            (count, _) if count == values.len() => values,
-            _ => {
-                return Err(
-                    "Enter values that fit the Rust constructor, or change its shape in source"
-                        .into(),
-                );
-            }
-        };
-        for (part, value) in parts.iter().zip(components) {
-            part.plan(value, patches);
+            ValueSyntax::Numbers(numbers) => numbers.plan(&numeric_parts(&value)?, patches),
         }
-        Ok(())
     }
 }
 

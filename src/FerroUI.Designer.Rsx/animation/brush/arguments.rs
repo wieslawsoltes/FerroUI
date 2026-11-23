@@ -1,5 +1,5 @@
 use super::{
-    super::{syntax, FloatSource},
+    super::{syntax, variant::VariantSource, FloatSource},
     operand::{self, GeometrySource, Leaf},
 };
 use ferroui_designer_animation::{
@@ -9,10 +9,12 @@ use ferroui_designer_animation::{
 use ferroui_designer_core::{SourceSpan, TextPatch};
 use syn::Expr;
 
+const SPREAD_TYPE: &str = "ferroui_base::media::GradientSpreadMethod";
+
 #[derive(Clone, Debug)]
 pub(super) struct Arguments {
     opacity: FloatSource,
-    spread: SourceSpan,
+    spread: VariantSource,
     origin: GeometrySource,
     transform: Leaf,
     geometry: Vec<GeometrySource>,
@@ -54,10 +56,7 @@ impl Arguments {
         value.spread = GradientSpread::parse(
             resolve(spread)?.strip_prefix("ferroui_base::media::GradientSpreadMethod::")?,
         )?;
-        let Expr::Path(spread) = spread else {
-            return None;
-        };
-        let spread = syntax::span(&spread.path.segments.last()?.ident);
+        let spread = VariantSource::read(spread, SPREAD_TYPE, value.spread.name(), resolve)?;
         let (transform_origin, origin) =
             GeometrySource::read(origin, &value.transform_origin.value(), resolve)?;
         value.transform_origin = point(&transform_origin)?;
@@ -106,10 +105,7 @@ impl Arguments {
     ) -> Result<(), String> {
         self.opacity.plan(next.opacity, patches);
         if original.spread != next.spread {
-            patches.push(TextPatch {
-                span: self.spread,
-                replacement: next.spread.name().into(),
-            });
+            self.spread.plan(SPREAD_TYPE, next.spread.name(), patches);
         }
         self.origin.plan(
             &original.transform_origin.value(),

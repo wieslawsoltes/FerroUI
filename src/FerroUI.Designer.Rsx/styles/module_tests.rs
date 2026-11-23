@@ -32,6 +32,48 @@ impl Drop for Fixture {
 }
 
 #[test]
+fn animation_reexports_follow_the_selected_module_draft() {
+    use ferroui_designer_animation::KeyframeEdit;
+
+    let fixture = Fixture::create();
+    fixture.write("application.rs", "mod motion; mod screen;\n");
+    let contract = "pub(crate) use ferroui_view::{animation as clip, ms as duration};\npub(crate) use ferroui_base::CornerRadius as Radius;\n";
+    let motion = fixture.write("motion.rs", contract);
+    let screen = r#"use crate::motion::{clip, duration, Radius};
+use ferroui_view::prelude::*;
+use ferroui_controls::Border;
+fn view() -> Element { rsx! { Border {
+    styles: [style("Border").animation(clip(duration(1000))
+        .key_frame(1.0, |key| key.set(Border::corner_radius_property(), Radius::new(6.0, 7.0, 8.0, 9.0))))],
+} } }"#;
+    let uri = fixture.write("screen.rs", screen);
+    let modules = RustModuleSources::capture(
+        &fixture.0, &fixture.0.join("application.rs"), &uri, screen, &[],
+    ).unwrap();
+    let catalog = RsxCatalog::built_in();
+    let caret = screen.find("rsx!").unwrap();
+    let view = catalog.project_with_modules(screen, caret, Some(&modules)).unwrap();
+    let markup = view.preview_markup();
+    let clip = markup.animations[0].1;
+    let edits = clip.author_keyframe(screen, catalog, "CornerRadius", KeyframeEdit::Upsert {
+        previous: None, time: 0.5, value: "2,3,4,5", easing: "LinearEasing",
+    }).unwrap();
+    let candidate = TextPatch::apply_all(screen, edits).unwrap();
+    assert!(candidate.contains("clip(duration(1000))"));
+    let edited = modules.with_file_text(&uri, &candidate).unwrap();
+    let preview = catalog.project_with_modules(&candidate, caret, Some(&edited)).unwrap();
+    assert!(preview.preview_markup().animations[0].1.xaml.contains("Value=\"2,3,4,5\""));
+
+    let changed = edited.with_file_text(&motion, &contract.replace(
+        "pub(crate) use ferroui_base::CornerRadius as Radius;",
+        "pub(crate) struct Radius;",
+    )).unwrap();
+    let preview = catalog.project_with_modules(&candidate, caret, Some(&changed)).unwrap();
+    assert!(preview.preview_markup().animations.is_empty());
+    assert_eq!(preview.animation_issues.len(), 1);
+}
+
+#[test]
 fn resolves_the_packed_integer_through_a_color_constructor_in_another_module() {
     let fixture = Fixture::create();
     fixture.write("application.rs", "mod tokens; mod brand; mod screen;\n");

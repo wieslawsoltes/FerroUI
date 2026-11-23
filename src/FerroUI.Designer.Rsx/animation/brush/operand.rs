@@ -102,7 +102,7 @@ impl GeometrySource {
             return Some((AnimationValue::Number(number.value), Self::Number(number)));
         }
         if let Some(operand) = optional(expression, resolve)? {
-            if let Some((value, source)) = RelativeSource::read(operand, default.kind()) {
+            if let Some((value, source)) = RelativeSource::read(operand, default.kind(), resolve) {
                 return Some((value, Self::Relative(source)));
             }
             let value = relative_constant(&resolve(operand)?)?;

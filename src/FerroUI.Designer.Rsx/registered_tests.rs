@@ -176,9 +176,13 @@ fn registered_typed_keys_keep_comments_other_invocations_and_opaque_clips() {
     assert_eq!(updated, source.replace("key_frame(0.5,", "key_frame(0.75,")
         .replace("/* top-right */ 28.0, 20.0, 16.0", "/* top-right */ 30.0, 20.0, 18.0"));
     assert!(catalog.project(&updated, caret).unwrap().xaml().contains("Value=\"24,30,20,18\""));
-    assert!(animation.patch_keyframe("ReadingRadius", KeyframeEdit::Upsert {
+    let changes = animation.patch_keyframe("ReadingRadius", KeyframeEdit::Upsert {
         previous: Some(0.0), time: 0.0, value: "10,20,30,40", easing: "LinearEasing",
-    }).is_err());
+    }).unwrap();
+    assert_eq!(
+        ferroui_designer_core::TextPatch::apply_all(&source, changes).unwrap(),
+        source.replace("CornerRadius::uniform(0.0)", "CornerRadius::new(10.0, 20.0, 30.0, 40.0)"),
+    );
     assert!(RsxCatalog::built_in().project(&source, caret).unwrap().preview_markup().animations.is_empty());
     let changes = animation.author_keyframe(&source, &catalog, "ReadingRadius", KeyframeEdit::Upsert {
         previous: None, time: 1.5, value: "24,30,20,18", easing: "LinearEasing",

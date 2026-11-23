@@ -157,6 +157,11 @@ to the same relative value keeps `with_radius`. Independent radii or a relative 
 the call to `new` while preserving the stops and comments. Use the Rust source editor for
 computed values, or edit the declaration that owns a bound or resource-backed brush.
 
+Solid brush keys can use `ImmutableSolidColorBrush::new`, `from_uint32`, or `with_opacity`.
+Choose **Opacity** on the brush track to animate its opacity independently of its color alpha.
+Changing the default opacity adds an explicit value through `with_opacity` while preserving the
+authored color argument and constructor alias.
+
 ```rust
 .key_frame(1.0, |key| key.set(
     ferroui_controls::Border::background_property(),
@@ -509,6 +514,18 @@ Select the target’s program and seek to the time you want. **Add keyframe at p
 ## Edit mapped Rust clips and state routes
 
 Open [animation_view.rs](../../../editors/vscode/test/fixtures/animation_view.rs), then select the RSX invocation containing the inline style animation. Timeline can preview that animation and patch its supported literal key times, values, and incoming splines. The source action jumps to the authored declaration. Use the warning action to find computed clips in the original Rust. For custom property accessors, export the [animation getter metadata](../../../editors/vscode/README.md#map-an-application-control-to-rsx) from the owning Cargo package. Use [App Preview](runtime.md#render-with-your-app-in-app-preview) for its registered control and animator.
+
+Use named imports and aliases for the animation factory, property getter, and native value
+constructors. The designer also resolves `style`, `animation`, and `ms` from an unambiguous
+`ferroui_view::prelude::*` import. Re-exports in the selected Cargo module tree use the current
+source, including supported unsaved module drafts. Editing a key keeps the original import and
+call spelling. Follow the source warning when a local definition or an ambiguous import hides
+the native factory.
+
+For `CornerRadius::uniform`, `CornerRadius::top_bottom`, `Thickness::uniform`, and
+`Thickness::symmetric`, use a value curve to change one corner or side. The designer keeps the
+shorthand while its fields can represent the edit and expands to the same type's `new` constructor
+when the fields become independent. The change preserves existing operand comments and takes one Undo.
 
 1. Seek to a time and choose **Add keyframe at playhead**, or double-click an empty part of a property track. The isolated designer samples the track at that time and adds a Rust `.key_frame(...)`. An empty mapped clip starts with Opacity.
 2. Select one or more keys and open **Keyframe Actions**. **Duplicate at Offset…** copies their values and easing. Use the same menu to [copy, paste, and mirror keys](#copy-paste-and-mirror-keyframes). **Delete** removes the selected setters. With a key focused, use Ctrl+D or Command+D to duplicate at the current snap interval, or press Delete or Backspace.

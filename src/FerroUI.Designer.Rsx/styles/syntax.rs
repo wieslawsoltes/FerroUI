@@ -75,11 +75,7 @@ impl ProjectedStyles {
             return None;
         }
         let (factory, methods) = rust::chain(expression)?;
-        let path = bindings.path(&factory.func)?;
-        if !matches!(path.as_str(), "ferroui_view::style" | "ferroui_view::prelude::style") || factory.args.len() != 1 {
-            return None;
-        }
-        let Expr::Lit(selector) = &factory.args[0] else {
+        let Expr::Lit(selector) = rust::view_argument_with(factory, "style", &|expr| bindings.path(expr))? else {
             return None;
         };
         let Lit::Str(selector) = &selector.lit else {
@@ -146,7 +142,7 @@ impl ProjectedStyles {
                     self.issue(rust::span(nested), "Reveal the computed nested Rust style");
                 }
             } else if let Some(animation) = rust::argument(call, "animation") {
-                if let Some(mut clip) = rust::clip(animation, catalog) {
+                if let Some(mut clip) = rust::clip(animation, catalog, |expression| bindings.path(expression)) {
                     if needs_target_type {
                         rust::scope_untyped_clip(&mut clip, catalog);
                     }
