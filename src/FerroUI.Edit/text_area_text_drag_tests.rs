@@ -233,6 +233,13 @@ fn apple_keymap_gives_box_word_and_copy_gestures_their_own_modifiers() {
     scene.pointer(RawPointerEventType::Move, 14, button | RawInputModifiers::CONTROL);
     assert!(!editor.selection().is_rectangular());
     scene.pointer(RawPointerEventType::LeftButtonUp, 14, RawInputModifiers::CONTROL);
+
+    // Inside a selection Option is the copy of a text drag, not a new rectangle.
+    editor.select(0, 5).unwrap();
+    scene.pointer(RawPointerEventType::LeftButtonDown, 2, button | RawInputModifiers::ALT);
+    assert_eq!(editor.selected_text().unwrap(), "alpha");
+    assert!(!editor.selection().is_rectangular());
+    scene.pointer(RawPointerEventType::LeftButtonUp, 2, RawInputModifiers::ALT);
 }
 
 #[test]
