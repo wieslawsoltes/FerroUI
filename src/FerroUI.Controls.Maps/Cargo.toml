@@ -29,6 +29,7 @@ ferroui-build-scan.workspace = true
 [dev-dependencies]
 ferroui-base = { workspace = true, features = ["testing"] }
 ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

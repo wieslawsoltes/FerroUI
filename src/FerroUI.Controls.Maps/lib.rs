@@ -19,7 +19,7 @@ mod tests;
 pub use camera::{MapCamera, MAX_ZOOM, MIN_ZOOM};
 pub use grid_tiles::{grid_tile_source, GridTileLoader};
 pub use map_automation::{MapControlAutomationPeer, MapElementAutomationPeer};
-pub use map_control::{MapControl, MapInteractionMode};
+pub use map_control::{MapControl, MapControlInteractionMode};
 pub use map_elements::{
     MapElement, MapElementClickEventArgs, MapElementsLayer, MapIcon, MapPolygon, MapPolyline,
 };
@@ -48,7 +48,7 @@ pub static ASSEMBLY: ferroui_base::metadata::MarkupAssembly =
     };
 ferroui_base::ferro_rust_paths! {
     classes: [crate::MapControl, crate::MapControlAutomationPeer, crate::MapElementAutomationPeer],
-    types: [crate::MapInteractionMode], contracts: [], generics: [], generic_contracts: [],
+    types: [crate::MapControlInteractionMode], contracts: [], generics: [], generic_contracts: [],
 }
 const TYPES: &[&ferroui_base::TypeInfo] = &[
     MapControl::TYPE,
@@ -66,5 +66,8 @@ pub fn register_types() {
         ferroui_base::metadata::MarkupAssembly::register_table(&ASSEMBLY);
         register_rust_paths();
         ferroui_base::TypeInfo::register_table(TYPES);
+        ferroui_base::metadata::MarkupType::register_table(&[
+            <MapControlInteractionMode as ferroui_base::metadata::MarkupTyped>::MARKUP,
+        ]);
     });
 }

@@ -241,6 +241,34 @@ fn the_disk_cache_answers_without_the_loader() {
     let _ = std::fs::remove_dir_all(&folder);
 }
 
+#[test]
+fn the_run_time_loader_resolves_the_control_and_its_modes_without_a_prefix() {
+    use ferroui_controls::Control;
+    use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    crate::register_types();
+    let root = FerroRuntimeXamlLoader::parse_as::<ferroui_base::Ref<Control>>(
+        r#"<MapControl xmlns="https://github.com/ferroui" MapServiceToken="Token" ZoomLevel="5"
+                       Heading="30" PanInteractionMode="Disabled" ZoomInteractionMode="Auto"
+                       RotateInteractionMode="Disabled" />"#,
+        None,
+    )
+    .expect("the document loads without a prefix");
+    let map = root.cast::<MapControl>().expect("a map");
+    assert_eq!(map.map_service_token().as_deref(), Some("Token"));
+    assert_eq!(map.zoom_level(), 5.0);
+    assert_eq!(map.heading(), 30.0);
+    assert_eq!(
+        map.pan_interaction_mode(),
+        MapControlInteractionMode::Disabled
+    );
+    assert_eq!(map.zoom_interaction_mode(), MapControlInteractionMode::Auto);
+    assert_eq!(
+        map.rotate_interaction_mode(),
+        MapControlInteractionMode::Disabled
+    );
+}
+
 fn key(map: &MapControl, key: ferroui_base::input::Key) -> bool {
     let mut args = ferroui_base::input::KeyEventArgs::new();
     args.key = key;
@@ -258,10 +286,10 @@ fn the_arrow_keys_move_the_map_and_a_disabled_mode_stops_them() {
     assert!(key(&map, Key::Right));
     assert!(map.center().longitude > start, "the view moves east");
     let moved = map.center().longitude;
-    map.set_pan_interaction_mode(MapInteractionMode::Disabled);
+    map.set_pan_interaction_mode(MapControlInteractionMode::Disabled);
     assert!(!key(&map, Key::Right));
     assert_eq!(map.center().longitude, moved);
-    map.set_zoom_interaction_mode(MapInteractionMode::Disabled);
+    map.set_zoom_interaction_mode(MapControlInteractionMode::Disabled);
     assert!(!key(&map, Key::Add));
     assert_eq!(map.zoom_level(), 4.0);
 }
@@ -1121,7 +1149,7 @@ mod input {
     fn the_barrel_button_does_nothing_when_rotation_is_disabled() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
         let map = map();
-        map.set_rotate_interaction_mode(MapInteractionMode::Disabled);
+        map.set_rotate_interaction_mode(MapControlInteractionMode::Disabled);
         let center = map.center();
         finger_with_barrel(&map, (300.0, 150.0), (200.0, 50.0));
         assert_eq!(map.heading(), 0.0);
@@ -1132,7 +1160,7 @@ mod input {
     fn a_disabled_rotation_ignores_the_right_button_and_leaves_it_free() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
         let map = map();
-        map.set_rotate_interaction_mode(MapInteractionMode::Disabled);
+        map.set_rotate_interaction_mode(MapControlInteractionMode::Disabled);
         let finger = Finger::new(PointerType::Mouse, MouseButton::Right);
         finger.down(&map, (300.0, 150.0));
         finger.to(&map, (200.0, 250.0));
@@ -1181,7 +1209,7 @@ mod input {
     fn a_pinch_zooms_and_turns_only_what_is_enabled() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
         let map = map();
-        map.set_rotate_interaction_mode(MapInteractionMode::Disabled);
+        map.set_rotate_interaction_mode(MapControlInteractionMode::Disabled);
         let origin = Point::new(200.0, 150.0);
         map.raise_event(&PinchEventArgs::with_angle(1.0, origin, 10.0, 0.0));
         map.raise_event(&PinchEventArgs::with_angle(2.0, origin, 80.0, 0.0));
@@ -1263,7 +1291,7 @@ mod input {
     fn a_click_works_with_panning_disabled_and_misses_empty_map() {
         let _app = UnitTestApplication::start(TestServices::styled_window());
         let map = map();
-        map.set_pan_interaction_mode(MapInteractionMode::Disabled);
+        map.set_pan_interaction_mode(MapControlInteractionMode::Disabled);
         let place = map.center();
         let layer = MapElementsLayer::new();
         layer.add(MapElement::Icon(MapIcon::new(place)));

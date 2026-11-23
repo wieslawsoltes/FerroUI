@@ -1669,6 +1669,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-markup-xaml-loader",
  "ferroui-system",
 ]
 
