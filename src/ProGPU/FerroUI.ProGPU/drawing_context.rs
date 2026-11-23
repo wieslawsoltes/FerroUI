@@ -866,31 +866,85 @@ impl ProGpuDrawingContext {
         )
     }
 
-    /// A layer whose content is blurred by `sigma` (in the coordinates of the drawing), or a
-    /// plain layer for a sigma of zero.
-    fn push_blur_layer(&mut self, sigma: f32) {
+    /// The record of an analytic clip of a rectangle under `transform`.
+    fn analytic_mask_record(rect: Rect, transform: &Matrix, corner_radii_x: [f32; 4], corner_radii_y: [f32; 4]) -> progpu_native_scene_layer_mask {
+        progpu_native_scene_layer_mask {
+            struct_size: std::mem::size_of::<progpu_native_scene_layer_mask>() as u32,
+            kind: PROGPU_NATIVE_SCENE_LAYER_MASK_ROUNDED_RECTANGLE as u32,
+            flags: 0,
+            reserved: 0,
+            bounds: image_rect(rect),
+            transform: affine(transform),
+            corner_radii_x,
+            corner_radii_y,
+            opacity: 1.0,
+            reserved0: 0,
+            reserved1: 0,
+            reserved2: 0,
+        }
+    }
+
+    /// The mask of a blurred layer: the clips in force and `shape`, all applied to the result
+    /// of the blur, since a clip of the draws inside would cut the source of the blur. `None`
+    /// when they do not fit one chain of analytic masks; `Some(NO_INDEX)` for no clip at all.
+    fn blurred_layer_mask(&mut self, shape: Option<progpu_native_scene_layer_mask>) -> Option<u32> {
+        if self.current.mask != NO_INDEX && self.analytic.is_empty() {
+            return None;
+        }
+        let mut masks = self.analytic.clone();
+        if let Some(clip) = self.current.clip_rect {
+            masks.push(Self::analytic_mask_record(clip, &Matrix::IDENTITY, [0.0; 4], [0.0; 4]));
+        }
+        masks.extend(shape);
+        if masks.len() > PROGPU_NATIVE_SCENE_MAX_ANALYTIC_MASKS as usize {
+            return None;
+        }
+        let result = match masks.as_slice() {
+            [] => return Some(NO_INDEX),
+            [mask] => self.scene().add_rounded_rectangle_mask(mask),
+            masks => self.scene().add_analytic_mask_chain(masks),
+        };
+        self.record(result)
+    }
+
+    /// Draws with `draw`, unclipped, in a layer blurred by `sigma` and then masked by `mask`.
+    fn draw_blurred(&mut self, sigma: f32, mask: u32, draw: impl FnOnce(&mut Self)) {
         let chain = (sigma > 0.0)
             .then(|| self.effect_chain(PROGPU_NATIVE_GROUP_EFFECT_GAUSSIAN_BLUR as u32, sigma, (0.0, 0.0), [0.0; 4]))
             .flatten();
-        self.push_effect_layer(None, chain.unwrap_or(NO_INDEX));
+        self.push_effect_layer(None, chain.unwrap_or(NO_INDEX), mask);
+        let saved = self.current;
+        self.current.clip_rect = None;
+        self.current.mask = NO_INDEX;
+        self.changed();
+        draw(self);
+        self.current = saved;
+        self.changed();
+        self.pop_scene_layer();
     }
 
     /// An inset shadow: a frame around the shape with a hole at the shadow's offset, shrunk by
     /// the spread and blurred, seen through the shape.
     fn inset_shadow(&mut self, rect: &RoundedRect, shadow: &ferroui_base::media::BoxShadow, sigma: f32) {
-        if !has_area(rect.rect) {
+        if !has_area(rect.rect) || !invertible(&self.current.transform) {
             return;
         }
+        self.refuse_fragment();
+        let shape = Self::analytic_mask_record(
+            rect.rect,
+            &self.current.transform,
+            [rect.radii_top_left.x as f32, rect.radii_top_right.x as f32, rect.radii_bottom_right.x as f32, rect.radii_bottom_left.x as f32],
+            [rect.radii_top_left.y as f32, rect.radii_top_right.y as f32, rect.radii_bottom_right.y as f32, rect.radii_bottom_left.y as f32],
+        );
+        let Some(mask) = self.blurred_layer_mask(Some(shape)) else {
+            notes::note_once("inset-shadow-mask", "an inset shadow under a clip of a geometry or under many nested clips is not drawn by the ProGPU backend");
+            return;
+        };
         let reach = 3.0 * f64::from(sigma) + shadow.offset_x.abs().max(shadow.offset_y.abs()) + shadow.spread.abs() + 1.0;
         let hole = Self::spread_rect(rect, -shadow.spread, shadow.offset_x, shadow.offset_y);
-        let outer = rect.rect.inflate(reach);
-        let frame = Self::frame_path(outer, &hole);
-        self.push_clip_rounded(*rect);
-        self.push_blur_layer(sigma);
+        let frame = Self::frame_path(rect.rect.inflate(reach), &hole);
         let brush = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(shadow.color);
-        self.fill_path(&frame, &brush);
-        self.pop_scene_layer();
-        self.pop_clip();
+        self.draw_blurred(sigma, mask, |context| context.fill_path(&frame, &brush));
     }
 
     /// The path of `outer` with `hole` cut out of it.
@@ -926,29 +980,39 @@ impl ProGpuDrawingContext {
         builder.finish()
     }
 
-    /// The outer shadow of a rectangle whose corners differ: its shape blurred in a layer, kept
-    /// out of a shape that is not opaque by a difference mask.
+    /// The outer shadow of a rectangle whose corners differ: its shape blurred in a layer. Under
+    /// a shape that is not opaque, a difference mask of the shape on the layer keeps the shadow
+    /// out of it; the clips in force then apply to the source of the blur.
     fn outer_shadow_of_uneven_corners(&mut self, rect: &RoundedRect, shadow: &ferroui_base::media::BoxShadow, sigma: f32, opaque: bool) {
         let shape = Self::spread_rect(rect, shadow.spread, shadow.offset_x, shadow.offset_y);
         if !has_area(shape.rect) {
             return;
         }
-        let saved = self.current;
-        if !opaque && self.current.mask == NO_INDEX && has_area(rect.rect) {
-            let element = Self::rounded_rect_path(rect);
-            if let Some(mask) = self.vector_mask(&element, PROGPU_NATIVE_CLIP_DIFFERENCE as u32) {
-                self.current.mask = mask;
-                self.changed();
-            }
-        }
-        self.push_blur_layer(sigma);
+        self.refuse_fragment();
+        let path = Self::rounded_rect_path(&shape);
         let brush = ferroui_base::media::immutable::ImmutableSolidColorBrush::new(shadow.color);
-        self.fill_path(&Self::rounded_rect_path(&shape), &brush);
-        self.pop_scene_layer();
-        if self.current.mask != saved.mask {
-            self.current = saved;
-            self.changed();
+        if !opaque && has_area(rect.rect) {
+            let element = Self::rounded_rect_path(rect);
+            let Some(mask) = self.vector_mask(&element, PROGPU_NATIVE_CLIP_DIFFERENCE as u32) else { return };
+            let chain = (sigma > 0.0)
+                .then(|| self.effect_chain(PROGPU_NATIVE_GROUP_EFFECT_GAUSSIAN_BLUR as u32, sigma, (0.0, 0.0), [0.0; 4]))
+                .flatten();
+            self.push_effect_layer(None, chain.unwrap_or(NO_INDEX), mask);
+            self.fill_path(&path, &brush);
+            self.pop_scene_layer();
+            return;
         }
+        let Some(mask) = self.blurred_layer_mask(None) else {
+            // Under a clip of a geometry the clip stays on the draw.
+            let chain = (sigma > 0.0)
+                .then(|| self.effect_chain(PROGPU_NATIVE_GROUP_EFFECT_GAUSSIAN_BLUR as u32, sigma, (0.0, 0.0), [0.0; 4]))
+                .flatten();
+            self.push_effect_layer(None, chain.unwrap_or(NO_INDEX), NO_INDEX);
+            self.fill_path(&path, &brush);
+            self.pop_scene_layer();
+            return;
+        };
+        self.draw_blurred(sigma, mask, |context| context.fill_path(&path, &brush));
     }
 
     /// The effect chain of one effect, its sigma and offset in the coordinates of the drawing
@@ -984,9 +1048,9 @@ impl ProGpuDrawingContext {
         self.record(result)
     }
 
-    /// A layer through the effect chain `effect` (`NO_INDEX` for a plain layer), with its bounds
-    /// in device pixels.
-    fn push_effect_layer(&mut self, target: Option<Rect>, effect: u32) {
+    /// A layer through the effect chain `effect` and then the mask `mask` (`NO_INDEX` for none),
+    /// with its bounds in device pixels.
+    fn push_effect_layer(&mut self, target: Option<Rect>, effect: u32, mask: u32) {
         self.refuse_fragment();
         let layer = progpu_native_scene_layer {
             struct_size: std::mem::size_of::<progpu_native_scene_layer>() as u32,
@@ -994,7 +1058,7 @@ impl ProGpuDrawingContext {
             bounds: target.map(image_rect).unwrap_or(progpu_native_image_rect { x: 0.0, y: 0.0, width: 0.0, height: 0.0 }),
             opacity: 1.0,
             blend_mode: PROGPU_NATIVE_BLEND_SRC_OVER as u32,
-            mask_resource_index: NO_INDEX,
+            mask_resource_index: mask,
             effect_resource_index: effect,
             content_revision: 0,
             composite_revision: 0,
@@ -1604,7 +1668,7 @@ impl IDrawingContextImplWithEffects for ProGpuDrawingContext {
             notes::note_once("effect-kind", "this effect is drawn without it by the ProGPU backend");
             None
         };
-        self.push_effect_layer(target, chain.unwrap_or(NO_INDEX));
+        self.push_effect_layer(target, chain.unwrap_or(NO_INDEX), NO_INDEX);
     }
 
     fn pop_effect(&mut self) {
