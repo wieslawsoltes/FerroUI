@@ -26,7 +26,6 @@ impl ferroui_media_controls::TextureFrameImporter for NativeGlTextureImporter {
             KnownPlatformGraphicsExternalImageHandleTypes, LeasedPlatformHandle,
             PlatformGraphicsExternalImageFormat, PlatformGraphicsExternalImageProperties,
         };
-        use ferroui_media_controls::TextureFrameImporter as _;
         let Some(shared) = frame.resource::<frame_producer::SharedHandleFrame>() else {
             return ferroui_media_opengl::NativeGlTextureImporter.import(interop, frame);
         };
