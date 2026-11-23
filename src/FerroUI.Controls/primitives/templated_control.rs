@@ -108,13 +108,15 @@ impl LayoutableImpl for TemplatedControl {
 
             if let Some(template) = &template {
                 let this_ref = this.to_ref();
+                let _ = super::compiled_template_parts::take_compiled_template_parts();
                 if let Some(template_result) = template.build(&this_ref) {
+                    let compiled_parts = super::compiled_template_parts::take_compiled_template_parts();
                     let (child, name_scope) = template_result.deconstruct();
                     Self::apply_templated_parent(&child, Some(&this_ref.clone().upcast()));
                     child.set_parent(this_ref);
                     this.visual_children().add(child.upcast());
 
-                    let e = TemplateAppliedEventArgs::new(name_scope);
+                    let e = TemplateAppliedEventArgs::with_compiled_parts(name_scope, compiled_parts);
                     this.on_apply_template(&e);
                     this.raise_event(&e);
                 }

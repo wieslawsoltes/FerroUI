@@ -56841,6 +56841,7 @@ fn build_controls_macoscontrols_xaml_deferred_151(
     rt::pop_parent_end_init(&context, &border_1, 130, 14)?;
     rt::pop_parent_end_init(&context, &grid_0, 80, 12)?;
     rt::pop_parent_end_init(&context, &border_0, 76, 10)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -56954,6 +56955,7 @@ fn build_controls_macoscontrols_xaml_deferred_154(
     ::ferroui_base::input::gesture_recognizers::GestureRecognizerCollection::__markup_Add_0(&gesture_recognizers_collection_0, ::core::clone::Clone::clone(&scroll_gesture_recognizer_0).upcast::<::ferroui_base::input::gesture_recognizers::GestureRecognizer>());
     rt::pop_parent_end_init(&context, &scroll_content_presenter_0, 165, 8)?;
     rt::pop_parent_end_init(&context, &grid_0, 164, 6)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::None, ::core::option::Option::None, ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -58568,6 +58570,7 @@ fn build_controls_macoscontrols_xaml_deferred_171(
     rt::pop_parent_end_init(&context, &text_block_0, 50, 14)?;
     rt::pop_parent_end_init(&context, &layout_transform_control_0, 49, 12)?;
     rt::pop_parent_end_init(&context, &grid_0, 36, 10)?;
+    rt::publish_template_parts(&["PART_Indicator"], &[::core::option::Option::Some(::core::clone::Clone::clone(&border_3).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(grid_0.clone()))
 }
 
@@ -64219,6 +64222,7 @@ fn build_controls_macoscontrols_xaml_deferred_254(
     rt::pop_parent_end_init(&context, &border_2, 113, 14)?;
     rt::pop_parent_end_init(&context, &grid_0, 53, 12)?;
     rt::pop_parent_end_init(&context, &border_0, 49, 10)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_bar_0).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -67265,6 +67269,7 @@ fn build_controls_macoscontrols_xaml_deferred_289(
     rt::pop_parent_end_init(&context, &border_4, 167, 14)?;
     rt::pop_parent_end_init(&context, &grid_0, 133, 12)?;
     rt::pop_parent_end_init(&context, &border_0, 132, 10)?;
+    rt::publish_template_parts(&["PART_HorizontalScrollBar", "PART_VerticalScrollBar", "PART_ContentPresenter"], &[::core::option::Option::None, ::core::option::Option::None, ::core::option::Option::Some(::core::clone::Clone::clone(&scroll_content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 
@@ -73353,6 +73358,7 @@ fn build_controls_macoscontrols_xaml_deferred_378(
     rt::pop_parent_end_init(&context, &stack_panel_0, 71, 14)?;
     rt::pop_parent_end_init(&context, &grid_0, 39, 12)?;
     rt::pop_parent_end_init(&context, &border_0, 36, 10)?;
+    rt::publish_template_parts(&["PART_MovingKnobs", "PART_OffContentPresenter", "PART_OnContentPresenter", "PART_SwitchKnob", "PART_ContentPresenter"], &[::core::option::Option::Some(::core::clone::Clone::clone(&grid_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_1).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_2).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&canvas_0).upcast::<::ferroui_base::FerroObject>()), ::core::option::Option::Some(::core::clone::Clone::clone(&content_presenter_0).upcast::<::ferroui_base::FerroObject>())]);
     ::core::result::Result::Ok(rt::to_value(border_0.clone()))
 }
 

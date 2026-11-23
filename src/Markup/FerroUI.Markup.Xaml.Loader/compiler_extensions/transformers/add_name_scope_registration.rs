@@ -175,6 +175,9 @@ pub struct FerroNameScopeRegistrationXamlIlNode {
     base: XamlAstNode,
     pub name: RefCell<Rc<dyn IXamlAstValueNode>>,
     pub target_type: Option<Rc<dyn IXamlType>>,
+    /// The template part this name is, where the compiler resolves the parts of the template
+    /// (#1039): the names of the parts of the control, and the position of this one.
+    pub template_part: RefCell<Option<(Rc<[String]>, usize)>>,
 }
 
 impl FerroNameScopeRegistrationXamlIlNode {
@@ -182,6 +185,7 @@ impl FerroNameScopeRegistrationXamlIlNode {
         Rc::new(Self {
             base: XamlAstNode::new(&*name),
             target_type,
+            template_part: RefCell::new(None),
             name: RefCell::new(name),
         })
     }

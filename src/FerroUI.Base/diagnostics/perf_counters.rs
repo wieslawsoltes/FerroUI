@@ -347,6 +347,12 @@ perf_counters! {
     /// The replay of a drawing: a transform was pushed.
     RenderTransformsPushed => "render: transforms pushed by drawings",
 
+    /// `TemplateAppliedEventArgs::part`: a template part read from the parts the XAML compiler
+    /// resolved (#1039).
+    TemplatePartsCompiled => "templates: parts read from the compiled set",
+    /// `TemplateAppliedEventArgs::part`: a template part looked up by its name.
+    TemplatePartsByName => "templates: parts looked up by name",
+
     // --- the pipelined frame layers of the Skia backend (desktop-performance.md, section 9.33) ---
     /// `PipelinedLayer::begin_frame`: a layer that drew its frames directly began to pipeline
     /// them.

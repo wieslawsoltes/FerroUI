@@ -41,12 +41,16 @@ pub mod generated_conditional;
 #[rustfmt::skip]
 pub mod generated_handlers;
 #[rustfmt::skip]
+pub mod generated_template_parts;
+#[rustfmt::skip]
 pub mod rust_paths_check;
 
 #[cfg(test)]
 mod build_diagnostics;
 #[cfg(test)]
 mod catalog_measure;
+#[cfg(test)]
+mod compiled_template_parts;
 #[cfg(test)]
 mod conditional_namespaces;
 #[cfg(test)]
