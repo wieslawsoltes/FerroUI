@@ -100,6 +100,7 @@ fn fs_scale_up(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32>
 "#;
 
 /// The fragment stages of the module.
+#[cfg_attr(not(feature = "gpu"), allow(dead_code))]
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum PassKind {
     Gaussian,
@@ -334,6 +335,7 @@ pub(crate) fn blurred_shape(
 /// the blurred alpha, the shadow of the content. A large deviation is blurred at a reduced scale;
 /// the box of the reduction and the bilinear filter that scales back blur too, by a variance of
 /// a quarter of a reduced texel, which the Gaussian leaves out.
+#[cfg(feature = "gpu")]
 #[cfg_attr(not(test), allow(dead_code))]
 pub(crate) fn blurred_content(
     device: &Arc<VelloWgpuDevice>,
