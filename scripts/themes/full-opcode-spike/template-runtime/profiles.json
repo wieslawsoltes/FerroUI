@@ -1,0 +1,66 @@
+{
+  "winui": {
+    "native": {
+      "inside_control_template_build": 1715,
+      "template_binding_install_including_called_work": 435,
+      "malloc_library_exclusive": 575,
+      "value_types_try_cast_including_called_work": 167
+    },
+    "stock": {
+      "inside_control_template_build": 1813,
+      "construction_vm_including_called_work": 1123,
+      "template_binding_install_including_called_work": 329,
+      "malloc_library_exclusive": 609,
+      "value_types_try_cast_including_called_work": 133,
+      "construction_module_exclusive": 133
+    },
+    "single": {
+      "inside_control_template_build": 1783,
+      "construction_vm_including_called_work": 1053,
+      "template_binding_install_including_called_work": 322,
+      "malloc_library_exclusive": 534,
+      "value_types_try_cast_including_called_work": 156,
+      "construction_module_exclusive": 133
+    },
+    "fused": {
+      "inside_control_template_build": 1723,
+      "construction_vm_including_called_work": 1089,
+      "template_binding_install_including_called_work": 350,
+      "malloc_library_exclusive": 540,
+      "construction_module_exclusive": 107,
+      "value_types_try_cast_including_called_work": 144
+    }
+  },
+  "fluent": {
+    "native": {
+      "inside_control_template_build": 1727,
+      "template_binding_install_including_called_work": 467,
+      "malloc_library_exclusive": 663,
+      "value_types_try_cast_including_called_work": 147
+    },
+    "stock": {
+      "inside_control_template_build": 1756,
+      "construction_vm_including_called_work": 948,
+      "template_binding_install_including_called_work": 365,
+      "malloc_library_exclusive": 667,
+      "value_types_try_cast_including_called_work": 113,
+      "construction_module_exclusive": 129
+    },
+    "single": {
+      "inside_control_template_build": 1794,
+      "construction_vm_including_called_work": 923,
+      "template_binding_install_including_called_work": 381,
+      "malloc_library_exclusive": 675,
+      "value_types_try_cast_including_called_work": 98,
+      "construction_module_exclusive": 98
+    },
+    "fused": {
+      "inside_control_template_build": 1770,
+      "construction_vm_including_called_work": 1118,
+      "template_binding_install_including_called_work": 525,
+      "malloc_library_exclusive": 664,
+      "construction_module_exclusive": 93,
+      "value_types_try_cast_including_called_work": 83
+    }
+  }
+}

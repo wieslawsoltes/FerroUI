@@ -182,9 +182,10 @@ fn content_properties_and_dependencies_name_existing_properties() {
 fn enumeration_members_are_found_by_name() {
     let enums: Vec<_> = declared_types().into_iter().filter(|t| t.kind == MarkupTypeKind::Enum).collect();
     // `NumberStyles`, `TextLineBounds`, the three enums of the system backdrops,
-    // `AcrylicBrushBackgroundSource` and the rich text enumerations are declared next to the type.
+    // `AcrylicBrushBackgroundSource` and the rich text enumerations are declared next to the type;
+    // `FillBehavior` of the storyboards with the values.
     let rich_text_enums = super::rich_text::TYPES.iter().filter(|type_| type_.kind == MarkupTypeKind::Enum).count();
-    assert_eq!(enums.len(), super::enums::TYPES.len() + 6 + rich_text_enums);
+    assert_eq!(enums.len(), super::enums::TYPES.len() + 7 + rich_text_enums);
     for type_ in enums {
         assert!(!type_.enum_members.is_empty(), "{type_:?}");
         for member in type_.enum_members {
@@ -264,6 +265,8 @@ const PARSE_SAMPLES: &[(&str, &str)] = &[
     ("FerroUI.Input.KeyGesture", "Ctrl+A"),
     ("FerroUI.Animation.Cue", "50%"),
     ("FerroUI.Animation.IterationCount", "Infinite"),
+    ("FerroUI.Animation.TimelineDuration", "0:0:0.5"),
+    ("FerroUI.Animation.RepeatBehavior", "2x"),
     ("FerroUI.Animation.Easings.Easing", "LinearEasing"),
     ("FerroUI.Styling.ThemeVariant", "Dark"),
     ("System.TimeSpan", "0:0:1"),
@@ -1551,6 +1554,23 @@ fn easings_and_page_transitions_are_created_and_configured_through_metadata() {
         let type_ = MarkupType::find("FerroUI.Animation", name).unwrap();
         let value = (type_.constructors.iter().find(|c| c.parameters.is_empty()).unwrap().invoke)(&[]).unwrap();
         assert!(from_markup_value::<Rc<dyn IPageTransition>>(&value).is_some(), "{name}");
+    }
+}
+
+#[test]
+fn a_page_transition_made_in_code_is_assignable_to_its_contract() {
+    use crate::animation::{CompositePageTransition, CrossFade, IPageTransition, PageSlide, Rotate3DTransition, SlideAxis};
+
+    // The casts are registered by the construction of the transition, not by the start-up
+    // registration of the crate (#612): a transition made by code converts as one made by markup.
+    let values = [
+        boxed(Rc::new(CrossFade::new())),
+        boxed(Rc::new(PageSlide::with_duration(SignedDuration::from_seconds(0.2), SlideAxis::Vertical))),
+        boxed(Rc::new(Rotate3DTransition::default())),
+        boxed(Rc::new(CompositePageTransition::new())),
+    ];
+    for value in &values {
+        assert!(from_markup_value::<Option<Rc<dyn IPageTransition>>>(value).is_some_and(|t| t.is_some()));
     }
 }
 

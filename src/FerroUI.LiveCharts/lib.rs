@@ -12,7 +12,7 @@ pub mod geo_map_chart_engine;
 pub mod heat_functions;
 pub mod heat_legend;
 pub mod kernel;
-mod label_lines;
+pub mod label_lines;
 pub mod labelers;
 pub mod measure;
 pub mod motion;
@@ -23,6 +23,8 @@ pub mod sankey_chart_engine;
 pub mod scene;
 mod scene_transform;
 pub mod series;
+mod svg_path;
+pub mod tooltips;
 pub mod treemap_chart_engine;
 pub mod visual_states;
 
@@ -46,7 +48,10 @@ pub use geo_map_chart_engine::{
 pub use heat_functions::HeatFunctions;
 pub use heat_legend::{HeatLegend, HeatLegendSource};
 pub use kernel::{Coordinate, Error, StackedValue, Stacker};
-pub use labelers::{as_date, as_time_span, ChartPointFormatter, Labeler, Labelers};
+pub use labelers::{
+    as_date, as_time_span, ChartPointFormatter, Labeler, Labelers, NodeTooltipFormatter,
+    NodeTooltipPoint,
+};
 pub use motion::{Animatable, Animation, MotionProperty, Repeat};
 pub use paint::BrushSpace;
 pub use pie_chart_engine::{AngularTicks, Needle, PieChartEngine, PieOptions, PieVisual};
@@ -63,6 +68,9 @@ pub use scene::{
     PathCommand, PointId, Primitive, Scene, TextAnchor,
 };
 pub use series::{DataLabelsPosition, PolarLabelsPosition, RadialAlignment, Series, SeriesKind};
+pub use tooltips::{
+    geo_tooltip_location, tooltip_location, PopUpPlacement, TooltipHoverArea, TooltipLocation,
+};
 pub use treemap_chart_engine::{
     TreemapChartEngine, TreemapNode, TreemapOptions, TreemapSeries, TreemapSeriesOptions,
 };
@@ -79,3 +87,5 @@ mod cartesian_series_tests;
 mod upstream_regression_tests;
 #[cfg(test)]
 mod pie_series_tests;
+#[cfg(test)]
+mod tooltip_tests;

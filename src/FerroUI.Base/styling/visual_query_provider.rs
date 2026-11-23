@@ -16,6 +16,8 @@ struct Inner {
 #[derive(Clone)]
 pub(crate) struct VisualQueryProvider(Rc<Inner>);
 
+crate::styled_value!(VisualQueryProvider);
+
 impl PartialEq for VisualQueryProvider {
     fn eq(&self, other: &Self) -> bool {
         Rc::ptr_eq(&self.0, &other.0)

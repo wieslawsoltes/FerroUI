@@ -126,6 +126,10 @@ impl EmitMarkup for RuntimeMarkup {
     fn full_name(&self) -> String {
         self.0.full_name()
     }
+    fn property_index(&self, name: &str, is_static: bool) -> Option<usize> {
+        let list = if is_static { self.0.static_properties } else { self.0.properties };
+        list.iter().position(|property| property.name == name)
+    }
     fn rust_path(&self) -> Option<&str> {
         self.0.rust_path()
     }
@@ -172,6 +176,13 @@ impl EmitMarkup for RuntimeMarkup {
             false => self.0.rust_path()?.to_string(),
         };
         super::emit_types::markup_value_rust_type(value.name(), owner, &path)
+    }
+    fn is_optional_value(&self, key: TypeKey<'_>) -> bool {
+        let (Some(id), Some(value)) = (id_of(key), self.0.value) else { return false };
+        self.0.handles.iter().map(|handle| handle()).any(|handle| {
+            handle.id() == id
+                && handle.name().strip_prefix("core::option::Option<").and_then(|s| s.strip_suffix('>')) == Some(value().name())
+        })
     }
     fn is_flags(&self) -> bool {
         self.0.is_flags

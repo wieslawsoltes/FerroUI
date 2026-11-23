@@ -1,5 +1,6 @@
 //! The labelers of the pinned `Labelers`, the label function of an axis (`Labeler`), the text of
-//! a point that the tooltip label formatters of a series give (`ChartPointFormatter`), and the
+//! a point that the tooltip label formatters of a series give (`ChartPointFormatter`, and
+//! `NodeTooltipFormatter` for the nodes of the Sankey and treemap series), and the
 //! date and time conversions of `LiveCharts.AsDate` and `AsTimeSpan` that the `DateTimeAxis` and
 //! `TimeSpanAxis` of the source label their ticks with.
 
@@ -13,6 +14,8 @@ use std::rc::Rc;
 /// Two labelers are equal when they are the same function.
 #[derive(Clone)]
 pub struct Labeler(Rc<dyn Fn(f64) -> String>);
+
+ferroui_base::styled_value!(Labeler);
 
 impl Labeler {
     pub fn new(labeler: impl Fn(f64) -> String + 'static) -> Self {
@@ -66,6 +69,8 @@ impl fmt::Debug for Labeler {
 #[derive(Clone)]
 pub struct ChartPointFormatter(Rc<dyn Fn(&Coordinate) -> String>);
 
+ferroui_base::styled_value!(ChartPointFormatter);
+
 impl ChartPointFormatter {
     pub fn new(formatter: impl Fn(&Coordinate) -> String + 'static) -> Self {
         Self(Rc::new(formatter))
@@ -85,6 +90,68 @@ impl PartialEq for ChartPointFormatter {
 impl fmt::Debug for ChartPointFormatter {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str("ChartPointFormatter")
+    }
+}
+
+/// A node of a Sankey or treemap series as its tooltip label formatter reads it (the source's
+/// `ChartPoint` of a node): the label of the node, its value (the primary value of its coordinate)
+/// and its index in the series (the secondary value, the source's `EntityIndex`; the input index
+/// of a Sankey node, the preorder index of a treemap node).
+#[derive(Clone, Copy, Debug, PartialEq)]
+#[non_exhaustive]
+pub struct NodeTooltipPoint<'a> {
+    pub label: &'a str,
+    pub value: f64,
+    pub index: usize,
+}
+
+/// The tooltip text of a node of a Sankey or treemap series (the source's
+/// `Func<ChartPoint, string>`, `ToolTipLabelFormatter` of `CoreSankeySeries` and
+/// `CoreTreemapSeries`). Two formatters are equal when they are the same function.
+#[derive(Clone)]
+pub struct NodeTooltipFormatter(Rc<dyn Fn(&NodeTooltipPoint<'_>) -> String>);
+
+ferroui_base::styled_value!(NodeTooltipFormatter);
+
+impl NodeTooltipFormatter {
+    pub fn new(formatter: impl Fn(&NodeTooltipPoint<'_>) -> String + 'static) -> Self {
+        Self(Rc::new(formatter))
+    }
+    /// The text of a node.
+    pub fn format(&self, point: &NodeTooltipPoint<'_>) -> String {
+        (self.0)(point)
+    }
+}
+
+impl PartialEq for NodeTooltipFormatter {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
+impl fmt::Debug for NodeTooltipFormatter {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        f.write_str("NodeTooltipFormatter")
+    }
+}
+
+/// The tooltip text of a node (`GetPrimaryToolTipText` of `CoreSankeySeries` and
+/// `CoreTreemapSeries`): the text of the formatter of its series, else `<label>: <value>`, or the
+/// value alone when the node has no label.
+pub(crate) fn node_tooltip_text(
+    formatter: Option<&NodeTooltipFormatter>,
+    label: &str,
+    value: f64,
+    index: usize,
+) -> String {
+    match formatter {
+        Some(formatter) => formatter.format(&NodeTooltipPoint {
+            label,
+            value,
+            index,
+        }),
+        None if label.is_empty() => format!("{value}"),
+        None => format!("{label}: {value}"),
     }
 }
 

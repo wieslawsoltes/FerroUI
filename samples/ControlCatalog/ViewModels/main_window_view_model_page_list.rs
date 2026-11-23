@@ -84,10 +84,16 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/ItemsRepeaterPage.xaml", "ItemsRepeater", Icons::GRID, "Virtualized layouts, recycling, and collection changes across 10,000 items");
             s.add("/Pages/CarouselPage.xaml", "Carousel", Icons::SLIDES, "Cycle through a collection of items");
             s.add("/Pages/ListBoxPage.xaml", "ListBox", Icons::LIST, "A selectable, virtualized list of items");
+            // Not from upstream: ListView of WinUI (docs/porting/winui-calculator-gaps.md, LV-1).
+            // Not from upstream: GridView of WinUI (docs/porting/winui-calculator-gaps.md, LV-2).
+            s.add("/Pages/GridViewPage.xaml", "GridView", Icons::GRID, "WinUI's grid of items in wrapping rows");
+            s.add("/Pages/ListViewPage.xaml", "ListView", Icons::LIST, "WinUI's list with selection modes and item clicks");
             // Not from upstream: PagerControl of WinUI (docs/porting/winui-controls.md, G2).
             s.add("/Pages/PagerControlPage.xaml", "PagerControl", Icons::NUMBER, "Page through content with buttons, a combo box or a number box");
             s.add("/Pages/PipsPagerPage.xaml", "PipsPager", Icons::HORIZONTAL_DOTS, "Dot-style pager for paginated content");
             s.add("/Pages/RefreshContainerPage.xaml", "RefreshContainer", Icons::REFRESH, "Pull-to-refresh for scrollable content");
+            // Not from upstream: SwipeControl of WinUI (docs/porting/winui-calculator-gaps.md, SW-1).
+            s.add("/Pages/SwipeControlPage.xaml", "SwipeControl", Icons::GESTURE, "Commands revealed by swiping an item");
             s.add("/Pages/TableViewPage.xaml", "TableView", Icons::GRID, "Tabular data with resizable, sortable columns");
             // Not in the original: the pages of the TreeDataGrid demo.
             s.add("/Pages/TreeDataGridPage.xaml", "TreeDataGrid", Icons::GRID, "Virtualized rows and columns of flat and hierarchical data");
@@ -118,6 +124,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/NavigationDemoPage.xaml", "NavigationPage", Icons::NAVIGATION, "Stack-based page navigation");
             // Not from upstream: NavigationView and Frame of WinUI (docs/porting/winui-controls.md).
             s.add("/Pages/NavigationViewPage.xaml", "NavigationView", Icons::MENU, "Left, top and compact panes with a Frame");
+            // Not from upstream: Pivot of WinUI (docs/porting/winui-calculator-gaps.md, PV-3).
+            s.add("/Pages/PivotPage.xaml", "Pivot", Icons::TAB, "Items under a row of headers you pan through");
             s.add("/Pages/SplitViewPage.xaml", "SplitView", Icons::SPLIT, "A collapsible pane beside content");
             s.add("/Pages/TabbedDemoPage.xaml", "TabbedPage", Icons::TAB, "Tab-based page navigation");
             s.add("/Pages/TabControlPage.xaml", "TabControl", Icons::TAB, "Switch between tabbed content views");

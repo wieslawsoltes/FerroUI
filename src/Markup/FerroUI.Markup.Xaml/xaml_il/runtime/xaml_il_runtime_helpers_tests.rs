@@ -40,15 +40,15 @@ fn reload_deferred_context_rebases_weakly_and_restores_nested_scopes_on_unwind()
     let mut inner_content = None;
     let unwind = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
         let _inner = DeferredContentReloadScope::new();
-        inner_content = Some(XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+        inner_content = Some(XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(
             ValueType::object(), builder(), &provider,
-        ));
+        ).unwrap());
         panic!("candidate construction failed");
     }));
     assert!(unwind.is_err());
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_for(
+    let content = XamlIlRuntimeHelpers::try_deferred_transformation_factory_for(
         ValueType::object(), builder(), &provider,
-    );
+    ).unwrap();
     // Map a different base handle type, as the component adapter does.
     let mut rebase = outer.prepare_rebase(&[(
         boxed(candidate.clone().upcast::<ferroui_base::StyledElement>()),
@@ -85,7 +85,7 @@ fn button_builder() -> DeferredContentBuilder {
 fn every_instantiation_gets_a_new_name_scope() {
     let root = Border::new();
     let provider = declaration_context(vec![boxed(root.clone())], boxed(root), None);
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider).unwrap();
 
     let first = content.build_with(None);
     let second = content.build_with(None);
@@ -106,7 +106,7 @@ fn the_name_scope_of_an_instantiation_is_a_child_of_the_declaring_scope() {
     outer.register("Outer", named.clone().upcast());
     let root = Border::new();
     let provider = declaration_context(vec![], boxed(root), Some(outer.clone()));
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider).unwrap();
 
     let built = content.build_with(None);
     // Names of the declaring scope are found from the inner scope, not the
@@ -156,7 +156,7 @@ fn the_builder_sees_the_captured_context() {
         Some(boxed(Border::new()))
     });
 
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider).unwrap();
     // Changing the declaring context afterwards does not change what was captured.
     drop(provider);
     assert!(content.build_with(None).result.is_some());
@@ -184,7 +184,7 @@ fn the_service_provider_of_the_instantiation_is_the_parent_of_the_captured_one()
         assert!(sp.get_first_parent::<Ref<Border>>().is_some());
         Some(boxed(Border::new()))
     });
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &declared);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &declared).unwrap();
     assert!(content.build_with(Some(&instantiation)).result.is_some());
 }
 
@@ -202,8 +202,8 @@ fn resource_node_stacks_of_the_same_parents_are_shared() {
         })
     };
 
-    let first = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder(), &provider);
-    let second = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder(), &provider);
+    let first = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder(), &provider).unwrap();
+    let second = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder(), &provider).unwrap();
     first.build_with(None);
     second.build_with(None);
 
@@ -217,7 +217,7 @@ fn resource_node_stacks_of_the_same_parents_are_shared() {
 fn deferred_content_does_not_keep_what_it_was_declared_under_alive() {
     let root = Border::new();
     let provider = declaration_context(vec![boxed(root.clone())], boxed(root.clone()), None);
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider).unwrap();
     drop(provider);
 
     // The root owns the content, as an element owns the template declared
@@ -242,7 +242,7 @@ fn deferred_content_is_instantiated_with_the_captured_objects_that_are_alive() {
             None
         })
     };
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider).unwrap();
     drop(provider);
 
     content.build_with(None);
@@ -255,7 +255,7 @@ fn deferred_content_is_instantiated_with_the_captured_objects_that_are_alive() {
 fn deferred_content_builds_the_object_as_the_deferred_content_contract() {
     let root = Border::new();
     let provider = declaration_context(vec![], boxed(root), None);
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider).unwrap();
 
     let deferred: Rc<dyn IDeferredContent> = content.as_deferred_content();
     assert!(deferred.build(None).unwrap().is::<Ref<Button>>());
@@ -272,18 +272,18 @@ fn deferred_content_builds_the_object_as_the_deferred_content_contract() {
 fn building_content_of_the_wrong_type_panics() {
     let provider = declaration_context(vec![], boxed(Border::new()), None);
     let builder = DeferredContentBuilder::new(|_| Some(boxed("text".to_string())));
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider).unwrap();
     content.build_with(None);
 }
 
 #[test]
 fn the_older_factories_create_the_same_deferred_content() {
     let provider = declaration_context(vec![], boxed(Border::new()), None);
-    let v1 = XamlIlRuntimeHelpers::deferred_transformation_factory_v1(button_builder(), &provider);
+    let v1 = XamlIlRuntimeHelpers::deferred_transformation_factory_v1(button_builder(), &provider).unwrap();
     assert_eq!(v1.result_type(), ValueType::of::<Ref<Control>>());
     assert!(v1.build_with(None).result.is_some());
 
-    let v2 = XamlIlRuntimeHelpers::deferred_transformation_factory_v2::<Ref<Button>>(button_builder(), &provider);
+    let v2 = XamlIlRuntimeHelpers::deferred_transformation_factory_v2::<Ref<Button>>(button_builder(), &provider).unwrap();
     assert_eq!(v2.result_type(), ValueType::of::<Ref<Button>>());
     assert!(v2.build_with(None).result.is_some());
 }
@@ -292,7 +292,7 @@ fn the_older_factories_create_the_same_deferred_content() {
 #[should_panic(expected = "hasn't been registered")]
 fn the_factory_requires_a_parent_stack() {
     let provider = TestServiceProvider::new().with_root(Some(boxed(1i32))).sp();
-    let _ = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider);
+    let _ = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(button_builder(), &provider).unwrap();
 }
 
 #[test]
@@ -633,7 +633,7 @@ fn a_failing_builder_is_the_error_of_the_instantiation() {
     register_types();
     let provider = declaration_context(vec![], boxed(Border::new()), None);
     let builder = DeferredContentBuilder::try_new(|_| Err(XamlLoadError::with_message("Static resource 'x' not found.")));
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder.clone(), &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder.clone(), &provider).unwrap();
 
     assert_eq!(content.try_build_with(None).err().unwrap().message(), "Static resource 'x' not found.");
     let untyped: BoxedValue = content.clone();
@@ -665,7 +665,7 @@ fn a_failing_builder_is_the_error_of_the_instantiation() {
             Ok(Some(boxed(Button::new())))
         }
     });
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(flaky, &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(flaky, &provider).unwrap();
     assert!(content.try_build_with(None).is_err());
     assert!(content.try_build_with(None).unwrap().result.is_some());
     let _ = builder;
@@ -676,8 +676,27 @@ fn a_failing_builder_is_the_error_of_the_instantiation() {
 fn a_failing_builder_panics_through_the_infallible_contract() {
     let provider = declaration_context(vec![], boxed(Border::new()), None);
     let builder = DeferredContentBuilder::try_new(|_| Err(crate::XamlLoadError::with_message("deferred resource failed")));
-    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider);
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider).unwrap();
     let _ = content.as_deferred_content().build(None);
+}
+
+#[test]
+fn a_failing_builder_outside_a_load_raises_its_error_on_the_dispatcher() {
+    // Outside the error scope of a load, the error goes to the unhandled-exception events of
+    // the dispatcher (#567); a handler that handles it lets the build go on with nothing.
+    let _scope = ferroui_base::threading::Dispatcher::unit_test_scope();
+    let dispatcher = ferroui_base::threading::Dispatcher::current_dispatcher();
+    let raised = Rc::new(std::cell::RefCell::new(None::<String>));
+    let seen = raised.clone();
+    let _handler = dispatcher.unhandled_exception(move |args| {
+        *seen.borrow_mut() = args.exception_message().map(str::to_owned);
+        args.set_handled(true);
+    });
+    let provider = declaration_context(vec![], boxed(Border::new()), None);
+    let builder = DeferredContentBuilder::try_new(|_| Err(crate::XamlLoadError::with_message("deferred resource failed")));
+    let content = XamlIlRuntimeHelpers::deferred_transformation_factory_v3::<Ref<Control>>(builder, &provider).unwrap();
+    assert!(content.as_deferred_content().build(None).is_none());
+    assert!(raised.take().is_some_and(|message| message.contains("deferred resource failed")));
 }
 
 #[test]

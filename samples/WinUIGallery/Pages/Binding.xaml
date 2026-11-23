@@ -1,5 +1,122 @@
-<!-- Adapted from the pinned Microsoft WinUI Gallery; see ../NOTICE.md. The element bindings are
-     the source's OneWay x:Bind, compiled by the x:Bind core (#525). -->
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
-  <Slider x:Name="SizeSlider" Minimum="12" Maximum="36" Value="20" Width="300" HorizontalAlignment="Left"/><TextBlock FontSize="{x:Bind SizeSlider.Value, Mode=OneWay}" Text="Text size follows the slider"/><TextBox x:Name="NameInput" Text="FerroUI" Width="300" HorizontalAlignment="Left"/><TextBlock Text="{x:Bind NameInput.Text, Mode=OneWay}"/>
+<!-- Ported from the seven pinned Binding examples of WinUI Gallery (14061eea) and the code behind of
+     BindingPage.xaml.cs (binding_samples.rs); see ../NOTICE.md. The x:Bind of elements of the page
+     is the source's, compiled by the x:Bind core (#525); emptyStringToVisibilityConverter is
+     StringConverters.IsNotNullOrEmpty and Visibility is IsVisible. A native page has no x:Class, so
+     the x:Bind of the page's members (GreetingMessage, FormatDate, ViewModel, Items) is the code
+     behind in Rust: GreetingMessage is set once (OneTime), FormatDate follows the date picker, and the
+     view model is the page's DataContext, read with {Binding} over the markup types of
+     binding_samples.rs (TargetNullValue as the source's). FerroUI has no ListView: the list is a
+     ListBox. The Headers are composed; AppBarSeparator is CommandBarSeparator;
+     CaptionTextBlockStyle is 12; ThemeResource becomes DynamicResource. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel Margin="0,12,0,0" Spacing="12">
+    <RichTextBlock>
+      <Paragraph><Run FontWeight="SemiBold" Text="Key concepts" /></Paragraph>
+      <Paragraph><Run Text="• Target: The property of a control to which data is bound (e.g., Text, Background, Visibility)." /></Paragraph>
+      <Paragraph><Run Text="• Source: The data being bound, such as a property in a class, another control, or a static resource." /></Paragraph>
+      <Paragraph><Run Text="• Binding Modes:" /></Paragraph>
+      <Paragraph><Run Text="    ◦ OneWay updates the target when the source changes." /></Paragraph>
+      <Paragraph><Run Text="    ◦ TwoWay updates both the target and the source." /></Paragraph>
+      <Paragraph><Run Text="    ◦ OneTime sets the target once and does not update afterward." /></Paragraph>
+    </RichTextBlock>
+    <RichTextBlock>
+      <Paragraph><Run Text="Learn more about the differences between " /><Run FontFamily="Consolas" Text="x:Bind" /><Run Text=" and " /><Run FontFamily="Consolas" Text="Binding" /><Run Text=" by visiting " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/develop/data-binding/data-binding-in-depth#xbind-and-binding-feature-comparison"><Run Text="Microsoft Learn" /></Hyperlink><Run Text="." /></Paragraph>
+    </RichTextBlock>
+  </StackPanel>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Binding between controls" FontSize="18" />
+    <StackPanel Spacing="12">
+      <Grid ColumnDefinitions="Auto,Auto,Auto" ColumnSpacing="12">
+        <StackPanel Grid.Column="0" Spacing="8">
+          <TextBlock FontWeight="SemiBold" Text="OneWay binding" />
+          <TextBox x:Name="SourceTextBoxOneWay" MinWidth="380" HorizontalAlignment="Left"
+                   PlaceholderText="Enter text here" />
+          <TextBox x:Name="TargetTextBoxOneWay" MinWidth="380" HorizontalAlignment="Left"
+                   PlaceholderText="Mirrors above text"
+                   Text="{x:Bind SourceTextBoxOneWay.Text, Mode=OneWay}" />
+        </StackPanel>
+        <CommandBarSeparator Grid.Column="1" />
+        <StackPanel Grid.Column="2" Spacing="8">
+          <TextBlock FontWeight="SemiBold" Text="TwoWay binding" />
+          <TextBox x:Name="SourceTextBoxTwoWay" MinWidth="380" HorizontalAlignment="Left"
+                   PlaceholderText="Enter text here" />
+          <TextBox x:Name="TargetTextBoxTwoWay" MinWidth="380" HorizontalAlignment="Left"
+                   PlaceholderText="Mirrors and edits above text"
+                   Text="{x:Bind SourceTextBoxTwoWay.Text, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+        </StackPanel>
+      </Grid>
+      <RichTextBlock>
+        <Paragraph><Run Text="In " /><Run FontWeight="SemiBold" Text="OneWay" /><Run Text=" binding mode, changes in the source (SourceTextBox) are reflected in the target, but not vice versa." /></Paragraph>
+        <Paragraph><Run Text="In " /><Run FontWeight="SemiBold" Text="TwoWay" /><Run Text=" binding mode, changes in either box update the other." /></Paragraph>
+      </RichTextBlock>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Binding to a property in code-behind" FontSize="18" />
+    <TextBlock x:Name="GreetingMessageText" HorizontalAlignment="Center" VerticalAlignment="Center" FontSize="24" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Using a function in x:Bind" FontSize="18" />
+    <TextBlock Text="Select a date" />
+    <DatePicker x:Name="DatePickerControl" AutomationProperties.Name="Select a date" />
+    <TextBlock x:Name="FormattedDate" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Using a converter in Binding" FontSize="18" />
+    <TextBlock Text="Enter Text:" />
+    <TextBox x:Name="InputTextBox" Width="300" HorizontalAlignment="Left" AutomationProperties.Name="Enter Text:" />
+    <TextBlock x:Name="NotEmptyText" Text="The input is not empty."
+               IsVisible="{x:Bind InputTextBox.Text, Mode=OneWay, Converter={x:Static StringConverters.IsNotNullOrEmpty}}" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Binding to a view model" FontSize="18" />
+    <TextBlock FontWeight="SemiBold" Text="Title:" />
+    <TextBlock x:Name="ViewModelTitle" FontSize="16" Text="{Binding Title}" />
+    <TextBlock FontWeight="SemiBold" Text="Description:" />
+    <TextBlock x:Name="ViewModelDescription" FontSize="16" Text="{Binding Description}" />
+  </StackPanel>
+
+  <InfoBar Title="MVVM Toolkit" Margin="0,8,0,0" IsClosable="False" IsOpen="True" Severity="Informational"
+           Message="The MVVM Toolkit, part of the .NET Community Toolkit, is designed to simplify the implementation of the Model-View-ViewModel (MVVM) pattern in applications. The toolkit includes a sample app to demonstrate its features and usage.">
+    <InfoBar.ActionButton>
+      <HyperlinkButton x:Name="mvvmToolkitSampleAppHyperlinkButton" Content="Go to the MVVM Toolkit repository"
+                       NavigateUri="https://github.com/CommunityToolkit/MVVM-Samples" />
+    </InfoBar.ActionButton>
+  </InfoBar>
+
+  <StackPanel x:Name="Example6" Spacing="8">
+    <TextBlock Text="Binding with TargetNullValue" FontSize="18" />
+    <TextBlock x:Name="NullStringText" Text="{Binding NullString, TargetNullValue='Anonymous User'}" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example7" Spacing="8">
+    <TextBlock Text="Binding a collection with data templates" FontSize="18" />
+    <Grid MinHeight="250" ColumnDefinitions="200,*" ColumnSpacing="16">
+      <ListBox x:Name="ListDetailListView" Grid.Column="0" BorderThickness="1" CornerRadius="4"
+               BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" SelectionMode="Single">
+        <ListBox.ItemTemplate>
+          <DataTemplate>
+            <StackPanel Margin="4" Spacing="2">
+              <TextBlock FontWeight="SemiBold" Text="{Binding Title}" />
+              <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                         Text="{Binding DateCreatedFormatted}" />
+            </StackPanel>
+          </DataTemplate>
+        </ListBox.ItemTemplate>
+      </ListBox>
+      <StackPanel x:Name="ListDetail" Grid.Column="1" Margin="16" Spacing="8"
+                  DataContext="{x:Bind ListDetailListView.SelectedItem, Mode=OneWay}">
+        <TextBlock x:Name="DetailTitle" FontSize="20" FontWeight="SemiBold" Text="{Binding Title}" />
+        <TextBlock FontSize="12" Foreground="{DynamicResource TextFillColorSecondaryBrush}"
+                   Text="{Binding DateCreatedFormatted}" />
+        <TextBlock x:Name="DetailText" TextWrapping="Wrap" Text="{Binding Text}" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
 </StackPanel>

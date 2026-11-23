@@ -9,6 +9,7 @@
 //! The source identifies nodes and links by reference; here a node is identified by its `id`, and
 //! a node whose id repeats an earlier one is skipped, as the source skips a repeated reference.
 
+use crate::labelers::{node_tooltip_text, NodeTooltipFormatter};
 use crate::pie_chart_engine::{annular_sector_path, append_arc, rounded_annular_sector_path};
 use crate::scene::*;
 use crate::label_lines::LabelLines;
@@ -16,7 +17,7 @@ use crate::series::{
     Series, SeriesKind, DATA_LABELS_COLOR, DATA_LABELS_MAX_WIDTH, DATA_LABELS_PADDING,
 };
 use crate::treemap_chart_engine::{
-    fill_color, fill_style, stroke_style, text_size, tooltip_text, validate_series,
+    fill_color, fill_style, stroke_style, text_size, validate_series,
 };
 use ferroui_base::{media::Color, Point, Rect, Size};
 use std::collections::{HashMap, VecDeque};
@@ -158,6 +159,8 @@ pub struct SankeySeriesOptions {
     /// `DataLabelsMaxWidth`: the width a label breaks its text at, its padding included; `None`
     /// is the source's [`DATA_LABELS_MAX_WIDTH`].
     pub data_labels_max_width: Option<f64>,
+    /// `ToolTipLabelFormatter`: the tooltip text of a node; `None` is `<label>: <value>`.
+    pub tool_tip_label_formatter: Option<NodeTooltipFormatter>,
 }
 
 /// A node rectangle of the vertical layout (`SankeyLayout.NodeBox`).
@@ -737,6 +740,9 @@ impl SankeyChartEngine {
                     .get(si)
                     .and_then(|o| o.data_labels_max_width)
                     .unwrap_or(DATA_LABELS_MAX_WIDTH),
+                tool_tip_label_formatter: series_options
+                    .get(si)
+                    .and_then(|o| o.tool_tip_label_formatter.as_ref()),
             };
             match s.layout {
                 SankeyLayoutKind::Vertical => context.vertical(plot)?,
@@ -762,6 +768,8 @@ struct Context<'a, F: FnMut(&str, f64) -> Size> {
     measure_text: &'a mut F,
     /// `DataLabelsMaxWidth`, the label padding included.
     labels_max_width: f64,
+    /// `ToolTipLabelFormatter` of the series.
+    tool_tip_label_formatter: Option<&'a NodeTooltipFormatter>,
 }
 
 impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
@@ -967,7 +975,12 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
                 shape: HitShape::Rectangle(bounds),
                 center: middle,
                 value: b.value,
-                label: tooltip_text(&node.name, b.value),
+                label: node_tooltip_text(
+                    self.tool_tip_label_formatter,
+                    &node.name,
+                    b.value,
+                    b.node,
+                ),
             });
             let Some((text, _)) = self.label(node) else {
                 continue;
@@ -1099,7 +1112,12 @@ impl<F: FnMut(&str, f64) -> Size> Context<'_, F> {
                     b.center.y + sin * b.outer_radius,
                 ),
                 value: b.value,
-                label: tooltip_text(&node.name, b.value),
+                label: node_tooltip_text(
+                    self.tool_tip_label_formatter,
+                    &node.name,
+                    b.value,
+                    b.node,
+                ),
             });
             let Some((text, _)) = self.label(node) else {
                 continue;
@@ -1828,5 +1846,35 @@ mod tests {
         let one = texts(&scene);
         assert_eq!(one.len(), 1);
         assert_eq!((one[0].1.as_str(), one[0].2), (name, TextAnchor::End));
+    }
+
+    /// `GetPrimaryToolTipText` of `CoreSankeySeries`: `<label>: <value>` for a node, the value
+    /// alone without a label, and the text of `ToolTipLabelFormatter` when the series has one,
+    /// which reads the label, the value and the input index of the node, in both layouts.
+    #[test]
+    fn tooltip_text_is_the_label_and_value_or_the_formatter_of_the_series() {
+        for layout in [SankeyLayoutKind::Vertical, SankeyLayoutKind::BipartiteArc] {
+            let mut s = series(nodes(&["A", "", "X"]), links(&[(1, 3, 5.0), (2, 3, 2.0)]));
+            s.layout = layout;
+            let labels = |options: SankeySeriesOptions| {
+                let scene = SankeyChartEngine::measure_with_series_options(
+                    Size::new(400.0, 400.0),
+                    std::slice::from_ref(&s),
+                    &SankeyOptions::default(),
+                    |_, _| Size::new(10.0, 10.0),
+                    &[options],
+                )
+                .unwrap();
+                let mut labels: Vec<_> = scene.hits.iter().map(|h| h.label.clone()).collect();
+                labels.sort();
+                labels
+            };
+            assert_eq!(labels(SankeySeriesOptions::default()), ["2", "A: 5", "X: 7"]);
+            let mut options = SankeySeriesOptions::default();
+            options.tool_tip_label_formatter = Some(NodeTooltipFormatter::new(|point| {
+                format!("{}#{} = {}", point.label, point.index, point.value)
+            }));
+            assert_eq!(labels(options), ["#1 = 2", "A#0 = 5", "X#2 = 7"]);
+        }
     }
 }

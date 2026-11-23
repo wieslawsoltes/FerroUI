@@ -14,6 +14,10 @@
 //!
 //! `cargo run -p todo-mvc`.
 
+// `compiled_markup`: the table of the units of the WinUI theme the build wrote (`build.rs`), which
+// `run` constructs the theme with.
+ferroui_markup_xaml::include_compiled_xaml!();
+
 pub mod model;
 mod shots;
 pub mod view;

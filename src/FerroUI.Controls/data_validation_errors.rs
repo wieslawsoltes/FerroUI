@@ -24,6 +24,8 @@ use std::rc::Rc;
 #[derive(Clone)]
 pub struct ErrorConverter(Rc<dyn Fn(&BoxedValue) -> Option<BoxedValue>>);
 
+ferroui_base::styled_value!(ErrorConverter);
+
 impl ErrorConverter {
     pub fn new(convert: impl Fn(&BoxedValue) -> Option<BoxedValue> + 'static) -> Self {
         Self(Rc::new(convert))
