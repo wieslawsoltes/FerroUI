@@ -15,6 +15,21 @@ How C# from the upstream project (Avalonia, MIT) maps to Rust in this repository
    - for a feature apps use on phones or in the browser, a measurement on a device or simulator (frame times, texture uploads).
 
    A backend that cannot express a feature on its GPU yet records the gap and the plan in [gpu-rendering.md](gpu-rendering.md); it does not fall back silently. [Rendering](#rendering-every-backend-draws-on-the-gpu) below says where the parts of this rule live.
+7. **Built-in features use the default XML namespace.** Every public type, attached property and markup extension of a crate in this repository is usable in markup from `https://github.com/ferroui`, with no `xmlns:` prefix:
+
+   ```xml
+   <!-- Right -->
+   <WebFonts.StyleSheet>...</WebFonts.StyleSheet>
+
+   <!-- Wrong: a built-in feature with its own prefix -->
+   <fonts:WebFonts.StyleSheet>...</fonts:WebFonts.StyleSheet>
+   ```
+
+   - The `MarkupAssembly` of the crate has an `XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "..." }` for each of its public dotted namespaces. A built-in crate does not introduce an XML namespace URI of its own.
+   - Docs, samples, templates, gallery pages and catalog pages use the unprefixed form.
+   - The mapping is metadata. An application gets a type only when it depends on the crate, so an optional crate stays optional and costs nothing to an application without it.
+   - Exceptions: implementation namespaces that are not public API (`*.Internal`), application and third-party types, and tests of namespace resolution. A URI that is already public may stay as an additional alias beside the default namespace.
+   - Two public types with the same name in the default namespace are a defect. Decide the public name in review; do not hide the collision behind a private namespace.
 
 ## Scope: product behavior, not runtime emulation
 
