@@ -1,4 +1,5 @@
-//! The sparse bit set of a patch map entry (section 5.3.3 of the standard).
+//! The sparse bit set of a patch map entry (section 5.3.3 of the standard). Bit 7 of the header
+//! is reserved and is not read.
 
 use crate::FontDecodeError;
 use std::collections::VecDeque;
@@ -17,9 +18,6 @@ pub(super) fn decode_sparse_bit_set(
 ) -> Result<(Vec<(u32, u32)>, usize), FontDecodeError> {
     const MALFORMED: FontDecodeError = FontDecodeError::Malformed("sparse bit set");
     let header = *data.first().ok_or(FontDecodeError::Truncated)?;
-    if header & 0x80 != 0 {
-        return Err(MALFORMED);
-    }
     let (branch, max_height): (u64, u32) = match header & 3 {
         0 => (2, 31),
         1 => (4, 16),

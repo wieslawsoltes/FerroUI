@@ -421,6 +421,43 @@ Limits, each of them deliberate:
 - After a failed extension with no further `src`, the status of the face stays `loaded`, since
   the state machine of CSS has no way back from it. Its text falls back.
 
+### 9.1 Checked against the text of the standard
+
+The decoder was compared, field by field, with the normative text of the draft of
+13 October 2026. The examples of the standard for sparse bit sets, URL templates and entry
+intersection are tests.
+
+| Section | What was checked | Result |
+| --- | --- | --- |
+| 3.4 | Big-endian fields | Matches |
+| 4.2, Appendix A | The 65 default feature tags | Matches |
+| 4.3, steps 2 to 4 | No `IFT `: not incremental; equal compatibility ids are an error | Matches |
+| 4.3, step 5 | An entry with any URL already applied is removed | **Fixed:** only the URL itself was skipped |
+| 4.3, steps 8 to 10 | Order of the maps; the first URL is applied, the others are loaded ahead | **Fixed:** every URL was applied |
+| 4.3, step 9 | At most 2000 patches in one run | **Fixed:** it counted the life of the face |
+| 4.3, intersection | Empty sets, design space, child entries | Matches |
+| 4.3, Load patch file | Resolved against the URL of the initial font | Matches, and limited to its origin (below) |
+| 4.6 | A font renders a text when no entry is left for it | Matches for `check`; the `cmap` test is not used |
+| 5.2 | The CharStrings INDEX is last, and its offset is in `IFT ` | **Fixed:** neither was checked |
+| 5.3 | Header and Mapping Entry: fields, order, widths | Matches |
+| 5.3 | Reserved bit 7 of `formatFlags` | **Fixed:** it was refused, and is now not read |
+| 5.3.1 | Ids: deltas, string lengths, range, ignored entries | Matches |
+| 5.3.2 | Removing an entry by its first URL | Matches |
+| 5.3.3 | Sparse bit set | Matches. **Fixed:** reserved bit 7 of the header was refused |
+| 5.3.4 | Opcodes, id32, d1 to d4, id64 | Matches. **Fixed:** a bad template was an error even with no entry to expand |
+| 6.1 | Format numbers | Matches |
+| 6.3 | Patch header and `GlyphPatches` | Matches. **Fixed:** offsets had to start after the header, which the text does not require |
+| 6.3.1, step 2 | The id is compared with the table that listed the patch | **Fixed:** any table was accepted |
+| 6.3.1, step 4 | An id past the last glyph has no glyph to replace | **Fixed:** it was an error, and is now ignored |
+| 6.3.1, step 4 | Offset sizes, missing tables, other tables ignored | Matches |
+| 6.3.1, steps 5 to 7 | Entry removed, other tables copied, checksums | Matches; `head.checkSumAdjustment` is also written |
+
+Stricter than the text, on purpose: patch URLs stay on the origin of the font; a failed patch
+ends the extension; an offset past the end of a patch is an error; a patch of more than 65536
+glyphs is refused as a limit on work; and table-keyed patches are not supported.
+
+No file from a real encoder has been loaded: that is still to be done (section 11).
+
 ## 10. Phases
 
 Each step is one draft pull request, stacked on the one below.

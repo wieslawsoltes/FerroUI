@@ -1,7 +1,7 @@
 //! Applying glyph-keyed patches (section 6.3 of the standard), in steps, so that a thread that
 //! must stay responsive can give the work a budget at a time.
 
-use super::map::PatchMap;
+use super::map::{PatchMap, PlannedPatch};
 use super::{IFTX_TABLE, IFT_TABLE};
 use crate::sfnt::{assemble, read_directory, ReadBe, TableRecord, Tag};
 use crate::woff2::{BrotliDecoderFactory, BrotliStatus, IBrotliDecoder};
@@ -15,7 +15,8 @@ const PATCH_TAG: &[u8; 4] = b"ifgk";
 const PATCH_HEADER: usize = 29;
 /// The most output of one decompression call, so that memory follows what a stream really holds.
 const DECOMPRESS_CHUNK: usize = 256 * 1024;
-/// Ids are unique and below `numGlyphs`, which is a 16-bit value.
+/// The most glyphs of one patch, a limit on work. `numGlyphs` is a 16-bit value, so a patch with
+/// more could only hold ids that are ignored.
 const MAX_GLYPHS: usize = 0x1_0000;
 /// The most data offsets of one patch: every glyph in several tables, and a limit on the work of
 /// validating a hostile one.
@@ -73,31 +74,39 @@ pub struct GlyphPatchJob {
 }
 
 impl GlyphPatchJob {
-    /// Starts applying `patches`, each with the URL its map writes for it. Headers are checked
-    /// here, before anything is decompressed.
+    /// Starts applying `patches`, each with what its map writes for it. Headers are checked here,
+    /// before anything is decompressed.
     pub fn new(
         font: Vec<u8>,
         maps: Vec<PatchMap>,
-        patches: Vec<(String, Vec<u8>)>,
+        patches: Vec<(PlannedPatch, Vec<u8>)>,
         brotli: BrotliDecoderFactory,
         limits: WebFontLimits,
     ) -> Result<Self, FontDecodeError> {
         let (version, records) = read_directory(&font, 0, &limits)?;
         let mut read = Vec::with_capacity(patches.len());
-        for (url, encoded) in patches {
+        for (planned, encoded) in patches {
             let header = encoded.get(..PATCH_HEADER).ok_or(FontDecodeError::Truncated)?;
             if &header[..4] != PATCH_TAG {
                 return Err(FontDecodeError::Unsupported("patch format"));
             }
-            let map = maps
-                .iter()
-                .position(|map| map.compatibility_id()[..] == header[9..25])
-                .ok_or(FontDecodeError::Malformed("the patch is for another font"))?;
+            // Against the table that listed it (section 6.3.1, step 2).
+            let map = maps.iter().position(|map| map.tag() == planned.table).ok_or(MALFORMED)?;
+            if maps[map].compatibility_id()[..] != header[9..25] {
+                return Err(FontDecodeError::Malformed("the patch is for another font"));
+            }
             let max_length = header.u32_at(25).ok_or(FontDecodeError::Truncated)? as usize;
             if max_length > limits.max_decoded_size {
                 return Err(TOO_LARGE);
             }
-            read.push(Patch { url, map, wide_ids: header[8] & 1 != 0, max_length, encoded, decoded: Vec::new() });
+            read.push(Patch {
+                url: planned.url,
+                map,
+                wide_ids: header[8] & 1 != 0,
+                max_length,
+                encoded,
+                decoded: Vec::new(),
+            });
         }
         let stage = if read.is_empty() {
             Stage::Finish
@@ -193,7 +202,7 @@ impl GlyphPatchJob {
         let glyph_count = data.u32_at(0).ok_or(FontDecodeError::Truncated)? as usize;
         let table_count = data.u8_at(4).ok_or(FontDecodeError::Truncated)? as usize;
         if glyph_count > MAX_GLYPHS || glyph_count * table_count >= MAX_OFFSETS {
-            return Err(MALFORMED);
+            return Err(FontDecodeError::LimitExceeded("glyphs of a patch"));
         }
         let id_size = if self.patches[index].wide_ids { 3 } else { 2 };
         let tables_at = 5 + glyph_count * id_size;
@@ -215,7 +224,7 @@ impl GlyphPatchJob {
             }
             ids.push(id);
         }
-        let mut previous = data_at as u32;
+        let mut previous = 0;
         for at in 0..offset_count {
             let offset = data.u32_at(offsets_at + at * 4).ok_or(FontDecodeError::Truncated)?;
             if offset < previous || offset as usize > data.len() {
@@ -233,19 +242,22 @@ impl GlyphPatchJob {
             if !matches!(&tag, b"glyf" | b"gvar" | b"CFF " | b"CFF2") {
                 continue;
             }
-            let rebuild = self.rebuild_for(tag, index)?;
+            let rebuild = self.rebuild_for(tag)?;
             for (glyph, id) in ids.iter().enumerate() {
                 let at = offsets_at + (table * glyph_count + glyph) * 4;
                 let start = data.u32_at(at).ok_or(FontDecodeError::Truncated)?;
                 let end = data.u32_at(at + 4).ok_or(FontDecodeError::Truncated)?;
-                let slot = self.rebuilds[rebuild].glyphs.get_mut(*id as usize).ok_or(MALFORMED)?;
-                *slot = Some((index as u32, start, end));
+                // A patch cannot add a glyph: an id past the end of the table has no glyph to
+                // replace (section 6.3.1, step 4).
+                if let Some(slot) = self.rebuilds[rebuild].glyphs.get_mut(*id as usize) {
+                    *slot = Some((index as u32, start, end));
+                }
             }
         }
         Ok(())
     }
 
-    fn rebuild_for(&mut self, tag: Tag, patch: usize) -> Result<usize, FontDecodeError> {
+    fn rebuild_for(&mut self, tag: Tag) -> Result<usize, FontDecodeError> {
         if let Some(found) = self.rebuilds.iter().position(|rebuild| rebuild.tag == tag) {
             return Ok(found);
         }
@@ -280,8 +292,8 @@ impl GlyphPatchJob {
                 (Layout::Gvar { long, offsets: 20, data, shared }, count)
             }
             _ => {
-                let own = self.maps[self.patches[patch].map].charstrings_offset(&tag);
-                let start = own.or_else(|| self.maps.iter().find_map(|map| map.charstrings_offset(&tag)));
+                // The offset is in `IFT ` (section 5.2), which is the first map.
+                let start = self.maps.first().and_then(|map| map.charstrings_offset(&tag));
                 let start = start.ok_or(MALFORMED)? as usize;
                 let count_size = if tag == *b"CFF " { 2 } else { 4 };
                 let count = if count_size == 2 {
@@ -300,6 +312,15 @@ impl GlyphPatchJob {
                 let data = offsets + (count + 1) * off_size;
                 if data > table.len() {
                     return Err(FontDecodeError::Truncated);
+                }
+                // The INDEX is the last element, followed only by zeros up to a four-byte word
+                // boundary (section 5.2): what is written again would otherwise lose the rest.
+                let last = table.get(data - off_size..data).ok_or(MALFORMED)?;
+                let last = last.iter().fold(0usize, |value, byte| value << 8 | *byte as usize);
+                let end = (data - 1).checked_add(last).ok_or(MALFORMED)?;
+                let rest = table.get(end..).ok_or(MALFORMED)?;
+                if last == 0 || rest.len() >= 4 || rest.iter().any(|byte| *byte != 0) {
+                    return Err(FontDecodeError::Malformed("the CharStrings INDEX is not last"));
                 }
                 (Layout::Index { start, count_size, off_size, offsets, data }, count)
             }
@@ -407,7 +428,8 @@ impl Rebuild {
                 }
                 None => self.base_glyph(font, glyph)?,
             };
-            if self.data.len() + bytes.len() + 1 > limits.max_decoded_size {
+            let end = self.data.len() + bytes.len() + 1;
+            if end > limits.max_decoded_size || u32::try_from(end).is_err() {
                 return Err(TOO_LARGE);
             }
             self.offsets.push(self.data.len() as u32);
