@@ -4,7 +4,7 @@ use super::{IPopupHost, Popup, TemplateAppliedEventArgs, TemplatedControl, Templ
 use crate::platform::{IPopupImpl, IWindowBaseImpl};
 use crate::presenters::ContentPresenter;
 use crate::{
-    ContentControlImpl, Control, ControlImpl, PlacementMode, TopLevel, TopLevelImpl, WindowBase, WindowBaseImpl,
+    ContentControlImpl, Control, ControlImpl, TopLevel, TopLevelImpl, WindowBase, WindowBaseImpl,
 };
 use ferroui_base::input::{IFocusScope, InputElement, InputElementImpl};
 use ferroui_base::interactivity::{Interactive, InteractiveImpl};
@@ -31,7 +31,6 @@ pub struct PopupRoot {
     popup_size: Cell<Size>,
     child_margin: Cell<Thickness>,
     needs_update: Cell<bool>,
-    has_initial_position: Cell<bool>,
 }
 
 ferro_class!(PopupRoot: WindowBase);
@@ -187,17 +186,7 @@ impl WindowBaseImpl for PopupRoot {
             reposition = true;
         }
 
-        if this.has_initial_position.get()
-            && this.popup_position_request.borrow().as_ref().is_some_and(|request| request.placement() == PlacementMode::Pointer)
-        {
-            reposition = false;
-        }
-
         if reposition {
-            if this.popup_position_request.borrow().is_some() {
-                this.has_initial_position.set(true);
-            }
-
             this.needs_update.set(true);
             this.update_position();
         }
@@ -252,7 +241,6 @@ impl PopupRoot {
             popup_size: Cell::new(Size::default()),
             child_margin: Cell::new(Thickness::default()),
             needs_update: Cell::new(false),
-            has_initial_position: Cell::new(false),
         })
     }
 
@@ -293,7 +281,6 @@ impl PopupRoot {
         if let Some(platform_impl) = self.platform_impl() {
             platform_impl.dispose();
         }
-        self.has_initial_position.set(false);
         self.ensure_closed();
     }
 

@@ -396,6 +396,13 @@ impl InputElementImpl for AutoCompleteBox {
     }
 
     fn on_lost_focus(this: &Self, e: &FocusChangedEventArgs) {
+        // The drop-down is a popup of its own, so picking an item moves focus into it without the
+        // box losing its text entry.
+        if this.is_inside_drop_down(e.new_focused_element.as_ref()) {
+            Self::parent_on_lost_focus(this, e);
+            return;
+        }
+
         this.set_current_value(Self::is_drop_down_open_property(), false);
 
         this.user_called_populate.set(false);
@@ -553,6 +560,11 @@ ferro_properties! {
         /// Defines the `PlaceholderForeground` property.
         pub fn placeholder_foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
             TextBox::placeholder_foreground_property().add_owner::<AutoCompleteBox>()
+        }
+
+        /// Defines the `UseFloatingPlaceholder` property.
+        pub fn use_floating_placeholder_property() -> StyledProperty<bool> {
+            TextBox::use_floating_placeholder_property().add_owner::<AutoCompleteBox>()
         }
 
         /// Identifies the `MinimumPrefixLength` property.
@@ -1205,6 +1217,15 @@ impl AutoCompleteBox {
 
     /// Gets or sets the brush used for the foreground color of the
     /// placeholder text.
+    /// Whether the placeholder text stays visible above the text once a text is set.
+    pub fn use_floating_placeholder(&self) -> bool {
+        self.get_value(Self::use_floating_placeholder_property())
+    }
+
+    pub fn set_use_floating_placeholder(&self, value: bool) {
+        self.set_value(Self::use_floating_placeholder_property(), value)
+    }
+
     pub fn placeholder_foreground(&self) -> Option<Rc<dyn IBrush>> {
         self.get_value(Self::placeholder_foreground_property())
     }
@@ -1642,6 +1663,14 @@ impl AutoCompleteBox {
     }
 
     /// Connects to the closed event of the drop down popup.
+    fn is_inside_drop_down(&self, element: Option<&Ref<InputElement>>) -> bool {
+        let Some(visual) = element.and_then(|element| element.cast::<Visual>()) else {
+            return false;
+        };
+        let popup = self.drop_down_popup.borrow().as_ref().map(|(popup, _)| popup.clone());
+        popup.and_then(|popup| popup.child()).is_some_and(|content| content.is_visual_ancestor_of(&visual))
+    }
+
     fn drop_down_popup_closed(&self) {
         // Force the drop down property to be false.
         if self.is_drop_down_open() {

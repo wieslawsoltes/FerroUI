@@ -526,7 +526,7 @@ impl PipsPager {
 
     fn update_pseudo_classes(&self) {
         let pseudo_classes = self.pseudo_classes();
-        pseudo_classes.set(PC_FIRST_PAGE, self.selected_page_index() == 0);
+        pseudo_classes.set(PC_FIRST_PAGE, self.number_of_pages() > 0 && self.selected_page_index() == 0);
         pseudo_classes
             .set(PC_LAST_PAGE, self.number_of_pages() > 0 && self.selected_page_index() >= self.number_of_pages() - 1);
         pseudo_classes.set(PC_VERTICAL, self.orientation() == Orientation::Vertical);
@@ -560,13 +560,21 @@ impl PipsPager {
             return;
         };
 
-        if self.number_of_pages() <= self.max_visible_pips() {
-            return;
-        }
-
         let Some(scroll_viewer) = list.scroll().and_then(|scroll| scroll.cast::<ScrollViewer>()) else {
             return;
         };
+
+        if self.number_of_pages() <= self.max_visible_pips() {
+            // All the pips fit: a scroll position kept from a longer list would hide some of them.
+            let offset = scroll_viewer.offset();
+            if offset.x != 0.0 || offset.y != 0.0 {
+                if let Some(cts) = self.scroll_animation_cts.take() {
+                    cts.cancel();
+                }
+                scroll_viewer.set_offset(Vector::new(0.0, 0.0));
+            }
+            return;
+        }
 
         let Some(container) = list.container_from_index(self.selected_page_index()) else {
             return;
@@ -741,6 +749,15 @@ impl PipsPager {
         let visible_count = i32::min(self.number_of_pages(), self.max_visible_pips());
 
         if visible_count <= 0 {
+            if self.orientation() == Orientation::Horizontal {
+                list.set_width(0.0);
+                list.set_height(f64::NAN);
+            } else {
+                list.set_height(0.0);
+                list.set_width(f64::NAN);
+            }
+
+            self.request_scroll_to_selected_pip();
             return;
         }
 

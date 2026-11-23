@@ -6,6 +6,8 @@ use ferroui_base::{Point, Rect, Ref, Visual};
 #[derive(Clone)]
 pub struct PopupPositionRequest {
     target: Ref<Visual>,
+    /// The pointer position of a popup with pointer placement, from when it was first placed.
+    pointer_position: Option<Point>,
     placement: PlacementMode,
     offset: Point,
     anchor: PopupAnchor,
@@ -20,6 +22,7 @@ impl PopupPositionRequest {
     pub(crate) fn new(target: Ref<Visual>, placement: PlacementMode) -> Self {
         Self {
             target,
+            pointer_position: None,
             placement,
             offset: Point::default(),
             anchor: PopupAnchor::NONE,
@@ -54,6 +57,17 @@ impl PopupPositionRequest {
 }
 
 impl PopupPositionRequest {
+    /// Sets the pointer position a pointer placement stays at.
+    pub(crate) fn with_pointer_position(mut self, pointer_position: Option<Point>) -> Self {
+        self.pointer_position = pointer_position;
+        self
+    }
+
+    /// The pointer position a pointer placement stays at, if the popup has one.
+    pub(crate) fn pointer_position(&self) -> Option<Point> {
+        self.pointer_position
+    }
+
     /// The placement target.
     pub fn target(&self) -> Ref<Visual> {
         self.target.clone()

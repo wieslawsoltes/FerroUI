@@ -559,6 +559,9 @@ impl TimePicker {
 
         // The extra 5 px I think is related to default popup placement behavior
         popup.set_vertical_offset(delta_y + 5.0);
+
+        // Focus only lands once the popup is open, so the selectors take the arrow keys.
+        presenter.focus_first_selector();
     }
 
     fn on_dismiss_picker(&self) {

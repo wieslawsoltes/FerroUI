@@ -11,7 +11,8 @@ use crate::{
 use ferroui_base::animation::IPageTransition;
 use ferroui_base::input::gesture_recognizers::SwipeGestureRecognizer;
 use ferroui_base::input::{
-    InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, NavigationMethod,
+    InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, KeyboardDevice,
+    NavigationMethod,
     SwipeDirection, SwipeGestureEventArgs,
 };
 use ferroui_base::interactivity::{InteractiveImpl, RoutedEventArgs, RoutedEventHandlerToken};
@@ -175,11 +176,22 @@ impl InputElementImpl for TabbedPage {
             return;
         };
 
+        // Focus on an element inside the page, other than a tab header of this page, keeps its
+        // arrow keys: only the page itself and its tab headers change the page with them.
+        let focus_owned_by_child = this.is_keyboard_focus_within()
+            && !this.is_focused()
+            && !KeyboardDevice::instance()
+                .and_then(|keyboard| keyboard.focused_element())
+                .and_then(|focused| focused.cast::<TabItem>())
+                .is_some_and(|item| tab_control.logical_children().iter().any(|child| child.ptr_eq(&item)));
+
         let resolved = this.resolve_tab_placement();
         let is_horizontal = resolved == TabPlacement::Top || resolved == TabPlacement::Bottom;
         let is_rtl = this.flow_direction() == FlowDirection::RightToLeft;
 
-        let mut next = if is_horizontal {
+        let mut next = if focus_owned_by_child {
+            false
+        } else if is_horizontal {
             if is_rtl {
                 e.key == Key::Left
             } else {
@@ -188,7 +200,9 @@ impl InputElementImpl for TabbedPage {
         } else {
             e.key == Key::Down
         };
-        let mut prev = if is_horizontal {
+        let mut prev = if focus_owned_by_child {
+            false
+        } else if is_horizontal {
             if is_rtl {
                 e.key == Key::Right
             } else {

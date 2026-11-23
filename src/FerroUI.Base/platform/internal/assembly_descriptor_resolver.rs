@@ -26,9 +26,16 @@ impl AssemblyDescriptorResolver {
         Self::default()
     }
 
-    fn starts_with_ignore_case(text: &str, prefix: &str) -> bool {
-        let mut text = text.chars().flat_map(char::to_uppercase);
-        prefix.chars().flat_map(char::to_uppercase).all(|c| text.next() == Some(c))
+    /// Whether `scope_name`, a registered assembly name, is the assembly `name`: the same name,
+    /// or that name with a `.dll` or `.exe` extension, ignoring case. A longer name that merely
+    /// starts with `name` (`Lib.Tests` for `Lib`) is another assembly.
+    fn is_scope_name_of(scope_name: &str, name: &str) -> bool {
+        let mut scope = scope_name.chars().flat_map(char::to_uppercase);
+        if !name.chars().flat_map(char::to_uppercase).all(|c| scope.next() == Some(c)) {
+            return false;
+        }
+        let rest: String = scope.collect();
+        rest.is_empty() || rest == ".DLL" || rest == ".EXE"
     }
 }
 
@@ -39,11 +46,11 @@ impl IAssemblyDescriptorResolver for AssemblyDescriptorResolver {
         }
 
         let loaded_assemblies = super::registered_assembly_names();
-        // The shortest registered name that starts with the requested name,
-        // ignoring case; the first registered one among equally long names.
+        // The shortest registered name that is the requested name, ignoring case; the first
+        // registered one among equally long names.
         let mut matched: Option<&String> = None;
         for candidate in &loaded_assemblies {
-            if Self::starts_with_ignore_case(candidate, name) && matched.is_none_or(|m| candidate.len() < m.len()) {
+            if Self::is_scope_name_of(candidate, name) && matched.is_none_or(|m| candidate.len() < m.len()) {
                 matched = Some(candidate);
             }
         }

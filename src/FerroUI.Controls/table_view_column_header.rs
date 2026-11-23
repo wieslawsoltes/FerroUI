@@ -109,7 +109,7 @@ impl TableViewColumnHeader {
 
         let resizer = self.resizer.borrow().as_ref().map(|(resizer, _)| resizer.clone());
         let min_width = resizer.map_or(0.0, |resizer| resizer.bounds().width);
-        let new_width = max(min_width, actual_width + e.vector.x);
+        let new_width = column.clamp_width(max(min_width, actual_width + e.vector.x));
         column.set_width(GridLength::new(new_width, GridUnitType::Pixel));
     }
 

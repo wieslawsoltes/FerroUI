@@ -413,6 +413,11 @@ impl TemplatedControlImpl for CalendarDatePicker {
         if let Some(calendar) = &calendar {
             calendar.set_selection_mode(CalendarSelectionMode::SingleDate);
 
+            // The calendar handles the arrow keys itself, so the drop-down gives it the focus
+            // without making it a tab stop of the page.
+            calendar.set_focusable(true);
+            calendar.set_is_tab_stop(false);
+
             let subscriptions = CompositeDisposable::new();
             let weak = this.to_ref().downgrade();
             subscriptions.add(calendar.day_button_mouse_up(move |_| {
@@ -1238,13 +1243,14 @@ impl CalendarDatePicker {
 
     fn open_drop_down(&self) {
         if let Some(calendar) = self.calendar() {
-            calendar.focus();
-
             // Open the PopUp
             self.on_open_selected_date.set(self.selected_date());
             let pop_up = self.pop_up.borrow().clone().expect("the date picker has a popup");
             pop_up.set_is_open(true);
             self.is_flyout_open.set(pop_up.is_open());
+
+            // Focus only lands once the popup is open.
+            calendar.focus();
 
             self.update_pseudo_classes();
             calendar.reset_states();
