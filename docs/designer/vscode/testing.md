@@ -5,7 +5,7 @@ description: "Run native XAML and RSX scenarios, compare screenshots with a Git 
 
 ## Run saved UI scenarios
 
-Open a workspace containing the [Task filter and Status indicator examples](../samples/scenarios). In VS Code, **Testing → FerroUI Scenarios** finds saved files ending in `*.ferroui-scenario.json`. Run one test or the selected set. FerroUI opens a fresh native preview for each scenario, sends its input, and checks rendered properties, accessibility, and screenshots.
+Open a workspace containing the [Task filter and Status indicator examples](../samples/scenarios). In VS Code, **Testing → FerroUI Scenarios** finds saved files ending in `*.ferroui-scenario.json`. The list follows additions, renames, and deletions. Run one test or the selected set. FerroUI opens a fresh native preview for each scenario, sends its input, and checks rendered properties, accessibility, and screenshots.
 
 Use a FerroUI selector such as `#Filter` for interaction and property assertions. For an RSX file with multiple invocations, add a zero-based UTF-16 `caret` with `line` and `character`. Document, stage set, and baseline paths are relative to the scenario file. A saved `.ferrostages` flow can exercise the prototype player, including overlays, focus, keyboard input, and settled transitions. [Scenario format](../../../editors/vscode/README.md#native-ui-scenarios) · [Prototype transitions](motion.md#set-a-prototype-transition)
 

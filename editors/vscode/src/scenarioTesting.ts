@@ -55,6 +55,10 @@ export class ScenarioTesting implements vscode.Disposable {
             const definition = JSON.parse(text) as { name?: unknown };
             if (typeof definition.name === 'string' && definition.name.trim()) label = definition.name;
         } catch (error) {
+            if (error instanceof vscode.FileSystemError && error.code === 'FileNotFound') {
+                if (!this.disposed && this.revisions.get(id) === revision) this.remove(id);
+                return;
+            }
             problem = errorMessage(error);
         }
         if (this.disposed || revision !== this.revisions.get(id)) return;
