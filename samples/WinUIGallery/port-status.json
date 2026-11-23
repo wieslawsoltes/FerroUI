@@ -3891,15 +3891,14 @@
       ]
     },
     "Chart": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/Chart.xaml",
         "samples/WinUIGallery/examples.rs",
         "samples/WinUIGallery/chart_samples.rs",
-        "src/FerroUI.Controls.LiveCharts/chart.rs",
-        "src/FerroUI.Controls.LiveCharts/axis.rs",
-        "src/FerroUI.Controls.LiveCharts/chart_series.rs",
-        "src/FerroUI.Controls.LiveCharts/series_classes.rs"
+        "src/FerroUI.Controls.Charts/chart.rs",
+        "src/FerroUI.Controls.Charts/cartesian_axis.rs",
+        "src/FerroUI.Controls.Charts/cartesian_series.rs"
       ],
       "tests": [
         {
@@ -3943,13 +3942,13 @@
           "name": "chart_page_releases_its_charts_with_the_page"
         }
       ],
-      "notes": "The seven examples of the source (Microsoft.UI.Xaml.Controls.Charts) map onto the native CartesianChart of ferroui-controls-livecharts with the data and the option handlers of ChartPage.xaml.cs in Rust: Chart is CartesianChart, CategoryAxis/LinearAxis are Axis (labels from the source arrays), LineSeries/AreaSeries/BarSeries are LineSeries/AreaSeries/ColumnSeries (RowSeries when horizontal), ShowLegend is LegendPosition, ShowDataMarkers is GeometrySize, StrokeDashStyle is a dash array, and the DateTimeAxis is an axis over the days of its range with day labels and the ticks of the interval type. Not available in the native chart, and recorded per example: LegendTitle, tick marks and axis line/tick brushes, marker shapes and per-point label and marker overrides, a marker brush apart from the area fill. Rendering parity with WinUI and screen-reader acceptance are not established.",
+      "notes": "The seven examples of the source on the native charts of ferroui-controls-charts, the same API as Microsoft.UI.Xaml.Controls.Charts, from the default XML namespace, with the data and option handlers of ChartPage.xaml.cs in Rust (chart_samples.rs). The x:Bind connections of each series are made in code by position. The markup follows the catalog's sample text; the source page itself was not compared for the initial option values. Rendering parity with WinUI and screen-reader acceptance are not established.",
       "examples": [
         {
           "source": "WinUIGallery/Samples/Chart/BasicLineChart.txt",
           "source_sha256": "8328b26e6daa21d15cfe584804e0d643c54eb4db65e78e64396d3715954e9349",
-          "status": "partial",
-          "notes": "A line series of the six profits over the month labels with the legend toggle (LegendPosition Top or Hidden). The legend has no title (LegendTitle \"Profit\"): the native legend lists the series names only.",
+          "status": "ported",
+          "notes": "The line series of the six profits over the month labels, with LegendTitle \"Profit\" and the legend toggle.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -3969,7 +3968,7 @@
           "source": "WinUIGallery/Samples/Chart/BarChart.txt",
           "source_sha256": "0aa9d3780598f719ba132e8b21b807f9e52971bb4a9c4255179efbe78ab48cff",
           "status": "ported",
-          "notes": "A column series of units sold per region. Orientation switches the series between column and row (the categories move to the vertical axis); SortKey (data order or value) and SortOrder reorder the points and the category labels, which the source's CategoryAxis sorts itself.",
+          "notes": "The bar series of the units sold by region, with the Orientation, SortKey and SortOrder options on the native CategoryAxis and BarSeries.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -3988,8 +3987,8 @@
         {
           "source": "WinUIGallery/Samples/Chart/AxisOptions.txt",
           "source_sha256": "cc82af92deecf5b80e09fe2e89c95c512b1012be132c441e18a62ebf3a3eff30",
-          "status": "partial",
-          "notes": "Grid lines None/Major/Minor set the separator lines of the visitors axis (Minor adds the separators at every 10), the axes toggle sets IsVisible of both axes and the tick-labels toggle hides their labels with a transparent label colour. Missing: tick marks (the ShowTickMarks option is not shown) and the AxisLineBrush, TickBrush and GridLineMinorBrush of the source.",
+          "status": "ported",
+          "notes": "The category and linear axes with the source's AxisLineBrush, TickBrush and grid line brushes; the options set GridLines, IsVisible, ShowTickLabels and ShowTickMarks of both axes.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -4008,8 +4007,8 @@
         {
           "source": "WinUIGallery/Samples/Chart/StyledSeries.txt",
           "source_sha256": "5bde81e505e6572ac59598f5684221a86ef8b5a173934cd03642759e87b9803e",
-          "status": "partial",
-          "notes": "The forecast area, the actual columns with data labels and the dashed target line with the source colours and thickness; the three check boxes set IsVisible of each series. Missing: the Diamond marker shape and a DataMarkerBrush apart from the fill (the markers are circles in the stroke colour).",
+          "status": "ported",
+          "notes": "The area, bar and line series with the source's brushes, thickness, Dash style, Diamond markers and DataMarkerBrush, under LegendTitle \"Monthly results\"; the check boxes set IsVisible of each series.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -4028,8 +4027,8 @@
         {
           "source": "WinUIGallery/Samples/Chart/LinesAndMarkers.txt",
           "source_sha256": "775655a12115e6476c906a089dd6bddfff53ede61f5582825959fab166a0ea12",
-          "status": "partial",
-          "notes": "The daily visits line with markers and data labels; dash style (in multiples of the thickness), thickness, data markers and data labels options. Missing: marker shapes (the Marker shape option is not shown) and the Peak label and marker overrides of HighlightPeakVisits (DataLabelOverrides and DataMarkerOverrides).",
+          "status": "ported",
+          "notes": "The daily visits line with the dash style, thickness, marker shape, data marker and data label options, and HighlightPeakVisits: the Peak label and Diamond marker through DataLabelOverrides and DataMarkerOverrides.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -4049,7 +4048,7 @@
           "source": "WinUIGallery/Samples/Chart/TimeSeries.txt",
           "source_sha256": "bdf4d9d288383a24a90e489d2ca55bff66e4b181860bee5c582de5746263b7ad",
           "status": "ported",
-          "notes": "CreateTimeSeriesChart in Rust: the temperature area over a date axis from 2026-07-27 to 2026-09-07 (an axis over its 42 days, labelled per day). Tick interval Auto/Day/Week/Month sets the separators (the chart's own step, every day, every week, the first day of each month); the label formats month day, month.abbreviated day and shortdate are formatted in en-US.",
+          "notes": "CreateTimeSeriesChart in Rust: the native DateTimeAxis from 2026-07-27 to 2026-09-07 with the IntervalType and LabelFormat options, and the area series of the five readings.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",
@@ -4069,7 +4068,7 @@
           "source": "WinUIGallery/Samples/Chart/LiveObservableSeries.txt",
           "source_sha256": "0d838fd0dc8a0556d01569daca719be32aa36236e3cf51c3edce5c9b6edc953f",
           "status": "ported",
-          "notes": "Add sample appends the next incoming response time, keeps the eight most recent values and updates the series (the chart redraws) and the summary text, as the source's ResponseTimes and LiveSeriesSummary do.",
+          "notes": "The line series over Samples whose source is replaced by AddResponseTimeSampleButton_Click, keeping the eight most recent values.",
           "tests": [
             {
               "path": "samples/WinUIGallery/tests.rs",

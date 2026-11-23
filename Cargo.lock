@@ -7969,9 +7969,9 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-charts",
  "ferroui-controls-color-picker",
  "ferroui-controls-inking",
- "ferroui-controls-livecharts",
  "ferroui-controls-repeater",
  "ferroui-desktop",
  "ferroui-harfbuzz",
