@@ -162,8 +162,8 @@ pub fn create_typeface_from_font_data(
     data: Arc<[u8]>,
     font_simulations: FontSimulations,
 ) -> Option<Rc<dyn IPlatformTypeface>> {
-    let typeface = VelloTypeface::new(fontique::Blob::new(Arc::new(data)), 0, font_simulations, &[])?;
-    Some(typeface as Rc<dyn IPlatformTypeface>)
+    let blob = fontique::Blob::new(Arc::new(data));
+    Some(VelloTypeface::new(blob, 0, font_simulations, &[])? as Rc<dyn IPlatformTypeface>)
 }
 
 /// The Vello font manager: the installed fonts of the system through
