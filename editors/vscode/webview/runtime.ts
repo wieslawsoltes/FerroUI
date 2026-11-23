@@ -1,6 +1,7 @@
 import type { FromRuntime, RuntimeFrame, RuntimeHierarchy, RuntimeInspection, RuntimeNode, RuntimeProperty, ToRuntime } from '../src/runtimeProtocol';
 import type { AppRuntime } from '../src/runtimeTargets';
 import { create, element, iconButton } from './dom';
+import { PreviewBitmap } from './previewBitmap';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromRuntime): void };
 const vscode = acquireVsCodeApi();
@@ -12,7 +13,8 @@ const tree = element('runtime-tree');
 const filter = element<HTMLInputElement>('runtime-filter');
 const propertyFilter = element<HTMLInputElement>('runtime-property-filter');
 const inspector = element('runtime-details');
-const image = element<HTMLImageElement>('runtime-image');
+const image = element<HTMLCanvasElement>('runtime-image');
+const presenter = new PreviewBitmap(image);
 const surface = image.parentElement!;
 const problem = element('runtime-problem');
 const main = document.querySelector<HTMLElement>('.runtime-main')!;
@@ -153,13 +155,15 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         }
     } else if (message.type === 'frame') {
         const revision = ++pending;
-        const decoded = new Image();
-        decoded.src = `data:image/png;base64,${message.frame.png}`;
-        try { await decoded.decode(); } catch { return; }
-        if (pending !== revision) return;
+        let bitmap: ImageBitmap | null;
+        try { bitmap = await presenter.decode(message.frame.png); } catch { return; }
+        if (pending !== revision) {
+            bitmap?.close();
+            return;
+        }
         const changed = JSON.stringify(frame?.tree) !== JSON.stringify(message.frame.tree);
+        presenter.present(message.frame.png, bitmap);
         frame = message.frame;
-        image.src = decoded.src;
         main.hidden = false;
         main.setAttribute('aria-busy', 'false');
         problem.hidden = true;

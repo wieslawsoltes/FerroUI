@@ -45,7 +45,15 @@ export class RuntimePanel implements vscode.Disposable {
                 { ...webviewOptions(this.context.extensionUri), retainContextWhenHidden: true });
             panel.webview.html = runtimeHtml(panel.webview, this.context.extensionUri);
             panel.webview.onDidReceiveMessage((message: FromRuntime) => { void this.receive(message); });
-            panel.onDidChangeViewState(() => this.schedule(0));
+            let visible = panel.visible;
+            panel.onDidChangeViewState(() => {
+                if (panel.visible && !visible) {
+                    this.postState();
+                    this.postFrame();
+                }
+                visible = panel.visible;
+                this.schedule(0);
+            });
             panel.onDidDispose(() => {
                 this.panel = undefined;
                 this.ready = false;
@@ -114,7 +122,7 @@ export class RuntimePanel implements vscode.Disposable {
             if (epoch !== this.epoch) return;
             if (this.frame?.png === png && JSON.stringify(this.frame.tree) === JSON.stringify(tree)) return;
             this.frame = { token: ++this.revision, root, tree, png };
-            this.post({ type: 'frame', frame: this.frame });
+            this.postFrame();
         } catch (error) {
             if (epoch === this.epoch) this.post({ type: 'problem', message: errorMessage(error) });
         } finally {
@@ -128,6 +136,8 @@ export class RuntimePanel implements vscode.Disposable {
         if (message.type === 'ready') {
             this.ready = true;
             this.reset();
+            this.postFrame();
+            this.schedule(0);
             return;
         }
         if (message.type === 'start' || message.type === 'attach') {
@@ -283,6 +293,10 @@ export class RuntimePanel implements vscode.Disposable {
         if (epoch === this.epoch && this.frame?.token === token) this.post({
             type: 'inspection', token, node, view, data, canReveal: Boolean(source), canApply: Boolean(canApply), canTrace, canInspectTemplates,
         });
+    }
+
+    private postFrame(): void {
+        if (this.frame) this.post({ type: 'frame', frame: this.frame });
     }
 
     private post(message: ToRuntime): void {

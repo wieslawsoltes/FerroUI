@@ -311,7 +311,7 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
                 <button id="runtime-interact" aria-pressed="false">${icon('run')}Interact</button>
             </div>
         </div>
-        <div class="runtime-canvas preview-surface"><img id="runtime-image" alt="Running FerroUI window" draggable="false"></div>
+        <div class="runtime-canvas preview-surface"><canvas id="runtime-image" role="img" aria-label="Running FerroUI window"></canvas></div>
         <form id="runtime-input" aria-label="Send input to the selected control" hidden>
             <select id="runtime-input-kind" aria-label="Input kind"><option value="text">Text</option><option value="key">Key gesture</option></select>
             <input id="runtime-input-value" aria-label="Text or key gesture" required maxlength="8192">
