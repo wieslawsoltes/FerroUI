@@ -54,20 +54,7 @@ fn quad() -> Arc<MeshData> {
 /// A red quad with a green emissive layer lit by a white ambient light, under WPF's orthographic
 /// camera at `(offset, 0, 5)` looking down -z with `Width` 2 and the planes 1 and 10.
 fn scene(offset: f32) -> Arc<Scene3DSnapshot> {
-    let (near, far) = (1.0f32, 10.0f32);
-    let position = Vector3::new(offset, 0.0, 5.0);
-    let view = Matrix4x4::create_look_at(position, Vector3::new(offset, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
-    let m33 = 1.0 / (near - far);
-    let projection =
-        Matrix4x4::new(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, m33, 0.0, 0.0, 0.0, near * m33, 1.0);
-    let camera = Scene3DCamera {
-        kind: Scene3DCameraKind::Orthographic,
-        view,
-        projection,
-        position,
-        near_plane_distance: near,
-        far_plane_distance: far,
-    };
+    let camera = camera(offset);
     let mesh = quad();
     let model = Scene3DModel {
         world: Matrix4x4::IDENTITY,
@@ -79,6 +66,11 @@ fn scene(offset: f32) -> Arc<Scene3DSnapshot> {
         ],
         back: Vec::new(),
     };
+    snapshot(camera, model)
+}
+
+/// A snapshot of `model` lit by a white ambient light.
+fn snapshot(camera: Scene3DCamera, model: Scene3DModel) -> Arc<Scene3DSnapshot> {
     Arc::new(Scene3DSnapshot {
         structure_generation: 1,
         record_generation: 1,
@@ -89,6 +81,25 @@ fn scene(offset: f32) -> Arc<Scene3DSnapshot> {
         lights: vec![Scene3DLight::Ambient { color: Color::from_argb(255, 255, 255, 255) }],
         bounds: None,
     })
+}
+
+/// WPF's orthographic camera at `(offset, 0, 5)` looking down -z with `Width` 2 and the planes 1
+/// and 10.
+fn camera(offset: f32) -> Scene3DCamera {
+    let (near, far) = (1.0f32, 10.0f32);
+    let position = Vector3::new(offset, 0.0, 5.0);
+    let view = Matrix4x4::create_look_at(position, Vector3::new(offset, 0.0, 0.0), Vector3::new(0.0, 1.0, 0.0));
+    let m33 = 1.0 / (near - far);
+    let projection =
+        Matrix4x4::new(1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0, 0.0, 0.0, m33, 0.0, 0.0, 0.0, near * m33, 1.0);
+    Scene3DCamera {
+        kind: Scene3DCameraKind::Orthographic,
+        view,
+        projection,
+        position,
+        near_plane_distance: near,
+        far_plane_distance: far,
+    }
 }
 
 /// Draws `scene` over the whole target (aliased, as [`GraphiteTarget::draw`] draws), and flushes the
@@ -194,4 +205,171 @@ fn graphite_steady_frames_of_a_moving_camera_write_only_uniforms() {
     let frame_bytes = std::mem::size_of::<ferroui_render3d::uniforms::FrameUniforms>() as u64;
     assert_eq!(6 * frame_bytes, after.uniform_bytes - before.uniform_bytes, "{after:?}");
     target.dispose();
+}
+
+/// #608 D7: a frame in a slot is sampled from the producer's texture on Graphite, with the colour
+/// transfer of its metadata, nothing is uploaded, and its storage is given back after the GPU.
+#[test]
+fn graphite_samples_a_frame_of_a_3d_material_from_its_texture() {
+    use super::{backend_textures, create_texture, sel, send, surfaces};
+    use crate::gpu::ISkiaGrContext;
+    use crate::leased_gpu_bitmap::LeasedGpuBitmap;
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{AlignmentX, AlignmentY, Stretch, TileMode};
+    use ferroui_base::platform::SharedBitmapImpl;
+    use ferroui_base::rendering::composition::frames::*;
+    use ferroui_base::rendering::scene3d::Scene3DFrameSlot;
+    use ferroui_base::utilities::RefCountable;
+    use ferroui_base::{RelativePoint, RelativeRect};
+    use skia_safe::{AlphaType, ColorType};
+
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let rec709 = |value: u8| {
+        let v = (f64::from(value) / 255.0).powf(2.4);
+        let curve = if v < 0.0031308 { 12.92 * v } else { 1.055 * v.powf(1.0 / 2.4) - 0.055 };
+        (curve * 255.0).round() as u8
+    };
+    let (red, green, blue) = (50u8, 100, 200);
+    let cases = [
+        (FrameColor::Srgb, (red, green, blue)),
+        (FrameColor::Rec709Full, (rec709(red), rec709(green), rec709(blue))),
+    ];
+    for (color, expected) in cases {
+        let target = GraphiteTarget::new(&device);
+        // SAFETY: the device handle is valid for the lifetime of `device`.
+        let texture = unsafe { create_texture(device.device, 8, 8) };
+        assert!(!texture.is_null());
+        // SAFETY: `texture` is alive until it is released below.
+        let backend = unsafe { backend_textures::make_metal((8, 8), texture) };
+        let mut producer = target
+            .gr_context
+            .with_recorder(|recorder| {
+                surfaces::wrap_backend_texture(recorder, &backend, ColorType::BGRA8888, None, None)
+            })
+            .expect("the texture can be drawn into");
+        producer.canvas().clear(skia_safe::Color::from_rgb(red, green, blue));
+        target.gr_context.snapshot_to_raster(&mut producer).expect("the frame is written");
+        drop(producer);
+        let image = target
+            .gr_context
+            .with_recorder(|recorder| {
+                skia_safe::gpu::graphite::images::wrap_texture(
+                    recorder,
+                    &backend,
+                    ColorType::BGRA8888,
+                    AlphaType::Opaque,
+                    None,
+                )
+            })
+            .expect("the texture can be wrapped");
+
+        let budget = FrameBudget::new(FrameBudgetLimits::default());
+        let context_id = target.gr_context.frame_context_id().expect("a frame context");
+        let metadata = FrameMetadata {
+            identity: FrameIdentity { source: 3, generation: 1, sequence: 1 },
+            width: 8,
+            height: 8,
+            visible: FrameRegion { x: 0, y: 0, width: 8, height: 8 },
+            format: FrameFormat::Bgra8,
+            color,
+            alpha: FrameAlpha::Opaque,
+            rotation: FrameRotation::None,
+            mirrored: false,
+            top_left_origin: true,
+            timestamp: std::time::Duration::ZERO,
+            device: None,
+            device_generation: context_id,
+            planes: vec![FramePlane { offset: 0, stride: 32, length: 256 }],
+            retained_bytes: 256,
+        };
+        let frame = budget.lease(metadata.clone(), ()).unwrap();
+        let counters = frame.counters();
+        let bitmap: Arc<SharedBitmapImpl> =
+            Arc::new(LeasedGpuBitmap::with_metal_texture(image, frame, context_id, texture));
+        let item = bitmap.clone();
+        let slot = Scene3DFrameSlot::new();
+        slot.publish(RefCountable::create(bitmap, move || item.dispose()), metadata);
+
+        let tile = ImmutableImageBrush::new(
+            None,
+            AlignmentX::Center,
+            AlignmentY::Center,
+            Some(RelativeRect::FILL),
+            1.0,
+            None,
+            RelativePoint::TOP_LEFT,
+            Some(RelativeRect::FILL),
+            Stretch::Fill,
+            TileMode::None,
+            None,
+        );
+        let positions = vec![
+            Vector3::new(-1.0, -1.0, 0.0),
+            Vector3::new(1.0, -1.0, 0.0),
+            Vector3::new(1.0, 1.0, 0.0),
+            Vector3::new(-1.0, 1.0, 0.0),
+        ];
+        let bounds = Scene3DBounds::of_points(positions.iter().copied());
+        let mesh = Arc::new(MeshData {
+            id: 9_608_007,
+            version: 1,
+            positions,
+            normals: vec![Vector3::new(0.0, 0.0, 1.0); 4],
+            normals_generated: false,
+            texture_coordinates: vec![
+                Vector2::new(0.0, 1.0),
+                Vector2::new(1.0, 1.0),
+                Vector2::new(1.0, 0.0),
+                Vector2::new(0.0, 0.0),
+            ],
+            indices: vec![0, 1, 2, 0, 2, 3],
+            bounds,
+        });
+        let white = Color::from_argb(255, 255, 255, 255);
+        let material = Scene3DMaterialLayer {
+            kind: Scene3DMaterialKind::Diffuse,
+            color: white,
+            ambient_color: white,
+            specular_power: 0.0,
+            brush: SharedBrush::from_frame_slot(&tile, slot.clone()),
+        };
+        let model = Scene3DModel {
+            world: Matrix4x4::IDENTITY,
+            world_bounds: bounds,
+            mesh,
+            front: vec![material],
+            back: Vec::new(),
+        };
+        let scene = snapshot(camera(0.0), model);
+
+        let before = crate::scene3d_counters();
+        draw(&target, &scene);
+        let after = crate::scene3d_counters();
+        assert_eq!(1, after.scenes_drawn_on_gpu - before.scenes_drawn_on_gpu, "{color:?} {after:?}");
+        assert_eq!(before.brush_textures_uploaded, after.brush_textures_uploaded, "{color:?}: nothing uploaded");
+        let drawn = target.pixel(SIDE / 2, SIDE / 2);
+        let close = |a: u8, b: u8| a.abs_diff(b) <= 2;
+        assert!(
+            close(drawn.0, expected.0) && close(drawn.1, expected.1) && close(drawn.2, expected.2) && drawn.3 == 255,
+            "{color:?}: {drawn:?}, expected {expected:?}"
+        );
+        let conversions = counters.snapshot().gpu_conversions;
+        assert_eq!(u64::from(color == FrameColor::Rec709Full), conversions as u64, "{color:?}");
+
+        // The storage is given back once the GPU has done what read it.
+        drop(scene);
+        slot.clear();
+        target.gr_context.flush();
+        let deadline = std::time::Instant::now() + std::time::Duration::from_secs(5);
+        while budget.usage().frames != 0 {
+            assert!(std::time::Instant::now() < deadline, "{color:?}: the frame is not given back");
+            std::thread::yield_now();
+        }
+        target.dispose();
+        // SAFETY: balances the +1 of `newTextureWithDescriptor:`; Skia no longer references it.
+        unsafe { send(texture, sel(b"release\0")) };
+    }
 }

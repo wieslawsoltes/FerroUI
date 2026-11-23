@@ -21,16 +21,66 @@ pub(crate) struct LeasedGpuBitmap {
     frame: Mutex<Option<FrameLease>>,
     context_id: u64,
     color: FrameColor,
+    /// The `id<MTLTexture>` the image wraps on Metal, as an address: valid while the image lives
+    /// (the wrapper holds a reference). 0 on the other routes.
+    #[cfg_attr(not(feature = "media3d"), allow(dead_code))]
+    metal_texture: usize,
 }
 impl LeasedGpuBitmap {
     pub(crate) fn new(image: Image, frame: FrameLease, context_id: u64) -> Self {
+        Self::with_metal_texture(image, frame, context_id, std::ptr::null_mut())
+    }
+
+    /// A frame whose image wraps the texture `metal_texture` (null on the other routes).
+    pub(crate) fn with_metal_texture(
+        image: Image,
+        frame: FrameLease,
+        context_id: u64,
+        metal_texture: *mut std::ffi::c_void,
+    ) -> Self {
         let color = frame.metadata().color;
         Self {
             image: ImmutableBitmap::from_image(image, None),
             frame: Mutex::new(Some(frame)),
             context_id,
             color,
+            metal_texture: metal_texture as usize,
         }
+    }
+
+    /// The `id<MTLTexture>` of the frame, while the frame is held and current on `context_id`.
+    #[cfg(feature = "media3d")]
+    pub(crate) fn metal_texture(&self, context_id: u64) -> Option<*mut std::ffi::c_void> {
+        let held = self.frame.lock().unwrap();
+        let usable = self.context_id == context_id
+            && self.metal_texture != 0
+            && held.as_ref().is_some_and(FrameLease::is_current);
+        usable.then_some(self.metal_texture as *mut std::ffi::c_void)
+    }
+
+    /// Keeps the storage of the frame until the GPU has done what `gr` submits next, for a 3D
+    /// render that samples it. `false` when the frame cannot be read any more.
+    #[cfg(feature = "media3d")]
+    pub(crate) fn retain_for_render(&self, gr: &dyn ISkiaGrContext) -> bool {
+        if gr.frame_context_id() != Some(self.context_id) {
+            return false;
+        }
+        let Some(frame) = self.frame.lock().unwrap().clone() else {
+            return false;
+        };
+        if !frame.is_current() {
+            return false;
+        }
+        let counters = frame.counters();
+        if gr.retain_frame(frame).is_err() {
+            return false;
+        }
+        if self.color == FrameColor::Rec709Full {
+            counters.gpu_conversion(
+                ferroui_base::rendering::composition::frames::GpuTransferReason::ColorSpaceConversion,
+            );
+        }
+        true
     }
 }
 impl IBitmapImpl for LeasedGpuBitmap {

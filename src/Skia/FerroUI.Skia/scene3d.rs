@@ -234,16 +234,17 @@ mod graphite {
     use super::count;
     use crate::gpu::graphite::{GraphiteGrContext, GraphitePrewarmContext};
     use crate::gpu::{ISkiaGpu, ISkiaGrContext};
+    use crate::leased_gpu_bitmap::LeasedGpuBitmap;
     use crate::metal::IMetalDevice;
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-    use ferroui_base::platform::IOptionalFeatureProvider;
+    use ferroui_base::platform::{IOptionalFeatureProvider, SharedBitmapImpl};
     use ferroui_base::rendering::scene3d::Scene3DSnapshot;
     use ferroui_base::PixelSize;
     use ferroui_metal::scene3d::{
-        counters, Scene3DMetalError, Scene3DMetalExecutor, Scene3DMetalTarget, Scene3DMetalTexture,
-        Scene3DMetalViewport,
+        counters, Scene3DMetalDeviceTextures, Scene3DMetalError, Scene3DMetalExecutor, Scene3DMetalTarget,
+        Scene3DMetalTexture, Scene3DMetalViewport,
     };
-    use ferroui_render3d::brush::scene_texture_inputs;
+    use ferroui_render3d::brush::{scene_texture_inputs, DeviceBitmap};
     use skia_safe as sk;
     use skia_safe::gpu::graphite::mtl::backend_textures;
     use std::cell::RefCell;
@@ -335,6 +336,46 @@ mod graphite {
         Skipped,
         /// The context cannot draw the scene on the GPU: the caller draws the CPU reference.
         OnCpu,
+    }
+
+    /// The frames of a video or a camera that a render samples from their textures (step D7).
+    /// The storage of each is kept, as for a 2D draw, until the GPU has done what the context
+    /// submits next: the 3D pass is committed to the same queue before that.
+    struct GraphiteFrames<'a> {
+        graphite: &'a GraphiteGrContext,
+        context_id: u64,
+        /// The bitmaps this render has kept the storage of.
+        retained: RefCell<Vec<*const ()>>,
+    }
+
+    impl GraphiteFrames<'_> {
+        fn leased<'b>(&self, bitmap: &'b SharedBitmapImpl) -> Option<&'b LeasedGpuBitmap> {
+            bitmap.as_any().downcast_ref::<LeasedGpuBitmap>()
+        }
+    }
+
+    // SAFETY: the texture is the one the image of the frame wraps, alive while the frame is held,
+    // and `sampling` keeps the storage of the frame until the GPU has done the render.
+    unsafe impl Scene3DMetalDeviceTextures for GraphiteFrames<'_> {
+        fn sampling(&self, bitmap: &SharedBitmapImpl) -> DeviceBitmap {
+            let Some(leased) = self.leased(bitmap) else { return DeviceBitmap::NotOnDevice };
+            if leased.metal_texture(self.context_id).is_none() {
+                return DeviceBitmap::NotOnDevice;
+            }
+            let address = std::ptr::from_ref(leased).cast::<()>();
+            let mut retained = self.retained.borrow_mut();
+            if !retained.contains(&address) {
+                if !leased.retain_for_render(self.graphite) {
+                    return DeviceBitmap::NotOnDevice;
+                }
+                retained.push(address);
+            }
+            DeviceBitmap::Stored
+        }
+
+        fn device_texture(&self, bitmap: &SharedBitmapImpl) -> Option<*mut std::ffi::c_void> {
+            self.leased(bitmap)?.metal_texture(self.context_id)
+        }
     }
 
     /// The image of `scene` drawn at `size` pixels (and `scale` device pixels per unit, with or
@@ -483,7 +524,8 @@ mod graphite {
             let new_textures = counters().textures_created - textures_before;
 
             let target = Scene3DMetalTarget { texture: &slot.texture, size, antialiased };
-            let rendered = executor.render(&mut slot.viewport, scene, &target);
+            let frames = GraphiteFrames { graphite, context_id, retained: RefCell::new(Vec::new()) };
+            let rendered = executor.render_with_textures(&mut slot.viewport, scene, &target, &frames);
             match rendered {
                 Ok(report) => {
                     slot.scene = Arc::downgrade(scene);
