@@ -167,6 +167,7 @@ impl<'a> RsxPreviewMarkup<'a> {
         let rules = styles.get(&index);
         let groups = states.get(&index);
         let columns = nodes.get(index).and_then(|node| node.columns.as_ref()).filter(|columns| columns.projected());
+        let transitions = nodes.get(index).and_then(|node| node.property_transitions.as_ref());
         self.source.push_str(&pad);
         let offset = self.source.len();
         self.controls.push(offset);
@@ -192,7 +193,8 @@ impl<'a> RsxPreviewMarkup<'a> {
             self.state_groups.extend(groups.groups.iter().map(|group| (offset, group)));
         }
         let trigger_comments = triggers.comments(index);
-        if element.children.is_empty() && rules.is_none() && groups.is_none() && columns.is_none() && trigger_comments.is_empty() {
+        if element.children.is_empty() && rules.is_none() && groups.is_none() && columns.is_none()
+            && transitions.is_none() && trigger_comments.is_empty() {
             self.source.push_str(" />");
             return;
         }
@@ -204,6 +206,9 @@ impl<'a> RsxPreviewMarkup<'a> {
         }
         if let Some(columns) = columns {
             columns.render(&mut self.source, &pad);
+        }
+        if let Some(transitions) = transitions {
+            transitions.render(&mut self.source, &tag, &pad);
         }
         for comment in trigger_comments {
             let _ = write!(self.source, "\n{pad}{INDENT}{comment}");

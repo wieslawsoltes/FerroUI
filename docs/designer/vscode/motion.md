@@ -21,6 +21,26 @@ To edit a shared transition, select its `Transitions` declaration in the Outline
 
 [Studio collection editor](../images/studio-property-transition-collection.png) · [VS Code timing editor](../images/vscode-property-transitions.png) · [Property transitions through MCP](reference.md#edit-property-transitions-with-mcp)
 
+### Preview property transitions in Rust
+
+Open an RSX view with **FerroUI: Open Designer** and choose the invocation that declares the transitions. An inline array passed to `ferroui_view::transitions` supplies the native transitions in the isolated canvas. The designer recognizes qualified builder paths and explicit Rust imports. Durations can use literal `ferroui_view::ms`, `Duration::from_millis`, or `Duration::from_secs` calls. For `transition_eased`, use a supported native easing constructor or a literal native `Easing::parse(...).unwrap()` call.
+
+```rust
+rsx! {
+    Border {
+        transitions: ferroui_view::transitions([
+            ferroui_view::transition(
+                ferroui_base::Visual::opacity_property(),
+                ferroui_view::ms(260),
+            ),
+        ]),
+        TextBlock { text: "Latest renewals" }
+    }
+}
+```
+
+Use **Interact** to see the transition when a setter changes its property. Inspect the projected XAML in the design tab and edit the collection in the original Rust buffer. Run the app to evaluate computed transition collections. The isolated preview reports those expressions in its partial-preview status.
+
 ## Edit an animation
 
 1. Open [DesignWorkflows.xaml](../samples/DesignWorkflows.xaml) or an XAML file with an authored animation. Choose **FerroUI: Show Animation Timeline**. In the default VS Code layout, the **FerroUI Timeline** tab opens below the source and design. Drag the Panel divider or use **Maximize Panel** for more space. If you previously moved the view, open its title context menu and choose **Reset Location**.

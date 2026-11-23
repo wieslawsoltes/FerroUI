@@ -566,6 +566,8 @@ A `ThemeVariantScope` element (`requested_theme_variant: variant`) switches the 
 
 In a component that runs again, keep `transitions([..])` in `use_hook`, as the template and the items of section 9.2: a new value on each run is set again.
 
+FerroUI's designer previews inline transition arrays on mapped RSX controls. Use a qualified builder path or an explicit import with a literal duration. [Preview Rust property transitions](designer/vscode/motion.md#preview-property-transitions-in-rust)
+
 ### 10.5 Popups and context menus
 
 A `Popup` takes its child as an element (`popup().child(..)`, or `Popup { .. }` in `rsx!`). The child is shown in a root of its own above the window: in the logical tree and under the owner of the popup, outside the visual tree of its parent. That is what a portal is in React. A property that holds a control of a class takes an element too: `context_menu: rsx! { ContextMenu { MenuItem { header: "Copy" } } }`. The reconciler patches the element there like any other.

@@ -157,6 +157,16 @@ pub(crate) fn builtins() -> &'static BTreeMap<String, RsxStyleField> {
                 "FontSize",
                 "TextBlock",
             ),
+            (
+                "ferroui_base::layout::Layoutable::margin_property",
+                "Margin",
+                "Layoutable",
+            ),
+            (
+                "ferroui_controls::Border::border_thickness_property",
+                "BorderThickness",
+                "Border",
+            ),
             ("ferroui_controls::Grid::row_property", "Row", "Grid"),
             ("ferroui_controls::Grid::column_property", "Column", "Grid"),
             (

@@ -64,6 +64,15 @@ impl Class {
         }
     }
 
+    pub(crate) fn transition_base(&self) -> Option<&str> {
+        let base = self.base()?;
+        let property = catalog::schema().property(base, None, "Transitions")?;
+        if property.type_name != "Option<Transitions>" {
+            return None;
+        }
+        Some(base)
+    }
+
     fn mapped_property(&self, name: &str) -> Option<&MappedProperty> {
         match self {
             Self::Builtin(_) => None,

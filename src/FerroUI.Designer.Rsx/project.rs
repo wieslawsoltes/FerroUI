@@ -8,6 +8,7 @@ use crate::item_templates::TemplateFields;
 use crate::literal;
 use crate::local_rust::LocalRust;
 use crate::markup::{RsxPreviewMarkup, serialize};
+use crate::property_transitions::RsxPropertyTransitions;
 use crate::source_array::ArraySlot;
 use crate::registered::{Class, RsxCatalog};
 use crate::source_edits::RsxEvent;
@@ -50,6 +51,7 @@ pub struct RsxNode {
     pub(crate) style_slot: ArraySlot,
     pub(crate) state_slot: ArraySlot,
     pub(crate) state_triggers: crate::state_triggers::StateTriggers,
+    pub(crate) property_transitions: Option<RsxPropertyTransitions>,
     pub(crate) columns: Option<ColumnSource>,
     pub(crate) templates: TemplateFields,
     pub(crate) subtree: ProjectedSubtree,
@@ -172,6 +174,14 @@ impl RsxProjection<'_> {
         self.nodes.iter().any(|node| !node.state_triggers.is_empty())
     }
 
+    pub fn property_transitions(&self, owner: usize) -> Option<&RsxPropertyTransitions> {
+        self.nodes.get(owner)?.property_transitions.as_ref()
+    }
+
+    fn has_property_transitions(&self) -> bool {
+        self.nodes.iter().any(|node| node.property_transitions.is_some())
+    }
+
     pub fn has_projected_columns(&self) -> bool {
         self.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected))
     }
@@ -184,7 +194,7 @@ impl RsxProjection<'_> {
     /// Structural conversion can replace a complete tree with no interior comments.
     pub fn can_replace_structure(&self) -> bool {
         self.omitted_count == 0 && !self.inner_trivia && !self.has_projected_styles() && !self.has_projected_states()
-            && !self.has_state_triggers() && !self.has_projected_columns()
+            && !self.has_state_triggers() && !self.has_projected_columns() && !self.has_property_transitions()
             && !self.has_explicit_child_lists() && !self.preserve_asset_expressions
     }
 
@@ -217,6 +227,9 @@ impl RsxProjection<'_> {
     pub fn apply_xaml(&self, draft: &str) -> Result<Vec<TextPatch>, String> {
         if self.has_projected_columns() {
             return Err("Edit authored Rust column collections in Columns or in source".into());
+        }
+        if self.has_property_transitions() {
+            return Err("Edit the authored transition collection in Rust source".into());
         }
         if self.has_projected_states() || self.has_state_triggers() {
             return Err("Edit mapped Rust state declarations in States or in the source editor".into());
@@ -355,8 +368,10 @@ pub(crate) fn parse_draft(source: &str, catalog: &RsxCatalog) -> Result<Element,
         return Err("Expected an rsx! expression".into());
     }
     let (tree, state) = parse_body(source, draft.mac.tokens, catalog, None)?;
-    if !state.styles.is_empty() || !state.states.is_empty() || state.nodes.iter().any(|node| node.columns.as_ref().is_some_and(ColumnSource::projected)) {
-        return Err("Edit native styles, animation, states, and columns in their authored scope".into());
+    if !state.styles.is_empty() || !state.states.is_empty() || state.nodes.iter().any(|node| {
+        node.property_transitions.is_some() || node.columns.as_ref().is_some_and(ColumnSource::projected)
+    }) {
+        return Err("Edit native styles, transitions, animation, states, and columns in their authored scope".into());
     }
     if state.omitted_count != 0 {
         return Err(format!(
@@ -419,6 +434,30 @@ impl State<'_> {
         }
     }
 
+    fn project_property_transitions(
+        &mut self,
+        source: &str,
+        index: usize,
+        value: Option<&syn::Expr>,
+        field: SourceSpan,
+        catalog: &RsxCatalog,
+    ) {
+        let node = &mut self.nodes[index];
+        let duplicate = node.expressions.insert(
+            "Transitions".into(), value.map_or(field, crate::animation::syntax::span),
+        ).is_some();
+        node.property_transitions = value.filter(|_| !duplicate).and_then(|value| {
+            let bindings = self.local_rust.get_or_insert_with(|| {
+                LocalRust::parse(source, value.span().byte_range().start, self.modules)
+            });
+            RsxPropertyTransitions::read(value, &node.class, catalog, bindings)
+        });
+        if node.property_transitions.is_none() {
+            let description = format!("{}.transitions expression", node.class);
+            self.omit(description);
+        }
+    }
+
     fn element(
         &mut self,
         source: &str,
@@ -465,6 +504,7 @@ impl State<'_> {
                 ArraySlot::Unavailable
             },
             state_triggers: crate::state_triggers::StateTriggers::default(),
+            property_transitions: None,
             style_slot: if class.xaml_property(None, "styles").is_none() {
                 ArraySlot::Missing
             } else {
@@ -506,6 +546,10 @@ impl State<'_> {
                         setter == "styles" && class.xaml_property(None, "styles").is_none()
                     }) {
                         self.project_styles(source, index, styles, catalog);
+                        continue;
+                    }
+                    if setter == "transitions" && class.xaml_property(None, &setter).is_none() {
+                        self.project_property_transitions(source, index, argument, field.unwrap_or(name), catalog);
                         continue;
                     }
                     self.project_template(index, &setter, false, argument, field);
@@ -565,6 +609,10 @@ impl State<'_> {
             let value_span = value.span().byte_range();
             let value_span = SourceSpan::new(value_span.start, value_span.end);
             let field = SourceSpan::new(name.span().byte_range().start, value_span.end);
+            if owner.is_none() && setter == "transitions" && class.xaml_property(None, &setter).is_none() {
+                self.project_property_transitions(source, index, Some(value), field, catalog);
+                continue;
+            }
             if self.project_command(index, &setter, owner.is_some(), PropertyField {
                 field: Some(field), fallback: field, expression: Some(value),
             }) {

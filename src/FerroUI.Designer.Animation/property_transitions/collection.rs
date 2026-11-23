@@ -14,6 +14,13 @@ pub struct XamlTransitionTarget {
     pub namespaces: Vec<(String, String)>,
 }
 
+impl XamlTransitionTarget {
+    /// Render a validated native transition for a designer projection or source insertion.
+    pub fn to_xaml(&self, timing: &PropertyTransitionTiming) -> Result<String> {
+        transition_markup(self, timing)
+    }
+}
+
 pub enum PropertyTransitionCollectionEdit<'a> {
     Add {
         target: &'a XamlTransitionTarget,
@@ -101,7 +108,7 @@ impl PropertyTransitionList {
             self.can_add(),
             "Open the authored transition collection before adding a property",
         )?;
-        let transition = transition_markup(target, timing)?;
+        let transition = target.to_xaml(timing)?;
         if let Some(parent) = self.collection {
             return Ok(Edit::InsertChild {
                 parent,

@@ -557,6 +557,8 @@ The keyframe view and **Compare animation clips** keep their own marker lists. T
 
 Select a control in XAML Design and choose the clock icon next to **Definition**. Choose a registered target property and use the add icon to create a transition. With an entry selected, use the target icon to change its property, the arrows to move it, or the minus icon to remove it. Edit literal duration, delay, and easing, and choose the check icon to apply them. Use the source icon to reveal the declaration. Switch the artboard to **Interact** and trigger the property change to verify its native behavior. [Property transition example](vscode/motion.md#edit-property-transitions) · [Studio collection editor](images/studio-property-transition-collection.png)
 
+An inline Rust `ferroui_view::transitions` collection also renders on the native artboard. Select the RSX invocation and switch the artboard to **Interact** to see its authored transition when a property changes. [Supported Rust builders](vscode/motion.md#preview-property-transitions-in-rust)
+
 ### Edit tracks and keyframes
 
 Select a key and drag either handle in the incoming easing graph. The graph and **Curve**
