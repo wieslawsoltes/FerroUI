@@ -4,7 +4,7 @@ use ferroui_designer_core::Document;
 use ferroui_designer_language::{exact_library_definition, ProjectLibraryEntry};
 use ferroui_designer_project::{
     design_handoff::{fingerprint, Asset, AssetCopy, Mapping, Target, Transfer},
-    file_uri, relative_file_path, relative_file_reference,
+    file_path, file_uri, relative_asset_uri, relative_file_path,
 };
 use std::path::Path;
 
@@ -157,7 +157,12 @@ impl ReviewContext<'_> {
         let reference = match address {
             Some(address) => address.into(),
             None => {
-                relative_file_reference(self.document, &uri).map_err(|error| error.to_string())?
+                let source = file_path(self.document).map_err(|error| error.to_string())?;
+                let parent = source.parent().ok_or("The design has no parent directory")?;
+                let directory = parent.canonicalize().map_err(|error| error.to_string())?;
+                let relative = relative_file_path(&directory, &asset.file)
+                    .map_err(|error| error.to_string())?;
+                relative_asset_uri(&relative).ok_or("Cannot represent a relative asset URI")?
             }
         };
         if asset.available {

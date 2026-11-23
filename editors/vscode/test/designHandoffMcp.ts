@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { symlink, unlink } from 'node:fs/promises';
 import * as vscode from 'vscode';
 import type { HandoffPlan } from '../src/designHandoffProtocol';
 import type { OutlineNode } from '../src/protocol';
@@ -119,6 +120,15 @@ export async function verifyDesignHandoff({ invoke, content }: McpFixture): Prom
         assert.equal(rustDoc.getText().split('\r\n')[0], rust.split('\r\n')[0]);
         await send('designer_history', { session: rsx, expected_version: rustDoc.version, action: 'undo' });
         assert.equal(rustDoc.getText(), rust);
+
+        const linked = 'Linked Handoff';
+        const alias = vscode.Uri.joinPath(root, linked);
+        await symlink(file('').fsPath, alias.fsPath, process.platform === 'win32' ? 'junction' : 'dir');
+        try {
+            const opened = await send<{ session: number }>('designer_open', { path: `${linked}/Checkout.xaml` });
+            const asset = (await plan(opened.session)).rows.find(row => row.id === 'mark');
+            assert.equal(asset?.reference, 'Assets/Brand%20Icon.png');
+        } finally { await unlink(alias.fsPath); }
     } finally {
         for (const name of ['Checkout.xaml', 'checkout.rs', 'Definitions.xaml']) {
             const draft = vscode.workspace.textDocuments.find(document => document.uri.toString() === file(name).toString() && document.isDirty);
