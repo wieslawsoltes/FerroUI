@@ -1,6 +1,6 @@
 //! The SelectorBar page: the source's three examples with their code behind.
 
-use crate::navigation_view_samples::page_type;
+use crate::navigation_view_samples::{SamplePage1, SamplePage3, SamplePage5};
 use crate::selector_bar_samples::{collection, slide};
 use crate::{examples, tests::start};
 use ferroui_base::Ref;
@@ -30,12 +30,14 @@ fn selector_bar_navigates_the_frame_with_a_slide_in_its_direction() {
     let bar = root.get_control::<SelectorBar>("SelectorBar2");
     let frame = root.get_control::<Frame>("SelectorContentFrame");
     assert_eq!(bar.selected_index(), 0);
-    assert_eq!(frame.current_source_page_type(), page_type("SamplePage1"));
+    // Without a navigation stack the frame shows the page and records no source type.
+    assert!(frame.current_page().and_then(|page| page.cast::<SamplePage1>()).is_some());
+    assert_eq!(frame.current_source_page_type(), None);
 
     bar.set_selected_index(2);
-    assert_eq!(frame.current_source_page_type(), page_type("SamplePage3"));
+    assert!(frame.current_page().and_then(|page| page.cast::<SamplePage3>()).is_some());
     bar.set_selected_index(4);
-    assert_eq!(frame.current_source_page_type(), page_type("SamplePage5"));
+    assert!(frame.current_page().and_then(|page| page.cast::<SamplePage5>()).is_some());
     assert!(!frame.can_go_back());
 
     assert_eq!(slide(0, 2), NavigationTransitionInfo::SlideFromRight);
