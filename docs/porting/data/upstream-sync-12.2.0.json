@@ -1440,8 +1440,10 @@
    "pr": 21826,
    "date": "2026-11-13",
    "area": "rendering",
-   "class": "deferred",
-   "note": "Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code."
+   "class": "port",
+   "note": "Visual.BackdropEffect, BackdropEffectBoundsSource and BackdropEffectCache (default XML namespace), composition fields, own layout bounds, catalog page. Drawn with the WinUI backdrop replay (`render_scope::draw_backdrop`) into `push_effect` of the backend, on the GPU in Skia and Vello (Quartz and Direct2D through their effects too), read beyond the bounds by the sampling radius and cut to them; the dirty area grows over it as for the backdrop brush. Not ported: the retained snapshot (`IDrawingContextImplWithBackdropSupport`, `BackdropVolatilePass`, snapshot dirty tracking): the replay reads no pixels back, works on every backend and is bounded by the dirty area, so the cache mode is a hint (DEVIATIONS.md).",
+   "part": "backdrop",
+   "state": "done"
   },
   {
    "hash": "80659c4c3e3a6ff985540e86ce10fe9c19bcd0ec",
