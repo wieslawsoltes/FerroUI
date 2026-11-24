@@ -60,7 +60,7 @@ impl VisualImpl for ContentPresenter {
         compositor: &Rc<ferroui_base::rendering::composition::Compositor>,
     ) -> ferroui_base::rendering::composition::CompositionDrawListVisual {
         if !Self::requires_composition_visual(this) {
-            return Self::parent_create_composition_visual(this, compositor);
+            return ferroui_base::rendering::composition::CompositionDrawListVisual::new(compositor, this);
         }
         let border_visual = crate::border_visual::CompositionBorderVisual::new(compositor, this);
         border_visual.set_corner_radius(this.corner_radius());
