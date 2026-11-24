@@ -2,11 +2,11 @@
 //! (`Contact`, `GroupInfoList`, `Message`, and the `CustomDataObject` of the gallery's
 //! ConnectedAnimation page) and `ListViewPersistenceHelper`.
 //!
-//! FerroUI has no ListView: every list of the page is a ListBox. Adaptations: x:Bind in the
+//! Every list of the page is a ListView. Adaptations: x:Bind in the
 //! templates becomes `{Binding}` over the markup types declared here; the contacts of
 //! `Assets/SampleMedia/Contacts.txt` are a table; the item collections are `FerroList`s set as the
 //! lists' items sources (the source adds the inverted list's messages to `Items`); the grouped list
-//! is one list of the group headers followed by their contacts; WinUI's `DragItemsStarting` is a
+//! is the view of a `CollectionViewSource` of the groups, as in the source; WinUI's `DragItemsStarting` is a
 //! drag started by the pointer on an item, carrying the contacts in an in-process format.
 
 use crate::connected_animation_samples::DESCRIPTIONS;
@@ -24,11 +24,11 @@ use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, BoxedValue, Point, Ref, Vector, Visual};
 use ferroui_controls::automation::{AccessibilityView, AutomationProperties};
-use ferroui_controls::primitives::SelectingItemsControl;
+use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
-    Border, Button, ComboBox, Control, ItemsSource, ListBox, MenuFlyout, MenuItem, NumberBox, ScrollViewer,
-    SelectionMode, TextBlock, TextBox,
+    Border, Button, CollectionViewGroup, CollectionViewSource, ComboBox, Control, ItemsSource, ItemsStackPanel,
+    ListView, ListViewSelectionMode, MenuFlyout, MenuItem, NumberBox, ScrollViewer, TextBlock, TextBox, ToggleSwitch,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -274,7 +274,7 @@ fn contact_list(contacts: Vec<Rc<Contact>>) -> Rc<FerroList<BoxedValue>> {
     Rc::new(FerroList::from_items(contacts.into_iter().map(boxed)))
 }
 
-fn set_items(list: &Ref<ListBox>, items: &Rc<FerroList<BoxedValue>>) {
+fn set_items(list: &Ref<ListView>, items: &Rc<FerroList<BoxedValue>>) {
     list.set_items_source(Some(items.clone().into()));
 }
 
@@ -404,25 +404,21 @@ fn position(list: &FerroList<BoxedValue>, contact: &Rc<Contact>) -> Option<usize
     (0..list.count()).find(|&index| contact_of(&list.get(index)).is_some_and(|item| Rc::ptr_eq(&item, contact)))
 }
 
-/// The selection mode of WinUI's `ListViewSelectionMode` name. FerroUI's SelectionMode has no
-/// None (see [`set_selection_none`]); Multiple, whose click toggles an item, is Multiple with Toggle;
-/// Extended, with Ctrl+Click and Shift+Click, is Multiple.
-pub(crate) fn selection_mode(name: &str) -> Option<SelectionMode> {
+/// The selection mode of a name of the options (`SelectionModeComboBox_SelectionChanged`).
+pub(crate) fn selection_mode(name: &str) -> Option<ListViewSelectionMode> {
     match name {
-        "None" | "Single" => Some(SelectionMode::SINGLE),
-        "Multiple" => Some(SelectionMode::MULTIPLE | SelectionMode::TOGGLE),
-        "Extended" => Some(SelectionMode::MULTIPLE),
+        "None" => Some(ListViewSelectionMode::None),
+        "Single" => Some(ListViewSelectionMode::Single),
+        "Multiple" => Some(ListViewSelectionMode::Multiple),
+        "Extended" => Some(ListViewSelectionMode::Extended),
         _ => None,
     }
 }
 
-/// WinUI's `SelectionMode="None"`: the list's items are neither selected nor hit by the pointer
-/// nor focused (the class `selection-none` of the page's style).
-pub(crate) fn set_selection_none(list: &Ref<ListBox>, none: bool) {
-    if none {
-        list.unselect_all();
-    }
-    list.classes().set("selection-none", none);
+/// WinUI's `SelectionMode="None"`, which leaves nothing selected.
+pub(crate) fn set_selection_none(list: &Ref<ListView>) {
+    list.set_selection_mode(ListViewSelectionMode::None);
+    SelectingItemsControl::selection(list).clear();
 }
 
 /// The insertion index of `ListView_Drop`: the item under the drop position (`y` in the items
@@ -446,7 +442,7 @@ fn contacts_format() -> DataFormatOf<Vec<Rc<Contact>>> {
 fn wire_list_view(root: &Ref<Control>) {
     // The page's constructor and `OnNavigatedTo`.
     let page = ListViewPage::new();
-    let base = root.get_control::<ListBox>("BaseExample");
+    let base = root.get_control::<ListView>("BaseExample");
     set_items(&base, &contact_list(Contact::get_contacts()));
     // `BaseExample_Loaded`: the list takes the focus, so that its first item has it.
     let weak_base = base.downgrade();
@@ -461,7 +457,7 @@ fn wire_list_view(root: &Ref<Control>) {
     wire_grouped(root);
     wire_filter(root, &page);
     wire_messages(root, &page);
-    root.get_control::<ListBox>("Control4")
+    root.get_control::<ListView>("Control4")
         .set_items_source(Some(ItemsSource::from_items(
             CustomDataObject::get_data_objects()
                 .into_iter()
@@ -474,7 +470,7 @@ fn wire_list_view(root: &Ref<Control>) {
 
 /// `SelectionModeComboBox_SelectionChanged`.
 fn wire_selection_modes(root: &Ref<Control>) {
-    let list = root.get_control::<ListBox>("Control2");
+    let list = root.get_control::<ListView>("Control2");
     set_items(&list, &contact_list(Contact::get_contacts()));
     let combo_box = root.get_control::<ComboBox>("SelectionModeComboBox");
     let weak_combo_box = combo_box.downgrade();
@@ -494,7 +490,9 @@ fn wire_selection_modes(root: &Ref<Control>) {
             .unwrap_or_default();
         if let Some(mode) = selection_mode(name) {
             list.set_selection_mode(mode);
-            set_selection_none(&list, name == "None");
+            if mode == ListViewSelectionMode::None {
+                SelectingItemsControl::selection(&list).clear();
+            }
         }
     });
 }
@@ -502,7 +500,7 @@ fn wire_selection_modes(root: &Ref<Control>) {
 /// `ListView_DragItemsStarting`, `Source_DragOver`, `Target_DragOver` and `ListView_Drop`.
 fn wire_drag_and_drop(root: &Ref<Control>, page: &Rc<ListViewPage>) {
     for (name, first) in [("DragDropListView", true), ("DragDropListView2", false)] {
-        let list = root.get_control::<ListBox>(name);
+        let list = root.get_control::<ListView>(name);
         set_items(&list, if first { &page.contacts1 } else { &page.contacts2 });
         // The drag starts once the pointer pressed on an item moves (WinUI's CanDragItems).
         let pressed: Rc<RefCell<Option<(PointerPressedEventArgs, Point, Rc<Contact>)>>> = Rc::default();
@@ -604,62 +602,39 @@ fn wire_drag_and_drop(root: &Ref<Control>, page: &Rc<ListViewPage>) {
     }
 }
 
-/// The header of a group, the source's `GroupStyle.HeaderTemplate`: the key in the
-/// TitleTextBlockStyle (28, semibold), raw for automation.
-fn group_header(group: &GroupInfoList) -> Ref<Control> {
-    let text = TextBlock::new();
-    text.set_text(Some(&group.key));
-    text.set_font_size(28.0);
-    text.set_font_weight(FontWeight::SemiBold);
-    AutomationProperties::set_accessibility_view(&text, AccessibilityView::Raw);
-    let border = Border::new();
-    AutomationProperties::set_accessibility_view(&border, AccessibilityView::Raw);
-    border.set_child(&text);
-    border.upcast()
-}
-
-/// The grouped list: each group's header before its contacts, which have the list's item template.
-/// The headers are not items one can select or focus.
+/// The grouped list: `ContactsCVS`, the source's `CollectionViewSource` with `IsSourceGrouped`,
+/// over the groups of `GetContactsGroupedAsync`; the toggle sets `AreStickyGroupHeadersEnabled`
+/// of the list's `ItemsStackPanel`. The headers are the page's `GroupStyle.HeaderTemplate`.
 fn wire_grouped(root: &Ref<Control>) {
-    let list = root.get_control::<ListBox>("GroupedListViewCtrl");
-    let Some(contact) = list.item_template() else {
-        return;
-    };
-    list.set_item_template(Some(FuncDataTemplate::new(
-        |_| true,
-        move |data, _| match data.as_ref().and_then(|data| data.downcast_ref::<Rc<GroupInfoList>>()) {
-            Some(group) => Some(group_header(group)),
-            None => contact.build(data),
-        },
-        false,
-    )));
-    let mut items = Vec::new();
-    for (key, contacts) in Contact::get_contacts_grouped() {
-        items.push(Some(boxed(Rc::new(GroupInfoList { key }))));
-        items.extend(contacts.into_iter().map(|contact| Some(boxed(contact))));
-    }
-    let headers: Vec<bool> = items
-        .iter()
-        .map(|item| {
-            item.as_ref()
-                .is_some_and(|item| item.downcast_ref::<Rc<GroupInfoList>>().is_some())
-        })
-        .collect();
-    list.set_items_source(Some(ItemsSource::from_items(items)));
-    list.container_prepared(move |args| {
-        let is_header = usize::try_from(args.index()).is_ok_and(|index| headers.get(index) == Some(&true));
-        let container = args.container();
-        container.set_is_hit_test_visible(!is_header);
-        container.set_focusable(!is_header);
-    })
-    .detach();
+    let list = root.get_control::<ListView>("GroupedListViewCtrl");
+    let groups = Contact::get_contacts_grouped().into_iter().map(|(key, contacts)| {
+        let items = ItemsSource::from_items(contacts.into_iter().map(|contact| Some(boxed(contact))));
+        CollectionViewGroup::new(Some(boxed(Rc::new(GroupInfoList { key }))), items)
+    });
+    let contacts = CollectionViewSource::new();
+    contacts.set_is_source_grouped(true);
+    contacts.set_source(Some(ItemsSource::from_values(groups)));
+    list.set_items_source(contacts.view());
+    let sticky = root.get_control::<ToggleSwitch>("StickySwitch");
+    let (weak_list, weak_sticky) = (list.downgrade(), sticky.downgrade());
+    sticky.property_changed(move |change| {
+        if change.property() != ToggleButton::is_checked_property().as_property() {
+            return;
+        }
+        let (Some(list), Some(sticky)) = (weak_list.upgrade(), weak_sticky.upgrade()) else {
+            return;
+        };
+        if let Some(panel) = list.items_panel_root().and_then(|panel| panel.cast::<ItemsStackPanel>()) {
+            panel.set_are_sticky_group_headers_enabled(sticky.is_checked() == Some(true));
+        }
+    });
 }
 
 /// `OnFilterChanged` of the three filter boxes, and its announcement of the count (a polite live
 /// region, for `UIHelper.AnnounceActionForAccessibility`).
 fn wire_filter(root: &Ref<Control>, page: &Rc<ListViewPage>) {
     set_items(
-        &root.get_control::<ListBox>("FilteredListView"),
+        &root.get_control::<ListView>("FilteredListView"),
         &page.contacts3_filtered,
     );
     let boxes =
@@ -693,9 +668,9 @@ fn wire_filter(root: &Ref<Control>, page: &Rc<ListViewPage>) {
 /// `AddItemToEnd` and `MessageReceived`. The inverted list keeps its last item in view
 /// (`ItemsUpdatingScrollMode="KeepLastItemInView"`).
 fn wire_messages(root: &Ref<Control>, page: &Rc<ListViewPage>) {
-    let list = root.get_control::<ListBox>("InvertedListView");
+    let list = root.get_control::<ListView>("InvertedListView");
     set_items(&list, &page.messages);
-    set_selection_none(&list, true);
+    set_selection_none(&list);
     for (name, alignment) in [
         ("SendMessage", HorizontalAlignment::Right),
         ("ReceiveMessage", HorizontalAlignment::Left),
@@ -715,7 +690,7 @@ fn wire_messages(root: &Ref<Control>, page: &Rc<ListViewPage>) {
 /// The context menu of the contacts: Delete (`ContactDeleteMenuItem_Click`) removes the contact
 /// of the item.
 fn wire_context_menu(root: &Ref<Control>, page: &Rc<ListViewPage>) {
-    let list = root.get_control::<ListBox>("ContextMenuList");
+    let list = root.get_control::<ListView>("ContextMenuList");
     set_items(&list, &page.contacts4_context_menu);
     let Some(inner) = list.item_template() else {
         return;
@@ -744,8 +719,8 @@ fn wire_context_menu(root: &Ref<Control>, page: &Rc<ListViewPage>) {
 }
 
 /// The scroll viewer of a list.
-fn scroll_viewer(list: &Ref<ListBox>) -> Option<Ref<ScrollViewer>> {
-    list.scroll().and_then(|scroll| scroll.cast::<ScrollViewer>())
+fn scroll_viewer(list: &Ref<ListView>) -> Option<Ref<ScrollViewer>> {
+    list.scroll_viewer()
 }
 
 /// The top of a list's container in its scroll viewer's viewport.
@@ -757,7 +732,7 @@ fn top_in_viewport(container: &Ref<Control>, viewer: &Ref<ScrollViewer>) -> Opti
 
 /// `ListViewPersistenceHelper.GetRelativeScrollPosition`: the key of the first item that reaches
 /// below the top of the viewport, and how far the viewport's top is below the item's top.
-pub(crate) fn relative_scroll_position(list: &Ref<ListBox>) -> Option<(String, f64)> {
+pub(crate) fn relative_scroll_position(list: &Ref<ListView>) -> Option<(String, f64)> {
     let viewer = scroll_viewer(list)?;
     let mut containers = list.get_realized_containers();
     containers.sort_by_key(|container| list.index_from_container(container));
@@ -773,7 +748,7 @@ pub(crate) fn relative_scroll_position(list: &Ref<ListBox>) -> Option<(String, f
 
 /// `ListViewPersistenceHelper.SetRelativeScrollPositionAsync`: the item of the key is brought into
 /// view, then the viewport's top is put at the saved distance below the item's top.
-pub(crate) fn set_relative_scroll_position(list: &Ref<ListBox>, key: &str, offset: f64) {
+pub(crate) fn set_relative_scroll_position(list: &Ref<ListView>, key: &str, offset: f64) {
     let Some(index) = list.items_source().and_then(|items| {
         (0..items.count()).find(|&index| {
             items
@@ -789,7 +764,7 @@ pub(crate) fn set_relative_scroll_position(list: &Ref<ListBox>, key: &str, offse
 }
 
 /// Scrolls the item of `index` into view, then puts its top `offset` above the viewport's top.
-fn scroll_to_top(list: &Ref<ListBox>, index: i32, offset: f64) {
+fn scroll_to_top(list: &Ref<ListView>, index: i32, offset: f64) {
     list.scroll_into_view(index);
     list.update_layout();
     let (Some(viewer), Some(container)) = (scroll_viewer(list), list.container_from_index(index)) else {
@@ -803,7 +778,7 @@ fn scroll_to_top(list: &Ref<ListBox>, index: i32, offset: f64) {
 
 /// `SavePositionButton_Click` and `RestorePositionButton_Click`.
 fn wire_scroll_position(root: &Ref<Control>, page: &Rc<ListViewPage>) {
-    let list = root.get_control::<ListBox>("RestoreScrollListView");
+    let list = root.get_control::<ListView>("RestoreScrollListView");
     // `contacts5`: each contact's name after its number.
     list.set_items_source(Some(ItemsSource::from_values(
         Contact::get_contacts()
@@ -840,7 +815,7 @@ fn wire_scroll_position(root: &Ref<Control>, page: &Rc<ListViewPage>) {
 /// `ScrollIntoViewButton_Click`: Default brings the item into view, Leading puts its top at the
 /// top of the viewport.
 fn wire_scroll_into_view(root: &Ref<Control>) {
-    let list = root.get_control::<ListBox>("ScrollIntoViewListView");
+    let list = root.get_control::<ListView>("ScrollIntoViewListView");
     // `contacts6`: ten copies of the contacts, numbered.
     let contacts = Contact::get_contacts();
     list.set_items_source(Some(ItemsSource::from_values(
