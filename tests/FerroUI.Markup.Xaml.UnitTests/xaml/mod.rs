@@ -2,6 +2,7 @@
 //! checks of the run-time type system that need the metadata of the
 //! controls library.
 
+mod list_view_group_style_tests;
 mod type_system_projection_tests;
 mod well_known_types_tests;
 
