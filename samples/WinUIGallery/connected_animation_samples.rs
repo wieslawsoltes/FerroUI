@@ -1,11 +1,10 @@
 //! The four original ConnectedAnimation compositions, using the native service.
 //!
-//! ListView/GridView/ItemsRepeater containers are explicitly composed from native
-//! panels and buttons. The sample calls ConnectedAnimationService directly; it
-//! does not add container shims. Frame navigation, cached source pages, selected
-//! data, coordinated details, return configuration, scroll and focus are real.
+//! The containers are the source's: a ListView, a GridView and an ItemsRepeater with a uniform
+//! grid. The sample calls ConnectedAnimationService directly. Frame navigation, cached source
+//! pages, selected data, coordinated details, return configuration, scroll and focus are real.
 
-use ferroui_base::input::InputElementImpl;
+use ferroui_base::input::{InputElement, InputElementImpl, Key, KeyEventArgs, TappedEventArgs};
 use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{HorizontalAlignment, LayoutableImpl, Orientation};
 use ferroui_base::media::{Stretch, TextTrimming, TextWrapping};
@@ -23,8 +22,10 @@ use ferroui_controls::navigation::{NavigationCacheMode, NavigationError, Navigat
 use ferroui_controls::primitives::TemplatedControlImpl;
 use ferroui_controls::{
     Border, Button, ContentControlImpl, Control, ControlImpl, Frame, FramePage, FramePageImpl,
-    Grid, Image, Panel, RadioButtons, ScrollViewer, StackPanel, TextBlock, ToolTip, TopLevel,
+    Grid, GridView, Image, ItemsSource, ListView, ListViewBase, RadioButtons, ScrollIntoViewAlignment,
+    ScrollViewer, StackPanel, TextBlock, ToolTip, TopLevel,
 };
+use ferroui_controls_repeater::ItemsRepeater;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::cell::{Cell, RefCell};
@@ -152,14 +153,86 @@ pub(crate) fn content(frame: &Frame) -> Option<Ref<Control>> {
         .and_then(Control::from_boxed)
 }
 
-/// Programmatically composed item children keep ordinary names and logical ancestry.
+/// An item of a composition by name: the items of a ListView and a GridView are logical children,
+/// and those of an ItemsRepeater are found in its source, realized or not.
 pub(crate) fn item_control<T: ferroui_base::ObjectType>(
     root: &Control,
     name: &str,
 ) -> Option<Ref<T>> {
+    let named = |candidate: &Ref<Control>| {
+        std::iter::once(candidate.clone().upcast::<ferroui_base::StyledElement>())
+            .chain(candidate.get_logical_descendants())
+            .find(|child| child.name().as_deref() == Some(name))
+            .and_then(|child| child.cast::<T>())
+    };
     root.get_logical_descendants()
         .find(|child| child.name().as_deref() == Some(name))
         .and_then(|child| child.cast::<T>())
+        .or_else(|| {
+            let repeater = root.find_control::<ItemsRepeater>("CollectionItems")?;
+            let source = repeater.items_source()?;
+            (0..source.count())
+                .filter_map(|index| source.get_at(index))
+                .filter_map(|item| Control::from_boxed(&item))
+                .find_map(|item| named(&item))
+        })
+}
+
+/// What activating an item of a composition does, kept on the root of the composition: a click of
+/// the ListView or GridView, or a tap or Enter on an item of the ItemsRepeater.
+struct ItemActivation(Rc<dyn Fn(usize)>);
+
+/// Activates an item as its container would, without needing a realized container.
+#[cfg(test)]
+pub(crate) fn activate_item(form: &Control, index: usize) {
+    let activation = form.tag().expect("the activation of the composition");
+    let activation = activation.downcast_ref::<ItemActivation>().expect("an item activation");
+    (activation.0)(index);
+}
+
+/// The index an item keeps in its tag.
+fn item_index(item: &Control) -> Option<usize> {
+    item.tag()?.downcast_ref::<usize>().copied()
+}
+
+/// `ItemClick` of a ListView or GridView.
+fn wire_item_click(list: &ListViewBase, activate: &Rc<dyn Fn(usize)>) {
+    let activate = activate.clone();
+    list.item_click(move |_, args| {
+        let index = args.clicked_item().as_ref().and_then(Control::from_boxed).and_then(|item| item_index(&item));
+        if let Some(index) = index {
+            activate(index);
+        }
+    })
+    .detach();
+}
+
+/// `Item_Tapped` and `Item_KeyDown` of the ItemsRepeater page: its items take the focus themselves.
+fn wire_tile_activation(tile: &Ref<Control>, index: usize, activate: &Rc<dyn Fn(usize)>) {
+    tile.set_focusable(true);
+    tile.set_is_tab_stop(true);
+    let on_tap = activate.clone();
+    tile.add_handler(InputElement::tapped_event(), move |_, e: &TappedEventArgs| {
+        on_tap(index);
+        e.set_handled(true);
+    });
+    let on_key = activate.clone();
+    tile.add_handler(InputElement::key_down_event(), move |_, e: &KeyEventArgs| {
+        if matches!(e.key, Key::Enter | Key::Space) {
+            on_key(index);
+            e.set_handled(true);
+        }
+    });
+}
+
+/// Scrolls a ListView or GridView to its item, and focuses the container once it is realized.
+fn return_to_item(list: &ListViewBase, index: usize) {
+    let item = list.items().get_at(index);
+    list.scroll_into_view_with_alignment(&item, ScrollIntoViewAlignment::Default);
+    list.update_layout();
+    if let Some(container) = list.container_from_index(index as i32) {
+        container.focus();
+    }
 }
 
 fn service(source: &Visual) -> Ref<ConnectedAnimationService> {
@@ -218,63 +291,58 @@ fn wire_trimmed_description(description: &Ref<TextBlock>) {
     }).detach();
 }
 
-fn item_button(
-    item: &GalleryItem,
-    index: usize,
-    tile: bool,
-) -> (Ref<Button>, Ref<Image>, Option<String>) {
-    let button = Button::new();
-    button.set_name(Some(format!("ConnectedItem{}", index + 1)));
-    button.set_tag(Some(Rc::new(index)));
-    button.set_padding(Thickness::uniform(0.0));
-    button.set_horizontal_alignment(HorizontalAlignment::Stretch);
-    button.set_horizontal_content_alignment(HorizontalAlignment::Stretch);
-    AutomationProperties::set_name(&button, Some(&item.title));
+/// The `DataTemplate` of the source's ListView.
+fn list_item(item: &GalleryItem, index: usize) -> (Ref<Control>, Ref<Image>, Option<String>) {
     let image = Image::new();
     image.set_name(Some(format!("ConnectedImage{}", index + 1)));
     image.set_width(150.0);
-    image.set_height(if tile { 90.0 } else { 100.0 });
-    image.set_stretch(if tile {
-        Stretch::UniformToFill
-    } else {
-        Stretch::Fill
-    });
+    image.set_height(100.0);
+    image.set_stretch(Stretch::Fill);
     // A decoder failure stays visible in the composition, without disabling
     // its navigation or replacing the original asset with a fabricated bitmap.
     let image_error = load_image(&image, item).err();
     let body = StackPanel::new();
-    body.set_orientation(if tile {
-        Orientation::Vertical
-    } else {
-        Orientation::Horizontal
-    });
-    body.set_spacing(if tile { 4.0 } else { 12.0 });
+    body.set_name(Some(format!("ConnectedItem{}", index + 1)));
+    body.set_tag(Some(Rc::new(index)));
+    body.set_orientation(Orientation::Horizontal);
+    body.set_spacing(12.0);
+    body.set_margin(Thickness::new(0.0, 12.0, 0.0, 12.0));
+    body.set_horizontal_alignment(HorizontalAlignment::Stretch);
+    AutomationProperties::set_name(&body, Some(&item.title));
     body.children().add(image.clone());
     let labels = StackPanel::new();
     labels.set_spacing(4.0);
     let title = text(&item.title);
-    title.set_font_size(if tile { 14.0 } else { 20.0 });
+    title.set_font_size(20.0);
     labels.children().add(title);
-    if !tile {
-        labels.children().add(text(&format!(
-            "Views: {}   Likes: {}",
-            item.views, item.likes
-        )));
-        let description = text(item.description);
-        description.set_max_width(500.0);
-        description.set_max_lines(2);
-        description.set_text_wrapping(TextWrapping::Wrap);
-        description.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
-        wire_trimmed_description(&description);
-        labels.children().add(description);
-    } else {
-        button.set_width(150.0);
-        button.set_height(120.0);
-        button.set_margin(Thickness::uniform(4.0));
-    }
+    labels.children().add(text(&format!("Views: {}   Likes: {}", item.views, item.likes)));
+    let description = text(item.description);
+    description.set_max_width(500.0);
+    description.set_max_lines(2);
+    description.set_text_wrapping(TextWrapping::Wrap);
+    description.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    wire_trimmed_description(&description);
+    labels.children().add(description);
     body.children().add(labels);
-    button.set_content(Some(Control::boxed(body)));
-    (button, image, image_error)
+    (body.upcast(), image, image_error)
+}
+
+/// The `DataTemplate` of the source's GridView and ItemsRepeater.
+fn tile_item(
+    item: &GalleryItem,
+    index: usize,
+    height: f64,
+) -> Result<(Ref<Control>, Ref<Image>, Option<String>), NavigationError> {
+    let tile = parse(include_str!("Pages/ConnectedTile.xaml"))?;
+    tile.set_name(Some(format!("ConnectedItem{}", index + 1)));
+    tile.set_tag(Some(Rc::new(index)));
+    tile.set_height(height);
+    AutomationProperties::set_name(&tile, Some(&item.title));
+    let image = tile.get_control::<Image>("TileImage");
+    image.set_name(Some(format!("ConnectedImage{}", index + 1)));
+    let image_error = load_image(&image, item).err();
+    tile.get_control::<TextBlock>("TileTitle").set_text(Some(&item.title));
+    Ok((tile, image, image_error))
 }
 
 struct CollectionState {
@@ -295,11 +363,9 @@ impl CollectionState {
         self.animation.clear();
         self.selected.set(Some(index));
         if let Some(current) = content(&frame) {
-            self.scroll_position.set(
-                current
-                    .get_control::<ScrollViewer>("CollectionScroll")
-                    .offset(),
-            );
+            if let Some(scroll) = current.find_control::<ScrollViewer>("CollectionScroll") {
+                self.scroll_position.set(scroll.offset());
+            }
         }
         let animation = service(source).prepare_to_animate("ForwardConnectedAnimation", source);
         self.animation.replace(animation);
@@ -336,19 +402,35 @@ fn collection_page(state: &Rc<CollectionState>) -> Result<Ref<FramePage>, Naviga
     } else {
         include_str!("Pages/ConnectedCollection.xaml")
     })?;
-    let panel = root.get_control::<Panel>("CollectionItems");
+    let weak_state = Rc::downgrade(state);
+    let weak_root = root.downgrade();
+    let activate: Rc<dyn Fn(usize)> = Rc::new(move |index| {
+        let (Some(state), Some(root)) = (weak_state.upgrade(), weak_root.upgrade()) else {
+            return;
+        };
+        if let Some(image) = item_control::<Image>(&root, &format!("ConnectedImage{}", index + 1)) {
+            state.open(index, &image);
+        }
+    });
+    root.set_tag(Some(Rc::new(ItemActivation(activate.clone())) as ferroui_base::BoxedValue));
     let mut image_errors = Vec::new();
-    for (index, item) in state.items.iter().enumerate() {
-        let (button, image, error) = item_button(item, index, state.tiles);
-        image_errors.extend(error);
-        let weak_state = Rc::downgrade(state);
-        let weak_image = image.downgrade();
-        button.click(move |_, _| {
-            if let (Some(state), Some(image)) = (weak_state.upgrade(), weak_image.upgrade()) {
-                state.open(index, &image);
-            }
-        });
-        panel.children().add(button);
+    if state.tiles {
+        let mut tiles = Vec::with_capacity(state.items.len());
+        for (index, item) in state.items.iter().enumerate() {
+            let (tile, _, error) = tile_item(item, index, 120.0)?;
+            image_errors.extend(error);
+            wire_tile_activation(&tile, index, &activate);
+            tiles.push(Some(Control::boxed(tile)));
+        }
+        root.get_control::<ItemsRepeater>("CollectionItems").set_items_source(Some(ItemsSource::from(tiles)));
+    } else {
+        let list = root.get_control::<ListView>("CollectionItems");
+        for (index, item) in state.items.iter().enumerate() {
+            let (body, _, error) = list_item(item, index);
+            image_errors.extend(error);
+            list.items().add(Some(Control::boxed(body)));
+        }
+        wire_item_click(&list, &activate);
     }
     show_image_errors(
         &root.get_control::<TextBlock>("CollectionImageErrors"),
@@ -449,24 +531,24 @@ fn wire_collection(
             }
             state.report(&format!("{} · details", state.items[index].title));
         } else if event.navigation_mode() == NavigationMode::Back {
-            let scroll = current.get_control::<ScrollViewer>("CollectionScroll");
             if state.tiles {
-                scroll.set_offset(state.scroll_position.get());
+                current
+                    .get_control::<ScrollViewer>("CollectionScroll")
+                    .set_offset(state.scroll_position.get());
+            } else {
+                return_to_item(&current.get_control::<ListView>("CollectionItems"), index);
             }
-            if let Some(item) =
-                item_control::<Button>(&current, &format!("ConnectedItem{}", index + 1))
-            {
-                if !state.tiles {
-                    item.bring_into_view();
+            current.update_layout();
+            if let (Some(animation), Some(target)) = (
+                state.animation.current(),
+                item_control::<Image>(&current, &format!("ConnectedImage{}", index + 1)),
+            ) {
+                animation.try_start(&target);
+            }
+            if state.tiles {
+                if let Some(item) = item_control::<Control>(&current, &format!("ConnectedItem{}", index + 1)) {
+                    item.focus();
                 }
-                current.update_layout();
-                if let (Some(animation), Some(target)) = (
-                    state.animation.current(),
-                    item_control::<Image>(&current, &format!("ConnectedImage{}", index + 1)),
-                ) {
-                    animation.try_start(&target);
-                }
-                item.focus();
             }
             state.report(&format!("Returned to {}", state.items[index].title));
         }
@@ -583,48 +665,48 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
             let items = Rc::new(data(13));
             let selected = Rc::new(Cell::new(None::<usize>));
             let active = Rc::new(ActiveAnimation::default());
-            let panel = cards.get_control::<Panel>("CardItems");
-            let mut image_errors = Vec::new();
+            let grid = cards.get_control::<GridView>("CardItems");
+            let mut image_errors: Vec<String> = Vec::new();
+            let mut item_errors: Vec<Option<String>> = Vec::with_capacity(items.len());
             for (index, item) in items.iter().enumerate() {
-                let (button, _, image_error) = item_button(item, index, true);
+                let (tile, _, image_error) = tile_item(item, index, 110.0)?;
+                tile.set_margin(Thickness::uniform(4.0));
                 image_errors.extend(image_error.clone());
-                let weak_cards = cards.downgrade();
-                let weak_button = button.downgrade();
-                let selected = selected.clone();
-                let active = active.clone();
-                let items = items.clone();
-                button.click(move |_, _| {
-                    let (Some(cards), Some(button)) = (weak_cards.upgrade(), weak_button.upgrade())
-                    else {
-                        return;
-                    };
-                    active.clear();
-                    selected.set(Some(index));
-                    let animation =
-                        service(&button).prepare_to_animate("forwardAnimation", &button);
-                    active.replace(animation.clone());
-                    let item = &items[index];
-                    let image = cards.get_control::<Image>("DetailImage");
-                    // The identical already-decoded item image is shared with the detail view.
-                    if let Some(source) =
-                        item_control::<Image>(&button, &format!("ConnectedImage{}", index + 1))
-                    {
-                        image.set_source(source.source());
-                    }
-                    AutomationProperties::set_name(&image, Some(&item.title));
-                    let errors: Vec<_> = image_error.iter().cloned().collect();
-                    show_image_errors(&cards.get_control::<TextBlock>("DetailImageError"), &errors);
-                    cards
-                        .get_control::<TextBlock>("CardTitle")
-                        .set_text(Some(&item.title));
-                    cards
-                        .get_control::<TextBlock>("CardDescription")
-                        .set_text(Some(item.description));
-                    cards.get_control::<Grid>("SmokeGrid").set_is_visible(true);
-                    animation.try_start(&cards.get_control::<Border>("DestinationElement"));
-                });
-                panel.children().add(button);
+                item_errors.push(image_error);
+                grid.items().add(Some(Control::boxed(tile)));
             }
+            let weak_cards = cards.downgrade();
+            let open_selected = selected.clone();
+            let open_active = active.clone();
+            let open_items = items.clone();
+            // `TipsGrid_ItemClick`.
+            let activate: Rc<dyn Fn(usize)> = Rc::new(move |index| {
+                let Some(cards) = weak_cards.upgrade() else {
+                    return;
+                };
+                let Some(tile) = item_control::<Control>(&cards, &format!("ConnectedItem{}", index + 1)) else {
+                    return;
+                };
+                open_active.clear();
+                open_selected.set(Some(index));
+                let animation = service(&tile).prepare_to_animate("forwardAnimation", &tile);
+                open_active.replace(animation.clone());
+                let item = &open_items[index];
+                let image = cards.get_control::<Image>("DetailImage");
+                // The identical already-decoded item image is shared with the detail view.
+                if let Some(source) = item_control::<Image>(&tile, &format!("ConnectedImage{}", index + 1)) {
+                    image.set_source(source.source());
+                }
+                AutomationProperties::set_name(&image, Some(&item.title));
+                let errors: Vec<_> = item_errors[index].iter().cloned().collect();
+                show_image_errors(&cards.get_control::<TextBlock>("DetailImageError"), &errors);
+                cards.get_control::<TextBlock>("CardTitle").set_text(Some(&item.title));
+                cards.get_control::<TextBlock>("CardDescription").set_text(Some(item.description));
+                cards.get_control::<Grid>("SmokeGrid").set_is_visible(true);
+                animation.try_start(&cards.get_control::<Border>("DestinationElement"));
+            });
+            cards.set_tag(Some(Rc::new(ItemActivation(activate.clone())) as ferroui_base::BoxedValue));
+            wire_item_click(&grid, &activate);
             show_image_errors(
                 &cards.get_control::<TextBlock>("CardImageErrors"),
                 &image_errors,
@@ -639,7 +721,7 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
                 let smoke = cards.get_control::<Grid>("SmokeGrid");
                 let destination = cards.get_control::<Border>("DestinationElement");
                 let Some(target) =
-                    item_control::<Button>(&cards, &format!("ConnectedItem{}", index + 1))
+                    item_control::<Control>(&cards, &format!("ConnectedItem{}", index + 1))
                 else {
                     return;
                 };
@@ -661,13 +743,13 @@ fn wire_cards(root: &Ref<Control>) -> Result<(), NavigationError> {
                         }
                     }
                 }).detach();
-                target.bring_into_view();
+                let grid = cards.get_control::<GridView>("CardItems");
+                return_to_item(&grid, index);
                 cards.update_layout();
                 if !animation.try_start(&target) {
                     smoke.set_is_visible(false);
                     smoke.children().add(destination);
                 }
-                target.focus();
             });
             cards.detached_from_visual_tree(move |_| {
                 active.clear();
