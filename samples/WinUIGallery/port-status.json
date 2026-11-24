@@ -1345,6 +1345,22 @@
         },
         {
           "path": "samples/WinUIGallery/scratch_pad_samples_tests.rs",
+          "name": "scratch_pad_tab_indents_and_shift_tab_unindents_the_selection"
+        },
+        {
+          "path": "samples/WinUIGallery/scratch_pad_samples_tests.rs",
+          "name": "scratch_pad_tab_leaves_a_caret_and_a_read_only_editor_alone"
+        },
+        {
+          "path": "samples/WinUIGallery/scratch_pad_samples_tests.rs",
+          "name": "scratch_pad_enter_keeps_the_indent_and_opens_an_end_tag"
+        },
+        {
+          "path": "samples/WinUIGallery/scratch_pad_samples_tests.rs",
+          "name": "scratch_pad_f5_loads_on_key_up_even_when_handled"
+        },
+        {
+          "path": "samples/WinUIGallery/scratch_pad_samples_tests.rs",
           "name": "scratch_pad_reset_asks_and_restores_the_default_content"
         }
       ],

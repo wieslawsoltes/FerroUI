@@ -1,9 +1,11 @@
 //! The ScratchPad page: the code behind of `ScratchPadPage.xaml.cs`.
 
 use crate::scratch_pad_samples::{
-    add_xml_namespace, auto_insert, indent_edit, previous_line, zone_color, zones, AutoInsert, Zone, DEFAULT_XAML,
+    add_xml_namespace, auto_insert, indent_edit, previous_line, selection_span, zone_color, zones, AutoInsert, Zone,
+    DEFAULT_XAML,
 };
 use crate::{examples, tests::start};
+use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
 use ferroui_base::media::Colors;
 use ferroui_base::Ref;
 use ferroui_controls::rich_text::TextGetOptions;
@@ -19,6 +21,34 @@ fn page() -> Ref<Control> {
 
 fn click(button: &Button) {
     button.raise_event(&ferroui_base::interactivity::RoutedEventArgs::with_event(Button::click_event()));
+}
+
+/// Raises a key event on the editor as the keyboard does; returns whether it was handled.
+fn key(textbox: &RichEditBox, key: Key, modifiers: KeyModifiers, up: bool) -> bool {
+    let mut args = KeyEventArgs::new();
+    args.key = key;
+    args.key_modifiers = modifiers;
+    args.set_routed_event(Some(if up { InputElement::key_up_event() } else { InputElement::key_down_event() }));
+    textbox.raise_event(&args);
+    args.handled()
+}
+
+/// A full press of Enter: the editor inserts the paragraph on the way down, the page indents on the way up.
+fn press_enter(textbox: &RichEditBox) {
+    key(textbox, Key::Enter, KeyModifiers::empty(), false);
+    key(textbox, Key::Enter, KeyModifiers::empty(), true);
+}
+
+/// The text of the editor with `\n` line ends, without the mark of the last paragraph.
+fn text_of(textbox: &RichEditBox) -> String {
+    let text = textbox.text_document().get_text(TextGetOptions::USE_LF).unwrap();
+    text.strip_suffix('\n').unwrap_or(&text).to_owned()
+}
+
+fn set_content(textbox: &RichEditBox, text: &str, selection: std::ops::Range<usize>) {
+    let document = textbox.text_document();
+    document.set_text(text).unwrap();
+    document.selection().set_range(selection.start, selection.end).unwrap();
 }
 
 #[test]
@@ -106,6 +136,87 @@ fn scratch_pad_loads_the_default_content_and_reports_errors() {
 
     textbox.text_document().set_text("<NoSuchControl/>").unwrap();
     click(&root.get_control::<Button>("loadButton"));
+    let message = status.text().unwrap_or_default();
+    assert!(!message.is_empty() && !message.starts_with("Load successful."), "{message}");
+}
+
+#[test]
+fn scratch_pad_tab_indents_and_shift_tab_unindents_the_selection() {
+    let _application = start();
+    let root = page();
+    let textbox = root.get_control::<RichEditBox>("textbox");
+    set_content(&textbox, "ab\ncd\nef", 1..4);
+
+    assert!(key(&textbox, Key::Tab, KeyModifiers::empty(), false), "Tab stays in the editor");
+    assert_eq!(text_of(&textbox), "    ab\n    cd\nef");
+    assert_eq!(selection_span(&textbox.text_document()), 5..12);
+
+    assert!(key(&textbox, Key::Tab, KeyModifiers::SHIFT, false), "Shift+Tab stays in the editor");
+    assert_eq!(text_of(&textbox), "ab\ncd\nef");
+    assert_eq!(selection_span(&textbox.text_document()), 1..4);
+}
+
+#[test]
+fn scratch_pad_tab_leaves_a_caret_and_a_read_only_editor_alone() {
+    let _application = start();
+    let root = page();
+    let textbox = root.get_control::<RichEditBox>("textbox");
+
+    // One character or less is not a block: no line gets the indent.
+    set_content(&textbox, "ab\ncd", 1..2);
+    key(&textbox, Key::Tab, KeyModifiers::empty(), false);
+    assert!(!text_of(&textbox).contains("    "), "{:?}", text_of(&textbox));
+
+    // A read-only editor keeps Tab for focus navigation.
+    set_content(&textbox, "ab\ncd", 0..4);
+    textbox.set_is_read_only(true);
+    assert!(!key(&textbox, Key::Tab, KeyModifiers::empty(), false));
+    assert_eq!(text_of(&textbox), "ab\ncd");
+}
+
+#[test]
+fn scratch_pad_enter_keeps_the_indent_and_opens_an_end_tag() {
+    let _application = start();
+    let root = page();
+    let textbox = root.get_control::<RichEditBox>("textbox");
+
+    set_content(&textbox, "  ab", 4..4);
+    press_enter(&textbox);
+    assert_eq!(text_of(&textbox), "  ab\n  ");
+    assert_eq!(selection_span(&textbox.text_document()), 7..7);
+
+    // Between a start tag and its end tag: the caret line is indented once more, the end tag
+    // moves to its own line at the indent of the start tag.
+    set_content(&textbox, "    <a></a>", 7..7);
+    press_enter(&textbox);
+    assert_eq!(text_of(&textbox), "    <a>\n        \n    </a>");
+    assert_eq!(selection_span(&textbox.text_document()), 16..16);
+}
+
+#[test]
+fn scratch_pad_f5_loads_on_key_up_even_when_handled() {
+    let _application = start();
+    let root = page();
+    let textbox = root.get_control::<RichEditBox>("textbox");
+    let host = root.get_control::<ScrollViewer>("scratchPad");
+    let status = root.get_control::<TextBlock>("loadStatus");
+    set_content(&textbox, "<Button Content=\"x\"/>", 0..0);
+
+    key(&textbox, Key::F5, KeyModifiers::empty(), false);
+    assert_eq!(status.text().unwrap_or_default(), "", "the page loads on the way up");
+
+    let mut args = KeyEventArgs::new();
+    args.key = Key::F5;
+    args.set_routed_event(Some(InputElement::key_up_event()));
+    args.set_handled(true);
+    textbox.raise_event(&args);
+    let loaded = status.text().unwrap_or_default();
+    assert!(loaded.starts_with("Load successful."), "{loaded}");
+    let content = host.content().and_then(|content| Control::from_boxed(&content)).unwrap();
+    assert!(content.cast::<Button>().is_some());
+
+    textbox.text_document().set_text("<NoSuchControl/>").unwrap();
+    key(&textbox, Key::F5, KeyModifiers::empty(), true);
     let message = status.text().unwrap_or_default();
     assert!(!message.is_empty() && !message.starts_with("Load successful."), "{message}");
 }

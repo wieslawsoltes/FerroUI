@@ -289,7 +289,7 @@ struct ScratchPad {
 }
 
 /// The offsets of the selection of `document`.
-fn selection_span(document: &RichEditTextDocument) -> Range<usize> {
+pub(crate) fn selection_span(document: &RichEditTextDocument) -> Range<usize> {
     document.selection().range().map_or(0..0, |range| range.range())
 }
 
@@ -428,6 +428,9 @@ impl ScratchPad {
                 self.insert_text("    ", true);
                 let start = selection_span(document).start;
                 document.get_range(start, start)?.set_text(&format!("\n{indent}"))?;
+                // The caret stays on the new inner line, before the end tag's line; an insertion at
+                // a collapsed selection here moves the selection after the inserted text.
+                document.selection().set_range(start, start)?;
             }
             Ok(())
         }));
