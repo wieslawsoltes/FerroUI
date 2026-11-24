@@ -102,6 +102,25 @@ impl FrameRing {
     }
 }
 
+/// How a frame is copied into the image of the swap chain.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum CopyKind {
+    /// The same size and format: `vkCmdCopyImage`, the texels as they are.
+    Copy,
+    /// Another size or format: `vkCmdBlitImage`, which scales with linear
+    /// filtering and converts the format (an sRGB swap chain encodes the
+    /// frame's values; a copy would not).
+    Blit,
+}
+
+impl CopyKind {
+    /// The copy from an image of `source` size and format to one of
+    /// `destination`.
+    pub fn between(source: (PixelSize, vk::Format), destination: (PixelSize, vk::Format)) -> Self {
+        if source == destination { Self::Copy } else { Self::Blit }
+    }
+}
+
 /// What a result of `vkAcquireNextImageKHR` or `vkQueuePresentKHR` means for
 /// the swap chain.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -563,8 +582,10 @@ impl VulkanDisplay {
         self.swapchain_images.borrow()[self.next_image.get() as usize]
     }
 
-    /// Records the copy of `image`, scaled to the size of the swap chain,
-    /// into the acquired image.
+    /// Records the copy of `image` into the acquired image: a plain copy
+    /// when the two have the same size and format ([`CopyKind`]), otherwise
+    /// a blit that scales it to the size of the swap chain and converts its
+    /// format.
     pub fn blit_image_to_current_image(&self, command_buffer: &VulkanCommandBuffer, image: &VulkanImage) {
         VulkanMemoryHelper::transition_layout(
             &*self.context,
@@ -578,6 +599,45 @@ impl VulkanDisplay {
         );
 
         let size = self.size.get();
+        let subresource = vk::ImageSubresourceLayers {
+            aspect_mask: vk::ImageAspectFlags::COLOR,
+            layer_count: 1,
+            ..Default::default()
+        };
+        match CopyKind::between((image.size(), image.format()), (size, self.surface_format.get().format)) {
+            CopyKind::Copy => {
+                let region = vk::ImageCopy {
+                    src_subresource: subresource,
+                    src_offset: vk::Offset3D::default(),
+                    dst_subresource: subresource,
+                    dst_offset: vk::Offset3D::default(),
+                    extent: vk::Extent3D { width: size.width as u32, height: size.height as u32, depth: 1 },
+                };
+                self.context.device_api().cmd_copy_image(
+                    command_buffer.handle(),
+                    image.handle(),
+                    vk::ImageLayout::TRANSFER_SRC_OPTIMAL,
+                    self.current_image(),
+                    vk::ImageLayout::TRANSFER_DST_OPTIMAL,
+                    &[region],
+                );
+            }
+            CopyKind::Blit => self.record_blit(command_buffer, image, size),
+        }
+
+        VulkanMemoryHelper::transition_layout(
+            &*self.context,
+            command_buffer,
+            image.handle(),
+            vk::ImageLayout::TRANSFER_SRC_OPTIMAL,
+            vk::AccessFlags::TRANSFER_READ,
+            image.current_layout(),
+            vk::AccessFlags::NONE,
+            image.mip_levels(),
+        );
+    }
+
+    fn record_blit(&self, command_buffer: &VulkanCommandBuffer, image: &VulkanImage, size: PixelSize) {
         let src_blit_region = vk::ImageBlit {
             src_offsets: [
                 vk::Offset3D::default(),
@@ -605,17 +665,6 @@ impl VulkanDisplay {
             &[src_blit_region],
             vk::Filter::LINEAR,
         );
-
-        VulkanMemoryHelper::transition_layout(
-            &*self.context,
-            command_buffer,
-            image.handle(),
-            vk::ImageLayout::TRANSFER_SRC_OPTIMAL,
-            vk::AccessFlags::TRANSFER_READ,
-            image.current_layout(),
-            vk::AccessFlags::NONE,
-            image.mip_levels(),
-        );
     }
 
     /// Submits the commands and presents the acquired image.
@@ -633,9 +682,11 @@ impl VulkanDisplay {
         let slot = &self.acquire_slots[self.current_slot.get()];
         let render_finished = self.render_finished_semaphores.borrow();
         let render_finished = &render_finished[self.next_image.get() as usize];
+        // The acquired image is first written by the transfer that copies the frame into it (after the layout
+        // transition, whose first stage is the transfer stage too): the transfer waits for the acquisition.
         command_buffer.submit_with(
             &[&slot.available],
-            &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT],
+            &[vk::PipelineStageFlags::TRANSFER],
             &[render_finished],
             None,
         )?;
@@ -698,7 +749,27 @@ mod tests {
     const FIFO: &[vk::PresentModeKHR] = &[vk::PresentModeKHR::FIFO];
 
     #[test]
-    fn the_acquire_slots_take_turns() {
+    fn a_frame_of_the_size_and_format_of_the_swap_chain_is_copied() {
+        let size = PixelSize::new(800, 600);
+        let bgra = vk::Format::B8G8R8A8_UNORM;
+        assert_eq!(CopyKind::between((size, bgra), (size, bgra)), CopyKind::Copy);
+        let rgba = vk::Format::R8G8B8A8_UNORM;
+        assert_eq!(CopyKind::between((size, rgba), (size, rgba)), CopyKind::Copy);
+    }
+
+    #[test]
+    fn a_frame_of_another_size_or_format_is_blitted() {
+        let size = PixelSize::new(800, 600);
+        let bgra = vk::Format::B8G8R8A8_UNORM;
+        assert_eq!(CopyKind::between((PixelSize::new(799, 600), bgra), (size, bgra)), CopyKind::Blit);
+        assert_eq!(CopyKind::between((size, bgra), (PixelSize::new(800, 601), bgra)), CopyKind::Blit);
+        // An sRGB swap chain: the blit encodes the values, a copy would take them as they are.
+        assert_eq!(CopyKind::between((size, bgra), (size, vk::Format::B8G8R8A8_SRGB)), CopyKind::Blit);
+        assert_eq!(CopyKind::between((size, vk::Format::R8G8B8A8_UNORM), (size, bgra)), CopyKind::Blit);
+    }
+
+    #[test]
+    fn the_frame_slots_take_turns() {
         let mut ring = FrameRing::default();
         let mut slots = Vec::new();
         for _ in 0..2 * FRAMES_IN_FLIGHT + 1 {
