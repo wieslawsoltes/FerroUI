@@ -18,6 +18,7 @@ import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
 import { verifyManagedSimulator } from './iosManagedMcp';
 import { verifyAndroidMcp } from './androidMcp';
 import { verifyAndroidDevelopment } from './androidManagedMcp';
+import { verifyNativeAndroidDevelopment } from './androidNativeDevelopmentMcp';
 import { verifyBrowserMcp } from './browserMcp';
 import { verifyBrowserReload } from './browserReloadMcp';
 import { verifyBrowserBuildTarget } from './browserBuildTarget';
@@ -46,7 +47,9 @@ export async function run(): Promise<void> {
         return;
     }
     if (process.env.FERROUI_TEST_ANDROID_DEVICE) {
-        await verifyAndroidMcp(process.env.FERROUI_TEST_ANDROID_DEVICE);
+        const device = process.env.FERROUI_TEST_ANDROID_DEVICE;
+        if (process.env.FERROUI_TEST_ANDROID_MANAGED_NATIVE) await verifyNativeAndroidDevelopment(device);
+        else await verifyAndroidMcp(device);
         return;
     }
     if (process.env.FERROUI_MANAGED_TEST_DIR) {

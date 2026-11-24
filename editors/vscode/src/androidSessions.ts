@@ -1,9 +1,9 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import { AndroidBridge, androidBridgePath, androidDevices } from './androidBridge';
-import { AndroidDebugger } from './androidDebugger';
 import { AndroidDevelopment } from './androidDevelopment';
 import { openAndroidProcess, type AndroidProcess } from './androidProcess';
+import { AndroidSessionDebugger } from './androidSessionDebugger';
 import { androidProfiles, type AndroidApp, type AndroidMode, type AndroidRequest } from './androidTargets';
 import { selectDebugConfiguration } from './reloadDebugConfiguration';
 import type { ReloadHistory } from './reloadHistory';
@@ -22,7 +22,7 @@ interface Session {
     process?: AndroidProcess;
     development?: AndroidDevelopment;
     runtime?: AppRuntime;
-    debugger?: AndroidDebugger;
+    debugger?: AndroidSessionDebugger;
     output?: { channel: vscode.OutputChannel; log: ReloadLog };
 }
 
@@ -85,7 +85,7 @@ export class AndroidSessions implements vscode.Disposable {
                 const runtime = this.connections.beginAndroid({ ...this.target(session), development: true }, this.label(session));
                 session.runtime = runtime.runtime;
                 session.development = new AndroidDevelopment(app, session.bridge, this.connections, runtime.runtime,
-                    this.history, this.output(session).log, session.stop.signal, async () => { await session.debugger?.close(); });
+                    this.history, this.output(session).log, session.stop.signal, this.debugger(session));
                 session.development.rebuild();
                 void this.watch(key, session);
                 return runtime;
@@ -144,22 +144,17 @@ export class AndroidSessions implements vscode.Disposable {
         if (!configuration) return { runtime, generation, attached: false };
         signal.throwIfAborted();
         if (!accepted.current() || session.development?.deploying) throw new Error('The Android app connection is changing. Read its current session.');
-        if (session.debugger) throw new Error('Stop the current Android debugger before attaching again.');
-        const debuggerSession = new AndroidDebugger(session.bridge, session.app.packageId, process.receipt, this.output(session).log, () => {
-            if (session.debugger === debuggerSession) session.debugger = undefined;
-        }, session.development?.symbols ?? session.app.symbolFiles);
-        session.debugger = debuggerSession;
-        try {
-            await debuggerSession.attach(folder, configuration, signal);
-            if (!accepted.current()) throw new Error('The Android app connection changed while attaching the debugger.');
-            return { runtime, generation, pid: process.receipt.pid, attached: true };
-        } catch (error) {
-            await debuggerSession.close();
-            throw error;
-        }
+        await this.debugger(session).attach(folder, configuration, process.receipt,
+            session.development?.symbols ?? session.app.symbolFiles, signal);
+        if (!accepted.current()) throw new Error('The Android app connection changed while attaching the debugger.');
+        return { runtime, generation, pid: process.receipt.pid, attached: true };
     }
 
     showOutput(runtime: AppRuntime): void { this.output(this.session(runtime)).channel.show(); }
+
+    private debugger(session: Session): AndroidSessionDebugger {
+        return session.debugger ??= new AndroidSessionDebugger(session.bridge, session.app.packageId, this.output(session).log);
+    }
 
     private output(session: Session) {
         if (!session.output) {

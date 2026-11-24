@@ -5,6 +5,7 @@ import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { androidManagedWorkspace } from './androidManagedWorkspace.mjs';
+import { androidNativeWorkspace } from './androidNativeWorkspace.mjs';
 import { testVSCodeExecutable } from './vscodeDownload.mjs';
 import { browserBuildWorkspace } from './browserBuildWorkspace.mjs';
 import { browserDebugWorkspace } from './browserDebugWorkspace.mjs';
@@ -22,6 +23,7 @@ const simulatorManaged = process.env.FERROUI_TEST_IOS_MANAGED === '1';
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const androidDebugExtensions = process.env.FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS;
 const androidManaged = process.env.FERROUI_TEST_ANDROID_MANAGED === '1';
+const androidNative = process.env.FERROUI_TEST_ANDROID_MANAGED === 'native';
 const browser = process.env.FERROUI_TEST_BROWSER_URL;
 const browserBuild = process.env.FERROUI_TEST_BROWSER_BUILD;
 const browserDebugSite = process.env.FERROUI_TEST_BROWSER_DEBUG_SITE;
@@ -33,6 +35,7 @@ try {
     if (simulatorDebugExtensions && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for simulator debugger acceptance.');
     if (simulatorManaged && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for the source-build regression.');
     if (androidDebugExtensions && !android) throw new Error('Set FERROUI_TEST_ANDROID_DEVICE for Android debugger acceptance.');
+    if (androidNative && !androidDebugExtensions) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS for native Android source builds.');
     if ([simulator, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
         throw new Error('Choose one platform acceptance fixture per run.');
     }
@@ -67,15 +70,27 @@ try {
     } else if (android) {
         const apkPath = process.env.FERROUI_TEST_ANDROID_APK;
         const adbPath = process.env.FERROUI_TEST_ANDROID_ADB;
-        if (!apkPath || !adbPath) throw new Error('Set FERROUI_TEST_ANDROID_APK and FERROUI_TEST_ANDROID_ADB for the Service Review fixture.');
-        target = resolve(process.env.FERROUI_TEST_ANDROID_SOURCE ?? join(extension, '../..'));
-        const app = { id: 'service-review', label: 'Service Review', packageId: 'org.ferroui.androidinspector', apkPath: resolve(apkPath) };
-        targetSettings = { 'ferroui.android.adbPath': resolve(adbPath), 'ferroui.android.apps': [app] };
+        if (!adbPath) throw new Error('Set FERROUI_TEST_ANDROID_ADB to the workspace host’s ADB executable.');
+        const source = resolve(process.env.FERROUI_TEST_ANDROID_SOURCE ?? join(extension, '../..'));
+        const app = !androidNative && apkPath ? {
+            id: 'service-review', label: 'Service Review', packageId: 'org.ferroui.androidinspector', apkPath: resolve(apkPath),
+        } : undefined;
         targetEnv = { FERROUI_TEST_ANDROID_DEVICE: android };
+        if (androidNative) {
+            targetSettings = await androidNativeWorkspace(workspace, source, resolve(adbPath));
+            targetEnv.FERROUI_TEST_ANDROID_MANAGED_NATIVE = '1';
+            targetEnv.CARGO_TARGET_DIR = process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo');
+        } else {
+            if (!app) throw new Error('Set FERROUI_TEST_ANDROID_APK for the prebuilt Service Review fixture.');
+            target = source;
+            targetSettings = { 'ferroui.android.adbPath': resolve(adbPath), 'ferroui.android.apps': [app] };
+        }
         if (androidDebugExtensions) {
-            const symbols = process.env.FERROUI_TEST_ANDROID_DEBUG_SYMBOLS;
-            if (!symbols) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_SYMBOLS to the matching unstripped libandroid_inspector.so.');
-            app.symbolFiles = [resolve(symbols)];
+            if (app) {
+                const symbols = process.env.FERROUI_TEST_ANDROID_DEBUG_SYMBOLS;
+                if (!symbols) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_SYMBOLS to the matching unstripped libandroid_inspector.so.');
+                app.symbolFiles = [resolve(symbols)];
+            }
             const adapter = process.env.FERROUI_TEST_ANDROID_LLDB_DAP ?? (process.platform === 'darwin'
                 ? execFileSync('/usr/bin/xcrun', ['--find', 'lldb-dap'], { encoding: 'utf8' }).trim() : undefined);
             if (adapter) targetSettings['lldb-dap.executable-path'] = resolve(adapter);

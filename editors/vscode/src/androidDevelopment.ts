@@ -2,6 +2,7 @@ import * as path from 'node:path';
 import type { AndroidBridge } from './androidBridge';
 import { buildAndroidApp, type AndroidArtifact } from './androidBuild';
 import { openAndroidProcess, type AndroidProcess } from './androidProcess';
+import type { AndroidSessionDebugger } from './androidSessionDebugger';
 import type { AndroidApp } from './androidTargets';
 import { MobileDevelopment } from './mobileDevelopment';
 import type { ReloadHistory } from './reloadHistory';
@@ -11,7 +12,7 @@ import type { AppRuntime } from './runtimeTargets';
 
 export class AndroidDevelopment extends MobileDevelopment<AndroidArtifact, AndroidProcess> {
     constructor(private readonly app: AndroidApp, bridge: AndroidBridge, connections: RuntimeConnections,
-        runtime: AppRuntime, history: ReloadHistory, output: ProcessOutput, signal: AbortSignal, beforeInstall: () => Promise<void>) {
+        runtime: AppRuntime, history: ReloadHistory, output: ProcessOutput, signal: AbortSignal, debuggerSession: AndroidSessionDebugger) {
         super({
             platform: 'Android',
             label: app.label,
@@ -20,10 +21,11 @@ export class AndroidDevelopment extends MobileDevelopment<AndroidArtifact, Andro
             install: (artifact, active) => openAndroidProcess({ ...app, apkPath: artifact.apkPath }, bridge, 'run', active),
             owns: (process, active) => bridge.matches(app.packageId, process.receipt, active),
             running: async active => Boolean(await bridge.pid(app.packageId, active)),
-            beforeInstall,
+            beforeInstall: () => debuggerSession.suspend(),
             publish: (status, process) => connections.updateAndroid(runtime, status, process ? {
                 pid: process.pid, debuggable: Boolean(process.receipt.debuggerPath), endpoint: process.forward.endpoint,
             } : process),
+            resumeDebugger: process => debuggerSession.resume(process.receipt, this.symbols, signal),
         }, runtime, history, output, signal);
     }
 

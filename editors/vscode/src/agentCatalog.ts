@@ -430,7 +430,7 @@ export const agentCatalog = {
         { device: { type: 'string', maxLength: 128 }, profile: { type: 'string', maxLength: 64 }, folder: text }, ['device', 'profile'], true),
     ferroui_android_attach: tool('Connect to a running Android debug app that enabled the FerroUI Live App inspector.',
         { device: { type: 'string', maxLength: 128 }, profile: { type: 'string', maxLength: 64 }, folder: text }, ['device', 'profile'], true),
-    ferroui_android_debug: tool('Attach LLDB DAP to the accepted Android app process, or detach and keep it running. Pass its exact runtime and generation. Use the launch.json configuration name when several are available.',
+    ferroui_android_debug: tool('Attach LLDB DAP to the exact accepted Android generation, or detach and keep the app running. The debugger follows source-built replacements. Use the launch.json configuration name when several are available.',
         { runtime: runtimeArgument, expected_generation: integer(1), action: choice('attach', 'detach'), debug_configuration: text },
         ['runtime', 'expected_generation'], true, false),
     ferroui_android_stop: tool('Close the exact Android Live App session. An app launched by this session stops. An attached app continues running.',
