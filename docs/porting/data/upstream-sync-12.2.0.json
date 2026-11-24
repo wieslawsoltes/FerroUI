@@ -206,8 +206,10 @@
    "pr": 22519,
    "date": "2026-10-20",
    "area": "platform-macos",
-   "class": "deferred",
-   "note": "Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator."
+   "class": "port",
+   "note": "microcom-codegen gets the smart pointer wrapper mode of MicroCom 0.11.7 (raw `impl_*` slots, `ComPtr` wrappers, `MicroComImpl<I>` adapters with `@cpp-call-preamble`), reproduced from the text templates of the published 0.11.7 generator package (read as data, not committed) and the upstream sources; ferroui-native generates in that mode. The native sources took the commit by a three-way merge (8 files with conflicts, resolved), and the FerroUI additions moved to `MicroComImpl` and `ComPtr` signatures. Not compiled locally (`ferroui-native` has a Skia edge): CI is the first compile.",
+   "part": "native-com",
+   "state": "done"
   },
   {
    "hash": "1fd3c0830edd6076edfe4b5d03e8e9c91d645c32",
