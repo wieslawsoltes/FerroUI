@@ -18,7 +18,7 @@ use std::sync::{Arc, Condvar, Mutex, MutexGuard, PoisonError};
 pub(super) const SPINS: usize = 32;
 
 struct Shared<T> {
-    queue: Mutex<Queue<T>>,
+    queue: Mutex<State<T>>,
     /// The length of the queue, read without the lock while spinning.
     len: AtomicUsize,
     senders: AtomicUsize,
@@ -26,14 +26,14 @@ struct Shared<T> {
     ready: Condvar,
 }
 
-struct Queue<T> {
+struct State<T> {
     items: VecDeque<T>,
     /// The receiver parked: a send has to wake it.
     parked: bool,
 }
 
 impl<T> Shared<T> {
-    fn lock(&self) -> MutexGuard<'_, Queue<T>> {
+    fn lock(&self) -> MutexGuard<'_, State<T>> {
         self.queue.lock().unwrap_or_else(PoisonError::into_inner)
     }
 }
@@ -47,7 +47,7 @@ pub(super) struct Receiver<T>(Arc<Shared<T>>);
 /// A queue and its two ends.
 pub(super) fn channel<T>() -> (Sender<T>, Receiver<T>) {
     let shared = Arc::new(Shared {
-        queue: Mutex::new(Queue { items: VecDeque::new(), parked: false }),
+        queue: Mutex::new(State { items: VecDeque::new(), parked: false }),
         len: AtomicUsize::new(0),
         senders: AtomicUsize::new(1),
         receiver_alive: AtomicBool::new(true),
