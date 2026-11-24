@@ -61,16 +61,17 @@ fn frame_submit_info(frame_id: u64) -> graphite::SubmitInfo {
 fn perform_deferred_cleanup(context: &mut graphite::Context, recorder: &mut graphite::Recorder) {
     // A `std::chrono::milliseconds` is its count; a disengaged `std::optional` of the longest
     // purge time is all zeros (no limit).
-    // SAFETY: the duration is an `i64` in a structure of that size (checked by `transmute`).
-    let age = unsafe { std::mem::transmute::<i64, skia_bindings::std_chrono_milliseconds>(DEFERRED_CLEANUP_AGE_MS) };
+    // SAFETY: the duration is an `i64` in a structure of that size (checked by `transmute`). A closure, because
+    // the binding of the duration is not `Copy` with every standard library (libstdc++ on Linux).
+    let age = || unsafe { std::mem::transmute::<i64, skia_bindings::std_chrono_milliseconds>(DEFERRED_CLEANUP_AGE_MS) };
     let no_limit = || skia_bindings::__BindgenOpaqueArray([0u64; 2]);
     // SAFETY: `RefHandle` is `repr(transparent)` over the pointer to the native object, which
     // both handles own and which is alive for the call; the context is behind its lock.
     unsafe {
         let context = *(context as *mut graphite::Context).cast::<*mut skia_bindings::skgpu_graphite_Context>();
-        (*context).performDeferredCleanup(age, no_limit());
+        (*context).performDeferredCleanup(age(), no_limit());
         let recorder = *(recorder as *mut graphite::Recorder).cast::<*mut skia_bindings::skgpu_graphite_Recorder>();
-        (*recorder).performDeferredCleanup(age, no_limit());
+        (*recorder).performDeferredCleanup(age(), no_limit());
     }
 }
 

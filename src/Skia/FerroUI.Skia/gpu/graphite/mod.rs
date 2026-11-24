@@ -13,10 +13,11 @@ mod pipelined_layer;
 pub use graphite_gr_context::GraphiteGrContext;
 #[cfg(feature = "graphite-vulkan")]
 pub(crate) use graphite_gr_context::FrameTarget;
-#[cfg(test)]
+// What the Metal tests use (`gpu/metal/tests.rs`).
+#[cfg(all(test, target_vendor = "apple"))]
 pub(crate) use graphite_gr_context::UPLOADED_IMAGE_SWEEP_INTERVAL;
 pub use graphite_prewarm::GraphitePrewarmContext;
-#[cfg(test)]
+#[cfg(all(test, target_vendor = "apple"))]
 pub(crate) use pipelined_layer::{band_clips, band_count, BandInsert};
 #[cfg(feature = "graphite-vulkan")]
 pub(crate) use pipelined_layer::LayerTexture;
