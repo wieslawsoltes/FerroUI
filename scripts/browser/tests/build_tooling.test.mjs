@@ -527,21 +527,28 @@ if (args[0] === "metadata") {
         CARGO_TARGET_DIR: path.join(root, "target") };
     const alias = path.join(root, "checkout-alias");
     fs.symlinkSync(root, alias);
-    const selection = (workspace, mode = "--debug") => {
-        const result = spawnSync("bash", [script, "live_inspector", mode], {
+    const selection = (workspace, ...options) => {
+        const result = spawnSync("bash", [script, "live_inspector", ...options], {
             env: { ...env, FERROUI_BROWSER_WORKSPACE: workspace }, encoding: "utf8",
         });
         assert.equal(result.status, 23, result.stderr + result.stdout);
         return JSON.parse(result.stderr.trim());
     };
     const target = flags => flags.slice(flags.indexOf("-p"), flags.indexOf("-p") + 4);
-    const standaloneBuild = selection(standalone);
-    assert.equal(standaloneBuild[0], "build");
+    const standaloneBuild = selection(standalone, "--debug");
     assert.deepEqual(target(standaloneBuild), ["-p", "live_inspector", "--bin", "live_inspector"]);
-    const example = selection(alias);
+    const example = selection(alias, "--debug");
     assert.deepEqual(target(example), ["-p", "ferroui-browser", "--example", "live_inspector"]);
     assert.ok(!example.includes("--config"));
     for (const [workspace, ordinary] of [[standalone, standaloneBuild], [alias, example]]) {
+        const optimized = selection(workspace);
+        assert.equal(optimized[0], "build");
+        assert.deepEqual(target(optimized), target(ordinary));
+        assert.equal(optimized[optimized.indexOf("--profile") + 1], "browser");
+        assert.ok(!optimized.includes("--"));
+        assert.equal(ordinary[0], "rustc");
+        assert.deepEqual(ordinary.slice(-4), ["--message-format=json-render-diagnostics",
+            "--", "-Cdebuginfo=0", "-Clink-arg=-g2"]);
         const symbols = selection(workspace, "--debug-symbols");
         assert.equal(symbols[0], "rustc");
         assert.deepEqual(target(symbols), target(ordinary));
