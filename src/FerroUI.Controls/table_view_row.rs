@@ -89,10 +89,6 @@ impl TableViewRow {
         *self.columns.borrow_mut() = value;
     }
 
-    fn cells_presenter(&self) -> Option<Ref<TableViewCellsPresenter>> {
-        self.cells_presenter.borrow().clone()
-    }
-
     pub(crate) fn clear_cells(&self) {
         if let Some(cells_presenter) = self.cells_presenter() {
             cells_presenter.clear_cells();
