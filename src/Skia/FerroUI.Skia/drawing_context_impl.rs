@@ -5,7 +5,6 @@ use crate::helpers::drawing_context_helper;
 use crate::i_drawable_bitmap_impl::try_get_drawable_bitmap;
 use crate::i_skia_api_lease_feature::{ISkiaApiLease, ISkiaApiLeaseFeature, ISkiaPlatformGraphicsApiLease};
 use crate::sk_paint_cache::SkPaintCache;
-use crate::sk_round_rect_cache::SkRoundRectCache;
 use crate::skia_options::SkiaOptions;
 use crate::skia_platform::SkiaPlatform;
 use crate::skia_region_impl::SkiaRegionImpl;
@@ -196,6 +195,30 @@ impl ContextCanvas {
         self.eager = true;
         self.apply_pending_transform();
     }
+}
+
+/// The Skia rounded rectangle of `rounded_rect` with the bounds `rectangle`, a value on the stack.
+pub(crate) fn sk_round_rect(rectangle: &sk::Rect, rounded_rect: &RoundedRect) -> sk::RRect {
+    let radius = |radius: ferroui_base::Vector| sk::Vector::new(radius.x as f32, radius.y as f32);
+    let radii = [
+        radius(rounded_rect.radii_top_left),
+        radius(rounded_rect.radii_top_right),
+        radius(rounded_rect.radii_bottom_right),
+        radius(rounded_rect.radii_bottom_left),
+    ];
+    sk::RRect::new_rect_radii(rectangle, &radii)
+}
+
+/// The one pair of radii of a rounded rectangle whose four corners have the same positive radii, when they fit
+/// in `rectangle` as they are: Skia's calls that take one pair (`draw_round_rect`, `RRect::new_rect_xy`) then make
+/// the rounded rectangle that the four radii make. Radii that would be scaled down to fit are left to the general
+/// path, whose scaling is the one of four radii.
+pub(crate) fn uniform_radii(rectangle: &sk::Rect, rounded_rect: &RoundedRect) -> Option<(f32, f32)> {
+    if !rounded_rect.is_uniform() {
+        return None;
+    }
+    let (rx, ry) = (rounded_rect.radii_top_left.x as f32, rounded_rect.radii_top_left.y as f32);
+    (rx > 0.0 && ry > 0.0 && rx + rx <= rectangle.width() && ry + ry <= rectangle.height()).then_some((rx, ry))
 }
 
 /// The transform of a drawing context as the context knows it.
@@ -1798,8 +1821,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         let rc = to_sk_rect(rect.rect);
         let is_rounded = rect.is_rounded();
-        let need_round_rect = rect.is_rounded() || box_shadows.has_inset_shadows();
-        let sk_round_rect = if need_round_rect { Some(SkRoundRectCache::get_and_set_radii(&rc, &rect)) } else { None };
+        // The shadow loops below do nothing for an empty collection: their iterator is the range of its count.
+        let has_shadows = box_shadows.count() > 0;
+        // Four equal corners and no shadow: Skia's call for a rectangle with one pair of radii.
+        let uniform = if is_rounded && !has_shadows { uniform_radii(&rc, &rect) } else { None };
+        let need_round_rect = uniform.is_none() && (is_rounded || box_shadows.has_inset_shadows());
+        let sk_round_rect = if need_round_rect { Some(sk_round_rect(&rc, &rect)) } else { None };
 
         for box_shadow in box_shadows.iter() {
             if box_shadow != BoxShadow::default() && !box_shadow.is_inset {
@@ -1814,8 +1841,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
                 self.canvas.get().save();
                 if let (true, Some(sk_round_rect)) = (is_rounded, &sk_round_rect) {
-                    let mut shadow_rect =
-                        SkRoundRectCache::get_and_set_radii_points(sk_round_rect.rect(), sk_round_rect.radii_ref());
+                    let mut shadow_rect = *sk_round_rect;
                     if spread != 0.0 {
                         shadow_rect.outset((spread, spread));
                     }
@@ -1827,7 +1853,6 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     );
                     self.canvas.get().draw_rrect(shadow_rect, &shadow_paint);
                     self.set_transform(old_transform);
-                    SkRoundRectCache::return_item(shadow_rect);
                 } else {
                     let mut shadow_rect = rc;
                     if spread != 0.0 {
@@ -1849,8 +1874,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         if let Some(brush) = brush {
             let fill = self.create_fill(brush, rect.rect);
-            match (is_rounded, &sk_round_rect) {
-                (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, fill.paint()),
+            match (uniform, is_rounded, &sk_round_rect) {
+                (Some((rx, ry)), ..) => self.canvas.get().draw_round_rect(rc, rx, ry, fill.paint()),
+                (None, true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, fill.paint()),
                 _ => self.canvas.get().draw_rect(rc, fill.paint()),
             };
             self.release_fill(fill);
@@ -1873,8 +1899,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     Self::area_casting_shadow_in_hole(rc, box_shadow.blur as f32, spread, offset_x, offset_y);
 
                 self.canvas.get().save();
-                let mut shadow_rect =
-                    SkRoundRectCache::get_and_set_radii_points(sk_round_rect.rect(), sk_round_rect.radii_ref());
+                let mut shadow_rect = *sk_round_rect;
                 if spread != 0.0 {
                     shadow_rect.inset((spread, spread));
                 }
@@ -1888,23 +1913,19 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 self.canvas.get().draw_drrect(outer_rrect, shadow_rect, &shadow_paint);
                 self.set_transform(old_transform);
                 self.restore_canvas();
-                SkRoundRectCache::return_item(shadow_rect);
                 self.box_shadow_paint = Some(reset_paint(shadow_paint));
             }
         }
 
         if let Some(pen) = pen {
             if let Some(stroke) = self.create_stroke(pen, rect.rect.inflate(pen.thickness() / 2.0)) {
-                match (is_rounded, &sk_round_rect) {
-                    (true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, stroke.paint()),
+                match (uniform, is_rounded, &sk_round_rect) {
+                    (Some((rx, ry)), ..) => self.canvas.get().draw_round_rect(rc, rx, ry, stroke.paint()),
+                    (None, true, Some(sk_round_rect)) => self.canvas.get().draw_rrect(sk_round_rect, stroke.paint()),
                     _ => self.canvas.get().draw_rect(rc, stroke.paint()),
                 };
                 self.release_stroke(stroke);
             }
-        }
-
-        if let Some(sk_round_rect) = sk_round_rect {
-            SkRoundRectCache::return_item(sk_round_rect);
         }
     }
 
@@ -2012,17 +2033,21 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn push_clip_rounded(&mut self, clip: RoundedRect) {
         self.check_lease();
 
-        // Get the rounded rectangle.
         let rc = to_sk_rect(clip.rect);
-
-        // Get a round rect from the cache.
-        let round_rect = SkRoundRectCache::get_and_set_radii(&rc, &clip);
-
+        if !clip.is_rounded() {
+            // No corner is rounded: the rectangle clip a rounded rectangle of that type is in Skia, antialiased as
+            // the rounded clip is.
+            let canvas = self.canvas.get();
+            canvas.save();
+            canvas.clip_rect(rc, sk::ClipOp::Intersect, true);
+            return;
+        }
+        let round_rect = match uniform_radii(&rc, &clip) {
+            Some((rx, ry)) => sk::RRect::new_rect_xy(rc, rx, ry),
+            None => sk_round_rect(&rc, &clip),
+        };
         self.canvas.get().save();
         self.clip_rounded_rect(&round_rect, sk::ClipOp::Intersect);
-
-        // Should not need to reset as setting the radii overrides the values.
-        SkRoundRectCache::return_item(round_rect);
     }
 
     fn push_clip_region(&mut self, region: &dyn IPlatformRenderInterfaceRegion) {
@@ -2905,9 +2930,7 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
         let fill = self.create_acrylic_paint(paint, material);
 
         if rect.is_rounded() {
-            let sk_round_rect = SkRoundRectCache::get_and_set_radii(&rc, &rect);
-            self.canvas.get().draw_rrect(sk_round_rect, fill.paint());
-            SkRoundRectCache::return_item(sk_round_rect);
+            self.canvas.get().draw_rrect(sk_round_rect(&rc, &rect), fill.paint());
         } else {
             self.canvas.get().draw_rect(rc, fill.paint());
         }

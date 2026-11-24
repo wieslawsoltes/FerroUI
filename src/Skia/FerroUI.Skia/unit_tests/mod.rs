@@ -17,6 +17,7 @@ mod hit_testing;
 mod media;
 mod path_geometry_tests;
 mod render_bounds_tests;
+mod rounded_fast_path_tests;
 mod skia_options_tests;
 mod test_font_manager;
 mod two_level_cache_tests;
