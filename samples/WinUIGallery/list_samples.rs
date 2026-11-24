@@ -18,16 +18,15 @@ use ferroui_base::input::{
 };
 use ferroui_base::interactivity::RoutingStrategies;
 use ferroui_base::layout::HorizontalAlignment;
-use ferroui_base::media::{FontWeight, IImage};
+use ferroui_base::media::IImage;
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, BoxedValue, Point, Ref, Vector, Visual};
-use ferroui_controls::automation::{AccessibilityView, AutomationProperties};
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::templates::FuncDataTemplate;
 use ferroui_controls::{
-    Border, Button, CollectionViewGroup, CollectionViewSource, ComboBox, Control, ItemsSource, ItemsStackPanel,
+    Button, CollectionViewGroup, CollectionViewSource, ComboBox, Control, ItemsSource, ItemsStackPanel,
     ListView, ListViewSelectionMode, MenuFlyout, MenuItem, NumberBox, ScrollViewer, TextBlock, TextBox, ToggleSwitch,
     ToolTip,
 };

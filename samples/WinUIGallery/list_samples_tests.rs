@@ -7,10 +7,7 @@ use crate::{examples, tests::start};
 use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::layout::HorizontalAlignment;
 use ferroui_base::{BoxedValue, Ref};
-use ferroui_controls::{
-    Button, ComboBox, Control, GroupedItemsView, ItemsStackPanel, ListView, ListViewHeaderItem, ListViewSelectionMode,
-    TextBlock, TextBox, ToggleSwitch, Window,
-};
+use ferroui_controls::{Button, ComboBox, Control, ListView, ListViewSelectionMode, TextBlock, TextBox};
 use std::rc::Rc;
 
 fn page() -> Ref<Control> {
@@ -154,9 +151,11 @@ fn key_of(group: &Option<BoxedValue>) -> Option<String> {
     group.as_ref()?.downcast_ref::<Rc<GroupInfoList>>().map(|group| group.key.clone())
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn list_view_grouped_list_shows_each_header_before_its_contacts() {
-    let _application = start();
+    use ferroui_controls::{GroupedItemsView, ItemsStackPanel, ListViewHeaderItem, ToggleSwitch, Window};
+    let _application = crate::tests::start_winui();
     let root = page();
     let list = root.get_control::<ListView>("GroupedListViewCtrl");
     // The items are the contacts only: the headers take no index.
