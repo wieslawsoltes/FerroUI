@@ -1039,3 +1039,54 @@ fn bands_inserted_from_deferred_canvases_in_completion_order_show_the_frames() {
         layers.dispose();
     }
 }
+
+/// Shapes that cross every row where the bands meet, antialiased: a stroked line from the top to the bottom of
+/// the layer, rounded rectangles and ellipses across each edge of 2 and 4 bands, a wide stroke, and text.
+fn draw_shapes_across_the_band_edges(context: &mut dyn IDrawingContextImpl) {
+    context.clear(Colors::WHITE);
+    context.draw_line(
+        Some(&ImmutablePen::from_uint32(0xff008040, 2.0)),
+        Point::new(4.0, 6.0),
+        Point::new(316.0, 250.0),
+    );
+    context.draw_line(
+        Some(&ImmutablePen::from_uint32(0xff400080, 9.0)),
+        Point::new(300.0, 2.0),
+        Point::new(20.0, 254.0),
+    );
+    for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
+        let left = 10.0 + index as f64 * 100.0;
+        context.draw_ellipse(
+            Some(&solid(0xc0e04020)),
+            Some(&ImmutablePen::from_uint32(0xff000000, 1.5)),
+            Rect::new(left, edge - 21.25, 70.0, 43.5),
+        );
+        context.draw_rectangle(
+            Some(&solid(0xff2060c0)),
+            Some(&ImmutablePen::from_uint32(0xff102030, 3.0)),
+            RoundedRect::from_radius(Rect::new(left + 30.5, edge - 9.75, 52.0, 19.5), 7.0),
+            &BoxShadows::default(),
+        );
+        if let Some(run) = glyph_run("Hxgjpqy", 22.0, Point::new(left, edge + 7.0)) {
+            context.draw_glyph_run(Some(&solid(0xff101010)), &run);
+        }
+    }
+}
+
+/// A shape that crosses a band edge is drawn by each band as the band of an ordinary layer draws it (#1363,
+/// variant A): on a canvas of the band's size such shapes differed along their whole length on Graphite Vulkan.
+#[test]
+fn deferred_bands_draw_the_shapes_across_their_edges_as_the_ordinary_layer() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    for bands in [2, 4] {
+        let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+        layers.gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::Deferred);
+        layers.draw(draw_shapes_across_the_band_edges);
+        let what = format!("shapes across the edges of {bands} bands");
+        layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
+        layers.dispose();
+    }
+}

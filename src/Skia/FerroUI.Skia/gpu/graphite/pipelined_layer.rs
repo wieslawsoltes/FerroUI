@@ -909,7 +909,7 @@ struct Held {
     /// The turn of an ordered insertion; `None` for a band recorded on a deferred canvas, which is
     /// inserted when it is ready ([`BandInsert::Deferred`]).
     turn: Option<Turn>,
-    /// The first row of the band: where a deferred recording is placed in the layer.
+    /// The row of the layer where a deferred recording is placed: 0, since it covers the layer.
     top: i32,
 }
 
@@ -1122,16 +1122,16 @@ fn play(
 }
 
 /// Plays a band on a deferred canvas of the layer's size under the clip of the band, as the band of an
-/// ordinary layer is drawn, and snaps the recorder; [`insert_at`] places the recording on the layer's texture.
-/// The surface that wraps the texture is made for the insertion if the thread has none yet.
+/// ordinary layer is drawn, and snaps the recorder; [`insert_at`] places the recording on the layer's
+/// texture. The surface that wraps the texture is made for the insertion if the thread has none yet.
 ///
-/// The canvas has the size of the layer, not of the band: a shape that crosses the row where two bands meet
-/// is then cut by the clip, inside the target, as on an ordinary layer. On a canvas of the band's size the
-/// shape crosses the edge of the target instead, and Graphite draws it another way: on lavapipe the
-/// antialiased edges of such a shape (a stroked line across the layer, a rounded rectangle across a band edge)
-/// came out up to 19 steps apart along the whole shape, while one band, which has no edge, matched the ordinary
-/// layer exactly (`gpu/vulkan/graphite_vulkan_layer_tests.rs`). The canvas only records: no texture of the
-/// layer's size is made for it.
+/// The canvas has the size of the layer, not of the band: a shape that crosses the row where two bands
+/// meet is then cut by the clip, inside the target, as on an ordinary layer. On a canvas of the band's
+/// size the shape crosses the edge of the target instead, which Graphite draws another way: on Graphite
+/// Vulkan (lavapipe) the antialiased edges of such shapes (a stroked line across the layer, a rounded
+/// rectangle across a band edge) came out up to 19 steps apart along the whole shape, while one band, which
+/// has no edge, matched the ordinary layer exactly. The canvas only records: no texture of the layer's size
+/// is made for it.
 fn play_deferred(
     recorder: &mut graphite::Recorder,
     surfaces: &mut BandSurfaces,
