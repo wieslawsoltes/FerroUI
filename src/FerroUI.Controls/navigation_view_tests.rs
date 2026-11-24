@@ -271,9 +271,9 @@ fn selection_and_invocation_recommend_the_transition_of_the_pane() {
     invoke(&items[1]);
     assert_eq!(selected.borrow().last(), Some(&NavigationTransitionInfo::SlideFromRight));
 
-    // The left pane recommends Entrance.
+    // The left pane recommends Entrance, for an item after the selected one too.
     nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
-    invoke(&items[1]);
+    invoke(&items[2]);
     assert_eq!(selected.borrow().last(), Some(&NavigationTransitionInfo::Entrance));
     assert_eq!(invoked.borrow().last(), Some(&NavigationTransitionInfo::Entrance));
 }
