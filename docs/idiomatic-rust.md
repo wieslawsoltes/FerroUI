@@ -123,7 +123,7 @@ The phases of #423, each as small pull requests from main:
 | C3 | Resources and errors: `IDisposable` to `Drop` and RAII guards (the steps: [idiomatic-rust-disposal.md](idiomatic-rust-disposal.md)), `...Exception` to `...Error` | 0.5 |
 | C4 (done) | Async: `Task`, `TaskCompletionSource` and `SynchronizationContext` to futures on the dispatcher's executor; one cancellation type (the plan, the ordering the dispatcher guarantees and the steps: [idiomatic-rust-async.md](idiomatic-rust-async.md); the status: section 7.3) | 0.5 |
 | C5 (done) | Public signatures take and return the std and chosen-crate types; the old types remain one release as deprecated aliases or conversions; migration notes (the measures, the target per type and the steps: [idiomatic-rust-signatures.md](idiomatic-rust-signatures.md); the status: section 7.4) | 0.5 |
-| C6 | The check is clean, the API gate has a 0.5 baseline, the samples and application repositories are updated | |
+| C6 | The check is clean, the API gate has a 0.5 baseline, the samples and application repositories are updated | none: the commands of section 7.5 |
 
 ### 7.1 C2: the conversions at the edges
 
@@ -154,3 +154,23 @@ C4 is done (steps A0 to A9, [idiomatic-rust-async.md](idiomatic-rust-async.md), 
 ### 7.4 Status of C5
 
 C5 is done (steps S0 to Z, [idiomatic-rust-signatures.md](idiomatic-rust-signatures.md), section 4). The public signatures take and return the std and chosen-crate types: `std::time::Duration` for the timer intervals and delays and `SignedDuration` (the port, renamed from `TimeSpan`) where a span can be negative; `url::Url` for an absolute URI and `UriRef` for a reference that can be relative; `SystemTime` for an instant; `icu_locale_core::Locale` for the identity of a culture; `uuid::Uuid` for an identifier; `HashMap` or `IndexMap` for a map. Markup is unchanged: its names (`System.TimeSpan`, `System.Uri`, `System.DateTime`, `System.Globalization.CultureInfo`) and its text formats load as before, and the new types are further Rust forms of them in the run-time loader and the compiler. What stays by decision (section 3.9 of the plan) is in the inventory baseline as deliberate declarations: `CultureInfo` (the formatting parameter, O3), `DateTime` and `DateTimeOffset` (the calendar values, O4), the BSON `DateTime` and `Dictionary` of the remote protocol (wire types, O6) and the `Guid` of `ferroui-microcom` (the COM layout). The old forms (`TimeSpan`, `NegativeTimeSpanError`, `Dictionary` of `ferroui-system`, the `Guid` of Splat and of the remote protocol, the methods of `ICultureDataProvider` keyed by name) are deprecated since 0.5.0 and removed in the release after 0.5 (C6). A trait method has one signature, so the traits that changed (`IAssetLoader`, `ILauncher`, `IStorageItem`, `IStorageProvider`, `IUriContext`, `IRuntimePlatform::get_utc_now`, `IMessageTypeResolver`, the font backends) have no deprecated form. The migration is the "Signatures migration" table of `CHANGELOG.md`, and the rows of `docs/porting/data/upstream-names.toml` map the upstream names.
+
+### 7.5 C6: the commands at landing
+
+C6 depends on which stacks have landed, so it is three commands, run on `main` when the 0.6.0
+stacks are in, rather than edits made now:
+
+1. `python3 scripts/idioms/inventory.py --check`: the check of CI. Clean on `main` at
+   `336498e69` (220 declarations in the baseline, none new).
+2. `python3 scripts/api-gate/set_baseline.py 0.6.0` after the release of 0.6.0, which moves the
+   API gate to it (docs/release.md, section 3.1). Until then the gate stays at 0.5.0.
+3. `python3 scripts/idioms/deprecated_uses.py --apply --write scripts/idioms/deprecated-uses.txt`:
+   the compiler's `deprecated` warnings for FerroUI items in `samples/`. A deprecated type alias is
+   replaced by its type; every other use is listed for a person.
+   `scripts/idioms/deprecated-uses.txt` is its last output: no uses, from the Linux workspace build
+   of CI on `main` at `336498e69` (the library and test targets of the samples) and from a local
+   check of the two samples that are only binaries and build without Skia.
+
+That output does not cover the binary-only samples that need Skia or another target (iOS, the
+browser): running the command where they build adds them. The application repositories are not
+changed from here.

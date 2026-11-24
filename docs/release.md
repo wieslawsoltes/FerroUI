@@ -383,7 +383,7 @@ After the release:
 - [ ] At the first release only: remove the note between the `release-note` markers of the README ("Upcoming"), and the sentence of its status paragraph that says nothing has been published.
 - [ ] Set the date of the entry in `CHANGELOG.md` and point its link at the tag.
 - [ ] Look at the docs.rs badges of the README table after an hour (section 7) and note the failures for the next preview.
-- [ ] After a release that starts a minor version: set the baseline of the API gate to it (`BASELINE_VERSION` and `BASELINE_COMMIT` of `scripts/api-gate/semver_checks.py`, section 3.1).
+- [ ] After a release that starts a minor version: set the baseline of the API gate to it with `python3 scripts/api-gate/set_baseline.py <version>`, which rewrites `BASELINE_VERSION`, `BASELINE_COMMIT` and their comment in `scripts/api-gate/semver_checks.py` (section 3.1). `set_baseline.py --check` says whether the baseline is the commit of its tag.
 - [ ] Set the next version (`scripts/release/set-version.sh 0.1.0-preview.<N+1>` after a preview, the first preview of the next minor version, such as `0.2.0-preview.1`, after a release), so that `main` never carries a version that is on crates.io with other contents.
 
 ## 10. A preview that turns out broken
