@@ -1239,3 +1239,45 @@ fn ordered_and_completion_order_bands_show_the_same_frame() {
         completion.dispose();
     }
 }
+
+/// Blurred shadows across the rows where 2 and 4 bands meet: a small blur and one that reaches far across the
+/// edges.
+fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingContextImpl) {
+    move |context: &mut dyn IDrawingContextImpl| {
+        context.clear(Colors::WHITE);
+        let shadow = BoxShadows::parse(&format!("3 5 {blur} 2 #b0000000")).unwrap();
+        for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
+            let left = 20.0 + index as f64 * 100.0;
+            context.draw_rectangle(
+                Some(&solid(0xfff0f0f0)),
+                None,
+                RoundedRect::from_radius(Rect::new(left, edge - 14.5, 60.0, 29.0), 6.0),
+                &shadow,
+            );
+        }
+    }
+}
+
+/// A blurred shadow that crosses a band edge is drawn as the bands of the reference draw it (each bounded to its
+/// rows, [`Layers::draw`]), in the default order and in completion order, whether its blur is small or reaches far
+/// across the edges.
+#[test]
+fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    for insert in [crate::gpu::graphite::BandInsert::Ordered, crate::gpu::graphite::BandInsert::Deferred] {
+        for (bands, blur) in [(2, 6.0), (4, 6.0), (2, 40.0), (4, 40.0)] {
+            let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+            layers.gr_context.set_band_insert_for_tests(insert);
+            draw_pipelined(&layers, draw_shadows_across_the_band_edges(blur));
+            let what = format!("{insert:?}: shadows blurred by {blur} across the edges of {bands} bands");
+            layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
+            // A frame after it, on what the first left.
+            draw_pipelined(&layers, draw_update);
+            layers.assert_pixels_within(&format!("{what}, then an update"), WIDTH as usize * (bands - 1), 8);
+            layers.dispose();
+        }
+    }
+}
