@@ -6,7 +6,7 @@ use ferroui_base::media::{Color, HsvColor};
 
 /// Contains and allows modification of Hue, Saturation and Value components.
 ///
-/// The is a specialized struct optimized for performance and memory:
+/// This is a specialized struct optimized for performance and memory:
 ///
 /// - This is not a read-only struct like [`HsvColor`] and allows editing the fields
 /// - Removes the alpha component unnecessary in core calculations

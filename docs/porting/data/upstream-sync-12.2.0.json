@@ -141,9 +141,9 @@
    "date": "2026-10-19",
    "area": "rendering",
    "class": "port",
-   "note": "Compositor output rotation through `RenderTargetProperties`.",
-   "part": "rendering",
-   "state": "planned"
+   "note": "Compositor output rotation: `RenderTargetProperties::required_rotation_for_orientation`; a rotated target draws the layer and the overlays with the quarter-turn transform and redraws on a change; the DRM output reports its orientation and drops its own rotation framebuffer and shaders; Skia and Vello GL targets forward it.",
+   "state": "done",
+   "part": "rotation"
   },
   {
    "hash": "be0c42891f160e0f5a6fafeb35991739f69e0364",
@@ -456,8 +456,10 @@
    "pr": 21771,
    "date": "2026-10-22",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class."
+   "class": "port",
+   "note": "Fluent 2 theme: no new theme crate (owner). Ported to the existing code: the `ButtonSpinner` spin buttons spin in the direction of their part. Not taken: the template, resources and samples of the new theme; the `Grid.Column` removal in the Fluent `ButtonSpinner` template (no effect inside a `DockPanel`).",
+   "state": "done",
+   "part": "themes4"
   },
   {
    "hash": "136efefc7de1d7e2b9844c67a97e116a8f642722",
@@ -484,8 +486,10 @@
    "pr": 22400,
    "date": "2026-10-23",
    "area": "samples",
-   "class": "deferred",
-   "note": "Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work."
+   "class": "port",
+   "note": "Catalog ColorPicker page redesign: the upstream 12.2.0 document converted by `scripts/convert_catalog_xaml.py`; the code-behind adds no picker any more.",
+   "part": "themes4",
+   "state": "done"
   },
   {
    "hash": "6a25cf4d9b8ee276427abe2db01dcb45bb1b4858",
@@ -724,8 +728,8 @@
    "pr": 22630,
    "date": "2026-10-28",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 resource providers; follows the Fluent 2 decision."
+   "class": "already",
+   "note": "Ordinal key comparison in the Fluent 2 resource providers: FerroUI compares resource keys as Rust strings, which is ordinal."
   },
   {
    "hash": "5865a87387d2c23786390e50d2de7ebca980b307",
@@ -748,8 +752,8 @@
    "pr": 22611,
    "date": "2026-10-28",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 brushes; follows the Fluent 2 decision."
+   "class": "not-applicable",
+   "note": "Brush resources of the Fluent 2 theme, which FerroUI does not add (owner decision); the Fluent and WinUI themes keep their own brushes."
   },
   {
    "hash": "d1cc67f3ae7476c4d32a31e1cde1f5555d877d10",
@@ -764,8 +768,8 @@
    "pr": 22636,
    "date": "2026-10-28",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 resources; follows the Fluent 2 decision."
+   "class": "not-applicable",
+   "note": "Light-theme caption button and notification brushes of the Fluent 2 theme only; the Fluent and WinUI themes have their own resources for them."
   },
   {
    "hash": "c85e221c6082e740968b12c8b6d01a7214e0b48b",
@@ -782,8 +786,10 @@
    "pr": 22569,
    "date": "2026-10-29",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 ColorPicker themes; follows the Fluent 2 decision."
+   "class": "port",
+   "note": "Fluent 2 ColorPicker themes: not added (owner). Ported: the `ColorSpectrum` templates of Fluent and Simple keep the code-behind tooltip as a comment, and the `Rgb`/`Hsv` doc typo; the other fixes came with `1968b08e18`.",
+   "state": "done",
+   "part": "themes4"
   },
   {
    "hash": "c9c7b90053345d16232aa41f9e78fe488323cecc",
@@ -900,16 +906,20 @@
    "pr": 22185,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "`FontVariations` property: register like `FontFeatures` in `documents/text_element.rs` (same owners, inheritance, no new storage), reach shaping by making the run glyph typeface `with_variation` (HarfBuzz, Skia, Vello follow the platform typeface), XAML through `FontVariationSettings::from_str`, a per-axis animator. Builds on PR 1376."
+   "class": "port",
+   "note": "`FontVariations`: inherited attached property like `FontFeatures` (same owners), folded into the `Typeface` (one pointer), resolved by the font manager to a bounded per-typeface instance cache, carried through fallback and `FormattedText`; markup value type; animator selected by type and `FontVariationSettingsTransition` with CSS interpolation. Quartz and Direct2D make no instances: design defaults there.",
+   "state": "done",
+   "part": "font-variations"
   },
   {
    "hash": "37279ab42060546f6a33b0b9b61fe6c384129fc9",
    "pr": 22650,
    "date": "2026-10-30",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 embedded root; follows the Fluent 2 decision."
+   "class": "port",
+   "note": "`EmbeddableControlRoot` sets `TransparencyBackgroundFallback` in the Fluent and WinUI themes (to the value of their `Window` theme), as the Fluent 2 fix does.",
+   "state": "done",
+   "part": "themes4"
   },
   {
    "hash": "432480ae82f36f40caf8693e1dfb11d4040404ea",
@@ -1090,8 +1100,8 @@
    "pr": 22756,
    "date": "2026-11-09",
    "area": "themes",
-   "class": "deferred",
-   "note": "Fluent 2 calendar; follows the Fluent 2 decision."
+   "class": "already",
+   "note": "Week numbers in the wrong column of the Fluent 2 calendar: the Fluent and WinUI `CalendarItem` templates of FerroUI already put the week numbers in a column of their own."
   },
   {
    "hash": "66f1f2a9dd08c9d96388a463ef60ab3ca44d3666",

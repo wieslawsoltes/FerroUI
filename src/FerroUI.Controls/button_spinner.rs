@@ -8,13 +8,17 @@ use ferroui_base::input::navigation::XYFocusHelpers;
 use ferroui_base::input::{
     InputElementImpl, InputElementImplExt, Key, KeyEventArgs, PointerReleasedEventArgs, PointerWheelEventArgs,
 };
-use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEventHandlerToken};
+use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, instantiate, FerroObjectImpl, FerroObjectImplExt,
     FerroProperty, FerroPropertyChangedEventArgs, Ref, StaticType, StyledElementImpl, StyledProperty, VisualImpl,
 };
 use std::cell::RefCell;
+
+#[cfg(test)]
+#[path = "button_spinner_tests.rs"]
+mod button_spinner_tests;
 
 const PC_LEFT: &str = ":left";
 const PC_RIGHT: &str = ":right";
@@ -225,7 +229,7 @@ impl ButtonSpinner {
     }
 
     fn set_decrease_button(&self, value: Option<Ref<Button>>) {
-        let value = value.map(|button| self.attach_click(button));
+        let value = value.map(|button| self.attach_click(button, SpinDirection::Decrease));
         let old = self.decrease_button.replace(value);
         Self::detach_click(old);
     }
@@ -235,16 +239,19 @@ impl ButtonSpinner {
     }
 
     fn set_increase_button(&self, value: Option<Ref<Button>>) {
-        let value = value.map(|button| self.attach_click(button));
+        let value = value.map(|button| self.attach_click(button, SpinDirection::Increase));
         let old = self.increase_button.replace(value);
         Self::detach_click(old);
     }
 
-    fn attach_click(&self, button: Ref<Button>) -> SpinButton {
+    /// Handles the clicks of a spin button: the direction is the one of the part the button is
+    /// (upstream bd835340fb), not found again from the sender of the click, which is another
+    /// element than the button when a click is raised for it by an element of its template.
+    fn attach_click(&self, button: Ref<Button>, direction: SpinDirection) -> SpinButton {
         let weak = self.to_ref().downgrade();
-        let token = button.click(move |sender, _| {
+        let token = button.click(move |_, _| {
             if let Some(this) = weak.upgrade() {
-                this.on_button_click(sender);
+                this.on_button_click(direction);
             }
         });
         (button, token)
@@ -300,13 +307,8 @@ impl ButtonSpinner {
     }
 
     /// Called when the user clicks one of the spin buttons.
-    fn on_button_click(&self, sender: &Interactive) {
+    fn on_button_click(&self, direction: SpinDirection) {
         if self.allow_spin() {
-            let is_increase = self.increase_button().is_some_and(|button| {
-                let button: &Interactive = &button;
-                std::ptr::eq(button, sender)
-            });
-            let direction = if is_increase { SpinDirection::Increase } else { SpinDirection::Decrease };
             self.on_spin(&SpinEventArgs::with_event(Some(Spinner::spin_event()), direction));
         }
     }

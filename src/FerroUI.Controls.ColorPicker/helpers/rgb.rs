@@ -7,7 +7,7 @@ use ferroui_base::utilities::MathUtilities;
 
 /// Contains and allows modification of Red, Green and Blue components.
 ///
-/// The is a specialized struct optimized for performance and memory:
+/// This is a specialized struct optimized for performance and memory:
 ///
 /// - This is not a read-only struct like [`Color`] and allows editing the fields
 /// - Removes the alpha component unnecessary in core calculations

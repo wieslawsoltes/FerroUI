@@ -159,8 +159,9 @@ fn the_color_picker_page_shows_with_the_styles_of_the_library() {
         }
         pending.extend(visual.visual_children().snapshot().iter().cloned());
     }
-    // The ColorView and the three ColorPickers of the document, and the one the class adds.
-    assert_eq!(5, color_views.len());
+    // The ColorView and the three ColorPickers of the document (since upstream 74b4e97962 the
+    // class adds none).
+    assert_eq!(4, color_views.len());
     assert!(color_views.iter().all(|view| view.template().is_some() && view.visual_children_count() == 1));
 }
 
