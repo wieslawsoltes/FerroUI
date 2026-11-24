@@ -1,5 +1,6 @@
 //! Skia's Graphite backend behind the backend-neutral GPU context.
 
+mod band_queue;
 mod graphite_gr_context;
 mod graphite_prewarm;
 pub(crate) mod pipeline_record;
