@@ -18,6 +18,54 @@ const CONTROLS_NAMESPACE: &str = "using:FerroUI.Controls";
 const PRIMITIVES_NAMESPACE: &str = "using:FerroUI.Controls.Primitives";
 const NAVIGATION_NAMESPACE: &str = "using:FerroUI.Navigation";
 
+/// The WinUI panels with a border and an inset of their own, which the FerroUI panels do not have:
+/// the importer wraps such a panel in a `Border` that takes them (#1349).
+const BORDERED_PANELS: &[&str] = &["Grid", "StackPanel", "RelativePanel"];
+/// The members of such a panel that make the importer wrap it.
+const PANEL_BORDER_MEMBERS: &[&str] = &["BorderThickness", "BorderBrush", "CornerRadius", "Padding"];
+/// The other members the `Border` takes: the background, which on the panel fills the border box,
+/// and the members that place the panel in its parent.
+const PANEL_BOX_MEMBERS: &[&str] = &[
+    "Background",
+    "BackgroundSizing",
+    "Margin",
+    "HorizontalAlignment",
+    "VerticalAlignment",
+    "Width",
+    "Height",
+    "MinWidth",
+    "MinHeight",
+    "MaxWidth",
+    "MaxHeight",
+    "Visibility",
+    "Opacity",
+];
+/// The attached members that place an element in its parent panel, by owner. `None` takes every
+/// attached member of the owner.
+const PLACEMENT_ATTACHED: &[(&str, Option<&[&str]>)] = &[
+    ("Grid", Some(&["Row", "Column", "RowSpan", "ColumnSpan"])),
+    ("Canvas", Some(&["Left", "Top", "Right", "Bottom", "ZIndex"])),
+    ("RelativePanel", None),
+    ("DockPanel", Some(&["Dock"])),
+    ("VariableSizedWrapGrid", Some(&["RowSpan", "ColumnSpan"])),
+];
+
+/// A panel the importer wraps in a `Border`: where the `Border` goes, and the migrated members it
+/// takes from the panel.
+struct PanelBorder {
+    /// The start of the panel element, where the start tag of the `Border` goes.
+    start: usize,
+    /// The end of the panel element, where the end tag of the `Border` goes.
+    end: usize,
+    /// The prefix of the panel's element name (with its colon), which the `Border` shares.
+    prefix: String,
+    /// The migrated members, each written ` name="value"`.
+    members: String,
+    /// Whether the panel is the root of the document: the `Border` then takes its namespace
+    /// declarations and the generated ones.
+    root: bool,
+}
+
 /// Migrates an explicit WinUI document without changing the normal XAML loader.
 ///
 /// Invalid XML or invalid policy returns `Err`. Unimplemented semantic features produce a
@@ -58,20 +106,28 @@ pub fn migrate_winui_xaml(
         diagnostics: Vec::new(),
         prefixes: BTreeMap::new(),
         reserved,
+        borders: Vec::new(),
     };
     for node in document.descendants().filter(Node::is_element) {
         migration.element(node);
     }
-    if !migration.prefixes.is_empty() {
+    let mut declarations = String::new();
+    for (namespace, prefix) in &migration.prefixes {
+        declarations.push_str(&format!(
+            " xmlns:{prefix}=\"{}\"",
+            escape_attribute(namespace)
+        ));
+    }
+    let root_border = migration.borders.iter().any(|border| border.root);
+    if !declarations.is_empty() && !root_border {
         let root_name = opening_name(source, document.root_element().range().start);
-        let mut declarations = String::new();
-        for (namespace, prefix) in &migration.prefixes {
-            declarations.push_str(&format!(
-                " xmlns:{prefix}=\"{}\"",
-                escape_attribute(namespace)
-            ));
-        }
-        migration.edit(root_name.end..root_name.end, declarations);
+        migration.edit(root_name.end..root_name.end, declarations.clone());
+    }
+    for border in std::mem::take(&mut migration.borders) {
+        let PanelBorder { start, end, prefix, members, root } = border;
+        let declarations = if root { declarations.as_str() } else { "" };
+        migration.edit(start..start, format!("<{prefix}Border{declarations}{members}>"));
+        migration.edit(end..end, format!("</{prefix}Border>"));
     }
     migration
         .edits
@@ -107,6 +163,7 @@ struct Migration<'a, 'input> {
     diagnostics: Vec<WinUIXamlDiagnostic>,
     prefixes: BTreeMap<String, String>,
     reserved: HashSet<String>,
+    borders: Vec<PanelBorder>,
 }
 
 impl Migration<'_, '_> {
@@ -435,14 +492,20 @@ impl Migration<'_, '_> {
         }
 
         let start_tag = start_tag(self.source, opening.end);
+        let mut border = self.panel_border(node, namespace, owner, member, &opening);
         for attribute in lexical_attributes(self.source, start_tag) {
             let qname = &self.source[attribute.name.clone()];
+            let mark = self.edits.len();
+            let moves = border.as_ref().is_some_and(|border| self.moves_to_border(node, border.root, qname));
             if qname == "xmlns" || qname.starts_with("xmlns:") {
                 let prefix = qname.strip_prefix("xmlns:");
                 if let Some(uri) = node.lookup_namespace_uri(prefix) {
                     if let Some(target) = self.namespace(uri) {
-                        self.edit(attribute.value, escape_attribute(&target));
+                        self.edit(attribute.value.clone(), escape_attribute(&target));
                     }
+                }
+                if let (true, Some(border)) = (moves, border.as_mut()) {
+                    self.move_attribute(mark, &attribute, border);
                 }
                 continue;
             }
@@ -468,8 +531,117 @@ impl Migration<'_, '_> {
                     &attribute,
                     value,
                 );
+                if let (true, Some(border)) = (moves, border.as_mut()) {
+                    self.move_attribute(mark, &attribute, border);
+                }
             }
         }
+        if let Some(border) = border {
+            self.borders.push(border);
+        }
+    }
+
+    /// The `Border` a WinUI panel with a border or an inset is wrapped in, which the FerroUI panels
+    /// do not have (#1349). `None` for any other element, and for a panel that cannot be wrapped,
+    /// which is reported.
+    fn panel_border(
+        &mut self,
+        node: Node<'_, '_>,
+        namespace: &str,
+        owner: &str,
+        member: Option<&str>,
+        opening: &Range<usize>,
+    ) -> Option<PanelBorder> {
+        if member.is_some()
+            || !is_control_namespace(namespace)
+            || !BORDERED_PANELS.contains(&owner)
+            || self.explicit_type(namespace, owner)
+            || self.options.namespaces.iter().any(|mapping| mapping.source == namespace)
+        {
+            return None;
+        }
+        // The property element form is not moved: its content would have to leave the panel.
+        for child in node.children().filter(Node::is_element) {
+            let child_name = child.tag_name();
+            if let Some((child_owner, child_member)) = child_name.name().split_once('.') {
+                if child_owner == owner
+                    && child_name.namespace() == Some(namespace)
+                    && PANEL_BORDER_MEMBERS.contains(&child_member)
+                {
+                    let span = opening_name(self.source, child.range().start);
+                    self.diagnostic("WXAML1013", true, span,
+                        format!("{owner}.{child_member} as a property element is not moved to the Border the \
+                                 importer wraps the panel in; write it as an attribute"));
+                }
+            }
+        }
+        let used: Vec<&str> = PANEL_BORDER_MEMBERS
+            .iter()
+            .copied()
+            .filter(|name| node.attribute(*name).is_some() || node.attribute((namespace, *name)).is_some())
+            .collect();
+        if used.is_empty() {
+            return None;
+        }
+        let root = node.parent().is_some_and(|parent| parent.is_root());
+        if root && node.attribute((XAML_NAMESPACE, "Class")).is_some() {
+            self.diagnostic("WXAML1013", true, opening.clone(),
+                format!("A FerroUI {owner} has no {}: the importer wraps such a panel in a Border, which \
+                         it cannot do for the root of a class (x:Class)", used.join(", ")));
+            return None;
+        }
+        self.diagnostic("WXAML2007", false, opening.clone(),
+            format!("A FerroUI {owner} has no {}: a Border around the panel takes them, with its \
+                     background and the members that place it in its parent", used.join(", ")));
+        let name = &self.source[opening.clone()];
+        let prefix = name.rsplit_once(':').map_or(String::new(), |(prefix, _)| format!("{prefix}:"));
+        Some(PanelBorder { start: node.range().start, end: node.range().end, prefix, members: String::new(), root })
+    }
+
+    /// Whether an attribute of a panel that is wrapped in a `Border` moves to the `Border`: its
+    /// border, inset and background, the members that place it in its parent and, for the root of
+    /// the document, the namespace declarations. Its name (`x:Name`) and everything else stay on
+    /// the panel.
+    fn moves_to_border(&self, node: Node<'_, '_>, root: bool, qname: &str) -> bool {
+        if qname == "xmlns" || qname.starts_with("xmlns:") {
+            return root;
+        }
+        let (prefix, local) = qname.split_once(':').map_or((None, qname), |(prefix, name)| (Some(prefix), name));
+        let attribute_namespace = prefix.and_then(|prefix| node.lookup_namespace_uri(Some(prefix)));
+        if attribute_namespace == Some(MC_NAMESPACE) {
+            return root && local == "Ignorable";
+        }
+        if attribute_namespace.is_some_and(|namespace| !is_winui_namespace(namespace)) {
+            return false;
+        }
+        match local.split_once('.') {
+            Some((attached_owner, attached_member)) => PLACEMENT_ATTACHED.iter().any(|(owner, members)| {
+                *owner == attached_owner && members.is_none_or(|members| members.contains(&attached_member))
+            }),
+            None => PANEL_BORDER_MEMBERS.contains(&local) || PANEL_BOX_MEMBERS.contains(&local),
+        }
+    }
+
+    /// Moves a migrated attribute to the `Border`: the edits made to it since `mark` are applied
+    /// to its text, which the `Border` takes, and the attribute leaves the panel.
+    fn move_attribute(&mut self, mark: usize, attribute: &LexicalAttribute, border: &mut PanelBorder) {
+        let start = attribute.name.start;
+        let end = attribute.value.end + 1;
+        let (inside, outside): (Vec<_>, Vec<_>) = self
+            .edits
+            .drain(mark..)
+            .partition(|edit| edit.span.bytes.start >= start && edit.span.bytes.end <= end);
+        self.edits.extend(outside);
+        let mut text = self.source[start..end].to_string();
+        let mut inside = inside;
+        inside.sort_by_key(|edit| edit.span.bytes.start);
+        for edit in inside.iter().rev() {
+            text.replace_range(edit.span.bytes.start - start..edit.span.bytes.end - start, &edit.replacement);
+        }
+        border.members.push(' ');
+        border.members.push_str(&text);
+        let blank = self.source[..start].trim_end_matches(|c: char| c.is_ascii_whitespace()).len();
+        self.edit(blank..end, String::new());
     }
 
     fn attribute(
