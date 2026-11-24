@@ -6,8 +6,10 @@ use crate::interop::java::{
     call_object, call_static_object, call_void, new_object, new_string_array, JavaClass, JavaLocal, JavaObject,
     JavaRef, JavaValue,
 };
+use crate::interop::java_callback::JavaCallback;
 use crate::interop::natives::sdk_int;
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, PlatformDataTransfer};
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, PlatformDataTransfer};
+use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::input::{DataFormat, DataFormatKind, IAsyncDataTransfer, IAsyncDataTransferItem, LocalBoxFuture};
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::platform::storage::IStorageItem;
@@ -16,6 +18,8 @@ use std::rc::Rc;
 
 const CLIP_DATA: &str = "android/content/ClipData";
 const CLIP_DATA_ITEM: &str = "android/content/ClipData$Item";
+const CHANGE_LISTENER: &str = "org/ferroui/android/ClipboardChangeListener";
+const LISTENER_SIGNATURE: &str = "(Landroid/content/ClipboardManager$OnPrimaryClipChangedListener;)V";
 
 /// Runs `operation` now and returns its outcome as a completed future; a
 /// panic (an exception of a call into the system) is raised when the
@@ -222,6 +226,26 @@ impl ClipboardImpl {
     }
 }
 
+impl IClipboardChangeImpl for ClipboardImpl {
+    // ClipboardManager.addPrimaryClipChangedListener: the system calls the listener on the main
+    // thread, while the application is in the foreground (Android 10 and newer).
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let (Some(manager), Some(class)) = (self.clipboard_manager.clone(), JavaClass::try_find(CHANGE_LISTENER)) else {
+            return Subscription::new(Disposable::empty());
+        };
+        let callback = JavaCallback::new(move |_| {
+            handler();
+            true
+        });
+        let listener = new_object(&class, "(J)V", &[JavaValue::Long(callback.handle())]).to_global();
+        call_void(&manager, "addPrimaryClipChangedListener", LISTENER_SIGNATURE, &[JavaValue::Object(Some(&listener))]);
+        Subscription::new(Disposable::create(move || {
+            call_void(&manager, "removePrimaryClipChangedListener", LISTENER_SIGNATURE, &[JavaValue::Object(Some(&listener))]);
+            drop(callback);
+        }))
+    }
+}
+
 impl IClipboardImpl for ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         completed(|| Ok(self.try_get_data().map(|data| data as Rc<dyn IAsyncDataTransfer>)))
@@ -236,5 +260,9 @@ impl IClipboardImpl for ClipboardImpl {
             Self::clear(self.clipboard_manager.as_ref());
             Ok(())
         })
+    }
+
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
+        self.clipboard_manager.as_ref().map(|_| self as &dyn IClipboardChangeImpl)
     }
 }
