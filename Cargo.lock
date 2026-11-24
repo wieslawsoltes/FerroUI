@@ -2928,6 +2928,21 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-svg"
+version = "0.6.0-preview.1"
+dependencies = [
+ "base64",
+ "ferroui-base",
+ "ferroui-controls",
+ "ferroui-fonts-inter",
+ "ferroui-harfbuzz",
+ "ferroui-skia",
+ "flate2",
+ "roxmltree 0.20.0",
+ "skia-safe",
+]
+
+[[package]]
 name = "ferroui-system"
 version = "0.6.0-preview.1"
 dependencies = [
