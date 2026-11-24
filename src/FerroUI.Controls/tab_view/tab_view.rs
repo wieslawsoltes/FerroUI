@@ -5,26 +5,31 @@
 use super::{TabViewItem, TabViewListView};
 use crate::automation::peers::{AutomationPeer, TabViewAutomationPeer};
 use crate::automation::AutomationProperties;
-use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl, TemplatedControlImplExt};
+use crate::primitives::{
+    ScrollBarVisibility, SelectingItemsControl, TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl,
+    TemplatedControlImplExt,
+};
+use crate::presenters::ContentPresenter;
 use crate::templates::IDataTemplate;
 use crate::{
-    Button, ColumnDefinition, ContentPresenter, Control, ControlImpl, GridLength, GridUnitType, ItemsChangedEventArgs,
-    ItemsSource, ListViewItem, RepeatButton, ScrollBarVisibility, ScrollViewer, SelectionChangedEventArgs, ToolTip,
+    Button, ColumnDefinition, Control, ControlImpl, GridLength, GridUnitType, ItemsChangedEventArgs,
+    ItemsSource, ListViewItem, RepeatButton, ScrollViewer, SelectionChangedEventArgs, ToolTip,
 };
 use ferroui_base::collections::{FerroList, NotifyCollectionChangedAction};
 use ferroui_base::input::{
     FocusManager, ICommand, InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers,
     NavigationMethod,
 };
-use ferroui_base::interactivity::{InteractiveImpl, RoutedEventHandlerToken};
+use ferroui_base::interactivity::InteractiveImpl;
 use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
+use ferroui_base::media::FlowDirection;
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_enum, ferro_markup_type, ferro_properties,
     ferro_property, instantiate, BoxedValue, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
-    FerroPropertyChangedEventArgs, FlowDirection, Ref, Size, StyledElementImpl, StyledProperty, VisualImpl, WeakRef,
+    FerroPropertyChangedEventArgs, Ref, Size, StyledElementImpl, StyledProperty, VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -133,9 +138,8 @@ struct TabViewParts {
     scroll_viewer: Option<WeakRef<ScrollViewer>>,
     scroll_decrease_button: Option<WeakRef<RepeatButton>>,
     scroll_increase_button: Option<WeakRef<RepeatButton>>,
-    /// The subscriptions of the parts, dropped with the template.
-    subscriptions: Vec<Subscription>,
-    tokens: Vec<(WeakRef<InputElement>, RoutedEventHandlerToken)>,
+    /// What removes the handlers of the parts, run when the template is replaced.
+    cleanup: Vec<Box<dyn FnOnce()>>,
 }
 
 /// A row of tabs over the content of the selected one (WinUI's `TabView`): the tabs are a
@@ -158,7 +162,7 @@ struct TabViewParts {
 /// UI Automation notifications are not raised.
 #[repr(C)]
 pub struct TabView {
-    base: Control,
+    base: TemplatedControl,
     tab_items: FerroList<Option<BoxedValue>>,
     parts: RefCell<TabViewParts>,
     previous_available_width: Cell<f64>,
@@ -173,7 +177,7 @@ pub struct TabView {
     tab_items_changed: HandlerList<dyn Fn(&Ref<TabView>, &ItemsChangedEventArgs<'_>)>,
 }
 
-ferro_class!(TabView: Control);
+ferro_class!(TabView: TemplatedControl);
 ferro_class_info!(TabView {
     new: TabView::new,
     markup: {
@@ -194,12 +198,6 @@ ferro_class_info!(TabView {
                     handler.invoke(&[into_markup_value(Some(sender.clone())), into_markup_value(None::<BoxedValue>)]);
                 })
             },
-            SelectionChanged(Option<BoxedValue>, SelectionChangedEventArgs) =>
-                |this: &Ref<TabView>, handler: MarkupDelegate| {
-                    this.selection_changed(move |sender, args| {
-                        handler.invoke(&[into_markup_value(Some(sender.clone())), into_markup_value(args.clone())]);
-                    })
-                },
         ],
         attributes: [
             TemplatePart("TabListView", type(Ref<TabViewListView>)),
@@ -348,7 +346,7 @@ impl FerroObjectImpl for TabView {
         }
         let property = change.property();
         if property == Self::selected_index_property().as_property() {
-            this.on_selected_index_changed(change.old_value::<i32>().unwrap_or(-1));
+            this.on_selected_index_changed(change.get_old_and_new_value::<i32>().0);
         } else if property == Self::selected_item_property().as_property() {
             this.update_selected_item();
         } else if property == Self::tab_width_mode_property().as_property() {
@@ -384,34 +382,45 @@ impl TemplatedControlImpl for TabView {
         };
         if let Some(container) = scope.find_as::<Control>("TabContainerGrid") {
             let (entered, exited) = (weak.clone(), weak.clone());
-            parts.tokens.push((
-                container.clone().upcast::<InputElement>().downgrade(),
-                container.pointer_entered(move |_, _| {
-                    if let Some(this) = entered.upgrade() {
-                        this.pointer_in_tab_strip.set(true);
-                    }
-                }),
-            ));
-            parts.tokens.push((
-                container.clone().upcast::<InputElement>().downgrade(),
-                container.pointer_exited(move |_, _| {
-                    if let Some(this) = exited.upgrade() {
-                        this.on_tab_strip_pointer_exited();
-                    }
-                }),
-            ));
+            let entered = container.add_handler(InputElement::pointer_entered_event(), move |_, _| {
+                if let Some(this) = entered.upgrade() {
+                    this.pointer_in_tab_strip.set(true);
+                }
+            });
+            let exited = container.add_handler(InputElement::pointer_exited_event(), move |_, _| {
+                if let Some(this) = exited.upgrade() {
+                    this.on_tab_strip_pointer_exited();
+                }
+            });
+            let target = container.downgrade();
+            parts.cleanup.push(Box::new(move || {
+                if let Some(container) = target.upgrade() {
+                    container.remove_handler(InputElement::pointer_entered_event(), entered);
+                    container.remove_handler(InputElement::pointer_exited_event(), exited);
+                }
+            }));
         }
         if let Some(list_view) = scope.find_as::<TabViewListView>("TabListView") {
             let loaded = weak.clone();
-            parts.subscriptions.push(list_view.loaded_subscription(move || {
+            let loaded = list_view.add_handler(Control::loaded_event(), move |_, _| {
                 if let Some(this) = loaded.upgrade() {
                     this.on_list_view_loaded();
                 }
-            }));
+            });
             let selection = weak.clone();
-            parts.subscriptions.push(list_view.selection_changed_subscription(move |args| {
-                if let Some(this) = selection.upgrade() {
-                    this.on_list_view_selection_changed(args);
+            let selection = list_view.add_handler(
+                SelectingItemsControl::selection_changed_event(),
+                move |_, args: &SelectionChangedEventArgs| {
+                    if let Some(this) = selection.upgrade() {
+                        this.on_list_view_selection_changed(args);
+                    }
+                },
+            );
+            let target = list_view.downgrade();
+            parts.cleanup.push(Box::new(move || {
+                if let Some(list_view) = target.upgrade() {
+                    list_view.remove_handler(Control::loaded_event(), loaded);
+                    list_view.remove_handler(SelectingItemsControl::selection_changed_event(), selection);
                 }
             }));
             parts.list_view = Some(list_view.downgrade());
@@ -424,14 +433,17 @@ impl TemplatedControlImpl for TabView {
                 ToolTip::set_tip(&add_button, Some(Rc::new(ADD_BUTTON_TOOLTIP.to_string()) as BoxedValue));
             }
             let click = weak.clone();
-            parts.tokens.push((
-                add_button.clone().upcast::<InputElement>().downgrade(),
-                add_button.click(move |_, _| {
-                    if let Some(this) = click.upgrade() {
-                        this.on_add_button_click();
-                    }
-                }),
-            ));
+            let click = add_button.click(move |_, _| {
+                if let Some(this) = click.upgrade() {
+                    this.on_add_button_click();
+                }
+            });
+            let target = add_button.downgrade();
+            parts.cleanup.push(Box::new(move || {
+                if let Some(button) = target.upgrade() {
+                    button.remove_handler(Button::click_event(), click);
+                }
+            }));
             parts.add_button = Some(add_button.downgrade());
         }
         *this.parts.borrow_mut() = parts;
@@ -452,9 +464,9 @@ impl LayoutableImpl for TabView {
 impl InputElementImpl for TabView {
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
         // The keyboard accelerators of WinUI's constructor: Ctrl+F4, Ctrl+Tab and Ctrl+Shift+Tab.
-        if !e.handled() && e.key_modifiers().contains(KeyModifiers::CONTROL) {
-            let shift = e.key_modifiers().contains(KeyModifiers::SHIFT);
-            let handled = match e.key() {
+        if !e.handled() && e.key_modifiers.contains(KeyModifiers::CONTROL) {
+            let shift = e.key_modifiers.contains(KeyModifiers::SHIFT);
+            let handled = match e.key {
                 Key::F4 if !shift => this.request_close_current_tab(),
                 Key::Tab => this.move_selection(!shift),
                 _ => false,
@@ -472,7 +484,7 @@ impl TabView {
     /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
     pub fn construct() -> Self {
         Self {
-            base: Control::construct(),
+            base: TemplatedControl::construct(),
             tab_items: FerroList::new(),
             parts: RefCell::new(TabViewParts::default()),
             previous_available_width: Cell::new(f64::NAN),
@@ -705,12 +717,9 @@ impl TabView {
 
     fn unhook_events_and_clear_fields(&self) {
         let parts = std::mem::take(&mut *self.parts.borrow_mut());
-        for (element, token) in parts.tokens {
-            if let Some(element) = element.upgrade() {
-                element.remove_handler_token(token);
-            }
+        for cleanup in parts.cleanup {
+            cleanup();
         }
-        drop(parts.subscriptions);
     }
 
     /// The tabs of the list: `TabItemsSource`, or `TabItems` (WinUI moves `TabItems` into the
@@ -746,8 +755,8 @@ impl TabView {
 
     fn on_scroll_viewer_loaded(&self, scroll_viewer: &Ref<ScrollViewer>) {
         let weak = self.to_ref().downgrade();
-        let decrease = scroll_viewer.find_template_descendant::<RepeatButton>("ScrollDecreaseButton");
-        let increase = scroll_viewer.find_template_descendant::<RepeatButton>("ScrollIncreaseButton");
+        let decrease = find_named::<RepeatButton>(scroll_viewer, "ScrollDecreaseButton");
+        let increase = find_named::<RepeatButton>(scroll_viewer, "ScrollIncreaseButton");
         let mut parts = self.parts.borrow_mut();
         for (button, tooltip, forward) in [
             (&decrease, SCROLL_DECREASE_BUTTON_TOOLTIP, false),
@@ -758,21 +767,30 @@ impl TabView {
                 ToolTip::set_tip(button, Some(Rc::new(tooltip.to_string()) as BoxedValue));
             }
             let weak = weak.clone();
-            parts.tokens.push((
-                button.clone().upcast::<InputElement>().downgrade(),
-                button.click(move |_, _| {
-                    if let Some(this) = weak.upgrade() {
-                        this.scroll_tabs(forward);
-                    }
-                }),
-            ));
+            let click = button.click(move |_, _| {
+                if let Some(this) = weak.upgrade() {
+                    this.scroll_tabs(forward);
+                }
+            });
+            let target = button.downgrade();
+            parts.cleanup.push(Box::new(move || {
+                if let Some(button) = target.upgrade() {
+                    button.remove_handler(Button::click_event(), click);
+                }
+            }));
         }
         parts.scroll_decrease_button = decrease.map(|button| button.downgrade());
         parts.scroll_increase_button = increase.map(|button| button.downgrade());
         let changed = weak.clone();
-        parts.subscriptions.push(scroll_viewer.scroll_changed_subscription(move || {
+        let changed = scroll_viewer.scroll_changed(move |_, _| {
             if let Some(this) = changed.upgrade() {
                 this.update_scroll_viewer_decrease_and_increase_buttons_view_state();
+            }
+        });
+        let target = scroll_viewer.downgrade();
+        parts.cleanup.push(Box::new(move || {
+            if let Some(viewer) = target.upgrade() {
+                viewer.remove_handler(ScrollViewer::scroll_changed_event(), changed);
             }
         }));
         drop(parts);
@@ -995,7 +1013,10 @@ impl TabView {
                 presenter.set_content_template(tab.content_template());
                 if had_focus {
                     // The focus moves into the new content, or to the tab (WinUI's LosingFocus).
-                    if !FocusManager::try_focus_first_in(&presenter) {
+                    let first = presenter.find_descendant_of_type_where::<InputElement>(false, |element| {
+                        element.focusable() && element.is_effectively_enabled() && element.is_effectively_visible()
+                    });
+                    if !first.is_some_and(|element| element.focus()) {
                         tab.focus();
                     }
                 }
@@ -1027,7 +1048,7 @@ impl TabView {
         for index in candidates {
             if let Some(container) = self.container_from_index(index) {
                 if Self::is_focusable(&container, true) {
-                    container.focus_with(NavigationMethod::Directional);
+                    container.focus_with(NavigationMethod::Directional, KeyModifiers::empty());
                     return;
                 }
             }
@@ -1039,11 +1060,7 @@ impl TabView {
 
     /// The widths of the tabs and of the column of the strip (UpdateTabWidths).
     pub(super) fn update_tab_widths(&self, should_update_widths: bool, fill_all_available_space: bool) {
-        let resource = |key: &str, fallback: f64| {
-            self.try_find_resource(key)
-                .and_then(|value| value.downcast_ref::<f64>().copied())
-                .unwrap_or(fallback)
-        };
+        let resource = |key: &str, fallback: f64| resource_of::<f64>(self, key).unwrap_or(fallback);
         let max_tab_width = resource(TAB_VIEW_ITEM_MAX_WIDTH_KEY, TAB_MAXIMUM_WIDTH);
         let mut tab_width = f64::NAN;
         let tab_count = self.get_item_count().max(0) as f64;
@@ -1093,7 +1110,7 @@ impl TabView {
                     if required_width > available_width {
                         tab_column.set_width(GridLength::new(available_width, GridUnitType::Pixel));
                         if let Some(list_view) = &list_view {
-                            ScrollViewer::set_horizontal_scroll_bar_visibility(list_view, ScrollBarVisibility::Visible);
+                            ScrollViewer::set_horizontal_scroll_bar_visibility_on(list_view, ScrollBarVisibility::Visible);
                         }
                         drop(parts);
                         self.update_scroll_viewer_decrease_and_increase_buttons_view_state();
@@ -1101,7 +1118,7 @@ impl TabView {
                         tab_column.set_width(GridLength::AUTO);
                         if let Some(list_view) = &list_view {
                             if should_update_widths && fill_all_available_space {
-                                ScrollViewer::set_horizontal_scroll_bar_visibility(list_view, ScrollBarVisibility::Hidden);
+                                ScrollViewer::set_horizontal_scroll_bar_visibility_on(list_view, ScrollBarVisibility::Hidden);
                             } else {
                                 for button in [&decrease, &increase].into_iter().flatten() {
                                     button.set_is_enabled(false);
@@ -1117,7 +1134,7 @@ impl TabView {
                         list_view.set_max_width(available_width);
                         let visible = list_view.items_width() > available_width;
                         let visibility = if visible { ScrollBarVisibility::Visible } else { ScrollBarVisibility::Hidden };
-                        ScrollViewer::set_horizontal_scroll_bar_visibility(list_view, visibility);
+                        ScrollViewer::set_horizontal_scroll_bar_visibility_on(list_view, visibility);
                         drop(parts);
                         if visible {
                             self.update_scroll_viewer_decrease_and_increase_buttons_view_state();
@@ -1194,7 +1211,9 @@ impl TabView {
 
     /// Moves the focus among the tabs, their close buttons and the add button (MoveFocus).
     pub(super) fn move_focus(&self, move_forward: bool) -> bool {
-        let Some(focused) = FocusManager::focused_element(self) else { return false };
+        let Some(focused) = FocusManager::get_focus_manager(self).and_then(|manager| manager.get_focused_element()) else {
+            return false;
+        };
         let mut order: Vec<Ref<Control>> = Vec::new();
         for index in 0..self.get_item_count() {
             if let Some(tab) = self.tab_at(index) {
@@ -1221,7 +1240,7 @@ impl TabView {
         };
         let count = order.len() as i32;
         let next = (position as i32 + if move_forward { 1 } else { -1 }).rem_euclid(count) as usize;
-        order[next].focus_with(NavigationMethod::Directional)
+        order[next].focus_with(NavigationMethod::Directional, KeyModifiers::empty())
     }
 
     /// Selects the next or the previous focusable tab, around the ends (MoveSelection).
@@ -1269,6 +1288,20 @@ impl TabView {
     pub(super) fn is_left_to_right(element: &Control) -> bool {
         element.flow_direction() == FlowDirection::LeftToRight
     }
+}
+
+/// The descendant of `root` of class `T` named `name` (WinUI's `FindInVisualTreeByName`).
+pub(super) fn find_named<T: ferroui_base::ObjectType>(root: &ferroui_base::Visual, name: &str) -> Option<Ref<T>> {
+    let found = root.find_descendant_of_type_where::<ferroui_base::StyledElement>(false, |element| {
+        element.name().as_deref() == Some(name) && element.to_ref().cast::<T>().is_some()
+    })?;
+    found.cast::<T>()
+}
+
+/// A resource of the theme, of type `T`, found from `element`.
+pub(super) fn resource_of<T: Clone + 'static>(element: &ferroui_base::StyledElement, key: &str) -> Option<T> {
+    let value = element.try_find_resource(&ferroui_base::controls::ResourceKey::from(key), None).flatten()?;
+    value.downcast_ref::<T>().cloned()
 }
 
 /// The bottom border line of a tab (the states of WinUI's `UpdateTabBottomBorderLineVisualStates`).

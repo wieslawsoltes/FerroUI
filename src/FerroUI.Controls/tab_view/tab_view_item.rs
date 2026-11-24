@@ -10,7 +10,7 @@ use crate::automation::AutomationProperties;
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControl, TemplatedControlImpl, TemplatedControlImplExt};
 use crate::templates::IDataTemplate;
 use crate::{
-    Button, ContentControlImpl, Control, ControlImpl, IconElement, IconSource, ListViewItem, Panel, ToolTip,
+    Button, ContentControlImpl, Control, ControlImpl, IconElement, IconSource, ListViewItem, ToolTip,
 };
 use ferroui_base::input::{InputElementImpl, InputElementImplExt, Key, KeyEventArgs, PointerEventArgs,
     PointerPressedEventArgs, PointerReleasedEventArgs, PointerUpdateKind};
@@ -21,47 +21,71 @@ use ferroui_base::metadata::{into_markup_value, MarkupDelegate};
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
-    ferro_class, ferro_class_info, ferro_impl_classes, ferro_markup_type, ferro_properties, ferro_property,
-    instantiate, BoxedValue, CornerRadius, DirectProperty, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
+    ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, ferro_property, instantiate, BoxedValue,
+    CornerRadius, DirectProperty, FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty,
     FerroPropertyChangedEventArgs, Ref, StyledElementImpl, StyledProperty, VisualImpl, WeakRef,
 };
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 /// The values the template of a tab binds to (WinUI's `TabViewItemTemplateSettings`): the icon
-/// element of [`TabViewItem::icon_source`] and the outline of the selected tab.
-#[derive(Clone, Default)]
+/// element of [`TabViewItem::icon_source`] and the outline of the selected tab. Each tab has its own.
+#[repr(C)]
 pub struct TabViewItemTemplateSettings {
-    icon_element: Rc<RefCell<Option<Ref<IconElement>>>>,
-    tab_geometry: Rc<RefCell<Option<Ref<Geometry>>>>,
+    base: FerroObject,
 }
 
+ferro_class!(TabViewItemTemplateSettings: FerroObject);
+ferro_class_info!(TabViewItemTemplateSettings {
+    new: TabViewItemTemplateSettings::new,
+    markup: { namespace: "FerroUI.Controls" },
+});
+ferro_impl_classes!(TabViewItemTemplateSettings: FerroObjectImpl);
+
+ferro_properties! { impl TabViewItemTemplateSettings {
+    ferro_property!(
+        /// Defines the `IconElement` property: the icon of the tab.
+        pub fn icon_element_property() -> StyledProperty<Option<Ref<IconElement>>> {
+            FerroProperty::register::<TabViewItemTemplateSettings, _>("IconElement", None)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `TabGeometry` property: the outline of the selected tab.
+        pub fn tab_geometry_property() -> StyledProperty<Option<Ref<Geometry>>> {
+            FerroProperty::register::<TabViewItemTemplateSettings, _>("TabGeometry", None)
+        }
+    );
+} }
+
 impl TabViewItemTemplateSettings {
+    /// Creates the class data; see [`ferroui_base::FerroObject::construct`].
+    pub fn construct() -> Self {
+        Self { base: FerroObject::construct() }
+    }
+
+    pub fn new() -> Ref<Self> {
+        instantiate(Self::construct())
+    }
+
     /// The icon of the tab.
     pub fn icon_element(&self) -> Option<Ref<IconElement>> {
-        self.icon_element.borrow().clone()
+        self.get_value(Self::icon_element_property())
+    }
+
+    pub fn set_icon_element(&self, value: Option<Ref<IconElement>>) {
+        self.set_value(Self::icon_element_property(), value)
     }
 
     /// The outline of the selected tab: its rounded top corners and the curves at its foot.
     pub fn tab_geometry(&self) -> Option<Ref<Geometry>> {
-        self.tab_geometry.borrow().clone()
+        self.get_value(Self::tab_geometry_property())
+    }
+
+    pub fn set_tab_geometry(&self, value: Option<Ref<Geometry>>) {
+        self.set_value(Self::tab_geometry_property(), value)
     }
 }
-
-impl PartialEq for TabViewItemTemplateSettings {
-    fn eq(&self, other: &Self) -> bool {
-        Rc::ptr_eq(&self.icon_element, &other.icon_element)
-    }
-}
-
-ferro_markup_type!(class TabViewItemTemplateSettings {
-    namespace: "FerroUI.Controls",
-    handles: [TabViewItemTemplateSettings],
-    properties: [
-        IconElement: Option<Ref<IconElement>> { get: |settings: &TabViewItemTemplateSettings| settings.icon_element() },
-        TabGeometry: Option<Ref<Geometry>> { get: |settings: &TabViewItemTemplateSettings| settings.tab_geometry() },
-    ],
-});
 
 const PC_CLOSE_BUTTON_COLLAPSED: &str = ":close-button-collapsed";
 const PC_COMPACT: &str = ":compact";
@@ -87,7 +111,7 @@ const OVERLAY_CORNER_RADIUS_KEY: &str = "OverlayCornerRadius";
 #[repr(C)]
 pub struct TabViewItem {
     base: ListViewItem,
-    settings: TabViewItemTemplateSettings,
+    settings: Ref<TabViewItemTemplateSettings>,
     parent_tab_view: RefCell<Option<WeakRef<TabView>>>,
     width_mode: Cell<TabViewWidthMode>,
     close_button_overlay_mode: Cell<TabViewCloseButtonOverlayMode>,
@@ -162,12 +186,12 @@ ferro_properties! { impl TabViewItem {
 
     ferro_property!(
         /// Defines the `TabViewTemplateSettings` property, read only.
-        pub fn tab_view_template_settings_property() -> DirectProperty<TabViewItem, TabViewItemTemplateSettings> {
+        pub fn tab_view_template_settings_property() -> DirectProperty<TabViewItem, Option<Ref<TabViewItemTemplateSettings>>> {
             FerroProperty::register_direct::<TabViewItem, _>(
                 "TabViewTemplateSettings",
-                |o| o.tab_view_template_settings(),
+                |o| Some(o.tab_view_template_settings()),
                 None,
-                TabViewItemTemplateSettings::default(),
+                None,
             )
         }
     );
@@ -192,7 +216,7 @@ impl FerroObjectImpl for TabViewItem {
         if !change.is_effective_value_change() {
             return;
         }
-        if property == ListViewItem::is_selected_property().as_property() {
+        if property == crate::ListBoxItem::is_selected_property().as_property() {
             this.on_is_selected_changed();
         } else if property == Self::is_closable_property().as_property() {
             this.update_close_button();
@@ -219,7 +243,7 @@ impl TemplatedControlImpl for TabViewItem {
         Self::parent_on_apply_template(this, e);
         if let Some((button, token)) = this.close_button.borrow_mut().take() {
             if let Some(button) = button.upgrade() {
-                button.remove_handler_token(token);
+                button.remove_handler(Button::click_event(), token);
             }
         }
         let scope = e.name_scope();
@@ -251,8 +275,9 @@ impl InputElementImpl for TabViewItem {
     fn on_pointer_pressed(this: &Self, e: &PointerPressedEventArgs) {
         Self::parent_on_pointer_pressed(this, e);
         // A middle click closes a closable tab when it is released over it.
-        if e.get_current_point(Some(this)).properties().pointer_update_kind() == PointerUpdateKind::MiddleButtonPressed {
-            e.pointer().capture(Some(this));
+        if e.get_current_point(Some(this)).properties.pointer_update_kind == PointerUpdateKind::MiddleButtonPressed {
+            let element: Ref<ferroui_base::input::InputElement> = this.to_ref().upcast();
+            e.pointer().capture(Some(&element));
             this.is_middle_pointer_button_pressed.set(true);
         }
     }
@@ -260,7 +285,7 @@ impl InputElementImpl for TabViewItem {
     fn on_pointer_released(this: &Self, e: &PointerReleasedEventArgs) {
         Self::parent_on_pointer_released(this, e);
         if this.is_middle_pointer_button_pressed.replace(false)
-            && e.get_current_point(Some(this)).properties().pointer_update_kind() == PointerUpdateKind::MiddleButtonReleased
+            && e.get_current_point(Some(this)).properties.pointer_update_kind == PointerUpdateKind::MiddleButtonReleased
         {
             e.pointer().capture(None);
             if this.is_closable() && this.is_pointer_over.get() {
@@ -285,9 +310,9 @@ impl InputElementImpl for TabViewItem {
     }
 
     fn on_key_down(this: &Self, e: &KeyEventArgs) {
-        if !e.handled() && matches!(e.key(), Key::Left | Key::Right) {
+        if !e.handled() && matches!(e.key, Key::Left | Key::Right) {
             let left_to_right = TabView::is_left_to_right(this);
-            let move_forward = (left_to_right && e.key() == Key::Right) || (!left_to_right && e.key() == Key::Left);
+            let move_forward = (left_to_right && e.key == Key::Right) || (!left_to_right && e.key == Key::Left);
             if let Some(tab_view) = this.parent_tab_view() {
                 if tab_view.move_focus(move_forward) {
                     e.set_handled(true);
@@ -304,7 +329,7 @@ impl TabViewItem {
     pub fn construct() -> Self {
         Self {
             base: ListViewItem::construct(),
-            settings: TabViewItemTemplateSettings::default(),
+            settings: TabViewItemTemplateSettings::new(),
             parent_tab_view: RefCell::new(None),
             width_mode: Cell::new(TabViewWidthMode::Equal),
             close_button_overlay_mode: Cell::new(TabViewCloseButtonOverlayMode::Auto),
@@ -356,7 +381,7 @@ impl TabViewItem {
     }
 
     /// WinUI's `TabViewTemplateSettings`.
-    pub fn tab_view_template_settings(&self) -> TabViewItemTemplateSettings {
+    pub fn tab_view_template_settings(&self) -> Ref<TabViewItemTemplateSettings> {
         self.settings.clone()
     }
 
@@ -390,7 +415,7 @@ impl TabViewItem {
         if let Some(tab_view) = self.parent_tab_view.borrow().as_ref().and_then(WeakRef::upgrade) {
             return Some(tab_view);
         }
-        self.find_ancestor_of_type::<TabView>()
+        self.find_ancestor_of_type::<TabView>(false)
     }
 
     pub(super) fn set_parent_tab_view(&self, tab_view: &TabView) {
@@ -464,7 +489,7 @@ impl TabViewItem {
 
     fn on_header_changed(&self) {
         if let Some(presenter) = self.header_presenter.borrow().as_ref().and_then(WeakRef::upgrade) {
-            if let Some(presenter) = presenter.cast::<crate::ContentPresenter>() {
+            if let Some(presenter) = presenter.cast::<crate::presenters::ContentPresenter>() {
                 presenter.set_content(self.header());
             }
         }
@@ -479,16 +504,12 @@ impl TabViewItem {
     fn on_icon_source_changed(&self) {
         let element = self.icon_source().and_then(|source| source.create_icon_element());
         self.pseudo_classes().set(PC_ICON, element.is_some());
-        *self.settings.icon_element.borrow_mut() = element;
-        self.raise_template_settings_changed();
+        self.settings.set_icon_element(element);
     }
 
     /// The outline of the selected tab, from its size and the theme's `OverlayCornerRadius`.
     fn update_tab_geometry(&self) {
-        let radius = self
-            .try_find_resource(OVERLAY_CORNER_RADIUS_KEY)
-            .and_then(|value| value.downcast_ref::<CornerRadius>().copied())
-            .unwrap_or_default();
+        let radius = super::tab_view::resource_of::<CornerRadius>(self, OVERLAY_CORNER_RADIUS_KEY).unwrap_or_default();
         let (height, width) = (self.bounds().height, self.bounds().width);
         let (left, right) = (radius.top_left, radius.top_right);
         let data = format!(
@@ -497,13 +518,7 @@ impl TabViewItem {
             width - (left + right),
             height - (4.0 + right),
         );
-        *self.settings.tab_geometry.borrow_mut() = Geometry::parse(&data).ok();
-        self.raise_template_settings_changed();
-    }
-
-    fn raise_template_settings_changed(&self) {
-        let settings = self.settings.clone();
-        self.raise_property_changed(Self::tab_view_template_settings_property(), settings.clone(), settings);
+        self.settings.set_tab_geometry(Geometry::parse(&data).ok());
     }
 
     fn hide_left_adjacent_tab_separator(&self) {
@@ -525,9 +540,4 @@ impl TabViewItem {
         let size = self.desired_size();
         self.bring_into_view_rect(ferroui_base::Rect::new(0.0, 0.0, size.width + 2.0, size.height));
     }
-}
-
-#[allow(dead_code)]
-fn panel_of(control: &Control) -> Option<Ref<Panel>> {
-    control.cast::<Panel>()
 }

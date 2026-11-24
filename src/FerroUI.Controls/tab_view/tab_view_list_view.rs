@@ -4,10 +4,11 @@
 
 use super::{TabView, TabViewItem};
 use crate::generators::RecycleKey;
+use crate::presenters::ContentPresenter;
 use crate::list_view::ListView;
 use crate::primitives::{SelectingItemsControl, SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::{
-    ContentPresenter, Control, ControlImpl, ItemsChangedEventArgs, ItemsControlImpl, ItemsControlImplExt,
+    Control, ControlImpl, ItemsChangedEventArgs, ItemsControlImpl, ItemsControlImplExt,
 };
 use ferroui_base::input::InputElementImpl;
 use ferroui_base::interactivity::InteractiveImpl;
@@ -140,7 +141,7 @@ impl TabViewListView {
     }
 
     fn presenter_width(&self, name: &str) -> f64 {
-        self.find_template_descendant::<ContentPresenter>(name).map_or(0.0, |presenter| presenter.bounds().width)
+        super::tab_view::find_named::<ContentPresenter>(self, name).map_or(0.0, |presenter| presenter.bounds().width)
     }
 
     /// The width of the tabs (`TabsItemsPresenter`).

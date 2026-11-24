@@ -137,6 +137,10 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <crate::ItemClickEventArgs as MarkupTyped>::MARKUP,
     <crate::ListViewItemTemplateSettings as MarkupTyped>::MARKUP,
     <crate::GridViewItemTemplateSettings as MarkupTyped>::MARKUP,
+    // WinUI's TabView (#418).
+    <crate::TabViewWidthMode as MarkupTyped>::MARKUP,
+    <crate::TabViewCloseButtonOverlayMode as MarkupTyped>::MARKUP,
+    <crate::TabViewTabCloseRequestedEventArgs as MarkupTyped>::MARKUP,
     // WinUI's Pivot (docs/porting/winui-calculator-gaps.md, PV-1).
     <crate::PivotHeaderFocusVisualPlacement as MarkupTyped>::MARKUP,
     <crate::PivotSlideInAnimationGroup as MarkupTyped>::MARKUP,
