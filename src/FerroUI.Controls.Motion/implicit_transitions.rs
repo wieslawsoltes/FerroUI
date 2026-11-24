@@ -128,11 +128,17 @@ impl Default for Vector3TransitionComponents {
     }
 }
 
-ferroui_base::ferro_markup_enum!(flags Vector3TransitionComponents {
-    X = Vector3TransitionComponents::X,
-    Y = Vector3TransitionComponents::Y,
-    Z = Vector3TransitionComponents::Z,
-}, { namespace: "FerroUI.Controls" });
+// The macro combines the flags as `result = result | value`.
+#[allow(clippy::assign_op_pattern)]
+mod vector3_transition_components_markup {
+    use super::Vector3TransitionComponents;
+
+    ferroui_base::ferro_markup_enum!(flags Vector3TransitionComponents {
+        X = Vector3TransitionComponents::X,
+        Y = Vector3TransitionComponents::Y,
+        Z = Vector3TransitionComponents::Z,
+    }, { namespace: "FerroUI.Controls" });
+}
 
 /// `Microsoft.UI.Xaml.Vector3Transition`: the animation of a change of `Scale` or `Translation`.
 #[repr(C)]
