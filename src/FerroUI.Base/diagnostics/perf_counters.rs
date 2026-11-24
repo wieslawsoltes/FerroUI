@@ -360,6 +360,12 @@ perf_counters! {
     SkiaPipelinedFramesPlayedDirectly => "skia: recorded frames played on the recorder of the context",
     /// `PipelinedLayerSurface::surface`: the layer was read while one of its frames was drawn.
     SkiaPipelinedLayerReadsInFrames => "skia: reads of a pipelined layer while a frame is drawn",
+    /// `PipelinedLayer::play_bands`: the draws the bands of the pipelined frames walk, each band
+    /// every draw of its frame (#1364).
+    SkiaBandDrawsWalked => "skia: draws the bands of pipelined frames walk",
+    /// `PipelinedLayer::play_bands`: the draws of those that lie in the rows of the band that
+    /// walks them (#1364); the rest is out-of-band work.
+    SkiaBandDrawsInside => "skia: draws the bands of pipelined frames draw in their rows",
 }
 
 /// The number of counters.

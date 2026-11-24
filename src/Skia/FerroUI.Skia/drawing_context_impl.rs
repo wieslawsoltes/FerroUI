@@ -172,6 +172,21 @@ impl ContextCanvas {
     }
 }
 
+ferroui_base::ferro_thread_local! {
+    /// The device rows of the draws of the recorded frames of pipelined layers on this thread,
+    /// with the feature `perf-counters` only (`DrawingContextImpl::note_band_draw`).
+    static BAND_DRAW_ROWS: RefCell<Vec<(f32, f32)>> = const { RefCell::new(Vec::new()) };
+}
+
+/// Takes the device rows of the draws counted since the last call (`note_band_draw`), leaving
+/// the storage of `rows` in their place.
+// Only the surface of a pipelined frame layer reads them (Graphite on Metal).
+#[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
+pub(crate) fn take_band_draw_rows(rows: &mut Vec<(f32, f32)>) {
+    rows.clear();
+    BAND_DRAW_ROWS.with(|drawn| std::mem::swap(&mut *drawn.borrow_mut(), rows));
+}
+
 /// The leases of the Skia API of a drawing context that records the frame of a surface as a
 /// picture (a frame layer that pipelines its frames, `gpu/graphite/pipelined_layer.rs`).
 ///
@@ -791,6 +806,25 @@ impl DrawingContextImpl {
             bounds.right.max(offset_bounds.right),
             bounds.bottom.max(offset_bounds.bottom),
         )
+    }
+
+    /// Counts a draw of a recorded frame of a pipelined layer by the rows it covers in the device
+    /// (`take_band_draw_rows`, #1364), with the feature `perf-counters` only: the bands of the
+    /// frame walk every draw of its picture, and the count tells how many of them a band draws.
+    #[inline]
+    fn note_band_draw(&self, local: Rect) {
+        if !ferroui_base::diagnostics::perf_counters::ENABLED {
+            return;
+        }
+        if !matches!(self.canvas.source, CanvasSource::Recorder { leases: Some(_), .. }) {
+            return;
+        }
+        let mut device = self.transform();
+        if let Some(post_transform) = self.post_transform {
+            device *= post_transform;
+        }
+        let bounds = local.transform_to_aabb(device);
+        BAND_DRAW_ROWS.with(|rows| rows.borrow_mut().push((bounds.y as f32, (bounds.y + bounds.height) as f32)));
     }
 
     /// Restores the canvas state. The transform of the context is what the
@@ -1656,6 +1690,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn draw_bitmap(&mut self, source: &dyn IBitmapImpl, opacity: f64, source_rect: Rect, dest_rect: Rect) {
         self.check_lease();
+        self.note_band_draw(dest_rect);
         let drawable_image = try_get_drawable_bitmap(source)
             .unwrap_or_else(|| panic!("The bitmap was not created by the Skia backend"));
         let s = to_sk_rect(source_rect);
@@ -1695,6 +1730,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn draw_line(&mut self, pen: Option<&dyn IPen>, p1: Point, p2: Point) {
         self.check_lease();
+        self.note_band_draw(Rect::from_points(p1, p2).normalize());
 
         let Some(pen) = pen else {
             return;
@@ -1710,6 +1746,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         self.check_lease();
         let geometry_impl = Self::geometry_impl(geometry);
         let rect = geometry.bounds();
+        self.note_band_draw(rect);
 
         if let (Some(brush), Some(fill_path)) = (brush, geometry_impl.fill_path()) {
             let fill = self.create_fill(brush, rect);
@@ -1736,6 +1773,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
             return;
         }
         self.check_lease();
+        self.note_band_draw(rect.rect);
 
         // Arbitrary chosen values.
         // On macOS Skia breaks the OpenGL context when asked to draw, e.g. a
@@ -1889,6 +1927,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
             return;
         }
         self.check_lease();
+        self.note_band_draw(rect);
 
         let rc = to_sk_rect(rect);
 
@@ -1908,6 +1947,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
     fn draw_glyph_run(&mut self, foreground: Option<&dyn IBrush>, glyph_run: &dyn IGlyphRunImpl) {
         self.check_lease();
+        self.note_band_draw(glyph_run.bounds());
 
         let Some(foreground) = foreground else {
             return;
