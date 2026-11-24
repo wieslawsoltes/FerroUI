@@ -603,6 +603,88 @@ fn keypresses_should_be_sent_to_focused_element() {
     assert!(!args.handled());
 }
 
+/// Sends a raw key event set up by `initialize` to a focused control and returns the routed one
+/// (upstream 12.2.0 `KeyEventArgsPlatformInfoTests`).
+fn send_key_with_info(
+    type_: RawKeyEventType,
+    key: Key,
+    modifiers: RawInputModifiers,
+    physical_key: PhysicalKey,
+    key_symbol: Option<&str>,
+    initialize: impl FnOnce(&RawKeyEventArgs),
+) -> KeyEventArgs {
+    let target = KeyboardDevice::new();
+    let focused = TestControl::new("focused");
+    let root = TestRoot::new();
+    let received = Rc::new(RefCell::new(None));
+    target.set_focused_element(Some(&focused.clone().upcast()), NavigationMethod::Unspecified, KeyModifiers::NONE);
+    let down = received.clone();
+    focused.key_down(move |_, e| *down.borrow_mut() = Some(e.clone()));
+    let up = received.clone();
+    focused.key_up(move |_, e| *up.borrow_mut() = Some(e.clone()));
+    let args = RawKeyEventArgs::new(
+        target.clone(),
+        0,
+        root.host.as_input_root(),
+        type_,
+        key,
+        modifiers,
+        physical_key,
+        key_symbol.map(str::to_string),
+        KeyDeviceType::Keyboard,
+    );
+    initialize(&args);
+    target.process_raw_event(&args);
+    let received = received.borrow_mut().take();
+    received.expect("the key event was raised")
+}
+
+#[test]
+fn raw_key_info_reaches_the_key_event_args() {
+    let info = PlatformKeyInfo::new(KnownPlatformKeyInfoFormats::WIN32)
+        .with_scan_code(0x2C)
+        .with_virtual_key(0x5A)
+        .with_modifiers(0x8);
+    for type_ in [RawKeyEventType::KeyDown, RawKeyEventType::KeyUp] {
+        let received = send_key_with_info(type_, Key::Z, RawInputModifiers::CONTROL, PhysicalKey::Z, None, |e| {
+            e.set_key_text(Some("\x1a".to_string()));
+            e.set_alternate_key_text(Some("z".to_string()));
+            e.set_consumed_modifiers(Some(RawInputModifiers::SHIFT));
+            e.set_platform_key_info(Some(info));
+        });
+        assert_eq!(received.key_text.as_deref(), Some("\x1a"));
+        assert_eq!(received.alternate_key_text.as_deref(), Some("z"));
+        assert_eq!(received.consumed_modifiers, Some(KeyModifiers::SHIFT));
+        assert_eq!(received.platform_key_info, Some(info));
+        assert_eq!(received.unconsumed_modifiers(), KeyModifiers::CONTROL);
+    }
+}
+
+#[test]
+fn key_text_keeps_a_nul_char_and_unreported_consumed_modifiers_stay_none() {
+    let (down, ctrl) = (RawKeyEventType::KeyDown, RawInputModifiers::CONTROL);
+    let received = send_key_with_info(down, Key::Space, ctrl, PhysicalKey::Space, Some(" "), |e| {
+        e.set_key_text(Some("\0".to_string()))
+    });
+    assert_eq!(received.key_text.as_deref(), Some("\0"));
+    // Not reported is different from nothing consumed.
+    assert_eq!(received.consumed_modifiers, None);
+    assert_eq!(received.unconsumed_modifiers(), KeyModifiers::CONTROL);
+}
+
+#[test]
+fn a_native_key_code_of_zero_differs_from_an_unavailable_one() {
+    // macOS reports the A key as key code 0.
+    let received =
+        send_key_with_info(RawKeyEventType::KeyDown, Key::A, RawInputModifiers::NONE, PhysicalKey::A, Some("a"), |e| {
+            e.set_platform_key_info(Some(
+                PlatformKeyInfo::new(KnownPlatformKeyInfoFormats::MACOS).with_scan_code(0).with_virtual_key(0),
+            ))
+        });
+    let info = received.platform_key_info.expect("platform key info");
+    assert_eq!((info.scan_code, info.virtual_key, info.modifiers), (Some(0), Some(0), None));
+}
+
 #[test]
 fn key_up_and_handled_state_are_reported_back() {
     let target = KeyboardDevice::new();

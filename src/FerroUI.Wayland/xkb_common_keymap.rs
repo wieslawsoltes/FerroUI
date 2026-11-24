@@ -4,7 +4,9 @@
 use crate::server::interop::unsafe_native_methods::MemoryMapping;
 use crate::xkb_context::XkbContext;
 use crate::xkb_key_transform::IXkbKeymap;
+use std::ffi::c_int;
 use std::os::fd::{AsFd, OwnedFd};
+use std::sync::OnceLock;
 use xkbcommon_dl::{xkb_keymap, xkb_keymap_compile_flags, xkb_keymap_format, xkb_keysym_t, xkb_state, xkbcommon_option};
 
 /// Managed wrapper around `xkb_keymap` + `xkb_state` for key resolution.
@@ -86,6 +88,51 @@ impl XkbCommonKeymap {
         // SAFETY: the state is alive; the rest are values.
         unsafe { (xkb.xkb_state_update_mask)(self.state, mods_depressed, mods_latched, mods_locked, 0, 0, group) };
     }
+}
+
+impl XkbCommonKeymap {
+    /// The modifiers (an XKB mask) that selected the level of a key in the current state, the
+    /// way GTK reports them (`xkb_state_key_get_consumed_mods2` in `XKB_CONSUMED_MODE_GTK`), or
+    /// `None` where the library does not have the function (before libxkbcommon 0.7).
+    pub fn consumed_modifiers(&self, evdev_keycode: u32) -> Option<u32> {
+        const XKB_CONSUMED_MODE_GTK: c_int = 1;
+        let get_consumed_mods2 = consumed_mods2()?;
+        // SAFETY: the state is alive; a key code outside the keymap has no consumed modifiers.
+        Some(unsafe { get_consumed_mods2(self.state, evdev_keycode + 8, XKB_CONSUMED_MODE_GTK) })
+    }
+
+    /// The UTF-8 text of a key symbol with no modifier transformation (`KeysymToText`).
+    pub fn keysym_to_text(keysym: u32) -> Option<String> {
+        let xkb = xkbcommon_option()?;
+        let mut buffer = [0u8; 8];
+        // SAFETY: the buffer has the size that is passed.
+        let length = unsafe { (xkb.xkb_keysym_to_utf8)(keysym, buffer.as_mut_ptr().cast(), buffer.len()) };
+        // The length includes the terminating NUL byte.
+        (length > 1).then(|| String::from_utf8_lossy(&buffer[..(length as usize - 1).min(buffer.len())]).into_owned())
+    }
+}
+
+/// `xkb_state_key_get_consumed_mods2(state, key, mode)`.
+type ConsumedMods2 = unsafe extern "C" fn(*mut xkb_state, u32, c_int) -> u32;
+
+/// `xkb_state_key_get_consumed_mods2`, which the loader of `xkbcommon-dl` does not bind: looked
+/// up once in the library that loader opened (`RTLD_NOLOAD`, so nothing new is loaded).
+fn consumed_mods2() -> Option<ConsumedMods2> {
+    static FUNCTION: OnceLock<Option<usize>> = OnceLock::new();
+    let address = *FUNCTION.get_or_init(|| {
+        xkbcommon_option()?;
+        // SAFETY: both names are terminated strings; `RTLD_NOLOAD` returns the library only if it
+        // is already loaded, and the handle is kept for the life of the process.
+        let library = unsafe { libc::dlopen(c"libxkbcommon.so.0".as_ptr(), libc::RTLD_LAZY | libc::RTLD_NOLOAD) };
+        if library.is_null() {
+            return None;
+        }
+        // SAFETY: the handle is the one `dlopen` returned.
+        let symbol = unsafe { libc::dlsym(library, c"xkb_state_key_get_consumed_mods2".as_ptr()) };
+        (!symbol.is_null()).then_some(symbol as usize)
+    });
+    // SAFETY: the address is the one of the function of this signature in a loaded library.
+    address.map(|address| unsafe { std::mem::transmute::<usize, ConsumedMods2>(address) })
 }
 
 impl IXkbKeymap for XkbCommonKeymap {
@@ -209,6 +256,20 @@ mod tests {
         assert_eq!(text.as_deref(), Some("й"));
         assert_eq!(keymap.find_keysym_in_layout(16, 0), 0x71);
         assert_eq!(XkbKeyTransform::resolve_key_with_fallback(&keymap, 16, PhysicalKey::Q), (Key::Q, Some("й".to_string())));
+
+        // 12.2.0: Shift on `2` selects `@`, and is consumed; the text of the key symbol.
+        keymap.update_modifiers(1, 0, 0, 0);
+        let resolved = XkbKeyTransform::resolve_key_with_text(&keymap, 3, PhysicalKey::Digit2);
+        assert_eq!((resolved.keysym, resolved.text.as_deref()), (0x40, Some("@")));
+        if let Some(consumed) = keymap.consumed_modifiers(3) {
+            assert_eq!(consumed & 1, 1);
+        }
+        assert_eq!(XkbCommonKeymap::keysym_to_text(0x40).as_deref(), Some("@"));
+        assert_eq!(XkbCommonKeymap::keysym_to_text(0xffe1), None);
+        keymap.update_modifiers(0, 0, 0, 0);
+        if let Some(consumed) = keymap.consumed_modifiers(3) {
+            assert_eq!(consumed, 0);
+        }
 
         // A key the keymap does not have.
         assert_eq!(keymap.resolve_key(100), (0, None));

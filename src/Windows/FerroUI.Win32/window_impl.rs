@@ -486,6 +486,8 @@ mod imp {
         shown: Cell<bool>,
         hidden_window_is_parent: Cell<bool>,
         ignore_wm_char: Cell<bool>,
+        /// A dead key of this window waits for the key it combines with (`_deadCharPending`).
+        dead_char_pending: Cell<bool>,
         /// A move or resize drag that a touch or a pen asked for before the system emulated the
         /// left button: it starts with that button (`_pendingDrag` of upstream).
         pending_drag: Cell<Option<PendingDrag>>,
@@ -635,6 +637,7 @@ mod imp {
                 shown: Cell::new(false),
                 hidden_window_is_parent: Cell::new(false),
                 ignore_wm_char: Cell::new(false),
+                dead_char_pending: Cell::new(false),
                 pending_drag: Cell::new(None),
                 drag_requested_from_pointer: Cell::new(false),
                 langid: Cell::new(0),
@@ -812,6 +815,14 @@ mod imp {
 
         pub(crate) fn set_ignore_wm_char(&self, value: bool) {
             self.ignore_wm_char.set(value);
+        }
+
+        pub(crate) fn dead_char_pending(&self) -> bool {
+            self.dead_char_pending.get()
+        }
+
+        pub(crate) fn set_dead_char_pending(&self, value: bool) {
+            self.dead_char_pending.set(value);
         }
 
         /// Takes the drag that waits on the emulated left button.

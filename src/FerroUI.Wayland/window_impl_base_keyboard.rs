@@ -4,7 +4,8 @@
 
 use crate::window_impl_base::{RawEvent, Sink};
 use ferroui_base::input::raw::{IRawInputEventArgs, RawInputEventArgs, RawKeyEventArgs, RawKeyEventType};
-use ferroui_base::input::{IInputDevice, IInputRoot, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
+use crate::server::persistent::wayland_key_info::WaylandKeyInfo;
+use ferroui_base::input::{IInputDevice, IInputRoot, Key, KeyDeviceType, RawInputModifiers};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use std::any::{Any, TypeId};
@@ -38,6 +39,69 @@ impl IRawInputEventArgs for RawKeyboardLeaveEventArgs {
     }
 }
 
+/// A change of the values of the key that is held down (`RawHeldKeyChangedEventArgs`, 12.2.0):
+/// queued like the key down, so that it cannot overtake the key down that starts the repeat.
+pub(crate) struct RawHeldKeyChangedEventArgs {
+    base: RawInputEventArgs,
+    modifiers: RawInputModifiers,
+    key: WaylandKeyInfo,
+}
+
+impl RawHeldKeyChangedEventArgs {
+    fn new(
+        device: Rc<dyn IInputDevice>,
+        root: Rc<dyn IInputRoot>,
+        modifiers: RawInputModifiers,
+        key: WaylandKeyInfo,
+    ) -> Self {
+        Self { base: RawInputEventArgs::new(device, 0, root), modifiers, key }
+    }
+}
+
+impl IRawInputEventArgs for RawHeldKeyChangedEventArgs {
+    fn as_raw_input_event_args(&self) -> &RawInputEventArgs {
+        &self.base
+    }
+
+    fn query_args(&self, type_id: TypeId) -> Option<&dyn Any> {
+        if type_id == TypeId::of::<RawHeldKeyChangedEventArgs>() {
+            Some(self)
+        } else {
+            IRawInputEventArgs::query_args(&self.base, type_id)
+        }
+    }
+}
+
+/// The raw key event of a resolved key (`CreateKeyEventArgs`).
+pub(crate) fn key_event_args(
+    device: Rc<dyn IInputDevice>,
+    timestamp: u64,
+    root: Rc<dyn IInputRoot>,
+    type_: RawKeyEventType,
+    modifiers: RawInputModifiers,
+    key: &WaylandKeyInfo,
+) -> RawKeyEventArgs {
+    let args = RawKeyEventArgs::new(
+        device,
+        timestamp,
+        root,
+        type_,
+        key.key,
+        modifiers,
+        key.physical_key,
+        key.key_symbol.clone(),
+        KeyDeviceType::Keyboard,
+    );
+    key.apply_to(&args);
+    args
+}
+
+/// Whether a key event is of the key `repeat` repeats: keys are matched by their key code
+/// (12.2.0), since the key of a held key can change with the modifiers.
+pub(crate) fn is_repeated_key(repeat: &WaylandKeyInfo, args: &RawKeyEventArgs) -> bool {
+    args.platform_key_info().is_some_and(|info| info.scan_code == repeat.platform_key_info.scan_code)
+}
+
 /// The interval between two repeats of a key at a rate in keys a second.
 pub(crate) fn repeat_interval(rate: i32) -> Duration {
     Duration::from_millis((1000 / rate.max(1)).max(1) as u64)
@@ -60,10 +124,8 @@ struct RepeatTimer {
 pub(crate) struct KeyRepeat {
     sink: Weak<Sink>,
     key_repeat_timer: RefCell<Option<RepeatTimer>>,
-    repeat_key: Cell<Key>,
-    repeat_physical_key: Cell<PhysicalKey>,
+    repeat_key: RefCell<Option<WaylandKeyInfo>>,
     repeat_modifiers: Cell<RawInputModifiers>,
-    repeat_key_symbol: RefCell<Option<String>>,
     key_repeat_delay: Cell<i32>,
     key_repeat_rate: Cell<i32>,
 }
@@ -73,10 +135,8 @@ impl KeyRepeat {
         Self {
             sink,
             key_repeat_timer: RefCell::new(None),
-            repeat_key: Cell::new(Key::None),
-            repeat_physical_key: Cell::new(PhysicalKey::None),
+            repeat_key: RefCell::new(None),
             repeat_modifiers: Cell::new(RawInputModifiers::NONE),
-            repeat_key_symbol: RefCell::new(None),
             key_repeat_delay: Cell::new(0),
             key_repeat_rate: Cell::new(0),
         }
@@ -95,10 +155,22 @@ impl KeyRepeat {
             return true;
         }
 
+        if let Some(held) = args.downcast_ref::<RawHeldKeyChangedEventArgs>() {
+            let mut repeat_key = self.repeat_key.borrow_mut();
+            let scan_code = held.key.platform_key_info.scan_code;
+            if repeat_key.as_ref().is_some_and(|k| k.platform_key_info.scan_code == scan_code) {
+                *repeat_key = Some(held.key.clone());
+                self.repeat_modifiers.set(held.modifiers);
+            }
+            return true;
+        }
+
         if let Some(key_args) = args.downcast_ref::<RawKeyEventArgs>() {
             if key_args.type_() == RawKeyEventType::KeyDown {
-                self.start(key_args.key(), key_args.physical_key(), key_args.modifiers(), key_args.key_symbol());
-            } else if key_args.type_() == RawKeyEventType::KeyUp && self.repeat_key.get() == key_args.key() {
+                self.start(key_args);
+            } else if key_args.type_() == RawKeyEventType::KeyUp
+                && self.repeat_key.borrow().as_ref().is_some_and(|repeat| is_repeated_key(repeat, key_args))
+            {
                 self.stop();
             }
         }
@@ -106,7 +178,7 @@ impl KeyRepeat {
         false
     }
 
-    fn start(&self, key: Key, physical_key: PhysicalKey, modifiers: RawInputModifiers, key_symbol: Option<String>) {
+    fn start(&self, key_args: &RawKeyEventArgs) {
         self.stop();
 
         if self.key_repeat_rate.get() <= 0 {
@@ -114,14 +186,24 @@ impl KeyRepeat {
         }
 
         // Modifier keys don't repeat
-        if !key_repeats(key) {
+        if !key_repeats(key_args.key()) {
             return;
         }
 
-        self.repeat_key.set(key);
-        self.repeat_physical_key.set(physical_key);
-        self.repeat_modifiers.set(modifiers);
-        *self.repeat_key_symbol.borrow_mut() = key_symbol;
+        // Every key of this backend has its platform data; one without is not repeated.
+        let Some(platform_key_info) = key_args.platform_key_info() else {
+            return;
+        };
+        *self.repeat_key.borrow_mut() = Some(WaylandKeyInfo {
+            key: key_args.key(),
+            physical_key: key_args.physical_key(),
+            key_symbol: key_args.key_symbol(),
+            key_text: key_args.key_text(),
+            alternate_key_text: key_args.alternate_key_text(),
+            consumed_modifiers: key_args.consumed_modifiers(),
+            platform_key_info,
+        });
+        self.repeat_modifiers.set(key_args.modifiers());
 
         let timer = DispatcherTimer::with_interval(
             repeat_interval(self.key_repeat_rate.get()),
@@ -147,6 +229,7 @@ impl KeyRepeat {
             timer.timer.stop();
             timer.tick.dispose();
         }
+        *self.repeat_key.borrow_mut() = None;
     }
 
     fn on_tick(&self) {
@@ -161,6 +244,10 @@ impl KeyRepeat {
         let Some(timer) = self.key_repeat_timer.borrow().as_ref().map(|timer| timer.timer.clone()) else {
             return;
         };
+        let Some(repeat_key) = self.repeat_key.borrow().clone() else {
+            self.stop();
+            return;
+        };
 
         // After first tick (initial delay), switch to repeat interval
         let interval = repeat_interval(self.key_repeat_rate.get());
@@ -168,67 +255,45 @@ impl KeyRepeat {
             timer.set_interval(interval);
         }
 
-        parent.base().raise_input(Rc::new(RawKeyEventArgs::new(
+        // Deviation (12.2.0 `8dae868308`): the repeat is raised on the window directly, as
+        // before, so it never reaches `handle_keyboard_dispatch` and needs no marker type
+        // (upstream's `RepeatedRawKeyEventArgs`) to keep it from restarting the repeat.
+        parent.base().raise_input(Rc::new(key_event_args(
             parent.base().keyboard(),
             0,
             input_root,
             RawKeyEventType::KeyDown,
-            self.repeat_key.get(),
             self.repeat_modifiers.get(),
-            self.repeat_physical_key.get(),
-            self.repeat_key_symbol.borrow().clone(),
-            KeyDeviceType::Keyboard,
+            &repeat_key,
         )));
     }
 }
 
 impl Sink {
-    pub(crate) fn on_key_down(
-        &self,
-        timestamp: u64,
-        key: Key,
-        modifiers: RawInputModifiers,
-        physical_key: PhysicalKey,
-        key_symbol: Option<String>,
-    ) {
+    pub(crate) fn on_key_down(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
         let (Some(parent), Some(input_root)) = (self.parent(), self.input_root()) else {
             return;
         };
-        self.schedule_input(Rc::new(RawKeyEventArgs::new(
-            parent.base().keyboard(),
-            timestamp,
-            input_root,
-            RawKeyEventType::KeyDown,
-            key,
-            modifiers,
-            physical_key,
-            key_symbol,
-            KeyDeviceType::Keyboard,
-        )));
+        let keyboard = parent.base().keyboard();
+        let args = key_event_args(keyboard, timestamp, input_root, RawKeyEventType::KeyDown, modifiers, &key);
+        self.schedule_input(Rc::new(args));
     }
 
-    pub(crate) fn on_key_up(
-        &self,
-        timestamp: u64,
-        key: Key,
-        modifiers: RawInputModifiers,
-        physical_key: PhysicalKey,
-        key_symbol: Option<String>,
-    ) {
+    pub(crate) fn on_key_up(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
         let (Some(parent), Some(input_root)) = (self.parent(), self.input_root()) else {
             return;
         };
-        self.schedule_input(Rc::new(RawKeyEventArgs::new(
-            parent.base().keyboard(),
-            timestamp,
-            input_root,
-            RawKeyEventType::KeyUp,
-            key,
-            modifiers,
-            physical_key,
-            key_symbol,
-            KeyDeviceType::Keyboard,
-        )));
+        let keyboard = parent.base().keyboard();
+        let args = key_event_args(keyboard, timestamp, input_root, RawKeyEventType::KeyUp, modifiers, &key);
+        self.schedule_input(Rc::new(args));
+    }
+
+    pub(crate) fn on_held_key_changed(&self, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        let (Some(parent), Some(input_root)) = (self.parent(), self.input_root()) else {
+            return;
+        };
+        let held = RawHeldKeyChangedEventArgs::new(parent.base().keyboard(), input_root, modifiers, key);
+        self.schedule_input(Rc::new(held));
     }
 
     pub(crate) fn on_keyboard_leave(&self) {

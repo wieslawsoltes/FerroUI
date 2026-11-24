@@ -354,6 +354,9 @@ pub enum Key {
     /// The OEM Clear key.
     OemClear = 171,
     /// The key is used with another key to create a single combined character.
+    ///
+    /// Reported for the key down that completes a dead key sequence. The matching key up reports
+    /// the real key. Use `KeyEventArgs::physical_key` to identify the key.
     DeadCharProcessed = 172,
     /// OSX Platform-specific Fn+Left key
     FnLeftArrow = 10001,

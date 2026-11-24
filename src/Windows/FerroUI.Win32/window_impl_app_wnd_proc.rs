@@ -464,7 +464,7 @@ mod imp {
     use super::*;
     use crate::automation::interop::UiaCoreProviderApi;
     use crate::automation::AutomationNode;
-    use crate::input::{Imm32InputMethod, KeyInterop, WindowsKeyboardDevice};
+    use crate::input::{Imm32InputMethod, KeyInterop, KeyboardLayoutTable, WindowsKeyboardDevice};
     use crate::interop::unmanaged_methods::*;
     use crate::win32_type_extensions::Win32TypeExtensions;
     use crate::window_impl::WindowImpl;
@@ -781,11 +781,11 @@ mod imp {
                 }
 
                 WindowsMessage::WM_KEYDOWN => {
-                    e = self.try_create_raw_key_event_args(RawKeyEventType::KeyDown, timestamp, w_param, l_param, true);
+                    e = self.try_create_key_down_event_args(timestamp, w_param, l_param, false);
                 }
 
                 WindowsMessage::WM_SYSKEYDOWN => {
-                    e = self.try_create_raw_key_event_args(RawKeyEventType::KeyDown, timestamp, w_param, l_param, false);
+                    e = self.try_create_key_down_event_args(timestamp, w_param, l_param, true);
                 }
 
                 WindowsMessage::WM_SYSCOMMAND => {
@@ -827,7 +827,7 @@ mod imp {
                     }
 
                     // Ignore control chars and chars that were handled in WM_KEYDOWN.
-                    if to_int32(w_param as isize) >= 32 && !self.ignore_wm_char() {
+                    if !KeyInterop::is_control_char(to_int32(w_param as isize) as u16) && !self.ignore_wm_char() {
                         // Deviation (DEVIATIONS.md, Windows platform
                         // backend): the two halves of a surrogate pair
                         // are delivered as one text.
@@ -1293,7 +1293,18 @@ mod imp {
                     }
                 }
 
+                WindowsMessage::WM_SETFOCUS => {
+                    // A pending dead key can come from another window or process, where this window
+                    // never saw its WM_DEADCHAR. Ending it keeps the pending flag in sync (12.2.0).
+                    KeyInterop::end_pending_dead_key(get_keyboard_layout(0));
+                    self.set_dead_char_pending(false);
+                }
+
                 WindowsMessage::WM_INPUTLANGCHANGE => {
+                    self.set_dead_char_pending(false);
+                    // A layout added after start-up has no table yet: build it before the first key
+                    // in that layout, which can be a dead key.
+                    let _ = KeyboardLayoutTable::get(l_param);
                     self.update_input_method(l_param);
                     // call DefWindowProc to pass to all children
                 }
@@ -1403,8 +1414,26 @@ mod imp {
                     input(args.clone());
 
                     if message == WindowsMessage::WM_KEYDOWN || message == WindowsMessage::WM_SYSKEYDOWN {
+                        let paired_text = match &e {
+                            RawEvent::Key(key_args) if key_args.key() != Key::ImeProcessed => key_args.key_text(),
+                            _ => None,
+                        };
                         if matches!(&e, RawEvent::Key(key_args) if key_args.key() == Key::ImeProcessed) {
                             self.set_ignore_wm_char(true);
+                        } else if let Some(paired_text) = paired_text {
+                            // The WM_CHAR/WM_SYSCHAR messages of this key were already taken off
+                            // the queue (12.2.0).
+                            if !args.handled() {
+                                if message == WindowsMessage::WM_KEYDOWN {
+                                    self.raise_paired_text_input(timestamp, &paired_text);
+                                } else {
+                                    // DefWindowProc turns WM_SYSCHAR into SC_KEYMENU (Alt+Space
+                                    // opens the system menu).
+                                    for c in paired_text.encode_utf16() {
+                                        def_window_proc(hwnd, WindowsMessage::WM_SYSCHAR, usize::from(c), l_param);
+                                    }
+                                }
+                            }
                         } else {
                             // Handling a WM_KEYDOWN or WM_SYSKEYDOWN message should cause the subsequent
                             // WM_CHAR or WM_SYSCHAR message to be ignored. This should be safe to do as
@@ -1616,6 +1645,159 @@ mod imp {
             )))
         }
 
+        /// The raw event of a key down (`TryCreateKeyDownEventArgs`, 12.2.0): the key text from
+        /// the WM_CHAR messages of the key, which are taken off the queue, its alternate text,
+        /// the consumed modifiers and the platform data.
+        fn try_create_key_down_event_args(
+            &self,
+            timestamp: u64,
+            w_param: usize,
+            l_param: isize,
+            is_system_key: bool,
+        ) -> Option<RawEvent> {
+            const VK_PROCESSKEY: i32 = 0xE5;
+            const VK_PACKET: i32 = 0xE7;
+            let virtual_key = to_int32(w_param as isize);
+            let key_data = to_int32(l_param);
+            let mut key = KeyInterop::key_from_virtual_key(virtual_key, key_data);
+            let physical_key = KeyInterop::physical_key_from_virtual_key(virtual_key, key_data);
+
+            let no_key = key == Key::None && physical_key == PhysicalKey::None;
+            if no_key || matches!(virtual_key, VK_PROCESSKEY | VK_PACKET) {
+                // No pairing: the chars of this key stay in the queue for the WM_CHAR handler.
+                return self.try_create_raw_key_event_args(
+                    RawKeyEventType::KeyDown,
+                    timestamp,
+                    w_param,
+                    l_param,
+                    !is_system_key,
+                );
+            }
+
+            let (key_text, dead_char) = self.take_paired_chars(is_system_key, key_data);
+            let is_control_or_alt = get_key_state(0x11) < 0 || get_key_state(0x12) < 0;
+
+            let (key_symbol, mut alternate_key_text) = if is_system_key {
+                // No ToUnicodeEx call during WM_SYSKEYDOWN: it breaks the keyboard state.
+                let alternate = if KeyInterop::is_printable(key_text.as_deref()) {
+                    key_text.clone()
+                } else {
+                    KeyInterop::get_text_ignoring_control_and_alt(virtual_key)
+                };
+                (KeyInterop::get_key_symbol_from_virtual_key(virtual_key), alternate)
+            } else if !is_control_or_alt {
+                KeyInterop::get_key_symbol_and_text(virtual_key, key_data)
+            } else {
+                // The paired chars are the result of the full-state translation, so the key symbol
+                // needs no other ToUnicodeEx call: at most one call per key event keeps the
+                // dead-key state on versions that ignore the "do not change keyboard state" flag.
+                let alternate = if KeyInterop::is_printable(key_text.as_deref()) {
+                    key_text.clone()
+                } else {
+                    KeyInterop::get_text_ignoring_control_and_alt(virtual_key)
+                };
+                (dead_char.clone().or_else(|| KeyInterop::filter_key_symbol(key_text.as_deref())), alternate)
+            };
+
+            // A dead key produces no text by itself, and the translation above sees the dead state
+            // that TranslateMessage already set, so it reports the char twice.
+            if dead_char.is_some() {
+                alternate_key_text = dead_char;
+            }
+
+            // A key that produces text uses a pending dead key. If that text is printable, the key
+            // is masked, so that it cannot match any gesture. Keys like Enter produce the dead char
+            // and a control char, and stay unmasked. Ctrl chords that produce only control chars
+            // leave the dead key pending.
+            if key_text.is_some() {
+                let is_printable = KeyInterop::is_printable(key_text.as_deref());
+                if self.dead_char_pending() && is_printable && !is_system_key {
+                    key = Key::DeadCharProcessed;
+                }
+                if is_printable || !is_control_or_alt {
+                    self.set_dead_char_pending(false);
+                }
+            }
+
+            let device: Rc<dyn IInputDevice> = WindowsKeyboardDevice::instance();
+            let modifiers = WindowsKeyboardDevice::modifiers();
+            let args = RawKeyEventArgs::new(
+                device,
+                timestamp,
+                self.owner(),
+                RawKeyEventType::KeyDown,
+                key,
+                modifiers,
+                physical_key,
+                key_symbol,
+                KeyDeviceType::Keyboard,
+            );
+            args.set_key_text(key_text);
+            args.set_alternate_key_text(alternate_key_text);
+            args.set_consumed_modifiers(KeyInterop::get_consumed_modifiers(virtual_key, modifiers));
+            args.set_platform_key_info(Some(KeyInterop::platform_key_info(virtual_key, key_data)));
+            Some(RawEvent::Key(Rc::new(args)))
+        }
+
+        /// Takes the WM_CHAR (or WM_SYSCHAR) messages that TranslateMessage posted for the key
+        /// down being processed off the queue and returns their text (`TakePairedChars`). A
+        /// pending WM_DEADCHAR stays in the queue for DefWindowProc and is returned second.
+        fn take_paired_chars(&self, is_system_key: bool, key_data: i32) -> (Option<String>, Option<String>) {
+            const PM_NOREMOVE: u32 = 0x0;
+            const PM_REMOVE: u32 = 0x1;
+            // PM_QS_* filters would keep sent messages from being dispatched here, but they also
+            // skip the chars that TranslateMessage queued.
+            const PM_NOYIELD: u32 = 0x2;
+            const MAX_CHARS: usize = 16;
+
+            let (char_message, dead_char_message) = if is_system_key {
+                (WindowsMessage::WM_SYSCHAR, WindowsMessage::WM_SYSDEADCHAR)
+            } else {
+                (WindowsMessage::WM_CHAR, WindowsMessage::WM_DEADCHAR)
+            };
+            let hwnd = self.hwnd();
+            let scan_code = KeyInterop::native_scan_code(key_data);
+            let of_this_key = |l_param: isize| KeyInterop::native_scan_code(to_int32(l_param)) == scan_code;
+
+            if let Some((w_param, l_param)) = peek_message_of(hwnd, dead_char_message, PM_NOREMOVE | PM_NOYIELD) {
+                if of_this_key(l_param) {
+                    self.set_dead_char_pending(true);
+                    return (None, Some(String::from_utf16_lossy(&[w_param as u16])));
+                }
+            }
+
+            // Scan codes are compared so that chars posted by other means are not attached to this
+            // key. Surrogate pairs and ligature keys produce several messages.
+            let mut units: Vec<u16> = Vec::new();
+            while units.len() < MAX_CHARS {
+                match peek_message_of(hwnd, char_message, PM_NOREMOVE | PM_NOYIELD) {
+                    Some((w_param, l_param)) if of_this_key(l_param) => {
+                        peek_message_of(hwnd, char_message, PM_REMOVE | PM_NOYIELD);
+                        units.push(w_param as u16);
+                    }
+                    _ => break,
+                }
+            }
+            ((!units.is_empty()).then(|| String::from_utf16_lossy(&units)), None)
+        }
+
+        /// The text input of the paired chars of a key down, control characters left out
+        /// (`RaisePairedTextInput`).
+        fn raise_paired_text_input(&self, timestamp: u64, text: &str) {
+            if Imm32InputMethod::current().is_composing() {
+                return;
+            }
+            let Some(input) = self.input_callback() else {
+                return;
+            };
+            let filtered: Vec<u16> = text.encode_utf16().filter(|c| !KeyInterop::is_control_char(*c)).collect();
+            if !filtered.is_empty() {
+                let device: Rc<dyn IInputDevice> = WindowsKeyboardDevice::instance();
+                let text = String::from_utf16_lossy(&filtered);
+                input(Rc::new(RawTextInputEventArgs::new(device, timestamp, self.owner(), text)));
+            }
+        }
+
         fn try_create_raw_key_event_args(
             &self,
             event_type: RawKeyEventType,
@@ -1646,7 +1828,7 @@ mod imp {
             }
 
             let device: Rc<dyn IInputDevice> = WindowsKeyboardDevice::instance();
-            Some(RawEvent::Key(Rc::new(RawKeyEventArgs::new(
+            let args = RawKeyEventArgs::new(
                 device,
                 timestamp,
                 self.owner(),
@@ -1656,7 +1838,9 @@ mod imp {
                 physical_key,
                 key_symbol,
                 KeyDeviceType::Keyboard,
-            ))))
+            );
+            args.set_platform_key_info(Some(KeyInterop::platform_key_info(virtual_key, key_data)));
+            Some(RawEvent::Key(Rc::new(args)))
         }
     }
 }

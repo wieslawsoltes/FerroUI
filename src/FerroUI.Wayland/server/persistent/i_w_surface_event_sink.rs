@@ -9,6 +9,7 @@
 //! an offer, which is an object of the connection.
 
 use super::decoration_mode::DecorationMode;
+use super::wayland_key_info::WaylandKeyInfo;
 use super::xdg_configure_batch::XdgConfigureBatch;
 use super::xdg_popup_configure_batch::XdgPopupConfigureBatch;
 use crate::screens::wayland_output_snapshot::WaylandOutputId;
@@ -18,7 +19,7 @@ use crate::server::transient::clipboard::wayland_offer_cookie::WaylandOfferCooki
 use ferroui_base::input::raw::RawPointerEventType;
 #[cfg(target_os = "linux")]
 use ferroui_base::input::DragDropEffects;
-use ferroui_base::input::{Key, PhysicalKey, RawInputModifiers};
+use ferroui_base::input::RawInputModifiers;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Point, Vector};
 use std::any::Any;
@@ -50,8 +51,11 @@ pub trait IWSurfaceEventSink {
     fn on_touch_move(&self, timestamp: u64, touch_id: i32, position: Point);
     fn on_touch_up(&self, timestamp: u64, touch_id: i32, position: Point);
     fn on_touch_cancel(&self, touch_id: i32, position: Point);
-    fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>);
-    fn on_key_up(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>);
+    fn on_key_down(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo);
+    fn on_key_up(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo);
+    /// The key that is held down resolves to different values after a modifier change; the
+    /// repeated presses use the new values (12.2.0, `8dae868308`).
+    fn on_held_key_changed(&self, modifiers: RawInputModifiers, key: WaylandKeyInfo);
     fn on_keyboard_leave(&self);
     fn on_key_repeat_info(&self, rate: i32, delay: i32);
 
@@ -172,26 +176,16 @@ impl WSurfaceEventSinkProxy {
         self.target.post(move |sink| sink.on_touch_cancel(touch_id, position));
     }
 
-    pub fn on_key_down(
-        &self,
-        timestamp: u64,
-        key: Key,
-        modifiers: RawInputModifiers,
-        physical_key: PhysicalKey,
-        key_symbol: Option<String>,
-    ) {
-        self.target.post(move |sink| sink.on_key_down(timestamp, key, modifiers, physical_key, key_symbol));
+    pub fn on_key_down(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.target.post(move |sink| sink.on_key_down(timestamp, modifiers, key));
     }
 
-    pub fn on_key_up(
-        &self,
-        timestamp: u64,
-        key: Key,
-        modifiers: RawInputModifiers,
-        physical_key: PhysicalKey,
-        key_symbol: Option<String>,
-    ) {
-        self.target.post(move |sink| sink.on_key_up(timestamp, key, modifiers, physical_key, key_symbol));
+    pub fn on_key_up(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.target.post(move |sink| sink.on_key_up(timestamp, modifiers, key));
+    }
+
+    pub fn on_held_key_changed(&self, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.target.post(move |sink| sink.on_held_key_changed(modifiers, key));
     }
 
     pub fn on_keyboard_leave(&self) {

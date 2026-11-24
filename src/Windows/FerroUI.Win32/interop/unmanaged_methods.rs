@@ -4031,6 +4031,22 @@ mod native {
         unsafe { kbm::MapVirtualKeyW(code, map_type) }
     }
 
+    /// `MapVirtualKeyEx` with a [`MapVirtualKeyMapTypes`] in a keyboard layout.
+    pub fn map_virtual_key_ex(code: u32, map_type: u32, layout: isize) -> u32 {
+        // SAFETY: plain values; a stale layout maps nothing.
+        unsafe { kbm::MapVirtualKeyExW(code, map_type, h(layout)) }
+    }
+
+    /// `PeekMessage` of one message kind for a window: its `wParam` and `lParam`, if one is in the
+    /// queue. `flags` are the `PM_*` flags (`PM_REMOVE` takes it off the queue).
+    pub fn peek_message_of(hwnd: isize, message: u32, flags: u32) -> Option<(usize, isize)> {
+        // SAFETY: zeroed plain data, filled by the call.
+        let mut msg: wm::MSG = unsafe { std::mem::zeroed() };
+        // SAFETY: a valid out structure; the window is a number, a stale one finds nothing.
+        let found = unsafe { wm::PeekMessageW(&mut msg, h(hwnd), message, message, flags) != 0 };
+        found.then_some((msg.wParam, msg.lParam))
+    }
+
     /// The keyboard layout of a thread (0: the calling thread).
     pub fn get_keyboard_layout(thread: u32) -> isize {
         // SAFETY: plain values.

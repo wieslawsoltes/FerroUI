@@ -5,12 +5,15 @@ mod imm32_caret_manager;
 mod imm32_context;
 mod imm32_input_method;
 mod key_interop;
+mod keyboard_layout_table;
 mod windows_input_pane;
 mod windows_keyboard_device;
 #[cfg(windows)]
 mod windows_mouse_device;
 
 pub use key_interop::KeyInterop;
+#[cfg(windows)]
+pub(crate) use keyboard_layout_table::KeyboardLayoutTable;
 pub use windows_keyboard_device::WindowsKeyboardDevice;
 #[cfg(windows)]
 pub use windows_mouse_device::{WindowsMouseDevice, WindowsMousePointer};
