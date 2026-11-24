@@ -15,6 +15,7 @@ mod drawing_context_impl_tests;
 mod drawing_context_transform_tests;
 mod hit_testing;
 mod media;
+mod paint_state_tests;
 mod path_geometry_tests;
 mod render_bounds_tests;
 mod rounded_fast_path_tests;

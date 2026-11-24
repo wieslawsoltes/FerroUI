@@ -658,7 +658,13 @@ pub struct DrawingContextImpl {
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     gpu: Option<Rc<dyn ISkiaGpu>>,
     stroke_paint: Option<sk::Paint>,
+    /// The values of `stroke_paint` when it is the paint of an undashed solid stroke that nothing else changed
+    /// since (`PaintWrapper::release_stroke`): the next solid stroke sets only the values that differ.
+    stroke_state: Option<SolidStrokeState>,
     fill_paint: Option<sk::Paint>,
+    /// The values of `fill_paint` when it is the paint of a solid fill that nothing else changed since
+    /// (`PaintWrapper::release_fill`): the next solid fill sets only the values that differ.
+    fill_state: Option<SolidFillState>,
     box_shadow_paint: Option<sk::Paint>,
     session: Option<Rc<dyn ISkiaGpuRenderSession>>,
     leased: Rc<Cell<bool>>,
@@ -726,7 +732,9 @@ impl DrawingContextImpl {
             gr_context: create_info.gr_context,
             gpu: create_info.gpu,
             stroke_paint: Some(SkPaintCache::get()),
+            stroke_state: None,
             fill_paint: Some(SkPaintCache::get()),
+            fill_state: None,
             box_shadow_paint: Some(SkPaintCache::get()),
             session: create_info.current_session,
             leased: Rc::new(Cell::new(false)),
@@ -1538,18 +1546,29 @@ impl DrawingContextImpl {
     /// `paint` is a reset paint, or the paint of an earlier solid colour fill
     /// ([`PaintWrapper::release_fill`]): the anti-aliasing and the colour are set on every
     /// path. It travels in the wrapper and comes back from [`PaintWrapper::dispose`].
-    fn create_paint(&mut self, mut paint: sk::Paint, brush: &dyn IBrush, target_rect: Rect) -> PaintWrapper {
-        paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
-
+    /// Configures `paint` for `brush`. `known` is what a kept solid paint has (see `fill_state`); a solid brush
+    /// then sets only the values that differ, any other brush sets every value it needs.
+    fn create_paint(
+        &mut self,
+        mut paint: sk::Paint,
+        known: Option<SolidFillState>,
+        brush: &dyn IBrush,
+        target_rect: Rect,
+    ) -> PaintWrapper {
+        let anti_alias = self.render_options.edge_mode != EdgeMode::Aliased;
         let opacity = brush.opacity() * if self.use_opacity_save_layer { 1.0 } else { self.current_opacity };
 
         if let Some(solid) = brush.as_solid_color_brush() {
             let color = solid.color();
-            paint.set_color(sk::Color::from_argb((color.a as f64 * opacity) as u8, color.r, color.g, color.b));
-
-            return PaintWrapper::solid_fill(paint);
+            let wanted = SolidFillState {
+                anti_alias,
+                color: sk::Color::from_argb((color.a as f64 * opacity) as u8, color.r, color.g, color.b),
+            };
+            wanted.apply(&mut paint, known);
+            return PaintWrapper::solid_fill(paint, wanted);
         }
 
+        paint.set_anti_alias(anti_alias);
         paint.set_color(sk::Color::from_argb((255.0 * opacity) as u8, 255, 255, 255));
 
         if let Some(gradient) = brush.as_gradient_brush() {
@@ -1598,6 +1617,7 @@ impl DrawingContextImpl {
     fn try_create_paint(
         &mut self,
         paint: sk::Paint,
+        known: Option<SolidStrokeState>,
         pen: &dyn IPen,
         target_rect: Rect,
     ) -> Result<PaintWrapper, sk::Paint> {
@@ -1610,7 +1630,25 @@ impl DrawingContextImpl {
             return Err(paint);
         }
 
-        let mut rv = self.create_paint(paint, &*brush, target_rect);
+        if brush.as_solid_color_brush().is_some() && !has_dashes(pen) {
+            // An undashed solid stroke: only the values that differ from the kept stroke paint are set.
+            let mut rv = self.create_paint(paint, known.map(|known| known.fill), &*brush, target_rect);
+            let fill = rv.solid.take().expect("a solid brush makes a solid paint");
+            let wanted = SolidStrokeState {
+                fill,
+                width: pen.thickness() as f32,
+                cap: to_sk_stroke_cap(pen.line_cap()),
+                join: to_sk_stroke_join(pen.line_join()),
+                miter: pen.miter_limit() as f32,
+            };
+            wanted.apply(&mut rv.paint, known);
+            rv.stroke = Some(wanted);
+            return Ok(rv);
+        }
+
+        // Any other stroke starts from a reset paint, as every stroke did before solid strokes were kept.
+        let paint = if known.is_some() { reset_paint(paint) } else { paint };
+        let mut rv = self.create_paint(paint, None, &*brush, target_rect);
         let paint = rv.paint_mut();
 
         paint.set_stroke(true);
@@ -1632,28 +1670,53 @@ impl DrawingContextImpl {
         Ok(rv)
     }
 
+    /// Replaces the kept fill and stroke paints with new ones, so that the next draw has paints no draw before
+    /// it has used.
+    #[cfg(test)]
+    pub(crate) fn reset_kept_paints_for_tests(&mut self) {
+        self.fill_paint = Some(sk::Paint::default());
+        self.fill_state = None;
+        self.stroke_paint = Some(sk::Paint::default());
+        self.stroke_state = None;
+    }
+
     fn create_fill(&mut self, brush: &dyn IBrush, target_rect: Rect) -> PaintWrapper {
-        let paint = self.fill_paint.take().unwrap_or_default();
-        self.create_paint(paint, brush, target_rect)
+        // The state goes with the paint: a paint that is not the kept one has no known values.
+        let known = self.fill_state.take();
+        let (paint, known) = match self.fill_paint.take() {
+            Some(paint) => (paint, known),
+            None => (sk::Paint::default(), None),
+        };
+        self.create_paint(paint, known, brush, target_rect)
     }
 
     fn release_fill(&mut self, fill: PaintWrapper) {
-        self.fill_paint = Some(fill.release_fill());
+        let (paint, state) = fill.release_fill();
+        self.fill_paint = Some(paint);
+        self.fill_state = state;
     }
 
     fn create_stroke(&mut self, pen: &dyn IPen, target_rect: Rect) -> Option<PaintWrapper> {
-        let paint = self.stroke_paint.take().unwrap_or_default();
-        match self.try_create_paint(paint, pen, target_rect) {
+        let known = self.stroke_state.take();
+        let (paint, known) = match self.stroke_paint.take() {
+            Some(paint) => (paint, known),
+            None => (sk::Paint::default(), None),
+        };
+        match self.try_create_paint(paint, known, pen, target_rect) {
             Ok(stroke) => Some(stroke),
             Err(paint) => {
+                // Not configured: the paint keeps its values.
                 self.stroke_paint = Some(paint);
+                self.stroke_state = known;
                 None
             }
         }
     }
 
     fn release_stroke(&mut self, stroke: PaintWrapper) {
-        self.stroke_paint = Some(stroke.dispose());
+        let (paint, state) = stroke.release_stroke();
+        self.stroke_paint = Some(paint);
+        self.stroke_state = state;
     }
 
     /// Creates a new render target compatible with this drawing context.
@@ -1991,7 +2054,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
             .downcast_ref::<GlyphRunImpl>()
             .unwrap_or_else(|| panic!("The glyph run was not created by the Skia backend"));
 
-        let paint_wrapper = self.create_fill(foreground, glyph_run.bounds());
+        // A solid fill needs no bounds; the run's bounds are read only for a brush that maps onto them.
+        let bounds = if foreground.as_solid_color_brush().is_some() { Rect::default() } else { glyph_run.bounds() };
+        let paint_wrapper = self.create_fill(foreground, bounds);
 
         let effective_text_options = effective_text_options(
             self.text_options,
@@ -2158,7 +2223,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
         canvas.save_layer(&SaveLayerRec::default().bounds(&sk_bounds).paint(&paint));
         let total_matrix = canvas.local_to_device();
 
-        let mask_paint = self.create_paint(paint, mask, bounds);
+        let mask_paint = self.create_paint(paint, None, mask, bounds);
         self.mask_stack.push((total_matrix, mask_paint));
     }
 
@@ -2926,6 +2991,7 @@ impl IDrawingContextWithAcrylicLikeSupport for DrawingContextImpl {
         let rc = to_sk_rect(rect.rect);
 
         // The kept fill paint may carry the colour of a solid fill.
+        self.fill_state = None;
         let paint = self.fill_paint.take().map(reset_paint).unwrap_or_default();
         let fill = self.create_acrylic_paint(paint, material);
 
@@ -2974,6 +3040,68 @@ fn color_matrix_filter(
         .unwrap_or_else(|| sk::color_filters::matrix_row_major(&matrix.to_row_major_4x5(), None))
 }
 
+/// The values a solid fill sets on a paint that is otherwise a reset paint.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct SolidFillState {
+    anti_alias: bool,
+    color: sk::Color,
+}
+
+impl SolidFillState {
+    /// Sets the values on `paint` whose values are `known` (none known: every value).
+    fn apply(self, paint: &mut sk::Paint, known: Option<Self>) {
+        if known.map(|known| known.anti_alias) != Some(self.anti_alias) {
+            paint.set_anti_alias(self.anti_alias);
+        }
+        if known.map(|known| known.color) != Some(self.color) {
+            paint.set_color(self.color);
+        }
+    }
+}
+
+/// The values an undashed solid stroke sets on a paint that is otherwise a reset paint.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct SolidStrokeState {
+    fill: SolidFillState,
+    width: f32,
+    cap: sk::PaintCap,
+    join: sk::PaintJoin,
+    miter: f32,
+}
+
+impl SolidStrokeState {
+    /// Sets the stroke values on `paint` whose values are `known` (none known: every value, the
+    /// style too). The fill values were set by [`SolidFillState::apply`].
+    fn apply(self, paint: &mut sk::Paint, known: Option<Self>) {
+        let Some(known) = known else {
+            paint.set_stroke(true);
+            paint.set_stroke_width(self.width);
+            paint.set_stroke_cap(self.cap);
+            paint.set_stroke_join(self.join);
+            paint.set_stroke_miter(self.miter);
+            return;
+        };
+        if known.width != self.width {
+            paint.set_stroke_width(self.width);
+        }
+        if known.cap != self.cap {
+            paint.set_stroke_cap(self.cap);
+        }
+        if known.join != self.join {
+            paint.set_stroke_join(self.join);
+        }
+        if known.miter != self.miter {
+            paint.set_stroke_miter(self.miter);
+        }
+    }
+}
+
+/// Whether the pen may draw dashes: it has a dash style. (A style without dashes draws none, and
+/// takes the general path of strokes; reading its dashes here would allocate them.)
+fn has_dashes(pen: &dyn IPen) -> bool {
+    pen.dash_style().is_some()
+}
+
 fn reset_paint(mut paint: sk::Paint) -> sk::Paint {
     paint.reset();
     paint
@@ -2983,9 +3111,12 @@ fn reset_paint(mut paint: sk::Paint) -> sk::Paint {
 /// released) with it.
 pub(crate) struct PaintWrapper {
     paint: sk::Paint,
-    /// The paint differs from a reset paint in its anti-aliasing and its colour only: the
-    /// paint of a solid colour fill that nothing changed since ([`Self::release_fill`]).
-    solid_fill: bool,
+    /// The paint differs from a reset paint in its anti-aliasing and its colour only, which are
+    /// these: the paint of a solid colour fill that nothing changed since ([`Self::release_fill`]).
+    solid: Option<SolidFillState>,
+    /// The paint differs from a reset paint in these values only: the paint of an undashed solid
+    /// stroke that nothing changed since ([`Self::release_stroke`]).
+    stroke: Option<SolidStrokeState>,
     // We are saving memory allocations here: up to three disposables without
     // a collection.
     disposable1: Option<Box<dyn FnOnce()>>,
@@ -2995,13 +3126,13 @@ pub(crate) struct PaintWrapper {
 
 impl PaintWrapper {
     pub fn new(paint: sk::Paint) -> Self {
-        Self { paint, solid_fill: false, disposable1: None, disposable2: None, disposable3: None }
+        Self { paint, solid: None, stroke: None, disposable1: None, disposable2: None, disposable3: None }
     }
 
-    /// The wrapper of a paint whose anti-aliasing and colour were set, and nothing else, since
-    /// it was reset or came back from [`Self::release_fill`].
-    fn solid_fill(paint: sk::Paint) -> Self {
-        Self { paint, solid_fill: true, disposable1: None, disposable2: None, disposable3: None }
+    /// The wrapper of a paint whose anti-aliasing and colour are `state`, and that differs from a
+    /// reset paint in nothing else.
+    fn solid_fill(paint: sk::Paint, state: SolidFillState) -> Self {
+        Self { paint, solid: Some(state), stroke: None, disposable1: None, disposable2: None, disposable3: None }
     }
 
     /// The configured paint.
@@ -3010,8 +3141,11 @@ impl PaintWrapper {
     }
 
     /// The paint, to configure further.
+    /// Anything set through it (a shader, a blend mode, a filter, a path effect) makes the paint
+    /// one whose values are not known: it is reset when it is released.
     pub fn paint_mut(&mut self) -> &mut sk::Paint {
-        self.solid_fill = false;
+        self.solid = None;
+        self.stroke = None;
         &mut self.paint
     }
 
@@ -3045,12 +3179,23 @@ impl PaintWrapper {
     /// values that every fill sets first (FerroUI addition, desktop-performance.md,
     /// section 9.31). A paint from here is given to [`DrawingContextImpl::create_paint`] only,
     /// or reset.
-    pub fn release_fill(mut self) -> sk::Paint {
-        if !self.solid_fill {
+    pub fn release_fill(mut self) -> (sk::Paint, Option<SolidFillState>) {
+        if self.solid.is_none() {
             self.paint.reset();
         }
         self.release_disposables();
-        self.paint
+        (self.paint, self.solid)
+    }
+
+    /// Releases the disposables and hands back the paint for the next stroke: reset, unless it
+    /// is the paint of an undashed solid stroke, whose values are handed back with it, so that
+    /// the next stroke sets only those that differ.
+    pub fn release_stroke(mut self) -> (sk::Paint, Option<SolidStrokeState>) {
+        if self.stroke.is_none() {
+            self.paint.reset();
+        }
+        self.release_disposables();
+        (self.paint, self.stroke)
     }
 
     fn release_disposables(&mut self) {
