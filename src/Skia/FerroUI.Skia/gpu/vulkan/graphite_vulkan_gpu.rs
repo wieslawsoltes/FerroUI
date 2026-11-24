@@ -84,7 +84,7 @@ impl GraphiteVulkanSkiaGpu {
         bands: usize,
     ) -> Option<PipelinedLayerSurface> {
         let vulkan = self.vulkan.clone();
-        let make_texture = move |width, height, rgba| LayerTexture::vulkan(&*vulkan, width, height, rgba);
+        let make_texture = |width, height, rgba| LayerTexture::vulkan(&*vulkan, width, height, rgba);
         PipelinedLayerSurface::try_with_texture(&self.gr_context, size, surface_props, mode, bands, make_texture)
     }
 }

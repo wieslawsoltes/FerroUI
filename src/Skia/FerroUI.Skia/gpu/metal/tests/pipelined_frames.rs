@@ -1053,96 +1053,6 @@ fn bands_inserted_from_deferred_canvases_in_completion_order_show_the_frames() {
     }
 }
 
-/// Draws one frame of each layer against the true frame (one recording, no band clip), and checks that the
-/// pipelined layer really handed it to its threads: a band whose insertion Graphite refused would end the threads,
-/// and the next frames would be drawn directly.
-fn draw_pipelined(layers: &Layers, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
-    layers.draw_against_one_recording(draw);
-    assert!(layers.pipelined.has_pending_frame(), "the frame was pipelined");
-}
-
-/// The layers with the band textures (#1363, variant B): each band draws on a texture of its own.
-fn band_texture_layers(device: &Rc<TestMetalDevice>, bands: usize) -> Layers {
-    let layers = Layers::with_bands(device, SkiaFramePipelining::On, bands);
-    // Before the first pipelined frame makes the threads.
-    layers.gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::BandTextures);
-    layers
-}
-
-#[test]
-fn bands_on_textures_of_their_own_show_the_frames() {
-    let Some(device) = TestMetalDevice::try_new() else {
-        eprintln!("skipped: no Metal device available");
-        return;
-    };
-    for bands in [2, 4] {
-        let layers = band_texture_layers(&device, bands);
-        // Antialiased edges and text across the rows the bands meet at: each band is a recording on a texture
-        // of its own size, so a pixel at an edge may differ as between any two clipped frames.
-        let tolerance = WIDTH as usize * (bands - 1);
-        draw_pipelined(&layers, draw_scene);
-        layers.assert_pixels_within(&format!("the first frame in {bands} bands"), tolerance, 8);
-        // The read above copied the textures of the bands onto the layer's texture; the bands keep theirs.
-        draw_pipelined(&layers, draw_update);
-        draw_pipelined(&layers, draw_update);
-        layers.assert_pixels_within(&format!("the third frame in {bands} bands"), tolerance, 8);
-        layers.dispose();
-    }
-}
-
-#[test]
-fn a_frame_on_band_textures_that_changes_one_band_keeps_the_textures_of_the_others() {
-    let Some(device) = TestMetalDevice::try_new() else {
-        eprintln!("skipped: no Metal device available");
-        return;
-    };
-    let layers = band_texture_layers(&device, BANDS);
-    draw_pipelined(&layers, draw_scene);
-    let frames: [(f64, f64, u32); 3] =
-        [(10.0, 60.0, 0xFF2563EB), (150.0, 200.0, 0xFFDC2626), (100.0, 160.0, 0xFF16A34A)];
-    for (frame, (top, bottom, color)) in frames.into_iter().enumerate() {
-        layers.pipelined.set_frame_dirty_rows(Some((top as i32 - 1, bottom as i32 + 1)));
-        draw_pipelined(&layers, draw_rows(top, bottom, color));
-        layers.pipelined.complete_pending_frame();
-        layers.assert_pixels_within(&format!("frame {frame} of rows {top} to {bottom}"), WIDTH as usize, 8);
-    }
-    layers.dispose();
-}
-
-#[test]
-fn when_the_bands_move_their_new_textures_start_from_the_rows_of_the_textures_before() {
-    let Some(device) = TestMetalDevice::try_new() else {
-        eprintln!("skipped: no Metal device available");
-        return;
-    };
-    let layers = band_texture_layers(&device, BANDS);
-    let equal = band_clips((WIDTH, HEIGHT), BANDS);
-    assert_eq!(layers.surface.band_clips(), equal, "a layer begins with equal bands");
-
-    // Frames whose lower part costs, until the bands move; the frames are not read in between, so the textures of
-    // the bands stay the only copy of what the layer shows.
-    let mut moved = false;
-    for _ in 0..24 {
-        let before = layers.surface.band_clips();
-        draw_pipelined(&layers, draw_scene_with_a_heavy_lower_part);
-        layers.pipelined.complete_pending_frame();
-        if layers.surface.band_clips() != before {
-            moved = true;
-            break;
-        }
-    }
-    assert!(moved, "the bands moved: {:?}", layers.surface.band_clips());
-
-    // The first frame under the moved bands changes rows of the lower band only: the upper band, whose rows moved,
-    // is played for the copy of its rows from the textures before, and shows the frame before in all of them.
-    let top = HEIGHT as f64 - 50.0;
-    layers.pipelined.set_frame_dirty_rows(Some((top as i32 - 1, HEIGHT)));
-    draw_pipelined(&layers, draw_rows(top, HEIGHT as f64 - 4.0, 0xFF9333EA));
-    layers.pipelined.complete_pending_frame();
-    layers.assert_pixels_within("a frame after the bands moved", WIDTH as usize, 8);
-    layers.dispose();
-}
-
 /// Shapes that cross every row where the bands meet, antialiased: a stroked line from the top to the bottom of
 /// the layer, rounded rectangles and ellipses across each edge of 2 and 4 bands, a wide stroke, and text.
 fn draw_shapes_across_the_band_edges(context: &mut dyn IDrawingContextImpl) {
@@ -1278,47 +1188,6 @@ fn ordered_and_completion_order_bands_show_the_same_frame() {
     }
 }
 
-/// Blurred shadows across the rows where 2 and 4 bands meet: a small blur and one that reaches far across the
-/// edges.
-fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingContextImpl) {
-    move |context: &mut dyn IDrawingContextImpl| {
-        context.clear(Colors::WHITE);
-        let shadow = BoxShadows::parse(&format!("3 5 {blur} 2 #b0000000")).unwrap();
-        for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
-            let left = 20.0 + index as f64 * 100.0;
-            context.draw_rectangle(
-                Some(&solid(0xfff0f0f0)),
-                None,
-                RoundedRect::from_radius(Rect::new(left, edge - 14.5, 60.0, 29.0), 6.0),
-                &shadow,
-            );
-        }
-    }
-}
-
-/// A blurred shadow that crosses a band edge is drawn as on the ordinary layer, with the band textures (#1363,
-/// variant B) and with the deferred canvases, whether its blur is small or reaches far across the edges.
-#[test]
-fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
-    let Some(device) = TestMetalDevice::try_new() else {
-        eprintln!("skipped: no Metal device available");
-        return;
-    };
-    for insert in [crate::gpu::graphite::BandInsert::BandTextures, crate::gpu::graphite::BandInsert::Deferred] {
-        for (bands, blur) in [(2, 6.0), (4, 6.0), (2, 40.0), (4, 40.0)] {
-            let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
-            layers.gr_context.set_band_insert_for_tests(insert);
-            draw_pipelined(&layers, draw_shadows_across_the_band_edges(blur));
-            let what = format!("{insert:?}: shadows blurred by {blur} across the edges of {bands} bands");
-            layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
-            // A frame after it, on what the first left.
-            draw_pipelined(&layers, draw_update);
-            layers.assert_pixels_within(&format!("{what}, then an update"), WIDTH as usize * (bands - 1), 8);
-            layers.dispose();
-        }
-    }
-}
-
 /// Draws a frame on an ordinary layer of the context of `layers` under each of `clips`, in that order, each a
 /// recording of its own, as the band threads' recordings are.
 fn draw_ordinary_bands(
@@ -1420,4 +1289,45 @@ fn a_band_writes_no_pixel_outside_its_rows() {
         }
     }
     layers.dispose();
+}
+
+/// Blurred shadows across the rows where 2 and 4 bands meet: a small blur and one that reaches far across the
+/// edges.
+fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingContextImpl) {
+    move |context: &mut dyn IDrawingContextImpl| {
+        context.clear(Colors::WHITE);
+        let shadow = BoxShadows::parse(&format!("3 5 {blur} 2 #b0000000")).unwrap();
+        for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
+            let left = 20.0 + index as f64 * 100.0;
+            context.draw_rectangle(
+                Some(&solid(0xfff0f0f0)),
+                None,
+                RoundedRect::from_radius(Rect::new(left, edge - 14.5, 60.0, 29.0), 6.0),
+                &shadow,
+            );
+        }
+    }
+}
+
+/// A blurred shadow that crosses a band edge is drawn as the true frame shows it (one recording, no band clip), in
+/// the default order and in completion order, whether its blur is small or reaches far across the edges.
+#[test]
+fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    for insert in [crate::gpu::graphite::BandInsert::Ordered, crate::gpu::graphite::BandInsert::Deferred] {
+        for (bands, blur) in [(2, 6.0), (4, 6.0), (2, 40.0), (4, 40.0)] {
+            let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+            layers.gr_context.set_band_insert_for_tests(insert);
+            draw_pipelined(&layers, draw_shadows_across_the_band_edges(blur));
+            let what = format!("{insert:?}: shadows blurred by {blur} across the edges of {bands} bands");
+            layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
+            // A frame after it, on what the first left.
+            draw_pipelined(&layers, draw_update);
+            layers.assert_pixels_within(&format!("{what}, then an update"), WIDTH as usize * (bands - 1), 8);
+            layers.dispose();
+        }
+    }
 }

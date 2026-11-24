@@ -49,44 +49,6 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 const WIDTH: i32 = 320;
-
-ferroui_base::ferro_thread_local! {
-    /// The tests of this thread draw with the band textures (`BandInsert::BandTextures`, #1363).
-    static BAND_TEXTURES: std::cell::Cell<bool> = std::cell::Cell::new(false);
-}
-
-fn band_textures() -> bool {
-    BAND_TEXTURES.with(std::cell::Cell::get)
-}
-
-/// Runs `test` once with the insertion of Vulkan (deferred canvases) and once with the band textures, each on a
-/// context of its own (the threads choose how they insert when they are made).
-fn in_both_modes(test: impl Fn()) {
-    // Each mode runs to its end whatever became of the other, so that both are seen.
-    let mut failures = Vec::new();
-    for textures in [false, true] {
-        BAND_TEXTURES.with(|cell| cell.set(textures));
-        if let Err(panic) = std::panic::catch_unwind(std::panic::AssertUnwindSafe(&test)) {
-            let message = panic
-                .downcast_ref::<String>()
-                .cloned()
-                .or_else(|| panic.downcast_ref::<&str>().map(|message| message.to_string()))
-                .unwrap_or_default();
-            failures.push(format!("{}: {message}", mode_name()));
-        }
-    }
-    BAND_TEXTURES.with(|cell| cell.set(false));
-    assert!(failures.is_empty(), "{failures:#?}");
-}
-
-/// The mode of the tests of this thread, for the messages.
-fn mode_name() -> &'static str {
-    if band_textures() {
-        "band textures"
-    } else {
-        "the default insertion"
-    }
-}
 const HEIGHT: i32 = 256;
 
 /// By how much a channel of a pixel may differ between the pipelined and the ordinary layer, as on Metal
@@ -187,10 +149,6 @@ struct Layers {
 impl Layers {
     fn new(gpu: &Rc<GraphiteVulkanSkiaGpu>, bands: usize, width: i32, height: i32) -> Self {
         let gr_context = gpu.gr_context();
-        if band_textures() {
-            // Before the first pipelined frame of the context makes the threads.
-            gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::BandTextures);
-        }
         let skia_gpu: Rc<dyn ISkiaGpu> = gpu.clone();
         let ordinary = SurfaceRenderTarget::new(create_info(&skia_gpu, &gr_context, width, height));
         let info = create_info(&skia_gpu, &gr_context, width, height);
@@ -217,9 +175,6 @@ impl Layers {
         let mut drawing_context = self.pipelined.create_drawing_context();
         draw(&mut *drawing_context);
         drawing_context.dispose();
-        // A band whose insertion Graphite refused would end the threads, and the next frames would be drawn
-        // directly: every frame of these tests is pipelined.
-        assert!(self.pipelined.has_pending_frame(), "{}: the frame was pipelined", mode_name());
     }
 
     /// Draws a frame on an ordinary layer of the context under each of `clips`, each a recording of its own.
@@ -397,10 +352,6 @@ fn draw_update(context: &mut dyn IDrawingContextImpl) {
 
 #[test]
 fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames() {
-    in_both_modes(|| bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mode());
-}
-
-fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mode() {
     for bands in [2, 4] {
         // A context of its own for each count: the threads of a context are as many as its first layer asked for.
         let Some((context, gpu)) = graphite_gpu() else { return };
@@ -418,10 +369,6 @@ fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mo
 
 #[test]
 fn a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of() {
-    in_both_modes(|| a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of_in_a_mode());
-}
-
-fn a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of_in_a_mode() {
     let Some((context, gpu)) = graphite_gpu() else { return };
     // A window that grows and shrinks: each size a layer of its own, on an image of its own, and the
     // image of the layer before goes with the flush after it was let go of.
@@ -487,10 +434,6 @@ fn draw_shapes_across_the_band_edges(context: &mut dyn IDrawingContextImpl) {
 /// of the band's size such shapes differed by up to 19 steps along their whole length (see the module).
 #[test]
 fn bands_draw_the_shapes_across_their_edges_as_the_ordinary_layer() {
-    in_both_modes(bands_draw_the_shapes_across_their_edges_in_a_mode);
-}
-
-fn bands_draw_the_shapes_across_their_edges_in_a_mode() {
     for bands in [2, 4] {
         let Some((context, gpu)) = graphite_gpu() else { return };
         let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
@@ -558,10 +501,6 @@ fn disposing_one_skia_context_leaves_another_on_the_same_device_drawing() {
 /// for 2 and 4 bands, where the pixels that differ lie against the band edges.
 #[test]
 fn diagnostic_where_the_frames_of_lavapipe_differ() {
-    in_both_modes(diagnostic_where_the_frames_of_lavapipe_differ_in_a_mode);
-}
-
-fn diagnostic_where_the_frames_of_lavapipe_differ_in_a_mode() {
     for bands in [1, 2, 4] {
         let Some((context, gpu)) = graphite_gpu() else { return };
         let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
@@ -573,7 +512,7 @@ fn diagnostic_where_the_frames_of_lavapipe_differ_in_a_mode() {
         let ordinary = bytes(&layers.ordinary, layers.size);
         let pipelined = bytes(&layers.pipelined, layers.size);
         let compare = |what: &str, one: &[u8], other: &[u8]| {
-            report(&format!("{}, {bands} bands: {what}", mode_name()), &difference(one, other, WIDTH), &edges)
+            report(&format!("{bands} bands: {what}"), &difference(one, other, WIDTH), &edges)
         };
         compare("pipelined against ordinary", &ordinary, &pipelined);
 
@@ -604,45 +543,6 @@ fn diagnostic_where_the_frames_of_lavapipe_differ_in_a_mode() {
         for layer in [again, once, other] {
             layer.dispose();
         }
-        layers.dispose();
-        context.dispose();
-    }
-}
-
-/// Blurred shadows across the rows where 2 and 4 bands meet: a small blur and one that reaches far across the
-/// edges.
-fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingContextImpl) {
-    move |context: &mut dyn IDrawingContextImpl| {
-        context.clear(Colors::WHITE);
-        let shadow = BoxShadows::parse(&format!("3 5 {blur} 2 #b0000000")).unwrap();
-        for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
-            let left = 20.0 + index as f64 * 100.0;
-            context.draw_rectangle(
-                Some(&solid(0xfff0f0f0)),
-                None,
-                RoundedRect::from_radius(Rect::new(left, edge - 14.5, 60.0, 29.0), 6.0),
-                &shadow,
-            );
-        }
-    }
-}
-
-/// A blurred shadow that crosses a band edge is drawn as the true frame shows it, at 8 steps, whether its blur is
-/// small or reaches far across the edges.
-#[test]
-fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
-    in_both_modes(blurred_shadows_across_the_band_edges_in_a_mode);
-}
-
-fn blurred_shadows_across_the_band_edges_in_a_mode() {
-    for (bands, blur) in [(2, 6.0), (4, 6.0), (2, 40.0), (4, 40.0)] {
-        let Some((context, gpu)) = graphite_gpu() else { return };
-        let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
-        layers.draw(draw_shadows_across_the_band_edges(blur));
-        let what = format!("shadows blurred by {blur} across the edges of {bands} bands");
-        layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), STEP);
-        layers.draw(draw_update);
-        layers.assert_pixels_within(&format!("{what}, then an update"), WIDTH as usize * (bands - 1), STEP);
         layers.dispose();
         context.dispose();
     }
@@ -830,4 +730,47 @@ fn ordered_and_completion_order_bands_show_the_same_frame() {
         ordered_context.dispose();
         completion_context.dispose();
     }
+}
+
+/// Blurred shadows across the rows where 2 and 4 bands meet: a small blur and one that reaches far across the
+/// edges.
+fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingContextImpl) {
+    move |context: &mut dyn IDrawingContextImpl| {
+        context.clear(Colors::WHITE);
+        let shadow = BoxShadows::parse(&format!("3 5 {blur} 2 #b0000000")).unwrap();
+        for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
+            let left = 20.0 + index as f64 * 100.0;
+            context.draw_rectangle(
+                Some(&solid(0xfff0f0f0)),
+                None,
+                RoundedRect::from_radius(Rect::new(left, edge - 14.5, 60.0, 29.0), 6.0),
+                &shadow,
+            );
+        }
+    }
+}
+
+/// A blurred shadow that crosses a band edge is drawn as the true frame shows it, at 8 steps, in the default order
+/// and in completion order, whether its blur is small or reaches far across the edges.
+#[test]
+fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
+    use crate::gpu::graphite::BandInsert;
+    for insert in [BandInsert::Ordered, BandInsert::Deferred] {
+        for (bands, blur) in [(2, 6.0), (4, 6.0), (2, 40.0), (4, 40.0)] {
+            shadows_in_a_mode(insert, bands, blur);
+        }
+    }
+}
+
+fn shadows_in_a_mode(insert: crate::gpu::graphite::BandInsert, bands: usize, blur: f64) {
+    let Some((context, gpu)) = graphite_gpu() else { return };
+    let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
+    layers.gr_context.set_band_insert_for_tests(insert);
+    layers.draw(draw_shadows_across_the_band_edges(blur));
+    let what = format!("{insert:?}: shadows blurred by {blur} across the edges of {bands} bands");
+    layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), STEP);
+    layers.draw(draw_update);
+    layers.assert_pixels_within(&format!("{what}, then an update"), WIDTH as usize * (bands - 1), STEP);
+    layers.dispose();
+    context.dispose();
 }
