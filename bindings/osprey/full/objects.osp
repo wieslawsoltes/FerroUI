@@ -641,11 +641,14 @@ fn navigationPage() = ferro_create(typeId: 234)
 // `:header-collapsed`, `:auto-suggest-box-collapsed`, `:closed-compact`, `:list-size-compact`,
 // `:pane-not-overlaying`, `:back-button-collapsed`, `:pane-collapsed`, and
 // `:back-button-row-visible` for the row WinUI sizes in code). The Fluent and Simple themes
-// have no template. The menu items are realized in stack panels, not in `ItemsRepeater`s with
-// a hierarchical `SelectionModel` (follow-up F1). Missing (docs/porting/winui-controls.md,
-// section 10.4): the overflow of the top pane, the animations of the pane, the shadow of the
-// pane, the padding of the title bar, the shoulder navigation and the selectors of templates
-// and styles.
+// have no template. The top-level items that do not fit in the top pane move to the overflow
+// menu of `TopNavOverflowButton`, the popup `TopNavOverflowFlyout` with the host
+// `TopNavMenuItemsOverflowHost` (`HandleTopNavigationMeasureOverride`): the items keep their
+// order, the selected item stays in the pane, and an item selected in the menu moves into the
+// pane. The menu items are realized in stack panels, not in `ItemsRepeater`s with a
+// hierarchical `SelectionModel` (follow-up F1). Missing (docs/porting/winui-controls.md,
+// section 10.4): the animations of the pane, the shadow of the pane, the padding of the title
+// bar, the shoulder navigation and the selectors of templates and styles.
 fn navigationView() = ferro_create(typeId: 236)
 // navigationViewItem() -> int: creates a NavigationViewItem. A selectable item of a
 // [`NavigationView`](crate::NavigationView), with an icon, an info badge and child items

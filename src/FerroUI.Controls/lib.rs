@@ -393,6 +393,7 @@ pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable
 mod navigation_view;
 mod navigation_view_events;
 mod navigation_view_item;
+mod navigation_view_top_overflow;
 pub use navigation_view::NavigationView;
 pub use navigation_view_events::{
     NavigationViewBackButtonVisible, NavigationViewBackRequestedEventArgs, NavigationViewDisplayMode,

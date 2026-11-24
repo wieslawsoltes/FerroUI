@@ -64104,9 +64104,9 @@
    "key": "MUX_NavigationViewItemPresenterStyleWhenOnTopPaneOverflow",
    "kind": "Style",
    "target_type": "NavigationViewItemPresenter",
-   "status": "pending",
+   "status": "ported",
    "reason": null,
-   "batch": "B5"
+   "batch": null
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64444,9 +64444,9 @@
    "key": "NavigationViewOverflowButtonNoLabelStyleWhenPaneOnTop",
    "kind": "Style",
    "target_type": "Button",
-   "status": "pending",
-   "reason": null,
-   "batch": "B5"
+   "status": "waived",
+   "reason": "The style of OverflowButtonNoLabel (OverflowLabelGroup), chosen by OverflowLabelMode NoLabel, which FerroUI's NavigationView does not have: the overflow button is always NavigationViewOverflowButtonStyleWhenPaneOnTop (Controls/NavigationView.xaml), from which the NoLabel style differs only in the vertical alignment of the button.",
+   "batch": null
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -64454,9 +64454,9 @@
    "key": "NavigationViewOverflowButtonStyleWhenPaneOnTop",
    "kind": "Style",
    "target_type": "Button",
-   "status": "pending",
+   "status": "ported",
    "reason": null,
-   "batch": "B5"
+   "batch": null
   },
   {
    "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
@@ -90074,6 +90074,7 @@
   "Controls/ComboBox.xaml",
   "Controls/ComboBoxItem.xaml",
   "Controls/CommandBar.xaml",
+  "Controls/ContentDialog.xaml",
   "Controls/ContentPage.xaml",
   "Controls/ContextMenu.xaml",
   "Controls/DataValidationErrors.xaml",
@@ -90707,7 +90708,7 @@
    "winui": "No WinUI control: built from the ListViewItem (ListViewItem_themeresources.xaml), TextBox, Button and ContentDialog (DefaultContentDialogStyle) styles.",
    "status": "ported",
    "deviations": 15,
-   "date": "2026-10-17"
+   "date": "2026-11-23"
   },
   {
    "document": "Menu.xaml",
@@ -90987,7 +90988,7 @@
    "winui": "PipsPager: {PipsPager} (PipsPager.xaml), PipsPagerNavigationButtonBaseStyle, PipsPagerPreviousPageButtonStyle, PipsPagerNextPageButtonStyle, PipsPagerButtonBaseStyle, PipsPagerSelectedPipButtonStyle, PipsPagerNormalPipButtonStyle (PipsPager_themeresources.xaml).",
    "status": "ported",
    "deviations": 12,
-   "date": "2026-10-17"
+   "date": "2026-11-23"
   },
   {
    "document": "PopupRoot.xaml",
@@ -91430,6 +91431,13 @@
    "variant": null,
    "reason": "Reveal styles other than ButtonRevealStyle, RepeatButtonRevealStyle and ToggleButtonRevealStyle (ListViewItemRevealStyle, AppBarButtonRevealStyle, ...): deprecated in WinUI 3, and their controls have themes of their own (see the Reveal brushes); the default styles they duplicate are ported. The three button styles are ported by hand in Controls/RevealStyles.xaml (docs/porting/winui-materials.md).",
    "items": 6
+  },
+  {
+   "document": "controls/dev/NavigationView/NavigationView_themeresources.xaml",
+   "key": "NavigationViewOverflowButtonNoLabelStyleWhenPaneOnTop",
+   "variant": null,
+   "reason": "The style of OverflowButtonNoLabel (OverflowLabelGroup), chosen by OverflowLabelMode NoLabel, which FerroUI's NavigationView does not have: the overflow button is always NavigationViewOverflowButtonStyleWhenPaneOnTop (Controls/NavigationView.xaml), from which the NoLabel style differs only in the vertical alignment of the button.",
+   "items": 1
   },
   {
    "document": "controls/dev/CommonStyles/Deprecated_themeresources.xaml",
