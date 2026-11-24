@@ -19,6 +19,7 @@ mod markup_types;
 mod off_thread;
 mod rust_paths;
 mod text_invalidation;
+mod variation_design;
 mod web_font_collection;
 mod web_fonts;
 
@@ -32,5 +33,6 @@ pub use fetchers::{DefaultFontFaceFetcher, FontFetchOptions};
 pub use font_data_stream::FontDataStream;
 pub use font_face_builder::FontFaceBuilder;
 pub use markup_types::{register_types, ASSEMBLY};
+pub use variation_design::variation_design;
 pub use web_font_collection::{FontFetchError, FontFetchResult, IFontFaceFetcher, WebFontCollection};
 pub use web_fonts::WebFonts;
