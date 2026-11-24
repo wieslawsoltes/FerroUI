@@ -493,21 +493,22 @@ fn hotKey(object, value) = {
 fn getHotKey(object) = "${ferro_get_cstr_or(object: object, property: 344, fallback: "")}"
 // icon(object: int, value: string) -> int: sets Icon (CommandBarButton,
 // CommandBarToggleButton, MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem,
-// TrayIcon, Window). Defines the `Icon` property.
+// TabStripItem, TrayIcon, Window). Defines the `Icon` property.
 fn icon(object, value) = {
     let _ = ferro_set_str(object: object, property: 346, text: value, length: -1)
     object
 }
 // iconObject(object: int, value: int) -> int: sets Icon (CommandBarButton,
 // CommandBarToggleButton, MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem,
-// TrayIcon, Window) to an object; 0 is null.
+// TabStripItem, TrayIcon, Window) to an object; 0 is null.
 fn iconObject(object, value) = {
     let _ = ferro_set_handle(object: object, property: 346, value: value)
     object
 }
 // getIcon(object: int) -> string: reads Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window); the fallback
-// of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TabStripItem, TrayIcon,
+// Window); the fallback of its kind when the read fails (`failure()` tells): a plain value, no
+// Result.
 fn getIcon(object) = "${ferro_get_cstr_or(object: object, property: 346, fallback: "")}"
 // innerLeftContent(object: int, value: string) -> int: sets InnerLeftContent (AutoCompleteBox,
 // NumericUpDown, TextBox). Defines the `InnerLeftContent` property.
@@ -703,14 +704,15 @@ fn maxLines(object, value) = {
 // getMaxLines(object: int) -> int: reads MaxLines (ContentPresenter, RichTextBlock, TextBox);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getMaxLines(object) = ferro_get_i64_or(object: object, property: 525, fallback: 0)
-// maxWidth(object: int, value: float) -> int: sets MaxWidth (ColumnDefinition, Layoutable).
-// Defines the `MaxWidth` property.
+// maxWidth(object: int, value: float) -> int: sets MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn). Defines the `MaxWidth` property.
 fn maxWidth(object, value) = {
     let _ = ferro_set_f64(object: object, property: 530, value: value)
     object
 }
-// getMaxWidth(object: int) -> float: reads MaxWidth (ColumnDefinition, Layoutable); the
-// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// getMaxWidth(object: int) -> float: reads MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
 fn getMaxWidth(object) = ferro_get_f64_or(object: object, property: 530, fallback: 0.0)
 // minHeight(object: int, value: float) -> int: sets MinHeight (Layoutable, RowDefinition).
 // Defines the `MinHeight` property.
@@ -730,14 +732,15 @@ fn minLines(object, value) = {
 // getMinLines(object: int) -> int: reads MinLines (TextBox); the fallback of its kind when the
 // read fails (`failure()` tells): a plain value, no Result.
 fn getMinLines(object) = ferro_get_i64_or(object: object, property: 542, fallback: 0)
-// minWidth(object: int, value: float) -> int: sets MinWidth (ColumnDefinition, Layoutable).
-// Defines the `MinWidth` property.
+// minWidth(object: int, value: float) -> int: sets MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn). Defines the `MinWidth` property.
 fn minWidth(object, value) = {
     let _ = ferro_set_f64(object: object, property: 543, value: value)
     object
 }
-// getMinWidth(object: int) -> float: reads MinWidth (ColumnDefinition, Layoutable); the
-// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// getMinWidth(object: int) -> float: reads MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
 fn getMinWidth(object) = ferro_get_f64_or(object: object, property: 543, fallback: 0.0)
 // name(object: int, value: string) -> int: sets Name (Application, StyledElement). Defines the
 // `Name` property.
@@ -1123,14 +1126,15 @@ fn undoLimit(object, value) = {
 // its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getUndoLimit(object) = ferro_get_i64_or(object: object, property: 987, fallback: 0)
 // useFloatingPlaceholder(object: int, value: bool) -> int: sets UseFloatingPlaceholder
-// (CalendarDatePicker, TextBox). Defines the `UseFloatingPlaceholder` property.
+// (AutoCompleteBox, CalendarDatePicker, TextBox). Defines the `UseFloatingPlaceholder`
+// property.
 fn useFloatingPlaceholder(object, value) = {
     let _ = ferro_set_bool(object: object, property: 991, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getUseFloatingPlaceholder(object: int) -> bool: reads UseFloatingPlaceholder
-// (CalendarDatePicker, TextBox); the fallback of its kind when the read fails (`failure()`
-// tells): a plain value, no Result.
+// (AutoCompleteBox, CalendarDatePicker, TextBox); the fallback of its kind when the read fails
+// (`failure()` tells): a plain value, no Result.
 fn getUseFloatingPlaceholder(object) = ferro_get_bool_or(object: object, property: 991, fallback: toInt8(0)) != toInt8(0)
 // useLayoutRounding(object: int, value: bool) -> int: sets UseLayoutRounding (Layoutable).
 // Defines the `UseLayoutRounding` property.

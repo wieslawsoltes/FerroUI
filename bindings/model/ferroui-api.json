@@ -3006,6 +3006,7 @@
     "Text",
     "TextFilter",
     "TextSelector",
+    "UseFloatingPlaceholder",
     "ValueMemberBinding"
    ],
    "events": [
@@ -11482,7 +11483,10 @@
    "creatable": true,
    "control": true,
    "children": "content",
-   "properties": [],
+   "properties": [
+    "Icon",
+    "IconTemplate"
+   ],
    "events": [],
    "doc": "Represents a tab in a `TabStrip`."
   },
@@ -11614,6 +11618,8 @@
     "HeaderTheme",
     "HorizontalContentAlignment",
     "IsVisible",
+    "MaxWidth",
+    "MinWidth",
     "TableView",
     "Width"
    ],
@@ -24208,6 +24214,18 @@
      "doc": "Defines the `Icon` property."
     },
     {
+     "owner": "TabStripItem",
+     "kind": "styled",
+     "value": {
+      "rust": "Option<BoxedValue>",
+      "nullable": true,
+      "kind": "content"
+     },
+     "default": "None",
+     "read_only": false,
+     "doc": "Defines the `Icon` property."
+    },
+    {
      "owner": "TrayIcon",
      "kind": "styled",
      "value": {
@@ -24366,6 +24384,18 @@
     },
     {
      "owner": "TabItem",
+     "kind": "styled",
+     "value": {
+      "rust": "Option<Rc<dyn IDataTemplate>>",
+      "nullable": true,
+      "kind": "unsupported"
+     },
+     "default": "None",
+     "read_only": false,
+     "doc": "Defines the `IconTemplate` property."
+    },
+    {
+     "owner": "TabStripItem",
      "kind": "styled",
      "value": {
       "rust": "Option<Rc<dyn IDataTemplate>>",
@@ -29725,6 +29755,18 @@
      "default": "f64::INFINITY",
      "read_only": false,
      "doc": "Defines the `MaxWidth` property."
+    },
+    {
+     "owner": "TableViewColumn",
+     "kind": "styled",
+     "value": {
+      "rust": "f64",
+      "nullable": false,
+      "kind": "number"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": "Defines the `MaxWidth` property."
     }
    ]
   },
@@ -30148,6 +30190,18 @@
       "kind": "number"
      },
      "default": "0.0",
+     "read_only": false,
+     "doc": "Defines the `MinWidth` property."
+    },
+    {
+     "owner": "TableViewColumn",
+     "kind": "styled",
+     "value": {
+      "rust": "f64",
+      "nullable": false,
+      "kind": "number"
+     },
+     "default": null,
      "read_only": false,
      "doc": "Defines the `MinWidth` property."
     }
@@ -43019,6 +43073,18 @@
     "placeholder"
    ],
    "declarations": [
+    {
+     "owner": "AutoCompleteBox",
+     "kind": "styled",
+     "value": {
+      "rust": "bool",
+      "nullable": false,
+      "kind": "bool"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": "Defines the `UseFloatingPlaceholder` property."
+    },
     {
      "owner": "CalendarDatePicker",
      "kind": "styled",
