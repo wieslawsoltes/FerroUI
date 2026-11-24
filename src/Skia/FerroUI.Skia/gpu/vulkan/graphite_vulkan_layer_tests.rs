@@ -581,8 +581,41 @@ fn diagnostic_what_a_band_writes_outside_its_rows() {
         }
     };
     let scene = |context: &mut dyn IDrawingContextImpl| draw_scene(context);
-    let shapes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 5] = [
+    // The rotated rectangle of the scene, under the rounded clip and the opacity layer of the scene, apart and
+    // together.
+    let rotated = |context: &mut dyn IDrawingContextImpl, opacity: bool, rounded_clip: bool| {
+        if opacity {
+            context.push_opacity(0.55, Some(Rect::new(30.0, 60.0, 200.0, 150.0)));
+        }
+        if rounded_clip {
+            context.push_clip_rounded(RoundedRect::from_radius(Rect::new(40.5, 70.5, 180.0, 130.0), 22.0));
+        }
+        let transform = context.transform();
+        context.set_transform(ferroui_base::Matrix::create_rotation_at(0.3, Point::new(130.0, 128.0)));
+        context.draw_rectangle(
+            Some(&solid(0xff2060c0)),
+            Some(&ImmutablePen::from_uint32(0xff400080, 2.5)),
+            RoundedRect::from_radius(Rect::new(60.0, 80.0, 150.0, 100.0), 9.0),
+            &BoxShadows::default(),
+        );
+        context.set_transform(transform);
+        if rounded_clip {
+            context.pop_clip();
+        }
+        if opacity {
+            context.pop_opacity();
+        }
+    };
+    let rotated_alone = |context: &mut dyn IDrawingContextImpl| rotated(context, false, false);
+    let rotated_clipped = |context: &mut dyn IDrawingContextImpl| rotated(context, false, true);
+    let rotated_in_layer = |context: &mut dyn IDrawingContextImpl| rotated(context, true, false);
+    let rotated_both = |context: &mut dyn IDrawingContextImpl| rotated(context, true, true);
+    let shapes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 9] = [
         ("the scene", &scene),
+        ("a rotated rectangle", &rotated_alone),
+        ("a rotated rectangle under a rounded clip", &rotated_clipped),
+        ("a rotated rectangle in an opacity layer", &rotated_in_layer),
+        ("a rotated rectangle under a rounded clip in an opacity layer", &rotated_both),
         ("a rounded rectangle", &rounded),
         ("an ellipse", &ellipse),
         ("a line", &line),
