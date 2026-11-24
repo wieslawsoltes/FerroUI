@@ -486,8 +486,10 @@
    "pr": 22400,
    "date": "2026-10-23",
    "area": "samples",
-   "class": "deferred",
-   "note": "Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work."
+   "class": "port",
+   "note": "Catalog ColorPicker page redesign: the upstream 12.2.0 document converted by `scripts/convert_catalog_xaml.py`; the code-behind adds no picker any more.",
+   "part": "themes4",
+   "state": "done"
   },
   {
    "hash": "6a25cf4d9b8ee276427abe2db01dcb45bb1b4858",

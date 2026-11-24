@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (116 done, 0 planned) | 116 |
+| `port` (117 done, 0 planned) | 117 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 10 |
+| `deferred` | 9 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -79,7 +79,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-win32 | 5 | 2 |  |  |  | 2 | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
-| samples | 1 |  |  |  | 1 | 1 | 3 |
+| samples | 2 |  |  |  | 1 |  | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
 | text | 10 | 2 |  | 4 | 1 | 1 | 18 |
 | themes | 8 | 4 |  |  | 2 | 1 | 15 |
@@ -143,7 +143,6 @@ are part of the base that the previous sync tracked, so they are not inventoried
 |---|---:|---|---|---|---|
 | `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check. |
 | `78316701f3` | #22451 | 2026-10-22 | platform-android |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
-| `74b4e97962` | #22400 | 2026-10-23 | samples |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
 | `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
 | `719787dc69` | #22637 | 2026-10-29 | themes |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
 | `8dae868308` | #22628 | 2026-11-10 | input |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
@@ -221,7 +220,7 @@ left out only with a recorded performance or better-code reason.
 | `bd835340fb` | #21771 | 2026-10-22 | themes | `port` (done) | themes4 | Fluent 2 theme: no new theme crate (owner). Ported to the existing code: the `ButtonSpinner` spin buttons spin in the direction of their part. Not taken: the template, resources and samples of the new theme; the `Grid.Column` removal in the Fluent `ButtonSpinner` template (no effect inside a `DockPanel`). |
 | `136efefc7d` | #22378 | 2026-10-22 | automation | `port` (done) | automation | ContentControl name no longer falls back to a type name. |
 | `7fda9c36a5` | #22562 | 2026-10-23 | automation | `port` (done) | platforms2 | UI Automation `Invoke` checks the provider and the enabled state, then posts the click, so a modal dialog no longer blocks the client. |
-| `74b4e97962` | #22400 | 2026-10-23 | samples | `deferred` |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
+| `74b4e97962` | #22400 | 2026-10-23 | samples | `port` (done) | themes4 | Catalog ColorPicker page redesign: the upstream 12.2.0 document converted by `scripts/convert_catalog_xaml.py`; the code-behind adds no picker any more. |
 | `6a25cf4d9b` | #22399 | 2026-10-23 | controls | `port` (done) | controls2 | A delayed submenu action no longer closes a reopened menu. |
 | `c1e4fab24c` | #22577 | 2026-10-23 | collections | `not-applicable` |  | `FerroList::contains` and `index_of` take `&T`; an invalid item cannot be passed. |
 | `1def5f851b` | #22426 | 2026-10-25 | controls | `port` (done) | controls2 | PipsPager sizing and scroll reset. |
