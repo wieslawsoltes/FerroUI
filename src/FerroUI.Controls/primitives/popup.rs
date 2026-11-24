@@ -51,6 +51,8 @@ pub struct Popup {
     base: Control,
     dependency_resolver: RefCell<Option<Rc<dyn IFerroDependencyResolver>>>,
     is_open_requested: Cell<bool>,
+    /// Where a pointer placement stays, from when it was first applied until the popup closes.
+    pointer_position: Cell<Option<Point>>,
     lifecycle_generation: Cell<u64>,
     parent_assignment_generation: Cell<u64>,
     closing_request: Cell<Option<u64>>,
@@ -384,6 +386,7 @@ impl Popup {
             base: Control::construct(),
             dependency_resolver: RefCell::new(None),
             is_open_requested: Cell::new(false),
+            pointer_position: Cell::new(None),
             lifecycle_generation: Cell::new(0),
             parent_assignment_generation: Cell::new(0),
             closing_request: Cell::new(None),
@@ -1126,6 +1129,16 @@ impl Popup {
     }
 
     fn update_host_position(&self, popup_host: &Rc<dyn IPopupHost>, placement_target: &Ref<Control>) {
+        // Pointer placement stays at the pointer position from when it was first applied.
+        if self.placement() != PlacementMode::Pointer {
+            self.pointer_position.set(None);
+        } else if self.pointer_position.get().is_none() {
+            if let Some(top_level) = TopLevel::get_top_level(Some(placement_target)) {
+                let position = top_level.point_to_client(top_level.last_pointer_position().unwrap_or_default());
+                self.pointer_position.set(Some(position));
+            }
+        }
+
         popup_host.configure_position(PopupPositionRequest::new_with(
             placement_target.clone().upcast(),
             self.placement(),
@@ -1135,7 +1148,7 @@ impl Popup {
             self.placement_constraint_adjustment(),
             Some(self.placement_rect().unwrap_or_else(|| Rect::from_size(placement_target.bounds().size()))),
             self.custom_popup_placement_callback(),
-        ));
+        ).with_pointer_position(self.pointer_position.get()));
     }
 
     fn update_host_sizing(
@@ -1360,6 +1373,8 @@ impl Popup {
             self.set_current_value(Self::is_open_property(), false);
             return;
         };
+
+        self.pointer_position.set(None);
 
         let this = self.to_ref();
         if let Some(parent_popup) = open_state.parent_popup() {

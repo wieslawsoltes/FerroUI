@@ -3,7 +3,7 @@ use crate::primitives::HeaderedContentControl;
 use crate::templates::IDataTemplate;
 use crate::utils::debug_display::{append_optional_boxed_value, build_base_debug_display};
 use crate::{AssignedBinding, ContentControl, GridLength, GridUnitType, TableView};
-use ferroui_base::layout::HorizontalAlignment;
+use ferroui_base::layout::{HorizontalAlignment, Layoutable};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
@@ -42,7 +42,10 @@ impl FerroObjectImpl for TableViewColumn {
 
         let property = change.property();
 
-        if property == Self::width_property().as_property() || property == Self::is_visible_property().as_property()
+        if property == Self::width_property().as_property()
+            || property == Self::is_visible_property().as_property()
+            || property == Self::min_width_property().as_property()
+            || property == Self::max_width_property().as_property()
         {
             if let Some(table_view) = this.table_view() {
                 table_view.on_columns_size_changed();
@@ -91,6 +94,16 @@ ferro_properties! {
         /// Defines the `Width` property.
         pub fn width_property() -> StyledProperty<GridLength> {
             FerroProperty::register::<TableViewColumn, _>("Width", GridLength::new(1.0, GridUnitType::Star))
+        }
+
+        /// Defines the `MinWidth` property.
+        pub fn min_width_property() -> StyledProperty<f64> {
+            Layoutable::min_width_property().add_owner::<TableViewColumn>()
+        }
+
+        /// Defines the `MaxWidth` property.
+        pub fn max_width_property() -> StyledProperty<f64> {
+            Layoutable::max_width_property().add_owner::<TableViewColumn>()
         }
 
         /// Defines the `CellTheme` property.
@@ -207,6 +220,32 @@ impl TableViewColumn {
     /// sizing.
     pub fn width(&self) -> GridLength {
         self.get_value(Self::width_property())
+    }
+
+    /// The minimum column width, in device independent pixels. The default is 0. Applies to
+    /// pixel, star and auto sizing and to interactive resizing, must be finite and non-negative,
+    /// and takes precedence over [`max_width`](Self::max_width) if the limits conflict.
+    pub fn min_width(&self) -> f64 {
+        self.get_value(Self::min_width_property())
+    }
+
+    pub fn set_min_width(&self, value: f64) {
+        self.set_value(Self::min_width_property(), value)
+    }
+
+    /// The maximum column width, in device independent pixels; infinity by default. Star columns
+    /// redistribute space when a column reaches a limit; they can leave unused space if all
+    /// maxima are reached, or overflow if their minima exceed the available space.
+    pub fn max_width(&self) -> f64 {
+        self.get_value(Self::max_width_property())
+    }
+
+    pub fn set_max_width(&self, value: f64) {
+        self.set_value(Self::max_width_property(), value)
+    }
+
+    pub(crate) fn clamp_width(&self, width: f64) -> f64 {
+        self.min_width().max(self.max_width().min(width))
     }
 
     pub fn set_width(&self, value: GridLength) {

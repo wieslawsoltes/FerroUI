@@ -549,6 +549,11 @@ impl InputElementImpl for ColorSpectrum {
 }
 
 impl ColorSpectrum {
+    fn static_constructor() {
+        // Focusable regardless of the theme, so that the tooltip with the color name can show.
+        InputElement::focusable_property().override_default_value::<ColorSpectrum>(true);
+    }
+
     /// The pseudo-class of a pressed spectrum.
     pub const PC_PRESSED: &'static str = ":pressed";
     /// The pseudo-class of a dark selection ellipse.
@@ -1075,9 +1080,8 @@ impl ColorSpectrum {
         self.focus();
 
         self.is_pointer_pressed.set(true);
-        // When the pen pointer type is available, `args.pointer().type_() == PointerType::Pen` is
-        // also a reason for a large selection (as in the original).
-        self.should_show_large_selection.set(args.pointer().type_() == PointerType::Touch);
+        self.should_show_large_selection
+            .set(matches!(args.pointer().type_(), PointerType::Touch | PointerType::Pen));
 
         let capture: Option<Ref<InputElement>> = self.input_target.borrow().clone().map(Ref::upcast);
         args.pointer().capture(capture.as_ref());

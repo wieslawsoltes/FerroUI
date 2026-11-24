@@ -87,10 +87,7 @@ impl FerroObjectImpl for TabControl {
             }
         } else if change.property() == KeyboardNavigation::tab_once_active_element_property().as_property() {
             if let Some(panel) = this.items_presenter_part().and_then(|presenter| presenter.panel()) {
-                KeyboardNavigation::set_tab_once_active_element(
-                    &panel,
-                    change.get_new_value::<Option<Ref<InputElement>>>(),
-                );
+                this.set_strip_active_element(&panel, change.get_new_value::<Option<Ref<InputElement>>>());
             }
         }
     }
@@ -165,10 +162,7 @@ impl TemplatedControlImpl for TabControl {
             if !panel.is_set(KeyboardNavigation::tab_navigation_property().as_property()) {
                 panel.set_current_value(KeyboardNavigation::tab_navigation_property(), KeyboardNavigationMode::Once);
             }
-            KeyboardNavigation::set_tab_once_active_element(
-                &panel,
-                KeyboardNavigation::get_tab_once_active_element(this),
-            );
+            this.set_strip_active_element(&panel, KeyboardNavigation::get_tab_once_active_element(this));
         }
     }
 }
@@ -466,6 +460,16 @@ impl TabControl {
 
     pub fn set_indicator_template(&self, value: Option<Rc<dyn IDataTemplate>>) {
         self.set_value(Self::indicator_template_property(), value)
+    }
+
+    /// Sets the element Tab returns to in the tab strip. An element outside the strip (focus can
+    /// be in the content) would make the strip unreachable with Tab: the selected tab is used.
+    fn set_strip_active_element(&self, panel: &Panel, element: Option<Ref<InputElement>>) {
+        let element = element
+            .filter(|element| element.cast::<Visual>().is_some_and(|visual| panel.is_visual_ancestor_of(&visual)))
+            .or_else(|| self.container_from_index(self.selected_index()).map(|container| container.upcast()));
+
+        KeyboardNavigation::set_tab_once_active_element(panel, element);
     }
 
     pub(crate) fn items_presenter_part(&self) -> Option<Ref<ItemsPresenter>> {

@@ -1056,24 +1056,10 @@ mod additional {
         date_picker.focus();
         assert!(tb.is_focused());
 
-        // A calendar is not focusable unless the application makes it so
-        // (the reference themes do not): opening the popup leaves the focus
-        // where it is.
-        assert!(!calendar.focusable());
-        click(&button);
-        assert!(popup.is_open());
-        assert!(!calendar.is_focused());
-        assert!(tb.is_focused());
-        click(&button);
-        assert!(!popup.is_open());
-        // Upstream #22354: focus that returns to the date picker while its drop-down is open, or by
-        // the pointer, stays on the date picker (only keyboard focus on a closed picker goes on to
-        // the text box).
-        assert!(date_picker.is_focused());
-        assert!(!tb.is_focused());
-
-        // A focusable calendar gets the focus once the popup is open ...
-        calendar.set_focusable(true);
+        // The template makes the calendar focusable without making it a tab stop, and it gets the
+        // focus once the popup is open ...
+        assert!(calendar.focusable());
+        assert!(!calendar.is_tab_stop());
         click(&button);
         assert!(popup.is_open());
         assert!(calendar.is_focused());

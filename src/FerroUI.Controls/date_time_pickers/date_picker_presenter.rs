@@ -239,7 +239,9 @@ impl InputElementImpl for DatePickerPresenter {
             Key::Tab => {
                 let focus_manager = FocusManager::get_focus_manager(this);
                 if let Some(focus) = focus_manager.and_then(|focus_manager| focus_manager.get_focused_element()) {
-                    let next_focus = KeyboardNavigationHandler::get_next(&focus, NavigationDirection::Next);
+                    let direction =
+                        e.key.to_navigation_direction(e.key_modifiers).unwrap_or(NavigationDirection::Next);
+                    let next_focus = KeyboardNavigationHandler::get_next(&focus, direction);
                     if let Some(next_focus) = next_focus {
                         next_focus.focus_with(NavigationMethod::Tab, KeyModifiers::NONE);
                     }
@@ -530,6 +532,42 @@ impl DatePickerPresenter {
 
         configure_spacer(&items.first_spacer, column_index > 1, 1);
         configure_spacer(&items.second_spacer, column_index > 2, 3);
+        Self::set_tab_order(items);
+    }
+
+    /// The culture decides which column comes first, so Tab follows the columns on screen and not
+    /// the declaration order.
+    fn set_tab_order(items: &TemplateItems) {
+        let selectors = [
+            (&items.month_host, &items.month_selector),
+            (&items.day_host, &items.day_selector),
+            (&items.year_host, &items.year_selector),
+        ];
+
+        let mut tab_index = 1;
+
+        for column in 0..selectors.len() as i32 * 2 {
+            for (host, selector) in selectors {
+                if host.is_visible() && Grid::get_column(host) == column {
+                    selector.set_tab_index(tab_index);
+                    tab_index += 1;
+                }
+            }
+        }
+
+        items.accept_button.set_tab_index(tab_index);
+        tab_index += 1;
+
+        if let Some(dismiss_button) = &items.dismiss_button {
+            dismiss_button.set_tab_index(tab_index);
+        }
+    }
+
+    /// Focuses the first selector, once the popup is open.
+    pub(super) fn focus_first_selector(&self) {
+        if let Some(items) = self.template_items.borrow().clone() {
+            self.set_initial_focus(&items);
+        }
     }
 
     fn set_initial_focus(&self, items: &TemplateItems) {
@@ -555,7 +593,7 @@ impl DatePickerPresenter {
         }
 
         if let Some(leftmost) = leftmost {
-            leftmost.focus_with(NavigationMethod::Pointer, KeyModifiers::NONE);
+            leftmost.focus_with(NavigationMethod::Unspecified, KeyModifiers::NONE);
         }
     }
 

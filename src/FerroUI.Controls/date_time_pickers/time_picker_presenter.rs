@@ -225,7 +225,9 @@ impl InputElementImpl for TimePickerPresenter {
             Key::Tab => {
                 let focus_manager = FocusManager::get_focus_manager(this);
                 if let Some(focus) = focus_manager.and_then(|focus_manager| focus_manager.get_focused_element()) {
-                    let next_focus = KeyboardNavigationHandler::get_next(&focus, NavigationDirection::Next);
+                    let direction =
+                        e.key.to_navigation_direction(e.key_modifiers).unwrap_or(NavigationDirection::Next);
+                    let next_focus = KeyboardNavigationHandler::get_next(&focus, direction);
                     if let Some(next_focus) = next_focus {
                         next_focus.focus_with(NavigationMethod::Tab, KeyModifiers::NONE);
                     }
@@ -405,7 +407,37 @@ impl TimePickerPresenter {
         items.period_selector.set_selected_value(if hr >= 12 { 1 } else { 0 });
 
         self.set_grid(&items);
-        items.hour_selector.focus_with(NavigationMethod::Pointer, KeyModifiers::NONE);
+        items.hour_selector.focus_with(NavigationMethod::Unspecified, KeyModifiers::NONE);
+    }
+
+    /// Focuses the first selector, once the popup is open.
+    pub(super) fn focus_first_selector(&self) {
+        if let Some(items) = &*self.template_items.borrow() {
+            items.hour_selector.focus_with(NavigationMethod::Unspecified, KeyModifiers::NONE);
+        }
+    }
+
+    fn set_tab_order(items: &TemplateItems) {
+        let mut tab_index = 1;
+
+        items.hour_selector.set_tab_index(tab_index);
+        tab_index += 1;
+        items.minute_selector.set_tab_index(tab_index);
+        tab_index += 1;
+
+        if let Some(second_selector) = &items.second_selector {
+            second_selector.set_tab_index(tab_index);
+            tab_index += 1;
+        }
+
+        items.period_selector.set_tab_index(tab_index);
+        tab_index += 1;
+        items.accept_button.set_tab_index(tab_index);
+        tab_index += 1;
+
+        if let Some(dismiss_button) = &items.dismiss_button {
+            dismiss_button.set_tab_index(tab_index);
+        }
     }
 
     fn set_grid(&self, items: &TemplateItems) {
@@ -447,6 +479,7 @@ impl TimePickerPresenter {
         }
 
         items.picker_container.set_column_definitions(columns_d);
+        Self::set_tab_order(items);
     }
 
     fn on_dismiss_button_clicked(&self) {
