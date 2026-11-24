@@ -550,6 +550,15 @@ fn diagnostic_where_the_frames_of_lavapipe_differ() {
         let twice = bytes(&again, layers.size);
         compare("ordinary band by band, twice", &ordinary, &twice);
 
+        // The same bands drawn bottom first: whether the order the band recordings go in changes a pixel.
+        let reversed = layers.another_ordinary();
+        let backwards: Vec<_> = clips.iter().rev().copied().collect();
+        layers.draw_ordinary(&reversed, &backwards, &draw_scene);
+        let bottom_first = bytes(&reversed, layers.size);
+        compare("ordinary band by band, bottom band first, against top first", &ordinary, &bottom_first);
+        compare("pipelined against ordinary bottom band first", &pipelined, &bottom_first);
+        reversed.dispose();
+
         let once = layers.another_ordinary();
         layers.draw_ordinary(&once, &whole, &draw_scene);
         let unbanded = bytes(&once, layers.size);
