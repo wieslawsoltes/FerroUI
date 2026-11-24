@@ -29707,6 +29707,34 @@
         "values": [],
         "attached": false
       },
+      "BackdropEffect": {
+        "name": "BackdropEffect",
+        "type_name": "Option<Rc<dyn IEffect>>",
+        "documentation": "Visual.BackdropEffect: Option<Rc<dyn IEffect>>",
+        "values": [],
+        "attached": false
+      },
+      "BackdropEffectBoundsSource": {
+        "name": "BackdropEffectBoundsSource",
+        "type_name": "BackdropEffectBoundsSource",
+        "documentation": "Visual.BackdropEffectBoundsSource: BackdropEffectBoundsSource",
+        "values": [
+          "Layout",
+          "Subtree"
+        ],
+        "attached": false
+      },
+      "BackdropEffectCache": {
+        "name": "BackdropEffectCache",
+        "type_name": "BackdropEffectCache",
+        "documentation": "Visual.BackdropEffectCache: BackdropEffectCache",
+        "values": [
+          "Default",
+          "Retained",
+          "Volatile"
+        ],
+        "attached": false
+      },
       "OpacityMask": {
         "name": "OpacityMask",
         "type_name": "Option<Rc<dyn IBrush>>",
