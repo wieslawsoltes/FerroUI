@@ -2,19 +2,23 @@
 //! same context, on the Vulkan implementation of the machine (lavapipe in the CI job
 //! `graphite-vulkan.yml`).
 //!
-//! On Vulkan the band threads draw on no shared target: whatever mode the environment asks for,
-//! the ordered insertion becomes the deferred one (`BandInsert::with_shared_target`), so each band
-//! is a recording of its own, on a deferred canvas of the layer's size under the band's clip, placed
-//! on the layer's image when it is ready. The frames are compared with the ordinary layer drawing the
-//! same frame band by band, each band a recording of its own under the same clip, within the
-//! tolerance of the Metal tests: at most a row of pixels per band edge, by at most [`STEP`].
+//! On Vulkan the band threads draw on no shared target: each band is a recording of its own, on a
+//! deferred canvas of the layer's size under the band's clip, which its insertion places on the
+//! layer's image bounded to the band's rows (`fTargetClip`), in the default order or in completion
+//! order. The frames are compared with the true frame: an ordinary layer drawing the same frame in one
+//! recording with no band clip, within the tolerance of the Metal tests (at most a row of pixels per
+//! band edge, by at most [`STEP`]).
 //!
 //! What the first runs on lavapipe showed (`diagnostic_where_the_frames_of_lavapipe_differ`): the
 //! ordinary path draws a frame the same way twice, band by band and in one recording, and a pipelined
 //! layer of one band matches the ordinary layer exactly. With 2 and 4 bands on canvases of the band's
 //! size, the shapes that cross a band edge (the stroked line across the layer, a rounded rectangle)
 //! were antialiased up to 19 steps apart along the whole shape; the canvases have the layer's size
-//! since, so that such a shape is cut by the clip inside the target, as on the ordinary layer.
+//! since, so that such a shape is cut by the clip inside the target, as on the ordinary layer. And the
+//! ordinary layer drawn band by band depended on the order of its bands at two pixels per edge: a band of
+//! the scene wrote one pixel across its integer clip that is not antialiased
+//! (`diagnostic_what_a_band_writes_outside_its_rows`), so the band drawn last won it. That is why the
+//! insertion bounds each band to its rows, and why the reference is one recording.
 //!
 //! Without a Vulkan loader or device the tests print why they do nothing and pass; with
 //! `FERROUI_VULKAN_TEST_REQUIRE=1` they fail instead.
@@ -80,7 +84,7 @@ fn mode_name() -> &'static str {
     if band_textures() {
         "band textures"
     } else {
-        "deferred canvases"
+        "the default insertion"
     }
 }
 const HEIGHT: i32 = 256;
@@ -203,14 +207,19 @@ impl Layers {
         Self { gpu: gpu.clone(), gr_context, size: (width, height), ordinary, pipelined, surface }
     }
 
-    /// One frame of each layer: the pipelined one hands it to its threads, the ordinary one draws it
-    /// band by band under the same clips, each band a recording of its own.
+    /// One frame of each layer: the pipelined one hands it to its threads, the ordinary one draws the true
+    /// frame, in one recording with no band clip.
     fn draw(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
-        self.draw_ordinary(&self.ordinary, &self.surface.band_clips(), &draw);
+        // The true frame: one recording with no band clip.
+        let whole = [(0, skia_safe::IRect::from_wh(self.size.0, self.size.1))];
+        self.draw_ordinary(&self.ordinary, &whole, &draw);
 
         let mut drawing_context = self.pipelined.create_drawing_context();
         draw(&mut *drawing_context);
         drawing_context.dispose();
+        // A band whose insertion Graphite refused would end the threads, and the next frames would be drawn
+        // directly: every frame of these tests is pipelined.
+        assert!(self.pipelined.has_pending_frame(), "{}: the frame was pipelined", mode_name());
     }
 
     /// Draws a frame on an ordinary layer of the context under each of `clips`, each a recording of its own.
@@ -600,9 +609,8 @@ fn diagnostic_where_the_frames_of_lavapipe_differ_in_a_mode() {
     }
 }
 
-/// Blurred shadows across the rows where 2 and 4 bands meet: one whose blur stays within the margin of the band
-/// textures and one whose blur reaches far beyond it (with the band textures that frame is drawn on the layer's
-/// texture instead).
+/// Blurred shadows across the rows where 2 and 4 bands meet: a small blur and one that reaches far across the
+/// edges.
 fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingContextImpl) {
     move |context: &mut dyn IDrawingContextImpl| {
         context.clear(Colors::WHITE);
@@ -619,8 +627,8 @@ fn draw_shadows_across_the_band_edges(blur: f64) -> impl Fn(&mut dyn IDrawingCon
     }
 }
 
-/// A blurred shadow that crosses a band edge is drawn as on the ordinary layer, at 8 steps, whether its blur fits
-/// the margin of the band textures or reaches beyond it.
+/// A blurred shadow that crosses a band edge is drawn as the true frame shows it, at 8 steps, whether its blur is
+/// small or reaches far across the edges.
 #[test]
 fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
     in_both_modes(blurred_shadows_across_the_band_edges_in_a_mode);
@@ -679,8 +687,41 @@ fn diagnostic_what_a_band_writes_outside_its_rows() {
         }
     };
     let scene = |context: &mut dyn IDrawingContextImpl| draw_scene(context);
-    let shapes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 5] = [
+    // The rotated rectangle of the scene, under the rounded clip and the opacity layer of the scene, apart and
+    // together.
+    let rotated = |context: &mut dyn IDrawingContextImpl, opacity: bool, rounded_clip: bool| {
+        if opacity {
+            context.push_opacity(0.55, Some(Rect::new(30.0, 60.0, 200.0, 150.0)));
+        }
+        if rounded_clip {
+            context.push_clip_rounded(RoundedRect::from_radius(Rect::new(40.5, 70.5, 180.0, 130.0), 22.0));
+        }
+        let transform = context.transform();
+        context.set_transform(ferroui_base::Matrix::create_rotation_at(0.3, Point::new(130.0, 128.0)));
+        context.draw_rectangle(
+            Some(&solid(0xff2060c0)),
+            Some(&ImmutablePen::from_uint32(0xff400080, 2.5)),
+            RoundedRect::from_radius(Rect::new(60.0, 80.0, 150.0, 100.0), 9.0),
+            &BoxShadows::default(),
+        );
+        context.set_transform(transform);
+        if rounded_clip {
+            context.pop_clip();
+        }
+        if opacity {
+            context.pop_opacity();
+        }
+    };
+    let rotated_alone = |context: &mut dyn IDrawingContextImpl| rotated(context, false, false);
+    let rotated_clipped = |context: &mut dyn IDrawingContextImpl| rotated(context, false, true);
+    let rotated_in_layer = |context: &mut dyn IDrawingContextImpl| rotated(context, true, false);
+    let rotated_both = |context: &mut dyn IDrawingContextImpl| rotated(context, true, true);
+    let shapes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 9] = [
         ("the scene", &scene),
+        ("a rotated rectangle", &rotated_alone),
+        ("a rotated rectangle under a rounded clip", &rotated_clipped),
+        ("a rotated rectangle in an opacity layer", &rotated_in_layer),
+        ("a rotated rectangle under a rounded clip in an opacity layer", &rotated_both),
         ("a rounded rectangle", &rounded),
         ("an ellipse", &ellipse),
         ("a line", &line),
@@ -716,4 +757,77 @@ fn diagnostic_what_a_band_writes_outside_its_rows() {
     }
     layers.dispose();
     context.dispose();
+}
+
+/// A band of the pipelined layer writes no pixel outside its rows, in the default order and in completion order:
+/// a frame whose dirty rows are those of one band plays that band alone, on a layer filled with [`SENTINEL`].
+#[test]
+fn a_pipelined_band_writes_no_pixel_outside_its_rows() {
+    use crate::gpu::graphite::BandInsert;
+    for insert in [BandInsert::Ordered, BandInsert::Deferred] {
+        for bands in [2, 4] {
+            let Some((context, gpu)) = graphite_gpu() else { return };
+            let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
+            layers.gr_context.set_band_insert_for_tests(insert);
+            for (index, clip) in layers.surface.band_clips() {
+                let mut drawing_context = layers.pipelined.create_drawing_context();
+                drawing_context.clear(ferroui_base::media::Color::from_uint32(SENTINEL));
+                drawing_context.dispose();
+                assert!(layers.pipelined.has_pending_frame(), "the fill was pipelined");
+                layers.pipelined.complete_pending_frame();
+                let before = bytes(&layers.pipelined, layers.size);
+                layers.pipelined.set_frame_dirty_rows(Some((clip.top, clip.bottom)));
+                let mut drawing_context = layers.pipelined.create_drawing_context();
+                draw_scene(&mut *drawing_context);
+                drawing_context.dispose();
+                assert!(layers.pipelined.has_pending_frame(), "the band was pipelined");
+                layers.pipelined.complete_pending_frame();
+                let after = bytes(&layers.pipelined, layers.size);
+                let outside = before
+                    .chunks_exact(4)
+                    .zip(after.chunks_exact(4))
+                    .enumerate()
+                    .filter(|(pixel, (a, b))| {
+                        let y = (pixel / WIDTH as usize) as i32;
+                        (y < clip.top || y >= clip.bottom) && a != b
+                    })
+                    .count();
+                assert_eq!(outside, 0, "{insert:?}, band {index} of {bands}: pixels written outside its rows");
+            }
+            layers.dispose();
+            context.dispose();
+        }
+    }
+}
+
+/// The default order and completion order show the same frame: each band is bounded to its rows at the insertion,
+/// so no pixel depends on which band went in last.
+#[test]
+fn ordered_and_completion_order_bands_show_the_same_frame() {
+    use crate::gpu::graphite::BandInsert;
+    for bands in [2, 4] {
+        let Some((ordered_context, ordered_gpu)) = graphite_gpu() else { return };
+        let Some((completion_context, completion_gpu)) = graphite_gpu() else { return };
+        let ordered = Layers::new(&ordered_gpu, bands, WIDTH, HEIGHT);
+        ordered.gr_context.set_band_insert_for_tests(BandInsert::Ordered);
+        let completion = Layers::new(&completion_gpu, bands, WIDTH, HEIGHT);
+        completion.gr_context.set_band_insert_for_tests(BandInsert::Deferred);
+        let scenes: [&dyn Fn(&mut dyn IDrawingContextImpl); 2] = [&draw_scene, &draw_shapes_across_the_band_edges];
+        for scene in scenes {
+            for layers in [&ordered, &completion] {
+                let mut drawing_context = layers.pipelined.create_drawing_context();
+                scene(&mut *drawing_context);
+                drawing_context.dispose();
+                assert!(layers.pipelined.has_pending_frame(), "the frame was pipelined");
+                layers.pipelined.complete_pending_frame();
+            }
+            let (one, other) = (bytes(&ordered.pipelined, ordered.size), bytes(&completion.pipelined, completion.size));
+            let found = difference(&one, &other, WIDTH);
+            assert_eq!(found.pixels, 0, "{bands} bands: pixels that differ between the orders: {:?}", found.first);
+        }
+        ordered.dispose();
+        completion.dispose();
+        ordered_context.dispose();
+        completion_context.dispose();
+    }
 }

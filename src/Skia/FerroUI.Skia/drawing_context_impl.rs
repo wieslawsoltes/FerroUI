@@ -178,20 +178,6 @@ ferroui_base::ferro_thread_local! {
     static BAND_DRAW_ROWS: RefCell<Vec<(f32, f32)>> = const { RefCell::new(Vec::new()) };
 }
 
-ferroui_base::ferro_thread_local! {
-    /// How far the effects of the draws of the recorded frames of pipelined layers on this thread
-    /// reach beyond the shapes they are drawn from, in device pixels (`note_effect_reach`): what a
-    /// band drawn on a texture of its own needs around it (`gpu/graphite/pipelined_layer.rs`).
-    static FRAME_EFFECT_REACH: Cell<f32> = const { Cell::new(0.0) };
-}
-
-/// Takes how far the effects of the draws recorded since the last call reach beyond their shapes,
-/// in device pixels (`note_effect_reach`), and starts again from none.
-#[cfg_attr(not(ferro_skia_graphite), allow(dead_code))]
-pub(crate) fn take_frame_effect_reach() -> f32 {
-    FRAME_EFFECT_REACH.with(|reach| reach.replace(0.0))
-}
-
 /// Takes the device rows of the draws counted since the last call (`note_band_draw`), leaving
 /// the storage of `rows` in their place.
 // Only the surface of a pipelined frame layer reads them (Graphite on Metal).
@@ -839,24 +825,6 @@ impl DrawingContextImpl {
         }
         let bounds = local.transform_to_aabb(device);
         BAND_DRAW_ROWS.with(|rows| rows.borrow_mut().push((bounds.y as f32, (bounds.y + bounds.height) as f32)));
-    }
-
-    /// Notes how far the blur of a box shadow of a recorded frame of a pipelined layer reaches beyond the
-    /// shadow's shape, in device pixels (`take_frame_effect_reach`): three standard deviations of the
-    /// blur, scaled by the largest scale of the transform. A band drawn on a texture of its own whose
-    /// margin is narrower than that is drawn on the layer's texture instead.
-    #[inline]
-    fn note_effect_reach(&self, blur_radius: f64) {
-        if blur_radius <= 0.0 || !matches!(self.canvas.source, CanvasSource::Recorder { leases: Some(_), .. }) {
-            return;
-        }
-        let mut device = self.transform();
-        if let Some(post_transform) = self.post_transform {
-            device *= post_transform;
-        }
-        let scale = device.m11.hypot(device.m12).max(device.m21.hypot(device.m22));
-        let reach = 3.0 * Self::sk_blur_radius_to_sigma(blur_radius) * scale as f32;
-        FRAME_EFFECT_REACH.with(|frame| frame.set(frame.get().max(reach)));
     }
 
     /// Restores the canvas state. The transform of the context is what the
@@ -1821,7 +1789,6 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         for box_shadow in box_shadows.iter() {
             if box_shadow != BoxShadow::default() && !box_shadow.is_inset {
-                self.note_effect_reach(box_shadow.blur);
                 let paint = self.box_shadow_paint.take().unwrap_or_default();
                 let (shadow_paint, clip_operation) =
                     Self::create_box_shadow_filter(paint, &box_shadow, self.current_opacity);
@@ -1881,7 +1848,6 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     continue;
                 };
 
-                self.note_effect_reach(box_shadow.blur);
                 let paint = self.box_shadow_paint.take().unwrap_or_default();
                 let (shadow_paint, clip_operation) =
                     Self::create_box_shadow_filter(paint, &box_shadow, self.current_opacity);
