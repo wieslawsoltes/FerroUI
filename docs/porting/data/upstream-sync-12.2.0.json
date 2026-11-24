@@ -408,8 +408,8 @@
    "area": "themes",
    "class": "port",
    "note": "CommandBar overflow scrolls in Fluent and Simple.",
-   "part": "themes",
-   "state": "planned"
+   "part": "themes2",
+   "state": "done"
   },
   {
    "hash": "f874d44497bc6b5ff92d3bb8e2f803597f542bb6",
@@ -538,10 +538,8 @@
    "pr": 22591,
    "date": "2026-10-25",
    "area": "themes",
-   "class": "port",
-   "note": "Fluent DropDownButton padding. Its Fluent 2 half follows commit bd835340fb.",
-   "part": "themes",
-   "state": "planned"
+   "class": "already",
+   "note": "The Fluent DropDownButton already has its padding on the content presenter; the Fluent half of the commit is a comment, the rest is its Fluent 2 theme."
   },
   {
    "hash": "584ae6f3a73af5c0cad22f360b9e189b7a8cddc7",
@@ -1372,8 +1370,8 @@
    "area": "themes",
    "class": "port",
    "note": "Fluent ButtonSpinner outer corner.",
-   "part": "themes",
-   "state": "planned"
+   "part": "themes2",
+   "state": "done"
   },
   {
    "hash": "a05d9d004625878081168576258bf80762b99f18",
@@ -1381,9 +1379,9 @@
    "date": "2026-11-13",
    "area": "themes",
    "class": "port",
-   "note": "Simple ComboBox and Slider show validation errors.",
-   "part": "themes",
-   "state": "planned"
+   "note": "Simple ComboBox and Slider are wrapped in `DataValidationErrors`. One more element per control in the Simple theme: theme start-up check owed.",
+   "part": "themes2",
+   "state": "done"
   },
   {
    "hash": "d0a30417019e5cba8c0d6253a2126a374022599b",
@@ -1536,8 +1534,8 @@
    "area": "themes",
    "class": "port",
    "note": "Simple theme: missing resources.",
-   "part": "themes",
-   "state": "planned"
+   "part": "themes2",
+   "state": "done"
   },
   {
    "hash": "a49cbefe8b787eda66229063115aacb2c6021f9d",
