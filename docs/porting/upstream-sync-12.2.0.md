@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (121 done, 0 planned) | 121 |
+| `port` (122 done, 0 planned) | 122 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 5 |
+| `deferred` | 4 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -76,7 +76,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-ios | 5 |  |  |  |  |  | 5 |
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
 | platform-macos | 8 | 1 |  |  |  | 1 | 10 |
-| platform-win32 | 6 | 2 |  |  |  | 1 | 9 |
+| platform-win32 | 7 | 2 |  |  |  |  | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
 | samples | 2 |  |  |  | 1 |  | 3 |
@@ -107,6 +107,7 @@ Changes of behaviour that the baseline does not record:
 | TwoWay bindings do not write a just-published value back | `500e78afef` | Follows upstream |
 | Fluent and Simple control resources merged into the theme dictionary | `719787dc69` | Follows upstream (PR 1408). `Controls/FluentControls.xaml` and `Controls/SimpleControls.xaml` are resource dictionaries: an application that included one with `StyleInclude` uses `ResourceInclude` or `MergeResourceInclude`. The theme units of the trimming stay one per control document (the merge records the innermost origin, as for the WinUI theme) |
 | Key events carry key text, alternate text, consumed modifiers and platform data | `8dae868308` | Follows upstream (PR 1409); `KeyEventArgs` has four more public fields |
+| `SwapChainGlSurface` is gone; the WinUI swap chain panel renders through the composition swap chain render target | `db0a9a9cdb` | Follows upstream. `ferroui_win32::open_gl::angle::SwapChainGlSurface` is removed: a host uses `ferroui_win32::direct_x::CompositionSwapchainSurface` over its own `ISwapchainVisualHost`. `SwapChainTopLevelImpl` reports `Transparent` |
 
 ## New upstream features and their state
 
@@ -119,7 +120,7 @@ Features merged in this range:
 | Backdrop effects | #21826 | `deferred`: needs a GPU path in Skia and Vello |
 | Key text, consumed modifiers, native key data | #22628, #22782 | `port` (PR 1409): Windows, macOS, X11, Wayland |
 | Opt-in EGL partial presentation | #22501 | `deferred` |
-| `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `deferred` |
+| `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `port` (part `composition-swapchain`): DirectComposition, Windows.UI.Composition and the WinUI swap chain panel; to validate in the Windows VM |
 | Android desktop drag and drop | #22451 | `port` (part `android-dnd`): drops from other applications and drags of the application; to validate on a device with a pointer |
 | Platform-simulated typefaces | #22773 | `deferred`: follows the web fonts stack |
 | Compositor output rotation | #22499 | `port` (PR 1398) |
@@ -143,7 +144,6 @@ are part of the base that the previous sync tracked, so they are not inventoried
 | Commit | PR | Date | Area | Part | Note |
 |---|---:|---|---|---|---|
 | `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
-| `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
 | `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
@@ -232,7 +232,7 @@ left out only with a recorded performance or better-code reason.
 | `0a728569fc` | #22619 | 2026-10-27 | tests | `not-applicable` |  | Dispatcher leak in the upstream xUnit fixtures. |
 | `c67550d9ec` | #22604 | 2026-10-27 | base | `already` |  | Rust `str` comparisons are ordinal (`iteration_count.rs`, `classes.rs`). |
 | `6b41bcb0be` | #22593 | 2026-10-27 | platform-win32 | `already` |  | `query_active_display_paths` in `interop/unmanaged_methods.rs` passes a null topology. |
-| `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 | `deferred` |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
+| `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 | `port` (done) | composition-swapchain | `Win32PlatformOptions::use_composition_swap_chain`: `CompositionSwapchainRenderTarget` renders into a flip-model swap chain for composition shown by an `ISwapchainVisualHost` (the DirectComposition window, the Windows.UI.Composition window through `CreateCompositionSurfaceForSwapChain`, the WinUI swap chain panel); `SwapChainGlSurface` removed, the panel renders through `CompositionSwapchainSurface`; `SwapChainTopLevelImpl` reports `Transparent`. The Windows.UI.Composition brush of a swap chain does not stretch (issue 476). Windows VM validation owed. |
 | `75ea7e186c` | #22549 | 2026-10-27 | build | `not-applicable` |  | Roslyn analyzer. Rust has no unchecked cast to warn about. |
 | `951ee3f067` | #22609 | 2026-10-27 | controls | `port` (done) | controls | Calendar waits for a whole wheel notch. |
 | `626c94d77c` | #22545 | 2026-10-27 | text | `already` |  | `bidi_algorithm.rs` already resolves W2 in one forward pass. |

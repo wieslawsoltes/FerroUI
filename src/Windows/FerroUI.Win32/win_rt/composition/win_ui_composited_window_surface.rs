@@ -27,7 +27,7 @@ mod imp {
     use super::super::win_ui_composition_shared::WinUiCompositionShared;
     use super::super::Required;
     use crate::direct_x::{
-        IDirect3D11TexturePlatformSurface, IDirect3D11TexturePlatformSurface2, IDirect3D11TextureRenderTarget,
+        CompositionSwapchainRenderTarget, IDirect3D11TexturePlatformSurface, IDirect3D11TexturePlatformSurface2, IDirect3D11TextureRenderTarget,
         IDirect3D11TextureRenderTarget2, IDirect3D11TextureRenderTargetRenderSession,
     };
     use crate::i_blur_host::{BlurEffect, ICompositionEffectsSurface};
@@ -60,6 +60,9 @@ mod imp {
         /// the thread that renders; the options of the port are of the UI
         /// thread, which reads the value when the mode is registered.
         backdrop_corner_radius: Option<f32>,
+        /// `Win32PlatformOptions::use_composition_swap_chain`, read with the
+        /// corner radius.
+        use_composition_swap_chain: bool,
         window: Mutex<Option<Arc<WinUiCompositedWindow>>>,
     }
 
@@ -77,10 +80,35 @@ mod imp {
             shared: Arc<WinUiCompositionShared>,
             info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
             backdrop_corner_radius: Option<f32>,
+            use_composition_swap_chain: bool,
         ) -> Arc<WinUiCompositedWindowSurface> {
             Arc::new(WinUiCompositedWindowSurface {
-                inner: Arc::new(Inner { shared, info, backdrop_corner_radius, window: Mutex::new(None) }),
+                inner: Arc::new(Inner {
+                    shared,
+                    info,
+                    backdrop_corner_radius,
+                    use_composition_swap_chain,
+                    window: Mutex::new(None),
+                }),
             })
+        }
+
+        /// The composition tree of the window, made by the first render
+        /// target.
+        fn window(&self) -> Result<Arc<WinUiCompositedWindow>, HResult> {
+            let mut window = self.inner.window.lock().unwrap_or_else(PoisonError::into_inner);
+            match &*window {
+                Some(window) => Ok(window.clone()),
+                None => {
+                    let created = WinUiCompositedWindow::new(
+                        self.inner.info.clone(),
+                        self.inner.shared.clone(),
+                        self.inner.backdrop_corner_radius,
+                    )?;
+                    *window = Some(created.clone());
+                    Ok(created)
+                }
+            }
         }
 
         fn create_target(
@@ -88,23 +116,24 @@ mod imp {
             context: &Rc<dyn IPlatformGraphicsContext>,
             d3d_device: isize,
         ) -> Result<Rc<WinUiCompositedWindowRenderTarget>, HResult> {
-            let window = {
-                let mut window = self.inner.window.lock().unwrap_or_else(PoisonError::into_inner);
-                match &*window {
-                    Some(window) => window.clone(),
-                    None => {
-                        let created = WinUiCompositedWindow::new(
-                            self.inner.info.clone(),
-                            self.inner.shared.clone(),
-                            self.inner.backdrop_corner_radius,
-                        )?;
-                        *window = Some(created.clone());
-                        created
-                    }
-                }
-            };
-
+            let window = self.window()?;
             WinUiCompositedWindowRenderTarget::new(context.clone(), window, d3d_device, self.inner.shared.compositor())
+        }
+
+        /// The render target of a swap chain for composition, when the
+        /// options ask for one.
+        fn create_swapchain_target(
+            &self,
+            context: &Rc<dyn IPlatformGraphicsContext>,
+            d3d_device: isize,
+        ) -> Option<Result<Rc<CompositionSwapchainRenderTarget>, HResult>> {
+            if !self.inner.use_composition_swap_chain {
+                return None;
+            }
+            Some(
+                self.window()
+                    .and_then(|window| CompositionSwapchainRenderTarget::new(context.clone(), d3d_device, window)),
+            )
         }
 
         /// Releases the composition tree of the window.
@@ -141,6 +170,9 @@ mod imp {
             context: &Rc<dyn IPlatformGraphicsContext>,
             d3d_device: isize,
         ) -> Result<Rc<dyn IDirect3D11TextureRenderTarget>, HResult> {
+            if let Some(target) = self.create_swapchain_target(context, d3d_device) {
+                return Ok(target?);
+            }
             Ok(self.create_target(context, d3d_device)?)
         }
     }
@@ -151,6 +183,9 @@ mod imp {
             context: &Rc<dyn IPlatformGraphicsContext>,
             d3d_device: isize,
         ) -> Result<Rc<dyn IDirect3D11TextureRenderTarget2>, HResult> {
+            if let Some(target) = self.create_swapchain_target(context, d3d_device) {
+                return Ok(target?);
+            }
             Ok(self.create_target(context, d3d_device)?)
         }
     }

@@ -92,6 +92,7 @@ mod imp {
     pub(crate) struct WinUiCompositorSurfaceFactory {
         connection: Arc<WinUiCompositorConnection>,
         backdrop_corner_radius: Option<f32>,
+        use_composition_swap_chain: bool,
     }
 
     impl IWindowsSurfaceFactory for WinUiCompositorSurfaceFactory {
@@ -100,7 +101,12 @@ mod imp {
         }
 
         fn create_surface(&self, info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>) -> WindowsSurface {
-            let surface = WinUiCompositedWindowSurface::new(self.connection.shared.clone(), info, self.backdrop_corner_radius);
+            let surface = WinUiCompositedWindowSurface::new(
+                self.connection.shared.clone(),
+                info,
+                self.backdrop_corner_radius,
+                self.use_composition_swap_chain,
+            );
             let render_surface: Arc<dyn IPlatformRenderSurface> = surface.clone();
             let effects: Arc<dyn ICompositionEffectsSurface> = surface.clone();
             WindowsSurface { surface: render_surface, effects: Some(effects), dispose: Some(Arc::new(move || surface.dispose())) }
@@ -160,9 +166,14 @@ mod imp {
                 .map_err(|_| HResult::FAIL)?;
 
             let connect = result.recv().map_err(|_| HResult::FAIL)??;
-            let backdrop_corner_radius = Win32Platform::options().win_ui_composition_backdrop_corner_radius;
-            let factory: Rc<dyn IWindowsSurfaceFactory> =
-                Rc::new(WinUiCompositorSurfaceFactory { connection: connect.clone(), backdrop_corner_radius });
+            let options = Win32Platform::options();
+            let backdrop_corner_radius = options.win_ui_composition_backdrop_corner_radius;
+            let use_composition_swap_chain = options.use_composition_swap_chain.unwrap_or(false);
+            let factory: Rc<dyn IWindowsSurfaceFactory> = Rc::new(WinUiCompositorSurfaceFactory {
+                connection: connect.clone(),
+                backdrop_corner_radius,
+                use_composition_swap_chain,
+            });
             let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(connect);
             FerroLocator::current_mutable()
                 .bind::<dyn IWindowsSurfaceFactory>()

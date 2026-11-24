@@ -8,6 +8,7 @@
 
 #![allow(non_camel_case_types)]
 
+mod composition_swapchain_render_target;
 mod direct_x_enums;
 mod direct_x_structs;
 #[cfg(windows)]
@@ -32,6 +33,13 @@ mod directx {
     include!(concat!(env!("OUT_DIR"), "/directx.rs"));
 }
 
+pub use composition_swapchain_render_target::{
+    inverse_scale_transform, DXGI_MATRIX_3X2_F, IDXGI_SWAP_CHAIN3_GUID, SET_MATRIX_TRANSFORM_SLOT,
+};
+#[cfg(windows)]
+pub(crate) use composition_swapchain_render_target::CompositionSwapchainRenderTarget;
+#[cfg(windows)]
+pub use composition_swapchain_render_target::{CompositionSwapchainSurface, ISwapchainVisualHost};
 pub use direct_x_enums::*;
 pub use direct_x_structs::*;
 #[cfg(windows)]

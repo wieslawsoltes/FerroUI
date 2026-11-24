@@ -93,6 +93,19 @@ pub struct Win32PlatformOptions {
     /// default settings (sharp corners).
     pub win_ui_composition_backdrop_corner_radius: Option<f32>,
 
+    /// When [`composition_mode`](Self::composition_mode) resolves to
+    /// [`Win32CompositionMode::WinUIComposition`] or
+    /// [`Win32CompositionMode::DirectComposition`], render into a DXGI
+    /// flip-model swap chain attached as the content of the visual of the
+    /// window instead of a composition drawing surface. The desktop window
+    /// manager can then use its optimized presentation modes (independent
+    /// flip) for a window that fills the screen, with less latency, at the
+    /// cost of two full-size buffers per window and, in the
+    /// Windows.UI.Composition mode, a looser synchronization of the
+    /// visual during an interactive resize. `None`, the default, lets the
+    /// framework decide (currently: off).
+    pub use_composition_swap_chain: Option<bool>,
+
     /// Render directly on the UI thread instead of using a dedicated render
     /// thread. This can be usable if your device don't have multiple cores
     /// to begin with. This setting is false by default.
@@ -133,6 +146,7 @@ impl Default for Win32PlatformOptions {
                 Win32CompositionMode::RedirectionSurface,
             ],
             win_ui_composition_backdrop_corner_radius: None,
+            use_composition_swap_chain: None,
             should_render_on_ui_thread: false,
             wgl_profiles: vec![GlVersion::new(GlProfileType::OpenGL, 4, 0), GlVersion::new(GlProfileType::OpenGL, 3, 2)],
             custom_platform_graphics: None,
@@ -172,6 +186,7 @@ mod tests {
             ]
         );
         assert_eq!(options.win_ui_composition_backdrop_corner_radius, None);
+        assert_eq!(options.use_composition_swap_chain, None);
         assert!(!options.should_render_on_ui_thread);
         assert_eq!(
             options.wgl_profiles,

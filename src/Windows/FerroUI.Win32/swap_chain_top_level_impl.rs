@@ -17,14 +17,14 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 /// A minimal top-level implementation that hosts a content tree on top of
-/// an externally managed swap-chain surface (e.g. a swap chain panel of
-/// another toolkit or any other host that supplies an OpenGL surface).
+/// an externally managed surface (e.g. a swap chain panel of another
+/// toolkit, or any other host that supplies a render surface).
 /// Sizing, scaling and input pumping are driven by the host.
 ///
 /// The swap chain panel of the WinUI integration (`ferroui-winui`) creates
 /// it; the reference grants that project access to its internals.
 pub struct SwapChainTopLevelImpl {
-    gl_surface: Arc<dyn IPlatformRenderSurface>,
+    surface: Arc<dyn IPlatformRenderSurface>,
     client_size: Cell<Size>,
     scaling: Cell<f64>,
     compositor: Rc<Compositor>,
@@ -41,12 +41,12 @@ pub struct SwapChainTopLevelImpl {
 }
 
 impl SwapChainTopLevelImpl {
-    /// `gl_surface` is the surface of the host, which answers as an OpenGL
-    /// surface (the reference takes it by that type).
-    pub fn new(gl_surface: Arc<dyn IPlatformRenderSurface>) -> Rc<SwapChainTopLevelImpl> {
+    /// `surface` is the surface of the host (the swap chain panel gives a
+    /// `CompositionSwapchainSurface`).
+    pub fn new(surface: Arc<dyn IPlatformRenderSurface>) -> Rc<SwapChainTopLevelImpl> {
         let platform_graphics = FerroLocator::current().get_service::<Arc<dyn IPlatformGraphics>>().map(|graphics| (*graphics).clone());
         Rc::new(SwapChainTopLevelImpl {
-            gl_surface,
+            surface,
             client_size: Cell::new(Size::default()),
             scaling: Cell::new(1.0),
             compositor: Compositor::new(platform_graphics, false),
@@ -148,7 +148,7 @@ impl ITopLevelImpl for SwapChainTopLevelImpl {
     /// rendering parameters of the system for a composited surface (a swap
     /// chain panel is composed by WinUI; docs/porting/text-rendering.md).
     fn surfaces(&self) -> Vec<Arc<dyn IPlatformRenderSurface>> {
-        vec![self.gl_surface.clone(), Arc::new(crate::win32_text_rendering::CompositedTextRenderingSurface)]
+        vec![self.surface.clone(), Arc::new(crate::win32_text_rendering::CompositedTextRenderingSurface)]
     }
 
     fn compositor(&self) -> Option<Rc<Compositor>> {
@@ -237,8 +237,10 @@ impl ITopLevelImpl for SwapChainTopLevelImpl {
 
     fn set_transparency_level_hint(&self, _transparency_levels: &[WindowTransparencyLevel]) {}
 
+    /// The content is composed over the visuals of the host, so the swap
+    /// chain keeps an alpha channel (upstream db0a9a9cdb).
     fn transparency_level(&self) -> WindowTransparencyLevel {
-        WindowTransparencyLevel::none()
+        WindowTransparencyLevel::transparent()
     }
 
     fn acrylic_compensation_levels(&self) -> AcrylicPlatformCompensationLevels {

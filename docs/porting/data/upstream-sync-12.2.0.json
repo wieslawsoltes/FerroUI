@@ -626,8 +626,10 @@
    "pr": 22115,
    "date": "2026-10-27",
    "area": "platform-win32",
-   "class": "deferred",
-   "note": "`UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement."
+   "class": "port",
+   "note": "`Win32PlatformOptions::use_composition_swap_chain`: `CompositionSwapchainRenderTarget` renders into a flip-model swap chain for composition shown by an `ISwapchainVisualHost` (the DirectComposition window, the Windows.UI.Composition window through `CreateCompositionSurfaceForSwapChain`, the WinUI swap chain panel); `SwapChainGlSurface` removed, the panel renders through `CompositionSwapchainSurface`; `SwapChainTopLevelImpl` reports `Transparent`. The Windows.UI.Composition brush of a swap chain does not stretch (issue 476). Windows VM validation owed.",
+   "part": "composition-swapchain",
+   "state": "done"
   },
   {
    "hash": "75ea7e186c01c86fe6af6be27257719ebbfe04b6",
