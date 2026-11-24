@@ -871,6 +871,9 @@ struct Band {
     /// a frame the textures of the bands do not), and starts from these images, each with the rows of
     /// the layer it holds; drawn before the band's part of the picture.
     sources: Option<Vec<(IRect, BandImage)>>,
+    /// How this band is inserted when it is not how the threads insert: a frame of band textures whose
+    /// effects reach further than their margin is drawn from deferred canvases on the layer's texture.
+    insert: Option<BandInsert>,
 }
 
 // SAFETY: a band is made on the render thread and used by the one thread it
@@ -1088,6 +1091,7 @@ impl BandWorker {
             match job {
                 BandJob::Play(band) => {
                     let started = Instant::now();
+                    let insert_mode = band.insert.unwrap_or(insert_mode);
                     let placement = match insert_mode {
                         BandInsert::Ordered => Placement::Turn(Turn { order: order.clone(), number: band.turn }),
                         // A deferred recording covers the whole layer (`play_deferred`): it is placed at the top.
@@ -1748,6 +1752,9 @@ struct PipelinedLayer {
     /// Where the frame the layer shows is: on the layer's texture, on the textures of the bands, or
     /// on both.
     latest: Cell<Latest>,
+    /// How far the effects of the recorded frame reach beyond their shapes, in device pixels
+    /// (`drawing_context_impl::take_frame_effect_reach`).
+    frame_reach: Cell<f32>,
 }
 
 /// Where the frame a layer shows is.
@@ -1885,6 +1892,7 @@ impl PipelinedLayer {
             return;
         };
         let recorded = started.elapsed();
+        self.frame_reach.set(crate::drawing_context_impl::take_frame_effect_reach());
 
         let direct_only = self.had_direct_only_draws() || leases.used();
         let played = if direct_only { Err(Fallback::DirectOnly) } else { self.play_bands(&picture) };
@@ -1996,7 +2004,15 @@ impl PipelinedLayer {
             if threads == 0 {
                 return Err(Fallback::PoolUnavailable);
             }
-            let band_textures = pool.insert_mode() == Some(BandInsert::BandTextures);
+            // A frame whose effects (the blur of a shadow) reach further across a band edge than the margin of the
+            // band textures is drawn from deferred canvases on the layer's texture, which has no edge inside the
+            // layer; the textures of the bands are copied onto it first when only they hold the frame before.
+            let textures_asked = pool.insert_mode() == Some(BandInsert::BandTextures);
+            let band_textures = textures_asked && self.frame_reach.get() <= BAND_TEXTURE_MARGIN as f32;
+            let insert = (textures_asked && !band_textures).then_some(BandInsert::Deferred);
+            if insert.is_some() {
+                self.make_surface_latest(true);
+            }
             // A band has a thread of its own: a layer that asks for more
             // bands than the first pipelined layer of the context did has
             // as many as there are threads.
@@ -2076,6 +2092,7 @@ impl PipelinedLayer {
                     index: *index,
                     turn: 0,
                     sources,
+                    insert,
                 };
                 if pool.play(band) {
                     sent += 1;
@@ -2218,6 +2235,7 @@ impl PipelinedLayerSurface {
             draw_rows: RefCell::new(Vec::new()),
             band_images: RefCell::new(Vec::new()),
             latest: Cell::new(Latest::Surface),
+            frame_reach: Cell::new(0.0),
             src_paint: {
                 let mut paint = Paint::default();
                 paint.set_blend_mode(BlendMode::Src);
@@ -2309,6 +2327,8 @@ impl ISkiaSurface for PipelinedLayerSurface {
             return None;
         }
         layer.frame_rows.set(rows);
+        // What an earlier recording on this thread noted is not this frame's.
+        crate::drawing_context_impl::take_frame_effect_reach();
 
         let (width, height) = layer.size;
         let bounds = Rect::new(0.0, 0.0, width as f32, height as f32);
