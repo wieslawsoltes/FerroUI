@@ -142,6 +142,9 @@ struct Layers {
     gr_context: Rc<GraphiteGrContext>,
     size: (i32, i32),
     ordinary: SurfaceRenderTarget,
+    /// The band reference: the frame drawn band by band, each band in a recording of its own bounded to its rows,
+    /// as on Metal (`gpu/metal/tests/pipelined_frames.rs`), so that both platforms run the same band check.
+    banded: SurfaceRenderTarget,
     pipelined: SurfaceRenderTarget,
     surface: Rc<PipelinedLayerSurface>,
 }
@@ -151,6 +154,7 @@ impl Layers {
         let gr_context = gpu.gr_context();
         let skia_gpu: Rc<dyn ISkiaGpu> = gpu.clone();
         let ordinary = SurfaceRenderTarget::new(create_info(&skia_gpu, &gr_context, width, height));
+        let banded = SurfaceRenderTarget::new(create_info(&skia_gpu, &gr_context, width, height));
         let info = create_info(&skia_gpu, &gr_context, width, height);
         let surface = Rc::new(
             gpu.try_create_pipelined_layer(
@@ -162,7 +166,7 @@ impl Layers {
             .expect("a layer that can be divided, on an image of the device"),
         );
         let pipelined = SurfaceRenderTarget::with_surface(info, surface.clone());
-        Self { gpu: gpu.clone(), gr_context, size: (width, height), ordinary, pipelined, surface }
+        Self { gpu: gpu.clone(), gr_context, size: (width, height), ordinary, banded, pipelined, surface }
     }
 
     /// One frame of each layer: the pipelined one hands it to its threads, the ordinary one draws the true
@@ -171,10 +175,44 @@ impl Layers {
         // The true frame: one recording with no band clip.
         let whole = [(0, skia_safe::IRect::from_wh(self.size.0, self.size.1))];
         self.draw_ordinary(&self.ordinary, &whole, &draw);
+        // The band reference, under the bands the pipelined layer is about to draw.
+        for (_, clip) in self.surface.band_clips() {
+            self.draw_bounded_band(&self.banded, clip, &draw);
+        }
 
         let mut drawing_context = self.pipelined.create_drawing_context();
         draw(&mut *drawing_context);
         drawing_context.dispose();
+    }
+
+    /// Draws one band of a frame on `target` as a band of the pipelined layer is drawn: in a recording of its own,
+    /// under the clip of the band, on a scratch layer that holds what `target` holds, and of what it draws only the
+    /// band's rows go onto `target`. A pixel the band's draws write across its clip is left out.
+    fn draw_bounded_band(
+        &self,
+        target: &SurfaceRenderTarget,
+        clip: skia_safe::IRect,
+        draw: &impl Fn(&mut dyn IDrawingContextImpl),
+    ) {
+        let whole = Rect::new(0.0, 0.0, self.size.0 as f64, self.size.1 as f64);
+        let scratch = self.another_ordinary();
+        let before = target.create_non_affined_snapshot();
+        let mut drawing_context = scratch.create_drawing_context();
+        drawing_context.clear(Colors::TRANSPARENT);
+        drawing_context.draw_bitmap(&*before, 1.0, whole, whole);
+        drawing_context.dispose();
+        self.gr_context.flush();
+        self.draw_ordinary(&scratch, &[(0, clip)], draw);
+        let after = scratch.create_non_affined_snapshot();
+        let rows = Rect::new(clip.left as f64, clip.top as f64, clip.width() as f64, clip.height() as f64);
+        let mut drawing_context = target.create_drawing_context();
+        drawing_context.push_clip(rows);
+        drawing_context.clear(Colors::TRANSPARENT);
+        drawing_context.draw_bitmap(&*after, 1.0, whole, whole);
+        drawing_context.pop_clip();
+        drawing_context.dispose();
+        self.gr_context.flush();
+        scratch.dispose();
     }
 
     /// Draws a frame on an ordinary layer of the context under each of `clips`, each a recording of its own.
@@ -225,10 +263,19 @@ impl Layers {
             "{what}: {different} pixels differ, by {largest} at most; \
              the first at {first:?} (x, y, ordinary, pipelined)"
         );
+        // The same limits against the band reference.
+        let banded = bytes(&self.banded, self.size);
+        let Difference { pixels: different, step: largest, first } = difference(&banded, &pipelined, self.size.0);
+        assert!(
+            different <= pixels && largest <= step,
+            "{what}, against the band reference: {different} pixels differ, by {largest} at most; \
+             the first at {first:?} (x, y, banded, pipelined)"
+        );
     }
 
     fn dispose(self) {
         self.pipelined.dispose();
+        self.banded.dispose();
         self.ordinary.dispose();
         // The flush after a layer was let go of destroys its image once the GPU has finished with it.
         self.gr_context.flush();
