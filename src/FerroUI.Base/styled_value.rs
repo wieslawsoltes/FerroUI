@@ -39,6 +39,7 @@ styled_value!(
     crate::media::Color, crate::media::BoxShadow, crate::media::BoxShadows, crate::input::KeyGesture,
     crate::animation::Transitions, crate::controls::NameScopeRef, crate::styling::ThemeVariant,
     crate::Vector3D, crate::media::FontFamily, crate::media::FontWeight, crate::media::HsvColor,
+    crate::media::FontVariationSettings,
     crate::media::text_formatting::TextTabStops, crate::animation::SignedDuration,
     crate::animation::RepeatBehavior, crate::animation::TimelineDuration, crate::utilities::CultureInfo,
     crate::utilities::DateTime, crate::utilities::DateTimeOffset, crate::utilities::Decimal,
