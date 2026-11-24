@@ -60,13 +60,9 @@ fn in_both_modes(test: impl Fn()) {
 }
 const HEIGHT: i32 = 256;
 
-/// By how much a channel of a pixel may differ between the pipelined and the ordinary layer: a tenth of the
-/// range. Where an antialiased edge is drawn by a recording of another target size (a band's deferred canvas
-/// against the band of the ordinary layer), lavapipe covers a few of its pixels differently: the first runs
-/// showed 2 pixels by at most 19 (2 bands, 384 by 336) and 11 pixels by at most 9 (4 bands), all on the edges
-/// of the line and the shapes, not only at the rows where the bands meet. How many pixels may differ stays a
-/// row per edge between bands.
-const STEP: u8 = 24;
+/// By how much a channel of a pixel may differ between the pipelined and the ordinary layer, as on Metal
+/// (`gpu/metal/tests/pipelined_frames.rs`).
+const STEP: u8 = 8;
 
 fn skip(reason: &str) {
     if std::env::var("FERROUI_VULKAN_TEST_REQUIRE").is_ok_and(|value| value == "1") {
@@ -151,6 +147,7 @@ fn create_info(
 
 /// An ordinary layer and a pipelined layer of one Graphite Vulkan context.
 struct Layers {
+    gpu: Rc<GraphiteVulkanSkiaGpu>,
     gr_context: Rc<GraphiteGrContext>,
     size: (i32, i32),
     ordinary: SurfaceRenderTarget,
@@ -178,14 +175,28 @@ impl Layers {
             .expect("a layer that can be divided, on an image of the device"),
         );
         let pipelined = SurfaceRenderTarget::with_surface(info, surface.clone());
-        Self { gr_context, size: (width, height), ordinary, pipelined, surface }
+        Self { gpu: gpu.clone(), gr_context, size: (width, height), ordinary, pipelined, surface }
     }
 
     /// One frame of each layer: the pipelined one hands it to its threads, the ordinary one draws it
     /// band by band under the same clips, each band a recording of its own.
     fn draw(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
-        for (_, clip) in self.surface.band_clips() {
-            let mut drawing_context = self.ordinary.create_drawing_context();
+        self.draw_ordinary(&self.ordinary, &self.surface.band_clips(), &draw);
+
+        let mut drawing_context = self.pipelined.create_drawing_context();
+        draw(&mut *drawing_context);
+        drawing_context.dispose();
+    }
+
+    /// Draws a frame on an ordinary layer of the context under each of `clips`, each a recording of its own.
+    fn draw_ordinary(
+        &self,
+        layer: &SurfaceRenderTarget,
+        clips: &[(usize, skia_safe::IRect)],
+        draw: &impl Fn(&mut dyn IDrawingContextImpl),
+    ) {
+        for (_, clip) in clips.iter().copied() {
+            let mut drawing_context = layer.create_drawing_context();
             let feature = drawing_context
                 .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
                 .and_then(|feature| feature.downcast_ref::<Rc<dyn ISkiaApiLeaseFeature>>().cloned())
@@ -206,31 +217,20 @@ impl Layers {
             drawing_context.dispose();
             self.gr_context.flush();
         }
+    }
 
-        let mut drawing_context = self.pipelined.create_drawing_context();
-        draw(&mut *drawing_context);
-        drawing_context.dispose();
+    /// Another ordinary layer of the size of the layers, on the same context.
+    fn another_ordinary(&self) -> SurfaceRenderTarget {
+        let skia_gpu: Rc<dyn ISkiaGpu> = self.gpu.clone();
+        SurfaceRenderTarget::new(create_info(&skia_gpu, &self.gr_context, self.size.0, self.size.1))
     }
 
     /// Reads both layers back: at most `pixels` of them may differ, by at most `step` in a channel.
     fn assert_pixels_within(&self, what: &str, pixels: usize, step: u8) {
         let ordinary = bytes(&self.ordinary, self.size);
         let pipelined = bytes(&self.pipelined, self.size);
-        assert_eq!(ordinary.len(), pipelined.len());
         assert!(ordinary.iter().any(|byte| *byte != ordinary[0]), "{what}: the frame shows something");
-        let mut different = 0usize;
-        let mut largest = 0u8;
-        let mut first = Vec::new();
-        for (index, (a, b)) in ordinary.chunks_exact(4).zip(pipelined.chunks_exact(4)).enumerate() {
-            if a != b {
-                different += 1;
-                largest = a.iter().zip(b).fold(largest, |largest, (a, b)| largest.max(a.abs_diff(*b)));
-                if first.len() < 16 {
-                    let width = self.size.0 as usize;
-                    first.push((index % width, index / width, a.to_vec(), b.to_vec()));
-                }
-            }
-        }
+        let Difference { pixels: different, step: largest, first } = difference(&ordinary, &pipelined, self.size.0);
         assert!(
             different <= pixels && largest <= step,
             "{what}: {different} pixels differ, by {largest} at most; \
@@ -244,6 +244,50 @@ impl Layers {
         // The flush after a layer was let go of destroys its image once the GPU has finished with it.
         self.gr_context.flush();
     }
+}
+
+/// What differs between two frames of `width` pixels a row: how many pixels, by how much in a channel at most,
+/// and the first of them (x, y, one, other).
+struct Difference {
+    pixels: usize,
+    step: u8,
+    first: Vec<(usize, usize, Vec<u8>, Vec<u8>)>,
+}
+
+fn difference(one: &[u8], other: &[u8], width: i32) -> Difference {
+    assert_eq!(one.len(), other.len());
+    let width = width as usize;
+    let mut found = Difference { pixels: 0, step: 0, first: Vec::new() };
+    for (index, (a, b)) in one.chunks_exact(4).zip(other.chunks_exact(4)).enumerate() {
+        if a != b {
+            found.pixels += 1;
+            found.step = a.iter().zip(b).fold(found.step, |largest, (a, b)| largest.max(a.abs_diff(*b)));
+            if found.first.len() < 24 {
+                found.first.push((index % width, index / width, a.to_vec(), b.to_vec()));
+            }
+        }
+    }
+    found
+}
+
+/// Prints what differs between two frames, with the distance of each listed pixel to the nearest row where
+/// two bands meet (`edges`), for the diagnosis of the CI job.
+fn report(what: &str, found: &Difference, edges: &[i32]) {
+    let near: Vec<(usize, usize, i32)> = found
+        .first
+        .iter()
+        .map(|(x, y, ..)| (*x, *y, edges.iter().map(|edge| (*y as i32 - edge).abs()).min().unwrap_or(i32::MAX)))
+        .collect();
+    eprintln!(
+        "diagnostic {what}: {} pixels differ, by {} at most; (x, y, rows to the nearest band edge) {near:?}; \
+         pixels (x, y, one, other) {:?}",
+        found.pixels, found.step, found.first
+    );
+}
+
+/// The rows where the bands of a layer meet.
+fn edges(clips: &[(usize, skia_safe::IRect)]) -> Vec<i32> {
+    clips.iter().skip(1).map(|(_, clip)| clip.top).collect()
 }
 
 /// The premultiplied pixels of a layer, read back from the GPU, row by row without padding.
@@ -427,4 +471,48 @@ fn disposing_one_skia_context_leaves_another_on_the_same_device_drawing() {
     second_layers.dispose();
     assert!(!second_gpu.gr_context().is_lost());
     second.dispose();
+}
+
+/// Diagnosis (printed by the CI job, nothing asserted): whether the ordinary path of lavapipe draws the same frame
+/// the same way twice, band by band and in one recording; how one recording under the clips of the bands differs
+/// from one without them; how a pipelined layer of one band (no band edge) differs from the ordinary layer; and,
+/// for 2 and 4 bands, where the pixels that differ lie against the band edges.
+#[test]
+fn diagnostic_where_the_frames_of_lavapipe_differ() {
+    for bands in [1, 2, 4] {
+        let Some((context, gpu)) = graphite_gpu() else { return };
+        let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
+        let clips = layers.surface.band_clips();
+        let whole = vec![(0, skia_safe::IRect::from_wh(WIDTH, HEIGHT))];
+        let edges = edges(&clips);
+
+        layers.draw(draw_scene);
+        let ordinary = bytes(&layers.ordinary, layers.size);
+        let pipelined = bytes(&layers.pipelined, layers.size);
+        let compare = |what: &str, one: &[u8], other: &[u8]| {
+            report(&format!("{bands} bands: {what}"), &difference(one, other, WIDTH), &edges)
+        };
+        compare("pipelined against ordinary", &ordinary, &pipelined);
+
+        let again = layers.another_ordinary();
+        layers.draw_ordinary(&again, &clips, &draw_scene);
+        let twice = bytes(&again, layers.size);
+        compare("ordinary band by band, twice", &ordinary, &twice);
+
+        let once = layers.another_ordinary();
+        layers.draw_ordinary(&once, &whole, &draw_scene);
+        let unbanded = bytes(&once, layers.size);
+        let other = layers.another_ordinary();
+        layers.draw_ordinary(&other, &whole, &draw_scene);
+        let unbanded_twice = bytes(&other, layers.size);
+        compare("ordinary in one recording, twice", &unbanded, &unbanded_twice);
+        compare("ordinary band by band against one recording", &ordinary, &unbanded);
+        compare("pipelined against one recording", &pipelined, &unbanded);
+
+        for layer in [again, once, other] {
+            layer.dispose();
+        }
+        layers.dispose();
+        context.dispose();
+    }
 }
