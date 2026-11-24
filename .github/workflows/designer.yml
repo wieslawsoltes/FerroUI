@@ -145,6 +145,11 @@ jobs:
           FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/todo-workbench
           FERROUI_TEST_VSCODE_VERSION: '1.102.0'
         run: xvfb-run -a node test/run.mjs
+      - name: Managed Android lifecycle in VS Code
+        working-directory: editors/vscode
+        env:
+          FERROUI_TEST_ANDROID_MANAGED: '1'
+        run: xvfb-run -a node test/run.mjs
       - name: Render evidence
         if: always()
         uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4

@@ -12,7 +12,8 @@ export async function androidManagedWorkspace(workspace, sandbox) {
         ...[scripts, join(workspace, 'app'), join(workspace, 'notes')].map(directory => mkdir(directory, { recursive: true })),
     ]);
     await Promise.all([
-        writeFile(adb, '#!' + process.execPath + '\n' + adbSource, { mode: 0o755 }),
+        writeFile(adb, '#!/bin/bash\nexec "$FERROUI_MANAGED_TEST_NODE" "$FERROUI_MANAGED_TEST_DIR/adb.mjs" "$@"\n', { mode: 0o755 }),
+        writeFile(join(sandbox, 'adb.mjs'), adbSource),
         writeFile(join(sandbox, 'package.mjs'), packageSource),
         writeFile(join(scripts, 'apk.sh'), '#!/bin/bash\nexec "$FERROUI_MANAGED_TEST_NODE" "$FERROUI_MANAGED_TEST_DIR/package.mjs" "$@"\n'),
         writeFile(join(workspace, 'Cargo.toml'), '[workspace]\nresolver = "3"\nmembers = ["app", "notes"]\n'),
