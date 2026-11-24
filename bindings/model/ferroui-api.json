@@ -2,7 +2,7 @@
  "format": 1,
  "generated_by": "scripts/generate_api_model.py",
  "abi_version": 1,
- "fingerprint": 1599030134001277186,
+ "fingerprint": 1668366080341449225,
  "naming": "Names are the names of the framework; `words` are their words in lower case, for each backend to apply the casing of its language.",
  "abi": {
   "functions": [
@@ -10175,6 +10175,7 @@
     "FontSize",
     "FontStretch",
     "FontStyle",
+    "FontVariations",
     "FontWeight",
     "Foreground",
     "HasOverflowContent",
@@ -11729,6 +11730,7 @@
     "FontSize",
     "FontStretch",
     "FontStyle",
+    "FontVariations",
     "FontWeight",
     "Foreground",
     "LetterSpacing",
@@ -11935,6 +11937,7 @@
     "FontSize",
     "FontStretch",
     "FontStyle",
+    "FontVariations",
     "FontWeight",
     "Foreground",
     "Inlines",
@@ -12102,6 +12105,7 @@
     "TextElement.FontSize",
     "TextElement.FontStretch",
     "TextElement.FontStyle",
+    "TextElement.FontVariations",
     "TextElement.FontWeight",
     "TextElement.Foreground",
     "TextElement.Language",
@@ -22354,6 +22358,52 @@
   },
   {
    "id": 295,
+   "name": "FontVariations",
+   "words": [
+    "font",
+    "variations"
+   ],
+   "declarations": [
+    {
+     "owner": "RichTextBlock",
+     "kind": "styled",
+     "value": {
+      "rust": "Option<FontVariationSettings>",
+      "nullable": true,
+      "kind": "parsed"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": ""
+    },
+    {
+     "owner": "TemplatedControl",
+     "kind": "styled",
+     "value": {
+      "rust": "Option<FontVariationSettings>",
+      "nullable": true,
+      "kind": "parsed"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": "Defines the `FontVariations` property: the values of the variation axes of a variable font ([`TextElement::font_variations_property`])."
+    },
+    {
+     "owner": "TextBlock",
+     "kind": "styled",
+     "value": {
+      "rust": "Option<FontVariationSettings>",
+      "nullable": true,
+      "kind": "parsed"
+     },
+     "default": null,
+     "read_only": false,
+     "doc": "Defines the `FontVariations` property: the values of the variation axes of a variable font ([`TextElement::font_variations_property`])."
+    }
+   ]
+  },
+  {
+   "id": 296,
    "name": "FontWeight",
    "words": [
     "font",
@@ -22423,7 +22473,7 @@
    ]
   },
   {
-   "id": 296,
+   "id": 297,
    "name": "Foo",
    "words": [
     "foo"
@@ -22456,7 +22506,7 @@
    ]
   },
   {
-   "id": 297,
+   "id": 298,
    "name": "Footer",
    "words": [
     "footer"
@@ -22477,7 +22527,7 @@
    ]
   },
   {
-   "id": 298,
+   "id": 299,
    "name": "FooterMenuItems",
    "words": [
     "footer",
@@ -22500,7 +22550,7 @@
    ]
   },
   {
-   "id": 299,
+   "id": 300,
    "name": "FooterMenuItemsSource",
    "words": [
     "footer",
@@ -22524,7 +22574,7 @@
    ]
   },
   {
-   "id": 300,
+   "id": 301,
    "name": "FooterTemplate",
    "words": [
     "footer",
@@ -22546,7 +22596,7 @@
    ]
   },
   {
-   "id": 301,
+   "id": 302,
    "name": "Foreground",
    "words": [
     "foreground"
@@ -22651,7 +22701,7 @@
    ]
   },
   {
-   "id": 302,
+   "id": 303,
    "name": "FormatString",
    "words": [
     "format",
@@ -22673,7 +22723,7 @@
    ]
   },
   {
-   "id": 303,
+   "id": 304,
    "name": "Frame",
    "words": [
     "frame"
@@ -22695,7 +22745,7 @@
    ]
   },
   {
-   "id": 304,
+   "id": 305,
    "name": "FrameSize",
    "words": [
     "frame",
@@ -22717,7 +22767,7 @@
    ]
   },
   {
-   "id": 305,
+   "id": 306,
    "name": "FrameThickness",
    "words": [
     "frame",
@@ -22739,7 +22789,7 @@
    ]
   },
   {
-   "id": 306,
+   "id": 307,
    "name": "From",
    "words": [
     "from"
@@ -22784,7 +22834,7 @@
    ]
   },
   {
-   "id": 307,
+   "id": 308,
    "name": "Geometry",
    "words": [
     "geometry"
@@ -22806,7 +22856,7 @@
    ]
   },
   {
-   "id": 308,
+   "id": 309,
    "name": "Geometry1",
    "words": [
     "geometry1"
@@ -22828,7 +22878,7 @@
    ]
   },
   {
-   "id": 309,
+   "id": 310,
    "name": "Geometry2",
    "words": [
     "geometry2"
@@ -22850,7 +22900,7 @@
    ]
   },
   {
-   "id": 310,
+   "id": 311,
    "name": "GeometryCombineMode",
    "words": [
     "geometry",
@@ -22874,7 +22924,7 @@
    ]
   },
   {
-   "id": 311,
+   "id": 312,
    "name": "Gesture",
    "words": [
     "gesture"
@@ -22907,7 +22957,7 @@
    ]
   },
   {
-   "id": 312,
+   "id": 313,
    "name": "Glyph",
    "words": [
     "glyph"
@@ -22952,7 +23002,7 @@
    ]
   },
   {
-   "id": 313,
+   "id": 314,
    "name": "GlyphRun",
    "words": [
     "glyph",
@@ -22974,7 +23024,7 @@
    ]
   },
   {
-   "id": 314,
+   "id": 315,
    "name": "GradientOrigin",
    "words": [
     "gradient",
@@ -22996,7 +23046,7 @@
    ]
   },
   {
-   "id": 315,
+   "id": 316,
    "name": "GradientStops",
    "words": [
     "gradient",
@@ -23018,7 +23068,7 @@
    ]
   },
   {
-   "id": 316,
+   "id": 317,
    "name": "Grid.Column",
    "words": [
     "grid",
@@ -23040,7 +23090,7 @@
    ]
   },
   {
-   "id": 317,
+   "id": 318,
    "name": "Grid.ColumnSpan",
    "words": [
     "grid",
@@ -23063,7 +23113,7 @@
    ]
   },
   {
-   "id": 318,
+   "id": 319,
    "name": "Grid.IsSharedSizeScope",
    "words": [
     "grid",
@@ -23088,7 +23138,7 @@
    ]
   },
   {
-   "id": 319,
+   "id": 320,
    "name": "Grid.Row",
    "words": [
     "grid",
@@ -23110,7 +23160,7 @@
    ]
   },
   {
-   "id": 320,
+   "id": 321,
    "name": "Grid.RowSpan",
    "words": [
     "grid",
@@ -23133,7 +23183,7 @@
    ]
   },
   {
-   "id": 321,
+   "id": 322,
    "name": "GroupHeaderPlacement",
    "words": [
     "group",
@@ -23157,7 +23207,7 @@
    ]
   },
   {
-   "id": 322,
+   "id": 323,
    "name": "GroupName",
    "words": [
     "group",
@@ -23191,7 +23241,7 @@
    ]
   },
   {
-   "id": 323,
+   "id": 324,
    "name": "GroupPadding",
    "words": [
     "group",
@@ -23213,7 +23263,7 @@
    ]
   },
   {
-   "id": 324,
+   "id": 325,
    "name": "HasBorder",
    "words": [
     "has",
@@ -23235,7 +23285,7 @@
    ]
   },
   {
-   "id": 325,
+   "id": 326,
    "name": "HasMirrorTransform",
    "words": [
     "has",
@@ -23258,7 +23308,7 @@
    ]
   },
   {
-   "id": 326,
+   "id": 327,
    "name": "HasOverflowContent",
    "words": [
     "has",
@@ -23281,7 +23331,7 @@
    ]
   },
   {
-   "id": 327,
+   "id": 328,
    "name": "HasSecondaryCommands",
    "words": [
     "has",
@@ -23304,7 +23354,7 @@
    ]
   },
   {
-   "id": 328,
+   "id": 329,
    "name": "HasShadow",
    "words": [
     "has",
@@ -23338,7 +23388,7 @@
    ]
   },
   {
-   "id": 329,
+   "id": 330,
    "name": "HasTitleBar",
    "words": [
     "has",
@@ -23361,7 +23411,7 @@
    ]
   },
   {
-   "id": 330,
+   "id": 331,
    "name": "HasUnrealizedChildren",
    "words": [
     "has",
@@ -23384,7 +23434,7 @@
    ]
   },
   {
-   "id": 331,
+   "id": 332,
    "name": "Header",
    "words": [
     "header"
@@ -23525,7 +23575,7 @@
    ]
   },
   {
-   "id": 332,
+   "id": 333,
    "name": "HeaderBackground",
    "words": [
     "header",
@@ -23559,7 +23609,7 @@
    ]
   },
   {
-   "id": 333,
+   "id": 334,
    "name": "HeaderFocusVisualPlacement",
    "words": [
     "header",
@@ -23584,7 +23634,7 @@
    ]
   },
   {
-   "id": 334,
+   "id": 335,
    "name": "HeaderTemplate",
    "words": [
     "header",
@@ -23714,7 +23764,7 @@
    ]
   },
   {
-   "id": 335,
+   "id": 336,
    "name": "HeaderTheme",
    "words": [
     "header",
@@ -23737,7 +23787,7 @@
    ]
   },
   {
-   "id": 336,
+   "id": 337,
    "name": "Height",
    "words": [
     "height"
@@ -23770,7 +23820,7 @@
    ]
   },
   {
-   "id": 337,
+   "id": 338,
    "name": "HideDelay",
    "words": [
     "hide",
@@ -23792,7 +23842,7 @@
    ]
   },
   {
-   "id": 338,
+   "id": 339,
    "name": "HidePromptOnLeave",
    "words": [
     "hide",
@@ -23816,7 +23866,7 @@
    ]
   },
   {
-   "id": 339,
+   "id": 340,
    "name": "HorizontalAlignment",
    "words": [
     "horizontal",
@@ -23839,7 +23889,7 @@
    ]
   },
   {
-   "id": 340,
+   "id": 341,
    "name": "HorizontalContentAlignment",
    "words": [
     "horizontal",
@@ -23980,7 +24030,7 @@
    ]
   },
   {
-   "id": 341,
+   "id": 342,
    "name": "HorizontalOffset",
    "words": [
     "horizontal",
@@ -24026,7 +24076,7 @@
    ]
   },
   {
-   "id": 342,
+   "id": 343,
    "name": "HorizontalOrientationPadding",
    "words": [
     "horizontal",
@@ -24049,7 +24099,7 @@
    ]
   },
   {
-   "id": 343,
+   "id": 344,
    "name": "HorizontalSpacing",
    "words": [
     "horizontal",
@@ -24071,7 +24121,7 @@
    ]
   },
   {
-   "id": 344,
+   "id": 345,
    "name": "HotKey",
    "words": [
     "hot",
@@ -24117,7 +24167,7 @@
    ]
   },
   {
-   "id": 345,
+   "id": 346,
    "name": "HotKeyManager.HotKey",
    "words": [
     "hot",
@@ -24142,7 +24192,7 @@
    ]
   },
   {
-   "id": 346,
+   "id": 347,
    "name": "Icon",
    "words": [
     "icon"
@@ -24272,7 +24322,7 @@
    ]
   },
   {
-   "id": 347,
+   "id": 348,
    "name": "IconElement",
    "words": [
     "icon",
@@ -24321,7 +24371,7 @@
    ]
   },
   {
-   "id": 348,
+   "id": 349,
    "name": "IconSource",
    "words": [
     "icon",
@@ -24383,7 +24433,7 @@
    ]
   },
   {
-   "id": 349,
+   "id": 350,
    "name": "IconTemplate",
    "words": [
     "icon",
@@ -24429,7 +24479,7 @@
    ]
   },
   {
-   "id": 350,
+   "id": 351,
    "name": "Id",
    "words": [
     "id"
@@ -24450,7 +24500,7 @@
    ]
   },
   {
-   "id": 351,
+   "id": 352,
    "name": "IgnoreThumbDrag",
    "words": [
     "ignore",
@@ -24473,7 +24523,7 @@
    ]
   },
   {
-   "id": 352,
+   "id": 353,
    "name": "Image",
    "words": [
     "image"
@@ -24494,7 +24544,7 @@
    ]
   },
   {
-   "id": 353,
+   "id": 354,
    "name": "ImageSource",
    "words": [
     "image",
@@ -24516,7 +24566,7 @@
    ]
   },
   {
-   "id": 354,
+   "id": 355,
    "name": "IncreaseButton",
    "words": [
     "increase",
@@ -24539,7 +24589,7 @@
    ]
   },
   {
-   "id": 355,
+   "id": 356,
    "name": "Increment",
    "words": [
     "increment"
@@ -24560,7 +24610,7 @@
    ]
   },
   {
-   "id": 356,
+   "id": 357,
    "name": "IncrementalLoadingThreshold",
    "words": [
     "incremental",
@@ -24583,7 +24633,7 @@
    ]
   },
   {
-   "id": 357,
+   "id": 358,
    "name": "IncrementalLoadingTrigger",
    "words": [
     "incremental",
@@ -24607,7 +24657,7 @@
    ]
   },
   {
-   "id": 358,
+   "id": 359,
    "name": "IndeterminateEndingOffset",
    "words": [
     "indeterminate",
@@ -24630,7 +24680,7 @@
    ]
   },
   {
-   "id": 359,
+   "id": 360,
    "name": "IndeterminateStartingOffset",
    "words": [
     "indeterminate",
@@ -24653,7 +24703,7 @@
    ]
   },
   {
-   "id": 360,
+   "id": 361,
    "name": "IndicatorTemplate",
    "words": [
     "indicator",
@@ -24699,7 +24749,7 @@
    ]
   },
   {
-   "id": 361,
+   "id": 362,
    "name": "InfoBadge",
    "words": [
     "info",
@@ -24722,7 +24772,7 @@
    ]
   },
   {
-   "id": 362,
+   "id": 363,
    "name": "InfoBadgeCornerRadius",
    "words": [
     "info",
@@ -24746,7 +24796,7 @@
    ]
   },
   {
-   "id": 363,
+   "id": 364,
    "name": "InfoBarPanel.HorizontalOrientationMargin",
    "words": [
     "info",
@@ -24772,7 +24822,7 @@
    ]
   },
   {
-   "id": 364,
+   "id": 365,
    "name": "InfoBarPanel.VerticalOrientationMargin",
    "words": [
     "info",
@@ -24798,7 +24848,7 @@
    ]
   },
   {
-   "id": 365,
+   "id": 366,
    "name": "InheritsTransform",
    "words": [
     "inherits",
@@ -24820,7 +24870,7 @@
    ]
   },
   {
-   "id": 366,
+   "id": 367,
    "name": "InitialSetValue",
    "words": [
     "initial",
@@ -24843,7 +24893,7 @@
    ]
   },
   {
-   "id": 367,
+   "id": 368,
    "name": "Initials",
    "words": [
     "initials"
@@ -24864,7 +24914,7 @@
    ]
   },
   {
-   "id": 368,
+   "id": 369,
    "name": "Inline.TextDecorations",
    "words": [
     "inline",
@@ -24887,7 +24937,7 @@
    ]
   },
   {
-   "id": 369,
+   "id": 370,
    "name": "Inlines",
    "words": [
     "inlines"
@@ -24920,7 +24970,7 @@
    ]
   },
   {
-   "id": 370,
+   "id": 371,
    "name": "InnerLeftContent",
    "words": [
     "inner",
@@ -24967,7 +25017,7 @@
    ]
   },
   {
-   "id": 371,
+   "id": 372,
    "name": "InnerRightContent",
    "words": [
     "inner",
@@ -25014,7 +25064,7 @@
    ]
   },
   {
-   "id": 372,
+   "id": 373,
    "name": "InputGesture",
    "words": [
     "input",
@@ -25036,7 +25086,7 @@
    ]
   },
   {
-   "id": 373,
+   "id": 374,
    "name": "InputMethod.IsInputMethodEnabled",
    "words": [
     "input",
@@ -25062,7 +25112,7 @@
    ]
   },
   {
-   "id": 374,
+   "id": 375,
    "name": "InputScope",
    "words": [
     "input",
@@ -25085,7 +25135,7 @@
    ]
   },
   {
-   "id": 375,
+   "id": 376,
    "name": "InteractionRatio",
    "words": [
     "interaction",
@@ -25107,7 +25157,7 @@
    ]
   },
   {
-   "id": 376,
+   "id": 377,
    "name": "Interval",
    "words": [
     "interval"
@@ -25128,7 +25178,7 @@
    ]
   },
   {
-   "id": 377,
+   "id": 378,
    "name": "IsActive",
    "words": [
     "is",
@@ -25174,7 +25224,7 @@
    ]
   },
   {
-   "id": 378,
+   "id": 379,
    "name": "IsBackButtonEffectivelyVisible",
    "words": [
     "is",
@@ -25199,7 +25249,7 @@
    ]
   },
   {
-   "id": 379,
+   "id": 380,
    "name": "IsBackButtonEnabled",
    "words": [
     "is",
@@ -25223,7 +25273,7 @@
    ]
   },
   {
-   "id": 380,
+   "id": 381,
    "name": "IsBackButtonVisible",
    "words": [
     "is",
@@ -25272,7 +25322,7 @@
    ]
   },
   {
-   "id": 381,
+   "id": 382,
    "name": "IsBackEnabled",
    "words": [
     "is",
@@ -25295,7 +25345,7 @@
    ]
   },
   {
-   "id": 382,
+   "id": 383,
    "name": "IsBold",
    "words": [
     "is",
@@ -25317,7 +25367,7 @@
    ]
   },
   {
-   "id": 383,
+   "id": 384,
    "name": "IsCancel",
    "words": [
     "is",
@@ -25339,7 +25389,7 @@
    ]
   },
   {
-   "id": 384,
+   "id": 385,
    "name": "IsChecked",
    "words": [
     "is",
@@ -25397,7 +25447,7 @@
    ]
   },
   {
-   "id": 385,
+   "id": 386,
    "name": "IsChildSelected",
    "words": [
     "is",
@@ -25420,7 +25470,7 @@
    ]
   },
   {
-   "id": 386,
+   "id": 387,
    "name": "IsClearEnabled",
    "words": [
     "is",
@@ -25443,7 +25493,7 @@
    ]
   },
   {
-   "id": 387,
+   "id": 388,
    "name": "IsClosable",
    "words": [
     "is",
@@ -25465,7 +25515,7 @@
    ]
   },
   {
-   "id": 388,
+   "id": 389,
    "name": "IsClosed",
    "words": [
     "is",
@@ -25499,7 +25549,7 @@
    ]
   },
   {
-   "id": 389,
+   "id": 390,
    "name": "IsClosing",
    "words": [
     "is",
@@ -25521,7 +25571,7 @@
    ]
   },
   {
-   "id": 390,
+   "id": 391,
    "name": "IsCompact",
    "words": [
     "is",
@@ -25567,7 +25617,7 @@
    ]
   },
   {
-   "id": 391,
+   "id": 392,
    "name": "IsDefault",
    "words": [
     "is",
@@ -25589,7 +25639,7 @@
    ]
   },
   {
-   "id": 392,
+   "id": 393,
    "name": "IsDirectionReversed",
    "words": [
     "is",
@@ -25636,7 +25686,7 @@
    ]
   },
   {
-   "id": 393,
+   "id": 394,
    "name": "IsDropDownOpen",
    "words": [
     "is",
@@ -25684,7 +25734,7 @@
    ]
   },
   {
-   "id": 394,
+   "id": 395,
    "name": "IsDynamicOverflowEnabled",
    "words": [
     "is",
@@ -25708,7 +25758,7 @@
    ]
   },
   {
-   "id": 395,
+   "id": 396,
    "name": "IsEditable",
    "words": [
     "is",
@@ -25730,7 +25780,7 @@
    ]
   },
   {
-   "id": 396,
+   "id": 397,
    "name": "IsEffectivelyEnabled",
    "words": [
     "is",
@@ -25753,7 +25803,7 @@
    ]
   },
   {
-   "id": 397,
+   "id": 398,
    "name": "IsEnabled",
    "words": [
     "is",
@@ -25811,7 +25861,7 @@
    ]
   },
   {
-   "id": 398,
+   "id": 399,
    "name": "IsExpanded",
    "words": [
     "is",
@@ -25881,7 +25931,7 @@
    ]
   },
   {
-   "id": 399,
+   "id": 400,
    "name": "IsExtendedIntoWindowDecorations",
    "words": [
     "is",
@@ -25906,7 +25956,7 @@
    ]
   },
   {
-   "id": 400,
+   "id": 401,
    "name": "IsFilled",
    "words": [
     "is",
@@ -25940,7 +25990,7 @@
    ]
   },
   {
-   "id": 401,
+   "id": 402,
    "name": "IsFocused",
    "words": [
     "is",
@@ -25962,7 +26012,7 @@
    ]
   },
   {
-   "id": 402,
+   "id": 403,
    "name": "IsGestureEnabled",
    "words": [
     "is",
@@ -26021,7 +26071,7 @@
    ]
   },
   {
-   "id": 403,
+   "id": 404,
    "name": "IsGroup",
    "words": [
     "is",
@@ -26043,7 +26093,7 @@
    ]
   },
   {
-   "id": 404,
+   "id": 405,
    "name": "IsHeaderItemsCarouselEnabled",
    "words": [
     "is",
@@ -26068,7 +26118,7 @@
    ]
   },
   {
-   "id": 405,
+   "id": 406,
    "name": "IsHitTestVisible",
    "words": [
     "is",
@@ -26092,7 +26142,7 @@
    ]
   },
   {
-   "id": 406,
+   "id": 407,
    "name": "IsIconVisible",
    "words": [
     "is",
@@ -26115,7 +26165,7 @@
    ]
   },
   {
-   "id": 407,
+   "id": 408,
    "name": "IsInNavigationPage",
    "words": [
     "is",
@@ -26139,7 +26189,7 @@
    ]
   },
   {
-   "id": 408,
+   "id": 409,
    "name": "IsInOverflow",
    "words": [
     "is",
@@ -26186,7 +26236,7 @@
    ]
   },
   {
-   "id": 409,
+   "id": 410,
    "name": "IsInactiveSelectionHighlightEnabled",
    "words": [
     "is",
@@ -26211,7 +26261,7 @@
    ]
   },
   {
-   "id": 410,
+   "id": 411,
    "name": "IsIndeterminate",
    "words": [
     "is",
@@ -26245,7 +26295,7 @@
    ]
   },
   {
-   "id": 411,
+   "id": 412,
    "name": "IsInteractingForRefresh",
    "words": [
     "is",
@@ -26269,7 +26319,7 @@
    ]
   },
   {
-   "id": 412,
+   "id": 413,
    "name": "IsItalic",
    "words": [
     "is",
@@ -26291,7 +26341,7 @@
    ]
   },
   {
-   "id": 413,
+   "id": 414,
    "name": "IsItemClickEnabled",
    "words": [
     "is",
@@ -26315,7 +26365,7 @@
    ]
   },
   {
-   "id": 414,
+   "id": 415,
    "name": "IsKeyboardFocusWithin",
    "words": [
     "is",
@@ -26339,7 +26389,7 @@
    ]
   },
   {
-   "id": 415,
+   "id": 416,
    "name": "IsKeyboardNavigationEnabled",
    "words": [
     "is",
@@ -26375,7 +26425,7 @@
    ]
   },
   {
-   "id": 416,
+   "id": 417,
    "name": "IsLargeArc",
    "words": [
     "is",
@@ -26398,7 +26448,7 @@
    ]
   },
   {
-   "id": 417,
+   "id": 418,
    "name": "IsLightDismissEnabled",
    "words": [
     "is",
@@ -26422,7 +26472,7 @@
    ]
   },
   {
-   "id": 418,
+   "id": 419,
    "name": "IsLocked",
    "words": [
     "is",
@@ -26444,7 +26494,7 @@
    ]
   },
   {
-   "id": 419,
+   "id": 420,
    "name": "IsMouseEnabled",
    "words": [
     "is",
@@ -26479,7 +26529,7 @@
    ]
   },
   {
-   "id": 420,
+   "id": 421,
    "name": "IsMultiSelectCheckBoxEnabled",
    "words": [
     "is",
@@ -26505,7 +26555,7 @@
    ]
   },
   {
-   "id": 421,
+   "id": 422,
    "name": "IsNavigating",
    "words": [
     "is",
@@ -26527,7 +26577,7 @@
    ]
   },
   {
-   "id": 422,
+   "id": 423,
    "name": "IsNavigationStackEnabled",
    "words": [
     "is",
@@ -26551,7 +26601,7 @@
    ]
   },
   {
-   "id": 423,
+   "id": 424,
    "name": "IsNextButtonVisible",
    "words": [
     "is",
@@ -26575,7 +26625,7 @@
    ]
   },
   {
-   "id": 424,
+   "id": 425,
    "name": "IsOpen",
    "words": [
     "is",
@@ -26657,7 +26707,7 @@
    ]
   },
   {
-   "id": 425,
+   "id": 426,
    "name": "IsOverflowButtonVisible",
    "words": [
     "is",
@@ -26681,7 +26731,7 @@
    ]
   },
   {
-   "id": 426,
+   "id": 427,
    "name": "IsPaneOpen",
    "words": [
     "is",
@@ -26716,7 +26766,7 @@
    ]
   },
   {
-   "id": 427,
+   "id": 428,
    "name": "IsPaneToggleButtonVisible",
    "words": [
     "is",
@@ -26753,7 +26803,7 @@
    ]
   },
   {
-   "id": 428,
+   "id": 429,
    "name": "IsPaneVisible",
    "words": [
     "is",
@@ -26776,7 +26826,7 @@
    ]
   },
   {
-   "id": 429,
+   "id": 430,
    "name": "IsPointerOver",
    "words": [
     "is",
@@ -26799,7 +26849,7 @@
    ]
   },
   {
-   "id": 430,
+   "id": 431,
    "name": "IsPressed",
    "words": [
     "is",
@@ -26821,7 +26871,7 @@
    ]
   },
   {
-   "id": 431,
+   "id": 432,
    "name": "IsPreviousButtonVisible",
    "words": [
     "is",
@@ -26845,7 +26895,7 @@
    ]
   },
   {
-   "id": 432,
+   "id": 433,
    "name": "IsReadOnly",
    "words": [
     "is",
@@ -26904,7 +26954,7 @@
    ]
   },
   {
-   "id": 433,
+   "id": 434,
    "name": "IsScrollInertiaEnabled",
    "words": [
     "is",
@@ -26928,7 +26978,7 @@
    ]
   },
   {
-   "id": 434,
+   "id": 435,
    "name": "IsSelected",
    "words": [
     "is",
@@ -26986,7 +27036,7 @@
    ]
   },
   {
-   "id": 435,
+   "id": 436,
    "name": "IsSettingsVisible",
    "words": [
     "is",
@@ -27009,7 +27059,7 @@
    ]
   },
   {
-   "id": 436,
+   "id": 437,
    "name": "IsSnapToTickEnabled",
    "words": [
     "is",
@@ -27034,7 +27084,7 @@
    ]
   },
   {
-   "id": 437,
+   "id": 438,
    "name": "IsSticky",
    "words": [
     "is",
@@ -27056,7 +27106,7 @@
    ]
   },
   {
-   "id": 438,
+   "id": 439,
    "name": "IsStroked",
    "words": [
     "is",
@@ -27078,7 +27128,7 @@
    ]
   },
   {
-   "id": 439,
+   "id": 440,
    "name": "IsSubMenuOpen",
    "words": [
     "is",
@@ -27102,7 +27152,7 @@
    ]
   },
   {
-   "id": 440,
+   "id": 441,
    "name": "IsSuggestionListOpen",
    "words": [
     "is",
@@ -27126,7 +27176,7 @@
    ]
   },
   {
-   "id": 441,
+   "id": 442,
    "name": "IsSwipeEnabled",
    "words": [
     "is",
@@ -27161,7 +27211,7 @@
    ]
   },
   {
-   "id": 442,
+   "id": 443,
    "name": "IsSwiping",
    "words": [
     "is",
@@ -27183,7 +27233,7 @@
    ]
   },
   {
-   "id": 443,
+   "id": 444,
    "name": "IsTabStop",
    "words": [
     "is",
@@ -27218,7 +27268,7 @@
    ]
   },
   {
-   "id": 444,
+   "id": 445,
    "name": "IsTextCompletionEnabled",
    "words": [
     "is",
@@ -27242,7 +27292,7 @@
    ]
   },
   {
-   "id": 445,
+   "id": 446,
    "name": "IsTextPredictionEnabled",
    "words": [
     "is",
@@ -27266,7 +27316,7 @@
    ]
   },
   {
-   "id": 446,
+   "id": 447,
    "name": "IsTextSearchEnabled",
    "words": [
     "is",
@@ -27290,7 +27340,7 @@
    ]
   },
   {
-   "id": 447,
+   "id": 448,
    "name": "IsTextSelectionEnabled",
    "words": [
     "is",
@@ -27326,7 +27376,7 @@
    ]
   },
   {
-   "id": 448,
+   "id": 449,
    "name": "IsTextTrimmed",
    "words": [
     "is",
@@ -27349,7 +27399,7 @@
    ]
   },
   {
-   "id": 449,
+   "id": 450,
    "name": "IsThreeState",
    "words": [
     "is",
@@ -27372,7 +27422,7 @@
    ]
   },
   {
-   "id": 450,
+   "id": 451,
    "name": "IsTodayHighlighted",
    "words": [
     "is",
@@ -27407,7 +27457,7 @@
    ]
   },
   {
-   "id": 451,
+   "id": 452,
    "name": "IsTransitionReversed",
    "words": [
     "is",
@@ -27430,7 +27480,7 @@
    ]
   },
   {
-   "id": 452,
+   "id": 453,
    "name": "IsUnderlined",
    "words": [
     "is",
@@ -27452,7 +27502,7 @@
    ]
   },
   {
-   "id": 453,
+   "id": 454,
    "name": "IsUndoEnabled",
    "words": [
     "is",
@@ -27487,7 +27537,7 @@
    ]
   },
   {
-   "id": 454,
+   "id": 455,
    "name": "IsUsingOverlayLayer",
    "words": [
     "is",
@@ -27511,7 +27561,7 @@
    ]
   },
   {
-   "id": 455,
+   "id": 456,
    "name": "IsVisible",
    "words": [
     "is",
@@ -27569,7 +27619,7 @@
    ]
   },
   {
-   "id": 456,
+   "id": 457,
    "name": "IsVisited",
    "words": [
     "is",
@@ -27603,7 +27653,7 @@
    ]
   },
   {
-   "id": 457,
+   "id": 458,
    "name": "IsWeekNumberVisible",
    "words": [
     "is",
@@ -27639,7 +27689,7 @@
    ]
   },
   {
-   "id": 458,
+   "id": 459,
    "name": "IsWrapEnabled",
    "words": [
     "is",
@@ -27674,7 +27724,7 @@
    ]
   },
   {
-   "id": 459,
+   "id": 460,
    "name": "ItalicState",
    "words": [
     "italic",
@@ -27696,7 +27746,7 @@
    ]
   },
   {
-   "id": 460,
+   "id": 461,
    "name": "ItemContainerTheme",
    "words": [
     "item",
@@ -27733,7 +27783,7 @@
    ]
   },
   {
-   "id": 461,
+   "id": 462,
    "name": "ItemCount",
    "words": [
     "item",
@@ -27755,7 +27805,7 @@
    ]
   },
   {
-   "id": 462,
+   "id": 463,
    "name": "ItemFilter",
    "words": [
     "item",
@@ -27777,7 +27827,7 @@
    ]
   },
   {
-   "id": 463,
+   "id": 464,
    "name": "ItemFormat",
    "words": [
     "item",
@@ -27799,7 +27849,7 @@
    ]
   },
   {
-   "id": 464,
+   "id": 465,
    "name": "ItemHeight",
    "words": [
     "item",
@@ -27833,7 +27883,7 @@
    ]
   },
   {
-   "id": 465,
+   "id": 466,
    "name": "ItemInfo",
    "words": [
     "item",
@@ -27856,7 +27906,7 @@
    ]
   },
   {
-   "id": 466,
+   "id": 467,
    "name": "ItemSelector",
    "words": [
     "item",
@@ -27878,7 +27928,7 @@
    ]
   },
   {
-   "id": 467,
+   "id": 468,
    "name": "ItemSpacing",
    "words": [
     "item",
@@ -27900,7 +27950,7 @@
    ]
   },
   {
-   "id": 468,
+   "id": 469,
    "name": "ItemTemplate",
    "words": [
     "item",
@@ -27946,7 +27996,7 @@
    ]
   },
   {
-   "id": 469,
+   "id": 470,
    "name": "ItemWidth",
    "words": [
     "item",
@@ -27968,7 +28018,7 @@
    ]
   },
   {
-   "id": 470,
+   "id": 471,
    "name": "ItemWidthBottom",
    "words": [
     "item",
@@ -27991,7 +28041,7 @@
    ]
   },
   {
-   "id": 471,
+   "id": 472,
    "name": "ItemWidthCollapsed",
    "words": [
     "item",
@@ -28014,7 +28064,7 @@
    ]
   },
   {
-   "id": 472,
+   "id": 473,
    "name": "ItemWidthRight",
    "words": [
     "item",
@@ -28037,7 +28087,7 @@
    ]
   },
   {
-   "id": 473,
+   "id": 474,
    "name": "ItemsAlignment",
    "words": [
     "items",
@@ -28060,7 +28110,7 @@
    ]
   },
   {
-   "id": 474,
+   "id": 475,
    "name": "ItemsPanel",
    "words": [
     "items",
@@ -28106,7 +28156,7 @@
    ]
   },
   {
-   "id": 475,
+   "id": 476,
    "name": "ItemsSource",
    "words": [
     "items",
@@ -28164,7 +28214,7 @@
    ]
   },
   {
-   "id": 476,
+   "id": 477,
    "name": "ItemsUpdatingScrollMode",
    "words": [
     "items",
@@ -28189,7 +28239,7 @@
    ]
   },
   {
-   "id": 477,
+   "id": 478,
    "name": "JustifyContent",
    "words": [
     "justify",
@@ -28212,7 +28262,7 @@
    ]
   },
   {
-   "id": 478,
+   "id": 479,
    "name": "KeySpline",
    "words": [
     "key",
@@ -28261,7 +28311,7 @@
    ]
   },
   {
-   "id": 479,
+   "id": 480,
    "name": "KeyTime",
    "words": [
     "key",
@@ -28319,7 +28369,7 @@
    ]
   },
   {
-   "id": 480,
+   "id": 481,
    "name": "KeyboardIncrement",
    "words": [
     "keyboard",
@@ -28341,7 +28391,7 @@
    ]
   },
   {
-   "id": 481,
+   "id": 482,
    "name": "KeyboardNavigation.IsTabStop",
    "words": [
     "keyboard",
@@ -28366,7 +28416,7 @@
    ]
   },
   {
-   "id": 482,
+   "id": 483,
    "name": "KeyboardNavigation.TabIndex",
    "words": [
     "keyboard",
@@ -28390,7 +28440,7 @@
    ]
   },
   {
-   "id": 483,
+   "id": 484,
    "name": "KeyboardNavigation.TabNavigation",
    "words": [
     "keyboard",
@@ -28415,7 +28465,7 @@
    ]
   },
   {
-   "id": 484,
+   "id": 485,
    "name": "KeyboardNavigation.TabOnceActiveElement",
    "words": [
     "keyboard",
@@ -28442,7 +28492,7 @@
    ]
   },
   {
-   "id": 485,
+   "id": 486,
    "name": "Kind",
    "words": [
     "kind"
@@ -28464,7 +28514,7 @@
    ]
   },
   {
-   "id": 486,
+   "id": 487,
    "name": "KnobTransitions",
    "words": [
     "knob",
@@ -28486,7 +28536,7 @@
    ]
   },
   {
-   "id": 487,
+   "id": 488,
    "name": "Label",
    "words": [
     "label"
@@ -28519,7 +28569,7 @@
    ]
   },
   {
-   "id": 488,
+   "id": 489,
    "name": "LabelPosition",
    "words": [
     "label",
@@ -28555,7 +28605,7 @@
    ]
   },
   {
-   "id": 489,
+   "id": 490,
    "name": "Language",
    "words": [
     "language"
@@ -28588,7 +28638,7 @@
    ]
   },
   {
-   "id": 490,
+   "id": 491,
    "name": "LargeChange",
    "words": [
     "large",
@@ -28646,7 +28696,7 @@
    ]
   },
   {
-   "id": 491,
+   "id": 492,
    "name": "LargeDisplayPicture",
    "words": [
     "large",
@@ -28669,7 +28719,7 @@
    ]
   },
   {
-   "id": 492,
+   "id": 493,
    "name": "LastButtonCommand",
    "words": [
     "last",
@@ -28692,7 +28742,7 @@
    ]
   },
   {
-   "id": 493,
+   "id": 494,
    "name": "LastButtonStyle",
    "words": [
     "last",
@@ -28716,7 +28766,7 @@
    ]
   },
   {
-   "id": 494,
+   "id": 495,
    "name": "LastButtonVisibility",
    "words": [
     "last",
@@ -28740,7 +28790,7 @@
    ]
   },
   {
-   "id": 495,
+   "id": 496,
    "name": "LastChildFill",
    "words": [
     "last",
@@ -28763,7 +28813,7 @@
    ]
   },
   {
-   "id": 496,
+   "id": 497,
    "name": "LastName",
    "words": [
     "last",
@@ -28785,7 +28835,7 @@
    ]
   },
   {
-   "id": 497,
+   "id": 498,
    "name": "LayoutTransform",
    "words": [
     "layout",
@@ -28807,7 +28857,7 @@
    ]
   },
   {
-   "id": 498,
+   "id": 499,
    "name": "LeftHeader",
    "words": [
     "left",
@@ -28842,7 +28892,7 @@
    ]
   },
   {
-   "id": 499,
+   "id": 500,
    "name": "LeftHeaderTemplate",
    "words": [
     "left",
@@ -28865,7 +28915,7 @@
    ]
   },
   {
-   "id": 500,
+   "id": 501,
    "name": "LeftIndent",
    "words": [
     "left",
@@ -28887,7 +28937,7 @@
    ]
   },
   {
-   "id": 501,
+   "id": 502,
    "name": "LeftItems",
    "words": [
     "left",
@@ -28910,7 +28960,7 @@
    ]
   },
   {
-   "id": 502,
+   "id": 503,
    "name": "LeftPaneVisibility",
    "words": [
     "left",
@@ -28933,7 +28983,7 @@
    ]
   },
   {
-   "id": 503,
+   "id": 504,
    "name": "LetterSpacing",
    "words": [
     "letter",
@@ -29003,7 +29053,7 @@
    ]
   },
   {
-   "id": 504,
+   "id": 505,
    "name": "Level",
    "words": [
     "level"
@@ -29024,7 +29074,7 @@
    ]
   },
   {
-   "id": 505,
+   "id": 506,
    "name": "LineCap",
    "words": [
     "line",
@@ -29047,7 +29097,7 @@
    ]
   },
   {
-   "id": 506,
+   "id": 507,
    "name": "LineHeight",
    "words": [
     "line",
@@ -29105,7 +29155,7 @@
    ]
   },
   {
-   "id": 507,
+   "id": 508,
    "name": "LineJoin",
    "words": [
     "line",
@@ -29128,7 +29178,7 @@
    ]
   },
   {
-   "id": 508,
+   "id": 509,
    "name": "LineSpacing",
    "words": [
     "line",
@@ -29162,7 +29212,7 @@
    ]
   },
   {
-   "id": 509,
+   "id": 510,
    "name": "LineSpacingRule",
    "words": [
     "line",
@@ -29186,7 +29236,7 @@
    ]
   },
   {
-   "id": 510,
+   "id": 511,
    "name": "LineStackingStrategy",
    "words": [
     "line",
@@ -29236,7 +29286,7 @@
    ]
   },
   {
-   "id": 511,
+   "id": 512,
    "name": "Location",
    "words": [
     "location"
@@ -29258,7 +29308,7 @@
    ]
   },
   {
-   "id": 512,
+   "id": 513,
    "name": "MacOSProperties.IsTemplateIcon",
    "words": [
     "mac",
@@ -29284,7 +29334,7 @@
    ]
   },
   {
-   "id": 513,
+   "id": 514,
    "name": "Margin",
    "words": [
     "margin"
@@ -29317,7 +29367,7 @@
    ]
   },
   {
-   "id": 514,
+   "id": 515,
    "name": "Mask",
    "words": [
     "mask"
@@ -29338,7 +29388,7 @@
    ]
   },
   {
-   "id": 515,
+   "id": 516,
    "name": "MaskCompleted",
    "words": [
     "mask",
@@ -29360,7 +29410,7 @@
    ]
   },
   {
-   "id": 516,
+   "id": 517,
    "name": "MaskFull",
    "words": [
     "mask",
@@ -29382,7 +29432,7 @@
    ]
   },
   {
-   "id": 517,
+   "id": 518,
    "name": "Material",
    "words": [
     "material"
@@ -29404,7 +29454,7 @@
    ]
   },
   {
-   "id": 518,
+   "id": 519,
    "name": "MaterialOpacity",
    "words": [
     "material",
@@ -29426,7 +29476,7 @@
    ]
   },
   {
-   "id": 519,
+   "id": 520,
    "name": "Matrix",
    "words": [
     "matrix"
@@ -29447,7 +29497,7 @@
    ]
   },
   {
-   "id": 520,
+   "id": 521,
    "name": "MaxColumns",
    "words": [
     "max",
@@ -29469,7 +29519,7 @@
    ]
   },
   {
-   "id": 521,
+   "id": 522,
    "name": "MaxDropDownHeight",
    "words": [
     "max",
@@ -29505,7 +29555,7 @@
    ]
   },
   {
-   "id": 522,
+   "id": 523,
    "name": "MaxHeight",
    "words": [
     "max",
@@ -29539,7 +29589,7 @@
    ]
   },
   {
-   "id": 523,
+   "id": 524,
    "name": "MaxItems",
    "words": [
     "max",
@@ -29561,7 +29611,7 @@
    ]
   },
   {
-   "id": 524,
+   "id": 525,
    "name": "MaxLength",
    "words": [
     "max",
@@ -29607,7 +29657,7 @@
    ]
   },
   {
-   "id": 525,
+   "id": 526,
    "name": "MaxLines",
    "words": [
     "max",
@@ -29653,7 +29703,7 @@
    ]
   },
   {
-   "id": 526,
+   "id": 527,
    "name": "MaxRating",
    "words": [
     "max",
@@ -29675,7 +29725,7 @@
    ]
   },
   {
-   "id": 527,
+   "id": 528,
    "name": "MaxSideLength",
    "words": [
     "max",
@@ -29698,7 +29748,7 @@
    ]
   },
   {
-   "id": 528,
+   "id": 529,
    "name": "MaxSuggestionListHeight",
    "words": [
     "max",
@@ -29722,7 +29772,7 @@
    ]
   },
   {
-   "id": 529,
+   "id": 530,
    "name": "MaxVisiblePips",
    "words": [
     "max",
@@ -29745,7 +29795,7 @@
    ]
   },
   {
-   "id": 530,
+   "id": 531,
    "name": "MaxWidth",
    "words": [
     "max",
@@ -29791,7 +29841,7 @@
    ]
   },
   {
-   "id": 531,
+   "id": 532,
    "name": "MaxYear",
    "words": [
     "max",
@@ -29825,7 +29875,7 @@
    ]
   },
   {
-   "id": 532,
+   "id": 533,
    "name": "MaxZoomFactor",
    "words": [
     "max",
@@ -29848,7 +29898,7 @@
    ]
   },
   {
-   "id": 533,
+   "id": 534,
    "name": "Maximum",
    "words": [
     "maximum"
@@ -29929,7 +29979,7 @@
    ]
   },
   {
-   "id": 534,
+   "id": 535,
    "name": "MaximumRowsOrColumns",
    "words": [
     "maximum",
@@ -29953,7 +30003,7 @@
    ]
   },
   {
-   "id": 535,
+   "id": 536,
    "name": "Menu",
    "words": [
     "menu"
@@ -29988,7 +30038,7 @@
    ]
   },
   {
-   "id": 536,
+   "id": 537,
    "name": "MenuItemContainerStyle",
    "words": [
     "menu",
@@ -30013,7 +30063,7 @@
    ]
   },
   {
-   "id": 537,
+   "id": 538,
    "name": "MenuItemTemplate",
    "words": [
     "menu",
@@ -30036,7 +30086,7 @@
    ]
   },
   {
-   "id": 538,
+   "id": 539,
    "name": "MenuItems",
    "words": [
     "menu",
@@ -30070,7 +30120,7 @@
    ]
   },
   {
-   "id": 539,
+   "id": 540,
    "name": "MenuItemsSource",
    "words": [
     "menu",
@@ -30105,7 +30155,7 @@
    ]
   },
   {
-   "id": 540,
+   "id": 541,
    "name": "Message",
    "words": [
     "message"
@@ -30126,7 +30176,7 @@
    ]
   },
   {
-   "id": 541,
+   "id": 542,
    "name": "MinHeight",
    "words": [
     "min",
@@ -30160,7 +30210,7 @@
    ]
   },
   {
-   "id": 542,
+   "id": 543,
    "name": "MinLines",
    "words": [
     "min",
@@ -30182,7 +30232,7 @@
    ]
   },
   {
-   "id": 543,
+   "id": 544,
    "name": "MinWidth",
    "words": [
     "min",
@@ -30228,7 +30278,7 @@
    ]
   },
   {
-   "id": 544,
+   "id": 545,
    "name": "MinWindowHeight",
    "words": [
     "min",
@@ -30251,7 +30301,7 @@
    ]
   },
   {
-   "id": 545,
+   "id": 546,
    "name": "MinWindowWidth",
    "words": [
     "min",
@@ -30274,7 +30324,7 @@
    ]
   },
   {
-   "id": 546,
+   "id": 547,
    "name": "MinYear",
    "words": [
     "min",
@@ -30308,7 +30358,7 @@
    ]
   },
   {
-   "id": 547,
+   "id": 548,
    "name": "MinZoomFactor",
    "words": [
     "min",
@@ -30331,7 +30381,7 @@
    ]
   },
   {
-   "id": 548,
+   "id": 549,
    "name": "Minimum",
    "words": [
     "minimum"
@@ -30412,7 +30462,7 @@
    ]
   },
   {
-   "id": 549,
+   "id": 550,
    "name": "MinimumPopulateDelay",
    "words": [
     "minimum",
@@ -30435,7 +30485,7 @@
    ]
   },
   {
-   "id": 550,
+   "id": 551,
    "name": "MinimumPrefixLength",
    "words": [
     "minimum",
@@ -30458,7 +30508,7 @@
    ]
   },
   {
-   "id": 551,
+   "id": 552,
    "name": "MinuteIncrement",
    "words": [
     "minute",
@@ -30492,7 +30542,7 @@
    ]
   },
   {
-   "id": 552,
+   "id": 553,
    "name": "MirroredWhenRightToLeft",
    "words": [
     "mirrored",
@@ -30529,7 +30579,7 @@
    ]
   },
   {
-   "id": 553,
+   "id": 554,
    "name": "MiterLimit",
    "words": [
     "miter",
@@ -30551,7 +30601,7 @@
    ]
   },
   {
-   "id": 554,
+   "id": 555,
    "name": "ModalTransition",
    "words": [
     "modal",
@@ -30573,7 +30623,7 @@
    ]
   },
   {
-   "id": 555,
+   "id": 556,
    "name": "Mode",
    "words": [
     "mode"
@@ -30595,7 +30645,7 @@
    ]
   },
   {
-   "id": 556,
+   "id": 557,
    "name": "MonthFormat",
    "words": [
     "month",
@@ -30629,7 +30679,7 @@
    ]
   },
   {
-   "id": 557,
+   "id": 558,
    "name": "MonthVisible",
    "words": [
     "month",
@@ -30663,7 +30713,7 @@
    ]
   },
   {
-   "id": 558,
+   "id": 559,
    "name": "Name",
    "words": [
     "name"
@@ -30696,7 +30746,7 @@
    ]
   },
   {
-   "id": 559,
+   "id": 560,
    "name": "NameScope.NameScope",
    "words": [
     "name",
@@ -30720,7 +30770,7 @@
    ]
   },
   {
-   "id": 560,
+   "id": 561,
    "name": "NameValue",
    "words": [
     "name",
@@ -30743,7 +30793,7 @@
    ]
   },
   {
-   "id": 561,
+   "id": 562,
    "name": "NativeDock.Menu",
    "words": [
     "native",
@@ -30767,7 +30817,7 @@
    ]
   },
   {
-   "id": 562,
+   "id": 563,
    "name": "NativeMenuInfo.IsNativeMenuExported",
    "words": [
     "native",
@@ -30794,7 +30844,7 @@
    ]
   },
   {
-   "id": 563,
+   "id": 564,
    "name": "NativeMenuInfo.Menu",
    "words": [
     "native",
@@ -30819,7 +30869,7 @@
    ]
   },
   {
-   "id": 564,
+   "id": 565,
    "name": "NavigateUri",
    "words": [
     "navigate",
@@ -30853,7 +30903,7 @@
    ]
   },
   {
-   "id": 565,
+   "id": 566,
    "name": "Navigation",
    "words": [
     "navigation"
@@ -30874,7 +30924,7 @@
    ]
   },
   {
-   "id": 566,
+   "id": 567,
    "name": "NavigationCacheMode",
    "words": [
     "navigation",
@@ -30898,7 +30948,7 @@
    ]
   },
   {
-   "id": 567,
+   "id": 568,
    "name": "NavigationPage.BackButtonContent",
    "words": [
     "navigation",
@@ -30923,7 +30973,7 @@
    ]
   },
   {
-   "id": 568,
+   "id": 569,
    "name": "NavigationPage.BarHeightOverride",
    "words": [
     "navigation",
@@ -30948,7 +30998,7 @@
    ]
   },
   {
-   "id": 569,
+   "id": 570,
    "name": "NavigationPage.BarLayoutBehavior",
    "words": [
     "navigation",
@@ -30974,7 +31024,7 @@
    ]
   },
   {
-   "id": 570,
+   "id": 571,
    "name": "NavigationPage.BottomCommandBar",
    "words": [
     "navigation",
@@ -31000,7 +31050,7 @@
    ]
   },
   {
-   "id": 571,
+   "id": 572,
    "name": "NavigationPage.HasBackButton",
    "words": [
     "navigation",
@@ -31025,7 +31075,7 @@
    ]
   },
   {
-   "id": 572,
+   "id": 573,
    "name": "NavigationPage.HasNavigationBar",
    "words": [
     "navigation",
@@ -31050,7 +31100,7 @@
    ]
   },
   {
-   "id": 573,
+   "id": 574,
    "name": "NavigationPage.IsBackButtonEnabled",
    "words": [
     "navigation",
@@ -31076,7 +31126,7 @@
    ]
   },
   {
-   "id": 574,
+   "id": 575,
    "name": "NavigationPage.TopCommandBar",
    "words": [
     "navigation",
@@ -31102,7 +31152,7 @@
    ]
   },
   {
-   "id": 575,
+   "id": 576,
    "name": "NewLine",
    "words": [
     "new",
@@ -31124,7 +31174,7 @@
    ]
   },
   {
-   "id": 576,
+   "id": 577,
    "name": "NextButtonCommand",
    "words": [
     "next",
@@ -31147,7 +31197,7 @@
    ]
   },
   {
-   "id": 577,
+   "id": 578,
    "name": "NextButtonStyle",
    "words": [
     "next",
@@ -31171,7 +31221,7 @@
    ]
   },
   {
-   "id": 578,
+   "id": 579,
    "name": "NextButtonTheme",
    "words": [
     "next",
@@ -31195,7 +31245,7 @@
    ]
   },
   {
-   "id": 579,
+   "id": 580,
    "name": "NextButtonVisibility",
    "words": [
     "next",
@@ -31219,7 +31269,7 @@
    ]
   },
   {
-   "id": 580,
+   "id": 581,
    "name": "NotificationCard.CloseOnClick",
    "words": [
     "notification",
@@ -31244,7 +31294,7 @@
    ]
   },
   {
-   "id": 581,
+   "id": 582,
    "name": "NotificationType",
    "words": [
     "notification",
@@ -31267,7 +31317,7 @@
    ]
   },
   {
-   "id": 582,
+   "id": 583,
    "name": "NumberFormat",
    "words": [
     "number",
@@ -31289,7 +31339,7 @@
    ]
   },
   {
-   "id": 583,
+   "id": 584,
    "name": "NumberFormatter",
    "words": [
     "number",
@@ -31311,7 +31361,7 @@
    ]
   },
   {
-   "id": 584,
+   "id": 585,
    "name": "NumberOfPages",
    "words": [
     "number",
@@ -31346,7 +31396,7 @@
    ]
   },
   {
-   "id": 585,
+   "id": 586,
    "name": "NumberPanelItems",
    "words": [
     "number",
@@ -31369,7 +31419,7 @@
    ]
   },
   {
-   "id": 586,
+   "id": 587,
    "name": "NumericUpDown.TextAlignment",
    "words": [
     "numeric",
@@ -31395,7 +31445,7 @@
    ]
   },
   {
-   "id": 587,
+   "id": 588,
    "name": "Off",
    "words": [
     "off"
@@ -31416,7 +31466,7 @@
    ]
   },
   {
-   "id": 588,
+   "id": 589,
    "name": "OffContentTemplate",
    "words": [
     "off",
@@ -31439,7 +31489,7 @@
    ]
   },
   {
-   "id": 589,
+   "id": 590,
    "name": "OffScreenMargin",
    "words": [
     "off",
@@ -31462,7 +31512,7 @@
    ]
   },
   {
-   "id": 590,
+   "id": 591,
    "name": "Offset",
    "words": [
     "offset"
@@ -31531,7 +31581,7 @@
    ]
   },
   {
-   "id": 591,
+   "id": 592,
    "name": "OffsetX",
    "words": [
     "offset",
@@ -31553,7 +31603,7 @@
    ]
   },
   {
-   "id": 592,
+   "id": 593,
    "name": "OffsetY",
    "words": [
     "offset",
@@ -31575,7 +31625,7 @@
    ]
   },
   {
-   "id": 593,
+   "id": 594,
    "name": "On",
    "words": [
     "on"
@@ -31596,7 +31646,7 @@
    ]
   },
   {
-   "id": 594,
+   "id": 595,
    "name": "OnContentTemplate",
    "words": [
     "on",
@@ -31619,7 +31669,7 @@
    ]
   },
   {
-   "id": 595,
+   "id": 596,
    "name": "Opacity",
    "words": [
     "opacity"
@@ -31676,7 +31726,7 @@
    ]
   },
   {
-   "id": 596,
+   "id": 597,
    "name": "OpacityMask",
    "words": [
     "opacity",
@@ -31710,7 +31760,7 @@
    ]
   },
   {
-   "id": 597,
+   "id": 598,
    "name": "OpenPaneLength",
    "words": [
     "open",
@@ -31757,7 +31807,7 @@
    ]
   },
   {
-   "id": 598,
+   "id": 599,
    "name": "Orientation",
    "words": [
     "orientation"
@@ -31896,7 +31946,7 @@
    ]
   },
   {
-   "id": 599,
+   "id": 600,
    "name": "Oscillations",
    "words": [
     "oscillations"
@@ -31917,7 +31967,7 @@
    ]
   },
   {
-   "id": 600,
+   "id": 601,
    "name": "OverflowButtonVisibility",
    "words": [
     "overflow",
@@ -31953,7 +32003,7 @@
    ]
   },
   {
-   "id": 601,
+   "id": 602,
    "name": "OverflowContentTarget",
    "words": [
     "overflow",
@@ -31977,7 +32027,7 @@
    ]
   },
   {
-   "id": 602,
+   "id": 603,
    "name": "OverlayDismissEventPassThrough",
    "words": [
     "overlay",
@@ -32014,7 +32064,7 @@
    ]
   },
   {
-   "id": 603,
+   "id": 604,
    "name": "OverlayInputPassThroughElement",
    "words": [
     "overlay",
@@ -32052,7 +32102,7 @@
    ]
   },
   {
-   "id": 604,
+   "id": 605,
    "name": "Owner",
    "words": [
     "owner"
@@ -32087,7 +32137,7 @@
    ]
   },
   {
-   "id": 605,
+   "id": 606,
    "name": "Padding",
    "words": [
     "padding"
@@ -32156,7 +32206,7 @@
    ]
   },
   {
-   "id": 606,
+   "id": 607,
    "name": "Page",
    "words": [
     "page"
@@ -32178,7 +32228,7 @@
    ]
   },
   {
-   "id": 607,
+   "id": 608,
    "name": "PageTemplate",
    "words": [
     "page",
@@ -32200,7 +32250,7 @@
    ]
   },
   {
-   "id": 608,
+   "id": 609,
    "name": "PageTransition",
    "words": [
     "page",
@@ -32282,7 +32332,7 @@
    ]
   },
   {
-   "id": 609,
+   "id": 610,
    "name": "PagerInputCommand",
    "words": [
     "pager",
@@ -32305,7 +32355,7 @@
    ]
   },
   {
-   "id": 610,
+   "id": 611,
    "name": "Pages",
    "words": [
     "pages"
@@ -32338,7 +32388,7 @@
    ]
   },
   {
-   "id": 611,
+   "id": 612,
    "name": "Pane",
    "words": [
     "pane"
@@ -32359,7 +32409,7 @@
    ]
   },
   {
-   "id": 612,
+   "id": 613,
    "name": "PaneBackground",
    "words": [
     "pane",
@@ -32381,7 +32431,7 @@
    ]
   },
   {
-   "id": 613,
+   "id": 614,
    "name": "PaneColumnGridLength",
    "words": [
     "pane",
@@ -32405,7 +32455,7 @@
    ]
   },
   {
-   "id": 614,
+   "id": 615,
    "name": "PaneCustomContent",
    "words": [
     "pane",
@@ -32429,7 +32479,7 @@
    ]
   },
   {
-   "id": 615,
+   "id": 616,
    "name": "PaneDisplayMode",
    "words": [
     "pane",
@@ -32453,7 +32503,7 @@
    ]
   },
   {
-   "id": 616,
+   "id": 617,
    "name": "PaneFooter",
    "words": [
     "pane",
@@ -32476,7 +32526,7 @@
    ]
   },
   {
-   "id": 617,
+   "id": 618,
    "name": "PaneHeader",
    "words": [
     "pane",
@@ -32499,7 +32549,7 @@
    ]
   },
   {
-   "id": 618,
+   "id": 619,
    "name": "PanePlacement",
    "words": [
     "pane",
@@ -32522,7 +32572,7 @@
    ]
   },
   {
-   "id": 619,
+   "id": 620,
    "name": "PaneRowGridLength",
    "words": [
     "pane",
@@ -32546,7 +32596,7 @@
    ]
   },
   {
-   "id": 620,
+   "id": 621,
    "name": "PaneTemplate",
    "words": [
     "pane",
@@ -32568,7 +32618,7 @@
    ]
   },
   {
-   "id": 621,
+   "id": 622,
    "name": "PaneTitle",
    "words": [
     "pane",
@@ -32590,7 +32640,7 @@
    ]
   },
   {
-   "id": 622,
+   "id": 623,
    "name": "PaneToggleButtonStyle",
    "words": [
     "pane",
@@ -32615,7 +32665,7 @@
    ]
   },
   {
-   "id": 623,
+   "id": 624,
    "name": "PaneToggleButtonVisibility",
    "words": [
     "pane",
@@ -32639,7 +32689,7 @@
    ]
   },
   {
-   "id": 624,
+   "id": 625,
    "name": "PaneToggleButtonWidth",
    "words": [
     "pane",
@@ -32663,7 +32713,7 @@
    ]
   },
   {
-   "id": 625,
+   "id": 626,
    "name": "PanelType",
    "words": [
     "panel",
@@ -32686,7 +32736,7 @@
    ]
   },
   {
-   "id": 626,
+   "id": 627,
    "name": "Parent",
    "words": [
     "parent"
@@ -32734,7 +32784,7 @@
    ]
   },
   {
-   "id": 627,
+   "id": 628,
    "name": "ParsingNumberStyle",
    "words": [
     "parsing",
@@ -32757,7 +32807,7 @@
    ]
   },
   {
-   "id": 628,
+   "id": 629,
    "name": "PasswordChar",
    "words": [
     "password",
@@ -32791,7 +32841,7 @@
    ]
   },
   {
-   "id": 629,
+   "id": 630,
    "name": "Pen",
    "words": [
     "pen"
@@ -32812,7 +32862,7 @@
    ]
   },
   {
-   "id": 630,
+   "id": 631,
    "name": "Percentage",
    "words": [
     "percentage"
@@ -32833,7 +32883,7 @@
    ]
   },
   {
-   "id": 631,
+   "id": 632,
    "name": "Pips",
    "words": [
     "pips"
@@ -32854,7 +32904,7 @@
    ]
   },
   {
-   "id": 632,
+   "id": 633,
    "name": "Pivot.SlideInAnimationGroup",
    "words": [
     "pivot",
@@ -32880,7 +32930,7 @@
    ]
   },
   {
-   "id": 633,
+   "id": 634,
    "name": "PlaceholderForeground",
    "words": [
     "placeholder",
@@ -32962,7 +33012,7 @@
    ]
   },
   {
-   "id": 634,
+   "id": 635,
    "name": "PlaceholderGlyph",
    "words": [
     "placeholder",
@@ -32984,7 +33034,7 @@
    ]
   },
   {
-   "id": 635,
+   "id": 636,
    "name": "PlaceholderImage",
    "words": [
     "placeholder",
@@ -33006,7 +33056,7 @@
    ]
   },
   {
-   "id": 636,
+   "id": 637,
    "name": "PlaceholderText",
    "words": [
     "placeholder",
@@ -33112,7 +33162,7 @@
    ]
   },
   {
-   "id": 637,
+   "id": 638,
    "name": "PlaceholderValue",
    "words": [
     "placeholder",
@@ -33134,7 +33184,7 @@
    ]
   },
   {
-   "id": 638,
+   "id": 639,
    "name": "Placement",
    "words": [
     "placement"
@@ -33195,7 +33245,7 @@
    ]
   },
   {
-   "id": 639,
+   "id": 640,
    "name": "PlacementAnchor",
    "words": [
     "placement",
@@ -33241,7 +33291,7 @@
    ]
   },
   {
-   "id": 640,
+   "id": 641,
    "name": "PlacementConstraintAdjustment",
    "words": [
     "placement",
@@ -33288,7 +33338,7 @@
    ]
   },
   {
-   "id": 641,
+   "id": 642,
    "name": "PlacementGravity",
    "words": [
     "placement",
@@ -33334,7 +33384,7 @@
    ]
   },
   {
-   "id": 642,
+   "id": 643,
    "name": "PlacementRect",
    "words": [
     "placement",
@@ -33368,7 +33418,7 @@
    ]
   },
   {
-   "id": 643,
+   "id": 644,
    "name": "PlacementTarget",
    "words": [
     "placement",
@@ -33404,7 +33454,7 @@
    ]
   },
   {
-   "id": 644,
+   "id": 645,
    "name": "PlatformFeedback.FeedbackType",
    "words": [
     "platform",
@@ -33429,7 +33479,7 @@
    ]
   },
   {
-   "id": 645,
+   "id": 646,
    "name": "PlatformTransparencyCompensationLevel",
    "words": [
     "platform",
@@ -33453,7 +33503,7 @@
    ]
   },
   {
-   "id": 646,
+   "id": 647,
    "name": "Point",
    "words": [
     "point"
@@ -33486,7 +33536,7 @@
    ]
   },
   {
-   "id": 647,
+   "id": 648,
    "name": "Point1",
    "words": [
     "point1"
@@ -33519,7 +33569,7 @@
    ]
   },
   {
-   "id": 648,
+   "id": 649,
    "name": "Point2",
    "words": [
     "point2"
@@ -33552,7 +33602,7 @@
    ]
   },
   {
-   "id": 649,
+   "id": 650,
    "name": "Point3",
    "words": [
     "point3"
@@ -33573,7 +33623,7 @@
    ]
   },
   {
-   "id": 650,
+   "id": 651,
    "name": "PointerOverGlyph",
    "words": [
     "pointer",
@@ -33596,7 +33646,7 @@
    ]
   },
   {
-   "id": 651,
+   "id": 652,
    "name": "PointerOverImage",
    "words": [
     "pointer",
@@ -33619,7 +33669,7 @@
    ]
   },
   {
-   "id": 652,
+   "id": 653,
    "name": "PointerOverPlaceholderGlyph",
    "words": [
     "pointer",
@@ -33643,7 +33693,7 @@
    ]
   },
   {
-   "id": 653,
+   "id": 654,
    "name": "PointerOverPlaceholderImage",
    "words": [
     "pointer",
@@ -33667,7 +33717,7 @@
    ]
   },
   {
-   "id": 654,
+   "id": 655,
    "name": "Points",
    "words": [
     "points"
@@ -33736,7 +33786,7 @@
    ]
   },
   {
-   "id": 655,
+   "id": 656,
    "name": "Popup.TakesFocusFromNativeControl",
    "words": [
     "popup",
@@ -33762,7 +33812,7 @@
    ]
   },
   {
-   "id": 656,
+   "id": 657,
    "name": "Position",
    "words": [
     "position"
@@ -33784,7 +33834,7 @@
    ]
   },
   {
-   "id": 657,
+   "id": 658,
    "name": "Power",
    "words": [
     "power"
@@ -33805,7 +33855,7 @@
    ]
   },
   {
-   "id": 658,
+   "id": 659,
    "name": "PreeditText",
    "words": [
     "preedit",
@@ -33827,7 +33877,7 @@
    ]
   },
   {
-   "id": 659,
+   "id": 660,
    "name": "PreeditTextCursorPosition",
    "words": [
     "preedit",
@@ -33851,7 +33901,7 @@
    ]
   },
   {
-   "id": 660,
+   "id": 661,
    "name": "PreferSmallImage",
    "words": [
     "prefer",
@@ -33874,7 +33924,7 @@
    ]
   },
   {
-   "id": 661,
+   "id": 662,
    "name": "PrefixText",
    "words": [
     "prefix",
@@ -33896,7 +33946,7 @@
    ]
   },
   {
-   "id": 662,
+   "id": 663,
    "name": "PreviewContent",
    "words": [
     "preview",
@@ -33918,7 +33968,7 @@
    ]
   },
   {
-   "id": 663,
+   "id": 664,
    "name": "PreviousButtonCommand",
    "words": [
     "previous",
@@ -33941,7 +33991,7 @@
    ]
   },
   {
-   "id": 664,
+   "id": 665,
    "name": "PreviousButtonStyle",
    "words": [
     "previous",
@@ -33965,7 +34015,7 @@
    ]
   },
   {
-   "id": 665,
+   "id": 666,
    "name": "PreviousButtonTheme",
    "words": [
     "previous",
@@ -33989,7 +34039,7 @@
    ]
   },
   {
-   "id": 666,
+   "id": 667,
    "name": "PreviousButtonVisibility",
    "words": [
     "previous",
@@ -34013,7 +34063,7 @@
    ]
   },
   {
-   "id": 667,
+   "id": 668,
    "name": "PrimaryCommands",
    "words": [
     "primary",
@@ -34035,7 +34085,7 @@
    ]
   },
   {
-   "id": 668,
+   "id": 669,
    "name": "ProfilePicture",
    "words": [
     "profile",
@@ -34057,7 +34107,7 @@
    ]
   },
   {
-   "id": 669,
+   "id": 670,
    "name": "Progress",
    "words": [
     "progress"
@@ -34078,7 +34128,7 @@
    ]
   },
   {
-   "id": 670,
+   "id": 671,
    "name": "ProgressTextFormat",
    "words": [
     "progress",
@@ -34101,7 +34151,7 @@
    ]
   },
   {
-   "id": 671,
+   "id": 672,
    "name": "PromptChar",
    "words": [
     "prompt",
@@ -34123,7 +34173,7 @@
    ]
   },
   {
-   "id": 672,
+   "id": 673,
    "name": "Property",
    "words": [
     "property"
@@ -34144,7 +34194,7 @@
    ]
   },
   {
-   "id": 673,
+   "id": 674,
    "name": "PullDirection",
    "words": [
     "pull",
@@ -34206,7 +34256,7 @@
    ]
   },
   {
-   "id": 674,
+   "id": 675,
    "name": "QueryIcon",
    "words": [
     "query",
@@ -34229,7 +34279,7 @@
    ]
   },
   {
-   "id": 675,
+   "id": 676,
    "name": "Radius",
    "words": [
     "radius"
@@ -34250,7 +34300,7 @@
    ]
   },
   {
-   "id": 676,
+   "id": 677,
    "name": "RadiusX",
    "words": [
     "radius",
@@ -34308,7 +34358,7 @@
    ]
   },
   {
-   "id": 677,
+   "id": 678,
    "name": "RadiusY",
    "words": [
     "radius",
@@ -34366,7 +34416,7 @@
    ]
   },
   {
-   "id": 678,
+   "id": 679,
    "name": "RecognizesAccessKey",
    "words": [
     "recognizes",
@@ -34389,7 +34439,7 @@
    ]
   },
   {
-   "id": 679,
+   "id": 680,
    "name": "Rect",
    "words": [
     "rect"
@@ -34434,7 +34484,7 @@
    ]
   },
   {
-   "id": 680,
+   "id": 681,
    "name": "RefreshVisualizerSize",
    "words": [
     "refresh",
@@ -34457,7 +34507,7 @@
    ]
   },
   {
-   "id": 681,
+   "id": 682,
    "name": "RefreshVisualizerState",
    "words": [
     "refresh",
@@ -34481,7 +34531,7 @@
    ]
   },
   {
-   "id": 682,
+   "id": 683,
    "name": "RelativePanel.Above",
    "words": [
     "relative",
@@ -34504,7 +34554,7 @@
    ]
   },
   {
-   "id": 683,
+   "id": 684,
    "name": "RelativePanel.AlignBottomWith",
    "words": [
     "relative",
@@ -34529,7 +34579,7 @@
    ]
   },
   {
-   "id": 684,
+   "id": 685,
    "name": "RelativePanel.AlignBottomWithPanel",
    "words": [
     "relative",
@@ -34555,7 +34605,7 @@
    ]
   },
   {
-   "id": 685,
+   "id": 686,
    "name": "RelativePanel.AlignHorizontalCenterWith",
    "words": [
     "relative",
@@ -34581,7 +34631,7 @@
    ]
   },
   {
-   "id": 686,
+   "id": 687,
    "name": "RelativePanel.AlignHorizontalCenterWithPanel",
    "words": [
     "relative",
@@ -34608,7 +34658,7 @@
    ]
   },
   {
-   "id": 687,
+   "id": 688,
    "name": "RelativePanel.AlignLeftWith",
    "words": [
     "relative",
@@ -34633,7 +34683,7 @@
    ]
   },
   {
-   "id": 688,
+   "id": 689,
    "name": "RelativePanel.AlignLeftWithPanel",
    "words": [
     "relative",
@@ -34659,7 +34709,7 @@
    ]
   },
   {
-   "id": 689,
+   "id": 690,
    "name": "RelativePanel.AlignRightWith",
    "words": [
     "relative",
@@ -34684,7 +34734,7 @@
    ]
   },
   {
-   "id": 690,
+   "id": 691,
    "name": "RelativePanel.AlignRightWithPanel",
    "words": [
     "relative",
@@ -34710,7 +34760,7 @@
    ]
   },
   {
-   "id": 691,
+   "id": 692,
    "name": "RelativePanel.AlignTopWith",
    "words": [
     "relative",
@@ -34735,7 +34785,7 @@
    ]
   },
   {
-   "id": 692,
+   "id": 693,
    "name": "RelativePanel.AlignTopWithPanel",
    "words": [
     "relative",
@@ -34761,7 +34811,7 @@
    ]
   },
   {
-   "id": 693,
+   "id": 694,
    "name": "RelativePanel.AlignVerticalCenterWith",
    "words": [
     "relative",
@@ -34787,7 +34837,7 @@
    ]
   },
   {
-   "id": 694,
+   "id": 695,
    "name": "RelativePanel.AlignVerticalCenterWithPanel",
    "words": [
     "relative",
@@ -34814,7 +34864,7 @@
    ]
   },
   {
-   "id": 695,
+   "id": 696,
    "name": "RelativePanel.Below",
    "words": [
     "relative",
@@ -34837,7 +34887,7 @@
    ]
   },
   {
-   "id": 696,
+   "id": 697,
    "name": "RelativePanel.LeftOf",
    "words": [
     "relative",
@@ -34861,7 +34911,7 @@
    ]
   },
   {
-   "id": 697,
+   "id": 698,
    "name": "RelativePanel.RightOf",
    "words": [
     "relative",
@@ -34885,7 +34935,7 @@
    ]
   },
   {
-   "id": 698,
+   "id": 699,
    "name": "RelativeTransform",
    "words": [
     "relative",
@@ -34907,7 +34957,7 @@
    ]
   },
   {
-   "id": 699,
+   "id": 700,
    "name": "RenderAtScale",
    "words": [
     "render",
@@ -34930,7 +34980,7 @@
    ]
   },
   {
-   "id": 700,
+   "id": 701,
    "name": "RenderTransform",
    "words": [
     "render",
@@ -34952,7 +35002,7 @@
    ]
   },
   {
-   "id": 701,
+   "id": 702,
    "name": "RenderTransformOrigin",
    "words": [
     "render",
@@ -34975,7 +35025,7 @@
    ]
   },
   {
-   "id": 702,
+   "id": 703,
    "name": "ReorderMode",
    "words": [
     "reorder",
@@ -34998,7 +35048,7 @@
    ]
   },
   {
-   "id": 703,
+   "id": 704,
    "name": "RepeatBehavior",
    "words": [
     "repeat",
@@ -35020,7 +35070,7 @@
    ]
   },
   {
-   "id": 704,
+   "id": 705,
    "name": "RequestedThemeVariant",
    "words": [
     "requested",
@@ -35055,7 +35105,7 @@
    ]
   },
   {
-   "id": 705,
+   "id": 706,
    "name": "ReservedSpace",
    "words": [
     "reserved",
@@ -35077,7 +35127,7 @@
    ]
   },
   {
-   "id": 706,
+   "id": 707,
    "name": "ResetOnPrompt",
    "words": [
     "reset",
@@ -35100,7 +35150,7 @@
    ]
   },
   {
-   "id": 707,
+   "id": 708,
    "name": "ResetOnSpace",
    "words": [
     "reset",
@@ -35123,7 +35173,7 @@
    ]
   },
   {
-   "id": 708,
+   "id": 709,
    "name": "ResizeBehavior",
    "words": [
     "resize",
@@ -35146,7 +35196,7 @@
    ]
   },
   {
-   "id": 709,
+   "id": 710,
    "name": "ResizeDirection",
    "words": [
     "resize",
@@ -35169,7 +35219,7 @@
    ]
   },
   {
-   "id": 710,
+   "id": 711,
    "name": "RevealBrush.IsContainer",
    "words": [
     "reveal",
@@ -35193,7 +35243,7 @@
    ]
   },
   {
-   "id": 711,
+   "id": 712,
    "name": "RevealBrush.State",
    "words": [
     "reveal",
@@ -35217,7 +35267,7 @@
    ]
   },
   {
-   "id": 712,
+   "id": 713,
    "name": "RevealPassword",
    "words": [
     "reveal",
@@ -35251,7 +35301,7 @@
    ]
   },
   {
-   "id": 713,
+   "id": 714,
    "name": "ReverseOrder",
    "words": [
     "reverse",
@@ -35273,7 +35323,7 @@
    ]
   },
   {
-   "id": 714,
+   "id": 715,
    "name": "RichDocument",
    "words": [
     "rich",
@@ -35307,7 +35357,7 @@
    ]
   },
   {
-   "id": 715,
+   "id": 716,
    "name": "RightHeader",
    "words": [
     "right",
@@ -35342,7 +35392,7 @@
    ]
   },
   {
-   "id": 716,
+   "id": 717,
    "name": "RightHeaderTemplate",
    "words": [
     "right",
@@ -35365,7 +35415,7 @@
    ]
   },
   {
-   "id": 717,
+   "id": 718,
    "name": "RightIndent",
    "words": [
     "right",
@@ -35387,7 +35437,7 @@
    ]
   },
   {
-   "id": 718,
+   "id": 719,
    "name": "RightItems",
    "words": [
     "right",
@@ -35410,7 +35460,7 @@
    ]
   },
   {
-   "id": 719,
+   "id": 720,
    "name": "RotationAngle",
    "words": [
     "rotation",
@@ -35432,7 +35482,7 @@
    ]
   },
   {
-   "id": 720,
+   "id": 721,
    "name": "RowSpacing",
    "words": [
     "row",
@@ -35490,7 +35540,7 @@
    ]
   },
   {
-   "id": 721,
+   "id": 722,
    "name": "Rows",
    "words": [
     "rows"
@@ -35511,7 +35561,7 @@
    ]
   },
   {
-   "id": 722,
+   "id": 723,
    "name": "SafeAreaPadding",
    "words": [
     "safe",
@@ -35534,7 +35584,7 @@
    ]
   },
   {
-   "id": 723,
+   "id": 724,
    "name": "ScaleX",
    "words": [
     "scale",
@@ -35556,7 +35606,7 @@
    ]
   },
   {
-   "id": 724,
+   "id": 725,
    "name": "ScaleY",
    "words": [
     "scale",
@@ -35578,7 +35628,7 @@
    ]
   },
   {
-   "id": 725,
+   "id": 726,
    "name": "Scroll",
    "words": [
     "scroll"
@@ -35600,7 +35650,7 @@
    ]
   },
   {
-   "id": 726,
+   "id": 727,
    "name": "ScrollBarMaximum",
    "words": [
     "scroll",
@@ -35623,7 +35673,7 @@
    ]
   },
   {
-   "id": 727,
+   "id": 728,
    "name": "ScrollContentPresenter.HorizontalSnapPointsAlignment",
    "words": [
     "scroll",
@@ -35651,7 +35701,7 @@
    ]
   },
   {
-   "id": 728,
+   "id": 729,
    "name": "ScrollContentPresenter.HorizontalSnapPointsType",
    "words": [
     "scroll",
@@ -35679,7 +35729,7 @@
    ]
   },
   {
-   "id": 729,
+   "id": 730,
    "name": "ScrollContentPresenter.IsScrollChainingEnabled",
    "words": [
     "scroll",
@@ -35706,7 +35756,7 @@
    ]
   },
   {
-   "id": 730,
+   "id": 731,
    "name": "ScrollContentPresenter.VerticalSnapPointsAlignment",
    "words": [
     "scroll",
@@ -35734,7 +35784,7 @@
    ]
   },
   {
-   "id": 731,
+   "id": 732,
    "name": "ScrollContentPresenter.VerticalSnapPointsType",
    "words": [
     "scroll",
@@ -35762,7 +35812,7 @@
    ]
   },
   {
-   "id": 732,
+   "id": 733,
    "name": "ScrollStartDistance",
    "words": [
     "scroll",
@@ -35785,7 +35835,7 @@
    ]
   },
   {
-   "id": 733,
+   "id": 734,
    "name": "ScrollViewer.AllowAutoHide",
    "words": [
     "scroll",
@@ -35810,7 +35860,7 @@
    ]
   },
   {
-   "id": 734,
+   "id": 735,
    "name": "ScrollViewer.BringIntoViewOnFocusChange",
    "words": [
     "scroll",
@@ -35838,7 +35888,7 @@
    ]
   },
   {
-   "id": 735,
+   "id": 736,
    "name": "ScrollViewer.HorizontalScrollBarVisibility",
    "words": [
     "scroll",
@@ -35865,7 +35915,7 @@
    ]
   },
   {
-   "id": 736,
+   "id": 737,
    "name": "ScrollViewer.HorizontalSnapPointsAlignment",
    "words": [
     "scroll",
@@ -35892,7 +35942,7 @@
    ]
   },
   {
-   "id": 737,
+   "id": 738,
    "name": "ScrollViewer.HorizontalSnapPointsType",
    "words": [
     "scroll",
@@ -35919,7 +35969,7 @@
    ]
   },
   {
-   "id": 738,
+   "id": 739,
    "name": "ScrollViewer.IsDeferredScrollingEnabled",
    "words": [
     "scroll",
@@ -35945,7 +35995,7 @@
    ]
   },
   {
-   "id": 739,
+   "id": 740,
    "name": "ScrollViewer.IsScrollChainingEnabled",
    "words": [
     "scroll",
@@ -35971,7 +36021,7 @@
    ]
   },
   {
-   "id": 740,
+   "id": 741,
    "name": "ScrollViewer.IsScrollInertiaEnabled",
    "words": [
     "scroll",
@@ -35997,7 +36047,7 @@
    ]
   },
   {
-   "id": 741,
+   "id": 742,
    "name": "ScrollViewer.VerticalScrollBarVisibility",
    "words": [
     "scroll",
@@ -36024,7 +36074,7 @@
    ]
   },
   {
-   "id": 742,
+   "id": 743,
    "name": "ScrollViewer.VerticalSnapPointsAlignment",
    "words": [
     "scroll",
@@ -36051,7 +36101,7 @@
    ]
   },
   {
-   "id": 743,
+   "id": 744,
    "name": "ScrollViewer.VerticalSnapPointsType",
    "words": [
     "scroll",
@@ -36078,7 +36128,7 @@
    ]
   },
   {
-   "id": 744,
+   "id": 745,
    "name": "SearchText",
    "words": [
     "search",
@@ -36100,7 +36150,7 @@
    ]
   },
   {
-   "id": 745,
+   "id": 746,
    "name": "SecondIncrement",
    "words": [
     "second",
@@ -36134,7 +36184,7 @@
    ]
   },
   {
-   "id": 746,
+   "id": 747,
    "name": "SecondaryCommands",
    "words": [
     "secondary",
@@ -36156,7 +36206,7 @@
    ]
   },
   {
-   "id": 747,
+   "id": 748,
    "name": "Segments",
    "words": [
     "segments"
@@ -36177,7 +36227,7 @@
    ]
   },
   {
-   "id": 748,
+   "id": 749,
    "name": "SelectedContent",
    "words": [
     "selected",
@@ -36199,7 +36249,7 @@
    ]
   },
   {
-   "id": 749,
+   "id": 750,
    "name": "SelectedContentTemplate",
    "words": [
     "selected",
@@ -36222,7 +36272,7 @@
    ]
   },
   {
-   "id": 750,
+   "id": 751,
    "name": "SelectedDate",
    "words": [
     "selected",
@@ -36268,7 +36318,7 @@
    ]
   },
   {
-   "id": 751,
+   "id": 752,
    "name": "SelectedDateFormat",
    "words": [
     "selected",
@@ -36292,7 +36342,7 @@
    ]
   },
   {
-   "id": 752,
+   "id": 753,
    "name": "SelectedIndex",
    "words": [
     "selected",
@@ -36326,7 +36376,7 @@
    ]
   },
   {
-   "id": 753,
+   "id": 754,
    "name": "SelectedItem",
    "words": [
     "selected",
@@ -36384,7 +36434,7 @@
    ]
   },
   {
-   "id": 754,
+   "id": 755,
    "name": "SelectedItems",
    "words": [
     "selected",
@@ -36418,7 +36468,7 @@
    ]
   },
   {
-   "id": 755,
+   "id": 756,
    "name": "SelectedPage",
    "words": [
     "selected",
@@ -36441,7 +36491,7 @@
    ]
   },
   {
-   "id": 756,
+   "id": 757,
    "name": "SelectedPageIndex",
    "words": [
     "selected",
@@ -36476,7 +36526,7 @@
    ]
   },
   {
-   "id": 757,
+   "id": 758,
    "name": "SelectedText",
    "words": [
     "selected",
@@ -36522,7 +36572,7 @@
    ]
   },
   {
-   "id": 758,
+   "id": 759,
    "name": "SelectedTime",
    "words": [
     "selected",
@@ -36544,7 +36594,7 @@
    ]
   },
   {
-   "id": 759,
+   "id": 760,
    "name": "SelectedValue",
    "words": [
     "selected",
@@ -36566,7 +36616,7 @@
    ]
   },
   {
-   "id": 760,
+   "id": 761,
    "name": "SelectedValueBinding",
    "words": [
     "selected",
@@ -36589,7 +36639,7 @@
    ]
   },
   {
-   "id": 761,
+   "id": 762,
    "name": "SelectingItemsControl.IsSelected",
    "words": [
     "selecting",
@@ -36614,7 +36664,7 @@
    ]
   },
   {
-   "id": 762,
+   "id": 763,
    "name": "Selection",
    "words": [
     "selection"
@@ -36635,7 +36685,7 @@
    ]
   },
   {
-   "id": 763,
+   "id": 764,
    "name": "SelectionBoxItem",
    "words": [
     "selection",
@@ -36658,7 +36708,7 @@
    ]
   },
   {
-   "id": 764,
+   "id": 765,
    "name": "SelectionBoxItemTemplate",
    "words": [
     "selection",
@@ -36682,7 +36732,7 @@
    ]
   },
   {
-   "id": 765,
+   "id": 766,
    "name": "SelectionBrush",
    "words": [
     "selection",
@@ -36728,7 +36778,7 @@
    ]
   },
   {
-   "id": 766,
+   "id": 767,
    "name": "SelectionEnd",
    "words": [
     "selection",
@@ -36798,7 +36848,7 @@
    ]
   },
   {
-   "id": 767,
+   "id": 768,
    "name": "SelectionFollowsFocus",
    "words": [
     "selection",
@@ -36822,7 +36872,7 @@
    ]
   },
   {
-   "id": 768,
+   "id": 769,
    "name": "SelectionForegroundBrush",
    "words": [
     "selection",
@@ -36893,7 +36943,7 @@
    ]
   },
   {
-   "id": 769,
+   "id": 770,
    "name": "SelectionHighlightColor",
    "words": [
     "selection",
@@ -36928,7 +36978,7 @@
    ]
   },
   {
-   "id": 770,
+   "id": 771,
    "name": "SelectionHighlightColorWhenNotFocused",
    "words": [
     "selection",
@@ -36954,7 +37004,7 @@
    ]
   },
   {
-   "id": 771,
+   "id": 772,
    "name": "SelectionMode",
    "words": [
     "selection",
@@ -37014,7 +37064,7 @@
    ]
   },
   {
-   "id": 772,
+   "id": 773,
    "name": "SelectionStart",
    "words": [
     "selection",
@@ -37084,7 +37134,7 @@
    ]
   },
   {
-   "id": 773,
+   "id": 774,
    "name": "SelectsOnInvoked",
    "words": [
     "selects",
@@ -37107,7 +37157,7 @@
    ]
   },
   {
-   "id": 774,
+   "id": 775,
    "name": "SettingsItem",
    "words": [
     "settings",
@@ -37129,7 +37179,7 @@
    ]
   },
   {
-   "id": 775,
+   "id": 776,
    "name": "Severity",
    "words": [
     "severity"
@@ -37151,7 +37201,7 @@
    ]
   },
   {
-   "id": 776,
+   "id": 777,
    "name": "Shadow",
    "words": [
     "shadow"
@@ -37172,7 +37222,7 @@
    ]
   },
   {
-   "id": 777,
+   "id": 778,
    "name": "ShadowDepth",
    "words": [
     "shadow",
@@ -37194,7 +37244,7 @@
    ]
   },
   {
-   "id": 778,
+   "id": 779,
    "name": "ShadowThickness",
    "words": [
     "shadow",
@@ -37216,7 +37266,7 @@
    ]
   },
   {
-   "id": 779,
+   "id": 780,
    "name": "ShouldLoop",
    "words": [
     "should",
@@ -37238,7 +37288,7 @@
    ]
   },
   {
-   "id": 780,
+   "id": 781,
    "name": "ShouldUseOverlayLayer",
    "words": [
     "should",
@@ -37262,7 +37312,7 @@
    ]
   },
   {
-   "id": 781,
+   "id": 782,
    "name": "ShowActivated",
    "words": [
     "show",
@@ -37284,7 +37334,7 @@
    ]
   },
   {
-   "id": 782,
+   "id": 783,
    "name": "ShowButtonSpinner",
    "words": [
     "show",
@@ -37319,7 +37369,7 @@
    ]
   },
   {
-   "id": 783,
+   "id": 784,
    "name": "ShowDelay",
    "words": [
     "show",
@@ -37341,7 +37391,7 @@
    ]
   },
   {
-   "id": 784,
+   "id": 785,
    "name": "ShowGridLines",
    "words": [
     "show",
@@ -37364,7 +37414,7 @@
    ]
   },
   {
-   "id": 785,
+   "id": 786,
    "name": "ShowInTaskbar",
    "words": [
     "show",
@@ -37387,7 +37437,7 @@
    ]
   },
   {
-   "id": 786,
+   "id": 787,
    "name": "ShowMode",
    "words": [
     "show",
@@ -37410,7 +37460,7 @@
    ]
   },
   {
-   "id": 787,
+   "id": 788,
    "name": "ShowProgressText",
    "words": [
     "show",
@@ -37433,7 +37483,7 @@
    ]
   },
   {
-   "id": 788,
+   "id": 789,
    "name": "ShowSelectionHighlight",
    "words": [
     "show",
@@ -37456,7 +37506,7 @@
    ]
   },
   {
-   "id": 789,
+   "id": 790,
    "name": "ShowsPreview",
    "words": [
     "shows",
@@ -37478,7 +37528,7 @@
    ]
   },
   {
-   "id": 790,
+   "id": 791,
    "name": "ShowsScrollingPlaceholders",
    "words": [
     "shows",
@@ -37501,7 +37551,7 @@
    ]
   },
   {
-   "id": 791,
+   "id": 792,
    "name": "SingleSelectionFollowsFocus",
    "words": [
     "single",
@@ -37537,7 +37587,7 @@
    ]
   },
   {
-   "id": 792,
+   "id": 793,
    "name": "Size",
    "words": [
     "size"
@@ -37558,7 +37608,7 @@
    ]
   },
   {
-   "id": 793,
+   "id": 794,
    "name": "SizeToContent",
    "words": [
     "size",
@@ -37581,7 +37631,7 @@
    ]
   },
   {
-   "id": 794,
+   "id": 795,
    "name": "SmallChange",
    "words": [
     "small",
@@ -37627,7 +37677,7 @@
    ]
   },
   {
-   "id": 795,
+   "id": 796,
    "name": "SmallDisplayPicture",
    "words": [
     "small",
@@ -37650,7 +37700,7 @@
    ]
   },
   {
-   "id": 796,
+   "id": 797,
    "name": "SmallerPaneToggleButtonWidth",
    "words": [
     "smaller",
@@ -37675,7 +37725,7 @@
    ]
   },
   {
-   "id": 797,
+   "id": 798,
    "name": "SnapsToDevicePixels",
    "words": [
     "snaps",
@@ -37699,7 +37749,7 @@
    ]
   },
   {
-   "id": 798,
+   "id": 799,
    "name": "Source",
    "words": [
     "source"
@@ -37744,7 +37794,7 @@
    ]
   },
   {
-   "id": 799,
+   "id": 800,
    "name": "SourceDisplayPicture",
    "words": [
     "source",
@@ -37767,7 +37817,7 @@
    ]
   },
   {
-   "id": 800,
+   "id": 801,
    "name": "SourcePageType",
    "words": [
     "source",
@@ -37790,7 +37840,7 @@
    ]
   },
   {
-   "id": 801,
+   "id": 802,
    "name": "SourceRect",
    "words": [
     "source",
@@ -37824,7 +37874,7 @@
    ]
   },
   {
-   "id": 802,
+   "id": 803,
    "name": "Spacing",
    "words": [
     "spacing"
@@ -37845,7 +37895,7 @@
    ]
   },
   {
-   "id": 803,
+   "id": 804,
    "name": "SpeedRatio",
    "words": [
     "speed",
@@ -37879,7 +37929,7 @@
    ]
   },
   {
-   "id": 804,
+   "id": 805,
    "name": "SpinButtonPlacementMode",
    "words": [
     "spin",
@@ -37904,7 +37954,7 @@
    ]
   },
   {
-   "id": 805,
+   "id": 806,
    "name": "SpreadMethod",
    "words": [
     "spread",
@@ -37927,7 +37977,7 @@
    ]
   },
   {
-   "id": 806,
+   "id": 807,
    "name": "Springiness",
    "words": [
     "springiness"
@@ -37948,7 +37998,7 @@
    ]
   },
   {
-   "id": 807,
+   "id": 808,
    "name": "StartAngle",
    "words": [
     "start",
@@ -37982,7 +38032,7 @@
    ]
   },
   {
-   "id": 808,
+   "id": 809,
    "name": "StartPoint",
    "words": [
     "start",
@@ -38040,7 +38090,7 @@
    ]
   },
   {
-   "id": 809,
+   "id": 810,
    "name": "StaysOpenOnClick",
    "words": [
     "stays",
@@ -38064,7 +38114,7 @@
    ]
   },
   {
-   "id": 810,
+   "id": 811,
    "name": "Storyboard.TargetName",
    "words": [
     "storyboard",
@@ -38087,7 +38137,7 @@
    ]
   },
   {
-   "id": 811,
+   "id": 812,
    "name": "Storyboard.TargetProperty",
    "words": [
     "storyboard",
@@ -38110,7 +38160,7 @@
    ]
   },
   {
-   "id": 812,
+   "id": 813,
    "name": "Stretch",
    "words": [
     "stretch"
@@ -38171,7 +38221,7 @@
    ]
   },
   {
-   "id": 813,
+   "id": 814,
    "name": "StretchDirection",
    "words": [
     "stretch",
@@ -38207,7 +38257,7 @@
    ]
   },
   {
-   "id": 814,
+   "id": 815,
    "name": "Stroke",
    "words": [
     "stroke"
@@ -38240,7 +38290,7 @@
    ]
   },
   {
-   "id": 815,
+   "id": 816,
    "name": "StrokeDashArray",
    "words": [
     "stroke",
@@ -38275,7 +38325,7 @@
    ]
   },
   {
-   "id": 816,
+   "id": 817,
    "name": "StrokeDashOffset",
    "words": [
     "stroke",
@@ -38310,7 +38360,7 @@
    ]
   },
   {
-   "id": 817,
+   "id": 818,
    "name": "StrokeJoin",
    "words": [
     "stroke",
@@ -38333,7 +38383,7 @@
    ]
   },
   {
-   "id": 818,
+   "id": 819,
    "name": "StrokeLineCap",
    "words": [
     "stroke",
@@ -38370,7 +38420,7 @@
    ]
   },
   {
-   "id": 819,
+   "id": 820,
    "name": "StrokeMiterLimit",
    "words": [
     "stroke",
@@ -38393,7 +38443,7 @@
    ]
   },
   {
-   "id": 820,
+   "id": 821,
    "name": "StrokeOffset",
    "words": [
     "stroke",
@@ -38415,7 +38465,7 @@
    ]
   },
   {
-   "id": 821,
+   "id": 822,
    "name": "StrokeOffsetUnit",
    "words": [
     "stroke",
@@ -38439,7 +38489,7 @@
    ]
   },
   {
-   "id": 822,
+   "id": 823,
    "name": "StrokeThickness",
    "words": [
     "stroke",
@@ -38473,7 +38523,7 @@
    ]
   },
   {
-   "id": 823,
+   "id": 824,
    "name": "StrokeThicknessUnit",
    "words": [
     "stroke",
@@ -38497,7 +38547,7 @@
    ]
   },
   {
-   "id": 824,
+   "id": 825,
    "name": "Subtitle",
    "words": [
     "subtitle"
@@ -38518,7 +38568,7 @@
    ]
   },
   {
-   "id": 825,
+   "id": 826,
    "name": "SuffixText",
    "words": [
     "suffix",
@@ -38540,7 +38590,7 @@
    ]
   },
   {
-   "id": 826,
+   "id": 827,
    "name": "SweepAngle",
    "words": [
     "sweep",
@@ -38574,7 +38624,7 @@
    ]
   },
   {
-   "id": 827,
+   "id": 828,
    "name": "SweepDirection",
    "words": [
     "sweep",
@@ -38597,7 +38647,7 @@
    ]
   },
   {
-   "id": 828,
+   "id": 829,
    "name": "Symbol",
    "words": [
     "symbol"
@@ -38632,7 +38682,7 @@
    ]
   },
   {
-   "id": 829,
+   "id": 830,
    "name": "SystemBackdrop",
    "words": [
     "system",
@@ -38666,7 +38716,7 @@
    ]
   },
   {
-   "id": 830,
+   "id": 831,
    "name": "TabIndex",
    "words": [
     "tab",
@@ -38700,7 +38750,7 @@
    ]
   },
   {
-   "id": 831,
+   "id": 832,
    "name": "TabPlacement",
    "words": [
     "tab",
@@ -38723,7 +38773,7 @@
    ]
   },
   {
-   "id": 832,
+   "id": 833,
    "name": "TabStops",
    "words": [
     "tab",
@@ -38745,7 +38795,7 @@
    ]
   },
   {
-   "id": 833,
+   "id": 834,
    "name": "TabStripPlacement",
    "words": [
     "tab",
@@ -38782,7 +38832,7 @@
    ]
   },
   {
-   "id": 834,
+   "id": 835,
    "name": "TabbedPage.IsTabEnabled",
    "words": [
     "tabbed",
@@ -38807,7 +38857,7 @@
    ]
   },
   {
-   "id": 835,
+   "id": 836,
    "name": "TableView",
    "words": [
     "table",
@@ -38830,7 +38880,7 @@
    ]
   },
   {
-   "id": 836,
+   "id": 837,
    "name": "Tag",
    "words": [
     "tag"
@@ -38851,7 +38901,7 @@
    ]
   },
   {
-   "id": 837,
+   "id": 838,
    "name": "Target",
    "words": [
     "target"
@@ -38885,7 +38935,7 @@
    ]
   },
   {
-   "id": 838,
+   "id": 839,
    "name": "TargetName",
    "words": [
     "target",
@@ -38907,7 +38957,7 @@
    ]
   },
   {
-   "id": 839,
+   "id": 840,
    "name": "TargetTheme",
    "words": [
     "target",
@@ -38930,7 +38980,7 @@
    ]
   },
   {
-   "id": 840,
+   "id": 841,
    "name": "Template",
    "words": [
     "template"
@@ -38963,7 +39013,7 @@
    ]
   },
   {
-   "id": 841,
+   "id": 842,
    "name": "TemplateSettings",
    "words": [
     "template",
@@ -39090,7 +39140,7 @@
    ]
   },
   {
-   "id": 842,
+   "id": 843,
    "name": "TemplatedControl.IsTemplateFocusTarget",
    "words": [
     "templated",
@@ -39116,7 +39166,7 @@
    ]
   },
   {
-   "id": 843,
+   "id": 844,
    "name": "TemplatedParent",
    "words": [
     "templated",
@@ -39139,7 +39189,7 @@
    ]
   },
   {
-   "id": 844,
+   "id": 845,
    "name": "Text",
    "words": [
     "text"
@@ -39292,7 +39342,7 @@
    ]
   },
   {
-   "id": 845,
+   "id": 846,
    "name": "TextAlignment",
    "words": [
     "text",
@@ -39367,7 +39417,7 @@
    ]
   },
   {
-   "id": 846,
+   "id": 847,
    "name": "TextBlock.BaselineOffset",
    "words": [
     "text",
@@ -39391,7 +39441,7 @@
    ]
   },
   {
-   "id": 847,
+   "id": 848,
    "name": "TextBlock.LayoutRoundingPlacement",
    "words": [
     "text",
@@ -39417,7 +39467,7 @@
    ]
   },
   {
-   "id": 848,
+   "id": 849,
    "name": "TextBlock.LineHeight",
    "words": [
     "text",
@@ -39441,7 +39491,7 @@
    ]
   },
   {
-   "id": 849,
+   "id": 850,
    "name": "TextBlock.LineSpacing",
    "words": [
     "text",
@@ -39465,7 +39515,7 @@
    ]
   },
   {
-   "id": 850,
+   "id": 851,
    "name": "TextBlock.MaxLines",
    "words": [
     "text",
@@ -39489,7 +39539,7 @@
    ]
   },
   {
-   "id": 851,
+   "id": 852,
    "name": "TextBlock.TextAlignment",
    "words": [
     "text",
@@ -39514,7 +39564,7 @@
    ]
   },
   {
-   "id": 852,
+   "id": 853,
    "name": "TextBlock.TextLineBounds",
    "words": [
     "text",
@@ -39540,7 +39590,7 @@
    ]
   },
   {
-   "id": 853,
+   "id": 854,
    "name": "TextBlock.TextTrimming",
    "words": [
     "text",
@@ -39564,7 +39614,7 @@
    ]
   },
   {
-   "id": 854,
+   "id": 855,
    "name": "TextBlock.TextWrapping",
    "words": [
     "text",
@@ -39589,7 +39639,7 @@
    ]
   },
   {
-   "id": 855,
+   "id": 856,
    "name": "TextBox.LineHeight",
    "words": [
     "text",
@@ -39613,7 +39663,7 @@
    ]
   },
   {
-   "id": 856,
+   "id": 857,
    "name": "TextBox.TextAlignment",
    "words": [
     "text",
@@ -39638,7 +39688,7 @@
    ]
   },
   {
-   "id": 857,
+   "id": 858,
    "name": "TextBox.TextWrapping",
    "words": [
     "text",
@@ -39663,7 +39713,7 @@
    ]
   },
   {
-   "id": 858,
+   "id": 859,
    "name": "TextConverter",
    "words": [
     "text",
@@ -39697,7 +39747,7 @@
    ]
   },
   {
-   "id": 859,
+   "id": 860,
    "name": "TextDecorations",
    "words": [
     "text",
@@ -39743,7 +39793,7 @@
    ]
   },
   {
-   "id": 860,
+   "id": 861,
    "name": "TextElement.FontFamily",
    "words": [
     "text",
@@ -39767,7 +39817,7 @@
    ]
   },
   {
-   "id": 861,
+   "id": 862,
    "name": "TextElement.FontFeatures",
    "words": [
     "text",
@@ -39791,7 +39841,7 @@
    ]
   },
   {
-   "id": 862,
+   "id": 863,
    "name": "TextElement.FontSize",
    "words": [
     "text",
@@ -39815,7 +39865,7 @@
    ]
   },
   {
-   "id": 863,
+   "id": 864,
    "name": "TextElement.FontStretch",
    "words": [
     "text",
@@ -39840,7 +39890,7 @@
    ]
   },
   {
-   "id": 864,
+   "id": 865,
    "name": "TextElement.FontStyle",
    "words": [
     "text",
@@ -39865,7 +39915,31 @@
    ]
   },
   {
-   "id": 865,
+   "id": 866,
+   "name": "TextElement.FontVariations",
+   "words": [
+    "text",
+    "element",
+    "font",
+    "variations"
+   ],
+   "declarations": [
+    {
+     "owner": "TextElement",
+     "kind": "attached",
+     "value": {
+      "rust": "Option<FontVariationSettings>",
+      "nullable": true,
+      "kind": "parsed"
+     },
+     "default": "None",
+     "read_only": false,
+     "doc": "Defines the `FontVariations` property (upstream dfee7f224b): the values of the variation axes of a variable font (`wght=650, wdth=85` in markup), inherited like the other font properties and folded into the [`Typeface`] of the text, so that shaping and drawing use the instance of the font at those values. Each value is clamped to its axis and an axis the font does not have is ignored; `None` gives the design defaults. Animations interpolate it per axis ([`FontVariationSettings::interpolate`])."
+    }
+   ]
+  },
+  {
+   "id": 867,
    "name": "TextElement.FontWeight",
    "words": [
     "text",
@@ -39889,7 +39963,7 @@
    ]
   },
   {
-   "id": 866,
+   "id": 868,
    "name": "TextElement.Foreground",
    "words": [
     "text",
@@ -39912,7 +39986,7 @@
    ]
   },
   {
-   "id": 867,
+   "id": 869,
    "name": "TextElement.Language",
    "words": [
     "text",
@@ -39935,7 +40009,7 @@
    ]
   },
   {
-   "id": 868,
+   "id": 870,
    "name": "TextElement.LetterSpacing",
    "words": [
     "text",
@@ -39959,7 +40033,7 @@
    ]
   },
   {
-   "id": 869,
+   "id": 871,
    "name": "TextFilter",
    "words": [
     "text",
@@ -39981,7 +40055,7 @@
    ]
   },
   {
-   "id": 870,
+   "id": 872,
    "name": "TextIndent",
    "words": [
     "text",
@@ -40027,7 +40101,7 @@
    ]
   },
   {
-   "id": 871,
+   "id": 873,
    "name": "TextInputOptions.AutoCapitalization",
    "words": [
     "text",
@@ -40052,7 +40126,7 @@
    ]
   },
   {
-   "id": 872,
+   "id": 874,
    "name": "TextInputOptions.ContentType",
    "words": [
     "text",
@@ -40078,7 +40152,7 @@
    ]
   },
   {
-   "id": 873,
+   "id": 875,
    "name": "TextInputOptions.InputScopeNames",
    "words": [
     "text",
@@ -40104,7 +40178,7 @@
    ]
   },
   {
-   "id": 874,
+   "id": 876,
    "name": "TextInputOptions.IsSensitive",
    "words": [
     "text",
@@ -40129,7 +40203,7 @@
    ]
   },
   {
-   "id": 875,
+   "id": 877,
    "name": "TextInputOptions.LocaleHints",
    "words": [
     "text",
@@ -40154,7 +40228,7 @@
    ]
   },
   {
-   "id": 876,
+   "id": 878,
    "name": "TextInputOptions.Lowercase",
    "words": [
     "text",
@@ -40178,7 +40252,7 @@
    ]
   },
   {
-   "id": 877,
+   "id": 879,
    "name": "TextInputOptions.Multiline",
    "words": [
     "text",
@@ -40202,7 +40276,7 @@
    ]
   },
   {
-   "id": 878,
+   "id": 880,
    "name": "TextInputOptions.ReturnKeyType",
    "words": [
     "text",
@@ -40229,7 +40303,7 @@
    ]
   },
   {
-   "id": 879,
+   "id": 881,
    "name": "TextInputOptions.ShowSuggestions",
    "words": [
     "text",
@@ -40254,7 +40328,7 @@
    ]
   },
   {
-   "id": 880,
+   "id": 882,
    "name": "TextInputOptions.Uppercase",
    "words": [
     "text",
@@ -40278,7 +40352,7 @@
    ]
   },
   {
-   "id": 881,
+   "id": 883,
    "name": "TextLineBounds",
    "words": [
     "text",
@@ -40302,7 +40376,7 @@
    ]
   },
   {
-   "id": 882,
+   "id": 884,
    "name": "TextMemberPath",
    "words": [
     "text",
@@ -40325,7 +40399,7 @@
    ]
   },
   {
-   "id": 883,
+   "id": 885,
    "name": "TextParagraphStyles",
    "words": [
     "text",
@@ -40360,7 +40434,7 @@
    ]
   },
   {
-   "id": 884,
+   "id": 886,
    "name": "TextPresenter.LetterSpacing",
    "words": [
     "text",
@@ -40384,7 +40458,7 @@
    ]
   },
   {
-   "id": 885,
+   "id": 887,
    "name": "TextPresenter.LineHeight",
    "words": [
     "text",
@@ -40408,7 +40482,7 @@
    ]
   },
   {
-   "id": 886,
+   "id": 888,
    "name": "TextPresenter.TextAlignment",
    "words": [
     "text",
@@ -40433,7 +40507,7 @@
    ]
   },
   {
-   "id": 887,
+   "id": 889,
    "name": "TextPresenter.TextWrapping",
    "words": [
     "text",
@@ -40458,7 +40532,7 @@
    ]
   },
   {
-   "id": 888,
+   "id": 890,
    "name": "TextSearch.Text",
    "words": [
     "text",
@@ -40481,7 +40555,7 @@
    ]
   },
   {
-   "id": 889,
+   "id": 891,
    "name": "TextSearch.TextBinding",
    "words": [
     "text",
@@ -40505,7 +40579,7 @@
    ]
   },
   {
-   "id": 890,
+   "id": 892,
    "name": "TextSelector",
    "words": [
     "text",
@@ -40527,7 +40601,7 @@
    ]
   },
   {
-   "id": 891,
+   "id": 893,
    "name": "TextStyleOverrides",
    "words": [
     "text",
@@ -40562,7 +40636,7 @@
    ]
   },
   {
-   "id": 892,
+   "id": 894,
    "name": "TextTrimming",
    "words": [
     "text",
@@ -40596,7 +40670,7 @@
    ]
   },
   {
-   "id": 893,
+   "id": 895,
    "name": "TextWrapping",
    "words": [
     "text",
@@ -40645,7 +40719,7 @@
    ]
   },
   {
-   "id": 894,
+   "id": 896,
    "name": "Theme",
    "words": [
     "theme"
@@ -40667,7 +40741,7 @@
    ]
   },
   {
-   "id": 895,
+   "id": 897,
    "name": "Thickness",
    "words": [
     "thickness"
@@ -40688,7 +40762,7 @@
    ]
   },
   {
-   "id": 896,
+   "id": 898,
    "name": "Threshold",
    "words": [
     "threshold"
@@ -40709,7 +40783,7 @@
    ]
   },
   {
-   "id": 897,
+   "id": 899,
    "name": "Thumb",
    "words": [
     "thumb"
@@ -40731,7 +40805,7 @@
    ]
   },
   {
-   "id": 898,
+   "id": 900,
    "name": "Thumbnail",
    "words": [
     "thumbnail"
@@ -40752,7 +40826,7 @@
    ]
   },
   {
-   "id": 899,
+   "id": 901,
    "name": "TickFrequency",
    "words": [
     "tick",
@@ -40786,7 +40860,7 @@
    ]
   },
   {
-   "id": 900,
+   "id": 902,
    "name": "TickPlacement",
    "words": [
     "tick",
@@ -40809,7 +40883,7 @@
    ]
   },
   {
-   "id": 901,
+   "id": 903,
    "name": "Ticks",
    "words": [
     "ticks"
@@ -40842,7 +40916,7 @@
    ]
   },
   {
-   "id": 902,
+   "id": 904,
    "name": "TileMode",
    "words": [
     "tile",
@@ -40865,7 +40939,7 @@
    ]
   },
   {
-   "id": 903,
+   "id": 905,
    "name": "Time",
    "words": [
     "time"
@@ -40886,7 +40960,7 @@
    ]
   },
   {
-   "id": 904,
+   "id": 906,
    "name": "TintColor",
    "words": [
     "tint",
@@ -40920,7 +40994,7 @@
    ]
   },
   {
-   "id": 905,
+   "id": 907,
    "name": "TintLuminosityOpacity",
    "words": [
     "tint",
@@ -40943,7 +41017,7 @@
    ]
   },
   {
-   "id": 906,
+   "id": 908,
    "name": "TintOpacity",
    "words": [
     "tint",
@@ -40977,7 +41051,7 @@
    ]
   },
   {
-   "id": 907,
+   "id": 909,
    "name": "TintTransitionDuration",
    "words": [
     "tint",
@@ -41000,7 +41074,7 @@
    ]
   },
   {
-   "id": 908,
+   "id": 910,
    "name": "Title",
    "words": [
     "title"
@@ -41069,7 +41143,7 @@
    ]
   },
   {
-   "id": 909,
+   "id": 911,
    "name": "TitleBar.IsDragRegion",
    "words": [
     "title",
@@ -41094,7 +41168,7 @@
    ]
   },
   {
-   "id": 910,
+   "id": 912,
    "name": "TitleBarHeight",
    "words": [
     "title",
@@ -41117,7 +41191,7 @@
    ]
   },
   {
-   "id": 911,
+   "id": 913,
    "name": "TitleTemplate",
    "words": [
     "title",
@@ -41139,7 +41213,7 @@
    ]
   },
   {
-   "id": 912,
+   "id": 914,
    "name": "To",
    "words": [
     "to"
@@ -41184,7 +41258,7 @@
    ]
   },
   {
-   "id": 913,
+   "id": 915,
    "name": "ToggleType",
    "words": [
     "toggle",
@@ -41220,7 +41294,7 @@
    ]
   },
   {
-   "id": 914,
+   "id": 916,
    "name": "ToolTip",
    "words": [
     "tool",
@@ -41242,7 +41316,7 @@
    ]
   },
   {
-   "id": 915,
+   "id": 917,
    "name": "ToolTip.BetweenShowDelay",
    "words": [
     "tool",
@@ -41267,7 +41341,7 @@
    ]
   },
   {
-   "id": 916,
+   "id": 918,
    "name": "ToolTip.CustomPopupPlacementCallback",
    "words": [
     "tool",
@@ -41293,7 +41367,7 @@
    ]
   },
   {
-   "id": 917,
+   "id": 919,
    "name": "ToolTip.HorizontalOffset",
    "words": [
     "tool",
@@ -41317,7 +41391,7 @@
    ]
   },
   {
-   "id": 918,
+   "id": 920,
    "name": "ToolTip.IsOpen",
    "words": [
     "tool",
@@ -41341,7 +41415,7 @@
    ]
   },
   {
-   "id": 919,
+   "id": 921,
    "name": "ToolTip.Placement",
    "words": [
     "tool",
@@ -41365,7 +41439,7 @@
    ]
   },
   {
-   "id": 920,
+   "id": 922,
    "name": "ToolTip.ServiceEnabled",
    "words": [
     "tool",
@@ -41389,7 +41463,7 @@
    ]
   },
   {
-   "id": 921,
+   "id": 923,
    "name": "ToolTip.ShouldUseOverlayLayer",
    "words": [
     "tool",
@@ -41415,7 +41489,7 @@
    ]
   },
   {
-   "id": 922,
+   "id": 924,
    "name": "ToolTip.ShowDelay",
    "words": [
     "tool",
@@ -41439,7 +41513,7 @@
    ]
   },
   {
-   "id": 923,
+   "id": 925,
    "name": "ToolTip.ShowOnDisabled",
    "words": [
     "tool",
@@ -41464,7 +41538,7 @@
    ]
   },
   {
-   "id": 924,
+   "id": 926,
    "name": "ToolTip.Tip",
    "words": [
     "tool",
@@ -41487,7 +41561,7 @@
    ]
   },
   {
-   "id": 925,
+   "id": 927,
    "name": "ToolTip.ToolTip",
    "words": [
     "tool",
@@ -41512,7 +41586,7 @@
    ]
   },
   {
-   "id": 926,
+   "id": 928,
    "name": "ToolTip.VerticalOffset",
    "words": [
     "tool",
@@ -41536,7 +41610,7 @@
    ]
   },
   {
-   "id": 927,
+   "id": 929,
    "name": "ToolTipText",
    "words": [
     "tool",
@@ -41559,7 +41633,7 @@
    ]
   },
   {
-   "id": 928,
+   "id": 930,
    "name": "TopCommandBar",
    "words": [
     "top",
@@ -41582,7 +41656,7 @@
    ]
   },
   {
-   "id": 929,
+   "id": 931,
    "name": "TopItems",
    "words": [
     "top",
@@ -41605,7 +41679,7 @@
    ]
   },
   {
-   "id": 930,
+   "id": 932,
    "name": "TopLevel.AutoSafeAreaPadding",
    "words": [
     "top",
@@ -41631,7 +41705,7 @@
    ]
   },
   {
-   "id": 931,
+   "id": 933,
    "name": "TopLevel.SystemBarColor",
    "words": [
     "top",
@@ -41657,7 +41731,7 @@
    ]
   },
   {
-   "id": 932,
+   "id": 934,
    "name": "TopPadding",
    "words": [
     "top",
@@ -41679,7 +41753,7 @@
    ]
   },
   {
-   "id": 933,
+   "id": 935,
    "name": "TopPaneVisibility",
    "words": [
     "top",
@@ -41702,7 +41776,7 @@
    ]
   },
   {
-   "id": 934,
+   "id": 936,
    "name": "Topmost",
    "words": [
     "topmost"
@@ -41735,7 +41809,7 @@
    ]
   },
   {
-   "id": 935,
+   "id": 937,
    "name": "Transform",
    "words": [
     "transform"
@@ -41808,7 +41882,7 @@
    ]
   },
   {
-   "id": 936,
+   "id": 938,
    "name": "TransformOrigin",
    "words": [
     "transform",
@@ -41830,7 +41904,7 @@
    ]
   },
   {
-   "id": 937,
+   "id": 939,
    "name": "Transitions",
    "words": [
     "transitions"
@@ -41851,7 +41925,7 @@
    ]
   },
   {
-   "id": 938,
+   "id": 940,
    "name": "Translation",
    "words": [
     "translation"
@@ -41872,7 +41946,7 @@
    ]
   },
   {
-   "id": 939,
+   "id": 941,
    "name": "TransparencyBackgroundFallback",
    "words": [
     "transparency",
@@ -41895,7 +41969,7 @@
    ]
   },
   {
-   "id": 940,
+   "id": 942,
    "name": "TransparencyLevelHint",
    "words": [
     "transparency",
@@ -41918,7 +41992,7 @@
    ]
   },
   {
-   "id": 941,
+   "id": 943,
    "name": "TrayIcon.Icons",
    "words": [
     "tray",
@@ -41941,7 +42015,7 @@
    ]
   },
   {
-   "id": 942,
+   "id": 944,
    "name": "Typography.AnnotationAlternates",
    "words": [
     "typography",
@@ -41964,7 +42038,7 @@
    ]
   },
   {
-   "id": 943,
+   "id": 945,
    "name": "Typography.CapitalSpacing",
    "words": [
     "typography",
@@ -41987,7 +42061,7 @@
    ]
   },
   {
-   "id": 944,
+   "id": 946,
    "name": "Typography.Capitals",
    "words": [
     "typography",
@@ -42010,7 +42084,7 @@
    ]
   },
   {
-   "id": 945,
+   "id": 947,
    "name": "Typography.CaseSensitiveForms",
    "words": [
     "typography",
@@ -42034,7 +42108,7 @@
    ]
   },
   {
-   "id": 946,
+   "id": 948,
    "name": "Typography.ContextualAlternates",
    "words": [
     "typography",
@@ -42057,7 +42131,7 @@
    ]
   },
   {
-   "id": 947,
+   "id": 949,
    "name": "Typography.ContextualLigatures",
    "words": [
     "typography",
@@ -42080,7 +42154,7 @@
    ]
   },
   {
-   "id": 948,
+   "id": 950,
    "name": "Typography.ContextualSwashes",
    "words": [
     "typography",
@@ -42103,7 +42177,7 @@
    ]
   },
   {
-   "id": 949,
+   "id": 951,
    "name": "Typography.DiscretionaryLigatures",
    "words": [
     "typography",
@@ -42126,7 +42200,7 @@
    ]
   },
   {
-   "id": 950,
+   "id": 952,
    "name": "Typography.EastAsianExpertForms",
    "words": [
     "typography",
@@ -42151,7 +42225,7 @@
    ]
   },
   {
-   "id": 951,
+   "id": 953,
    "name": "Typography.EastAsianLanguage",
    "words": [
     "typography",
@@ -42176,7 +42250,7 @@
    ]
   },
   {
-   "id": 952,
+   "id": 954,
    "name": "Typography.EastAsianWidths",
    "words": [
     "typography",
@@ -42201,7 +42275,7 @@
    ]
   },
   {
-   "id": 953,
+   "id": 955,
    "name": "Typography.Fraction",
    "words": [
     "typography",
@@ -42224,7 +42298,7 @@
    ]
   },
   {
-   "id": 954,
+   "id": 956,
    "name": "Typography.HistoricalForms",
    "words": [
     "typography",
@@ -42247,7 +42321,7 @@
    ]
   },
   {
-   "id": 955,
+   "id": 957,
    "name": "Typography.HistoricalLigatures",
    "words": [
     "typography",
@@ -42270,7 +42344,7 @@
    ]
   },
   {
-   "id": 956,
+   "id": 958,
    "name": "Typography.Kerning",
    "words": [
     "typography",
@@ -42292,7 +42366,7 @@
    ]
   },
   {
-   "id": 957,
+   "id": 959,
    "name": "Typography.MathematicalGreek",
    "words": [
     "typography",
@@ -42315,7 +42389,7 @@
    ]
   },
   {
-   "id": 958,
+   "id": 960,
    "name": "Typography.NumeralAlignment",
    "words": [
     "typography",
@@ -42339,7 +42413,7 @@
    ]
   },
   {
-   "id": 959,
+   "id": 961,
    "name": "Typography.NumeralStyle",
    "words": [
     "typography",
@@ -42363,7 +42437,7 @@
    ]
   },
   {
-   "id": 960,
+   "id": 962,
    "name": "Typography.SlashedZero",
    "words": [
     "typography",
@@ -42386,7 +42460,7 @@
    ]
   },
   {
-   "id": 961,
+   "id": 963,
    "name": "Typography.StandardLigatures",
    "words": [
     "typography",
@@ -42409,7 +42483,7 @@
    ]
   },
   {
-   "id": 962,
+   "id": 964,
    "name": "Typography.StandardSwashes",
    "words": [
     "typography",
@@ -42432,7 +42506,7 @@
    ]
   },
   {
-   "id": 963,
+   "id": 965,
    "name": "Typography.StylisticAlternates",
    "words": [
     "typography",
@@ -42455,7 +42529,7 @@
    ]
   },
   {
-   "id": 964,
+   "id": 966,
    "name": "Typography.StylisticSet1",
    "words": [
     "typography",
@@ -42478,7 +42552,7 @@
    ]
   },
   {
-   "id": 965,
+   "id": 967,
    "name": "Typography.StylisticSet10",
    "words": [
     "typography",
@@ -42501,7 +42575,7 @@
    ]
   },
   {
-   "id": 966,
+   "id": 968,
    "name": "Typography.StylisticSet11",
    "words": [
     "typography",
@@ -42524,7 +42598,7 @@
    ]
   },
   {
-   "id": 967,
+   "id": 969,
    "name": "Typography.StylisticSet12",
    "words": [
     "typography",
@@ -42547,7 +42621,7 @@
    ]
   },
   {
-   "id": 968,
+   "id": 970,
    "name": "Typography.StylisticSet13",
    "words": [
     "typography",
@@ -42570,7 +42644,7 @@
    ]
   },
   {
-   "id": 969,
+   "id": 971,
    "name": "Typography.StylisticSet14",
    "words": [
     "typography",
@@ -42593,7 +42667,7 @@
    ]
   },
   {
-   "id": 970,
+   "id": 972,
    "name": "Typography.StylisticSet15",
    "words": [
     "typography",
@@ -42616,7 +42690,7 @@
    ]
   },
   {
-   "id": 971,
+   "id": 973,
    "name": "Typography.StylisticSet16",
    "words": [
     "typography",
@@ -42639,7 +42713,7 @@
    ]
   },
   {
-   "id": 972,
+   "id": 974,
    "name": "Typography.StylisticSet17",
    "words": [
     "typography",
@@ -42662,7 +42736,7 @@
    ]
   },
   {
-   "id": 973,
+   "id": 975,
    "name": "Typography.StylisticSet18",
    "words": [
     "typography",
@@ -42685,7 +42759,7 @@
    ]
   },
   {
-   "id": 974,
+   "id": 976,
    "name": "Typography.StylisticSet19",
    "words": [
     "typography",
@@ -42708,7 +42782,7 @@
    ]
   },
   {
-   "id": 975,
+   "id": 977,
    "name": "Typography.StylisticSet2",
    "words": [
     "typography",
@@ -42731,7 +42805,7 @@
    ]
   },
   {
-   "id": 976,
+   "id": 978,
    "name": "Typography.StylisticSet20",
    "words": [
     "typography",
@@ -42754,7 +42828,7 @@
    ]
   },
   {
-   "id": 977,
+   "id": 979,
    "name": "Typography.StylisticSet3",
    "words": [
     "typography",
@@ -42777,7 +42851,7 @@
    ]
   },
   {
-   "id": 978,
+   "id": 980,
    "name": "Typography.StylisticSet4",
    "words": [
     "typography",
@@ -42800,7 +42874,7 @@
    ]
   },
   {
-   "id": 979,
+   "id": 981,
    "name": "Typography.StylisticSet5",
    "words": [
     "typography",
@@ -42823,7 +42897,7 @@
    ]
   },
   {
-   "id": 980,
+   "id": 982,
    "name": "Typography.StylisticSet6",
    "words": [
     "typography",
@@ -42846,7 +42920,7 @@
    ]
   },
   {
-   "id": 981,
+   "id": 983,
    "name": "Typography.StylisticSet7",
    "words": [
     "typography",
@@ -42869,7 +42943,7 @@
    ]
   },
   {
-   "id": 982,
+   "id": 984,
    "name": "Typography.StylisticSet8",
    "words": [
     "typography",
@@ -42892,7 +42966,7 @@
    ]
   },
   {
-   "id": 983,
+   "id": 985,
    "name": "Typography.StylisticSet9",
    "words": [
     "typography",
@@ -42915,7 +42989,7 @@
    ]
   },
   {
-   "id": 984,
+   "id": 986,
    "name": "Typography.Variants",
    "words": [
     "typography",
@@ -42938,7 +43012,7 @@
    ]
   },
   {
-   "id": 985,
+   "id": 987,
    "name": "UnderlineState",
    "words": [
     "underline",
@@ -42960,7 +43034,7 @@
    ]
   },
   {
-   "id": 986,
+   "id": 988,
    "name": "UnderlineStyle",
    "words": [
     "underline",
@@ -42983,7 +43057,7 @@
    ]
   },
   {
-   "id": 987,
+   "id": 989,
    "name": "UndoLimit",
    "words": [
     "undo",
@@ -43017,7 +43091,7 @@
    ]
   },
   {
-   "id": 988,
+   "id": 990,
    "name": "UnsetGlyph",
    "words": [
     "unset",
@@ -43039,7 +43113,7 @@
    ]
   },
   {
-   "id": 989,
+   "id": 991,
    "name": "UnsetImage",
    "words": [
     "unset",
@@ -43061,7 +43135,7 @@
    ]
   },
   {
-   "id": 990,
+   "id": 992,
    "name": "UpdateTextOnSelect",
    "words": [
     "update",
@@ -43085,7 +43159,7 @@
    ]
   },
   {
-   "id": 991,
+   "id": 993,
    "name": "UseFloatingPlaceholder",
    "words": [
     "use",
@@ -43132,7 +43206,7 @@
    ]
   },
   {
-   "id": 992,
+   "id": 994,
    "name": "UseLayoutRounding",
    "words": [
     "use",
@@ -43155,7 +43229,7 @@
    ]
   },
   {
-   "id": 993,
+   "id": 995,
    "name": "UseLightDismissOverlayMode",
    "words": [
     "use",
@@ -43180,7 +43254,7 @@
    ]
   },
   {
-   "id": 994,
+   "id": 996,
    "name": "UseRenderTransform",
    "words": [
     "use",
@@ -43203,7 +43277,7 @@
    ]
   },
   {
-   "id": 995,
+   "id": 997,
    "name": "UseSeconds",
    "words": [
     "use",
@@ -43237,7 +43311,7 @@
    ]
   },
   {
-   "id": 996,
+   "id": 998,
    "name": "ValidSpinDirection",
    "words": [
     "valid",
@@ -43260,7 +43334,7 @@
    ]
   },
   {
-   "id": 997,
+   "id": 999,
    "name": "ValidationMode",
    "words": [
     "validation",
@@ -43283,7 +43357,7 @@
    ]
   },
   {
-   "id": 998,
+   "id": 1000,
    "name": "Value",
    "words": [
     "value"
@@ -43448,7 +43522,7 @@
    ]
   },
   {
-   "id": 999,
+   "id": 1001,
    "name": "ValueMemberBinding",
    "words": [
     "value",
@@ -43471,7 +43545,7 @@
    ]
   },
   {
-   "id": 1000,
+   "id": 1002,
    "name": "VerticalAlignment",
    "words": [
     "vertical",
@@ -43494,7 +43568,7 @@
    ]
   },
   {
-   "id": 1001,
+   "id": 1003,
    "name": "VerticalContentAlignment",
    "words": [
     "vertical",
@@ -43648,7 +43722,7 @@
    ]
   },
   {
-   "id": 1002,
+   "id": 1004,
    "name": "VerticalOffset",
    "words": [
     "vertical",
@@ -43694,7 +43768,7 @@
    ]
   },
   {
-   "id": 1003,
+   "id": 1005,
    "name": "VerticalOrientationPadding",
    "words": [
     "vertical",
@@ -43717,7 +43791,7 @@
    ]
   },
   {
-   "id": 1004,
+   "id": 1006,
    "name": "VerticalSpacing",
    "words": [
     "vertical",
@@ -43739,7 +43813,7 @@
    ]
   },
   {
-   "id": 1005,
+   "id": 1007,
    "name": "Viewbox",
    "words": [
     "viewbox"
@@ -43760,7 +43834,7 @@
    ]
   },
   {
-   "id": 1006,
+   "id": 1008,
    "name": "Viewport",
    "words": [
     "viewport"
@@ -43805,7 +43879,7 @@
    ]
   },
   {
-   "id": 1007,
+   "id": 1009,
    "name": "ViewportFraction",
    "words": [
     "viewport",
@@ -43827,7 +43901,7 @@
    ]
   },
   {
-   "id": 1008,
+   "id": 1010,
    "name": "ViewportSize",
    "words": [
     "viewport",
@@ -43861,7 +43935,7 @@
    ]
   },
   {
-   "id": 1009,
+   "id": 1011,
    "name": "Visibility",
    "words": [
     "visibility"
@@ -43883,7 +43957,7 @@
    ]
   },
   {
-   "id": 1010,
+   "id": 1012,
    "name": "Visual",
    "words": [
     "visual"
@@ -43905,7 +43979,7 @@
    ]
   },
   {
-   "id": 1011,
+   "id": 1013,
    "name": "Visual.FlowDirection",
    "words": [
     "visual",
@@ -43929,7 +44003,7 @@
    ]
   },
   {
-   "id": 1012,
+   "id": 1014,
    "name": "VisualParent",
    "words": [
     "visual",
@@ -43952,7 +44026,7 @@
    ]
   },
   {
-   "id": 1013,
+   "id": 1015,
    "name": "VisualStateManager.CustomVisualStateManager",
    "words": [
     "visual",
@@ -43980,7 +44054,7 @@
    ]
   },
   {
-   "id": 1014,
+   "id": 1016,
    "name": "VisualStateManager.VisualStateGroups",
    "words": [
     "visual",
@@ -44006,7 +44080,7 @@
    ]
   },
   {
-   "id": 1015,
+   "id": 1017,
    "name": "Visualizer",
    "words": [
     "visualizer"
@@ -44028,7 +44102,7 @@
    ]
   },
   {
-   "id": 1016,
+   "id": 1018,
    "name": "WaylandProperties.AppId",
    "words": [
     "wayland",
@@ -44052,7 +44126,7 @@
    ]
   },
   {
-   "id": 1017,
+   "id": 1019,
    "name": "WeekNumberRule",
    "words": [
     "week",
@@ -44089,7 +44163,7 @@
    ]
   },
   {
-   "id": 1018,
+   "id": 1020,
    "name": "Width",
    "words": [
     "width"
@@ -44134,7 +44208,7 @@
    ]
   },
   {
-   "id": 1019,
+   "id": 1021,
    "name": "Win32Properties.NonClientHitTestResult",
    "words": [
     "win32",
@@ -44162,7 +44236,7 @@
    ]
   },
   {
-   "id": 1020,
+   "id": 1022,
    "name": "Win32Properties.WindowCornerPreference",
    "words": [
     "win32",
@@ -44188,7 +44262,7 @@
    ]
   },
   {
-   "id": 1021,
+   "id": 1023,
    "name": "WindowDecorationMargin",
    "words": [
     "window",
@@ -44211,7 +44285,7 @@
    ]
   },
   {
-   "id": 1022,
+   "id": 1024,
    "name": "WindowDecorationProperties.ElementRole",
    "words": [
     "window",
@@ -44237,7 +44311,7 @@
    ]
   },
   {
-   "id": 1023,
+   "id": 1025,
    "name": "WindowDecorations",
    "words": [
     "window",
@@ -44260,7 +44334,7 @@
    ]
   },
   {
-   "id": 1024,
+   "id": 1026,
    "name": "WindowDecorationsTheme",
    "words": [
     "window",
@@ -44284,7 +44358,7 @@
    ]
   },
   {
-   "id": 1025,
+   "id": 1027,
    "name": "WindowDrawnDecorations.TitleBarDecorations",
    "words": [
     "window",
@@ -44310,7 +44384,7 @@
    ]
   },
   {
-   "id": 1026,
+   "id": 1028,
    "name": "WindowManagerAddShadowHint",
    "words": [
     "window",
@@ -44359,7 +44433,7 @@
    ]
   },
   {
-   "id": 1027,
+   "id": 1029,
    "name": "WindowStartupLocation",
    "words": [
     "window",
@@ -44383,7 +44457,7 @@
    ]
   },
   {
-   "id": 1028,
+   "id": 1030,
    "name": "WindowState",
    "words": [
     "window",
@@ -44406,7 +44480,7 @@
    ]
   },
   {
-   "id": 1029,
+   "id": 1031,
    "name": "Wrap",
    "words": [
     "wrap"
@@ -44428,7 +44502,7 @@
    ]
   },
   {
-   "id": 1030,
+   "id": 1032,
    "name": "WrapSelection",
    "words": [
     "wrap",
@@ -44450,7 +44524,7 @@
    ]
   },
   {
-   "id": 1031,
+   "id": 1033,
    "name": "X",
    "words": [
     "x"
@@ -44471,7 +44545,7 @@
    ]
   },
   {
-   "id": 1032,
+   "id": 1034,
    "name": "X11Properties.NetWmWindowType",
    "words": [
     "x11",
@@ -44498,7 +44572,7 @@
    ]
   },
   {
-   "id": 1033,
+   "id": 1035,
    "name": "X11Properties.WmClass",
    "words": [
     "x11",
@@ -44522,7 +44596,7 @@
    ]
   },
   {
-   "id": 1034,
+   "id": 1036,
    "name": "XYFocus.NavigationModes",
    "words": [
     "xy",
@@ -44546,7 +44620,7 @@
    ]
   },
   {
-   "id": 1035,
+   "id": 1037,
    "name": "XamlAmbientLight.IsTarget",
    "words": [
     "xaml",
@@ -44571,7 +44645,7 @@
    ]
   },
   {
-   "id": 1036,
+   "id": 1038,
    "name": "XamlBindingHelper.DataTemplateComponent",
    "words": [
     "xaml",
@@ -44597,7 +44671,7 @@
    ]
   },
   {
-   "id": 1037,
+   "id": 1039,
    "name": "Y",
    "words": [
     "y"
@@ -44618,7 +44692,7 @@
    ]
   },
   {
-   "id": 1038,
+   "id": 1040,
    "name": "YearFormat",
    "words": [
     "year",
@@ -44652,7 +44726,7 @@
    ]
   },
   {
-   "id": 1039,
+   "id": 1041,
    "name": "YearVisible",
    "words": [
     "year",
@@ -44686,7 +44760,7 @@
    ]
   },
   {
-   "id": 1040,
+   "id": 1042,
    "name": "ZIndex",
    "words": [
     "z",
@@ -44708,7 +44782,7 @@
    ]
   },
   {
-   "id": 1041,
+   "id": 1043,
    "name": "ZoomFactor",
    "words": [
     "zoom",
@@ -44730,7 +44804,7 @@
    ]
   },
   {
-   "id": 1042,
+   "id": 1044,
    "name": "ZoomMode",
    "words": [
     "zoom",
