@@ -254,17 +254,6 @@ impl fmt::Debug for Subscription {
 #[derive(Debug)]
 pub struct TestError(pub String);
 
-/// The name of [`TestError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `TestError`")]
-pub type TestException = TestError;
-
-/// The constructor of the tuple struct [`TestError`] under its name before 0.5.
-#[deprecated(since = "0.5.0", note = "use `TestError`")]
-#[allow(non_snake_case)]
-pub fn TestException(message: String) -> TestError {
-    TestError(message)
-}
-
 impl fmt::Display for TestError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.0)

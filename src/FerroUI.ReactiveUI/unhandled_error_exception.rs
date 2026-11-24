@@ -18,10 +18,6 @@ pub struct UnhandledError {
     inner_exception: Option<String>,
 }
 
-/// The name of [`UnhandledError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `UnhandledError`")]
-pub type UnhandledErrorException = UnhandledError;
-
 impl Default for UnhandledError {
     fn default() -> Self {
         Self::new()

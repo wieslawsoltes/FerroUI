@@ -23,10 +23,6 @@ pub struct PanicError {
     pub message: String,
 }
 
-/// The name of [`PanicError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `PanicError`")]
-pub type PanicException = PanicError;
-
 impl fmt::Display for PanicError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         f.write_str(&self.message)

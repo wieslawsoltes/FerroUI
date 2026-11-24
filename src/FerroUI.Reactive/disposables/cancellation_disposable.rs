@@ -22,13 +22,6 @@ impl CancellationDisposable {
         Rc::new(Self { token })
     }
 
-    /// A disposable that cancels `source` when it is disposed.
-    #[deprecated(since = "0.5.0", note = "use `with_token`, with a `CancellationToken::new()` in the place of the source")]
-    #[allow(deprecated)]
-    pub fn with_source(source: ferroui_system::threading::CancellationTokenSource) -> Rc<Self> {
-        Self::with_token(source.into())
-    }
-
     /// The token that disposing cancels (a clone of it).
     pub fn token(&self) -> CancellationToken {
         self.token.clone()

@@ -34,10 +34,6 @@ pub struct InvalidCastError {
     target_type: &'static str,
 }
 
-/// The name of [`InvalidCastError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `InvalidCastError`")]
-pub type InvalidCastException = InvalidCastError;
-
 impl InvalidCastError {
     /// The error of a value that does not cast to `U`.
     pub fn new<U: ?Sized>() -> Self {

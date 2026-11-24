@@ -10,8 +10,7 @@
 //! the sequence is subscribed to on the thread of the context, later, when the context runs the
 //! work it was posted. Upstream posts from the thread that subscribes, which may be any thread.
 //!
-//! The context is a schedule of `ferroui-system` (`subscribe_on_schedule`); the form that takes a
-//! `SynchronizationContext` (`subscribe_on_context`) is deprecated since 0.5.0.
+//! The context is a schedule of `ferroui-system` (`subscribe_on_schedule`).
 
 use crate::concurrency::{post_with_start_complete, IScheduler, PostTarget};
 use crate::disposables::{ContextDisposable, Disposable, ScheduledDisposable, SerialDisposableValue, SingleAssignmentDisposableValue};
@@ -141,17 +140,6 @@ macro_rules! subscribe_on_methods {
             schedule: std::sync::Arc<dyn ferroui_system::task::Schedule>,
         ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
             crate::linq::subscribe_on::subscribe_on_context(self.observable(), crate::concurrency::PostTarget::Schedule(schedule))
-        }
-
-        /// Subscribes to the sequence, and disposes the subscription, on `context`: both are posted
-        /// to it; the notifications are not moved (`SubscribeOn(SynchronizationContext)`).
-        #[deprecated(since = "0.5.0", note = "use `subscribe_on_schedule` with a `ferroui_system::task::Schedule`")]
-        #[allow(deprecated)]
-        fn subscribe_on_context(
-            &self,
-            context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>,
-        ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
-            crate::linq::subscribe_on::subscribe_on_context(self.observable(), crate::concurrency::PostTarget::Context(context))
         }
     };
 }

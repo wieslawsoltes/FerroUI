@@ -14,10 +14,6 @@ pub struct UnhandledInteractionError<I, O> {
     input: Option<I>,
 }
 
-/// The name of [`UnhandledInteractionError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `UnhandledInteractionError`")]
-pub type UnhandledInteractionException<I, O> = UnhandledInteractionError<I, O>;
-
 impl<I, O> UnhandledInteractionError<I, O> {
     /// The error of `interaction`, which no handler handled for `input`
     /// (`UnhandledInteractionException(Interaction<TInput, TOutput>, TInput)`).

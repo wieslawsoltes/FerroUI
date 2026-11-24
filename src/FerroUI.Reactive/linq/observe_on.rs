@@ -16,8 +16,7 @@
 //! when the context runs the work it was posted, later on that thread. Upstream posts from the
 //! thread of the source, which may be any thread.
 //!
-//! The context is a schedule of `ferroui-system` (`observe_on_schedule`); the form that takes a
-//! `SynchronizationContext` (`observe_on_context`) is deprecated since 0.5.0.
+//! The context is a schedule of `ferroui-system` (`observe_on_schedule`).
 
 use crate::concurrency::{IScheduler, PostTarget};
 use crate::disposables::{Disposable, MultipleAssignmentDisposableValue, SingleAssignmentDisposable};
@@ -182,8 +181,6 @@ struct ObserveOnContextSink<T> {
     this: Weak<ObserveOnContextSink<T>>,
     sink: Sink<T>,
     context: PostTarget,
-    /// Whether the operation of the subscription has been completed (`Dispose(bool)` runs once).
-    operation_completed: Cell<bool>,
 }
 
 impl<T: 'static> ObserveOnContextSink<T> {
@@ -191,9 +188,8 @@ impl<T: 'static> ObserveOnContextSink<T> {
         self.this.upgrade().expect("the sink is alive while it is notified")
     }
 
-    /// `Run`: the operation of the subscription starts, then the source is subscribed to.
+    /// `Run`: the source is subscribed to (a schedule has no operation to start).
     fn run(self: &Rc<Self>, source: &Rc<dyn IObservable<T>>) {
-        self.context.operation_started();
         let upstream = source.subscribe(self.clone());
         self.sink.set_upstream(upstream);
     }
@@ -229,11 +225,8 @@ impl<T: 'static> IObserver<T> for ObserveOnContextSink<T> {
 }
 
 impl<T: 'static> IDisposable for ObserveOnContextSink<T> {
-    /// `Dispose(bool)`: the operation of the subscription completes, then the sink is disposed.
+    /// `Dispose(bool)`.
     fn dispose(&self) {
-        if !self.operation_completed.replace(true) {
-            self.context.operation_completed();
-        }
         self.sink.dispose();
     }
 }
@@ -255,7 +248,6 @@ impl<T: 'static> IObservable<T> for ObserveOnContextObservable<T> {
                     this: this.clone(),
                     sink: Sink::new(observer),
                     context,
-                    operation_completed: Cell::new(false),
                 })
             },
             move |sink: &Rc<ObserveOnContextSink<T>>| sink.run(&source),
@@ -286,17 +278,6 @@ macro_rules! observe_on_methods {
             schedule: std::sync::Arc<dyn ferroui_system::task::Schedule>,
         ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
             crate::linq::observe_on::observe_on_context(self.observable(), crate::concurrency::PostTarget::Schedule(schedule))
-        }
-
-        /// Delivers the notifications of the sequence through `context`, each posted to it in order
-        /// (`ObserveOn(SynchronizationContext)`). The sequence notifies on the thread of the context.
-        #[deprecated(since = "0.5.0", note = "use `observe_on_schedule` with a `ferroui_system::task::Schedule`")]
-        #[allow(deprecated)]
-        fn observe_on_context(
-            &self,
-            context: std::sync::Arc<dyn ferroui_system::threading::SynchronizationContext>,
-        ) -> std::rc::Rc<dyn ferroui_system::IObservable<T>> {
-            crate::linq::observe_on::observe_on_context(self.observable(), crate::concurrency::PostTarget::Context(context))
         }
     };
 }

@@ -77,16 +77,12 @@ pub use interfaces::*;
 pub use mixins::*;
 pub use reactive_command::*;
 pub use internal::PanicError;
-#[allow(deprecated)]
-pub use internal::PanicException;
 pub use reactive_object::*;
 pub use rx_cache_size::RxCacheSize;
 pub use rx_schedulers::RxSchedulers;
 pub use rx_state::RxState;
 pub use scheduler::*;
 pub use unhandled_error_exception::UnhandledError;
-#[allow(deprecated)]
-pub use unhandled_error_exception::UnhandledErrorException;
 
 /// What the macros of the crate expand to, so that a crate that uses them needs no other
 /// dependency.
