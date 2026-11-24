@@ -25013,6 +25013,12 @@
         "documentation": "TextBlock.Inlines: Option<InlineCollection>",
         "values": [],
         "attached": false
+      },
+      "IsTextTrimmedChanged": {
+        "name": "IsTextTrimmedChanged",
+        "type_name": "IsTextTrimmedChangedEventArgs",
+        "documentation": "TextBlock.IsTextTrimmedChanged routed event",
+        "event": true
       }
     },
     "namespace_aliases": [

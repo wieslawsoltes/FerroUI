@@ -430,6 +430,9 @@ fn isTabStop(object, value) = {
 // getIsTabStop(object: int) -> bool: reads IsTabStop (Hyperlink, InputElement); the fallback
 // of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getIsTabStop(object) = ferro_get_bool_or(object: object, property: 446, fallback: toInt8(0)) != toInt8(0)
+// getIsTextTrimmed(object: int) -> bool: reads IsTextTrimmed (RichTextBlock, TextBlock); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+fn getIsTextTrimmed(object) = ferro_get_bool_or(object: object, property: 451, fallback: toInt8(0)) != toInt8(0)
 // isVisible(object: int, value: bool) -> int: sets IsVisible (NativeMenuItem, TableViewColumn,
 // TrayIcon, Visual). Defines the `IsVisible` property.
 fn isVisible(object, value) = {
@@ -875,6 +878,20 @@ fn onHorizontalSnapPointsChanged(object, tag) = {
 // the object, as the control does (for tests and scripts).
 fn raiseHorizontalSnapPointsChanged(object) = {
     let _ = ferro_raise(object: object, event: 27)
+    object
+}
+// onIsTextTrimmedChanged(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
+// the application on every IsTextTrimmedChanged (RichTextBlock, TextBlock). Defines the
+// `IsTextTrimmedChanged` routed event, raised on the text block when
+// [`is_text_trimmed`](Self::is_text_trimmed) changes.
+fn onIsTextTrimmedChanged(object, tag) = {
+    let _ = ferro_subscribe_dispatch(object: object, event: 30, tag: tag)
+    object
+}
+// raiseIsTextTrimmedChanged(object: int) -> int: raises IsTextTrimmedChanged on the object, as
+// the control does (for tests and scripts).
+fn raiseIsTextTrimmedChanged(object) = {
+    let _ = ferro_raise(object: object, event: 30)
     object
 }
 // onKeyDown(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of the

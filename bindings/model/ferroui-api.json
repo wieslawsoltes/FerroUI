@@ -11993,6 +11993,7 @@
     "FontWeight",
     "Foreground",
     "Inlines",
+    "IsTextTrimmed",
     "LetterSpacing",
     "Padding",
     "Text",
@@ -12007,7 +12008,9 @@
     "TextBlock.TextWrapping",
     "TextDecorations"
    ],
-   "events": [],
+   "events": [
+    "IsTextTrimmedChanged"
+   ],
    "doc": "A control that displays a block of text."
   },
   {
@@ -27458,6 +27461,18 @@
      "default": "Self::is_text_trimmed",
      "read_only": true,
      "doc": ""
+    },
+    {
+     "owner": "TextBlock",
+     "kind": "direct",
+     "value": {
+      "rust": "bool",
+      "nullable": false,
+      "kind": "bool"
+     },
+     "default": "|o| o.is_text_trimmed()",
+     "read_only": true,
+     "doc": "Defines the `IsTextTrimmed` property: whether the layout trimmed the text, read only."
     }
    ]
   },
@@ -45579,6 +45594,12 @@
      "args": "RoutedEventArgs",
      "raisable": true,
      "doc": ""
+    },
+    {
+     "owner": "TextBlock",
+     "args": "IsTextTrimmedChangedEventArgs",
+     "raisable": false,
+     "doc": "Defines the `IsTextTrimmedChanged` routed event, raised on the text block when [`is_text_trimmed`](Self::is_text_trimmed) changes."
     }
    ],
    "value_property": null,

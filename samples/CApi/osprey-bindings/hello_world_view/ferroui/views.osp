@@ -286,6 +286,9 @@ fn onHolding(message) = AttrOn { attrOnEvent: 26, attrOnMessage: message }
 // onHorizontalSnapPointsChanged(message: M) -> Attr<M>: sends the message on every
 // HorizontalSnapPointsChanged (PivotPanel, StackPanel, VirtualizingStackPanel).
 fn onHorizontalSnapPointsChanged(message) = AttrOn { attrOnEvent: 27, attrOnMessage: message }
+// onIsTextTrimmedChanged(message: M) -> Attr<M>: sends the message on every
+// IsTextTrimmedChanged (RichTextBlock, TextBlock).
+fn onIsTextTrimmedChanged(message) = AttrOn { attrOnEvent: 30, attrOnMessage: message }
 // onKeyDown(message: M) -> Attr<M>: sends the message on every KeyDown (InputElement).
 fn onKeyDown(message) = AttrOn { attrOnEvent: 31, attrOnMessage: message }
 // onKeyUp(message: M) -> Attr<M>: sends the message on every KeyUp (InputElement).
@@ -394,6 +397,9 @@ fn raiseContextCanceledAt(key) = toInt(ferro_raise(object: findKey(key: key), ev
 // raiseHorizontalSnapPointsChangedAt(key: int) -> int: raises HorizontalSnapPointsChanged on
 // the control of the element with the key `key`, as the control does.
 fn raiseHorizontalSnapPointsChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 27))
+// raiseIsTextTrimmedChangedAt(key: int) -> int: raises IsTextTrimmedChanged on the control of
+// the element with the key `key`, as the control does.
+fn raiseIsTextTrimmedChangedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 30))
 // raiseLoadedAt(key: int) -> int: raises Loaded on the control of the element with the key
 // `key`, as the control does.
 fn raiseLoadedAt(key) = toInt(ferro_raise(object: findKey(key: key), event: 33))

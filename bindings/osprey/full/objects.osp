@@ -5195,8 +5195,8 @@ fn isTextSelectionEnabled(object, value) = {
 // RichTextBlock); the fallback of its kind when the read fails (`failure()` tells): a plain
 // value, no Result.
 fn getIsTextSelectionEnabled(object) = ferro_get_bool_or(object: object, property: 450, fallback: toInt8(0)) != toInt8(0)
-// getIsTextTrimmed(object: int) -> bool: reads IsTextTrimmed (RichTextBlock); the fallback of
-// its kind when the read fails (`failure()` tells): a plain value, no Result.
+// getIsTextTrimmed(object: int) -> bool: reads IsTextTrimmed (RichTextBlock, TextBlock); the
+// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getIsTextTrimmed(object) = ferro_get_bool_or(object: object, property: 451, fallback: toInt8(0)) != toInt8(0)
 // isThreeState(object: int, value: bool) -> int: sets IsThreeState (ToggleButton). Defines the
 // `IsThreeState` property.
@@ -10379,7 +10379,9 @@ fn raiseIsSelectedChanged(object) = {
     object
 }
 // onIsTextTrimmedChanged(object: int, tag: int) -> int: dispatches `tag` to the dispatcher of
-// the application on every IsTextTrimmedChanged (RichTextBlock).
+// the application on every IsTextTrimmedChanged (RichTextBlock, TextBlock). Defines the
+// `IsTextTrimmedChanged` routed event, raised on the text block when
+// [`is_text_trimmed`](Self::is_text_trimmed) changes.
 fn onIsTextTrimmedChanged(object, tag) = {
     let _ = ferro_subscribe_dispatch(object: object, event: 30, tag: tag)
     object
