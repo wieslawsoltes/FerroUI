@@ -2009,8 +2009,8 @@ impl PipelinedLayer {
             // layer; the textures of the bands are copied onto it first when only they hold the frame before.
             let textures_asked = pool.insert_mode() == Some(BandInsert::BandTextures);
             let band_textures = textures_asked && self.frame_reach.get() <= BAND_TEXTURE_MARGIN as f32;
-            let insert = (textures_asked && !band_textures).then_some(BandInsert::Deferred);
-            if insert.is_some() {
+            let on_the_layer = (textures_asked && !band_textures).then_some(BandInsert::Deferred);
+            if on_the_layer.is_some() {
                 self.make_surface_latest(true);
             }
             // A band has a thread of its own: a layer that asks for more
@@ -2092,7 +2092,7 @@ impl PipelinedLayer {
                     index: *index,
                     turn: 0,
                     sources,
-                    insert,
+                    insert: on_the_layer,
                 };
                 if pool.play(band) {
                     sent += 1;
