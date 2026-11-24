@@ -1391,6 +1391,26 @@ impl DrawingContextImpl {
         None
     }
 
+    /// Attempts to push a custom effect with an explicit execution result.
+    ///
+    /// A successful push must be balanced with
+    /// [`IDrawingContextImplWithEffects::pop_effect`]. On failure no effect or
+    /// canvas state is pushed. This lets exporters reject missing, disabled or
+    /// invalid shader implementations instead of inheriting the normal
+    /// drawing contract's unchanged-content fallback.
+    pub fn try_push_custom_effect(
+        &mut self,
+        clip_rect: Option<Rect>,
+        effect: &ferroui_base::media::effects::ImmutableCustomEffect,
+    ) -> bool {
+        self.check_lease();
+        let Some(pushed) = self.try_push_shader_effect(clip_rect, effect) else {
+            return false;
+        };
+        self.effect_stack.push(pushed);
+        true
+    }
+
     /// Pushes the custom effect `effect` as its runtime shader (#455, E4),
     /// over `clip_rect` (the area of the effect; the clip of the canvas
     /// without one): a save of the canvas under the matrix of the layer of

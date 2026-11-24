@@ -541,9 +541,12 @@ impl ServerCompositionTarget {
         // is given the dirty rectangles one at a time (section 9.56 of
         // desktop-performance.md).
         self.draws_rects_apart.set(render_target.clips_regions_per_draw());
-        let need_layer = self.overlays.require_layer() // Check if we don't need overlays
-            // Check if render target can be rendered to directly and preserves the previous frame
-            || !(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);
+        // Export targets need the original draw commands. A non-retained
+        // target can explicitly prefer direct full-frame drawing; the context
+        // properties below then invalidate the complete viewport each redraw.
+        let need_layer = self.overlays.require_layer()
+            || !(properties.is_suitable_for_direct_rendering
+                && (properties.retains_previous_frame_contents || render_target.prefers_full_frame_rendering()));
 
         let pixel_size = self.pixel_size();
         let scene_info = RenderTargetSceneInfo {
@@ -625,7 +628,9 @@ impl ServerCompositionTarget {
                 self.layer_unpresented.set(false);
             }
 
-            if self.full_redraw_requested.get() || (!need_layer && !properties.previous_frame_is_retained) {
+            if self.full_redraw_requested.get()
+                || (!need_layer && (render_target.prefers_full_frame_rendering() || !properties.previous_frame_is_retained))
+            {
                 self.full_redraw_requested.set(false);
                 full_redraw = true;
             }
