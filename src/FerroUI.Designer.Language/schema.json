@@ -24337,6 +24337,18 @@
     ]
   },
   {
+    "name": "TableViewRowAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "TableViewRowAutomationPeer",
+    "base": "ListItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "TappedEventArgs",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::TappedEventArgs",
