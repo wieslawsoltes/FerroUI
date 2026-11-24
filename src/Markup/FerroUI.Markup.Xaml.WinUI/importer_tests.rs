@@ -1068,3 +1068,167 @@ fn migrated_template_xbind_uses_each_deferred_instance_and_typed_item() {
         &XBindings::get_for_root(&second).unwrap()
     ));
 }
+
+// A panel with a border or an inset is wrapped in a Border (#1349).
+
+const WINUI_ROOT: &str = "xmlns='http://schemas.microsoft.com/winfx/2006/xaml/presentation' \
+xmlns:x='http://schemas.microsoft.com/winfx/2006/xaml'";
+
+fn panel_border_document(panel: &str) -> String {
+    format!(
+        "<Grid {WINUI_ROOT} RowDefinitions='10,*' Width='200' Height='160'>\
+         <{panel} x:Name='Panel' Grid.Row='1' Margin='5' BorderThickness='2' BorderBrush='Green' \
+         CornerRadius='4' Padding='3,4' Background='Red'>\
+         <Border x:Name='Leaf' Width='20' Height='10' HorizontalAlignment='Left' VerticalAlignment='Top'/>\
+         </{panel}></Grid>"
+    )
+}
+
+fn panel_border_explicit(panel: &str) -> String {
+    format!(
+        "<Grid {WINUI_ROOT} RowDefinitions='10,*' Width='200' Height='160'>\
+         <Border Grid.Row='1' Margin='5' BorderThickness='2' BorderBrush='Green' CornerRadius='4' \
+         Padding='3,4' Background='Red'><{panel} x:Name='Panel'>\
+         <Border x:Name='Leaf' Width='20' Height='10' HorizontalAlignment='Left' VerticalAlignment='Top'/>\
+         </{panel}></Border></Grid>"
+    )
+}
+
+/// Loads a document, lays it out, and gives the bounds of the named panel and leaf relative to
+/// the root.
+fn panel_border_layout(xaml: &str) -> (ferroui_base::Rect, ferroui_base::Rect) {
+    use ferroui_base::{Point, Rect, Ref, Size};
+    use ferroui_controls::Control;
+    let root: Ref<Control> = crate::parse_winui_as(xaml, None, &WinUIXamlOptions::default()).unwrap();
+    root.measure(Size::new(200.0, 160.0));
+    root.arrange(Rect::new(0.0, 0.0, 200.0, 160.0));
+    let place = |name: &str| {
+        let control = root.get_control::<Control>(name);
+        let origin = control.translate_point(Point::new(0.0, 0.0), &root).unwrap();
+        Rect::new(origin.x, origin.y, control.bounds().width, control.bounds().height)
+    };
+    (place("Panel"), place("Leaf"))
+}
+
+#[test]
+fn a_panel_with_a_border_or_an_inset_is_wrapped_in_a_border() {
+    let input = format!(
+        "<Grid {WINUI_ROOT}><StackPanel x:Name='P' Grid.Row='1' Margin='2' Visibility='Collapsed' \
+         BorderThickness='1' BorderBrush='Green' CornerRadius='4' Padding='3' Spacing='6' \
+         ToolTipService.ToolTip='Tip'><TextBlock/></StackPanel><Grid Padding='1'/></Grid>"
+    );
+    let result = migrate_winui_xaml(&input, &WinUIXamlOptions::default()).unwrap();
+    let root = WINUI_ROOT.replace(WINUI_PRESENTATION_NAMESPACE, FERRO_XML_NAMESPACE);
+    let expected = format!(
+        "<Grid {root}><Border Grid.Row='1' Margin='2' IsVisible='False' BorderThickness='1' \
+         BorderBrush='Green' CornerRadius='4' Padding='3'><StackPanel x:Name='P' Spacing='6' \
+         ToolTipService.ToolTip='Tip'><TextBlock/></StackPanel></Border><Border Padding='1'><Grid/></Border></Grid>"
+    );
+    assert_eq!(result.xaml, expected);
+    let notices: Vec<_> = result.diagnostics.iter().filter(|diagnostic| diagnostic.code == "WXAML2007").collect();
+    assert_eq!(notices.len(), 2);
+    assert!(notices.iter().all(|notice| notice.severity == WinUIXamlDiagnosticSeverity::Adaptation));
+    assert!(notices[0].message.contains("BorderThickness, BorderBrush, CornerRadius, Padding"));
+    // The result has no panel with a border left: migrating it again changes nothing.
+    let again = migrate_winui_xaml(&result.xaml, &WinUIXamlOptions::default()).unwrap();
+    assert_eq!(again.xaml, result.xaml);
+    assert!(result.into_xaml().is_ok());
+}
+
+#[test]
+fn a_wrapped_panel_lays_out_as_with_an_explicit_border() {
+    for panel in ["StackPanel", "Grid", "RelativePanel"] {
+        assert_eq!(
+            panel_border_layout(&panel_border_document(panel)),
+            panel_border_layout(&panel_border_explicit(panel)),
+            "{panel}"
+        );
+    }
+    // Each member on its own.
+    for member in ["BorderThickness='2'", "BorderBrush='Green'", "CornerRadius='4'", "Padding='3,4'"] {
+        for panel in ["StackPanel", "Grid", "RelativePanel"] {
+            let leaf = "<Border x:Name='Leaf' Width='20' Height='10' HorizontalAlignment='Left' \
+                        VerticalAlignment='Top'/>";
+            let imported = format!("<Grid {WINUI_ROOT}><{panel} x:Name='Panel' {member}>{leaf}</{panel}></Grid>");
+            let explicit =
+                format!("<Grid {WINUI_ROOT}><Border {member}><{panel} x:Name='Panel'>{leaf}</{panel}></Border></Grid>");
+            assert_eq!(panel_border_layout(&imported), panel_border_layout(&explicit), "{panel} {member}");
+        }
+    }
+}
+
+#[test]
+fn a_wrapped_panel_keeps_its_name_and_its_border_takes_the_attached_members() {
+    use ferroui_base::Ref;
+    use ferroui_controls::{Border, Control, Grid, StackPanel};
+    let root: Ref<Control> =
+        crate::parse_winui_as(&panel_border_document("StackPanel"), None, &WinUIXamlOptions::default()).unwrap();
+    let panel = root.get_control::<StackPanel>("Panel");
+    let border = panel.parent().and_then(|parent| parent.cast::<Border>()).expect("the Border around the panel");
+    assert_eq!(Grid::get_row(&border), 1);
+    assert_eq!(Grid::get_row(&panel), 0);
+    assert!(border.border_brush().is_some() && border.background().is_some());
+    assert!(panel.background().is_none());
+}
+
+#[test]
+fn the_root_of_a_template_and_of_the_document_can_be_wrapped() {
+    use ferroui_base::Ref;
+    use ferroui_controls::templates::IDataTemplate;
+    use ferroui_controls::{Border, ContentControl, Control, StackPanel};
+    let template = format!(
+        "<ContentControl {WINUI_ROOT}><ContentControl.ContentTemplate><DataTemplate>\
+         <StackPanel x:Name='Root' Padding='4' Grid.Column='1'/></DataTemplate>\
+         </ContentControl.ContentTemplate></ContentControl>"
+    );
+    let host: Ref<Control> = crate::parse_winui_as(&template, None, &WinUIXamlOptions::default()).unwrap();
+    let template: std::rc::Rc<dyn IDataTemplate> =
+        host.cast::<ContentControl>().unwrap().content_template().expect("the template");
+    let built = template.build(&None).expect("the template root");
+    let border = built.cast::<Border>().expect("a Border at the root of the template");
+    assert_eq!(ferroui_controls::Grid::get_column(&border), 1);
+    let panel = border.child().and_then(|child| child.cast::<StackPanel>()).expect("the panel in the Border");
+    assert_eq!(panel.name().as_deref(), Some("Root"));
+
+    // The root of the document, as the ScratchPad page of the gallery loads its default markup.
+    let scratch = format!(
+        "<StackPanel {WINUI_ROOT} BorderThickness=\"1\" BorderBrush=\"Green\" CornerRadius=\"4\" Padding=\"3\">\n    \
+         <!-- Note: {{x:Bind}} is not supported in Scratch Pad. -->\n    \
+         <TextBlock>This is a sample TextBlock.</TextBlock>\n    <Button Content=\"Click me!\"/>\n\n    \
+         <!-- Note: Syntax highlighting updates on 'Load'. -->\n</StackPanel>"
+    );
+    let result = migrate_winui_xaml(&scratch, &WinUIXamlOptions::default()).unwrap();
+    assert!(result.xaml.starts_with("<Border xmlns="), "{}", result.xaml);
+    assert!(result.diagnostics.iter().all(|diagnostic| diagnostic.severity != WinUIXamlDiagnosticSeverity::Error));
+    let root: Ref<Control> = crate::parse_winui_as(&scratch, None, &WinUIXamlOptions::default()).unwrap();
+    let border = root.cast::<Border>().expect("a Border at the root");
+    let panel = border.child().and_then(|child| child.cast::<StackPanel>()).expect("the panel");
+    assert_eq!(panel.children().count(), 2);
+
+    // A generated prefix is declared on the Border that is the new root.
+    let generated = migrate_winui_xaml(
+        &format!("<StackPanel {WINUI_ROOT} Padding='1'><Frame/></StackPanel>"),
+        &WinUIXamlOptions::default(),
+    )
+    .unwrap();
+    let document = Document::parse(&generated.xaml).unwrap();
+    assert_eq!(document.root_element().tag_name().name(), "Border");
+    let frame = document.descendants().find(|node| node.tag_name().name() == "Frame").unwrap();
+    assert_eq!(frame.tag_name().namespace(), Some(CONTROLS_NAMESPACE));
+}
+
+#[test]
+fn a_panel_border_that_cannot_be_moved_is_reported() {
+    let class = format!("<StackPanel {WINUI_ROOT} x:Class='App.Panel' Padding='1'/>");
+    let result = migrate_winui_xaml(&class, &WinUIXamlOptions::default()).unwrap();
+    let migrated = class.replace(WINUI_PRESENTATION_NAMESPACE, FERRO_XML_NAMESPACE);
+    assert_eq!(result.xaml, migrated, "only the namespace changes");
+    assert!(result.diagnostics.iter().any(|diagnostic| diagnostic.code == "WXAML1013"));
+    let element = migrate(
+        "<StackPanel><StackPanel.BorderBrush><SolidColorBrush Color='Red'/></StackPanel.BorderBrush></StackPanel>",
+    );
+    assert!(element.diagnostics.iter().any(|diagnostic| diagnostic.code == "WXAML1013"));
+    // Other panels and a panel of another namespace are left alone.
+    let other = migrate("<Canvas Background='Red'/><StackPanel Spacing='2'/>");
+    assert!(other.diagnostics.iter().all(|diagnostic| diagnostic.code != "WXAML2007"));
+}
