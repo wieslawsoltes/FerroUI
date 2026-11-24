@@ -1587,9 +1587,9 @@
    "date": "2026-11-18",
    "area": "platform-android",
    "class": "port",
-   "note": "Accessibility focus changes reported.",
-   "part": "android",
-   "state": "planned"
+   "note": "The root peer reports focus changes to TalkBack: the focused virtual view is invalidated and takes the keyboard focus. An interop peer counts as no focus.",
+   "part": "platforms3",
+   "state": "done"
   },
   {
    "hash": "70072230024b4d107304eae788ebdb14c6589e52",

@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (91 done, 21 planned) | 112 |
+| `port` (92 done, 20 planned) | 112 |
 | `already` | 18 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -350,7 +350,7 @@ left out only with a recorded performance or better-code reason.
 | `fda56217a5` | #22872 | 2026-11-18 | build | `not-applicable` |  | Upstream workflows. |
 | `251fda6155` |  | 2026-11-18 | build | `not-applicable` |  | Upstream contribution bot. |
 | `a096f9bbde` | #22862 | 2026-11-18 | platform-android | `port` | android | Accessibility node position. |
-| `92dc2b7207` | #22849 | 2026-11-18 | platform-android | `port` | android | Accessibility focus changes reported. |
+| `92dc2b7207` | #22849 | 2026-11-18 | platform-android | `port` (done) | platforms3 | The root peer reports focus changes to TalkBack: the focused virtual view is invalidated and takes the keyboard focus. An interop peer counts as no focus. |
 | `7007223002` | #22871 | 2026-11-18 | controls | `port` (done) | controls | FlexPanel relative basis is a fraction. Parsed percentages were divided by 100 twice; code passing `50` must pass `0.5`. |
 | `192e7a0ba5` | #22880 | 2026-11-18 | platform-macos | `port` (done) | macos | Leaf nodes are not reported as expandable. |
 | `2d34086103` | #22883 | 2026-11-19 | build | `not-applicable` |  | Upstream contribution guide. |

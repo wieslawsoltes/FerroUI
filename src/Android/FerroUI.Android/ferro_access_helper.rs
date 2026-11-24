@@ -23,7 +23,7 @@ use crate::automation::{INodeInfoProvider, NodeActionArguments};
 use crate::explore_by_touch_helper::{
     ExploreByTouchHelper, IAccessibilityHost, IExploreByTouchCallbacks, IVirtualViewOwner, INVALID_ID,
 };
-use ferroui_base::reactive::Subscription;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{PixelPoint, PixelRect, Point, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, ControlAutomationPeer, InteropAutomationPeer,
@@ -121,6 +121,9 @@ pub(crate) struct FerroAccessHelper {
     /// ID that is still in use.
     next_peer_view_id: Cell<i32>,
 
+    /// The subscription to the focus of the root, when the root peer reports it.
+    root_focus_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+
     view: Rc<dyn IAccessHelperView>,
 }
 
@@ -139,12 +142,45 @@ impl FerroAccessHelper {
             peer_ids: RefCell::new(HashMap::new()),
             peer_node_info_providers: RefCell::new(HashMap::new()),
             next_peer_view_id: Cell::new(0),
+            root_focus_changed: RefCell::new(None),
             view,
         });
 
         this.get_or_create_node_info_providers_from_peer(&root_peer);
 
+        if let Some(root_provider) = root_peer.get_provider::<dyn IEmbeddedRootProvider>() {
+            let weak = Rc::downgrade(&this);
+            let subscription = root_provider.focus_changed(Rc::new(move || {
+                if let Some(this) = weak.upgrade() {
+                    this.on_root_focus_changed();
+                }
+            }));
+            *this.root_focus_changed.borrow_mut() = Some(subscription);
+        }
+
         this
+    }
+
+    /// Reports a change of the focus of the root to the accessibility services.
+    fn on_root_focus_changed(&self) {
+        let Some(root_provider) = self.root_peer().and_then(|root| root.get_provider::<dyn IEmbeddedRootProvider>())
+        else {
+            return;
+        };
+
+        match root_provider.get_focus().filter(|focused| !Self::is_interop_peer(focused)) {
+            Some(focused) => {
+                let view_id = self.get_or_create_node_info_providers_from_peer(&focused);
+                self.base.invalidate_virtual_view(view_id);
+                self.base.request_keyboard_focus_for_virtual_view(view_id);
+            }
+            None => {
+                let view_id = self.base.keyboard_focused_virtual_view_id();
+                if view_id != INVALID_ID {
+                    self.base.clear_keyboard_focus_for_virtual_view(view_id);
+                }
+            }
+        }
     }
 
     fn get_node_info_providers_from_virtual_view_id(&self, virtual_view_id: i32) -> Option<Rc<PeerRegistration>> {
