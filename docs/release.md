@@ -376,6 +376,7 @@ Before the release:
 The release:
 
 - [ ] Run the release workflow with `dry_run` off, or push the tag `v<version>` for the commit.
+- [ ] Check that the GitHub release has the patched Skia binding, `skia-bindings-<binding version>-ferroui-<version>.tar.gz` and its `.sha256` (#622; the release workflow uploads them with `scripts/release/skia_bindings_archive.py`, and `docs/apps.md` says how an application uses them).
 - [ ] Check that crates.io lists every crate of section 1.1 at the version (the last lines of the job say how many were published and how many skipped).
 
 After the release:
