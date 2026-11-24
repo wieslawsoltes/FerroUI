@@ -60,36 +60,55 @@ impl CommaSeparatedParenthesesTreeParser {
         for ch in s.chars() {
             let position = c;
             c += ch.len_utf16();
-            if ch == ',' {
-                current = new_node(&mut arena);
-                let top = *stack
-                    .last()
-                    .ok_or_else(|| ParseException::new("Unmatched ')'", position))?;
-                arena[top].children.push(current);
-            } else if after_closing && ch.is_whitespace() {
-                continue;
-            } else if ch == ')' {
-                current = stack
-                    .pop()
-                    .ok_or_else(|| ParseException::new("Unmatched ')'", position))?;
-                if stack.is_empty() {
-                    return Err(ParseException::new("Unmatched ')'", position));
+            match ch {
+                ',' => {
+                    current = new_node(&mut arena);
+                    let top = *stack
+                        .last()
+                        .ok_or_else(|| ParseException::new("Unmatched ')'", position))?;
+                    arena[top].children.push(current);
                 }
-            } else if after_closing {
-                return Err(ParseException::new("Invalid character after ')'", position));
-            } else if ch == '(' {
-                stack.push(current);
-                current = new_node(&mut arena);
-                let top = stack[stack.len() - 1];
-                arena[top].children.push(current);
-            } else {
-                arena[current]
-                    .value
-                    .get_or_insert_with(String::new)
-                    .push(ch);
+                ')' => {
+                    current = stack
+                        .pop()
+                        .ok_or_else(|| ParseException::new("Unmatched ')'", position))?;
+                    if stack.is_empty() {
+                        return Err(ParseException::new("Unmatched ')'", position));
+                    }
+                }
+                _ if after_closing => {
+                    if ch.is_whitespace() {
+                        continue;
+                    }
+                    // A nullable indicator may follow a generic type.
+                    if ch != '?' {
+                        return Err(ParseException::new("Invalid character after ')'", position));
+                    }
+                    arena[current]
+                        .value
+                        .get_or_insert_with(String::new)
+                        .push('?');
+                }
+                '(' => {
+                    stack.push(current);
+                    current = new_node(&mut arena);
+                    let top = stack[stack.len() - 1];
+                    arena[top].children.push(current);
+                }
+                _ => {
+                    arena[current]
+                        .value
+                        .get_or_insert_with(String::new)
+                        .push(ch);
+                }
             }
 
-            after_closing = ch == ')';
+            after_closing = ch == ')' || (after_closing && ch == '?');
+        }
+
+        // Final state: initial node at the top of the stack
+        if stack.len() != 1 {
+            return Err(ParseException::new("Unmatched '('", c));
         }
 
         fn build(arena: &[ArenaNode], index: usize) -> Node {
@@ -103,7 +122,6 @@ impl CommaSeparatedParenthesesTreeParser {
             }
         }
 
-        // Final state: initial node at the top of the stack
         let top = stack.pop().unwrap_or(0);
         Ok(arena[top]
             .children

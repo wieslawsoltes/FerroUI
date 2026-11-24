@@ -8,6 +8,8 @@ use crate::ast::{
     XamlNullExtensionNode, XamlStaticExtensionNode, XamlTypeExtensionNode,
 };
 use crate::exceptions::{XamlError, XamlResult};
+use crate::parsers::{CommaSeparatedParenthesesTreeParser, Node};
+use crate::transform::transformers::TypeReferenceResolver;
 use crate::transform::{AstTransformationContext, IXamlAstTransformer};
 use crate::type_system::XamlValue;
 use crate::xaml_namespaces::XamlNamespaces;
@@ -51,6 +53,115 @@ fn resolve_argument_or_value(
     })
 }
 
+/// The type of an `x:Type` or `x:Static` expression: a name, optionally with inline generic
+/// arguments (`scg:Dictionary(x:String, scg:List(x:Int32))`) and a nullable indicator
+/// (`x:Int32?`, a `Nullable<T>` for a value type). Inline arguments and `x:TypeArguments`
+/// cannot be mixed.
+fn resolve_type_expression(
+    context: &AstTransformationContext,
+    xml: &XamlAstXmlTypeReference,
+    extension_name: &str,
+    type_expression: &str,
+    text_node: &Rc<XamlAstTextNode>,
+) -> XamlResult<Rc<XamlAstXmlTypeReference>> {
+    let has_inline_generic_syntax = type_expression.contains(['(', ')']);
+    let generic_arguments = xml.generic_arguments.borrow().clone();
+
+    if !generic_arguments.is_empty() && has_inline_generic_syntax {
+        return Err(XamlError::transform_exception(
+            format!("{extension_name} generic arguments cannot be specified both inline and in x:TypeArguments"),
+            Some(&**text_node),
+        ));
+    }
+
+    if has_inline_generic_syntax {
+        let tree = CommaSeparatedParenthesesTreeParser::parse(type_expression).map_err(|e| {
+            XamlError::transform_exception(format!("Unable to parse {extension_name}: {e}"), Some(&**text_node))
+        })?;
+        if tree.len() != 1 {
+            return Err(XamlError::transform_exception(
+                format!("{extension_name} should contain exactly one type expression"),
+                Some(&**text_node),
+            ));
+        }
+        return convert_node(context, extension_name, &tree[0], text_node);
+    }
+
+    let type_reference = resolve_type_name(context, type_expression, text_node, None)?;
+    if !generic_arguments.is_empty() {
+        *type_reference.generic_arguments.borrow_mut() = generic_arguments;
+    }
+    Ok(type_reference)
+}
+
+fn convert_node(
+    context: &AstTransformationContext,
+    extension_name: &str,
+    parsed_node: &Node,
+    text_node: &Rc<XamlAstTextNode>,
+) -> XamlResult<Rc<XamlAstXmlTypeReference>> {
+    let value = parsed_node.value.as_deref().unwrap_or("");
+    if value.trim().is_empty() {
+        return Err(XamlError::transform_exception(
+            format!("{extension_name} contains an empty type name"),
+            Some(&**text_node),
+        ));
+    }
+    let generic_arguments = parsed_node
+        .children
+        .iter()
+        .map(|child| convert_node(context, extension_name, child, text_node))
+        .collect::<XamlResult<Vec<_>>>()?;
+    resolve_type_name(context, value.trim(), text_node, Some(generic_arguments))
+}
+
+fn resolve_type_name(
+    context: &AstTransformationContext,
+    type_name: &str,
+    text_node: &Rc<XamlAstTextNode>,
+    generic_arguments: Option<Vec<Rc<XamlAstXmlTypeReference>>>,
+) -> XamlResult<Rc<XamlAstXmlTypeReference>> {
+    let (type_name, is_nullable) = match type_name.strip_suffix('?') {
+        Some(type_name) => (type_name, true),
+        None => (type_name, false),
+    };
+    if type_name.contains('?') {
+        return Err(XamlError::transform_exception(
+            format!("Type {type_name}? is cannot contain multiple nullable indicators ('?')"),
+            Some(&**text_node),
+        ));
+    }
+
+    let (prefix, name) = type_name.split_once(':').unwrap_or(("", type_name));
+    let Some(resolved_ns) = context.try_get_namespace_alias_at(prefix.trim(), &**text_node) else {
+        return Err(XamlError::transform_exception(
+            format!("Unable to resolve namespace {prefix}"),
+            Some(&**text_node),
+        ));
+    };
+
+    let type_reference = XamlAstXmlTypeReference::with_generic_arguments(
+        &**text_node,
+        Some(&resolved_ns),
+        name.trim(),
+        generic_arguments.unwrap_or_default(),
+    );
+
+    if is_nullable {
+        let resolved = TypeReferenceResolver::resolve_type_reference(context, &type_reference)?;
+        if resolved.type_.is_value_type() {
+            return Ok(XamlAstXmlTypeReference::with_generic_arguments(
+                &**text_node,
+                Some(XamlNamespaces::XAML2006),
+                "Nullable`1",
+                vec![type_reference],
+            ));
+        }
+    }
+
+    Ok(type_reference)
+}
+
 impl IXamlAstTransformer for XamlIntrinsicsTransformer {
     fn transform(
         &self,
@@ -92,65 +203,25 @@ impl IXamlAstTransformer for XamlIntrinsicsTransformer {
             let text_node = resolve_argument_or_value(&node, &ni, "x:Type", "TypeName")?;
             let text = text_node.text();
             let type_ref_text = text.trim_matches(char::is_whitespace);
-            let (prefix, type_name) = match type_ref_text.split_once(':') {
-                Some((prefix, type_name)) => (prefix, type_name),
-                None => ("", type_ref_text),
-            };
-            let Some(resolved_ns) = context
-                .try_get_namespace_alias_at(prefix.trim_matches(char::is_whitespace), &*text_node)
-            else {
-                return context.report_transform_error(
-                    &format!("Unable to resolve namespace {prefix}"),
-                    Some(&*text_node),
-                    node,
-                );
-            };
+            let type_reference = resolve_type_expression(context, &xml, "x:Type", type_ref_text, &text_node)?;
 
-            return Ok(XamlTypeExtensionNode::new(
-                &*node,
-                XamlAstXmlTypeReference::with_generic_arguments(
-                    &*text_node,
-                    Some(&resolved_ns),
-                    type_name,
-                    xml.generic_arguments.borrow().clone(),
-                ),
-                well_known_types.type_.clone(),
-            ));
+            return Ok(XamlTypeExtensionNode::new(&*node, type_reference, well_known_types.type_.clone()));
         }
 
         if xml_name == "Static" {
             let text_node = resolve_argument_or_value(&node, &ni, "x:Static", "Member")?;
             let text = text_node.text();
-            let trimmed = text.trim_matches(char::is_whitespace);
-            let (ns, type_and_member) = match trimmed.split_once(':') {
-                Some((ns, type_and_member)) => (ns, type_and_member),
-                None => ("", trimmed),
-            };
+            let type_ref_text = text.trim_matches(char::is_whitespace);
 
-            let Some((type_name, member)) = type_and_member.split_once('.') else {
+            let Some((type_expression, member)) = type_ref_text.split_once('.') else {
                 return Err(XamlError::transform_exception(
-                    format!("Unable to parse {type_and_member} as 'type.member'"),
+                    format!("Unable to parse {type_ref_text} as 'type.member'"),
                     Some(&*text_node),
                 ));
             };
 
-            let Some(resolved_ns) = context.try_get_namespace_alias_at(ns, &*text_node) else {
-                return Err(XamlError::transform_exception(
-                    format!("Unable to resolve namespace {ns}"),
-                    Some(&*text_node),
-                ));
-            };
-
-            return Ok(XamlStaticExtensionNode::new(
-                &ni,
-                Some(XamlAstXmlTypeReference::with_generic_arguments(
-                    &*ni,
-                    Some(&resolved_ns),
-                    type_name,
-                    xml.generic_arguments.borrow().clone(),
-                )),
-                member,
-            ));
+            let type_reference = resolve_type_expression(context, &xml, "x:Static", type_expression, &text_node)?;
+            return Ok(XamlStaticExtensionNode::new(&ni, Some(type_reference), member));
         }
 
         Ok(node)
