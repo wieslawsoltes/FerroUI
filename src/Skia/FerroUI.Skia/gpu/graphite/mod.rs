@@ -18,7 +18,10 @@ pub(crate) use graphite_gr_context::FrameTarget;
 pub(crate) use graphite_gr_context::UPLOADED_IMAGE_SWEEP_INTERVAL;
 pub use graphite_prewarm::GraphitePrewarmContext;
 #[cfg(all(test, target_vendor = "apple"))]
-pub(crate) use pipelined_layer::{band_clips, band_count, BandInsert};
+pub(crate) use pipelined_layer::{band_clips, band_count};
+// The Metal tests and the Graphite Vulkan tests choose the insertion with it.
+#[cfg(test)]
+pub(crate) use pipelined_layer::BandInsert;
 #[cfg(feature = "graphite-vulkan")]
 pub(crate) use pipelined_layer::LayerTexture;
 pub(crate) use pipelined_layer::PipelinedLayerSurface;
