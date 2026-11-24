@@ -18,6 +18,7 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use ferroui_base::metadata::FERRO_XML_NAMESPACE;
 use ferroui_base::utilities::UriRef;
 use xamlx::ast::XamlAstExtensions as _;
 use xamlx::ast::XamlAstNodeExtensions as _;
@@ -238,6 +239,9 @@ pub fn transform_group(
 ) -> XamlResult<Vec<TransformedDocument>> {
     let (mut mappings, emit_mappings) = FerroXamlIlLanguage::configure(&type_system)?;
     adapt_type_mappings(&mut mappings);
+    // At build time a name of the default XML namespace is one type. The loader of markup at run
+    // time keeps its first match, so this costs a running application nothing.
+    mappings.unambiguous_xml_namespaces.push(FERRO_XML_NAMESPACE.to_owned());
 
     let assembly: Option<Rc<dyn IXamlAssembly>> = match &options.local_assembly {
         Some(local) => type_system.assemblies().into_iter().find(|a| a.name() == *local),
