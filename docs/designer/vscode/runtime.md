@@ -344,7 +344,7 @@ The same Run and Debug command can launch a served profile. It uses the workspac
 2. Set a breakpoint in your app's Rust source. In Dispatch Desk, use the increment in `mark_dispatched`. Choose **Run and Debug Browser App**. After the first frame and a verified breakpoint appear, use **Live App → Interact** and click **Mark dispatched** to stop in the Rust handler.
 3. Save a change and wait for the new frame. FerroUI reattaches to the accepted replacement page. Trigger the handler again to reach the existing breakpoint. Use **Continue** to resume the program.
 
-The build keeps DWARF in the development WebAssembly file. The selected target is compiled with full debug information. Dependencies follow their Cargo development profile. To debug an independently built site, use `scripts/build-browser.sh <application> --debug-symbols` and open the output through a served profile.
+Ordinary browser development builds keep Wasm function names for stack traces. Enabling `build.debugSymbols` preserves DWARF for Rust source breakpoints and compiles the selected target with full debug information. Dependencies follow their Cargo development profile. To debug an independently built site, use `scripts/build-browser.sh <application> --debug-symbols` and open the output through a served profile.
 
 Use **Call Stack** to inspect Rust source locations. The adapter's Rust variable and expression support is limited. If the Variables view reports an error, use the Live App properties to inspect the running UI after resuming. [VS Code WebAssembly debugger](https://github.com/microsoft/vscode-dwarf-debugging-ext) · [Browser toolchain and debug symbols](../../porting/browser-platform.md#debug-a-browser-build)
 

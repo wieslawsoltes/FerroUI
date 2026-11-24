@@ -35,7 +35,7 @@
 #
 # The module is built with the `browser` profile of the workspace (optimised for size, see
 # docs/porting/browser-platform.md, section 18), or with the `dev` profile with --debug.
-# --debug-symbols also uses `dev` and retains DWARF for the browser debugger.
+# The ordinary development output preserves function names. --debug-symbols also retains DWARF.
 #
 # --features <list> turns on features of the package that is built (cargo's --features): `vello`
 # adds the Vello render backend to the module beside Skia (the feature of the browser crate for its
@@ -357,6 +357,9 @@ RUSTC_FLAGS=()
 if [ -n "$DEBUG_SYMBOLS" ]; then
   CARGO_COMMAND=rustc
   RUSTC_FLAGS+=(-- -Cdebuginfo=2 -Cstrip=none -Clink-arg=-g3)
+elif [ "$PROFILE" = "debug" ]; then
+  CARGO_COMMAND=rustc
+  RUSTC_FLAGS+=(-- -Cdebuginfo=0 -Clink-arg=-g2)
 fi
 # Bash 3 (the macOS system shell) treats an empty array as unset under -u.
 STATUS=0

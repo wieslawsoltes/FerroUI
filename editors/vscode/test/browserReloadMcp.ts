@@ -1,4 +1,5 @@
 import { strict as assert } from 'node:assert';
+import { createHash } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { ReloadRecord } from '../src/reloadHistory';
@@ -60,7 +61,8 @@ export async function verifyBrowserReload(): Promise<void> {
         });
         const history = async () => content<{ records: ReloadRecord[] }>(await invoke('ferroui_reload_history', { app_session: runtime })).records;
         const windows = async (app: ReturnType<typeof runtimeApp>) => (await app.result<RuntimeNode[]>('list_windows'))[0];
-        const frame = async (app: ReturnType<typeof runtimeApp>) => app.frame((await windows(app)).node_id);
+        const frame = async (app: ReturnType<typeof runtimeApp>) =>
+            createHash('sha256').update(await app.frame((await windows(app)).node_id)).digest('hex');
 
         const initial = await ready(undefined, initialTimeout);
         assert.ok(initial.browser?.url && initial.pid);
@@ -72,21 +74,23 @@ export async function verifyBrowserReload(): Promise<void> {
         const live = runtimeApp(mcp, initial);
         assert.equal((await live.find('Heading')).text, 'Dispatch desk');
         assert.equal((await live.find('DispatchInstructions')).text, 'Confirm the orders ready for pickup');
+        const beforeInput = await frame(live);
         await live.click((await live.find('DispatchOrder')).node_id);
         assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 1');
-        const accepted = await frame(live);
+        await waitFor(async () => await frame(live) !== beforeInput ? true : undefined, 'the frame after the first dispatch');
 
         const notes = vscode.Uri.joinPath(folder, 'notes/src/lib.rs');
         await save(notes, 'pub const STATUS: &str = "Updated notes";\n');
         await delay(700);
         assert.equal((await current())?.status, 'Watching browser saves');
         assert.ok(!(await history()).some(record => record.file.endsWith('notes/src/lib.rs')));
+        const accepted = await frame(live);
 
         await save(xaml, '<TextBlock');
         await status('Starting browser candidate', buildTimeout);
-        assert.deepEqual(await frame(live), accepted, 'Startup retains the accepted frame');
+        assert.equal(await frame(live), accepted, 'Startup retains the accepted frame');
         await live.click((await live.find('DispatchOrder')).node_id);
-        await waitFor(async () => (await frame(live)).equals(accepted) ? undefined : true,
+        await waitFor(async () => await frame(live) !== accepted ? true : undefined,
             'a new frame after input on the accepted page', 5_000);
         const startup = await status('Browser update failed');
         assert.equal(startup.generation, initial.generation);
@@ -101,7 +105,7 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal(new URL(xamlAccepted.browser!.url!).origin, new URL(initial.browser.url).origin);
         assert.equal((await xamlApp.find('DispatchInstructions')).text, 'Review the outgoing routes');
         assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 2');
-        assert.notDeepEqual(await frame(xamlApp), accepted);
+        assert.notEqual(await frame(xamlApp), accepted);
         await waitFor(async () => (await fetch(initial.browser!.url!)).status === 404 ? true : undefined, 'retirement of the previous site');
         assert.ok((await history()).some(record => record.file.endsWith('Instructions.xaml')
             && record.outcome === 'rebuilt' && record.frame?.status === 'rendered'));

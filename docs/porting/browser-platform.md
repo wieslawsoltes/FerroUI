@@ -556,6 +556,8 @@ Rules that keep the boundary sound (section 5): imports by `raw_module = "./ferr
 
 ### Debug a browser build
 
+An ordinary `--debug` build uses Cargo’s development profile and preserves function names for WebAssembly stack traces. The link omits DWARF from the served module to reduce the size of each development update. [Emscripten debugging levels](https://emscripten.org/docs/porting/Debugging.html#fast-edit-compile-with-minimal-debug-information)
+
 Use `scripts/build-browser.sh <application> --debug-symbols` to build in Cargo's development profile and retain DWARF in the app's WebAssembly file. The selected binary or example gets full debug information. Its dependencies use the existing development build. Serve the site and attach VS Code with Microsoft's WebAssembly DWARF Debugging extension installed. The same option is available as `build.debugSymbols` in a managed FerroUI browser profile. [Run and Debug Browser App](../designer/vscode/runtime.md#debug-rust-code-in-a-browser-app) · [Emscripten debug symbols](https://emscripten.org/docs/porting/Debugging.html)
 
 ### Remaining stages
