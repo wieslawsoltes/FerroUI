@@ -1,5 +1,6 @@
 use crate::toolbar_consumer::ConsumerToolBarPanel;
-use ferroribbon::{compat::Orientation, primitives::RibbonToolBarPanel};
+use ferroui_base::layout::Orientation;
+use ferroribbon::primitives::RibbonToolBarPanel;
 use ferroui_base::{Rect, Size, TypeInfo, controls::NameScope, data::core::ValueTypes};
 use ferroui_controls::{Button, Control, TextBlock, Window};
 #[test]
@@ -40,43 +41,26 @@ fn toolbar_panel_compiled_runtime_subclass_orientation_collections_and_bound_cou
                 .cast::<ConsumerToolBarPanel>()
                 .unwrap();
             assert_eq!(p.orientation(), Orientation::Vertical);
-            assert_eq!(p.orientation().raw(), 0);
             assert_eq!(p.columns(), 2);
             assert_eq!(p.spacing(), 1.25);
             let more = scope.find("More").unwrap().cast::<Button>().unwrap();
             assert!(p.overflow_button().unwrap().ptr_eq(&more));
             assert_eq!(p.children().count(), 5);
-            let unknown = scope
-                .find("UnknownOrientation")
+            let negative = scope
+                .find("NegativeColumns")
                 .unwrap()
                 .cast::<RibbonToolBarPanel>()
                 .unwrap();
-            assert_eq!(unknown.orientation().raw(), 99);
-            assert_eq!(unknown.columns(), -2);
+            assert_eq!(negative.columns(), -2);
+            // A number in markup is the framework's: Horizontal 0, Vertical 1 (DEVIATIONS.md,
+            // FerroRibbon). The source numbered them the other way round.
             for (name, expected) in [
-                ("MinimumOrientation", i32::MIN),
-                ("MaximumOrientation", i32::MAX),
+                ("NumericHorizontal", Orientation::Horizontal),
+                ("NumericVertical", Orientation::Vertical),
             ] {
-                assert_eq!(
-                    scope
-                        .find(name)
-                        .unwrap()
-                        .cast::<RibbonToolBarPanel>()
-                        .unwrap()
-                        .orientation()
-                        .raw(),
-                    expected
-                );
+                let panel = scope.find(name).unwrap().cast::<RibbonToolBarPanel>().unwrap();
+                assert_eq!(panel.orientation(), expected);
             }
-            assert_eq!(
-                scope
-                    .find("NumericHorizontal")
-                    .unwrap()
-                    .cast::<RibbonToolBarPanel>()
-                    .unwrap()
-                    .orientation(),
-                Orientation::Horizontal
-            );
             let held = p.overflow_items();
             p.measure(Size::new(140., 30.));
             p.arrange(Rect::new(0., 0., 140., 30.));

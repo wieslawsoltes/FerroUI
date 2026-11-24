@@ -13,6 +13,15 @@ use std::{
     pin::Pin,
     task::{Context, Waker},
 };
+/// The source's numeric `ContentDialogButton`: a value without a name selects no button.
+fn dialog_button(value: i64) -> crate::compat::ContentDialogButton {
+    match value {
+        1 => crate::compat::ContentDialogButton::Primary,
+        2 => crate::compat::ContentDialogButton::Secondary,
+        3 => crate::compat::ContentDialogButton::Close,
+        _ => crate::compat::ContentDialogButton::None,
+    }
+}
 fn native(test: impl FnOnce() + Send + 'static) {
     ferroui_headless::HeadlessUnitTestSession::start_new(|| {
         ferroui_controls::AppBuilder::configure::<Application>()
@@ -65,9 +74,7 @@ fn source_default_key_dispatch_completion_counts_and_handled_state() {
                     ContentDialogButton::Primary,
                     "static source service explicitly selects Primary"
                 );
-                s.shield.set_default_button(ContentDialogButton::from_raw(
-                    case["choice"].as_i64().unwrap() as i32,
-                ));
+                s.shield.set_default_button(dialog_button(case["choice"].as_i64().unwrap()));
                 let native_clicks = Rc::new(Cell::new(0));
                 for b in [
                     s.shield.primary_button().unwrap(),

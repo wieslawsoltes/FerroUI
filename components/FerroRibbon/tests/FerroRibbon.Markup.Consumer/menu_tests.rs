@@ -82,8 +82,9 @@ fn source_style_menus_icons_attached_property_collections_and_compiled_binding()
 #[test]
 fn public_menu_static_overloads_are_invocable_from_dependency_metadata() {
     super::tests::run(|| {
+        use ferroui_controls_icons::ImageIcon;
         use ferroribbon::{
-            compat::{ImageIcon, MenuFlyoutItem},
+            compat::MenuFlyoutItem,
             controls::{RibbonButton, RibbonItemHelper, RibbonMenu},
             primitives::{RibbonDeferredImage, RibbonImageLoadError},
         };

@@ -28,7 +28,7 @@ fn load_lazy_state_host(
 fn independent_compiled_runtime_lazy_static_state_capture_matches_source_corpus() {
     crate::tests::run_standalone(|| {
         let _theme = crate::tests::NativeThemeScope::new();
-        use ferroribbon::compat::ContentDialogButton;
+        use ferroui_controls::ContentDialogButton;
         use ferroui_base::styling::ControlTheme;
         use std::rc::Rc;
         for runtime in [false, true] {
@@ -84,7 +84,13 @@ fn independent_compiled_runtime_lazy_static_state_capture_matches_source_corpus(
                     }
                     _ => {}
                 }
-                let choice = ContentDialogButton::from_raw(case["choice"].as_i64().unwrap() as i32);
+                // The recorded source number: one without a name selects no button.
+                let choice = match case["choice"].as_i64().unwrap() {
+                    1 => ContentDialogButton::Primary,
+                    2 => ContentDialogButton::Secondary,
+                    3 => ContentDialogButton::Close,
+                    _ => ContentDialogButton::None,
+                };
                 host.set_default_button(choice);
                 window.update_layout();
                 let selected = match choice {
@@ -116,7 +122,7 @@ fn independent_compiled_runtime_focus_callback_can_remove_subclass_template() {
             window.set_content(Some(Control::boxed(host.clone())));
             window.show();
             window.update_layout();
-            host.set_default_button(ferroribbon::compat::ContentDialogButton::Primary);
+            host.set_default_button(ferroui_controls::ContentDialogButton::Primary);
             assert!(host.secondary_button().unwrap().focus());
             let called = Rc::new(Cell::new(false));
             let seen = called.clone();
@@ -191,7 +197,7 @@ fn independent_compiled_runtime_subclass_content_properties_resources_and_retemp
                     .unwrap()
                     .ptr_eq(&host.primary_button_style().unwrap())
             );
-            use ferroribbon::compat::ContentDialogButton;
+            use ferroui_controls::ContentDialogButton;
             let primary = host.primary_button().unwrap();
             host.set_default_button(ContentDialogButton::Primary);
             assert_ne!(primary.theme(), host.primary_button_style());
@@ -274,7 +280,7 @@ fn independent_compiled_runtime_subclass_content_properties_resources_and_retemp
 fn independent_compiled_runtime_default_button_named_static_unknown_numeric_and_nullable_metadata()
 {
     crate::tests::run_standalone(|| {
-        use ferroribbon::compat::ContentDialogButton;
+        use ferroui_controls::ContentDialogButton;
         let _theme = crate::tests::NativeThemeScope::new();
         TypeInfo::register_namespaces(&[(
             "ferroribbon_markup_consumer::dialog_consumer",
@@ -300,14 +306,12 @@ fn independent_compiled_runtime_default_button_named_static_unknown_numeric_and_
                 .unwrap()
                 .cast::<ferroui_controls::StackPanel>()
                 .unwrap();
-            assert_eq!(stack.children().count(), 6);
+            assert_eq!(stack.children().count(), 4);
             for (i, (value, optional)) in [
-                (0, None),
-                (1, Some(3)),
-                (2, Some(0)),
-                (3, Some(99)),
-                (99, Some(i32::MIN)),
-                (i32::MIN, Some(i32::MAX)),
+                (ContentDialogButton::None, None),
+                (ContentDialogButton::Primary, Some(ContentDialogButton::Close)),
+                (ContentDialogButton::Secondary, Some(ContentDialogButton::None)),
+                (ContentDialogButton::Close, Some(ContentDialogButton::Secondary)),
             ]
             .into_iter()
             .enumerate()
@@ -317,13 +321,10 @@ fn independent_compiled_runtime_default_button_named_static_unknown_numeric_and_
                     .get(i)
                     .cast::<crate::dialog_consumer::ConsumerDialogHost>()
                     .unwrap();
-                assert_eq!(host.default_button(), ContentDialogButton::from_raw(value));
-                assert_eq!(
-                    host.optional_default_button(),
-                    optional.map(ContentDialogButton::from_raw)
-                );
-                host.set_default_button(ContentDialogButton::from_raw(i32::MAX));
-                assert_eq!(host.default_button().raw(), i32::MAX);
+                assert_eq!(host.default_button(), value);
+                assert_eq!(host.optional_default_button(), optional);
+                host.set_default_button(ContentDialogButton::Close);
+                assert_eq!(host.default_button(), ContentDialogButton::Close);
                 host.set_optional_default_button(None);
                 assert_eq!(host.optional_default_button(), None);
             }
@@ -331,47 +332,20 @@ fn independent_compiled_runtime_default_button_named_static_unknown_numeric_and_
     });
 }
 
+/// `ContentDialogButton` is the framework's closed enum: a number without a name is refused, where
+/// the source's enum kept it (DEVIATIONS.md, FerroRibbon).
 #[test]
-fn independent_runtime_unknown_default_button_and_nullable_integer_boundaries() {
+fn a_default_button_number_without_a_name_is_refused() {
     crate::tests::run_standalone(|| {
-        use ferroribbon::compat::ContentDialogButton;
         TypeInfo::register_namespaces(&[(
             "ferroribbon_markup_consumer::dialog_consumer",
             "FerroRibbon.Consumer",
         )]);
         TypeInfo::register_all(&[crate::dialog_consumer::ConsumerDialogHost::TYPE]);
-        let value = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(
+        let result = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(
             include_str!("../fixtures/markup/UnknownDialogButtons.xaml"),
             Some(&crate::CONSUMER_ASSEMBLY),
-        )
-        .unwrap();
-        let stack = ValueTypes::as_object(&*value)
-            .unwrap()
-            .cast::<ferroui_controls::StackPanel>()
-            .unwrap();
-        assert_eq!(stack.children().count(), 6);
-        for (i, (value, optional)) in [
-            (0, None),
-            (1, Some(3)),
-            (2, Some(0)),
-            (3, Some(99)),
-            (99, Some(i32::MIN)),
-            (i32::MIN, Some(i32::MAX)),
-        ]
-        .into_iter()
-        .enumerate()
-        {
-            let host = stack
-                .children()
-                .get(i)
-                .cast::<crate::dialog_consumer::ConsumerDialogHost>()
-                .unwrap();
-            assert_eq!(host.default_button(), ContentDialogButton::from_raw(value));
-            assert_eq!(
-                host.optional_default_button(),
-                optional.map(ContentDialogButton::from_raw)
-            );
-        }
-        // The same original fixture now also compiles through DefaultButtons.xaml;
+        );
+        assert!(result.is_err());
     });
 }

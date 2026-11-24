@@ -14,7 +14,7 @@ fn rows(menu: &MenuFlyout) -> Vec<Ref<Control>> {
 }
 fn describe(control: &Control) -> Value {
     if let Some(item) = control.to_ref().cast::<RadioMenuFlyoutItem>() {
-        json!({"kind":"radio","text":item.text(),"group":item.group_name(),"checked":item.is_checked(),"glyph":item.icon().and_then(|i|ValueTypes::as_object(&*i)).and_then(|i|i.cast::<FontIcon>()).and_then(|i|i.glyph())})
+        json!({"kind":"radio","text":item.text(),"group":item.group_name(),"checked":item.is_checked(),"glyph":item.icon().and_then(|i|ValueTypes::as_object(&*i)).and_then(|i|i.cast::<FontIcon>()).map(|i|i.glyph())})
     } else if let Some(item) = control.to_ref().cast::<ToggleMenuFlyoutItem>() {
         json!({"kind":"toggle","text":item.text(),"group":null,"checked":item.is_checked(),"glyph":null})
     } else {

@@ -1,5 +1,5 @@
 <!-- Copyright (c) Microsoft Corporation. MIT. Exact pinned Uno Fluent v2 conversion -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:c="using:FerroRibbon.Controls">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">
       <Color x:Key="SystemAccentColorLight2">#FF76B9ED</Color>
@@ -224,7 +224,7 @@
       <SolidColorBrush x:Key="FocusStrokeColorInnerBrush" Color="{StaticResource FocusStrokeColorInner}" />
       <StaticResource x:Key="SystemControlFocusVisualSecondaryBrush" ResourceKey="FocusStrokeColorInnerBrush" />
     </ResourceDictionary>
-    <ResourceDictionary x:Key="{x:Static c:RibbonColorDialogHost.HighContrastVariant}">
+    <ResourceDictionary x:Key="{x:Static RibbonColorDialogHost.HighContrastVariant}">
       <Color x:Key="SystemAccentColor">#FF0078D7</Color>
       <SolidColorBrush x:Key="SystemControlHighlightAccentBrush" Color="{DynamicResource SystemAccentColor}" />
       <StaticResource x:Key="AccentButtonBackground" ResourceKey="SystemControlHighlightAccentBrush" />
@@ -392,7 +392,7 @@
       <Setter Property="Foreground" Value="{DynamicResource AccentButtonForegroundDisabled}" />
     </Style>
   </ControlTheme>
-  <ControlTheme x:Key="{x:Type c:RibbonDialogHost}" TargetType="c:RibbonDialogHost">
+  <ControlTheme x:Key="{x:Type RibbonDialogHost}" TargetType="RibbonDialogHost">
     <Setter Property="Foreground" Value="{DynamicResource ContentDialogForeground}" />
     <Setter Property="Background" Value="{DynamicResource ContentDialogBackground}" />
     <Setter Property="BorderThickness" Value="{DynamicResource ContentDialogBorderWidth}" />
@@ -459,5 +459,5 @@
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme x:Key="{x:Type c:RibbonColorDialogHost}" TargetType="c:RibbonColorDialogHost" BasedOn="{StaticResource {x:Type c:RibbonDialogHost}}" />
+  <ControlTheme x:Key="{x:Type RibbonColorDialogHost}" TargetType="RibbonColorDialogHost" BasedOn="{StaticResource {x:Type RibbonDialogHost}}" />
 </ResourceDictionary>

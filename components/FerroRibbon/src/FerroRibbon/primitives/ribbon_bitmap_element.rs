@@ -1,6 +1,10 @@
 // SPDX-License-Identifier: Apache-2.0
-// Native FerroUI adaptation of the pinned BitmapIcon implementation.
-//! Bitmap icon with one retained native Image child and a mutable color filter.
+// Native FerroUI adaptation of the pinned RibbonBitmapElement implementation.
+//! What the ribbon's icon presenter shows for a `BitmapIcon` or `BitmapIconSource`: one retained
+//! native Image child with a mutable color filter, loaded through the ribbon's image pipeline
+//! (`ms-appx`, `ms-appdata`, `http`, scale-qualified assets, deferred loads and their errors). It is
+//! internal: the public `BitmapIcon` is the framework's.
+use crate::compat::{BitmapIcon, BitmapIconSource};
 use crate::primitives::{RibbonDeferredImage, RibbonIconPresenter, RibbonImageLoadError};
 use ferroribbon_core::RibbonString;
 use ferroui_base::{
@@ -82,20 +86,20 @@ impl VisualImpl for BitmapIconImage {
 }
 
 #[repr(C)]
-pub struct BitmapIcon {
+pub(crate) struct RibbonBitmapElement {
     base: IconElement,
     root: OnceCell<Ref<Grid>>,
     image: OnceCell<Ref<BitmapIconImage>>,
     source_binding: OnceCell<Rc<dyn IDisposable>>,
 }
-ferro_class!(BitmapIcon:IconElement);
-ferro_class_info!(BitmapIcon {new:BitmapIcon::new,markup:{namespace:"FerroRibbon.Compatibility",attributes:[UsableDuringInitialization(false)]}});
-ferro_impl_classes!(BitmapIcon:StyledElementImpl,VisualImpl,InteractiveImpl,InputElementImpl,ControlImpl,TemplatedControlImpl);
-ferro_properties! {impl BitmapIcon {
+ferro_class!(RibbonBitmapElement:IconElement);
+ferro_class_info!(RibbonBitmapElement {});
+ferro_impl_classes!(RibbonBitmapElement:StyledElementImpl,VisualImpl,InteractiveImpl,InputElementImpl,ControlImpl,TemplatedControlImpl);
+ferro_properties! {impl RibbonBitmapElement {
     pub fn uri_source_property()->StyledProperty<Option<Uri>> {FerroProperty::register::<Self,_>("UriSource",None)}
     pub fn show_as_monochrome_property()->StyledProperty<bool> {FerroProperty::register::<Self,_>("ShowAsMonochrome",true)}
 }}
-impl BitmapIcon {
+impl RibbonBitmapElement {
     fn static_constructor() {
         // The source IconElement DP defaults to White before inherited/theme values.
         TemplatedControl::foreground_property()
@@ -111,6 +115,27 @@ impl BitmapIcon {
     }
     pub fn new() -> Ref<Self> {
         instantiate(Self::construct())
+    }
+    /// What a presenter or a menu shows for a `BitmapIcon`: a bitmap the icon already holds stays
+    /// the framework's icon; a URI goes through the ribbon's image pipeline.
+    pub(crate) fn for_icon(icon: &BitmapIcon) -> Ref<IconElement> {
+        if let Some(source) = icon.source() {
+            let clone = BitmapIcon::new();
+            clone.set_source(Some(source));
+            clone.set_show_as_monochrome(icon.show_as_monochrome());
+            return clone.upcast();
+        }
+        Self::with_uri(icon.uri_source(), icon.show_as_monochrome())
+    }
+    /// What a presenter or a menu shows for a `BitmapIconSource`.
+    pub(crate) fn for_source(source: &BitmapIconSource) -> Ref<IconElement> {
+        Self::with_uri(source.uri_source(), source.show_as_monochrome())
+    }
+    fn with_uri(uri: Option<Uri>, show_as_monochrome: bool) -> Ref<IconElement> {
+        let element = Self::new();
+        element.set_uri_source(uri);
+        element.set_show_as_monochrome(show_as_monochrome);
+        element.upcast()
     }
     pub fn uri_source(&self) -> Option<Uri> {
         self.get_value(Self::uri_source_property())
@@ -153,7 +178,7 @@ impl BitmapIcon {
         }
     }
 }
-impl FerroObjectImpl for BitmapIcon {
+impl FerroObjectImpl for RibbonBitmapElement {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         let root = Grid::new();
@@ -166,10 +191,10 @@ impl FerroObjectImpl for BitmapIcon {
         this.logical_children().add(root.clone().upcast());
         this.root
             .set(root)
-            .expect("BitmapIcon root initialized once");
+            .expect("RibbonBitmapElement root initialized once");
         this.image
             .set(image)
-            .expect("BitmapIcon image initialized once");
+            .expect("RibbonBitmapElement image initialized once");
         this.update_monochrome_color();
         let source = FerroObject::get_observable_with(this, Self::uri_source_property(), |uri| {
             let uri = uri?;
@@ -187,7 +212,7 @@ impl FerroObjectImpl for BitmapIcon {
                     BindingPriority::LocalValue
                 ))
                 .is_ok(),
-            "BitmapIcon source binding initialized once"
+            "RibbonBitmapElement source binding initialized once"
         );
     }
     fn on_property_changed(this: &Self, e: &FerroPropertyChangedEventArgs<'_>) {
@@ -201,7 +226,7 @@ impl FerroObjectImpl for BitmapIcon {
         }
     }
 }
-impl Drop for BitmapIcon {
+impl Drop for RibbonBitmapElement {
     fn drop(&mut self) {
         // The selected SDK returns IDisposable. Keep that boundary local and
         // release it with the Rust owner; no port-owned disposable hierarchy.
@@ -210,22 +235,22 @@ impl Drop for BitmapIcon {
         }
     }
 }
-impl LayoutableImpl for BitmapIcon {
+impl LayoutableImpl for RibbonBitmapElement {
     fn apply_template(this: &Self) {
         assert!(
             this.template().is_none(),
-            "BitmapIcon has no source Template property"
+            "RibbonBitmapElement has no source Template property"
         );
     }
     fn measure_override(this: &Self, size: Size) -> Size {
-        let root = this.root.get().expect("BitmapIcon root");
+        let root = this.root.get().expect("RibbonBitmapElement root");
         root.measure(size);
         root.desired_size()
     }
     fn arrange_override(this: &Self, size: Size) -> Size {
         this.root
             .get()
-            .expect("BitmapIcon root")
+            .expect("RibbonBitmapElement root")
             .arrange(Rect::from_size(size));
         size
     }

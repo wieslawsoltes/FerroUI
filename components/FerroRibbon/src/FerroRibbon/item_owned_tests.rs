@@ -552,7 +552,7 @@ fn helper_metadata_null_unknown_and_utf16_errors_are_explicit_without_early_owne
         let item = Item::new();
         let external = ToolTip::new();
         item.set_value(ToolTip::tip_property(), Some(Control::boxed(external)));
-        let model = ferroribbon_core::model::RibbonScreenTip::new();
+        let model = ferroribbon_core::model::RibbonScreenTipModel::new();
         model.set_title(Some(RibbonString::from_utf16(vec![0xd800])));
         item.tip.replace(Some(model));
         assert_eq!(

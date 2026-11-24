@@ -75,11 +75,11 @@ fn consumes_commands_through_existing_native_interface() {
 
 #[test]
 fn consumes_icon_and_screentip_defaults_with_shared_identity() {
-    use ferroribbon_core::model::{RibbonIcon, RibbonIconLayer, RibbonIcons, RibbonScreenTip};
+    use ferroribbon_core::model::{RibbonIcon, RibbonIconLayer, RibbonIcons, RibbonScreenTipModel};
     use std::rc::Rc;
     let icon = RibbonIcon::glyph(Some(RibbonIcons::Bold.into()));
     assert_eq!(icon.view_box_size, 24.);
-    let tip = RibbonScreenTip::with_title(Some("Bold".into()));
+    let tip = RibbonScreenTipModel::with_title(Some("Bold".into()));
     tip.set_image(Some(icon.clone()));
     assert!(Rc::ptr_eq(&tip.image().unwrap(), &icon));
     assert!(tip.description().is_none());

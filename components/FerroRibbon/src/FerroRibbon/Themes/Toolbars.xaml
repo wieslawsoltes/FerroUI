@@ -1,9 +1,9 @@
 <!-- Original RibbonSpace toolbar templates. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonToolBar" x:Key="{x:Type c:RibbonToolBar}">
+  <ControlTheme TargetType="RibbonToolBar" x:Key="{x:Type RibbonToolBar}">
     <Setter Property="Background" Value="{DynamicResource RibbonToolBarBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource RibbonCommandBarBorderBrush}" />
@@ -19,7 +19,7 @@
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonContextualToolBar" x:Key="{x:Type c:RibbonContextualToolBar}">
+  <ControlTheme TargetType="RibbonContextualToolBar" x:Key="{x:Type RibbonContextualToolBar}">
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
@@ -28,7 +28,7 @@
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonMenuBar" x:Key="{x:Type c:RibbonMenuBar}">
+  <ControlTheme TargetType="RibbonMenuBar" x:Key="{x:Type RibbonMenuBar}">
     <Setter Property="Background" Value="{DynamicResource RibbonChromeBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="Height" Value="28" />

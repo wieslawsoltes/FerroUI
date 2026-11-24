@@ -27,7 +27,7 @@ impl Ribbon {
             item.set_group_name(Some("visibility".into()));
             item.set_is_checked(self.visibility_mode() == mode);
             let icon = FontIcon::new();
-            icon.set_glyph(Some(glyph.into()));
+            icon.set_glyph(glyph);
             item.set_icon(Some(Control::boxed(icon)));
             let weak = self.to_ref().downgrade();
             item.add_click_action(move |_, _| {

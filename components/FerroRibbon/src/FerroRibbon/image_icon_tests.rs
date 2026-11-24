@@ -48,46 +48,6 @@ fn image_uri_failures_leave_the_ribbon_presenter_replaceable() {
 }
 
 #[test]
-fn native_image_icon_retains_tree_across_reload_and_updates_shared_source() {
-    run(|| {
-        let a: Rc<dyn IImage> = Rc::new(TestImage(Size::new(30., 20.)));
-        let b: Rc<dyn IImage> = Rc::new(TestImage(Size::new(60., 40.)));
-        let icon = ImageIcon::new();
-        assert!(icon.source().is_none());
-        icon.set_source(Some(a.clone()));
-        assert!(icon.visual_children().is_empty());
-        icon.measure(Size::INFINITY);
-        assert_eq!(icon.desired_size(), Size::default());
-        let window = Window::new();
-        window.set_content(Some(Control::boxed(icon.clone())));
-        window.show();
-        Dispatcher::ui_thread().run_jobs(None);
-        assert!(icon.is_loaded());
-        let grid = root(&icon);
-        let image = grid.children().get(0).cast::<Image>().unwrap();
-        assert!(Rc::ptr_eq(&image.source().unwrap(), &a));
-        assert_eq!(image.stretch(), ferroui_base::media::Stretch::Uniform);
-        icon.set_source(Some(b.clone()));
-        assert!(Rc::ptr_eq(&image.source().unwrap(), &b));
-        icon.set_source(None);
-        assert!(image.source().is_none());
-        window.set_content(None);
-        assert!(!icon.is_loaded());
-        icon.set_source(Some(a.clone()));
-        assert!(Rc::ptr_eq(&image.source().unwrap(), &a));
-        window.set_content(Some(Control::boxed(icon.clone())));
-        Dispatcher::ui_thread().run_jobs(None);
-        assert!(root(&icon).ptr_eq(&grid));
-        assert!(grid.children().get(0).ptr_eq(&image));
-        assert_eq!(icon.visual_children().count(), 1);
-        window.set_content(None);
-        window.close();
-        let weak = icon.downgrade();
-        drop(icon);
-        assert!(weak.upgrade().is_none());
-    });
-}
-#[test]
 fn image_icon_presenter_and_menu_clones_share_images_without_stealing_controls() {
     run(|| {
         let image: Rc<dyn IImage> = Rc::new(TestImage(Size::new(30., 20.)));
@@ -306,7 +266,7 @@ fn uri_controls_use_deferred_provider_results_and_cancel_released_sources() {
         assert_eq!(menu_source.size(), size);
 
         let bitmap_result = provider.request("/broken.png");
-        let bitmap = BitmapIcon::new();
+        let bitmap = crate::primitives::RibbonBitmapElement::new();
         bitmap.set_uri_source(Some(
             Uri::absolute("https://example.invalid/broken.png").unwrap(),
         ));

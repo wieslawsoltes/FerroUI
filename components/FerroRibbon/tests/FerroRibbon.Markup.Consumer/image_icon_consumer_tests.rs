@@ -1,6 +1,7 @@
 //! Independent compiled/runtime ImageIcon consumer; decoding is tested by real Skia.
+use ferroui_controls_icons::ImageIcon;
 use ferroribbon::{
-    compat::{ImageIcon, MenuFlyoutItem},
+    compat::MenuFlyoutItem,
     primitives::RibbonIconPresenter,
 };
 use ferroui_base::{

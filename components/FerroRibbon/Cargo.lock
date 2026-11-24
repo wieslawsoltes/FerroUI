@@ -324,6 +324,7 @@ dependencies = [
  "ferroui-build",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-controls-icons",
  "ferroui-headless",
  "ferroui-markup-xaml",
  "ferroui-system",
@@ -386,6 +387,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
+ "ferroui-controls-icons",
  "ferroui-headless",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
@@ -432,6 +434,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
+ "ferroui-controls-icons",
  "ferroui-desktop",
  "ferroui-headless",
  "ferroui-markup-xaml",
@@ -520,6 +523,15 @@ dependencies = [
  "ferroui-system",
  "rustc-hash",
  "url",
+]
+
+[[package]]
+name = "ferroui-controls-icons"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
 ]
 
 [[package]]

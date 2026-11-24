@@ -158,8 +158,8 @@ fn original_watch_inner_does_not_apply_initially_and_detaches_replaced_tips() {
     crate::group_tests::run(|| {
         let b = RibbonModelBindings::new();
         let m = RibbonSliderModel::new(Some("s".into()), Some("Slider".into()));
-        let first = ferroribbon_core::model::RibbonScreenTip::with_title(Some("first".into()));
-        let second = ferroribbon_core::model::RibbonScreenTip::with_title(Some("second".into()));
+        let first = ferroribbon_core::model::RibbonScreenTipModel::with_title(Some("first".into()));
+        let second = ferroribbon_core::model::RibbonScreenTipModel::with_title(Some("second".into()));
         m.set_screen_tip(Some(first.clone()));
         let trace = Rc::new(RefCell::new(Vec::new()));
         let out = trace.clone();
@@ -528,7 +528,7 @@ fn model_tip(v: Option<ferroui_base::BoxedValue>) -> String {
     match v {
         None => "null".into(),
         Some(v) => {
-            if let Some(t) = v.downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTip>>() {
+            if let Some(t) = v.downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTipModel>>() {
                 format!("model:{}", t.title().unwrap().to_utf8().unwrap())
             } else if let Some(s) = v.downcast_ref::<String>() {
                 format!("string:{s}")
@@ -544,8 +544,8 @@ fn original_group_factory_resets_same_screen_tips_and_preserves_missing_launcher
         use ferroribbon_core::{RibbonGroupItemsLayout, RibbonSimplifiedVisibility};
         let f = RibbonElementFactory::new();
         let b = RibbonModelBindings::new();
-        let tip = ferroribbon_core::model::RibbonScreenTip::with_title(Some("old".into()));
-        let launcher = ferroribbon_core::model::RibbonScreenTip::with_title(Some("launch".into()));
+        let tip = ferroribbon_core::model::RibbonScreenTipModel::with_title(Some("old".into()));
+        let launcher = ferroribbon_core::model::RibbonScreenTipModel::with_title(Some("launch".into()));
         let m = RibbonGroupModel::new(Some("g".into()), Some("Group".into()));
         m.set_screen_tip(Some(tip.clone()));
         m.set_dialog_launcher_screen_tip(Some(launcher.clone()));
@@ -589,7 +589,7 @@ fn original_group_factory_resets_same_screen_tips_and_preserves_missing_launcher
         launcher.set_title(Some("disposed".into()));
         check(
             "structure_group",
-            json!({"tipTrace":tip_trace,"launcherTrace":launcher_trace,"missing":missing,"visible":visible,"hidden":hidden,"row":g.row_count(),"reduction":g.reduction_order(),"collapse":g.can_collapse(),"layout":g.items_layout().raw(),"simplified":g.simplified_visibility().raw(),"header":g.header(),"tipSame":Rc::ptr_eq(g.screen_tip().unwrap().downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTip>>().unwrap(),&tip),"launcherSame":Rc::ptr_eq(g.dialog_launcher_screen_tip().unwrap().downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTip>>().unwrap(),&launcher)}),
+            json!({"tipTrace":tip_trace,"launcherTrace":launcher_trace,"missing":missing,"visible":visible,"hidden":hidden,"row":g.row_count(),"reduction":g.reduction_order(),"collapse":g.can_collapse(),"layout":g.items_layout().raw(),"simplified":g.simplified_visibility().raw(),"header":g.header(),"tipSame":Rc::ptr_eq(g.screen_tip().unwrap().downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTipModel>>().unwrap(),&tip),"launcherSame":Rc::ptr_eq(g.dialog_launcher_screen_tip().unwrap().downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTipModel>>().unwrap(),&launcher)}),
         );
         assert_eq!(*tips.borrow(), tip_trace);
         assert_eq!(*launchers.borrow(), launcher_trace);

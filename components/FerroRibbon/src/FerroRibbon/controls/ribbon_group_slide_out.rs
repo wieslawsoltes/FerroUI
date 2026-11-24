@@ -54,7 +54,7 @@ impl SlideOut {
             .detach();
         }
         let icon = crate::compat::FontIcon::new();
-        icon.set_glyph(Some("\u{e718}".into()));
+        icon.set_glyph("\u{e718}");
         icon.set_font_size(11.);
         pin.set_content(Some(Control::boxed(icon)));
         pin.set_padding(Thickness::uniform(0.));
@@ -273,14 +273,11 @@ impl RibbonGroup {
             .and_then(|v| ValueTypes::as_object(&*v))
             .and_then(|o| o.cast::<crate::compat::FontIcon>())
         {
-            icon.set_glyph(Some(
-                if self.is_slide_out_pinned() {
-                    "\u{e841}"
-                } else {
-                    "\u{e718}"
-                }
-                .into(),
-            ));
+            icon.set_glyph(if self.is_slide_out_pinned() {
+                "\u{e841}"
+            } else {
+                "\u{e718}"
+            });
         }
     }
     pub(super) fn detach_slide_out_panel(&self) {

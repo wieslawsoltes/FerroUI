@@ -1,6 +1,7 @@
 //! ItemTests.cs interaction sequences from RibbonSpace 9755e281.
 //! Copyright Wiesław Šoltés, MIT. Native compiled and runtime Generic hosts.
-use ferroribbon::{compat::FontIcon, controls::*, primitives::RibbonIconPresenter};
+use ferroui_controls::FontIcon;
+use ferroribbon::{controls::*, primitives::RibbonIconPresenter};
 use ferroribbon_core::{commands::*, model::RibbonIcon};
 use ferroui_base::{
     ObjectType, Ref, Visual,

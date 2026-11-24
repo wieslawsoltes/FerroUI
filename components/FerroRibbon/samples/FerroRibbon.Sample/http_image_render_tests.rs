@@ -1,9 +1,7 @@
 use super::build;
-use ferroribbon::{
-    compat::{BitmapIcon, ImageIcon},
-    controls::RibbonItemHelper,
-    primitives::{RibbonDeferredImage, RibbonIconPresenter, RibbonImageLoadError},
-};
+use ferroui_controls_icons::{BitmapIcon, ImageIcon};
+use ferroribbon::{controls::RibbonItemHelper,
+    primitives::{RibbonDeferredImage, RibbonIconPresenter, RibbonImageLoadError}};
 use ferroui_base::{
     PixelRect, PixelSize, Rect, Size, Vector,
     media::{

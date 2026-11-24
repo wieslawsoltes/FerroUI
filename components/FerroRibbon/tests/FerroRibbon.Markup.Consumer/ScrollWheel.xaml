@@ -1,14 +1,13 @@
 <StackPanel xmlns="https://github.com/ferroui"
-  xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace"
   xmlns:local="using:FerroRibbon.Consumer">
-  <rs:RibbonScrollPanel MeasureInfinite="True" UseLayoutRounding="False">
-    <rs:RibbonScrollPanel.Content>
+  <RibbonScrollPanel MeasureInfinite="True" UseLayoutRounding="False">
+    <RibbonScrollPanel.Content>
       <Border Width="1000" Height="40" UseLayoutRounding="False" />
-    </rs:RibbonScrollPanel.Content>
-  </rs:RibbonScrollPanel>
+    </RibbonScrollPanel.Content>
+  </RibbonScrollPanel>
   <local:ConsumerScroll MeasureInfinite="True" UseLayoutRounding="False">
-    <rs:RibbonScrollPanel.Content>
+    <RibbonScrollPanel.Content>
       <local:ConsumerAdaptive ExtentWidth="1000" UseLayoutRounding="False" />
-    </rs:RibbonScrollPanel.Content>
+    </RibbonScrollPanel.Content>
   </local:ConsumerScroll>
 </StackPanel>

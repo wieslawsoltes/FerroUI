@@ -15,6 +15,7 @@ ferroribbon-core = { path = "../../src/FerroRibbon.Core" }
 futures-util = { version = "0.3.34", default-features = false, features = ["std"] }
 ferroui-base = { workspace = true }
 ferroui-controls = { workspace = true }
+ferroui-controls-icons = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-system = { workspace = true }
 

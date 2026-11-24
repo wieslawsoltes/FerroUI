@@ -288,7 +288,8 @@ fn verify_native_actions(page: &ferroui_base::Ref<CadPage>, chrome: &serde_json:
 }
 
 fn verify_chrome_brushes(page: &CadPage, chrome: &serde_json::Value, theme: &str) {
-    use ferroribbon::{compat::FontIcon, theming::RibbonTheme};
+    use ferroui_controls::FontIcon;
+    use ferroribbon::theming::RibbonTheme;
     use ferroui_base::media::{Color, IBrush};
     use ferroui_controls::{
         Border,

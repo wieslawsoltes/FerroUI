@@ -263,17 +263,17 @@ fn independent_compiled_runtime_native_dialog_buttons_cancel_with_typed_args() {
             let mut subscriptions = Vec::new();
             for (button, part, parameter) in [
                 (
-                    ferroribbon::compat::ContentDialogButton::Primary,
+                    ferroui_controls::ContentDialogButton::Primary,
                     host.primary_button().unwrap(),
                     host.primary_button_command_parameter(),
                 ),
                 (
-                    ferroribbon::compat::ContentDialogButton::Secondary,
+                    ferroui_controls::ContentDialogButton::Secondary,
                     host.secondary_button().unwrap(),
                     host.secondary_button_command_parameter(),
                 ),
                 (
-                    ferroribbon::compat::ContentDialogButton::Close,
+                    ferroui_controls::ContentDialogButton::Close,
                     host.close_button().unwrap(),
                     host.close_button_command_parameter(),
                 ),

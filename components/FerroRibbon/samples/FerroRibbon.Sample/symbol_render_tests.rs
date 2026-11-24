@@ -1,6 +1,6 @@
 //! Actual bundled glyph rendering.
 use super::*;
-use ferroribbon::compat::{Symbol, SymbolIcon};
+use ferroui_controls::{Symbol, SymbolIcon};
 use ferroui_base::{
     PixelRect,
     layout::{HorizontalAlignment, VerticalAlignment},

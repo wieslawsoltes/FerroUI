@@ -1,11 +1,11 @@
 //! Native leaf metadata against unchanged C# and actual independent compiled/runtime XAML.
 use ferroribbon::metadata::{
     model_icon::{RibbonIconLayerMetadata, RibbonIconMetadata},
-    model_screen_tip::RibbonScreenTipMetadata,
+    model_screen_tip::RibbonScreenTipModelMetadata,
 };
 use ferroribbon_core::{
     RibbonString,
-    model::{RibbonIcon, RibbonIconKind, RibbonScreenTip},
+    model::{RibbonIcon, RibbonIconKind, RibbonScreenTipModel},
 };
 use ferroui_base::{
     BoxedValue,
@@ -44,14 +44,14 @@ fn source_leaf_constructor_property_shapes_and_explicit_init_gap() {
         for m in [
             RibbonIconMetadata::MARKUP,
             RibbonIconLayerMetadata::MARKUP,
-            RibbonScreenTipMetadata::MARKUP,
+            RibbonScreenTipModelMetadata::MARKUP,
         ] {
             let source = corpus();
             let class = source["corpus"]["classes"]
                 .as_array()
                 .unwrap()
                 .iter()
-                .find(|c| c["name"] == m.name)
+                .find(|c| c["name"] == m.name.strip_suffix("TipModel").map_or(m.name.to_owned(), |name| format!("{name}Tip")))
                 .unwrap();
             assert_eq!(
                 m.constructors
@@ -91,7 +91,7 @@ fn source_leaf_constructor_property_shapes_and_explicit_init_gap() {
             }
         }
         assert_eq!(
-            RibbonScreenTipMetadata::MARKUP.base_type().unwrap().name,
+            RibbonScreenTipModelMetadata::MARKUP.base_type().unwrap().name,
             "ObservableObject"
         );
         for e in corpus()["corpus"]["enumNames"].as_array().unwrap() {
@@ -105,10 +105,10 @@ fn source_leaf_constructor_property_shapes_and_explicit_init_gap() {
 #[test]
 fn source_screentip_notifications_reentrancy_structural_image_equality_and_detach() {
     crate::tests::run(|| {
-        let m = RibbonScreenTipMetadata::MARKUP;
+        let m = RibbonScreenTipModelMetadata::MARKUP;
         let args = [text("Title"), text("Description"), text("Ctrl+T")];
         let value = (m.constructors[3].invoke)(&args).unwrap().unwrap();
-        let tip = cast::<Rc<RibbonScreenTip>>(&value);
+        let tip = cast::<Rc<RibbonScreenTipModel>>(&value);
         let first = RibbonIcon::text_with_foreground(Some("📐".into()), Some("#112233".into()));
         let equal = RibbonIcon::text_with_foreground(Some("📐".into()), Some("#112233".into()));
         let changed = first.with_foreground(Some("#445566".into()));
@@ -175,12 +175,12 @@ fn source_screentip_notifications_reentrancy_structural_image_equality_and_detac
 #[test]
 fn native_leaf_optional_constructor_defaults_and_invalid_utf16_getters() {
     crate::tests::run(|| {
-        let m = RibbonScreenTipMetadata::MARKUP;
+        let m = RibbonScreenTipModelMetadata::MARKUP;
         let args = [text("T"), text("D"), text("S")];
         for ctor in m.constructors {
             let n = ctor.parameters.len();
             let v = (ctor.invoke)(&args[..n]).unwrap().unwrap();
-            let tip = cast::<Rc<RibbonScreenTip>>(&v);
+            let tip = cast::<Rc<RibbonScreenTipModel>>(&v);
             assert_eq!(tip.title(), (n > 0).then(|| "T".into()));
             assert_eq!(tip.description(), (n > 1).then(|| "D".into()));
             assert_eq!(tip.shortcut(), (n > 2).then(|| "S".into()));
@@ -215,7 +215,7 @@ fn native_leaf_optional_constructor_defaults_and_invalid_utf16_getters() {
             );
         }
         let bad = RibbonString::from_utf16(vec![0xd800]);
-        let tip = RibbonScreenTip::with_title(Some(bad.clone()));
+        let tip = RibbonScreenTipModel::with_title(Some(bad.clone()));
         let value = Rc::new(tip.clone()) as BoxedValue;
         assert!(tip.title().unwrap().to_utf8().is_err());
         assert!((property(m, "Title").get.unwrap())(&[Some(value)]).is_err());
@@ -261,7 +261,7 @@ fn independent_model_leaf_xaml_bindings_factory_replacement_and_resource_identit
                     .flatten()
                     .unwrap()
             };
-            let tip = cast::<Rc<RibbonScreenTip>>(&resource("Tip"));
+            let tip = cast::<Rc<RibbonScreenTipModel>>(&resource("Tip"));
             let icon = cast::<Rc<RibbonIcon>>(&resource("Illustration"));
             let model = cast::<Rc<dyn RibbonButtonModelImpl>>(&resource("Command"));
             assert!(Rc::ptr_eq(&tip.image().unwrap(), &icon));
@@ -289,7 +289,7 @@ fn independent_model_leaf_xaml_bindings_factory_replacement_and_resource_identit
                 .cast::<RibbonButton>()
                 .unwrap();
             assert!(Rc::ptr_eq(
-                &cast::<Rc<RibbonScreenTip>>(&button.screen_tip().unwrap()),
+                &cast::<Rc<RibbonScreenTipModel>>(&button.screen_tip().unwrap()),
                 &tip
             ));
             let native_tip = || {
@@ -313,7 +313,7 @@ fn independent_model_leaf_xaml_bindings_factory_replacement_and_resource_identit
             editor.set_text(Some("From editor"));
             Dispatcher::ui_thread().run_jobs(None);
             assert_eq!(tip.title(), Some("From editor".into()));
-            let replacement = RibbonScreenTip::with_title(Some("Replacement".into()));
+            let replacement = RibbonScreenTipModel::with_title(Some("Replacement".into()));
             model.set_screen_tip(Some(replacement.clone()));
             Dispatcher::ui_thread().run_jobs(None);
             let current = native_tip();
@@ -403,7 +403,7 @@ fn source_icon_factory_optional_arities_and_layer_formatting_through_native_meta
             );
         }
         let original: Value = serde_json::from_str(include_str!("../fixtures/icons.json")).unwrap();
-        let format = RibbonScreenTipMetadata::MARKUP
+        let format = RibbonScreenTipModelMetadata::MARKUP
             .methods
             .iter()
             .find(|m| m.name == "FormatTitle")

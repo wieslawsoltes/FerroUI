@@ -52,7 +52,7 @@ impl FloatingPanel {
         let strings = ferroribbon_core::localization::RibbonStrings::current();
         let return_button = Button::new();
         let icon = crate::compat::FontIcon::new();
-        icon.set_glyph(Some("\u{e70e}".into()));
+        icon.set_glyph("\u{e70e}");
         icon.set_font_size(10.);
         return_button.set_content(Some(Control::boxed(icon)));
         return_button.set_padding(Thickness::uniform(0.));

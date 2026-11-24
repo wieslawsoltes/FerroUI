@@ -1,11 +1,11 @@
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:cad="using:FerroRibbon.Sample.Cad" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" x:CompileBindings="True">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:cad="using:FerroRibbon.Sample.Cad" x:CompileBindings="True">
  <StackPanel.Resources>
     <!-- AutoCAD-style layer drop-down: on / off, freeze / thaw, lock / unlock, colour, name. -->
     <DataTemplate x:Key="LayerItemTemplate" x:DataType="cad:CadLayer">
       <StackPanel Orientation="Horizontal" Spacing="3" Height="20">
-        <r:RibbonIconPresenter Icon="{Binding OnIcon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
-        <r:RibbonIconPresenter Icon="{Binding FreezeIcon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
-        <r:RibbonIconPresenter Icon="{Binding LockIcon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
+        <RibbonIconPresenter Icon="{Binding OnIcon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
+        <RibbonIconPresenter Icon="{Binding FreezeIcon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
+        <RibbonIconPresenter Icon="{Binding LockIcon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
         <Border Width="12" Height="12" Margin="3,0,5,0" VerticalAlignment="Center" Background="{Binding ColorBrush}" BorderBrush="{DynamicResource RibbonSwatchBorderBrush}" BorderThickness="1" />
         <TextBlock Text="{Binding Name}" VerticalAlignment="Center" FontSize="12" />
       </StackPanel>
@@ -32,8 +32,8 @@
       </StackPanel>
     </DataTemplate>
  </StackPanel.Resources>
- <r:RibbonComboBox x:Name="Layers" ItemsSource="{x:Static cad:CadLayer.Samples}" ItemTemplate="{StaticResource LayerItemTemplate}" SelectionBoxTemplate="{StaticResource LayerItemTemplate}" />
- <r:RibbonComboBox x:Name="Colors" ItemsSource="{x:Static cad:CadColorOption.Samples}" ItemTemplate="{StaticResource ColorItemTemplate}" SelectionBoxTemplate="{StaticResource ColorItemTemplate}" />
- <r:RibbonComboBox x:Name="Linetypes" ItemsSource="{x:Static cad:CadLinetype.Samples}" ItemTemplate="{StaticResource LinetypeItemTemplate}" SelectionBoxTemplate="{StaticResource LinetypeItemTemplate}" />
- <r:RibbonComboBox x:Name="Weights" ItemsSource="{x:Static cad:CadLineweight.Samples}" ItemTemplate="{StaticResource LineweightItemTemplate}" SelectionBoxTemplate="{StaticResource LineweightItemTemplate}" />
+ <RibbonComboBox x:Name="Layers" ItemsSource="{x:Static cad:CadLayer.Samples}" ItemTemplate="{StaticResource LayerItemTemplate}" SelectionBoxTemplate="{StaticResource LayerItemTemplate}" />
+ <RibbonComboBox x:Name="Colors" ItemsSource="{x:Static cad:CadColorOption.Samples}" ItemTemplate="{StaticResource ColorItemTemplate}" SelectionBoxTemplate="{StaticResource ColorItemTemplate}" />
+ <RibbonComboBox x:Name="Linetypes" ItemsSource="{x:Static cad:CadLinetype.Samples}" ItemTemplate="{StaticResource LinetypeItemTemplate}" SelectionBoxTemplate="{StaticResource LinetypeItemTemplate}" />
+ <RibbonComboBox x:Name="Weights" ItemsSource="{x:Static cad:CadLineweight.Samples}" ItemTemplate="{StaticResource LineweightItemTemplate}" SelectionBoxTemplate="{StaticResource LineweightItemTemplate}" />
 </StackPanel>

@@ -152,7 +152,7 @@ fn original_primary_presentation_fallbacks_and_localized_options_format() {
                 choice.set_text(case["text"].as_str().map(Into::into));
                 if case["icon"] == "font" {
                     let f = FontIcon::new();
-                    f.set_glyph(Some("glyph".into()));
+                    f.set_glyph("glyph");
                     choice.set_icon(Some(Control::boxed(f)));
                 } else if case["icon"] == "other" {
                     choice.set_icon(Some(Control::boxed(ferroui_controls::PathIcon::new())));

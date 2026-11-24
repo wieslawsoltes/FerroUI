@@ -1147,7 +1147,7 @@ fn structure_collections_keep_sharing_and_core_setters_do_not_invoke_actions() {
     picker.recent_colors().add(RibbonColor::BLACK);
     assert_eq!(picker.recent_colors().get(0), RibbonColor::BLACK);
     assert_eq!(calls.get(), 0);
-    let tip = RibbonScreenTip::new();
+    let tip = RibbonScreenTipModel::new();
     let trace = Rc::new(RefCell::new(0));
     let out = trace.clone();
     group
@@ -1155,7 +1155,7 @@ fn structure_collections_keep_sharing_and_core_setters_do_not_invoke_actions() {
         .add(Rc::new(move |_| *out.borrow_mut() += 1));
     group.set_dialog_launcher_screen_tip(Some(tip.clone()));
     group.set_dialog_launcher_screen_tip(Some(tip));
-    group.set_dialog_launcher_screen_tip(Some(RibbonScreenTip::new()));
+    group.set_dialog_launcher_screen_tip(Some(RibbonScreenTipModel::new()));
     assert_eq!(*trace.borrow(), 2);
 }
 

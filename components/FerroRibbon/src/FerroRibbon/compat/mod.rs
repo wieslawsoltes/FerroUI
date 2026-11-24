@@ -1,24 +1,16 @@
 //! Native FerroUI adapters for the ribbon's icon and input contracts.
 //! These are not aliases for framework types or claims of complete platform parity.
-mod font_icon;
-pub use font_icon::FontIcon;
-mod image_icon;
-pub use image_icon::ImageIcon;
-mod icon_source;
-pub use icon_source::IconSource;
-mod font_icon_source;
-pub use font_icon_source::FontIconSource;
-mod path_icon_source;
-pub use path_icon_source::PathIconSource;
-mod image_icon_source;
-pub use image_icon_source::ImageIconSource;
-mod symbol;
-pub use symbol::Symbol;
-mod symbol_glyphs;
-mod symbol_icon;
-pub use symbol_icon::{SymbolIcon, SymbolIconError};
-mod symbol_icon_source;
-pub use symbol_icon_source::SymbolIconSource;
+
+// The icons, `Orientation` and `ContentDialogButton` are the framework's: one type per name in the
+// default XML namespace.
+pub(crate) use ferroui_base::layout::Orientation;
+#[cfg(test)]
+pub(crate) use ferroui_controls::Symbol;
+pub(crate) use ferroui_controls::{
+    ContentDialogButton, FontIcon, FontIconSource, IconSource, PathIconSource, SymbolIcon,
+    SymbolIconSource,
+};
+pub(crate) use ferroui_controls_icons::{BitmapIcon, BitmapIconSource, ImageIcon, ImageIconSource};
 
 mod menu_items;
 pub use menu_items::{
@@ -49,11 +41,3 @@ pub use data_template_selector::{
 mod event_args;
 pub(crate) use event_args::empty_event_args;
 
-mod content_dialog_button;
-pub use content_dialog_button::ContentDialogButton;
-mod orientation;
-pub use orientation::Orientation;
-mod bitmap_icon;
-mod bitmap_icon_source;
-pub use bitmap_icon::BitmapIcon;
-pub use bitmap_icon_source::BitmapIconSource;

@@ -14,17 +14,17 @@ ferro_class!(ConsumerDialogHost:RibbonColorDialogHost);
 ferro_class_info!(ConsumerDialogHost {new:ConsumerDialogHost::new,markup:{namespace:"FerroRibbon.Consumer"}});
 ferro_impl_classes!(ConsumerDialogHost:FerroObjectImpl,StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,ContentControlImpl,TemplatedControlImpl);
 ferroui_base::ferro_properties! {impl ConsumerDialogHost {
-    pub fn optional_default_button_property()->StyledProperty<Option<ferroribbon::compat::ContentDialogButton>> {
+    pub fn optional_default_button_property()->StyledProperty<Option<ferroui_controls::ContentDialogButton>> {
         FerroProperty::register::<Self,_>("OptionalDefaultButton",None)
     }
 }}
 impl ConsumerDialogHost {
-    pub fn optional_default_button(&self) -> Option<ferroribbon::compat::ContentDialogButton> {
+    pub fn optional_default_button(&self) -> Option<ferroui_controls::ContentDialogButton> {
         self.get_value(Self::optional_default_button_property())
     }
     pub fn set_optional_default_button(
         &self,
-        value: Option<ferroribbon::compat::ContentDialogButton>,
+        value: Option<ferroui_controls::ContentDialogButton>,
     ) {
         self.set_value(Self::optional_default_button_property(), value)
     }

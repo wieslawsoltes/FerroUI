@@ -238,7 +238,7 @@ fn original_search_descriptions_native_model_unknown_and_reindexing() {
                     t.set_description(Some("native tip".into()));
                     Rc::new(t)
                 }
-                "model" => Rc::new(ferroribbon_core::model::RibbonScreenTip::with_description(
+                "model" => Rc::new(ferroribbon_core::model::RibbonScreenTipModel::with_description(
                     None,
                     Some("model tip".into()),
                 )),

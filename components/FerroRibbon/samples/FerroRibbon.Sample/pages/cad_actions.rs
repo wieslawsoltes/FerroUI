@@ -4,11 +4,9 @@ use crate::cad::{
     CadDrawingCanvas, CadLayer,
     cad_view_model::{CadPageAction, CadSceneAction, CadSurface},
 };
-use ferroribbon::{
-    compat::FontIcon,
-    controls::{Ribbon, RibbonApplicationMenuRecentItem, RibbonButton, RibbonToggleButton},
-    theming::RibbonTheme,
-};
+use ferroui_controls::FontIcon;
+use ferroribbon::{controls::{Ribbon, RibbonApplicationMenuRecentItem, RibbonButton, RibbonToggleButton},
+    theming::RibbonTheme};
 use ferroui_base::{
     CornerRadius, Point, Ref, Thickness,
     media::{Colors, IBrush, SolidColorBrush},

@@ -1,9 +1,7 @@
 //! Public compiled/runtime icon URI integration. Decoding is verified separately with Skia.
-use ferroribbon::{
-    compat::ImageIcon,
-    controls::RibbonItemHelper,
-    primitives::{RibbonIconPresenter, RibbonImageLoadError, observe_image_loads},
-};
+use ferroui_controls_icons::ImageIcon;
+use ferroribbon::{controls::RibbonItemHelper,
+    primitives::{RibbonIconPresenter, RibbonImageLoadError, observe_image_loads}};
 use ferroui_base::{
     TypeInfo,
     data::core::ValueTypes,

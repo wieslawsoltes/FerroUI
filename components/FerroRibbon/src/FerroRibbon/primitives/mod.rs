@@ -8,6 +8,8 @@ pub use ribbon_metrics::{RibbonMetrics, RibbonMetricsValues};
 
 mod ribbon_scroll_panel;
 pub use ribbon_scroll_panel::{IRibbonScrollContent, RibbonScrollPanel};
+mod ribbon_bitmap_element;
+pub(crate) use ribbon_bitmap_element::RibbonBitmapElement;
 mod ribbon_icon_presenter;
 pub use ribbon_icon_presenter::RibbonIconPresenter;
 #[cfg(any(not(target_arch = "wasm32"), target_os = "emscripten"))]

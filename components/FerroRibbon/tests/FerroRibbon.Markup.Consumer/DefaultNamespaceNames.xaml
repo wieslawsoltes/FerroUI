@@ -1,0 +1,11 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Resources>
+    <RibbonScreenTipModel x:Key="Model" Title="Model" />
+    <RibbonElementFactory x:Key="Factory" />
+  </StackPanel.Resources>
+  <RibbonScreenTip />
+  <RibbonButton />
+  <RibbonIconPresenter />
+  <MenuFlyoutSeparator />
+</StackPanel>

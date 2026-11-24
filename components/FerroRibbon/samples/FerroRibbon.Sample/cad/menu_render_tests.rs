@@ -1,8 +1,9 @@
 //! The original rasterizer fixtures use actual SkiaSharp, not drawing descriptors.
 use super::build;
 use crate::cad::CadMenuIcons;
+use ferroui_controls_icons::ImageIcon;
 use ferroribbon::{
-    compat::{ImageIcon, MenuFlyoutItem, MenuFlyoutSeparator, MenuFlyoutSubItem},
+    compat::{MenuFlyoutItem, MenuFlyoutSeparator, MenuFlyoutSubItem},
     metadata::control_items::RibbonControlItems,
 };
 use ferroribbon_core::model::RibbonIcon;

@@ -22,7 +22,7 @@ fn describe(item: &Control) -> Value {
     }
     let item = item.to_ref().cast::<MenuFlyoutItem>().unwrap();
     let toggle = item.cast::<ToggleMenuFlyoutItem>();
-    json!({"kind":if toggle.is_some(){"toggle"}else{"item"},"text":item.text(),"glyph":item.icon().and_then(|i|ValueTypes::as_object(&*i)).and_then(|i|i.cast::<crate::compat::FontIcon>()).and_then(|i|i.glyph()),"checked":toggle.map(|t|t.is_checked()),"children":null})
+    json!({"kind":if toggle.is_some(){"toggle"}else{"item"},"text":item.text(),"glyph":item.icon().and_then(|i|ValueTypes::as_object(&*i)).and_then(|i|i.cast::<crate::compat::FontIcon>()).map(|i|i.glyph()),"checked":toggle.map(|t|t.is_checked()),"children":null})
 }
 fn sample() -> (
     Ref<Ribbon>,

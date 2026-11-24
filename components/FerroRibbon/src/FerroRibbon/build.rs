@@ -225,54 +225,6 @@ fn main() {
         .collect();
     simplified.enum_i32_factory = Some("__markup_from_i32".into());
     model.types.push(simplified);
-    let mut dialog_button = TypeModel::new(
-        "ContentDialogButton",
-        TypeKind::Enum,
-        RustType::resolved("::ferroribbon::compat::ContentDialogButton"),
-        "ferroribbon",
-    );
-    dialog_button.namespace = "FerroRibbon.Controls".into();
-    dialog_button.explicit_namespace = Some(dialog_button.namespace.clone());
-    dialog_button.public_path =
-        Some("::ferroribbon::metadata::content_dialog_button::ContentDialogButtonMetadata".into());
-    dialog_button.handles = vec![RustType::resolved(
-        "::ferroribbon::compat::ContentDialogButton",
-    )];
-    dialog_button.enum_members = [("None", 0), ("Primary", 1), ("Secondary", 2), ("Close", 3)]
-        .into_iter()
-        .map(|(name, value)| EnumMemberModel {
-            name: name.into(),
-            rust_variant: Some(name.into()),
-            rust_value: None,
-            value: Some(value),
-        })
-        .collect();
-    dialog_button.enum_i32_factory = Some("__markup_from_i32".into());
-    model.types.push(dialog_button);
-    // WinUI/Uno Orientation has a different integer order from FerroUI's.
-    // Publish the explicit compatibility descriptor, including unnamed values.
-    let mut orientation = TypeModel::new(
-        "Orientation",
-        TypeKind::Enum,
-        RustType::resolved("::ferroribbon::compat::Orientation"),
-        "ferroribbon",
-    );
-    orientation.namespace = "FerroRibbon.Compatibility".into();
-    orientation.explicit_namespace = Some(orientation.namespace.clone());
-    orientation.public_path =
-        Some("::ferroribbon::metadata::orientation::OrientationMetadata".into());
-    orientation.handles = vec![RustType::resolved("::ferroribbon::compat::Orientation")];
-    orientation.enum_members = [("Vertical", 0), ("Horizontal", 1)]
-        .into_iter()
-        .map(|(name, value)| EnumMemberModel {
-            name: name.into(),
-            rust_variant: Some(name.into()),
-            rust_value: None,
-            value: Some(value),
-        })
-        .collect();
-    orientation.enum_i32_factory = Some("__markup_from_i32".into());
-    model.types.push(orientation);
     let definition = model
         .types
         .iter_mut()

@@ -68,15 +68,17 @@ fn snapshot(
             "{key}: {expected}"
         );
     }
+    // The framework's glyph is a string: the source's null glyph is the empty one.
     let glyph = font
         .as_ref()
-        .and_then(|f| f.glyph())
-        .map(|s| s.encode_utf16().map(u64::from).collect::<Vec<_>>());
+        .map(|f| f.glyph().encode_utf16().map(u64::from).collect::<Vec<_>>())
+        .unwrap_or_default();
     assert_eq!(
         glyph,
         expected["glyph"]
             .as_array()
-            .map(|a| a.iter().map(|n| n.as_u64().unwrap()).collect::<Vec<_>>()),
+            .map(|a| a.iter().map(|n| n.as_u64().unwrap()).collect::<Vec<_>>())
+            .unwrap_or_default(),
         "{expected}"
     );
     if let Some(font) = &font {
@@ -188,20 +190,24 @@ fn original_presenter_and_menu_icon_source_snapshots_keep_different_copy_sets() 
             let source: Ref<IconSource> = match kind {
                 "font" => {
                     let f = FontIconSource::new();
-                    f.set_glyph(case["glyph"].as_array().map(|a| {
-                        String::from_utf16(
-                            &a.iter()
-                                .map(|n| n.as_u64().unwrap() as u16)
-                                .collect::<Vec<_>>(),
-                        )
-                        .unwrap()
-                    }));
+                    f.set_glyph(
+                        case["glyph"]
+                            .as_array()
+                            .map(|a| {
+                                String::from_utf16(
+                                    &a.iter()
+                                        .map(|n| n.as_u64().unwrap() as u16)
+                                        .collect::<Vec<_>>(),
+                                )
+                                .unwrap()
+                            })
+                            .unwrap_or_default(),
+                    );
                     f.set_font_family(case["family"].as_str().map(FontFamily::new));
                     f.set_font_weight(FontWeight::Bold);
                     f.set_font_style(FontStyle::Italic);
                     f.set_font_size(99.);
                     f.set_mirrored_when_right_to_left(true);
-                    f.set_is_text_scale_factor_enabled(false);
                     f.upcast()
                 }
                 "path" => {
@@ -239,7 +245,7 @@ fn original_presenter_and_menu_icon_source_snapshots_keep_different_copy_sets() 
             );
             check(menu.clone(), &case["menuFirst"]);
             if let Some(font) = source.cast::<FontIconSource>() {
-                font.set_glyph(Some("Later".into()));
+                font.set_glyph("Later");
                 font.set_font_weight(FontWeight(900));
             }
             if let Some(path) = source.cast::<PathIconSource>() {

@@ -1,7 +1,5 @@
 <StackPanel xmlns="https://github.com/ferroui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
-            xmlns:compat="using:FerroRibbon.Compatibility">
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <StackPanel.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
@@ -9,19 +7,19 @@
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </StackPanel.Resources>
-  <r:RibbonComboBox Label="Choose" />
-  <r:RibbonFontComboBox Label="Font" />
-  <r:RibbonFontSizeComboBox Label="Font Size" />
-  <r:RibbonComboBox Label="Custom">
-    <r:RibbonComboBox.Template>
+  <RibbonComboBox Label="Choose" />
+  <RibbonFontComboBox Label="Font" />
+  <RibbonFontSizeComboBox Label="Font Size" />
+  <RibbonComboBox Label="Custom">
+    <RibbonComboBox.Template>
       <ControlTemplate>
         <StackPanel Orientation="Horizontal">
           <TextBox x:Name="PART_TextBox" Width="100" />
           <Button x:Name="PART_DropDownButton" AutomationProperties.Name="Downstream options">
-            <compat:FontIcon Glyph="v" />
+            <FontIcon Glyph="v" />
           </Button>
         </StackPanel>
       </ControlTemplate>
-    </r:RibbonComboBox.Template>
-  </r:RibbonComboBox>
+    </RibbonComboBox.Template>
+  </RibbonComboBox>
 </StackPanel>

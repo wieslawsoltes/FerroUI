@@ -425,7 +425,7 @@ fn actual_overflow_entries_snapshot_fields_keep_source_and_release_without_self_
 fn menu_icons_convert_for_attached_non_menu_targets_and_clone_font_glyph_only() {
     crate::group_tests::run(|| {
         let icon = FontIcon::new();
-        icon.set_glyph(Some("\u{e700}".into()));
+        icon.set_glyph("\u{e700}");
         icon.set_font_size(42.);
         let converted = RibbonItemHelper::create_menu_icon(Some(Control::boxed(icon.clone())))
             .unwrap()

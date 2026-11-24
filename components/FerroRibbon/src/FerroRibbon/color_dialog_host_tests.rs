@@ -4,6 +4,15 @@ use ferroui_base::controls::{
 };
 use ferroui_base::{Rect, Size};
 use ferroui_controls::{TextBox, Window};
+/// The source's numeric `ContentDialogButton`: a value without a name selects no button.
+fn dialog_button(value: i64) -> ContentDialogButton {
+    match value {
+        1 => ContentDialogButton::Primary,
+        2 => ContentDialogButton::Secondary,
+        3 => ContentDialogButton::Close,
+        _ => ContentDialogButton::None,
+    }
+}
 #[repr(C)]
 struct RetemplatingResources {
     base: ResourceDictionary,
@@ -514,7 +523,7 @@ fn original_lazy_static_state_style_identity_survives_resource_replacement_until
                 }
                 _ => {}
             }
-            let choice = ContentDialogButton::from_raw(case["choice"].as_i64().unwrap() as i32);
+            let choice = dialog_button(case["choice"].as_i64().unwrap());
             host.set_default_button(choice);
             w.update_layout();
             let selected = match choice {
@@ -648,7 +657,7 @@ fn source_default_button_states_focus_and_style_override_restore_binding_identit
         let cases = data["default_button_corpus"].as_array().unwrap();
         assert_eq!(cases.len(), 5);
         for case in cases.iter().chain(cases.iter().rev()) {
-            let choice = ContentDialogButton::from_raw(case["choice"].as_i64().unwrap() as i32);
+            let choice = dialog_button(case["choice"].as_i64().unwrap());
             host.set_default_button(choice);
             w.update_layout();
             for (i, (name, button)) in ["Primary", "Secondary", "Close"]

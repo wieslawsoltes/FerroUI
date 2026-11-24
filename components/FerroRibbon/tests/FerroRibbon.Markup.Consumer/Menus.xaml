@@ -1,8 +1,8 @@
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer">
- <r:RibbonButton Label="Menu">
-  <r:RibbonButton.Flyout>
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer">
+ <RibbonButton Label="Menu">
+  <RibbonButton.Flyout>
    <MenuFlyout>
-    <local:ConsumerMenu Text="_Literal-" r:RibbonMenu.Icon="&#xE700;" KeyboardAcceleratorTextOverride="Localized shortcut" />
+    <local:ConsumerMenu Text="_Literal-" RibbonMenu.Icon="&#xE700;" KeyboardAcceleratorTextOverride="Localized shortcut" />
     <ToggleMenuFlyoutItem x:Name="MenuSource" Text="Toggle" IsChecked="True" />
     <ToggleMenuFlyoutItem Text="Mirror" IsChecked="{Binding ElementName=MenuSource,Path=IsChecked,Mode=TwoWay}" />
     <MenuFlyoutSubItem Text="Nested" RadioMenuFlyoutItem.AreCheckStatesEnabled="True">
@@ -11,6 +11,6 @@
      <MenuFlyoutSeparator />
     </MenuFlyoutSubItem>
    </MenuFlyout>
-  </r:RibbonButton.Flyout>
- </r:RibbonButton>
+  </RibbonButton.Flyout>
+ </RibbonButton>
 </StackPanel>

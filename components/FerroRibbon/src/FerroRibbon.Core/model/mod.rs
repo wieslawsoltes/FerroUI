@@ -1,12 +1,12 @@
 mod ribbon_icon;
 mod ribbon_icons;
-mod ribbon_screen_tip;
+mod ribbon_screen_tip_model;
 pub use ribbon_icon::{
     RibbonIcon, RibbonIconError, RibbonIconKind, RibbonIconLayer, RibbonIconLayerArray,
     RibbonIconLayerList, RibbonIconLayers,
 };
 pub use ribbon_icons::RibbonIcons;
-pub use ribbon_screen_tip::RibbonScreenTip;
+pub use ribbon_screen_tip_model::RibbonScreenTipModel;
 
 mod ribbon_object;
 pub use ribbon_object::{RibbonObject, RibbonObjectEquality};

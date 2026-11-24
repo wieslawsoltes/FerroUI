@@ -45,6 +45,7 @@ ferroui-browser = { path = "../../src/Browser/FerroUI.Browser" }
 ferroui-build = { path = "../../src/FerroUI.Build.Tasks" }
 ferroui-build-scan = { path = "../../src/FerroUI.Build.Scan" }
 ferroui-controls = { path = "../../src/FerroUI.Controls" }
+ferroui-controls-icons = { path = "../../src/FerroUI.Controls.Icons" }
 ferroui-desktop = { path = "../../src/FerroUI.Desktop" }
 ferroui-fonts-inter = { path = "../../src/FerroUI.Fonts.Inter" }
 ferroui-headless = { path = "../../src/Headless/FerroUI.Headless" }

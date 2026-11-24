@@ -50,7 +50,7 @@ fn screen(mode: &str) -> Option<BoxedValue> {
     match mode {
         "description" => Some(Rc::new("Body".to_owned())),
         "model" => {
-            let tip = ferroribbon_core::model::RibbonScreenTip::new();
+            let tip = ferroribbon_core::model::RibbonScreenTipModel::new();
             tip.set_title(Some("".into()));
             tip.set_description(Some("Body".into()));
             tip.set_shortcut(Some("".into()));
@@ -325,7 +325,7 @@ fn helper_hidden_item_identity_and_text_errors_do_not_close_the_previous_popup()
         let popup = input.page.captured_tip_popup().unwrap();
         assert_eq!(popup.horizontal_offset(), 0.);
         assert_eq!(popup.vertical_offset(), hidden.bounds().height + 4.);
-        let model = Rc::new(ferroribbon_core::model::RibbonScreenTip::new());
+        let model = Rc::new(ferroribbon_core::model::RibbonScreenTipModel::new());
         model.set_title(Some("Valid".into()));
         input.button.set_label(Some("Line".into()));
         input.button.set_screen_tip(Some(model.clone()));

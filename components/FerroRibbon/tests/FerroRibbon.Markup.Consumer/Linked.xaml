@@ -1,5 +1,4 @@
-<Panel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-  xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace">
+<Panel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <Border x:Name="original" />
-  <Border x:Name="copy" rs:RibbonItemHelper.SourceItem="{Binding #original}" />
+  <Border x:Name="copy" RibbonItemHelper.SourceItem="{Binding #original}" />
 </Panel>

@@ -3,6 +3,14 @@ use crate::tests::run;
 use ferroui_base::{input::KeyboardNavigation, layout::LayoutableImplExt};
 use ferroui_controls::primitives::{TemplatedControl, TemplatedControlImpl};
 use serde_json::{Value, json};
+/// The source's numeric `Orientation`, as the recorded corpus states it.
+fn source_orientation(value: i64) -> Orientation {
+    if value == 1 {
+        Orientation::Horizontal
+    } else {
+        Orientation::Vertical
+    }
+}
 #[repr(C)]
 struct Fixed {
     base: TemplatedControl,
@@ -106,9 +114,7 @@ fn toolbar_panel_original_layout_overflow_and_focus_corpus() {
     run(|| {
         for case in corpus()["corpus"]["cases"].as_array().unwrap() {
             let p = RibbonToolBarPanel::new();
-            p.set_orientation(Orientation::from_raw(
-                case["orientation"].as_i64().unwrap() as i32
-            ));
+            p.set_orientation(source_orientation(case["orientation"].as_i64().unwrap()));
             p.set_columns(case["columns"].as_i64().unwrap() as i32);
             let a = Fixed::new("a", Size::new(29.25, 17.5));
             let b = Fixed::new("b", Size::new(41., 23.));
@@ -196,7 +202,7 @@ fn toolbar_panel_defaults_plain_setters_button_reassignment_and_shared_overflow(
         p.measure(Size::new(200., 200.));
         assert!(p.is_measure_valid());
         p.set_columns(-2);
-        p.set_orientation(Orientation::from_raw(99));
+        p.set_orientation(Orientation::Vertical);
         p.set_spacing(1.5);
         p.set_is_overflow_enabled(false);
         assert!(
@@ -256,29 +262,19 @@ fn toolbar_panel_missing_overflow_button_preserves_source_failure() {
     });
 }
 #[test]
-fn toolbar_orientation_uses_source_numeric_values_and_explicit_native_conversion() {
+fn toolbar_orientation_maps_the_source_numbers_to_the_framework_enum() {
     run(|| {
         let d = corpus();
-        assert_eq!(
-            i64::from(Orientation::Vertical.raw()),
-            d["corpus"]["orientation"]["vertical"]
-        );
-        assert_eq!(
-            i64::from(Orientation::Horizontal.raw()),
-            d["corpus"]["orientation"]["horizontal"]
-        );
-        assert_eq!(
-            Orientation::from(ferroui_base::layout::Orientation::Horizontal),
-            Orientation::Horizontal
-        );
-        assert_eq!(
-            ferroui_base::layout::Orientation::try_from(Orientation::Vertical),
-            Ok(ferroui_base::layout::Orientation::Vertical)
-        );
-        assert_eq!(
-            ferroui_base::layout::Orientation::try_from(Orientation::from_raw(99)),
-            Err(99)
-        );
+        let number = |name: &str| d["corpus"]["orientation"][name].as_i64().unwrap();
+        // The source numbers Vertical 0 and Horizontal 1; the framework the other way round.
+        assert_eq!((number("vertical"), number("horizontal")), (0, 1));
+        assert_eq!(source_orientation(number("vertical")), Orientation::Vertical);
+        assert_eq!(source_orientation(number("horizontal")), Orientation::Horizontal);
+        assert_eq!((Orientation::Horizontal as i32, Orientation::Vertical as i32), (0, 1));
+        // A source value without a name is not Horizontal, so it lays out as Vertical.
+        for unnamed in [99, i64::from(i32::MIN), i64::from(i32::MAX)] {
+            assert_eq!(source_orientation(unnamed), Orientation::Vertical);
+        }
     });
 }
 #[test]

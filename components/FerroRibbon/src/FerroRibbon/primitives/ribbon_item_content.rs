@@ -117,7 +117,7 @@ impl RibbonItemContent {
         let line1 = text_factory();
         let line2 = text_factory();
         let chevron = FontIcon::new();
-        chevron.set_glyph(Some("\u{e70d}".into()));
+        chevron.set_glyph("\u{e70d}");
         chevron.set_font_size(8.);
         chevron.set_is_hit_test_visible(false);
         let color_bar = Rectangle::new();

@@ -40,7 +40,7 @@ fn snapshot(p: &RibbonIconPresenter, expected: &serde_json::Value) {
             );
             (
                 "FontIcon",
-                font.glyph(),
+                Some(font.glyph()),
                 font.font_size(),
                 font.font_weight().0,
                 font.font_style().to_string(),
@@ -126,7 +126,7 @@ fn original_whole_presenter_glyph_decisions_and_parented_font_clones() {
         }
         for case in corpus["clones"].as_array().unwrap() {
             let source = FontIcon::new();
-            source.set_glyph(Some("\u{e000}".into()));
+            source.set_glyph("\u{e000}");
             source.set_font_family(FontFamily::new("Clone Font"));
             source.set_font_size(99.);
             source.set_font_weight(FontWeight::Bold);
@@ -153,7 +153,7 @@ fn original_whole_presenter_glyph_decisions_and_parented_font_clones() {
                 p.children().get(0).ptr_eq(&source),
                 case["same"].as_bool().unwrap()
             );
-            source.set_glyph(Some("Changed".into()));
+            source.set_glyph("Changed");
             snapshot(&p, &case["before"]);
             p.set_icon_size(32.);
             snapshot(&p, &case["after"]);
@@ -162,81 +162,5 @@ fn original_whole_presenter_glyph_decisions_and_parented_font_clones() {
                 case["parentRetained"].as_bool().unwrap()
             );
         }
-    });
-}
-#[test]
-fn native_font_object_inheritance_text_child_invalidation_and_lifetimes() {
-    run(|| {
-        let font = FontIcon::new();
-        assert!(
-            font.clone()
-                .upcast::<Control>()
-                .cast::<FontIcon>()
-                .is_some()
-        );
-        font.set_use_layout_rounding(false);
-        font.set_glyph(Some("a".into()));
-        font.set_font_size(20.);
-        let text = font.visual_children_snapshot().unwrap()[0]
-            .cast::<TextBlock>()
-            .unwrap();
-        assert_eq!(text.text().as_deref(), Some("a"));
-        assert!(text.parent().unwrap().ptr_eq(&font));
-        font.measure(Size::INFINITY);
-        font.arrange(Rect::from_size(font.desired_size()));
-        let first = font.desired_size();
-        assert!(first.width > 0. && first.height > 0.);
-        font.set_glyph(Some("Longer".into()));
-        assert!(!font.is_measure_valid());
-        font.measure(Size::INFINITY);
-        assert!(font.desired_size().width > first.width);
-        font.set_font_style(FontStyle::Italic);
-        font.set_font_weight(FontWeight::Bold);
-        font.set_font_size(25.);
-        font.set_foreground(Some(brush(0xffff0000)));
-        assert_eq!(text.font_style(), FontStyle::Italic);
-        assert_eq!(text.font_weight(), FontWeight::Bold);
-        assert_eq!(text.font_size(), 25.);
-        assert_eq!(text.foreground(), font.foreground());
-        font.set_flow_direction(FlowDirection::RightToLeft);
-        assert!(!font.has_mirror_transform());
-        let weak = font.downgrade();
-        let text_weak = text.downgrade();
-        drop(text);
-        drop(font);
-        assert!(weak.upgrade().is_none());
-        assert!(text_weak.upgrade().is_none());
-    });
-}
-#[test]
-fn font_settings_are_independent_of_ambient_text_but_foreground_inherits() {
-    run(|| {
-        let parent = ferroui_controls::primitives::TemplatedControl::new();
-        parent.set_font_size(80.);
-        parent.set_font_weight(FontWeight::Bold);
-        parent.set_font_style(FontStyle::Italic);
-        parent.set_font_family(FontFamily::new("Ambient Text"));
-        parent.set_foreground(Some(brush(0xffff0000)));
-        let font = FontIcon::new();
-        font.set_glyph(Some("A".into()));
-        font.set_parent(parent.clone());
-        assert_eq!(font.font_size(), 20.);
-        assert_eq!(font.font_weight(), FontWeight::Normal);
-        assert_eq!(font.font_style(), FontStyle::Normal);
-        assert_ne!(font.font_family(), parent.font_family());
-        assert_eq!(font.foreground(), parent.foreground());
-        let text = font.visual_children_snapshot().unwrap()[0]
-            .cast::<TextBlock>()
-            .unwrap();
-        assert_eq!(text.font_size(), 20.);
-        // Uno omits initial FontWeight synchronization: the child can inherit
-        // ambient weight even while the icon's separate property is Normal.
-        assert_eq!(text.font_weight(), FontWeight::Bold);
-        assert_eq!(text.foreground(), parent.foreground());
-        parent.set_font_size(100.);
-        parent.set_foreground(Some(brush(0xff0000ff)));
-        assert_eq!(font.font_size(), 20.);
-        assert_eq!(text.foreground(), parent.foreground());
-        font.set_parent(None);
     });
 }

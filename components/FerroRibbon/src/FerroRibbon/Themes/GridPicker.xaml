@@ -1,9 +1,9 @@
 <!-- Original RibbonSpace grid picker template. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonGridPicker" x:Key="{x:Type c:RibbonGridPicker}">
+  <ControlTheme TargetType="RibbonGridPicker" x:Key="{x:Type RibbonGridPicker}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalAlignment" Value="Center" />

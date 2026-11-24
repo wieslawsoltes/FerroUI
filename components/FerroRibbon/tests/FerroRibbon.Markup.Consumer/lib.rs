@@ -244,10 +244,10 @@ mod tests {
             for (name,xaml) in [
                 ("source",source.to_owned()),
                 ("no-inline-resources",source.replace("<StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source=\"ferres://FerroRibbon/Themes/Ribbon.xaml\" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>","")),
-                ("base-type",source.replace("local:ConsumerRibbon", "r:Ribbon")),
+                ("base-type",source.replace("local:ConsumerRibbon", "Ribbon")),
                 ("unmounted",source.to_owned()),
-                ("no-owner-bindings",source.replace(" r:RibbonItemHelper.Owner=\"{Binding ElementName=OwnerRoot}\"", "")),
-                ("no-name",source.replace(" x:Name=\"OwnerRoot\"", "").replace(" r:RibbonItemHelper.Owner=\"{Binding ElementName=OwnerRoot}\"", "")),
+                ("no-owner-bindings",source.replace(" RibbonItemHelper.Owner=\"{Binding ElementName=OwnerRoot}\"", "")),
+                ("no-name",source.replace(" x:Name=\"OwnerRoot\"", "").replace(" RibbonItemHelper.Owner=\"{Binding ElementName=OwnerRoot}\"", "")),
                 ("no-command-bindings",source.replace(" Command=\"{Binding Command}\" CommandParameter=\"{Binding Value}\"", "")),
             ] {
                 let weak={
@@ -670,7 +670,7 @@ mod tests {
                 assert_eq!(copy.title(), tip.title());
                 assert!(!copy.is_extended());
                 assert!(copy.template().is_none());
-                let model = ferroribbon_core::model::RibbonScreenTip::new();
+                let model = ferroribbon_core::model::RibbonScreenTipModel::new();
                 model.set_title(Some("Model".into()));
                 let output = RibbonScreenTipService::create(None, Some(model), None)
                     .unwrap()
@@ -1692,51 +1692,10 @@ mod tests {
         });
     }
     #[test]
-    fn font_mirroring_compiled_and_runtime_uses_native_property_and_original_callback_order() {
-        run(|| {
-            use ferroribbon::compat::FontIcon;
-            use ferroui_base::RelativePoint;
-            use ferroui_base::data::core::ValueTypes;
-            use ferroui_base::media::FlowDirection;
-            use ferroui_controls::StackPanel;
-            let compiled = compiled_xaml::try_load(
-                None,
-                "ferres://ferroribbon_markup_consumer/FontMirroring.xaml",
-            )
-            .unwrap()
-            .unwrap();
-            let runtime = ferroui_markup_xaml_loader::FerroRuntimeXamlLoader::parse(
-                include_str!("FontMirroring.xaml"),
-                Some(&crate::CONSUMER_ASSEMBLY),
-            )
-            .unwrap();
-            for value in [compiled, runtime] {
-                let panel = ValueTypes::as_object(&*value)
-                    .unwrap()
-                    .cast::<StackPanel>()
-                    .unwrap();
-                let first = panel.children().get(0).cast::<FontIcon>().unwrap();
-                let second = panel.children().get(1).cast::<FontIcon>().unwrap();
-                assert!(first.mirrored_when_right_to_left());
-                assert_eq!(first.flow_direction(), FlowDirection::RightToLeft);
-                assert_eq!(first.render_transform().unwrap().value().m11, -1.);
-                assert_eq!(first.render_transform_origin(), RelativePoint::CENTER);
-                assert!(second.mirrored_when_right_to_left());
-                assert_eq!(second.flow_direction(), FlowDirection::RightToLeft);
-                assert!(second.render_transform().is_none());
-                assert_eq!(second.render_transform_origin(), RelativePoint::TOP_LEFT);
-                second.set_mirrored_when_right_to_left(false);
-                second.set_mirrored_when_right_to_left(true);
-                assert_eq!(second.render_transform().unwrap().value().m11, -1.);
-                first.set_mirrored_when_right_to_left(false);
-                assert_eq!(first.render_transform().unwrap().value().m11, 1.);
-            }
-        });
-    }
-    #[test]
     fn compiled_and_runtime_font_inputs_initialize_before_clone_with_library_metadata() {
         run(|| {
-            use ferroribbon::{compat::FontIcon, primitives::RibbonIconPresenter};
+            use ferroui_controls::FontIcon;
+            use ferroribbon::primitives::RibbonIconPresenter;
             use ferroui_base::data::core::{ValueType, ValueTypes};
             use ferroui_base::media::{FontFamily, FontStyle, FontWeight};
             let compiled =
@@ -1761,7 +1720,7 @@ mod tests {
                 let source = source.downcast_ref::<Ref<FontIcon>>().unwrap();
                 let clone = p.children().get(0).cast::<FontIcon>().unwrap();
                 assert_ne!(&clone, source);
-                assert_eq!(clone.glyph().as_deref(), Some("\u{e000}"));
+                assert_eq!(clone.glyph(), "\u{e000}");
                 assert_eq!(clone.font_size(), 22.);
                 assert!(clone.width().is_nan() && clone.height().is_nan());
                 assert_eq!(clone.font_family(), FontFamily::new("Consumer Symbols"));
@@ -1777,17 +1736,16 @@ mod tests {
                         .to_uint32(),
                     0xff0000ff
                 );
-                source.set_glyph(Some("Changed".into()));
-                assert_eq!(clone.glyph().as_deref(), Some("\u{e000}"));
+                source.set_glyph("Changed");
+                assert_eq!(clone.glyph(), "\u{e000}");
                 p.set_icon_size(30.);
                 assert_eq!(
                     p.children()
                         .get(0)
                         .cast::<FontIcon>()
                         .unwrap()
-                        .glyph()
-                        .as_deref(),
-                    Some("Changed")
+                        .glyph(),
+                    "Changed"
                 );
             }
         });
@@ -1795,7 +1753,8 @@ mod tests {
     #[test]
     fn runtime_glyph_uses_the_same_native_font_icon_and_source_resource_key() {
         run(|| {
-            use ferroribbon::{compat::FontIcon, primitives::RibbonIconPresenter};
+            use ferroui_controls::FontIcon;
+            use ferroribbon::primitives::RibbonIconPresenter;
             use ferroui_base::media::FontFamily;
             use std::rc::Rc;
             let resources = Application::current().unwrap().resources();
@@ -1812,7 +1771,7 @@ mod tests {
             .unwrap();
             let p = value.downcast_ref::<Ref<RibbonIconPresenter>>().unwrap();
             let icon = p.children().get(0).cast::<FontIcon>().unwrap();
-            assert_eq!(icon.glyph().as_deref(), Some("\u{e000}"));
+            assert_eq!(icon.glyph(), "\u{e000}");
             assert_eq!(icon.font_size(), 24.);
             assert_eq!(icon.font_family(), FontFamily::new("Runtime Symbols"));
             assert_eq!(icon.foreground(), p.foreground());
@@ -2573,6 +2532,8 @@ mod model_object_tests;
 
 #[cfg(test)]
 mod model_leaf_tests;
+#[cfg(test)]
+mod default_namespace_tests;
 
 pub mod icon_sequence_consumer;
 

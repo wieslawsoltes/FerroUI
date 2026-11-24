@@ -81,7 +81,7 @@ fn source_node_setters_preserve_null_utf16_reference_and_structural_equality() {
     node.set_is_visible(false);
     node.set_is_enabled(false);
     node.set_key_tip(Some(RibbonString::from_utf16(vec![0xdc00])));
-    node.set_screen_tip(Some(RibbonScreenTip::new()));
+    node.set_screen_tip(Some(RibbonScreenTipModel::new()));
     node.set_description(Some("text".into()));
     node.set_order(-42);
     node.set_tag(Some(RibbonObject::value(7_i32)));

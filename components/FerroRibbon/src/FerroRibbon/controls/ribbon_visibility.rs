@@ -430,14 +430,11 @@ impl Ribbon {
         }
         let strings = RibbonStrings::current();
         if let Some(g) = { self.parts.borrow().minimize_glyph.clone() } {
-            g.set_glyph(Some(
-                if Self::is_minimized_mode(self.visibility_mode()) {
-                    "\u{e70d}"
-                } else {
-                    "\u{e70e}"
-                }
-                .into(),
-            ));
+            g.set_glyph(if Self::is_minimized_mode(self.visibility_mode()) {
+                "\u{e70d}"
+            } else {
+                "\u{e70e}"
+            });
         }
         if let Some(b) = { self.parts.borrow().minimize.clone() } {
             let text = match self.next_minimize_state() {

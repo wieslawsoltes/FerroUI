@@ -16,7 +16,7 @@ pub struct RibbonGroupModel {
     items_layout: RefCell<RibbonGroupItemsLayout>,
     row_count: RefCell<i32>,
     dialog_launcher_command_id: RefCell<Option<RibbonString>>,
-    dialog_launcher_screen_tip: RefCell<Option<Rc<RibbonScreenTip>>>,
+    dialog_launcher_screen_tip: RefCell<Option<Rc<RibbonScreenTipModel>>>,
     reduction_order: RefCell<i32>,
     can_collapse: RefCell<bool>,
     simplified_visibility: RefCell<RibbonSimplifiedVisibility>,
@@ -64,13 +64,13 @@ pub trait RibbonGroupModelExt: RibbonGroupModelImpl {
             "DialogLauncherCommandId",
         );
     }
-    fn dialog_launcher_screen_tip(&self) -> Option<Rc<RibbonScreenTip>> {
+    fn dialog_launcher_screen_tip(&self) -> Option<Rc<RibbonScreenTipModel>> {
         self.ribbon_group_model()
             .dialog_launcher_screen_tip
             .borrow()
             .to_owned()
     }
-    fn set_dialog_launcher_screen_tip(&self, value: Option<Rc<RibbonScreenTip>>) {
+    fn set_dialog_launcher_screen_tip(&self, value: Option<Rc<RibbonScreenTipModel>>) {
         ObservableObject::set_property(
             self,
             &self.ribbon_group_model().dialog_launcher_screen_tip,

@@ -6,7 +6,7 @@ use crate::{
 use ferroui_system::{component_model::INotifyPropertyChanged, events::Event};
 use std::{cell::RefCell, rc::Rc};
 
-pub struct RibbonScreenTip {
+pub struct RibbonScreenTipModel {
     base: ObservableObject,
     title: RefCell<Option<RibbonString>>,
     description: RefCell<Option<RibbonString>>,
@@ -27,7 +27,7 @@ macro_rules! property {
         }
     };
 }
-impl RibbonScreenTip {
+impl RibbonScreenTipModel {
     pub fn with_title(title: Option<RibbonString>) -> Rc<Self> {
         Self::with_text(title, None, None)
     }
@@ -100,13 +100,13 @@ impl RibbonScreenTip {
         RibbonString::from_utf16(units)
     }
 }
-impl INotifyPropertyChanged for RibbonScreenTip {
+impl INotifyPropertyChanged for RibbonScreenTipModel {
     fn property_changed(&self) -> &Event<str> {
         self.base.property_changed()
     }
 }
-impl ObservableObjectImpl for RibbonScreenTip {}
-impl PartialEq for RibbonScreenTip {
+impl ObservableObjectImpl for RibbonScreenTipModel {}
+impl PartialEq for RibbonScreenTipModel {
     fn eq(&self, other: &Self) -> bool {
         std::ptr::eq(self, other)
     }

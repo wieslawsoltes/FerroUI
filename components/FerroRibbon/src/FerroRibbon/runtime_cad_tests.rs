@@ -615,7 +615,7 @@ fn menu_icons_convert_paths_images_and_use_the_converter() {
             text.filter(|t| !t.is_empty() && t.starts_with('['))
                 .map(|_| {
                     let icon = FontIcon::new();
-                    icon.set_glyph(Some("\u{e8c6}".into()));
+                    icon.set_glyph("\u{e8c6}");
                     Control::boxed(icon)
                 })
         })));

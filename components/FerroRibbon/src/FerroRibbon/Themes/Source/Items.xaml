@@ -1,5 +1,5 @@
 <!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:ns2="using:FerroRibbon.Compatibility" xmlns:si="using:FerroRibbon.Internal" xmlns="https://github.com/ferroui" xmlns:meta="using:FerroRibbon.Internal" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:u="using:FerroRibbon.Compatibility" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><meta:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /></ResourceDictionary.MergedDictionaries><ControlTheme x:Key="DefaultRibbonButtonStyle" TargetType="c:RibbonButton">
+<ResourceDictionary xmlns:i="using:FerroRibbon.Internal" xmlns:si="using:FerroRibbon.Internal" xmlns="https://github.com/ferroui" xmlns:meta="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><meta:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /></ResourceDictionary.MergedDictionaries><ControlTheme x:Key="DefaultRibbonButtonStyle" TargetType="RibbonButton">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="BorderBrush" Value="Transparent" />
@@ -15,7 +15,7 @@
       <Setter.Value>
         <ControlTemplate>
           <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
-            <p:RibbonItemContent x:Name="PART_Content" Icon="{TemplateBinding Icon}" LargeIcon="{TemplateBinding LargeIcon}" Label="{TemplateBinding Label}" ItemSize="{TemplateBinding CurrentSize}" ShowLabel="{TemplateBinding ActualShowLabel}" ShowChevron="{TemplateBinding ShowChevron}" IsSimplified="{TemplateBinding IsSimplified}" Metrics="{TemplateBinding Metrics}" Foreground="{TemplateBinding Foreground}" IconForeground="{DynamicResource RibbonIconBrush}" />
+            <RibbonItemContent x:Name="PART_Content" Icon="{TemplateBinding Icon}" LargeIcon="{TemplateBinding LargeIcon}" Label="{TemplateBinding Label}" ItemSize="{TemplateBinding CurrentSize}" ShowLabel="{TemplateBinding ActualShowLabel}" ShowChevron="{TemplateBinding ShowChevron}" IsSimplified="{TemplateBinding IsSimplified}" Metrics="{TemplateBinding Metrics}" Foreground="{TemplateBinding Foreground}" IconForeground="{DynamicResource RibbonIconBrush}" />
           </Border>
         </ControlTemplate>
       </Setter.Value>
@@ -29,16 +29,16 @@
     <Style Selector="^:pressed:not(:disabled) /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
     </Style>
-    <Style Selector="^:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonButton" BasedOn="{StaticResource DefaultRibbonButtonStyle}" x:Key="{x:Type c:RibbonButton}" />
-  <ControlTheme TargetType="c:RibbonDropDownButton" BasedOn="{StaticResource DefaultRibbonButtonStyle}" x:Key="{x:Type c:RibbonDropDownButton}" />
-<ControlTheme TargetType="c:RibbonToggleButton" x:Key="{x:Type c:RibbonToggleButton}">
+  <ControlTheme TargetType="RibbonButton" BasedOn="{StaticResource DefaultRibbonButtonStyle}" x:Key="{x:Type RibbonButton}" />
+  <ControlTheme TargetType="RibbonDropDownButton" BasedOn="{StaticResource DefaultRibbonButtonStyle}" x:Key="{x:Type RibbonDropDownButton}" />
+<ControlTheme TargetType="RibbonToggleButton" x:Key="{x:Type RibbonToggleButton}">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="BorderBrush" Value="Transparent" />
@@ -54,7 +54,7 @@
       <Setter.Value>
         <ControlTemplate>
           <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
-            <p:RibbonItemContent x:Name="PART_Content" Icon="{TemplateBinding Icon}" LargeIcon="{TemplateBinding LargeIcon}" Label="{TemplateBinding Label}" ItemSize="{TemplateBinding CurrentSize}" ShowLabel="{TemplateBinding ActualShowLabel}" ShowChevron="{TemplateBinding ShowChevron}" IsSimplified="{TemplateBinding IsSimplified}" Metrics="{TemplateBinding Metrics}" Foreground="{TemplateBinding Foreground}" IconForeground="{DynamicResource RibbonIconBrush}" />
+            <RibbonItemContent x:Name="PART_Content" Icon="{TemplateBinding Icon}" LargeIcon="{TemplateBinding LargeIcon}" Label="{TemplateBinding Label}" ItemSize="{TemplateBinding CurrentSize}" ShowLabel="{TemplateBinding ActualShowLabel}" ShowChevron="{TemplateBinding ShowChevron}" IsSimplified="{TemplateBinding IsSimplified}" Metrics="{TemplateBinding Metrics}" Foreground="{TemplateBinding Foreground}" IconForeground="{DynamicResource RibbonIconBrush}" />
           </Border>
         </ControlTemplate>
       </Setter.Value>
@@ -65,10 +65,10 @@
     <Style Selector="^:unchecked:pressed:not(:disabled) /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
     </Style>
-    <Style Selector="^:unchecked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:unchecked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:unchecked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:unchecked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
     <Style Selector="^:checked:not(:pointerover):not(:pressed):not(:disabled) /template/ Border#RootGrid">
@@ -92,10 +92,10 @@
     <Style Selector="^:checked:disabled /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemCheckedBrush}" />
     </Style>
-    <Style Selector="^:checked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:checked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:checked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:checked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
     <Style Selector="^:indeterminate:not(:pointerover):not(:pressed):not(:disabled) /template/ Border#RootGrid">
@@ -107,11 +107,11 @@
     <Style Selector="^:indeterminate:pressed:not(:disabled) /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
     </Style>
-    <Style Selector="^:indeterminate:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:indeterminate:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
   </ControlTheme>
-  <ControlTheme x:Key="DefaultRibbonSplitButtonStyle" TargetType="c:RibbonSplitButton">
+  <ControlTheme x:Key="DefaultRibbonSplitButtonStyle" TargetType="RibbonSplitButton">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="KeyboardNavigation.IsTabStop" Value="False" />
@@ -121,10 +121,10 @@
           <Border x:Name="PART_Chrome" CornerRadius="{DynamicResource RibbonControlCornerRadius}" BorderThickness="1" BorderBrush="Transparent" Background="Transparent">
             <Grid x:Name="PART_Root">
               <Button x:Name="PART_PrimaryButton" Foreground="{TemplateBinding Foreground}" Theme="{StaticResource RibbonSplitPartButtonStyle}">
-                <p:RibbonItemContent x:Name="PART_PrimaryContent" IconForeground="{DynamicResource RibbonIconBrush}" Foreground="{TemplateBinding Foreground}" />
+                <RibbonItemContent x:Name="PART_PrimaryContent" IconForeground="{DynamicResource RibbonIconBrush}" Foreground="{TemplateBinding Foreground}" />
               </Button>
               <Button x:Name="PART_SecondaryButton" Foreground="{TemplateBinding Foreground}" Theme="{StaticResource RibbonSplitPartButtonStyle}">
-                <p:RibbonItemContent x:Name="PART_SecondaryContent" IconForeground="{DynamicResource RibbonIconBrush}" Foreground="{TemplateBinding Foreground}" />
+                <RibbonItemContent x:Name="PART_SecondaryContent" IconForeground="{DynamicResource RibbonIconBrush}" Foreground="{TemplateBinding Foreground}" />
               </Button>
             </Grid>
           </Border>
@@ -137,25 +137,25 @@
     <Style Selector="^:checked /template/ Border#PART_Chrome">
       <Setter Property="BorderBrush" Value="{DynamicResource RibbonItemCheckedBorderBrush}" />
     </Style>
-    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_PrimaryContent">
+    <Style Selector="^:splitdisabled /template/ RibbonItemContent#PART_PrimaryContent">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_PrimaryContent">
+    <Style Selector="^:splitdisabled /template/ RibbonItemContent#PART_PrimaryContent">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_SecondaryContent">
+    <Style Selector="^:splitdisabled /template/ RibbonItemContent#PART_SecondaryContent">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:splitdisabled /template/ p|RibbonItemContent#PART_SecondaryContent">
+    <Style Selector="^:splitdisabled /template/ RibbonItemContent#PART_SecondaryContent">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
     <Style Selector="^:dropdownopen /template/ Button#PART_SecondaryButton">
       <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
     </Style>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonSplitButton" BasedOn="{StaticResource DefaultRibbonSplitButtonStyle}" x:Key="{x:Type c:RibbonSplitButton}" />
-<ControlTheme x:Key="{x:Type c:RibbonColorPicker}" TargetType="c:RibbonColorPicker" BasedOn="{StaticResource DefaultRibbonSplitButtonStyle}" />
-<ControlTheme TargetType="c:RibbonCheckBox" x:Key="{x:Type c:RibbonCheckBox}">
+  <ControlTheme TargetType="RibbonSplitButton" BasedOn="{StaticResource DefaultRibbonSplitButtonStyle}" x:Key="{x:Type RibbonSplitButton}" />
+<ControlTheme x:Key="{x:Type RibbonColorPicker}" TargetType="RibbonColorPicker" BasedOn="{StaticResource DefaultRibbonSplitButtonStyle}" />
+<ControlTheme TargetType="RibbonCheckBox" x:Key="{x:Type RibbonCheckBox}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="FontSize" Value="12" />
@@ -176,7 +176,7 @@
               </Grid.ColumnDefinitions>
               <Grid Width="14" Height="14" VerticalAlignment="Center">
                 <Border x:Name="PART_Box" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource RibbonInputHoverBorderBrush}" Background="{DynamicResource RibbonInputBackgroundBrush}" />
-                <u:FontIcon x:Name="PART_Check" Glyph="" FontSize="10" Foreground="{DynamicResource RibbonAccentForegroundBrush}" IsVisible="False" />
+                <FontIcon x:Name="PART_Check" Glyph="" FontSize="10" Foreground="{DynamicResource RibbonAccentForegroundBrush}" IsVisible="False" />
                 <Rectangle x:Name="PART_Indeterminate" Width="7" Height="2" Fill="{DynamicResource RibbonAccentForegroundBrush}" IsVisible="False" />
               </Grid>
               <TextBlock x:Name="PART_Label" Grid.Column="1" Margin="6,0,0,0" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" TextLineBounds="Full" />
@@ -192,24 +192,24 @@
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
   </ControlTheme>
-<ControlTheme TargetType="c:RibbonSeparator" x:Key="{x:Type c:RibbonSeparator}">
+<ControlTheme TargetType="RibbonSeparator" x:Key="{x:Type RibbonSeparator}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonSeparator">
+        <ControlTemplate TargetType="RibbonSeparator">
           <Rectangle x:Name="PART_Line" Fill="{DynamicResource RibbonSeparatorBrush}" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonLabel" x:Key="{x:Type c:RibbonLabel}">
+  <ControlTheme TargetType="RibbonLabel" x:Key="{x:Type RibbonLabel}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonLabel">
+        <ControlTemplate TargetType="RibbonLabel">
           <Border Padding="4,0" Height="22">
             <StackPanel Orientation="Horizontal" Spacing="5">
-              <p:RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
+              <RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
               <TextBlock Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" />
             </StackPanel>
           </Border>
@@ -217,44 +217,44 @@
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonButtonGroup" x:Key="{x:Type c:RibbonButtonGroup}">
+  <ControlTheme TargetType="RibbonButtonGroup" x:Key="{x:Type RibbonButtonGroup}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonButtonGroup">
+        <ControlTemplate TargetType="RibbonButtonGroup">
           <StackPanel x:Name="PART_ItemsHost" Orientation="Horizontal" Spacing="0" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonStackPanel" x:Key="{x:Type c:RibbonStackPanel}">
+  <ControlTheme TargetType="RibbonStackPanel" x:Key="{x:Type RibbonStackPanel}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonStackPanel">
+        <ControlTemplate TargetType="RibbonStackPanel">
           <StackPanel x:Name="PART_ItemsHost" Orientation="{TemplateBinding Orientation}" Spacing="{TemplateBinding Spacing}" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </ControlTheme>
-<ControlTheme TargetType="c:RibbonScreenTip" x:Key="{x:Type c:RibbonScreenTip}">
+<ControlTheme TargetType="RibbonScreenTip" x:Key="{x:Type RibbonScreenTip}">
     <Setter Property="MaxWidth" Value="320" />
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonScreenTip">
+        <ControlTemplate TargetType="RibbonScreenTip">
           <Border Padding="2">
             <StackPanel Spacing="6">
               <TextBlock Text="{TemplateBinding TitleText}" FontWeight="SemiBold" TextWrapping="Wrap" />
-              <p:RibbonIconPresenter x:Name="PART_Image" Icon="{TemplateBinding Image}" IconSize="96" HorizontalAlignment="Left" Foreground="{DynamicResource RibbonIconBrush}" />
+              <RibbonIconPresenter x:Name="PART_Image" Icon="{TemplateBinding Image}" IconSize="96" HorizontalAlignment="Left" Foreground="{DynamicResource RibbonIconBrush}" />
               <TextBlock x:Name="PART_Description" Text="{TemplateBinding Description}" TextWrapping="Wrap" Opacity="0.9" />
               <TextBlock x:Name="PART_DisabledReason" Text="{TemplateBinding DisabledReason}" TextWrapping="Wrap" FontStyle="Italic" Opacity="0.8" />
               <Border x:Name="PART_Extended" BorderThickness="0,1,0,0" Padding="0,6,0,0" BorderBrush="{DynamicResource RibbonSeparatorBrush}" IsVisible="False">
                 <StackPanel Spacing="6">
-                  <p:RibbonIconPresenter x:Name="PART_ExtendedImage" Icon="{TemplateBinding ExtendedImage}" IconSize="160" HorizontalAlignment="Left" Foreground="{DynamicResource RibbonIconBrush}" />
+                  <RibbonIconPresenter x:Name="PART_ExtendedImage" Icon="{TemplateBinding ExtendedImage}" IconSize="160" HorizontalAlignment="Left" Foreground="{DynamicResource RibbonIconBrush}" />
                   <TextBlock x:Name="PART_ExtendedDescription" Text="{TemplateBinding ExtendedDescription}" TextWrapping="Wrap" Opacity="0.9" />
                 </StackPanel>
               </Border>
               <Border x:Name="PART_HelpText" BorderThickness="0,1,0,0" Padding="0,6,0,0" BorderBrush="{DynamicResource RibbonSeparatorBrush}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                  <u:FontIcon Glyph="" FontSize="12" />
+                  <FontIcon Glyph="" FontSize="12" />
                   <TextBlock Text="{TemplateBinding HelpText}" TextWrapping="Wrap" />
                 </StackPanel>
               </Border>

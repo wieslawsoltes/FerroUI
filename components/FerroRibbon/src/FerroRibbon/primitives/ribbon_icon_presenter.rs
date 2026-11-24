@@ -3,6 +3,7 @@ use crate::compat::{
     BitmapIcon, BitmapIconSource, FontIcon, FontIconSource, IconSource, ImageIcon, ImageIconSource,
     PathIconSource, SymbolIcon, SymbolIconSource,
 };
+use super::RibbonBitmapElement;
 use ferroribbon_core::{
     RibbonString,
     model::{RibbonIcon, RibbonIconKind, RibbonIconLayer},
@@ -18,7 +19,8 @@ use ferroui_base::media::{
     Stretch, StretchDirection, TextAlignment,
 };
 use ferroui_base::{
-    BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StyledElementImpl,
+    BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroProperty, InitializationError, Ref,
+    StyledElementImpl, StyledElementImplExt,
     StyledProperty, VisualImpl, ferro_class, ferro_class_info, ferro_impl_classes,
     ferro_properties, instantiate,
 };
@@ -38,15 +40,34 @@ pub struct RibbonIconPresenter {
     base: Grid,
     element: RefCell<Option<Ref<Control>>>,
     fixed_foreground: Cell<bool>,
+    /// Markup hands an icon to its parent before it sets the icon's properties: a copy made while
+    /// this presenter initializes is made again when it ends.
+    initializing: Cell<u32>,
+    rebuild_after_init: Cell<bool>,
 }
 ferro_class!(RibbonIconPresenter:Grid);
-ferro_impl_classes!(RibbonIconPresenter:StyledElementImpl,VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,PanelImpl);
+ferro_impl_classes!(RibbonIconPresenter:VisualImpl,LayoutableImpl,InteractiveImpl,InputElementImpl,ControlImpl,PanelImpl);
 ferro_class_info!(RibbonIconPresenter {
     new:RibbonIconPresenter::new,
     markup:{namespace:"FerroRibbon.Controls.Primitives",content:Children,properties:[
         HasIcon:bool {get:RibbonIconPresenter::has_icon},
     ]},
 });
+impl StyledElementImpl for RibbonIconPresenter {
+    fn begin_init(this: &Self) {
+        Self::parent_begin_init(this);
+        this.initializing.set(this.initializing.get() + 1);
+    }
+    fn try_end_init(this: &Self) -> Result<(), InitializationError> {
+        let result = Self::parent_try_end_init(this);
+        let count = this.initializing.get().saturating_sub(1);
+        this.initializing.set(count);
+        if count == 0 && this.rebuild_after_init.replace(false) {
+            this.rebuild();
+        }
+        result
+    }
+}
 ferro_properties! {impl RibbonIconPresenter {
     pub fn icon_property()->StyledProperty<Option<BoxedValue>> {FerroProperty::register::<RibbonIconPresenter,_>("Icon",None)}
     pub fn icon_size_property()->StyledProperty<f64> {FerroProperty::register::<RibbonIconPresenter,_>("IconSize",16.)}
@@ -78,6 +99,8 @@ impl RibbonIconPresenter {
             base: Grid::construct(),
             element: RefCell::new(None),
             fixed_foreground: Cell::new(false),
+            initializing: Cell::new(0),
+            rebuild_after_init: Cell::new(false),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -123,6 +146,9 @@ impl RibbonIconPresenter {
         };
         self.set_width(size);
         self.set_height(size);
+        if self.initializing.get() > 0 && is_copied_icon(&icon) {
+            self.rebuild_after_init.set(true);
+        }
         let (element, fixed) = create_element(&icon, size);
         self.fixed_foreground.set(fixed);
         self.element.replace(element.clone());
@@ -313,6 +339,16 @@ fn convert<T: ferroui_base::PropertyValue>(value: &BoxedValue) -> Option<T> {
             .and_then(|v| v.downcast_ref::<T>().cloned())
     })
 }
+/// Whether the presenter shows a copy of `icon`, which markup may still be filling in.
+fn is_copied_icon(icon: &BoxedValue) -> bool {
+    convert::<Ref<Control>>(icon).is_some_and(|control| {
+        control.cast::<FontIcon>().is_some()
+            || control.cast::<SymbolIcon>().is_some()
+            || control.cast::<PathIcon>().is_some()
+            || control.cast::<BitmapIcon>().is_some()
+            || control.cast::<ImageIcon>().is_some()
+    })
+}
 fn create_element(value: &BoxedValue, size: f64) -> (Option<Ref<Control>>, bool) {
     if let Some(text) = value
         .downcast_ref::<String>()
@@ -359,18 +395,13 @@ fn create_element(value: &BoxedValue, size: f64) -> (Option<Ref<Control>>, bool)
                 clone.set_font_style(font.font_style());
                 clone.upcast::<IconElement>()
             } else if let Some(symbol) = icon.cast::<SymbolIcon>() {
-                SymbolIcon::with_symbol(symbol.symbol())
-                    .expect("SymbolIcon native text boundary")
-                    .upcast::<IconElement>()
+                SymbolIcon::with_symbol(symbol.symbol()).upcast::<IconElement>()
             } else if let Some(path) = icon.cast::<PathIcon>() {
                 let clone = PathIcon::new();
                 clone.set_data(path.data());
                 clone.upcast::<IconElement>()
             } else if let Some(bitmap) = icon.cast::<BitmapIcon>() {
-                let clone = BitmapIcon::new();
-                clone.set_uri_source(bitmap.uri_source());
-                clone.set_show_as_monochrome(bitmap.show_as_monochrome());
-                clone.upcast::<IconElement>()
+                RibbonBitmapElement::for_icon(&bitmap)
             } else if let Some(image) = icon.cast::<ImageIcon>() {
                 let clone = ImageIcon::new();
                 clone.set_source(image.source());
@@ -421,14 +452,9 @@ fn create_from_icon_source(source: &IconSource, size: f64) -> (Option<Ref<Contro
         icon.set_font_weight(font.font_weight());
         icon.upcast()
     } else if let Some(bitmap) = source.to_ref().cast::<BitmapIconSource>() {
-        let clone = BitmapIcon::new();
-        clone.set_uri_source(bitmap.uri_source());
-        clone.set_show_as_monochrome(bitmap.show_as_monochrome());
-        clone.upcast::<Control>()
+        RibbonBitmapElement::for_source(&bitmap).upcast::<Control>()
     } else if let Some(symbol) = source.to_ref().cast::<SymbolIconSource>() {
-        SymbolIcon::with_symbol(symbol.symbol())
-            .expect("SymbolIcon native text boundary")
-            .upcast()
+        SymbolIcon::with_symbol(symbol.symbol()).upcast()
     } else if let Some(path) = source.to_ref().cast::<PathIconSource>() {
         let icon = PathIcon::new();
         icon.set_data(path.data());
@@ -482,7 +508,7 @@ fn create_icon(icon: &RibbonIcon, size: f64) -> (Option<Ref<Control>>, bool) {
                     != RibbonIconKind::Text =>
         {
             let font = FontIcon::new();
-            font.set_glyph(value.map(utf8));
+            font.set_glyph(value.map(utf8).unwrap_or_default());
             font.set_font_size(size);
             font.set_font_family(
                 icon.font_family

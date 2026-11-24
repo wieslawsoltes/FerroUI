@@ -1,9 +1,9 @@
 <!-- Original RibbonSpace Backstage template. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:si="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:si="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <si:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonBackstage" x:Key="{x:Type c:RibbonBackstage}">
+  <ControlTheme TargetType="RibbonBackstage" x:Key="{x:Type RibbonBackstage}">
     <Setter Property="Background" Value="{DynamicResource RibbonBackstageContentBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="Template">
@@ -23,7 +23,7 @@
                 <RowDefinition Height="Auto" />
               </Grid.RowDefinitions>
               <Button x:Name="PART_BackButton" Foreground="{DynamicResource RibbonBackstagePaneForegroundBrush}" HorizontalAlignment="Left" Width="40" Height="40" Margin="12,14,0,6" CornerRadius="20" Theme="{StaticResource RibbonChromeButtonStyle}">
-                <compat:FontIcon Glyph="" FontSize="16" />
+                <FontIcon Glyph="" FontSize="16" />
               </Button>
               <TextBlock Grid.Row="1" Text="{TemplateBinding Title}" Margin="20,0,12,10" FontSize="18" FontWeight="SemiBold" Foreground="{DynamicResource RibbonBackstagePaneForegroundBrush}" TextTrimming="CharacterEllipsis" />
               <ContentPresenter Grid.Row="2" Content="{TemplateBinding PaneHeader}" Foreground="{DynamicResource RibbonBackstagePaneForegroundBrush}" />

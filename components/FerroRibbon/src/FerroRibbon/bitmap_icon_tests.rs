@@ -2,7 +2,7 @@
 use crate::{
     compat::{BitmapIcon, BitmapIconSource},
     controls::RibbonItemHelper,
-    primitives::RibbonIconPresenter,
+    primitives::{RibbonBitmapElement, RibbonIconPresenter},
 };
 use ferroui_base::{
     Ref,
@@ -14,7 +14,7 @@ use ferroui_controls::{Control, Grid, Image, StackPanel, Viewbox};
 use serde_json::{Value, json};
 use std::rc::Rc;
 
-fn child(icon: &BitmapIcon) -> Ref<Image> {
+fn child(icon: &RibbonBitmapElement) -> Ref<Image> {
     icon.visual_children_snapshot().unwrap()[0]
         .cast::<Grid>()
         .unwrap()
@@ -32,7 +32,7 @@ fn snapshot(root: Ref<Control>) -> Value {
         .as_ref()
         .map(|v| v.child().unwrap())
         .unwrap_or(root.clone())
-        .cast::<BitmapIcon>()
+        .cast::<RibbonBitmapElement>()
         .unwrap();
     let dimension = |value: f64| {
         if value.is_nan() {
@@ -153,7 +153,7 @@ fn bitmap_monochrome_flag_and_brush_snapshot_cache_match_whole_source_helper() {
     crate::tests::run(|| {
         let fixture: Value =
             serde_json::from_str(include_str!("../../tests/fixtures/bitmap-icon.json")).unwrap();
-        let icon = BitmapIcon::new();
+        let icon = RibbonBitmapElement::new();
         let image = child(&icon);
         let brush = SolidColorBrush::with_color_and_opacity(Color::from_uint32(0x80ff0000), 0.25);
         // Private cached color is observed by the child module, as the source oracle
@@ -232,7 +232,7 @@ fn bitmap_source_assignment_reentry_keeps_latest_request_and_tint_retains_decode
                 include_bytes!("../../tests/fixtures/images/bitmap-mask-3x2.png"),
             )],
         );
-        let icon = BitmapIcon::new();
+        let icon = RibbonBitmapElement::new();
         let image = child(&icon);
         assert!(image.has_local_value_binding(Image::source_property().as_property()));
         let changes = Rc::new(Cell::new(0));
@@ -288,7 +288,7 @@ fn bitmap_load_error_belongs_to_the_displayed_source() {
     use ferroui_base::media::{DrawingImage, IImage};
 
     crate::tests::run(|| {
-        let icon = BitmapIcon::new();
+        let icon = RibbonBitmapElement::new();
         let image = child(&icon);
         icon.set_uri_source(Some(uri(
             "ferres://FerroRibbon/Assets/missing-test-icon.png",
@@ -346,7 +346,7 @@ fn bitmap_native_source_binding_clear_replacement_and_owner_release() {
                 ),
             ],
         );
-        let icon = BitmapIcon::new();
+        let icon = RibbonBitmapElement::new();
         let image = child(&icon);
         let property = Image::source_property();
         assert!(image.has_local_value_binding(property.as_property()));
@@ -382,7 +382,7 @@ fn bitmap_native_source_binding_clear_replacement_and_owner_release() {
         binding.dispose();
         assert!(!image.has_local_value_binding(property.as_property()));
 
-        let owner = BitmapIcon::new();
+        let owner = RibbonBitmapElement::new();
         let retained_child = child(&owner);
         let weak = owner.downgrade();
         drop(owner);
@@ -397,7 +397,7 @@ fn bitmap_filter_belongs_to_retained_image_across_source_replacement() {
         use ferroui_base::media::{DrawingImage, IImage};
         let fixture: Value =
             serde_json::from_str(include_str!("../../tests/fixtures/bitmap-icon.json")).unwrap();
-        let icon = BitmapIcon::new();
+        let icon = RibbonBitmapElement::new();
         let image = child(&icon);
         image.clear_local_value_and_binding(Image::source_property());
         let peer =

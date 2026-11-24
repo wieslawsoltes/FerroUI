@@ -1,6 +1,6 @@
 //! Native Skia decoding, opacity-mask tint, identity and incremental property state.
 use super::*;
-use ferroribbon::compat::BitmapIcon;
+use ferroui_controls_icons::BitmapIcon;
 use ferroui_base::{
     PixelRect, PixelSize, Rect, Size,
     media::{

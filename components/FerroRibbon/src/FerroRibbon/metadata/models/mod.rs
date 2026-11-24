@@ -503,8 +503,8 @@ pub(crate) fn register() {
         Rc<ferroribbon_core::model::RibbonMenuSeparatorModel>,
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
     >(|v| v.clone());
-    ValueTypes::register_reference::<ferroribbon_core::model::RibbonScreenTip>();
-    plain::<ferroribbon_core::model::RibbonScreenTip>();
+    ValueTypes::register_reference::<ferroribbon_core::model::RibbonScreenTipModel>();
+    plain::<ferroribbon_core::model::RibbonScreenTipModel>();
     ValueTypes::register_reference_view::<
         Rc<dyn ferroribbon_core::model::RibbonBackstageItemModelImpl>,
     >(|v| v.clone());
@@ -813,7 +813,7 @@ pub(crate) fn register() {
         Rc<dyn ferroribbon_core::model::RibbonNodeModelImpl>,
     >(|v| v.clone());
     ValueTypes::register_reference::<RibbonIcon>();
-    plain::<RibbonScreenTip>();
+    plain::<RibbonScreenTipModel>();
     ValueTypes::register_reference::<RibbonCommandCatalog>();
     ModelTypes::register_notifying_collection::<ModelColors>();
     ModelTypes::register_notifying_collection::<ModelSwatches>();

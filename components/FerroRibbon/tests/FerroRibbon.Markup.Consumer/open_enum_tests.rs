@@ -41,7 +41,7 @@ fn native_enum_metadata_numeric_conversion_matches_unchanged_clr_reference() {
     use ferroui_base::metadata::MarkupTyped;
     let data: serde_json::Value =
         serde_json::from_str(include_str!("../fixtures/open-enum-clr.json")).unwrap();
-    let m = ferroribbon::metadata::content_dialog_button::ContentDialogButtonMetadata::MARKUP;
+    let m = ferroribbon::metadata::enums::RibbonDensityMetadata::MARKUP;
     for case in data["cases"].as_array().unwrap() {
         let value = case["text"].as_str().unwrap().parse::<i64>().unwrap();
         let native = m.enum_from_value.unwrap()(value);

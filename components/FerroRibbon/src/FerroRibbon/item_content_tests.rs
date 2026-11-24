@@ -260,7 +260,7 @@ fn native_text_rendering_children_brushes_measure_invalidation_and_icon_identity
         assert_eq!(text(&p, 1).line_height(), 14.);
         assert_eq!(text(&p, 1).foreground(), p.foreground());
         let chevron = p.children().get(3).cast::<FontIcon>().unwrap();
-        assert_eq!(chevron.glyph().as_deref(), Some("\u{e70d}"));
+        assert_eq!(chevron.glyph(), "\u{e70d}");
         let before = chevron.foreground();
         p.set_foreground(None);
         assert!(text(&p, 1).foreground().is_none());

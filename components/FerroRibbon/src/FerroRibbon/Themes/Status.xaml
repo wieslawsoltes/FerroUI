@@ -1,6 +1,6 @@
 <!-- Source Chrome.xaml StatusBar; explicit Border supplies native padding. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <ControlTheme TargetType="c:RibbonStatusBar" x:Key="{x:Type c:RibbonStatusBar}">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ControlTheme TargetType="RibbonStatusBar" x:Key="{x:Type RibbonStatusBar}">
     <Setter Property="Background" Value="{DynamicResource RibbonStatusBarBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonStatusBarForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />

@@ -80,7 +80,7 @@ fn original_screentip_titles_preserve_null_whitespace_and_surrogates() {
         let title = text(&case["title"]);
         let shortcut = text(&case["shortcut"]);
         assert_eq!(
-            units(Some(RibbonScreenTip::format_title(
+            units(Some(RibbonScreenTipModel::format_title(
                 title.as_ref(),
                 shortcut.as_ref()
             ))),
@@ -123,7 +123,7 @@ fn original_icon_factories() {
 
 #[test]
 fn screentip_notification_trace_matches_source() {
-    let tip = RibbonScreenTip::with_text(
+    let tip = RibbonScreenTipModel::with_text(
         Some("Title".into()),
         Some("Description".into()),
         Some("Ctrl+T".into()),
@@ -247,7 +247,7 @@ fn icon_layers_round_trip() {
 
 #[test]
 fn structural_icon_equality_suppresses_assignment_but_screentip_uses_identity() {
-    let tip = RibbonScreenTip::new();
+    let tip = RibbonScreenTipModel::new();
     let first = RibbonIcon::new_with_options(RibbonIconKind::Path, None, None, None, f64::NAN);
     tip.set_image(Some(first.clone()));
     let second = RibbonIcon::new_with_options(
@@ -265,7 +265,7 @@ fn structural_icon_equality_suppresses_assignment_but_screentip_uses_identity() 
     assert_eq!(first, copy);
     assert!(!Rc::ptr_eq(&first, &copy));
     assert!(tip == tip.clone());
-    assert!(tip != RibbonScreenTip::new());
+    assert!(tip != RibbonScreenTipModel::new());
 }
 
 #[test]

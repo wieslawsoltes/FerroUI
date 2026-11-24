@@ -1,7 +1,7 @@
+use ferroui_controls::{FontIcon, FontIconSource, PathIconSource};
+use ferroui_controls_icons::{ImageIcon, ImageIconSource};
 use ferroribbon::{
-    compat::{
-        FontIcon, FontIconSource, ImageIcon, ImageIconSource, MenuFlyoutItem, PathIconSource,
-    },
+    compat::MenuFlyoutItem,
     primitives::RibbonIconPresenter,
 };
 use ferroui_base::{
@@ -119,18 +119,18 @@ fn independent_icon_sources_initialize_before_snapshots_in_compiled_and_runtime_
                 .cast::<FontIconSource>()
                 .unwrap();
             let font = presenter.children().get(0).cast::<FontIcon>().unwrap();
-            assert_eq!(font.glyph().as_deref(), Some("Source"));
+            assert_eq!(font.glyph(), "Source");
             assert_eq!(font.font_family(), FontFamily::new("Consumer Symbols"));
             assert_eq!(font.font_size(), 23.5);
             assert_eq!(font.font_weight(), FontWeight::Bold);
             assert_eq!(font.font_style(), FontStyle::Normal);
             assert!(!font.mirrored_when_right_to_left());
             assert_eq!(font.foreground(), source.foreground());
-            source.set_glyph(Some("Later".into()));
-            assert_eq!(font.glyph().as_deref(), Some("Source"));
+            source.set_glyph("Later");
+            assert_eq!(font.glyph(), "Source");
             presenter.set_icon_size(32.);
             let updated = presenter.children().get(0).cast::<FontIcon>().unwrap();
-            assert_eq!(updated.glyph().as_deref(), Some("Later"));
+            assert_eq!(updated.glyph(), "Later");
             assert!(!updated.ptr_eq(&font));
             let p = panel
                 .children()
@@ -173,13 +173,13 @@ fn independent_icon_sources_initialize_before_snapshots_in_compiled_and_runtime_
                 .get(0)
                 .cast::<FontIcon>()
                 .unwrap();
-            assert_eq!(inline.glyph().as_deref(), Some("Inline"));
+            assert_eq!(inline.glyph(), "Inline");
             let menu = panel.children().get(4).cast::<MenuFlyoutItem>().unwrap();
             let menu_font = ValueTypes::as_object(&*menu.icon().unwrap())
                 .unwrap()
                 .cast::<FontIcon>()
                 .unwrap();
-            assert_eq!(menu_font.glyph().as_deref(), Some("Source"));
+            assert_eq!(menu_font.glyph(), "Source");
             assert_eq!(menu_font.font_size(), 20.);
             assert_eq!(menu_font.font_weight(), FontWeight::Normal);
             assert_eq!(menu_font.font_family(), FontIcon::new().font_family());

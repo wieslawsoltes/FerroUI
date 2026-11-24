@@ -1,5 +1,6 @@
 //! RibbonButton.cs Menu helpers and RibbonItemHelper.cs menu conversion/projection.
 use super::RibbonItemHelper;
+use crate::primitives::RibbonBitmapElement;
 use crate::compat::{
     BitmapIcon, BitmapIconSource, FontIcon, FontIconSource, ImageIcon, ImageIconSource,
     MenuFlyoutItem, MenuFlyoutSubItem, PathIconSource, SymbolIcon, SymbolIconSource,
@@ -199,15 +200,10 @@ impl RibbonItemHelper {
                 return Ok(Some(result.upcast()));
             }
             if let Some(symbol) = object.cast::<SymbolIconSource>() {
-                return SymbolIcon::with_symbol(symbol.symbol())
-                    .map(|s| Some(s.upcast()))
-                    .map_err(|e| RibbonMenuError(e.to_string()));
+                return Ok(Some(SymbolIcon::with_symbol(symbol.symbol()).upcast()));
             }
             if let Some(bitmap) = object.cast::<BitmapIconSource>() {
-                let result = BitmapIcon::new();
-                result.set_uri_source(bitmap.uri_source());
-                result.set_show_as_monochrome(bitmap.show_as_monochrome());
-                return Ok(Some(result.upcast()));
+                return Ok(Some(RibbonBitmapElement::for_source(&bitmap)));
             }
             if let Some(image) = object.cast::<ImageIconSource>() {
                 let result = ImageIcon::new();
@@ -220,10 +216,7 @@ impl RibbonItemHelper {
                 return Ok(Some(result.upcast()));
             }
             if let Some(bitmap) = object.cast::<BitmapIcon>() {
-                let result = BitmapIcon::new();
-                result.set_uri_source(bitmap.uri_source());
-                result.set_show_as_monochrome(bitmap.show_as_monochrome());
-                return Ok(Some(result.upcast()));
+                return Ok(Some(RibbonBitmapElement::for_icon(&bitmap)));
             }
             if let Some(image) = object.cast::<ImageIcon>() {
                 let result = ImageIcon::new();
@@ -231,9 +224,7 @@ impl RibbonItemHelper {
                 return Ok(Some(result.upcast()));
             }
             if let Some(symbol) = object.cast::<SymbolIcon>() {
-                return SymbolIcon::with_symbol(symbol.symbol())
-                    .map(|s| Some(s.upcast()))
-                    .map_err(|e| RibbonMenuError(e.to_string()));
+                return Ok(Some(SymbolIcon::with_symbol(symbol.symbol()).upcast()));
             }
         }
         Ok(None)
@@ -269,7 +260,8 @@ fn create_description(
             value
                 .map(|v| v.to_utf8())
                 .transpose()
-                .map_err(|_| RibbonMenuError("glyph has unpaired UTF-16".into()))?,
+                .map_err(|_| RibbonMenuError("glyph has unpaired UTF-16".into()))?
+                .unwrap_or_default(),
         );
         return Ok(Some(font.upcast()));
     }

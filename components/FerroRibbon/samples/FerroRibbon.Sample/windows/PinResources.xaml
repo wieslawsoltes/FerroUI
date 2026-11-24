@@ -1,8 +1,7 @@
 <ResourceDictionary xmlns="https://github.com/ferroui"
-                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-                    xmlns:winui="using:FerroUI.Themes.WinUI">
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <!-- Each slide-out pin owns its local copy of the platform resources. -->
   <Styles x:Key="RibbonSlideOutPinStyles" x:Shared="False">
-    <winui:WinUITheme UseSystemHighContrast="False" />
+    <WinUITheme UseSystemHighContrast="False" />
   </Styles>
 </ResourceDictionary>

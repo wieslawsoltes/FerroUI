@@ -46,7 +46,7 @@ fn default_base_overflow_matches_source_snapshots_identity_and_virtual_invocatio
             source.set_is_enabled(expected["enabled"].as_bool().unwrap());
             source.set_shortcut(Some("  ".into()));
             let icon = FontIcon::new();
-            icon.set_glyph(Some("g".into()));
+            icon.set_glyph("g");
             source.set_icon(Some(Control::boxed(icon.clone())));
             let sequence = source.create_overflow_menu_items_core();
             assert_eq!(sequence.iter().count(), 1);
@@ -66,7 +66,7 @@ fn default_base_overflow_matches_source_snapshots_identity_and_virtual_invocatio
             source.set_label(Some("Changed".into()));
             source.set_shortcut(Some("other".into()));
             let next_icon = FontIcon::new();
-            next_icon.set_glyph(Some("h".into()));
+            next_icon.set_glyph("h");
             source.set_icon(Some(Control::boxed(next_icon)));
             source.set_is_enabled(!expected["enabled"].as_bool().unwrap());
             menu.invoke_menu_core();

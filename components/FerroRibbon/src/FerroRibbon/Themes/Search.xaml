@@ -1,9 +1,9 @@
 <!-- Original RibbonSpace Inputs.xaml SearchBox tree. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonSearchBox" x:Key="{x:Type c:RibbonSearchBox}">
+  <ControlTheme TargetType="RibbonSearchBox" x:Key="{x:Type RibbonSearchBox}">
     <Setter Property="Width" Value="320" />
     <Setter Property="Height" Value="30" />
     <Setter Property="Template">
@@ -15,7 +15,7 @@
                 <ColumnDefinition Width="Auto" />
                 <ColumnDefinition Width="*" />
               </Grid.ColumnDefinitions>
-              <compat:FontIcon Glyph="" FontSize="14" Foreground="{DynamicResource RibbonSecondaryForegroundBrush}" VerticalAlignment="Center" />
+              <FontIcon Glyph="" FontSize="14" Foreground="{DynamicResource RibbonSecondaryForegroundBrush}" VerticalAlignment="Center" />
               <i:RibbonInputTextBox x:Name="PART_TextBox" Grid.Column="1" VerticalAlignment="Center" MinWidth="0" MinHeight="0" FontSize="12" Padding="6,2,4,2" BorderThickness="0" Background="Transparent"
                   Foreground="{DynamicResource RibbonForegroundBrush}" CaretBrush="{DynamicResource RibbonForegroundBrush}"
                   PlaceholderForeground="{DynamicResource RibbonSecondaryForegroundBrush}"

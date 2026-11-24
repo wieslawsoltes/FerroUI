@@ -1,4 +1,4 @@
-use super::{RibbonIcon, RibbonObject, RibbonScreenTip};
+use super::{RibbonIcon, RibbonObject, RibbonScreenTipModel};
 use crate::{ObservableObject, ObservableObjectImpl, RibbonMergeAction, RibbonString};
 use crate::collections::ObservableCollection;
 use ferroui_system::{
@@ -18,7 +18,7 @@ pub struct RibbonNodeModel {
     is_visible: RefCell<bool>,
     is_enabled: RefCell<bool>,
     key_tip: RefCell<Option<RibbonString>>,
-    screen_tip: RefCell<Option<Rc<RibbonScreenTip>>>,
+    screen_tip: RefCell<Option<Rc<RibbonScreenTipModel>>>,
     description: RefCell<Option<RibbonString>>,
     order: RefCell<i32>,
     tag: RefCell<Option<RibbonObject>>,
@@ -83,7 +83,7 @@ pub trait RibbonNodeModelExt: RibbonNodeModelImpl {
     property!(
         screen_tip,
         set_screen_tip,
-        Option<Rc<RibbonScreenTip>>,
+        Option<Rc<RibbonScreenTipModel>>,
         "ScreenTip"
     );
     property!(

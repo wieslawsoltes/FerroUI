@@ -83,7 +83,7 @@ fn description(tip: Option<BoxedValue>) -> Option<RibbonString> {
     if let Some(tip) = ValueTypes::as_object(&*tip).and_then(|v| v.cast::<RibbonScreenTip>()) {
         return tip.description().map(Into::into);
     }
-    cast::<Rc<ferroribbon_core::model::RibbonScreenTip>>(&tip).and_then(|tip| tip.description())
+    cast::<Rc<ferroribbon_core::model::RibbonScreenTipModel>>(&tip).and_then(|tip| tip.description())
 }
 fn keywords(value: Option<String>) -> Option<ferroribbon_core::search::RibbonSearchStrings> {
     value.map(|value| {

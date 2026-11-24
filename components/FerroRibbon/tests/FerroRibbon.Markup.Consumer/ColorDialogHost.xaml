@@ -1,6 +1,6 @@
-<local:ConsumerDialogHost xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" Title="Consumer dialog" PrimaryButtonText="Apply" SecondaryButtonText="Other" CloseButtonText="Cancel" IsSecondaryButtonEnabled="False">
+<local:ConsumerDialogHost xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer" Title="Consumer dialog" PrimaryButtonText="Apply" SecondaryButtonText="Other" CloseButtonText="Cancel" IsSecondaryButtonEnabled="False">
  <local:ConsumerDialogHost.Resources>
-  <ControlTemplate x:Key="Replacement" TargetType="r:RibbonColorDialogHost">
+  <ControlTemplate x:Key="Replacement" TargetType="RibbonColorDialogHost">
    <StackPanel>
     <ContentControl x:Name="Title" Content="{TemplateBinding Title}" />
     <ContentPresenter x:Name="Content" Content="{TemplateBinding Content}" />

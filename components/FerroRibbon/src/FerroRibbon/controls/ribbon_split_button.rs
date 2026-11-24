@@ -275,7 +275,7 @@ impl RibbonSplitButton {
             .and_then(|i| ferroui_base::data::core::ValueTypes::as_object(&*i))
             .and_then(|o| o.cast::<FontIcon>());
         let icon = if let Some(font) = &font {
-            font.glyph().map(|s| Rc::new(s) as BoxedValue)
+            Some(Rc::new(font.glyph()) as BoxedValue)
         } else {
             choice.tag().or_else(|| self.icon())
         };

@@ -1,5 +1,5 @@
 //! A downstream subclass and typed image binding use only the public dependency API.
-use ferroribbon::compat::ImageIcon;
+use ferroui_controls_icons::ImageIcon;
 use ferroui_base::{
     FerroObject, FerroObjectImpl, FerroProperty, Ref, Size, StyledElementImpl, StyledProperty,
     VisualImpl, ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties,

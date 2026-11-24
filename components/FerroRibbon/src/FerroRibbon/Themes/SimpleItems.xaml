@@ -1,23 +1,23 @@
 <!-- RibbonSpace Items.xaml simple items/container split. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
-  <ControlTheme TargetType="c:RibbonSeparator" x:Key="{x:Type c:RibbonSeparator}">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <ControlTheme TargetType="RibbonSeparator" x:Key="{x:Type RibbonSeparator}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonSeparator">
+        <ControlTemplate TargetType="RibbonSeparator">
           <Rectangle x:Name="PART_Line" Fill="{DynamicResource RibbonSeparatorBrush}" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonLabel" x:Key="{x:Type c:RibbonLabel}">
+  <ControlTheme TargetType="RibbonLabel" x:Key="{x:Type RibbonLabel}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonLabel">
+        <ControlTemplate TargetType="RibbonLabel">
           <Border Padding="4,0" Height="22">
             <StackPanel Orientation="Horizontal" Spacing="5">
-              <p:RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
+              <RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" />
               <TextBlock Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" />
             </StackPanel>
           </Border>
@@ -25,19 +25,19 @@
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonButtonGroup" x:Key="{x:Type c:RibbonButtonGroup}">
+  <ControlTheme TargetType="RibbonButtonGroup" x:Key="{x:Type RibbonButtonGroup}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonButtonGroup">
+        <ControlTemplate TargetType="RibbonButtonGroup">
           <StackPanel x:Name="PART_ItemsHost" Orientation="Horizontal" Spacing="0" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonStackPanel" x:Key="{x:Type c:RibbonStackPanel}">
+  <ControlTheme TargetType="RibbonStackPanel" x:Key="{x:Type RibbonStackPanel}">
     <Setter Property="Template">
       <Setter.Value>
-        <ControlTemplate TargetType="c:RibbonStackPanel">
+        <ControlTemplate TargetType="RibbonStackPanel">
           <StackPanel x:Name="PART_ItemsHost" Orientation="{TemplateBinding Orientation}" Spacing="{TemplateBinding Spacing}" />
         </ControlTemplate>
       </Setter.Value>

@@ -1,5 +1,5 @@
 <!-- Adapted from pinned RibbonSpace Themes/Shared.xaml, Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ControlTheme x:Key="RibbonChromeButtonStyle" TargetType="Button">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
@@ -75,7 +75,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
-          <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" c:RibbonGallery.SupportsUnselectedState="True" c:RibbonGallery.SupportsSelectedState="True">
+          <Border x:Name="RootGrid" Background="{TemplateBinding Background}" CornerRadius="{TemplateBinding CornerRadius}" RibbonGallery.SupportsUnselectedState="True" RibbonGallery.SupportsSelectedState="True">
             <Grid>
               <Border x:Name="Hover" Opacity="0" Background="{DynamicResource RibbonBackstagePaneHoverBrush}" CornerRadius="{TemplateBinding CornerRadius}" />
               <Rectangle x:Name="Indicator" Width="3" Height="18" RadiusX="1.5" RadiusY="1.5" HorizontalAlignment="Left" Margin="4,0,0,0" Opacity="0" Fill="{DynamicResource RibbonBackstagePaneForegroundBrush}" />
@@ -156,7 +156,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
-          <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" c:RibbonGallery.SupportsUnselectedState="True" c:RibbonGallery.SupportsSelectedState="True">
+          <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}" RibbonGallery.SupportsUnselectedState="True" RibbonGallery.SupportsSelectedState="True">
             <ContentPresenter Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Stretch" VerticalContentAlignment="Stretch" x:Name="PART_ContentPresenter" />
           </Border>
         </ControlTemplate>
@@ -181,7 +181,7 @@
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
-          <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" c:RibbonGallery.SupportsUnselectedState="True" c:RibbonGallery.SupportsSelectedState="True">
+          <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="2" RibbonGallery.SupportsUnselectedState="True" RibbonGallery.SupportsSelectedState="True">
             <Grid>
               <Border x:Name="SelectedRing" Opacity="0" BorderBrush="{DynamicResource RibbonAccentBrush}" BorderThickness="2" Margin="-2" CornerRadius="3">
                 <Border BorderBrush="{DynamicResource RibbonPopupBackgroundBrush}" BorderThickness="1" CornerRadius="1" />
@@ -202,7 +202,7 @@
       <Setter Property="Opacity" Value="1" />
     </Style>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonKeyTip" x:Key="{x:Type c:RibbonKeyTip}">
+  <ControlTheme TargetType="RibbonKeyTip" x:Key="{x:Type RibbonKeyTip}">
     <Setter Property="Background" Value="{DynamicResource RibbonKeyTipBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonKeyTipForegroundBrush}" />
     <Setter Property="BorderBrush" Value="{DynamicResource RibbonKeyTipBorderBrush}" />

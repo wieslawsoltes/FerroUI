@@ -1,5 +1,5 @@
 <!-- Derived from RibbonSpace 9755e281. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns:compat="using:FerroRibbon.Compatibility" xmlns:i="using:FerroRibbon.Internal" xmlns:ns2="using:FerroRibbon.Compatibility" xmlns:si="using:FerroRibbon.Internal" xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:meta="using:FerroRibbon.Internal" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:u="using:FerroRibbon.Compatibility" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><meta:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /></ResourceDictionary.MergedDictionaries><ControlTheme TargetType="c:Ribbon" x:Key="{x:Type c:Ribbon}">
+<ResourceDictionary xmlns:i="using:FerroRibbon.Internal" xmlns:si="using:FerroRibbon.Internal" xmlns="https://github.com/ferroui" xmlns:meta="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"><ResourceDictionary.MergedDictionaries><meta:RibbonSharedThemeInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" /></ResourceDictionary.MergedDictionaries><ControlTheme TargetType="Ribbon" x:Key="{x:Type Ribbon}">
     <Setter Property="Background" Value="{DynamicResource RibbonChromeBackgroundBrush}" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />
@@ -26,16 +26,16 @@
               </Grid.ColumnDefinitions>
               <Button x:Name="PART_ApplicationButton" Theme="{StaticResource RibbonApplicationButtonStyle}" />
               <ContentPresenter Grid.Column="1" Content="{TemplateBinding TabStripStartContent}" VerticalAlignment="Center" />
-              <p:RibbonScrollPanel x:Name="PART_TabStripScroll" Grid.Column="2" MeasureInfinite="True" HorizontalAlignment="Left" />
+              <RibbonScrollPanel x:Name="PART_TabStripScroll" Grid.Column="2" MeasureInfinite="True" HorizontalAlignment="Left" />
               <StackPanel Grid.Column="3" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" Margin="8,0,0,0">
                 <StackPanel x:Name="PART_TabStripItemsHost" Orientation="Horizontal" Spacing="4" VerticalAlignment="Center" />
                 <ContentPresenter Content="{TemplateBinding TabStripEndContent}" VerticalAlignment="Center" />
                 <StackPanel x:Name="PART_MinimizeButtons" Orientation="Horizontal" Spacing="0" IsVisible="False">
                   <Button x:Name="PART_MinimizeButton" Width="24" Height="22" Padding="0" Theme="{StaticResource RibbonChromeButtonStyle}">
-                    <u:FontIcon x:Name="PART_MinimizeGlyph" Glyph="" FontSize="10" />
+                    <FontIcon x:Name="PART_MinimizeGlyph" Glyph="" FontSize="10" />
                   </Button>
                   <Button x:Name="PART_MinimizeBehaviorButton" Width="14" Height="22" Padding="0" Theme="{StaticResource RibbonChromeButtonStyle}">
-                    <u:FontIcon Glyph="" FontSize="8" />
+                    <FontIcon Glyph="" FontSize="8" />
                   </Button>
                 </StackPanel>
               </StackPanel>
@@ -48,14 +48,14 @@
                 </Grid.ColumnDefinitions>
                 <Grid x:Name="PART_TabContentHost" Padding="2,1,0,1" />
                 <Button x:Name="PART_DisplayOptionsButton" Grid.Column="1" VerticalAlignment="Bottom" Width="24" Height="22" Padding="0" Margin="0,0,3,3" Theme="{StaticResource RibbonChromeButtonStyle}">
-                  <u:FontIcon Glyph="" FontSize="10" />
+                  <FontIcon Glyph="" FontSize="10" />
                 </Button>
               </Grid>
             </Border>
             <Border x:Name="PART_QuickAccessBelowHost" Grid.Row="3" Padding="8,0,6,4" HorizontalAlignment="Left" IsVisible="False" />
             <Grid x:Name="PART_RevealBar" Grid.Row="4" Height="22" IsVisible="False">
               <Button x:Name="PART_RevealButton" HorizontalAlignment="Right" Width="36" Margin="0,0,8,0" Theme="{StaticResource RibbonChromeButtonStyle}">
-                <u:FontIcon Glyph="" FontSize="12" />
+                <FontIcon Glyph="" FontSize="12" />
               </Button>
             </Grid>
           </Grid>
@@ -63,7 +63,7 @@
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonTabHeader" x:Key="{x:Type c:RibbonTabHeader}">
+  <ControlTheme TargetType="RibbonTabHeader" x:Key="{x:Type RibbonTabHeader}">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonTabForegroundBrush}" />
     <Setter Property="BorderThickness" Value="0" />
@@ -80,7 +80,7 @@
               <Border x:Name="PART_SelectedBackground" Opacity="0" Background="{DynamicResource RibbonTabSelectedBackgroundBrush}" CornerRadius="{DynamicResource RibbonTabCornerRadius}" />
               <Rectangle x:Name="PART_ContextualBand" Height="3" VerticalAlignment="Top" Margin="6,0" RadiusX="1.5" RadiusY="1.5" Opacity="0" Fill="{DynamicResource RibbonAccentBrush}" />
               <StackPanel Orientation="Horizontal" HorizontalAlignment="Center" VerticalAlignment="Center" Margin="{TemplateBinding Padding}">
-                <p:RibbonIconPresenter x:Name="PART_Icon" IconSize="16" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" IsVisible="False" />
+                <RibbonIconPresenter x:Name="PART_Icon" IconSize="16" Margin="0,0,6,0" VerticalAlignment="Center" Foreground="{TemplateBinding Foreground}" IsVisible="False" />
                 <ContentPresenter x:Name="PART_Text" Content="{TemplateBinding Content}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
               </StackPanel>
               <Rectangle x:Name="PART_Indicator" Height="3" VerticalAlignment="Bottom" Margin="10,0,10,1" RadiusX="1.5" RadiusY="1.5" Opacity="0" Fill="{DynamicResource RibbonTabIndicatorBrush}" />
@@ -123,16 +123,16 @@
       <Setter Property="Opacity" Value="1" />
     </Style>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonTab" x:Key="{x:Type c:RibbonTab}">
+  <ControlTheme TargetType="RibbonTab" x:Key="{x:Type RibbonTab}">
     <Setter Property="Template">
       <Setter.Value>
         <ControlTemplate>
-          <p:RibbonScrollPanel x:Name="PART_ScrollHost" />
+          <RibbonScrollPanel x:Name="PART_ScrollHost" />
         </ControlTemplate>
       </Setter.Value>
     </Setter>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonGroup" x:Key="{x:Type c:RibbonGroup}">
+  <ControlTheme TargetType="RibbonGroup" x:Key="{x:Type RibbonGroup}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="Template">
       <Setter.Value>
@@ -148,7 +148,7 @@
                 <RowDefinition Height="Auto" />
               </Grid.RowDefinitions>
               <Border x:Name="PART_ItemsPresenter" Margin="4,2,4,0" VerticalAlignment="Center" />
-              <c:RibbonButton x:Name="PART_CollapsedButton" ShowChevron="True" Size="{x:Static meta:RibbonTemplateValues.LargeItemSize}" CanAddToQuickAccess="False" Margin="3,2,3,0" IsVisible="False" />
+              <RibbonButton x:Name="PART_CollapsedButton" ShowChevron="True" Size="{x:Static meta:RibbonTemplateValues.LargeItemSize}" CanAddToQuickAccess="False" Margin="3,2,3,0" IsVisible="False" />
               <Border x:Name="PART_CaptionRow" Grid.Row="1" Height="17" Margin="{DynamicResource RibbonGroupCaptionMargin}" Background="{DynamicResource RibbonGroupCaptionBackgroundBrush}" CornerRadius="{DynamicResource RibbonGroupCaptionCornerRadius}">
                 <Grid>
                   <Grid.ColumnDefinitions>
@@ -171,7 +171,7 @@
       <Setter Property="Margin" Value="4,9,4,9" />
     </Style>
   </ControlTheme>
-<ControlTheme TargetType="c:RibbonQuickAccessToolBar" x:Key="{x:Type c:RibbonQuickAccessToolBar}">
+<ControlTheme TargetType="RibbonQuickAccessToolBar" x:Key="{x:Type RibbonQuickAccessToolBar}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="IsTabStop" Value="False" />
     <Setter Property="Template">
@@ -180,7 +180,7 @@
           <StackPanel Orientation="Horizontal" Spacing="1" VerticalAlignment="Center">
             <StackPanel x:Name="PART_ItemsHost" Orientation="Horizontal" Spacing="1" VerticalAlignment="Center" />
             <Button x:Name="PART_CustomizeButton" Foreground="{TemplateBinding Foreground}" Width="20" Height="26" Padding="0" Theme="{StaticResource RibbonChromeButtonStyle}">
-              <u:FontIcon Glyph="" FontSize="9" />
+              <FontIcon Glyph="" FontSize="9" />
             </Button>
           </StackPanel>
         </ControlTemplate>

@@ -1,9 +1,9 @@
 <!-- Original RibbonSpace slider template. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:i="using:FerroRibbon.Internal" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:i="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonSlider" x:Key="{x:Type c:RibbonSlider}">
+  <ControlTheme TargetType="RibbonSlider" x:Key="{x:Type RibbonSlider}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="FontSize" Value="12" />
     <Setter Property="VerticalAlignment" Value="Center" />
@@ -16,7 +16,7 @@
               <ColumnDefinition Width="Auto" />
               <ColumnDefinition Width="Auto" />
             </Grid.ColumnDefinitions>
-            <p:RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" Margin="3,0,4,0" IsVisible="{TemplateBinding IconVisibility,Converter={x:Static i:RibbonInputTemplateValues.VisibilityToBoolean}}" />
+            <RibbonIconPresenter Icon="{TemplateBinding Icon}" IconSize="16" Foreground="{DynamicResource RibbonIconBrush}" Margin="3,0,4,0" IsVisible="{TemplateBinding IconVisibility,Converter={x:Static i:RibbonInputTemplateValues.VisibilityToBoolean}}" />
             <TextBlock x:Name="PART_Label" Grid.Column="1" Text="{TemplateBinding Label}" VerticalAlignment="Center" Margin="0,0,6,0" Foreground="{TemplateBinding Foreground}" IsVisible="{TemplateBinding LabelVisibility,Converter={x:Static i:RibbonInputTemplateValues.VisibilityToBoolean}}" />
             <i:RibbonInputSlider x:Name="PART_Slider" Grid.Column="2" Width="{TemplateBinding InputWidth}" VerticalAlignment="Center" MinHeight="0" Padding="0" />
           </Grid>

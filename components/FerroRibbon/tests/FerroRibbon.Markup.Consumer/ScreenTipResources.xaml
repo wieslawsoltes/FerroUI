@@ -1,6 +1,5 @@
 <StackPanel xmlns="https://github.com/ferroui"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:rs="https://github.com/wieslawsoltes/RibbonSpace">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <StackPanel.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
@@ -8,6 +7,6 @@
       </ResourceDictionary.MergedDictionaries>
     </ResourceDictionary>
   </StackPanel.Resources>
-  <rs:RibbonScreenTip Title="Library" Description="External dictionary"
-      ExtendedDescription="More" Theme="{DynamicResource {x:Type rs:RibbonScreenTip}}" />
+  <RibbonScreenTip Title="Library" Description="External dictionary"
+      ExtendedDescription="More" Theme="{DynamicResource {x:Type RibbonScreenTip}}" />
 </StackPanel>

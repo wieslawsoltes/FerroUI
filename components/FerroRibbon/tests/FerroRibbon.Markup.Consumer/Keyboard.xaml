@@ -1,8 +1,8 @@
-<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:local="using:FerroRibbon.Consumer">
+<StackPanel xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:local="using:FerroRibbon.Consumer">
  <StackPanel.Resources><ResourceDictionary><ResourceDictionary.MergedDictionaries><ResourceInclude Source="ferres://FerroRibbon/Themes/Ribbon.xaml" /></ResourceDictionary.MergedDictionaries></ResourceDictionary></StackPanel.Resources>
  <local:ConsumerRibbon x:Name="KeyRibbon" x:DataType="local:CommandViewModel" IsKeyTipsEnabled="True" ApplicationButtonKeyTip="FF" IsApplicationButtonVisible="False" IsDisplayOptionsButtonVisible="False">
-  <r:Ribbon.DataContext><local:CommandViewModel /></r:Ribbon.DataContext>
-  <r:RibbonTab Header="Home" KeyTip="H"><r:RibbonGroup Header="Tools"><r:RibbonButton Id="run" Label="Run" r:RibbonKeyTip.KeyTip="AB" Command="{Binding Command}" CommandParameter="{Binding Value}" /></r:RibbonGroup></r:RibbonTab>
+  <Ribbon.DataContext><local:CommandViewModel /></Ribbon.DataContext>
+  <RibbonTab Header="Home" KeyTip="H"><RibbonGroup Header="Tools"><RibbonButton Id="run" Label="Run" RibbonKeyTip.KeyTip="AB" Command="{Binding Command}" CommandParameter="{Binding Value}" /></RibbonGroup></RibbonTab>
  </local:ConsumerRibbon>
  <TextBlock Text="{Binding ElementName=KeyRibbon,Path=CurrentKeyTips.Count}" />
  <TextBlock>

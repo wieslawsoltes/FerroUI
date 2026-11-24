@@ -1,5 +1,6 @@
 //! Public native asset lookup assertions shared by library, consumer and real Skia.
-use ferroribbon::{compat::ImageIcon, controls::RibbonItemHelper, primitives::RibbonIconPresenter};
+use ferroui_controls_icons::ImageIcon;
+use ferroribbon::{controls::RibbonItemHelper, primitives::RibbonIconPresenter};
 use ferroribbon_core::model::RibbonIcon;
 use ferroui_base::{
     BoxedValue,

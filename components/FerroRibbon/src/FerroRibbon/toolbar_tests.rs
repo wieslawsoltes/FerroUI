@@ -77,13 +77,17 @@ fn send(c: &Control, key: Key) -> bool {
     c.raise_event(&e);
     e.handled()
 }
+/// The number the recorded corpus has for an orientation: the source's Vertical 0, Horizontal 1.
+fn source_number(value: Orientation) -> i32 {
+    i32::from(value == Orientation::Horizontal)
+}
 #[test]
 fn original_toolbar_defaults_and_layout_property_callbacks() {
     run(|| {
         let t = RibbonToolBar::new();
         let b = &t.overflow_button;
         assert_eq!(
-            json!({"name":"defaults","orientation":t.orientation().raw(),"Columns":t.columns(),"ShowLabels":t.show_labels(),"IsOverflowEnabled":t.is_overflow_enabled(),"density":t.density().to_string(),"IsTabStop":KeyboardNavigation::get_is_tab_stop(&t),"automation":AutomationProperties::get_name(&t),"button":{"Id":b.id(),"Label":b.label(),"ShowLabel":b.show_label(),"CanAddToQuickAccess":b.can_add_to_quick_access(),"IsChromeButton":b.is_chrome_button()},"overflow":t.overflow_items().count()}),
+            json!({"name":"defaults","orientation":source_number(t.orientation()),"Columns":t.columns(),"ShowLabels":t.show_labels(),"IsOverflowEnabled":t.is_overflow_enabled(),"density":t.density().to_string(),"IsTabStop":KeyboardNavigation::get_is_tab_stop(&t),"automation":AutomationProperties::get_name(&t),"button":{"Id":b.id(),"Label":b.label(),"ShowLabel":b.show_label(),"CanAddToQuickAccess":b.can_add_to_quick_access(),"IsChromeButton":b.is_chrome_button()},"overflow":t.overflow_items().count()}),
             corpus("defaults")
         );
         let a = button("a");
@@ -104,7 +108,7 @@ fn original_toolbar_defaults_and_layout_property_callbacks() {
         t.set_density(RibbonDensity::Touch);
         t.set_is_overflow_enabled(false);
         assert_eq!(
-            t.panel.orientation().raw(),
+            source_number(t.panel.orientation()),
             expected["changed"]["orientation"]
         );
         assert_eq!(t.panel.columns(), expected["changed"]["columns"]);

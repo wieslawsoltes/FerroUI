@@ -245,7 +245,7 @@ fn original_factory_backstage_nested_screentip_replacement_and_disposal() {
     crate::group_tests::run(|| {
         let f = RibbonElementFactory::new();
         let scope = RibbonModelBindings::new();
-        let tip = ferroribbon_core::model::RibbonScreenTip::new();
+        let tip = ferroribbon_core::model::RibbonScreenTipModel::new();
         tip.set_title(Some("old".into()));
         let m = page("tip");
         m.set_label(Some("Label".into()));

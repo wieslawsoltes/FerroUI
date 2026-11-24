@@ -1,9 +1,9 @@
 <!-- RibbonSpace Items.xaml checked controls. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:c="using:FerroRibbon.Controls" xmlns:p="using:FerroRibbon.Controls.Primitives" xmlns:u="using:FerroRibbon.Compatibility" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonToggleButton" x:Key="{x:Type c:RibbonToggleButton}">
+  <ControlTheme TargetType="RibbonToggleButton" x:Key="{x:Type RibbonToggleButton}">
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="BorderBrush" Value="Transparent" />
@@ -19,7 +19,7 @@
       <Setter.Value>
         <ControlTemplate>
           <Border x:Name="RootGrid" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="{TemplateBinding CornerRadius}">
-            <p:RibbonItemContent x:Name="PART_Content" Icon="{TemplateBinding Icon}" LargeIcon="{TemplateBinding LargeIcon}" Label="{TemplateBinding Label}" ItemSize="{TemplateBinding CurrentSize}" ShowLabel="{TemplateBinding ActualShowLabel}" ShowChevron="{TemplateBinding ShowChevron}" IsSimplified="{TemplateBinding IsSimplified}" Metrics="{TemplateBinding Metrics}" Foreground="{TemplateBinding Foreground}" IconForeground="{DynamicResource RibbonIconBrush}" />
+            <RibbonItemContent x:Name="PART_Content" Icon="{TemplateBinding Icon}" LargeIcon="{TemplateBinding LargeIcon}" Label="{TemplateBinding Label}" ItemSize="{TemplateBinding CurrentSize}" ShowLabel="{TemplateBinding ActualShowLabel}" ShowChevron="{TemplateBinding ShowChevron}" IsSimplified="{TemplateBinding IsSimplified}" Metrics="{TemplateBinding Metrics}" Foreground="{TemplateBinding Foreground}" IconForeground="{DynamicResource RibbonIconBrush}" />
           </Border>
         </ControlTemplate>
       </Setter.Value>
@@ -30,10 +30,10 @@
     <Style Selector="^:unchecked:pressed:not(:disabled) /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
     </Style>
-    <Style Selector="^:unchecked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:unchecked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:unchecked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:unchecked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
     <Style Selector="^:checked:not(:pointerover):not(:pressed):not(:disabled) /template/ Border#RootGrid">
@@ -57,10 +57,10 @@
     <Style Selector="^:checked:disabled /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemCheckedBrush}" />
     </Style>
-    <Style Selector="^:checked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:checked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
-    <Style Selector="^:checked:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:checked:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="IconForeground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
     <Style Selector="^:indeterminate:not(:pointerover):not(:pressed):not(:disabled) /template/ Border#RootGrid">
@@ -72,11 +72,11 @@
     <Style Selector="^:indeterminate:pressed:not(:disabled) /template/ Border#RootGrid">
       <Setter Property="Background" Value="{DynamicResource RibbonItemPressedBrush}" />
     </Style>
-    <Style Selector="^:indeterminate:disabled /template/ p|RibbonItemContent#PART_Content">
+    <Style Selector="^:indeterminate:disabled /template/ RibbonItemContent#PART_Content">
       <Setter Property="Foreground" Value="{DynamicResource RibbonDisabledForegroundBrush}" />
     </Style>
   </ControlTheme>
-  <ControlTheme TargetType="c:RibbonCheckBox" x:Key="{x:Type c:RibbonCheckBox}">
+  <ControlTheme TargetType="RibbonCheckBox" x:Key="{x:Type RibbonCheckBox}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="Background" Value="Transparent" />
     <Setter Property="FontSize" Value="12" />
@@ -97,7 +97,7 @@
               </Grid.ColumnDefinitions>
               <Grid Width="14" Height="14" VerticalAlignment="Center">
                 <Border x:Name="PART_Box" CornerRadius="3" BorderThickness="1" BorderBrush="{DynamicResource RibbonInputHoverBorderBrush}" Background="{DynamicResource RibbonInputBackgroundBrush}" />
-                <u:FontIcon x:Name="PART_Check" Glyph="" FontSize="10" Foreground="{DynamicResource RibbonAccentForegroundBrush}" IsVisible="False" />
+                <FontIcon x:Name="PART_Check" Glyph="" FontSize="10" Foreground="{DynamicResource RibbonAccentForegroundBrush}" IsVisible="False" />
                 <Rectangle x:Name="PART_Indeterminate" Width="7" Height="2" Fill="{DynamicResource RibbonAccentForegroundBrush}" IsVisible="False" />
               </Grid>
               <TextBlock x:Name="PART_Label" Grid.Column="1" Margin="6,0,0,0" Text="{TemplateBinding Label}" Foreground="{TemplateBinding Foreground}" VerticalAlignment="Center" TextLineBounds="Full" />

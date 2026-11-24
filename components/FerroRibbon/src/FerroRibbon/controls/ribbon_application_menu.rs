@@ -640,14 +640,11 @@ impl RibbonApplicationMenu {
         let pin = ToggleButton::new();
         pin.set_is_checked(Some(item.is_pinned()));
         let icon = crate::compat::FontIcon::new();
-        icon.set_glyph(Some(
-            if item.is_pinned() {
-                "\u{e841}"
-            } else {
-                "\u{e718}"
-            }
-            .into(),
-        ));
+        icon.set_glyph(if item.is_pinned() {
+            "\u{e841}"
+        } else {
+            "\u{e718}"
+        });
         icon.set_font_size(12.);
         pin.set_content(Some(Control::boxed(icon)));
         pin.set_width(28.);
@@ -733,7 +730,7 @@ impl RibbonApplicationMenu {
         grid.children().add(text.upcast::<Control>());
         if chevron {
             let arrow = crate::compat::FontIcon::new();
-            arrow.set_glyph(Some("\u{e76c}".into()));
+            arrow.set_glyph("\u{e76c}");
             arrow.set_font_size(10.);
             arrow.set_vertical_alignment(VerticalAlignment::Center);
             Grid::set_column(&arrow, 2);

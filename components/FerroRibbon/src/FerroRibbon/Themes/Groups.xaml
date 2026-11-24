@@ -1,10 +1,10 @@
 <!-- RibbonSpace Ribbon.xaml group template. Copyright Wiesław Šoltés, MIT. -->
-<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:meta="using:FerroRibbon.Internal" xmlns:c="using:FerroRibbon.Controls" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+<ResourceDictionary xmlns="https://github.com/ferroui" xmlns:meta="using:FerroRibbon.Internal" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <ResourceDictionary.MergedDictionaries>
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Shared.xaml" />
     <ResourceInclude Source="ferres://FerroRibbon/Themes/Buttons.xaml" />
   </ResourceDictionary.MergedDictionaries>
-  <ControlTheme TargetType="c:RibbonGroup" x:Key="{x:Type c:RibbonGroup}">
+  <ControlTheme TargetType="RibbonGroup" x:Key="{x:Type RibbonGroup}">
     <Setter Property="Foreground" Value="{DynamicResource RibbonForegroundBrush}" />
     <Setter Property="Template">
       <Setter.Value>
@@ -20,7 +20,7 @@
                 <RowDefinition Height="Auto" />
               </Grid.RowDefinitions>
               <Border x:Name="PART_ItemsPresenter" Margin="4,2,4,0" VerticalAlignment="Center" />
-              <c:RibbonButton x:Name="PART_CollapsedButton" ShowChevron="True" Size="{x:Static meta:RibbonTemplateValues.LargeItemSize}" CanAddToQuickAccess="False" Margin="3,2,3,0" IsVisible="False" />
+              <RibbonButton x:Name="PART_CollapsedButton" ShowChevron="True" Size="{x:Static meta:RibbonTemplateValues.LargeItemSize}" CanAddToQuickAccess="False" Margin="3,2,3,0" IsVisible="False" />
               <Border x:Name="PART_CaptionRow" Grid.Row="1" Height="17" Margin="{DynamicResource RibbonGroupCaptionMargin}" Background="{DynamicResource RibbonGroupCaptionBackgroundBrush}" CornerRadius="{DynamicResource RibbonGroupCaptionCornerRadius}">
                 <Grid>
                   <Grid.ColumnDefinitions>

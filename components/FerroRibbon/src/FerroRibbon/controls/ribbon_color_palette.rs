@@ -383,7 +383,7 @@ impl RibbonColorPalette {
             content.children().add(b.upcast::<Control>());
         } else if let Some(glyph) = glyph {
             let icon = FontIcon::new();
-            icon.set_glyph(Some(glyph.into()));
+            icon.set_glyph(glyph);
             icon.set_font_size(14.);
             content.children().add(icon.upcast::<Control>());
         }

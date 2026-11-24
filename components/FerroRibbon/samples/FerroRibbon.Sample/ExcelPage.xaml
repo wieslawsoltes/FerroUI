@@ -1,5 +1,5 @@
 <!-- Pinned original ExcelPage and BuildSheet visuals. Copyright Wiesław Šoltés, MIT. -->
-<UserControl xmlns="https://github.com/ferroui" xmlns:r="https://github.com/wieslawsoltes/RibbonSpace" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.ExcelPage" x:Name="ExcelView" x:DataType="vm:ExcelViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}">
+<UserControl xmlns="https://github.com/ferroui" xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" xmlns:vm="using:FerroRibbon.Sample" x:Class="FerroRibbon.Sample.Pages.ExcelPage" x:Name="ExcelView" x:DataType="vm:ExcelViewModel" x:CompileBindings="True" FontSize="14" FontFamily="Segoe UI" Foreground="{DynamicResource ThemeForegroundBrush}">
   <UserControl.Resources>
     <ResourceDictionary>
       <SolidColorBrush x:Key="ExcelSheetHeaderBrush" Color="#FFF3F3F3" />
@@ -14,8 +14,8 @@
       <RowDefinition Height="*" />
       <RowDefinition Height="Auto" />
     </Grid.RowDefinitions>
-    <r:RibbonTitleBar x:Name="TitleBar" Title="Budget 2026" Subtitle="• MVVM ribbon" AppIcon="" />
-    <r:Ribbon x:Name="Ribbon" Grid.Row="1" Model="{Binding #ExcelView.ViewModel.Ribbon, Mode=OneTime}" IsShortcutRoutingEnabled="True" />
+    <RibbonTitleBar x:Name="TitleBar" Title="Budget 2026" Subtitle="• MVVM ribbon" AppIcon="" />
+    <Ribbon x:Name="Ribbon" Grid.Row="1" Model="{Binding #ExcelView.ViewModel.Ribbon, Mode=OneTime}" IsShortcutRoutingEnabled="True" />
     <Border Padding="8,4" Grid.Row="2" Background="{DynamicResource RibbonCommandBarBackgroundBrush}">
       <Grid ColumnSpacing="8" Background="{DynamicResource RibbonCommandBarBackgroundBrush}">
         <Grid.ColumnDefinitions>
@@ -3213,12 +3213,12 @@
         </Border>
       </Grid>
     </ScrollViewer>
-    <r:RibbonStatusBar Grid.Row="4">
+    <RibbonStatusBar Grid.Row="4">
       <TextBlock Text="{Binding Status, Mode=OneWay}" VerticalAlignment="Center" DataContext="{Binding #ExcelView.ViewModel, Mode=OneTime}" />
-      <r:RibbonStatusBar.EndItems>
+      <RibbonStatusBar.EndItems>
         <TextBlock Text="Average: 1,240   Count: 5   Sum: 6,200" VerticalAlignment="Center" Margin="0,0,12,0" />
-        <r:RibbonZoomControl Value="100" />
-      </r:RibbonStatusBar.EndItems>
-    </r:RibbonStatusBar>
+        <RibbonZoomControl Value="100" />
+      </RibbonStatusBar.EndItems>
+    </RibbonStatusBar>
   </Grid>
 </UserControl>

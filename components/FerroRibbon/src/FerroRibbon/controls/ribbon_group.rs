@@ -561,7 +561,7 @@ impl RibbonGroup {
             {
                 return control.description().or_else(|| control.title());
             }
-            if let Some(model) = tip.downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTip>>()
+            if let Some(model) = tip.downcast_ref::<Rc<ferroribbon_core::model::RibbonScreenTipModel>>()
             {
                 return model.description().or_else(|| model.title()).map(|s| {
                     String::from_utf16(s.as_utf16())

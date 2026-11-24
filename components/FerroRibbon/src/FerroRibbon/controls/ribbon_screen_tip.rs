@@ -1,6 +1,6 @@
 //! Port of the unchanged shared Controls/RibbonScreenTip.cs (control and service).
 use crate::theming::RibbonTheme;
-use ferroribbon_core::{RibbonString, model::RibbonScreenTip as ModelScreenTip, text::trim};
+use ferroribbon_core::{RibbonString, model::RibbonScreenTipModel as ModelScreenTip, text::trim};
 use ferroui_base::{
     BoxedValue, FerroObjectImpl, FerroObjectImplExt, FerroProperty, Ref, StaticType,
     StyledElementImpl, StyledProperty, TypeInfo, VisualImpl,

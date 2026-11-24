@@ -178,5 +178,3 @@ mod icon_source_tests;
 
 #[cfg(test)]
 mod bitmap_icon_tests;
-#[cfg(test)]
-mod symbol_icon_tests;

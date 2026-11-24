@@ -1,15 +1,13 @@
 <!-- Public consumer: no individual ribbon template dictionaries are included. -->
 <StackPanel xmlns="https://github.com/ferroui"
-            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-            xmlns:r="https://github.com/wieslawsoltes/RibbonSpace"
-            xmlns:m="using:FerroRibbon.Model">
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
   <StackPanel.Resources>
     <ResourceDictionary>
       <ResourceDictionary.MergedDictionaries>
         <ResourceInclude Source="ferres://FerroRibbon/Themes/Generic.xaml" />
       </ResourceDictionary.MergedDictionaries>
-      <m:RibbonButtonModel x:Key="Model" Id="generated" Label="Generated" />
-      <ControlTheme x:Key="ConsumerButton" TargetType="r:RibbonButton"
+      <RibbonButtonModel x:Key="Model" Id="generated" Label="Generated" />
+      <ControlTheme x:Key="ConsumerButton" TargetType="RibbonButton"
                     BasedOn="{StaticResource DefaultRibbonButtonStyle}">
         <Setter Property="Padding" Value="23" />
         <Setter Property="Template">
@@ -18,21 +16,21 @@
           </ControlTemplate>
         </Setter>
       </ControlTheme>
-      <ControlTheme x:Key="ImplicitConsumerButton" TargetType="r:RibbonButton"
+      <ControlTheme x:Key="ImplicitConsumerButton" TargetType="RibbonButton"
                     BasedOn="{StaticResource DefaultRibbonButtonStyle}">
         <Setter Property="Padding" Value="91" />
       </ControlTheme>
     </ResourceDictionary>
   </StackPanel.Resources>
-  <r:Ribbon SelectedTabId="home" IsApplicationButtonVisible="False"
+  <Ribbon SelectedTabId="home" IsApplicationButtonVisible="False"
             IsDisplayOptionsButtonVisible="False">
-    <r:RibbonTab Id="home" Header="Home">
-      <r:RibbonGroup Header="Commands">
-        <r:RibbonButton Label="Declared" />
-      </r:RibbonGroup>
-    </r:RibbonTab>
-  </r:Ribbon>
-  <r:RibbonSpinner Value="12" />
-  <r:RibbonStatusBar />
-  <r:RibbonZoomControl Value="100" />
+    <RibbonTab Id="home" Header="Home">
+      <RibbonGroup Header="Commands">
+        <RibbonButton Label="Declared" />
+      </RibbonGroup>
+    </RibbonTab>
+  </Ribbon>
+  <RibbonSpinner Value="12" />
+  <RibbonStatusBar />
+  <RibbonZoomControl Value="100" />
 </StackPanel>
