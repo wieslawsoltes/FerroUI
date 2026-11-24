@@ -185,8 +185,24 @@ pub fn fragment(svg: &str, prefix: &str, style: &InspectionStyle) -> Result<Stri
     rewrite(&mut root, &names)?;
     if !matches!(style, InspectionStyle::Normal) {
         let mut image_bounds = HashMap::new();
-        collect_image_bounds(&root, &mut image_bounds);
+        let mut definitions = Vec::new();
+        if matches!(style, InspectionStyle::Wireframe { .. }) {
+            collect_image_bounds(&root, prefix, style, &mut image_bounds, &mut definitions);
+        }
         inspect(&mut root, style, &image_bounds, false);
+        if !definitions.is_empty() {
+            root.children.insert(
+                0,
+                Child::Element(Element {
+                    qualified: qualified_name_for(&root.namespaces, SVG_NS, "defs", false),
+                    local: "defs".into(),
+                    namespace: SVG_NS.into(),
+                    namespaces: root.namespaces.clone(),
+                    attributes: Vec::new(),
+                    children: definitions,
+                }),
+            );
+        }
     }
     root.attributes.retain(|attribute| {
         attribute.namespace.is_some()
@@ -683,7 +699,20 @@ fn map_urls(
     let mut copied = 0;
     let mut index = 0;
     while index + 3 <= bytes.len() {
-        if !bytes[index..index + 3].eq_ignore_ascii_case(b"url") {
+        if bytes[index..].starts_with(b"/*") {
+            index = css_comment_end(value, index)?;
+            continue;
+        }
+        if matches!(bytes[index], b'\'' | b'"') {
+            index = css_string_end(value, index)?;
+            continue;
+        }
+        if !bytes[index..index + 3].eq_ignore_ascii_case(b"url")
+            || (index > 0
+                && (bytes[index - 1].is_ascii_alphanumeric()
+                    || matches!(bytes[index - 1], b'_' | b'-')
+                    || !bytes[index - 1].is_ascii()))
+        {
             index += 1;
             continue;
         }
@@ -695,30 +724,88 @@ fn map_urls(
             index += 3;
             continue;
         }
-        let end = value[open + 1..]
-            .find(')')
-            .map(|offset| open + 1 + offset)
-            .ok_or_else(|| XmlError::new("Unterminated SVG URL reference"))?;
-        let mut target = value[open + 1..end].trim();
-        if target.starts_with(['\'', '"']) {
-            if target.len() < 2 || target.as_bytes().last() != target.as_bytes().first() {
+        let mut start = open + 1;
+        while bytes.get(start).is_some_and(u8::is_ascii_whitespace) {
+            start += 1;
+        }
+        let (target, end) = if matches!(bytes.get(start), Some(b'\'' | b'"')) {
+            let close = css_string_end(value, start)?;
+            let mut end = close;
+            while bytes.get(end).is_some_and(u8::is_ascii_whitespace) {
+                end += 1;
+            }
+            if bytes.get(end) != Some(&b')') {
                 return Err(XmlError::new("Invalid quoted SVG URL reference"));
             }
-            target = &target[1..target.len() - 1];
-        }
+            (&value[start + 1..close - 1], end)
+        } else {
+            let end = value[start..]
+                .find(')')
+                .map(|offset| start + offset)
+                .ok_or_else(|| XmlError::new("Unterminated SVG URL reference"))?;
+            let target = value[start..end].trim();
+            if target.contains(['\'', '"', '(']) {
+                return Err(XmlError::new("Invalid unquoted SVG URL reference"));
+            }
+            (target, end)
+        };
         let id = target
             .strip_prefix('#')
             .filter(|id| !id.is_empty() && !id.chars().any(char::is_whitespace))
             .ok_or_else(|| XmlError::new("SVG URL resources must be local fragment references"))?;
         output.push_str(&value[copied..index]);
-        output.push_str("url(#");
-        output.push_str(&map(id)?);
+        let replacement = map(id)?;
+        // Semantic IDs are retained verbatim and may contain parentheses or
+        // quotes. Keep the CSS reference quoted when unquoted syntax is invalid.
+        let quote = if replacement.contains(['\'', '"', '(', ')']) {
+            if !replacement.contains('\'') {
+                Some('\'')
+            } else if !replacement.contains('"') {
+                Some('"')
+            } else {
+                return Err(XmlError::new(
+                    "SVG URL identifiers cannot contain both quote types",
+                ));
+            }
+        } else {
+            None
+        };
+        output.push_str("url(");
+        if let Some(quote) = quote {
+            output.push(quote);
+        }
+        output.push('#');
+        output.push_str(&replacement);
+        if let Some(quote) = quote {
+            output.push(quote);
+        }
         output.push(')');
         copied = end + 1;
         index = copied;
     }
     output.push_str(&value[copied..]);
     Ok(output)
+}
+
+fn css_comment_end(value: &str, start: usize) -> Result<usize, XmlError> {
+    value[start + 2..]
+        .find("*/")
+        .map(|end| start + 2 + end + 2)
+        .ok_or_else(|| XmlError::new("Unterminated SVG CSS comment"))
+}
+
+fn css_string_end(value: &str, start: usize) -> Result<usize, XmlError> {
+    // CSS escapes are rejected by validate_attribute before tokenization.
+    let end = value[start + 1..]
+        .find(value.as_bytes()[start] as char)
+        .map(|end| start + 1 + end + 1)
+        .ok_or_else(|| XmlError::new("Unterminated SVG CSS string"))?;
+    // A raw newline ends a CSS string with a bad-string token. Treating it as
+    // part of a quoted literal could otherwise conceal a following active URL.
+    if value[start + 1..end - 1].contains(['\n', '\r', '\u{c}']) {
+        return Err(XmlError::new("Newlines are not allowed in SVG CSS strings"));
+    }
+    Ok(end)
 }
 
 fn numeric_attribute(name: &str) -> bool {
@@ -760,7 +847,10 @@ fn numeric_attribute(name: &str) -> bool {
 
 fn quantize(element: &mut Element, precision: u8) -> Result<(), XmlError> {
     for attribute in &mut element.attributes {
-        if attribute.namespace.is_none() && numeric_attribute(&attribute.local) {
+        if element.namespace == SVG_NS
+            && attribute.namespace.is_none()
+            && numeric_attribute(&attribute.local)
+        {
             attribute.value = quantize_numbers(&attribute.value, precision)?;
         }
     }
@@ -822,24 +912,26 @@ fn quantize_numbers(value: &str, precision: u8) -> Result<String, XmlError> {
         // Avoid inflating scientific notation and rounding huge magnitudes.
         if number.abs() >= 1e16 {
             result.push_str(token);
-            continue;
-        }
-        let mut formatted = format!("{:.*}", usize::from(precision), number);
-        if formatted.contains('.') {
-            while formatted.ends_with('0') {
-                formatted.pop();
+        } else {
+            let mut formatted = format!("{:.*}", usize::from(precision), number);
+            if formatted.contains('.') {
+                while formatted.ends_with('0') {
+                    formatted.pop();
+                }
+                if formatted.ends_with('.') {
+                    formatted.pop();
+                }
             }
-            if formatted.ends_with('.') {
-                formatted.pop();
+            if formatted == "-0" {
+                formatted = "0".into();
             }
+            result.push_str(&formatted);
         }
-        if formatted == "-0" {
-            formatted = "0".into();
-        }
-        result.push_str(&formatted);
-        // A rounded number can end in a digit where the next original token
-        // began with '.', e.g. 1.5.5. Keep the two tokens distinct.
-        if bytes.get(index) == Some(&b'.') {
+        // Decimal points and signs can delimit adjacent SVG number tokens.
+        // Formatting removes leading '+' and rounded negative zero, so all
+        // such boundaries need an explicit separator, including after a
+        // scientific-notation token that was deliberately kept unchanged.
+        if matches!(bytes.get(index), Some(b'.' | b'+' | b'-')) {
             result.push(' ');
         }
     }
@@ -1037,14 +1129,27 @@ fn validate_inspection(style: &InspectionStyle) -> Result<(), XmlError> {
 
 fn without_css_property(style: &str, property: &str) -> String {
     let mut result = String::with_capacity(style.len());
-    let mut quote = None;
     let mut parentheses = 0usize;
     let mut start = 0;
     let mut append = |declaration: &str| {
-        if declaration
-            .split_once(':')
-            .is_some_and(|(name, _)| name.trim().eq_ignore_ascii_case(property))
-        {
+        let mut name = String::new();
+        let mut index = 0;
+        while index < declaration.len() {
+            if declaration.as_bytes()[index..].starts_with(b"/*") {
+                // Comments separate tokens; do not join two partial names into
+                // a different declaration when removing them for comparison.
+                name.push(' ');
+                index = css_comment_end(declaration, index).unwrap_or(declaration.len());
+                continue;
+            }
+            let character = declaration[index..].chars().next().unwrap();
+            if character == ':' {
+                break;
+            }
+            name.push(character);
+            index += character.len_utf8();
+        }
+        if name.trim().eq_ignore_ascii_case(property) {
             return;
         }
         if !result.is_empty() {
@@ -1052,48 +1157,70 @@ fn without_css_property(style: &str, property: &str) -> String {
         }
         result.push_str(declaration);
     };
-    for (index, character) in style.char_indices() {
-        if let Some(delimiter) = quote {
-            if character == delimiter {
-                quote = None;
-            }
-        } else {
-            match character {
-                '\'' | '"' => quote = Some(character),
-                '(' => parentheses += 1,
-                ')' => parentheses = parentheses.saturating_sub(1),
-                ';' if parentheses == 0 => {
-                    append(&style[start..index]);
-                    start = index + 1;
-                }
-                _ => {}
-            }
+    let mut index = 0;
+    while index < style.len() {
+        if style.as_bytes()[index..].starts_with(b"/*") {
+            index = css_comment_end(style, index).unwrap_or(style.len());
+            continue;
         }
+        match style.as_bytes()[index] {
+            b'\'' | b'"' => {
+                index = css_string_end(style, index).unwrap_or(style.len());
+                continue;
+            }
+            b'(' => parentheses += 1,
+            b')' => parentheses = parentheses.saturating_sub(1),
+            b';' if parentheses == 0 => {
+                append(&style[start..index]);
+                start = index + 1;
+            }
+            _ => {}
+        }
+        index += 1;
     }
     append(&style[start..]);
     result
 }
 
-fn collect_image_bounds(element: &Element, images: &mut HashMap<String, Vec<Attribute>>) {
-    if element.local == "image" {
+fn collect_image_bounds(
+    element: &Element,
+    prefix: &str,
+    style: &InspectionStyle,
+    images: &mut HashMap<String, String>,
+    definitions: &mut Vec<Child>,
+) {
+    if element.namespace == SVG_NS && element.local == "image" {
         if let Some(id) = element.id() {
-            images.insert(
-                id.into(),
-                element
+            // Keep <use> as <use>: its x/y add a translation, its width/height
+            // do not resize image references, and both source and instance
+            // transforms/graphical effects must survive. A separate rectangle
+            // resource gives SVG's own instance layout those same semantics.
+            // The original image remains available to clips, masks and filters.
+            let bounds_id = format!("{prefix}-image-bounds-{}", definitions.len());
+            let mut bounds = Element {
+                qualified: qualified_name_for(&element.namespaces, SVG_NS, "rect", false),
+                local: "rect".into(),
+                namespace: SVG_NS.into(),
+                namespaces: element.namespaces.clone(),
+                attributes: element
                     .attributes
                     .iter()
-                    .filter(|a| {
-                        a.namespace.is_none()
-                            && matches!(a.local.as_str(), "x" | "y" | "width" | "height")
-                    })
+                    .filter(|a| !matches!(a.local.as_str(), "href" | "preserveAspectRatio"))
                     .cloned()
                     .collect(),
-            );
+                // Descriptive children belong to the original image. Copying
+                // their IDs would create duplicate identifiers in the fragment.
+                children: Vec::new(),
+            };
+            bounds.set("id", bounds_id.clone());
+            inspect(&mut bounds, style, &HashMap::new(), false);
+            images.insert(id.into(), bounds_id);
+            definitions.push(Child::Element(bounds));
         }
     }
     for child in &element.children {
         if let Child::Element(child) = child {
-            collect_image_bounds(child, images);
+            collect_image_bounds(child, prefix, style, images, definitions);
         }
     }
 }
@@ -1101,7 +1228,7 @@ fn collect_image_bounds(element: &Element, images: &mut HashMap<String, Vec<Attr
 fn inspect(
     element: &mut Element,
     style: &InspectionStyle,
-    images: &HashMap<String, Vec<Attribute>>,
+    images: &HashMap<String, String>,
     resource: bool,
 ) {
     let resource = resource
@@ -1128,20 +1255,23 @@ fn inspect(
         } else {
             None
         };
-        if matches!(style, InspectionStyle::Wireframe { .. })
-            && (image || referenced_image.is_some())
-        {
-            if let Some(bounds) = referenced_image {
-                for attribute in bounds {
-                    if element.get(&attribute.local).is_none() {
-                        element.attributes.push(attribute.clone());
+        if matches!(style, InspectionStyle::Wireframe { .. }) {
+            if let Some(bounds_id) = referenced_image {
+                for attribute in &mut element.attributes {
+                    if attribute.local == "href"
+                        && (attribute.namespace.is_none()
+                            || attribute.namespace.as_deref() == Some(XLINK_NS))
+                    {
+                        attribute.value = format!("#{bounds_id}");
                     }
                 }
             }
-            element.local = "rect".into();
-            element.qualified = qualified_name_for(&element.namespaces, SVG_NS, "rect", false);
-            element.remove("href");
-            element.remove("preserveAspectRatio");
+            if image {
+                element.local = "rect".into();
+                element.qualified = qualified_name_for(&element.namespaces, SVG_NS, "rect", false);
+                element.remove("href");
+                element.remove("preserveAspectRatio");
+            }
         }
         if matches!(
             element.local.as_str(),
@@ -1182,11 +1312,27 @@ fn inspect(
             element.set("vector-effect", "non-scaling-stroke");
         } else if image || element.local == "use" {
             if let InspectionStyle::XRay { fill_opacity, .. } = style {
-                let original = element
-                    .get("opacity")
-                    .and_then(|opacity| opacity.parse::<f64>().ok())
-                    .unwrap_or(1.0);
-                element.set("opacity", (original * fill_opacity).to_string());
+                // Multiplication must preserve inline CSS precedence, percentage
+                // values and !important, as well as presentation attributes.
+                // A compositing group avoids parsing or overriding their paint.
+                let wrapper = Element {
+                    qualified: qualified_name_for(&element.namespaces, SVG_NS, "g", false),
+                    local: "g".into(),
+                    namespace: SVG_NS.into(),
+                    namespaces: element.namespaces.clone(),
+                    attributes: vec![Attribute {
+                        qualified: "opacity".into(),
+                        local: "opacity".into(),
+                        namespace: None,
+                        value: fill_opacity.to_string(),
+                    }],
+                    children: Vec::new(),
+                };
+                let original = std::mem::replace(element, wrapper);
+                element.children.push(Child::Element(original));
+                // The original is intentionally unchanged; inspecting it again
+                // would apply the same opacity multiplier recursively.
+                return;
             }
         }
     }

@@ -279,9 +279,14 @@ fn wireframe_draws_bitmap_bounds_and_retains_the_source_resource() {
         .collect::<Vec<_>>();
     assert_eq!(rectangles.len(), 2);
     assert_eq!(rectangles[0].attribute("width"), Some("20"));
+    let instance = document
+        .descendants()
+        .find(|n| n.has_tag_name("use"))
+        .unwrap();
+    assert_eq!(instance.attribute("transform"), Some("translate(10 20)"));
     assert_eq!(
-        rectangles[0].attribute("transform"),
-        Some("translate(10 20)")
+        instance.attribute((XLINK_NS, "href")),
+        Some("#layer-image-bounds-0")
     );
     assert_eq!(rectangles[0].attribute("fill"), Some("none"));
     assert_eq!(rectangles[1].attribute("x"), Some("2"));
@@ -302,6 +307,7 @@ fn unsafe_and_unresolved_documents_are_rejected() {
         r#"<rect fill="url(https://example.com/paint)"/>"#,
         r#"<style>rect{fill:red}</style>"#,
         r#"<rect style="fill:u\72l(#a)"/>"#,
+        r#"<rect style="font-family:'broken&#10;;fill:url(https://example.com/paint);x'"/>"#,
         r##"<use xlink:href="#missing"/>"##,
         r#"<rect filter="url(#missing)"/>"#,
         r#"<g id="a"/><g id="a"/>"#,
@@ -426,4 +432,232 @@ fn inspection_overrides_inline_paint_without_destroying_other_style() {
     assert_eq!(path.attribute("fill"), Some("none"));
     assert_eq!(path.attribute("stroke"), Some("blue"));
     assert_eq!(path.attribute("style"), Some("filter:none"));
+}
+
+#[test]
+fn wireframe_image_instances_preserve_source_and_instance_layout() {
+    let input = svg(
+        r##"<defs><image id="im" x="5" y="7" width="20" height="30" transform="scale(2)" opacity=".5" style="fill:red;filter:none" xlink:href="data:image/png;base64,AAAA"><title id="image-title">Original bitmap</title></image></defs><use x="11" y="13" width="999" height="888" xlink:href="#im" transform="rotate(15)" opacity=".4"/><use xlink:href="#im"/>"##,
+    );
+    let result = fragment(
+        &input,
+        "layer",
+        &InspectionStyle::Wireframe {
+            stroke: "blue".into(),
+            stroke_width: 1.0,
+            stroke_opacity: 0.75,
+        },
+    )
+    .unwrap();
+    // A complete optimization pass must still resolve every resource and ID.
+    let result = optimize(&svg(&result), &XmlOptions::default()).unwrap();
+    let document = Document::parse(&result.svg).unwrap();
+    let instance = document
+        .descendants()
+        .find(|n| n.has_tag_name("use"))
+        .unwrap();
+    let reference = instance
+        .attribute((XLINK_NS, "href"))
+        .unwrap()
+        .strip_prefix('#')
+        .unwrap();
+    let bounds = document
+        .descendants()
+        .find(|n| n.attribute("id") == Some(reference))
+        .unwrap();
+    assert!(bounds.has_tag_name("rect"));
+    for (name, value) in [
+        ("x", "5"),
+        ("y", "7"),
+        ("width", "20"),
+        ("height", "30"),
+        ("transform", "scale(2)"),
+        ("opacity", ".5"),
+        ("fill", "none"),
+        ("style", "filter:none"),
+    ] {
+        assert_eq!(bounds.attribute(name), Some(value));
+    }
+    for (name, value) in [
+        ("x", "11"),
+        ("y", "13"),
+        ("width", "999"),
+        ("height", "888"),
+        ("transform", "rotate(15)"),
+        ("opacity", ".4"),
+    ] {
+        assert_eq!(instance.attribute(name), Some(value));
+    }
+    assert_eq!(
+        document
+            .descendants()
+            .filter(|n| n.has_tag_name("rect"))
+            .count(),
+        1
+    );
+    assert_eq!(
+        document
+            .descendants()
+            .filter(|n| n.has_tag_name("image"))
+            .count(),
+        1
+    );
+    assert_eq!(
+        document
+            .descendants()
+            .filter(|n| n.has_tag_name("title"))
+            .count(),
+        1
+    );
+}
+
+#[test]
+fn xray_multiplies_bitmap_opacity_without_overriding_inline_css() {
+    let input = svg(
+        r##"<defs><image id="im" width="20" height="30" opacity=".8" xlink:href="data:image/png;base64,AAAA"/></defs><use xlink:href="#im" opacity=".9" style="opacity:20%!important;filter:none"/><image width="4" height="5" opacity=".7" style="opacity: .3" xlink:href="data:image/png;base64,AAAA"/>"##,
+    );
+    let result = fragment(
+        &input,
+        "layer",
+        &InspectionStyle::XRay {
+            fill_opacity: 0.2,
+            stroke: "blue".into(),
+            stroke_width: 1.0,
+            stroke_opacity: 1.0,
+        },
+    )
+    .unwrap();
+    let wrapped = svg(&result);
+    let document = Document::parse(&wrapped).unwrap();
+    let instance = document
+        .descendants()
+        .find(|n| n.has_tag_name("use"))
+        .unwrap();
+    assert_eq!(instance.attribute("opacity"), Some(".9"));
+    assert_eq!(
+        instance.attribute("style"),
+        Some("opacity:20%!important;filter:none")
+    );
+    assert_eq!(
+        instance.parent_element().unwrap().attribute("opacity"),
+        Some("0.2")
+    );
+    let images = document
+        .descendants()
+        .filter(|n| n.has_tag_name("image"))
+        .collect::<Vec<_>>();
+    assert_eq!(images[0].attribute("opacity"), Some(".8"));
+    assert!(images[0].parent_element().unwrap().has_tag_name("defs"));
+    assert_eq!(images[1].attribute("opacity"), Some(".7"));
+    assert_eq!(images[1].attribute("style"), Some("opacity: .3"));
+    assert_eq!(
+        images[1].parent_element().unwrap().attribute("opacity"),
+        Some("0.2")
+    );
+}
+
+#[test]
+fn rounded_adjacent_numbers_never_merge_into_a_different_coordinate() {
+    assert_eq!(
+        quantize_numbers("1+2 1-0.001 1.5.5 1e20.5 1e20-0.001", 2).unwrap(),
+        "1 2 1 0 1.5 0.5 1e20 0.5 1e20 0"
+    );
+    assert_eq!(
+        quantize_numbers("12.345px 50% -1.25em", 2).unwrap(),
+        "12.35px 50% -1.25em"
+    );
+}
+
+#[test]
+fn numeric_precision_leaves_foreign_metadata_attributes_unchanged() {
+    let input = svg(
+        r#"<metadata><design:point xmlns:design="urn:example:design" x="1.23456789" width="12.3456789"/><plain xmlns="" x="9.87654321"/></metadata><rect x="1.23456789"/>"#,
+    );
+    let result = optimize(
+        &input,
+        &XmlOptions {
+            precision: Some(2),
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let document = Document::parse(&result.svg).unwrap();
+    assert_eq!(
+        document
+            .descendants()
+            .find(|n| n.has_tag_name(("urn:example:design", "point")))
+            .unwrap()
+            .attribute("x"),
+        Some("1.23456789")
+    );
+    let plain = document
+        .descendants()
+        .find(|n| n.tag_name().name() == "plain")
+        .unwrap();
+    assert_eq!(plain.tag_name().namespace().unwrap_or(""), "");
+    assert_eq!(plain.attribute("x"), Some("9.87654321"));
+    assert_eq!(
+        document
+            .descendants()
+            .find(|n| n.has_tag_name((SVG_NS, "rect")))
+            .unwrap()
+            .attribute("x"),
+        Some("1.23")
+    );
+}
+
+#[test]
+fn css_urls_are_parsed_outside_comments_strings_and_other_function_names() {
+    let input = svg(
+        r##"<defs><linearGradient id="a(b)"><stop stop-color="red"/></linearGradient></defs><path style="/* url(https://example.com/unused) */ font-family:'curl(#not-a-reference)';fill:url('#a(b)')"/><text style="font-family:'url(#literal)'">Example</text>"##,
+    );
+    let result = optimize(&input, &XmlOptions::default()).unwrap();
+    let document = Document::parse(&result.svg).unwrap();
+    let path = document
+        .descendants()
+        .find(|n| n.has_tag_name("path"))
+        .unwrap();
+    assert_eq!(
+        path.attribute("style"),
+        Some(
+            "/* url(https://example.com/unused) */ font-family:'curl(#not-a-reference)';fill:url(#svg-0)"
+        )
+    );
+    assert!(result.svg.contains("font-family:'url(#literal)'"));
+    assert_eq!(
+        map_urls("custom-url(#literal)", |_| panic!("not a CSS url function")).unwrap(),
+        "custom-url(#literal)"
+    );
+}
+
+#[test]
+fn semantic_ids_with_parentheses_keep_valid_quoted_css_references() {
+    let result = optimized(
+        r##"<linearGradient id="ferro-paint(1)"><stop stop-color="red"/></linearGradient><rect fill="url('#ferro-paint(1)')"/>"##,
+    );
+    let again = optimize(&result.svg, &XmlOptions::default()).unwrap();
+    assert_eq!(result.svg, again.svg);
+    assert!(result.svg.contains("fill=\"url('#ferro-paint(1)')\""));
+}
+
+#[test]
+fn inspection_overrides_css_paint_with_comments_in_declaration_names() {
+    let result = fragment(
+        &svg(r#"<path style="/* a; : b */ stroke/**/:red!important;stroke-width:9;filter:none;/* c */ fill:blue" d="M0 0L10 10"/>"#),
+        "layer",
+        &InspectionStyle::Wireframe {
+            stroke: "blue".into(),
+            stroke_width: 1.0,
+            stroke_opacity: 1.0,
+        },
+    ).unwrap();
+    let wrapped = svg(&result);
+    let document = Document::parse(&wrapped).unwrap();
+    let path = document
+        .descendants()
+        .find(|n| n.has_tag_name("path"))
+        .unwrap();
+    assert_eq!(path.attribute("style"), Some("filter:none"));
+    assert_eq!(path.attribute("fill"), Some("none"));
+    assert_eq!(path.attribute("stroke"), Some("blue"));
 }

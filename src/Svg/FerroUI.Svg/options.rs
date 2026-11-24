@@ -80,7 +80,8 @@ impl SvgLayerFilter {
     }
 }
 
-/// Inspection paint for vector shapes. Raster islands retain their pixels and are reported.
+/// Inspection paint for vector shapes. X-ray fades raster islands and outlines their bounds;
+/// wireframe draws their bounds without pixels. These substitutions are reported.
 #[derive(Clone, Debug, Default)]
 pub enum SvgInspection {
     #[default]

@@ -273,6 +273,36 @@ fn composed_transform_and_bounds_overflow_are_errors() {
 }
 
 #[test]
+fn raster_mapping_rejects_nonfinite_native_scale_and_translation_before_replay() {
+    for bounds in [
+        Rect::new(0.0, 0.0, 1e-50, 1.0),
+        Rect::new(0.0, 0.0, 1.0, 1e-50),
+        Rect::new(f64::from(f32::MAX) * 0.75, 0.0, 1.0, 1.0),
+        Rect::new(0.0, -f64::from(f32::MAX) * 0.75, 1.0, 1.0),
+    ] {
+        let mut document = SvgDocument::new(Size::new(2.0, 2.0)).unwrap();
+        document
+            .record_layer(
+                SvgLayerOptions::new("part", "Part").with_bounds(bounds),
+                |_| {},
+            )
+            .unwrap();
+        let options = SvgExportOptions {
+            fidelity: SvgFidelity::Raster,
+            raster_scale: 2.0,
+            ..Default::default()
+        };
+        // The surface is at most 2x2; this is a matrix failure, not a pixel-budget failure.
+        let (width, height) = raster_size(bounds, &options).unwrap();
+        assert!(width <= 2 && height <= 2);
+        assert!(
+            matches!(document.export(&options), Err(SvgError::InvalidOptions(message)) if message.contains("finite Skia device transform")),
+            "accepted {bounds:?}"
+        );
+    }
+}
+
+#[test]
 fn target_records_device_pixels_and_converts_to_logical_coordinates_once() {
     let target = SvgRenderTarget::new();
     let scene = RenderTargetSceneInfo::new(

@@ -167,14 +167,29 @@ impl IRenderTarget for SvgRenderTarget {
         let state = self.state.clone();
         let completion = self.completion.clone();
         self.state.borrow_mut().recording = true;
+        // Own readiness in the completion closure itself: dropping that
+        // closure after a failed native finalization must release the target,
+        // even when its body never runs and no picture can be retrieved.
+        let finish_recording = FinishRecording(state.clone());
         let context = SvgDrawingContext::new(Box::new(context))
             .with_recording_bounds(bounds)
-            .on_finished(move |audit| {
-                let picture = picture_target.get_picture();
-                let _finish_recording = FinishRecording(state.clone());
+            .on_completed(move |audit, finalized| {
+                let _finish_recording = finish_recording;
                 if state.borrow().disposed {
                     return;
                 }
+                let picture = if finalized {
+                    picture_target.get_picture()
+                } else {
+                    // An error-bearing document carries the failed capture
+                    // through the same target/surface result APIs. Its audit
+                    // rejects export before any placeholder can be replayed.
+                    debug_assert!(!audit.errors.is_empty());
+                    skia_safe::Picture::new_placeholder(skia_safe::Rect::from_wh(
+                        bounds.width as f32,
+                        bounds.height as f32,
+                    ))
+                };
                 document.layers.push(SvgLayer {
                     options: SvgLayerOptions::new("frame", "FerroUI frame")
                         .with_bounds(bounds)

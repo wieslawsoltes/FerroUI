@@ -384,7 +384,11 @@ fn skia_layer_blits_reach_the_underlying_context_without_a_downcast_panic() {
     child.clear(Colors::TRANSPARENT);
     fill(&mut *child, Colors::BLUE, Rect::new(4.0, 4.0, 16.0, 16.0));
     child.dispose();
+    drop(child);
     layer.blit(&mut context);
+    // The deferred picture owns the snapshot after its source surface dies.
+    layer.dispose();
+    drop(layer);
     context.finish();
     assert_eq!(
         [0, 0, 255, 255],
@@ -392,6 +396,100 @@ fn skia_layer_blits_reach_the_underlying_context_without_a_downcast_panic() {
     );
     assert!(!context.audit().raster_reasons.is_empty());
     assert!(context.audit().errors.is_empty());
+    assert_eq!(1, context.audit().draw_calls);
+    assert_eq!(1, context.audit().embedded_images);
+}
+
+#[test]
+fn gpu_affined_layer_blits_are_rejected_before_native_context_access() {
+    use ferroui_skia::gpu::{ISkiaGrContext, SkiaGpuBackend};
+    use ferroui_skia::{SurfaceRenderTarget, SurfaceRenderTargetCreateInfo};
+    use skia_safe::{Image, ImageInfo, Surface, SurfaceProps};
+
+    // A CPU-backed stand-in with the same context affinity contract as a GPU
+    // layer exercises the rejection without a hardware/device dependency.
+    // Any implicit GPU readback is a bug, even though test pixels are in RAM.
+    struct AffinedContext;
+    impl ISkiaGrContext for AffinedContext {
+        fn backend(&self) -> SkiaGpuBackend {
+            SkiaGpuBackend::Ganesh
+        }
+        fn create_surface(&self, info: &ImageInfo, props: &SurfaceProps) -> Option<Surface> {
+            skia_safe::surfaces::raster(info, None, Some(props))
+        }
+        fn max_render_target_size(&self) -> Option<i32> {
+            None
+        }
+        fn flush(&self) {}
+        fn reset_context(&self) {}
+        fn set_resource_cache_limit(&self, _: i64) {}
+        fn snapshot_to_raster(&self, _: &mut Surface) -> Option<Image> {
+            panic!("SVG export must not implicitly read back an unrelated GPU context")
+        }
+        fn is_lost(&self) -> bool {
+            false
+        }
+        fn as_any(&self) -> &dyn Any {
+            self
+        }
+    }
+    let layer = SurfaceRenderTarget::new(SurfaceRenderTargetCreateInfo {
+        width: 16,
+        height: 16,
+        dpi: Vector::new(96.0, 96.0),
+        gr_context: Some(Rc::new(AffinedContext)),
+        ..Default::default()
+    });
+    let (target, mut context) = recording();
+    layer.blit(&mut context);
+    context.finish();
+    let audit = context.audit();
+    assert_eq!(0, audit.draw_calls);
+    assert_eq!(0, audit.embedded_images);
+    assert!(
+        audit
+            .errors
+            .iter()
+            .any(|error| error.contains("CPU-readable")),
+        "{audit:?}"
+    );
+    assert_eq!([0, 0, 0, 0], pixel(&pixels(&target.get_picture()), 8, 8));
+}
+
+#[test]
+fn failed_native_finalization_is_not_retried_and_releases_target_readiness() {
+    use crate::SvgRenderTarget;
+    use ferroui_base::platform::{IRenderTarget, PlatformRenderTargetState, RenderTargetSceneInfo};
+    use ferroui_base::rendering::composition::CompositionTransparencyLevel;
+
+    let target = SvgRenderTarget::new();
+    let scene = RenderTargetSceneInfo::new(
+        PixelSize::new(16, 16),
+        1.0,
+        CompositionTransparencyLevel::None,
+    );
+    let (mut context, _) = target.try_create_drawing_context(&scene).unwrap();
+    let feature = context
+        .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
+        .unwrap();
+    let lease = feature
+        .downcast_ref::<Rc<dyn ISkiaApiLeaseFeature>>()
+        .unwrap()
+        .lease();
+    // Native Skia rejects finalization while an explicit native lease is live.
+    let result = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| context.dispose()));
+    assert!(result.is_err());
+    assert_eq!(
+        PlatformRenderTargetState::READY,
+        target.platform_render_target_state()
+    );
+    assert_eq!(0, target.frame_count());
+    // Drop must not attempt finalization a second time with the same lease.
+    let dropped = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| drop(context)));
+    assert!(dropped.is_ok());
+    lease.dispose();
+    drop(target.try_create_drawing_context(&scene).unwrap());
+    assert_eq!(1, target.frame_count());
 }
 
 #[test]
@@ -490,6 +588,42 @@ fn dropping_the_adapter_finalizes_the_recording() {
 }
 
 #[test]
+fn completion_callbacks_keep_the_finalized_picture_guarantee_during_unwind() {
+    use std::cell::Cell;
+    let completed = Rc::new(Cell::new(0));
+    let observed = completed.clone();
+    let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let (_target, context) = recording();
+        let mut context = context.on_finished(move |_| observed.set(observed.get() + 1));
+        let feature = context
+            .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
+            .unwrap();
+        let _lease = feature
+            .downcast_ref::<Rc<dyn ISkiaApiLeaseFeature>>()
+            .unwrap()
+            .lease();
+        panic!("producer failed before releasing its native lease");
+    }));
+    assert!(panic.is_err());
+    assert_eq!(
+        0,
+        completed.get(),
+        "no callback may retrieve an unfinished picture"
+    );
+
+    let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let (_target, context) = recording();
+        let _context = context.on_finished(|_| panic!("completion callback also failed"));
+        panic!("original producer failure");
+    }))
+    .unwrap_err();
+    assert_eq!(
+        Some(&"original producer failure"),
+        panic.downcast_ref::<&str>()
+    );
+}
+
+#[test]
 fn reflected_and_repeating_gradients_request_fallback_but_padded_gradients_remain_vector() {
     use ferroui_base::media::immutable::{ImmutableGradientStop, ImmutableLinearGradientBrush};
     let stops = [
@@ -517,6 +651,182 @@ fn reflected_and_repeating_gradients_request_fallback_but_padded_gradients_remai
             context.audit().raster_reasons.is_empty()
         );
     }
+}
+
+#[test]
+fn relative_radial_and_conic_centers_are_validated_after_resolving_bounds() {
+    use ferroui_base::media::immutable::{
+        ImmutableConicGradientBrush, ImmutableGradientStop, ImmutableRadialGradientBrush,
+    };
+    use ferroui_base::{RelativePoint, RelativeUnit};
+    let stops = [
+        ImmutableGradientStop::new(0.0, Colors::RED),
+        ImmutableGradientStop::new(1.0, Colors::BLUE),
+    ];
+    // Each input fits f32, but its resolved coordinate does not. Letting this
+    // reach Skia would turn the invalid shader into an unrelated solid fill.
+    let center = Some(RelativePoint::new(2.0e37, 0.5, RelativeUnit::Relative));
+    let radial = ImmutableRadialGradientBrush::new(
+        &stops,
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        center,
+        center,
+        None,
+        None,
+        None,
+    );
+    let conic = ImmutableConicGradientBrush::new(
+        &stops,
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        center,
+        0.0,
+        None,
+    );
+    for brush in [&radial as &dyn IBrush, &conic as &dyn IBrush] {
+        let (_, mut context) = recording();
+        context.draw_ellipse(Some(brush), None, Rect::new(0.0, 0.0, 32.0, 32.0));
+        context.finish();
+        let audit = context.audit();
+        assert_eq!(0, audit.draw_calls);
+        assert!(
+            audit.errors.iter().any(|error| error.contains("resolved")),
+            "{audit:?}"
+        );
+    }
+}
+
+#[test]
+fn gradient_strokes_and_region_fills_validate_the_same_bounds_as_native_skia() {
+    use ferroui_base::media::immutable::{
+        ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen,
+    };
+    use ferroui_base::platform::{IPlatformRenderInterface, LtrbPixelRect};
+    use ferroui_base::{RelativePoint, RelativeUnit};
+    let stops = [
+        ImmutableGradientStop::new(0.0, Colors::RED),
+        ImmutableGradientStop::new(1.0, Colors::BLUE),
+    ];
+    let brush = Rc::new(ImmutableLinearGradientBrush::new(
+        &stops,
+        1.0,
+        None,
+        None,
+        GradientSpreadMethod::Pad,
+        None,
+        Some(RelativePoint::new(2.0e37, 1.0, RelativeUnit::Relative)),
+        None,
+    ));
+    let pen = ImmutablePen::with_brush(Some(brush.clone()), 2.0);
+    let bounds = Rect::new(0.0, 0.0, 32.0, 32.0);
+    let geometry = crate::SvgPlatformRenderInterface::default().create_rectangle_geometry(bounds);
+    let region = ferroui_skia::SkiaRegionImpl::new();
+    region.add_rect(LtrbPixelRect::new(0, 0, 32, 32));
+    for operation in 0..6 {
+        let (_, mut context) = recording();
+        match operation {
+            0 => context.draw_line(Some(&pen), Point::new(0.0, 0.0), Point::new(32.0, 32.0)),
+            1 => context.draw_geometry(None, Some(&pen), &*geometry),
+            2 => context.draw_rectangle(None, Some(&pen), bounds.into(), &BoxShadows::default()),
+            3 => context.draw_ellipse(None, Some(&pen), bounds),
+            4 => context.draw_region(None, Some(&pen), &region),
+            5 => context.draw_region(Some(&*brush), None, &region),
+            _ => unreachable!(),
+        }
+        context.finish();
+        let audit = context.audit();
+        assert_eq!(0, audit.draw_calls, "operation {operation}: {audit:?}");
+        assert!(
+            audit
+                .errors
+                .iter()
+                .any(|error| error.contains("resolved linear gradient")),
+            "operation {operation}: {audit:?}"
+        );
+    }
+}
+
+fn image_tile_brush(
+    source_rect: ferroui_base::RelativeRect,
+    destination_rect: ferroui_base::RelativeRect,
+) -> ferroui_base::media::immutable::ImmutableImageBrush {
+    use ferroui_base::media::imaging::Bitmap;
+    use ferroui_base::media::immutable::ImmutableImageBrush;
+    use ferroui_base::media::{AlignmentX, AlignmentY, Stretch, TileMode};
+    let mut surface = skia_safe::surfaces::raster_n32_premul((32, 32)).unwrap();
+    surface.canvas().clear(skia_safe::Color::RED);
+    let image = ferroui_skia::ImmutableBitmap::from_image(surface.image_snapshot(), None);
+    ImmutableImageBrush::new(
+        Some(Rc::new(Bitmap::from_impl(std::sync::Arc::new(image)))),
+        AlignmentX::Center,
+        AlignmentY::Center,
+        Some(destination_rect),
+        1.0,
+        None,
+        ferroui_base::RelativePoint::TOP_LEFT,
+        Some(source_rect),
+        Stretch::Fill,
+        TileMode::None,
+        None,
+    )
+}
+
+#[test]
+fn image_tile_brushes_reject_nonfinite_raw_and_resolved_viewports() {
+    use ferroui_base::{RelativeRect, RelativeUnit};
+    let invalid = RelativeRect::new(f64::NAN, 0.0, 1.0, 1.0, RelativeUnit::Relative);
+    let overflowing = RelativeRect::new(2.0e37, 0.0, 1.0, 1.0, RelativeUnit::Relative);
+    for (source, destination) in [
+        (invalid, RelativeRect::FILL),
+        (RelativeRect::FILL, invalid),
+        (overflowing, RelativeRect::FILL),
+        (RelativeRect::FILL, overflowing),
+    ] {
+        let (_, mut context) = recording();
+        context.draw_ellipse(
+            Some(&image_tile_brush(source, destination)),
+            None,
+            Rect::new(0.0, 0.0, 32.0, 32.0),
+        );
+        context.finish();
+        let audit = context.audit();
+        assert_eq!(0, audit.draw_calls);
+        assert!(
+            audit.errors.iter().any(|error| error.contains("rectangle")),
+            "{audit:?}"
+        );
+    }
+}
+
+#[test]
+fn tile_source_validation_uses_context_dpi_and_keeps_empty_viewports_valid() {
+    use ferroui_base::{RelativeRect, RelativeUnit};
+    let target = PictureRenderTarget::new(None, None, Vector::new(192.0, 192.0));
+    let mut context = SvgDrawingContext::new(Box::new(
+        target.create_export_drawing_context(Size::new(64.0, 64.0), false),
+    ));
+    // The 32-pixel image resolves to 16 logical units at this context DPI.
+    // Using the bitmap's 96-DPI metadata instead would reject this coordinate.
+    let source = RelativeRect::new(2.0e37, 0.0, 1.0, 1.0, RelativeUnit::Relative);
+    context.draw_ellipse(
+        Some(&image_tile_brush(source, RelativeRect::FILL)),
+        None,
+        Rect::new(0.0, 0.0, 16.0, 16.0),
+    );
+    let empty = RelativeRect::new(0.0, 0.0, 0.0, 0.0, RelativeUnit::Relative);
+    context.draw_ellipse(
+        Some(&image_tile_brush(empty, empty)),
+        None,
+        Rect::new(0.0, 0.0, 16.0, 16.0),
+    );
+    context.finish();
+    assert_eq!(2, context.audit().draw_calls);
+    assert!(context.audit().errors.is_empty(), "{:?}", context.audit());
 }
 
 #[test]

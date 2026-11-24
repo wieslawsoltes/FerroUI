@@ -9,7 +9,7 @@ use ferroui_base::media::effects::IEffect;
 use ferroui_base::media::imaging::BitmapBlendingMode;
 use ferroui_base::media::{
     BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix, GradientSpreadMethod,
-    IBrush, IExperimentalAcrylicMaterial, IPen, RenderOptions, TextOptions,
+    IBrush, IExperimentalAcrylicMaterial, IPen, ITileBrush, RenderOptions, TextOptions,
 };
 use ferroui_base::platform::{
     IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects,
@@ -19,7 +19,7 @@ use ferroui_base::platform::{
     IPlatformRenderInterfaceRegion, LightingParameters, MultiplyLayerFactors, PixelOperation,
 };
 use ferroui_base::rendering::scene3d::Scene3DFrame;
-use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect};
+use ferroui_base::{Matrix, PixelSize, Point, Rect, RoundedRect, Vector};
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
 use std::rc::Rc;
@@ -71,14 +71,19 @@ pub struct SvgDrawingContext {
     fragment_open: bool,
     disposed: bool,
     recording_bounds: Option<Rect>,
-    on_finished: Option<Box<dyn FnOnce(RecordingAudit)>>,
+    intermediate_dpi: Option<Vector>,
+    on_finished: Option<Box<dyn FnOnce(RecordingAudit, bool)>>,
 }
 
 impl SvgDrawingContext {
     /// Wraps a fresh, empty recording context without changing its rendering
     /// configuration. All drawing and state changes must pass through this
     /// adapter: commands recorded before wrapping cannot be audited retroactively.
-    pub fn new(inner: Box<dyn IDrawingContextImpl>) -> Self {
+    pub fn new(mut inner: Box<dyn IDrawingContextImpl>) -> Self {
+        let intermediate_dpi = inner
+            .as_any_mut()
+            .downcast_mut::<ferroui_skia::DrawingContextImpl>()
+            .map(|context| context.intermediate_surface_dpi());
         Self {
             inner,
             audit: Rc::new(RefCell::new(RecordingAudit::default())),
@@ -86,6 +91,7 @@ impl SvgDrawingContext {
             fragment_open: false,
             disposed: false,
             recording_bounds: None,
+            intermediate_dpi,
             on_finished: None,
         }
     }
@@ -102,8 +108,23 @@ impl SvgDrawingContext {
 
     /// Runs `callback` once after the inner recording has been finalized, on
     /// explicit disposal or drop. The callback receives the completed audit and
-    /// may retrieve the picture from the associated Skia recording target.
+    /// may retrieve the picture from the associated Skia recording target. It is
+    /// not invoked if the native context fails to finalize its recording.
     pub fn on_finished(mut self, callback: impl FnOnce(RecordingAudit) + 'static) -> Self {
+        self.on_finished = Some(Box::new(move |audit, finalized| {
+            if finalized {
+                callback(audit);
+            }
+        }));
+        self
+    }
+
+    /// Target completion also observes a failed native finalization during
+    /// unwind. A false flag means that no finished picture may be retrieved.
+    pub(crate) fn on_completed(
+        mut self,
+        callback: impl FnOnce(RecordingAudit, bool) + 'static,
+    ) -> Self {
         self.on_finished = Some(Box::new(callback));
         self
     }
@@ -125,6 +146,46 @@ impl SvgDrawingContext {
         let mut audit = self.audit.borrow_mut();
         if !audit.errors.iter().any(|item| item == message) {
             audit.errors.push(message.into());
+        }
+    }
+
+    fn finalize(&mut self, unwinding: bool) {
+        if self.disposed {
+            return;
+        }
+        // Finalization can invoke native code and client completion callbacks.
+        // Do not retry it from Drop if either unwinds. Keep the callback local
+        // so captured cleanup guards run even if native finalization fails.
+        self.disposed = true;
+        let on_finished = self.on_finished.take();
+        if !self.states.is_empty() || self.fragment_open {
+            self.error("Export recording finished with unbalanced drawing state");
+        }
+        if unwinding {
+            self.error("Export recording was aborted while unwinding a panic");
+            // A producer can panic with a native lease still active. Native
+            // finalization then panics too; allowing that second panic to leave
+            // Drop would abort the process and prevent failure publication.
+            let finalized = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                self.inner.dispose();
+            }))
+            .is_ok();
+            if !finalized {
+                self.error("Native export recording could not be finalized during unwind");
+            }
+            if let Some(callback) = on_finished {
+                let audit = self.audit();
+                // Preserve the producer's original panic even if a user
+                // completion callback also panics while reporting the failure.
+                let _ = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+                    callback(audit, finalized);
+                }));
+            }
+        } else {
+            self.inner.dispose();
+            if let Some(callback) = on_finished {
+                callback(self.audit(), true);
+            }
         }
     }
 
@@ -216,10 +277,6 @@ impl SvgDrawingContext {
         self.states.remove(index.unwrap()).1
     }
 
-    fn brush(&self, brush: Option<&dyn IBrush>) -> bool {
-        self.brush_with_bounds(brush, None)
-    }
-
     fn brush_with_bounds(&self, brush: Option<&dyn IBrush>, bounds: Option<Rect>) -> bool {
         let Some(brush) = brush else { return true };
         if !self.finite(&[brush.opacity()], "brush opacity") {
@@ -277,8 +334,14 @@ impl SvgDrawingContext {
                 }
                 let (radius_x, radius_y) = (radial.radius_x(), radial.radius_y());
                 if let Some(bounds) = bounds {
+                    let (center, origin) =
+                        (center.to_pixels_rect(bounds), origin.to_pixels_rect(bounds));
                     if !self.finite(
                         &[
+                            center.x,
+                            center.y,
+                            origin.x,
+                            origin.y,
                             radius_x.to_value(bounds.width),
                             radius_y.to_value(bounds.height),
                         ],
@@ -302,20 +365,38 @@ impl SvgDrawingContext {
             if let Some(conic) = brush.as_conic_gradient_brush() {
                 self.reason("Conic gradient shader");
                 let center = conic.center().point;
-                return self.finite(&[center.x, center.y, conic.angle()], "conic gradient");
+                if !self.finite(&[center.x, center.y, conic.angle()], "conic gradient") {
+                    return false;
+                }
+                if let Some(bounds) = bounds {
+                    let center = conic.center().to_pixels_rect(bounds);
+                    return self.finite(&[center.x, center.y], "resolved conic gradient");
+                }
+                return true;
             }
             self.error("Unknown gradient brush is not implemented by Skia");
             return false;
         }
-        if brush.as_scene_brush().is_some() {
+        if let Some(scene) = brush.as_scene_brush() {
             self.reason("Scene brush can contain unclassified drawing operations");
-            return true;
+            return self.tile_brush(scene, bounds);
         }
         if let Some(image) = brush.as_image_brush() {
             self.reason("Image brush shader");
+            if !self.tile_brush(image, bounds) {
+                return false;
+            }
             if let Some(bitmap) = image.source().and_then(|source| source.get_bitmap()) {
                 if !self.bitmap(&*bitmap) {
                     return false;
+                }
+                if let Some(dpi) = self.intermediate_dpi {
+                    // Skia resolves image source coordinates with the context's
+                    // intermediate DPI, not the bitmap's own metadata DPI.
+                    let source = bitmap.pixel_size().to_size_with_dpi_vector(dpi);
+                    if !self.rect(image.source_rect().to_pixels(source)) {
+                        return false;
+                    }
                 }
             }
             return true;
@@ -324,7 +405,17 @@ impl SvgDrawingContext {
         false
     }
 
-    fn pen(&self, pen: Option<&dyn IPen>) -> bool {
+    fn tile_brush(&self, brush: &dyn ITileBrush, bounds: Option<Rect>) -> bool {
+        // Empty/degenerate viewports retain native no-op behavior. Reject only
+        // coordinates that cannot reach Skia's intermediate allocation/mapping
+        // path as finite f32 values.
+        self.rect(brush.source_rect().rect)
+            && self.rect(brush.destination_rect().rect)
+            && bounds
+                .is_none_or(|bounds| self.rect(brush.destination_rect().to_pixels_rect(bounds)))
+    }
+
+    fn pen(&self, pen: Option<&dyn IPen>, bounds: Rect) -> bool {
         let Some(pen) = pen else { return true };
         if !self.finite(&[pen.thickness(), pen.miter_limit()], "pen") {
             return false;
@@ -345,7 +436,7 @@ impl SvgDrawingContext {
                 }
             }
         }
-        self.brush(pen.brush().as_deref())
+        self.rect(bounds) && self.brush_with_bounds(pen.brush().as_deref(), Some(bounds))
     }
 
     fn geometry(&self, geometry: &dyn IGeometryImpl) -> bool {
@@ -564,7 +655,10 @@ impl IDrawingContextImpl for SvgDrawingContext {
     }
 
     fn draw_line(&mut self, pen: Option<&dyn IPen>, p1: Point, p2: Point) {
-        if !self.active() || !self.pen(pen) || !self.finite(&[p1.x, p1.y, p2.x, p2.y], "line") {
+        if !self.active()
+            || !self.finite(&[p1.x, p1.y, p2.x, p2.y], "line")
+            || !self.pen(pen, Rect::from_points(p1, p2).normalize())
+        {
             return;
         }
         self.count_draw();
@@ -579,7 +673,12 @@ impl IDrawingContextImpl for SvgDrawingContext {
     ) {
         if !self.active()
             || !self.brush_with_bounds(brush, Some(geometry.bounds()))
-            || !self.pen(pen)
+            || !self.pen(
+                pen,
+                geometry
+                    .bounds()
+                    .inflate(pen.map_or(0.0, |pen| pen.thickness() / 2.0)),
+            )
             || !self.geometry(geometry)
         {
             return;
@@ -597,7 +696,11 @@ impl IDrawingContextImpl for SvgDrawingContext {
     ) {
         if !self.active()
             || !self.brush_with_bounds(brush, Some(rect.rect))
-            || !self.pen(pen)
+            || !self.pen(
+                pen,
+                rect.rect
+                    .inflate(pen.map_or(0.0, |pen| pen.thickness() / 2.0)),
+            )
             || !self.rounded_rect(rect)
         {
             return;
@@ -623,7 +726,16 @@ impl IDrawingContextImpl for SvgDrawingContext {
         pen: Option<&dyn IPen>,
         region: &dyn IPlatformRenderInterfaceRegion,
     ) {
-        if !self.active() || !self.brush(brush) || !self.pen(pen) || !self.region(region) {
+        if !self.active() || !self.region(region) {
+            return;
+        }
+        let bounds = region.bounds().to_pixel_rect().to_rect(1.0);
+        if !self.brush_with_bounds(brush, Some(bounds))
+            || !self.pen(
+                pen,
+                bounds.inflate(pen.map_or(0.0, |pen| pen.thickness() / 2.0)),
+            )
+        {
             return;
         }
         self.count_draw();
@@ -633,7 +745,10 @@ impl IDrawingContextImpl for SvgDrawingContext {
     fn draw_ellipse(&mut self, brush: Option<&dyn IBrush>, pen: Option<&dyn IPen>, rect: Rect) {
         if !self.active()
             || !self.brush_with_bounds(brush, Some(rect))
-            || !self.pen(pen)
+            || !self.pen(
+                pen,
+                rect.inflate(pen.map_or(0.0, |pen| pen.thickness() / 2.0)),
+            )
             || !self.rect(rect)
         {
             return;
@@ -682,6 +797,21 @@ impl IDrawingContextImpl for SvgDrawingContext {
             return self.inner.create_temporary_layer(PixelSize::new(1, 1));
         }
         self.inner.create_temporary_layer(size)
+    }
+
+    fn try_blit_layer(&mut self, layer: &dyn IDrawingContextLayerImpl) -> bool {
+        // A native Skia blit normally downcasts its destination. Intercept it
+        // before that escape so a GPU-only source cannot enter a CPU picture
+        // and silently disappear during SVG or raster replay.
+        if self.active() && self.bitmap(layer) {
+            self.reason("Intermediate layer bitmap blit");
+            self.count_draw();
+            self.audit.borrow_mut().embedded_images += 1;
+            // Preserve Skia's device-space blit, including its transform and
+            // opacity rules, rather than emulating it with draw_bitmap.
+            layer.blit(self.inner.as_mut());
+        }
+        true
     }
 
     fn prefers_bounded_effect_targets(&self) -> bool {
@@ -926,17 +1056,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
     }
 
     fn dispose(&mut self) {
-        if self.disposed {
-            return;
-        }
-        if !self.states.is_empty() || self.fragment_open {
-            self.error("Export recording finished with unbalanced drawing state");
-        }
-        self.inner.dispose();
-        self.disposed = true;
-        if let Some(callback) = self.on_finished.take() {
-            callback(self.audit());
-        }
+        self.finalize(false);
     }
 }
 
@@ -1268,7 +1388,7 @@ impl IDrawingContextImplWithFragments for SvgDrawingContext {
 
 impl Drop for SvgDrawingContext {
     fn drop(&mut self) {
-        self.dispose();
+        self.finalize(std::thread::panicking());
     }
 }
 

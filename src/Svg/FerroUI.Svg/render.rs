@@ -438,17 +438,32 @@ pub(crate) fn raster_layer(
     options: &SvgExportOptions,
 ) -> Result<Vec<u8>, SvgError> {
     let (width, height) = raster_size(layer.bounds, options)?;
+    let scale = (
+        (f64::from(width) / layer.bounds.width) as f32,
+        (f64::from(height) / layer.bounds.height) as f32,
+    );
+    let origin = (-layer.bounds.x as f32, -layer.bounds.y as f32);
+    // An allocation may be small even when its logical-to-device mapping
+    // overflows Skia's scalar range (for example a subnormal logical width).
+    // Check the composed translation too, before allocating or replaying.
+    if scale.0 <= 0.0
+        || scale.1 <= 0.0
+        || ![scale.0, scale.1, origin.0 * scale.0, origin.1 * scale.1]
+            .iter()
+            .all(|value| value.is_finite())
+    {
+        return Err(SvgError::InvalidOptions(
+            "raster bounds and scale must produce a finite Skia device transform".into(),
+        ));
+    }
     let mut surface =
         sk::surfaces::raster_n32_premul((width, height)).ok_or(SvgError::RasterAllocation)?;
     let canvas = surface.canvas();
     canvas.clear(sk::Color::TRANSPARENT);
     // Map fractional logical dimensions onto the complete integer pixel grid. The inverse
     // mapping is the image element's exact width/height, so ceil does not stretch the scene.
-    canvas.scale((
-        width as f32 / layer.bounds.width as f32,
-        height as f32 / layer.bounds.height as f32,
-    ));
-    canvas.translate((-layer.bounds.x as f32, -layer.bounds.y as f32));
+    canvas.scale(scale);
+    canvas.translate(origin);
     canvas.draw_picture(&layer.picture, None, None);
     encode_surface(&mut surface)
 }

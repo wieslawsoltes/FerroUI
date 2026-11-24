@@ -33,6 +33,9 @@ commands, then export or take the completed document. It advertises direct rende
 retained prior frame. Overlapping recordings return `NotReady`; disposal marks the target
 corrupted and prevents an in-flight recording from publishing a new snapshot. Serialization is
 separate from frame capture, so a frame that is never exported incurs no XML work.
+An unwinding frame producer marks the capture as a recording failure. Completion owns a readiness
+guard, so failed finalization cannot leave the target permanently busy or publish a partial frame
+as successful artwork.
 
 `SvgSurface` implements `IPlatformRenderSurface` and provides the platform integration path.
 `SvgPlatformRenderInterface` delegates resource creation, ordinary window surfaces and offscreen
@@ -87,7 +90,7 @@ but conservatively classified as uninspectable, requiring fallback. Application 
 depends on external GPU textures, an actual surface or platform child windows must provide an
 export-compatible snapshot.
 
-Direct bitmap and image-brush capture rejects leased GPU frames, texture-backed Skia images and
+Direct bitmap, image-brush and native layer-blit capture rejects leased GPU frames, texture-backed Skia images and
 surfaces requiring their owning GPU context. The recording fails with a request for an explicit CPU
 snapshot; it never attempts an implicit GPU readback. Unit tests exercise the leased-frame
 contract without hardware and accept every current CPU bitmap implementation. Actual GPU texture
@@ -114,8 +117,8 @@ brush callbacks must likewise supply CPU-compatible resources inside their own d
 | Box shadows, blur/drop shadow and custom effects | Forwarded to Skia and rasterized as a composed layer; a missing or invalid custom shader is an error. |
 | Color matrix, multiply, convolution, lighting and pixel operations | Every optional layer-effect method forwards through the audited adapter; fallback is explicit. |
 | Acrylic-like materials | Skia material rendering with fallback. |
-| Offscreen layers and blitting | Existing Skia layers remain usable; native downcasts are audited so blit stays compatible. |
-| Native Skia canvas leases | Captured in order, including a lease that finishes immediately before context disposal; fallback. |
+| Offscreen layers and blitting | A destination-context hook validates CPU readability before native downcasting. Accepted blits retain Skia's device-space semantics and use explicit raster fallback. |
+| Native Skia canvas leases | Captured in order with the transform, DPI and opacity at lease acquisition, including a lease that finishes immediately before context disposal; fallback. Retained features cannot outlive their context. |
 | Reusable fragments | Capability mirrors the underlying Skia context; no unsupported fragment support is advertised. |
 | 3D scenes | Optional `media3d` forwards the CPU scene renderer; missing executor is an error, supported output is raster. |
 | Perspective transforms | Captured by Skia; raster fallback because SVG affine transforms cannot express them. |
@@ -123,6 +126,8 @@ brush callbacks must likewise supply CPU-compatible resources inside their own d
 The adapter implements the full core drawing-context surface and the effects, layer-effects,
 acrylic and scene interfaces. Extending the underlying contract creates a compile-time obligation
 for new required members. New optional/default methods still require a fidelity audit when added.
+Brush validation includes resolved gradient coordinates and stroke-expanded bounds, so otherwise
+finite inputs that overflow Skia's scalar range fail before native recording.
 
 ### Visual trees versus compositor frames
 
@@ -195,6 +200,11 @@ generic-font editable text when requested. These generated technical labels use 
 positioning and report a diagnostic for non-ASCII content; record application-shaped text inside
 a layer when complex-script or bidirectional labels are needed. Annotations are emitted above the
 scene so later layers cannot obscure an earlier label.
+
+Wireframe image instances retain `<use>` layout, including both source and instance transforms;
+they reference a separate bounds rectangle while the original image remains available to paint
+resources. X-ray image opacity composes with existing CSS opacity. Optional numeric rounding
+preserves token boundaries and leaves foreign metadata unchanged.
 
 ## 6. Performance and resource behavior
 
@@ -301,6 +311,7 @@ cargo test --locked -p ferroui-svg --lib
 cargo test --locked -p ferroui-svg --features media3d --lib
 cargo test --locked -p ferroui-base --lib full_frame_render_tests
 cargo test --locked -p ferroui-skia --lib bitmap_cpu_export_tests
+cargo test --locked -p ferroui-skia --lib native_lease_tests
 cargo clippy --locked -p ferroui-svg --all-targets --all-features --no-deps -- -D warnings
 cargo run --locked -p ferroui-svg --example layered_export -- samples/SvgExport/output
 cargo run --release --locked -p ferroui-svg --example layered_export -- /tmp/svg-check --reference --benchmark
@@ -319,11 +330,13 @@ Inkscape, and reports RGB error metrics when the raster reference is present. It
 Pillow/NumPy or its standard-library PNG decoder. See `samples/SvgExport/README.md` for the checked
 example workload and measured results.
 
-The implementation was validated on Linux with 71 passing SVG tests in the default build and
-71 in the `media3d` build, three passing compositor integration tests, and three passing Skia
-bitmap exportability tests. The feature-enabled run checks actual 3D triangle pixels; the
-feature-disabled run checks the missing-executor error, accounting for Cargo feature unification.
-These are focused backend checks, rather than a claim that every workspace/platform test ran.
+The correctness review was validated on Linux with 89 passing SVG tests in the default build and
+89 in the `media3d` build, three passing Base compositor tests, and 603 passing Skia library tests
+(nine existing ignored tests) under a controlled Noto font setup. The feature-enabled run checks
+actual 3D triangle pixels; the feature-disabled run checks the missing-executor error, accounting
+for Cargo feature unification. [The review report](svg-review.md) describes fixes, real compositor
+coverage, font-environment requirements and validation boundaries. These local results do not
+substitute for the repository's separate cross-platform CI.
 
 ## 9. Primary format and implementation references
 

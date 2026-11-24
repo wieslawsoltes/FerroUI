@@ -270,6 +270,9 @@ impl IBitmapImpl for SurfaceRenderTarget {
 
 impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     fn blit(&self, context: &mut dyn IDrawingContextImpl) {
+        if context.try_blit_layer(self) {
+            return;
+        }
         let context = context
             .as_any_mut()
             .downcast_mut::<DrawingContextImpl>()

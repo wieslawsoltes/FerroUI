@@ -106,6 +106,98 @@ fn a_surface_failure_replaces_the_previous_result_instead_of_publishing_stale_ar
 }
 
 #[test]
+fn unwinding_a_frame_publishes_a_recording_failure_and_allows_the_next_frame() {
+    let surface = SvgSurface::default();
+    let backend = SvgPlatformRenderInterface::default().create_backend_context(None);
+    let target = backend.create_render_target(&[Arc::new(surface.clone())]);
+    let scene = RenderTargetSceneInfo::new(
+        PixelSize::new(20, 20),
+        1.0,
+        CompositionTransparencyLevel::None,
+    );
+    let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let (mut context, _) = target.try_create_drawing_context(&scene).unwrap();
+        context.draw_ellipse(
+            Some(&ImmutableSolidColorBrush::new(Colors::BLUE)),
+            None,
+            Rect::new(0.0, 0.0, 10.0, 10.0),
+        );
+        panic!("the frame producer failed after a balanced drawing command");
+    }));
+    assert!(panic.is_err());
+    let failed = surface
+        .take_frame()
+        .expect("the aborted frame replaces the result");
+    assert!(matches!(failed.result, Err(SvgError::Recording { .. })));
+    let (mut context, _) = target.try_create_drawing_context(&scene).unwrap();
+    context.dispose();
+    let recovered = surface
+        .take_frame()
+        .expect("the target remains usable after unwind");
+    assert!(recovered.sequence > failed.sequence);
+    assert!(recovered.result.is_ok());
+}
+
+#[test]
+fn producer_panic_with_an_active_native_lease_publishes_failure_without_double_unwind() {
+    use ferroui_skia::{ISkiaApiLease, ISkiaApiLeaseFeature};
+    use std::any::TypeId;
+    use std::cell::RefCell;
+
+    let surface = SvgSurface::default();
+    let backend = SvgPlatformRenderInterface::default().create_backend_context(None);
+    let target = backend.create_render_target(&[Arc::new(surface.clone())]);
+    let scene = RenderTargetSceneInfo::new(
+        PixelSize::new(20, 20),
+        1.0,
+        CompositionTransparencyLevel::None,
+    );
+    drop(target.try_create_drawing_context(&scene).unwrap());
+    // Keep the previous success in the latest-result slot to detect stale
+    // artwork if failed native finalization cannot publish a replacement.
+    let held_lease = RefCell::<Option<Rc<dyn ISkiaApiLease>>>::new(None);
+    let panic = std::panic::catch_unwind(std::panic::AssertUnwindSafe(|| {
+        let (mut context, _) = target.try_create_drawing_context(&scene).unwrap();
+        context.draw_ellipse(
+            Some(&ImmutableSolidColorBrush::new(Colors::BLUE)),
+            None,
+            Rect::new(0.0, 0.0, 10.0, 10.0),
+        );
+        let feature = context
+            .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
+            .unwrap();
+        *held_lease.borrow_mut() = Some(
+            feature
+                .downcast_ref::<Rc<dyn ISkiaApiLeaseFeature>>()
+                .unwrap()
+                .lease(),
+        );
+        panic!("original producer panic with a live native lease");
+    }))
+    .unwrap_err();
+    assert_eq!(
+        Some(&"original producer panic with a live native lease"),
+        panic.downcast_ref::<&str>()
+    );
+    let failed = surface
+        .take_frame()
+        .expect("failed finalization replaces the old result");
+    assert_eq!(2, failed.sequence);
+    let Err(SvgError::Recording { reasons, .. }) = failed.result else {
+        panic!("the incomplete picture must never be exported successfully");
+    };
+    assert!(reasons.iter().any(|reason| reason.contains("aborted")));
+    assert!(reasons
+        .iter()
+        .any(|reason| reason.contains("could not be finalized")));
+    held_lease.borrow_mut().take().unwrap().dispose();
+    drop(target.try_create_drawing_context(&scene).unwrap());
+    let recovered = surface.take_frame().unwrap();
+    assert_eq!(3, recovered.sequence);
+    assert!(recovered.result.is_ok());
+}
+
+#[test]
 fn caches_reuse_recordings_and_respect_stricter_limits_on_every_export() {
     let mut document = SvgDocument::new(Size::new(20.0, 20.0)).unwrap();
     document
@@ -245,4 +337,136 @@ fn harfbuzz_shaped_ligatures_combining_marks_and_polish_text_export_as_paths() {
         .diagnostics
         .iter()
         .any(|diagnostic| diagnostic.message.contains("Unicode")));
+}
+
+#[test]
+fn real_compositor_captures_complete_hidpi_frames_and_isolated_opacity() {
+    use base64::Engine;
+    use ferroui_base::media::{Brushes, Color};
+    use ferroui_controls::testing::{CompositorTestServices, MockWindowingPlatform, TestServices};
+    use ferroui_controls::{Border, Canvas, Control, Window};
+
+    // Exercise the public window -> layout -> renderer -> compositor -> SVG
+    // surface path. Only the OS window is mocked; drawing uses native Skia.
+    let services = CompositorTestServices::start(
+        TestServices::styled_window()
+            .with_render_interface(Rc::new(SvgPlatformRenderInterface::default())),
+    );
+    let surface = SvgSurface::new(SvgExportOptions {
+        fidelity: SvgFidelity::VectorOnly,
+        ..Default::default()
+    })
+    .unwrap();
+    let window_impl = MockWindowingPlatform::create_window_mock_with_size(64.0, 48.0);
+    window_impl.render_scaling.set(2.0);
+    window_impl.setup_surfaces(vec![Arc::new(surface.clone())]);
+    services.setup(&window_impl);
+    let window = Window::with_impl(window_impl);
+    // Ensure cleanup even if an assertion fails, before the application scope
+    // restores the dispatcher and platform services.
+    struct CloseWindow(ferroui_base::Ref<Window>);
+    impl Drop for CloseWindow {
+        fn drop(&mut self) {
+            self.0.close();
+        }
+    }
+    let _close = CloseWindow(window.clone());
+    window.set_background(Some(Brushes::white()));
+    window.set_width(64.0);
+    window.set_height(48.0);
+    let canvas = Canvas::new();
+    let left = Border::new();
+    left.set_width(20.0);
+    left.set_height(20.0);
+    left.set_background(Some(Brushes::red()));
+    Canvas::set_left(&left, 4.0);
+    Canvas::set_top(&left, 4.0);
+    let right = Border::new();
+    right.set_width(20.0);
+    right.set_height(20.0);
+    right.set_background(Some(Brushes::blue()));
+    Canvas::set_left(&right, 36.0);
+    Canvas::set_top(&right, 4.0);
+    canvas.children().add(left.clone().upcast::<Control>());
+    canvas.children().add(right.clone().upcast::<Control>());
+    window.set_content(Some(Control::boxed(&canvas)));
+    window.show();
+    services.run_jobs();
+
+    let first = surface
+        .take_frame()
+        .expect("the compositor published its first frame");
+    let output = first.result.unwrap();
+    assert_eq!(1, output.report.vector_layers);
+    assert_eq!(0, output.report.raster_layers);
+    let has_fill = |output: &SvgOutput, color: Color| {
+        let xml = roxmltree::Document::parse(&output.svg).unwrap();
+        xml.descendants().any(|node| {
+            node.attribute("fill")
+                .and_then(|fill| Color::parse(fill).ok())
+                == Some(color)
+        })
+    };
+    let xml = roxmltree::Document::parse(&output.svg).unwrap();
+    assert_eq!(Some("0 0 64 48"), xml.root_element().attribute("viewBox"));
+    assert!(has_fill(&output, Colors::RED), "{}", output.svg);
+    assert!(has_fill(&output, Colors::BLUE), "{}", output.svg);
+
+    // Invalidate one sibling only. A capture target must redraw the unchanged
+    // sibling too; a normal incremental target would preserve its old pixels.
+    left.set_background(Some(Brushes::green()));
+    services.run_jobs();
+    let second = surface
+        .take_frame()
+        .expect("the changed control produced a new frame");
+    assert!(second.sequence > first.sequence);
+    let output = second.result.unwrap();
+    assert_eq!(1, output.report.vector_layers);
+    assert!(has_fill(&output, Colors::GREEN), "{}", output.svg);
+    assert!(has_fill(&output, Colors::BLUE), "{}", output.svg);
+    assert!(!has_fill(&output, Colors::RED), "{}", output.svg);
+
+    // This state change is applied by the actual compositor, not by the
+    // test calling push_opacity. Its complete frame must be rasterized once.
+    surface
+        .set_options(SvgExportOptions {
+            raster_scale: 1.0,
+            ..Default::default()
+        })
+        .unwrap();
+    left.set_opacity(0.5);
+    services.run_jobs();
+    let third = surface
+        .take_frame()
+        .expect("the opacity change produced a new frame");
+    assert!(third.sequence > second.sequence);
+    let output = third.result.unwrap();
+    assert_eq!(1, output.report.raster_layers, "{:?}", output.report);
+    let xml = roxmltree::Document::parse(&output.svg).unwrap();
+    let href = xml
+        .descendants()
+        .find(|node| node.has_tag_name("image"))
+        .unwrap()
+        .attributes()
+        .find(|attribute| attribute.name() == "href")
+        .unwrap()
+        .value();
+    let png = base64::engine::general_purpose::STANDARD
+        .decode(href.strip_prefix("data:image/png;base64,").unwrap())
+        .unwrap();
+    let image = skia_safe::Image::from_encoded(skia_safe::Data::new_copy(&png))
+        .unwrap()
+        .make_raster_image(None, skia_safe::image::CachingHint::Allow)
+        .unwrap();
+    let pixels = image.peek_pixels().unwrap();
+    // The recorded canvas is in device pixels (2x), then mapped to logical
+    // SVG units. Sampling away from edges also catches doubled DPI scaling.
+    assert_eq!((128, 96), (pixels.width(), pixels.height()));
+    assert_eq!(skia_safe::Color::BLUE, pixels.get_color((80, 20)));
+    assert_eq!(skia_safe::Color::WHITE, pixels.get_color((60, 20)));
+    let green = pixels.get_color((20, 20));
+    assert_eq!(255, green.a());
+    assert!((127..=128).contains(&green.r()), "{green:?}");
+    assert!((191..=192).contains(&green.g()), "{green:?}");
+    assert!((127..=128).contains(&green.b()), "{green:?}");
 }
