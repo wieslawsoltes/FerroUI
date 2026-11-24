@@ -1,6 +1,6 @@
 use super::{
-    AutomationControlType, AutomationPeerImpl, ControlAutomationPeer, ControlAutomationPeerImpl,
-    ListItemAutomationPeer,
+    AutomationControlType, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer,
+    ControlAutomationPeerImpl, ListItemAutomationPeer,
 };
 use crate::automation::provider::{IRangeValueProvider, IValueProvider};
 use crate::automation::{AccessibilityView, AutomationProperties};
@@ -42,7 +42,7 @@ impl AutomationPeerImpl for TableViewRowAutomationPeer {
         let mut builder = String::new();
         let mut has_visible_cell = false;
         let children = presenter.children();
-        for child in children.iter() {
+        for child in children.snapshot().iter() {
             let Some(cell) = child.cast::<TableViewCell>() else { continue };
             if !cell.is_visible() || AutomationProperties::get_accessibility_view(&cell) == AccessibilityView::Raw {
                 continue;
@@ -103,8 +103,8 @@ fn append_cell_name(row: &TableViewRow, cell: &TableViewCell, builder: &mut Stri
 }
 
 fn append_visual_name(row: &TableViewRow, visual: &Visual, builder: &mut String, allow_labeled_by: bool) {
-    let Some(control) = visual.cast::<Control>() else {
-        for child in visual.visual_children().iter() {
+    let Some(control) = visual.to_ref().cast::<Control>() else {
+        for child in visual.visual_children().snapshot().iter() {
             append_visual_name(row, &child, builder, allow_labeled_by);
         }
         return;
@@ -145,7 +145,7 @@ fn append_visual_name(row: &TableViewRow, visual: &Visual, builder: &mut String,
         return;
     }
     if !control.visual_children().is_empty() {
-        for child in control.visual_children().iter() {
+        for child in control.visual_children().snapshot().iter() {
             append_visual_name(row, &child, builder, true);
         }
         return;
