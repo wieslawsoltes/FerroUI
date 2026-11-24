@@ -61,16 +61,17 @@ fn frame_submit_info(frame_id: u64) -> graphite::SubmitInfo {
 fn perform_deferred_cleanup(context: &mut graphite::Context, recorder: &mut graphite::Recorder) {
     // A `std::chrono::milliseconds` is its count; a disengaged `std::optional` of the longest
     // purge time is all zeros (no limit).
-    // SAFETY: the duration is an `i64` in a structure of that size (checked by `transmute`).
-    let age = unsafe { std::mem::transmute::<i64, skia_bindings::std_chrono_milliseconds>(DEFERRED_CLEANUP_AGE_MS) };
+    // SAFETY: the duration is an `i64` in a structure of that size (checked by `transmute`). A closure, because
+    // the binding of the duration is not `Copy` with every standard library (libstdc++ on Linux).
+    let age = || unsafe { std::mem::transmute::<i64, skia_bindings::std_chrono_milliseconds>(DEFERRED_CLEANUP_AGE_MS) };
     let no_limit = || skia_bindings::__BindgenOpaqueArray([0u64; 2]);
     // SAFETY: `RefHandle` is `repr(transparent)` over the pointer to the native object, which
     // both handles own and which is alive for the call; the context is behind its lock.
     unsafe {
         let context = *(context as *mut graphite::Context).cast::<*mut skia_bindings::skgpu_graphite_Context>();
-        (*context).performDeferredCleanup(age, no_limit());
+        (*context).performDeferredCleanup(age(), no_limit());
         let recorder = *(recorder as *mut graphite::Recorder).cast::<*mut skia_bindings::skgpu_graphite_Recorder>();
-        (*recorder).performDeferredCleanup(age, no_limit());
+        (*recorder).performDeferredCleanup(age(), no_limit());
     }
 }
 
@@ -194,6 +195,47 @@ pub struct GraphiteGrContext {
     /// When the last flush ended: where the cost of a frame that a layer
     /// drew directly ends.
     last_flush_end: Cell<Option<Instant>>,
+    /// The context draws with a Vulkan device (#1365): the images of its layers are not held by the
+    /// GPU's work ([`retire`](Self::retire)), and its disposal waits for the GPU.
+    #[cfg(feature = "graphite-vulkan")]
+    vulkan: bool,
+    /// What the layers let go of since the last flush and the GPU may still use: dropped after the
+    /// next flush has waited for the GPU (Vulkan only).
+    #[cfg(feature = "graphite-vulkan")]
+    retired: RefCell<Vec<Box<dyn Any>>>,
+    /// The window surface the next flush leaves in a given state (Vulkan only).
+    #[cfg(feature = "graphite-vulkan")]
+    frame_target: RefCell<Option<FrameTarget>>,
+}
+
+/// The surface of a window frame and the state its texture is left in once the frame's recording
+/// has run (`fTargetSurface` and `fTargetTextureState` of the insertion): on Vulkan the layout the
+/// present path expects the image in, which Graphite's record of the layout keeps from then on.
+#[cfg_attr(not(feature = "graphite-vulkan"), allow(dead_code))]
+pub(crate) struct FrameTarget {
+    pub(crate) surface: Surface,
+    pub(crate) state: skia_safe::gpu::MutableTextureState,
+}
+
+/// Names the target of an insertion and the state its texture is left in once the recording has
+/// run (skia-safe sets neither; through `skia-bindings`, as for `fRequireOrderedRecordings`,
+/// desktop-performance.md section 9.17). A recording without a deferred canvas draws where it drew:
+/// the target only names the surface whose texture is transitioned.
+fn set_target_state(info: &mut InsertRecordingInfo, target: &FrameTarget) {
+    // The wrapper holds the pointer to the native structure and a marker of no size: of the size of a
+    // pointer, the pointer is at offset 0. Surface and state handles are `repr(transparent)` over the
+    // pointer to their native objects.
+    const _: () = assert!(std::mem::size_of::<InsertRecordingInfo<'static>>() == std::mem::size_of::<*mut ()>());
+    // SAFETY: by the assertion the first word of the wrapper is the native structure it owns; the surface and the
+    // state outlive the insertion (the caller holds them), which reads them and takes references of its own.
+    unsafe {
+        let native =
+            *(info as *mut InsertRecordingInfo).cast::<*mut skia_bindings::skgpu_graphite_InsertRecordingInfo>();
+        (*native).fTargetSurface = *(&target.surface as *const Surface).cast::<*mut skia_bindings::SkSurface>();
+        let state = *(&target.state as *const skia_safe::gpu::MutableTextureState)
+            .cast::<*mut skia_bindings::skgpu_MutableTextureState>();
+        (*native).fTargetTextureState = state as _;
+    }
 }
 
 impl GraphiteGrContext {
@@ -219,7 +261,51 @@ impl GraphiteGrContext {
             direct_only_draws: Cell::new(0),
             layer_blit: Cell::new(false),
             last_flush_end: Cell::new(None),
+            #[cfg(feature = "graphite-vulkan")]
+            vulkan: false,
+            #[cfg(feature = "graphite-vulkan")]
+            retired: RefCell::new(Vec::new()),
+            #[cfg(feature = "graphite-vulkan")]
+            frame_target: RefCell::new(None),
         })
+    }
+
+    /// Wraps a Graphite context of a Vulkan device (#1365): as [`new`](Self::new), with the threads
+    /// of the pipelined layers drawing on no shared target (`BandInsert::with_shared_target`), the
+    /// images of the layers kept until the GPU has finished with them, and a disposal that waits
+    /// for the GPU.
+    #[cfg(feature = "graphite-vulkan")]
+    pub(crate) fn on_vulkan(context: graphite::Context) -> Option<Self> {
+        let mut this = Self::new(context)?;
+        this.vulkan = true;
+        if let Some(state) = this.state.get_mut().as_mut() {
+            state.bands.forbid_shared_target();
+        }
+        Some(this)
+    }
+
+    /// Keeps what a layer let go of, which the GPU may still use (the image of a layer on Vulkan),
+    /// until the next flush has submitted the last use and waited for the GPU. Dropped at once when
+    /// the context has been disposed (its disposal waited for the GPU).
+    pub(super) fn retire(&self, value: Box<dyn Any>) {
+        if self.is_disposed() {
+            return;
+        }
+        #[cfg(feature = "graphite-vulkan")]
+        self.retired.borrow_mut().push(value);
+        // Only a Vulkan image is retired (Metal's textures are held by the GPU's work).
+        #[cfg(not(feature = "graphite-vulkan"))]
+        drop(value);
+    }
+
+    /// Flushes the recorder, leaving the texture of the window surface `target` in `state` once the
+    /// recording has run (the end of a window frame on Vulkan).
+    #[cfg(feature = "graphite-vulkan")]
+    pub(crate) fn flush_to_target(&self, target: FrameTarget) {
+        *self.frame_target.borrow_mut() = Some(target);
+        self.flush();
+        // A flush that found the context disposed leaves the target behind.
+        self.frame_target.borrow_mut().take();
     }
 
     /// The count of the draws only this recorder draws as an ordinary layer
@@ -298,6 +384,7 @@ impl GraphiteGrContext {
     }
 
     /// Installs native asynchronous completion on this context's actual queue.
+    #[cfg_attr(not(target_vendor = "apple"), allow(dead_code))]
     pub(crate) fn set_frame_completion_handler(&self, handler: Box<dyn Fn(GpuCompletion)>) {
         self.with_state(|state| state.completion_handler = Some(handler));
     }
@@ -307,8 +394,17 @@ impl GraphiteGrContext {
         let mut state = self.state.borrow_mut();
         if let Some(state) = state.as_mut() {
             self.flush_now(state);
+            #[cfg(feature = "graphite-vulkan")]
+            if self.vulkan {
+                // The disposal of the GPU waits for it: no image of FerroUI that Graphite drew on (a layer's, a
+                // window's) is destroyed while the GPU uses it.
+                let _ = state.context.lock().submit_and_wait();
+            }
         }
         *state = None;
+        drop(state);
+        #[cfg(feature = "graphite-vulkan")]
+        self.retired.borrow_mut().clear();
     }
 
     /// Whether the context has been disposed.
@@ -317,14 +413,34 @@ impl GraphiteGrContext {
     }
 
     /// Flushes the recorder and notes when the flush ended.
+    #[cfg(not(feature = "graphite-vulkan"))]
     fn flush_now(&self, state: &mut GraphiteState) {
-        Self::flush_state(state, self.layer_blit.take());
+        Self::flush_state(state, self.layer_blit.take(), None);
+        self.last_flush_end.set(Some(Instant::now()));
+    }
+
+    /// Flushes the recorder and notes when the flush ended; on Vulkan with the frame target, and
+    /// with what the layers let go of dropped once the GPU has finished with it.
+    #[cfg(feature = "graphite-vulkan")]
+    fn flush_now(&self, state: &mut GraphiteState) {
+        let retiring = std::mem::take(&mut *self.retired.borrow_mut());
+        let target = self.frame_target.borrow_mut().take();
+        Self::flush_state(state, self.layer_blit.take(), target.as_ref());
+        if !retiring.is_empty() {
+            // What the layers let go of since the last flush (the images of layers on Vulkan) goes once the GPU
+            // has finished its last use, which this flush submitted: a wait of a resize or of the disposal of a
+            // layer, once, never one of an ordinary frame.
+            let _ = state.context.lock().submit_and_wait();
+        }
+        drop(retiring);
+        drop(target);
         self.last_flush_end.set(Some(Instant::now()));
     }
 
     /// `blitted`: a pipelined layer was drawn onto a canvas of the recorder
     /// since the last flush.
-    fn flush_state(state: &mut GraphiteState, blitted: bool) {
+    /// `target`: the window surface whose texture the recording leaves in a given state.
+    fn flush_state(state: &mut GraphiteState, blitted: bool, target: Option<&FrameTarget>) {
         // The recordings the threads of the pipelined layers were told to
         // insert come before the recording of this recorder, all of them:
         // what it draws may be the texture they are drawing on, or what a
@@ -337,7 +453,10 @@ impl GraphiteGrContext {
         let submit_info = frame_submit_info(flush);
         let completion = std::mem::take(&mut state.frame_completion);
         if let Some(mut recording) = state.recorder.snap() {
-            let info = InsertRecordingInfo::new(&mut recording);
+            let mut info = InsertRecordingInfo::new(&mut recording);
+            if let Some(target) = target {
+                set_target_state(&mut info, target);
+            }
             let (inserted, submitted) = {
                 let mut context = state.context.lock();
                 let inserted = context.insert_recording(&info) == graphite::InsertStatus::Success;

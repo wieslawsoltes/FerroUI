@@ -66,6 +66,11 @@
 //!   sent, and why no recording of that recorder is inserted while bands
 //!   that were told to insert have not answered.
 //!
+//! On Graphite Vulkan (#1365) the layer's texture is an image of `ferroui-vulkan`
+//! ([`LayerTexture`]), and the recorders of the threads draw on no shared
+//! target: the bands insert from deferred canvases
+//! ([`BandInsert::with_shared_target`]).
+//!
 //! A frame is drawn directly although the layer is pipelined when only the
 //! recorder of the context draws it as an ordinary layer would: when it
 //! leased the Skia API (what the client draws belongs to the recorder the
@@ -78,10 +83,11 @@
 
 use super::graphite_gr_context::{GraphiteGrContext, SharedContext};
 use crate::drawing_context_impl::{CanvasSource, RecordedLeases};
-use crate::gpu::metal::AutoReleasePool;
+use super::AutoReleasePool;
 use crate::gpu::ISkiaSurface;
 use crate::{SkiaFramePipelining, MAX_FRAME_PIPELINING_BANDS};
 use ferroui_base::PixelSize;
+#[cfg(target_vendor = "apple")]
 use skia_safe::gpu::graphite::mtl::backend_textures;
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::{
@@ -89,6 +95,7 @@ use skia_safe::{
     SamplingOptions, Surface, SurfaceProps,
 };
 use std::cell::{Cell, RefCell};
+#[cfg(target_vendor = "apple")]
 use std::ffi::c_void;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
@@ -237,6 +244,7 @@ impl PipelinePolicy {
     }
 }
 
+#[cfg(target_vendor = "apple")]
 extern "C" {
     /// A new `id<MTLTexture>` of the device, drawn to and sampled, with one
     /// reference that the caller owns; null when it cannot be made
@@ -247,25 +255,130 @@ extern "C" {
     fn ferro_skia_layer_texture_release(texture: *mut c_void);
 }
 
-/// The Metal texture of a pipelined layer: one owned reference to an
-/// `id<MTLTexture>`. Every surface that wraps the texture holds a reference
-/// of its own, so the texture outlives this one for as long as it is drawn.
-struct LayerTexture(*mut c_void);
+/// The texture of a pipelined layer, which the recorder of the context and
+/// the threads of the bands wrap in surfaces of their own.
+pub(crate) struct LayerTexture(LayerTextureKind);
 
-// SAFETY: the pointer is an `id<MTLTexture>`, an object Metal lets any
-// thread retain, use and release. The type only hands the pointer to Skia,
-// which takes a reference of its own, and releases its one reference when it
-// is dropped, on whichever thread that is.
+enum LayerTextureKind {
+    /// One owned reference to an `id<MTLTexture>`. Every surface that wraps
+    /// the texture holds a reference of its own, so the texture outlives
+    /// this one for as long as it is drawn.
+    #[cfg(target_vendor = "apple")]
+    Metal(*mut c_void),
+    /// An image of `ferroui-vulkan` and the one Graphite backend texture of
+    /// it that every wrap copies: the copies share Graphite's record of the
+    /// image's layout, so every recorder that draws on or inserts onto the
+    /// image sees the layout the last insertion left (the insertions run
+    /// one at a time, under the lock of the context). Nothing of the GPU's
+    /// work holds the image, so the layer hands it to the context when it
+    /// lets it go ([`GraphiteGrContext::retire`]), which destroys it after
+    /// the GPU has finished with it. The backend texture is declared first:
+    /// it goes before the image it describes.
+    #[cfg(feature = "graphite-vulkan")]
+    Vulkan {
+        texture: graphite::BackendTexture,
+        /// Held for its lifetime: the image the backend texture describes.
+        #[allow(dead_code)]
+        image: ferroui_vulkan::VulkanOffscreenImage,
+    },
+}
+
+// SAFETY: on Metal the pointer is an `id<MTLTexture>`, an object Metal lets
+// any thread retain, use and release; the value only hands the pointer to
+// Skia, which takes a reference of its own, and releases its one reference
+// when it is dropped, on whichever thread that is. On Vulkan the image is
+// `Send + Sync`, and the backend texture is a description of it with a
+// reference-counted (atomically) record of its layout, which is read and
+// changed only by insertions, under the lock of the context; copies of it are
+// made on any thread, which only adds a reference to that record.
 unsafe impl Send for LayerTexture {}
-// SAFETY: as above; the type has no interior state.
+// SAFETY: as above; the value has no interior state of its own.
 unsafe impl Sync for LayerTexture {}
+
+impl LayerTexture {
+    /// A texture of the Metal device `device` (an `id<MTLDevice>`, alive for
+    /// the call); `None` when Metal makes none.
+    #[cfg(target_vendor = "apple")]
+    pub(crate) fn metal(device: *mut c_void, width: i32, height: i32, rgba: bool) -> Option<Self> {
+        if device.is_null() {
+            return None;
+        }
+        // SAFETY: `device` is the `id<MTLDevice>` of the GPU that asks for
+        // the layer, alive for the call; the function has no other
+        // precondition and returns null when it makes no texture.
+        let texture = unsafe { ferro_skia_layer_texture_new(device, width, height, i32::from(rgba)) };
+        (!texture.is_null()).then(|| Self(LayerTextureKind::Metal(texture)))
+    }
+
+    /// A texture of the device of `vulkan`: an image with the usage Graphite
+    /// asks for (input attachment besides the default usage), owned by the
+    /// queue family of the device's main queue, in the layout `UNDEFINED`
+    /// (the first draw of the layer clears it). Made without a command and
+    /// without a wait; `None` when the device makes no image.
+    #[cfg(feature = "graphite-vulkan")]
+    pub(crate) fn vulkan(
+        vulkan: &dyn ferroui_vulkan::IVulkanPlatformGraphicsContext,
+        width: i32,
+        height: i32,
+        rgba: bool,
+    ) -> Option<Self> {
+        use ferroui_vulkan::ash::vk;
+        let format = if rgba { vk::Format::R8G8B8A8_UNORM } else { vk::Format::B8G8R8A8_UNORM };
+        let image = ferroui_vulkan::VulkanOffscreenImage::new(
+            vulkan,
+            PixelSize::new(width, height),
+            format.as_raw() as u32,
+            vk::ImageUsageFlags::INPUT_ATTACHMENT.as_raw(),
+        )
+        .ok()?;
+        let queue_family = vulkan.device().graphics_queue_family_index();
+        let texture = crate::gpu::vulkan::graphite_backend_texture(&image.image_info(), queue_family);
+        Some(Self(LayerTextureKind::Vulkan { texture, image }))
+    }
+
+    /// The Graphite backend texture of the texture, of the given size, for a
+    /// wrap or for its description.
+    fn backend_texture(&self, size: (i32, i32)) -> graphite::BackendTexture {
+        match &self.0 {
+            // SAFETY: the value holds a reference to the `id<MTLTexture>` for
+            // the duration of the call, and the backend texture is used only
+            // while the value is alive (a wrap, in which Graphite takes a
+            // reference of its own, or a read of its description).
+            #[cfg(target_vendor = "apple")]
+            LayerTextureKind::Metal(texture) => unsafe { backend_textures::make_metal(size, *texture) },
+            #[cfg(feature = "graphite-vulkan")]
+            LayerTextureKind::Vulkan { texture, .. } => {
+                let _ = size;
+                graphite::BackendTexture::from_backend_texture(texture)
+            }
+        }
+    }
+
+    /// Whether the GPU's work keeps the texture alive by itself (Metal): a
+    /// Vulkan image is destroyed when the value goes, so the layer lets the
+    /// context keep it until the GPU has finished with it.
+    fn is_held_by_the_gpu(&self) -> bool {
+        match &self.0 {
+            #[cfg(target_vendor = "apple")]
+            LayerTextureKind::Metal(_) => true,
+            #[cfg(feature = "graphite-vulkan")]
+            LayerTextureKind::Vulkan { .. } => false,
+        }
+    }
+}
 
 impl Drop for LayerTexture {
     fn drop(&mut self) {
-        // SAFETY: the pointer came from `ferro_skia_layer_texture_new`, was
-        // not null (a null one is never wrapped in this type), and its one
-        // reference is given back exactly once, here.
-        unsafe { ferro_skia_layer_texture_release(self.0) };
+        match &self.0 {
+            // SAFETY: the pointer came from `ferro_skia_layer_texture_new`,
+            // was not null (a null one is never wrapped in this type), and
+            // its one reference is given back exactly once, here.
+            #[cfg(target_vendor = "apple")]
+            LayerTextureKind::Metal(texture) => unsafe { ferro_skia_layer_texture_release(*texture) },
+            // The fields go by themselves: the backend texture, then the image.
+            #[cfg(feature = "graphite-vulkan")]
+            LayerTextureKind::Vulkan { .. } => {}
+        }
     }
 }
 
@@ -279,10 +392,7 @@ fn wrap_texture(
     color_type: ColorType,
     props: &SurfaceProps,
 ) -> Option<Surface> {
-    // SAFETY: `texture` holds a reference to the `id<MTLTexture>` for the
-    // duration of the call, and the backend texture is used only by the call
-    // below, in which Graphite takes a reference of its own for the surface.
-    let backend_texture = unsafe { backend_textures::make_metal(size, texture.0) };
+    let backend_texture = texture.backend_texture(size);
     graphite::surfaces::wrap_backend_texture(recorder, &backend_texture, color_type, None, Some(props))
 }
 
@@ -839,6 +949,18 @@ impl BandInsert {
             _ => Self::Ordered,
         }
     }
+
+    /// The mode where the recorders of the threads may draw on one target at the same time
+    /// (`shared`), or may not: Graphite on Vulkan does not allow it (#1365), and there the direct
+    /// path, whose bands all draw on the layer's texture, becomes the ordered insertion, which
+    /// records on deferred canvases and has the same order. The other modes draw on no shared
+    /// target.
+    pub(crate) fn with_shared_target(self, shared: bool) -> Self {
+        match self {
+            Self::Direct if !shared => Self::Ordered,
+            mode => mode,
+        }
+    }
 }
 
 /// The order in which the threads insert their recordings: the order the
@@ -921,9 +1043,10 @@ impl BandWorker {
         let BandWorker { recorder, jobs, results, context, order, unsubmitted, insert_mode } = self;
         let mut recorder = recorder.0;
         let mut held: Vec<Held> = Vec::new();
-        // The surfaces that wrap the textures of the layers, by layer. They
+        // The surfaces that wrap the textures of the layers, by layer, with the textures (which go after
+        // the surfaces that wrap them). They
         // belong to the recorder, so they are made, used and dropped here.
-        let mut surfaces: Vec<(u64, Surface)> = Vec::new();
+        let mut surfaces: BandSurfaces = Vec::new();
 
         while let Some(job) = jobs.recv() {
             let pool = AutoReleasePool::new();
@@ -954,7 +1077,7 @@ impl BandWorker {
                     // (see `Band`).
                     drop(band);
                 }
-                BandJob::Forget { layer } => surfaces.retain(|(id, _)| *id != layer),
+                BandJob::Forget { layer } => surfaces.retain(|(id, ..)| *id != layer),
                 BandJob::Insert => {
                     let mut gone = false;
                     for Held { layer, index, recording, busy, turn, clip, direct } in held.drain(..) {
@@ -962,7 +1085,7 @@ impl BandWorker {
                         if let Some(turn) = &turn {
                             drop(turn.wait());
                         }
-                        let target = surfaces.iter().find(|(id, _)| *id == layer).map(|(_, surface)| surface);
+                        let target = surfaces.iter().find(|(id, ..)| *id == layer).map(|(_, surface, _)| surface);
                         let inserted = recording.is_some_and(|mut recording| {
                             catch_unwind(AssertUnwindSafe(|| match (direct, target) {
                                 (true, _) => insert(&mut context.lock(), &mut recording),
@@ -994,18 +1117,22 @@ impl BandWorker {
     }
 }
 
+/// The surfaces a thread of the bands wrapped the textures of the layers in, by layer, each with its
+/// texture: the texture outlives the surface that wraps it, also on the thread.
+type BandSurfaces = Vec<(u64, Surface, Arc<LayerTexture>)>;
+
 /// Plays a band on the shared texture of the layer, under the clip of the band alone, on the recorder of its
 /// thread and snaps the recorder ([`BandInsert::Direct`], the path before the bands were bounded to their rows).
 fn play(
     recorder: &mut graphite::Recorder,
-    surfaces: &mut Vec<(u64, Surface)>,
+    surfaces: &mut BandSurfaces,
     band: &Band,
 ) -> Option<graphite::Recording> {
-    let position = match surfaces.iter().position(|(layer, _)| *layer == band.layer) {
+    let position = match surfaces.iter().position(|(layer, ..)| *layer == band.layer) {
         Some(position) => position,
         None => {
             let surface = wrap_texture(recorder, &band.texture, band.size, band.color_type, &band.props)?;
-            surfaces.push((band.layer, surface));
+            surfaces.push((band.layer, surface, band.texture.clone()));
             surfaces.len() - 1
         }
     };
@@ -1026,16 +1153,14 @@ fn play(
 /// is made for it.
 fn play_deferred(
     recorder: &mut graphite::Recorder,
-    surfaces: &mut Vec<(u64, Surface)>,
+    surfaces: &mut BandSurfaces,
     band: &Band,
 ) -> Option<graphite::Recording> {
-    if !surfaces.iter().any(|(layer, _)| *layer == band.layer) {
+    if !surfaces.iter().any(|(layer, ..)| *layer == band.layer) {
         let surface = wrap_texture(recorder, &band.texture, band.size, band.color_type, &band.props)?;
-        surfaces.push((band.layer, surface));
+        surfaces.push((band.layer, surface, band.texture.clone()));
     }
-    // SAFETY: as in `wrap_texture`: the texture is alive for the call, and only its description
-    // is read from the backend texture.
-    let texture_info = unsafe { backend_textures::make_metal(band.size, band.texture.0) }.info();
+    let texture_info = band.texture.backend_texture(band.size).info();
     let image_info = skia_safe::ImageInfo::new(band.size, band.color_type, AlphaType::Premul, None);
     {
         let canvas = recorder.make_deferred_canvas(&image_info, &texture_info)?;
@@ -1110,6 +1235,9 @@ pub(super) struct BandPool {
     /// How the threads insert, chosen when they are made (`BandInsert::from_environment`), unless
     /// a test chose before.
     insert_mode: Option<BandInsert>,
+    /// The recorders of the threads may not draw on one target at the same time (Graphite on
+    /// Vulkan): see [`BandInsert::with_shared_target`].
+    no_shared_target: bool,
 }
 
 impl BandPool {
@@ -1117,6 +1245,13 @@ impl BandPool {
     /// sends to the GPU (`GraphiteGrContext::submit_inserted_bands`, and every flush).
     pub(super) fn take_unsubmitted(&self) -> usize {
         self.unsubmitted.swap(0, Ordering::Acquire)
+    }
+
+    /// Tells the pool that the recorders of its threads may not draw on one target at the same
+    /// time (Graphite on Vulkan), before the threads are made.
+    #[cfg_attr(not(feature = "graphite-vulkan"), allow(dead_code))]
+    pub(super) fn forbid_shared_target(&mut self) {
+        self.no_shared_target = true;
     }
 
     /// Chooses how threads made from now on insert (for the tests).
@@ -1138,7 +1273,10 @@ impl BandPool {
         }
 
         let (results_sender, results) = band_queue::channel();
-        let insert_mode = *self.insert_mode.get_or_insert_with(BandInsert::from_environment);
+        let insert_mode = self
+            .insert_mode
+            .get_or_insert_with(BandInsert::from_environment)
+            .with_shared_target(!self.no_shared_target);
         for index in 0..bands.max(1) {
             let Some(recorder) = context.lock().make_recorder(None) else {
                 self.disable();
@@ -1487,7 +1625,12 @@ impl PipelinedLayer {
         if had_surface {
             let _ = self.context.with_band_parts(|parts| parts.pool.forget(self.id));
         }
-        *self.texture.borrow_mut() = None;
+        let texture = self.texture.borrow_mut().take();
+        if let Some(texture) = texture.filter(|texture| !texture.is_held_by_the_gpu()) {
+            // A draw of the layer may still be in the recorder of the context, and the GPU may still be drawing
+            // what was submitted: the context keeps the image until the GPU has finished with it.
+            self.context.retire(Box::new(texture));
+        }
     }
 
     /// Whether only the recorder of the context draws what was drawn with
@@ -1721,6 +1864,7 @@ impl PipelinedLayerSurface {
     /// [`SkiaFramePipelining::Off`], when the layer is too low to be
     /// divided, and when the texture cannot be made: the layer is then an
     /// ordinary one.
+    #[cfg(target_vendor = "apple")]
     pub(crate) fn try_new(
         context: &Rc<GraphiteGrContext>,
         device: *mut c_void,
@@ -1729,7 +1873,23 @@ impl PipelinedLayerSurface {
         mode: SkiaFramePipelining,
         bands: usize,
     ) -> Option<Self> {
-        if mode == SkiaFramePipelining::Off || device.is_null() || context.is_disposed() {
+        Self::try_with_texture(context, size, props, mode, bands, |width, height, rgba| {
+            LayerTexture::metal(device, width, height, rgba)
+        })
+    }
+
+    /// [`try_new`](Self::try_new) on a texture that `make_texture` makes of the width, the height
+    /// and the order of the channels (red first, or blue first) of the layer: a texture of Metal
+    /// or of Vulkan ([`LayerTexture`]).
+    pub(crate) fn try_with_texture(
+        context: &Rc<GraphiteGrContext>,
+        size: PixelSize,
+        props: &SurfaceProps,
+        mode: SkiaFramePipelining,
+        bands: usize,
+        make_texture: impl FnOnce(i32, i32, bool) -> Option<LayerTexture>,
+    ) -> Option<Self> {
+        if mode == SkiaFramePipelining::Off || context.is_disposed() {
             return None;
         }
         // The size of the surface of an ordinary layer.
@@ -1741,21 +1901,14 @@ impl PipelinedLayerSurface {
         // The colour type of an ordinary layer, in the format of the texture.
         let color_type = ColorType::N32;
         let rgba = if color_type == ColorType::RGBA8888 {
-            1
+            true
         } else if color_type == ColorType::BGRA8888 {
-            0
+            false
         } else {
             return None;
         };
 
-        // SAFETY: `device` is the `id<MTLDevice>` of the GPU that asks for
-        // the layer, alive for the call; the function has no other
-        // precondition and returns null when it makes no texture.
-        let texture = unsafe { ferro_skia_layer_texture_new(device, width, height, rgba) };
-        if texture.is_null() {
-            return None;
-        }
-        let texture = Arc::new(LayerTexture(texture));
+        let texture = Arc::new(make_texture(width, height, rgba)?);
 
         let mut surface = context
             .with_recorder(|recorder| wrap_texture(recorder, &texture, (width, height), color_type, props))?;
@@ -1922,6 +2075,26 @@ impl ISkiaSurface for PipelinedLayerSurface {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn without_a_shared_target_the_direct_path_becomes_the_ordered_insertion() {
+        // Metal: the recorders of the threads may draw on the layer's texture at the same time.
+        assert_eq!(BandInsert::Ordered.with_shared_target(true), BandInsert::Ordered);
+        assert_eq!(BandInsert::Deferred.with_shared_target(true), BandInsert::Deferred);
+        assert_eq!(BandInsert::Direct.with_shared_target(true), BandInsert::Direct);
+        // Graphite on Vulkan: they may not (#1365).
+        assert_eq!(BandInsert::Ordered.with_shared_target(false), BandInsert::Ordered);
+        assert_eq!(BandInsert::Deferred.with_shared_target(false), BandInsert::Deferred);
+        assert_eq!(BandInsert::Direct.with_shared_target(false), BandInsert::Ordered);
+    }
+
+    #[test]
+    fn a_pool_without_a_shared_target_is_told_so_before_its_threads_are_made() {
+        let mut pool = BandPool::default();
+        assert!(!pool.no_shared_target);
+        pool.forbid_shared_target();
+        assert!(pool.no_shared_target);
+    }
 
     const FRAME: Duration = Duration::from_micros(16_667);
 

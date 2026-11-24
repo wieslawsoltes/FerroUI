@@ -1,21 +1,34 @@
-//! Rendering with Vulkan through Skia's Ganesh backend.
+//! Rendering with Vulkan through Skia's Ganesh backend, and through Graphite with the feature
+//! `graphite-vulkan`.
 //!
 //! The GPU over the graphics context of a Vulkan device
 //! ([`VulkanSkiaGpu`]), the render target that draws a frame into the image
 //! of a Vulkan render session ([`VulkanSkiaRenderTarget`]) and the import of
-//! images of other devices ([`VulkanSkiaExternalObjectsFeature`]).
+//! images of other devices ([`VulkanSkiaExternalObjectsFeature`]). With the
+//! feature, the Graphite GPU of the device (`GraphiteVulkanSkiaGpu`), which
+//! the backend takes first and which falls back to Ganesh.
 //!
 //! The module needs a Skia build with Vulkan (the `ferro_skia_vulkan`
 //! configuration: Linux, and the feature `vulkan` of this crate elsewhere).
 
 #[cfg(feature = "graphite-vulkan")]
 mod graphite_vulkan;
+#[cfg(feature = "graphite-vulkan")]
+mod graphite_vulkan_gpu;
+#[cfg(all(test, feature = "graphite-vulkan"))]
+mod graphite_vulkan_layer_tests;
 mod vulkan_skia_external_objects_feature;
 mod vulkan_skia_gpu;
 mod vulkan_skia_render_target;
 
 #[cfg(feature = "graphite-vulkan")]
+pub(crate) use graphite_vulkan::graphite_backend_texture;
+#[cfg(feature = "graphite-vulkan")]
 pub use graphite_vulkan::GraphiteVulkanContext;
+#[cfg(feature = "graphite-vulkan")]
+pub(crate) use graphite_vulkan_gpu::selects_graphite;
+#[cfg(feature = "graphite-vulkan")]
+pub use graphite_vulkan_gpu::{GraphiteVulkanRenderTarget, GraphiteVulkanSkiaGpu};
 pub use vulkan_skia_external_objects_feature::VulkanSkiaExternalObjectsFeature;
 pub use vulkan_skia_gpu::VulkanSkiaGpu;
 pub use vulkan_skia_render_target::VulkanSkiaRenderTarget;

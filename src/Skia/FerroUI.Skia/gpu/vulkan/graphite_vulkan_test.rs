@@ -13,7 +13,8 @@ use ferroui_base::platform::{
     IOptionalFeatureProvider, IPlatformGraphics, IPlatformGraphicsContext,
 };
 use ferroui_base::PixelSize;
-use ferroui_skia::gpu::vulkan::GraphiteVulkanContext;
+use ferroui_skia::gpu::vulkan::{GraphiteVulkanContext, GraphiteVulkanSkiaGpu};
+use ferroui_skia::gpu::{ISkiaGpu, ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaSurfaceOrigin};
 use ferroui_vulkan::ash::{self, vk};
 use ferroui_vulkan::{
     IVulkanInstance, IVulkanKhrSurfacePlatformSurface, IVulkanKhrSurfacePlatformSurfaceFactory,
@@ -126,6 +127,88 @@ impl IVulkanKhrSurfacePlatformSurfaceFactory for HeadlessSurfaceFactory {
 fn color_of(pixels: &[u8], width: i32, x: i32, y: i32) -> [u8; 4] {
     let at = ((y * width + x) * 4) as usize;
     [pixels[at], pixels[at + 1], pixels[at + 2], pixels[at + 3]]
+}
+
+/// A Vulkan context of the machine with a headless surface of the given size; `None` (after
+/// [`skip`]) when there is none.
+fn headless_context(size: PixelSize) -> Option<Rc<dyn IPlatformGraphicsContext>> {
+    let loader = match loader() {
+        Ok(loader) => loader,
+        Err(reason) => {
+            skip(&reason);
+            return None;
+        }
+    };
+    let global = ferroui_vulkan::unmanaged_interop::VulkanGlobalApi::new(loader.clone());
+    let headless = global.vk_enumerate_instance_extension_properties().is_ok_and(|extensions| {
+        extensions.iter().any(|properties| {
+            // SAFETY: the name of an extension is a zero-terminated string within its array.
+            unsafe { CStr::from_ptr(properties.extension_name.as_ptr()) }.to_bytes() == b"VK_EXT_headless_surface"
+        })
+    });
+    if !headless {
+        skip("the Vulkan implementation has no VK_EXT_headless_surface");
+        return None;
+    }
+    let mut platform_options = VulkanPlatformSpecificOptions {
+        required_instance_extensions: vec!["VK_EXT_headless_surface".to_string()],
+        get_proc_address_delegate: Some(loader),
+        device_check_surface_factory: Some(Arc::new(|instance: &Arc<dyn IVulkanInstance>| {
+            Ok(create_headless_surface(instance))
+        })),
+        ..Default::default()
+    };
+    let size = Arc::new(Mutex::new(size));
+    platform_options.set_khr_surface_factory(Arc::new(HeadlessSurfaceFactory { size }));
+    let Some(graphics) = VulkanPlatformGraphics::try_create(&VulkanOptions::default(), platform_options) else {
+        skip("the Vulkan implementation has no device that presents to a headless surface");
+        return None;
+    };
+    Some(graphics.create_context())
+}
+
+/// The window target of the Graphite GPU (#1365, part 3): two frames on the image of a swap chain,
+/// the second on the surface the first wrapped (Graphite's record of the layout kept from one
+/// frame to the next), each read back before it is presented.
+#[test]
+fn the_graphite_gpu_draws_frames_on_the_window_image_and_presents_them() {
+    let Some(context) = headless_context(PixelSize::new(160, 96)) else { return };
+    let features: &dyn IOptionalFeatureProvider = &*context;
+    let vulkan = features.try_get::<dyn IVulkanPlatformGraphicsContext>().expect("the context is a Vulkan context");
+    let Some(gpu) = GraphiteVulkanSkiaGpu::try_new(vulkan.clone(), None) else {
+        return skip("Skia makes no Graphite context for the device");
+    };
+    let surfaces: Vec<Arc<dyn IPlatformRenderSurface>> = vec![Arc::new(TestSurface)];
+    assert!(gpu.is_ready_to_create_render_target(&surfaces));
+    let target = gpu.try_create_render_target(&surfaces).expect("a render target of the headless surface");
+    let scene = ferroui_base::platform::RenderTargetSceneInfo::new(
+        PixelSize::new(160, 96),
+        2.0,
+        Default::default(),
+    );
+    let props = skia_safe::SurfaceProps::default();
+    for (frame, color) in [Color::RED, Color::BLUE, Color::from_argb(255, 0, 160, 80)].into_iter().enumerate() {
+        let session = target.begin_rendering_session(&scene, &props);
+        assert_eq!(session.surface_origin(), SkiaSurfaceOrigin::TopLeft);
+        let mut surface = session.sk_surface();
+        surface.canvas().clear(color);
+        let mut paint = skia_safe::Paint::default();
+        paint.set_anti_alias(true);
+        paint.set_color(Color::WHITE);
+        surface.canvas().draw_circle((80.0, 48.0), 20.5, &paint);
+        let image = session.gr_context().snapshot_to_raster(&mut surface).expect("a read-back of the frame");
+        let pixmap = image.peek_pixels().expect("the read-back is a raster image");
+        let rgba = |x: i32, y: i32| {
+            let color = pixmap.get_color((x, y));
+            [color.r(), color.g(), color.b(), color.a()]
+        };
+        assert_eq!(rgba(4, 4), [color.r(), color.g(), color.b(), 255], "frame {frame}: the clear");
+        assert_eq!(rgba(80, 48), [255, 255, 255, 255], "frame {frame}: the circle");
+        drop(surface);
+        session.dispose();
+    }
+    target.dispose();
+    gpu.dispose();
 }
 
 #[test]

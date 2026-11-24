@@ -385,6 +385,41 @@ fn frames_are_presented_through_a_swap_chain_and_the_swap_chain_follows_the_surf
     context.dispose();
 }
 
+#[test]
+fn an_offscreen_image_is_made_with_its_usage_without_a_command_and_released_on_another_thread() {
+    let Some(live) = live("offscreen image", Default::default(), false) else { return };
+    let context = live.graphics.create_context();
+    let vulkan = vulkan_context(&context);
+    let lock = context.ensure_current();
+
+    let input = vk::ImageUsageFlags::INPUT_ATTACHMENT;
+    let image = crate::VulkanOffscreenImage::new(
+        &*vulkan,
+        PixelSize::new(96, 40),
+        vk::Format::B8G8R8A8_UNORM.as_raw() as u32,
+        input.as_raw(),
+    )
+    .unwrap();
+    let info = image.image_info();
+    assert_ne!(info.handle, 0);
+    assert_ne!(info.memory_handle, 0);
+    assert_eq!(info.view_handle, 0);
+    assert!(info.memory_size >= 96 * 40 * 4);
+    assert_eq!(info.pixel_size, PixelSize::new(96, 40));
+    assert_eq!(info.format, vk::Format::B8G8R8A8_UNORM.as_raw() as u32);
+    assert_eq!(info.layout, vk::ImageLayout::UNDEFINED.as_raw() as u32);
+    assert_eq!(info.tiling, vk::ImageTiling::OPTIMAL.as_raw() as u32);
+    assert_eq!((info.level_count, info.sample_count), (1, 1));
+    let usage = vk::ImageUsageFlags::from_raw(info.usage_flags);
+    assert!(usage.contains(input | vk::ImageUsageFlags::from_raw(crate::VulkanOffscreenImage::DEFAULT_USAGE)));
+    assert!(crate::VulkanOffscreenImage::new(&*vulkan, PixelSize::new(0, 40), info.format, 0).is_err());
+
+    // Nothing used the image: it is released on another thread.
+    std::thread::spawn(move || drop(image)).join().unwrap();
+    lock.dispose();
+    context.dispose();
+}
+
 fn external_objects(
     test: &str,
 ) -> Option<(Rc<dyn IPlatformGraphicsContext>, Rc<dyn IVulkanPlatformGraphicsContext>, Rc<dyn IVulkanContextExternalObjectsFeature>)>

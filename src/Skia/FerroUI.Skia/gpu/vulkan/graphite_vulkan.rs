@@ -1,7 +1,8 @@
 //! Skia's Graphite on the device of a Vulkan context (#1365, part 2; the feature `graphite-vulkan`,
 //! off by default): the context, its recorder, Graphite surfaces on images of `ferroui-vulkan`, and
 //! the flush of a frame. The window target and the pipelined layer on Vulkan build on it (the
-//! next parts); Ganesh stays the GPU of the default build and the fallback, never the CPU.
+//! next part, `graphite_vulkan_gpu.rs`); Ganesh stays the GPU of the default build and the
+//! fallback, never the CPU.
 
 use super::vulkan_skia_gpu::with_backend_context;
 use ferroui_vulkan::{IVulkanPlatformGraphicsContext, VulkanImageInfo};
@@ -23,10 +24,7 @@ impl GraphiteVulkanContext {
     /// one for the device: the caller takes Ganesh.
     pub fn new(vulkan: Rc<dyn IVulkanPlatformGraphicsContext>) -> Option<Self> {
         let current = vulkan.ensure_current();
-        let options = ordered_recordings_options();
-        let context = with_backend_context(&*vulkan, |backend| {
-            graphite::vk::context_factory::make_vulkan(backend, &options)
-        });
+        let context = make_context(&*vulkan);
         let made = context.and_then(|mut context| context.make_recorder(None).map(|recorder| (recorder, context)));
         current.dispose();
         let (recorder, context) = made?;
@@ -49,7 +47,7 @@ impl GraphiteVulkanContext {
         props: &SurfaceProps,
     ) -> Option<Surface> {
         let queue_family = self.vulkan.device().graphics_queue_family_index();
-        let texture = backend_texture(image, queue_family);
+        let texture = graphite_backend_texture(image, queue_family);
         let color_space = ColorSpace::new_srgb();
         graphite::surfaces::wrap_backend_texture(&mut self.recorder, &texture, color_type, color_space, Some(props))
     }
@@ -89,6 +87,13 @@ impl GraphiteVulkanContext {
     }
 }
 
+/// A Graphite context of the device of `vulkan`, with the recordings inserted in order; `None` when
+/// Skia makes none for the device. The caller made the context current.
+pub(crate) fn make_context(vulkan: &dyn IVulkanPlatformGraphicsContext) -> Option<graphite::Context> {
+    let options = ordered_recordings_options();
+    with_backend_context(vulkan, |backend| graphite::vk::context_factory::make_vulkan(backend, &options))
+}
+
 /// Graphite's context options with `fRequireOrderedRecordings` (skia-safe has no setter; the
 /// native field through `skia-bindings`, as on Metal).
 fn ordered_recordings_options() -> graphite::ContextOptions {
@@ -105,7 +110,7 @@ fn ordered_recordings_options() -> graphite::ContextOptions {
 
 /// The Graphite backend texture of an image of `ferroui-vulkan`, through the patched bindings
 /// (`C_BackendTextures_MakeVulkan`, FERROUI-PATCH.md of `external/rust-skia-bindings`).
-fn backend_texture(image: &VulkanImageInfo, queue_family: u32) -> graphite::BackendTexture {
+pub(crate) fn graphite_backend_texture(image: &VulkanImageInfo, queue_family: u32) -> graphite::BackendTexture {
     let mut texture = graphite::BackendTexture::new();
     // SAFETY: the backend texture is a valid, default-constructed native value, which the call
     // destroys in place and constructs again (the binding's constructors do the same); the image
