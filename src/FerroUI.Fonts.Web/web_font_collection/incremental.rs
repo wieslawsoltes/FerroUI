@@ -108,7 +108,7 @@ impl Shared {
             return false;
         }
         let generation = self.next_tick();
-        let design_space = read_font_axes(font).map_or(Vec::new(), |axes| {
+        let design_space = read_fvar(font).map_or(Vec::new(), |axes| {
             let fixed = |value: f32| (f64::from(value) * 65536.0) as i32;
             axes.axes.iter().map(|axis| (axis.tag, fixed(axis.min), fixed(axis.max))).collect()
         });
