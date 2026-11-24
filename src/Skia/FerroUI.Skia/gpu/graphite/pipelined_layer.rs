@@ -2758,6 +2758,7 @@ mod tests {
             sent,
             period: None,
             picture: picture.clone(),
+            band_textures: false,
         };
         assert!(feeds_balance(&frame(4, 4)));
         assert!(!feeds_balance(&frame(1, 1)), "a frame that left bands out");
