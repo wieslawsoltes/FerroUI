@@ -3,10 +3,10 @@
 //! The controls keep their existing platform services and event/deferral APIs.
 
 use ferroui_base::input::platform::{ClipboardContentOptions, ClipboardExtensions, IClipboard};
-use ferroui_base::input::{DataFormat, DataTransfer, DataTransferItem, IAsyncDataTransfer};
+use ferroui_base::input::{DataFormat, DataPackageOperation, DataTransfer, DataTransferItem, IAsyncDataTransfer};
 use ferroui_base::media::IImage;
 use ferroui_base::platform::storage::{FilePickerOpenOptions, IStorageItem};
-use ferroui_base::reactive::Subscription;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{BoxedValue, ObjectType, Ref, WeakRef};
 use ferroui_controls::primitives::{Popup, ToggleButton};
@@ -93,6 +93,25 @@ fn on_clipboard_click<F>(
         }
         drop(Dispatcher::ui_thread().start_local(operation(root)));
     });
+}
+
+/// The RequestedOperation of the data on the clipboard, by WinUI's names.
+async fn requested_operation(clipboard: &Rc<dyn IClipboard>) -> String {
+    let Ok(Some(data)) = clipboard.try_get_data_async().await else {
+        return "None".to_string();
+    };
+    let operation = DataPackageOperation::of_async(data.clone()).await.unwrap_or_default();
+    data.dispose();
+    let names: Vec<&str> = [
+        (DataPackageOperation::COPY, "Copy"),
+        (DataPackageOperation::MOVE, "Move"),
+        (DataPackageOperation::LINK, "Link"),
+    ]
+    .into_iter()
+    .filter(|(flag, _)| operation.contains(*flag))
+    .map(|(_, name)| name)
+    .collect();
+    if names.is_empty() { "None".to_string() } else { names.join(", ") }
 }
 
 fn clipboard_of(root: &Ref<Control>) -> Option<Rc<dyn IClipboard>> {
@@ -231,9 +250,14 @@ fn wire_clipboard(root: &Ref<Control>) {
                 }
             };
             let count = files.len();
+            let files: Vec<Rc<dyn IStorageItem>> = files.into_iter().map(|file| file as Rc<dyn IStorageItem>).collect();
             let data = DataTransfer::new();
-            for file in files {
-                data.add(DataTransferItem::create(&DataFormat::file(), Some(file as Rc<dyn IStorageItem>)));
+            for file in &files {
+                data.add(DataTransferItem::create(&DataFormat::file(), Some(file.clone())));
+            }
+            // RequestedOperation = DataPackageOperation.Copy, where the platform has a format for it.
+            if let Some(operation) = DataPackageOperation::COPY.to_data_transfer_item(&files) {
+                data.add(operation);
             }
             let message = match clipboard.set_data_async(Some(data as Rc<dyn IAsyncDataTransfer>)).await {
                 Ok(()) => format!("{count} file(s) copied to clipboard."),
@@ -253,6 +277,7 @@ fn wire_clipboard(root: &Ref<Control>) {
                     for file in &files {
                         output.push_str(&format!("\n  \u{2022} {}", file.name()));
                     }
+                    output.push_str(&format!("\nRequested operation: {}", requested_operation(&clipboard).await));
                     output
                 }
                 Ok(None) => "StorageItems format is not available in the clipboard.".to_string(),
