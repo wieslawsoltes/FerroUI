@@ -44,7 +44,7 @@ impl BlobReadableStream {
     }
 
     pub fn can_seek(&self) -> bool {
-        false
+        true
     }
 
     pub fn can_write(&self) -> bool {
@@ -64,22 +64,24 @@ impl BlobReadableStream {
     /// returns how many were read; `0` at the end of the blob.
     pub async fn read_async(&mut self, buffer: &mut [u8]) -> io::Result<usize> {
         let num_bytes_to_read = (buffer.len() as u64).min(self.length.saturating_sub(self.position)) as usize;
+        if num_bytes_to_read == 0 {
+            return Ok(0);
+        }
         let js_reference = self.js_reference()?.clone();
-        let bytes_read = stream_helper::slice_async(&js_reference, self.position, num_bytes_to_read)
+        // Straight into the buffer of the caller, without a copy in between.
+        let bytes_read = stream_helper::read_into(&js_reference, self.position, &mut buffer[..num_bytes_to_read])
             .await
             .map_err(io::Error::from)?;
-        self.complete_read(&bytes_read, num_bytes_to_read, buffer)
+        self.complete_read(bytes_read, num_bytes_to_read)
     }
 
-    fn complete_read(&mut self, bytes_read: &[u8], num_bytes_to_read: usize, buffer: &mut [u8]) -> io::Result<usize> {
-        if bytes_read.len() != num_bytes_to_read {
+    fn complete_read(&mut self, bytes_read: usize, num_bytes_to_read: usize) -> io::Result<usize> {
+        if bytes_read != num_bytes_to_read {
             return Err(end_of_stream());
         }
 
-        self.position += bytes_read.len() as u64;
-        buffer[..bytes_read.len()].copy_from_slice(bytes_read);
-
-        Ok(bytes_read.len())
+        self.position += bytes_read as u64;
+        Ok(bytes_read)
     }
 
     /// Reads the whole blob into memory, after which the stream can be read
@@ -190,10 +192,9 @@ mod tests {
     #[test]
     fn short_slice_is_an_end_of_stream_error() {
         let mut stream = stream(None, 10);
-        let mut buffer = [0u8; 4];
-        let error = stream.complete_read(b"ab", 4, &mut buffer).unwrap_err();
+        let error = stream.complete_read(2, 4).unwrap_err();
         assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
-        assert_eq!(stream.complete_read(b"abcd", 4, &mut buffer).unwrap(), 4);
+        assert_eq!(stream.complete_read(4, 4).unwrap(), 4);
         assert_eq!(stream.position(), 4);
     }
 
@@ -204,6 +205,11 @@ mod tests {
         assert_eq!(error.kind(), io::ErrorKind::UnexpectedEof);
         assert_eq!(stream.length(), 10);
         assert!(stream.read(&mut [0; 1]).is_err(), "nothing was loaded");
+    }
+
+    #[test]
+    fn the_stream_seeks() {
+        assert!(stream(None, 0).can_seek());
     }
 
     #[test]

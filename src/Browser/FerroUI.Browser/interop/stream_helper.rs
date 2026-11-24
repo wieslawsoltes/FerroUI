@@ -58,6 +58,21 @@ pub fn byte_length(stream: &JsObject) -> u64 {
     byte_length_raw(stream) as u64
 }
 
+/// Reads up to `target.len()` bytes of the blob `stream` from `offset` straight into `target`
+/// and returns how many were read; fewer when the blob ends before. The bytes are copied after
+/// the slice of the blob resolved, while `target` is still borrowed, so a dropped read never
+/// writes into memory it no longer owns.
+pub async fn read_into(stream: &JsObject, offset: u64, target: &mut [u8]) -> Result<usize, PromiseError> {
+    let buffer = await_promise(&slice_to_array_buffer(stream, offset as f64, target.len())).await?;
+    let count = byte_array_length(&buffer);
+    if count > target.len() {
+        return Err(PromiseError::new("RangeError", "the blob returned more bytes than were asked for"));
+    }
+    // The script copies exactly `count` bytes to the address of `target`.
+    array_buffer_to_memory_view(&buffer, target.as_mut_ptr() as usize);
+    Ok(count)
+}
+
 /// Reads `count` bytes of the blob `stream` from `offset`. Fewer bytes are
 /// returned when the blob ends before.
 pub async fn slice_async(stream: &JsObject, offset: u64, count: usize) -> Result<Vec<u8>, PromiseError> {

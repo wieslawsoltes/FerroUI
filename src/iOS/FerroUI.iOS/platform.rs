@@ -108,7 +108,7 @@ mod uikit {
     use crate::platform_settings::PlatformSettings;
     use crate::stubs::{CursorFactoryStub, PlatformIconLoaderStub, WindowingPlatformStub};
     use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
-    use ferroui_base::input::{IKeyboardDevice, Key, KeyModifiers, KeyboardDevice};
+    use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
     use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformSettings};
     use ferroui_base::rendering::composition::Compositor;
     use ferroui_base::rendering::{IRenderLoop, IRenderTimer, RenderLoop};
@@ -122,7 +122,6 @@ mod uikit {
     #[cfg(all(not(ferroui_docsrs), feature = "skia", not(feature = "quartz-metal")))]
     use ferroui_skia::SkiaApplicationExtensions;
     use std::cell::RefCell;
-    use std::collections::HashMap;
     use std::rc::Rc;
     use std::sync::Arc;
 
@@ -267,21 +266,6 @@ mod uikit {
             let cursor_factory: Rc<dyn ICursorFactory> = Rc::new(CursorFactoryStub);
             let windowing_platform: Rc<dyn IWindowingPlatform> = Rc::new(WindowingPlatformStub);
             let icon_loader: Rc<dyn IPlatformIconLoader> = Rc::new(PlatformIconLoaderStub);
-            let key_names = HashMap::from([
-                (Key::Back, "\u{232B}".to_string()),
-                (Key::Down, "\u{2193}".to_string()),
-                (Key::End, "\u{2198}".to_string()),
-                (Key::Escape, "\u{238B}".to_string()),
-                (Key::Home, "\u{2196}".to_string()),
-                (Key::Left, "\u{2190}".to_string()),
-                (Key::Return, "\u{21A9}".to_string()),
-                (Key::PageDown, "\u{21DF}".to_string()),
-                (Key::PageUp, "\u{21DE}".to_string()),
-                (Key::Right, "\u{2192}".to_string()),
-                (Key::Space, "\u{2423}".to_string()),
-                (Key::Tab, "\u{21E5}".to_string()),
-                (Key::Up, "\u{2191}".to_string()),
-            ]);
             let render_timer: Arc<dyn IRenderTimer> = timer;
             let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(render_timer);
             let keyboard: Rc<dyn IKeyboardDevice> = keyboard;
@@ -300,14 +284,8 @@ mod uikit {
                 .to_constant(icon_loader)
                 .bind::<dyn IScreenImpl>()
                 .to_lazy(|| Some(IosScreens::new() as Rc<dyn IScreenImpl>))
-                .bind_to_self(Rc::new(PlatformHotkeyConfiguration::new(KeyModifiers::CONTROL)))
-                .bind_to_self(Rc::new(KeyGestureFormatInfo::new(
-                    Some(key_names),
-                    "\u{2318}",
-                    "\u{2303}",
-                    "\u{2325}",
-                    "\u{21E7}",
-                )))
+                .bind_to_self(Rc::new(PlatformHotkeyConfiguration::apple()))
+                .bind_to_self(Rc::new(KeyGestureFormatInfo::apple()))
                 .bind::<Arc<dyn IRenderLoop>>()
                 .to_constant(Rc::new(render_loop))
                 .bind::<dyn IKeyboardDevice>()

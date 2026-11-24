@@ -31,7 +31,7 @@ use crate::window_impl::WindowImpl;
 use ferroui_base::input::platform::{
     Clipboard, IClipboard, IClipboardImpl, IPlatformDragSource, KeyGestureFormatInfo, PlatformHotkeyConfiguration,
 };
-use ferroui_base::input::{IKeyboardDevice, Key, KeyGesture, KeyModifiers, KeyboardDevice};
+use ferroui_base::input::{IKeyboardDevice, KeyboardDevice};
 use ferroui_base::platform::{ICursorFactory, IPlatformGraphics, IPlatformGraphicsContext, IPlatformSettings};
 use ferroui_base::rendering::composition::Compositor;
 use ferroui_base::rendering::{IRenderLoop, RenderLoop, ThreadProxyRenderTimer};
@@ -45,7 +45,6 @@ use ferroui_controls::platform::{
 };
 use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
-use std::collections::HashMap;
 use std::ffi::{c_char, c_int, c_void, CString};
 use std::rc::Rc;
 use std::sync::Arc;
@@ -298,42 +297,8 @@ impl FerroNativePlatform {
             // storage API of this backend only.
             .bind_to_self(storage_provider_api);
 
-        let mut hotkeys =
-            PlatformHotkeyConfiguration::with_modifiers(KeyModifiers::META, KeyModifiers::SHIFT, KeyModifiers::ALT);
-        let command_modifiers = hotkeys.command_modifiers;
-        let selection_modifiers = hotkeys.selection_modifiers;
-        hotkeys.move_cursor_to_the_start_of_line.push(KeyGesture::new(Key::Left, command_modifiers));
-        hotkeys
-            .move_cursor_to_the_start_of_line_with_selection
-            .push(KeyGesture::new(Key::Left, command_modifiers | selection_modifiers));
-        hotkeys.move_cursor_to_the_end_of_line.push(KeyGesture::new(Key::Right, command_modifiers));
-        hotkeys
-            .move_cursor_to_the_end_of_line_with_selection
-            .push(KeyGesture::new(Key::Right, command_modifiers | selection_modifiers));
-
-        locator.bind_to_self(Rc::new(hotkeys));
-
-        locator.bind_to_self(Rc::new(KeyGestureFormatInfo::new(
-            Some(HashMap::from([
-                (Key::Back, "⌫".to_string()),
-                (Key::Down, "↓".to_string()),
-                (Key::End, "↘".to_string()),
-                (Key::Escape, "⎋".to_string()),
-                (Key::Home, "↖".to_string()),
-                (Key::Left, "←".to_string()),
-                (Key::Return, "↩".to_string()),
-                (Key::PageDown, "⇟".to_string()),
-                (Key::PageUp, "⇞".to_string()),
-                (Key::Right, "→".to_string()),
-                (Key::Space, "␣".to_string()),
-                (Key::Tab, "⇥".to_string()),
-                (Key::Up, "↑".to_string()),
-            ])),
-            "⌘",
-            "⌃",
-            "⌥",
-            "⇧",
-        )));
+        locator.bind_to_self(Rc::new(PlatformHotkeyConfiguration::apple()));
+        locator.bind_to_self(Rc::new(KeyGestureFormatInfo::apple()));
 
         for mode in &options.rendering_mode {
             match mode {

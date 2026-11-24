@@ -103,11 +103,20 @@ impl BrowserWindowingPlatform {
             .to_constant(instance)
             .bind::<dyn IPlatformIconLoader>()
             .to_singleton::<IconLoaderStub>(|instance| instance)
-            .bind_to_self_singleton::<PlatformHotkeyConfiguration>()
-            .bind_to_self(Rc::new(KeyGestureFormatInfo::new(Some(HashMap::new()), "Cmd", "Ctrl", "Alt", "Shift")))
             .bind::<dyn IActivatableLifetime>()
             .to_constant(activatable_lifetime.clone())
             .bind_to_self(activatable_lifetime);
+
+        // Command is the shortcut modifier of the browser on macOS, iOS and iPadOS.
+        if ferro_module::is_apple_platform() {
+            locator
+                .bind_to_self(Rc::new(PlatformHotkeyConfiguration::apple()))
+                .bind_to_self(Rc::new(KeyGestureFormatInfo::apple()));
+        } else {
+            locator
+                .bind_to_self_singleton::<PlatformHotkeyConfiguration>()
+                .bind_to_self(Rc::new(KeyGestureFormatInfo::new(Some(HashMap::new()), "Cmd", "Ctrl", "Alt", "Shift")));
+        }
 
         Dispatcher::initialize_ui_thread_dispatcher(BrowserSingleThreadedDispatcherImpl::new());
 
