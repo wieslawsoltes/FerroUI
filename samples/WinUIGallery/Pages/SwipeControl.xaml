@@ -1,0 +1,111 @@
+<!-- Ported from the five examples of the pinned SwipeControl page of WinUI Gallery (14061eea) and
+     their sample text in the catalog, with the handlers of SwipeControlPage.xaml.cs in Rust
+     (swipe_control_samples.rs); see ../NOTICE.md. The controls are the native SwipeControl,
+     SwipeItems and SwipeItem of WinUI. ThemeResource becomes DynamicResource. The second sample
+     names an ArchiveIcon it does not define: it is defined here. The UriSource of the bitmap icons
+     of the third and fifth samples is the folder image of the sample media: the coffee cup of the
+     source is not in the assets of the port. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Swipe right to reveal actions" FontSize="18" />
+    <Border>
+      <Border.Resources>
+        <FontIconSource x:Key="AcceptIcon" Glyph="&#xE8FB;" />
+        <FontIconSource x:Key="FlagIcon" Glyph="&#xE7C1;" />
+        <SwipeItems x:Key="RevealLeftItems" Mode="Reveal">
+          <SwipeItem Text="Accept" IconSource="{StaticResource AcceptIcon}" />
+          <SwipeItem Text="Flag" IconSource="{StaticResource FlagIcon}" />
+        </SwipeItems>
+      </Border.Resources>
+      <SwipeControl x:Name="RevealSwipe" BorderThickness="1" LeftItems="{StaticResource RevealLeftItems}"
+                    BorderBrush="{DynamicResource ButtonBackground}" Width="300" Margin="12" Height="68"
+                    HorizontalAlignment="Left">
+        <TextBlock Text="Swipe Right" Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </SwipeControl>
+    </Border>
+    <TextBlock x:Name="RevealOutput" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Swipe left to invoke an execute" FontSize="18" />
+    <Border>
+      <Border.Resources>
+        <FontIconSource x:Key="DeleteIcon" Glyph="&#xE74D;" />
+        <FontIconSource x:Key="ArchiveIcon" Glyph="&#xE7B8;" />
+        <SwipeItems x:Key="ExecuteRightItems" Mode="Execute">
+          <SwipeItem Text="Archive" IconSource="{StaticResource ArchiveIcon}" BehaviorOnInvoked="Close" />
+        </SwipeItems>
+      </Border.Resources>
+      <SwipeControl x:Name="ExecuteSwipe" BorderThickness="1" BorderBrush="{DynamicResource ButtonBackground}"
+                    RightItems="{StaticResource ExecuteRightItems}" Width="300" Margin="12" Height="68"
+                    HorizontalAlignment="Left">
+        <TextBlock Text="Swipe Left" Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </SwipeControl>
+    </Border>
+    <TextBlock x:Name="ExecuteOutput" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Custom Swipe in a ListView" FontSize="18" />
+    <Border>
+      <Border.Resources>
+        <SwipeItems x:Key="ListLeftItems" Mode="Reveal">
+          <SwipeItem Text="Coffee">
+            <SwipeItem.IconSource>
+              <BitmapIconSource UriSource="ferres://WinUIGallery/Assets/SampleMedia/folder.png" />
+            </SwipeItem.IconSource>
+          </SwipeItem>
+        </SwipeItems>
+      </Border.Resources>
+      <SwipeControl x:Name="ListSwipe" BorderThickness="1" LeftItems="{StaticResource ListLeftItems}"
+                    BorderBrush="{DynamicResource ButtonBackground}" Width="300" Margin="12" Height="68"
+                    HorizontalAlignment="Left">
+        <TextBlock Text="Swipe Right" Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </SwipeControl>
+    </Border>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Gradient Background" FontSize="18" />
+    <Border>
+      <Border.Resources>
+        <FontIconSource x:Key="LockIcon" Glyph="&#xE72E;" />
+        <LinearGradientBrush x:Key="PurpleGradient" StartPoint="0,0.5" EndPoint="1,0.5">
+          <GradientStop Color="#ff8990f9" Offset="0.0" />
+          <GradientStop Color="#ff5b66fb" Offset="0.5" />
+          <GradientStop Color="#ff5c1df4" Offset="1.0" />
+        </LinearGradientBrush>
+        <SwipeItems x:Key="GradientRightItems" Mode="Execute">
+          <SwipeItem Text="Lock" Background="{StaticResource PurpleGradient}" BehaviorOnInvoked="Close"
+                     IconSource="{StaticResource LockIcon}" />
+        </SwipeItems>
+      </Border.Resources>
+      <SwipeControl x:Name="GradientSwipe" BorderThickness="1" BorderBrush="{DynamicResource ButtonBackground}"
+                    RightItems="{StaticResource GradientRightItems}" Width="500" Margin="12" Height="68"
+                    HorizontalAlignment="Left">
+        <TextBlock Text="Swipe Left" Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </SwipeControl>
+    </Border>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Custom icons" FontSize="18" />
+    <Border>
+      <Border.Resources>
+        <SwipeItems x:Key="IconLeftItems" Mode="Reveal">
+          <SwipeItem Text="Coffee">
+            <SwipeItem.IconSource>
+              <BitmapIconSource UriSource="ferres://WinUIGallery/Assets/SampleMedia/folder.png" />
+            </SwipeItem.IconSource>
+          </SwipeItem>
+        </SwipeItems>
+      </Border.Resources>
+      <SwipeControl x:Name="IconSwipe" BorderThickness="1" LeftItems="{StaticResource IconLeftItems}"
+                    BorderBrush="{DynamicResource ButtonBackground}" Width="300" Margin="12" Height="68"
+                    HorizontalAlignment="Left">
+        <TextBlock Text="Swipe Right" Margin="12" HorizontalAlignment="Center" VerticalAlignment="Center" />
+      </SwipeControl>
+    </Border>
+  </StackPanel>
+</StackPanel>

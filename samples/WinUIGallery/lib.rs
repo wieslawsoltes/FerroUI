@@ -49,6 +49,7 @@ mod split_view_samples;
 mod content_dialog_samples;
 mod selector_bar_samples;
 mod status_samples;
+mod swipe_control_samples;
 mod text_input_samples;
 mod text_samples;
 mod tree_samples;
@@ -135,6 +136,8 @@ mod date_samples_tests;
 
 #[cfg(test)]
 mod list_samples_tests;
+#[cfg(test)]
+mod swipe_control_samples_tests;
 
 #[cfg(test)]
 mod tree_samples_tests;

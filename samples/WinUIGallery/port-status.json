@@ -633,6 +633,129 @@
       "notes": "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button, with the source's FontIcon glyphs on the button and on the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows).",
       "examples": []
     },
+    "SwipeControl": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/SwipeControl.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/swipe_control_samples.rs",
+        "src/FerroUI.Controls.Icons/icon_sources.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+          "name": "each_example_has_the_items_and_modes_of_the_source"
+        }
+      ],
+      "notes": "The five source examples use the native SwipeControl, SwipeItems and SwipeItem. The bitmap icons use BitmapIconSource of ferroui-controls-icons with UriSource on the folder image of the sample media, because the coffee cup of the source is not in the assets of the port. The markup follows the catalog's sample text; the handlers write what was invoked.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/SwipeControl/SwipeControlSwipeRightRevealActions.txt",
+          "source_sha256": "e9dcb877b7285a16744e908273344f768416bb730d9738472f4c671c611fd380",
+          "status": "ported",
+          "target_control": "Example1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "each_example_has_the_items_and_modes_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "invoking_an_item_runs_its_handler"
+            }
+          ],
+          "notes": "Reveal items Accept and Flag with font icons and their Invoked handlers."
+        },
+        {
+          "source": "WinUIGallery/Samples/SwipeControl/SwipeControlSwipeLeftInvokeExecute.txt",
+          "source_sha256": "aad8772bb1e1eebae8f5d1a4fa3817d9d7f54443fae005a6ea9adfd3ee3d53df",
+          "status": "ported",
+          "target_control": "Example2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "each_example_has_the_items_and_modes_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "invoking_an_item_runs_its_handler"
+            }
+          ],
+          "notes": "An execute item that closes on invoke, with its Invoked handler. The sample names an ArchiveIcon it does not define; it is defined here."
+        },
+        {
+          "source": "WinUIGallery/Samples/SwipeControl/SwipeControlCustomSwipeListview.txt",
+          "source_sha256": "01895a0bd41776f905a63b751d2c989dfeae1966f9e16e269b7c795db21235bf",
+          "status": "ported",
+          "target_control": "Example3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "each_example_has_the_items_and_modes_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "the_custom_icons_are_bitmap_icon_sources_of_an_image_of_the_sample_media"
+            }
+          ],
+          "notes": "A reveal item with a bitmap icon source; the sample text is one SwipeControl, as here."
+        },
+        {
+          "source": "WinUIGallery/Samples/SwipeControl/SwipeControlGradientBackground.txt",
+          "source_sha256": "6be3ddd77ec19cb9ec53c42294017ce11e56b735a3fd39c621d7838d4ea905a8",
+          "status": "ported",
+          "target_control": "Example4",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "each_example_has_the_items_and_modes_of_the_source"
+            }
+          ],
+          "notes": "An execute item with the purple linear gradient as its background."
+        },
+        {
+          "source": "WinUIGallery/Samples/SwipeControl/SwipeControlCustomIcons.txt",
+          "source_sha256": "3de995634e15d390bc8baf1e38e2ff873156edb6830a973c27500e098788d585",
+          "status": "ported",
+          "target_control": "Example5",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "each_example_has_the_items_and_modes_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/swipe_control_samples_tests.rs",
+              "name": "the_custom_icons_are_bitmap_icon_sources_of_an_image_of_the_sample_media"
+            }
+          ],
+          "notes": "A reveal item with a bitmap icon source."
+        }
+      ]
+    },
     "Expander": {
       "status": "ported",
       "implementation": [
