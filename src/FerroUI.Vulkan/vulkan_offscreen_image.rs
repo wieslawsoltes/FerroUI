@@ -1,5 +1,8 @@
 use crate::interop::VulkanMemoryHelper;
-use crate::{IVulkanDevice, IVulkanPlatformGraphicsContext, VulkanError, VulkanImageInfo, VulkanResultExtensions};
+use crate::{
+    IVulkanDevice, IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions, VulkanImageInfo,
+    VulkanResultExtensions,
+};
 use ash::vk;
 use ferroui_base::PixelSize;
 use std::sync::Arc;
