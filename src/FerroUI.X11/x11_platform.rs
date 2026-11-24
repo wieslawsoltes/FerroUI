@@ -720,6 +720,12 @@ pub struct X11PlatformOptions {
     /// The default value is null.
     pub use_x_shm_framebuffer: Option<bool>,
 
+    /// Enables partial presentation where the rendering backend supports it: with
+    /// [`X11RenderingMode::Egl`], a frame repaints what changed in its buffer and is presented
+    /// with the region that changed (upstream 070c3be990). `None`, the default, lets the
+    /// platform decide (currently: off).
+    pub use_partial_presentation: Option<bool>,
+
     /// If this option is set to true, GMainLoop and GSource based dispatcher implementation will be used instead
     /// of epoll-based one.
     /// Use this if you need to use GLib-based libraries on the main thread
@@ -790,6 +796,7 @@ impl X11PlatformOptions {
             enable_multi_touch: Some(true),
             use_retained_framebuffer: None,
             use_x_shm_framebuffer: None,
+            use_partial_presentation: None,
             use_g_lib_main_loop: false,
             enable_drawn_decorations: None,
             force_drawn_decorations: false,

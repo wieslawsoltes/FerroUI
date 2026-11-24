@@ -2162,6 +2162,11 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        if feature_type == TypeId::of::<dyn ferroui_base::platform::IPartialPresentationFeature>() {
+            let feature = self.session.as_ref()?.partial_presentation()?;
+            return Some(Rc::new(feature));
+        }
+
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
             if let CanvasSource::Recorder { leases: Some(leases), .. } = &self.canvas.source {
                 let leases = leases.clone();

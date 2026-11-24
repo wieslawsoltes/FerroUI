@@ -8,7 +8,9 @@ use crate::server::persistent::w_surface::WSurfaceId;
 use crate::server::wayland_platform_graphics::WaylandPlatformGraphics;
 use crate::server::wayland_worker::with_worker_thread;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
-use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    PlatformRenderTargetState, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
+};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use ferroui_opengl::egl::{
@@ -74,9 +76,20 @@ impl IGlPlatformSurface for WaylandEglWsiSurface {
         let Some(egl_context) = context.as_any().downcast_ref::<EglContext>() else {
             panic!("Unable to cast the context to type 'EglContext'.");
         };
+        let use_partial_presentation =
+            with_worker_thread(|worker| worker.state.options.use_partial_presentation).unwrap_or(false);
+        let surface = self.surface;
+        // A frame callback staged before a swap that failed is never committed.
+        let on_swap_buffers_failed: Rc<dyn Fn()> = Rc::new(move || {
+            with_worker_thread(|worker| {
+                worker.state.on_buffer_attach_aborted(WaylandRenderSurfaceTarget::Surface(surface));
+            });
+        });
         let render_target = Rc::new_cyclic(|this| RenderTarget {
             this: this.clone(),
-            base: EglPlatformSurfaceRenderTargetBase::new(egl_context.this()),
+            base: EglPlatformSurfaceRenderTargetBase::new(egl_context.this())
+                .with_partial_presentation(use_partial_presentation)
+                .with_on_swap_buffers_failed(on_swap_buffers_failed),
             surface: self.surface,
             egl_window: RefCell::new(None),
             egl_surface: RefCell::new(None),
@@ -147,6 +160,7 @@ impl RenderTarget {
 
     /// Releases the surface of EGL and the window of the driver, in that order.
     fn dispose_core(&self) {
+        self.base.invalidate_partial_presentation();
         if let Some(egl_surface) = self.egl_surface.borrow_mut().take() {
             egl_surface.dispose();
         }
@@ -272,6 +286,10 @@ impl IGlPlatformSurfaceRenderTarget for RenderTarget {
         scene_info: &RenderTargetSceneInfo,
     ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         EglPlatformSurfaceRenderTarget::try_begin_draw(self, scene_info)
+    }
+
+    fn properties(&self) -> RenderTargetProperties {
+        self.base.properties()
     }
 
     fn dispose(&self) {

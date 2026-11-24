@@ -24,6 +24,10 @@ pub const EGL_CORE_NATIVE_ENGINE: i32 = 0x305B;
 pub const EGL_DEPTH_SIZE: i32 = 0x3025;
 pub const EGL_DRAW: i32 = 0x3059;
 pub const EGL_EXTENSIONS: i32 = 0x3055;
+pub const EGL_SWAP_BEHAVIOR: i32 = 0x3093;
+pub const EGL_BUFFER_DESTROYED: i32 = 0x3095;
+/// `EGL_EXT_buffer_age`.
+pub const EGL_BUFFER_AGE_EXT: i32 = 0x313D;
 pub const EGL_FALSE: i32 = 0;
 pub const EGL_GREEN_SIZE: i32 = 0x3023;
 pub const EGL_HEIGHT: i32 = 0x3056;

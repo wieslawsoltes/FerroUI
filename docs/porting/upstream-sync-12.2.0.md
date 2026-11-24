@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (122 done, 0 planned) | 122 |
+| `port` (123 done, 0 planned) | 123 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 4 |
+| `deferred` | 3 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -78,7 +78,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-macos | 8 | 1 |  |  |  | 1 | 10 |
 | platform-win32 | 7 | 2 |  |  |  |  | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
-| rendering | 11 | 3 |  |  | 2 | 2 | 18 |
+| rendering | 12 | 3 |  |  | 2 | 1 | 18 |
 | samples | 2 |  |  |  | 1 |  | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
 | text | 10 | 2 |  | 4 | 1 | 1 | 18 |
@@ -108,6 +108,7 @@ Changes of behaviour that the baseline does not record:
 | Fluent and Simple control resources merged into the theme dictionary | `719787dc69` | Follows upstream (PR 1408). `Controls/FluentControls.xaml` and `Controls/SimpleControls.xaml` are resource dictionaries: an application that included one with `StyleInclude` uses `ResourceInclude` or `MergeResourceInclude`. The theme units of the trimming stay one per control document (the merge records the innermost origin, as for the WinUI theme) |
 | Key events carry key text, alternate text, consumed modifiers and platform data | `8dae868308` | Follows upstream (PR 1409); `KeyEventArgs` has four more public fields |
 | `SwapChainGlSurface` is gone; the WinUI swap chain panel renders through the composition swap chain render target | `db0a9a9cdb` | Follows upstream. `ferroui_win32::open_gl::angle::SwapChainGlSurface` is removed: a host uses `ferroui_win32::direct_x::CompositionSwapchainSurface` over its own `ISwapchainVisualHost`. `SwapChainTopLevelImpl` reports `Transparent` |
+| The region dirty rectangle tracker inflates by a pixel inside the surface | `070c3be990` | Follows upstream: the inflation was undone by intersecting with the rectangle itself. A target that clips with regions repaints one more pixel around each rectangle. `RenderTargetProperties` has a new field (`supports_partial_presentation`) |
 
 ## New upstream features and their state
 
@@ -119,7 +120,7 @@ Features merged in this range:
 | Variable fonts: axes, instances, gvar, HVAR, MVAR, VVAR, `FontVariations` | #22179 to #22185 | axes, instances and instance clones `port` (PR 1376, 0.6.0); gvar, HVAR, MVAR, VVAR `skip-better`; `FontVariations` `port` (PR 1397): Skia and Vello, design defaults on Quartz and Direct2D |
 | Backdrop effects | #21826 | `deferred`: needs a GPU path in Skia and Vello |
 | Key text, consumed modifiers, native key data | #22628, #22782 | `port` (PR 1409): Windows, macOS, X11, Wayland |
-| Opt-in EGL partial presentation | #22501 | `deferred` |
+| Opt-in EGL partial presentation | #22501 | `port` (part `egl-partial`): X11, Wayland and DRM with Skia on EGL; Vello GL presents whole buffers; to validate on Mesa and a DRM device |
 | `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `port` (part `composition-swapchain`): DirectComposition, Windows.UI.Composition and the WinUI swap chain panel; to validate in the Windows VM |
 | Android desktop drag and drop | #22451 | `port` (part `android-dnd`): drops from other applications and drags of the application; to validate on a device with a pointer |
 | Platform-simulated typefaces | #22773 | `deferred`: follows the web fonts stack |
@@ -144,7 +145,6 @@ are part of the base that the previous sync tracked, so they are not inventoried
 | Commit | PR | Date | Area | Part | Note |
 |---|---:|---|---|---|---|
 | `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
-| `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
 | `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
 <!-- /generated:deferred -->
@@ -306,7 +306,7 @@ left out only with a recorded performance or better-code reason.
 | `ee79f65f26` | #22685 | 2026-11-12 | platform-android | `port` (done) | android | Input type no longer forced to a password variation. |
 | `84f262c218` | #22676 | 2026-11-12 | markup | `not-applicable` |  | Function-pointer factories for IL-compiled property info. FerroUI generates Rust. |
 | `24b6c7b410` | #22610 | 2026-11-12 | platform-macos | `port` (done) | render-flush | `updateLayer` runs the render pass with dispatcher processing disabled (`MediaContext::paint_with_render_pass`); not skip-better: FerroUI ran the same jobs, and the cooperative resize (#476) keeps its frame. Native patch 0008. |
-| `070c3be990` | #22501 | 2026-11-12 | rendering | `deferred` |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
+| `070c3be990` | #22501 | 2026-11-12 | rendering | `port` (done) | egl-partial | Opt-in EGL partial presentation: `IPartialPresentationFeature`/`IPartialPresentationBuffer`, `RenderTargetProperties::supports_partial_presentation`, `PartialPresentationDirtyRectHistory` in the composition target (replay of the frames a buffer missed, rotated output rectangles), tracker `copy_rects`/`copy_uninflated_rects` and the region tracker inflation fix; EGL buffer age, `eglSetDamageRegionKHR`, swap with damage (KHR/EXT) in `EglPlatformSurfaceRenderTargetBase` and the DRM output; Skia GL forwards the feature; `use_partial_presentation` of X11, Wayland (aborted frame callback) and DRM. Vello GL targets do not take it. Linux/Android GPU validation owed. |
 | `ca61365d75` | #22538 | 2026-11-12 | rendering | `port` (done) | rendering | Animated value written even when an expression has read it. |
 | `61c3aaa876` | #22810 | 2026-11-13 | rendering | `port` (done) | rendering | Remove `CompositorDrawingContextProxy`: on main only its own tests construct it. |
 | `6350ac83e6` | #22774 | 2026-11-13 | text | `port` (done) | text | `TextLineImpl::collapse` gives the collapsed line its own references and keeps the source line valid after a split; the layout releases the replaced line. |

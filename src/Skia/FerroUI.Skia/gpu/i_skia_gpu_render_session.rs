@@ -1,4 +1,5 @@
 use super::ISkiaGrContext;
+use ferroui_base::platform::IPartialPresentationFeature;
 use skia_safe::Surface;
 use std::rc::Rc;
 
@@ -23,6 +24,13 @@ pub trait ISkiaGpuRenderSession {
 
     /// The origin of the surface.
     fn surface_origin(&self) -> SkiaSurfaceOrigin;
+
+    /// The partial presentation of the frame, when the render target presents partially
+    /// (upstream `ISkiaGpuRenderSessionWithPartialPresentation`, 070c3be990): what the
+    /// drawing context answers for `IPartialPresentationFeature`. `None` by default.
+    fn partial_presentation(&self) -> Option<Rc<dyn IPartialPresentationFeature>> {
+        None
+    }
 
     /// Ends the session: flushes the drawing and presents the frame.
     fn dispose(&self);

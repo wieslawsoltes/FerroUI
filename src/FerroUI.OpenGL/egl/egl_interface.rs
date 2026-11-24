@@ -64,6 +64,37 @@ gl_entry_points! {
 
     required safe pub fn swap_buffers(display: isize, surface: isize) = get("eglSwapBuffers");
 
+    // The same entry point with its result: what partial presentation checks.
+    required safe pub(crate) fn swap_buffers_checked_native(display: isize, surface: isize) -> u32
+        = get("eglSwapBuffers");
+
+    required unsafe pub(crate) fn query_surface_native(display: isize, surface: isize, attribute: i32, value: *mut i32)
+        -> u32 = get("eglQuerySurface");
+
+    // EGL_KHR_partial_update
+    optional unsafe pub(crate) fn set_damage_region_khr_native(
+        display: isize,
+        surface: isize,
+        rects: *const i32,
+        count: i32
+    ) -> u32 = get("eglSetDamageRegionKHR");
+
+    // EGL_KHR_swap_buffers_with_damage
+    optional unsafe pub(crate) fn swap_buffers_with_damage_khr_native(
+        display: isize,
+        surface: isize,
+        rects: *const i32,
+        count: i32
+    ) -> u32 = get("eglSwapBuffersWithDamageKHR");
+
+    // EGL_EXT_swap_buffers_with_damage
+    optional unsafe pub(crate) fn swap_buffers_with_damage_ext_native(
+        display: isize,
+        surface: isize,
+        rects: *const i32,
+        count: i32
+    ) -> u32 = get("eglSwapBuffersWithDamageEXT");
+
     required safe pub(crate) fn swap_interval_native(display: isize, interval: i32) -> u32 = get("eglSwapInterval");
 
     required unsafe pub fn create_window_surface_native(display: isize, config: isize, window: isize, attrs: *const i32) -> isize
@@ -401,6 +432,75 @@ impl EglInterface {
     /// `eglWaitNative`.
     pub fn wait_native(&self, engine: i32) -> bool {
         self.wait_native_native(engine) != 0
+    }
+
+    /// `eglSwapBuffers` with its result: `false` when it failed (`get_error` says why).
+    pub(crate) fn swap_buffers_checked(&self, display: isize, surface: isize) -> bool {
+        self.swap_buffers_checked_native(display, surface) != 0
+    }
+
+    /// `eglQuerySurface`: the value of the attribute, `None` when the query failed.
+    pub(crate) fn query_surface(&self, display: isize, surface: isize, attribute: i32) -> Option<i32> {
+        let mut value = 0;
+        // SAFETY: the pointer is valid for the one value written.
+        (unsafe { self.query_surface_native(display, surface, attribute, &mut value) } != 0).then_some(value)
+    }
+
+    /// `eglSetDamageRegionKHR` with `count` rectangles of four values each in `rects`.
+    ///
+    /// # Panics
+    /// Panics when `rects` holds fewer than `count` rectangles.
+    pub(crate) fn set_damage_region_khr(&self, display: isize, surface: isize, rects: &[i32], count: i32) -> bool {
+        assert!(rects.len() >= count as usize * 4);
+        // SAFETY: the slice holds the rectangles the count names (checked above).
+        unsafe { self.set_damage_region_khr_native(display, surface, rects.as_ptr(), count) != 0 }
+    }
+
+    /// Whether the library has `eglSetDamageRegionKHR`.
+    pub(crate) fn is_set_damage_region_khr_available(&self) -> bool {
+        self.is_set_damage_region_khr_native_available()
+    }
+
+    /// `eglSwapBuffersWithDamageKHR` with `count` rectangles of four values each in `rects`.
+    ///
+    /// # Panics
+    /// Panics when `rects` holds fewer than `count` rectangles.
+    pub(crate) fn swap_buffers_with_damage_khr(
+        &self,
+        display: isize,
+        surface: isize,
+        rects: &[i32],
+        count: i32,
+    ) -> bool {
+        assert!(rects.len() >= count as usize * 4);
+        // SAFETY: the slice holds the rectangles the count names (checked above).
+        unsafe { self.swap_buffers_with_damage_khr_native(display, surface, rects.as_ptr(), count) != 0 }
+    }
+
+    /// Whether the library has `eglSwapBuffersWithDamageKHR`.
+    pub(crate) fn is_swap_buffers_with_damage_khr_available(&self) -> bool {
+        self.is_swap_buffers_with_damage_khr_native_available()
+    }
+
+    /// `eglSwapBuffersWithDamageEXT` with `count` rectangles of four values each in `rects`.
+    ///
+    /// # Panics
+    /// Panics when `rects` holds fewer than `count` rectangles.
+    pub(crate) fn swap_buffers_with_damage_ext(
+        &self,
+        display: isize,
+        surface: isize,
+        rects: &[i32],
+        count: i32,
+    ) -> bool {
+        assert!(rects.len() >= count as usize * 4);
+        // SAFETY: the slice holds the rectangles the count names (checked above).
+        unsafe { self.swap_buffers_with_damage_ext_native(display, surface, rects.as_ptr(), count) != 0 }
+    }
+
+    /// Whether the library has `eglSwapBuffersWithDamageEXT`.
+    pub(crate) fn is_swap_buffers_with_damage_ext_available(&self) -> bool {
+        self.is_swap_buffers_with_damage_ext_native_available()
     }
 
     /// `eglQueryString`, `None` when the display has no such string.

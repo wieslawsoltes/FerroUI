@@ -6,7 +6,7 @@ use super::{IDirtyRectCollector, IDirtyRectTracker};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::Color;
 use crate::platform::{IDrawingContextImpl, IPlatformRenderInterface, IPlatformRenderInterfaceRegion, LtrbRect};
-use crate::Thickness;
+use crate::{PixelRect, Thickness};
 use std::cell::{Cell, Ref, RefCell};
 use std::rc::Rc;
 
@@ -119,6 +119,16 @@ impl IDirtyRectTracker for MultiDirtyRectTracker {
 
     fn combined_rect(&self) -> LtrbRect {
         self.combined_rect.get()
+    }
+
+    fn copy_rects(&self, rects: &mut Vec<PixelRect>) {
+        rects.clear();
+        rects.extend(self.clip_region.rects().into_iter().map(|rect| rect.to_pixel_rect()));
+    }
+
+    fn copy_uninflated_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        rects.extend_from_slice(self.regions.borrow_mut().get_uninflated_dirty_regions());
     }
 }
 

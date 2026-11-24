@@ -491,6 +491,13 @@ impl WaylandWorkerState {
         }
     }
 
+    /// The EGL swap of a frame of `target` failed: what was staged for its buffer is dropped.
+    pub fn on_buffer_attach_aborted(&mut self, target: WaylandRenderSurfaceTarget) {
+        if let Some((_, surface)) = self.framebuffer_surface(target) {
+            surface.on_buffer_attach_aborted();
+        }
+    }
+
     /// What a popup reads of its parent, when both exist.
     fn popup_parent(&self, popup: WSurfaceId) -> Option<(WSurfaceId, Option<PopupParent>)> {
         let parent_id = self.popups.get(&popup)?.parent();

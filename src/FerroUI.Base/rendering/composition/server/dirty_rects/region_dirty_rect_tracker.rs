@@ -7,7 +7,7 @@ use crate::media::Color;
 use crate::platform::{
     IDrawingContextImpl, IPlatformRenderInterface, IPlatformRenderInterfaceRegion, LtrbPixelRect, LtrbRect,
 };
-use crate::Thickness;
+use crate::{PixelRect, Thickness};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -18,6 +18,8 @@ pub struct RegionDirtyRectTracker {
     rects: RefCell<Vec<LtrbRect>>,
     random: VisualizeRandom,
     combined_rect: Cell<LtrbRect>,
+    /// The bounds of the surface of the last finalized frame, which the inflation stays in.
+    bounds: Cell<LtrbRect>,
 }
 
 impl RegionDirtyRectTracker {
@@ -27,6 +29,7 @@ impl RegionDirtyRectTracker {
             rects: RefCell::new(Vec::new()),
             random: VisualizeRandom::new(),
             combined_rect: Cell::new(LtrbRect::default()),
+            bounds: Cell::new(LtrbRect::default()),
         }
     }
 
@@ -35,10 +38,11 @@ impl RegionDirtyRectTracker {
         self.combined_rect.set(pixel_rect_to_ltrb_rect_unscaled(self.region.bounds()));
     }
 
-    fn get_inflated_pixel_rect(rc: LtrbRect) -> LtrbPixelRect {
-        // The inflated rectangle is intersected with the rectangle itself, as
-        // in the C# source: the inflation is effectively undone.
-        let inflated = rc.inflate(Thickness::uniform(1.0)).intersect_or_empty(rc);
+    /// The rectangle inflated by a pixel for antialiasing, inside the bounds of the surface
+    /// (upstream 070c3be990 fixed the intersection, which was with the rectangle itself and
+    /// undid the inflation).
+    fn get_inflated_pixel_rect(rc: LtrbRect, bounds: LtrbRect) -> LtrbPixelRect {
+        let inflated = rc.inflate(Thickness::uniform(1.0)).intersect_or_empty(bounds);
         pixel_rect_from_rect_unscaled(inflated)
     }
 }
@@ -50,17 +54,19 @@ impl IDirtyRectCollector for RegionDirtyRectTracker {
 }
 
 impl IDirtyRectTracker for RegionDirtyRectTracker {
-    fn finalize_frame(&self, _bounds: LtrbRect) {
+    fn finalize_frame(&self, bounds: LtrbRect) {
+        self.bounds.set(bounds);
         self.region.reset();
         for rc in self.rects.borrow().iter() {
-            self.region.add_rect(Self::get_inflated_pixel_rect(*rc));
+            self.region.add_rect(Self::get_inflated_pixel_rect(*rc, bounds));
         }
         self.publish();
     }
 
-    fn include(&self, rect: LtrbRect, _bounds: LtrbRect) {
+    fn include(&self, rect: LtrbRect, bounds: LtrbRect) {
+        self.bounds.set(bounds);
         self.rects.borrow_mut().push(rect);
-        self.region.add_rect(Self::get_inflated_pixel_rect(rect));
+        self.region.add_rect(Self::get_inflated_pixel_rect(rect, bounds));
         self.publish();
     }
 
@@ -71,7 +77,10 @@ impl IDirtyRectTracker for RegionDirtyRectTracker {
     fn separate_rects(&self, rects: &mut Vec<LtrbRect>) {
         rects.clear();
         let added = self.rects.borrow();
-        rects.extend(added.iter().map(|rect| pixel_rect_to_ltrb_rect_unscaled(Self::get_inflated_pixel_rect(*rect))));
+        let bounds = self.bounds.get();
+        rects.extend(
+            added.iter().map(|rect| pixel_rect_to_ltrb_rect_unscaled(Self::get_inflated_pixel_rect(*rect, bounds))),
+        );
         separate_dirty_rects(rects);
     }
 
@@ -104,6 +113,16 @@ impl IDirtyRectTracker for RegionDirtyRectTracker {
     fn combined_rect(&self) -> LtrbRect {
         self.combined_rect.get()
     }
+
+    fn copy_rects(&self, rects: &mut Vec<PixelRect>) {
+        rects.clear();
+        rects.extend(self.region.rects().into_iter().map(|rect| rect.to_pixel_rect()));
+    }
+
+    fn copy_uninflated_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        rects.extend_from_slice(&self.rects.borrow());
+    }
 }
 
 #[cfg(test)]
@@ -126,13 +145,13 @@ mod tests {
         assert!(region.rects.borrow().is_empty());
 
         tracker.finalize_frame(BOUNDS);
-        // The inflation is undone by the self-intersection; only the pixel
-        // snapping (truncate left/top, ceil right/bottom) remains.
+        // Each rectangle is inflated by a pixel inside the bounds, then
+        // snapped to pixels (truncate left/top, ceil right/bottom).
         assert_eq!(
-            vec![LtrbPixelRect::new(10, 10, 21, 20), LtrbPixelRect::new(50, 60, 70, 80)],
+            vec![LtrbPixelRect::new(9, 9, 22, 21), LtrbPixelRect::new(49, 59, 71, 81)],
             *region.rects.borrow()
         );
-        assert_eq!(LtrbRect::new(10.0, 10.0, 70.0, 80.0), tracker.combined_rect());
+        assert_eq!(LtrbRect::new(9.0, 9.0, 71.0, 81.0), tracker.combined_rect());
         assert!(tracker.intersects(LtrbRect::new(15.0, 15.0, 16.0, 16.0)));
         assert!(!tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
     }
@@ -147,10 +166,10 @@ mod tests {
         assert!(!tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
         tracker.include(LtrbRect::new(15.0, 15.0, 40.0, 50.0), BOUNDS);
         assert_eq!(
-            vec![LtrbPixelRect::new(10, 10, 20, 20), LtrbPixelRect::new(15, 15, 40, 50)],
+            vec![LtrbPixelRect::new(9, 9, 21, 21), LtrbPixelRect::new(14, 14, 41, 51)],
             *region.rects.borrow()
         );
-        assert_eq!(LtrbRect::new(10.0, 10.0, 40.0, 50.0), tracker.combined_rect());
+        assert_eq!(LtrbRect::new(9.0, 9.0, 41.0, 51.0), tracker.combined_rect());
         assert!(tracker.intersects(LtrbRect::new(30.0, 30.0, 40.0, 40.0)));
         // The frame after it starts from the rectangles that were added.
         tracker.finalize_frame(BOUNDS);
@@ -174,14 +193,14 @@ mod tests {
         tracker.add_rect(LtrbRect::new(50.0, 60.0, 70.0, 80.0));
         tracker.finalize_frame(BOUNDS);
         tracker.separate_rects(&mut rects);
-        assert_eq!(vec![LtrbRect::new(50.0, 60.0, 70.0, 80.0), LtrbRect::new(10.0, 10.0, 21.0, 20.0)], rects);
+        assert_eq!(vec![LtrbRect::new(49.0, 59.0, 71.0, 81.0), LtrbRect::new(9.0, 9.0, 22.0, 21.0)], rects);
 
         // One included after the frame was made final is among them, and
         // one it is close to is drawn with it, as the rectangle that
         // holds both.
         tracker.include(LtrbRect::new(60.0, 70.0, 90.0, 90.0), BOUNDS);
         tracker.separate_rects(&mut rects);
-        assert_eq!(vec![LtrbRect::new(50.0, 60.0, 90.0, 90.0), LtrbRect::new(10.0, 10.0, 21.0, 20.0)], rects);
+        assert_eq!(vec![LtrbRect::new(49.0, 59.0, 91.0, 91.0), LtrbRect::new(9.0, 9.0, 22.0, 21.0)], rects);
 
         // The frame is what it was: a region, and nothing between its
         // rectangles.
@@ -209,6 +228,26 @@ mod tests {
         tracker.finalize_frame(BOUNDS);
         assert!(region.rects.borrow().is_empty());
         assert_eq!(LtrbRect::default(), tracker.combined_rect());
+    }
+
+    #[test]
+    fn the_copies_are_the_region_in_pixels_and_the_rectangles_as_added() {
+        let platform = MockRenderInterface::default();
+        let tracker = RegionDirtyRectTracker::new(&platform);
+        tracker.add_rect(LtrbRect::new(10.2, 10.7, 20.1, 20.0));
+        tracker.finalize_frame(BOUNDS);
+        let mut pixels = vec![PixelRect::new(1, 1, 1, 1)];
+        tracker.copy_rects(&mut pixels);
+        assert_eq!(vec![PixelRect::new(9, 9, 13, 12)], pixels);
+        let mut uninflated = Vec::new();
+        tracker.copy_uninflated_rects(&mut uninflated);
+        assert_eq!(vec![LtrbRect::new(10.2, 10.7, 20.1, 20.0)], uninflated);
+        // The inflation stays inside the bounds.
+        tracker.initialize(BOUNDS);
+        tracker.add_rect(LtrbRect::new(0.0, 0.0, 100.0, 100.0));
+        tracker.finalize_frame(BOUNDS);
+        tracker.copy_rects(&mut pixels);
+        assert_eq!(vec![PixelRect::new(0, 0, 100, 100)], pixels);
     }
 
     #[test]

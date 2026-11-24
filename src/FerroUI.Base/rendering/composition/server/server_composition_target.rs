@@ -6,7 +6,8 @@ use super::{
 use crate::media::Colors;
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
-    IDrawingContextImpl, IDrawingContextLayerImpl, IRenderTarget, LtrbRect, RenderTargetError, RenderTargetSceneInfo,
+    IDrawingContextImpl, IDrawingContextLayerImpl, IPartialPresentationFeature, IRenderTarget, LtrbRect,
+    RenderTargetError, RenderTargetSceneInfo,
     SurfaceOrientation,
 };
 use crate::rendering::composition::generated::{
@@ -15,6 +16,7 @@ use crate::rendering::composition::generated::{
 use crate::rendering::composition::transport::BatchStreamReader;
 use crate::rendering::composition::{CompositionTransparencyLevel, ICompositionTargetDebugEvents};
 use crate::rendering::{LayoutPassTiming, RendererDebugOverlays};
+use super::dirty_rects::PartialPresentationDirtyRectHistory;
 use crate::{Matrix, PixelRect, PixelSize, Size};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
@@ -48,6 +50,9 @@ pub struct ServerCompositionTarget {
     /// The transform from the scene to the framebuffer of the target: the rotation of its
     /// properties (`required_rotation_for_orientation`), identity mostly.
     output_transform: Cell<Matrix>,
+    /// The dirty rectangles of the frames before this one, while the target presents
+    /// partially (upstream 070c3be990); `None` makes the next such frame start a history.
+    partial_presentation_history: RefCell<Option<PartialPresentationDirtyRectHistory>>,
     disposed: Cell<bool>,
     attached_visuals: RefCell<HashMap<*const ServerCompositionVisual, Rc<ServerCompositionVisual>>>,
     dirty_rects: Rc<dyn IDirtyRectTracker>,
@@ -190,6 +195,7 @@ impl ServerCompositionTarget {
                 redraw_requested: Cell::new(false),
                 full_redraw_requested: Cell::new(false),
                 output_transform: Cell::new(Matrix::IDENTITY),
+                partial_presentation_history: RefCell::new(None),
                 disposed: Cell::new(false),
                 attached_visuals: RefCell::new(HashMap::new()),
                 dirty_rects,
@@ -502,6 +508,8 @@ impl ServerCompositionTarget {
                 render_target.dispose();
             }
             self.redraw_requested.set(true);
+            self.full_redraw_requested.set(true);
+            *self.partial_presentation_history.borrow_mut() = None;
         }
 
         if self.render_target.borrow().is_none() {
@@ -552,12 +560,19 @@ impl ServerCompositionTarget {
         // turns keep the pixel edges aligned. A change of the rotation redraws everything.
         let output_transform = output_transform(properties.required_rotation_for_orientation, pixel_size);
         if self.output_transform.replace(output_transform) != output_transform {
+            *self.partial_presentation_history.borrow_mut() = None;
             self.full_redraw_requested.set(true);
         }
+        // A target that presents partially repaints, in the buffer a frame draws into, what
+        // changed since that buffer was drawn (upstream 070c3be990); not with debug overlays.
+        let use_partial_presentation =
+            properties.supports_partial_presentation && self.debug_overlays() == RendererDebugOverlays::NONE;
         let need_layer = !output_transform.is_identity()
             || self.overlays.require_layer() // Check if we don't need overlays
-            // Check if render target can be rendered to directly and preserves the previous frame
-            || !(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);
+            // Check if render target can be rendered to directly and preserves the previous frame,
+            // or presents partially
+            || !(properties.is_suitable_for_direct_rendering
+                && (properties.retains_previous_frame_contents || use_partial_presentation));
 
         let scene_info = RenderTargetSceneInfo {
             size: pixel_size,
@@ -574,7 +589,11 @@ impl ServerCompositionTarget {
         // (section 9.51 of desktop-performance.md): the wait for the surface
         // of the target comes after the drawing, not before it.
         let mut drawn_ahead = false;
-        let layer_ahead = need_layer.then(|| self.layer_to_draw_ahead(&compositor, &render_target, &scene_info)).flatten();
+        // Not while presenting partially: the history captures the frame with the feature of
+        // the drawing context, before anything of the frame is drawn.
+        let layer_ahead = (need_layer && !use_partial_presentation)
+            .then(|| self.layer_to_draw_ahead(&compositor, &render_target, &scene_info))
+            .flatten();
         if let Some(layer) = layer_ahead {
             let held_before = self.has_pending_frame();
             if self.full_redraw_requested.replace(false) {
@@ -616,8 +635,20 @@ impl ServerCompositionTarget {
             }
         };
 
+        // Whether the platform refused the dirty rectangles of a partial frame: the frame is not
+        // presented, and the next one starts again from a whole repaint.
+        let mut refused = false;
+        // The feature of the drawing context, taken only when the frame presents partially: a
+        // context whose feature is not taken presents the whole buffer.
+        let partial_presentation = use_partial_presentation
+            .then(|| render_target_context.get_feature(TypeId::of::<dyn IPartialPresentationFeature>()))
+            .flatten()
+            .and_then(|feature| feature.downcast_ref::<Rc<dyn IPartialPresentationFeature>>().cloned());
+
         {
-            let mut full_redraw = false;
+            // A target that announced partial presentation and has no feature is drawn whole
+            // (upstream throws).
+            let mut full_redraw = use_partial_presentation && partial_presentation.is_none();
 
             let layer_is_stale = {
                 let layer = self.layer.borrow();
@@ -638,7 +669,9 @@ impl ServerCompositionTarget {
                 self.layer_unpresented.set(false);
             }
 
-            if self.full_redraw_requested.get() || (!need_layer && !properties.previous_frame_is_retained) {
+            if self.full_redraw_requested.get()
+                || (!need_layer && partial_presentation.is_none() && !properties.previous_frame_is_retained)
+            {
                 self.full_redraw_requested.set(false);
                 full_redraw = true;
             }
@@ -657,6 +690,12 @@ impl ServerCompositionTarget {
                 if draws {
                     self.begin_scene(render_bounds, pixel_size);
                 }
+                let mut history_slot = self.partial_presentation_history.borrow_mut();
+                let history = partial_presentation.as_ref().map(|feature| {
+                    let history = history_slot.get_or_insert_with(PartialPresentationDirtyRectHistory::new);
+                    history.before_draw(feature.clone(), &**self.dirty_rects);
+                    history
+                });
                 match layer {
                     Some(layer) => {
                         if draws {
@@ -669,23 +708,52 @@ impl ServerCompositionTarget {
                         }
                         self.layer_unpresented.set(false);
 
-                        render_target_context.clear(Colors::TRANSPARENT);
-                        render_target_context.set_transform(output_transform);
-                        // A blit copies pixels as they are: a rotated target draws the layer.
-                        if layer.can_blit() && output_transform.is_identity() {
-                            layer.blit(&mut *render_target_context);
-                        } else {
-                            let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
-                            render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                        let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
+                        match history {
+                            // The layer is copied into the rectangles the buffer needs: the
+                            // history replays the frames this buffer missed and declares them
+                            // before the first draw to the buffer. A rectangle copy works on a
+                            // framebuffer without a stencil, and a blit could ignore the clip.
+                            Some(history) => {
+                                refused =
+                                    !history.before_target_draw(&**self.dirty_rects, render_bounds, output_transform);
+                                for dirty_rect in history.buffer_dirty_rects().iter().filter(|_| !refused) {
+                                    render_target_context.set_transform(Matrix::IDENTITY);
+                                    render_target_context.push_clip(dirty_rect.to_rect(1.0));
+                                    render_target_context.clear(Colors::TRANSPARENT);
+                                    render_target_context.set_transform(output_transform);
+                                    render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                                    render_target_context.pop_clip();
+                                }
+                            }
+                            None => {
+                                render_target_context.clear(Colors::TRANSPARENT);
+                                render_target_context.set_transform(output_transform);
+                                // A blit copies pixels as they are: a rotated target draws the layer.
+                                if layer.can_blit() && output_transform.is_identity() {
+                                    layer.blit(&mut *render_target_context);
+                                } else {
+                                    render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                                }
+                            }
                         }
-                        self.overlays.draw(self, &mut *render_target_context, true, output_transform);
+                        if !refused {
+                            self.overlays.draw(self, &mut *render_target_context, true, output_transform);
+                        }
                     }
                     // Without a layer no frame is held back: the tick draws.
                     None => {
-                        self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
-                        self.overlays.draw(self, &mut *render_target_context, false, Matrix::IDENTITY);
+                        // The tracker is extended with what the buffer missed before the draw.
+                        if let Some(history) = history {
+                            refused = !history.before_target_draw(&**self.dirty_rects, render_bounds, output_transform);
+                        }
+                        if !refused {
+                            self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
+                            self.overlays.draw(self, &mut *render_target_context, false, Matrix::IDENTITY);
+                        }
                     }
                 }
+                drop(history_slot);
                 if draws {
                     self.record_backdrop_regions();
                 }
@@ -693,7 +761,21 @@ impl ServerCompositionTarget {
 
             self.end_frame(render_bounds);
         }
+        // The frame is complete, which the feature needs before the context is disposed, or the
+        // disposal cancels the presentation.
+        if let Some(feature) = partial_presentation.as_ref().filter(|_| !refused) {
+            feature.succeeded();
+        }
         render_target_context.dispose();
+        if refused {
+            *self.partial_presentation_history.borrow_mut() = None;
+            self.full_redraw_requested.set(true);
+            self.redraw_requested.set(true);
+        } else if partial_presentation.is_some() {
+            if let Some(history) = self.partial_presentation_history.borrow_mut().as_mut() {
+                history.after_successful_draw();
+            }
+        }
         self.report_render_counters();
 
         self.prewarm_effects(&compositor, &render_target, &scene_info);
@@ -883,6 +965,8 @@ impl ServerCompositionTarget {
     }
 
     pub fn reset_render_target(&self) {
+        *self.partial_presentation_history.borrow_mut() = None;
+        self.full_redraw_requested.set(true);
         if self.layer.borrow().is_none() && self.render_target.borrow().is_none() {
             return;
         }
@@ -951,6 +1035,7 @@ impl ServerCompositionTargetHooks for ServerCompositionTarget {
 
     fn on_debug_overlays_changed(&self) {
         self.full_redraw_requested.set(true);
+        *self.partial_presentation_history.borrow_mut() = None;
         self.overlays.on_changed(self.debug_overlays());
     }
 

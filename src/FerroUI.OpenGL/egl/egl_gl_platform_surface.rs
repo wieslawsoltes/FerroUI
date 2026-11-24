@@ -5,7 +5,9 @@ use super::{EglContext, EglSurface};
 use crate::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
 use crate::IGlContext;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
-use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    PlatformRenderTargetState, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
+};
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use std::any::{Any, TypeId};
@@ -54,11 +56,21 @@ pub trait IEglWindowGlPlatformSurfaceInfoWithWaitPolicy: IEglWindowGlPlatformSur
 /// that renders, with the context.
 pub struct EglGlPlatformSurface {
     info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
+    use_partial_presentation: bool,
 }
 
 impl EglGlPlatformSurface {
     pub fn new(info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>) -> Arc<EglGlPlatformSurface> {
-        Arc::new(Self { info })
+        Self::new_with_partial_presentation(info, false)
+    }
+
+    /// A surface whose render targets present partially when `use_partial_presentation` and
+    /// the display has buffer age (upstream 070c3be990: the option of X11, Wayland and DRM).
+    pub fn new_with_partial_presentation(
+        info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
+        use_partial_presentation: bool,
+    ) -> Arc<EglGlPlatformSurface> {
+        Arc::new(Self { info, use_partial_presentation })
     }
 }
 
@@ -68,7 +80,8 @@ impl IPlatformRenderSurface for EglGlPlatformSurface {
             // The view is a handle of the calling thread, the surface a handle shared
             // between the threads: the view is a surface of its own over the same window,
             // which is all the state of a surface.
-            let this: Rc<dyn IGlPlatformSurface> = Rc::new(Self { info: self.info.clone() });
+            let this: Rc<dyn IGlPlatformSurface> =
+                Rc::new(Self { info: self.info.clone(), use_partial_presentation: self.use_partial_presentation });
             return Some(Rc::new(this));
         }
         None
@@ -91,7 +104,7 @@ impl IGlPlatformSurface for EglGlPlatformSurface {
         };
         let egl_context = egl_context.this();
         let gl_surface = create_window_surface(&egl_context, self.info.as_ref(), self.info.handle());
-        Rc::new(RenderTarget::new(gl_surface, egl_context, self.info.clone()))
+        Rc::new(RenderTarget::new(gl_surface, egl_context, self.info.clone(), self.use_partial_presentation))
     }
 }
 
@@ -122,12 +135,17 @@ struct RenderTarget {
 }
 
 impl RenderTarget {
-    fn new(gl_surface: Rc<EglSurface>, context: Rc<EglContext>, info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>) -> Self {
+    fn new(
+        gl_surface: Rc<EglSurface>,
+        context: Rc<EglContext>,
+        info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
+        use_partial_presentation: bool,
+    ) -> Self {
         let current_size = info.size();
         let handle = info.handle();
         let skip_waits = info.as_info_with_wait_policy().is_some_and(|info| info.skip_waits());
         Self {
-            base: EglPlatformSurfaceRenderTargetBase::new(context),
+            base: EglPlatformSurfaceRenderTargetBase::new(context).with_partial_presentation(use_partial_presentation),
             gl_surface: RefCell::new(Some(gl_surface)),
             info,
             current_size: Cell::new(current_size),
@@ -147,6 +165,7 @@ impl EglPlatformSurfaceRenderTarget for RenderTarget {
     }
 
     fn dispose(&self) {
+        self.base.invalidate_partial_presentation();
         let gl_surface = self.gl_surface.borrow().clone();
         if let Some(gl_surface) = gl_surface {
             gl_surface.dispose();
@@ -214,6 +233,10 @@ impl IGlPlatformSurfaceRenderTarget for RenderTarget {
         scene_info: &RenderTargetSceneInfo,
     ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         EglPlatformSurfaceRenderTarget::try_begin_draw(self, scene_info)
+    }
+
+    fn properties(&self) -> RenderTargetProperties {
+        self.base.properties()
     }
 
     fn dispose(&self) {
