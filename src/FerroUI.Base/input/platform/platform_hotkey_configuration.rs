@@ -42,6 +42,19 @@ impl PlatformHotkeyConfiguration {
         Self::with_modifiers(command_modifiers, KeyModifiers::SHIFT, KeyModifiers::CONTROL)
     }
 
+    /// The configuration of Apple platforms (macOS, iOS, iPadOS and the browser on them):
+    /// Command is the command modifier, Option the whole-word modifier, and Command with the
+    /// left and right arrows moves to the start and the end of the line.
+    pub fn apple() -> Self {
+        let mut hotkeys = Self::with_modifiers(KeyModifiers::META, KeyModifiers::SHIFT, KeyModifiers::ALT);
+        let (command, selection) = (hotkeys.command_modifiers, hotkeys.selection_modifiers);
+        hotkeys.move_cursor_to_the_start_of_line.push(KeyGesture::new(Key::Left, command));
+        hotkeys.move_cursor_to_the_start_of_line_with_selection.push(KeyGesture::new(Key::Left, command | selection));
+        hotkeys.move_cursor_to_the_end_of_line.push(KeyGesture::new(Key::Right, command));
+        hotkeys.move_cursor_to_the_end_of_line_with_selection.push(KeyGesture::new(Key::Right, command | selection));
+        hotkeys
+    }
+
     /// Creates a configuration for the given modifiers.
     pub fn with_modifiers(
         command_modifiers: KeyModifiers,
@@ -82,5 +95,27 @@ impl PlatformHotkeyConfiguration {
             page_up: vec![k(Key::PageUp)],
             page_down: vec![k(Key::PageDown)],
         }
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+    use crate::input::platform::KeyGestureFormatInfo;
+
+    #[test]
+    fn apple_platforms_use_command_and_option() {
+        let hotkeys = PlatformHotkeyConfiguration::apple();
+        assert_eq!(hotkeys.command_modifiers, KeyModifiers::META);
+        assert_eq!(hotkeys.whole_word_text_action_modifiers, KeyModifiers::ALT);
+        assert!(hotkeys.copy.contains(&KeyGesture::new(Key::C, KeyModifiers::META)));
+        assert!(hotkeys.move_cursor_to_the_start_of_line.contains(&KeyGesture::new(Key::Left, KeyModifiers::META)));
+        assert!(hotkeys
+            .move_cursor_to_the_end_of_line_with_selection
+            .contains(&KeyGesture::new(Key::Right, KeyModifiers::META | KeyModifiers::SHIFT)));
+
+        let format = KeyGestureFormatInfo::apple();
+        assert_eq!(format.meta(), "\u{2318}");
+        assert_ne!(format, KeyGestureFormatInfo::default());
     }
 }

@@ -45,6 +45,28 @@ impl KeyGestureFormatInfo {
         }
     }
 
+    /// The format info of Apple platforms (macOS, iOS, iPadOS and the browser on them): the
+    /// key and modifier symbols of their menus.
+    pub fn apple() -> Self {
+        let keys = [
+            (Key::Back, "\u{232B}"),
+            (Key::Down, "\u{2193}"),
+            (Key::End, "\u{2198}"),
+            (Key::Escape, "\u{238B}"),
+            (Key::Home, "\u{2196}"),
+            (Key::Left, "\u{2190}"),
+            (Key::Return, "\u{21A9}"),
+            (Key::PageDown, "\u{21DF}"),
+            (Key::PageUp, "\u{21DE}"),
+            (Key::Right, "\u{2192}"),
+            (Key::Space, "\u{2423}"),
+            (Key::Tab, "\u{21E5}"),
+            (Key::Up, "\u{2191}"),
+        ];
+        let keys = keys.into_iter().map(|(key, name)| (key, name.to_string())).collect();
+        Self::new(Some(keys), "\u{2318}", "\u{2303}", "\u{2325}", "\u{21E7}")
+    }
+
     /// The invariant format info, used as formatting fallback.
     pub fn invariant() -> Rc<KeyGestureFormatInfo> {
         crate::ferro_thread_local! {

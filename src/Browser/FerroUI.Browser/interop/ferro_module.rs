@@ -11,6 +11,10 @@ extern "C" {
     #[wasm_bindgen(js_namespace = Caniuse, js_name = isMobile)]
     pub fn is_mobile() -> bool;
 
+    /// Whether the page runs on macOS, iOS or iPadOS, where Command is the shortcut modifier.
+    #[wasm_bindgen(js_namespace = Caniuse, js_name = isApplePlatform)]
+    pub fn is_apple_platform() -> bool;
+
     /// Whether the page runs on a television.
     #[wasm_bindgen(js_namespace = Caniuse, js_name = isTv)]
     pub fn is_tv() -> bool;
