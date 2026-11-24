@@ -20,6 +20,7 @@ mod ferro_intrinsics_tests;
 mod generic_template_tests;
 mod ignored_directives_tests;
 mod items_panel_template_tests;
+mod list_view_group_style_tests;
 mod merge_resource_include_tests;
 mod parent_stack_provider_tests;
 mod provide_value_target_tests;
