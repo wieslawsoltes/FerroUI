@@ -207,7 +207,7 @@
    "date": "2026-10-20",
    "area": "platform-macos",
    "class": "deferred",
-   "note": "Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check."
+   "note": "Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator."
   },
   {
    "hash": "1fd3c0830edd6076edfe4b5d03e8e9c91d645c32",
@@ -826,8 +826,10 @@
    "pr": 22637,
    "date": "2026-10-29",
    "area": "themes",
-   "class": "deferred",
-   "note": "Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first."
+   "class": "port",
+   "note": "Compiler: a merged document is flattened before it is inlined, recursively, relative sources against its own URI, circular merges reported; entries recorded with the innermost origin, so the theme units stay per control document. Themes: the Fluent and Simple controls documents are resource dictionaries merged into the theme dictionary (as the WinUI theme already does, so not against trimming); duplicate `MenuFlyoutScrollerMargin` and the Fluent `PipsPager` `Light` dictionary removed. The Fluent 2 palettes have no theme crate.",
+   "part": "merge-nested",
+   "state": "done"
   },
   {
    "hash": "55129e06595f1637eb7b94ddad323a67ed3e39f6",
@@ -1194,16 +1196,20 @@
    "pr": 22628,
    "date": "2026-11-10",
    "area": "input",
-   "class": "deferred",
-   "note": "Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked."
+   "class": "port",
+   "note": "`KeyEventArgs::key_text`, `alternate_key_text`, `consumed_modifiers`, `platform_key_info` (`PlatformKeyInfo`, `KnownPlatformKeyInfoFormats`) on Windows (paired `WM_CHAR`, layout table built lazily per layout instead of at start-up, dead keys), X11 (GTK consumed rules), Wayland (`WaylandKeyInfo`, held key changes) and macOS (native patch 0009, IDL `FrnKeyEventInfo`).",
+   "part": "key-info",
+   "state": "done"
   },
   {
    "hash": "5ef345810e89d1a4a3b7ff38b62587a450e7da93",
    "pr": 22782,
    "date": "2026-11-12",
    "area": "platform-win32",
-   "class": "deferred",
-   "note": "Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit."
+   "class": "port",
+   "note": "Win32 layout table: none while a dead key is pending (Windows 10 1607 and later), a table for a layout added after start-up. Its CI and integration test changes have no FerroUI counterpart; the layouts are checked in the Windows VM.",
+   "part": "key-info",
+   "state": "done"
   },
   {
    "hash": "3ecf2a3fd87021335e0896d3f876278af7b90a8f",

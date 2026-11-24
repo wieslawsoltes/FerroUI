@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (117 done, 0 planned) | 117 |
+| `port` (120 done, 0 planned) | 120 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 9 |
+| `deferred` | 6 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -67,7 +67,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | collections |  |  |  |  | 1 |  | 1 |
 | controls | 26 | 2 |  |  |  |  | 28 |
 | data | 2 |  |  |  |  |  | 2 |
-| input | 5 |  |  |  |  | 1 | 6 |
+| input | 6 |  |  |  |  |  | 6 |
 | layout | 1 |  |  |  |  |  | 1 |
 | markup | 2 |  |  |  | 3 |  | 5 |
 | platform | 3 |  |  |  |  |  | 3 |
@@ -76,13 +76,13 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-ios | 5 |  |  |  |  |  | 5 |
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
 | platform-macos | 8 | 1 |  |  |  | 1 | 10 |
-| platform-win32 | 5 | 2 |  |  |  | 2 | 9 |
+| platform-win32 | 6 | 2 |  |  |  | 1 | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
 | samples | 2 |  |  |  | 1 |  | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
 | text | 10 | 2 |  | 4 | 1 | 1 | 18 |
-| themes | 8 | 4 |  |  | 2 | 1 | 15 |
+| themes | 9 | 4 |  |  | 2 |  | 15 |
 | threading |  | 1 |  |  |  |  | 1 |
 <!-- /generated:areas -->
 
@@ -105,7 +105,8 @@ Changes of behaviour that the baseline does not record:
 | A masked `TextBox` reports its mask to accessibility, not its text | `51f5c8f123` | FerroUI reports no value at all for a password field, also while revealed. Its remaining paths are fixed in PR 1317 |
 | Space key up clicks a button only if the button was pressed | `c4dfde67c3` | Follows upstream |
 | TwoWay bindings do not write a just-published value back | `500e78afef` | Follows upstream |
-| Fluent control resources merged into the theme dictionary | `719787dc69` | Deferred. Lookup order of a custom theme could change; merging the control dictionaries into one works against theme trimming, while the compiler half (nested `MergeResourceInclude` flattened in any order, circular merges reported) is a candidate for a markup part |
+| Fluent and Simple control resources merged into the theme dictionary | `719787dc69` | Follows upstream (PR 1408). `Controls/FluentControls.xaml` and `Controls/SimpleControls.xaml` are resource dictionaries: an application that included one with `StyleInclude` uses `ResourceInclude` or `MergeResourceInclude`. The theme units of the trimming stay one per control document (the merge records the innermost origin, as for the WinUI theme) |
+| Key events carry key text, alternate text, consumed modifiers and platform data | `8dae868308` | Follows upstream (PR 1409); `KeyEventArgs` has four more public fields |
 
 ## New upstream features and their state
 
@@ -116,7 +117,7 @@ Features merged in this range:
 | Fluent 2 theme with its ColorPicker themes | #21771, #22569, #22611 | No new theme (owner decision below). Audited: the fixes that apply to the existing themes are ported (`ButtonSpinner` directions, `EmbeddableControlRoot` transparency fallback in Fluent and WinUI, `ColorSpectrum` tooltip, #22578); the rest is `already` or `not-applicable` |
 | Variable fonts: axes, instances, gvar, HVAR, MVAR, VVAR, `FontVariations` | #22179 to #22185 | axes, instances and instance clones `port` (PR 1376, 0.6.0); gvar, HVAR, MVAR, VVAR `skip-better`; `FontVariations` `port` (PR 1397): Skia and Vello, design defaults on Quartz and Direct2D |
 | Backdrop effects | #21826 | `deferred`: needs a GPU path in Skia and Vello |
-| Key text, consumed modifiers, native key data | #22628 | `deferred` |
+| Key text, consumed modifiers, native key data | #22628, #22782 | `port` (PR 1409): Windows, macOS, X11, Wayland |
 | Opt-in EGL partial presentation | #22501 | `deferred` |
 | `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `deferred` |
 | Android desktop drag and drop | #22451 | `deferred` |
@@ -141,12 +142,9 @@ are part of the base that the previous sync tracked, so they are not inventoried
 <!-- generated:deferred -->
 | Commit | PR | Date | Area | Part | Note |
 |---|---:|---|---|---|---|
-| `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check. |
+| `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
 | `78316701f3` | #22451 | 2026-10-22 | platform-android |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
 | `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
-| `719787dc69` | #22637 | 2026-10-29 | themes |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
-| `8dae868308` | #22628 | 2026-11-10 | input |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
-| `5ef345810e` | #22782 | 2026-11-12 | platform-win32 |  | Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
 | `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack. |
@@ -191,7 +189,7 @@ left out only with a recorded performance or better-code reason.
 | `ae55790316` | #22526 | 2026-10-20 | platform-ios | `port` (done) | ios2 | Touches in progress are cancelled when the view leaves its window or is disposed. |
 | `45693b1713` | #22196 | 2026-10-20 | build | `not-applicable` |  | .NET 11 SDK and .NET WebAssembly runtime. |
 | `fa6d6f069e` | #22532 | 2026-10-20 | platform-macos | `port` (done) | macos | `automation.mm`: AXFocused settable only on keyboard-focusable elements. |
-| `dc0105179b` | #22519 | 2026-10-20 | platform-macos | `deferred` |  | Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check. |
+| `dc0105179b` | #22519 | 2026-10-20 | platform-macos | `deferred` |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
 | `1fd3c0830e` | #22227 | 2026-10-20 | data | `port` (done) | data | Indexer bindings refresh on `Item[]` and `Item[key]`. |
 | `06c2072375` | #22531 | 2026-10-20 | platform-win32 | `port` (done) | win32 | OLE data object accepts a combination of media. |
 | `5eedd4afe5` | #22463 | 2026-10-20 | platform-macos | `port` (done) | macos | `automation.mm`: no announcement for an empty live region. |
@@ -258,7 +256,7 @@ left out only with a recorded performance or better-code reason.
 | `c9c7b90053` | #22641 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: popups report the window role. |
 | `5aa47e4f7f` | #22642 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: active state only for the active window. |
 | `1968b08e18` | #22578 | 2026-10-29 | themes | `port` (done) | themes3 | ColorPicker Fluent 2 fixes in the Fluent and Simple colour picker themes (theme dictionaries for the base resources). |
-| `719787dc69` | #22637 | 2026-10-29 | themes | `deferred` |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
+| `719787dc69` | #22637 | 2026-10-29 | themes | `port` (done) | merge-nested | Compiler: a merged document is flattened before it is inlined, recursively, relative sources against its own URI, circular merges reported; entries recorded with the innermost origin, so the theme units stay per control document. Themes: the Fluent and Simple controls documents are resource dictionaries merged into the theme dictionary (as the WinUI theme already does, so not against trimming); duplicate `MenuFlyoutScrollerMargin` and the Fluent `PipsPager` `Light` dictionary removed. The Fluent 2 palettes have no theme crate. |
 | `55129e0659` | #22229 | 2026-10-30 | platform-win32 | `port` (done) | win32b | Move and resize drags wait for the emulated left button of touch and pen. |
 | `2a38dc63eb` | #22624 | 2026-10-30 | controls | `port` (done) | controls2 | Popup with pointer placement resizes with its content. |
 | `eae84c1403` | #22179 | 2026-10-30 | text | `port` (done) | variation-axes | Public axis API (`FontVariationAxis`, `FontVariationInstance`, `GlyphTypeface::variation_axes`, `named_instances`) on the Skia and Vello axis queries; PR 1376 (0.6.0). No managed fvar or avar parser. |
@@ -298,8 +296,8 @@ left out only with a recorded performance or better-code reason.
 | `bdeeeef0a7` | #22693 | 2026-11-10 | platform-ios | `port` (done) | ios2 | Native control views listed for VoiceOver; `accessibilityElements`. |
 | `80c4f31848` | #22462 | 2026-11-10 | platform-x11 | `port` (done) | x11 | ConfigureNotify older than our last resize ignored. |
 | `0dc28102b4` | #22566 | 2026-11-10 | platform-linux | `port` (done) | x11b | DRM output: the next frame renders while the flip just queued waits for vblank; the wait happens before the next flip, or at once when no free buffer is left. |
-| `8dae868308` | #22628 | 2026-11-10 | input | `deferred` |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
-| `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `deferred` |  | Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit. |
+| `8dae868308` | #22628 | 2026-11-10 | input | `port` (done) | key-info | `KeyEventArgs::key_text`, `alternate_key_text`, `consumed_modifiers`, `platform_key_info` (`PlatformKeyInfo`, `KnownPlatformKeyInfoFormats`) on Windows (paired `WM_CHAR`, layout table built lazily per layout instead of at start-up, dead keys), X11 (GTK consumed rules), Wayland (`WaylandKeyInfo`, held key changes) and macOS (native patch 0009, IDL `FrnKeyEventInfo`). |
+| `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `port` (done) | key-info | Win32 layout table: none while a dead key is pending (Windows 10 1607 and later), a table for a layout added after start-up. Its CI and integration test changes have no FerroUI counterpart; the layouts are checked in the Windows VM. |
 | `3ecf2a3fd8` | #22777 | 2026-11-12 | build | `not-applicable` |  | Empty upstream CI commit. |
 | `b04cec5ef5` | #22801 | 2026-11-12 | build | `not-applicable` |  | .NET SDK update. |
 | `dc2253658c` | #22674 | 2026-11-12 | markup | `port` (done) | xamlx | The enum whitespace trim of its XamlX update is ported; compact IL identifiers do not apply (the Rust emitter writes no IL). |
