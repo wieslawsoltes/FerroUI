@@ -4,7 +4,7 @@
 use crate::SvgDocument;
 use ferroui_base::media::{DrawingContext, PlatformDrawingContext};
 use ferroui_base::platform::{IPlatformRenderInterface, IReadableBitmapImpl, PixelFormat};
-use ferroui_base::{FerroLocator, LocatorExtensions, PixelSize, Rect, Vector};
+use ferroui_base::{FerroLocator, PixelSize, Rect, Vector};
 use ferroui_vello::{PlatformRenderInterface, VelloOptions, VelloRenderingMode};
 use std::rc::Rc;
 
@@ -133,6 +133,49 @@ fn a_clip_path_and_group_opacity_apply() {
         assert!(near(pixels.at(10, 32), pixels.at(30, 32), 2), "{mode:?}: {:?} {:?}", pixels.at(10, 32), pixels.at(30, 32));
         assert!(pixels.at(30, 32)[3].abs_diff(128) <= 2, "{mode:?}: {:?}", pixels.at(30, 32));
     }
+}
+
+#[test]
+fn a_pattern_repeats_its_tile_in_every_rendering_mode() {
+    // Tiles of 16 units with their left half red, from x = 8.
+    let text = br##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>
+        <pattern id="p" patternUnits="userSpaceOnUse" x="8" width="16" height="16"><rect width="8" height="16" fill="#ff0000"/></pattern>
+        </defs><rect width="64" height="64" fill="url(#p)"/></svg>"##;
+    for mode in modes() {
+        let pixels = render(text, mode, 64, 64);
+        for x in [12, 28, 44] {
+            assert!(near(pixels.at(x, 32), [255, 0, 0, 255], 3), "{mode:?} at {x}: {:?}", pixels.at(x, 32));
+        }
+        for x in [20, 36, 52] {
+            assert!(near(pixels.at(x, 32), [0, 0, 0, 0], 3), "{mode:?} at {x}: {:?}", pixels.at(x, 32));
+        }
+    }
+}
+
+#[test]
+fn a_luminance_mask_with_a_dark_shape_cuts_a_hole_in_every_rendering_mode() {
+    // White with a black square over it: what is under the square is hidden, which a mask made
+    // from the alpha of each shape would get wrong.
+    let text = br##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>
+        <mask id="m" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+          <rect width="64" height="64" fill="#ffffff"/><rect x="16" y="16" width="32" height="32" fill="#000000"/>
+        </mask></defs><rect width="64" height="64" fill="#ff0000" mask="url(#m)"/></svg>"##;
+    for mode in modes() {
+        let pixels = render(text, mode, 64, 64);
+        assert!(near(pixels.at(8, 8), [255, 0, 0, 255], 3), "{mode:?}: {:?}", pixels.at(8, 8));
+        assert!(near(pixels.at(32, 32), [0, 0, 0, 0], 3), "{mode:?}: {:?}", pixels.at(32, 32));
+    }
+}
+
+#[test]
+fn an_alpha_mask_reads_the_alpha_of_its_content() {
+    let text = br##"<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><defs>
+        <mask id="m" style="mask-type: alpha" maskUnits="userSpaceOnUse" x="0" y="0" width="64" height="64">
+          <rect width="32" height="64" fill="#000000"/>
+        </mask></defs><rect width="64" height="64" fill="#00ff00" mask="url(#m)"/></svg>"##;
+    let pixels = render(text, VelloRenderingMode::Cpu, 64, 64);
+    assert!(near(pixels.at(16, 32), [0, 255, 0, 255], 3), "{:?}", pixels.at(16, 32));
+    assert!(near(pixels.at(48, 32), [0, 0, 0, 0], 3), "{:?}", pixels.at(48, 32));
 }
 
 #[test]

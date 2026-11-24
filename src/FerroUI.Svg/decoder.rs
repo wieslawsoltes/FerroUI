@@ -1,7 +1,8 @@
 //! From the XML of a document to its tree of shapes.
 
 use crate::color::parse_color;
-use crate::document::{Gradient, GradientKind, Group, Item, Paint, Shape, Stroke, SvgDocument, SvgError, SvgLimits};
+use crate::css::{declarations, Cascade};
+use crate::document::{Gradient, GradientKind, Group, Item, Mask, Paint, Pattern, Shape, Stroke, SvgDocument, SvgError, SvgLimits};
 use crate::numbers::{length, number_list, opacity};
 use crate::path::{self, OutOfSegments};
 use crate::transform::parse_transform;
@@ -20,8 +21,11 @@ const XLINK_NAMESPACE: &str = "http://www.w3.org/1999/xlink";
 /// The size of an image that does not say: the default of a replaced element in CSS.
 const DEFAULT_SIZE: Size = Size::new(300.0, 150.0);
 
-/// How many gradients one `href` chain may pass through.
+/// How many gradients or patterns one `href` chain may pass through.
 const MOST_GRADIENT_LINKS: usize = 16;
+
+/// How deep patterns may paint with patterns.
+const MOST_NESTED_PATTERNS: usize = 4;
 
 /// The most stops of a gradient.
 const MOST_GRADIENT_STOPS: usize = 256;
@@ -35,25 +39,21 @@ const MOST_REPORTED: usize = 256;
 /// The elements the decoder reads, and those that draw nothing by their nature.
 const KNOWN_ELEMENTS: &[&str] = &[
     "svg", "g", "a", "switch", "use", "symbol", "defs", "path", "rect", "circle", "ellipse", "line", "polyline", "polygon",
-    "linearGradient", "radialGradient", "stop", "clipPath", "title", "desc", "metadata",
+    "linearGradient", "radialGradient", "stop", "clipPath", "pattern", "marker", "mask", "title", "desc", "metadata", "style",
 ];
 
 /// The properties the decoder reads in a `style` attribute.
 const KNOWN_PROPERTIES: &[&str] = &[
     "color", "fill", "fill-opacity", "fill-rule", "clip-rule", "clip-path", "stroke", "stroke-opacity", "stroke-width",
     "stroke-linecap", "stroke-linejoin", "stroke-miterlimit", "stroke-dasharray", "stroke-dashoffset", "visibility",
-    "display", "opacity", "stop-color", "stop-opacity",
+    "display", "opacity", "stop-color", "stop-opacity", "marker", "marker-start", "marker-mid", "marker-end",
+    "mask", "mask-type",
 ];
 
 /// The presentation attributes that change the picture and that the decoder does not apply, with
 /// the value of each that changes nothing.
 const UNSUPPORTED_ATTRIBUTES: &[(&str, &str)] = &[
-    ("mask", "none"),
     ("filter", "none"),
-    ("marker", "none"),
-    ("marker-start", "none"),
-    ("marker-mid", "none"),
-    ("marker-end", "none"),
     ("mix-blend-mode", "normal"),
     ("isolation", "auto"),
     ("paint-order", "normal"),
@@ -95,20 +95,27 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
             ids.entry(id).or_insert(node);
         }
     }
-    let mut unsupported = unsupported_features(&document);
+    let mut unsupported = BTreeSet::new();
+    let cascade = Cascade::build(&document, &mut unsupported, MOST_UNSUPPORTED)?;
+    unsupported_features(&document, &cascade, &mut unsupported);
     let mut decoder = Decoder {
+        cascade: &cascade,
         ids,
         limits,
         elements: 0,
         segments: limits.max_path_segments,
         use_stack: Vec::new(),
         gradients: HashMap::new(),
+        patterns: HashMap::new(),
+        pattern_stack: Vec::new(),
+        marker_stack: Vec::new(),
+        mask_stack: Vec::new(),
         unsupported: &mut unsupported,
         viewport: view_box.map_or(Size::new(width, height), |view_box| Size::new(view_box.width, view_box.height)),
     };
 
     let mut style = Style::default();
-    style.apply(root);
+    style.apply(root, &cascade);
     decoder.count(1)?;
     let children = decoder.children(root, &style, 1)?;
     let mut group = Group::new(children);
@@ -116,7 +123,7 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
         let aspect = root.attribute("preserveAspectRatio").unwrap_or("");
         group.transform = view_transform(view_box, aspect, Rect::new(0.0, 0.0, width, height));
     }
-    if let Some(value) = property(root, "opacity").and_then(opacity) {
+    if let Some(value) = cascade.get(root, "opacity").and_then(opacity) {
         group.opacity = value;
     }
     let unsupported: Vec<String> = unsupported.into_iter().collect();
@@ -126,8 +133,12 @@ pub(crate) fn decode(bytes: &[u8], limits: &SvgLimits) -> Result<SvgDocument, Sv
 
 /// What `document` asks for that is not drawn, each named once: elements of SVG the decoder does
 /// not read, properties it does not apply and references it does not follow.
-fn unsupported_features(document: &Document<'_>) -> BTreeSet<String> {
-    let mut found = BTreeSet::new();
+fn unsupported_features(document: &Document<'_>, cascade: &Cascade, found: &mut BTreeSet<String>) {
+    for name in cascade.names() {
+        if found.len() < MOST_UNSUPPORTED && !KNOWN_PROPERTIES.contains(&name) && !is_unsupported_attribute(name) {
+            found.insert(format!("property {}", name.chars().take(64).collect::<String>()));
+        }
+    }
     for node in document.descendants().filter(|node| node.is_element() && is_svg(*node)) {
         if found.len() >= MOST_UNSUPPORTED {
             break;
@@ -137,16 +148,18 @@ fn unsupported_features(document: &Document<'_>) -> BTreeSet<String> {
             found.insert(format!("element <{name}>"));
         }
         for (attribute, neutral) in UNSUPPORTED_ATTRIBUTES {
-            if property(node, attribute).is_some_and(|value| value != *neutral) {
+            // A marker reads its own `overflow`.
+            if *attribute == "overflow" && name == "marker" {
+                continue;
+            }
+            if cascade.get(node, attribute).is_some_and(|value| value != *neutral) {
                 found.insert(format!("property {attribute}"));
             }
         }
-        for declaration in node.attribute("style").unwrap_or("").split(';') {
-            if let Some((key, _)) = declaration.split_once(':') {
-                let key = key.trim().to_ascii_lowercase();
-                if !key.is_empty() && !KNOWN_PROPERTIES.contains(&key.as_str()) {
-                    found.insert(format!("property {}", key.chars().take(64).collect::<String>()));
-                }
+        for (key, _, _) in declarations(node.attribute("style").unwrap_or("")) {
+            let key = key.to_ascii_lowercase();
+            if !KNOWN_PROPERTIES.contains(&key.as_str()) {
+                found.insert(format!("property {}", key.chars().take(64).collect::<String>()));
             }
         }
         let reference = node.attribute((XLINK_NAMESPACE, "href")).or_else(|| node.attribute("href"));
@@ -154,7 +167,12 @@ fn unsupported_features(document: &Document<'_>) -> BTreeSet<String> {
             found.insert("external reference".to_owned());
         }
     }
-    found
+}
+
+/// Whether `name` is one of [`UNSUPPORTED_ATTRIBUTES`], reported where its value changes the
+/// picture.
+fn is_unsupported_attribute(name: &str) -> bool {
+    UNSUPPORTED_ATTRIBUTES.iter().any(|(attribute, _)| *attribute == name)
 }
 
 /// The features of `features` this process has not reported yet, which are now reported.
@@ -194,7 +212,7 @@ fn view_box(node: Node<'_, '_>) -> Option<Rect> {
 }
 
 /// The transform from `view_box` to `target` under a `preserveAspectRatio` value.
-fn view_transform(view_box: Rect, aspect: &str, target: Rect) -> Matrix {
+pub(crate) fn view_transform(view_box: Rect, aspect: &str, target: Rect) -> Matrix {
     let mut words = aspect.split_ascii_whitespace();
     let align = words.next().unwrap_or("xMidYMid");
     let is_slice = words.next() == Some("slice");
@@ -216,21 +234,6 @@ fn view_transform(view_box: Rect, aspect: &str, target: Rect) -> Matrix {
     let x = target.x - view_box.x * scale_x + (target.width - view_box.width * scale_x) * along_x;
     let y = target.y - view_box.y * scale_y + (target.height - view_box.height * scale_y) * along_y;
     Matrix::new(scale_x, 0.0, 0.0, scale_y, x, y)
-}
-
-/// A property of an element: from its `style` attribute, else its presentation attribute.
-fn property<'a>(node: Node<'a, '_>, name: &str) -> Option<&'a str> {
-    if let Some(style) = node.attribute("style") {
-        for declaration in style.split(';') {
-            if let Some((key, value)) = declaration.split_once(':') {
-                if key.trim().eq_ignore_ascii_case(name) {
-                    let value = value.trim();
-                    return Some(value.strip_suffix("!important").map_or(value, str::trim));
-                }
-            }
-        }
-    }
-    node.attribute(name).map(str::trim)
 }
 
 /// A paint as it is written.
@@ -277,6 +280,8 @@ struct Style {
     dashes: Option<String>,
     dash_offset: String,
     is_visible: bool,
+    /// The ids of the markers at the start, the middle vertices and the end.
+    markers: [Option<String>; 3],
 }
 
 impl Default for Style {
@@ -296,6 +301,7 @@ impl Default for Style {
             dashes: None,
             dash_offset: "0".to_owned(),
             is_visible: true,
+            markers: [None, None, None],
         }
     }
 }
@@ -311,8 +317,8 @@ fn parse_fill_rule(text: &str) -> Option<FillRule> {
 impl Style {
     /// Takes the properties `node` sets. A value that is not valid, or `inherit`, leaves what the
     /// parent gave.
-    fn apply(&mut self, node: Node<'_, '_>) {
-        let get = |name: &str| property(node, name).filter(|value| *value != "inherit");
+    fn apply(&mut self, node: Node<'_, '_>, cascade: &Cascade) {
+        let get = |name: &str| cascade.get(node, name).filter(|value| *value != "inherit");
         if let Some(color) = get("color").and_then(parse_color) {
             self.color = color;
         }
@@ -365,16 +371,37 @@ impl Style {
             Some("hidden" | "collapse") => self.is_visible = false,
             _ => {}
         }
+        // The shorthand exists only in CSS.
+        if let Some(value) = cascade.from_css(node, "marker").filter(|value| *value != "inherit") {
+            let id = url_reference(value).map(str::to_owned);
+            self.markers = [id.clone(), id.clone(), id];
+        }
+        for (slot, name) in ["marker-start", "marker-mid", "marker-end"].into_iter().enumerate() {
+            if let Some(value) = get(name) {
+                self.markers[slot] = url_reference(value).map(str::to_owned);
+            }
+        }
     }
 }
 
+/// The id of a `url(#id)` value.
+fn url_reference(value: &str) -> Option<&str> {
+    let inner = value.trim().strip_prefix("url(")?.split_once(')')?.0.trim();
+    inner.trim_matches(|c| c == '"' || c == '\'').strip_prefix('#')
+}
+
 struct Decoder<'a, 'input> {
+    cascade: &'a Cascade,
     ids: HashMap<&'a str, Node<'a, 'input>>,
     limits: &'a SvgLimits,
     elements: usize,
     segments: usize,
     use_stack: Vec<NodeId>,
     gradients: HashMap<NodeId, Option<Rc<Gradient>>>,
+    patterns: HashMap<NodeId, Option<Rc<Pattern>>>,
+    pattern_stack: Vec<NodeId>,
+    marker_stack: Vec<NodeId>,
+    mask_stack: Vec<NodeId>,
     unsupported: &'a mut BTreeSet<String>,
     viewport: Size,
 }
@@ -428,11 +455,11 @@ impl<'a, 'input> Decoder<'a, 'input> {
 
     fn item(&mut self, node: Node<'a, 'input>, parent: &Style, depth: usize) -> Result<Option<Item>, SvgError> {
         self.count(depth)?;
-        if !is_svg(node) || property(node, "display") == Some("none") {
+        if !is_svg(node) || self.cascade.get(node, "display") == Some("none") {
             return Ok(None);
         }
         let mut style = parent.clone();
-        style.apply(node);
+        style.apply(node, self.cascade);
         let item = match node.tag_name().name() {
             "g" | "a" => Some(Item::Group(Group::new(self.children(node, &style, depth + 1)?))),
             "switch" => match node.children().find(|child| child.is_element() && is_svg(*child)) {
@@ -442,7 +469,7 @@ impl<'a, 'input> Decoder<'a, 'input> {
             "svg" => self.nested_viewport(node, node, &style, depth)?,
             "use" => self.use_element(node, &style, depth)?,
             "path" | "rect" | "circle" | "ellipse" | "line" | "polyline" | "polygon" => {
-                self.shape_item(node, &style)?
+                self.shape_item(node, &style, depth)?
             }
             _ => None,
         };
@@ -453,8 +480,8 @@ impl<'a, 'input> Decoder<'a, 'input> {
     /// `item` under the transform, the opacity and the clip of `node`.
     fn placed(&mut self, node: Node<'a, 'input>, item: Item) -> Result<Option<Item>, SvgError> {
         let transform = node.attribute("transform").and_then(parse_transform).unwrap_or(Matrix::IDENTITY);
-        let element_opacity = property(node, "opacity").and_then(opacity).unwrap_or(1.0);
-        let clip = match clip_reference(node) {
+        let element_opacity = self.cascade.get(node, "opacity").and_then(opacity).unwrap_or(1.0);
+        let clip = match clip_reference(self.cascade, node) {
             Some(id) => {
                 let bounds = item.bounds();
                 match self.clip_commands(id, bounds)? {
@@ -463,6 +490,10 @@ impl<'a, 'input> Decoder<'a, 'input> {
                     other => other,
                 }
             }
+            None => None,
+        };
+        let mask = match self.cascade.get(node, "mask").and_then(url_reference) {
+            Some(id) => self.mask(id, item.bounds())?.map(Box::new),
             None => None,
         };
         let mut item = item;
@@ -477,7 +508,7 @@ impl<'a, 'input> Decoder<'a, 'input> {
                 opacity_left = 1.0;
             }
         }
-        if transform == Matrix::IDENTITY && opacity_left >= 1.0 && clip.is_none() {
+        if transform == Matrix::IDENTITY && opacity_left >= 1.0 && clip.is_none() && mask.is_none() {
             return Ok(Some(item));
         }
         // A group of this element alone takes them directly.
@@ -488,7 +519,47 @@ impl<'a, 'input> Decoder<'a, 'input> {
         group.transform = transform;
         group.opacity = opacity_left;
         group.clip = clip;
+        group.mask = mask;
         Ok(Some(Item::Group(group)))
+    }
+
+    /// The `mask` of `id` for an element with `bounds`. A reference that finds none, or a mask
+    /// inside itself, leaves the element unmasked.
+    fn mask(&mut self, id: &str, bounds: Option<Rect>) -> Result<Option<Mask>, SvgError> {
+        let Some(node) = self.ids.get(id).copied().filter(|node| node.tag_name().name() == "mask") else {
+            return Ok(None);
+        };
+        if self.mask_stack.contains(&node.id()) {
+            return Ok(None);
+        }
+        let in_bounding_box = node.attribute("maskUnits") != Some("userSpaceOnUse");
+        let content_in_bounding_box = node.attribute("maskContentUnits") == Some("objectBoundingBox");
+        let bounds = bounds.unwrap_or_default();
+        let region = if in_bounding_box {
+            let part = |name: &str, default: f64| node.attribute(name).and_then(|text| length(text, 1.0)).unwrap_or(default);
+            Rect::new(
+                bounds.x + part("x", -0.1) * bounds.width,
+                bounds.y + part("y", -0.1) * bounds.height,
+                part("width", 1.2) * bounds.width,
+                part("height", 1.2) * bounds.height,
+            )
+        } else {
+            let (width, height) = (self.viewport.width, self.viewport.height);
+            let part = |name: &str, side: f64, default: f64| {
+                node.attribute(name).and_then(|text| length(text, side)).unwrap_or(default * side)
+            };
+            Rect::new(part("x", width, -0.1), part("y", height, -0.1), part("width", width, 1.2), part("height", height, 1.2))
+        };
+        let style = self.style_of(node);
+        self.mask_stack.push(node.id());
+        let children = self.children(node, &style, node.ancestors().count());
+        self.mask_stack.pop();
+        let mut content = Group::new(children?);
+        if content_in_bounding_box {
+            content.transform = Matrix::new(bounds.width, 0.0, 0.0, bounds.height, bounds.x, bounds.y);
+        }
+        let is_luminance = self.cascade.get(node, "mask-type") != Some("alpha");
+        Ok(Some(Mask { content, region, is_luminance }))
     }
 
     /// The content of `container` (an `svg` or a `symbol`) in the viewport `node` gives it.
@@ -538,7 +609,7 @@ impl<'a, 'input> Decoder<'a, 'input> {
         self.use_stack.push(target.id());
         let result = if target.tag_name().name() == "symbol" {
             let mut style = style.clone();
-            style.apply(target);
+            style.apply(target, self.cascade);
             self.nested_viewport(node, target, &style, depth)
         } else {
             self.item(target, style, depth + 1)
@@ -612,7 +683,7 @@ impl<'a, 'input> Decoder<'a, 'input> {
         Ok(path::is_finite(&commands).then_some(commands))
     }
 
-    fn shape_item(&mut self, node: Node<'a, 'input>, style: &Style) -> Result<Option<Item>, SvgError> {
+    fn shape_item(&mut self, node: Node<'a, 'input>, style: &Style, depth: usize) -> Result<Option<Item>, SvgError> {
         if !style.is_visible {
             return Ok(None);
         }
@@ -622,36 +693,210 @@ impl<'a, 'input> Decoder<'a, 'input> {
         let Some(bounds) = path::bounds(&commands) else {
             return Ok(None);
         };
-        let fill = self.resolve(&style.fill, style).map(|paint| paint.with_opacity(style.fill_opacity));
-        let stroke = self.stroke(style);
-        if fill.is_none() && stroke.is_none() {
-            return Ok(None);
+        let fill = self.resolve(&style.fill, style)?.map(|paint| paint.with_opacity(style.fill_opacity));
+        let stroke = self.stroke(style)?;
+        // Markers belong to paths and lines, not to the other basic shapes.
+        let has_markers = matches!(node.tag_name().name(), "path" | "line" | "polyline" | "polygon");
+        let markers = if has_markers { self.marker_items(&commands, style, depth)? } else { Vec::new() };
+        let shape = (fill.is_some() || stroke.is_some()).then(|| Item::Shape(Shape { commands, bounds, fill, stroke }));
+        if markers.is_empty() {
+            return Ok(shape);
         }
-        Ok(Some(Item::Shape(Shape { commands, bounds, fill, stroke })))
+        let mut children: Vec<Item> = shape.into_iter().collect();
+        children.extend(markers);
+        Ok(Some(Item::Group(Group::new(children))))
     }
 
-    fn stroke(&mut self, style: &Style) -> Option<Stroke> {
-        let paint = self.resolve(&style.stroke, style)?.with_opacity(style.stroke_opacity);
-        let diagonal = self.diagonal();
-        let width = length(&style.stroke_width, diagonal).filter(|width| *width > 0.0)?;
-        let dashes = style.dashes.as_deref().and_then(|text| parse_dashes(text, diagonal));
-        let dash_offset = length(&style.dash_offset, diagonal).unwrap_or(0.0);
-        Some(Stroke { paint, width, cap: style.cap, join: style.join, miter_limit: style.miter_limit, dashes, dash_offset })
-    }
-
-    fn resolve(&mut self, value: &PaintValue, style: &Style) -> Option<Paint> {
-        match value {
-            PaintValue::None => None,
-            PaintValue::Color(color) => Some(Paint::Solid(*color, 1.0)),
-            PaintValue::CurrentColor => Some(Paint::Solid(style.color, 1.0)),
-            PaintValue::Reference(id, fallback) => {
-                let gradient = self.ids.get(id.as_str()).copied().and_then(|node| self.gradient(node));
-                match gradient {
-                    Some(gradient) => Some(gradient),
-                    None => fallback.as_ref().and_then(|fallback| self.resolve(fallback, style)),
+    /// The instances of the markers of `style` on the vertices of `commands`.
+    fn marker_items(&mut self, commands: &[PathCommand], style: &Style, depth: usize) -> Result<Vec<Item>, SvgError> {
+        if style.markers.iter().all(Option::is_none) {
+            return Ok(Vec::new());
+        }
+        let vertices = path::vertices(commands);
+        let Some(last) = vertices.len().checked_sub(1) else { return Ok(Vec::new()) };
+        let stroke_width = length(&style.stroke_width, self.diagonal()).filter(|width| *width >= 0.0).unwrap_or(1.0);
+        let mut items = Vec::new();
+        for (index, vertex) in vertices.iter().enumerate() {
+            // A path of one vertex has its start and its end there.
+            let mut slots = [None, None];
+            if index == 0 {
+                slots[0] = Some(0);
+            }
+            if index == last {
+                slots[1] = Some(2);
+            }
+            if index != 0 && index != last {
+                slots[0] = Some(1);
+            }
+            for slot in slots.into_iter().flatten() {
+                let Some(id) = style.markers[slot].as_deref() else { continue };
+                let Some(marker) = self.ids.get(id).copied().filter(|node| node.tag_name().name() == "marker") else {
+                    continue;
+                };
+                if let Some(item) = self.marker_item(marker, vertex, slot == 0, stroke_width, depth)? {
+                    items.push(item);
                 }
             }
         }
+        Ok(items)
+    }
+
+    /// One instance of a marker. A marker drawn inside itself is left out.
+    fn marker_item(
+        &mut self,
+        marker: Node<'a, 'input>,
+        vertex: &path::Vertex,
+        is_start: bool,
+        stroke_width: f64,
+        depth: usize,
+    ) -> Result<Option<Item>, SvgError> {
+        if self.marker_stack.contains(&marker.id()) {
+            return Ok(None);
+        }
+        let width = marker.attribute("markerWidth").and_then(|text| length(text, self.viewport.width)).unwrap_or(3.0);
+        let height = marker.attribute("markerHeight").and_then(|text| length(text, self.viewport.height)).unwrap_or(3.0);
+        if !(width > 0.0 && height > 0.0) {
+            return Ok(None);
+        }
+        let view = view_box(marker);
+        let area = Rect::new(0.0, 0.0, width, height);
+        let to_marker = view.map_or(Matrix::IDENTITY, |view| {
+            view_transform(view, marker.attribute("preserveAspectRatio").unwrap_or(""), area)
+        });
+        let content_size = view.map_or(Size::new(width, height), |view| Size::new(view.width, view.height));
+        let reference = |name: &str, side: f64| marker.attribute(name).and_then(|text| length(text, side)).unwrap_or(0.0);
+        let anchor = to_marker.transform(Point::new(reference("refX", content_size.width), reference("refY", content_size.height)));
+        let scale = if marker.attribute("markerUnits") == Some("userSpaceOnUse") { 1.0 } else { stroke_width };
+        let angle = match marker.attribute("orient").map(str::trim) {
+            Some("auto") => vertex.angle(),
+            Some("auto-start-reverse") if is_start => vertex.angle() + std::f64::consts::PI,
+            Some("auto-start-reverse") => vertex.angle(),
+            Some(text) => text.trim_end_matches("deg").trim().parse::<f64>().map_or(0.0, f64::to_radians),
+            None => 0.0,
+        };
+        let style = self.style_of(marker);
+        let saved = self.viewport;
+        self.viewport = content_size;
+        self.marker_stack.push(marker.id());
+        let children = self.children(marker, &style, depth + 1);
+        self.marker_stack.pop();
+        self.viewport = saved;
+        let children = children?;
+        if children.is_empty() {
+            return Ok(None);
+        }
+        let mut group = Group::new(children);
+        group.transform = to_marker
+            * Matrix::create_translation(-anchor.x, -anchor.y)
+            * Matrix::create_scale(scale, scale)
+            * Matrix::create_rotation(angle)
+            * Matrix::create_translation(vertex.point.x, vertex.point.y);
+        if self.cascade.get(marker, "overflow") != Some("visible") {
+            let clip = view.unwrap_or(area);
+            group.clip = Some(path::rectangle(clip, (0.0, 0.0), FillRule::NonZero));
+        }
+        Ok(Some(Item::Group(group)))
+    }
+
+    /// The inherited properties at `node`, from the root down: what the content of a pattern or a
+    /// marker inherits, rather than what it paints.
+    fn style_of(&self, node: Node<'a, 'input>) -> Style {
+        let mut style = Style::default();
+        let mut line: Vec<_> = node.ancestors().filter(Node::is_element).collect();
+        line.reverse();
+        for ancestor in line {
+            style.apply(ancestor, self.cascade);
+        }
+        style
+    }
+
+    fn stroke(&mut self, style: &Style) -> Result<Option<Stroke>, SvgError> {
+        let Some(paint) = self.resolve(&style.stroke, style)? else { return Ok(None) };
+        let paint = paint.with_opacity(style.stroke_opacity);
+        let diagonal = self.diagonal();
+        let Some(width) = length(&style.stroke_width, diagonal).filter(|width| *width > 0.0) else { return Ok(None) };
+        let dashes = style.dashes.as_deref().and_then(|text| parse_dashes(text, diagonal));
+        let dash_offset = length(&style.dash_offset, diagonal).unwrap_or(0.0);
+        Ok(Some(Stroke { paint, width, cap: style.cap, join: style.join, miter_limit: style.miter_limit, dashes, dash_offset }))
+    }
+
+    fn resolve(&mut self, value: &PaintValue, style: &Style) -> Result<Option<Paint>, SvgError> {
+        match value {
+            PaintValue::None => Ok(None),
+            PaintValue::Color(color) => Ok(Some(Paint::Solid(*color, 1.0))),
+            PaintValue::CurrentColor => Ok(Some(Paint::Solid(style.color, 1.0))),
+            PaintValue::Reference(id, fallback) => {
+                let target = self.ids.get(id.as_str()).copied();
+                let paint = match target {
+                    Some(node) if node.tag_name().name() == "pattern" => self.pattern(node)?,
+                    Some(node) => self.gradient(node),
+                    None => None,
+                };
+                match (paint, fallback) {
+                    (Some(paint), _) => Ok(Some(paint)),
+                    (None, Some(fallback)) => self.resolve(fallback, style),
+                    (None, None) => Ok(None),
+                }
+            }
+        }
+    }
+
+    /// The paint of a `pattern`, kept for its other uses. A pattern that paints with itself, or
+    /// deeper than [`MOST_NESTED_PATTERNS`], does not paint.
+    fn pattern(&mut self, node: Node<'a, 'input>) -> Result<Option<Paint>, SvgError> {
+        if let Some(known) = self.patterns.get(&node.id()) {
+            return Ok(known.clone().map(|pattern| Paint::Pattern(pattern, 1.0)));
+        }
+        if self.pattern_stack.contains(&node.id()) || self.pattern_stack.len() >= MOST_NESTED_PATTERNS {
+            return Ok(None);
+        }
+        self.pattern_stack.push(node.id());
+        let built = self.build_pattern(node);
+        self.pattern_stack.pop();
+        let built = built?;
+        self.patterns.insert(node.id(), built.clone());
+        Ok(built.map(|pattern| Paint::Pattern(pattern, 1.0)))
+    }
+
+    fn build_pattern(&mut self, node: Node<'a, 'input>) -> Result<Option<Rc<Pattern>>, SvgError> {
+        // The element with the links it inherits from, nearest first.
+        let mut chain = vec![node];
+        let mut at = node;
+        while let Some(next) = href(at).and_then(|id| self.ids.get(id).copied()) {
+            if next.tag_name().name() != "pattern" || chain.contains(&next) || chain.len() >= MOST_GRADIENT_LINKS {
+                break;
+            }
+            chain.push(next);
+            at = next;
+        }
+        let attribute = |name: &str| chain.iter().find_map(|link| link.attribute(name));
+        let tile_in_bounding_box = attribute("patternUnits") != Some("userSpaceOnUse");
+        let content_in_bounding_box = attribute("patternContentUnits") == Some("objectBoundingBox");
+        let (along_x, along_y) = if tile_in_bounding_box { (1.0, 1.0) } else { (self.viewport.width, self.viewport.height) };
+        let value = |name: &str, reference: f64| attribute(name).and_then(|text| length(text, reference)).unwrap_or(0.0);
+        let tile = Rect::new(value("x", along_x), value("y", along_y), value("width", along_x), value("height", along_y));
+        if !(tile.width > 0.0 && tile.height > 0.0) {
+            return Ok(None);
+        }
+        let view = chain.iter().find_map(|link| view_box(*link)).map(|view| {
+            (view, attribute("preserveAspectRatio").unwrap_or("").to_owned())
+        });
+        let transform = attribute("patternTransform").and_then(parse_transform).unwrap_or(Matrix::IDENTITY);
+        let Some(content) = chain.iter().copied().find(|link| link.children().any(|child| child.is_element())) else {
+            return Ok(None);
+        };
+
+        // The content inherits from the pattern and its ancestors, not from what it paints.
+        let style = self.style_of(content);
+        let children = self.children(content, &style, content.ancestors().count())?;
+        Ok(Some(Rc::new(Pattern {
+            content: Group::new(children),
+            tile,
+            tile_in_bounding_box,
+            content_in_bounding_box,
+            view,
+            transform,
+        })))
     }
 
     /// The paint of a gradient element, kept for its other uses.
@@ -695,12 +940,12 @@ impl<'a, 'input> Decoder<'a, 'input> {
             for stop in stops_node.children().filter(|child| is_stop(*child)).take(MOST_GRADIENT_STOPS) {
                 let offset = stop.attribute("offset").and_then(opacity).unwrap_or(0.0).max(last);
                 last = offset;
-                let color = match property(stop, "stop-color") {
-                    Some("currentColor" | "currentcolor") => property(stop, "color").and_then(parse_color).unwrap_or(Colors::BLACK),
+                let color = match self.cascade.get(stop, "stop-color") {
+                    Some("currentColor" | "currentcolor") => self.cascade.get(stop, "color").and_then(parse_color).unwrap_or(Colors::BLACK),
                     Some(text) => parse_color(text).unwrap_or(Colors::BLACK),
                     None => Colors::BLACK,
                 };
-                let alpha = property(stop, "stop-opacity").and_then(opacity).unwrap_or(1.0);
+                let alpha = self.cascade.get(stop, "stop-opacity").and_then(opacity).unwrap_or(1.0);
                 let alpha = (f64::from(color.a) * alpha).round().clamp(0.0, 255.0) as u8;
                 stops.push(ImmutableGradientStop::new(offset, Color::from_argb(alpha, color.r, color.g, color.b)));
             }
@@ -765,10 +1010,10 @@ impl<'a, 'input> Decoder<'a, 'input> {
             } else {
                 (child, child.attribute("transform").and_then(parse_transform).unwrap_or(Matrix::IDENTITY))
             };
-            if property(shape, "display") == Some("none") {
+            if self.cascade.get(shape, "display") == Some("none") {
                 continue;
             }
-            let rule = property(shape, "clip-rule").and_then(parse_fill_rule).unwrap_or(FillRule::NonZero);
+            let rule = self.cascade.get(shape, "clip-rule").and_then(parse_fill_rule).unwrap_or(FillRule::NonZero);
             if *first_rule.get_or_insert(rule) != rule {
                 self.unsupported.insert("property clip-rule (mixed in one clipPath)".to_owned());
             }
@@ -800,10 +1045,8 @@ fn is_stop(node: Node<'_, '_>) -> bool {
 }
 
 /// The id a `clip-path` property refers to.
-fn clip_reference<'a>(node: Node<'a, '_>) -> Option<&'a str> {
-    let value = property(node, "clip-path")?;
-    let inner = value.strip_prefix("url(")?.split_once(')')?.0.trim();
-    inner.trim_matches(|c| c == '"' || c == '\'').strip_prefix('#')
+fn clip_reference<'a>(cascade: &'a Cascade, node: Node<'a, '_>) -> Option<&'a str> {
+    url_reference(cascade.get(node, "clip-path")?)
 }
 
 /// The id of an `href` that points into this document. Any other reference is not followed.

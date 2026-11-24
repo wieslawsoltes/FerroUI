@@ -5,12 +5,14 @@ use ferroui_base::media::immutable::{
     ImmutableDashStyle, ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen, ImmutableRadialGradientBrush,
     ImmutableSolidColorBrush, ImmutableTransform,
 };
+use ferroui_base::media::effects::ImmutableLuminanceToAlphaEffect;
 use ferroui_base::media::imaging::BitmapBlendingMode;
 use ferroui_base::media::{
-    Color, DrawingGroup, DrawingImage, GeometryDrawing, GradientSpreadMethod, IImmutableBrush, IPen, MatrixTransform, PathCommand,
-    PenLineCap, PenLineJoin, StreamGeometry,
+    AlignmentX, AlignmentY, Color, DrawingBrush, DrawingGroup, DrawingImage, GeometryDrawing, GradientSpreadMethod, IBrush,
+    IDashStyle, IImmutableBrush, IPen, MatrixTransform, PathCommand, Pen, PenLineCap, PenLineJoin, RectangleGeometry, Stretch,
+    StreamGeometry, TileMode,
 };
-use ferroui_base::{Matrix, Point, Rect, Ref, RelativePoint, RelativeScalar, RelativeUnit, Size};
+use ferroui_base::{Matrix, Point, Rect, Ref, RelativePoint, RelativeRect, RelativeScalar, RelativeUnit, Size};
 use std::fmt;
 use std::rc::Rc;
 
@@ -123,17 +125,28 @@ pub(crate) struct Group {
     pub(crate) transform: Matrix,
     pub(crate) opacity: f64,
     pub(crate) clip: Option<Vec<PathCommand>>,
+    pub(crate) mask: Option<Box<Mask>>,
     pub(crate) children: Vec<Item>,
+}
+
+/// A `mask` for one element.
+pub(crate) struct Mask {
+    pub(crate) content: Group,
+    /// The mask region, in the user space of the element.
+    pub(crate) region: Rect,
+    /// The value of the mask is the luminance of its content (`mask-type: luminance`, the
+    /// default), else its alpha.
+    pub(crate) is_luminance: bool,
 }
 
 impl Group {
     pub(crate) fn new(children: Vec<Item>) -> Self {
-        Self { transform: Matrix::IDENTITY, opacity: 1.0, clip: None, children }
+        Self { transform: Matrix::IDENTITY, opacity: 1.0, clip: None, mask: None, children }
     }
 
     /// Whether the group changes nothing about its children.
     pub(crate) fn is_plain(&self) -> bool {
-        self.transform == Matrix::IDENTITY && self.opacity >= 1.0 && self.clip.is_none()
+        self.transform == Matrix::IDENTITY && self.opacity >= 1.0 && self.clip.is_none() && self.mask.is_none()
     }
 }
 
@@ -171,6 +184,7 @@ pub(crate) struct Shape {
 pub(crate) enum Paint {
     Solid(Color, f64),
     Gradient(Rc<Gradient>, f64),
+    Pattern(Rc<Pattern>, f64),
 }
 
 impl Paint {
@@ -179,6 +193,7 @@ impl Paint {
         match self {
             Paint::Solid(color, own) => Paint::Solid(color, own * opacity),
             Paint::Gradient(gradient, own) => Paint::Gradient(gradient, own * opacity),
+            Paint::Pattern(pattern, own) => Paint::Pattern(pattern, own * opacity),
         }
     }
 }
@@ -197,6 +212,18 @@ pub(crate) enum GradientKind {
     Radial { center: Point, radius: f64, focus: Point },
 }
 
+/// A `pattern`: its content, repeated over what it paints.
+pub(crate) struct Pattern {
+    pub(crate) content: Group,
+    /// The first tile, in the user space or as fractions of the bounding box.
+    pub(crate) tile: Rect,
+    pub(crate) tile_in_bounding_box: bool,
+    pub(crate) content_in_bounding_box: bool,
+    /// The `viewBox` of the content and its `preserveAspectRatio`.
+    pub(crate) view: Option<(Rect, String)>,
+    pub(crate) transform: Matrix,
+}
+
 pub(crate) struct Stroke {
     pub(crate) paint: Paint,
     pub(crate) width: f64,
@@ -211,12 +238,71 @@ fn absolute(point: Point) -> RelativePoint {
     RelativePoint::new(point.x, point.y, RelativeUnit::Absolute)
 }
 
-/// The brush of a paint over `bounds`. `None` for a gradient in a bounding box without area,
-/// which SVG does not paint.
-fn brush(paint: &Paint, bounds: Rect) -> Option<Rc<dyn IImmutableBrush>> {
+/// The brush of a paint over `bounds`. `None` for a paint in a bounding box without area, which
+/// SVG does not paint.
+fn brush(paint: &Paint, bounds: Rect) -> Option<Rc<dyn IBrush>> {
+    match paint {
+        Paint::Pattern(pattern, opacity) => pattern_brush(pattern, *opacity, bounds),
+        _ => immutable_brush(paint, bounds).map(|brush| brush as Rc<dyn IBrush>),
+    }
+}
+
+/// A tile of the content, repeated by the backend: its content stays vectors at every scale.
+fn pattern_brush(pattern: &Pattern, opacity: f64, bounds: Rect) -> Option<Rc<dyn IBrush>> {
+    let tile = if pattern.tile_in_bounding_box {
+        Rect::new(
+            bounds.x + pattern.tile.x * bounds.width,
+            bounds.y + pattern.tile.y * bounds.height,
+            pattern.tile.width * bounds.width,
+            pattern.tile.height * bounds.height,
+        )
+    } else {
+        pattern.tile
+    };
+    if !(tile.width > 0.0 && tile.height > 0.0) {
+        return None;
+    }
+    let local = Rect::new(0.0, 0.0, tile.width, tile.height);
+    let content = group_drawing(&pattern.content);
+    let to_tile = match &pattern.view {
+        Some((view, aspect)) => Some(crate::decoder::view_transform(*view, aspect, local)),
+        None if pattern.content_in_bounding_box => Some(Matrix::create_scale(bounds.width, bounds.height)),
+        None => None,
+    };
+    if let Some(to_tile) = to_tile {
+        content.set_transform(MatrixTransform::with_matrix(to_tile));
+    }
+    // A transparent drawing of the whole tile makes the bounds of the content those of the tile.
+    let area = GeometryDrawing::new();
+    area.set_geometry(RectangleGeometry::with_rect(local));
+    area.set_brush(Some(Rc::new(ImmutableSolidColorBrush::with_opacity(Color::from_argb(0, 0, 0, 0), 1.0)) as Rc<dyn IBrush>));
+    let drawing = DrawingGroup::new();
+    drawing.set_clip_geometry(RectangleGeometry::with_rect(local));
+    drawing.children().add(area.upcast());
+    drawing.children().add(content.upcast());
+
+    let brush = DrawingBrush::new();
+    brush.set_drawing(Some(drawing.upcast()));
+    brush.set_tile_mode(TileMode::Tile);
+    brush.set_stretch(Stretch::None);
+    brush.set_alignment_x(AlignmentX::Left);
+    brush.set_alignment_y(AlignmentY::Top);
+    brush.set_source_rect(RelativeRect::new(0.0, 0.0, tile.width, tile.height, RelativeUnit::Absolute));
+    brush.set_destination_rect(RelativeRect::new(tile.x, tile.y, tile.width, tile.height, RelativeUnit::Absolute));
+    brush.set_opacity(opacity);
+    if pattern.transform != Matrix::IDENTITY {
+        brush.set_transform(Some(Rc::new(ImmutableTransform::new(pattern.transform))));
+        brush.set_transform_origin(absolute(Point::new(0.0, 0.0)));
+    }
+    Some(brush.into())
+}
+
+/// The brush of a solid or gradient paint.
+fn immutable_brush(paint: &Paint, bounds: Rect) -> Option<Rc<dyn IImmutableBrush>> {
     let (gradient, opacity) = match paint {
         Paint::Solid(color, opacity) => return Some(Rc::new(ImmutableSolidColorBrush::with_opacity(*color, *opacity))),
         Paint::Gradient(gradient, opacity) => (gradient, *opacity),
+        Paint::Pattern(..) => return None,
     };
     let mut transform = gradient.transform;
     if gradient.in_bounding_box {
@@ -259,12 +345,22 @@ fn brush(paint: &Paint, bounds: Rect) -> Option<Rc<dyn IImmutableBrush>> {
 }
 
 fn pen(stroke: &Stroke, bounds: Rect) -> Option<Rc<dyn IPen>> {
-    let brush = brush(&stroke.paint, bounds)?;
     // The dashes of a pen are multiples of its thickness.
     let dash_style = stroke.dashes.as_ref().map(|dashes| {
         let scaled: Vec<f64> = dashes.iter().map(|dash| dash / stroke.width).collect();
         Rc::new(ImmutableDashStyle::new(Some(&scaled), stroke.dash_offset / stroke.width))
     });
+    if matches!(stroke.paint, Paint::Pattern(..)) {
+        // The brush of a pattern is not immutable, so neither is its pen.
+        let pen = Pen::with_brush(brush(&stroke.paint, bounds), stroke.width);
+        pen.brush()?;
+        pen.set_dash_style(dash_style.map(|style| style as Rc<dyn IDashStyle>));
+        pen.set_line_cap(stroke.cap);
+        pen.set_line_join(stroke.join);
+        pen.set_miter_limit(stroke.miter_limit);
+        return Some(pen.into());
+    }
+    let brush = immutable_brush(&stroke.paint, bounds)?;
     Some(Rc::new(ImmutablePen::new(Some(brush), stroke.width, dash_style, stroke.cap, stroke.join, stroke.miter_limit)))
 }
 
@@ -276,16 +372,41 @@ fn shape_drawing(shape: &Shape) -> Option<Ref<GeometryDrawing>> {
     }
     let drawing = GeometryDrawing::new();
     drawing.set_geometry(StreamGeometry::from_commands(&shape.commands));
-    drawing.set_brush(fill.map(|brush| brush as _));
+    drawing.set_brush(fill);
     drawing.set_pen(stroke);
     Some(drawing)
 }
 
+/// The brush of a mask over `target`, in the same coordinates: the content is drawn at its place,
+/// and its luminance becomes alpha through the effect every backend runs on the GPU.
+fn mask_brush(mask: &Mask, target: Rect) -> Rc<dyn IBrush> {
+    let content = group_drawing(&mask.content);
+    let region = DrawingGroup::new();
+    region.set_clip_geometry(RectangleGeometry::with_rect(mask.region));
+    region.children().add(content.upcast());
+    if mask.is_luminance {
+        region.set_effect(Some(Rc::new(ImmutableLuminanceToAlphaEffect)));
+    }
+    let area = GeometryDrawing::new();
+    area.set_geometry(RectangleGeometry::with_rect(target));
+    area.set_brush(Some(Rc::new(ImmutableSolidColorBrush::with_opacity(Color::from_argb(0, 0, 0, 0), 1.0)) as Rc<dyn IBrush>));
+    let drawing = DrawingGroup::new();
+    drawing.children().add(area.upcast());
+    drawing.children().add(region.upcast());
+
+    let brush = DrawingBrush::new();
+    brush.set_drawing(Some(drawing.upcast()));
+    brush.set_stretch(Stretch::None);
+    brush.set_alignment_x(AlignmentX::Left);
+    brush.set_alignment_y(AlignmentY::Top);
+    let rect = RelativeRect::new(target.x, target.y, target.width, target.height, RelativeUnit::Absolute);
+    brush.set_source_rect(rect);
+    brush.set_destination_rect(rect);
+    brush.into()
+}
+
 fn group_drawing(group: &Group) -> Ref<DrawingGroup> {
     let drawing = DrawingGroup::new();
-    if group.transform != Matrix::IDENTITY {
-        drawing.set_transform(MatrixTransform::with_matrix(group.transform));
-    }
     if let Some(clip) = &group.clip {
         drawing.set_clip_geometry(StreamGeometry::from_commands(clip));
     }
@@ -299,6 +420,14 @@ fn group_drawing(group: &Group) -> Ref<DrawingGroup> {
                 }
             }
         }
+    }
+    // The mask is in the coordinates of the content, so it is read before the transform.
+    if let Some(mask) = &group.mask {
+        let bounds = drawing.get_bounds();
+        drawing.set_opacity_mask(Some(mask_brush(mask, bounds)));
+    }
+    if group.transform != Matrix::IDENTITY {
+        drawing.set_transform(MatrixTransform::with_matrix(group.transform));
     }
     if group.opacity < 1.0 {
         return in_layer(drawing, group.opacity);

@@ -24,6 +24,7 @@
 //! [`SvgDocument::unsupported_features`] and logged once.
 
 mod color;
+mod css;
 mod decoder;
 mod document;
 mod numbers;

@@ -423,3 +423,91 @@ pub(crate) fn bounds(commands: &[PathCommand]) -> Option<Rect> {
     }
     any.then(|| Rect::new(xs.0, ys.0, xs.1 - xs.0, ys.1 - ys.0))
 }
+
+/// A vertex of a path with the directions of the segments that meet there, for markers.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct Vertex {
+    pub(crate) point: Point,
+    pub(crate) incoming: Option<(f64, f64)>,
+    pub(crate) outgoing: Option<(f64, f64)>,
+}
+
+impl Vertex {
+    /// The direction at the vertex in radians: the bisector of the two segments, or the one there
+    /// is.
+    pub(crate) fn angle(&self) -> f64 {
+        let unit = |(x, y): (f64, f64)| {
+            let length = x.hypot(y);
+            (x / length, y / length)
+        };
+        match (self.incoming.map(unit), self.outgoing.map(unit)) {
+            (Some(a), Some(b)) => {
+                let (x, y) = (a.0 + b.0, a.1 + b.1);
+                if x.abs() < 1e-9 && y.abs() < 1e-9 {
+                    // The path turns back: the direction of the segment that arrives.
+                    a.1.atan2(a.0)
+                } else {
+                    y.atan2(x)
+                }
+            }
+            (Some(a), None) | (None, Some(a)) => a.1.atan2(a.0),
+            (None, None) => 0.0,
+        }
+    }
+}
+
+fn direction(from: Point, to: Point) -> Option<(f64, f64)> {
+    let (x, y) = (to.x - from.x, to.y - from.y);
+    (x != 0.0 || y != 0.0).then_some((x, y))
+}
+
+/// The first direction of `points` leaving `from`, the control points of a curve in order.
+fn first_direction(from: Point, points: &[Point]) -> Option<(f64, f64)> {
+    points.iter().find_map(|point| direction(from, *point))
+}
+
+/// The last direction arriving at `to`.
+fn last_direction(to: Point, points: &[Point]) -> Option<(f64, f64)> {
+    points.iter().rev().find_map(|point| direction(*point, to))
+}
+
+/// The vertices of `commands`, in order. The end of a closed figure is a vertex at its start.
+pub(crate) fn vertices(commands: &[PathCommand]) -> Vec<Vertex> {
+    let mut vertices: Vec<Vertex> = Vec::new();
+    let mut first = 0;
+    let segment = |vertices: &mut Vec<Vertex>, controls: &[Point], end: Point| {
+        let Some(last) = vertices.last_mut() else { return };
+        let from = last.point;
+        let mut before = vec![from];
+        before.extend_from_slice(controls);
+        let mut after = controls.to_vec();
+        after.push(end);
+        last.outgoing = first_direction(from, &after);
+        vertices.push(Vertex { point: end, incoming: last_direction(end, &before), outgoing: None });
+    };
+    for command in commands {
+        match *command {
+            PathCommand::BeginFigure(point, _) => {
+                first = vertices.len();
+                vertices.push(Vertex { point, incoming: None, outgoing: None });
+            }
+            PathCommand::LineTo(point, _) => segment(&mut vertices, &[], point),
+            PathCommand::QuadraticBezierTo(control, end, _) => segment(&mut vertices, &[control], end),
+            PathCommand::CubicBezierTo(one, two, end, _) => segment(&mut vertices, &[one, two], end),
+            PathCommand::ArcTo(end, ..) => segment(&mut vertices, &[], end),
+            PathCommand::EndFigure(true) => {
+                let Some(start) = vertices.get(first).copied() else { continue };
+                if vertices.last().is_some_and(|last| last.point != start.point) {
+                    segment(&mut vertices, &[], start.point);
+                }
+                let arriving = vertices.last().and_then(|last| last.incoming);
+                if let Some(last) = vertices.last_mut() {
+                    last.outgoing = start.outgoing;
+                }
+                vertices[first].incoming = arriving;
+            }
+            PathCommand::EndFigure(false) | PathCommand::SetFillRule(_) => {}
+        }
+    }
+    vertices
+}

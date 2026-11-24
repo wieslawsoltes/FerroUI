@@ -208,15 +208,98 @@ fn what_is_not_drawn_is_reported_once_and_what_changes_nothing_is_not() {
     let document = SvgDocument::parse(&svg(body)).unwrap();
     let features = document.unsupported_features();
     for expected in [
-        "element <style>", "element <mask>", "element <pattern>", "element <filter>", "element <text>", "element <image>",
-        "property mask", "property mix-blend-mode", "external reference",
+        "element <filter>", "element <text>", "element <image>",
+        "property mix-blend-mode", "external reference",
     ] {
         assert_eq!(features.iter().filter(|feature| *feature == expected).count(), 1, "{expected} in {features:?}");
     }
-    for silent in ["property filter", "property paint-order", "element <title>", "element <desc>", "element <metadata>", "element <thing>", "property fill"] {
+    for silent in ["element <style>", "element <mask>", "element <pattern>", "property mask", "property filter", "property paint-order", "element <title>", "element <desc>", "element <metadata>", "element <thing>", "property fill"] {
         assert!(!features.iter().any(|feature| feature == silent), "{silent} in {features:?}");
     }
     assert!(SvgDocument::parse(&svg(r#"<rect width="1" height="1" fill="red"/>"#)).unwrap().unsupported_features().is_empty());
+}
+
+#[test]
+fn a_style_sheet_paints_shapes_by_class_type_and_id() {
+    let body = r##"<style><![CDATA[
+            .cls-1 { fill: #ff0000; stroke: #00ff00; stroke-width: 2px }
+            circle { fill: #0000ff; opacity: 0.5 }
+            #hidden { display: none }
+        ]]></style>
+        <rect class="cls-1" width="10" height="10"/>
+        <circle r="5"/>
+        <rect id="hidden" width="10" height="10"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    assert_eq!(shapes(&document.root.children), 2, "the rule with display: none hides its element");
+    let Some(Item::Shape(rect)) = document.root.children.first() else { panic!("a shape") };
+    assert!(matches!(rect.fill, Some(crate::document::Paint::Solid(color, _)) if color.r == 255 && color.b == 0));
+    assert_eq!(rect.stroke.as_ref().map(|stroke| stroke.width), Some(2.0));
+    let Some(Item::Shape(circle)) = document.root.children.get(1) else { panic!("a shape") };
+    assert!(matches!(circle.fill, Some(crate::document::Paint::Solid(color, opacity)) if color.b == 255 && opacity == 0.5));
+    assert_eq!(document.unsupported_features(), &[] as &[String]);
+}
+
+#[test]
+fn a_property_a_sheet_sets_and_the_decoder_does_not_read_is_reported() {
+    let body = r##"<style>.a { fill: red; text-shadow: none }</style><rect class="a" width="1" height="1"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    assert!(document.unsupported_features().iter().any(|feature| feature == "property text-shadow"));
+}
+
+#[test]
+fn a_pattern_is_read_with_its_links_and_units() {
+    let body = r##"<defs>
+          <pattern id="base" width="0.5" height="0.25" patternTransform="translate(1 2)"><rect width="1" height="1" fill="red"/></pattern>
+          <pattern id="link" href="#base" x="0.1"/>
+        </defs><rect width="10" height="10" fill="url(#link)"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    let shape = first_shape(&document.root.children).unwrap();
+    let Some(crate::document::Paint::Pattern(pattern, _)) = &shape.fill else { panic!("a pattern") };
+    assert!(pattern.tile_in_bounding_box && !pattern.content_in_bounding_box);
+    assert!(close(pattern.tile, Rect::new(0.1, 0.0, 0.5, 0.25)), "{:?}", pattern.tile);
+    assert_eq!(shapes(&pattern.content.children), 1, "the content comes through the link");
+    assert_eq!(document.unsupported_features(), &[] as &[String]);
+}
+
+#[test]
+fn a_pattern_that_paints_with_itself_ends() {
+    let body = r##"<defs><pattern id="p" width="1" height="1"><rect width="1" height="1" fill="url(#p) blue"/></pattern></defs>
+        <rect width="10" height="10" fill="url(#p)"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    let shape = first_shape(&document.root.children).unwrap();
+    let Some(crate::document::Paint::Pattern(pattern, _)) = &shape.fill else { panic!("a pattern") };
+    let inner = first_shape(&pattern.content.children).unwrap();
+    assert!(matches!(inner.fill, Some(crate::document::Paint::Solid(color, _)) if color.b == 255), "the fallback paints");
+}
+
+#[test]
+fn markers_land_on_the_vertices_of_a_path() {
+    let body = r##"<defs><marker id="m" markerWidth="4" markerHeight="4" refX="2" refY="2" orient="auto" markerUnits="userSpaceOnUse">
+          <rect width="4" height="4"/></marker></defs>
+        <path d="M 10 10 L 30 10 L 30 30" fill="none" stroke="red" marker-start="url(#m)" marker-mid="url(#m)" marker-end="url(#m)"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    assert_eq!(shapes(&document.root.children), 4, "the path and three markers");
+    assert_eq!(document.unsupported_features(), &[] as &[String]);
+    let vertices = crate::path::vertices(&first_shape(&document.root.children).unwrap().commands);
+    assert_eq!(vertices.len(), 3);
+    assert!((vertices[1].angle() - std::f64::consts::FRAC_PI_4).abs() < 1e-9, "the bisector of the corner");
+}
+
+#[test]
+fn a_closed_figure_ends_on_a_vertex_at_its_start() {
+    let commands = crate::path::parse_path("M 0 0 L 10 0 L 10 10 Z", ferroui_base::media::FillRule::NonZero, &mut 100).ok().unwrap();
+    let vertices = crate::path::vertices(&commands);
+    assert_eq!(vertices.len(), 4);
+    assert_eq!(vertices[3].point, vertices[0].point);
+    assert!(vertices[0].incoming.is_some() && vertices[3].outgoing.is_some());
+}
+
+#[test]
+fn a_marker_inside_itself_ends() {
+    let body = r##"<defs><marker id="m"><path d="M 0 0 L 1 1" stroke="red" marker-end="url(#m)"/></marker></defs>
+        <path d="M 0 0 L 5 5" stroke="red" marker-end="url(#m)"/>"##;
+    let document = SvgDocument::parse(&svg(body)).unwrap();
+    assert_eq!(shapes(&document.root.children), 2);
 }
 
 #[test]
