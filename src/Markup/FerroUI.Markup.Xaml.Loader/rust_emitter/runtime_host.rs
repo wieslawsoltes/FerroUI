@@ -173,6 +173,17 @@ pub fn transformed_tree(name: &str, xaml: &str, configuration: &RuntimeXamlLoade
     transformed.first().map(|transformed| crate::testing::objects::dump_tree(&transformed.root)).ok_or_else(|| "The document was not transformed".to_string())
 }
 
+/// The namespace table of a document as the compiler resolves it. With the `testing` feature.
+#[cfg(any(test, feature = "testing"))]
+pub fn transformed_namespace_table(
+    name: &str,
+    xaml: &str,
+    configuration: &RuntimeXamlLoaderConfiguration,
+) -> Option<super::NamespaceTable> {
+    let transformed = transform_with_runtime_types(&[(name, xaml, None, None)], configuration, &[]).ok()?;
+    transformed.into_iter().next()?.namespaces
+}
+
 /// The transformed trees of the group of the document registered for
 /// `class` (the document with every document it includes), as text, by
 /// document name: what the emitter walks for a group. With the `testing`

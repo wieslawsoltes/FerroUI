@@ -9,6 +9,7 @@ use ferroui_base::controls::{NameScope, NameScopeRef};
 use ferroui_base::metadata::IServiceProvider;
 use ferroui_base::BoxedValue;
 
+use super::XmlNamespaceTypes;
 use super::compiled::{create_context, populate_context, to_value, DocumentInfo, XmlNamespaceTable, FRAMEWORK_CONTEXT};
 use super::{IFerroXamlIlEagerParentStackProvider, IFerroXamlIlParentStackProvider, IFerroXamlIlXmlNamespaceInfoProvider};
 use crate::test_support::{boxed, TestServiceProvider};
@@ -80,6 +81,66 @@ fn the_namespace_information_has_the_types_the_compiler_resolved() {
     }
     assert!(controls.find_type("Button").is_none());
     assert!(namespaces[""][1].types().is_empty());
+}
+
+const FERRO_XML: &str = "https://github.com/ferroui";
+
+fn listed(entries: &[(&'static str, &'static str, XmlNamespaceTypes)]) -> Vec<(String, String, usize)> {
+    super::compiled::expand_xml_namespace_entries(entries)
+        .iter()
+        .map(|info| (info.clr_namespace(), info.clr_assembly_name(), info.types().len()))
+        .collect()
+}
+
+#[test]
+fn a_reference_stands_for_every_namespace_its_assembly_maps_in_its_order() {
+    ferroui_controls::register_types();
+    let assembly = ferroui_base::metadata::MarkupAssembly::find("FerroUI.Controls").expect("registered");
+    let expected: Vec<(String, String, usize)> = assembly
+        .xmlns_definitions
+        .iter()
+        .filter(|definition| definition.xml_namespace == FERRO_XML)
+        .map(|definition| (definition.namespace.to_owned(), "FerroUI.Controls".to_owned(), 0))
+        .collect();
+    assert!(expected.len() > 1);
+    assert_eq!(listed(&[(FERRO_XML, "FerroUI.Controls", &[])]), expected);
+}
+
+#[test]
+fn types_the_compiler_resolved_stay_on_their_entry_in_place() {
+    use ferroui_base::data::core::expression_nodes::CastTarget;
+    use ferroui_base::StaticType;
+    ferroui_controls::register_types();
+    const TYPES: XmlNamespaceTypes =
+        &[("TextBox", || CastTarget::Class(<ferroui_controls::TextBox as StaticType>::TYPE))];
+    let found = listed(&[(FERRO_XML, "FerroUI.Controls", &[]), ("FerroUI.Controls", "FerroUI.Controls", TYPES)]);
+    assert_eq!(found.iter().filter(|entry| entry.0 == "FerroUI.Controls").count(), 1, "not listed twice");
+    assert_eq!(found.iter().find(|entry| entry.0 == "FerroUI.Controls").unwrap().2, 1);
+    assert!(found.len() > 1, "the other namespaces of the assembly are still there");
+}
+
+#[test]
+fn an_assembly_that_is_not_registered_keeps_only_what_the_compiler_resolved() {
+    use ferroui_base::data::core::expression_nodes::CastTarget;
+    use ferroui_base::StaticType;
+    const TYPES: XmlNamespaceTypes =
+        &[("TextBox", || CastTarget::Class(<ferroui_controls::TextBox as StaticType>::TYPE))];
+    assert!(listed(&[(FERRO_XML, "Not.Registered", &[])]).is_empty());
+    let found = listed(&[(FERRO_XML, "Not.Registered", &[]), ("Some.Namespace", "Not.Registered", TYPES)]);
+    assert_eq!(found, [("Some.Namespace".to_owned(), "Not.Registered".to_owned(), 1)]);
+}
+
+#[test]
+fn a_table_written_with_every_namespace_reads_as_it_did() {
+    let entries: &[(&'static str, &'static str, XmlNamespaceTypes)] =
+        &[("FerroUI.Controls", "FerroUI.Controls", &[]), ("FerroUI.Media", "FerroUI.Base", &[])];
+    assert_eq!(
+        listed(entries),
+        [
+            ("FerroUI.Controls".to_owned(), "FerroUI.Controls".to_owned(), 0),
+            ("FerroUI.Media".to_owned(), "FerroUI.Base".to_owned(), 0)
+        ]
+    );
 }
 
 #[test]

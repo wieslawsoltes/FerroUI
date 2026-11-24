@@ -18,7 +18,7 @@ use std::rc::Rc;
 use ferroui_base::controls::{INameScope, NameScope, NameScopeRef, NameScopeValueError};
 use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::metadata::{
-    from_markup_value, into_markup_value, service, IServiceProvider, MarkupInvokeError, MarkupValue,
+    from_markup_value, into_markup_value, service, IServiceProvider, MarkupAssembly, MarkupInvokeError, MarkupValue,
 };
 use ferroui_base::utilities::UriRef;
 use ferroui_base::data::core::{
@@ -1224,16 +1224,56 @@ impl IFerroXamlIlXmlNamespaceInfoProvider for CompiledXmlNamespaceInfo {
     fn xml_namespaces(&self) -> XmlNamespaces {
         let mut namespaces = HashMap::with_capacity(self.table.len());
         for (prefix, infos) in self.table {
-            let infos = infos
-                .iter()
-                .map(|&(clr_namespace, clr_assembly_name, types)| {
-                    FerroXamlIlXmlNamespaceInfo::with_types(clr_namespace, clr_assembly_name, types)
-                })
-                .collect();
-            namespaces.insert(prefix.to_string(), infos);
+            namespaces.insert(prefix.to_string(), expand_xml_namespace_entries(infos));
         }
         Rc::new(namespaces)
     }
+}
+
+/// The dotted namespaces a registered assembly maps an XML namespace to, in its order. `None`
+/// when the assembly is not registered, and then no name can be resolved through it either.
+fn registered_namespaces(assembly: &str, xml_namespace: &str) -> Option<Vec<&'static str>> {
+    let assembly = MarkupAssembly::find(assembly)?;
+    let definitions = assembly.xmlns_definitions.iter();
+    Some(definitions.filter(|d| d.xml_namespace == xml_namespace).map(|d| d.namespace).collect())
+}
+
+/// The entries of a prefix of a table, as the run-time loader has them for the same document.
+///
+/// An entry whose first field is an XML namespace (it has a `:`, which a dotted namespace
+/// cannot) stands for every namespace its assembly maps that XML namespace to. The entries
+/// right after it, of the same assembly, are those with types the compiler resolved. The list
+/// is built only when something asks for the namespaces of a document, which a type name
+/// resolved at run time does, so building a document pays nothing for it.
+#[doc(hidden)]
+pub fn expand_xml_namespace_entries(
+    entries: &[(&'static str, &'static str, XmlNamespaceTypes)],
+) -> Vec<Rc<FerroXamlIlXmlNamespaceInfo>> {
+    let is_reference = |clr_namespace: &str| clr_namespace.contains(':');
+    let mut expanded = Vec::with_capacity(entries.len());
+    let mut index = 0;
+    while let Some(&(clr_namespace, assembly, types)) = entries.get(index) {
+        index += 1;
+        if !is_reference(clr_namespace) {
+            expanded.push(FerroXamlIlXmlNamespaceInfo::with_types(clr_namespace, assembly, types));
+            continue;
+        }
+        let first_typed = index;
+        while entries.get(index).is_some_and(|entry| entry.1 == assembly && !is_reference(entry.0)) {
+            index += 1;
+        }
+        let typed = &entries[first_typed..index];
+        let namespaces = registered_namespaces(assembly, clr_namespace).unwrap_or_default();
+        for namespace in &namespaces {
+            let types = typed.iter().find(|entry| entry.0 == *namespace).map_or(&[][..], |entry| entry.2);
+            expanded.push(FerroXamlIlXmlNamespaceInfo::with_types(namespace, assembly, types));
+        }
+        // What the compiler resolved is kept where the metadata of the assembly is not there.
+        for entry in typed.iter().filter(|entry| !namespaces.contains(&entry.0)) {
+            expanded.push(FerroXamlIlXmlNamespaceInfo::with_types(entry.0, assembly, entry.2));
+        }
+    }
+    expanded
 }
 
 impl IStaticServiceProvider for CompiledXmlNamespaceInfo {

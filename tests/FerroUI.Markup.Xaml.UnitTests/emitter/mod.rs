@@ -54,6 +54,8 @@ mod model_emit;
 #[cfg(test)]
 mod model_transform;
 #[cfg(test)]
+mod namespace_table_tests;
+#[cfg(test)]
 mod repository_documents;
 #[cfg(test)]
 mod rust_paths_tests;
