@@ -8,7 +8,10 @@
 //! automation peer (`automation_peer_wrapper.rs`). The swipe gestures of a
 //! remote, which the reference adds on tvOS, are not ported.
 
-use crate::automation_peer_wrapper::{element_object_of, wrapper_of, AutomationPeerWrapper, ViewWrapperHost, NOT_FOUND};
+use crate::automation_peer_wrapper::{
+    accessibility_elements_of, index_of_element, object_of_child, AutomationPeerWrapper, ViewWrapperHost, NOT_FOUND,
+};
+use crate::display_link_timer::DisplayLinkTimer;
 use crate::eagl::{eagl_layer_class, EaglLayerSurface, SharedEaglLayer};
 use crate::input_handler::InputHandler;
 use crate::insets_manager::InsetsManager;
@@ -45,7 +48,7 @@ use ferroui_controls::{
 use objc2::rc::{Retained, Weak};
 use objc2::runtime::{AnyClass, AnyObject};
 use objc2::{define_class, msg_send, sel, ClassType, DefinedClass, MainThreadMarker, MainThreadOnly, Message};
-use objc2_foundation::{NSDictionary, NSInteger, NSNumber, NSObjectProtocol, NSSet, NSString};
+use objc2_foundation::{NSArray, NSDictionary, NSInteger, NSNumber, NSObjectProtocol, NSSet, NSString};
 #[allow(deprecated)]
 use objc2_open_gl_es::{
     kEAGLColorFormatRGBA8, kEAGLDrawablePropertyColorFormat, kEAGLDrawablePropertyRetainedBacking, EAGLDrawable,
@@ -53,7 +56,7 @@ use objc2_open_gl_es::{
 use objc2_quartz_core::{CADisplayLink, CAMetalLayer};
 use objc2_ui_kit::{
     UIEvent, UIPanGestureRecognizer, UIPasteboard, UIPress, UIPressesEvent, UIResponder, UIScreen, UIScrollTypeMask, UITouch,
-    UITraitCollection, UIView,
+    UITraitCollection, UIView, UIWindow,
 };
 use std::any::{Any, TypeId};
 use std::cell::{Cell, OnceCell, RefCell};
@@ -223,10 +226,29 @@ define_class!(
 
         /// The tick of the display link of inertia scrolling.
         #[unsafe(method(ferroUpdateInertiaScrolling:))]
-        fn ferro_update_inertia_scrolling(&self, _link: &CADisplayLink) {
+        fn ferro_update_inertia_scrolling(&self, link: &CADisplayLink) {
             if let Some(state) = self.ivars().state.get() {
-                state.input.update_inertia_scrolling();
+                state.input.update_inertia_scrolling(link);
             }
+        }
+
+        #[unsafe(method(willMoveToWindow:))]
+        fn will_move_to_window(&self, window: Option<&UIWindow>) {
+            // SAFETY: the method of the superclass this one overrides.
+            let _: () = unsafe { msg_send![super(self), willMoveToWindow: window] };
+            if window.is_none() {
+                if let Some(state) = self.ivars().state.get() {
+                    state.input.reset_touches();
+                }
+            }
+        }
+
+        #[unsafe(method(didMoveToWindow))]
+        fn did_move_to_window(&self) {
+            // SAFETY: the method of the superclass this one overrides.
+            let _: () = unsafe { msg_send![super(self), didMoveToWindow] };
+            let screen = self.window().and_then(|window| window.windowScene()).map(|scene| scene.screen());
+            DisplayLinkTimer::warn_if_limited_to_60_hz(self.mtm(), screen.as_deref());
         }
 
         #[unsafe(method(layoutSubviews))]
@@ -283,16 +305,21 @@ define_class!(
         #[unsafe(method_id(accessibilityElementAtIndex:))]
         fn get_accessibility_element_at(&self, index: NSInteger) -> Option<Retained<AnyObject>> {
             let child =
-                self.ivars().state.get().and_then(|state| state.access_wrapper.get_accessibility_element_at(index));
-            child.and_then(|child| element_object_of(&child))
+                self.ivars().state.get().and_then(|state| state.access_wrapper.get_accessibility_child_at(index));
+            child.and_then(|child| object_of_child(&child))
         }
 
         #[unsafe(method(indexOfAccessibilityElement:))]
         fn get_index_of_accessibility_element(&self, element: &AnyObject) -> NSInteger {
             match self.ivars().state.get() {
-                Some(state) => state.access_wrapper.get_index_of_accessibility_element(wrapper_of(element).as_deref()),
+                Some(state) => index_of_element(&state.access_wrapper, element),
                 None => NOT_FOUND,
             }
+        }
+
+        #[unsafe(method_id(accessibilityElements))]
+        fn accessibility_elements(&self) -> Option<Retained<NSArray<AnyObject>>> {
+            self.ivars().state.get().map(|state| accessibility_elements_of(&state.access_wrapper))
         }
     }
 
@@ -545,6 +572,7 @@ impl FerroView {
     /// Releases the top-level of the view.
     pub fn dispose(&self) {
         if !self.ivars().disposed_value.replace(true) {
+            self.state().input.reset_touches();
             self.state().top_level.dispose();
         }
     }

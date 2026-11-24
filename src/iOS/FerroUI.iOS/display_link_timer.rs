@@ -9,7 +9,7 @@ use block2::RcBlock;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::rendering::{IRenderTimer, RenderTimerTick};
 use objc2::rc::{autoreleasepool, Retained};
-use objc2::{define_class, msg_send, sel, AllocAnyThread, DefinedClass, MainThreadMarker};
+use objc2::{define_class, msg_send, sel, AllocAnyThread, ClassType, DefinedClass, MainThreadMarker};
 use objc2_foundation::{
     NSBundle, NSNotification, NSNotificationCenter, NSNotificationName, NSNumber, NSObject, NSObjectProtocol,
     NSRunLoop, NSRunLoopCommonModes, NSString,
@@ -22,8 +22,8 @@ use objc2_ui_kit::{
 use std::cell::RefCell;
 use std::ffi::c_void;
 use std::ptr::NonNull;
-use std::sync::atomic::{AtomicU64, Ordering};
-use std::sync::{Arc, Mutex, MutexGuard, PoisonError};
+use std::sync::atomic::{AtomicBool, AtomicU64, Ordering};
+use std::sync::{Arc, Mutex, MutexGuard, OnceLock, PoisonError};
 use std::thread::Thread;
 use std::time::Instant;
 
@@ -181,7 +181,7 @@ impl DisplayLinkTimer {
                 let link = CADisplayLink::displayLinkWithTarget_selector(&target, sel!(onLinkTick:));
                 link.setPaused(true);
                 if enable_high_refresh_rate {
-                    Self::set_preferred_frame_rate_range(&link);
+                    Self::request_high_refresh_rate(&link);
                 }
                 let run_loop = NSRunLoop::currentRunLoop();
                 link.addToRunLoop_forMode(&run_loop, NSRunLoopCommonModes);
@@ -198,10 +198,9 @@ impl DisplayLinkTimer {
             Err(error) => panic!("Unable to start the thread of the render timer: {error}"),
         };
 
+        // The warning about a display kept at 60 Hz comes from the view, once it is in a window
+        // and knows its screen (`warn_if_limited_to_60_hz`).
         let timer = Arc::new(DisplayLinkTimer { state, timer_thread });
-        if enable_high_refresh_rate {
-            timer.warn_if_limited_to_60_hz();
-        }
 
         // SAFETY: the two names are constants of UIKit.
         let (entered_background, will_enter_foreground) =
@@ -220,46 +219,77 @@ impl DisplayLinkTimer {
 
     /// `iOSPlatformOptions.EnableHighRefreshRate` of the options of the platform; false when the
     /// platform has no options yet (`Platform.Options is { EnableHighRefreshRate: true }`).
+    /// Only on the main thread, which holds the options.
     fn enable_high_refresh_rate() -> bool {
         Platform::options().is_some_and(|options| options.enable_high_refresh_rate)
     }
 
-    /// Lets `link` follow the display refresh rate instead of the 60 Hz default; the caller
-    /// asks [`IosPlatformOptions::enable_high_refresh_rate`](crate::IosPlatformOptions) first.
-    /// On iPhone, this also needs CADisableMinimumFrameDurationOnPhone in the app's Info.plist.
-    /// The reference asks for iOS, tvOS or Mac Catalyst 15, the systems with
-    /// `preferredFrameRateRange`; the port asks the link whether it has it.
-    fn set_preferred_frame_rate_range(link: &CADisplayLink) {
+    /// Whether display links ask for more than the default 60 Hz: the platform options enable it
+    /// and display links have `preferredFrameRateRange` (iOS, tvOS and Mac Catalyst 15, which the
+    /// reference asks for by version). Only on the main thread.
+    pub(crate) fn uses_high_refresh_rate() -> bool {
+        Self::enable_high_refresh_rate() && CADisplayLink::class().responds_to(sel!(setPreferredFrameRateRange:))
+    }
+
+    /// Lets `link` follow the display refresh rate instead of the 60 Hz default when
+    /// [`uses_high_refresh_rate`](Self::uses_high_refresh_rate). On iPhone, this also needs
+    /// CADisableMinimumFrameDurationOnPhone in the app's Info.plist. Only on the main thread.
+    pub(crate) fn set_preferred_frame_rate_range(link: &CADisplayLink) {
+        if Self::enable_high_refresh_rate() {
+            Self::request_high_refresh_rate(link);
+        }
+    }
+
+    /// Asks `link` for up to 120 Hz, where links have `preferredFrameRateRange`; the caller asks
+    /// [`IosPlatformOptions::enable_high_refresh_rate`](crate::IosPlatformOptions) first.
+    fn request_high_refresh_rate(link: &CADisplayLink) {
         if link.respondsToSelector(sel!(setPreferredFrameRateRange:)) {
             link.setPreferredFrameRateRange(CAFrameRateRange { minimum: 60.0, maximum: 120.0, preferred: 120.0 });
         }
     }
 
-    /// Warns when the display can go above 60 Hz and the application's Info.plist does not
-    /// allow it. Only on the main thread, where UIKit may be asked.
-    fn warn_if_limited_to_60_hz(&self) {
-        let Some(mtm) = MainThreadMarker::new() else {
-            return;
-        };
-        if UIDevice::currentDevice(mtm).userInterfaceIdiom() != UIUserInterfaceIdiom::Phone {
-            return;
-        }
-        if UIScreen::mainScreen(mtm).maximumFramesPerSecond() <= 60 {
-            return;
-        }
-        let key = NSString::from_str("CADisableMinimumFrameDurationOnPhone");
-        let allowed = NSBundle::mainBundle()
-            .objectForInfoDictionaryKey(&key)
-            .and_then(|value| value.downcast::<NSNumber>().ok())
-            .is_some_and(|value| value.boolValue());
-        if !allowed {
-            if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::IOS_PLATFORM) {
-                logger.log(
-                    Some(self as &dyn std::any::Any),
-                    "Rendering is limited to 60 Hz on this ProMotion display. Set CADisableMinimumFrameDurationOnPhone \
-                     to true in Info.plist, or set IosPlatformOptions::enable_high_refresh_rate to false.",
-                );
+    /// Whether display links can actually run faster than 60 Hz on `screen`:
+    /// [`uses_high_refresh_rate`](Self::uses_high_refresh_rate), a screen faster than 60 Hz and,
+    /// on iPhone, CADisableMinimumFrameDurationOnPhone in Info.plist.
+    pub(crate) fn can_exceed_60_hz(mtm: MainThreadMarker, screen: Option<&UIScreen>) -> bool {
+        Self::uses_high_refresh_rate()
+            && !Self::is_phone_without_high_refresh_rate_key(mtm)
+            && screen.is_some_and(|screen| screen.maximumFramesPerSecond() > 60)
+    }
+
+    /// An iPhone whose application's Info.plist does not allow more than 60 Hz; read once.
+    fn is_phone_without_high_refresh_rate_key(mtm: MainThreadMarker) -> bool {
+        static PHONE_WITHOUT_KEY: OnceLock<bool> = OnceLock::new();
+        *PHONE_WITHOUT_KEY.get_or_init(|| {
+            if UIDevice::currentDevice(mtm).userInterfaceIdiom() != UIUserInterfaceIdiom::Phone {
+                return false;
             }
+            let key = NSString::from_str("CADisableMinimumFrameDurationOnPhone");
+            let allowed = NSBundle::mainBundle()
+                .objectForInfoDictionaryKey(&key)
+                .and_then(|value| value.downcast::<NSNumber>().ok())
+                .is_some_and(|value| value.boolValue());
+            !allowed
+        })
+    }
+
+    /// Warns once when rendering on `screen` could go above 60 Hz but iOS keeps it at 60 Hz.
+    pub(crate) fn warn_if_limited_to_60_hz(mtm: MainThreadMarker, screen: Option<&UIScreen>) {
+        static WARNED: AtomicBool = AtomicBool::new(false);
+        if WARNED.load(Ordering::Relaxed)
+            || !Self::enable_high_refresh_rate()
+            || !screen.is_some_and(|screen| screen.maximumFramesPerSecond() > 60)
+            || !Self::is_phone_without_high_refresh_rate_key(mtm)
+        {
+            return;
+        }
+        WARNED.store(true, Ordering::Relaxed);
+        if let Some(logger) = Logger::try_get(LogEventLevel::Warning, LogArea::IOS_PLATFORM) {
+            logger.log(
+                None,
+                "Rendering is limited to 60 Hz on this ProMotion display. Set CADisableMinimumFrameDurationOnPhone \
+                 to true in Info.plist, or set IosPlatformOptions::enable_high_refresh_rate to false.",
+            );
         }
     }
 
