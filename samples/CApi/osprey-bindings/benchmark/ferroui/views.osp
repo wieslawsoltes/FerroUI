@@ -23,7 +23,7 @@ fn button(attrs, children) = Element { elementType: 28, elementAttrs: attrs, ele
 fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
 // textBlock(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBlock. A control
 // that displays a block of text.
-fn textBlock(attrs) = Element { elementType: 429, elementAttrs: attrs, elementChildren: [] }
+fn textBlock(attrs) = Element { elementType: 430, elementAttrs: attrs, elementChildren: [] }
 
 // ---- attributes of properties ----------------------------------------------------------------
 

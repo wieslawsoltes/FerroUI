@@ -17,15 +17,15 @@ import ferroui::*
 // or vertically.
 fn stackPanel() = ferro_create(typeId: 387)
 // textBlock() -> int: creates a TextBlock. A control that displays a block of text.
-fn textBlock() = ferro_create(typeId: 429)
+fn textBlock() = ferro_create(typeId: 430)
 // textBox() -> int: creates a TextBox. Represents a control that can be used to display or
 // edit unformatted text. Template parts: `PART_TextPresenter` (a [`TextPresenter`], required)
 // and `PART_ScrollViewer` (a [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every
 // text position (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code
 // unit index.
-fn textBox() = ferro_create(typeId: 431)
+fn textBox() = ferro_create(typeId: 432)
 // window() -> int: creates a Window. A top-level window.
-fn window() = ferro_create(typeId: 497)
+fn window() = ferro_create(typeId: 498)
 
 // ---- properties ----------------------------------------------------------------------------
 
