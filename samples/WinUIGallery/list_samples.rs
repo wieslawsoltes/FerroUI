@@ -42,7 +42,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
 }
 
 /// The markup types of the page, for the `{Binding}` paths of its templates.
-fn register() {
+pub(crate) fn register() {
     MarkupType::register_all(&[
         <Contact as MarkupTyped>::MARKUP,
         <GroupInfoList as MarkupTyped>::MARKUP,

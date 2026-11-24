@@ -27,6 +27,7 @@ pub mod examples;
 mod feedback_samples;
 mod frame_sample;
 pub mod gallery;
+mod grid_view_samples;
 mod ink_samples;
 mod input_samples;
 mod layout_samples;
@@ -129,6 +130,8 @@ mod date_samples_tests;
 
 #[cfg(test)]
 mod list_samples_tests;
+#[cfg(test)]
+mod grid_view_samples_tests;
 
 #[cfg(test)]
 mod tree_samples_tests;

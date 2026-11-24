@@ -1,0 +1,99 @@
+<!-- Ported from the three examples of the pinned GridView page of WinUI Gallery (14061eea) and the
+     code behind of GridViewPage.xaml.cs (grid_view_samples.rs); see ../NOTICE.md. The lists are the
+     native GridView of WinUI with its ItemsWrapGrid. The markup follows the catalog's sample text:
+     x:Bind becomes {Binding} over CustomDataObject of list_samples.rs, ThemeResource becomes
+     DynamicResource, and the option controls of the page stand for the $(...) values of the samples. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel.Resources>
+    <DataTemplate x:Key="ImageTemplate">
+      <Image Stretch="UniformToFill" Source="{Binding Image}" Width="190" Height="130" />
+    </DataTemplate>
+    <DataTemplate x:Key="ImageOverlayTemplate">
+      <Grid Width="100">
+        <Image Source="{Binding Image}" Stretch="UniformToFill" />
+        <Border Height="40" VerticalAlignment="Bottom" Padding="5,1,5,1" Background="LightGray" Opacity="0.75">
+          <StackPanel Orientation="Vertical">
+            <TextBlock Text="{Binding Title}" />
+            <StackPanel Orientation="Horizontal">
+              <TextBlock Text="{Binding Likes}" FontSize="12"
+                         Foreground="{DynamicResource SystemControlPageTextBaseMediumBrush}" />
+              <TextBlock Text=" Likes" FontSize="12"
+                         Foreground="{DynamicResource SystemControlPageTextBaseMediumBrush}" />
+            </StackPanel>
+          </StackPanel>
+        </Border>
+      </Grid>
+    </DataTemplate>
+    <DataTemplate x:Key="TextTemplate">
+      <StackPanel Width="150" Margin="8">
+        <TextBlock Text="{Binding Title}" FontWeight="SemiBold" />
+        <TextBlock Text="{Binding Description}" FontSize="12" TextWrapping="Wrap" MaxHeight="48" />
+      </StackPanel>
+    </DataTemplate>
+  </StackPanel.Resources>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Basic GridView with Simple DataTemplate" FontSize="18" />
+    <GridView x:Name="BasicGridView" Height="300" ItemTemplate="{StaticResource ImageTemplate}"
+              IsItemClickEnabled="True" SelectionMode="Single" AutomationProperties.Name="Basic GridView" />
+    <TextBlock x:Name="BasicClickOutput" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="GridView with Layout Customization" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <NumberBox x:Name="ColumnMarginBox" Header="Column margin" Minimum="0" Maximum="40" Value="5" SmallChange="1"
+                 SpinButtonPlacementMode="Inline" />
+      <NumberBox x:Name="RowMarginBox" Header="Row margin" Minimum="0" Maximum="40" Value="5" SmallChange="1"
+                 SpinButtonPlacementMode="Inline" />
+      <NumberBox x:Name="MaxItemsBox" Header="Max items in a row" Minimum="1" Maximum="8" Value="4" SmallChange="1"
+                 SpinButtonPlacementMode="Inline" />
+    </StackPanel>
+    <GridView x:Name="StyledGrid" Height="300" ItemTemplate="{StaticResource ImageOverlayTemplate}"
+              AutomationProperties.Name="Customized GridView">
+      <GridView.ItemsPanel>
+        <ItemsPanelTemplate>
+          <ItemsWrapGrid MaximumRowsOrColumns="4" Orientation="Horizontal" />
+        </ItemsPanelTemplate>
+      </GridView.ItemsPanel>
+    </GridView>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Content inside of a GridView." FontSize="18" />
+    <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
+      <StackPanel Spacing="8">
+        <GridView x:Name="ContentGridView" Height="320" ItemTemplate="{StaticResource ImageTemplate}"
+                  AutomationProperties.Name="Content GridView" />
+        <TextBlock x:Name="ContentSelectionOutput" />
+        <TextBlock x:Name="ContentClickOutput" />
+      </StackPanel>
+      <StackPanel Grid.Column="1" Spacing="8">
+        <TextBlock Text="Item template" />
+        <ComboBox x:Name="ItemTemplateComboBox" AutomationProperties.Name="Item template" SelectedIndex="0" HorizontalAlignment="Stretch">
+          <x:String>ImageTemplate</x:String>
+          <x:String>ImageOverlayTemplate</x:String>
+          <x:String>TextTemplate</x:String>
+        </ComboBox>
+        <CheckBox x:Name="ItemClickCheckBox" Content="IsItemClickEnabled" />
+        <CheckBox x:Name="DragCheckBox" Content="CanDragItems" />
+        <CheckBox x:Name="DropCheckBox" Content="AllowDrop" />
+        <CheckBox x:Name="ReorderCheckBox" Content="CanReorderItems" />
+        <TextBlock Text="Selection mode" />
+        <ComboBox x:Name="SelectionModeComboBox" AutomationProperties.Name="Selection mode" SelectedIndex="1" HorizontalAlignment="Stretch">
+          <x:String>None</x:String>
+          <x:String>Single</x:String>
+          <x:String>Multiple</x:String>
+          <x:String>Extended</x:String>
+        </ComboBox>
+        <TextBlock Text="Flow direction" />
+        <ComboBox x:Name="FlowDirectionComboBox" AutomationProperties.Name="Flow direction" SelectedIndex="0" HorizontalAlignment="Stretch">
+          <x:String>LeftToRight</x:String>
+          <x:String>RightToLeft</x:String>
+        </ComboBox>
+        <TextBlock x:Name="TemplateName" TextWrapping="Wrap" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>
