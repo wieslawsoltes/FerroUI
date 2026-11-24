@@ -1,6 +1,5 @@
 use super::{
-    VulkanCommandBuffer, VulkanCommandBufferPool, VulkanImage, VulkanKhrSurface, VulkanMemoryHelper,
-    VulkanSemaphorePair,
+    VulkanCommandBuffer, VulkanCommandBufferPool, VulkanImage, VulkanKhrSurface, VulkanMemoryHelper, VulkanSemaphore,
 };
 use crate::{
     IVulkanKhrSurfacePlatformSurface, IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions,
@@ -17,7 +16,18 @@ use std::time::Duration;
 /// needs.
 pub(crate) struct VulkanDisplay {
     context: Rc<dyn IVulkanPlatformGraphicsContext>,
-    semaphore_pair: VulkanSemaphorePair,
+    /// The frames that can be in flight at once, used in turn.
+    acquire_slots: Vec<AcquireSlot>,
+    /// Which of `acquire_slots` the next presentation uses.
+    frame_ring: Cell<FrameRing>,
+    /// The slot of the presentation that was started and not yet ended.
+    current_slot: Cell<usize>,
+    /// One semaphore for each image of the swap chain, signalled when the
+    /// commands that fill the image have run and waited for by its
+    /// presentation. An image's semaphore is signalled again only after the
+    /// image was acquired again, so the presentation that waited for it is
+    /// done with it.
+    render_finished_semaphores: RefCell<Vec<VulkanSemaphore>>,
     next_image: Cell<u32>,
     surface: RefCell<Option<VulkanKhrSurface>>,
     surface_format: Cell<vk::SurfaceFormatKHR>,
@@ -33,6 +43,63 @@ pub(crate) struct VulkanDisplay {
     /// What the results of the presentation engine said of the swap chain
     /// since it was last checked, before a frame.
     state: Cell<SwapchainState>,
+}
+
+/// The number of frames a display can have in flight: while the GPU copies
+/// and presents one frame, the CPU prepares the next.
+pub(crate) const FRAMES_IN_FLIGHT: usize = 2;
+
+/// What one frame in flight needs of its own: the semaphore the acquired
+/// image of the swap chain signals, and the command buffer, with its fence,
+/// that copies the frame into that image. Both are made once, with the
+/// display, and reused when the slot comes round again.
+struct AcquireSlot {
+    available: VulkanSemaphore,
+    command_buffer: Rc<VulkanCommandBuffer>,
+}
+
+impl AcquireSlot {
+    fn new(
+        context: &Rc<dyn IVulkanPlatformGraphicsContext>,
+        pool: &VulkanCommandBufferPool,
+    ) -> Result<Self, VulkanError> {
+        let available = VulkanSemaphore::new(context.clone())?;
+        match pool.create_reusable_command_buffer() {
+            Ok(command_buffer) => Ok(Self { available, command_buffer }),
+            Err(error) => {
+                available.dispose();
+                Err(error)
+            }
+        }
+    }
+
+    /// Frees the objects of the slot; the device is idle (the dispose of
+    /// the display waited for it).
+    fn dispose(&self) {
+        self.command_buffer.dispose();
+        self.available.dispose();
+    }
+}
+
+/// The turn of the frame slots: frame n uses slot n modulo
+/// [`FRAMES_IN_FLIGHT`]. A slot is reused only after the frames of the other
+/// slots, so a frame waits at most for the frame `FRAMES_IN_FLIGHT` before
+/// it, never for the one just submitted.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub(crate) struct FrameRing {
+    next: usize,
+}
+
+impl FrameRing {
+    /// The slot of the next frame.
+    pub fn slot(self) -> usize {
+        self.next
+    }
+
+    /// The turn after the next frame was submitted.
+    pub fn advanced(self) -> Self {
+        Self { next: (self.next + 1) % FRAMES_IN_FLIGHT }
+    }
 }
 
 /// What a result of `vkAcquireNextImageKHR` or `vkQueuePresentKHR` means for
@@ -208,11 +275,26 @@ impl VulkanDisplay {
         parameters: SwapchainParameters,
         platform_surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
     ) -> Result<Self, VulkanError> {
-        let semaphore_pair = VulkanSemaphorePair::new(context.clone())?;
         let command_buffer_pool = VulkanCommandBufferPool::new(context.clone(), false)?;
+        let mut acquire_slots = Vec::with_capacity(FRAMES_IN_FLIGHT);
+        for _ in 0..FRAMES_IN_FLIGHT {
+            match AcquireSlot::new(&context, &command_buffer_pool) {
+                Ok(slot) => acquire_slots.push(slot),
+                Err(error) => {
+                    for slot in &acquire_slots {
+                        slot.dispose();
+                    }
+                    command_buffer_pool.dispose();
+                    return Err(error);
+                }
+            }
+        }
         let display = Self {
             context,
-            semaphore_pair,
+            acquire_slots,
+            frame_ring: Cell::new(FrameRing::default()),
+            current_slot: Cell::new(0),
+            render_finished_semaphores: RefCell::new(Vec::new()),
             next_image: Cell::new(0),
             surface: RefCell::new(Some(surface)),
             surface_format: Cell::new(vk::SurfaceFormatKHR::default()),
@@ -325,10 +407,16 @@ impl VulkanDisplay {
         VulkanDisplay::new(context.clone(), khr_surface, swapchain, parameters, surface)
     }
 
+    /// Destroys the views and the semaphores of the images of the swap
+    /// chain. The callers waited for the device to be idle (a recreation of
+    /// the swap chain, the dispose of the display) or have not used them yet.
     fn destroy_current_image_views(&self) {
         let views = std::mem::take(&mut *self.swapchain_image_views.borrow_mut());
         for image_view in views {
             self.context.device_api().destroy_image_view(self.context.device_handle(), image_view);
+        }
+        for semaphore in std::mem::take(&mut *self.render_finished_semaphores.borrow_mut()) {
+            semaphore.dispose();
         }
     }
 
@@ -343,12 +431,19 @@ impl VulkanDisplay {
             .throw_on_error("vkGetSwapchainImagesKHR")?;
         let format = self.surface_format()?.format;
         let mut views = Vec::with_capacity(images.len());
-        for image in &images {
-            views.push(self.create_swapchain_image_view(*image, format)?);
-        }
+        let mut semaphores = Vec::with_capacity(images.len());
+        let created: Result<(), VulkanError> = (|| {
+            for image in &images {
+                views.push(self.create_swapchain_image_view(*image, format)?);
+                semaphores.push(VulkanSemaphore::new(self.context.clone())?);
+            }
+            Ok(())
+        })();
         *self.swapchain_images.borrow_mut() = images;
+        // Kept also when a creation failed, so that the next recreation or the dispose destroys them.
         *self.swapchain_image_views.borrow_mut() = views;
-        Ok(())
+        *self.render_finished_semaphores.borrow_mut() = semaphores;
+        created
     }
 
     fn create_swapchain_image_view(
@@ -376,6 +471,8 @@ impl VulkanDisplay {
         if self.surface.borrow().is_none() {
             return self.recreate_surface();
         }
+        // Allowed wait (a recreation, never a steady frame): the images, views and semaphores of the old swap
+        // chain may be destroyed only when no command uses them.
         let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
         let (swapchain, parameters) = {
             let surface = self.surface.borrow();
@@ -413,15 +510,23 @@ impl VulkanDisplay {
     }
 
     /// Acquires the next image of the swap chain and starts the commands
-    /// that fill it.
+    /// that fill it, in the command buffer of the next frame slot.
     pub fn start_presentation(&self) -> Result<Rc<VulkanCommandBuffer>, VulkanError> {
+        let slot_index = self.frame_ring.get().slot();
+        let slot = &self.acquire_slots[slot_index];
+        // The only wait of a steady frame, and only for the frame FRAMES_IN_FLIGHT frames back that used this slot:
+        // its semaphore and command buffer can be used again when that frame's copy has run. The frame just
+        // submitted used the other slot, so the GPU keeps it to work on while this frame is prepared.
+        slot.command_buffer.prepare_for_recording()?;
+        self.current_slot.set(slot_index);
+
         self.next_image.set(0);
         loop {
             let (acquire_result, next_image) = self.context.device_api().acquire_next_image_khr(
                 self.context.device_handle(),
                 self.swapchain.get(),
                 u64::MAX,
-                self.semaphore_pair.image_available_semaphore().handle(),
+                slot.available.handle(),
                 vk::Fence::null(),
             );
             self.next_image.set(next_image);
@@ -439,7 +544,7 @@ impl VulkanDisplay {
             }
         }
 
-        let command_buffer = self.command_buffer_pool.create_command_buffer()?;
+        let command_buffer = slot.command_buffer.clone();
         command_buffer.begin_recording()?;
         VulkanMemoryHelper::transition_layout(
             &*self.context,
@@ -525,16 +630,21 @@ impl VulkanDisplay {
             vk::AccessFlags::NONE,
             1,
         );
+        let slot = &self.acquire_slots[self.current_slot.get()];
+        let render_finished = self.render_finished_semaphores.borrow();
+        let render_finished = &render_finished[self.next_image.get() as usize];
         command_buffer.submit_with(
-            &[self.semaphore_pair.image_available_semaphore()],
+            &[&slot.available],
             &[vk::PipelineStageFlags::COLOR_ATTACHMENT_OUTPUT],
-            &[self.semaphore_pair.render_finished_semaphore()],
+            &[render_finished],
             None,
         )?;
+        // The slot's fence now belongs to this frame: the next frame takes the other slot.
+        self.frame_ring.set(self.frame_ring.get().advanced());
 
         let (call_result, result) = self.context.device_api().vk_queue_present_khr(
             self.context.main_queue_handle(),
-            self.semaphore_pair.render_finished_semaphore().handle(),
+            render_finished.handle(),
             self.swapchain.get(),
             self.next_image.get(),
         );
@@ -552,8 +662,11 @@ impl VulkanDisplay {
     }
 
     pub fn dispose(&self) {
+        // Allowed wait (dispose): the objects of the display may be destroyed only when no command uses them.
         let _ = self.context.device_api().device_wait_idle(self.context.device_handle());
-        self.semaphore_pair.dispose();
+        for slot in &self.acquire_slots {
+            slot.dispose();
+        }
         self.destroy_current_image_views();
         self.destroy_swapchain();
         self.command_buffer_pool.dispose();
@@ -583,6 +696,33 @@ mod tests {
     }
 
     const FIFO: &[vk::PresentModeKHR] = &[vk::PresentModeKHR::FIFO];
+
+    #[test]
+    fn the_acquire_slots_take_turns() {
+        let mut ring = FrameRing::default();
+        let mut slots = Vec::new();
+        for _ in 0..2 * FRAMES_IN_FLIGHT + 1 {
+            slots.push(ring.slot());
+            ring = ring.advanced();
+        }
+        assert_eq!(slots, [0, 1, 0, 1, 0]);
+    }
+
+    #[test]
+    fn a_frame_never_waits_for_the_frame_just_submitted() {
+        // A frame waits for the fence of its slot, which the last frame of that slot signals: the frame
+        // FRAMES_IN_FLIGHT frames back, never the one before it.
+        let mut ring = FrameRing::default();
+        let mut submitted_by: [Option<usize>; FRAMES_IN_FLIGHT] = [None; FRAMES_IN_FLIGHT];
+        for frame in 0..10 {
+            let slot = ring.slot();
+            if let Some(waited_for) = submitted_by[slot] {
+                assert_eq!(frame - waited_for, FRAMES_IN_FLIGHT, "frame {frame} waits for frame {waited_for}");
+            }
+            submitted_by[slot] = Some(frame);
+            ring = ring.advanced();
+        }
+    }
 
     #[test]
     fn one_image_more_than_the_minimum_within_the_maximum() {

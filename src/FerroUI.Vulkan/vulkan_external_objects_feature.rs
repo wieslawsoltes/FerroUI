@@ -266,9 +266,11 @@ impl ImportedSemaphore {
             &[],
         );
         buf.end_recording()?;
-        let wait: Vec<&VulkanSemaphore> = sem.iter().filter(|_| wait).collect();
-        let signal: Vec<&VulkanSemaphore> = sem.iter().filter(|_| signal).collect();
-        buf.submit_with(&wait, &[vk::PipelineStageFlags::ALL_GRAPHICS], &signal, None)
+        let semaphore: Option<&VulkanSemaphore> = sem.as_ref();
+        let semaphores = semaphore.as_slice();
+        let wait = if wait { semaphores } else { &[] };
+        let signal = if signal { semaphores } else { &[] };
+        buf.submit_with(wait, &[vk::PipelineStageFlags::ALL_GRAPHICS], signal, None)
     }
 }
 
