@@ -7,6 +7,10 @@ use crate::type_system::{
     get_type, IXamlCustomAttribute, IXamlMethod, IXamlProperty, IXamlType, IXamlTypeSystem,
 };
 
+/// What a language adds to the error of a type it cannot resolve, from the XML namespace and the
+/// name of the type.
+pub type UnresolvedTypeHint = Rc<dyn Fn(&str, &str) -> Option<String>>;
+
 #[derive(Default)]
 pub struct XamlLanguageTypeMappings {
     pub xmlns_attributes: Vec<Rc<dyn IXamlType>>,
@@ -41,6 +45,8 @@ pub struct XamlLanguageTypeMappings {
     pub deferred_content_executor_customization_type_parameter_deferred_content_attribute_property_names:
         Vec<String>,
     pub root_object_provider_intermediate_root_property_name: Option<String>,
+    /// Says more about a type that is not found, such as where it can be found.
+    pub unresolved_type_hint: Option<UnresolvedTypeHint>,
 }
 
 impl XamlLanguageTypeMappings {
