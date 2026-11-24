@@ -24,7 +24,7 @@ use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::media::MediaContext;
 use ferroui_base::input::{
     DragDropEffects, IDataTransfer, CaptureSource, IInputDevice, IInputRoot, IKeyboardDevice, IPointer, KeyDeviceType, MouseDevice, PenDevice,
-    StandardCursorType,
+    KnownPlatformKeyInfoFormats, PlatformKeyInfo, StandardCursorType,
 };
 use ferroui_base::platform::surfaces::{
     FramebufferLockProperties, IFramebufferPlatformSurface, IFramebufferRenderTarget, IPlatformRenderSurface,
@@ -487,6 +487,9 @@ impl TopLevelImpl {
         key: FrnKey,
         physical_key: FrnPhysicalKey,
         key_symbol: Option<String>,
+        key_text: Option<String>,
+        alternate_key_text: Option<String>,
+        info: FrnKeyEventInfo,
     ) -> bool {
         let Some(input_root) = self.input_root() else {
             return false;
@@ -510,6 +513,18 @@ impl TopLevelImpl {
             key_symbol,
             KeyDeviceType::Keyboard,
         ));
+        // 12.2.0 (`8dae868308`): the key text, the alternate text, the consumed modifiers and the
+        // native key code of the event.
+        args.set_key_text(key_text);
+        args.set_alternate_key_text(alternate_key_text);
+        let consumed = info.has_consumed_modifiers.then(|| to_raw_input_modifiers(info.consumed_modifiers));
+        args.set_consumed_modifiers(consumed);
+        args.set_platform_key_info(info.has_native_key_code.then(|| PlatformKeyInfo {
+            format: KnownPlatformKeyInfoFormats::MACOS,
+            scan_code: Some(info.native_key_code as u32),
+            virtual_key: None,
+            modifiers: Some(info.native_modifiers),
+        }));
 
         self.invoke_input(args.clone());
 
@@ -1203,6 +1218,9 @@ impl<P: TopLevelParent> IFrnTopLevelEventsImpl for TopLevelEvents<P> {
         key: FrnKey,
         physical_key: FrnPhysicalKey,
         key_symbol: Option<&CStr>,
+        key_text: Option<&IFrnString>,
+        alternate_key_text: Option<&IFrnString>,
+        info: FrnKeyEventInfo,
     ) -> bool {
         crate::callback_base::guard(false, || {
             self.0.top_level().raw_key_event(
@@ -1212,6 +1230,9 @@ impl<P: TopLevelParent> IFrnTopLevelEventsImpl for TopLevelEvents<P> {
                 key,
                 physical_key,
                 c_str_to_string(key_symbol),
+                key_text.and_then(crate::frn_string::frn_string_to_string),
+                alternate_key_text.and_then(crate::frn_string::frn_string_to_string),
+                info,
             )
         })
     }
