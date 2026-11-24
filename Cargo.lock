@@ -3075,6 +3075,7 @@ dependencies = [
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-render3d",
+ "ferroui-svg",
  "fontique",
  "gif",
  "glifo",
