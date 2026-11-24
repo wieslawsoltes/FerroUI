@@ -43,5 +43,10 @@ public class FerroApplication extends Application {
         }
     }
 
+    /** The Android package manager's location for the app's extracted native code. */
+    public final String getFerroNativeLibraryDirectory() {
+        return getApplicationInfo().nativeLibraryDir;
+    }
+
     private native void nativeOnCreate();
 }

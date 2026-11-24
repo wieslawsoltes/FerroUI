@@ -90,6 +90,10 @@ mod app {
         }
     }
 
+    fn complete_review(count: &mut i32) {
+        *count += 1;
+    }
+
     #[component(rerender)]
     fn ServiceReview() -> Element {
         let reviewed = use_signal(|| 0);
@@ -101,7 +105,7 @@ mod app {
                     Border { background: "#FFFFFF", corner_radius: 14.0, padding: 16.0,
                         StackPanel { spacing: 10.0,
                             TextBox { name: "Search", placeholder_text: "Find a case" }
-                            Button { name: "ReviewCase", on_click: move |_| reviewed.update(|count| *count += 1), "Complete review" }
+                            Button { name: "ReviewCase", on_click: move |_| reviewed.update(complete_review), "Complete review" }
                             TextBlock { name: "ReviewedCount", text: format!("Reviewed cases: {}", reviewed.get()), foreground: "#2E5C6A" }
                         }
                     }

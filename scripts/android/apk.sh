@@ -18,6 +18,7 @@
 #                       (default: $FERROUI_ANDROID_BUILD_DIR, else <cargo target directory>/android)
 #   --no-strip          package the library with its symbol table
 #   --no-cargo          package the library that is already built
+#   --debugger          include the NDK LLDB server in a debuggable APK
 #   --features LIST     cargo features of the build, for example ferroui-android/vulkan (the Vulkan
 #                       rendering mode with the Skia binary that has Ganesh on Vulkan as well)
 #
@@ -52,6 +53,7 @@ abi="arm64-v8a"
 out=""
 strip=1
 run_cargo=1
+debugger=0
 features=""
 host_package=""
 package_label=""
@@ -73,6 +75,7 @@ while [ $# -gt 0 ]; do
         --out) out="${2:?--out needs a value}"; shift ;;
         --no-strip) strip=0 ;;
         --no-cargo) run_cargo=0 ;;
+        --debugger) debugger=1 ;;
         --features) features="${2:?--features needs a value}"; shift ;;
         -h|--help) usage; exit 0 ;;
         *) echo "unknown argument: $1" >&2; usage >&2; exit 2 ;;
@@ -83,6 +86,10 @@ if [ -z "$app" ]; then
     usage >&2
     exit 2
 fi
+if [ "$debugger" = 1 ] && [ "$profile" != dev ]; then
+    echo "--debugger requires the debuggable dev profile" >&2
+    exit 2
+fi
 
 repo="$(cd "$(dirname "$0")/../.." && pwd)"
 # shellcheck source=scripts/android/env.sh
@@ -91,8 +98,8 @@ repo="$(cd "$(dirname "$0")/../.." && pwd)"
 workspace="$(cd "${FERROUI_ANDROID_WORKSPACE:-$repo}" && pwd)"
 
 case "$abi" in
-    arm64-v8a) target="aarch64-linux-android" ;;
-    x86_64) target="x86_64-linux-android" ;;
+    arm64-v8a) target="aarch64-linux-android"; debugger_arch="aarch64" ;;
+    x86_64) target="x86_64-linux-android"; debugger_arch="x86_64" ;;
     *) echo "unknown ABI: $abi (arm64-v8a or x86_64)" >&2; exit 2 ;;
 esac
 
@@ -200,7 +207,14 @@ if [ "$run_cargo" = 1 ]; then
         echo "the Rust target $target is not installed: rustup target add $target" >&2
         exit 1
     fi
-    (cd "$workspace" && cargo build "${cargo_args[@]}" --target "$target" ${profile_args[@]+"${profile_args[@]}"})
+    cargo_command=build
+    linker_args=()
+    if [ "$debugger" = 1 ]; then
+        cargo_command=rustc
+        linker_args+=(-- -Cdebuginfo=2 -Cstrip=none -Clink-arg=-Wl,--build-id=sha1)
+    fi
+    (cd "$workspace" && cargo "$cargo_command" "${cargo_args[@]}" --target "$target" \
+        ${profile_args[@]+"${profile_args[@]}"} ${linker_args[@]+"${linker_args[@]}"})
 fi
 built="$cargo_target_dir/$target/$profile_dir/${library_dir:+$library_dir/}lib$library.so"
 if [ ! -f "$built" ]; then
@@ -216,7 +230,7 @@ if [ "$strip" = 1 ]; then
 else
     cp "$built" "$work/stage/lib/$abi/lib$library.so"
 fi
-# The library needs nothing but libraries of the system: the package carries no other library.
+# The application library needs only Android system libraries.
 needed="$("$FERROUI_ANDROID_TOOLCHAIN/llvm-readelf" -d "$work/stage/lib/$abi/lib$library.so" | sed -n 's/.*Shared library: \[\(.*\)\]/\1/p' | tr '\n' ' ')"
 for needed_library in $needed; do
     case "$needed_library" in
@@ -228,6 +242,15 @@ done
 if ! "$FERROUI_ANDROID_TOOLCHAIN/llvm-nm" -D --defined-only "$work/stage/lib/$abi/lib$library.so" | grep -q ' JNI_OnLoad$'; then
     echo "lib$library.so does not export JNI_OnLoad (the application lacks ferroui_android::android_application!)" >&2
     exit 1
+fi
+if [ "$debugger" = 1 ]; then
+    if ! "$FERROUI_ANDROID_TOOLCHAIN/llvm-readelf" -n "$built" | grep -q 'Build ID:'; then
+        echo "the native library needs an ELF build ID for LLDB to match its symbols; rebuild with --debugger" >&2
+        exit 1
+    fi
+    debugger_server="$("$FERROUI_ANDROID_TOOLCHAIN/clang" --print-resource-dir)/lib/linux/$debugger_arch/lldb-server"
+    if [ ! -f "$debugger_server" ]; then echo "missing NDK LLDB server: $debugger_server" >&2; exit 1; fi
+    "$FERROUI_ANDROID_TOOLCHAIN/llvm-strip" --strip-unneeded -o "$work/stage/lib/$abi/libferroui_lldb_server.so" "$debugger_server"
 fi
 
 # 2. The Java layer: classes, then one dex file.

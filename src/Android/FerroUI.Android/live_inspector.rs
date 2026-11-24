@@ -49,7 +49,8 @@ pub fn serve(options: Options) -> io::Result<LiveAppInspector> {
             "Live App requires IPv4 loopback HTTP",
         ));
     }
-    let destination = files_dir()?.join(RECEIPT);
+    let (files, debugger) = application_paths()?;
+    let destination = files.join(RECEIPT);
     if ACTIVE.swap(true, Ordering::AcqRel) {
         return Err(io::Error::new(
             io::ErrorKind::AlreadyExists,
@@ -58,7 +59,7 @@ pub fn serve(options: Options) -> io::Result<LiveAppInspector> {
     }
     let mut receipt = Receipt(None);
     let server = ferroui_mcp::serve_private(options)?;
-    write_receipt(&destination, &server)?;
+    write_receipt(&destination, &server, debugger.as_deref())?;
     receipt.0 = Some(destination);
     Ok(LiveAppInspector {
         _server: server,
@@ -66,7 +67,7 @@ pub fn serve(options: Options) -> io::Result<LiveAppInspector> {
     })
 }
 
-fn files_dir() -> io::Result<PathBuf> {
+fn application_paths() -> io::Result<(PathBuf, Option<PathBuf>)> {
     let application = FerroAndroidApplication::try_context()
         .ok_or_else(|| io::Error::other("The Android application has not initialized"))?;
     let directory = call_object(&application, "getFilesDir", "()Ljava/io/File;", &[])
@@ -76,16 +77,34 @@ fn files_dir() -> io::Result<PathBuf> {
         .ok_or_else(|| {
             io::Error::other("Android could not open the application's files directory")
         })?;
-    Ok(PathBuf::from(string_of(&directory)))
+    let debugger = call_object(
+        &application,
+        "getFerroNativeLibraryDirectory",
+        "()Ljava/lang/String;",
+        &[],
+    )
+    .map(|directory| PathBuf::from(string_of(&directory)).join("libferroui_lldb_server.so"))
+    .filter(|server| server.is_file());
+    Ok((PathBuf::from(string_of(&directory)), debugger))
 }
 
-fn write_receipt(destination: &Path, server: &ServerHandle) -> io::Result<()> {
+fn write_receipt(
+    destination: &Path,
+    server: &ServerHandle,
+    debugger: Option<&Path>,
+) -> io::Result<()> {
     let (address, token) = server
         .address
         .zip(server.token.as_deref())
         .ok_or_else(|| io::Error::other("Live App could not create its HTTP endpoint"))?;
     let pid = std::process::id();
-    let payload = serde_json::json!({"version":1,"pid":pid,"port":address.port(),"token":token});
+    let payload = serde_json::json!({
+        "version": 1,
+        "pid": pid,
+        "port": address.port(),
+        "token": token,
+        "debuggerPath": debugger,
+    });
     let temporary = destination.with_extension(format!("{pid}.{}.tmp", address.port()));
     let mut file = OpenOptions::new()
         .write(true)
