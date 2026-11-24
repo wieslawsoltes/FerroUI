@@ -1671,9 +1671,9 @@
    "date": "2026-11-23",
    "area": "platform-android",
    "class": "port",
-   "note": "TalkBack roles.",
-   "part": "android",
-   "state": "planned"
+   "note": "`android_access_role_helper.rs` maps controls to Android widget classes, so TalkBack announces their role.",
+   "part": "platforms3",
+   "state": "done"
   },
   {
    "hash": "5d9e6d1b0e87337f74f233bead580db186412357",

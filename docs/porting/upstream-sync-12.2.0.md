@@ -36,7 +36,7 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (92 done, 20 planned) | 112 |
+| `port` (93 done, 19 planned) | 112 |
 | `already` | 18 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
@@ -359,6 +359,6 @@ left out only with a recorded performance or better-code reason.
 | `3f984fa0d9` | #22870 | 2026-11-19 | text | `port` (done) | text | `ParagraphIndent` and first-line `Indent` honoured by the formatter, beside the paragraph styles of `TextLayout`. |
 | `debc815ba9` | #22914 | 2026-11-21 | build | `not-applicable` |  | Upstream build services package. |
 | `605e161019` | #22738 | 2026-11-23 | platform-android | `port` | android | Render call synchronized with surface create and destroy. |
-| `51dae7305e` | #22681 | 2026-11-23 | platform-android | `port` | android | TalkBack roles. |
+| `51dae7305e` | #22681 | 2026-11-23 | platform-android | `port` (done) | platforms3 | `android_access_role_helper.rs` maps controls to Android widget classes, so TalkBack announces their role. |
 | `5d9e6d1b0e` |  | 2026-11-23 | build | `not-applicable` |  | Upstream version number. |
 <!-- /generated:inventory -->

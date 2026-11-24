@@ -460,7 +460,7 @@ impl IExploreByTouchCallbacks for FerroAccessHelper {
         }
 
         // UI debug metadata
-        node_info.class_name = Some(peer.get_class_name());
+        node_info.class_name = Some(crate::android_access_role_helper::get_class_name(&peer));
         let automation_id = peer.get_automation_id();
         node_info.unique_id = automation_id.clone();
         node_info.view_id_resource_name = automation_id;
@@ -891,7 +891,7 @@ mod tests {
         let fixture = helper_of(&panel);
         let id = id_of(&fixture, &button);
         let node = fixture.helper.create_node_for_virtual_view(id);
-        assert_eq!(Some("Button".to_string()), node.class_name);
+        assert_eq!(Some("android.widget.Button".to_string()), node.class_name);
         assert_eq!(Some("Press".to_string()), node.text);
         assert_eq!(Some("Presses".to_string()), node.content_description);
         assert_eq!(Some("press-button".to_string()), node.unique_id);
@@ -935,7 +935,7 @@ mod tests {
         let fixture = helper_of(&panel);
         let id = id_of(&fixture, &check_box);
         let node = fixture.helper.create_node_for_virtual_view(id);
-        assert_eq!(Some("CheckBox".to_string()), node.class_name);
+        assert_eq!(Some("android.widget.CheckBox".to_string()), node.class_name);
         assert!(node.checkable && node.clickable);
         assert_eq!(CHECKED_STATE_FALSE, node.checked);
         assert!(node.has_action(ACTION_CLICK));
@@ -994,7 +994,7 @@ mod tests {
         let fixture = helper_of(&panel);
         let id = id_of(&fixture, &slider);
         let node = fixture.helper.create_node_for_virtual_view(id);
-        assert_eq!(Some("Slider".to_string()), node.class_name);
+        assert_eq!(Some("android.widget.SeekBar".to_string()), node.class_name);
         assert_eq!(Some("Volume".to_string()), node.text);
         assert_eq!(Some(RangeInfo { range_type: RANGE_TYPE_FLOAT, min: 0.0, max: 10.0, current: 4.0 }), node.range_info);
         // The reference gives a range no action: only the focus actions of the helper.
