@@ -398,6 +398,47 @@ fn a_layer_disposed_with_a_frame_pending_leaves_the_vulkan_context_usable() {
     context.dispose();
 }
 
+/// Shapes that cross every row where 2 or 4 bands meet, antialiased: a thin and a wide stroked line from the top
+/// to the bottom of the layer, rounded rectangles, ellipses and text across each edge.
+fn draw_shapes_across_the_band_edges(context: &mut dyn IDrawingContextImpl) {
+    context.clear(Colors::WHITE);
+    let (thin, wide) = (ImmutablePen::from_uint32(0xff008040, 2.0), ImmutablePen::from_uint32(0xff400080, 9.0));
+    context.draw_line(Some(&thin), Point::new(4.0, 6.0), Point::new(316.0, 250.0));
+    context.draw_line(Some(&wide), Point::new(300.0, 2.0), Point::new(20.0, 254.0));
+    for (index, edge) in [64.0, 128.0, 192.0].into_iter().enumerate() {
+        let left = 10.0 + index as f64 * 100.0;
+        context.draw_ellipse(
+            Some(&solid(0xc0e04020)),
+            Some(&ImmutablePen::from_uint32(0xff000000, 1.5)),
+            Rect::new(left, edge - 21.25, 70.0, 43.5),
+        );
+        context.draw_rectangle(
+            Some(&solid(0xff2060c0)),
+            Some(&ImmutablePen::from_uint32(0xff102030, 3.0)),
+            RoundedRect::from_radius(Rect::new(left + 30.5, edge - 9.75, 52.0, 19.5), 7.0),
+            &BoxShadows::default(),
+        );
+        if let Some(run) = glyph_run("Hxgjpqy", 22.0, Point::new(left, edge + 7.0)) {
+            context.draw_glyph_run(Some(&solid(0xff101010)), &run);
+        }
+    }
+}
+
+/// A shape that crosses a band edge is drawn by each band as the band of an ordinary layer draws it: on canvases
+/// of the band's size such shapes differed by up to 19 steps along their whole length (see the module).
+#[test]
+fn bands_draw_the_shapes_across_their_edges_as_the_ordinary_layer() {
+    for bands in [2, 4] {
+        let Some((context, gpu)) = graphite_gpu() else { return };
+        let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
+        layers.draw(draw_shapes_across_the_band_edges);
+        let what = format!("shapes across the edges of {bands} bands");
+        layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), STEP);
+        layers.dispose();
+        context.dispose();
+    }
+}
+
 /// Two pipelined layers of one context (two windows of one compositor): the one that goes releases its own image
 /// and the surfaces the threads wrapped it in, and the other keeps drawing on the same threads.
 #[test]
