@@ -97,6 +97,21 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         const input = ({ generation, revision, sequence }: Capture, gesture: HostedGesture) =>
             invoke('designer_hosted_input', { session, expected_generation: generation,
                 expected_revision: revision, expected_sequence: sequence, input: gesture });
+        const deliver = async (gesture: HostedGesture): Promise<Capture> => {
+            let accepted: Capture | undefined;
+            await until(async () => {
+                const frame = await image();
+                const result = await input(frame, gesture);
+                const message = result.content[0]?.text;
+                if (result.isError && (message === 'The hosted frame changed. Wait for the current frame.'
+                    || message === 'The application preview frame changed. Read the current frame before sending input.')) return false;
+                assert.deepEqual(content(result), { generation,
+                    frame: { revision: frame.revision, sequence: frame.sequence } });
+                accepted = frame;
+                return true;
+            });
+            return accepted!;
+        };
         const start = await image();
         const click = { type: 'click', x: .34, y: .30 } as const;
         const rejected = await input({ ...start, generation: generation + 1 }, click);
@@ -104,25 +119,12 @@ export async function verifyHostedInputMcp({ invoke, content }: McpFixture, sibl
         const outside = await input(start, { ...click, x: 1.25 });
         assert.match(outside.content[0]?.text ?? '', /matching input form/);
         assert.match((await input({ ...start, revision: start.revision + 1 }, click)).content[0]?.text ?? '', /frame changed/i);
-        assert.deepEqual(content(await input(start, click)), { generation,
-            frame: { revision: start.revision, sequence: start.sequence } });
-        const focused = await image(start);
-        assert.match((await input(start, click)).content[0]?.text ?? '', /frame changed/i);
-        const send = async (gesture: HostedGesture) => {
-            let before: Capture | undefined;
-            await until(async () => {
-                const frame = await image();
-                const result = await input(frame, gesture);
-                if (result.isError && /frame changed/i.test(result.content[0]?.text ?? '')) return false;
-                content(result);
-                before = frame;
-                return true;
-            });
-            return image(before);
-        };
-        const typed = await send({ type: 'text', text: 'Leave at reception' });
+        const clicked = await deliver(click);
+        const focused = await image(clicked);
+        assert.match((await input(clicked, click)).content[0]?.text ?? '', /frame changed/i);
+        const typed = await image(await deliver({ type: 'text', text: 'Leave at reception' }));
         assert.notEqual(typed.pixels, focused.pixels);
-        const scrolled = await send({ type: 'scroll', x: .60, y: .78, delta: -8 });
+        const scrolled = await image(await deliver({ type: 'scroll', x: .60, y: .78, delta: -8 }));
         assert.notEqual(scrolled.pixels, typed.pixels);
         const refresh = (expected_revision: number, expected_generation = generation) =>
             invoke('designer_hosted_refresh', { session, expected_generation, expected_revision });
