@@ -99,7 +99,7 @@ fn compiled_runtime_image_icons_and_attached_menu_conversion_share_native_source
             let menu = host.children().get(1).cast::<MenuFlyoutItem>().unwrap();
             let menu_icon = Control::from_boxed(&menu.icon().unwrap())
                 .unwrap()
-                .cast::<ImageIcon>()
+                .cast::<ferroribbon::primitives::RibbonImageElement>()
                 .unwrap();
             assert!(menu_icon.source().is_some());
             let empty = host.children().get(2).cast::<ImageIcon>().unwrap();
@@ -128,7 +128,7 @@ fn compiled_runtime_image_icons_and_attached_menu_conversion_share_native_source
                     .unwrap()
                     .child()
                     .unwrap()
-                    .cast::<ImageIcon>()
+                    .cast::<ferroribbon::primitives::RibbonImageElement>()
                     .unwrap()
                     .source()
                     .is_none()
