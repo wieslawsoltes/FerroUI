@@ -36,6 +36,7 @@ use skia_safe as sk;
 use skia_safe::canvas::SaveLayerRec;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
+use std::ptr::NonNull;
 use std::rc::Rc;
 
 /// What a drawing context draws to.
@@ -91,6 +92,9 @@ impl CanvasSource {
 /// one upstream would have set.
 struct ContextCanvas {
     source: CanvasSource,
+    /// The canvas of a recording source, for reading its matrix from `&self`
+    /// ([`local_to_device`](Self::local_to_device)).
+    recording_canvas: Option<NonNull<sk::Canvas>>,
     /// The transform of the context the canvas does not have yet.
     pending_transform: Option<Matrix>,
     /// What a transform is multiplied with before it is set on the canvas
@@ -103,8 +107,30 @@ struct ContextCanvas {
 }
 
 impl ContextCanvas {
-    fn new(source: CanvasSource, post_transform: Option<Matrix>) -> Self {
-        Self { source, pending_transform: None, post_transform, eager: false }
+    fn new(mut source: CanvasSource, post_transform: Option<Matrix>) -> Self {
+        let recording_canvas = match &mut source {
+            CanvasSource::Recorder { recorder, .. } => recorder.recording_canvas().map(NonNull::from),
+            _ => None,
+        };
+        Self { source, recording_canvas, pending_transform: None, post_transform, eager: false }
+    }
+
+    /// The matrix the canvas has now, without a pending transform; `None`
+    /// when the drawing has ended.
+    fn local_to_device(&self) -> Option<sk::M44> {
+        match &self.source {
+            // A clone of the surface is a reference to it; its canvas is the surface's one.
+            CanvasSource::Surface(surface) => Some(surface.clone().canvas().local_to_device()),
+            CanvasSource::Recorder { .. } => {
+                let canvas = self.recording_canvas?;
+                // SAFETY: the pointer is the recording canvas of the recorder that `source` owns, taken when the
+                // context was made; the recorder keeps that canvas, at the same address, until the recording is
+                // finished, and finishing replaces `source` with `Finished` first. The canvas is only read here
+                // (`Canvas` methods take `&self`).
+                Some(unsafe { canvas.as_ref() }.local_to_device())
+            }
+            CanvasSource::Finished => None,
+        }
     }
 
     /// The canvas, with the transform of the context on it.
@@ -170,6 +196,21 @@ impl ContextCanvas {
         self.eager = true;
         self.apply_pending_transform();
     }
+}
+
+/// The transform of a drawing context as the context knows it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+enum ContextTransform {
+    /// None was set: the identity.
+    Unset,
+    /// The transform, without the post transform.
+    Known(Matrix),
+    /// The canvas was restored since the transform was last known: the
+    /// transform is the canvas's matrix less the post transform, read when
+    /// it is asked for. Almost every restore (the pop of a clip, a layer, an
+    /// opacity or an effect) is followed by a new transform, so the read is
+    /// usually never needed.
+    Restored,
 }
 
 /// The leases of the Skia API of a drawing context that records the frame of a surface as a
@@ -583,11 +624,13 @@ pub struct DrawingContextImpl {
     render_options_stack: Vec<RenderOptions>,
     text_options_stack: Vec<TextOptions>,
     post_transform: Option<Matrix>,
+    /// The inverse of `post_transform`, computed once.
+    post_transform_inverse: Option<Matrix>,
     current_opacity: f64,
     disable_subpixel_text_rendering: bool,
     text_rendering: TextRenderingSettings,
     frame_text_rendering: Option<Rc<Cell<TextRenderingSettings>>>,
-    current_transform: Option<Matrix>,
+    current_transform: Cell<ContextTransform>,
     disposed: bool,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     gpu: Option<Rc<dyn ISkiaGpu>>,
@@ -650,11 +693,12 @@ impl DrawingContextImpl {
             render_options_stack: Vec::new(),
             text_options_stack: Vec::new(),
             post_transform,
+            post_transform_inverse: post_transform.and_then(|post_transform| post_transform.try_invert()),
             current_opacity: 1.0,
             disable_subpixel_text_rendering: create_info.disable_subpixel_text_rendering,
             text_rendering: create_info.text_rendering,
             frame_text_rendering: create_info.frame_text_rendering,
-            current_transform: None,
+            current_transform: Cell::new(ContextTransform::Unset),
             disposed: false,
             gr_context: create_info.gr_context,
             gpu: create_info.gpu,
@@ -784,21 +828,33 @@ impl DrawingContextImpl {
     }
 
     /// Restores the canvas state. The transform of the context is what the
-    /// canvas has afterwards, less the post transform of a scaled context.
+    /// canvas has afterwards, less the post transform of a scaled context,
+    /// read when it is asked for ([`ContextTransform::Restored`]).
     fn restore_canvas(&mut self) {
         let canvas = self.canvas.restore();
         let level = canvas.save_count();
         self.rounded_clip_elements.retain(|saved| *saved <= level);
-        // Deviation (DEVIATIONS.md, Skia backend): upstream reads the
-        // transform back from the canvas (`Canvas.TotalMatrix44`), post
-        // transform included, so a scaled context (a render target bitmap of
-        // more than 96 DPI) scaled the transforms pushed after a restore
-        // twice. The transform of the context is the logical one.
-        let total = matrix44_to_matrix(&canvas.local_to_device());
-        self.current_transform = Some(match self.post_transform {
-            Some(post_transform) => total * post_transform.invert(),
-            None => total,
-        });
+        self.current_transform.set(ContextTransform::Restored);
+    }
+
+    /// The transform of the context after a restore: the matrix of the
+    /// canvas, less the post transform.
+    ///
+    /// Deviation (DEVIATIONS.md, Skia backend): upstream reads the transform
+    /// back from the canvas (`Canvas.TotalMatrix44`), post transform
+    /// included, so a scaled context (a render target bitmap of more than 96
+    /// DPI) scaled the transforms pushed after a restore twice. The transform
+    /// of the context is the logical one.
+    fn restored_transform(&self) -> Matrix {
+        // A disposed context reports the identity, as one that never had a transform.
+        let Some(matrix) = self.canvas.local_to_device() else { return Matrix::IDENTITY };
+        let total = matrix44_to_matrix(&matrix);
+        match (self.post_transform, self.post_transform_inverse) {
+            (Some(_), Some(inverse)) => total * inverse,
+            // Not invertible: the panic of the inversion, as when it was inverted at every restore.
+            (Some(post_transform), None) => total * post_transform.invert(),
+            (None, _) => total,
+        }
     }
 
     /// The relative transform of a brush conjugated into target space: the
@@ -1621,19 +1677,25 @@ impl DrawingContextImpl {
 
 impl IDrawingContextImpl for DrawingContextImpl {
     fn transform(&self) -> Matrix {
-        // The transform is set when the context is created and re-read from
-        // the canvas after every restore, so the cached value is always
-        // present here.
-        self.current_transform.unwrap_or(Matrix::IDENTITY)
+        match self.current_transform.get() {
+            ContextTransform::Unset => Matrix::IDENTITY,
+            ContextTransform::Known(transform) => transform,
+            ContextTransform::Restored => {
+                let transform = self.restored_transform();
+                self.current_transform.set(ContextTransform::Known(transform));
+                transform
+            }
+        }
     }
 
     fn set_transform(&mut self, value: Matrix) {
         self.check_lease();
-        if self.current_transform == Some(value) {
+        // After a restore the transform is not compared: reading it back would cost what the comparison saves.
+        if self.current_transform.get() == ContextTransform::Known(value) {
             return;
         }
 
-        self.current_transform = Some(value);
+        self.current_transform.set(ContextTransform::Known(value));
 
         // The canvas takes the transform with its next use (9.28).
         self.canvas.set_transform(value);
@@ -2242,7 +2304,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
 impl ferroui_base::platform::IDrawingContextImplWithScene3D for DrawingContextImpl {
     fn draw_scene_3d(&mut self, frame: &ferroui_base::rendering::scene3d::Scene3DFrame) -> bool {
         self.check_lease();
-        let mut device = self.current_transform.unwrap_or(Matrix::IDENTITY);
+        let mut device = self.transform();
         if let Some(post_transform) = self.post_transform {
             device *= post_transform;
         }
