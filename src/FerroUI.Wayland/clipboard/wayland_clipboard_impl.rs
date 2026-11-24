@@ -5,10 +5,14 @@ use super::wayland_data_transfer::WaylandDataTransfer;
 use super::wayland_mime_mapper;
 use super::wayland_outgoing_transfer::WaylandOutgoingTransfer;
 use crate::server::wayland_worker::WaylandWorker;
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IOwnedClipboardImpl};
+use crate::server::wayland_marshallers::UiThreadRef;
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{AsyncDataTransferExtensions, DataFormat, DataTransfer, IAsyncDataTransfer, LocalBoxFuture};
 use ferroui_base::media::imaging::{Bitmap, PngBitmapEncoderOptions};
 use ferroui_x11::selections::uri_list_helper;
+use ferroui_base::reactive::{Disposable, Subscription};
+use ferroui_base::threading::Dispatcher;
+use ferroui_base::utilities::HandlerList;
 use std::rc::Rc;
 use std::sync::Arc;
 
@@ -18,11 +22,47 @@ use std::sync::Arc;
 /// No shared mutable state between threads — all cross-thread communication via messaging.
 pub struct WaylandClipboardImpl {
     worker: Arc<WaylandWorker>,
+    changes: Rc<ClipboardChanges>,
 }
 
 impl WaylandClipboardImpl {
     pub fn new(worker: Arc<WaylandWorker>) -> Rc<Self> {
-        Rc::new(Self { worker })
+        Rc::new(Self { worker, changes: Rc::new(ClipboardChanges { handlers: HandlerList::new() }) })
+    }
+}
+
+/// The handlers of the changes of the selection, on the UI thread; the worker reaches them
+/// through a [`UiThreadRef`].
+pub(crate) struct ClipboardChanges {
+    handlers: HandlerList<dyn Fn()>,
+}
+
+impl ClipboardChanges {
+    pub(crate) fn raise(&self) {
+        for (_, handler) in self.handlers.snapshot().iter() {
+            handler();
+        }
+    }
+}
+
+impl IClipboardChangeImpl for WaylandClipboardImpl {
+    // The compositor sends the selection to a client that has the keyboard focus: a change made
+    // while the application has no focus is reported when it gets it.
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let first = self.changes.handlers.is_empty();
+        let token = self.changes.handlers.add(handler);
+        if first {
+            self.worker.set_clipboard_observer(Some(UiThreadRef::new(self.changes.clone(), Dispatcher::ui_thread())));
+        }
+        let changes = Rc::downgrade(&self.changes);
+        let worker = self.worker.clone();
+        Subscription::new(Disposable::create(move || {
+            let Some(changes) = changes.upgrade() else { return };
+            changes.handlers.remove(token);
+            if changes.handlers.is_empty() {
+                worker.set_clipboard_observer(None);
+            }
+        }))
     }
 }
 
@@ -63,6 +103,10 @@ impl IClipboardImpl for WaylandClipboardImpl {
     }
 
     fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
+        Some(self)
+    }
+
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
         Some(self)
     }
 }

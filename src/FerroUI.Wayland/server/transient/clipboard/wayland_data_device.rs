@@ -158,6 +158,8 @@ impl WaylandDataDevice {
                 }
             }
         }
+        // A new selection (or none): the clipboard's content changed.
+        self.worker.notify_selection_changed();
     }
 
     fn on_dnd_enter(

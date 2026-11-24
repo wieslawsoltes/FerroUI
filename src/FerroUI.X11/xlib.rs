@@ -2360,6 +2360,27 @@ pub const SHAPE_INPUT: c_int = 2;
 /// Sets the input shape of a window to nothing (`empty`) or back to the
 /// whole window (`XFixesCreateRegion`, `XFixesSetWindowShapeRegion`,
 /// `XFixesDestroyRegion`).
+/// The number of the first event of XFixes, `None` without the extension.
+pub fn x_fixes_event_base(display: XDisplay) -> Option<c_int> {
+    let fixes = libraries().xfixes.as_ref()?;
+    let (mut event_base, mut error_base) = (0, 0);
+    // SAFETY: the pointers are valid places for the results.
+    let found = unsafe { (fixes.XFixesQueryExtension)(display.raw(), &mut event_base, &mut error_base) };
+    (found != 0).then_some(event_base)
+}
+
+/// The `XFixesSelectionNotify` event (number 0 of XFixes) for a change of the owner of
+/// `selection`, sent to `window` while `notify` is true.
+pub fn x_fixes_select_selection_input(display: XDisplay, window: XID, selection: Atom, notify: bool) {
+    let Some(fixes) = libraries().xfixes.as_ref() else {
+        return;
+    };
+    // XFixesSetSelectionOwnerNotifyMask.
+    let mask = if notify { 1 } else { 0 };
+    // SAFETY: identifiers only.
+    unsafe { (fixes.XFixesSelectSelectionInput)(display.raw(), window, selection, mask) };
+}
+
 pub fn x_fixes_set_input_shape(display: XDisplay, windows: &[XID], empty: bool) {
     let Some(fixes) = libraries().xfixes.as_ref() else {
         return;
