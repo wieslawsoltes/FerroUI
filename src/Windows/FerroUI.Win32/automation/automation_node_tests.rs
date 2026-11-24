@@ -492,6 +492,9 @@ fn the_patterns_a_peer_provides_are_the_ones_a_client_gets() {
 
     // Invoke.
     button.cast::<IInvokeProvider>().unwrap().invoke().unwrap();
+    // The call returns before the click runs, so that a modal dialog does not block the client.
+    assert_eq!(0, ui.clicks.get());
+    Dispatcher::ui_thread().run_jobs(None);
     assert_eq!(1, ui.clicks.get());
     // A pattern the peer does not provide fails as in the reference.
     assert_eq!(Err(NOT_SUPPORTED), check_box.cast::<IInvokeProvider>().unwrap().invoke());

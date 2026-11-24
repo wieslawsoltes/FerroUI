@@ -47,7 +47,6 @@ struct Shared {
     state: Mutex<State>,
     /// The choreographer of the looper thread, once that thread has it.
     choreographer: Mutex<Option<Choreographer>>,
-    choreographer_ready: Condvar,
     event: AutoResetEvent,
 }
 
@@ -81,23 +80,17 @@ impl Shared {
         looper_prepare();
         let choreographer = Choreographer::instance();
         *self.choreographer.lock().unwrap_or_else(PoisonError::into_inner) = choreographer;
-        self.choreographer_ready.notify_all();
         if choreographer.is_none() {
             crate::log::error("The choreographer of the system is not available: nothing will be rendered.");
             return;
         }
-        looper_loop();
-    }
 
-    /// The choreographer, waiting for the looper thread to have it.
-    fn choreographer(&self) -> Choreographer {
-        let mut choreographer = self.choreographer.lock().unwrap_or_else(PoisonError::into_inner);
-        loop {
-            if let Some(choreographer) = *choreographer {
-                return choreographer;
-            }
-            choreographer = self.choreographer_ready.wait(choreographer).unwrap_or_else(PoisonError::into_inner);
+        // A tick set before the choreographer existed gets its first callback here.
+        {
+            let mut state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
+            self.post_frame_callback_if_needed(&mut state);
         }
+        looper_loop();
     }
 
     fn render_loop(&self) {
@@ -123,9 +116,15 @@ impl Shared {
             return;
         }
 
+        // Start-up never waits for the looper thread: it posts the first callback once it has the
+        // choreographer.
+        let Some(choreographer) = *self.choreographer.lock().unwrap_or_else(PoisonError::into_inner) else {
+            return;
+        };
+
         state.pending_callback = true;
 
-        self.choreographer().post_frame_callback(self);
+        choreographer.post_frame_callback(self);
     }
 }
 

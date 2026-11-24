@@ -32,7 +32,8 @@ enum RawInputModifiers {
 * which will un-handle KeyDown event, basically allowing browser to pass a Paste event properly.
 * On actual Paste event we execute promise callbacks, resuming async operation, and returning pasted text to the app.
 * Note #1, on every KeyUp event we will reset all the state and reject pending promises if any, as this event it expected to come after Paste.
-* Note #2, whole this code will be executed only on older browsers where clipboard.read/readText is not available.
+* Note #2, whole this code will be executed only on older browsers where clipboard.read/readText is not available,
+* or in non-secure contexts where navigator.clipboard is undefined.
 * Note #3, with all of these hacks Clipboard.ReadText will still work only on actual "paste" gesture initiated by user.
 * */
 enum ClipboardState {
@@ -112,16 +113,35 @@ export class InputHelper {
 
             // Differs from the original, which resolves with the items of the event: they are read
             // after the event, when the browser no longer gives their values (getAsString never
-            // calls back), so the read never completed. The string values are read now; a file
-            // stays an item of the event.
+            // calls back), so the read never completed. The string values are read now, and the
+            // file items move to a copy that stays readable after the event.
             const clipboardData = args.clipboardData;
-            const items: ReadableDataItem[] = this.getDataTransferItems(clipboardData).map((item) => item.kind === "string" && clipboardData != null
-                ? { type: "string", value: clipboardData.getData(item.type), format: item.type }
-                : { type: "dataTransferItem", value: item });
+            const files = clipboardData == null ? null : this.copyFileItems(clipboardData);
+            const strings: ReadableDataItem[] = clipboardData == null
+                ? []
+                : this.getDataTransferItems(clipboardData)
+                    .filter((item) => item.kind === "string")
+                    .map((item) => ({ type: "string", value: clipboardData.getData(item.type), format: item.type }));
+            const fileItems: ReadableDataItem[] = this.getDataTransferItems(files)
+                .map((item) => ({ type: "dataTransferItem", value: item }));
+            const items: ReadableDataItem[] = [...strings, ...fileItems];
             const result: ClipboardResult = { result: items };
             this.resolveClipboard(result);
         });
         this.clipboardState = ClipboardState.Ready;
+    }
+
+    private static copyFileItems(dataTransfer: DataTransfer): DataTransfer {
+        const copy = new DataTransfer();
+        for (const item of this.getDataTransferItems(dataTransfer)) {
+            if (item.kind === "file") {
+                const file = item.getAsFile();
+                if (file != null) {
+                    copy.items.add(file);
+                }
+            }
+        }
+        return copy;
     }
 
     private static getDataTransferItems(dataTransfer?: DataTransfer | null): DataTransferItem[] {
@@ -166,11 +186,12 @@ export class InputHelper {
         const clipboard = window.navigator.clipboard;
 
         try {
-            if (clipboard.read) {
+            // navigator.clipboard only exists in secure contexts.
+            if (clipboard?.read) {
                 const clipboardItems = await clipboard.read();
                 const result: ClipboardResult = { result: clipboardItems.map((item) => ({ type: "clipboardItem", value: item })) };
                 return result;
-            } else if (clipboard.readText) {
+            } else if (clipboard?.readText) {
                 const item: ReadableDataItem = {
                     type: "string",
                     value: await clipboard.readText()
@@ -200,6 +221,11 @@ export class InputHelper {
     }
 
     public static async writeClipboard(window: Window, source?: WriteableClipboardSource | null): Promise<string> {
+        // navigator.clipboard only exists in secure contexts.
+        if (!window.navigator.clipboard) {
+            return "denied";
+        }
+
         try {
             const items = source?.items ?? [];
             if (items.length === 0) {
