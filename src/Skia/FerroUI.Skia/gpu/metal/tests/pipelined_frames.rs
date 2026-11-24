@@ -1214,3 +1214,106 @@ fn blurred_shadows_across_the_band_edges_are_drawn_as_on_the_ordinary_layer() {
         }
     }
 }
+
+/// Draws a frame on an ordinary layer of the context of `layers` under each of `clips`, in that order, each a
+/// recording of its own, as the band threads' recordings are.
+fn draw_ordinary_bands(
+    layers: &Layers,
+    target: &SurfaceRenderTarget,
+    clips: &[(usize, skia_safe::IRect)],
+    draw: &dyn Fn(&mut dyn IDrawingContextImpl),
+) {
+    for (_, clip) in clips {
+        let mut drawing_context = target.create_drawing_context();
+        let feature = drawing_context
+            .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
+            .and_then(|feature| feature.downcast_ref::<Rc<dyn ISkiaApiLeaseFeature>>().cloned())
+            .expect("the drawing context of a layer leases the Skia API");
+        let with_canvas = |use_canvas: &mut dyn FnMut(&skia_safe::Canvas)| {
+            let lease = feature.lease();
+            lease.with_sk_canvas(use_canvas);
+            lease.dispose();
+        };
+        with_canvas(&mut |canvas| {
+            canvas.save();
+            canvas.clip_rect(skia_safe::Rect::from(*clip), skia_safe::ClipOp::Intersect, false);
+        });
+        draw(&mut *drawing_context);
+        with_canvas(&mut |canvas| {
+            canvas.restore();
+        });
+        drawing_context.dispose();
+        layers.gr_context.flush();
+    }
+}
+
+/// The order the band recordings of the ordinary path go in does not change a pixel on Metal: each band is drawn
+/// under its integer clip that is not antialiased, top band first and bottom band first. (On lavapipe two pixels
+/// per band edge differed between the two orders; `gpu/vulkan/graphite_vulkan_layer_tests.rs`.)
+#[test]
+fn the_ordinary_bands_show_the_same_frame_in_either_order() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    for bands in [2, 4] {
+        let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+        let clips = layers.surface.band_clips();
+        let backwards: Vec<_> = clips.iter().rev().copied().collect();
+        let top_first = SurfaceRenderTarget::new(create_info(&layers.gpu, &layers.gr_context));
+        let bottom_first = SurfaceRenderTarget::new(create_info(&layers.gpu, &layers.gr_context));
+        for scene in [&draw_scene as &dyn Fn(&mut dyn IDrawingContextImpl), &draw_shapes_across_the_band_edges] {
+            draw_ordinary_bands(&layers, &top_first, &clips, scene);
+            draw_ordinary_bands(&layers, &bottom_first, &backwards, scene);
+            let (one, other) = (bytes(&top_first), bytes(&bottom_first));
+            let different: Vec<_> = one
+                .chunks_exact(4)
+                .zip(other.chunks_exact(4))
+                .enumerate()
+                .filter(|(_, (a, b))| a != b)
+                .map(|(index, (a, b))| (index % WIDTH as usize, index / WIDTH as usize, a.to_vec(), b.to_vec()))
+                .take(12)
+                .collect();
+            assert!(different.is_empty(), "{bands} bands, top first against bottom first: {different:?}");
+        }
+        top_first.dispose();
+        bottom_first.dispose();
+        layers.dispose();
+    }
+}
+
+/// A band of the ordinary path writes no pixel outside its rows on Metal: each band is drawn alone, under its
+/// integer clip that is not antialiased, on a layer filled with a colour the scene does not draw.
+#[test]
+fn a_band_writes_no_pixel_outside_its_rows() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::with_bands(&device, SkiaFramePipelining::On, 2);
+    let clips = layers.surface.band_clips();
+    let whole = [(0, skia_safe::IRect::from_wh(WIDTH, HEIGHT))];
+    let fill = |context: &mut dyn IDrawingContextImpl| context.clear(Color::from_uint32(0xff00ff00));
+    for scene in [&draw_scene as &dyn Fn(&mut dyn IDrawingContextImpl), &draw_shapes_across_the_band_edges] {
+        for (index, clip) in clips.iter().copied() {
+            let layer = SurfaceRenderTarget::new(create_info(&layers.gpu, &layers.gr_context));
+            draw_ordinary_bands(&layers, &layer, &whole, &fill);
+            let before = bytes(&layer);
+            draw_ordinary_bands(&layers, &layer, &[(index, clip)], scene);
+            let after = bytes(&layer);
+            let outside: Vec<_> = before
+                .chunks_exact(4)
+                .zip(after.chunks_exact(4))
+                .enumerate()
+                .map(|(pixel, (a, b))| ((pixel % WIDTH as usize) as i32, (pixel / WIDTH as usize) as i32, a, b))
+                .filter(|(_, y, a, b)| (*y < clip.top || *y >= clip.bottom) && a != b)
+                .map(|(x, y, a, b)| (x, y, a.to_vec(), b.to_vec()))
+                .take(12)
+                .collect();
+            let rows = (clip.top, clip.bottom);
+            assert!(outside.is_empty(), "band {index} (rows {rows:?}) wrote outside: {outside:?}");
+            layer.dispose();
+        }
+    }
+    layers.dispose();
+}
