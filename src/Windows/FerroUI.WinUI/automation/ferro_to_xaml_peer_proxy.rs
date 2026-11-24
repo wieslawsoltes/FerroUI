@@ -421,10 +421,17 @@ mod imp {
             base!(self.get_level_core())
         }
         fn get_landmark_type_core(&self) -> Result<i32, HResult> {
-            base!(self.get_landmark_type_core())
+            Ok(ControlTypeMap::landmark_to_xaml(self.peer.get_landmark_type()))
         }
         fn get_localized_landmark_type_core(&self) -> Result<isize, HResult> {
-            base!(self.get_localized_landmark_type_core())
+            let landmark = self.peer.get_landmark_type();
+            match self.peer.get_localized_landmark_type() {
+                Some(name) => new_string(&name),
+                None => match ControlTypeMap::landmark_name(landmark) {
+                    Some(name) => new_string(name),
+                    None => base!(self.get_localized_landmark_type_core()),
+                },
+            }
         }
         fn is_peripheral_core(&self) -> Result<u8, HResult> {
             base!(self.is_peripheral_core())
@@ -433,7 +440,10 @@ mod imp {
             base!(self.is_data_valid_for_form_core())
         }
         fn get_full_description_core(&self) -> Result<isize, HResult> {
-            base!(self.get_full_description_core())
+            match self.peer.get_full_description() {
+                Some(description) => new_string(&description),
+                None => base!(self.get_full_description_core()),
+            }
         }
         fn get_described_by_core(&self) -> Result<Option<ComPtr<IIterableAutomationPeer>>, HResult> {
             base!(self.get_described_by_core())

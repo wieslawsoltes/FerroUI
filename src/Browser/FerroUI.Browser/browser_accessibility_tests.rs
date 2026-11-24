@@ -28,6 +28,23 @@ fn the_roles_of_the_common_control_types() {
 }
 
 #[test]
+fn a_named_custom_landmark_and_a_full_description() {
+    use ferroui_controls::Border;
+    let border = Border::new();
+    AutomationProperties::set_landmark_type(&border, Some(AutomationLandmarkType::Custom));
+    AutomationProperties::set_localized_landmark_type(&border, Some("Current viewers"));
+    AutomationProperties::set_full_description(&border, Some("The people watching now"));
+    let state = state_of(&border);
+    assert_eq!(state.role, "region");
+    assert_eq!(aria(&state, "aria-roledescription"), "Current viewers");
+    assert_eq!(aria(&state, "aria-description"), "The people watching now");
+
+    // Without a landmark, the name of one is not a role description.
+    AutomationProperties::set_landmark_type(&border, None);
+    assert_eq!(aria(&state_of(&border), "aria-roledescription"), "");
+}
+
+#[test]
 fn a_button_has_its_role_name_and_type() {
     let button = Button::new();
     AutomationProperties::set_name(&button, Some("Save"));

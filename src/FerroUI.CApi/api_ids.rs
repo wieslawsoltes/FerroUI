@@ -5,7 +5,7 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -2034746434256777622;
+pub(crate) const API_FINGERPRINT: i64 = -8370955629332515818;
 
 /// The classes, by type ID.
 pub(crate) static TYPE_NAMES: [&str; 507] = [
@@ -519,7 +519,7 @@ pub(crate) static TYPE_NAMES: [&str; 507] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1044] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -565,6 +565,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "AutomationProperties.AutomationId",
     "AutomationProperties.ClassNameOverride",
     "AutomationProperties.ControlTypeOverride",
+    "AutomationProperties.FullDescription",
     "AutomationProperties.HeadingLevel",
     "AutomationProperties.HelpText",
     "AutomationProperties.IsColumnHeader",
@@ -577,6 +578,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1042] = [
     "AutomationProperties.LabeledBy",
     "AutomationProperties.LandmarkType",
     "AutomationProperties.LiveSetting",
+    "AutomationProperties.LocalizedLandmarkType",
     "AutomationProperties.Name",
     "AutomationProperties.PositionInSet",
     "AutomationProperties.SizeOfSet",

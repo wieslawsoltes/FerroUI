@@ -46,6 +46,20 @@ impl AutomationElementIdentifiers {
         &PROPERTY
     }
 
+    /// Identifies the localized landmark type automation property. The property value is returned
+    /// by the `AutomationPeer::get_localized_landmark_type` method.
+    pub fn localized_landmark_type_property() -> &'static AutomationProperty {
+        static PROPERTY: AutomationProperty = AutomationProperty::new();
+        &PROPERTY
+    }
+
+    /// Identifies the full description automation property. The property value is returned by the
+    /// `AutomationPeer::get_full_description` method.
+    pub fn full_description_property() -> &'static AutomationProperty {
+        static PROPERTY: AutomationProperty = AutomationProperty::new();
+        &PROPERTY
+    }
+
     /// Identifies the heading level automation property. The class name property value is returned
     /// by the `AutomationPeer::get_heading_level` method.
     pub fn heading_level_property() -> &'static AutomationProperty {

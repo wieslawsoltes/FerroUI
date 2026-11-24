@@ -181,6 +181,8 @@ impl AutomationNode {
                 (AutomationElementIdentifiers::name_property(), UiaPropertyId::Name),
                 (AutomationElementIdentifiers::help_text_property(), UiaPropertyId::HelpText),
                 (AutomationElementIdentifiers::landmark_type_property(), UiaPropertyId::LandmarkType),
+                (AutomationElementIdentifiers::localized_landmark_type_property(), UiaPropertyId::LocalizedLandmarkType),
+                (AutomationElementIdentifiers::full_description_property(), UiaPropertyId::FullDescription),
                 (AutomationElementIdentifiers::heading_level_property(), UiaPropertyId::HeadingLevel),
                 (AutomationElementIdentifiers::item_status_property(), UiaPropertyId::ItemStatus),
                 (ExpandCollapsePatternIdentifiers::expand_collapse_state_property(), UiaPropertyId::ExpandCollapseExpandCollapseState),
@@ -468,9 +470,12 @@ impl AutomationNode {
                 Some(landmark) => Plain::I4(landmark.0),
                 None => Plain::None,
             },
-            UiaPropertyId::LocalizedLandmarkType => {
-                Plain::Text(Self::to_uia_localized_landmark_type(peer.get_landmark_type()).map(str::to_owned))
-            }
+            // The application's name of the landmark, else the name of a landmark type the system
+            // has no identifier for.
+            UiaPropertyId::LocalizedLandmarkType => Plain::Text(peer.get_localized_landmark_type().or_else(|| {
+                Self::to_uia_localized_landmark_type(peer.get_landmark_type()).map(str::to_owned)
+            })),
+            UiaPropertyId::FullDescription => Plain::Text(peer.get_full_description()),
             UiaPropertyId::HeadingLevel => Plain::I4(Self::to_uia_heading_level(peer.get_heading_level()).0),
             UiaPropertyId::LiveSetting => Plain::I4(Self::to_uia_live_setting(peer.get_live_setting()).0),
             _ => Plain::None,
@@ -649,6 +654,9 @@ impl AutomationNode {
         // (`IConvertible` in the reference).
         fn value(value: Option<&ferroui_base::BoxedValue>) -> Option<VariantValue> {
             let value = value?;
+            if let Some(landmark) = value.downcast_ref::<AutomationLandmarkType>() {
+                return AutomationNode::to_uia_landmark_type(Some(*landmark)).map(|landmark| VariantValue::I4(landmark.0));
+            }
             match value.downcast_ref::<ExpandCollapseState>() {
                 Some(state) => Some(VariantValue::I4(AutomationNode::to_uia_expand_collapse_state(*state))),
                 None => VariantValue::from_any(&**value),
@@ -746,7 +754,8 @@ impl AutomationNode {
             AutomationLandmarkType::Banner
             | AutomationLandmarkType::Complementary
             | AutomationLandmarkType::ContentInfo
-            | AutomationLandmarkType::Region => UiaLandmarkType::Custom,
+            | AutomationLandmarkType::Region
+            | AutomationLandmarkType::Custom => UiaLandmarkType::Custom,
             AutomationLandmarkType::Form => UiaLandmarkType::Form,
             AutomationLandmarkType::Main => UiaLandmarkType::Main,
             AutomationLandmarkType::Navigation => UiaLandmarkType::Navigation,

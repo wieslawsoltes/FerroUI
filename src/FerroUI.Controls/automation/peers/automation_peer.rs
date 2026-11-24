@@ -76,6 +76,9 @@ pub enum AutomationLandmarkType {
     Main,
     Navigation,
     Search,
+    /// A landmark that none of the other types describes; the application names it with
+    /// `AutomationProperties.LocalizedLandmarkType` (WinUI's `AutomationLandmarkType.Custom`).
+    Custom,
 }
 
 /// Provides a base class that exposes an element to UI Automation.
@@ -111,6 +114,12 @@ ferro_class! {
         fn get_help_text_core(this) -> Option<String>;
         fn get_placeholder_text_core(this) -> Option<String>;
         fn get_landmark_type_core(this) -> Option<AutomationLandmarkType>;
+        /// The localized name of the landmark type of the element (WinUI's
+        /// `GetLocalizedLandmarkTypeCore`); `None` lets the platform name a standard landmark.
+        fn get_localized_landmark_type_core(this) -> Option<String>;
+        /// The extended description of the element, read after its name and help text (WinUI's
+        /// `GetFullDescriptionCore`).
+        fn get_full_description_core(this) -> Option<String>;
         fn get_heading_level_core(this) -> i32;
         fn get_item_type_core(this) -> Option<String>;
         fn get_item_status_core(this) -> Option<String>;
@@ -240,6 +249,14 @@ impl AutomationPeerImpl for AutomationPeer {
     }
 
     fn get_landmark_type_core(_this: &Self) -> Option<AutomationLandmarkType> {
+        None
+    }
+
+    fn get_localized_landmark_type_core(_this: &Self) -> Option<String> {
+        None
+    }
+
+    fn get_full_description_core(_this: &Self) -> Option<String> {
         None
     }
 
@@ -487,6 +504,24 @@ impl AutomationPeer {
             return None;
         }
         self.get_landmark_type_core()
+    }
+
+    /// Gets the localized name of the landmark type of the element, when the application gives
+    /// one (WinUI's `GetLocalizedLandmarkType`). An empty name is no name.
+    pub fn get_localized_landmark_type(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
+        self.get_localized_landmark_type_core().filter(|name| !name.is_empty())
+    }
+
+    /// Gets the extended description of the element (WinUI's `GetFullDescription`). An empty
+    /// description is no description.
+    pub fn get_full_description(&self) -> Option<String> {
+        if !self.is_element_available() {
+            return None;
+        }
+        self.get_full_description_core().filter(|description| !description.is_empty())
     }
 
     /// Gets the heading level that is associated with this automation peer.

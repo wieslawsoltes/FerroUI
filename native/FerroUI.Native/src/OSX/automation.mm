@@ -154,6 +154,8 @@
         case LandmarkMain: return @"AXLandmarkMain";
         case LandmarkNavigation: return @"AXLandmarkNavigation";
         case LandmarkSearch: return @"AXLandmarkSearch";
+        // A custom landmark is a named region (AutomationProperties.LocalizedLandmarkType).
+        case LandmarkCustom: return @"AXLandmarkRegion";
     }
 
     return NSAccessibilityUnknownSubrole;
@@ -162,6 +164,13 @@
 - (NSString *)accessibilityRoleDescription
 {
     auto landmarkType = _peer->GetLandmarkType();
+    if (landmarkType != LandmarkNone)
+    {
+        // The name the application gives the landmark, if any.
+        NSString* name = GetNSStringAndRelease(_peer->GetLocalizedLandmarkType());
+        if (name != nil && name.length > 0)
+            return name;
+    }
     switch (landmarkType) {
         case LandmarkBanner: return @"banner";
         case LandmarkComplementary: return @"complementary";
@@ -171,6 +180,7 @@
         case LandmarkMain: return @"main";
         case LandmarkNavigation: return @"navigation";
         case LandmarkSearch: return @"search";
+        case LandmarkCustom: return @"region";
     }
     return NSAccessibilityRoleDescription([self accessibilityRole], [self accessibilitySubrole]);
 }
@@ -220,7 +230,15 @@
 
 - (NSString *)accessibilityHelp
 {
-    return GetNSStringAndRelease(_peer->GetHelpText()); 
+    // NSAccessibility has one help text: the help text, then the full description
+    // (AutomationProperties.FullDescription), each when the element has it.
+    NSString* help = GetNSStringAndRelease(_peer->GetHelpText());
+    NSString* description = GetNSStringAndRelease(_peer->GetFullDescription());
+    if (description == nil || description.length == 0)
+        return help;
+    if (help == nil || help.length == 0)
+        return description;
+    return [NSString stringWithFormat:@"%@\n%@", help, description];
 }
 
 - (NSString *)accessibilityPlaceholderValue

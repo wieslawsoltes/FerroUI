@@ -111,12 +111,14 @@ fn accessibility_screen_reader_examples_keep_the_source_automation_properties() 
     }
     let students = AutomationProperties::get_labeled_by(&root.get_control::<ListBox>("StudentsList"));
     assert_eq!(students.and_then(|by| by.name()).as_deref(), Some("StudentsLabel"));
-    // The description of the check box is the text of its description; the help text of the
+    // The full description of the check box is the text of its description; the help text of the
     // button.
+    let clear_cache = root.get_control::<CheckBox>("ClearCacheCheckBox");
     assert_eq!(
-        AutomationProperties::get_help_text(&root.get_control::<CheckBox>("ClearCacheCheckBox")).as_deref(),
+        AutomationProperties::get_full_description(&clear_cache).as_deref(),
         Some("Deletes all cached items when closing the browser. This includes cookies, images, and browsing history.")
     );
+    assert_eq!(AutomationProperties::get_help_text(&clear_cache), None);
     assert_eq!(
         AutomationProperties::get_help_text(&root.get_control::<Button>("CancelSubscriptionsButton")).as_deref(),
         Some("Launch the cancellation wizard")
@@ -140,10 +142,14 @@ fn accessibility_screen_reader_examples_keep_the_source_automation_properties() 
     for (name, landmark) in [
         ("NavigationLandmark", AutomationLandmarkType::Navigation),
         ("MainLandmark", AutomationLandmarkType::Main),
-        ("ViewersLandmark", AutomationLandmarkType::Region),
+        ("ViewersLandmark", AutomationLandmarkType::Custom),
     ] {
         assert_eq!(AutomationProperties::get_landmark_type(&root.get_control::<Border>(name)), Some(landmark));
     }
+    // The sidebar is a custom landmark the page names.
+    let viewers = root.get_control::<Border>("ViewersLandmark");
+    assert_eq!(AutomationProperties::get_localized_landmark_type(&viewers).as_deref(), Some("Current viewers"));
+    assert_eq!(AutomationProperties::get_name(&viewers), None);
     let levels: Vec<i32> = root
         .get_control::<StackPanel>("HeadingsPanel")
         .children()

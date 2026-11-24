@@ -102,6 +102,8 @@ pub(crate) fn landmark_role(landmark: AutomationLandmarkType) -> &'static str {
         AutomationLandmarkType::Main => "main",
         AutomationLandmarkType::Navigation => "navigation",
         AutomationLandmarkType::Search => "search",
+        // A custom landmark is a named region; aria-roledescription carries its name.
+        AutomationLandmarkType::Custom => "region",
     }
 }
 
@@ -201,6 +203,10 @@ pub(crate) fn read_attributes(peer: &AutomationPeer, state: &mut NodeState) {
             _ => String::new(),
         },
     ));
+    // AutomationProperties.FullDescription, and the name the application gives a landmark.
+    states.push(("aria-description", peer.get_full_description().unwrap_or_default()));
+    let landmark_name = peer.get_landmark_type().and_then(|_| peer.get_localized_landmark_type());
+    states.push(("aria-roledescription", landmark_name.unwrap_or_default()));
     state.states = states;
 }
 

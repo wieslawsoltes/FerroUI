@@ -1047,6 +1047,20 @@
         "values": [],
         "attached": true
       },
+      "LocalizedLandmarkType": {
+        "name": "LocalizedLandmarkType",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.LocalizedLandmarkType: Option<String>",
+        "values": [],
+        "attached": true
+      },
+      "FullDescription": {
+        "name": "FullDescription",
+        "type_name": "Option<String>",
+        "documentation": "AutomationProperties.FullDescription: Option<String>",
+        "values": [],
+        "attached": true
+      },
       "HeadingLevel": {
         "name": "HeadingLevel",
         "type_name": "i32",

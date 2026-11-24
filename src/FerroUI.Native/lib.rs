@@ -233,6 +233,8 @@ mod tests {
         assert_eq!(size_of::<FrnKey>(), 4);
         assert_eq!(FrnLandmarkType::LandmarkNone.0, -1);
         assert_eq!(FrnLandmarkType::LandmarkBanner.0, 0);
+        // The values are the ones of `AutomationLandmarkType`, which the peer casts.
+        assert_eq!(FrnLandmarkType::LandmarkCustom.0, ferroui_controls::automation::peers::AutomationLandmarkType::Custom as i32);
         assert_eq!(FrnKey::FrnKeyEnter, FrnKey::FrnKeyReturn);
         assert_eq!(format!("{:?}", FrnWindowState(99)), "FrnWindowState(99)");
     }

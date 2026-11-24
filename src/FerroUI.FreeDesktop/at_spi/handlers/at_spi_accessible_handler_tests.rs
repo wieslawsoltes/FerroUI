@@ -40,8 +40,12 @@ impl Handler {
         AtSpiAccessibleHandler::get_role_name_async(&self.node)
     }
 
-    fn get_localized_role_name_async(&self) -> &'static str {
+    fn get_localized_role_name_async(&self) -> String {
         AtSpiAccessibleHandler::get_localized_role_name_async(&self.node)
+    }
+
+    fn description(&self) -> String {
+        AtSpiAccessibleHandler::description(&self.node)
     }
 
     fn get_attributes_async(&self) -> AtSpiAttributeSet {
@@ -73,6 +77,29 @@ fn exposes_heading_role_and_level(level: i32) {
     assert_eq!("heading", handler.get_role_name_async());
     assert_eq!("heading", handler.get_localized_role_name_async());
     assert_eq!(Some(&level.to_string()), handler.get_attributes_async().get("level"));
+    server.dispose();
+}
+
+#[test]
+fn exposes_a_named_landmark_and_the_full_description() {
+    use ferroui_controls::automation::peers::AutomationLandmarkType;
+    let _app = UnitTestApplication::start(TestServices::default());
+    let control = ferroui_controls::Border::new();
+    AutomationProperties::set_landmark_type(&control, Some(AutomationLandmarkType::Custom));
+    AutomationProperties::set_localized_landmark_type(&control, Some("Current viewers"));
+    AutomationProperties::set_help_text(&control, Some("Help"));
+    let server = AtSpiServer::new();
+    let handler = create_handler(&control, server.clone());
+
+    assert_eq!(AtSpiRole::Landmark as u32, handler.get_role_async());
+    assert_eq!("landmark", handler.get_role_name_async());
+    assert_eq!("Current viewers", handler.get_localized_role_name_async());
+    // The help text is the description until the element has a full description.
+    assert_eq!("Help", handler.description());
+    AutomationProperties::set_full_description(&control, Some("The people watching now"));
+    assert_eq!("The people watching now", handler.description());
+    AutomationProperties::set_localized_landmark_type(&control, None);
+    assert_eq!("landmark", handler.get_localized_role_name_async());
     server.dispose();
 }
 
