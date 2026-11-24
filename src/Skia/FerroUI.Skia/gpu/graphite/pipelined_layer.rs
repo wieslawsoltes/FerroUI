@@ -922,7 +922,8 @@ struct Held {
 enum Placement {
     /// In the order the bands were sent ([`BandInsert::Ordered`]).
     Turn(Turn),
-    /// On the layer's texture at row `top` of the layer, when it is ready ([`BandInsert::Deferred`]).
+    /// On the layer's texture at row `top` of the layer (0: a deferred canvas has the layer's size), when it
+    /// is ready ([`BandInsert::Deferred`]).
     At { top: i32 },
     /// As it is, on the band's own texture, when it is ready ([`BandInsert::BandTextures`]).
     Own,
@@ -957,9 +958,9 @@ pub(crate) enum BandInsert {
     /// Each band draws on the layer's texture and the recordings go in in the order the bands
     /// were sent ([`InsertOrder`]).
     Ordered,
-    /// Each band records on a deferred canvas of its own size, which the insertion places on the
-    /// layer's texture at the band's row: no shared target while the threads record, and the
-    /// recordings go in as they are ready, with no turn to wait for. Asked for with
+    /// Each band records on a deferred canvas of the layer's size under the clip of the band, which
+    /// the insertion places on the layer's texture: no shared target while the threads record, and
+    /// the recordings go in as they are ready, with no turn to wait for. Asked for with
     /// `FERROUI_SKIA_BAND_INSERT=deferred`.
     Deferred,
     /// Each band draws on a texture of its own, of its size, kept from frame to frame while the band
@@ -1088,7 +1089,8 @@ impl BandWorker {
                     let started = Instant::now();
                     let placement = match insert_mode {
                         BandInsert::Ordered => Placement::Turn(Turn { order: order.clone(), number: band.turn }),
-                        BandInsert::Deferred => Placement::At { top: band.clip.top },
+                        // A deferred recording covers the whole layer (`play_deferred`): it is placed at the top.
+                        BandInsert::Deferred => Placement::At { top: 0 },
                         BandInsert::BandTextures => Placement::Own,
                     };
                     // A panic would leave the render thread waiting for an
@@ -1187,9 +1189,17 @@ fn play(
     recorder.snap()
 }
 
-/// Plays a band on a deferred canvas of the band's size, its rows moved to the top, and snaps the
-/// recorder; [`insert_at`] places the recording on the layer's texture. The surface that wraps the
-/// texture is made for the insertion if the thread has none yet.
+/// Plays a band on a deferred canvas of the layer's size under the clip of the band, as the band of an
+/// ordinary layer is drawn, and snaps the recorder; [`insert_at`] places the recording on the layer's texture.
+/// The surface that wraps the texture is made for the insertion if the thread has none yet.
+///
+/// The canvas has the size of the layer, not of the band: a shape that crosses the row where two bands meet
+/// is then cut by the clip, inside the target, as on an ordinary layer. On a canvas of the band's size the
+/// shape crosses the edge of the target instead, and Graphite draws it another way: on lavapipe the
+/// antialiased edges of such a shape (a stroked line across the layer, a rounded rectangle across a band edge)
+/// came out up to 19 steps apart along the whole shape, while one band, which has no edge, matched the ordinary
+/// layer exactly (`gpu/vulkan/graphite_vulkan_layer_tests.rs`). The canvas only records: no texture of the
+/// layer's size is made for it.
 fn play_deferred(
     recorder: &mut graphite::Recorder,
     surfaces: &mut BandSurfaces,
@@ -1200,11 +1210,9 @@ fn play_deferred(
         surfaces.push((band.layer, surface, band.texture.clone()));
     }
     let texture_info = band.texture.backend_texture(band.size).info();
-    let image_info =
-        skia_safe::ImageInfo::new((band.clip.width(), band.clip.height()), band.color_type, AlphaType::Premul, None);
+    let image_info = skia_safe::ImageInfo::new(band.size, band.color_type, AlphaType::Premul, None);
     {
         let canvas = recorder.make_deferred_canvas(&image_info, &texture_info)?;
-        canvas.translate((0.0, -(band.clip.top as f32)));
         canvas.clip_rect(Rect::from(band.clip), ClipOp::Intersect, false);
         canvas.draw_picture(&band.picture, None, None);
     }

@@ -1029,8 +1029,8 @@ fn bands_inserted_from_deferred_canvases_in_completion_order_show_the_frames() {
         // Before the first pipelined frame makes the threads.
         layers.gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::Deferred);
         // The scene has antialiased edges and text across the rows the bands meet at; each band is its own
-        // recording on a target of its own size, so a pixel at an edge may differ as between any two clipped
-        // frames (the module's note): at most a row of them, by a few steps.
+        // recording (on a deferred canvas of the layer's size under the band's clip), so a pixel at an edge may
+        // differ as between any two clipped frames (the module's note): at most a row of them, by a few steps.
         layers.draw(draw_scene);
         layers.assert_pixels_within(&format!("the first frame in {bands} bands"), WIDTH as usize * (bands - 1), 8);
         layers.draw(draw_update);
