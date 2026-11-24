@@ -11,5 +11,5 @@ pub use graphite_gr_context::GraphiteGrContext;
 pub(crate) use graphite_gr_context::UPLOADED_IMAGE_SWEEP_INTERVAL;
 pub use graphite_prewarm::GraphitePrewarmContext;
 #[cfg(test)]
-pub(crate) use pipelined_layer::{band_clips, band_count};
+pub(crate) use pipelined_layer::{band_clips, band_count, BandInsert};
 pub(crate) use pipelined_layer::PipelinedLayerSurface;
