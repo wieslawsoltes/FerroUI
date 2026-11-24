@@ -82,14 +82,14 @@ use ferroui_base::PixelSize;
 use skia_safe::gpu::graphite::mtl::backend_textures;
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::{
-    Canvas, ClipOp, Color, ColorType, IRect, Picture, PictureRecorder, Point, Rect, SamplingOptions, Surface,
-    SurfaceProps,
+    BlendMode, Canvas, ClipOp, Color, ColorType, IRect, Paint, Picture, PictureRecorder, Point, Rect,
+    SamplingOptions, Surface, SurfaceProps,
 };
 use std::cell::{Cell, RefCell};
 use std::ffi::c_void;
 use std::panic::{catch_unwind, AssertUnwindSafe};
 use std::rc::Rc;
-use std::sync::atomic::{AtomicU64, Ordering};
+use std::sync::atomic::{AtomicU64, AtomicUsize, Ordering};
 use std::sync::{mpsc, Arc, Condvar, Mutex, MutexGuard, PoisonError};
 use std::thread;
 use std::time::{Duration, Instant};
@@ -861,11 +861,13 @@ struct BandWorker {
     /// The context the thread inserts its recordings into.
     context: Arc<SharedContext>,
     order: Arc<InsertOrder>,
+    /// Counts the recordings this thread inserted, until a submit takes them.
+    unsubmitted: Arc<AtomicUsize>,
 }
 
 impl BandWorker {
     fn run(self) {
-        let BandWorker { recorder, jobs, results, context, order } = self;
+        let BandWorker { recorder, jobs, results, context, order, unsubmitted } = self;
         let mut recorder = recorder.0;
         let mut held: Vec<Held> = Vec::new();
         // The surfaces that wrap the textures of the layers, by layer. They
@@ -898,6 +900,9 @@ impl BandWorker {
                             catch_unwind(AssertUnwindSafe(|| insert(&mut context.lock(), &mut recording)))
                                 .unwrap_or(false)
                         });
+                        if inserted {
+                            unsubmitted.fetch_add(1, Ordering::Release);
+                        }
                         drop(turn);
                         gone |= results.send(BandOutput { layer, index, recorded, inserted, busy }).is_err();
                     }
@@ -962,9 +967,17 @@ pub(super) struct BandPool {
     /// is sent.
     order: Arc<InsertOrder>,
     next_turn: u64,
+    /// The band recordings the threads inserted that no submit has taken yet.
+    unsubmitted: Arc<AtomicUsize>,
 }
 
 impl BandPool {
+    /// Takes the count of the band recordings inserted since the last submit: what a submit now
+    /// sends to the GPU (`GraphiteGrContext::submit_inserted_bands`, and every flush).
+    pub(super) fn take_unsubmitted(&self) -> usize {
+        self.unsubmitted.swap(0, Ordering::Acquire)
+    }
+
     /// Makes the threads, each with a recorder of the context: `bands` of
     /// them, for the first layer of the context that pipelines a frame.
     /// Returns how many there are, which is how many bands a frame can
@@ -990,6 +1003,7 @@ impl BandPool {
                 results: results_sender.clone(),
                 context: context.clone(),
                 order: self.order.clone(),
+                unsubmitted: self.unsubmitted.clone(),
             };
             let spawned =
                 thread::Builder::new().name(format!("ferroui-skia-band-{index}")).spawn(move || worker.run());
@@ -1236,9 +1250,30 @@ struct PipelinedLayer {
     balance: RefCell<BandBalance>,
     /// The frame the threads are playing.
     pending: RefCell<Option<PendingFrame>>,
+    /// The paint of a blit that replaces the target's pixels (`BlendMode::Src`), made once.
+    src_paint: Paint,
 }
 
 impl PipelinedLayer {
+    /// Draws the layer onto the canvas, which draws with the recorder of the context: the texture
+    /// itself is drawn, not a copy of it, over the canvas (`SrcOver`) or, with `paint`, as the
+    /// paint blends. The draw is inserted with the recording of that recorder by the next flush,
+    /// and a frame the threads are playing is inserted after that flush.
+    fn blit(&self, canvas: &Canvas, paint: Option<&Paint>) {
+        let Some(mut surface) = self.surface.borrow().clone() else {
+            return;
+        };
+        let image = match graphite::surfaces::as_image(&surface) {
+            Some(image) => image,
+            None => surface.image_snapshot(),
+        };
+        self.context.note_layer_blit();
+        let old_matrix = canvas.local_to_device();
+        canvas.reset_matrix();
+        canvas.draw_image_with_sampling_options(image, Point::new(0.0, 0.0), SamplingOptions::default(), paint);
+        canvas.set_matrix(&old_matrix);
+    }
+
     fn release(&self) {
         self.flush_pending();
         let had_surface = self.surface.borrow_mut().take().is_some();
@@ -1257,6 +1292,9 @@ impl PipelinedLayer {
 
     /// The beginning of a frame. Returns whether it is pipelined.
     fn begin_frame(&self, now: Instant) -> bool {
+        // The bands of the frame before were inserted by the threads after the last flush; they go to the GPU now,
+        // while this frame is recorded, not with this frame's flush.
+        self.context.submit_inserted_bands();
         let previous_cost = match self.last_frame.get() {
             Some(LastFrame::Direct { begun }) => {
                 self.context.last_flush_end().and_then(|end| end.checked_duration_since(begun))
@@ -1516,6 +1554,11 @@ impl PipelinedLayerSurface {
             busy: Cell::new(Duration::ZERO),
             balance: RefCell::new(BandBalance::following(height, bands, most)),
             pending: RefCell::new(None),
+            src_paint: {
+                let mut paint = Paint::default();
+                paint.set_blend_mode(BlendMode::Src);
+                paint
+            },
         })))
     }
 }
@@ -1564,18 +1607,15 @@ impl ISkiaSurface for PipelinedLayerSurface {
     /// is inserted with the recording of that recorder by the next flush,
     /// and a frame the threads are playing is inserted after that flush.
     fn blit(&self, canvas: &Canvas) {
-        let Some(mut surface) = self.0.surface.borrow().clone() else {
-            return;
-        };
-        let image = match graphite::surfaces::as_image(&surface) {
-            Some(image) => image,
-            None => surface.image_snapshot(),
-        };
-        self.0.context.note_layer_blit();
-        let old_matrix = canvas.local_to_device();
-        canvas.reset_matrix();
-        canvas.draw_image_with_sampling_options(image, Point::new(0.0, 0.0), SamplingOptions::default(), None);
-        canvas.set_matrix(&old_matrix);
+        self.0.blit(canvas, None);
+    }
+
+    /// The full-window layer replaces the pixels of the window's canvas: with the `Src` blend mode
+    /// (its cached paint) the GPU does not read the target, which a tile-based GPU otherwise loads,
+    /// and the clear before it is left out.
+    fn blit_replacing(&self, canvas: &Canvas) -> bool {
+        self.0.blit(canvas, Some(&self.0.src_paint));
+        true
     }
 
     fn dispose(&self) {

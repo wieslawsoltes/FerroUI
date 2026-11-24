@@ -879,3 +879,103 @@ fn rgba(pixel: &[u8]) -> [u8; 4] {
         [pixel[0], pixel[1], pixel[2], pixel[3]]
     }
 }
+
+#[test]
+fn the_bands_inserted_after_a_flush_are_submitted_when_the_next_frame_begins() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::new(&device, SkiaFramePipelining::On);
+    layers.draw(draw_scene);
+    assert!(layers.is_pending());
+    // The frame is shown (blitted and flushed): the threads insert its bands after that flush.
+    let mut window = layers.ordinary.create_drawing_context();
+    layers.pipelined.blit(&mut *window);
+    window.dispose();
+    layers.gr_context.flush();
+    layers.pipelined.complete_pending_frame();
+    assert!(layers.gr_context.take_unsubmitted_band_inserts() > 0, "the inserted bands wait for a submit");
+
+    // The next frame submits what was inserted since, at its beginning.
+    layers.draw(draw_scene);
+    let mut window = layers.ordinary.create_drawing_context();
+    layers.pipelined.blit(&mut *window);
+    window.dispose();
+    layers.gr_context.flush();
+    layers.pipelined.complete_pending_frame();
+    layers.gr_context.submit_inserted_bands();
+    assert_eq!(0, layers.gr_context.take_unsubmitted_band_inserts());
+    layers.dispose();
+}
+
+/// A target of `width` by `height` pixels on the context of the layers, filled with an opaque colour.
+fn window(layers: &Layers, width: i32, height: i32) -> SurfaceRenderTarget {
+    let info = SurfaceRenderTargetCreateInfo { width, height, ..create_info(&layers.gpu, &layers.gr_context) };
+    let target = SurfaceRenderTarget::new(info);
+    let mut context = target.create_drawing_context();
+    context.clear(Colors::MAGENTA);
+    context.dispose();
+    target
+}
+
+#[test]
+fn a_layer_that_covers_its_target_replaces_its_pixels_as_a_clear_and_a_blit_do() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::new(&device, SkiaFramePipelining::On);
+    // A frame with transparent parts: what the layer replaces the target's pixels with includes them.
+    layers.draw(|context| {
+        context.clear(Colors::TRANSPARENT);
+        draw_update(context);
+    });
+    layers.pipelined.complete_pending_frame();
+
+    let replaced = window(&layers, WIDTH, HEIGHT);
+    let mut context = replaced.create_drawing_context();
+    assert!(layers.pipelined.blit_replacing(&mut *context), "the layer covers the target");
+    context.dispose();
+
+    let blended = window(&layers, WIDTH, HEIGHT);
+    let mut context = blended.create_drawing_context();
+    context.clear(Colors::TRANSPARENT);
+    layers.pipelined.blit(&mut *context);
+    context.dispose();
+
+    let (replaced_bytes, blended_bytes) = (bytes(&replaced), bytes(&blended));
+    assert!(replaced_bytes == blended_bytes, "the pixels of a clear and a blit");
+    assert!(replaced_bytes.chunks_exact(4).any(|pixel| pixel[3] == 0), "transparent pixels are replaced too");
+    replaced.dispose();
+    blended.dispose();
+    layers.dispose();
+}
+
+#[test]
+fn a_layer_that_does_not_cover_its_target_is_cleared_and_blitted_as_before() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::new(&device, SkiaFramePipelining::On);
+    layers.draw(draw_scene);
+    layers.pipelined.complete_pending_frame();
+
+    // A larger target, and a target with a clip.
+    let larger = window(&layers, WIDTH + 16, HEIGHT);
+    let mut context = larger.create_drawing_context();
+    assert!(!layers.pipelined.blit_replacing(&mut *context));
+    context.dispose();
+    let clipped = window(&layers, WIDTH, HEIGHT);
+    let mut context = clipped.create_drawing_context();
+    context.push_clip(Rect::new(0.0, 0.0, 10.0, 10.0));
+    assert!(!layers.pipelined.blit_replacing(&mut *context));
+    context.pop_clip();
+    context.dispose();
+
+    larger.dispose();
+    clipped.dispose();
+    layers.dispose();
+}
+

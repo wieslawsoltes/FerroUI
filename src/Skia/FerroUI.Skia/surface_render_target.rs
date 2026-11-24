@@ -42,6 +42,16 @@ impl ISkiaSurface for SkiaSurfaceWrapper {
     }
 }
 
+/// Whether a layer of `size` pixels covers all of `canvas`: the canvas is no larger, has no
+/// layer saved on it and no clip (its device clip is all of it). Only then does drawing the layer
+/// with the `Src` blend mode give the pixels of a clear and the layer over it.
+pub(crate) fn covers(canvas: &Canvas, size: (i32, i32)) -> bool {
+    let base = canvas.base_layer_size();
+    canvas.save_count() == 1
+        && (base.width, base.height) == size
+        && canvas.device_clip_bounds() == Some(skia_safe::IRect::from_wh(size.0, size.1))
+}
+
 /// Create info of a [`SurfaceRenderTarget`].
 #[derive(Clone, Default)]
 pub struct SurfaceRenderTargetCreateInfo {
@@ -292,6 +302,31 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     }
 
     fn can_blit(&self) -> bool {
+        true
+    }
+
+    /// The layer replaces the pixels of a canvas it covers: drawn with the `Src` blend mode, as
+    /// [`blit`](IDrawingContextLayerImpl::blit) draws it over a transparent canvas.
+    fn blit_replacing(&self, context: &mut dyn IDrawingContextImpl) -> bool {
+        let Some(context) = context.as_any_mut().downcast_mut::<DrawingContextImpl>() else {
+            return false;
+        };
+        let gr_context = context.gr_context().cloned();
+        let canvas = context.canvas();
+        let size = self.pixel_size();
+        if !covers(canvas, (size.width, size.height)) {
+            return false;
+        }
+        if self.surface.can_blit() {
+            return self.surface.blit_replacing(canvas);
+        }
+        let image = drawable_image(gr_context.as_deref(), self.snapshot_image(), false);
+        let mut paint = Paint::default();
+        paint.set_blend_mode(skia_safe::BlendMode::Src);
+        let old_matrix = canvas.local_to_device();
+        canvas.reset_matrix();
+        canvas.draw_image_with_sampling_options(image, (0.0, 0.0), SamplingOptions::default(), Some(&paint));
+        canvas.set_matrix(&old_matrix);
         true
     }
 
