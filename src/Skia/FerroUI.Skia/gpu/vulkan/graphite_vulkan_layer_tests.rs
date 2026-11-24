@@ -541,3 +541,81 @@ fn diagnostic_where_the_frames_of_lavapipe_differ() {
         context.dispose();
     }
 }
+
+/// The colour the layers of the diagnosis of what a band writes are filled with before a band is drawn.
+const SENTINEL: u32 = 0xff00ff00;
+
+/// Diagnosis (printed, nothing asserted): what one band of the ordinary path writes outside its rows. Each band is
+/// drawn alone, under its integer clip that is not antialiased, on a layer filled with [`SENTINEL`]; every pixel
+/// outside the band's rows that is not the sentinel any more was written by the band. Per shape of the scene, to
+/// find the draw that writes across its clip.
+#[test]
+fn diagnostic_what_a_band_writes_outside_its_rows() {
+    let Some((context, gpu)) = graphite_gpu() else { return };
+    let layers = Layers::new(&gpu, 2, WIDTH, HEIGHT);
+    let clips = layers.surface.band_clips();
+    let whole = vec![(0, skia_safe::IRect::from_wh(WIDTH, HEIGHT))];
+    let fill = |context: &mut dyn IDrawingContextImpl| context.clear(ferroui_base::media::Color::from_uint32(SENTINEL));
+    let rounded = |context: &mut dyn IDrawingContextImpl| {
+        context.draw_rectangle(
+            Some(&solid(0xff2060c0)),
+            None,
+            RoundedRect::from_radius(Rect::new(140.5, 118.25, 52.0, 19.5), 7.0),
+            &BoxShadows::default(),
+        );
+    };
+    let ellipse = |context: &mut dyn IDrawingContextImpl| {
+        context.draw_ellipse(
+            Some(&solid(0xc0e04020)),
+            Some(&ImmutablePen::from_uint32(0xff000000, 1.5)),
+            Rect::new(110.0, 106.75, 70.0, 43.5),
+        );
+    };
+    let line = |context: &mut dyn IDrawingContextImpl| {
+        let pen = ImmutablePen::from_uint32(0xff008040, 2.0);
+        context.draw_line(Some(&pen), Point::new(4.0, 6.0), Point::new(316.0, 250.0));
+    };
+    let text = |context: &mut dyn IDrawingContextImpl| {
+        if let Some(run) = glyph_run("Hxgjpqy", 22.0, Point::new(110.0, 135.0)) {
+            context.draw_glyph_run(Some(&solid(0xff101010)), &run);
+        }
+    };
+    let scene = |context: &mut dyn IDrawingContextImpl| draw_scene(context);
+    let shapes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 5] = [
+        ("the scene", &scene),
+        ("a rounded rectangle", &rounded),
+        ("an ellipse", &ellipse),
+        ("a line", &line),
+        ("text", &text),
+    ];
+    let sentinel = SENTINEL.to_be_bytes();
+    // Premultiplied BGRA or RGBA in memory: green and alpha are where they are in both.
+    for (name, shape) in shapes {
+        for (index, clip) in clips.iter().copied() {
+            let layer = layers.another_ordinary();
+            layers.draw_ordinary(&layer, &whole, &fill);
+            let reference = bytes(&layer, layers.size);
+            layers.draw_ordinary(&layer, &[(index, clip)], &|context: &mut dyn IDrawingContextImpl| shape(context));
+            let drawn = bytes(&layer, layers.size);
+            let mut outside = Vec::new();
+            for (pixel, (before, after)) in reference.chunks_exact(4).zip(drawn.chunks_exact(4)).enumerate() {
+                let (x, y) = ((pixel % WIDTH as usize) as i32, (pixel / WIDTH as usize) as i32);
+                if (y < clip.top || y >= clip.bottom) && before != after {
+                    outside.push((x, y, before.to_vec(), after.to_vec()));
+                }
+            }
+            eprintln!(
+                "diagnostic {name}, band {index} (rows {} to {}): {} pixels outside its rows written; the first {:?} \\
+                 (the fill is {:?} as ARGB)",
+                clip.top,
+                clip.bottom,
+                outside.len(),
+                &outside[..outside.len().min(12)],
+                sentinel
+            );
+            layer.dispose();
+        }
+    }
+    layers.dispose();
+    context.dispose();
+}
