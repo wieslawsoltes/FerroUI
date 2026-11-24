@@ -4,6 +4,7 @@ import type { AndroidApp, AndroidMode } from './androidTargets';
 import { verifyRuntime } from './runtimeReady';
 
 export interface AndroidProcess {
+    pid: number;
     receipt: AndroidReceipt;
     forward: AndroidForward;
     close(terminate: boolean): Promise<void>;
@@ -51,7 +52,7 @@ export async function openAndroidProcess(app: AndroidApp, bridge: AndroidBridge,
         await verifyRuntime(forward.endpoint, signal);
         if (!await bridge.matches(packageId, receipt, signal)) throw new Error('The Android app changed during connection.');
         signal.throwIfAborted();
-        return { receipt, forward, close };
+        return { pid: receipt.pid, receipt, forward, close };
     } catch (error) {
         await close(true).catch(problem => console.warn(problem));
         throw error;

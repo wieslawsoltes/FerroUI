@@ -1,13 +1,11 @@
-import { spawn } from 'node:child_process';
 import { constants } from 'node:fs';
 import { copyFile, mkdir, mkdtemp, realpath, rename, rm, stat } from 'node:fs/promises';
 import * as path from 'node:path';
-import { createInterface } from 'node:readline';
 import type { AndroidBridge } from './androidBridge';
 import type { AndroidApp } from './androidTargets';
 import { inCargoBuildSlot } from './cargoBuildGate';
 import { androidCargoTarget, type CargoTarget } from './cargoTarget';
-import { OwnedProcess } from './ownedProcess';
+import { runMobilePackager } from './mobilePackager';
 import type { ProcessOutput } from './reloadLog';
 import { fileKey, workspaceFolders } from './workspacePaths';
 
@@ -16,7 +14,6 @@ export interface AndroidArtifact {
     symbolFiles: string[];
     dispose(): Promise<void>;
 }
-
 const targets = { 'arm64-v8a': 'aarch64-linux-android', 'x86_64': 'x86_64-linux-android' };
 type AndroidAbi = keyof typeof targets;
 
@@ -61,7 +58,7 @@ export async function buildAndroidApp(app: AndroidApp, bridge: AndroidBridge, ou
                 '--permission', 'android.permission.INTERNET');
             if (build.features.length) args.push('--features', build.features.join(','));
             if (build.debugger) args.push('--debugger');
-            await packageApp(args, workspace, {
+            await runMobilePackager('Android', args, workspace, {
                 ...process.env, FERROUI_ANDROID_WORKSPACE: workspace, CARGO_TARGET_DIR: cargo.targetDirectory,
                 FERROUI_ANDROID_DEBUG_KEYSTORE: keystore,
             }, output, signal);
@@ -80,22 +77,4 @@ export async function buildAndroidApp(app: AndroidApp, bridge: AndroidBridge, ou
             return { apkPath, symbolFiles, dispose };
         } catch (error) { await dispose(); throw error; }
     });
-}
-
-async function packageApp(args: string[], workspace: string, env: NodeJS.ProcessEnv, output: ProcessOutput, signal: AbortSignal): Promise<void> {
-    signal.throwIfAborted();
-    const child = spawn('bash', args, {
-        cwd: workspace, detached: true, windowsHide: true, stdio: ['ignore', 'pipe', 'pipe'], env,
-    });
-    const compiler = new OwnedProcess(child);
-    const stop = () => { void compiler.stop(); };
-    signal.addEventListener('abort', stop, { once: true });
-    for (const stream of [child.stdout, child.stderr]) {
-        createInterface({ input: stream }).on('line', line => output.appendLine(line));
-    }
-    let exit: number | null;
-    try { exit = await compiler.closed; }
-    finally { signal.removeEventListener('abort', stop); }
-    signal.throwIfAborted();
-    if (exit !== 0) throw new Error(`The Android build failed${exit === null ? '' : ` with exit code ${exit}`}. See Show App Output.`);
 }
