@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (111 done, 1 planned) | 112 |
-| `already` | 19 |
+| `port` (116 done, 0 planned) | 116 |
+| `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
-| `not-applicable` | 28 |
-| `deferred` | 18 |
+| `not-applicable` | 30 |
+| `deferred` | 10 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -81,8 +81,8 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
 | samples | 1 |  |  |  | 1 | 1 | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
-| text | 9 | 2 |  | 4 | 1 | 2 | 18 |
-| themes | 5 | 2 |  |  |  | 8 | 15 |
+| text | 10 | 2 |  | 4 | 1 | 1 | 18 |
+| themes | 8 | 4 |  |  | 2 | 1 | 15 |
 | threading |  | 1 |  |  |  |  | 1 |
 <!-- /generated:areas -->
 
@@ -105,7 +105,7 @@ Changes of behaviour that the baseline does not record:
 | A masked `TextBox` reports its mask to accessibility, not its text | `51f5c8f123` | FerroUI reports no value at all for a password field, also while revealed. Its remaining paths are fixed in PR 1317 |
 | Space key up clicks a button only if the button was pressed | `c4dfde67c3` | Follows upstream |
 | TwoWay bindings do not write a just-published value back | `500e78afef` | Follows upstream |
-| Fluent control resources merged into the theme dictionary | `719787dc69` | Deferred. Lookup order of a custom theme could change |
+| Fluent control resources merged into the theme dictionary | `719787dc69` | Deferred. Lookup order of a custom theme could change; merging the control dictionaries into one works against theme trimming, while the compiler half (nested `MergeResourceInclude` flattened in any order, circular merges reported) is a candidate for a markup part |
 
 ## New upstream features and their state
 
@@ -113,15 +113,15 @@ Features merged in this range:
 
 | Feature | Upstream PR | State |
 |---|---|---|
-| Fluent 2 theme with its ColorPicker themes | #21771, #22569, #22611 | `deferred`: owner decision below; the ColorPicker fixes are ported to Fluent and Simple (#22578) |
-| Variable fonts: axes, instances, gvar, HVAR, MVAR, VVAR, `FontVariations` | #22179 to #22185 | axes, instances and instance clones `port` (PR 1376, 0.6.0); gvar, HVAR, MVAR, VVAR `skip-better`; `FontVariations` `deferred` |
+| Fluent 2 theme with its ColorPicker themes | #21771, #22569, #22611 | No new theme (owner decision below). Audited: the fixes that apply to the existing themes are ported (`ButtonSpinner` directions, `EmbeddableControlRoot` transparency fallback in Fluent and WinUI, `ColorSpectrum` tooltip, #22578); the rest is `already` or `not-applicable` |
+| Variable fonts: axes, instances, gvar, HVAR, MVAR, VVAR, `FontVariations` | #22179 to #22185 | axes, instances and instance clones `port` (PR 1376, 0.6.0); gvar, HVAR, MVAR, VVAR `skip-better`; `FontVariations` `port` (PR 1397): Skia and Vello, design defaults on Quartz and Direct2D |
 | Backdrop effects | #21826 | `deferred`: needs a GPU path in Skia and Vello |
 | Key text, consumed modifiers, native key data | #22628 | `deferred` |
 | Opt-in EGL partial presentation | #22501 | `deferred` |
 | `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `deferred` |
 | Android desktop drag and drop | #22451 | `deferred` |
 | Platform-simulated typefaces | #22773 | `deferred`: follows the web fonts stack |
-| Compositor output rotation | #22499 | `port` (planned, not written yet) |
+| Compositor output rotation | #22499 | `port` (PR 1398) |
 | Android cursors and TalkBack roles | #22438, #22681 | `port` |
 | Paragraph and first-line indents | #22870 | `port` |
 | TableView column limits and row automation name | #22707, #22709 | `port` |
@@ -143,17 +143,9 @@ are part of the base that the previous sync tracked, so they are not inventoried
 |---|---:|---|---|---|---|
 | `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check. |
 | `78316701f3` | #22451 | 2026-10-22 | platform-android |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
-| `bd835340fb` | #21771 | 2026-10-22 | themes |  | Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class. |
 | `74b4e97962` | #22400 | 2026-10-23 | samples |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
 | `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
-| `5d6b56563b` | #22630 | 2026-10-28 | themes |  | Fluent 2 resource providers; follows the Fluent 2 decision. |
-| `725b5975e4` | #22611 | 2026-10-28 | themes |  | Fluent 2 brushes; follows the Fluent 2 decision. |
-| `1c82a11d87` | #22636 | 2026-10-28 | themes |  | Fluent 2 resources; follows the Fluent 2 decision. |
-| `23dce09edc` | #22569 | 2026-10-29 | themes |  | Fluent 2 ColorPicker themes; follows the Fluent 2 decision. |
 | `719787dc69` | #22637 | 2026-10-29 | themes |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
-| `dfee7f224b` | #22185 | 2026-10-30 | text |  | `FontVariations` property: register like `FontFeatures` in `documents/text_element.rs` (same owners, inheritance, no new storage), reach shaping by making the run glyph typeface `with_variation` (HarfBuzz, Skia, Vello follow the platform typeface), XAML through `FontVariationSettings::from_str`, a per-axis animator. Builds on PR 1376. |
-| `37279ab420` | #22650 | 2026-10-30 | themes |  | Fluent 2 embedded root; follows the Fluent 2 decision. |
-| `9186fcf61f` | #22756 | 2026-11-09 | themes |  | Fluent 2 calendar; follows the Fluent 2 decision. |
 | `8dae868308` | #22628 | 2026-11-10 | input |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
 | `5ef345810e` | #22782 | 2026-11-12 | platform-win32 |  | Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
@@ -193,7 +185,7 @@ left out only with a recorded performance or better-code reason.
 | `b13194be25` | #22453 | 2026-10-19 | platform-x11 | `port` (done) | x11b | The X11 run loop implements explicit background processing, with the restructured wait of upstream. |
 | `f547369621` | #22496 | 2026-10-19 | threading | `already` |  | `Dispatcher::replace_implementation` already moves the due times of the queue and of every timer by the difference of the two clocks. |
 | `ee85f0604a` | #22504 | 2026-10-19 | rendering | `port` (done) | rendering | Skia geometry: path bounds computed before sharing; stroke cache kept valid on failure. |
-| `9b3e9c881b` | #22499 | 2026-10-19 | rendering | `port` | rendering | Compositor output rotation through `RenderTargetProperties`. |
+| `9b3e9c881b` | #22499 | 2026-10-19 | rendering | `port` (done) | rotation | Compositor output rotation: `RenderTargetProperties::required_rotation_for_orientation`; a rotated target draws the layer and the overlays with the quarter-turn transform and redraws on a change; the DRM output reports its orientation and drops its own rotation framebuffer and shaders; Skia and Vello GL targets forward it. |
 | `be0c42891f` | #22522 | 2026-10-19 | build | `not-applicable` |  | Upstream repository workflow. |
 | `b515c3ae17` | #22523 | 2026-10-20 | controls | `port` (done) | controls2 | Per-area log verbosity for `log_to_trace` and `log_to_delegate`. |
 | `ba4fedb31e` | #22529 | 2026-10-20 | platform-ios | `port` (done) | platforms2 | Keyboard stays up when focus moves between text boxes. |
@@ -226,7 +218,7 @@ left out only with a recorded performance or better-code reason.
 | `e7cd2df08e` | #22489 | 2026-10-22 | controls | `port` (done) | controls2 | Keyboard works inside the date, time and calendar picker popups. |
 | `d8f2fc7b9f` | #22554 | 2026-10-22 | text | `port` (done) | text | Bounded lookahead (4096) on the enumerator and on the break table of a run, so a long unbroken run does not rescan the rest of the text per line. |
 | `e4452b5bdb` | #22429 | 2026-10-22 | input | `port` (done) | input | Double tap needs the same button for both clicks. |
-| `bd835340fb` | #21771 | 2026-10-22 | themes | `deferred` |  | Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class. |
+| `bd835340fb` | #21771 | 2026-10-22 | themes | `port` (done) | themes4 | Fluent 2 theme: no new theme crate (owner). Ported to the existing code: the `ButtonSpinner` spin buttons spin in the direction of their part. Not taken: the template, resources and samples of the new theme; the `Grid.Column` removal in the Fluent `ButtonSpinner` template (no effect inside a `DockPanel`). |
 | `136efefc7d` | #22378 | 2026-10-22 | automation | `port` (done) | automation | ContentControl name no longer falls back to a type name. |
 | `7fda9c36a5` | #22562 | 2026-10-23 | automation | `port` (done) | platforms2 | UI Automation `Invoke` checks the provider and the enabled state, then posts the click, so a modal dialog no longer blocks the client. |
 | `74b4e97962` | #22400 | 2026-10-23 | samples | `deferred` |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
@@ -256,14 +248,14 @@ left out only with a recorded performance or better-code reason.
 | `da1dafcdfb` | #22629 | 2026-10-28 | tests | `not-applicable` |  | Removal of the upstream Appium suite. |
 | `0e0dad08ca` | #22631 | 2026-10-28 | themes | `already` |  | `SystemAccentColors::try_get_resource` matches typed resource keys; no culture comparison. |
 | `b0ad044a65` | #22626 | 2026-10-28 | text | `not-applicable` |  | Pooled-buffer disposal. `ShapedBuffer` halves are `Rc` handles released by ownership. |
-| `5d6b56563b` | #22630 | 2026-10-28 | themes | `deferred` |  | Fluent 2 resource providers; follows the Fluent 2 decision. |
+| `5d6b56563b` | #22630 | 2026-10-28 | themes | `already` |  | Ordinal key comparison in the Fluent 2 resource providers: FerroUI compares resource keys as Rust strings, which is ordinal. |
 | `5865a87387` | #22632 | 2026-10-28 | build | `not-applicable` |  | Upstream test projects removed. |
 | `1efe0dfabb` | #22633 | 2026-10-28 | build | `not-applicable` |  | Upstream Xcode target. FerroUI sets its own minimum in `src/FerroUI.Native/build.rs`; raising it is an owner decision. |
-| `725b5975e4` | #22611 | 2026-10-28 | themes | `deferred` |  | Fluent 2 brushes; follows the Fluent 2 decision. |
+| `725b5975e4` | #22611 | 2026-10-28 | themes | `not-applicable` |  | Brush resources of the Fluent 2 theme, which FerroUI does not add (owner decision); the Fluent and WinUI themes keep their own brushes. |
 | `d1cc67f3ae` | #22634 | 2026-10-28 | build | `not-applicable` |  | Upstream solution filter. |
-| `1c82a11d87` | #22636 | 2026-10-28 | themes | `deferred` |  | Fluent 2 resources; follows the Fluent 2 decision. |
+| `1c82a11d87` | #22636 | 2026-10-28 | themes | `not-applicable` |  | Light-theme caption button and notification brushes of the Fluent 2 theme only; the Fluent and WinUI themes have their own resources for them. |
 | `c85e221c60` | #22565 | 2026-10-28 | automation | `port` (done) | automation | TreeViewItem expand and collapse provider. |
-| `23dce09edc` | #22569 | 2026-10-29 | themes | `deferred` |  | Fluent 2 ColorPicker themes; follows the Fluent 2 decision. |
+| `23dce09edc` | #22569 | 2026-10-29 | themes | `port` (done) | themes4 | Fluent 2 ColorPicker themes: not added (owner). Ported: the `ColorSpectrum` templates of Fluent and Simple keep the code-behind tooltip as a comment, and the `Rgb`/`Hsv` doc typo; the other fixes came with `1968b08e18`. |
 | `c9c7b90053` | #22641 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: popups report the window role. |
 | `5aa47e4f7f` | #22642 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: active state only for the active window. |
 | `1968b08e18` | #22578 | 2026-10-29 | themes | `port` (done) | themes3 | ColorPicker Fluent 2 fixes in the Fluent and Simple colour picker themes (theme dictionaries for the base resources). |
@@ -276,8 +268,8 @@ left out only with a recorded performance or better-code reason.
 | `9ce8ffda39` | #22182 | 2026-10-30 | text | `skip-better` |  | Managed HVAR advances: HarfBuzz, Skia and Vello apply them natively. |
 | `ee4f35bfdd` | #22183 | 2026-10-30 | text | `skip-better` |  | Managed MVAR metrics: the backends read varied metrics natively. |
 | `408f2494f0` | #22184 | 2026-10-30 | text | `skip-better` |  | Managed VVAR advances: HarfBuzz applies them natively. |
-| `dfee7f224b` | #22185 | 2026-10-30 | text | `deferred` |  | `FontVariations` property: register like `FontFeatures` in `documents/text_element.rs` (same owners, inheritance, no new storage), reach shaping by making the run glyph typeface `with_variation` (HarfBuzz, Skia, Vello follow the platform typeface), XAML through `FontVariationSettings::from_str`, a per-axis animator. Builds on PR 1376. |
-| `37279ab420` | #22650 | 2026-10-30 | themes | `deferred` |  | Fluent 2 embedded root; follows the Fluent 2 decision. |
+| `dfee7f224b` | #22185 | 2026-10-30 | text | `port` (done) | font-variations | `FontVariations`: inherited attached property like `FontFeatures` (same owners), folded into the `Typeface` (one pointer), resolved by the font manager to a bounded per-typeface instance cache, carried through fallback and `FormattedText`; markup value type; animator selected by type and `FontVariationSettingsTransition` with CSS interpolation. Quartz and Direct2D make no instances: design defaults there. |
+| `37279ab420` | #22650 | 2026-10-30 | themes | `port` (done) | themes4 | `EmbeddableControlRoot` sets `TransparencyBackgroundFallback` in the Fluent and WinUI themes (to the value of their `Window` theme), as the Fluent 2 fix does. |
 | `432480ae82` | #22574 | 2026-10-30 | controls | `port` (done) | controls2 | `TabStripItem.Icon` and `IconTemplate`; icon presenter in the Fluent tab templates (two more elements per tab: start-up check owed). |
 | `5b36bbe0ad` | #22683 | 2026-11-03 | platform-ios | `port` (done) | platforms2 | Accessibility traversal skips interop peers. |
 | `99b0962977` | #22686 | 2026-11-03 | rendering | `already` |  | `immutable_bitmap.rs` returns an error from `Codec::from_data` on null. |
@@ -297,7 +289,7 @@ left out only with a recorded performance or better-code reason.
 | `dc061bc3ef` | #22698 | 2026-11-09 | rendering | `already` |  | `sk_round_rect_cache.rs` passes the radii without a heap array. |
 | `1b53d56525` | #22688 | 2026-11-09 | platform-android | `already` |  | `StorageHelper.java` runs every query in try-with-resources, so the cursors are closed. |
 | `5bbaa8e331` | #22743 | 2026-11-09 | rendering | `already` |  | `LockGuard` in `vulkan_khr_surface_render_target.rs` releases the lock on every exit. |
-| `9186fcf61f` | #22756 | 2026-11-09 | themes | `deferred` |  | Fluent 2 calendar; follows the Fluent 2 decision. |
+| `9186fcf61f` | #22756 | 2026-11-09 | themes | `already` |  | Week numbers in the wrong column of the Fluent 2 calendar: the Fluent and WinUI `CalendarItem` templates of FerroUI already put the week numbers in a column of their own. |
 | `66f1f2a9dd` | #22763 | 2026-11-09 | rendering | `port` (done) | rendering | `ImmutableRadialGradientBrush` copied `radius_x` into `radius_y`. |
 | `c93b0d6c52` | #22764 | 2026-11-09 | rendering | `port` (done) | rendering | Visual cache layer: the vertical scale was the horizontal one. |
 | `45ddd45380` | #22659 | 2026-11-09 | rendering | `not-applicable` |  | Finalizer race of the .NET Skia binding. Rust ownership keeps the stream alive. |
