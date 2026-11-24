@@ -61,6 +61,12 @@ impl MarkupAssembly {
     /// `DefaultCompileBindings`. The previewer of the designer reads it.
     pub const USE_COMPILED_BINDINGS_BY_DEFAULT: &'static str = "FerroUseCompiledBindingsByDefault";
 
+    /// The metadata key of a markup alias of a property, one entry per alias:
+    /// `"FerroUI.Visual.OpacityTransition=FerroUI.Controls.ImplicitTransitions.Opacity"`. Markup
+    /// that names the property on that class or a derived class sets the attached property on
+    /// the right. Only the markup compiler reads it (docs/porting/xaml.md, "Property aliases").
+    pub const PROPERTY_ALIAS: &'static str = "FerroXamlPropertyAlias";
+
     /// The value of the metadata entry `key`.
     pub fn metadata_value(&self, key: &str) -> Option<&'static str> {
         self.metadata.iter().find(|(k, _)| *k == key).map(|(_, value)| *value)

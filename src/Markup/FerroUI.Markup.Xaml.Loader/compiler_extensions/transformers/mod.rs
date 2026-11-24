@@ -16,6 +16,8 @@ pub use transform_errors::{FerroTransformErrorKind, FerroTransformErrors};
 mod ferro_x_aml_il_classes_transformer;
 mod ferro_xaml_il_add_source_info_transformer;
 mod ferro_xaml_il_classes_property_resolver;
+mod ferro_xaml_il_property_alias_transformer;
+pub use ferro_xaml_il_property_alias_transformer::FerroXamlIlPropertyAliasTransformer;
 mod ferro_xaml_il_constructor_service_provider_transformer;
 mod ferro_xaml_il_design_properties_transformer;
 mod ferro_xaml_il_ensure_resource_dictionary_capacity_transformer;

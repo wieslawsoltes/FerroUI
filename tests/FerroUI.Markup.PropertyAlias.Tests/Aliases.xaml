@@ -1,0 +1,19 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <StackPanel.Styles>
+    <Style Selector="Border.named">
+      <Setter Property="FadeAmount" Value="0.25" />
+    </Style>
+    <Style Selector="Border.owned">
+      <Setter Property="Border.FadeAmount" Value="0.375" />
+    </Style>
+  </StackPanel.Styles>
+  <Border x:Name="Attribute" FadeAmount="0.5" />
+  <Border x:Name="Element">
+    <Border.FadeAmount>0.75</Border.FadeAmount>
+  </Border>
+  <TextBlock x:Name="OtherClass" FadeAmount="0.125" />
+  <Border x:Name="Real" Width="42" />
+  <Border x:Name="StyledByName" Classes="named" />
+  <Border x:Name="StyledByOwner" Classes="owned" />
+</StackPanel>

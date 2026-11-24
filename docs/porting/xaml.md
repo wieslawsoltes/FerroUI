@@ -190,6 +190,30 @@ Limits (documented, each produces a targeted diagnostic):
 - **Compat data file** `src/Markup/FerroUI.Markup.Xaml.Loader/compat/xmlns-compat.toml` (embedded with `include_str!`, data, not code): URI aliases (upstream default URI to FerroUI URI), namespace prefix rewrite (`Avalonia` to `FerroUI`), assembly aliases (also used for `avares://Avalonia.Themes.Fluent/...`), and the BCL table below. Applied in exactly two places: xmlns resolution and URI resolution.
 - BCL types (`clr-namespace:System;assembly=mscorlib|netstandard|System.Runtime`, `x:String`, `x:Double`, `x:Int32`, `x:Boolean`, `x:Object`, `sys:TimeSpan`, `sys:Uri`, ...) map through a closed table to Rust types (`String`, `f64`, `i32`, `bool`, boxed value, `TimeSpan`, `Uri`). Anything outside the table is an error naming the type.
 
+#### Property aliases
+
+A crate can give a property of another crate's class its WinUI name without adding anything to that class. Motion uses this: `<Rectangle.OpacityTransition>` is an attached property of `ferroui-controls-motion`, so an application that does not use motion pays nothing for it on `Visual`.
+
+The crate states each alias in the `metadata` of its `MarkupAssembly`:
+
+```rust
+metadata: &[(
+    MarkupAssembly::PROPERTY_ALIAS,
+    "FerroUI.Visual.OpacityTransition=FerroUI.Controls.ImplicitTransitions.Opacity",
+)],
+```
+
+The left side is the class and the name markup uses. The right side is the owner and the name of the attached property, which has the usual `Get`/`Set` accessors and `Property` field. The compiled and the run-time loaders resolve an alias in the same transformer, `FerroXamlIlPropertyAliasTransformer`, which runs before `PropertyReferenceResolver`. It applies to attributes, property elements and the `Property` of a `Setter`, written `Name` or `Owner.Name`.
+
+The rules:
+
+- A real property, event or attached property of the name always wins.
+- The class of the alias and every class derived from it have the alias. The nearest class decides.
+- Two declarations of one alias are a compile error where the name is used, naming both crates.
+- Without the declaring crate as a dependency there is no alias, and the name fails as any unknown property does.
+
+An alias costs an application nothing at run time unless it loads markup at run time: the entry is data of the declaring crate, and the transformer is part of the markup compiler.
+
 ### 3.2 Directives and intrinsics
 
 | Feature | Build path | Runtime path |

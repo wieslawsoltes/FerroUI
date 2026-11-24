@@ -2177,6 +2177,27 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-markup-property-alias-library"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
+]
+
+[[package]]
+name = "ferroui-markup-property-alias-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-markup-property-alias-library",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-markup-xaml"
 version = "0.6.0-preview.1"
 dependencies = [
