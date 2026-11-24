@@ -13,6 +13,9 @@ const COMPOSITION_FIELDS_MASK: F = F::OPACITY
     .union(F::SIZE_ANIMATED)
     .union(F::RENDER_OPTIONS)
     .union(F::EFFECT)
+    .union(F::BACKDROP_EFFECT)
+    .union(F::BACKDROP_EFFECT_BOUNDS_SOURCE)
+    .union(F::BACKDROP_EFFECT_CACHE)
     .union(F::COMPOSITION_CLIP)
     .union(WINUI_SIZE_FIELDS_MASK);
 
@@ -36,6 +39,8 @@ const OWN_BOUNDS_UPDATE_FIELDS_MASK: F = F::CLIP
     .union(F::SIZE)
     .union(F::SIZE_ANIMATED)
     .union(F::EFFECT)
+    .union(F::BACKDROP_EFFECT)
+    .union(F::BACKDROP_EFFECT_BOUNDS_SOURCE)
     .union(F::COMPOSITION_CLIP)
     .union(WINUI_SIZE_FIELDS_MASK);
 
@@ -137,6 +142,12 @@ impl ServerCompositionVisual {
 
         if clip_to_bounds || size {
             self.trigger_clip_size_dirty();
+        }
+
+        // The layout rect is part of the own content bounds of a layout-bounds backdrop visual.
+        if size && self.has_layout_bounds_backdrop() {
+            self.own_bounds_dirty.set(true);
+            self.enqueue_own_properties_recompute();
         }
 
         if size {

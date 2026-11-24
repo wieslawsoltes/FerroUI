@@ -1,6 +1,6 @@
 use super::walker::{walk, IServerTreeVisitor, TreeWalkContext};
 use super::ServerCompositionVisual;
-use crate::media::{RenderOptions, TextOptions};
+use crate::media::{EffectExtensions, RenderOptions, TextOptions};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
 use crate::rendering::composition::effects::{pop_custom_effect_graph_with, push_custom_effect_graph_with};
 use crate::rendering::composition::server::{
@@ -230,6 +230,49 @@ impl RenderContext<'_> {
             LtrbRect::new(origin_left, origin_top, origin_right, origin_bottom),
         ))
     }
+
+    /// Draws the backdrop effect of `visual` in its backdrop bounds, which are in the visual's
+    /// own space (the current space of the canvas, so the clip follows its transform): the
+    /// tree behind the visual, drawn again by the backdrop replay
+    /// ([`render_scope::draw_backdrop`]) into the effect layer of the backend, as the WinUI
+    /// backdrop brush draws it. The replay reads the backdrop beyond the bounds by the
+    /// sampling radius of the effect, so a blur does not fade at the edges of the bounds, and
+    /// the result is cut to the bounds. Nothing is read back from the target: a backend with
+    /// effects draws it on its GPU (Skia, Vello), and a context without effects draws none.
+    /// The dirty area of a later frame grows over the whole backdrop that it touches
+    /// (`expand_dirty_rects_over_backdrops`).
+    fn draw_backdrop_effect(&mut self, visual: &Rc<ServerCompositionVisual>) {
+        let Some(effect) = visual.backdrop_effect() else { return };
+        let Some(bounds) = visual.backdrop_effect_bounds() else { return };
+        let bounds = bounds.to_rect();
+        let input = bounds.inflate(EffectExtensions::get_backdrop_sampling_radius(Some(&*effect)));
+        // A custom effect that is an effect graph (#455) is drawn as its graph, as the
+        // visual's own effect is.
+        let custom = effect.as_custom_effect();
+        self.canvas.push_clip(bounds);
+        let graph = custom.is_some_and(|custom| {
+            push_custom_effect_graph_with(self.canvas, custom, input, visual.compositor())
+        });
+        if !graph {
+            let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() else {
+                self.canvas.pop_clip();
+                return;
+            };
+            effects.push_effect(Some(input), &*effect);
+        }
+        let canvas = &mut *self.canvas;
+        render_scope::with_painting_visual(visual, || {
+            render_scope::draw_backdrop(canvas, input);
+        });
+        if graph {
+            if let Some(custom) = custom {
+                pop_custom_effect_graph_with(self.canvas, custom, input, visual.compositor());
+            }
+        } else if let Some(effects) = self.canvas.as_drawing_context_impl_with_effects() {
+            effects.pop_effect();
+        }
+        self.canvas.pop_clip();
+    }
 }
 
 impl IServerTreeVisitor for RenderContext<'_> {
@@ -291,6 +334,13 @@ impl IServerTreeVisitor for RenderContext<'_> {
             // Push adorner clip
             if visual.adorned_visual().is_some() {
                 self.adorner_helper_render_pre_graph_push_adorner_clip(visual);
+            }
+
+            // Before the visual's own content and children. Not reached for the root of a
+            // bitmap cache render: its backdrop effect belongs to the outer layer, and the
+            // outer render walk drew it.
+            if visual.backdrop_effect().is_some() {
+                self.draw_backdrop_effect(visual);
             }
 
             // If caching is enabled, draw from cache and skip rendering

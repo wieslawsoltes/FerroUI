@@ -257,6 +257,8 @@ ferro_markup_enum!(
 ferro_markup_enum!(AcrylicBackgroundSource { None, Digger }, { namespace: "FerroUI.Media" });
 ferro_markup_enum!(AlignmentX { Left, Center, Right }, { namespace: "FerroUI.Media" });
 ferro_markup_enum!(AlignmentY { Top, Center, Bottom }, { namespace: "FerroUI.Media" });
+ferro_markup_enum!(BackdropEffectBoundsSource { Layout, Subtree }, { namespace: "FerroUI.Media" });
+ferro_markup_enum!(BackdropEffectCache { Default, Retained, Volatile }, { namespace: "FerroUI.Media" });
 ferro_markup_enum!(
     BackgroundSizing {
         InnerBorderEdge, OuterBorderEdge, CenterBorder,
@@ -450,6 +452,8 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <AcrylicBackgroundSource as MarkupTyped>::MARKUP,
     <AlignmentX as MarkupTyped>::MARKUP,
     <AlignmentY as MarkupTyped>::MARKUP,
+    <BackdropEffectBoundsSource as MarkupTyped>::MARKUP,
+    <BackdropEffectCache as MarkupTyped>::MARKUP,
     <BackgroundSizing as MarkupTyped>::MARKUP,
     <BaselineAlignment as MarkupTyped>::MARKUP,
     <BaselinePixelAlignment as MarkupTyped>::MARKUP,
@@ -541,6 +545,8 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<AcrylicBackgroundSource>();
     ValueTypes::register_used::<AlignmentX>();
     ValueTypes::register_used::<AlignmentY>();
+    ValueTypes::register_used::<BackdropEffectBoundsSource>();
+    ValueTypes::register_used::<BackdropEffectCache>();
     ValueTypes::register_used::<BackgroundSizing>();
     ValueTypes::register_used::<BaselineAlignment>();
     ValueTypes::register_used::<BaselinePixelAlignment>();
@@ -849,6 +855,18 @@ impl crate::data::core::ValueTypeRegistration for ChildIndexChangedAction {
 impl crate::data::core::ValueTypeRegistration for AcrylicBackgroundSource {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<AcrylicBackgroundSource>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BackdropEffectBoundsSource {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BackdropEffectBoundsSource>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for BackdropEffectCache {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<BackdropEffectCache>();
     }
 }
 

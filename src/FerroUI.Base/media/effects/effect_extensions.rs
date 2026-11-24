@@ -48,6 +48,13 @@ impl EffectExtensions {
         panic!("Unknown effect type");
     }
 
+    /// The sampling radius of a backdrop effect in the visual's local space:
+    /// the largest side of the effect's output padding.
+    pub fn get_backdrop_sampling_radius(effect: Option<&dyn IEffect>) -> f64 {
+        let padding = Self::get_effect_output_padding(effect);
+        padding.left.max(padding.top).max(padding.right.max(padding.bottom))
+    }
+
     /// The snapshot of a custom effect (#455, not from upstream): the effect
     /// itself when it is an [`ImmutableCustomEffect`], the snapshot of its
     /// values when it is a custom effect class

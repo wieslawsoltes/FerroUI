@@ -10,8 +10,9 @@ use crate::rendering::composition::server::{ServerCompositor, ServerObjectId};
 use crate::rendering::composition::server::IServerObject;
 use crate::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use crate::media::{
-    AlignmentX, AlignmentY, BaselinePixelAlignment, BoxShadow, Color, EdgeMode, GradientSpreadMethod, PenLineCap,
-    PenLineJoin, RenderOptions, Stretch, TextHintingMode, TextOptions, TextRenderingMode, TileMode,
+    AlignmentX, AlignmentY, BackdropEffectBoundsSource, BackdropEffectCache, BaselinePixelAlignment, BoxShadow, Color,
+    EdgeMode, GradientSpreadMethod, PenLineCap, PenLineJoin, RenderOptions, Stretch, TextHintingMode, TextOptions,
+    TextRenderingMode, TileMode,
 };
 use crate::numerics::{Matrix3x2, Matrix4x4, Quaternion, Vector2, Vector3, Vector4};
 use crate::rendering::composition::{
@@ -370,6 +371,8 @@ impl_batch_value_for_enum!(PenLineCap as i32 { Flat, Round, Square });
 impl_batch_value_for_enum!(PenLineJoin as i32 { Bevel, Miter, Round });
 impl_batch_value_for_enum!(AlignmentX as i32 { Left, Center, Right });
 impl_batch_value_for_enum!(AlignmentY as i32 { Top, Center, Bottom });
+impl_batch_value_for_enum!(BackdropEffectBoundsSource as u8 { Layout, Subtree });
+impl_batch_value_for_enum!(BackdropEffectCache as u8 { Default, Retained, Volatile });
 impl_batch_value_for_enum!(Stretch as i32 { None, Fill, Uniform, UniformToFill });
 impl_batch_value_for_enum!(TileMode as i32 { None, FlipX, FlipY, FlipXY, Tile });
 impl_batch_value_for_enum!(GradientSpreadMethod as i32 { Pad, Reflect, Repeat });

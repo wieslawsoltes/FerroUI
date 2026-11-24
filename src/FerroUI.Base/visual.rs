@@ -1,7 +1,7 @@
 use crate::collections::{FerroList, NotifyCollectionChangedAction, NotifyCollectionChangedEventArgs, ResetBehavior};
 use crate::media::{
-    affects_render_source, can_value_affect_render, CacheMode, DrawingContext, FlowDirection, Geometry, IBrush, IEffect,
-    ITransform, RenderOptions, TextOptions, Transform,
+    affects_render_source, can_value_affect_render, BackdropEffectBoundsSource, BackdropEffectCache, CacheMode,
+    DrawingContext, FlowDirection, Geometry, IBrush, IEffect, ITransform, RenderOptions, TextOptions, Transform,
 };
 use crate::rendering::composition::{
     CompositionDrawItem, CompositionDrawListVisual, CompositionEntry, CompositionVisual, Compositor,
@@ -129,6 +129,7 @@ struct CompositionStyledInputs {
     has_opacity_mask: bool,
     has_cache_mode: bool,
     has_effect: bool,
+    has_backdrop_effect: bool,
     has_render_transform: bool,
 }
 
@@ -875,6 +876,25 @@ impl VisualImpl for Visual {
             comp.set_effect(effect.as_ref().map(crate::media::EffectExtensions::to_immutable));
         }
 
+        // The backdrop effect and how it is drawn. The two modes are read only for a visual
+        // that has one, and reach a composition visual that had one.
+        let backdrop_effect = if inputs.has_backdrop_effect { this.backdrop_effect() } else { None };
+        if !crate::media::EffectExtensions::effect_equals(comp.backdrop_effect().as_deref(), backdrop_effect.as_deref())
+        {
+            comp.set_backdrop_effect(backdrop_effect.as_ref().map(crate::media::EffectExtensions::to_immutable));
+        }
+        let (bounds_source, backdrop_cache) = if inputs.has_backdrop_effect {
+            (this.backdrop_effect_bounds_source(), this.backdrop_effect_cache())
+        } else {
+            Default::default()
+        };
+        if comp.backdrop_effect_bounds_source() != bounds_source {
+            comp.set_backdrop_effect_bounds_source(bounds_source);
+        }
+        if comp.backdrop_effect_cache() != backdrop_cache {
+            comp.set_backdrop_effect_cache(backdrop_cache);
+        }
+
         comp.set_render_options(this.render_options());
         comp.set_text_options(this.text_options());
 
@@ -1009,6 +1029,28 @@ crate::ferro_properties! { impl Visual {
     );
 
     ferro_property!(
+        /// Defines the `BackdropEffect` property: the effect applied to what is drawn behind
+        /// the visual.
+        pub fn backdrop_effect_property() -> StyledProperty<Option<Rc<dyn IEffect>>> {
+            FerroProperty::register::<Visual, _>("BackdropEffect", None)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `BackdropEffectBoundsSource` property.
+        pub fn backdrop_effect_bounds_source_property() -> StyledProperty<BackdropEffectBoundsSource> {
+            FerroProperty::register::<Visual, _>("BackdropEffectBoundsSource", BackdropEffectBoundsSource::Layout)
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `BackdropEffectCache` property.
+        pub fn backdrop_effect_cache_property() -> StyledProperty<BackdropEffectCache> {
+            FerroProperty::register::<Visual, _>("BackdropEffectCache", BackdropEffectCache::Default)
+        }
+    );
+
+    ferro_property!(
         /// Defines the `OpacityMask` property.
         pub fn opacity_mask_property() -> StyledProperty<Option<Rc<dyn IBrush>>> {
             FerroProperty::register::<Visual, _>("OpacityMask", None)
@@ -1094,6 +1136,7 @@ impl Visual {
             has_opacity_mask: self.opacity_mask().is_some(),
             has_cache_mode: self.cache_mode().is_some(),
             has_effect: self.effect().is_some(),
+            has_backdrop_effect: self.backdrop_effect().is_some(),
             has_render_transform: self.render_transform().is_some(),
         }
     }
@@ -1111,6 +1154,9 @@ impl Visual {
             Self::is_visible_property().as_property(),
             Self::opacity_mask_property().as_property(),
             Self::effect_property().as_property(),
+            Self::backdrop_effect_property().as_property(),
+            Self::backdrop_effect_bounds_source_property().as_property(),
+            Self::backdrop_effect_cache_property().as_property(),
             Self::has_mirror_transform_property().as_property(),
         ]);
         // A visual draws in its own coordinates and its position reaches the compositor as the
@@ -1330,6 +1376,35 @@ impl Visual {
 
     pub fn set_effect(&self, value: Option<Rc<dyn IEffect>>) {
         self.set_value(Self::effect_property(), value)
+    }
+
+    /// The effect applied to what is drawn behind the visual, before the visual
+    /// itself is drawn.
+    pub fn backdrop_effect(&self) -> Option<Rc<dyn IEffect>> {
+        self.get_value(Self::backdrop_effect_property())
+    }
+
+    pub fn set_backdrop_effect(&self, value: Option<Rc<dyn IEffect>>) {
+        self.set_value(Self::backdrop_effect_property(), value)
+    }
+
+    /// Which bounds of the visual the backdrop effect is limited to.
+    pub fn backdrop_effect_bounds_source(&self) -> BackdropEffectBoundsSource {
+        self.get_value(Self::backdrop_effect_bounds_source_property())
+    }
+
+    pub fn set_backdrop_effect_bounds_source(&self, value: BackdropEffectBoundsSource) {
+        self.set_value(Self::backdrop_effect_bounds_source_property(), value)
+    }
+
+    /// Whether the backdrop effect keeps a snapshot of what is behind the visual, or reads it
+    /// again on every draw; with `Default` the compositor chooses.
+    pub fn backdrop_effect_cache(&self) -> BackdropEffectCache {
+        self.get_value(Self::backdrop_effect_cache_property())
+    }
+
+    pub fn set_backdrop_effect_cache(&self, value: BackdropEffectCache) {
+        self.set_value(Self::backdrop_effect_cache_property(), value)
     }
 
     /// The opacity mask of the control.
@@ -1634,6 +1709,7 @@ impl Visual {
             || inputs.has_opacity_mask
             || inputs.has_cache_mode
             || inputs.has_effect
+            || inputs.has_backdrop_effect
             || inputs.has_render_transform
             || !self.is_visible()
             || self.requires_composition_visual()

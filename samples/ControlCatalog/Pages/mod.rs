@@ -9,6 +9,7 @@ mod accelerator_page;
 mod acrylic_page;
 mod adorner_layer_page;
 mod auto_complete_box_page;
+mod backdrop_effect_page;
 mod bitmap_cache_page;
 mod border_page;
 mod cartesian_chart_page;
@@ -154,6 +155,7 @@ pub use accelerator_page::AcceleratorPage;
 pub use acrylic_page::AcrylicPage;
 pub use adorner_layer_page::AdornerLayerPage;
 pub use auto_complete_box_page::AutoCompleteBoxPage;
+pub use backdrop_effect_page::BackdropEffectPage;
 pub use bitmap_cache_page::BitmapCachePage;
 pub use border_page::BorderPage;
 pub use cartesian_chart_page::CartesianChartPage;
@@ -369,6 +371,7 @@ const ROOT_TYPES: &[&TypeInfo] = &[
     CalendarDatePickerPage::TYPE,
     AcceleratorPage::TYPE,
     AcrylicPage::TYPE,
+    BackdropEffectPage::TYPE,
     AdornerLayerPage::TYPE,
     AutoCompleteBoxPage::TYPE,
     BitmapCachePage::TYPE,
@@ -482,6 +485,7 @@ const ROOT_CLASSES: &[&XamlClass] = &[
     &CalendarDatePickerPage::XAML_CLASS,
     &AcceleratorPage::XAML_CLASS,
     &AcrylicPage::XAML_CLASS,
+    &BackdropEffectPage::XAML_CLASS,
     &AdornerLayerPage::XAML_CLASS,
     &AutoCompleteBoxPage::XAML_CLASS,
     &BitmapCachePage::XAML_CLASS,
