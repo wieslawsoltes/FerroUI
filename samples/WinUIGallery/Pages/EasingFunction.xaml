@@ -1,0 +1,107 @@
+<!-- Ported from the pinned EasingFunction page of WinUI Gallery (14061eea) and the code behind of
+     EasingFunctionPage.xaml.cs (motion_samples.rs); see ../NOTICE.md. Each storyboard animates the
+     TranslateTransform of its rectangle, and the exponents follow their number boxes. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel Spacing="4">
+    <TextBlock Text="- Use the Standard easing function for animating general property changes." TextWrapping="Wrap" />
+    <TextBlock Text="- Use the Accelerate easing function to animate objects that are exiting the scene." TextWrapping="Wrap" />
+    <TextBlock Text="- Use the Decelerate easing function to animate objects that are entering the scene." TextWrapping="Wrap" />
+  </StackPanel>
+
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Standard Easing Function" FontSize="18" />
+    <Grid x:Name="Grid1" ColumnDefinitions="Auto,*">
+      <Grid.Resources>
+        <Storyboard x:Key="Storyboard1">
+          <DoubleAnimation Storyboard.TargetProperty="X" Duration="0:0:0.5">
+            <DoubleAnimation.EasingFunction>
+              <CircleEase EasingMode="EaseInOut" />
+            </DoubleAnimation.EasingFunction>
+          </DoubleAnimation>
+        </Storyboard>
+      </Grid.Resources>
+      <Button x:Name="Button1" AutomationProperties.Name="Animate rectangle using Standard Easing Function" Content="Animate" />
+      <Rectangle x:Name="Rectangle1" Grid.Column="1" Width="50" Height="50" HorizontalAlignment="Left" Margin="12,0,0,0">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.RenderTransform><TranslateTransform /></Rectangle.RenderTransform>
+      </Rectangle>
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Accelerate Easing Function" FontSize="18" />
+    <Grid x:Name="Grid2" ColumnDefinitions="Auto,*,Auto">
+      <Grid.Resources>
+        <Storyboard x:Key="Storyboard2">
+          <DoubleAnimation Storyboard.TargetProperty="X" Duration="0:0:0.15">
+            <DoubleAnimation.EasingFunction>
+              <ExponentialEase EasingMode="EaseIn" Exponent="4.5" />
+            </DoubleAnimation.EasingFunction>
+          </DoubleAnimation>
+        </Storyboard>
+      </Grid.Resources>
+      <Button x:Name="Button2" AutomationProperties.Name="Animate rectangle using Accelerate Easing Function" Content="Animate" />
+      <Rectangle x:Name="Rectangle2" Grid.Column="1" Width="50" Height="50" HorizontalAlignment="Left" Margin="12,0,0,0">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.RenderTransform><TranslateTransform /></Rectangle.RenderTransform>
+      </Rectangle>
+      <NumberBox x:Name="AccelerateEasingExponent" Grid.Column="2" AutomationProperties.Name="Accelerate easing exponent" Header="Exponent" Value="4.5" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Decelerate Easing Function" FontSize="18" />
+    <Grid x:Name="Grid3" ColumnDefinitions="Auto,*,Auto">
+      <Grid.Resources>
+        <Storyboard x:Key="Storyboard3">
+          <DoubleAnimation Storyboard.TargetProperty="X" Duration="0:0:0.3">
+            <DoubleAnimation.EasingFunction>
+              <ExponentialEase EasingMode="EaseOut" Exponent="7" />
+            </DoubleAnimation.EasingFunction>
+          </DoubleAnimation>
+        </Storyboard>
+      </Grid.Resources>
+      <Button x:Name="Button3" AutomationProperties.Name="Animate rectangle using Decelerate Easing Function" Content="Animate" />
+      <Rectangle x:Name="Rectangle3" Grid.Column="1" Width="50" Height="50" HorizontalAlignment="Left" Margin="12,0,0,0">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.RenderTransform><TranslateTransform /></Rectangle.RenderTransform>
+      </Rectangle>
+      <NumberBox x:Name="DecelerateEasingExponent" Grid.Column="2" AutomationProperties.Name="Decelerate easing exponent" Header="Exponent" Value="7" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Other easing functions" FontSize="18" />
+    <Grid x:Name="Grid4" ColumnDefinitions="Auto,*,Auto">
+      <Grid.Resources>
+        <Storyboard x:Key="Storyboard4">
+          <DoubleAnimation Storyboard.TargetProperty="X" Duration="0:0:0.5" />
+        </Storyboard>
+      </Grid.Resources>
+      <Button x:Name="Button4" AutomationProperties.Name="Animate rectangle using an Easing Function" Content="Animate" />
+      <Rectangle x:Name="Rectangle4" Grid.Column="1" Width="50" Height="50" HorizontalAlignment="Left" Margin="12,0,0,0">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.RenderTransform><TranslateTransform /></Rectangle.RenderTransform>
+      </Rectangle>
+      <StackPanel Grid.Column="2" Spacing="8">
+        <ComboBox x:Name="EasingComboBox" SelectedIndex="0" AutomationProperties.Name="Easing type">
+          <ComboBoxItem Content="BackEase" />
+          <ComboBoxItem Content="BounceEase" />
+          <ComboBoxItem Content="CircleEase" />
+          <ComboBoxItem Content="CubicEase" />
+          <ComboBoxItem Content="ElasticEase" />
+          <ComboBoxItem Content="ExponentialEase" />
+          <ComboBoxItem Content="PowerEase" />
+          <ComboBoxItem Content="QuadraticEase" />
+          <ComboBoxItem Content="QuarticEase" />
+          <ComboBoxItem Content="QuinticEase" />
+          <ComboBoxItem Content="SineEase" />
+        </ComboBox>
+        <RadioButton x:Name="EaseOutRadio" GroupName="EasingMode" Content="EaseOut" IsChecked="True" />
+        <RadioButton x:Name="EaseInRadio" GroupName="EasingMode" Content="EaseIn" />
+        <RadioButton x:Name="EaseInOutRadio" GroupName="EasingMode" Content="EaseInOut" />
+      </StackPanel>
+    </Grid>
+  </StackPanel>
+</StackPanel>
