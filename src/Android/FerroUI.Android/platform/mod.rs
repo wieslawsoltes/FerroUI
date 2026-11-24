@@ -3,6 +3,11 @@
 
 pub(crate) mod android_activatable_lifetime;
 pub(crate) mod android_data_format_helper;
+#[cfg(target_os = "android")]
+pub(crate) mod android_drag_drop;
+pub(crate) mod android_drag_drop_state;
+#[cfg(target_os = "android")]
+pub(crate) mod android_drag_source;
 pub(crate) mod android_insets_manager;
 #[cfg(target_os = "android")]
 pub(crate) mod android_launcher;
@@ -16,6 +21,8 @@ pub(crate) mod android_system_navigation_manager;
 pub(crate) mod clip_data_item_to_data_transfer_item_wrapper;
 #[cfg(target_os = "android")]
 pub(crate) mod clip_data_to_data_transfer_wrapper;
+#[cfg(target_os = "android")]
+pub(crate) mod clip_description_to_data_transfer_wrapper;
 #[cfg(target_os = "android")]
 pub(crate) mod clipboard_impl;
 pub(crate) mod input;

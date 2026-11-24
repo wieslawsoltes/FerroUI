@@ -93,7 +93,8 @@ mod imp {
     use crate::cursor_factory::CursorFactory;
     use crate::platform::AndroidActivatableLifetime;
     use crate::stubs::{PlatformIconLoaderStub, WindowingPlatformStub};
-    use ferroui_base::input::platform::{KeyGestureFormatInfo, PlatformHotkeyConfiguration};
+    use ferroui_base::input::platform::{IPlatformDragSource, KeyGestureFormatInfo, PlatformHotkeyConfiguration};
+    use crate::platform::android_drag_source::AndroidDragSource;
     use crate::ferro_android_application::FerroAndroidApplication;
     use crate::platform::android_platform_settings::ApplicationSettingsContext;
     use crate::platform::{AndroidKeyboardDevice, AndroidPlatformSettings};
@@ -183,6 +184,7 @@ mod imp {
             let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(render_timer);
             let activatable_lifetime = AndroidActivatableLifetime::new();
             let activatable: Rc<dyn IActivatableLifetime> = activatable_lifetime.clone();
+            let drag_source: Rc<dyn IPlatformDragSource> = Rc::new(AndroidDragSource);
 
             let locator = FerroLocator::current_mutable();
             locator
@@ -200,6 +202,8 @@ mod imp {
                 .to_constant(Rc::new(render_loop))
                 .bind_to_self_singleton::<PlatformHotkeyConfiguration>()
                 .bind_to_self(Rc::new(KeyGestureFormatInfo::new(Some(HashMap::new()), "Cmd", "Ctrl", "Alt", "Shift")))
+                .bind::<dyn IPlatformDragSource>()
+                .to_constant(drag_source)
                 .bind::<dyn IActivatableLifetime>()
                 .to_constant(activatable)
                 // With its concrete type, for the activities of this backend.
