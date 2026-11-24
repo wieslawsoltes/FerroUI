@@ -35,9 +35,14 @@ ferro_impl_classes!(
     LayoutableImpl,
     InteractiveImpl,
     InputElementImpl,
-    ControlImpl,
     ContentControlImpl
 );
+
+impl ControlImpl for TableViewRow {
+    fn on_create_automation_peer(this: &Self) -> Ref<crate::automation::peers::AutomationPeer> {
+        crate::automation::peers::TableViewRowAutomationPeer::new(this).upcast()
+    }
+}
 
 impl TemplatedControlImpl for TableViewRow {
     fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
@@ -70,6 +75,11 @@ impl TableViewRow {
         instantiate(Self::construct())
     }
 
+    /// The presenter of the cells of the row, once the template is applied.
+    pub(crate) fn cells_presenter(&self) -> Option<Ref<TableViewCellsPresenter>> {
+        self.cells_presenter.borrow().clone()
+    }
+
     /// The columns of the table view the row belongs to.
     pub(crate) fn columns(&self) -> Option<FerroList<Ref<TableViewColumn>>> {
         self.columns.borrow().clone()
@@ -77,10 +87,6 @@ impl TableViewRow {
 
     pub(crate) fn set_columns(&self, value: Option<FerroList<Ref<TableViewColumn>>>) {
         *self.columns.borrow_mut() = value;
-    }
-
-    fn cells_presenter(&self) -> Option<Ref<TableViewCellsPresenter>> {
-        self.cells_presenter.borrow().clone()
     }
 
     pub(crate) fn clear_cells(&self) {

@@ -41,6 +41,7 @@ mod items_control_automation_peer;
 mod label_automation_peer;
 mod list_box_automation_peer;
 mod list_item_automation_peer;
+mod table_view_row_automation_peer;
 mod list_view_automation_peer;
 mod menu_item_automation_peer;
 #[cfg(test)]
@@ -131,6 +132,7 @@ pub use items_control_automation_peer::{
 pub use label_automation_peer::LabelAutomationPeer;
 pub use list_box_automation_peer::ListBoxAutomationPeer;
 pub use list_item_automation_peer::ListItemAutomationPeer;
+pub use table_view_row_automation_peer::TableViewRowAutomationPeer;
 pub use list_view_automation_peer::{
     GridViewAutomationPeer, GridViewItemAutomationPeer, ListViewAutomationPeer, ListViewBaseAutomationPeer, ListViewBaseItemAutomationPeer, ListViewItemAutomationPeer,
 };
