@@ -28,6 +28,11 @@ pub mod parsers;
 #[cfg(all(debug_assertions, feature = "hot-reload"))]
 pub mod binding_capture;
 
+/// Which built-in crate a type is in, for the errors of the build-time compiler. Never compiled into
+/// the run-time loader, so no application links the table.
+#[cfg(any(feature = "compiler", test))]
+mod built_in_types;
+
 /// The run-time back end: the run-time type system and the AST interpreter.
 #[cfg(feature = "runtime")]
 pub mod runtime;

@@ -238,6 +238,7 @@ pub fn transform_group(
 ) -> XamlResult<Vec<TransformedDocument>> {
     let (mut mappings, emit_mappings) = FerroXamlIlLanguage::configure(&type_system)?;
     adapt_type_mappings(&mut mappings);
+    mappings.unresolved_type_hint = Some(Rc::new(crate::built_in_types::unresolved_type_hint));
 
     let assembly: Option<Rc<dyn IXamlAssembly>> = match &options.local_assembly {
         Some(local) => type_system.assemblies().into_iter().find(|a| a.name() == *local),

@@ -55,6 +55,15 @@ impl TestHost {
     }
 
     pub fn with_options(options: TestHostOptions) -> Self {
+        Self::with_setup(options, |_, _| {})
+    }
+
+    /// The host with what `setup` adds to the type system and the language before the XML
+    /// namespaces are read.
+    pub fn with_setup(
+        options: TestHostOptions,
+        setup: impl FnOnce(&Rc<FakeTypeSystem>, &mut XamlLanguageTypeMappings),
+    ) -> Self {
         let ts = FakeTypeSystem::new();
         let asm = ts.define_assembly(NS);
         define_test_language(&ts, &asm);
@@ -83,6 +92,7 @@ impl TestHost {
         mappings.provide_value_target = Some(t("ITestProvideValueTarget"));
         mappings.i_add_child = Some(t("IAddChild"));
         mappings.i_add_child_of_t = Some(t("IAddChild`1"));
+        setup(&ts, &mut mappings);
 
         let diagnostics: Rc<RefCell<Vec<XamlDiagnostic>>> = Rc::new(RefCell::new(Vec::new()));
         let collected = diagnostics.clone();

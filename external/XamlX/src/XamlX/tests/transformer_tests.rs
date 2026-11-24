@@ -66,6 +66,22 @@ fn types_are_resolved_through_xmlns_definitions_and_clr_namespaces() {
 }
 
 #[test]
+fn the_language_can_say_where_an_unresolved_type_is() {
+    let options = TestHostOptions { errors_are_fatal: false, custom_value_converter: None };
+    let host = TestHost::with_setup(options, |_, mappings| {
+        mappings.unresolved_type_hint = Some(Rc::new(|xmlns, name| {
+            (xmlns == "test" && name == "Missing").then(|| "It is in the crate `elsewhere`.".to_string())
+        }));
+    });
+    host.transform("<ContentControl xmlns='test'>\n  <Missing/>\n  <Other/>\n</ContentControl>")
+        .expect("non-fatal");
+    let errors = host.errors();
+    assert_eq!(errors.len(), 2);
+    assert!(errors[0].title.contains("Unable to resolve type Missing from namespace test. It is in"));
+    assert!(!errors[1].title.contains("elsewhere"));
+}
+
+#[test]
 fn unresolved_types_are_reported() {
     let host = TestHost::new();
     let doc = host

@@ -171,9 +171,15 @@ impl TypeReferenceResolver {
             ));
         }
 
+        let hint = configuration
+            .type_mappings
+            .unresolved_type_hint
+            .as_ref()
+            .and_then(|hint| hint(xmlns.unwrap_or(""), name))
+            .map_or_else(String::new, |hint| format!(". {hint}"));
         Err(XamlError::transform_exception(
             format!(
-                "Unable to resolve type {} from namespace {}",
+                "Unable to resolve type {} from namespace {}{hint}",
                 name,
                 xmlns.unwrap_or("")
             ),

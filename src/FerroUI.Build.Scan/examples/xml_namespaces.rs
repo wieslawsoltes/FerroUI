@@ -7,10 +7,13 @@
 //! - `scripts/conventions/xml-namespace-prefixes.txt`, generated: the prefixes for mapped built-in
 //!   namespaces that markup and docs still have.
 //!
+//! It also writes the table the compiler names a missing crate from (#1285).
+//!
 //! ```text
 //! cargo run -p ferroui-build-scan --example xml_namespaces -- --check
 //! cargo run -p ferroui-build-scan --example xml_namespaces -- --report
 //! cargo run -p ferroui-build-scan --example xml_namespaces -- --write-prefixes
+//! cargo run -p ferroui-build-scan --example xml_namespaces -- --write-built-in-types
 //! ```
 //!
 //! Something new fails the check. Something that went away is only said, so that a change that
@@ -29,6 +32,8 @@ const DEFAULT_XML_NAMESPACE: &str = "https://github.com/ferroui";
 const RULES_FILE: &str = "scripts/conventions/xml-namespaces.txt";
 /// The generated list of prefixes.
 const PREFIXES_FILE: &str = "scripts/conventions/xml-namespace-prefixes.txt";
+/// The generated table of the built-in crates and their types.
+const BUILT_IN_TYPES_FILE: &str = "src/Markup/FerroUI.Markup.Xaml.Loader/built_in_types.txt";
 /// The folders that hold the built-in crates.
 const CRATE_FOLDERS: [&str; 2] = ["src/", "components/"];
 /// What is not product markup: tests, copies of other projects and generated references.
@@ -66,7 +71,7 @@ fn tracked_files(repository: &Path) -> Result<Vec<String>, String> {
 }
 
 /// The library crates that state markup (a `register_types.rs` beside their root file), as the
-/// name of the crate and its root file.
+/// name of the package and its root file.
 fn markup_crates(repository: &Path, files: &[String]) -> Vec<(String, PathBuf)> {
     let mut crates = Vec::new();
     for file in files {
@@ -80,7 +85,7 @@ fn markup_crates(repository: &Path, files: &[String]) -> Vec<(String, PathBuf)> 
         let library = manifest_value(&manifest, "[lib]", "path").unwrap_or_else(|| "src/lib.rs".to_owned());
         let root = path.with_file_name(library);
         if root.is_file() && root.with_file_name("register_types.rs").is_file() {
-            crates.push((name.replace('-', "_"), root));
+            crates.push((name, root));
         }
     }
     crates
@@ -104,10 +109,12 @@ struct Inventory {
     other_uris: BTreeMap<String, BTreeSet<String>>,
     /// The public types: their namespace and the names in it.
     types: BTreeMap<String, BTreeSet<String>>,
+    /// The public types of each package, with their namespaces.
+    package_types: BTreeMap<String, BTreeSet<(String, String)>>,
 }
 
 impl Inventory {
-    fn add(&mut self, model: &AssemblyModel) {
+    fn add(&mut self, package: &str, model: &AssemblyModel) {
         for definition in &model.xmlns_definitions {
             if definition.xml_namespace == DEFAULT_XML_NAMESPACE {
                 self.mapped.insert(definition.namespace.clone());
@@ -120,8 +127,25 @@ impl Inventory {
             let is_public = type_.public_path.is_some() || type_.stated_path.is_some();
             if is_public && !type_.namespace.is_empty() {
                 self.types.entry(type_.namespace.clone()).or_default().insert(type_.name.clone());
+                let types = self.package_types.entry(package.to_owned()).or_default();
+                types.insert((type_.namespace.clone(), type_.name.clone()));
             }
         }
+    }
+
+    /// The names a document can write without a prefix, by package.
+    fn built_in_types(&self) -> BTreeMap<String, BTreeSet<String>> {
+        let mut table: BTreeMap<String, BTreeSet<String>> = BTreeMap::new();
+        for (package, types) in &self.package_types {
+            for (namespace, name) in types {
+                if self.mapped.contains(namespace) && !is_internal(namespace) {
+                    // A generic type is written without its arity.
+                    let written = name.split('`').next().unwrap_or(name);
+                    table.entry(package.clone()).or_default().insert(written.to_owned());
+                }
+            }
+        }
+        table
     }
 
     /// The names that more than one namespace has, among the namespaces that are or will be in
@@ -249,6 +273,47 @@ fn format_prefixes(counts: &BTreeMap<(String, String), usize>) -> String {
     text
 }
 
+fn format_built_in_types(table: &BTreeMap<String, BTreeSet<String>>) -> String {
+    let mut text = String::from(
+        "# The public types of the default XML namespace by crate, for the error of a missing crate (#1285).\n\
+         # Generated: cargo run -p ferroui-build-scan --example xml_namespaces -- --write-built-in-types\n",
+    );
+    for (package, names) in table {
+        let names: Vec<&str> = names.iter().map(String::as_str).collect();
+        text.push_str(&format!("{package}\t{}\n", names.join(" ")));
+    }
+    text
+}
+
+fn parse_built_in_types(text: &str) -> BTreeMap<String, BTreeSet<String>> {
+    text.lines()
+        .filter(|line| !line.starts_with('#'))
+        .filter_map(|line| line.split_once('\t'))
+        .map(|(package, names)| (package.to_owned(), names.split(' ').map(str::to_owned).collect()))
+        .collect()
+}
+
+/// A built-in crate the table does not have fails; a type it lacks is only said, because the error
+/// is then just shorter, and every new control would otherwise have to edit one generated file.
+fn compare_built_in_types(
+    found: &BTreeMap<String, BTreeSet<String>>,
+    listed: &BTreeMap<String, BTreeSet<String>>,
+    findings: &mut Findings,
+) {
+    let mut missing_types = 0;
+    for (package, names) in found {
+        match listed.get(package) {
+            None => findings.errors.push(format!(
+                "the crate {package} is not in {BUILT_IN_TYPES_FILE}: run this tool with --write-built-in-types"
+            )),
+            Some(known) => missing_types += names.difference(known).count(),
+        }
+    }
+    if missing_types > 0 {
+        findings.notes.push(format!("{BUILT_IN_TYPES_FILE} lacks {missing_types} public types"));
+    }
+}
+
 /// What the check finds: what fails it, and what could leave the lists.
 #[derive(Default, Debug, PartialEq)]
 struct Findings {
@@ -317,12 +382,13 @@ fn report(inventory: &Inventory, rules: &Rules) {
 fn run(mode: &str, repository: &Path) -> Result<bool, String> {
     let files = tracked_files(repository)?;
     let mut inventory = Inventory::default();
-    for (name, root) in markup_crates(repository, &files) {
-        let mut model = scan_crate(&ScanOptions::new(&name, root)).model;
+    for (package, root) in markup_crates(repository, &files) {
+        let crate_name = package.replace('-', "_");
+        let mut model = scan_crate(&ScanOptions::new(&crate_name, root)).model;
         if model.name.is_empty() {
-            model.name = name;
+            model.name = crate_name;
         }
-        inventory.add(&model);
+        inventory.add(&package, &model);
     }
     let text = fs::read_to_string(repository.join(RULES_FILE)).map_err(|error| format!("{RULES_FILE}: {error}"))?;
     let rules = Rules::parse(&text)?;
@@ -337,10 +403,18 @@ fn run(mode: &str, repository: &Path) -> Result<bool, String> {
                 .map_err(|error| format!("{PREFIXES_FILE}: {error}"))?;
             Ok(true)
         }
+        "--write-built-in-types" => {
+            fs::write(repository.join(BUILT_IN_TYPES_FILE), format_built_in_types(&inventory.built_in_types()))
+                .map_err(|error| format!("{BUILT_IN_TYPES_FILE}: {error}"))?;
+            Ok(true)
+        }
         "--check" => {
             let allowed = fs::read_to_string(repository.join(PREFIXES_FILE))
                 .map_err(|error| format!("{PREFIXES_FILE}: {error}"))?;
-            let findings = compare(&inventory, &rules, &prefixes, &parse_prefixes(&allowed));
+            let mut findings = compare(&inventory, &rules, &prefixes, &parse_prefixes(&allowed));
+            let listed = fs::read_to_string(repository.join(BUILT_IN_TYPES_FILE))
+                .map_err(|error| format!("{BUILT_IN_TYPES_FILE}: {error}"))?;
+            compare_built_in_types(&inventory.built_in_types(), &parse_built_in_types(&listed), &mut findings);
             findings.notes.iter().for_each(|note| println!("note: {note}"));
             findings.errors.iter().for_each(|error| eprintln!("error: {error}"));
             println!(
@@ -352,7 +426,7 @@ fn run(mode: &str, repository: &Path) -> Result<bool, String> {
             );
             Ok(findings.errors.is_empty())
         }
-        other => Err(format!("unknown mode `{other}`: --check, --report or --write-prefixes")),
+        other => Err(format!("unknown mode `{other}`: --check, --report, --write-prefixes or --write-built-in-types")),
     }
 }
 
@@ -383,6 +457,7 @@ mod tests {
             mapped: set(mapped),
             other_uris: BTreeMap::new(),
             types: types.iter().map(|(namespace, names)| ((*namespace).to_owned(), set(names))).collect(),
+            package_types: BTreeMap::new(),
         }
     }
 
@@ -444,6 +519,32 @@ mod tests {
         assert!(Rules::parse("exception System\n").is_err());
         assert!(Rules::parse("exception System # the runtime library\nopen A\n").is_ok());
         assert!(Rules::parse("nonsense A\n").is_err());
+    }
+
+    #[test]
+    fn the_table_of_crates_holds_mapped_public_names_without_their_arity() {
+        let mut found = inventory(&["A"], &[]);
+        let types = [("A", "List`1"), ("A", "Plain"), ("A.Internal", "Hidden"), ("B", "NotMapped")];
+        found.package_types.insert(
+            "crate-a".to_owned(),
+            types.iter().map(|(namespace, name)| ((*namespace).to_owned(), (*name).to_owned())).collect(),
+        );
+        let table = found.built_in_types();
+        assert_eq!(table["crate-a"], set(&["List", "Plain"]));
+        assert_eq!(parse_built_in_types(&format_built_in_types(&table)), table);
+    }
+
+    #[test]
+    fn a_crate_missing_from_the_table_fails_and_a_missing_type_is_a_note() {
+        let found = BTreeMap::from([("crate-a".to_owned(), set(&["One", "Two"]))]);
+        let mut findings = Findings::default();
+        compare_built_in_types(&found, &BTreeMap::new(), &mut findings);
+        assert_eq!(findings.errors.len(), 1);
+        let listed = BTreeMap::from([("crate-a".to_owned(), set(&["One"]))]);
+        let mut findings = Findings::default();
+        compare_built_in_types(&found, &listed, &mut findings);
+        assert!(findings.errors.is_empty());
+        assert_eq!(findings.notes.len(), 1);
     }
 
     #[test]
