@@ -92,6 +92,11 @@ skia-safe = { workspace = true, features = ["gl"] }
 name = "vulkan_frames"
 path = "gpu/vulkan/frames_test.rs"
 
+[[test]]
+name = "graphite_vulkan"
+path = "gpu/vulkan/graphite_vulkan_test.rs"
+required-features = ["graphite-vulkan"]
+
 [features]
 # Development-only independent native GPU fixtures.
 native-frame-tests = []
@@ -106,6 +111,11 @@ vulkan = ["skia-safe/vulkan", "skia-safe/ganesh"]
 # an application without 3D links none of it; the facade's `media3d` turns it on. Without it a
 # scene draws nothing and is counted (`rendering::scene3d::scenes_not_drawn`).
 media3d = ["dep:ferroui-render3d"]
+# Graphite on the Vulkan device (`gpu/vulkan/graphite_vulkan.rs`, #1365): Skia with Graphite and
+# Vulkan, which no published binary of Skia has, so the bindings compile Skia from source (with the
+# patched bindings' Graphite Vulkan backend textures, FERROUI-PATCH.md). Off by default; the CI job
+# `graphite-vulkan.yml` builds and tests it. Ganesh stays the GPU of the default build.
+graphite-vulkan = ["vulkan", "skia-safe/graphite"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]

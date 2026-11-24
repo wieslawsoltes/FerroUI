@@ -8,10 +8,14 @@
 //! The module needs a Skia build with Vulkan (the `ferro_skia_vulkan`
 //! configuration: Linux, and the feature `vulkan` of this crate elsewhere).
 
+#[cfg(feature = "graphite-vulkan")]
+mod graphite_vulkan;
 mod vulkan_skia_external_objects_feature;
 mod vulkan_skia_gpu;
 mod vulkan_skia_render_target;
 
+#[cfg(feature = "graphite-vulkan")]
+pub use graphite_vulkan::GraphiteVulkanContext;
 pub use vulkan_skia_external_objects_feature::VulkanSkiaExternalObjectsFeature;
 pub use vulkan_skia_gpu::VulkanSkiaGpu;
 pub use vulkan_skia_render_target::VulkanSkiaRenderTarget;
