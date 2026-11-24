@@ -198,6 +198,16 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **The camera preview on iOS is upright in every interface orientation** (`ferroui-media-camera-apple`): the preview showed the buffers in the orientation of the sensor, a quarter turn off in a portrait interface, and did not follow the interface when the device turned. Each frame now carries the rotation the presenter applies on the GPU, from the interface orientation and the mounting of the selected camera (on iOS 17 and later, the rotation coordinator of AVFoundation, read per frame); before iOS 17 the connection rotates the buffers, and a turn during a recording waits for its end. macOS is unchanged.
 
+### Migration
+
+- **The reactive forms deprecated in 0.5.0 are removed** (#625; `ferroui-reactive`, `ferroui-reactiveui`, `ferroui-reactiveui-controls`, `ferroui-dynamic-data`, `ferroui-reactive-testing`). Replace:
+  - `SynchronizationContextScheduler::new(context)` and `with_always_post(context, always)` with `with_schedule(schedule)` and `with_schedule_and_always_post(schedule, always)`; `context()` with `context_schedule()`, which now returns the schedule itself rather than an `Option`.
+  - `ContextDisposable::new(context, disposable)` with `with_schedule(schedule, disposable)`; `context()` with `schedule()`, which now returns the schedule itself.
+  - `CancellationDisposable::with_source(source)` with `with_token(CancellationToken::new())`, keeping the token in the place of the source.
+  - `observe_on_context`, `subscribe_on_context` and `notify_on_context` with `observe_on_schedule`, `subscribe_on_schedule` and `notify_on_schedule`, given a `ferroui_system::task::Schedule` (a dispatcher's `task_schedule(priority)`).
+  - `BindingSchedulers::use_synchronization_context` with `use_schedule`; `FerroScheduler::install_on_ui_thread` with nothing, as the dispatcher is the schedule of its thread and its jobs.
+  - The error aliases `TimeoutException`, `InvalidCastException`, `TargetInvocationException`, `UnhandledInteractionException`, `ViewLocatorNotFoundException`, `PanicException`, `UnhandledErrorException`, `SortException` and `TestException` (and the function `TestException`) with `TimeoutError`, `InvalidCastError`, `TargetInvocationError`, `UnhandledInteractionError`, `ViewLocatorNotFoundError`, `PanicError`, `UnhandledError`, `SortError` and `TestError`.
+
 ## [0.5.0] - 2026-11-14
 
 The fifth release. It adds, among the entries below:
