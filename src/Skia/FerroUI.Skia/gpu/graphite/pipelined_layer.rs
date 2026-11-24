@@ -963,7 +963,8 @@ pub(crate) enum BandInsert {
     /// the recordings go in as they are ready, with no turn to wait for. Asked for with
     /// `FERROUI_SKIA_BAND_INSERT=deferred`.
     Deferred,
-    /// Each band draws on a texture of its own, of its size, kept from frame to frame while the band
+    /// Each band draws on a texture of its own, of its rows and a margin of the bands next to it
+    /// ([`BAND_TEXTURE_MARGIN`], so that the band's clip lies inside it), kept from frame to frame while the band
     /// keeps its rows, and its recording goes in as it is ready. The layer is the bands' textures
     /// side by side: it is blitted band by band, and copied onto the layer's texture only to be read
     /// or drawn directly. When the bands move, a band's new texture starts from a copy, on the GPU,
@@ -1219,6 +1220,29 @@ fn play_deferred(
     recorder.snap()
 }
 
+/// How many rows of the bands next to it the texture of a band holds besides its own
+/// (`BandInsert::BandTextures`): the clip of the band then lies inside the texture, and a shape that
+/// crosses the row where two bands meet is cut by the clip inside the target, as on an ordinary layer.
+/// At the edge of a texture of the band's size the same shape crosses the edge of the target, which
+/// Graphite draws another way (on lavapipe the antialiased edges of such a shape came out up to 19 steps
+/// apart; `gpu/vulkan/graphite_vulkan_layer_tests.rs`). The margin rows are drawn, never shown.
+const BAND_TEXTURE_MARGIN: i32 = 16;
+
+/// The rows of the layer the texture of a band of `rows` holds, in a layer `height` pixels high: the band's
+/// rows and [`BAND_TEXTURE_MARGIN`] rows on either side, as far as the layer goes.
+fn band_texture_rows(rows: IRect, height: i32) -> IRect {
+    let (top, bottom) = ((rows.top - BAND_TEXTURE_MARGIN).max(0), (rows.bottom + BAND_TEXTURE_MARGIN).min(height));
+    IRect::new(rows.left, top, rows.right, bottom)
+}
+
+/// Draws the part of the texture of a band (or of the layer's texture) that holds the layer's `rows` at those
+/// rows: `image` holds the layer's rows from `image_top` on. A copy of the pixels, on the GPU.
+fn draw_band_rows(canvas: &Canvas, image: &Image, rows: IRect, image_top: i32, paint: &Paint) {
+    let source = Rect::from(rows.with_offset((0, -image_top)));
+    let constraint = skia_safe::canvas::SrcRectConstraint::Strict;
+    canvas.draw_image_rect(image, Some((&source, constraint)), Rect::from(rows), paint);
+}
+
 /// Plays a band on its own texture (`BandInsert::BandTextures`) and snaps the recorder: the texture
 /// the thread keeps for the band while it keeps its rows, or a new one of the band's size when the
 /// band has sources, which are copied onto it first (a draw that replaces the pixels, on the GPU).
@@ -1236,33 +1260,28 @@ fn play_band_texture(
         _ => {
             // A band without a kept texture always has sources; one without is drawn on a cleared texture.
             textures.retain(|texture| !(texture.layer == band.layer && texture.index == band.index));
-            let info = skia_safe::ImageInfo::new(
-                (band.clip.width(), band.clip.height()),
-                band.color_type,
-                AlphaType::Premul,
-                None,
-            );
+            let held = band_texture_rows(band.clip, band.size.1);
+            let size = (held.width(), held.height());
+            let info = skia_safe::ImageInfo::new(size, band.color_type, AlphaType::Premul, None);
             let mipmapped = skia_safe::gpu::Mipmapped::No;
             let surface = graphite::surfaces::render_target(recorder, &info, mipmapped, Some(&band.props), None)?;
             textures.push(BandTexture { layer: band.layer, index: band.index, rows: band.clip, surface });
             textures.len() - 1
         }
     };
+    let held = band_texture_rows(band.clip, band.size.1);
     let surface = &mut textures[position].surface;
     let canvas = surface.canvas();
     canvas.save();
-    canvas.translate((0.0, -(band.clip.top as f32)));
+    canvas.translate((0.0, -(held.top as f32)));
     if let Some(sources) = &band.sources {
         canvas.clear(Color::TRANSPARENT);
         let mut copy = Paint::default();
         copy.set_blend_mode(BlendMode::Src);
         for (rows, image) in sources {
-            canvas.draw_image_with_sampling_options(
-                &image.0,
-                Point::new(rows.left as f32, rows.top as f32),
-                SamplingOptions::default(),
-                Some(&copy),
-            );
+            // The rows of the band and of its margin that the source holds.
+            let Some(wanted) = IRect::intersect(rows, &held) else { continue };
+            draw_band_rows(canvas, &image.0, wanted, band_texture_rows(*rows, band.size.1).top, &copy);
         }
     }
     canvas.clip_rect(Rect::from(band.clip), ClipOp::Intersect, false);
@@ -1774,9 +1793,10 @@ impl PipelinedLayer {
 
     /// Draws the textures of the bands at their rows onto `canvas`, whose matrix is the identity.
     fn draw_band_images(&self, canvas: &Canvas, paint: Option<&Paint>) {
+        let plain = Paint::default();
+        let paint = paint.unwrap_or(&plain);
         for (rows, image) in self.band_images.borrow().iter().flatten() {
-            let at = Point::new(rows.left as f32, rows.top as f32);
-            canvas.draw_image_with_sampling_options(image, at, SamplingOptions::default(), paint);
+            draw_band_rows(canvas, image, *rows, band_texture_rows(*rows, self.size.1).top, paint);
         }
     }
 
@@ -1930,9 +1950,8 @@ impl PipelinedLayer {
                 let canvas = surface.canvas();
                 for (index, image) in &images {
                     if let Some(rows) = rows_of(*index) {
-                        let at = Point::new(rows.left as f32, rows.top as f32);
-                        let sampling = SamplingOptions::default();
-                        canvas.draw_image_with_sampling_options(image, at, sampling, Some(&self.src_paint));
+                        let image_top = band_texture_rows(rows, self.size.1).top;
+                        draw_band_rows(canvas, image, rows, image_top, &self.src_paint);
                     }
                 }
             }
@@ -2377,6 +2396,24 @@ mod tests {
         assert_eq!(rows(band_texture_sources(&kept, IRect::from_ltrb(0, 0, 320, 100))), vec![
             IRect::from_ltrb(0, 0, 320, 100)
         ]);
+    }
+
+    #[test]
+    fn the_texture_of_a_band_holds_a_margin_of_the_bands_next_to_it_inside_the_layer() {
+        let margin = BAND_TEXTURE_MARGIN;
+        // A band inside the layer: margin rows above and below.
+        assert_eq!(
+            band_texture_rows(IRect::from_ltrb(0, 64, 320, 128), 256),
+            IRect::from_ltrb(0, 64 - margin, 320, 128 + margin)
+        );
+        // The bands at the top and the bottom stop at the layer's edges, as the ordinary layer's target does.
+        assert_eq!(band_texture_rows(IRect::from_ltrb(0, 0, 320, 64), 256), IRect::from_ltrb(0, 0, 320, 64 + margin));
+        assert_eq!(
+            band_texture_rows(IRect::from_ltrb(0, 192, 320, 256), 256),
+            IRect::from_ltrb(0, 192 - margin, 320, 256)
+        );
+        // The layer's own texture, as a source, is the whole layer.
+        assert_eq!(band_texture_rows(IRect::from_wh(320, 256), 256), IRect::from_wh(320, 256));
     }
 
     #[test]
