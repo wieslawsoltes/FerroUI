@@ -36,8 +36,8 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (69 done, 45 planned) | 114 |
-| `already` | 16 |
+| `port` (71 done, 42 planned) | 113 |
+| `already` | 17 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
 | `not-applicable` | 27 |
@@ -71,7 +71,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
 | platform-macos | 8 | 1 |  |  |  | 1 | 10 |
 | platform-win32 | 6 | 2 |  |  |  | 1 | 9 |
-| platform-x11 | 6 |  |  |  |  |  | 6 |
+| platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
 | samples | 1 |  |  |  |  | 2 | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
@@ -190,7 +190,7 @@ left out only with a recorded performance or better-code reason.
 | `da7ea04e6d` | #22497 | 2026-10-19 | controls | `already` |  | `ClassicDesktopStyleApplicationLifetime::start` takes the token after showing the window and skips the loop when it is gone. |
 | `b72f1fd4d8` | #22470 | 2026-10-19 | platform-browser | `port` | browser | Blob stream: seeking, bounded reads, write position. |
 | `b6ed89b8d9` | #22457 | 2026-10-19 | controls | `port` (done) | controls | `Popup`: the Y scale read M11/M12. |
-| `b13194be25` | #22453 | 2026-10-19 | platform-x11 | `port` | x11 | X11 dispatcher: explicit background processing. |
+| `b13194be25` | #22453 | 2026-10-19 | platform-x11 | `port` (done) | x11b | The X11 run loop implements explicit background processing, with the restructured wait of upstream. |
 | `f547369621` | #22496 | 2026-10-19 | threading | `already` |  | `Dispatcher::replace_implementation` already moves the due times of the queue and of every timer by the difference of the two clocks. |
 | `ee85f0604a` | #22504 | 2026-10-19 | rendering | `port` | rendering | Skia geometry: path bounds computed before sharing; stroke cache kept valid on failure. |
 | `9b3e9c881b` | #22499 | 2026-10-19 | rendering | `port` | rendering | Compositor output rotation through `RenderTargetProperties`. |
@@ -250,7 +250,7 @@ left out only with a recorded performance or better-code reason.
 | `626c94d77c` | #22545 | 2026-10-27 | text | `already` |  | `bidi_algorithm.rs` already resolves W2 in one forward pass. |
 | `f3eca207d0` | #22307 | 2026-10-27 | samples | `deferred` |  | Catalog theme switching. Depends on the Fluent 2 decision. |
 | `b6fa4b12ea` | #22621 | 2026-10-27 | controls | `port` (done) | controls2 | DrawerPage and NavigationPage template parts relaxed to Decorator. |
-| `7e8b76db3c` | #22379 | 2026-10-27 | platform-x11 | `port` | x11 | AT-SPI windows added on the UI thread. |
+| `7e8b76db3c` | #22379 | 2026-10-27 | platform-x11 | `already` |  | `X11AtSpiAccessibility` starts its server and adds the tracked windows in a task on the UI thread (`spawn_local_with_priority`). |
 | `a9d935b5c7` | #22423 | 2026-10-27 | controls | `port` (done) | controls | `ComboBox.WrapSelection` with nothing to select. |
 | `ca9149f2fa` | #22625 | 2026-10-28 | platform-linux | `port` (done) | linux | IBus expects evdev keycodes (X11 keycode minus 8). |
 | `da1dafcdfb` | #22629 | 2026-10-28 | tests | `not-applicable` |  | Removal of the upstream Appium suite. |
@@ -306,7 +306,7 @@ left out only with a recorded performance or better-code reason.
 | `2061fb5090` | #22760 | 2026-11-10 | text | `port` (done) | text | Wrap opportunity between shaped runs, decided from a window of both runs. The per-run break tables stay, so multi-run lines do not fall back to the enumerator. |
 | `bdeeeef0a7` | #22693 | 2026-11-10 | platform-ios | `port` | ios | Embedded native controls in accessibility. |
 | `80c4f31848` | #22462 | 2026-11-10 | platform-x11 | `port` (done) | x11 | ConfigureNotify older than our last resize ignored. |
-| `0dc28102b4` | #22566 | 2026-11-10 | platform-linux | `port` | linux | DRM: no block on the page flip just queued. |
+| `0dc28102b4` | #22566 | 2026-11-10 | platform-linux | `port` (done) | x11b | DRM output: the next frame renders while the flip just queued waits for vblank; the wait happens before the next flip, or at once when no free buffer is left. |
 | `8dae868308` | #22628 | 2026-11-10 | input | `deferred` |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
 | `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `port` | win32 | Virtual key mapping behind the keyboard layout tests. |
 | `3ecf2a3fd8` | #22777 | 2026-11-12 | build | `not-applicable` |  | Empty upstream CI commit. |

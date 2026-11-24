@@ -345,6 +345,7 @@ pub mod lib_drm {
                 lib::gbm_surface_create: unsafe extern "C" fn(*mut c_void, u32, u32, u32, u32) -> *mut c_void;
                 lib::gbm_surface_lock_front_buffer: unsafe extern "C" fn(*mut c_void) -> *mut c_void;
                 lib::gbm_surface_release_buffer: unsafe extern "C" fn(*mut c_void, *mut c_void);
+                lib::gbm_surface_has_free_buffers: unsafe extern "C" fn(*mut c_void) -> c_int;
                 lib::gbm_bo_get_user_data: unsafe extern "C" fn(*mut c_void) -> *mut c_void;
                 lib::gbm_bo_set_user_data: unsafe extern "C" fn(*mut c_void, *mut c_void, Option<GbmBoUserDataDestroyCallbackDelegate>);
                 lib::gbm_bo_get_width: unsafe extern "C" fn(*mut c_void) -> u32;
@@ -517,6 +518,10 @@ pub mod lib_drm {
 
             pub(crate) unsafe fn gbm_surface_release_buffer(&self, surface: *mut c_void, bo: *mut c_void) {
                 unsafe { (self.gbm.gbm_surface_release_buffer)(surface, bo) }
+            }
+
+            pub(crate) unsafe fn gbm_surface_has_free_buffers(&self, surface: *mut c_void) -> c_int {
+                unsafe { (self.gbm.gbm_surface_has_free_buffers)(surface) }
             }
 
             pub(crate) unsafe fn gbm_bo_get_user_data(&self, bo: *mut c_void) -> *mut c_void {
