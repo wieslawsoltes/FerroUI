@@ -47,7 +47,7 @@ fn a_rounded_rectangle_with_four_equal_corners_draws_the_pixels_of_four_radii() 
         draw(&fast, rect, &BoxShadows::default());
         let mut general = surface();
         draw(&general, rect, &invisible_shadow());
-        assert!(pixels(&fast) == pixels(&general), "radii {rx}, {ry}");
+        assert!(pixels(&mut fast) == pixels(&mut general), "radii {rx}, {ry}");
     }
 }
 
@@ -61,7 +61,7 @@ fn radii_that_do_not_fit_take_the_general_path() {
     draw(&fast, rect, &BoxShadows::default());
     let mut general = surface();
     draw(&general, rect, &invisible_shadow());
-    assert!(pixels(&fast) == pixels(&general));
+    assert!(pixels(&mut fast) == pixels(&mut general));
 }
 
 /// Fills the surface red through a drawing context under the clip of the canvas.
@@ -85,7 +85,7 @@ fn a_rounded_clip_without_rounding_clips_as_the_rounded_clip_of_a_rectangle() {
     general.canvas().clip_rrect(RRect::new_rect(rc), ClipOp::Intersect, true);
     fill_under_clip(&general, |_| {});
     general.canvas().restore();
-    assert!(pixels(&fast) == pixels(&general));
+    assert!(pixels(&mut fast) == pixels(&mut general));
 }
 
 #[test]
@@ -100,5 +100,5 @@ fn a_rounded_clip_with_four_equal_corners_clips_as_four_radii() {
     general.canvas().clip_rrect(RRect::new_rect_radii(rc, &radii), ClipOp::Intersect, true);
     fill_under_clip(&general, |_| {});
     general.canvas().restore();
-    assert!(pixels(&fast) == pixels(&general));
+    assert!(pixels(&mut fast) == pixels(&mut general));
 }
