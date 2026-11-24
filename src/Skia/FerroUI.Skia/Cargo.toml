@@ -28,6 +28,10 @@ skia-safe.workspace = true
 # The CPU reference of 3D scenes (`Viewport3D`, #608), drawn as an image until the backend has a GPU
 # executor (feature `media3d`).
 ferroui-render3d = { workspace = true, optional = true }
+# The native functions of the bindings that Graphite on Vulkan uses (feature `graphite-vulkan`):
+# the Graphite Vulkan backend textures of the patched bindings and the context option skia-safe has
+# no setter for. Apple targets with Graphite depend on the bindings below in any case.
+skia-bindings = { version = "=0.153.3", default-features = false, optional = true }
 
 [dev-dependencies]
 ferroui-controls = { workspace = true, features = ["testing"] }
@@ -115,7 +119,7 @@ media3d = ["dep:ferroui-render3d"]
 # Vulkan, which no published binary of Skia has, so the bindings compile Skia from source (with the
 # patched bindings' Graphite Vulkan backend textures, FERROUI-PATCH.md). Off by default; the CI job
 # `graphite-vulkan.yml` builds and tests it. Ganesh stays the GPU of the default build.
-graphite-vulkan = ["vulkan", "skia-safe/graphite"]
+graphite-vulkan = ["vulkan", "skia-safe/graphite", "dep:skia-bindings"]
 
 # The group of the crate in the table of the README (docs/release.md).
 [package.metadata.release]
