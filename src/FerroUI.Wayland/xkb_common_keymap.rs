@@ -267,8 +267,11 @@ mod tests {
         assert_eq!(XkbCommonKeymap::keysym_to_text(0x40).as_deref(), Some("@"));
         assert_eq!(XkbCommonKeymap::keysym_to_text(0xffe1), None);
         keymap.update_modifiers(0, 0, 0, 0);
+        // The raw mask of GTK mode names the modifiers the level of the key depends on, Shift,
+        // also while none is active (libxkbcommon on the CI runner): the dispatcher keeps only
+        // the effective ones, none here.
         if let Some(consumed) = keymap.consumed_modifiers(3) {
-            assert_eq!(consumed, 0);
+            assert_eq!(consumed & !1, 0);
         }
 
         // A key the keymap does not have.
