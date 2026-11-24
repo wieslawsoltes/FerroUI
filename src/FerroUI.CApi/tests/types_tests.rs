@@ -157,8 +157,27 @@ fn the_entries_are_up_to_date() {
     assert!(
         current == text,
         "api_types.rs is not the one of the API model: write it again with \
-         FERROUI_CAPI_WRITE_TYPES=1 cargo test -p ferroui-capi --lib types"
+         FERROUI_CAPI_WRITE_TYPES=1 cargo test -p ferroui-capi --lib types\n{}",
+        changed_lines(&current, &text)
     );
+}
+
+/// The lines that differ between the file and the generated text, by line number (at most 200),
+/// so that a run without the write (CI) says what changed.
+#[cfg(feature = "desktop")]
+fn changed_lines(current: &str, generated: &str) -> String {
+    let (current, generated): (Vec<&str>, Vec<&str>) = (current.lines().collect(), generated.lines().collect());
+    let mut report = String::new();
+    for index in 0..current.len().max(generated.len()) {
+        let (was, now) = (current.get(index), generated.get(index));
+        if was != now {
+            let _ = writeln!(report, "line {}:\n  - {}\n  + {}", index + 1, was.unwrap_or(&""), now.unwrap_or(&""));
+            if report.lines().count() >= 600 {
+                break;
+            }
+        }
+    }
+    report
 }
 
 #[test]
