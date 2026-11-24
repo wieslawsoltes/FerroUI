@@ -1,4 +1,4 @@
-use super::IDrawingContextImpl;
+use super::{IDrawingContextImpl, SurfaceOrientation};
 use crate::rendering::composition::CompositionTransparencyLevel;
 use crate::{PixelSize, RenderTargetCorruptedError, RenderTargetNotReadyError, Size};
 use std::any::Any;
@@ -74,6 +74,12 @@ pub struct RenderTargetProperties {
     /// Whether it's worth to render directly to this target rather than
     /// through an intermediate surface.
     pub is_suitable_for_direct_rendering: bool,
+    /// The clockwise rotation the compositor applies when it copies the scene into the
+    /// framebuffer of the target (upstream 9b3e9c881b): a display mounted in another
+    /// orientation. A rotation other than `Rotation0` makes the compositor draw the scene into
+    /// a layer and draw that layer, and the overlays, rotated; the scene keeps its size in
+    /// scene pixels, the drawing context of the target is in framebuffer pixels.
+    pub required_rotation_for_orientation: SurfaceOrientation,
 }
 
 /// Properties of one drawing context created from a render target.

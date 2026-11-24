@@ -7,6 +7,7 @@ use crate::media::Colors;
 use crate::platform::surfaces::IPlatformRenderSurface;
 use crate::platform::{
     IDrawingContextImpl, IDrawingContextLayerImpl, IRenderTarget, LtrbRect, RenderTargetError, RenderTargetSceneInfo,
+    SurfaceOrientation,
 };
 use crate::rendering::composition::generated::{
     CompositionTargetChangedFields, ServerCompositionTargetHooks, ServerCompositionTargetProps,
@@ -44,6 +45,9 @@ pub struct ServerCompositionTarget {
     update_requested: Cell<bool>,
     redraw_requested: Cell<bool>,
     full_redraw_requested: Cell<bool>,
+    /// The transform from the scene to the framebuffer of the target: the rotation of its
+    /// properties (`required_rotation_for_orientation`), identity mostly.
+    output_transform: Cell<Matrix>,
     disposed: Cell<bool>,
     attached_visuals: RefCell<HashMap<*const ServerCompositionVisual, Rc<ServerCompositionVisual>>>,
     dirty_rects: Rc<dyn IDirtyRectTracker>,
@@ -185,6 +189,7 @@ impl ServerCompositionTarget {
                 update_requested: Cell::new(false),
                 redraw_requested: Cell::new(false),
                 full_redraw_requested: Cell::new(false),
+                output_transform: Cell::new(Matrix::IDENTITY),
                 disposed: Cell::new(false),
                 attached_visuals: RefCell::new(HashMap::new()),
                 dirty_rects,
@@ -541,11 +546,19 @@ impl ServerCompositionTarget {
         // is given the dirty rectangles one at a time (section 9.56 of
         // desktop-performance.md).
         self.draws_rects_apart.set(render_target.clips_regions_per_draw());
-        let need_layer = self.overlays.require_layer() // Check if we don't need overlays
+        let pixel_size = self.pixel_size();
+        // A target in another orientation than the scene (upstream 9b3e9c881b): the scene is
+        // drawn into the layer, and the layer and the overlays are drawn rotated. Exact quarter
+        // turns keep the pixel edges aligned. A change of the rotation redraws everything.
+        let output_transform = output_transform(properties.required_rotation_for_orientation, pixel_size);
+        if self.output_transform.replace(output_transform) != output_transform {
+            self.full_redraw_requested.set(true);
+        }
+        let need_layer = !output_transform.is_identity()
+            || self.overlays.require_layer() // Check if we don't need overlays
             // Check if render target can be rendered to directly and preserves the previous frame
             || !(properties.retains_previous_frame_contents && properties.is_suitable_for_direct_rendering);
 
-        let pixel_size = self.pixel_size();
         let scene_info = RenderTargetSceneInfo {
             size: pixel_size,
             scaling: self.scaling(),
@@ -657,19 +670,20 @@ impl ServerCompositionTarget {
                         self.layer_unpresented.set(false);
 
                         render_target_context.clear(Colors::TRANSPARENT);
-                        render_target_context.set_transform(Matrix::IDENTITY);
-                        if layer.can_blit() {
+                        render_target_context.set_transform(output_transform);
+                        // A blit copies pixels as they are: a rotated target draws the layer.
+                        if layer.can_blit() && output_transform.is_identity() {
                             layer.blit(&mut *render_target_context);
                         } else {
                             let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
                             render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
                         }
-                        self.overlays.draw(self, &mut *render_target_context, true);
+                        self.overlays.draw(self, &mut *render_target_context, true, output_transform);
                     }
                     // Without a layer no frame is held back: the tick draws.
                     None => {
                         self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);
-                        self.overlays.draw(self, &mut *render_target_context, false);
+                        self.overlays.draw(self, &mut *render_target_context, false, Matrix::IDENTITY);
                     }
                 }
                 if draws {
@@ -983,5 +997,50 @@ impl IServerObject for ServerCompositionTarget {
 
     fn into_any_rc(self: Rc<Self>) -> Rc<dyn Any> {
         self
+    }
+}
+
+/// The transform that draws a scene of `scene_size` pixels into the framebuffer of a target
+/// that needs `rotation` (clockwise): the framebuffer of a quarter turn is `scene_size`
+/// transposed.
+pub(crate) fn output_transform(rotation: SurfaceOrientation, scene_size: PixelSize) -> Matrix {
+    let (width, height) = (scene_size.width as f64, scene_size.height as f64);
+    match rotation {
+        SurfaceOrientation::Rotation0 => Matrix::IDENTITY,
+        SurfaceOrientation::Rotation90 => Matrix::new(0.0, 1.0, -1.0, 0.0, height, 0.0),
+        SurfaceOrientation::Rotation180 => Matrix::new(-1.0, 0.0, 0.0, -1.0, width, height),
+        SurfaceOrientation::Rotation270 => Matrix::new(0.0, -1.0, 1.0, 0.0, 0.0, width),
+    }
+}
+
+#[cfg(test)]
+mod output_transform_tests {
+    use super::output_transform;
+    use crate::platform::SurfaceOrientation;
+    use crate::{Matrix, PixelSize, Point};
+
+    /// The corners of a 200 x 100 scene in the framebuffer of each quarter turn (clockwise): the
+    /// scene fills the framebuffer, which is 100 x 200 for a quarter turn.
+    #[test]
+    fn each_quarter_turn_maps_the_scene_onto_the_framebuffer() {
+        let size = PixelSize::new(200, 100);
+        let corners = |rotation| {
+            let transform = output_transform(rotation, size);
+            [Point::new(0.0, 0.0), Point::new(200.0, 0.0), Point::new(200.0, 100.0), Point::new(0.0, 100.0)]
+                .map(|corner| transform.transform(corner))
+        };
+        assert_eq!(output_transform(SurfaceOrientation::Rotation0, size), Matrix::IDENTITY);
+        assert_eq!(
+            corners(SurfaceOrientation::Rotation90),
+            [Point::new(100.0, 0.0), Point::new(100.0, 200.0), Point::new(0.0, 200.0), Point::new(0.0, 0.0)]
+        );
+        assert_eq!(
+            corners(SurfaceOrientation::Rotation180),
+            [Point::new(200.0, 100.0), Point::new(0.0, 100.0), Point::new(0.0, 0.0), Point::new(200.0, 0.0)]
+        );
+        assert_eq!(
+            corners(SurfaceOrientation::Rotation270),
+            [Point::new(0.0, 200.0), Point::new(0.0, 0.0), Point::new(100.0, 0.0), Point::new(100.0, 200.0)]
+        );
     }
 }

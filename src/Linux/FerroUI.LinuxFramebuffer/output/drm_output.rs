@@ -11,8 +11,7 @@
 //! output) does what is plain handles: the card, the connector, the mode,
 //! the CRTC, the GBM device and surface. The EGL half (the display on the
 //! GBM device, the window surface, the context, the first frame, the mode
-//! set with it, the objects of the rotation and the initial buffer
-//! swapping) is done, in the reference's order, on the thread that first
+//! set with it and the initial buffer swapping) is done, in the reference's order, on the thread that first
 //! asks the platform graphics for the shared context: the render thread.
 //! The platform graphics still use one shared context, as the reference.
 
@@ -94,43 +93,6 @@ pub(crate) fn rotated_size(orientation: SurfaceOrientation, resolution: PixelSiz
     }
 }
 
-/// The quad that draws the rotated scene onto the screen: per corner the
-/// position and the coordinates in the texture of the scene (x, y, u, v).
-pub(crate) fn rotation_vertices(orientation: SurfaceOrientation) -> [f32; 16] {
-    #[rustfmt::skip]
-    let vertices = match orientation {
-        SurfaceOrientation::Rotation90 => [
-            // 90° clockwise rotation
-            -1.0, -1.0,        1.0, 0.0,  // Bottom-left -> Bottom-right of texture
-             1.0, -1.0,        1.0, 1.0,  // Bottom-right -> Top-right of texture
-             1.0,  1.0,        0.0, 1.0,  // Top-right -> Top-left of texture
-            -1.0,  1.0,        0.0, 0.0,  // Top-left -> Bottom-left of texture
-        ],
-        SurfaceOrientation::Rotation180 => [
-            // 180° rotation
-            -1.0, -1.0,        1.0, 1.0,  // Bottom-left -> Top-right of texture
-             1.0, -1.0,        0.0, 1.0,  // Bottom-right -> Top-left of texture
-             1.0,  1.0,        0.0, 0.0,  // Top-right -> Bottom-left of texture
-            -1.0,  1.0,        1.0, 0.0,  // Top-left -> Bottom-right of texture
-        ],
-        SurfaceOrientation::Rotation270 => [
-            // 270° clockwise (90° counter-clockwise) rotation
-            -1.0, -1.0,        0.0, 1.0,  // Bottom-left -> Top-left of texture
-             1.0, -1.0,        0.0, 0.0,  // Bottom-right -> Bottom-left of texture
-             1.0,  1.0,        1.0, 0.0,  // Top-right -> Bottom-right of texture
-            -1.0,  1.0,        1.0, 1.0,  // Top-left -> Top-right of texture
-        ],
-        SurfaceOrientation::Rotation0 => [
-            // No rotation (shouldn't reach here but fallback)
-            -1.0, -1.0,        0.0, 0.0,
-             1.0, -1.0,        1.0, 0.0,
-             1.0,  1.0,        1.0, 1.0,
-            -1.0,  1.0,        0.0, 1.0,
-        ],
-    };
-    vertices
-}
-
 #[cfg(target_os = "linux")]
 mod imp {
     use super::super::drm::lib_drm::{
@@ -138,12 +100,12 @@ mod imp {
     };
     use super::super::drm_bindings::{DrmCard, DrmConnector, DrmModeInfo, DrmResources};
     use super::super::{IGlOutputBackend, IOutputBackend};
-    use super::{get_crtc, rotated_size, rotation_vertices, select_connector, select_mode};
+    use super::{get_crtc, rotated_size, select_connector, select_mode};
     use crate::DrmOutputOptions;
     use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
     use ferroui_base::platform::{
         IPlatformGraphics, IPlatformGraphicsContext, ISurfaceOrientation, PlatformRenderTargetState,
-        RenderTargetSceneInfo, SurfaceOrientation,
+        RenderTargetProperties, RenderTargetSceneInfo, SurfaceOrientation,
     };
     use ferroui_base::reactive::IDisposable;
     use ferroui_base::rendering::composition::CompositionTransparencyLevel;
@@ -292,12 +254,6 @@ mod imp {
         /// Whether a flip of this output is queued. Allocated for the life of the process: a page
         /// flip event can arrive through another output that shares the descriptor of the card.
         flip_pending: &'static Cell<bool>,
-        rotation_fbo: i32,
-        rotation_texture: i32,
-        rotated_size: PixelSize,
-        rotation_program: i32,
-        rotation_vbo: i32,
-        rotation_vao: i32,
     }
 
     impl Inner {
@@ -497,112 +453,6 @@ mod imp {
 
             let current_bo = Cell::new(bo);
 
-            // Initialize FBO for rotation if needed
-            let needs_rotation = options.orientation != SurfaceOrientation::Rotation0;
-            let (mut rotation_fbo, mut rotation_texture, mut rotation_program, mut rotation_vbo, mut rotation_vao) =
-                (0, 0, 0, 0, 0);
-            let rotated_size = if needs_rotation {
-                // For 90/270 rotation, swap width and height
-                let rotated = rotated_size(options.orientation, self.resolution());
-
-                let current = make_current()?;
-                let gl = deferred_context.gl_interface();
-                rotation_fbo = gl.gen_framebuffer();
-                rotation_texture = gl.gen_texture();
-
-                gl.bind_texture(GL_TEXTURE_2D, rotation_texture);
-                // SAFETY: no data: the texture is allocated, not filled.
-                unsafe {
-                    gl.tex_image_2d(
-                        GL_TEXTURE_2D,
-                        0,
-                        GL_RGBA,
-                        rotated.width,
-                        rotated.height,
-                        0,
-                        GL_RGBA,
-                        GL_UNSIGNED_BYTE,
-                        std::ptr::null(),
-                    );
-                }
-                gl.tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
-                gl.tex_parameteri(GL_TEXTURE_2D, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
-
-                gl.bind_framebuffer(GL_FRAMEBUFFER, rotation_fbo);
-                gl.framebuffer_texture_2d(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, rotation_texture, 0);
-                gl.bind_framebuffer(GL_FRAMEBUFFER, 0);
-
-                // Create shader program for textured quad
-                const VERTEX_SHADER: &str = "
-                        attribute vec2 aPos;
-                        attribute vec2 aTexCoord;
-                        varying vec2 vTexCoord;
-                        void main() {
-                            gl_Position = vec4(aPos, 0.0, 1.0);
-                            vTexCoord = aTexCoord;
-                        }";
-
-                const FRAGMENT_SHADER: &str = "
-                        precision mediump float;
-                        varying vec2 vTexCoord;
-                        uniform sampler2D uTexture;
-                        void main() {
-                            gl_FragColor = texture2D(uTexture, vTexCoord);
-                        }";
-
-                let vs = gl.create_shader(GL_VERTEX_SHADER);
-                gl.shader_source_string(vs, VERTEX_SHADER);
-                gl.compile_shader(vs);
-
-                let fs = gl.create_shader(GL_FRAGMENT_SHADER);
-                gl.shader_source_string(fs, FRAGMENT_SHADER);
-                gl.compile_shader(fs);
-
-                rotation_program = gl.create_program();
-                gl.attach_shader(rotation_program, vs);
-                gl.attach_shader(rotation_program, fs);
-                gl.link_program(rotation_program);
-                gl.delete_shader(vs);
-                gl.delete_shader(fs);
-
-                // Create VBO with quad vertices - texture coords depend on rotation
-                // Format: x, y, u, v
-                let vertices = rotation_vertices(options.orientation);
-
-                rotation_vbo = gl.gen_buffer();
-                rotation_vao = gl.gen_vertex_array();
-
-                gl.bind_vertex_array(rotation_vao);
-                gl.bind_buffer(GL_ARRAY_BUFFER, rotation_vbo);
-
-                let float = std::mem::size_of::<f32>() as i32;
-                // SAFETY: the data is the array of vertices, alive for the call, of the size given;
-                // the attribute pointers are offsets into the bound buffer.
-                unsafe {
-                    gl.buffer_data(
-                        GL_ARRAY_BUFFER,
-                        std::mem::size_of_val(&vertices) as isize,
-                        vertices.as_ptr().cast(),
-                        GL_STATIC_DRAW,
-                    );
-
-                    let pos_attrib = gl.get_attrib_location_string(rotation_program, "aPos");
-                    gl.enable_vertex_attrib_array(pos_attrib);
-                    gl.vertex_attrib_pointer(pos_attrib, 2, GL_FLOAT, 0, 4 * float, std::ptr::null());
-
-                    let tex_attrib = gl.get_attrib_location_string(rotation_program, "aTexCoord");
-                    gl.enable_vertex_attrib_array(tex_attrib);
-                    gl.vertex_attrib_pointer(tex_attrib, 2, GL_FLOAT, 0, 4 * float, (2 * float) as usize as *const c_void);
-                }
-
-                gl.bind_vertex_array(0);
-                current.dispose();
-                rotated
-            } else {
-                // No rotation needed
-                self.resolution()
-            };
-
             let state = Rc::new(EglState {
                 egl_display,
                 egl_surface,
@@ -610,12 +460,6 @@ mod imp {
                 current_bo,
                 pending_bo: Cell::new(std::ptr::null_mut()),
                 flip_pending: Box::leak(Box::new(Cell::new(false))),
-                rotation_fbo,
-                rotation_texture,
-                rotated_size,
-                rotation_program,
-                rotation_vbo,
-                rotation_vao,
             });
 
             if options.enable_initial_buffer_swapping {
@@ -644,14 +488,11 @@ mod imp {
             self.this.upgrade().expect("an output that is called is alive")
         }
 
+        /// The size of the scene: the resolution of the screen, its sides exchanged for a
+        /// quarter turn. The compositor turns the scene into the framebuffer
+        /// (`RenderTarget::properties`).
         fn pixel_size(&self) -> PixelSize {
-            let resolution = self.resolution();
-            let orientation = self.orientation();
-            if orientation == SurfaceOrientation::Rotation0 || orientation == SurfaceOrientation::Rotation180 {
-                PixelSize::new(resolution.width, resolution.height)
-            } else {
-                PixelSize::new(resolution.height, resolution.width)
-            }
+            rotated_size(self.orientation(), self.resolution())
         }
     }
 
@@ -915,16 +756,11 @@ mod imp {
             };
             let gl = self.egl.deferred_context.gl_interface();
 
-            if self.parent.orientation() != SurfaceOrientation::Rotation0 {
-                // Bind FBO for rendering when rotation is enabled
-                gl.bind_framebuffer(GL_FRAMEBUFFER, self.egl.rotation_fbo);
-                gl.viewport(0, 0, self.egl.rotated_size.width, self.egl.rotated_size.height);
-            } else {
-                // Render directly to screen when no rotation
-                gl.bind_framebuffer(GL_FRAMEBUFFER, 0);
-                let resolution = self.parent.resolution();
-                gl.viewport(0, 0, resolution.width, resolution.height);
-            }
+            // The framebuffer of the screen: a rotation is drawn by the compositor (upstream
+            // 9b3e9c881b), which turns its layer into it.
+            gl.bind_framebuffer(GL_FRAMEBUFFER, 0);
+            let resolution = self.parent.resolution();
+            gl.viewport(0, 0, resolution.width, resolution.height);
 
             Rc::new(RenderSession {
                 parent: self.parent.clone(),
@@ -932,6 +768,16 @@ mod imp {
                 clear_context,
                 disposed: Cell::new(false),
             })
+        }
+
+        /// The rotation of the screen: the compositor draws the scene into a layer and turns
+        /// it into the framebuffer, overlays included (upstream 9b3e9c881b replaced the
+        /// rotation framebuffer and shaders of the output with it).
+        fn properties(&self) -> RenderTargetProperties {
+            RenderTargetProperties {
+                required_rotation_for_orientation: self.parent.orientation(),
+                ..RenderTargetProperties::default()
+            }
         }
 
         fn dispose(&self) {
@@ -951,8 +797,9 @@ mod imp {
             self.egl.deferred_context.clone()
         }
 
+        /// The framebuffer of the screen, in its own orientation.
         fn size(&self) -> PixelSize {
-            self.egl.rotated_size
+            self.parent.resolution()
         }
 
         fn scaling(&self) -> f64 {
@@ -974,37 +821,6 @@ mod imp {
             let parent = &self.parent;
             let egl = &self.egl;
             let gl = egl.deferred_context.gl_interface();
-
-            if parent.orientation() != SurfaceOrientation::Rotation0 {
-                // Rotation enabled - blit from FBO to screen
-                // Unbind FBO to render to default framebuffer
-                gl.bind_framebuffer(GL_FRAMEBUFFER, 0);
-                let resolution = parent.resolution();
-                gl.viewport(0, 0, resolution.width, resolution.height);
-
-                // Clear the screen
-                gl.clear_color(0.0, 0.0, 0.0, 1.0);
-                gl.clear(GL_COLOR_BUFFER_BIT);
-
-                // Use the shader program
-                gl.use_program(egl.rotation_program);
-
-                // Bind the FBO texture
-                gl.active_texture(GL_TEXTURE0);
-                gl.bind_texture(GL_TEXTURE_2D, egl.rotation_texture);
-
-                // Set texture uniform (texture unit 0)
-                let tex_loc = gl.get_uniform_location_string(egl.rotation_program, "uTexture");
-                gl.uniform1i(tex_loc, 0);
-
-                // Draw the rotated quad
-                gl.bind_vertex_array(egl.rotation_vao);
-                // SAFETY: the bound vertex array has the four vertices of the quad.
-                unsafe { gl.draw_arrays(GL_TRIANGLE_FAN, 0, 4) };
-                gl.bind_vertex_array(0);
-
-                gl.use_program(0);
-            }
 
             gl.flush();
             egl.egl_surface.swap_buffers();
@@ -1160,38 +976,11 @@ mod tests {
     }
 
     #[test]
-    fn a_quarter_turn_exchanges_the_sides_and_the_quad_maps_the_corners() {
+    fn a_quarter_turn_exchanges_the_sides_of_the_scene() {
         let size = PixelSize::new(1024, 768);
         assert_eq!(rotated_size(SurfaceOrientation::Rotation0, size), size);
         assert_eq!(rotated_size(SurfaceOrientation::Rotation180, size), size);
         assert_eq!(rotated_size(SurfaceOrientation::Rotation90, size), PixelSize::new(768, 1024));
         assert_eq!(rotated_size(SurfaceOrientation::Rotation270, size), PixelSize::new(768, 1024));
-
-        // The bottom-left corner of the screen shows, per orientation, this corner of the scene.
-        let corner = |o| {
-            let v = rotation_vertices(o);
-            (v[2], v[3])
-        };
-        assert_eq!(corner(SurfaceOrientation::Rotation0), (0.0, 0.0));
-        assert_eq!(corner(SurfaceOrientation::Rotation90), (1.0, 0.0));
-        assert_eq!(corner(SurfaceOrientation::Rotation180), (1.0, 1.0));
-        assert_eq!(corner(SurfaceOrientation::Rotation270), (0.0, 1.0));
-    }
-
-    #[test]
-    fn the_top_left_corner_of_the_scene_is_turned_clockwise() {
-        // The scene is drawn into the texture with its top row at v = 1 (the session is not
-        // flipped), and the screen's top is y = 1: the corner of the screen whose vertex
-        // samples (0, 1) shows the scene's top-left corner. The smoke example expects its
-        // marker there.
-        let screen_corner = |o| {
-            let v = rotation_vertices(o);
-            let i = (0..4).find(|i| v[i * 4 + 2] == 0.0 && v[i * 4 + 3] == 1.0).unwrap();
-            (v[i * 4], v[i * 4 + 1])
-        };
-        assert_eq!(screen_corner(SurfaceOrientation::Rotation0), (-1.0, 1.0)); // top left
-        assert_eq!(screen_corner(SurfaceOrientation::Rotation90), (1.0, 1.0)); // top right
-        assert_eq!(screen_corner(SurfaceOrientation::Rotation180), (1.0, -1.0)); // bottom right
-        assert_eq!(screen_corner(SurfaceOrientation::Rotation270), (-1.0, -1.0)); // bottom left
     }
 }

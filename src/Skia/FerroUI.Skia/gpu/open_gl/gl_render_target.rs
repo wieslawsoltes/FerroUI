@@ -1,6 +1,8 @@
 use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::{ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaSurfaceOrigin};
-use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    PlatformRenderTargetState, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
+};
 use ferroui_opengl::gl_consts::{GL_FRAMEBUFFER_BINDING, GL_RGBA8};
 use ferroui_opengl::surfaces::{
     IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession,
@@ -109,6 +111,10 @@ impl Drop for SessionGuard {
 }
 
 impl ISkiaGpuRenderTarget for GlRenderTarget {
+    fn properties(&self) -> RenderTargetProperties {
+        self.surface.properties()
+    }
+
     fn begin_rendering_session(
         &self,
         scene_info: &RenderTargetSceneInfo,

@@ -186,6 +186,7 @@ impl IRenderTarget for MetalTarget {
         RenderTargetProperties {
             retains_previous_frame_contents: false,
             is_suitable_for_direct_rendering: true,
+            ..Default::default()
         }
     }
     fn create_drawing_context(

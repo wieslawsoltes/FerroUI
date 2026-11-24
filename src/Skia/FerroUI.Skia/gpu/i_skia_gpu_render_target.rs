@@ -1,10 +1,18 @@
 use super::ISkiaGpuRenderSession;
-use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
+use ferroui_base::platform::{
+    PlatformRenderTargetState, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
+};
 use skia_safe::SurfaceProps;
 use std::rc::Rc;
 
 /// Custom Skia render target.
 pub trait ISkiaGpuRenderTarget {
+    /// The properties of the target (upstream 9b3e9c881b): the rotation a GL surface mounted in
+    /// another orientation needs, reported by its platform surface. The default has none.
+    fn properties(&self) -> RenderTargetProperties {
+        RenderTargetProperties::default()
+    }
+
     /// Starts rendering to this render target. The Skia surface of the
     /// session is created with `surface_props` (the text rendering of the
     /// frame, docs/porting/text-rendering.md).

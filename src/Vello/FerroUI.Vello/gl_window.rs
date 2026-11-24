@@ -286,7 +286,15 @@ fn present_frame(
 
 impl IRenderTarget for VelloGlRenderTarget {
     fn properties(&self) -> RenderTargetProperties {
-        RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }
+        // The rotation of a surface mounted in another orientation (a DRM output) is drawn by
+        // the compositor (upstream 9b3e9c881b).
+        let target = self.target.borrow();
+        let rotation = target.as_ref().map(|target| target.properties().required_rotation_for_orientation);
+        RenderTargetProperties {
+            retains_previous_frame_contents: true,
+            is_suitable_for_direct_rendering: true,
+            required_rotation_for_orientation: rotation.unwrap_or_default(),
+        }
     }
 
     fn create_drawing_context(

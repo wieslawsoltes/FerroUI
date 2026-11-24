@@ -346,7 +346,11 @@ impl IRenderTarget for VelloWebGlRenderTarget {
         // rectangle a frame). The drawing buffer holds nothing of the frame
         // before, which the properties of each drawing context say, so
         // every frame is drawn whole.
-        RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }
+        RenderTargetProperties {
+            retains_previous_frame_contents: true,
+            is_suitable_for_direct_rendering: true,
+            ..Default::default()
+        }
     }
 
     fn create_drawing_context(

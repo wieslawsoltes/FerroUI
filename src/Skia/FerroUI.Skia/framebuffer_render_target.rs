@@ -150,6 +150,7 @@ impl IRenderTarget for FramebufferRenderTarget {
             retains_previous_frame_contents: !self.had_conversion_shim.get()
                 && self.render_target.borrow().as_ref().is_some_and(|target| target.retains_frame_contents()),
             is_suitable_for_direct_rendering: true,
+            ..Default::default()
         }
     }
 

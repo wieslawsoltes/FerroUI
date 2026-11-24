@@ -116,7 +116,7 @@ pub(crate) fn clips_regions_per_draw(backend: Option<SkiaGpuBackend>) -> bool {
 
 impl IRenderTarget for SkiaGpuRenderTarget {
     fn properties(&self) -> RenderTargetProperties {
-        RenderTargetProperties::default()
+        self.render_target.properties()
     }
 
     fn create_drawing_context(
