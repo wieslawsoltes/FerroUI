@@ -10,7 +10,7 @@
                     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
                     xmlns:converters="using:FerroUI.Controls.Converters"
                     xmlns:winui="using:FerroUI.Themes.Material"
-                    xmlns:winuiconverters="using:FerroUI.Themes.Material.Converters"
+                    xmlns:winuiconverters="using:FerroUI.Themes.Material.Internal.Converters"
                     x:ClassModifier="internal">
   <ResourceDictionary.ThemeDictionaries>
     <ResourceDictionary x:Key="Default">

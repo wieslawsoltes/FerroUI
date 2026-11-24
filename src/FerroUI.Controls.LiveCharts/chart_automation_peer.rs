@@ -1,4 +1,4 @@
-use crate::Chart;
+use crate::LiveChart;
 use ferroui_base::{ferro_class, ferro_class_info, instantiate, FerroObjectImpl, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer,
@@ -16,7 +16,7 @@ impl FerroObjectImpl for ChartAutomationPeer {}
 impl ControlAutomationPeerImpl for ChartAutomationPeer {}
 impl AutomationPeerImpl for ChartAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
-        "Chart".to_owned()
+        "LiveChart".to_owned()
     }
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Custom
@@ -27,7 +27,7 @@ impl AutomationPeerImpl for ChartAutomationPeer {
             return Some(name);
         }
         this.try_owner()
-            .and_then(|owner| owner.cast::<Chart>())
+            .and_then(|owner| owner.cast::<LiveChart>())
             .map(|chart| {
                 let title = chart.title();
                 if title.is_empty() {
@@ -44,7 +44,7 @@ impl AutomationPeerImpl for ChartAutomationPeer {
             return Some(help);
         }
         this.try_owner()
-            .and_then(|owner| owner.cast::<Chart>())
+            .and_then(|owner| owner.cast::<LiveChart>())
             .map(|chart| {
                 chart
                     .series()
@@ -73,12 +73,12 @@ impl AutomationPeerImpl for ChartAutomationPeer {
     }
 }
 impl ChartAutomationPeer {
-    pub fn construct(owner: &Chart) -> Self {
+    pub fn construct(owner: &LiveChart) -> Self {
         Self {
             base: ControlAutomationPeer::construct(owner),
         }
     }
-    pub fn new(owner: &Chart) -> Ref<Self> {
+    pub fn new(owner: &LiveChart) -> Ref<Self> {
         instantiate(Self::construct(owner))
     }
 }

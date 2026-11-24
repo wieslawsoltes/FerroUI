@@ -9,7 +9,7 @@
 //! dependency properties; here the paddings are styled properties and the margins attached
 //! properties of the children (`Control`), as FerroUI's panels have them. The WinUI theme has a
 //! port of the same class for its notifications (`ferroui_themes_winui::primitives::InfoBarPanel`,
-//! namespace `FerroUI.Themes.WinUI.Primitives`); the template of InfoBar uses this one.
+//! namespace `FerroUI.Themes.WinUI.Internal.Primitives`); the template of InfoBar uses this one.
 
 use crate::{Control, ControlImpl, Panel, PanelImpl};
 use ferroui_base::input::InputElementImpl;

@@ -27,14 +27,14 @@ pub mod scene_transition;
 mod series_classes;
 mod visual_elements;
 
-pub use axis::{Axis, DateTimeAxis, TimeSpanAxis};
-pub use chart::{Chart, ChartPointerEventArgs};
+pub use axis::{LiveAxis, LiveDateTimeAxis, TimeSpanAxis};
+pub use chart::{LiveChart, ChartPointerEventArgs};
 pub use chart_automation_peer::ChartAutomationPeer;
 pub use chart_classes::*;
 pub use chart_point::ChartPoint;
 pub use chart_series::ChartSeries;
 pub use collections::{
-    Axes, ChartPoints, ChartSeriesCollection, ChartVisualElements, GeoMarkers, HeatLands,
+    Axes, ChartPoints, LiveChartSeriesCollection, ChartVisualElements, GeoMarkers, HeatLands,
     SankeyLinks, SankeyNodes, TreemapNodes,
 };
 pub use enums::{ChartKind, LegendPosition, MapInteractionMode, TooltipPosition, ZoomAndPanMode};

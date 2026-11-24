@@ -300,9 +300,39 @@ pub trait IXamlField: IXamlMember {
     fn as_any(&self) -> &dyn Any;
 }
 
+/// A name an XML namespace keeps for a type that is called something else now. It is stated in
+/// the metadata of an assembly, under the key `FerroXmlnsTypeAlias <xml namespace> <name>` with
+/// the name of the type as the value, so only an assembly that has one pays for it.
+#[derive(Clone, Debug, PartialEq, Eq)]
+pub struct XmlnsTypeAlias {
+    pub xml_namespace: String,
+    pub name: String,
+    pub type_name: String,
+}
+
+impl XmlnsTypeAlias {
+    /// The first word of the key of an alias in the metadata of an assembly.
+    pub const METADATA_KEY: &'static str = "FerroXmlnsTypeAlias";
+
+    /// The alias a metadata entry states, if it states one.
+    pub fn from_metadata(key: &str, value: &str) -> Option<Self> {
+        let rest = key.strip_prefix(Self::METADATA_KEY)?.strip_prefix(' ')?;
+        let (xml_namespace, name) = rest.rsplit_once(' ')?;
+        (!xml_namespace.is_empty() && !name.is_empty() && !value.is_empty()).then(|| XmlnsTypeAlias {
+            xml_namespace: xml_namespace.to_owned(),
+            name: name.to_owned(),
+            type_name: value.to_owned(),
+        })
+    }
+}
+
 pub trait IXamlAssembly: 'static {
     fn name(&self) -> String;
     fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>>;
+    /// The names XML namespaces keep for the renamed types of this assembly.
+    fn xmlns_type_aliases(&self) -> Vec<XmlnsTypeAlias> {
+        Vec::new()
+    }
     fn find_type(&self, full_name: &str) -> Option<Rc<dyn IXamlType>>;
     fn equals(&self, other: &dyn IXamlAssembly) -> bool;
     fn as_any(&self) -> &dyn Any;

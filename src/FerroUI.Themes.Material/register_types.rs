@@ -5,7 +5,7 @@
 use crate::accents::SystemAccentColors;
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
-use crate::material_theme::{DensityStyle, MaterialTheme};
+use crate::material_theme::MaterialTheme;
 use crate::{MaterialBottomSheetHost, MaterialSheetState, MaterialSnackbar, MaterialSnackbarHost};
 use crate::{MaterialTextField, MaterialTextFieldLayout, MaterialTextFieldSlot};
 use crate::MaterialSearchView;
@@ -58,9 +58,9 @@ const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_material::extended_fab", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::range_slider", "FerroUI.Themes.Material"),
     ("ferroui_themes_material::snackbar", "FerroUI.Themes.Material"),
-    ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Accents"),
-    ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Converters"),
-    ("ferroui_themes_material::primitives", "FerroUI.Themes.Material.Primitives"),
+    ("ferroui_themes_material::accents", "FerroUI.Themes.Material.Internal.Accents"),
+    ("ferroui_themes_material::converters", "FerroUI.Themes.Material.Internal.Converters"),
+    ("ferroui_themes_material::primitives", "FerroUI.Themes.Material.Internal.Primitives"),
 ];
 
 /// What this crate states about itself for markup: its assembly name and
@@ -91,7 +91,6 @@ const MARKUP_TYPES: &[&MarkupType] = &[
     <MaterialTimeSelection as MarkupTyped>::MARKUP,
     <MaterialTimeDisplayMode as MarkupTyped>::MARKUP,
 
-    <DensityStyle as MarkupTyped>::MARKUP,
     <MaterialMotionScheme as MarkupTyped>::MARKUP,
     <MaterialSheetState as MarkupTyped>::MARKUP,
     <MaterialTextFieldSlot as MarkupTyped>::MARKUP,
@@ -136,7 +135,6 @@ fn register_value_types() {
     ValueTypes::register_nullable::<MaterialTimeSelection>();
     ValueTypes::register_nullable::<MaterialTimeDisplayMode>();
 
-    ValueTypes::register_nullable::<DensityStyle>();
     ValueTypes::register_nullable::<MaterialMotionScheme>();
     ValueTypes::register_nullable::<MaterialSheetState>();
     ValueTypes::register_nullable::<MaterialTextFieldSlot>();

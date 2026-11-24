@@ -50,16 +50,16 @@ pub(super) fn window(child: Ref<Control>) -> Ref<Window> {
     update(&window);
     window
 }
-fn layer(overlay: Ref<Control>, z: i32) -> Ref<OverlayLayer> {
-    let layer = OverlayLayer::new();
+fn layer(overlay: Ref<Control>, z: i32) -> Ref<DockOverlayLayer> {
+    let layer = DockOverlayLayer::new();
     layer.set_overlay(Some(overlay));
     layer.set_z_index(z);
     layer
 }
-fn layers(values: impl IntoIterator<Item = Ref<OverlayLayer>>) -> OverlayLayerCollection {
+fn layers(values: impl IntoIterator<Item = Ref<DockOverlayLayer>>) -> OverlayLayerCollection {
     let collection = OverlayLayerCollection::new();
     for layer in values {
-        collection.add(Some(OverlayLayer::as_layer(layer)));
+        collection.add(Some(DockOverlayLayer::as_layer(layer)));
     }
     collection
 }
@@ -119,7 +119,7 @@ fn structurally_equivalent_replacement_keeps_current_attached_layers_and_pipelin
         // Source retains the old private list while the public property holds new.
         assert!(host.overlay_layers() == replacement);
         let extra = Border::new();
-        old.add(Some(OverlayLayer::as_layer(layer(
+        old.add(Some(DockOverlayLayer::as_layer(layer(
             extra.clone().upcast(),
             10,
         ))));
@@ -257,7 +257,7 @@ fn rebuild_reentrant_mutation_during_detach_is_coalesced_not_recursive() {
         let new_layer = layer(extra.clone().upcast(), 20);
         let captured = layers.clone();
         outer.callback.replace(Some(Box::new(move || {
-            captured.add(Some(OverlayLayer::as_layer(new_layer)))
+            captured.add(Some(DockOverlayLayer::as_layer(new_layer)))
         })));
         let new_content = Border::new();
         host.set_content(Some(Control::boxed(new_content.clone())));
@@ -281,7 +281,7 @@ fn rebuild_reentrant_mutation_during_detach_is_coalesced_not_recursive() {
 #[test]
 fn layer_defaults_properties_and_canonical_interface_preserve_native_identity() {
     run(|| {
-        let a = OverlayLayer::new();
+        let a = DockOverlayLayer::new();
         assert_eq!(a.z_index(), 0);
         assert!(a.is_visible());
         assert!(a.blocks_input());
@@ -293,8 +293,8 @@ fn layer_defaults_properties_and_canonical_interface_preserve_native_identity() 
         a.set_style_key(Some(Rc::new("theme".to_owned())));
         let overlay = Border::new();
         a.set_overlay(Some(overlay.clone().upcast()));
-        let x = OverlayLayer::as_layer(a.clone());
-        let y = OverlayLayer::as_layer(a.clone());
+        let x = DockOverlayLayer::as_layer(a.clone());
+        let y = DockOverlayLayer::as_layer(a.clone());
         assert!(Rc::ptr_eq(&x, &y));
         assert!(x.as_object().unwrap().ptr_eq(&a));
         assert_eq!(x.z_index(), 12);
@@ -342,14 +342,14 @@ fn ordered_layers_are_lazy_repeatable_stable_and_buffer_before_reading_keys() {
             overlay: Border::new().upcast(),
             on_z: RefCell::new(None),
         });
-        let b = OverlayLayer::as_layer(layer(Border::new().upcast(), 5));
-        let c = OverlayLayer::as_layer(layer(Border::new().upcast(), -1));
+        let b = DockOverlayLayer::as_layer(layer(Border::new().upcast(), 5));
+        let c = DockOverlayLayer::as_layer(layer(Border::new().upcast(), -1));
         collection.add(Some(a.clone()));
         collection.add(Some(b.clone()));
         let query = collection.get_ordered_layers();
         let mut iter = query.iter();
         collection.add(Some(c.clone()));
-        let d = OverlayLayer::as_layer(layer(Border::new().upcast(), -10));
+        let d = DockOverlayLayer::as_layer(layer(Border::new().upcast(), -10));
         let shared = collection.clone();
         a.on_z.replace(Some(Box::new(move || shared.add(Some(d)))));
         assert!(Rc::ptr_eq(&iter.next().unwrap(), &c));
@@ -435,7 +435,7 @@ fn factory_layers_take_priority_and_create_distinct_controls_for_each_host() {
         let factory = OverlayLayerFactory::new(Some(Rc::new(move || {
             let control = Border::new();
             output.borrow_mut().push(control.clone());
-            Some(OverlayLayer::as_layer(layer(control.upcast(), 0)))
+            Some(DockOverlayLayer::as_layer(layer(control.upcast(), 0)))
         })));
         let null = OverlayLayerFactory::new(Some(Rc::new(|| None)));
         let factories = OverlayFactorySource::from_items(vec![None, Some(null), Some(factory)]);
@@ -492,7 +492,7 @@ fn service_collection_identity_empty_fallback_and_invisible_layer_priority_are_r
         update(&w);
         assert!(contains(&host, &explicit));
         assert_eq!(provider_calls.get(), 1);
-        shared.add(Some(OverlayLayer::as_layer(item)));
+        shared.add(Some(DockOverlayLayer::as_layer(item)));
         update(&w);
         assert!(contains(&host, &service));
         host.set_use_service_layers(false);
@@ -584,7 +584,7 @@ fn detached_host_unsubscribes_from_live_layer_lists_registry_and_rebuilds_latest
         w.close();
         w.set_content(None);
         item.set_is_visible(false);
-        list.add(Some(OverlayLayer::as_layer(layer(
+        list.add(Some(DockOverlayLayer::as_layer(layer(
             Border::new().upcast(),
             10,
         ))));

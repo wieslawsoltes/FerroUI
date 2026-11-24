@@ -215,7 +215,7 @@ fn prefix_counts(
 ) -> BTreeMap<(String, String), usize> {
     let mut counts = BTreeMap::new();
     for file in files {
-        let is_markup = [".axaml", ".xaml", ".md"].iter().any(|extension| file.ends_with(extension));
+        let is_markup = [".xaml", ".md"].iter().any(|extension| file.ends_with(extension));
         if !is_markup || is_outside_product(file) {
             continue;
         }
@@ -421,7 +421,7 @@ mod tests {
     #[test]
     fn more_prefixes_fail_and_fewer_do_not() {
         let found = inventory(&["A"], &[("A", &["X"])]);
-        let key = ("a.axaml".to_owned(), "A".to_owned());
+        let key = ("a.xaml".to_owned(), "A".to_owned());
         let allowed = BTreeMap::from([(key.clone(), 2)]);
         let fewer = BTreeMap::from([(key.clone(), 1)]);
         let more = BTreeMap::from([(key, 3)]);

@@ -11,8 +11,8 @@ use ferroui_livecharts::kernel::{Coordinate, Error};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::{cell::Cell, rc::Rc};
 
-fn line() -> Ref<LineSeries> {
-    let series = LineSeries::new();
+fn line() -> Ref<LiveLineSeries> {
+    let series = LiveLineSeries::new();
     series.set_numeric_values([3.0, 8.0, 5.0]);
     series
 }
@@ -48,7 +48,7 @@ fn default_collections_are_per_instance_and_derived_series_keep_their_kind() {
     let b = CartesianChart::new();
     a.series().add(line().upcast());
     assert!(b.series().is_empty());
-    let axis = Axis::new();
+    let axis = LiveAxis::new();
     axis.set_name("first only".into());
     a.x_axes().add(axis);
     assert!(b.x_axes().is_empty());
@@ -58,8 +58,8 @@ fn default_collections_are_per_instance_and_derived_series_keep_their_kind() {
         SeriesKind::StackedStepArea
     );
     assert_eq!(PolarLineSeries::new().kind(), SeriesKind::PolarLine);
-    let c = LineSeries::new();
-    let d = LineSeries::new();
+    let c = LiveLineSeries::new();
+    let d = LiveLineSeries::new();
     c.values().add(ChartPoint::with_xy(0.0, 1.0));
     assert!(d.values().is_empty());
 }
@@ -71,7 +71,7 @@ fn shared_series_mutation_invalidates_each_chart_and_scene_cache() {
     let a = CartesianChart::new();
     let b = CartesianChart::new();
     let series = line();
-    let shared = ChartSeriesCollection::from_items([series.clone().upcast()]);
+    let shared = LiveChartSeriesCollection::from_items([series.clone().upcast()]);
     a.set_series(shared.clone());
     b.set_series(shared);
     let size = Size::new(640.0, 360.0);
@@ -275,6 +275,30 @@ fn runtime_xaml_loads_native_chart_series_points_and_axes() {
     let revision = chart.revision();
     series.values().get(0).set_y(12.0);
     assert!(chart.revision() > revision);
+}
+
+#[test]
+fn the_renamed_classes_load_from_the_default_xml_namespace_and_by_their_old_names() {
+    let _app = UnitTestApplication::start(TestServices::new());
+    register_types();
+    for markup in [
+        r##"<CartesianChart xmlns="https://github.com/ferroui">
+          <CartesianChart.XAxes><LiveAxis Name="Time" /></CartesianChart.XAxes>
+          <LiveLineSeries Name="Line" /><LiveAreaSeries Name="Area" />
+        </CartesianChart>"##,
+        r##"<lc:CartesianChart xmlns:lc="https://ferroui.dev/livecharts">
+          <lc:CartesianChart.XAxes><lc:Axis Name="Time" /></lc:CartesianChart.XAxes>
+          <lc:LineSeries Name="Line" /><lc:AreaSeries Name="Area" />
+        </lc:CartesianChart>"##,
+    ] {
+        let loaded = FerroRuntimeXamlLoader::parse(markup, Some(&ASSEMBLY))
+            .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
+        let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
+        assert_eq!(chart.x_axes().get(0).name(), "Time");
+        assert_eq!(chart.series().count(), 2);
+        assert!(chart.series().get(0).cast::<LiveLineSeries>().is_some());
+        assert!(chart.series().get(1).cast::<LiveAreaSeries>().is_some());
+    }
 }
 
 #[test]
@@ -797,7 +821,7 @@ fn ohlc_errors_heat_and_date_axes_load_from_markup_and_reach_the_engine() {
     assert_eq!(heat.point_padding(), ferroui_base::Thickness::uniform(4.0));
     // DateTimeAxis and TimeSpanAxis take the unit width and minimum step of their interval
     // (OnAxisIntervalChanged) and label with their format.
-    let dates = DateTimeAxis::new();
+    let dates = LiveDateTimeAxis::new();
     let day = SignedDuration::TICKS_PER_DAY as f64;
     assert_eq!((dates.unit_width(), dates.min_step()), (day, day));
     dates.set_date_format("MM dd".into());
@@ -833,7 +857,7 @@ fn ohlc_errors_heat_and_date_axes_load_from_markup_and_reach_the_engine() {
     .unwrap_or_else(|error| panic!("{}; {:?}", error.message(), error.inner_exception()));
     let chart = from_markup_value::<Ref<CartesianChart>>(&Some(loaded)).unwrap();
     chart.set_animations_speed(0.0);
-    let axis = chart.x_axes().get(0).cast::<DateTimeAxis>().unwrap();
+    let axis = chart.x_axes().get(0).cast::<LiveDateTimeAxis>().unwrap();
     assert_eq!(axis.unit_width(), 2.0 * day);
     assert_eq!(axis.date_format(), "MMM dd");
     assert_eq!(chart.series().get(0).kind(), SeriesKind::Ohlc);
@@ -1050,7 +1074,7 @@ fn polar_tooltip_text_takes_the_angle_labels_and_the_formatters_of_the_series() 
     chart.series().add(series.clone().upcast());
     let label = |chart: &PolarChart| chart.scene(size).unwrap().hits[0].label.clone();
     assert_eq!(label(&chart), "Wind: 5");
-    let angles = Axis::new();
+    let angles = LiveAxis::new();
     angles.set_labels(vec!["N".into(), "E".into(), "S".into(), "W".into()]);
     chart.x_axes().add(angles);
     assert_eq!(label(&chart), "Wind: E: 5");
@@ -1081,7 +1105,7 @@ fn cartesian_tooltip_text_takes_the_category_labels_and_the_formatters_of_the_se
     chart.series().add(series.clone().upcast());
     let label = |chart: &CartesianChart| chart.scene(size).unwrap().hits[0].label.clone();
     assert_eq!(label(&chart), "Sales: 5");
-    let months = Axis::new();
+    let months = LiveAxis::new();
     months.set_labels(vec!["Jan".into()]);
     chart.x_axes().add(months);
     assert_eq!(label(&chart), "Sales: Jan: 5");
@@ -1147,7 +1171,7 @@ fn scatter_and_column_series_draw_their_geometry_svg_from_markup() {
 fn node_tooltip_text_takes_the_tool_tip_label_formatter_of_the_series() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let size = Size::new(600.0, 600.0);
-    let labels = |chart: &Chart| {
+    let labels = |chart: &LiveChart| {
         let mut labels: Vec<_> = chart
             .scene(size)
             .unwrap()
@@ -1503,7 +1527,7 @@ fn gauge_generator_builds_solid_and_angular_gauges_with_the_theme_rules() {
 #[test]
 fn data_labels_of_every_series_break_at_their_max_width() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    assert_eq!(LineSeries::new().data_labels_max_width(), 170.0);
+    assert_eq!(LiveLineSeries::new().data_labels_max_width(), 170.0);
     let chart = CartesianChart::new();
     chart.set_animations_speed(0.0);
     let series = BoxSeries::new();

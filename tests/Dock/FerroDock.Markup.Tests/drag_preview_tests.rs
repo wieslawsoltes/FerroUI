@@ -1,5 +1,5 @@
 //! Separate compiled consumer for preview properties and the original window theme.
-use ferrodock_ferro::controls::{DragPreviewControl, DragPreviewWindow};
+use ferrodock_ferro::controls::{DragPreviewControl, DockDragPreviewWindow};
 use ferroui_base::{
     threading::{CancellationToken, Dispatcher},
     Ref,
@@ -80,9 +80,9 @@ fn compiled_preview_properties_update_native_template_and_original_window_theme_
                 assert_eq!(content.height(), 180.0);
                 preview.set_preview_content(None);
                 assert!(content.content().is_none());
-                let host = DragPreviewWindow::new();
+                let host = DockDragPreviewWindow::new();
                 let theme = panel.find_resource(&ferroui_base::controls::ResourceKey::from(
-                    DragPreviewWindow::TYPE,
+                    DockDragPreviewWindow::TYPE,
                 ));
                 let theme = ferroui_base::metadata::from_markup_value::<
                     Ref<ferroui_base::styling::ControlTheme>,

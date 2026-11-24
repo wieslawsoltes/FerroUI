@@ -7,7 +7,7 @@ use super::{
 };
 use crate::{
     controls::{
-        DragPreviewControl, DragPreviewWindow, ManagedDockWindowDocument, ManagedWindowLayer,
+        DragPreviewControl, DockDragPreviewWindow, ManagedDockWindowDocument, ManagedWindowLayer,
     },
     model_projection,
 };
@@ -30,7 +30,7 @@ const USE_WINDOW_MOVE_COALESCING: bool = cfg!(target_os = "macos");
 // Source Monitor is reentrant. No TLS/RefCell borrow is held across native or model callbacks.
 // This preserves UI-thread reentry; process-wide/cross-thread Monitor equivalence remains open.
 struct PreviewState {
-    window: RefCell<Option<Ref<DragPreviewWindow>>>,
+    window: RefCell<Option<Ref<DockDragPreviewWindow>>>,
     control: RefCell<Option<Ref<DragPreviewControl>>>,
     window_templates_initialized: Cell<bool>,
     managed_templates_initialized: Cell<bool>,
@@ -78,7 +78,7 @@ impl PreviewState {
             window_move_post_sequence: Cell::new(0),
         }
     }
-    fn window(&self) -> Option<Ref<DragPreviewWindow>> {
+    fn window(&self) -> Option<Ref<DockDragPreviewWindow>> {
         self.window.borrow().clone()
     }
     fn control(&self) -> Option<Ref<DragPreviewControl>> {
@@ -90,7 +90,7 @@ impl PreviewState {
     fn managed_layer(&self) -> Option<Ref<ManagedWindowLayer>> {
         self.managed_layer.borrow().clone()
     }
-    fn expect_window(&self) -> Ref<DragPreviewWindow> {
+    fn expect_window(&self) -> Ref<DockDragPreviewWindow> {
         self.window().expect("source current preview window")
     }
     fn expect_control(&self) -> Ref<DragPreviewControl> {
@@ -182,7 +182,7 @@ impl DragPreviewHelper {
         }
     }
     fn queue_window_move(
-        window: &DragPreviewWindow,
+        window: &DockDragPreviewWindow,
         control: &DragPreviewControl,
         target: PixelPoint,
         status: Option<&str>,
@@ -255,7 +255,7 @@ impl DragPreviewHelper {
         }
     }
     fn apply_window_move(
-        window: &DragPreviewWindow,
+        window: &DockDragPreviewWindow,
         control: &DragPreviewControl,
         target: PixelPoint,
         status: Option<&str>,
@@ -293,7 +293,7 @@ impl DragPreviewHelper {
             1.0
         }
     }
-    fn maintain_frozen_window_size(window: &DragPreviewWindow, control: &DragPreviewControl) {
+    fn maintain_frozen_window_size(window: &DockDragPreviewWindow, control: &DragPreviewControl) {
         let scale = Self::get_window_scaling(window);
         let state = Self::state();
         if (scale - state.last_frozen_window_scaling.get()).abs() < 0.0001 {
@@ -398,7 +398,7 @@ impl DragPreviewHelper {
                 &state.expect_control(),
                 &state.window_templates_initialized,
             );
-            let window = DragPreviewWindow::new();
+            let window = DockDragPreviewWindow::new();
             window.set_content(Some(Control::boxed(
                 state.expect_control().upcast::<Control>(),
             )));

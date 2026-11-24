@@ -26,16 +26,7 @@ ferroui_base::ferro_thread_local! {
     static HIGH_CONTRAST: ThemeVariant = ThemeVariant::new("HighContrast", Some(ThemeVariant::dark()));
 }
 
-/// Legacy density selection. Compact maps the standard controls to the Small size.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq, Hash)]
-#[repr(i32)]
-pub enum DensityStyle {
-    #[default]
-    Normal,
-    Compact,
-}
-
-ferro_markup_enum!(DensityStyle { Normal, Compact }, { namespace: "FerroUI.Themes.MacOS" });
+pub use ferroui_controls::DensityStyle;
 
 /// macOS 26 control sizes. Values are in device-independent points.
 /// Large and extra-large controls use capsule outlines; the smaller sizes

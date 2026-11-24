@@ -1,7 +1,7 @@
 ﻿<UserControl xmlns="https://github.com/ferroui"
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              x:Class="FerroUI.Diagnostics.Views.LayoutExplorerView"
-             xmlns:controls="using:FerroUI.Diagnostics.Controls"
+             xmlns:controls="using:FerroUI.Diagnostics.Internal.Controls"
              xmlns:converters="using:FerroUI.Diagnostics.Converters"
              xmlns:viewModels="using:FerroUI.Diagnostics.ViewModels"
              x:DataType="viewModels:ControlLayoutViewModel">

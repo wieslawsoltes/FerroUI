@@ -3,7 +3,7 @@
 use crate::renderer::NativeScene;
 use crate::scene_transition::SceneTransition;
 use crate::{
-    Axes, Axis, ChartKind, ChartLegend, ChartSeries, ChartSeriesCollection, ChartVisualElement,
+    Axes, LiveAxis, ChartKind, ChartLegend, ChartSeries, LiveChartSeriesCollection, ChartVisualElement,
     ChartVisualElements, GeoMarkers, HeatSeries, LegendPosition, MapInteractionMode,
     PolarLineSeries, TooltipPosition, ZoomAndPanMode,
 };
@@ -51,8 +51,8 @@ fn series_geometry_svg(model: &Ref<ChartSeries>) -> Option<String> {
         };
     }
     svg!(
-        LineSeries,
-        AreaSeries,
+        LiveLineSeries,
+        LiveAreaSeries,
         StackedAreaSeries,
         ScatterSeries,
         ColumnSeries,
@@ -110,7 +110,7 @@ const MAP_CLICK_DISTANCE_SQUARED: f64 = 25.0;
 
 /// Shared host for all chart families. All application state stays on the UI thread.
 #[repr(C)]
-pub struct Chart {
+pub struct LiveChart {
     base: Control,
     revision: Cell<u64>,
     measurement: RefCell<Option<Measurement>>,
@@ -174,14 +174,14 @@ impl NeedleMotion {
     }
 }
 
-ferro_class!(Chart:Control);
-ferro_class_info!(Chart {new:Chart::new,markup:{content:Series}});
-ferro_impl_classes!(Chart:StyledElementImpl,InteractiveImpl);
+ferro_class!(LiveChart:Control);
+ferro_class_info!(LiveChart {new:LiveChart::new,markup:{content:Series}});
+ferro_impl_classes!(LiveChart:StyledElementImpl,InteractiveImpl);
 
-impl FerroObjectImpl for Chart {
+impl FerroObjectImpl for LiveChart {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
-        this.set_series(ChartSeriesCollection::new());
+        this.set_series(LiveChartSeriesCollection::new());
         this.set_x_axes(Axes::new());
         this.set_y_axes(Axes::new());
         this.set_markers(GeoMarkers::new());
@@ -218,7 +218,7 @@ impl FerroObjectImpl for Chart {
     }
 }
 
-impl ControlImpl for Chart {
+impl ControlImpl for LiveChart {
     fn on_create_automation_peer(
         this: &Self,
     ) -> Ref<ferroui_controls::automation::peers::AutomationPeer> {
@@ -226,7 +226,7 @@ impl ControlImpl for Chart {
     }
 }
 
-impl LayoutableImpl for Chart {
+impl LayoutableImpl for LiveChart {
     fn measure_override(_this: &Self, available: Size) -> Size {
         Size::new(
             if available.width.is_finite() {
@@ -247,7 +247,7 @@ impl LayoutableImpl for Chart {
     }
 }
 
-impl VisualImpl for Chart {
+impl VisualImpl for LiveChart {
     fn render(this: &Self, context: &mut DrawingContext<'_>) {
         let size = this.bounds().size();
         if size.width <= 0.0 || size.height <= 0.0 {
@@ -335,7 +335,7 @@ impl VisualImpl for Chart {
     }
 }
 
-impl InputElementImpl for Chart {
+impl InputElementImpl for LiveChart {
     fn on_pointer_moved(this: &Self, e: &PointerEventArgs) {
         Self::parent_on_pointer_moved(this, e);
         let position = e.get_position(Some(this));
@@ -518,7 +518,7 @@ impl InputElementImpl for Chart {
     }
 }
 
-impl Chart {
+impl LiveChart {
     pub fn construct() -> Self {
         Self {
             base: Control::construct(),
@@ -575,7 +575,7 @@ impl Chart {
         let declared = self.x_axes();
         if declared.is_empty() {
             self.fallback_x_axes
-                .get_or_init(|| Axes::from_items([Axis::new()]))
+                .get_or_init(|| Axes::from_items([LiveAxis::new()]))
                 .clone()
         } else {
             declared
@@ -586,7 +586,7 @@ impl Chart {
         let declared = self.y_axes();
         if declared.is_empty() {
             self.fallback_y_axes
-                .get_or_init(|| Axes::from_items([Axis::new()]))
+                .get_or_init(|| Axes::from_items([LiveAxis::new()]))
                 .clone()
         } else {
             declared
@@ -1738,7 +1738,7 @@ impl Chart {
 }
 
 /// The geographic map (`GeoMapChart`): its viewport, rotation, projection and lands.
-impl Chart {
+impl LiveChart {
     fn geo_options(&self, margin: Option<Rect>) -> GeoMapOptions {
         GeoMapOptions {
             draw_margin: margin,
@@ -1997,7 +1997,7 @@ impl Chart {
     }
 }
 
-impl Drop for Chart {
+impl Drop for LiveChart {
     fn drop(&mut self) {
         drop(std::mem::take(self.source_subscriptions.get_mut()));
         if let Some(timer) = self.animation_timer.get_mut().take() {
@@ -2069,7 +2069,7 @@ fn observe_list<T: Clone + 'static>(
         list.remove_collection_changed(token);
     })
 }
-fn set_limits(axis: &Axis, min: f64, max: f64) -> bool {
+fn set_limits(axis: &LiveAxis, min: f64, max: f64) -> bool {
     if !min.is_finite()
         || !max.is_finite()
         || min >= max

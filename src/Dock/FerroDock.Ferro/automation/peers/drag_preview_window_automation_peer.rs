@@ -1,7 +1,7 @@
 // Copyright (c) Wiesław Šoltés. All rights reserved.
 // Licensed under the MIT license. See LICENSE.TXT in the workspace root.
 use super::dock_automation_peer_helper::DockAutomationPeerHelper as Helper;
-use crate::controls::DragPreviewWindow;
+use crate::controls::DockDragPreviewWindow;
 use ferroui_base::{ferro_class, ferro_impl_classes, instantiate, FerroObjectImpl, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeerImpl, AutomationPeerImplExt, ControlAutomationPeer,
@@ -17,7 +17,7 @@ ferroui_base::ferro_class_info!(DragPreviewWindowAutomationPeer {});
 ferro_impl_classes!(DragPreviewWindowAutomationPeer:FerroObjectImpl,ControlAutomationPeerImpl);
 impl AutomationPeerImpl for DragPreviewWindowAutomationPeer {
     fn get_class_name_core(_this: &Self) -> String {
-        "DragPreviewWindow".into()
+        "DockDragPreviewWindow".into()
     }
     fn get_automation_control_type_core(_this: &Self) -> AutomationControlType {
         AutomationControlType::Pane
@@ -48,12 +48,12 @@ impl AutomationPeerImpl for DragPreviewWindowAutomationPeer {
     }
 }
 impl DragPreviewWindowAutomationPeer {
-    pub(crate) fn new(owner: &DragPreviewWindow) -> Ref<Self> {
+    pub(crate) fn new(owner: &DockDragPreviewWindow) -> Ref<Self> {
         instantiate(Self {
             base: WindowAutomationPeer::construct(owner),
         })
     }
-    fn owner(&self) -> Ref<DragPreviewWindow> {
+    fn owner(&self) -> Ref<DockDragPreviewWindow> {
         ControlAutomationPeer::owner(self)
             .cast()
             .expect("native drag-preview window peer owner")

@@ -196,6 +196,13 @@ All notable changes to FerroUI are recorded in this file. The format follows [Ke
 
 - **The camera preview on iOS is upright in every interface orientation** (`ferroui-media-camera-apple`): the preview showed the buffers in the orientation of the sensor, a quarter turn off in a portrait interface, and did not follow the interface when the device turned. Each frame now carries the rotation the presenter applies on the GPU, from the interface orientation and the mounting of the selected camera (on iOS 17 and later, the rotation coordinator of AVFoundation, read per frame); before iOS 17 the connection rotates the buffers, and a turn during a recording waits for its end. macOS is unchanged.
 
+### Migration
+
+- **Dock's `OverlayLayer` and `DragPreviewWindow` are `DockOverlayLayer` and `DockDragPreviewWindow`** (#1279, `ferrodock-ferro`): the framework has types with those names in the default XML namespace. Rename them in Rust and in markup (`<overlays:OverlayLayer>` becomes `<overlays:DockOverlayLayer>`, `{x:Type d:DragPreviewWindow}` becomes `{x:Type d:DockDragPreviewWindow}`).
+- **`DensityStyle` is one enum in `ferroui-controls`** (#1279): the four themes re-export it, so `ferroui_themes_fluent::DensityStyle` and `DensityStyle="Compact"` keep working. Code that matched the enums of two themes as different types uses the one type, and markup that named it with a prefix for a theme namespace (`{x:Static fluent:DensityStyle.Compact}`) names it without one.
+- **The helpers of the themes and of the developer tools are in `*.Internal` markup namespaces** (#1279): `using:FerroUI.Themes.<theme>.Converters`, `.Primitives` and `.Accents` are `using:FerroUI.Themes.<theme>.Internal.Converters` and so on, and `using:FerroUI.Diagnostics.Controls` and `.Behaviors` are `using:FerroUI.Diagnostics.Internal.Controls` and `.Behaviors`. Their Rust paths do not change.
+- **Six LiveCharts classes have a `Live` prefix, and LiveCharts, its core and the ReactiveUI controls are in the default XML namespace** (#1281, `ferroui-controls-livecharts`, `ferroui-livecharts`, `ferroui-reactiveui-controls`): `Chart`, `Axis`, `AreaSeries`, `LineSeries`, `DateTimeAxis` and `ChartSeriesCollection` are `LiveChart`, `LiveAxis`, `LiveAreaSeries`, `LiveLineSeries`, `LiveDateTimeAxis` and `LiveChartSeriesCollection`, because the native charts have the plain names. Rename them in Rust. Markup that uses `xmlns:lc="https://ferroui.dev/livecharts"` keeps working with the old names; without a prefix, use the new ones.
+
 ## [0.5.0] - 2026-11-14
 
 The fifth release. It adds, among the entries below:

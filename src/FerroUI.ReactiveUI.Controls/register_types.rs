@@ -11,7 +11,7 @@
 
 use crate::{ReactiveUserControlBase, ReactiveWindowBase, RoutedViewHost, ViewModelViewHost};
 use ferroui_base::data::core::ValueTypes;
-use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition};
+use ferroui_base::metadata::{MarkupAssembly, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::{StaticType, TypeInfo};
 use ferroui_reactiveui::RoutingState;
 
@@ -27,7 +27,10 @@ const NAMESPACES: &[(&str, &str)] = &[("ferroui_reactiveui_controls", "ReactiveU
 pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "FerroUI.ReactiveUI.Controls",
     crate_name: "ferroui_reactiveui_controls",
-    xmlns_definitions: &[XmlnsDefinition { xml_namespace: REACTIVEUI_XML_NAMESPACE, namespace: "ReactiveUI.FerroUI" }],
+    xmlns_definitions: &[
+        XmlnsDefinition { xml_namespace: REACTIVEUI_XML_NAMESPACE, namespace: "ReactiveUI.FerroUI" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "ReactiveUI.FerroUI" },
+    ],
     xmlns_prefixes: &[],
     metadata: &[],
 };

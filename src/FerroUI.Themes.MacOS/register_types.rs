@@ -5,7 +5,7 @@
 use crate::accents::SystemAccentColors;
 use crate::converters::{CornerRadiusToThicknessConverter, CornerRadiusToThicknessConverterKind};
 use crate::primitives::{InfoBarPanel, TabViewEqualWidthPanel};
-use crate::macos_theme::{ControlSize, DensityStyle, MacOSTheme};
+use crate::macos_theme::{ControlSize, MacOSTheme};
 use ferroui_base::data::converters::IValueConverter;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
@@ -16,9 +16,9 @@ use std::rc::Rc;
 /// The dotted namespaces of the modules of this crate.
 const NAMESPACES: &[(&str, &str)] = &[
     ("ferroui_themes_macos", "FerroUI.Themes.MacOS"),
-    ("ferroui_themes_macos::accents", "FerroUI.Themes.MacOS.Accents"),
-    ("ferroui_themes_macos::converters", "FerroUI.Themes.MacOS.Converters"),
-    ("ferroui_themes_macos::primitives", "FerroUI.Themes.MacOS.Primitives"),
+    ("ferroui_themes_macos::accents", "FerroUI.Themes.MacOS.Internal.Accents"),
+    ("ferroui_themes_macos::converters", "FerroUI.Themes.MacOS.Internal.Converters"),
+    ("ferroui_themes_macos::primitives", "FerroUI.Themes.MacOS.Internal.Primitives"),
 ];
 
 /// What this crate states about itself for markup: its assembly name and
@@ -36,7 +36,6 @@ const TYPES: &[&TypeInfo] =
 
 const MARKUP_TYPES: &[&MarkupType] = &[
     <ControlSize as MarkupTyped>::MARKUP,
-    <DensityStyle as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverter as MarkupTyped>::MARKUP,
     <CornerRadiusToThicknessConverterKind as MarkupTyped>::MARKUP,
 ];
@@ -66,7 +65,6 @@ pub fn register_types() {
 /// forms of the enumerations and of the converter, and the converter as its contract.
 fn register_value_types() {
     ValueTypes::register_nullable::<ControlSize>();
-    ValueTypes::register_nullable::<DensityStyle>();
     ValueTypes::register_nullable::<CornerRadiusToThicknessConverterKind>();
     ValueTypes::register_nullable::<Rc<CornerRadiusToThicknessConverter>>();
     ValueTypes::register_cast::<Rc<CornerRadiusToThicknessConverter>, Rc<dyn IValueConverter>>(|c| c.clone());

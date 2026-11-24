@@ -33,17 +33,25 @@ When two namespaces mapped to one XML namespace hold the same name, the compiler
 type of the first assembly in the order of the type system and says nothing. Which type a
 document gets can then depend on what the application links.
 
+## Old names
+
+An XML namespace can keep the name a type had before a rename. The assembly states it in its
+metadata, under the key `FerroXmlnsTypeAlias <xml namespace> <old name>` with the new name as
+the value. The compiler and the run-time loader read it from the same place, and only an
+assembly that has an alias pays for it. `https://ferroui.dev/livecharts` keeps the six old
+names of its classes this way.
+
 ## Collisions
 
 Measured with the scanner on `main` at `ea825fdfc`. "Live" means both namespaces are already
-in the default XML namespace. The recommendations below are proposals until the owner decides.
+in the default XML namespace. The owner approved all four decisions on 2026-11-23.
 
-| # | Names | Where | Live | Recommendation |
+| # | Names | Where | Live | Decision |
 |---|---|---|---|---|
-| 1 | `OverlayLayer`, `DragPreviewWindow` | Dock against `FerroUI.Controls.Primitives` and the drag and drop behaviors | `OverlayLayer` | The framework keeps the plain name; Dock's become `DockOverlayLayer` and `DockDragPreviewWindow` |
-| 2 | `DensityStyle` | One identical enum in each of the four themes | yes | One shared enum in `ferroui-controls`, re-exported by each theme |
-| 3 | `Chart`, `Axis`, `AreaSeries`, `LineSeries`, `DateTimeAxis`, `ChartSeriesCollection` | Charts against LiveCharts | no | Charts keeps the names; LiveCharts gets `LiveChart`, `LiveAxis` and so on, with a per-URI alias so its old XML namespace keeps the old names |
-| 4 | `InfoBarPanel`, `TabViewEqualWidthPanel`, `CornerRadiusToThicknessConverter`, `CornerRadiusToThicknessConverterKind`, `SystemAccentColors`, `Application`, `ColumnDefinition` | Details of the themes and of the developer tools | no | Move their namespaces to `*.Internal`, which the rule leaves out |
+| 1 | `OverlayLayer`, `DragPreviewWindow` | Dock against `FerroUI.Controls.Primitives` and the drag and drop behaviors | `OverlayLayer` | Done: the framework keeps the plain name; Dock's are `DockOverlayLayer` and `DockDragPreviewWindow` |
+| 2 | `DensityStyle` | One identical enum in each of the four themes | yes | Done: one shared enum in `ferroui-controls`, re-exported by each theme |
+| 3 | `Chart`, `Axis`, `AreaSeries`, `LineSeries`, `DateTimeAxis`, `ChartSeriesCollection` | Charts against LiveCharts | no | Done: Charts keeps the names; LiveCharts has `LiveChart`, `LiveAxis`, `LiveAreaSeries`, `LiveLineSeries`, `LiveDateTimeAxis` and `LiveChartSeriesCollection`, and its old XML namespace keeps the old names |
+| 4 | `InfoBarPanel`, `TabViewEqualWidthPanel`, `CornerRadiusToThicknessConverter`, `CornerRadiusToThicknessConverterKind`, `SystemAccentColors`, `Application`, `ColumnDefinition` | Details of the themes and of the developer tools | no | Done: their markup namespaces are `FerroUI.Themes.<theme>.Internal.*` and `FerroUI.Diagnostics.Internal.*`, which the rule leaves out |
 
 These need no decision:
 
