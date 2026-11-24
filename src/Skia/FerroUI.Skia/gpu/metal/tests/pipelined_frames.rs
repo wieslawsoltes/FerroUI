@@ -174,6 +174,19 @@ impl Layers {
 
     /// Draws one frame of each layer, the ordinary one as it always draws: a
     /// frame the pipelined layer draws directly.
+    /// Draws one frame of each layer: the pipelined one hands it to its threads, the ordinary one draws it in
+    /// one recording with no band clip, the true frame (`gpu/graphite/pipelined_layer.rs`, `insert_at`).
+    fn draw_against_one_recording(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
+        let mut drawing_context = self.ordinary.create_drawing_context();
+        draw(&mut *drawing_context);
+        drawing_context.dispose();
+        self.gr_context.flush();
+
+        let mut drawing_context = self.pipelined.create_drawing_context();
+        draw(&mut *drawing_context);
+        drawing_context.dispose();
+    }
+
     fn draw_unclipped(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
         for layer in [&self.ordinary, &self.pipelined] {
             let mut drawing_context = layer.create_drawing_context();
@@ -1073,21 +1086,105 @@ fn draw_shapes_across_the_band_edges(context: &mut dyn IDrawingContextImpl) {
     }
 }
 
-/// A shape that crosses a band edge is drawn by each band as the band of an ordinary layer draws it (#1363,
-/// variant A): on a canvas of the band's size such shapes differed along their whole length on Graphite Vulkan.
+/// A shape that crosses a band edge is drawn by the bands as the true frame shows it, the frame drawn in one
+/// recording with no band clip, in both insertion orders (#1363): on a canvas of the band's size such shapes
+/// differed along their whole length on Graphite Vulkan, and a band whose draws reached a row across its clip
+/// made the frame depend on the order of the insertions.
 #[test]
-fn deferred_bands_draw_the_shapes_across_their_edges_as_the_ordinary_layer() {
+fn bands_draw_the_shapes_across_their_edges_as_the_true_frame() {
     let Some(device) = TestMetalDevice::try_new() else {
         eprintln!("skipped: no Metal device available");
         return;
     };
+    use crate::gpu::graphite::BandInsert;
+    for insert in [BandInsert::Ordered, BandInsert::Deferred] {
+        for bands in [2, 4] {
+            let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+            layers.gr_context.set_band_insert_for_tests(insert);
+            let scenes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 2] =
+                [("shapes across the edges", &draw_shapes_across_the_band_edges), ("the scene", &draw_scene)];
+            for (name, scene) in scenes {
+                layers.draw_against_one_recording(scene);
+                layers.pipelined.complete_pending_frame();
+                let what = format!("{insert:?}: {name} in {bands} bands against one recording");
+                layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
+            }
+            layers.dispose();
+        }
+    }
+}
+
+/// A band of the pipelined layer writes no pixel outside its rows, in both insertion orders: a frame whose dirty
+/// rows are those of one band plays that band alone, on a layer filled with a colour the scene does not draw.
+#[test]
+fn a_pipelined_band_writes_no_pixel_outside_its_rows() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    use crate::gpu::graphite::BandInsert;
+    let fill = |context: &mut dyn IDrawingContextImpl| context.clear(Color::from_uint32(0xff00ff00));
+    for insert in [BandInsert::Ordered, BandInsert::Deferred] {
+        for bands in [2, 4] {
+            let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+            layers.gr_context.set_band_insert_for_tests(insert);
+            for (index, clip) in layers.surface.band_clips() {
+                let mut drawing_context = layers.pipelined.create_drawing_context();
+                fill(&mut *drawing_context);
+                drawing_context.dispose();
+                layers.pipelined.complete_pending_frame();
+                let before = bytes(&layers.pipelined);
+                layers.pipelined.set_frame_dirty_rows(Some((clip.top, clip.bottom)));
+                let mut drawing_context = layers.pipelined.create_drawing_context();
+                draw_scene(&mut *drawing_context);
+                drawing_context.dispose();
+                layers.pipelined.complete_pending_frame();
+                let after = bytes(&layers.pipelined);
+                let outside: Vec<_> = before
+                    .chunks_exact(4)
+                    .zip(after.chunks_exact(4))
+                    .enumerate()
+                    .map(|(pixel, (a, b))| ((pixel % WIDTH as usize) as i32, (pixel / WIDTH as usize) as i32, a, b))
+                    .filter(|(_, y, a, b)| (*y < clip.top || *y >= clip.bottom) && a != b)
+                    .map(|(x, y, a, b)| (x, y, a.to_vec(), b.to_vec()))
+                    .take(12)
+                    .collect();
+                let rows = (clip.top, clip.bottom);
+                let what = format!("{insert:?}, band {index} of {bands} (rows {rows:?})");
+                assert!(outside.is_empty(), "{what} wrote outside: {outside:?}");
+            }
+            layers.dispose();
+        }
+    }
+}
+
+/// The two insertion orders show the same frame: each band is bounded to its rows at the insertion, so no pixel
+/// depends on which band went in last.
+#[test]
+fn ordered_and_completion_order_bands_show_the_same_frame() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    use crate::gpu::graphite::BandInsert;
     for bands in [2, 4] {
-        let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
-        layers.gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::Deferred);
-        layers.draw(draw_shapes_across_the_band_edges);
-        let what = format!("shapes across the edges of {bands} bands");
-        layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
-        layers.dispose();
+        let ordered = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+        ordered.gr_context.set_band_insert_for_tests(BandInsert::Ordered);
+        let completion = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+        completion.gr_context.set_band_insert_for_tests(BandInsert::Deferred);
+        for scene in [&draw_scene as &dyn Fn(&mut dyn IDrawingContextImpl), &draw_shapes_across_the_band_edges] {
+            for layers in [&ordered, &completion] {
+                let mut drawing_context = layers.pipelined.create_drawing_context();
+                scene(&mut *drawing_context);
+                drawing_context.dispose();
+                layers.pipelined.complete_pending_frame();
+            }
+            let (one, other) = (bytes(&ordered.pipelined), bytes(&completion.pipelined));
+            let different = one.chunks_exact(4).zip(other.chunks_exact(4)).filter(|(a, b)| a != b).count();
+            assert_eq!(different, 0, "{bands} bands: pixels that differ between the insertion orders");
+        }
+        ordered.dispose();
+        completion.dispose();
     }
 }
 
