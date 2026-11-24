@@ -24,5 +24,5 @@ pub(crate) use vulkan_fence::VulkanFence;
 pub(crate) use vulkan_image::{VulkanImage, VulkanImageBase};
 pub(crate) use vulkan_instance::VulkanInstance;
 pub(crate) use vulkan_khr_surface::VulkanKhrSurface;
-pub(crate) use vulkan_memory_helper::VulkanMemoryHelper;
+pub(crate) use vulkan_memory_helper::{BarrierMasks, VulkanMemoryHelper};
 pub(crate) use vulkan_semaphore::VulkanSemaphore;

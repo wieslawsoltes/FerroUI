@@ -258,6 +258,10 @@ impl ImportedSemaphore {
         let sem = self.sem.borrow();
         let buf = self.pool.create_command_buffer()?;
         buf.begin_recording()?;
+        // Kept broad (reviewed with the precise barriers of the present path): the semaphore orders this queue
+        // against work of another API or process on memory this device imports, and which stages that work and the
+        // next user of the memory use is not known here. It is one submission per external synchronization, not a
+        // barrier of the present path.
         self.context.device_api().cmd_pipeline_barrier(
             buf.handle(),
             vk::PipelineStageFlags::ALL_COMMANDS,

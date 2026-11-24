@@ -1,4 +1,4 @@
-use super::{VulkanCommandBufferPool, VulkanMemoryHelper};
+use super::{BarrierMasks, VulkanCommandBufferPool, VulkanMemoryHelper};
 use crate::{
     IVulkanPlatformGraphicsContext, VulkanError, VulkanExceptionExtensions, VulkanImageInfo,
     VulkanResultExtensions,
@@ -27,6 +27,11 @@ pub(crate) struct VulkanImageBase {
     size: PixelSize,
     memory_size: Cell<u64>,
     current_layout: Cell<vk::ImageLayout>,
+    /// The current layout was recorded with
+    /// [`set_current_layout`](Self::set_current_layout): another user of
+    /// the memory brought the image there, with work this device does not
+    /// know, so the next transition waits for every stage.
+    foreign_layout: Cell<bool>,
 }
 
 /// Memory to import for an image.
@@ -64,6 +69,7 @@ impl VulkanImageBase {
             size,
             memory_size: Cell::new(0),
             current_layout: Cell::new(vk::ImageLayout::UNDEFINED),
+            foreign_layout: Cell::new(false),
         }
     }
 
@@ -76,7 +82,6 @@ impl VulkanImageBase {
         self.handle.get()
     }
 
-    #[allow(dead_code)]
     pub fn format(&self) -> vk::Format {
         self.format
     }
@@ -108,6 +113,7 @@ impl VulkanImageBase {
     pub fn set_current_layout(&self, layout: vk::ImageLayout) {
         self.current_layout.set(layout);
         self.current_access_flags.set(vk::AccessFlags::empty());
+        self.foreign_layout.set(true);
     }
 
     pub fn memory_handle(&self) -> vk::DeviceMemory {
@@ -243,16 +249,29 @@ impl VulkanImageBase {
         let command_buffer = self.command_buffer_pool.create_command_buffer()?;
         command_buffer.begin_recording()?;
 
-        VulkanMemoryHelper::transition_layout(
-            &*self.context,
-            &command_buffer,
-            self.handle(),
-            self.current_layout.get(),
-            self.current_access_flags.get(),
-            destination_layout,
-            destination_access_flags,
-            self.mip_levels.get(),
-        );
+        if self.foreign_layout.replace(false) {
+            // Kept broad: the image's earlier user is another API or process.
+            VulkanMemoryHelper::record_barrier(
+                &*self.context,
+                &command_buffer,
+                self.handle(),
+                self.current_layout.get(),
+                destination_layout,
+                BarrierMasks::broad(self.current_access_flags.get(), destination_access_flags),
+                self.mip_levels.get(),
+            );
+        } else {
+            VulkanMemoryHelper::transition_layout(
+                &*self.context,
+                &command_buffer,
+                self.handle(),
+                self.current_layout.get(),
+                self.current_access_flags.get(),
+                destination_layout,
+                destination_access_flags,
+                self.mip_levels.get(),
+            );
+        }
 
         command_buffer.end_recording()?;
 
