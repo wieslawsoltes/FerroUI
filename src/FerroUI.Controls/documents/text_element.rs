@@ -4,7 +4,7 @@ use crate::primitives::TemplatedControl;
 use ferroui_base::controls::NameScope;
 use ferroui_base::media::{
     subscribe_invalidated, Brushes, FontFamily, FontFeatureCollection, FontStretch, FontStyle,
-    FontWeight, IBrush,
+    FontVariationSettings, FontWeight, IBrush, Typeface,
 };
 use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::Locale;
@@ -69,7 +69,7 @@ impl FerroObjectImpl for TextElement {
 
         match change.property().name() {
             "Background" | "FontFamily" | "FontSize" | "FontStyle" | "FontWeight"
-            | "FontStretch" | "Foreground" | "FontFeatures" | "LetterSpacing" | "Language" => {
+            | "FontStretch" | "FontVariations" | "Foreground" | "FontFeatures" | "LetterSpacing" | "Language" => {
                 this.invalidate_format_change(change);
             }
             _ => {}
@@ -124,6 +124,22 @@ ferroui_base::ferro_properties! { impl TextElement {
         pub fn font_features_property() -> AttachedProperty<Option<FontFeatureCollection>> {
             FerroProperty::register_attached_with::<TextElement, TextElement, _>(
                 "FontFeatures",
+                StyledPropertyOptions::new(None).inherits(true),
+            )
+        }
+    );
+
+    ferro_property!(
+        /// Defines the `FontVariations` property (upstream dfee7f224b): the values of the
+        /// variation axes of a variable font (`wght=650, wdth=85` in markup), inherited like
+        /// the other font properties and folded into the [`Typeface`] of the text, so that
+        /// shaping and drawing use the instance of the font at those values. Each value is
+        /// clamped to its axis and an axis the font does not have is ignored; `None` gives the
+        /// design defaults. Animations interpolate it per axis
+        /// ([`FontVariationSettings::interpolate`]).
+        pub fn font_variations_property() -> AttachedProperty<Option<FontVariationSettings>> {
+            FerroProperty::register_attached_with::<TextElement, TextElement, _>(
+                "FontVariations",
                 StyledPropertyOptions::new(None).inherits(true),
             )
         }
@@ -356,6 +372,15 @@ impl TextElement {
         self.set_value(Self::font_features_property(), value)
     }
 
+    /// The values of the variation axes of a variable font.
+    pub fn font_variations(&self) -> Option<FontVariationSettings> {
+        self.get_value(Self::font_variations_property())
+    }
+
+    pub fn set_font_variations(&self, value: Option<FontVariationSettings>) {
+        self.set_value(Self::font_variations_property(), value)
+    }
+
     /// The font size.
     pub fn font_size(&self) -> f64 {
         self.get_value(Self::font_size_property())
@@ -428,6 +453,26 @@ impl TextElement {
     /// Sets the value of the attached `FontFeatures` property on a control.
     pub fn set_font_features_on(control: &Control, value: Option<FontFeatureCollection>) {
         control.set_value(Self::font_features_property(), value)
+    }
+
+    /// Gets the value of the attached `FontVariations` property on a control.
+    pub fn get_font_variations(control: &Control) -> Option<FontVariationSettings> {
+        control.get_value(Self::font_variations_property())
+    }
+
+    /// Sets the value of the attached `FontVariations` property on a control.
+    pub fn set_font_variations_on(control: &Control, value: Option<FontVariationSettings>) {
+        control.set_value(Self::font_variations_property(), value)
+    }
+
+    /// `typeface` with the `FontVariations` of an element that displays text (a text element
+    /// or a control with the property): the one place the property is folded into the
+    /// typeface of a text.
+    pub(crate) fn with_font_variations_of(typeface: Typeface, element: &FerroObject) -> Typeface {
+        match element.get_value(Self::font_variations_property()) {
+            None => typeface,
+            font_variations => typeface.with_font_variations(font_variations),
+        }
     }
 
     /// Gets the value of the attached `LetterSpacing` property on a control.

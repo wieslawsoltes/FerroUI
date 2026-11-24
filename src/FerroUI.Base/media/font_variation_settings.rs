@@ -156,6 +156,36 @@ impl FontVariationSettings {
         self.variations.iter().find(|variation| variation.tag == tag).map(|variation| variation.value)
     }
 
+    /// Interpolates between two settings, for animation (upstream dfee7f224b), as CSS
+    /// interpolates `font-variation-settings`: when both set exactly the same axes, each axis
+    /// is interpolated linearly (an easing that overshoots extrapolates); otherwise the result
+    /// is discrete, `from` below the midpoint and `to` from it on, because an axis that one
+    /// side does not set has the default of the font, which is not known here. `None` and
+    /// empty settings both set no axis.
+    pub fn interpolate(
+        from: Option<&FontVariationSettings>,
+        to: Option<&FontVariationSettings>,
+        progress: f64,
+    ) -> Option<FontVariationSettings> {
+        let discrete = || if progress < 0.5 { from.cloned() } else { to.cloned() };
+        let (Some(from_settings), Some(to_settings)) = (from, to) else { return discrete() };
+        let (from_variations, to_variations) = (from_settings.variations(), to_settings.variations());
+        // Both are sorted by tag, so the axes match when the tags match by position.
+        if from_variations.is_empty()
+            || from_variations.len() != to_variations.len()
+            || from_variations.iter().zip(to_variations).any(|(a, b)| a.tag != b.tag)
+        {
+            return discrete();
+        }
+        let variations = from_variations.iter().zip(to_variations).map(|(a, b)| {
+            let value = a.value + (b.value - a.value) * progress;
+            // Infinite ends make the arithmetic NaN (infinity minus infinity): the nearer end.
+            let value = if value.is_nan() { if progress < 0.5 { a.value } else { b.value } } else { value };
+            FontVariation::new(a.tag, value)
+        });
+        Some(Self::from_sorted(variations.collect()))
+    }
+
     /// Parses a comma-separated list of `tag=value` pairs, e.g.
     /// `"wght=650,wdth=85"`. Values use the invariant culture.
     pub fn parse(s: &str) -> Result<FontVariationSettings, FormatError> {
@@ -478,5 +508,39 @@ mod tests {
 
         assert_eq!(FontVariationSettings::parse("wght=+.5e1").unwrap().try_get_value(wght()), Some(5.0));
         assert_eq!(FontVariationSettings::parse("wght=5.").unwrap().try_get_value(wght()), Some(5.0));
+    }
+
+    #[test]
+    fn interpolation_is_per_axis_when_the_axes_match() {
+        let from = FontVariationSettings::parse("wght=100,wdth=50").unwrap();
+        let to = FontVariationSettings::parse("wdth=100,wght=900").unwrap();
+        let middle = FontVariationSettings::interpolate(Some(&from), Some(&to), 0.5).unwrap();
+        assert_eq!(middle, FontVariationSettings::parse("wght=500,wdth=75").unwrap());
+        let overshoot = FontVariationSettings::interpolate(Some(&from), Some(&to), 1.25).unwrap();
+        assert_eq!(overshoot.try_get_value(wght()), Some(1100.0));
+        let reversed = FontVariationSettings::interpolate(Some(&to), Some(&from), 0.25).unwrap();
+        assert_eq!(reversed.try_get_value(wght()), Some(700.0));
+    }
+
+    #[test]
+    fn interpolation_is_discrete_when_the_axes_differ_or_an_end_is_empty() {
+        let weight = FontVariationSettings::parse("wght=100").unwrap();
+        let width = FontVariationSettings::parse("wdth=100").unwrap();
+        assert_eq!(FontVariationSettings::interpolate(Some(&weight), Some(&width), 0.49), Some(weight.clone()));
+        assert_eq!(FontVariationSettings::interpolate(Some(&weight), Some(&width), 0.5), Some(width.clone()));
+        assert_eq!(FontVariationSettings::interpolate(None, Some(&width), 0.2), None);
+        assert_eq!(FontVariationSettings::interpolate(Some(&weight), None, 0.7), None);
+        let empty = FontVariationSettings::empty();
+        assert_eq!(FontVariationSettings::interpolate(Some(&empty), Some(&empty), 0.7), Some(empty.clone()));
+    }
+
+    #[test]
+    fn interpolation_between_infinite_ends_takes_the_nearer_end() {
+        let from = FontVariationSettings::new([FontVariation::new(wght(), f64::INFINITY)]);
+        let to = FontVariationSettings::new([FontVariation::new(wght(), f64::NEG_INFINITY)]);
+        let early = FontVariationSettings::interpolate(Some(&from), Some(&to), 0.25).unwrap();
+        assert_eq!(early.try_get_value(wght()), Some(f64::INFINITY));
+        let late = FontVariationSettings::interpolate(Some(&from), Some(&to), 0.75).unwrap();
+        assert_eq!(late.try_get_value(wght()), Some(f64::NEG_INFINITY));
     }
 }

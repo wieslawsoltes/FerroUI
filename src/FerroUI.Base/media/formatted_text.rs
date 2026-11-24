@@ -323,7 +323,8 @@ impl FormattedText {
                     old_typeface.style(),
                     old_typeface.weight(),
                     FontStretch::Normal,
-                ),
+                )
+                .with_font_variations(old_typeface.font_variations().cloned()),
                 run_props.font_rendering_em_size(),
                 run_props.text_decorations().cloned(),
                 run_props.foreground_brush().cloned(),
@@ -425,7 +426,8 @@ impl FormattedText {
                     old_typeface.style(),
                     weight,
                     FontStretch::Normal,
-                ),
+                )
+                .with_font_variations(old_typeface.font_variations().cloned()),
                 run_props.font_rendering_em_size(),
                 run_props.text_decorations().cloned(),
                 run_props.foreground_brush().cloned(),
@@ -463,7 +465,8 @@ impl FormattedText {
                     style,
                     old_typeface.weight(),
                     FontStretch::Normal,
-                ),
+                )
+                .with_font_variations(old_typeface.font_variations().cloned()),
                 run_props.font_rendering_em_size(),
                 run_props.text_decorations().cloned(),
                 run_props.foreground_brush().cloned(),

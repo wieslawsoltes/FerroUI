@@ -60,6 +60,7 @@ impl Registry {
         register_animator::<RelativeScalarAnimator>(&mut animators);
         register_animator::<SizeAnimator>(&mut animators);
         register_animator::<ThicknessAnimator>(&mut animators);
+        register_animator::<FontVariationSettingsAnimator>(&mut animators);
 
         Self { animators, setter_animators: Vec::new() }
     }

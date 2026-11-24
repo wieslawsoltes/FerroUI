@@ -1941,3 +1941,29 @@ fn text_blocks_of_the_same_font_and_brush_share_their_run_properties() {
     assert!(same(&second.default_run_properties(), &larger.default_run_properties()));
     assert!(same(&first.default_run_properties(), &before));
 }
+
+/// `FontVariations` (upstream dfee7f224b) is inherited like the other font properties and folded
+/// into the typeface of the text; a change makes other run properties, and empty settings are the
+/// design defaults.
+#[test]
+fn font_variations_are_inherited_into_the_typeface_of_the_text() {
+    let _scope = test_scope();
+    let border = Border::new();
+    let block = text_block("variable");
+    border.set_child(&block);
+    assert!(block.default_run_properties().typeface().font_variations().is_none());
+
+    let bold: ferroui_base::media::FontVariationSettings = "wght=700, wdth=85".parse().unwrap();
+    TextElement::set_font_variations_on(&border, Some(bold.clone()));
+    assert_eq!(block.font_variations(), Some(bold.clone()));
+    let properties = block.default_run_properties();
+    assert_eq!(properties.typeface().font_variations(), Some(&bold));
+
+    block.set_font_variations(Some("wght=300".parse().unwrap()));
+    let light = block.default_run_properties();
+    assert!(!Rc::ptr_eq(&properties, &light));
+    assert_eq!(light.typeface().font_variations().map(ToString::to_string).as_deref(), Some("wght=300"));
+
+    block.set_font_variations(Some(ferroui_base::media::FontVariationSettings::empty()));
+    assert!(block.default_run_properties().typeface().font_variations().is_none());
+}

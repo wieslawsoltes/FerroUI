@@ -31,8 +31,8 @@ use ferroui_base::data::core::ValueTypes;
 use ferroui_base::input::*;
 use ferroui_base::interactivity::*;
 use ferroui_base::media::{
-    FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection,
-    TextLineBounds, TextTrimming, TextWrapping,
+    FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontVariationSettings, FontWeight, IBrush, TextAlignment,
+    TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping,
 };
 use ferroui_base::metadata::{into_markup_value, MarkupDelegate, MarkupType};
 use ferroui_base::styling::*;
@@ -1089,6 +1089,12 @@ ferro_class_info!(TextElement {
                 get: |this: &Ref<TextElement>| this.get_value(TextElement::font_features_property()),
                 set: |this: &Ref<TextElement>, value: Option<FontFeatureCollection>| this.set_value(TextElement::font_features_property(), value)
             },
+            FontVariations: Option<FontVariationSettings> {
+                get: |this: &Ref<TextElement>| this.get_value(TextElement::font_variations_property()),
+                set: |this: &Ref<TextElement>, value: Option<FontVariationSettings>| {
+                    this.set_value(TextElement::font_variations_property(), value)
+                }
+            },
             FontSize: f64 {
                 get: |this: &Ref<TextElement>| this.get_value(TextElement::font_size_property()),
                 set: |this: &Ref<TextElement>, value: f64| this.set_value(TextElement::font_size_property(), value)
@@ -1125,6 +1131,12 @@ ferro_class_info!(TextElement {
                 |element: Ref<Control>| element.get_value(TextElement::font_features_property()),
             static fn SetFontFeatures(Ref<Control>, Option<FontFeatureCollection>) =>
                 |element: Ref<Control>, value: Option<FontFeatureCollection>| element.set_value(TextElement::font_features_property(), value),
+            static fn GetFontVariations(Ref<Control>) -> Option<FontVariationSettings> =>
+                |element: Ref<Control>| element.get_value(TextElement::font_variations_property()),
+            static fn SetFontVariations(Ref<Control>, Option<FontVariationSettings>) =>
+                |element: Ref<Control>, value: Option<FontVariationSettings>| {
+                    element.set_value(TextElement::font_variations_property(), value)
+                },
             static fn GetFontSize(Ref<Control>) -> f64 =>
                 |element: Ref<Control>| element.get_value(TextElement::font_size_property()),
             static fn SetFontSize(Ref<Control>, f64) =>
@@ -1169,6 +1181,10 @@ ferro_class_info!(TextPresenter {
         properties: [
             FontFamily: FontFamily { get: TextPresenter::font_family, set: TextPresenter::set_font_family },
             FontFeatures: Option<FontFeatureCollection> { get: TextPresenter::font_features, set: TextPresenter::set_font_features },
+            FontVariations: Option<FontVariationSettings> {
+                get: TextPresenter::font_variations,
+                set: TextPresenter::set_font_variations
+            },
             FontSize: f64 { get: TextPresenter::font_size, set: TextPresenter::set_font_size },
             FontStyle: FontStyle { get: TextPresenter::font_style, set: TextPresenter::set_font_style },
             FontWeight: FontWeight { get: TextPresenter::font_weight, set: TextPresenter::set_font_weight },

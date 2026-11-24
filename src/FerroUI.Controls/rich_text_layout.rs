@@ -182,11 +182,14 @@ impl RichTextSource {
             let length = block.text_length();
             let properties: Rc<dyn TextRunProperties> = if empty {
                 Rc::new(GenericTextRunProperties::with_all(
-                    Typeface::with_style(
-                        view.font_family(),
-                        view.font_style(),
-                        view.font_weight(),
-                        view.font_stretch(),
+                    crate::documents::TextElement::with_font_variations_of(
+                        Typeface::with_style(
+                            view.font_family(),
+                            view.font_style(),
+                            view.font_weight(),
+                            view.font_stretch(),
+                        ),
+                        view,
                     ),
                     view.font_size(),
                     view.text_decorations(),
@@ -200,11 +203,14 @@ impl RichTextSource {
                 ))
             } else {
                 Rc::new(GenericTextRunProperties::with_all(
-                    Typeface::with_style(
-                        block.font_family(),
-                        block.font_style(),
-                        block.font_weight(),
-                        block.font_stretch(),
+                    crate::documents::TextElement::with_font_variations_of(
+                        Typeface::with_style(
+                            block.font_family(),
+                            block.font_style(),
+                            block.font_weight(),
+                            block.font_stretch(),
+                        ),
+                        &block,
                     ),
                     block.font_size(),
                     block.get_value(Inline::text_decorations_property()),

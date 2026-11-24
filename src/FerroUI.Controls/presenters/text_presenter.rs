@@ -11,8 +11,8 @@ use ferroui_base::media::text_formatting::{
 };
 use ferroui_base::media::{
     BaselineAlignment, BrushExtensions, Brushes, CharacterHit, Color, DrawingContext, FlowDirection, FontFamily,
-    FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, IImmutableBrush, IPen, TextAlignment,
-    TextWrapping, Typeface,
+    FontFeatureCollection, FontStretch, FontStyle, FontVariationSettings, FontWeight, IBrush, IImmutableBrush, IPen,
+    TextAlignment, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
@@ -131,7 +131,7 @@ impl FerroObjectImpl for TextPresenter {
         match property.name() {
             // Properties that affect shaping: invalidate the run cache + layout.
             "PreeditText" | "Foreground" | "FontSize" | "FontStyle" | "FontWeight" | "FontFamily" | "FontStretch"
-            | "Text" | "LetterSpacing" | "PasswordChar" | "RevealPassword" | "FlowDirection"
+            | "FontVariations" | "Text" | "LetterSpacing" | "PasswordChar" | "RevealPassword" | "FlowDirection"
             | "FontFeatures" | "TextStyleOverrides" | "TextParagraphStyles"
             | "SelectionForegroundBrush" | "ShowSelectionHighlight" => {
                 this.invalidate_text_layout();
@@ -307,6 +307,7 @@ impl TextPresenterImpl for TextPresenter {
         let text = Self::get_combined_text(this.utf16_text(), caret_index, preedit_text.as_ref());
         let typeface =
             Typeface::with_style(this.font_family(), this.font_style(), this.font_weight(), this.font_stretch());
+        let typeface = TextElement::with_font_variations_of(typeface, this);
         let selection_start = this.selection_start();
         let selection_end = this.selection_end();
         let start = selection_start.min(selection_end);
@@ -676,6 +677,15 @@ impl TextPresenter {
 
     pub fn set_font_features(&self, value: Option<FontFeatureCollection>) {
         TextElement::set_font_features_on(self, value)
+    }
+
+    /// The values of the variation axes of a variable font.
+    pub fn font_variations(&self) -> Option<FontVariationSettings> {
+        TextElement::get_font_variations(self)
+    }
+
+    pub fn set_font_variations(&self, value: Option<FontVariationSettings>) {
+        TextElement::set_font_variations_on(self, value)
     }
 
     /// The font size.

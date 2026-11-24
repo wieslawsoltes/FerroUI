@@ -210,6 +210,7 @@ impl Inline {
             self.font_weight(),
             self.font_stretch(),
         );
+        let typeface = super::TextElement::with_font_variations_of(typeface, self);
 
         Rc::new(GenericTextRunProperties::with_all(
             typeface,

@@ -662,7 +662,9 @@ fn attached_accessors_take_the_element_type_the_managed_original_declares() {
     let get = text_element.find_methods("GetFontSize").next().unwrap();
     assert_eq!((get.parameters[0])(), ValueType::of::<Ref<Control>>());
     assert_eq!(unbox::<f64>(&(get.invoke)(&[instance.clone()]).unwrap()), 21.0);
-    for name in ["FontFamily", "FontFeatures", "FontStyle", "FontWeight", "FontStretch", "Foreground"] {
+    let names =
+        ["FontFamily", "FontFeatures", "FontVariations", "FontStyle", "FontWeight", "FontStretch", "Foreground"];
+    for name in names {
         assert!(text_element.find_methods(&format!("Set{name}")).next().is_some(), "{name}");
         assert!(text_element.find_methods(&format!("Get{name}")).next().is_some(), "{name}");
     }

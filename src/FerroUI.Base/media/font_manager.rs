@@ -211,7 +211,16 @@ impl FontManager {
     /// typeface or a collection is added or removed; a collection that does not derive from
     /// [`FontCollectionBase`](crate::media::fonts::FontCollectionBase) and changes what it returns
     /// calls [`invalidate_glyph_typefaces`](Self::invalidate_glyph_typefaces).
+    ///
+    /// A typeface with [`font_variations`](Typeface::font_variations) resolves to the instance of
+    /// the glyph typeface of its design defaults at those values (the instances are kept by that
+    /// glyph typeface, a bounded number of them), or to that glyph typeface itself where the
+    /// backend makes no instances.
     pub fn try_get_glyph_typeface(&self, typeface: &Typeface) -> Option<Rc<GlyphTypeface>> {
+        if let Some(font_variations) = typeface.font_variations() {
+            let glyph_typeface = self.try_get_glyph_typeface(&typeface.without_font_variations())?;
+            return Some(glyph_typeface.instance_with_variations(font_variations));
+        }
         let generation = GLYPH_TYPEFACE_GENERATION.with(Cell::get);
         if self.resolved_generation.get() == generation {
             if let Some(found) = self.resolved_glyph_typefaces.borrow().get(typeface) {
