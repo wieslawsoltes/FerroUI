@@ -664,6 +664,55 @@ fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
 /// the kernel as a correlation (the weight of row `i`, column `j` at
 /// `i * width + j`), the sum times the gain plus the bias, the colours
 /// un-premultiplied and the alpha kept, or the four channels convolved.
+/// A multiply layer of factors: each colour channel of the content times the factor of its point,
+/// sampled bilinearly between the centres of the samples (`MultiplyLayerFactors::factor_at`),
+/// clamped to the alpha; a pixel outside the unit square of the factors is cleared.
+const MULTIPLY_FACTORS_WGSL: &str = r#"
+struct Params {
+    // The rows of the transform from the pixels of the area to the unit square of the factors.
+    row_u: vec4<f32>,
+    row_v: vec4<f32>,
+    // x, y: the size of the samples; z: what a sample of 1 stands for.
+    samples: vec4<f32>,
+    // x, y: the size of the area in pixels.
+    extent: vec4<f32>,
+}
+
+@group(0) @binding(0) var<uniform> params: Params;
+@group(0) @binding(1) var content: texture_2d<f32>;
+@group(0) @binding(2) var factors: texture_2d<f32>;
+
+fn sample(p: vec2<i32>) -> vec3<f32> {
+    return textureLoad(factors, p, 0).rgb;
+}
+
+@fragment
+fn fs_main(@builtin(position) fragment: vec4<f32>) -> @location(0) vec4<f32> {
+    let pixel = vec2<i32>(floor(fragment.xy));
+    if (f32(pixel.x) >= params.extent.x || f32(pixel.y) >= params.extent.y) {
+        return vec4<f32>(0.0);
+    }
+    let c = textureLoad(content, pixel, 0);
+    if (c.a <= 0.0) {
+        return vec4<f32>(0.0);
+    }
+    let at = vec3<f32>(vec2<f32>(pixel) + 0.5, 1.0);
+    let unit = vec2<f32>(dot(params.row_u.xyz, at), dot(params.row_v.xyz, at));
+    if (any(unit < vec2<f32>(0.0)) || any(unit > vec2<f32>(1.0))) {
+        return vec4<f32>(0.0);
+    }
+    let size = params.samples.xy;
+    let p = clamp(unit * size - 0.5, vec2<f32>(0.0), size - 1.0);
+    let a = vec2<i32>(floor(p));
+    let b = min(a + vec2<i32>(1), vec2<i32>(size) - vec2<i32>(1));
+    let f = p - vec2<f32>(a);
+    let top = mix(sample(a), sample(vec2<i32>(b.x, a.y)), f.x);
+    let bottom = mix(sample(vec2<i32>(a.x, b.y)), sample(b), f.x);
+    let factor = mix(top, bottom, f.y) * params.samples.z;
+    return vec4<f32>(min(c.rgb * factor, vec3<f32>(c.a)), c.a);
+}
+"#;
+
 const CONVOLUTION_WGSL: &str = r#"
 struct Params {
     weights: array<vec4<f32>, 7>,
@@ -744,6 +793,7 @@ enum LayerProgram {
     PixelOperation,
     Convolution,
     FrameConversion,
+    MultiplyFactors,
 }
 
 impl LayerProgram {
@@ -754,6 +804,7 @@ impl LayerProgram {
             LayerProgram::PixelOperation => "FerroUI pixel operation",
             LayerProgram::Convolution => "FerroUI convolution",
             LayerProgram::FrameConversion => "FerroUI frame conversion",
+            LayerProgram::MultiplyFactors => "FerroUI multiply factors",
         }
     }
 
@@ -765,13 +816,14 @@ impl LayerProgram {
             LayerProgram::PixelOperation => format!("{LAYER_VERTEX_WGSL}{PIXEL_OPERATION_WGSL}"),
             LayerProgram::Convolution => format!("{LAYER_VERTEX_WGSL}{CONVOLUTION_WGSL}"),
             LayerProgram::FrameConversion => format!("{LAYER_VERTEX_WGSL}{FRAME_CONVERSION_WGSL}"),
+            LayerProgram::MultiplyFactors => format!("{LAYER_VERTEX_WGSL}{MULTIPLY_FACTORS_WGSL}"),
         }
     }
 
     /// The textures the program reads.
     fn inputs(self) -> usize {
         match self {
-            LayerProgram::PixelOperation => 2,
+            LayerProgram::PixelOperation | LayerProgram::MultiplyFactors => 2,
             _ => 1,
         }
     }
@@ -784,6 +836,7 @@ impl LayerProgram {
             LayerProgram::PixelOperation => blocks::PIXEL_OPERATION_FLOATS,
             LayerProgram::FrameConversion => 2 * 4,
             LayerProgram::Convolution => blocks::CONVOLUTION_FLOATS,
+            LayerProgram::MultiplyFactors => blocks::MULTIPLY_FACTORS_FLOATS,
         }
     }
 }
@@ -972,7 +1025,9 @@ fn run_layer_pass(
     let first = inputs.first()?;
     if inputs.len() != program.inputs()
         || uniforms.len() != program.uniform_floats()
-        || inputs.iter().any(|input| input.width() != first.width() || input.height() != first.height())
+        // The factors of a multiply layer are an image of their own size.
+        || (program != LayerProgram::MultiplyFactors
+            && inputs.iter().any(|input| input.width() != first.width() || input.height() != first.height()))
     {
         return None;
     }
@@ -1098,6 +1153,37 @@ pub(crate) fn pixel_operation_texture(
 }
 
 /// `content` convolved with `convolution`.
+/// `content` multiplied by `factors`, whose samples are uploaded into a texture of the pool for
+/// the pass. `to_unit` maps the pixels of the area to the unit square of the factors.
+pub(crate) fn multiply_factors_texture(
+    device: &Arc<VelloWgpuDevice>,
+    content: &Arc<VelloDeviceTexture>,
+    area: LayerArea,
+    factors: &ferroui_base::platform::MultiplyLayerFactors,
+    to_unit: kurbo::Affine,
+) -> Option<Arc<VelloDeviceTexture>> {
+    let (width, height, samples, scale) = blocks::factor_samples(factors);
+    let largest = device.device().limits().max_texture_dimension_2d;
+    if width > largest || height > largest {
+        return None;
+    }
+    let (texture_width, texture_height) = pooled_size(device, width, height);
+    let texture = pooled_texture(device, texture_width, texture_height);
+    device.queue().write_texture(
+        wgpu::TexelCopyTextureInfo {
+            texture: texture.texture(),
+            mip_level: 0,
+            origin: wgpu::Origin3d::ZERO,
+            aspect: wgpu::TextureAspect::All,
+        },
+        &samples[..width as usize * height as usize * 4],
+        wgpu::TexelCopyBufferLayout { offset: 0, bytes_per_row: Some(width * 4), rows_per_image: Some(height) },
+        wgpu::Extent3d { width, height, depth_or_array_layers: 1 },
+    );
+    let floats = blocks::multiply_factors((width, height, scale), to_unit, (area.width, area.height));
+    run_layer_pass(device, LayerProgram::MultiplyFactors, &floats, &[content, &texture])
+}
+
 pub(crate) fn convolution_texture(
     device: &Arc<VelloWgpuDevice>,
     content: &Arc<VelloDeviceTexture>,
