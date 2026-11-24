@@ -39,65 +39,13 @@ impl VulkanSkiaGpu {
         max_resource_bytes: Option<i64>,
         use_stencil_buffers: Option<bool>,
     ) -> Rc<Self> {
-        let device = vulkan.device();
         let gr_context = {
             let current = vulkan.ensure_current();
-            let instance = vulkan.instance();
-
-            let get_proc_address_wrapper = |name: &str, instance_handle: isize, device_handle: isize| -> isize {
-                if device_handle != 0 {
-                    let addr = instance.get_device_proc_address(device_handle, name);
-                    if addr != 0 {
-                        return addr;
-                    }
-                }
-
-                if instance_handle != 0 {
-                    let addr = instance.get_instance_proc_address(instance_handle, name);
-                    if addr != 0 {
-                        return addr;
-                    }
-                }
-
-                instance.get_instance_proc_address(0, name)
-            };
-            let get_proc = |of: GetProcOf| -> *const c_void {
-                let (name, instance_handle, device_handle) = match of {
-                    GetProcOf::Instance(instance, name) => (name, instance as usize as isize, 0),
-                    GetProcOf::Device(device, name) => (name, 0, device as usize as isize),
-                };
-                // SAFETY: Skia passes the name of an entry point as a
-                // zero-terminated string that lives for the call.
-                let name = unsafe { CStr::from_ptr(name) };
-                match name.to_str() {
-                    Ok(name) => get_proc_address_wrapper(name, instance_handle, device_handle) as *const c_void,
-                    Err(_) => std::ptr::null(),
-                }
-            };
-
-            // SAFETY: the handles are those of the device of the context,
-            // which outlives the Skia context: the GPU holds the context and
-            // releases Skia's first.
-            let ctx = unsafe {
-                BackendContext::new_builder(
-                    device.instance().handle() as usize as _,
-                    device.physical_device_handle() as usize as _,
-                    device.handle() as usize as _,
-                    (device.main_queue_handle() as usize as _, device.graphics_queue_family_index() as usize),
-                    &get_proc,
-                    // The version Skia validates the entry points for. Without one Skia takes the
-                    // version of the loader, and a driver hands out the entry points of the
-                    // version the instance was created for only: 1.1 is what the platform
-                    // graphics ask for by default and the least Skia accepts.
-                    Some(Version::new(1, 1, 0)),
-                )
-                .build()
-            };
-
             let avoid_stencil_buffers = SkiaOptions::should_avoid_stencil_buffers(use_stencil_buffers);
             let mut options = ContextOptions::default();
             options.avoid_stencil_buffers = avoid_stencil_buffers;
-            let gr_context = direct_contexts::make_vulkan(&ctx, &options).map(GaneshGrContext::new);
+            let gr_context = with_backend_context(&*vulkan, |ctx| direct_contexts::make_vulkan(ctx, &options))
+                .map(GaneshGrContext::new);
             current.dispose();
             let gr_context = gr_context.unwrap_or_else(|| {
                 panic!("{}", VulkanError::new("Unable to create GrContext from IVulkanDevice"))
@@ -210,4 +158,66 @@ impl ISkiaGpu for VulkanSkiaGpu {
         let context: Rc<dyn ISkiaGrContext> = self.gr_context.clone();
         Some(ScopedGrContext::new(context, Some(self.ensure_current())))
     }
+}
+
+/// Runs `f` with the Skia backend context of the device of `vulkan` (the instance, the devices, the
+/// main queue and the entry points of the context): what a Ganesh and a Graphite context of the
+/// device are made from. The caller made the context current.
+pub(super) fn with_backend_context<R>(
+    vulkan: &dyn IVulkanPlatformGraphicsContext,
+    f: impl FnOnce(&BackendContext) -> R,
+) -> R {
+    let device = vulkan.device();
+    let instance = vulkan.instance();
+
+    let get_proc_address_wrapper = |name: &str, instance_handle: isize, device_handle: isize| -> isize {
+        if device_handle != 0 {
+            let addr = instance.get_device_proc_address(device_handle, name);
+            if addr != 0 {
+                return addr;
+            }
+        }
+
+        if instance_handle != 0 {
+            let addr = instance.get_instance_proc_address(instance_handle, name);
+            if addr != 0 {
+                return addr;
+            }
+        }
+
+        instance.get_instance_proc_address(0, name)
+    };
+    let get_proc = |of: GetProcOf| -> *const c_void {
+        let (name, instance_handle, device_handle) = match of {
+            GetProcOf::Instance(instance, name) => (name, instance as usize as isize, 0),
+            GetProcOf::Device(device, name) => (name, 0, device as usize as isize),
+        };
+        // SAFETY: Skia passes the name of an entry point as a
+        // zero-terminated string that lives for the call.
+        let name = unsafe { CStr::from_ptr(name) };
+        match name.to_str() {
+            Ok(name) => get_proc_address_wrapper(name, instance_handle, device_handle) as *const c_void,
+            Err(_) => std::ptr::null(),
+        }
+    };
+
+    // SAFETY: the handles are those of the device of the context,
+    // which outlives the Skia context: the GPU holds the context and
+    // releases Skia's first.
+    let ctx = unsafe {
+        BackendContext::new_builder(
+            device.instance().handle() as usize as _,
+            device.physical_device_handle() as usize as _,
+            device.handle() as usize as _,
+            (device.main_queue_handle() as usize as _, device.graphics_queue_family_index() as usize),
+            &get_proc,
+            // The version Skia validates the entry points for. Without one Skia takes the
+            // version of the loader, and a driver hands out the entry points of the
+            // version the instance was created for only: 1.1 is what the platform
+            // graphics ask for by default and the least Skia accepts.
+            Some(Version::new(1, 1, 0)),
+        )
+        .build()
+    };
+    f(&ctx)
 }

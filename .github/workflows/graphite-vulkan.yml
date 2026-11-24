@@ -1,0 +1,94 @@
+name: Skia Graphite on Vulkan (Linux)
+
+# The feature `graphite-vulkan` of ferroui-skia (#1365): Graphite on the Vulkan device of the
+# backend, tested on Mesa's software Vulkan (lavapipe). No published binary of Skia has Graphite
+# with Vulkan, so the build script of skia-bindings compiles Skia from source: it downloads the Skia
+# sources of the pinned revision and runs `skia/tools/git-sync-deps`, which fetches Skia's
+# third-party repositories (about a gigabyte), and then builds Skia with ninja (a cold build is
+# about 14 minutes on a hosted runner; the build step prints its time). The bindings are a path
+# dependency, which the Rust cache does not keep (their fingerprints follow the times of the files
+# of the checkout), so every run builds Skia again; the cache keeps the registry crates. The step
+# after the build lists what `git-sync-deps` fetched and how large the folders are.
+#
+# It does not run on ordinary pull requests: only by hand, and on a pull request that changes the
+# Graphite Vulkan files or the patch of the bindings. The feature is off by default, so the default
+# builds and hello world are not changed by it.
+
+on:
+  workflow_dispatch:
+  pull_request:
+    paths:
+      - 'src/Skia/FerroUI.Skia/gpu/vulkan/graphite_vulkan.rs'
+      - 'src/Skia/FerroUI.Skia/gpu/vulkan/graphite_vulkan_test.rs'
+      - 'external/rust-skia-bindings/src/graphite.cpp'
+      - 'external/rust-skia-bindings/FERROUI-PATCH.md'
+      - '.github/workflows/graphite-vulkan.yml'
+
+permissions:
+  contents: read
+
+concurrency:
+  group: graphite-vulkan-${{ github.ref }}
+  cancel-in-progress: true
+
+jobs:
+  build:
+    name: Build and test Graphite on Vulkan (Skia from source)
+    runs-on: ubuntu-latest
+    timeout-minutes: 240
+    env:
+      CARGO_PROFILE_DEV_DEBUG: 0
+      CARGO_PROFILE_TEST_DEBUG: 0
+      CARGO_TERM_COLOR: always
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
+      - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
+      # What a source build of Skia needs (clang, Python, ninja, git and the network), the libraries
+      # Skia links, a font, and the Vulkan loader with lavapipe.
+      - name: System packages
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y --no-install-recommends \
+            ninja-build python3 clang git \
+            libfontconfig1-dev libfreetype6-dev fonts-dejavu-core pkg-config \
+            libgl1 libegl1 libgl1-mesa-dri \
+            libvulkan1 libvulkan-dev mesa-vulkan-drivers vulkan-tools
+          ninja --version
+          clang --version
+      - name: The cache key of the Skia build
+        id: key
+        run: |
+          version="$(sed -n 's/^version = "\(.*\)"$/\1/p' external/rust-skia-bindings/Cargo.toml | head -n 1)"
+          patch="$(cat external/rust-skia-bindings/src/*.cpp external/rust-skia-bindings/src/*.h \
+            external/rust-skia-bindings/patches/* external/rust-skia-bindings/build_support.rs \
+            | sha256sum | cut -c1-16)"
+          echo "key=graphite-vulkan-${version}-ganesh-gl-graphite-vulkan-${patch}" >> "$GITHUB_OUTPUT"
+      # The registry crates and their builds, restored for the key and saved when the build ends,
+      # also after a failure. The Skia build (in the out folder of the build script of the path
+      # dependency skia-bindings) is not kept: see the top of the file.
+      - uses: Swatinem/rust-cache@6323deb102c322ba6fcbdcafc7e3dddab59af2b6 # v2
+        with:
+          key: ${{ steps.key.outputs.key }}
+          cache-on-failure: true
+      - name: What the system offers for Vulkan
+        run: vulkaninfo --summary || true
+      - name: Build ferroui-skia with the feature graphite-vulkan
+        run: |
+          start=$(date +%s)
+          cargo test --locked -p ferroui-skia --features graphite-vulkan --test graphite_vulkan --no-run
+          echo "::notice::the build with the feature graphite-vulkan took $(( $(date +%s) - start )) s"
+      # What the build script of the bindings downloaded: the Skia sources of the pinned revision
+      # and the third-party repositories `git-sync-deps` fetched (its output is in the output file
+      # of the build script, which cargo does not print), with the sizes on disk.
+      - name: What the Skia source build fetched
+        if: always()
+        run: |
+          grep -h -e 'DOWNLOADING' -e 'Synchronizing' -e 'third_party/externals' \
+            target/debug/build/skia-bindings-*/output 2>/dev/null | sort -u || true
+          du -sh external/rust-skia-bindings/skia 2>/dev/null || true
+          du -sh external/rust-skia-bindings/skia/third_party/externals/* 2>/dev/null | sort -h || true
+          du -sh target 2>/dev/null || true
+      - name: Graphite on Vulkan against lavapipe
+        env:
+          FERROUI_VULKAN_TEST_REQUIRE: 1
+        run: cargo test --locked -p ferroui-skia --features graphite-vulkan --test graphite_vulkan -- --nocapture
