@@ -469,14 +469,15 @@ fn maxHeight(object, value) = {
 // getMaxHeight(object: int) -> float: reads MaxHeight (Layoutable, RowDefinition); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getMaxHeight(object) = ferro_get_f64_or(object: object, property: 522, fallback: 0.0)
-// maxWidth(object: int, value: float) -> int: sets MaxWidth (ColumnDefinition, Layoutable).
-// Defines the `MaxWidth` property.
+// maxWidth(object: int, value: float) -> int: sets MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn). Defines the `MaxWidth` property.
 fn maxWidth(object, value) = {
     let _ = ferro_set_f64(object: object, property: 530, value: value)
     object
 }
-// getMaxWidth(object: int) -> float: reads MaxWidth (ColumnDefinition, Layoutable); the
-// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// getMaxWidth(object: int) -> float: reads MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
 fn getMaxWidth(object) = ferro_get_f64_or(object: object, property: 530, fallback: 0.0)
 // minHeight(object: int, value: float) -> int: sets MinHeight (Layoutable, RowDefinition).
 // Defines the `MinHeight` property.
@@ -487,14 +488,15 @@ fn minHeight(object, value) = {
 // getMinHeight(object: int) -> float: reads MinHeight (Layoutable, RowDefinition); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
 fn getMinHeight(object) = ferro_get_f64_or(object: object, property: 541, fallback: 0.0)
-// minWidth(object: int, value: float) -> int: sets MinWidth (ColumnDefinition, Layoutable).
-// Defines the `MinWidth` property.
+// minWidth(object: int, value: float) -> int: sets MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn). Defines the `MinWidth` property.
 fn minWidth(object, value) = {
     let _ = ferro_set_f64(object: object, property: 543, value: value)
     object
 }
-// getMinWidth(object: int) -> float: reads MinWidth (ColumnDefinition, Layoutable); the
-// fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
+// getMinWidth(object: int) -> float: reads MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn); the fallback of its kind when the read fails (`failure()` tells): a plain
+// value, no Result.
 fn getMinWidth(object) = ferro_get_f64_or(object: object, property: 543, fallback: 0.0)
 // name(object: int, value: string) -> int: sets Name (Application, StyledElement). Defines the
 // `Name` property.

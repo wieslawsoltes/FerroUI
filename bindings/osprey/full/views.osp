@@ -1642,7 +1642,8 @@ fn hotKey(value) = AttrText { attrTextProperty: 344, attrTextValue: value }
 // hotKeyManagerHotKey(value: string) -> Attr<M>: sets HotKeyManager.HotKey (HotKeyManager).
 fn hotKeyManagerHotKey(value) = AttrText { attrTextProperty: 345, attrTextValue: value }
 // icon(value: string) -> Attr<M>: sets Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window).
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TabStripItem, TrayIcon,
+// Window).
 fn icon(value) = AttrText { attrTextProperty: 346, attrTextValue: value }
 // id(value: string) -> Attr<M>: sets Id (Contact).
 fn id(value) = AttrText { attrTextProperty: 350, attrTextValue: value }
@@ -1983,7 +1984,8 @@ fn maxRating(value) = AttrInteger { attrIntegerProperty: 526, attrIntegerValue: 
 fn maxSuggestionListHeight(value) = AttrNumber { attrNumberProperty: 528, attrNumberValue: value }
 // maxVisiblePips(value: int) -> Attr<M>: sets MaxVisiblePips (PipsPager).
 fn maxVisiblePips(value) = AttrInteger { attrIntegerProperty: 529, attrIntegerValue: value }
-// maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable).
+// maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable,
+// TableViewColumn).
 fn maxWidth(value) = AttrNumber { attrNumberProperty: 530, attrNumberValue: value }
 // maxYear(value: string) -> Attr<M>: sets MaxYear (DatePicker, DatePickerPresenter).
 fn maxYear(value) = AttrText { attrTextProperty: 531, attrTextValue: value }
@@ -2006,7 +2008,8 @@ fn message(value) = AttrText { attrTextProperty: 540, attrTextValue: value }
 fn minHeight(value) = AttrNumber { attrNumberProperty: 541, attrNumberValue: value }
 // minLines(value: int) -> Attr<M>: sets MinLines (TextBox).
 fn minLines(value) = AttrInteger { attrIntegerProperty: 542, attrIntegerValue: value }
-// minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable).
+// minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable,
+// TableViewColumn).
 fn minWidth(value) = AttrNumber { attrNumberProperty: 543, attrNumberValue: value }
 // minWindowHeight(value: float) -> Attr<M>: sets MinWindowHeight (AdaptiveTrigger).
 fn minWindowHeight(value) = AttrNumber { attrNumberProperty: 544, attrNumberValue: value }
@@ -2944,7 +2947,7 @@ fn unsetImage(value) = AttrText { attrTextProperty: 989, attrTextValue: value }
 // updateTextOnSelect(value: bool) -> Attr<M>: sets UpdateTextOnSelect (AutoSuggestBox).
 fn updateTextOnSelect(value) = AttrBool { attrBoolProperty: 990, attrBoolValue: value }
 // useFloatingPlaceholder(value: bool) -> Attr<M>: sets UseFloatingPlaceholder
-// (CalendarDatePicker, TextBox).
+// (AutoCompleteBox, CalendarDatePicker, TextBox).
 fn useFloatingPlaceholder(value) = AttrBool { attrBoolProperty: 991, attrBoolValue: value }
 // useLayoutRounding(value: bool) -> Attr<M>: sets UseLayoutRounding (Layoutable).
 fn useLayoutRounding(value) = AttrBool { attrBoolProperty: 992, attrBoolValue: value }
