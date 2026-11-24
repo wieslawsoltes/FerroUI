@@ -9,14 +9,6 @@
       "build_path": null,
       "populate_path": "::ferroui_themes_simple::compiled_xaml::populate",
       "public": true
-    },
-    {
-      "uri": "ferres://ferroui.themes.simple/Controls/SimpleControls.xaml",
-      "root_type": "FerroUI.Styling.Styles",
-      "class_rust_path": null,
-      "build_path": "::ferroui_themes_simple::compiled_xaml::build_controls_simplecontrols_xaml",
-      "populate_path": null,
-      "public": false
     }
   ],
   "dependencies": [],
@@ -32,7 +24,7 @@
           "keys": ["SelectableTextBlockContextFlyout"],
           "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "RefreshVisualizer", "SelectableTextBlock", "ThemeVariantScope", "Window"],
           "references": ["ContentControlThemeFontFamily", "FontSizeNormal", "HighlightBrush", "HighlightForegroundColor", "RefreshVisualizerBackground", "RefreshVisualizerForeground", "SelectableTextBlockContextFlyout", "StringTextFlyoutCopyText", "ThemeBackgroundBrush", "ThemeForegroundBrush"],
-          "types": ["AdornerLayer", "Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "MenuFlyout", "MenuItem", "MergeResourceInclude", "Panel", "PathIcon", "Rectangle", "RefreshVisualizer", "ResourceDictionary", "SelectableTextBlock", "Setter", "Style", "StyleInclude", "Styles", "Template", "ThemeVariantScope", "VisualLayerManager", "Window"]
+          "types": ["AdornerLayer", "Border", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "MenuFlyout", "MenuItem", "MergeResourceInclude", "Panel", "PathIcon", "Rectangle", "RefreshVisualizer", "ResourceDictionary", "SelectableTextBlock", "Setter", "Style", "Styles", "Template", "ThemeVariantScope", "VisualLayerManager", "Window"]
         },
         {
           "name": "Accents/Base.xaml",

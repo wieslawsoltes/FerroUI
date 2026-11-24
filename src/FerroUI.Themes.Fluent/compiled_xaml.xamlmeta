@@ -25,14 +25,6 @@
       "build_path": "::ferroui_themes_fluent::compiled_xaml::build_densitystyles_compact_xaml",
       "populate_path": null,
       "public": false
-    },
-    {
-      "uri": "ferres://ferroui.themes.fluent/Controls/FluentControls.xaml",
-      "root_type": "FerroUI.Styling.Styles",
-      "class_rust_path": null,
-      "build_path": "::ferroui_themes_fluent::compiled_xaml::build_controls_fluentcontrols_xaml",
-      "populate_path": null,
-      "public": false
     }
   ],
   "dependencies": [],
@@ -44,11 +36,11 @@
         {
           "name": "ambient",
           "index": 0,
-          "documents": ["FluentTheme.xaml", "Accents/BaseColorsPalette.xaml", "DensityStyles/Compact.xaml", "Controls/FluentControls.xaml", "Controls/AdornerLayer.xaml", "Controls/Window.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/RefreshVisualizer.xaml", "Controls/ThemeVariantScope.xaml"],
+          "documents": ["FluentTheme.xaml", "Accents/BaseColorsPalette.xaml", "Controls/FluentControls.xaml", "Controls/AdornerLayer.xaml", "Controls/Window.xaml", "Controls/EmbeddableControlRoot.xaml", "Controls/RefreshVisualizer.xaml", "Controls/ThemeVariantScope.xaml", "DensityStyles/Compact.xaml"],
           "keys": ["ButtonPadding", "ButtonSpinnerPadding", "CalendarButtonMinHeight", "CalendarButtonMinWidth", "CheckBoxMinHeight", "CheckBoxPadding", "ComboBoxEditableTextPadding", "ComboBoxItemThemePadding", "ComboBoxMinHeight", "ComboBoxPadding", "CommandBarButtonIsInOverflowMinHeight", "CommandBarButtonMinHeight", "CommandBarButtonPadding", "CommandBarButtonWidth", "CommandBarMinHeight", "CommandBarPadding", "CommandBarSeparatorMinHeight", "CommandBarToggleButtonPadding", "CompactStyles", "ControlContentThemeFontSize", "DatePickerHostMonthPadding", "DatePickerHostPadding", "ListBoxItemPadding", "MenuBarItemPadding", "MenuFlyoutItemThemePaddingNarrow", "NavigationViewItemOnLeftMinHeight", "PipsPagerNavigationButtonSize", "RadioButtonMinHeight", "RadioButtonPadding", "SystemAltHighColor", "SystemAltLowColor", "SystemAltMediumColor", "SystemAltMediumHighColor", "SystemAltMediumLowColor", "SystemBaseHighColor", "SystemBaseLowColor", "SystemBaseMediumColor", "SystemBaseMediumHighColor", "SystemBaseMediumLowColor", "SystemChromeAltLowColor", "SystemChromeBlackHighColor", "SystemChromeBlackLowColor", "SystemChromeBlackMediumColor", "SystemChromeBlackMediumLowColor", "SystemChromeDisabledHighColor", "SystemChromeDisabledLowColor", "SystemChromeGrayColor", "SystemChromeHighColor", "SystemChromeLowColor", "SystemChromeMediumColor", "SystemChromeMediumLowColor", "SystemChromeWhiteColor", "SystemControlFocusVisualMargin", "SystemControlFocusVisualPrimaryThickness", "SystemControlFocusVisualSecondaryThickness", "SystemErrorTextColor", "SystemListLowColor", "SystemListMediumColor", "SystemRegionColor", "SystemRevealListLowColor", "SystemRevealListMediumColor", "TabItemHeaderMargin", "TabItemMinHeight", "TableViewCellPadding", "TableViewColumnResizerMargin", "TableViewColumnResizerWidth", "TableViewRowPadding", "TextControlThemeMinHeight", "TextControlThemeMinWidth", "TextControlThemePadding", "TimePickerHostPadding", "TreeViewItemMinHeight"],
           "type_keys": ["AdornerLayer", "EmbeddableControlRoot", "RefreshVisualizer", "ThemeVariantScope", "Window"],
           "references": ["ContentControlThemeFontFamily", "ControlContentThemeFontSize", "RefreshVisualizerBackground", "RefreshVisualizerForeground", "RefreshVisualizerIndicatorSize", "SystemControlBackgroundAltHighBrush", "SystemControlFocusVisualMargin", "SystemControlFocusVisualPrimaryBrush", "SystemControlFocusVisualPrimaryThickness", "SystemControlFocusVisualSecondaryBrush", "SystemControlFocusVisualSecondaryThickness", "SystemControlForegroundBaseHighBrush", "SystemRegionBrush"],
-          "types": ["AdornerLayer", "Border", "Color", "ColorPaletteResourcesCollection", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "MergeResourceInclude", "Panel", "PathIcon", "RefreshVisualizer", "ResourceDictionary", "ResourceInclude", "Setter", "StyleInclude", "Styles", "SystemAccentColors", "Template", "ThemeVariantScope", "Thickness", "VisualLayerManager", "Window"]
+          "types": ["AdornerLayer", "Border", "Color", "ColorPaletteResourcesCollection", "ContentPresenter", "ControlTemplate", "ControlTheme", "EmbeddableControlRoot", "FocusAdornerTemplate", "Grid", "MergeResourceInclude", "Panel", "PathIcon", "RefreshVisualizer", "ResourceDictionary", "ResourceInclude", "Setter", "Styles", "SystemAccentColors", "Template", "ThemeVariantScope", "Thickness", "VisualLayerManager", "Window"]
         },
         {
           "name": "Accents/BaseResources.xaml",
@@ -639,10 +631,10 @@
           "name": "Controls/ContextMenu.xaml",
           "index": 66,
           "documents": ["Controls/ContextMenu.xaml"],
-          "keys": ["MenuFlyoutScrollerMargin"],
+          "keys": [],
           "type_keys": ["ContextMenu"],
           "references": ["FluentMenuScrollViewer", "FlyoutThemeMaxWidth", "MenuFlyoutPresenterBackground", "MenuFlyoutPresenterBorderBrush", "MenuFlyoutPresenterBorderThemeThickness", "MenuFlyoutPresenterThemePadding", "MenuFlyoutScrollerMargin", "MenuFlyoutThemeMinHeight", "OverlayCornerRadius"],
-          "types": ["Border", "ContextMenu", "ControlTemplate", "ControlTheme", "ItemsPresenter", "ResourceDictionary", "ScrollViewer", "Setter", "Thickness"]
+          "types": ["Border", "ContextMenu", "ControlTemplate", "ControlTheme", "ItemsPresenter", "ResourceDictionary", "ScrollViewer", "Setter"]
         },
         {
           "name": "Controls/DataValidationErrors.xaml",
