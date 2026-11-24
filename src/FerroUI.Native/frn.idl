@@ -834,7 +834,6 @@ interface IFrnTopLevelEvents : IUnknown
                           FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol);
     bool RawTextInputEvent(u_int64_t timeStamp, [const] char* text);
     void ScalingChanged(double scaling);
-    void RunRenderPriorityJobs();
     void LostFocus();
     
     IFrnAutomationPeer* GetAutomationPeer();

@@ -23,6 +23,7 @@ pub use i_layout_root::ILayoutRoot;
 pub use layout_extensions::LayoutExtensions;
 pub use layout_helper::LayoutHelper;
 pub use layout_information::LayoutInformation;
+pub(crate) use layout_manager::any_layout_pass_running;
 pub use layout_manager::LayoutManager;
 pub use layoutable::{
     HorizontalAlignment, Layoutable, LayoutableImpl, LayoutableImplExt, LayoutableVTable, VerticalAlignment,

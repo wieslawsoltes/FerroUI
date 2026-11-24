@@ -245,7 +245,6 @@ mod macos {
             println!("ScalingChanged: {scaling}");
         }
 
-        fn run_render_priority_jobs(&self) {}
 
         fn lost_focus(&self) {
             println!("LostFocus");
