@@ -158,6 +158,12 @@
         "category": "FerroUI"
       },
       {
+        "command": "ferroui.android.debug",
+        "title": "Run and Debug Android App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
         "command": "ferroui.android.attach",
         "title": "Attach to Android App",
         "category": "FerroUI"
@@ -891,6 +897,10 @@
           "when": "isWorkspaceTrusted"
         },
         {
+          "command": "ferroui.android.debug",
+          "when": "isWorkspaceTrusted"
+        },
+        {
           "command": "ferroui.android.attach",
           "when": "isWorkspaceTrusted"
         },
@@ -1400,7 +1410,7 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-debug)?|browser(-development)?(-debug)?)$/",
           "group": "inline@1"
         },
         {
@@ -1410,7 +1420,7 @@
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android|browser(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-debug)?|browser(-development)?(-debug)?)$/",
           "group": "inline@3"
         },
         {
@@ -1420,12 +1430,12 @@
         },
         {
           "command": "ferroui.appSessions.debug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|browser(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|android-debug|browser(-development)?-debug)$/",
           "group": "1_apps@2"
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|browser-development(-debug)?|browser-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|android-debug|browser-development(-debug)?|browser-debug)$/",
           "group": "1_apps@3"
         },
         {
@@ -1690,7 +1700,12 @@
                 "default": "org.ferroui.android.FerroMainActivity",
                 "description": "The app's launch activity."
               },
-              "apkPath": { "type": "string", "description": "Optional built APK to install when running. Relative paths start at this workspace folder." }
+              "apkPath": { "type": "string", "description": "Optional built APK to install when running. Relative paths start at this workspace folder." },
+              "symbolFiles": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "Optional unstripped native libraries from the installed debug APK's build and ABI. Relative paths start at this workspace folder."
+              }
             }
           }
         },

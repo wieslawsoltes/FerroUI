@@ -259,6 +259,37 @@ For your own app, enable the `live-inspector` feature of `ferroui-android` and i
 
 ![Service Review running on the Android 16 emulator, beside its Rust source and native visual tree in VS Code](../images/vscode-android-live-app.png)
 
+#### Debug Rust on Android
+
+Install the **LLDB DAP** extension on the workspace host. Build Service Review with `scripts/android/apk.sh inspector --debugger` to include the NDK debugger server in the debuggable APK. Update the profile’s `apkPath` if you built to a different output directory. [Android native debugging](https://developer.android.com/studio/debug) · [LLDB DAP setup](https://lldb.llvm.org/use/lldbdap.html)
+
+For an app packaged with Gradle, include the NDK’s `lldb-server` as `libferroui_lldb_server.so` in each debug variant’s native library directory and enable native library extraction. Link the Rust library with `-Clink-arg=-Wl,--build-id=sha1` so LLDB can match it with local symbols. App Sessions offers the debugger action after the app reports the extracted server. [Android native library packaging](https://developer.android.com/ndk/guides/abis)
+
+Add `"symbolFiles": ["target/aarch64-linux-android/debug/examples/libandroid_inspector.so"]` to the ARM64 Service Review entry in `ferroui.android.apps`. Use your actual output directory if you set `CARGO_TARGET_DIR`. Each file must be an unstripped library from the same build and ABI as the installed app. Its filename must match the library packaged in the APK. FerroUI verifies the build ID and loads the symbols at the shared library’s address in the accepted process. Close and reopen the app session if you change its profile.
+
+Add an attach configuration to `.vscode/launch.json` in the app’s workspace folder.
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Service Review",
+      "type": "lldb-dap",
+      "request": "attach",
+      "gdb-remote-port": "${command:ferroui.android.debugPort}"
+    }
+  ]
+}
+```
+
+1. Set a breakpoint inside `complete_review` in `android_inspector.rs`. Choose **FerroUI: Run and Debug Android App** and select your app profile and device. For an app already connected to Live App, choose **Attach Debugger to This App** in its App Sessions context menu.
+2. Choose the attach configuration if VS Code lists several. FerroUI uses the debugger installed with the app and a temporary ADB forward for the verified process. Once the breakpoint binds, click **Complete review** in the app or in **Live App → Interact**.
+3. Use **Continue** to resume the app and its inspector. Use **Stop Debugging** to keep the app and Live App connected. **Stop or Disconnect This App** also closes the debugger. The session still follows the ownership rules for apps you ran or attached to independently.
+4. If attaching fails, open **Show App Output** on the App Sessions row for the Android debugger log. A library mismatch calls for the unstripped output of the exact installed build. If a matched breakpoint stays unbound, check the source paths recorded by the Rust compiler. LLDB DAP’s `sourceMap` can map a different build machine’s source paths to your workspace. [LLDB DAP configuration](https://lldb.llvm.org/use/lldbdap.html)
+
+[Android debugger MCP actions](reference.md#run-or-attach-an-android-app-with-mcp)
+
 ### Run or attach a browser app
 
 Install Chrome or Chromium and the FerroUI browser toolchain on the workspace host. Open a trusted workspace. Use a managed build when you want VS Code to rebuild on save. For a served profile, run these commands from the FerroUI checkout to build Dispatch Desk and serve it on loopback.

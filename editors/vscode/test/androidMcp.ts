@@ -4,6 +4,7 @@ import { promisify } from 'node:util';
 import * as vscode from 'vscode';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import type { RuntimeNode, RuntimeSource } from '../src/runtimeProtocol';
+import { verifyAndroidDebug } from './androidDebugMcp';
 import { openEditorMcp, type McpFixture } from './mcpFixture';
 import { until } from './wait';
 
@@ -51,7 +52,15 @@ export async function verifyAndroidMcp(device: string): Promise<void> {
         assert.equal(await adb('-s', device, 'exec-out', 'run-as', packageId, 'stat', '-c', '%a', 'files/ferroui-live-app.json'), '600');
         assert.equal(content<RuntimeSummary>(await invoke('ferroui_android_run', request)).runtime, started.runtime);
         assert.match((await invoke('ferroui_android_attach', request)).content[0]?.text ?? '', /Close the current Android session/);
+        const debug = { runtime: started.runtime, expected_generation: started.generation };
+        await writes(false);
+        assert.match((await invoke('ferroui_android_debug', debug)).content[0]?.text ?? '', /allowWrites/);
+        await writes(true);
+        assert.ok(started.generation);
+        assert.match((await invoke('ferroui_android_debug', { ...debug, expected_generation: started.generation + 1 })).content[0]?.text ?? '',
+            /current accepted Android generation/);
         await checkNativeApp({ invoke, content }, started, document);
+        if (process.env.FERROUI_TEST_ANDROID_DEBUG) await verifyAndroidDebug({ invoke, content }, started, document, forwards);
         await vscode.commands.executeCommand('ferroui.appSessions.stop', started.runtime);
         assert.ok(!(await sessions()).some(session => session.runtime === started.runtime));
         assert.equal(await pid(), '');

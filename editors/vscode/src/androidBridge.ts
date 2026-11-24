@@ -1,4 +1,4 @@
-import { execFile } from 'node:child_process';
+import { execFile, spawn } from 'node:child_process';
 import { constants } from 'node:fs';
 import { access, realpath, stat } from 'node:fs/promises';
 import { homedir } from 'node:os';
@@ -30,7 +30,7 @@ export async function androidBridgePath(signal: AbortSignal): Promise<string> {
 }
 
 export async function androidDevices(executable: string, signal: AbortSignal): Promise<AndroidDevice[]> {
-    const output = await adb(executable, ['devices', '-l'], signal);
+    const output = (await adb(executable, ['devices', '-l'], signal)).toString('utf8');
     return output.split(/\r?\n/).flatMap(line => {
         const match = /^(\S{1,128})\s+(device|offline|unauthorized|no permissions|recovery|sideload|bootloader)(?:\s+(.*))?$/.exec(line);
         if (!match) return [];
@@ -44,6 +44,7 @@ export interface AndroidReceipt {
     pid: number;
     port: number;
     token: string;
+    debuggerPath?: string;
 }
 
 export class AndroidBridge {
@@ -85,32 +86,55 @@ export class AndroidBridge {
             .catch(() => '');
         signal.throwIfAborted();
         try {
-            const { version, pid, port, token } = JSON.parse(output);
+            const { version, pid, port, token, debuggerPath } = JSON.parse(output);
             if (version === 1 && Number.isSafeInteger(pid) && pid > 0 && validPort(port)
-                && typeof token === 'string' && /^[a-f0-9]{64}$/i.test(token)) return { pid, port, token };
+                && typeof token === 'string' && /^[a-f0-9]{64}$/i.test(token)) {
+                return { pid, port, token, debuggerPath: installedDebuggerPath(debuggerPath) };
+            }
         } catch { /* The app has yet to supply a complete receipt. */ }
     }
 
     async forward(receipt: AndroidReceipt): Promise<AndroidForward> {
-        const port = Number((await this.command(['forward', '--no-rebind', 'tcp:0', `tcp:${receipt.port}`], AbortSignal.timeout(4_000))).trim());
-        if (!validPort(port)) throw new Error('ADB did not allocate a local inspector port.');
+        const { port, close } = await this.forwardPort(`tcp:${receipt.port}`);
         return { endpoint: { url: `http://127.0.0.1:${port}/mcp`, token: receipt.token, devicePort: receipt.port },
-            close: () => this.removeForward(port, receipt.port) };
+            close };
+    }
+
+    async forwardPort(remote: string): Promise<AndroidPortForward> {
+        const port = Number((await this.command(['forward', '--no-rebind', 'tcp:0', remote], AbortSignal.timeout(4_000))).trim());
+        if (!validPort(port)) throw new Error('ADB did not allocate a local forwarding port.');
+        return { port, close: () => this.removeForward(port, remote) };
+    }
+
+    async matches(packageId: string, expected: AndroidReceipt, signal: AbortSignal): Promise<boolean> {
+        const [pid, current] = await Promise.all([this.pid(packageId, signal), this.receipt(packageId, signal)]);
+        return current !== undefined && pid === expected.pid && current.pid === pid
+            && current.port === expected.port && current.token === expected.token && current.debuggerPath === expected.debuggerPath;
     }
 
     async stop(packageId: string): Promise<void> {
         await this.command(['shell', 'am', 'force-stop', packageId], AbortSignal.timeout(4_000));
     }
 
-    private async removeForward(local: number, remote: number): Promise<void> {
+    private async removeForward(local: number, remote: string): Promise<void> {
         const signal = AbortSignal.timeout(4_000);
-        const output = await adb(this.executable, ['forward', '--list'], signal);
-        const owned = output.split(/\r?\n/).some(line => line.trim().split(/\s+/).join(' ') === `${this.device.id} tcp:${local} tcp:${remote}`);
+        const output = (await adb(this.executable, ['forward', '--list'], signal)).toString('utf8');
+        const owned = output.split(/\r?\n/).some(line => line.trim().split(/\s+/).join(' ') === `${this.device.id} tcp:${local} ${remote}`);
         if (owned) await this.command(['forward', '--remove', `tcp:${local}`], signal);
     }
 
-    private command(args: string[], signal: AbortSignal, timeout?: number, maxBuffer?: number): Promise<string> {
+    async command(args: string[], signal: AbortSignal, timeout?: number, maxBuffer?: number): Promise<string> {
+        return (await this.commandBytes(args, signal, timeout, maxBuffer)).toString('utf8');
+    }
+
+    commandBytes(args: string[], signal: AbortSignal, timeout?: number, maxBuffer?: number): Promise<Buffer> {
         return adb(this.executable, ['-s', this.device.id, ...args], signal, timeout, maxBuffer);
+    }
+
+    spawnShell(args: string[]) {
+        return spawn(this.executable, ['-s', this.device.id, 'shell', '-T', ...args], {
+            detached: true, stdio: ['ignore', 'pipe', 'pipe'], windowsHide: true, env: adbEnvironment(),
+        });
     }
 }
 
@@ -119,18 +143,31 @@ export interface AndroidForward {
     close(): Promise<void>;
 }
 
+export interface AndroidPortForward { port: number; close(): Promise<void> }
+
 function validPort(port: unknown): port is number {
     return typeof port === 'number' && Number.isInteger(port) && port > 0 && port < 65_536;
 }
 
-async function adb(executable: string, args: string[], signal: AbortSignal, timeout = 6_000, maxBuffer = 64 * 1024): Promise<string> {
+function installedDebuggerPath(value: unknown): string | undefined {
+    if (typeof value === 'string' && value.length <= 1_024
+        && /^\/(?:[A-Za-z0-9_.~+=-]+\/)+libferroui_lldb_server\.so$/.test(value)
+        && !value.split('/').some(part => part === '.' || part === '..')) return value;
+}
+
+async function adb(executable: string, args: string[], signal: AbortSignal, timeout = 6_000, maxBuffer = 64 * 1024): Promise<Buffer> {
     try {
-        // The assigned forward belongs to the workspace host's local ADB server.
-        const env = { ...process.env, ADB_SERVER_SOCKET: undefined, ANDROID_ADB_SERVER_ADDRESS: undefined };
-        const { stdout } = await execute(executable, args, { signal, timeout, maxBuffer, windowsHide: true, env });
+        const { stdout } = await execute(executable, args, {
+            encoding: 'buffer', signal, timeout, maxBuffer, windowsHide: true, env: adbEnvironment(),
+        });
         return stdout;
     } catch {
         signal.throwIfAborted();
         throw new Error(`ADB could not complete ${args[0] === '-s' ? args[2] : args[0]} on the workspace host.`);
     }
+}
+
+function adbEnvironment(): NodeJS.ProcessEnv {
+    // Forwarding belongs to the workspace host's ADB server.
+    return { ...process.env, ADB_SERVER_SOCKET: undefined, ANDROID_ADB_SERVER_ADDRESS: undefined };
 }

@@ -1,7 +1,9 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import { AndroidBridge, androidBridgePath, androidDevices, type AndroidForward, type AndroidReceipt } from './androidBridge';
+import { AndroidDebugger } from './androidDebugger';
 import { androidProfiles, type AndroidApp, type AndroidMode, type AndroidRequest } from './androidTargets';
+import { selectDebugConfiguration } from './reloadDebugConfiguration';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import { verifyRuntime } from './runtimeReady';
 import type { AppRuntime } from './runtimeTargets';
@@ -18,11 +20,15 @@ interface Session {
     receipt?: AndroidReceipt;
     forward?: AndroidForward;
     runtime?: AppRuntime;
+    debugger?: AndroidDebugger;
 }
+
+interface DebugOptions { configuration?: string; interactive?: boolean; detach?: boolean; signal?: AbortSignal }
 
 export class AndroidSessions implements vscode.Disposable {
     private readonly lifetime = new AbortController();
     private readonly sessions = new Map<string, Session>();
+    private debugOutput?: vscode.OutputChannel;
     private readonly folders = vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
         const closed = new Set(removed.map(folder => folder.uri.toString()));
         for (const [key, session] of this.sessions) {
@@ -36,7 +42,7 @@ export class AndroidSessions implements vscode.Disposable {
         const active = this.requireWorkspace(signal);
         const profiles = androidProfiles(folder);
         const executable = await androidBridgePath(active);
-        return { devices: await androidDevices(executable, active), apps: profiles.map(({ apkPath, ...profile }) => ({
+        return { devices: await androidDevices(executable, active), apps: profiles.map(({ apkPath, symbolFiles, ...profile }) => ({
             ...profile, installsApk: apkPath !== undefined,
         })) };
     }
@@ -57,7 +63,9 @@ export class AndroidSessions implements vscode.Disposable {
         const existing = this.sessions.get(key);
         if (existing) {
             const prior = existing.app;
-            const same = prior.folder === app.folder && prior.id === app.id && prior.activity === app.activity && prior.apkPath === app.apkPath;
+            const same = prior.folder === app.folder && prior.id === app.id && prior.activity === app.activity && prior.apkPath === app.apkPath
+                && prior.symbolFiles.length === app.symbolFiles.length
+                && prior.symbolFiles.every((file, index) => file === app.symbolFiles[index]);
             const ready = existing.runtime && this.connections.describe(existing.runtime);
             if (same && ready && existing.mode === mode && !existing.stop.signal.aborted) return ready;
             throw new Error('Close the current Android session for this package and device before starting another.');
@@ -84,6 +92,42 @@ export class AndroidSessions implements vscode.Disposable {
         if (!match) throw new Error('Choose a current Android app session.');
         await this.close(...match, true);
     }
+
+    async debug(runtime: AppRuntime, generation: number, options: DebugOptions = {}) {
+        this.requireWorkspace(options.signal ?? this.lifetime.signal);
+        const session = [...this.sessions.values()].find(item => item.runtime === runtime);
+        const accepted = this.connections.session(runtime);
+        if (!session?.receipt || accepted.generation !== generation) throw new Error('Use the current accepted Android generation.');
+        const signal = options.signal ? AbortSignal.any([session.stop.signal, options.signal]) : session.stop.signal;
+        signal.throwIfAborted();
+        if (options.detach) {
+            await session.debugger?.close();
+            return { runtime, generation, attached: false };
+        }
+        const [folder] = workspaceFolders(session.app.folder);
+        const configuration = await selectDebugConfiguration(folder, { name: options.configuration,
+            target: 'android', interactive: options.interactive ?? false });
+        if (!configuration) return { runtime, generation, attached: false };
+        signal.throwIfAborted();
+        if (!accepted.current()) throw new Error('The Android app connection changed. Read its current session.');
+        if (session.debugger) throw new Error('Stop the current Android debugger before attaching again.');
+        const debuggerSession = new AndroidDebugger(session.bridge, session.app.packageId, session.receipt, this.debuggerOutput(), () => {
+            if (session.debugger === debuggerSession) session.debugger = undefined;
+        }, session.app.symbolFiles);
+        session.debugger = debuggerSession;
+        try {
+            await debuggerSession.attach(folder, configuration, signal);
+            if (!accepted.current()) throw new Error('The Android app connection changed while attaching the debugger.');
+            return { runtime, generation, pid: session.receipt.pid, attached: true };
+        } catch (error) {
+            await debuggerSession.close();
+            throw error;
+        }
+    }
+
+    showDebugOutput(): void { this.debuggerOutput().show(); }
+
+    private debuggerOutput() { return this.debugOutput ??= vscode.window.createOutputChannel('FerroUI Android Debugger'); }
 
     private async connect(session: Session, signal: AbortSignal): Promise<RuntimeSummary> {
         const { app, bridge, mode } = session;
@@ -119,7 +163,8 @@ export class AndroidSessions implements vscode.Disposable {
         signal.throwIfAborted();
         const { device } = bridge;
         const runtime = this.connections.addPlatform({ kind: 'android', android: { device: device.id, name: device.name,
-            emulator: device.emulator, profile: app.id, packageId, launched: mode === 'run', pid: receipt.pid } },
+            emulator: device.emulator, profile: app.id, packageId, launched: mode === 'run', pid: receipt.pid,
+            debuggable: Boolean(receipt.debuggerPath) } },
         `${app.label} · ${device.name}`, session.forward.endpoint);
         session.runtime = runtime.runtime;
         return runtime;
@@ -165,6 +210,7 @@ export class AndroidSessions implements vscode.Disposable {
         if (session.runtime) this.connections.removePlatform(session.runtime);
         return session.closing = (async () => {
             await session.ready?.catch(() => {});
+            await session.debugger?.close().catch(error => console.warn(error));
             try {
                 if (terminate && session.mode === 'run' && session.pid) await this.stopOwnedApp(session);
             } finally {
@@ -192,6 +238,8 @@ export class AndroidSessions implements vscode.Disposable {
     async shutdown(): Promise<void> {
         this.lifetime.abort();
         await Promise.allSettled([...this.sessions].map(([key, session]) => this.close(key, session, true)));
+        this.debugOutput?.dispose();
+        this.debugOutput = undefined;
     }
 
     dispose(): void { this.folders.dispose(); void this.shutdown(); }

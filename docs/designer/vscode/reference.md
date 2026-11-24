@@ -276,6 +276,7 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 1. Call `ferroui_android_targets` on the workspace host. Supply `folder` to select a workspace folder. Choose an authorized device with `status: "device"` and take a profile’s `id` and `folder`.
 2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_android_run` or `ferroui_android_attach`. Pass the device ID as `device`, profile ID as `profile`, and the profile’s `folder`. The tool authenticates the opted-in app and returns its exact `runtime` and `generation` after the first native frame.
 3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s permissions still apply to input and live property writes. Use `ferroui_android_stop` to close that session. Apps started by the run tool stop, and independently started apps remain running. [Configure and run an Android app](runtime.md#run-or-attach-an-android-app)
+4. When `android.debuggable` is true, call `ferroui_android_debug` with `runtime` and `expected_generation` to attach the debugger. Set `debug_configuration` to the selected `launch.json` name when there are several. Use `action: "detach"` with the same runtime and generation to close the debugger and keep the app running. Both actions require editor write permission. [Debug Rust on Android](runtime.md#debug-rust-on-android)
 
 ### Run or attach a browser app with MCP
 
@@ -533,7 +534,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
-| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run Android App**, **Attach to Android App** |
+| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run Android App**, **Run and Debug Android App**, **Attach to Android App** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
 
 ## Configure the workspace

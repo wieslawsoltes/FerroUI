@@ -61,8 +61,11 @@ export class AppSessions implements vscode.Disposable {
             command('debug', session => this.debug(session)),
             command('rebuild', session => session.browser?.development ? this.browser.rebuild(session.runtime)
                 : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session)),
-            command('showOutput', session => session.browser?.development || session.browser?.debuggable ? this.browser.showOutput()
-                : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session)),
+            command('showOutput', session => {
+                if (session.android) return this.android.showDebugOutput();
+                if (session.browser?.development || session.browser?.debuggable) return this.browser.showOutput();
+                if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session);
+            }),
             command('stop', session => this.stop(session)),
         ];
     }
@@ -82,6 +85,7 @@ export class AppSessions implements vscode.Disposable {
             if (session.app_session) await vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session);
             else if (session.browser && session.generation !== null) await this.browser.debug(session.runtime, session.generation);
             else if (session.simulator && session.generation !== null) await this.simulators.debug(session.runtime, session.generation, { interactive: true });
+            else if (session.android && session.generation !== null) await this.android.debug(session.runtime, session.generation, { interactive: true });
         } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
     }
 
@@ -108,6 +112,8 @@ export class AppSessions implements vscode.Disposable {
             const development = session.browser.development ? '-development' : '';
             const debug = session.browser.debuggable && session.available ? '-debug' : '';
             item.contextValue = `app-session-browser${development}${debug}`;
+        } else if (session.android?.debuggable) {
+            item.contextValue = 'app-session-android-debug';
         } else {
             item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         }

@@ -14,7 +14,7 @@ export class ReloadDebugger implements vscode.Disposable {
     private closing?: Promise<void>;
 
     constructor(private readonly output: Pick<vscode.OutputChannel, 'appendLine'>,
-        private readonly attachError = 'The configured Rust debugger did not attach.') {
+        private readonly attachError = 'The configured Rust debugger did not attach.', onDetach?: () => void) {
         this.subscriptions = [
             vscode.debug.onDidStartDebugSession(session => {
                 if (session.configuration.ferrouiManagedInstance !== this.instance) return;
@@ -26,6 +26,7 @@ export class ReloadDebugger implements vscode.Disposable {
                 if (this.active?.id === session.id) {
                     this.active = undefined;
                     this.attachment = undefined;
+                    onDetach?.();
                 }
             }),
         ];

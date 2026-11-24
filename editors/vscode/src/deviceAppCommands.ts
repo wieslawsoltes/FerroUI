@@ -14,6 +14,10 @@ export class DeviceAppCommands implements vscode.Disposable {
         const context = () => {
             void vscode.commands.executeCommand('setContext', 'ferroui.mobileAppProfiles', this.ios.supported || hasAndroidProfiles());
         };
+        const present = async (runtime: AppRuntime, debug: boolean) => {
+            open(runtime);
+            if (debug) await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
+        };
         void vscode.commands.executeCommand('setContext', 'ferroui.iosSimulatorHost', ios.supported);
         context();
         this.subscriptions = [
@@ -22,12 +26,11 @@ export class DeviceAppCommands implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.appSessions.mobile', () => this.chooseAction()),
             ...(['run', 'debug'] as const).map(mode => vscode.commands.registerCommand(`ferroui.iosSimulator.${mode}`, (selection?: IosSimulatorRun) =>
                 connectApp('Connecting to the iOS simulator app', () => selection ?? this.chooseIosApp(mode),
-                    (request, signal) => this.ios.start(request, signal), async runtime => {
-                        open(runtime);
-                        if (mode === 'debug') await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
-                    }))),
-            ...(['run', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
-                connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode), (request, signal) => this.android.open(request, mode, signal), open))),
+                    (request, signal) => this.ios.start(request, signal), runtime => present(runtime, mode === 'debug')))),
+            ...(['run', 'debug', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
+                connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode),
+                    (request, signal) => this.android.open(request, mode === 'attach' ? 'attach' : 'run', signal),
+                    runtime => present(runtime, mode === 'debug')))),
         ];
     }
 
@@ -39,6 +42,7 @@ export class DeviceAppCommands implements vscode.Disposable {
         );
         if (hasAndroidProfiles()) actions.push(
             { label: 'Run Android App', command: 'ferroui.android.run' },
+            { label: 'Run and Debug Android App', command: 'ferroui.android.debug' },
             { label: 'Attach to Android App', command: 'ferroui.android.attach' },
         );
         const action = actions.length === 1 ? actions[0]
@@ -63,14 +67,15 @@ export class DeviceAppCommands implements vscode.Disposable {
         if (device) return { device: device.device.id, profile: app.app.id, folder: app.app.folder };
     }
 
-    private async chooseAndroidApp(mode: AndroidMode): Promise<AndroidRequest | undefined> {
+    private async chooseAndroidApp(mode: AndroidMode | 'debug'): Promise<AndroidRequest | undefined> {
         if (!hasAndroidProfiles()) throw new Error('Add a profile to ferroui.android.apps in Workspace Settings.');
         const { devices, apps } = await this.android.targets(undefined, AbortSignal.timeout(12_000));
         const available = devices.filter(device => device.status === 'device');
         if (!available.length) throw new Error('Start an Android emulator or authorize a connected device in ADB.');
         const app = await vscode.window.showQuickPick(apps.map(app => ({
             label: app.label, description: app.packageId, detail: vscode.Uri.parse(app.folder).fsPath, app,
-        })), { title: mode === 'run' ? 'Run Android App' : 'Attach to Android App', placeHolder: 'Choose the configured Android app',
+        })), { title: { run: 'Run Android App', debug: 'Run and Debug Android App', attach: 'Attach to Android App' }[mode],
+            placeHolder: 'Choose the configured Android app',
             matchOnDescription: true, matchOnDetail: true });
         if (!app) return;
         const device = await vscode.window.showQuickPick(available.map(device => ({

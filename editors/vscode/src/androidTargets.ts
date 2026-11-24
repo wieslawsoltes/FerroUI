@@ -16,6 +16,7 @@ export interface AndroidApp {
     activity: string;
     label: string;
     apkPath?: string;
+    symbolFiles: string[];
 }
 
 export interface AndroidRequest {
@@ -46,7 +47,8 @@ function androidSettings(folder: vscode.WorkspaceFolder): unknown[] {
 }
 
 function androidApp(value: unknown, folder: vscode.WorkspaceFolder): AndroidApp {
-    const { id, packageId, activity = 'org.ferroui.android.FerroMainActivity', label, apkPath } = (value ?? {}) as Record<string, unknown>;
+    const { id, packageId, activity = 'org.ferroui.android.FerroMainActivity', label, apkPath, symbolFiles = [] } = (
+        value ?? {}) as Record<string, unknown>;
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(id)
         || typeof packageId !== 'string' || packageId.length > 255 || !/^[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+$/.test(packageId)
         || typeof activity !== 'string' || activity.length > 255 || !/^\.?[A-Za-z_][A-Za-z0-9_]*(?:\.[A-Za-z_][A-Za-z0-9_]*)*$/.test(activity)
@@ -54,6 +56,14 @@ function androidApp(value: unknown, folder: vscode.WorkspaceFolder): AndroidApp 
         || apkPath !== undefined && (typeof apkPath !== 'string' || path.extname(apkPath).toLowerCase() !== '.apk' || apkPath.includes('\0'))) {
         throw new Error(`Check the Android app profile in ${folder.name}. Use an ID, package name, activity, and optional APK path.`);
     }
+    if (!Array.isArray(symbolFiles) || !symbolFiles.every(file => typeof file === 'string' && !/[\u0000-\u001f]/.test(file)
+        && /^lib[A-Za-z0-9_.+-]+\.so$/.test(path.basename(file)))) {
+        throw new Error(`Set symbolFiles for ${id} to unstripped Android shared libraries, such as libandroid_inspector.so.`);
+    }
+    if (new Set(symbolFiles.map(file => path.basename(file))).size !== symbolFiles.length) {
+        throw new Error(`List one symbol file per installed library in the Android profile ${id}.`);
+    }
     return { id, folder: folder.uri.toString(), packageId, activity, label: typeof label === 'string' ? label.trim() : packageId,
-        apkPath: typeof apkPath === 'string' ? path.resolve(folder.uri.fsPath, apkPath) : undefined };
+        apkPath: typeof apkPath === 'string' ? path.resolve(folder.uri.fsPath, apkPath) : undefined,
+        symbolFiles: symbolFiles.map(file => path.resolve(folder.uri.fsPath, file)) };
 }

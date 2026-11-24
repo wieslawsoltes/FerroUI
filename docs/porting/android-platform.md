@@ -315,6 +315,8 @@ Files of the port without an upstream file: `interop/java.rs` (JNI, section 2.1)
 
 Nothing of this writes outside the build directory. A release configuration (`--release`) uses the release profile of cargo; signing for a store is the application's business.
 
+Use `--debugger` with a debuggable `dev` APK to package the NDK’s `lldb-server` for the selected ABI as `libferroui_lldb_server.so`. Android extracts the helper with the app’s native libraries. The build adds an ELF build ID to the application library so LLDB can match its local symbols. Keep the original Cargo library for source debugging. [Debug Rust on Android in VS Code](../designer/vscode/runtime.md#debug-rust-on-android)
+
 ## 10. Verification
 
 Three levels, because nothing of Android runs on the development machine without the emulator, and the emulator may only run while no virtual machine does (the orchestrator serialises it).

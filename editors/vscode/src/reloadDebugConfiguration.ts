@@ -1,16 +1,25 @@
 import * as vscode from 'vscode';
 import { managedProcessVariable } from './reloadDebugger';
 
-interface DebugSelection { interactive?: boolean; name?: string; exactPid?: boolean }
+export const androidDebugPortVariable = '${command:ferroui.android.debugPort}';
+
+const targets = {
+    desktop: (config: vscode.DebugConfiguration) => JSON.stringify(config).includes(managedProcessVariable),
+    simulator: (config: vscode.DebugConfiguration) => config.pid === managedProcessVariable || config.processId === managedProcessVariable,
+    android: (config: vscode.DebugConfiguration) => config.type === 'lldb-dap' && config['gdb-remote-port'] === androidDebugPortVariable
+        && config.pid === undefined && config.attachCommands === undefined && config.coreFile === undefined,
+};
+
+interface DebugSelection { interactive?: boolean; name?: string; target?: keyof typeof targets }
 
 export async function selectDebugConfiguration(folder: vscode.WorkspaceFolder,
-    { interactive = true, name, exactPid = false }: DebugSelection = {}): Promise<vscode.DebugConfiguration | undefined> {
+    { interactive = true, name, target = 'desktop' }: DebugSelection = {}): Promise<vscode.DebugConfiguration | undefined> {
     const configurations = vscode.workspace.getConfiguration('launch', folder.uri)
         .get<vscode.DebugConfiguration[]>('configurations', [])
-        .filter(configuration => configuration?.request === 'attach' && (exactPid
-            ? configuration.pid === managedProcessVariable || configuration.processId === managedProcessVariable
-            : JSON.stringify(configuration).includes(managedProcessVariable)));
-    if (!configurations.length) throw new Error(`Add a Rust attach configuration with ${managedProcessVariable} as its process ID.`);
+        .filter(configuration => configuration?.request === 'attach' && targets[target](configuration));
+    if (!configurations.length) throw new Error(target === 'android'
+        ? `Add an LLDB DAP attach configuration with ${androidDebugPortVariable} as its gdb-remote-port.`
+        : `Add a Rust attach configuration with ${managedProcessVariable} as its process ID.`);
     if (name !== undefined) {
         const matches = configurations.filter(configuration => configuration.name === name);
         if (matches.length !== 1) throw new Error('Choose one attach configuration by its name in launch.json.');

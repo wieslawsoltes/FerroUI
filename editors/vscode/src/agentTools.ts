@@ -256,6 +256,8 @@ export class AgentTools {
         if (tool === 'ferroui_android_run' || tool === 'ferroui_android_attach') {
             return this.appSessions.android.open(input as AndroidRequest, tool === 'ferroui_android_run' ? 'run' : 'attach', signal);
         }
+        if (tool === 'ferroui_android_debug') return this.appSessions.android.debug(args.runtime as AppRuntime, args.expected_generation,
+            { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
         if (tool === 'ferroui_android_stop') {
             await this.appSessions.android.stop(args.runtime as AppRuntime);
             return { closed: true };

@@ -116,7 +116,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             requireCurrent();
             const [folder] = workspaceFolders(launch.app.folder);
             const configuration = await selectDebugConfiguration(folder, { interactive: options.interactive ?? false,
-                name: options.configuration, exactPid: true });
+                name: options.configuration, target: 'simulator' });
             if (!configuration) return { runtime, generation, attached: false };
             requireCurrent();
             const pid = await simulatorAppPid(launch.device.id, launch.app.bundleId, endpoint, signal);
