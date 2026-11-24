@@ -31,6 +31,9 @@ pub struct UntypedBindingExpressionBase {
     rare: OptionCell<Box<RareState>>,
     frame: OptionCell<Weak<ImmediateValueFrame>>,
     is_running: Cell<bool>,
+    /// Set while the sink is told of a new value, so that a target change it causes can be told
+    /// from a change made by the target itself.
+    is_publishing_value: Cell<bool>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
     reload_paused: Cell<bool>,
     #[cfg(all(debug_assertions, feature = "hot-reload"))]
@@ -77,6 +80,7 @@ impl UntypedBindingExpressionBase {
             rare: OptionCell::new(),
             frame: OptionCell::new(),
             is_running: Cell::new(false),
+            is_publishing_value: Cell::new(false),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
             reload_paused: Cell::new(false),
             #[cfg(all(debug_assertions, feature = "hot-reload"))]
@@ -191,7 +195,7 @@ impl UntypedBindingExpressionBase {
             }
             let sink = self.sink.get();
             if let (Some(sink), Some(this)) = (sink, self.this.upgrade()) {
-                sink.on_changed(&this, value_changed, error_changed);
+                self.notify_sink(sink, &this, value_changed, error_changed);
             }
         }
     }
@@ -423,7 +427,29 @@ impl UntypedBindingExpressionBase {
 
         // Expressions, their sources and their targets belong to one thread,
         // so the sink is always notified directly.
-        sink.on_changed(&this, has_value_changed, has_error_changed);
+        self.notify_sink(sink, &this, has_value_changed, has_error_changed);
+    }
+
+    fn notify_sink(
+        &self,
+        sink: SinkRef,
+        this: &Rc<dyn BindingExpressionBase>,
+        has_value_changed: bool,
+        has_error_changed: bool,
+    ) {
+        struct Restore<'a>(&'a Cell<bool>, bool);
+        impl Drop for Restore<'_> {
+            fn drop(&mut self) {
+                self.0.set(self.1);
+            }
+        }
+        let _restore = Restore(&self.is_publishing_value, self.is_publishing_value.replace(has_value_changed));
+        sink.on_changed(this, has_value_changed, has_error_changed);
+    }
+
+    /// Whether the expression is telling its target of a new value.
+    pub(crate) fn is_publishing_value(&self) -> bool {
+        self.is_publishing_value.get()
     }
 }
 

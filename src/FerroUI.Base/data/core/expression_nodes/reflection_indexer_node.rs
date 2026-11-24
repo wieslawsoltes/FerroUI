@@ -1,6 +1,6 @@
 use super::{CollectionNode, CollectionNodeBase, ExpressionNode, ISettableNode, NodeState};
 use crate::data::core::plugins::markup_members;
-use crate::data::core::{ValueType, ValueTypes, INDEXER_NAME};
+use crate::data::core::{is_indexer_change, ValueType, ValueTypes, INDEXER_NAME};
 use crate::data::model::{IBindableIndexer, IBindableList, ModelType, ModelTypes};
 use crate::data::BindingError;
 use crate::metadata::{MarkupIndexer, MarkupValue};
@@ -236,10 +236,12 @@ impl CollectionNode for ReflectionIndexerNode {
         &self.base
     }
 
-    fn should_update(&self, _source: &BoxedValue, property_name: &str) -> bool {
-        // The notification names the indexer property itself. A name that
-        // carries the arguments (`Item[key]`) is not the name of a property.
+    fn should_update(&self, source: &BoxedValue, property_name: &str) -> bool {
+        // `Item[]` and `Item[key]` name the indexer too. A collection reports the same change
+        // through its collection event, so that event alone updates the node.
         property_name == INDEXER_NAME
+            || (is_indexer_change(property_name)
+                && !ModelTypes::find(&**source).is_some_and(|m| m.as_notify_collection_changed(&**source).is_some()))
     }
 
     fn try_get_first_argument_as_int(&self) -> Option<i32> {

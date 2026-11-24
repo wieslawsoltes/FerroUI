@@ -72,6 +72,48 @@ impl IValueConverter for CaseConverter {
     }
 }
 
+/// Whether the value equals the parameter; not reversible, and it counts the attempts.
+#[derive(Default)]
+struct EqualsParameterConverter {
+    convert_back_count: Cell<i32>,
+    unset_for_null: bool,
+}
+
+impl IValueConverter for EqualsParameterConverter {
+    fn convert(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        let text = to_text(value);
+        if text.is_none() && self.unset_for_null {
+            return Ok(Some(crate::FerroProperty::unset_value()));
+        }
+        Ok(Some(boxed(text == to_text(parameter))))
+    }
+
+    fn convert_back(
+        &self,
+        value: Option<&BoxedValue>,
+        _target_type: ValueType,
+        parameter: Option<&BoxedValue>,
+        _culture: &CultureInfo,
+    ) -> Result<Option<BoxedValue>, BindingError> {
+        self.convert_back_count.set(self.convert_back_count.get() + 1);
+        let is_true = value.and_then(|v| v.downcast_ref::<bool>()).copied().unwrap_or(false);
+        Ok(if is_true { parameter.cloned() } else { None })
+    }
+}
+
+crate::ferro_property!(fn coerced_int_property() -> crate::StyledProperty<i32> {
+    crate::FerroProperty::register_with::<TargetClass, i32>(
+        "CoercedInt",
+        crate::StyledPropertyOptions::new(0).coerce(|_, value: i32| value.min(10)),
+    )
+});
+
 fn two_way() -> Opts {
     Opts::mode(BindingMode::TwoWay)
 }
@@ -159,6 +201,63 @@ binding_tests! {
 
         assert_eq!(target.int(), 3);
         assert_eq!(data.lives.get(), 8);
+    }
+
+    fn two_way_binding_should_not_write_source_value_back_with_non_reversible_converter(f) {
+        let data = ViewModel::with_string("foo");
+        let converter = Rc::new(EqualsParameterConverter::default());
+        let target = create_target_with_source(
+            f,
+            src(&data),
+            &Path::of(ViewModel::string_step()),
+            two_way()
+                .with_property(TargetClass::bool_property())
+                .with_converter(converter.clone())
+                .with_converter_parameter("foo"),
+        );
+        assert!(target.bool());
+
+        data.set_string_value(Some(s("bar")));
+
+        assert!(!target.bool());
+        assert_eq!(data.string_value(), Some(s("bar")));
+        assert_eq!(converter.convert_back_count.get(), 0);
+    }
+
+    fn two_way_binding_should_not_write_default_value_back_when_converter_returns_unset(f) {
+        let data = ViewModel::with_string("foo");
+        let converter = Rc::new(EqualsParameterConverter { unset_for_null: true, ..Default::default() });
+        let target = create_target_with_source(
+            f,
+            src(&data),
+            &Path::of(ViewModel::string_step()),
+            two_way()
+                .with_property(TargetClass::bool_property())
+                .with_converter(converter.clone())
+                .with_converter_parameter("foo"),
+        );
+        assert!(target.bool());
+
+        data.set_string_value(None);
+
+        assert!(!target.bool());
+        assert_eq!(data.string_value(), None);
+        assert_eq!(converter.convert_back_count.get(), 0);
+    }
+
+    fn two_way_binding_should_write_coerced_value_back_to_source(f) {
+        let data = ViewModel::with_int(5);
+        let target = create_target_with_source(
+            f,
+            src(&data),
+            &Path::of(ViewModel::int_step()),
+            two_way().with_property(coerced_int_property()),
+        );
+
+        data.set_int_value(15);
+
+        assert_eq!(target.get_value(coerced_int_property()), 10);
+        assert_eq!(data.int_value(), 10);
     }
 
     fn setter_should_convert_double_to_string(f) {
