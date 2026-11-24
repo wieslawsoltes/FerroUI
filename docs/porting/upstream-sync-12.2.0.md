@@ -147,7 +147,7 @@ are part of the base that the previous sync tracked, so they are not inventoried
 | `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
-| `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack. |
+| `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
 <!-- /generated:deferred -->
 
 ## Decisions of the owner (2026-11-23)
@@ -322,7 +322,7 @@ left out only with a recorded performance or better-code reason.
 | `ad90a07d03` | #22671 | 2026-11-13 | automation | `port` (done) | platforms2 | `LabeledBy` in Windows UI Automation. |
 | `10a2fb0ac5` | #22682 | 2026-11-13 | platform-win32 | `port` (done) | platforms2 | OLE `GetData` retried for 100 ms while another process holds the clipboard, then a timeout error instead of no data. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering | `deferred` |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
-| `80659c4c3e` | #22773 | 2026-11-13 | text | `deferred` |  | Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack. |
+| `80659c4c3e` | #22773 | 2026-11-13 | text | `deferred` |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
 | `02d7bc35e3` | #22662 | 2026-11-13 | text | `port` (done) | text | Runs of different scripts shaped in separate buffers. |
 | `9d6cb1ea62` | #22015 | 2026-11-13 | rendering | `port` (done) | rendering | `ContentPresenter` and acrylic clip to rounded bounds. A presenter pays for a border visual only when it clips with a corner radius. |
 | `d379b92b87` | #22694 | 2026-11-13 | platform-macos | `port` (done) | macos | `automation.mm`: tab button subrole. |

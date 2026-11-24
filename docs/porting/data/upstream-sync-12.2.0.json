@@ -1443,7 +1443,7 @@
    "date": "2026-11-13",
    "area": "text",
    "class": "deferred",
-   "note": "Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack."
+   "note": "Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser)."
   },
   {
    "hash": "02d7bc35e34fa1207a93d540b1639e42e4e88f57",
