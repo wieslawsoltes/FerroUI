@@ -231,6 +231,9 @@ mod macos {
             key: FrnKey,
             physical_key: FrnPhysicalKey,
             key_symbol: Option<&CStr>,
+            _key_text: Option<&IFrnString>,
+            _alternate_key_text: Option<&IFrnString>,
+            _info: FrnKeyEventInfo,
         ) -> bool {
             println!("RawKeyEvent: {type_:?} {key:?} {physical_key:?} symbol={key_symbol:?} modifiers {}", modifiers.0);
             false

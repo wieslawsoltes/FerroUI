@@ -8,6 +8,7 @@ use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::popup_impl::PopupImpl;
 use crate::screens::wayland_output_snapshot::WaylandOutputId;
 use crate::server::persistent::i_w_surface::IWSurface;
+use crate::server::persistent::wayland_key_info::WaylandKeyInfo;
 use crate::server::persistent::i_w_surface_event_sink::{
     IWSurfaceEventSink, IWXdgPopupEventSink, PlatformInputEventCookie, WXdgPopupEventSinkProxy,
 };
@@ -15,7 +16,7 @@ use crate::server::persistent::i_w_xdg_top_level::{IWXdgPopup, IWXdgShellSurface
 use crate::server::persistent::xdg_popup_configure_batch::XdgPopupConfigureBatch;
 use crate::window_impl_base::{get, ISinkOwner, Sink};
 use ferroui_base::input::raw::RawPointerEventType;
-use ferroui_base::input::{Key, PhysicalKey, RawInputModifiers};
+use ferroui_base::input::RawInputModifiers;
 use ferroui_base::reactive::IDisposable;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Point, Rect, Vector};
@@ -159,12 +160,16 @@ impl IWSurfaceEventSink for PopupImplSink {
         self.base.on_touch_cancel(touch_id, position);
     }
 
-    fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>) {
-        self.base.on_key_down(timestamp, key, modifiers, physical_key, key_symbol);
+    fn on_key_down(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.base.on_key_down(timestamp, modifiers, key);
     }
 
-    fn on_key_up(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>) {
-        self.base.on_key_up(timestamp, key, modifiers, physical_key, key_symbol);
+    fn on_key_up(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.base.on_key_up(timestamp, modifiers, key);
+    }
+
+    fn on_held_key_changed(&self, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.base.on_held_key_changed(modifiers, key);
     }
 
     fn on_keyboard_leave(&self) {

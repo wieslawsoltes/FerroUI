@@ -13,6 +13,16 @@ pub trait IXkbKeymap {
     fn find_keysym_in_layout(&self, evdev_keycode: u32, layout: u32) -> u32;
 }
 
+/// A key resolved against a keymap: the key, the key symbol, the text of the key in the
+/// current state (control characters included) and the key symbol.
+#[derive(Clone, Debug, PartialEq)]
+pub struct ResolvedKey {
+    pub key: Key,
+    pub key_symbol: Option<String>,
+    pub text: Option<String>,
+    pub keysym: u32,
+}
+
 /// Translates the evdev codes and the key symbols a compositor sends.
 pub struct XkbKeyTransform;
 
@@ -518,17 +528,32 @@ impl XkbKeyTransform {
         evdev_keycode: u32,
         physical_key: PhysicalKey,
     ) -> (Key, Option<String>) {
-        let (keysym, text) = keymap.resolve_key(evdev_keycode);
-        let key_symbol = Self::filter_key_symbol(text);
+        let resolved = Self::resolve_key_with_text(keymap, evdev_keycode, physical_key);
+        (resolved.key, resolved.key_symbol)
+    }
 
+    /// [`resolve_key_with_fallback`](Self::resolve_key_with_fallback) with the text of the key
+    /// in the current state and its key symbol (12.2.0, `8dae868308`).
+    pub fn resolve_key_with_text(
+        keymap: &dyn IXkbKeymap,
+        evdev_keycode: u32,
+        physical_key: PhysicalKey,
+    ) -> ResolvedKey {
+        let (keysym, text) = keymap.resolve_key(evdev_keycode);
+        let key_symbol = Self::filter_key_symbol(text.clone());
+        let key = Self::resolve_key_value(keymap, evdev_keycode, physical_key, keysym);
+        ResolvedKey { key, key_symbol, text, keysym }
+    }
+
+    fn resolve_key_value(keymap: &dyn IXkbKeymap, evdev_keycode: u32, physical_key: PhysicalKey, keysym: u32) -> Key {
         // Always use digit keys from QWERTY, matching Windows/macOS
         if physical_key >= PhysicalKey::Digit0 && physical_key <= PhysicalKey::Digit9 {
-            return (physical_key.to_qwerty_key(), key_symbol);
+            return physical_key.to_qwerty_key();
         }
 
         let key = Self::key_from_keysym(keysym);
         if key != Key::None {
-            return (key, key_symbol);
+            return key;
         }
 
         // Non-latin fallback: cycle through other layout groups
@@ -538,17 +563,17 @@ impl XkbKeyTransform {
             if group_keysym != 0 {
                 let key = Self::key_from_keysym(group_keysym);
                 if key != Key::None {
-                    return (key, key_symbol);
+                    return key;
                 }
             }
         }
 
         // Ultimate fallback: QWERTY physical key mapping
         if keysym != 0 {
-            return (physical_key.to_qwerty_key(), key_symbol);
+            return physical_key.to_qwerty_key();
         }
 
-        (Key::None, key_symbol)
+        Key::None
     }
 
     /// The text of a key as the framework takes it: nothing for an empty text and for a single
@@ -610,6 +635,24 @@ mod tests {
                 _ => 0,
             }
         }
+    }
+
+    #[test]
+    fn a_resolved_key_keeps_the_text_with_control_characters_and_the_key_symbol() {
+        // 12.2.0: the text is the key text (control characters included), the key symbol is
+        // filtered.
+        let enter = XkbKeyTransform::resolve_key_with_text(&TwoLayouts, 28, PhysicalKey::Enter);
+        assert_eq!(enter.key, Key::Return);
+        assert_eq!((enter.text.as_deref(), enter.keysym), (Some("\r"), 0xff0d));
+        assert_eq!(enter.key_symbol.as_deref(), Some("\r"));
+        let q = XkbKeyTransform::resolve_key_with_text(&TwoLayouts, 16, PhysicalKey::Q);
+        assert_eq!((q.key, q.text.as_deref(), q.keysym), (Key::Q, Some("й"), 0x06ca));
+        assert_eq!(
+            XkbKeyTransform::resolve_key_with_fallback(&TwoLayouts, 16, PhysicalKey::Q),
+            (q.key, q.key_symbol.clone())
+        );
+        let unknown = XkbKeyTransform::resolve_key_with_text(&TwoLayouts, 200, PhysicalKey::None);
+        assert_eq!((unknown.key, unknown.text, unknown.keysym), (Key::None, None, 0));
     }
 
     #[test]

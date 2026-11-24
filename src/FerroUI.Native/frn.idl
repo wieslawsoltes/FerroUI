@@ -524,6 +524,15 @@ enum FrnInputModifiers
     XButton2MouseButton = 256
 }
 
+struct FrnKeyEventInfo
+{
+    bool HasConsumedModifiers;
+    FrnInputModifiers ConsumedModifiers;
+    bool HasNativeKeyCode;
+    int NativeKeyCode;
+    u_int64_t NativeModifiers;
+}
+
 [class-enum]
 enum FrnDragDropEffects
 {
@@ -831,7 +840,8 @@ interface IFrnTopLevelEvents : IUnknown
                                     float yTilt
                                     );
     bool RawKeyEvent(FrnRawKeyEventType type, u_int64_t timeStamp, FrnInputModifiers modifiers,
-                          FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol);
+                          FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol,
+                          IFrnString* keyText, IFrnString* alternateKeyText, FrnKeyEventInfo info);
     bool RawTextInputEvent(u_int64_t timeStamp, [const] char* text);
     void ScalingChanged(double scaling);
     void LostFocus();

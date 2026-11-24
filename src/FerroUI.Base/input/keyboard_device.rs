@@ -342,6 +342,10 @@ impl IInputDevice for KeyboardDevice {
             ev.physical_key = key_input.physical_key();
             ev.key_symbol = key_input.key_symbol();
             ev.key_device_type = key_input.key_device_type();
+            ev.key_text = key_input.key_text();
+            ev.alternate_key_text = key_input.alternate_key_text();
+            ev.consumed_modifiers = key_input.consumed_modifiers().map(|m| m.to_key_modifiers());
+            ev.platform_key_info = key_input.platform_key_info();
             ev.set_source(&element);
 
             if key_input.type_() == RawKeyEventType::KeyDown {

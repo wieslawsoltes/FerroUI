@@ -1,0 +1,232 @@
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.mm b/native/FerroUI.Native/src/OSX/FrnView.mm
+index 4795ff52e4..6407ad336d 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.mm
++++ b/native/FerroUI.Native/src/OSX/FrnView.mm
+@@ -7,6 +7,7 @@
+ #import <Carbon/Carbon.h> /* For the TIS functions used to classify the keyboard input source. */
+ #include "FrnView.h"
+ #include "automation.h"
++#include "FrnString.h"
+ #import "WindowInterfaces.h"
+ #import "WindowImpl.h"
+ 
+@@ -594,7 +595,14 @@ - (void) keyboardEvent: (NSEvent *) event withType: (FrnRawKeyEventType)type
+     auto timestamp = static_cast<uint64_t>([event timestamp] * 1000);
+     auto modifiers = [self getModifiers:[event modifierFlags]];
+ 
+-    parent->TopLevelEvents->RawKeyEvent(type, timestamp, modifiers, key, physicalKey, keySymbolUtf8);
++    FrnKeyEventInfo info = {};
++    info.HasNativeKeyCode = true;
++    info.NativeKeyCode = [event keyCode];
++    info.NativeModifiers = [event modifierFlags];
++
++    // Also called from flagsChanged:, where reading the event's characters throws
++    parent->TopLevelEvents->RawKeyEvent(type, timestamp, modifiers, key, physicalKey, keySymbolUtf8,
++                                        nullptr, nullptr, info);
+ }
+ 
+ - (void)setModifiers:(NSEventModifierFlags)modifierFlags
+@@ -795,7 +803,24 @@ - (void)keyDown:(NSEvent *)event
+     // A KeyDown is always raised before the input context sees the event, otherwise the
+     // input context silently consumes printable keys (space, letters, digits) and user code
+     // never gets a chance to react to them.
+-    auto handled = parent->TopLevelEvents->RawKeyEvent(KeyDown, timestamp, modifiers, key, physicalKey, keySymbolUtf8);
++    auto characters = [event characters];
++    ComPtr<IFrnString> keyText;
++    if ([characters length] != 0)
++        keyText = CreateFrnString(characters);
++    // Option counts as Alt here, so a terminal can use it as a Meta key
++    auto alternateSymbol = KeySymbolFromScanCode(scanCode, [event modifierFlags] & ~NSEventModifierFlagOption, true);
++    ComPtr<IFrnString> alternateKeyText;
++    if (alternateSymbol != nullptr)
++        alternateKeyText = CreateFrnString(alternateSymbol);
++
++    FrnKeyEventInfo info = {};
++    info.HasConsumedModifiers = ConsumedModifiersFromScanCode(scanCode, [event modifierFlags], &info.ConsumedModifiers);
++    info.HasNativeKeyCode = true;
++    info.NativeKeyCode = scanCode;
++    info.NativeModifiers = [event modifierFlags];
++
++    auto handled = parent->TopLevelEvents->RawKeyEvent(KeyDown, timestamp, modifiers, key, physicalKey, keySymbolUtf8,
++                                                       keyText, alternateKeyText, info);
+ 
+     if(handled)
+     {
+@@ -920,8 +945,12 @@ - (void)setMarkedText:(id)string selectedRange:(NSRange)selectedRange replacemen
+     {
+         parent->InputMethod->Client->SelectInSurroundingText((int)finalReplacementRange.location, (int)(finalReplacementRange.location + finalReplacementRange.length));
+         uint64_t timestamp = static_cast<uint64_t>([NSDate timeIntervalSinceReferenceDate] * 1000);
+-        parent->TopLevelEvents->RawKeyEvent(KeyDown, timestamp, FrnInputModifiersNone, FrnKeyBack, FrnPhysicalKeyNone, "\b");
+-        parent->TopLevelEvents->RawKeyEvent(KeyUp, timestamp, FrnInputModifiersNone, FrnKeyBack, FrnPhysicalKeyNone, "\b");
++        // Synthesized events: no native data
++        FrnKeyEventInfo info = {};
++        parent->TopLevelEvents->RawKeyEvent(KeyDown, timestamp, FrnInputModifiersNone, FrnKeyBack, FrnPhysicalKeyNone, "\b",
++                                            nullptr, nullptr, info);
++        parent->TopLevelEvents->RawKeyEvent(KeyUp, timestamp, FrnInputModifiersNone, FrnKeyBack, FrnPhysicalKeyNone, "\b",
++                                            nullptr, nullptr, info);
+     }
+ 
+     auto markedLocation = [self selectedRange].location;
+diff --git a/native/FerroUI.Native/src/OSX/KeyTransform.h b/native/FerroUI.Native/src/OSX/KeyTransform.h
+index 95b483ea9a..c31fe4b068 100644
+--- a/native/FerroUI.Native/src/OSX/KeyTransform.h
++++ b/native/FerroUI.Native/src/OSX/KeyTransform.h
+@@ -8,8 +8,13 @@ FrnPhysicalKey PhysicalKeyFromScanCode(uint16_t scanCode);
+ 
+ FrnKey VirtualKeyFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags);
+ 
+-NSString* KeySymbolFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags);
++// With useLayoutFallback, an input method without its own layout data uses the keyboard layout that it types with
++NSString* KeySymbolFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags, bool useLayoutFallback = false);
+ 
+ uint16_t MenuCharFromVirtualKey(FrnKey key);
+ 
++// Gets the pressed modifiers that change the key's characters: Shift and Option. Control and Command are never consumed.
++// Returns false when no keyboard layout data is available.
++bool ConsumedModifiersFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags, FrnInputModifiers* result);
++
+ #endif
+diff --git a/native/FerroUI.Native/src/OSX/KeyTransform.mm b/native/FerroUI.Native/src/OSX/KeyTransform.mm
+index a6056cef91..e9dd457090 100644
+--- a/native/FerroUI.Native/src/OSX/KeyTransform.mm
++++ b/native/FerroUI.Native/src/OSX/KeyTransform.mm
+@@ -403,16 +403,34 @@ static bool IsAllowedAsciiChar(UniChar c)
+     return true;
+ }
+ 
+-static UniCharCount CharsFromScanCode(UInt16 scanCode, NSEventModifierFlags modifierFlags, UInt16 keyAction, UniChar* buffer, UniCharCount bufferSize)
++// Returns the retained 'uchr' data of the current input source. With useLayoutFallback, an input method without its
++// own layout data (for example Pinyin) gives the data of the keyboard layout that it uses.
++static CFDataRef CopyKeyboardLayoutData(bool useLayoutFallback)
+ {
+-    auto currentKeyboard = TISCopyCurrentKeyboardInputSource();
+-    if (!currentKeyboard)
+-        return 0;
++    auto source = TISCopyCurrentKeyboardInputSource();
++    auto data = source ?
++        static_cast<CFDataRef>(TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData)) :
++        nullptr;
+ 
+-    auto layoutData = static_cast<CFDataRef>(TISGetInputSourceProperty(currentKeyboard, kTISPropertyUnicodeKeyLayoutData));
+-    if (!layoutData)
+-        return 0;
++    if (!data && useLayoutFallback)
++    {
++        if (source)
++            CFRelease(source);
++        source = TISCopyCurrentKeyboardLayoutInputSource();
++        data = source ?
++            static_cast<CFDataRef>(TISGetInputSourceProperty(source, kTISPropertyUnicodeKeyLayoutData)) :
++            nullptr;
++    }
++
++    if (data)
++        CFRetain(data);
++    if (source)
++        CFRelease(source);
++    return data;
++}
+ 
++static UniCharCount CharsFromLayout(CFDataRef layoutData, UInt16 scanCode, NSEventModifierFlags modifierFlags, UInt16 keyAction, UniChar* buffer, UniCharCount bufferSize)
++{
+     auto* keyboardLayout = reinterpret_cast<const UCKeyboardLayout*>(CFDataGetBytePtr(layoutData));
+ 
+     UInt32 deadKeyState = 0;
+@@ -466,6 +484,17 @@ static UniCharCount CharsFromScanCode(UInt16 scanCode, NSEventModifierFlags modi
+     return length;
+ }
+ 
++static UniCharCount CharsFromScanCode(UInt16 scanCode, NSEventModifierFlags modifierFlags, UInt16 keyAction, UniChar* buffer, UniCharCount bufferSize, bool useLayoutFallback = false)
++{
++    auto layoutData = CopyKeyboardLayoutData(useLayoutFallback);
++    if (!layoutData)
++        return 0;
++
++    auto length = CharsFromLayout(layoutData, scanCode, modifierFlags, keyAction, buffer, bufferSize);
++    CFRelease(layoutData);
++    return length;
++}
++
+ FrnKey VirtualKeyFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags)
+ {
+     auto physicalKey = PhysicalKeyFromScanCode(scanCode);
+@@ -486,13 +515,47 @@ FrnKey VirtualKeyFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFl
+     return it == qwertyVirtualKeyFromPhysicalKey.end() ? FrnKeyNone : it->second;
+ }
+ 
+-NSString* KeySymbolFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags)
++static NSString* CharsStringFromLayout(CFDataRef layoutData, uint16_t scanCode, NSEventModifierFlags modifierFlags)
++{
++    const UniCharCount charCount = 4;
++    UniChar chars[charCount];
++    auto length = CharsFromLayout(layoutData, scanCode, modifierFlags, kUCKeyActionDown, chars, charCount);
++    return length > 0 ? [NSString stringWithCharacters:chars length:length] : nullptr;
++}
++
++static bool SameChars(NSString* a, NSString* b)
++{
++    return a == b || (a != nullptr && b != nullptr && [a isEqualToString:b]);
++}
++
++bool ConsumedModifiersFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags, FrnInputModifiers* result)
++{
++    auto layoutData = CopyKeyboardLayoutData(true);
++    if (!layoutData)
++        return false;
++
++    unsigned int consumed = FrnInputModifiersNone;
++    auto chars = CharsStringFromLayout(layoutData, scanCode, modifierFlags);
++
++    if ((modifierFlags & NSEventModifierFlagShift)
++        && !SameChars(chars, CharsStringFromLayout(layoutData, scanCode, modifierFlags & ~NSEventModifierFlagShift)))
++        consumed |= Shift;
++    if ((modifierFlags & NSEventModifierFlagOption)
++        && !SameChars(chars, CharsStringFromLayout(layoutData, scanCode, modifierFlags & ~NSEventModifierFlagOption)))
++        consumed |= Alt;
++
++    CFRelease(layoutData);
++    *result = (FrnInputModifiers)consumed;
++    return true;
++}
++
++NSString* KeySymbolFromScanCode(uint16_t scanCode, NSEventModifierFlags modifierFlags, bool useLayoutFallback)
+ {
+     auto physicalKey = PhysicalKeyFromScanCode(scanCode);
+ 
+     const UniCharCount charCount = 4;
+     UniChar chars[charCount];
+-    auto length = CharsFromScanCode(scanCode, modifierFlags, kUCKeyActionDisplay, chars, charCount);
++    auto length = CharsFromScanCode(scanCode, modifierFlags, kUCKeyActionDisplay, chars, charCount, useLayoutFallback);
+     if (length > 0)
+         return [NSString stringWithCharacters:chars length:length];
+ 
+diff --git a/src/FerroUI.Native/frn.idl b/src/FerroUI.Native/frn.idl
+index b44637d31d..95be076739 100644
+--- a/src/FerroUI.Native/frn.idl
++++ b/src/FerroUI.Native/frn.idl
+@@ -526,6 +526,15 @@ enum FrnInputModifiers
+     XButton2MouseButton = 256
+ }
+ 
++struct FrnKeyEventInfo
++{
++    bool HasConsumedModifiers;
++    FrnInputModifiers ConsumedModifiers;
++    bool HasNativeKeyCode;
++    int NativeKeyCode;
++    u_int64_t NativeModifiers;
++}
++
+ [class-enum]
+ enum FrnDragDropEffects
+ {
+@@ -833,7 +842,8 @@ interface IFrnTopLevelEvents : IUnknown
+                                     float yTilt
+                                     );
+     bool RawKeyEvent(FrnRawKeyEventType type, u_int64_t timeStamp, FrnInputModifiers modifiers,
+-                          FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol);
++                          FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol,
++                          IFrnString* keyText, IFrnString* alternateKeyText, FrnKeyEventInfo info);
+     bool RawTextInputEvent(u_int64_t timeStamp, [const] char* text);
+     void ScalingChanged(double scaling);
+     void RunRenderPriorityJobs();

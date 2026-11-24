@@ -19,7 +19,8 @@ use ferroui_base::input::raw::{
 };
 use ferroui_base::input::text_input::ITextInputMethodImpl;
 use ferroui_base::input::{
-    IInputDevice, IInputRoot, Key, KeyDeviceType, KeySymbolHelper, PhysicalKey, RawInputModifiers,
+    IInputDevice, IInputRoot, Key, KeyDeviceType, KeySymbolHelper, KnownPlatformKeyInfoFormats, PhysicalKey,
+    PlatformKeyInfo, RawInputModifiers,
 };
 use std::any::{Any, TypeId};
 use std::cell::RefCell;
@@ -199,6 +200,78 @@ fn get_key_symbol_xkb(display: XDisplay, x11_key: X11Key) -> Option<String> {
     key_symbol_from_bytes(&bytes)
 }
 
+/// `GetKeysymTextXkb`: the text of a key symbol under no modifiers, control
+/// characters included (the alternate key text of 12.2.0, `8dae868308`).
+fn get_keysym_text_xkb(display: XDisplay, x11_key: X11Key) -> Option<String> {
+    let bytes = xlib::xkb_translate_key_sym(display, x11_key.0 as u32 as _);
+    (!bytes.is_empty()).then(|| String::from_utf8_lossy(&bytes).into_owned())
+}
+
+/// `LookupAlternateKeyTextXCore`: the text of a key with Ctrl and Alt (Mod1)
+/// released, for a server without XKB.
+fn lookup_alternate_key_text_x_core(key_event: &XKeyEvent) -> Option<String> {
+    const BUFFER_SIZE: usize = 16;
+    let mut key_event = *key_event;
+    key_event.state &= !((XModifierMask::CONTROL_MASK | XModifierMask::MOD1_MASK).bits() as std::ffi::c_uint);
+    let (bytes, _) = xlib::x_lookup_string(&mut key_event, BUFFER_SIZE);
+    (!bytes.is_empty()).then(|| String::from_utf8_lossy(&bytes).into_owned())
+}
+
+/// `GetConsumedModifiers`: the pressed modifiers the layout used for a key,
+/// with the rules of `XKB_CONSUMED_MODE_GTK` of xkbcommon, so that X11 reports
+/// the same as Wayland. `lookup(state)` is `XkbLookupKeySym` of the key: the
+/// modifiers of the key type that the matching level does not preserve, and
+/// the key symbol.
+///
+/// `XkbLookupKeySym` reports every modifier of the key type (the XKB mode),
+/// even those that do not change the key symbol. The GTK rules compare key
+/// symbols: the active modifiers that can affect the key are all consumed if
+/// the key symbol differs from the unmodified one, and a single one is
+/// consumed if alone it changes the key symbol and its level does not preserve
+/// it. Modifiers the matching level preserves are never consumed.
+pub(crate) fn consumed_modifiers_gtk(
+    state: u32,
+    lookup: &dyn Fn(u32) -> Option<(u32, u64)>,
+) -> Option<RawInputModifiers> {
+    const GROUP_MASK: u32 = 0x6000;
+    const REAL_MODIFIERS_MASK: u32 = 0xFF;
+
+    let (type_modifiers, key_sym) = lookup(state)?;
+    let candidates = state & type_modifiers & REAL_MODIFIERS_MASK;
+    if candidates == 0 {
+        return Some(RawInputModifiers::NONE);
+    }
+
+    let group = state & GROUP_MASK;
+    let plain = lookup(group).map_or(0, |(_, sym)| sym);
+    let mut consumed = if key_sym != plain { candidates } else { 0 };
+    let mut modifier = 1;
+    while modifier <= candidates {
+        // A modifier that its own level preserves is not consumed.
+        if candidates & modifier != 0 {
+            if let Some((level_modifiers, level_sym)) = lookup(group | modifier) {
+                if level_sym != plain {
+                    consumed |= modifier & level_modifiers;
+                }
+            }
+        }
+        modifier <<= 1;
+    }
+
+    Some(XModifierMask::from_bits_retain(consumed as i32).to_raw_input_modifiers())
+}
+
+/// The platform data of an X11 key event: the key code, the key symbol (when
+/// there is one) and the state before the event.
+pub(crate) fn x11_platform_key_info(key_code: Option<u32>, x11_key: X11Key, state: Option<u64>) -> PlatformKeyInfo {
+    PlatformKeyInfo {
+        format: KnownPlatformKeyInfoFormats::X11,
+        scan_code: key_code,
+        virtual_key: (x11_key.0 != 0).then_some(x11_key.0 as u32),
+        modifiers: state,
+    }
+}
+
 fn lookup_key_x_core(key_event: &mut XKeyEvent) -> KeyLookup {
     const BUFFER_SIZE: usize = 4;
 
@@ -254,9 +327,10 @@ impl X11Window {
         let modifiers = XModifierMask::from_bits_retain(key_event.state as i32).to_raw_input_modifiers();
         let timestamp = key_event.time as u64;
 
+        let info = x11_platform_key_info(Some(key_event.keycode as u32), x11_key, Some(key_event.state as u64));
         let args: Rc<dyn IRawInputEventArgs> = if xlib::event_type(ev) == XEventName::KeyPress as i32 {
-            let text = self.translate_event_to_string(ev, symbol.clone());
-            Rc::new(RawKeyEventArgsWithText::new(
+            let key_text = self.translate_event_to_string(ev);
+            let args = RawKeyEventArgsWithText::new(
                 self.keyboard.clone(),
                 timestamp,
                 self.input_root(),
@@ -265,10 +339,19 @@ impl X11Window {
                 modifiers,
                 physical_key,
                 symbol,
-                text,
-            ))
+                filter_key_text(key_text.clone()),
+            );
+            args.set_key_text(key_text);
+            args.set_alternate_key_text(if self.x11.has_xkb() {
+                get_keysym_text_xkb(self.x11.display(), x11_key)
+            } else {
+                lookup_alternate_key_text_x_core(&key_event)
+            });
+            args.set_consumed_modifiers(self.consumed_modifiers(&key_event));
+            args.set_platform_key_info(Some(info));
+            Rc::new(args)
         } else {
-            Rc::new(RawKeyEventArgs::new(
+            let args = RawKeyEventArgs::new(
                 self.keyboard.clone(),
                 timestamp,
                 self.input_root(),
@@ -278,7 +361,9 @@ impl X11Window {
                 physical_key,
                 symbol,
                 KeyDeviceType::Keyboard,
-            ))
+            );
+            args.set_platform_key_info(Some(info));
+            Rc::new(args)
         };
 
         self.schedule_key_input(args, ev, x11_key.0, key_event.keycode as i32);
@@ -300,18 +385,32 @@ impl X11Window {
         adjust_looked_up_key(lookup, physical_key)
     }
 
-    fn translate_event_to_string(&self, ev: &mut XEvent, symbol: Option<String>) -> Option<String> {
+    /// The pressed modifiers the layout used for the key (`GetConsumedModifiers`); `None`
+    /// without XKB.
+    fn consumed_modifiers(&self, key_event: &XKeyEvent) -> Option<RawInputModifiers> {
+        if !self.x11.has_xkb() {
+            return None;
+        }
+        let display = self.x11.display();
+        let key_code = key_event.keycode as u8;
+        consumed_modifiers_gtk(key_event.state as u32, &|state| {
+            xlib::xkb_lookup_key_sym_with_modifiers(display, key_code, state).map(|(m, sym)| (m as u32, sym as u64))
+        })
+    }
+
+    /// The text of a key press with every modifier applied, control characters included
+    /// (`TranslateEventToString` of 12.2.0): the key text. The text input of the key is
+    /// [`filter_key_text`] of it.
+    fn translate_event_to_string(&self, ev: &mut XEvent) -> Option<String> {
         let xic = self.xic.get();
-        let text = if !self.x11.has_xkb() && xic.is_null() {
-            symbol // We already got the symbol from XLookupString, no need to call it again.
-        } else if xic.is_null() {
+        if xic.is_null() {
             let (bytes, _) = xlib::x_lookup_string(xlib::key_event_mut(ev), IME_BUFFER_SIZE);
             if bytes.is_empty() {
                 return None;
             }
             Some(String::from_utf8_lossy(&bytes).into_owned())
         } else {
-            let text = IME_BUFFER.with(|buffer| {
+            IME_BUFFER.with(|buffer| {
                 let mut buffer = buffer.borrow_mut();
                 if buffer.is_empty() {
                     buffer.resize(IME_BUFFER_SIZE, 0);
@@ -321,11 +420,8 @@ impl X11Window {
                     return None;
                 }
                 Some(String::from_utf8_lossy(&buffer[..len]).into_owned())
-            });
-            Some(text?)
-        };
-
-        filter_key_text(text)
+            })
+        }
     }
 
     fn schedule_key_input(&self, args: Rc<dyn IRawInputEventArgs>, xev: &XEvent, keyval: i32, keycode: i32) {
@@ -396,9 +492,14 @@ impl X11Window {
         };
         let timestamp = self.x11.last_activity_timestamp() as u64;
 
+        let alternate_key_text = (forwarded_key.type_ == RawKeyEventType::KeyDown && self.x11.has_xkb())
+            .then(|| get_keysym_text_xkb(self.x11.display(), x11_key))
+            .flatten();
+
         self.schedule_input(forwarded_key_args(
             forwarded_key,
             key_symbol,
+            alternate_key_text,
             self.keyboard.clone(),
             timestamp,
             input_root,
@@ -498,9 +599,13 @@ pub(crate) fn passes_although_handled(args: &Rc<dyn IRawInputEventArgs>) -> bool
 /// The raw input of a key an input method forwards
 /// (`OnImeControlForwardKey`): a key event without a physical key, with
 /// the symbol as its text when the input method says the key has text.
+///
+/// The key down carries `alternate_key_text` (the text of the key symbol), and every event the
+/// key symbol as its platform data (12.2.0, `8dae868308`).
 pub(crate) fn forwarded_key_args(
     forwarded_key: X11InputMethodForwardedKey,
     key_symbol: Option<String>,
+    alternate_key_text: Option<String>,
     keyboard: Rc<dyn IInputDevice>,
     timestamp: u64,
     input_root: Rc<dyn IInputRoot>,
@@ -508,9 +613,11 @@ pub(crate) fn forwarded_key_args(
     let x11_key = X11Key(forwarded_key.key_val);
     let key = X11KeyTransform::key_from_x11_key(x11_key);
     let modifiers = RawInputModifiers::from_bits_retain(forwarded_key.modifiers.bits());
+    let info = Some(x11_platform_key_info(None, x11_key, None));
+    let alternate_key_text = alternate_key_text.filter(|_| forwarded_key.type_ == RawKeyEventType::KeyDown);
 
     if forwarded_key.with_text {
-        Rc::new(RawKeyEventArgsWithText::new(
+        let args = RawKeyEventArgsWithText::new(
             keyboard,
             timestamp,
             input_root,
@@ -520,9 +627,12 @@ pub(crate) fn forwarded_key_args(
             PhysicalKey::None,
             key_symbol.clone(),
             key_symbol,
-        ))
+        );
+        args.set_alternate_key_text(alternate_key_text);
+        args.set_platform_key_info(info);
+        Rc::new(args)
     } else {
-        Rc::new(RawKeyEventArgs::new(
+        let args = RawKeyEventArgs::new(
             keyboard,
             timestamp,
             input_root,
@@ -532,7 +642,10 @@ pub(crate) fn forwarded_key_args(
             PhysicalKey::None,
             key_symbol,
             KeyDeviceType::Keyboard,
-        ))
+        );
+        args.set_alternate_key_text(alternate_key_text);
+        args.set_platform_key_info(info);
+        Rc::new(args)
     }
 }
 
@@ -735,7 +848,7 @@ mod tests {
             type_: RawKeyEventType::KeyUp,
             with_text: false,
         };
-        let args = forwarded_key_args(forwarded, None, Rc::new(TestDevice), 77, Rc::new(TestRoot));
+        let args = forwarded_key_args(forwarded, None, None, Rc::new(TestDevice), 77, Rc::new(TestRoot));
         let key = args.downcast_ref::<RawKeyEventArgs>().unwrap();
         assert_eq!(key.key(), Key::Enter);
         assert_eq!(key.type_(), RawKeyEventType::KeyUp);
@@ -751,11 +864,78 @@ mod tests {
             type_: RawKeyEventType::KeyDown,
             with_text: true,
         };
-        let args =
-            forwarded_key_args(forwarded, Some("a".to_string()), Rc::new(TestDevice), 78, Rc::new(TestRoot));
+        let a = || Some("a".to_string());
+        let args = forwarded_key_args(forwarded, a(), a(), Rc::new(TestDevice), 78, Rc::new(TestRoot));
         let key = args.downcast_ref::<RawKeyEventArgs>().unwrap();
         assert_eq!(key.key(), Key::A);
         assert_eq!(key.key_symbol().as_deref(), Some("a"));
         assert_eq!(text_of(&args).as_deref(), Some("a"));
+        // 12.2.0: the key symbol is the platform data, the press has the alternate text.
+        assert_eq!(key.alternate_key_text().as_deref(), Some("a"));
+        let info = key.platform_key_info().expect("platform key info");
+        assert_eq!(info.format, KnownPlatformKeyInfoFormats::X11);
+        assert_eq!((info.scan_code, info.virtual_key, info.modifiers), (None, Some(0x61), None));
+    }
+
+    #[test]
+    fn a_forwarded_release_has_no_alternate_key_text() {
+        let forwarded = X11InputMethodForwardedKey {
+            key_val: 0,
+            modifiers: ferroui_base::input::KeyModifiers::empty(),
+            type_: RawKeyEventType::KeyUp,
+            with_text: false,
+        };
+        let args =
+            forwarded_key_args(forwarded, None, Some("a".to_string()), Rc::new(TestDevice), 79, Rc::new(TestRoot));
+        let key = args.downcast_ref::<RawKeyEventArgs>().unwrap();
+        assert_eq!(key.alternate_key_text(), None);
+        // No key symbol: no virtual key.
+        assert_eq!(key.platform_key_info().and_then(|info| info.virtual_key), None);
+    }
+
+    /// A key of a fake keymap for [`consumed_modifiers_gtk`]: `levels` maps the modifiers of the
+    /// key type that select a level to the key symbol, `preserved` are the modifiers each level
+    /// preserves. The lookup answers what `XkbLookupKeySym` answers.
+    fn fake_key(
+        type_modifiers: u32,
+        levels: &'static [(u32, u64)],
+        preserved: u32,
+    ) -> impl Fn(u32) -> Option<(u32, u64)> {
+        move |state| {
+            let level = state & type_modifiers;
+            let sym = levels.iter().find(|(mods, _)| *mods == level).or_else(|| levels.first())?.1;
+            Some((type_modifiers & !preserved, sym))
+        }
+    }
+
+    #[test]
+    fn consumed_modifiers_follow_the_gtk_rules() {
+        const SHIFT: u32 = 1;
+        const LOCK: u32 = 2;
+        const CONTROL: u32 = 4;
+        // `2` on a US layout: Shift selects `@`.
+        let two = fake_key(SHIFT, &[(0, 0x32), (SHIFT, 0x40)], 0);
+        assert_eq!(consumed_modifiers_gtk(SHIFT, &two), Some(RawInputModifiers::SHIFT));
+        // Ctrl+Shift+2: only Shift is consumed.
+        assert_eq!(consumed_modifiers_gtk(SHIFT | CONTROL, &two), Some(RawInputModifiers::SHIFT));
+        // Ctrl+Z: Ctrl is not a modifier of the key type.
+        let z = fake_key(SHIFT | LOCK, &[(0, 0x7a), (SHIFT, 0x5a), (LOCK, 0x5a), (SHIFT | LOCK, 0x7a)], 0);
+        assert_eq!(consumed_modifiers_gtk(CONTROL, &z), Some(RawInputModifiers::NONE));
+        // Shift on a key whose levels have the same symbol: nothing changes, nothing is consumed.
+        let enter = fake_key(SHIFT, &[(0, 0xff0d), (SHIFT, 0xff0d)], 0);
+        assert_eq!(consumed_modifiers_gtk(SHIFT, &enter), Some(RawInputModifiers::NONE));
+        // A modifier the matching level preserves is not consumed.
+        let preserving = fake_key(SHIFT, &[(0, 0x32), (SHIFT, 0x40)], SHIFT);
+        assert_eq!(consumed_modifiers_gtk(SHIFT, &preserving), Some(RawInputModifiers::NONE));
+        // A key code the keymap does not know.
+        assert_eq!(consumed_modifiers_gtk(SHIFT, &|_| None), None);
+    }
+
+    #[test]
+    fn the_platform_data_of_a_key_event_has_its_code_symbol_and_state() {
+        let info = x11_platform_key_info(Some(38), X11Key(0x61), Some(0x14));
+        assert_eq!(info.format, "X11");
+        assert_eq!((info.scan_code, info.virtual_key, info.modifiers), (Some(38), Some(0x61), Some(0x14)));
+        assert_eq!(x11_platform_key_info(Some(38), X11Key(0), None).virtual_key, None);
     }
 }

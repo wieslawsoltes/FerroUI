@@ -29,8 +29,27 @@ fn the_header_is_up_to_date() {
     assert!(
         current == header,
         "include/ferroui.h is not the header of the sources: write it again with \
-         FERROUI_CAPI_WRITE_HEADER=1 cargo test -p ferroui-capi --lib header"
+         FERROUI_CAPI_WRITE_HEADER=1 cargo test -p ferroui-capi --lib header\n{}",
+        changed_lines(&current, &header)
     );
+}
+
+/// The lines that differ between the file and the generated header, by line number (at most
+/// 200), so that a run without the write (CI) says what changed.
+fn changed_lines(current: &str, generated: &str) -> String {
+    use std::fmt::Write as _;
+    let (current, generated): (Vec<&str>, Vec<&str>) = (current.lines().collect(), generated.lines().collect());
+    let mut report = String::new();
+    for index in 0..current.len().max(generated.len()) {
+        let (was, now) = (current.get(index), generated.get(index));
+        if was != now {
+            let _ = writeln!(report, "line {}:\n  - {}\n  + {}", index + 1, was.unwrap_or(&""), now.unwrap_or(&""));
+            if report.lines().count() >= 600 {
+                break;
+            }
+        }
+    }
+    report
 }
 
 #[test]

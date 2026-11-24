@@ -1,6 +1,6 @@
 use super::raw_input_event_args::raw_input_event_args;
 use super::RawInputEventArgs;
-use crate::input::{IInputDevice, IInputRoot, Key, KeyDeviceType, PhysicalKey, RawInputModifiers};
+use crate::input::{IInputDevice, IInputRoot, Key, KeyDeviceType, PhysicalKey, PlatformKeyInfo, RawInputModifiers};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -20,6 +20,10 @@ pub struct RawKeyEventArgs {
     physical_key: Cell<PhysicalKey>,
     key_device_type: Cell<KeyDeviceType>,
     key_symbol: RefCell<Option<String>>,
+    key_text: RefCell<Option<String>>,
+    alternate_key_text: RefCell<Option<String>>,
+    consumed_modifiers: Cell<Option<RawInputModifiers>>,
+    platform_key_info: Cell<Option<PlatformKeyInfo>>,
 }
 
 raw_input_event_args!(RawKeyEventArgs: RawInputEventArgs);
@@ -46,6 +50,10 @@ impl RawKeyEventArgs {
             physical_key: Cell::new(physical_key),
             key_device_type: Cell::new(key_device_type),
             key_symbol: RefCell::new(key_symbol),
+            key_text: RefCell::new(None),
+            alternate_key_text: RefCell::new(None),
+            consumed_modifiers: Cell::new(None),
+            platform_key_info: Cell::new(None),
         }
     }
 
@@ -100,5 +108,44 @@ impl RawKeyEventArgs {
 
     pub fn set_key_symbol(&self, value: Option<String>) {
         *self.key_symbol.borrow_mut() = value;
+    }
+
+    /// The text the platform attached to the key, with all modifiers applied
+    /// (`KeyEventArgs::key_text`).
+    pub fn key_text(&self) -> Option<String> {
+        self.key_text.borrow().clone()
+    }
+
+    pub fn set_key_text(&self, value: Option<String>) {
+        *self.key_text.borrow_mut() = value;
+    }
+
+    /// The text with Ctrl, Alt and Meta ignored (`KeyEventArgs::alternate_key_text`).
+    pub fn alternate_key_text(&self) -> Option<String> {
+        self.alternate_key_text.borrow().clone()
+    }
+
+    pub fn set_alternate_key_text(&self, value: Option<String>) {
+        *self.alternate_key_text.borrow_mut() = value;
+    }
+
+    /// The modifiers the layout used for the key's text (`KeyEventArgs::consumed_modifiers`).
+    #[inline]
+    pub fn consumed_modifiers(&self) -> Option<RawInputModifiers> {
+        self.consumed_modifiers.get()
+    }
+
+    pub fn set_consumed_modifiers(&self, value: Option<RawInputModifiers>) {
+        self.consumed_modifiers.set(value);
+    }
+
+    /// The platform data of the key (`KeyEventArgs::platform_key_info`).
+    #[inline]
+    pub fn platform_key_info(&self) -> Option<PlatformKeyInfo> {
+        self.platform_key_info.get()
+    }
+
+    pub fn set_platform_key_info(&self, value: Option<PlatformKeyInfo>) {
+        self.platform_key_info.set(value);
     }
 }

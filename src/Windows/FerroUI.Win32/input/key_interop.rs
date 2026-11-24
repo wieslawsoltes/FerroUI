@@ -9,7 +9,9 @@
 //! without a system.
 
 use crate::interop::unmanaged_methods::{MapVirtualKeyMapTypes, VirtualKeyStates};
-use ferroui_base::input::{Key, KeySymbolHelper, PhysicalKey};
+use ferroui_base::input::{
+    Key, KeySymbolHelper, KnownPlatformKeyInfoFormats, PhysicalKey, PlatformKeyInfo, RawInputModifiers,
+};
 use std::collections::HashMap;
 use std::sync::OnceLock;
 
@@ -514,10 +516,148 @@ impl KeyInterop {
             length => Some(text(length as usize)),
         }
     }
+
+    /// The unfiltered text of a `ToUnicodeEx` result, or its dead character, or `None`.
+    fn text_from_to_unicode(length: i32, buffer: &[u16; 4]) -> Option<String> {
+        let count = (length.unsigned_abs() as usize).min(buffer.len());
+        (length != 0).then(|| String::from_utf16_lossy(&buffer[..count]))
+    }
+
+    /// Whether a character is a C0 control character or DEL (`IsControlChar`, 12.2.0).
+    pub fn is_control_char(c: u16) -> bool {
+        c < 0x20 || c == 0x7F
+    }
+
+    /// Whether a text is not empty and has no control characters (`IsPrintable`).
+    pub fn is_printable(text: Option<&str>) -> bool {
+        text.is_some_and(|text| !text.is_empty() && text.encode_utf16().all(|c| !Self::is_control_char(c)))
+    }
+
+    /// The filter of [`get_key_symbol`](Self::get_key_symbol) applied to a text the layout
+    /// produced (`FilterKeySymbol`).
+    pub fn filter_key_symbol(text: Option<&str>) -> Option<String> {
+        let text = text?;
+        let units: Vec<u16> = text.encode_utf16().collect();
+        match units.as_slice() {
+            [] => None,
+            [c] if !char::from_u32(u32::from(*c)).is_some_and(KeySymbolHelper::is_allowed_ascii_key_symbol) => None,
+            [a, b] if a == b => Some(String::from_utf16_lossy(&units[..1])),
+            _ => Some(text.to_string()),
+        }
+    }
+
+    /// The scan code of a key, with `0xE000` added for extended keys (`GetNativeScanCode`).
+    pub fn native_scan_code(key_data: i32) -> u32 {
+        u32::from(Self::get_scan_code(key_data)) | if Self::is_extended(key_data) { 0xE000 } else { 0 }
+    }
+
+    /// The modifier state in the layout of the console `dwControlKeyState` field
+    /// (`GetNativeModifiers`). `key_state` is `GetKeyState`.
+    pub fn native_modifiers(key_data: i32, key_state: &dyn Fn(i32) -> i16) -> u64 {
+        const RIGHT_ALT_PRESSED: u64 = 0x1;
+        const LEFT_ALT_PRESSED: u64 = 0x2;
+        const RIGHT_CTRL_PRESSED: u64 = 0x4;
+        const LEFT_CTRL_PRESSED: u64 = 0x8;
+        const SHIFT_PRESSED: u64 = 0x10;
+        const NUM_LOCK_ON: u64 = 0x20;
+        const SCROLL_LOCK_ON: u64 = 0x40;
+        const CAPS_LOCK_ON: u64 = 0x80;
+        const ENHANCED_KEY: u64 = 0x100;
+        let down = |vk: i32| key_state(vk) < 0;
+        let toggled = |vk: i32| key_state(vk) & 1 != 0;
+        let mut result = 0;
+        for (on, flag) in [
+            (down(0xA5), RIGHT_ALT_PRESSED),
+            (down(0xA4), LEFT_ALT_PRESSED),
+            (down(0xA3), RIGHT_CTRL_PRESSED),
+            (down(0xA2), LEFT_CTRL_PRESSED),
+            (down(0x10), SHIFT_PRESSED),
+            (toggled(0x90), NUM_LOCK_ON),
+            (toggled(0x91), SCROLL_LOCK_ON),
+            (toggled(0x14), CAPS_LOCK_ON),
+            (Self::is_extended(key_data), ENHANCED_KEY),
+        ] {
+            if on {
+                result |= flag;
+            }
+        }
+        result
+    }
+
+    /// The platform data of a key message (`GetPlatformKeyInfo`).
+    pub fn platform_key_info_with(virtual_key: i32, key_data: i32, key_state: &dyn Fn(i32) -> i16) -> PlatformKeyInfo {
+        PlatformKeyInfo::new(KnownPlatformKeyInfoFormats::WIN32)
+            .with_scan_code(Self::native_scan_code(key_data))
+            .with_virtual_key(virtual_key as u32)
+            .with_modifiers(Self::native_modifiers(key_data, key_state))
+    }
 }
 
 #[cfg(windows)]
 impl KeyInterop {
+    /// [`platform_key_info_with`](Self::platform_key_info_with) of the thread's key state.
+    pub fn platform_key_info(virtual_key: i32, key_data: i32) -> PlatformKeyInfo {
+        Self::platform_key_info_with(virtual_key, key_data, &crate::interop::unmanaged_methods::get_key_state)
+    }
+
+    /// [`get_key_symbol`](Self::get_key_symbol) and the unfiltered text of the key (or its dead
+    /// character).
+    pub fn get_key_symbol_and_text(virtual_key: i32, key_data: i32) -> (Option<String>, Option<String>) {
+        let (length, buffer) = Self::translate_key(virtual_key, key_data);
+        (Self::key_symbol_from_to_unicode(length, &buffer), Self::text_from_to_unicode(length, &buffer))
+    }
+
+    fn translate_key(virtual_key: i32, key_data: i32) -> (i32, [u16; 4]) {
+        use crate::interop::unmanaged_methods::{get_keyboard_layout, get_keyboard_state, to_unicode_ex};
+        const DO_NOT_CHANGE_KEYBOARD_STATE: u32 = 1 << 2;
+        let key_states = get_keyboard_state();
+        to_unicode_ex(
+            virtual_key as u32,
+            u32::from(Self::get_scan_code(key_data)),
+            &key_states,
+            DO_NOT_CHANGE_KEYBOARD_STATE,
+            get_keyboard_layout(0),
+        )
+    }
+
+    /// Ends a pending dead key by translating a space (`EndPendingDeadKey`). The dead-key state is
+    /// shared by all windows and processes of the session, so a dead key pressed in another
+    /// window would otherwise combine with the next key typed into this one.
+    pub fn end_pending_dead_key(layout: isize) {
+        use crate::interop::unmanaged_methods::{map_virtual_key_ex, to_unicode_ex};
+        const VK_SPACE: u32 = 0x20;
+        to_unicode_ex(VK_SPACE, map_virtual_key_ex(VK_SPACE, 0, layout), &[0; 256], 0, layout);
+    }
+
+    /// Whether a dead key is pending, without changing the dead-key state (`IsDeadKeyPending`).
+    /// Needs Windows 10 1607 or later: older versions end the pending dead key.
+    pub fn is_dead_key_pending(layout: isize) -> bool {
+        use crate::interop::unmanaged_methods::{map_virtual_key_ex, to_unicode_ex};
+        const VK_SPACE: u32 = 0x20;
+        const DO_NOT_CHANGE_KEYBOARD_STATE: u32 = 1 << 2;
+        let scan_code = map_virtual_key_ex(VK_SPACE, 0, layout);
+        let (length, buffer) = to_unicode_ex(VK_SPACE, scan_code, &[0; 256], DO_NOT_CHANGE_KEYBOARD_STATE, layout);
+        length != 1 || buffer[0] != u16::from(b' ')
+    }
+
+    /// The text of a key with Shift and Caps Lock applied and Ctrl and Alt ignored, from the
+    /// layout table (`GetTextIgnoringControlAndAlt`). Unlike `ToUnicodeEx`, this neither touches
+    /// the keyboard state nor combines with a pending dead key.
+    pub fn get_text_ignoring_control_and_alt(virtual_key: i32) -> Option<String> {
+        use crate::interop::unmanaged_methods::get_key_state;
+        let table = super::keyboard_layout_table::KeyboardLayoutTable::current()?;
+        let (shift, caps_lock) = (get_key_state(0x10) < 0, get_key_state(0x14) & 1 != 0);
+        table.text_ignoring_control_and_alt(virtual_key, shift, caps_lock).map(str::to_string)
+    }
+
+    /// The pressed modifiers that select the level of the key in the current layout, or `None`
+    /// if the layout could not be read (`GetConsumedModifiers`).
+    pub fn get_consumed_modifiers(virtual_key: i32, pressed: RawInputModifiers) -> Option<RawInputModifiers> {
+        use crate::interop::unmanaged_methods::get_key_state;
+        let table = super::keyboard_layout_table::KeyboardLayoutTable::current()?;
+        Some(table.consumed_modifiers(virtual_key, pressed, get_key_state(0x14) & 1 != 0))
+    }
+
     /// Gets a key of the toolkit from a Windows virtual-key and key data
     /// (in the same format as lParam for WM_KEYDOWN), or [`Key::None`] if
     /// none matched.
@@ -562,6 +702,46 @@ impl KeyInterop {
 
 #[cfg(test)]
 mod tests {
+    #[test]
+    fn control_characters_and_printable_texts() {
+        assert!(KeyInterop::is_control_char(0x1A));
+        assert!(KeyInterop::is_control_char(0x7F));
+        assert!(!KeyInterop::is_control_char(u16::from(b' ')));
+        assert!(KeyInterop::is_printable(Some("@")));
+        assert!(!KeyInterop::is_printable(Some("")));
+        assert!(!KeyInterop::is_printable(Some("a\r")));
+        assert!(!KeyInterop::is_printable(None));
+    }
+
+    #[test]
+    fn a_layout_text_is_filtered_like_a_key_symbol() {
+        assert_eq!(KeyInterop::filter_key_symbol(Some("\u{1a}")), None);
+        assert_eq!(KeyInterop::filter_key_symbol(Some("``")).as_deref(), Some("`"));
+        assert_eq!(KeyInterop::filter_key_symbol(Some("@")).as_deref(), Some("@"));
+        assert_eq!(KeyInterop::filter_key_symbol(Some("")), None);
+        assert_eq!(KeyInterop::text_from_to_unicode(-1, &[0x5E, 0, 0, 0]).as_deref(), Some("^"));
+        assert_eq!(KeyInterop::text_from_to_unicode(1, &[0x1A, 0, 0, 0]).as_deref(), Some("\u{1a}"));
+        assert_eq!(KeyInterop::text_from_to_unicode(0, &[0; 4]), None);
+    }
+
+    #[test]
+    fn the_platform_data_has_the_extended_scan_code_and_the_console_modifiers() {
+        // Right Ctrl: scan code 0x1D, extended.
+        let key_data = (0x1D << 16) | (1 << 24);
+        assert_eq!(KeyInterop::native_scan_code(key_data), 0xE01D);
+        // Right Ctrl down and Caps Lock on.
+        let state = |vk: i32| match vk {
+            0xA3 => -128,
+            0x14 => 1,
+            _ => 0,
+        };
+        let info = KeyInterop::platform_key_info_with(0x11, key_data, &state);
+        assert_eq!(info.format, KnownPlatformKeyInfoFormats::WIN32);
+        assert_eq!(info.scan_code, Some(0xE01D));
+        assert_eq!(info.virtual_key, Some(0x11));
+        assert_eq!(info.modifiers, Some(0x4 | 0x80 | 0x100));
+    }
+
     use super::*;
 
     /// The key data of a key message: the scan code in bits 16 to 23 and

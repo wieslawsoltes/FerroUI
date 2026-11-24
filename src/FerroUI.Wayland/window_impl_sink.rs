@@ -6,6 +6,7 @@ use crate::server::transient::clipboard::wayland_offer_cookie::WaylandOfferCooki
 use ferroui_base::input::DragDropEffects;
 use crate::screens::wayland_output_snapshot::WaylandOutputId;
 use crate::server::persistent::decoration_mode::DecorationMode;
+use crate::server::persistent::wayland_key_info::WaylandKeyInfo;
 use crate::server::persistent::i_w_surface_event_sink::{
     IWSurfaceEventSink, IWXdgTopLevelEventSink, PlatformInputEventCookie, WXdgTopLevelEventSinkProxy,
 };
@@ -15,7 +16,7 @@ use crate::ferro_wayland_exception::FerroWaylandError;
 use crate::window_impl::WindowImpl;
 use crate::window_impl_base::{get, ISinkOwner, Sink};
 use ferroui_base::input::raw::RawPointerEventType;
-use ferroui_base::input::{Key, PhysicalKey, RawInputModifiers};
+use ferroui_base::input::RawInputModifiers;
 use ferroui_base::threading::Dispatcher;
 use ferroui_base::{Point, Rect, Size, Vector};
 use ferroui_controls::WindowCloseReason;
@@ -189,12 +190,16 @@ impl IWSurfaceEventSink for WindowImplSink {
         self.base.on_touch_cancel(touch_id, position);
     }
 
-    fn on_key_down(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>) {
-        self.base.on_key_down(timestamp, key, modifiers, physical_key, key_symbol);
+    fn on_key_down(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.base.on_key_down(timestamp, modifiers, key);
     }
 
-    fn on_key_up(&self, timestamp: u64, key: Key, modifiers: RawInputModifiers, physical_key: PhysicalKey, key_symbol: Option<String>) {
-        self.base.on_key_up(timestamp, key, modifiers, physical_key, key_symbol);
+    fn on_key_up(&self, timestamp: u64, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.base.on_key_up(timestamp, modifiers, key);
+    }
+
+    fn on_held_key_changed(&self, modifiers: RawInputModifiers, key: WaylandKeyInfo) {
+        self.base.on_held_key_changed(modifiers, key);
     }
 
     fn on_keyboard_leave(&self) {

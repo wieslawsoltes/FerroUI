@@ -1419,6 +1419,17 @@ pub fn xkb_lookup_key_sym(display: XDisplay, key_code: u8, state: c_uint) -> Opt
     (found != 0).then_some(key_sym)
 }
 
+/// `XkbLookupKeySym` with the modifiers of the key type: the modifiers the
+/// lookup reports as used (those the matching level preserves left out) and
+/// the key symbol of a key code under a modifier state.
+pub fn xkb_lookup_key_sym_with_modifiers(display: XDisplay, key_code: u8, state: c_uint) -> Option<(c_uint, c_ulong)> {
+    let mut modifiers: c_uint = 0;
+    let mut key_sym: c_ulong = 0;
+    // SAFETY: both out pointers are valid places for the results.
+    let found = unsafe { (x().XkbLookupKeySym)(display.raw(), key_code, state, &mut modifiers, &mut key_sym) };
+    (found != 0).then_some((modifiers, key_sym))
+}
+
 /// `XkbTranslateKeySym`: the bytes a key symbol produces under no
 /// modifiers.
 pub fn xkb_translate_key_sym(display: XDisplay, key_sym: c_ulong) -> Vec<u8> {

@@ -826,6 +826,9 @@ impl TopLevel {
                     key_event.physical_key = raw_key_event_args.physical_key();
                     key_event.key_device_type = raw_key_event_args.key_device_type();
                     key_event.key_symbol = raw_key_event_args.key_symbol();
+                    // Deviation (12.2.0, `8dae868308`): the key text, consumed modifiers and
+                    // platform data are not copied here. The event only matches the back gesture,
+                    // which reads none of them, and the texts would be cloned on every key down.
 
                     back_requested = hotkeys.back.iter().any(|key| key.matches(Some(&key_event)));
                 }

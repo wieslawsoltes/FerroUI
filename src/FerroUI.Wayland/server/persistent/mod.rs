@@ -6,6 +6,7 @@
 pub mod decoration_mode;
 pub mod i_w_surface_event_sink;
 pub mod w_surface;
+pub mod wayland_key_info;
 pub mod xdg_configure_batch;
 pub mod xdg_popup_configure_batch;
 
