@@ -1,7 +1,7 @@
 #include "common.h"
 
 
-IFrnNativeControlHostTopLevelAttachment* CreateAttachment();
+static ComPtr<IFrnNativeControlHostTopLevelAttachment> CreateAttachment();
 
 class FrnNativeControlHost :
     public ComSingleObject<IFrnNativeControlHost, &IID_IFrnNativeControlHost>
@@ -16,8 +16,6 @@ public:
     
     virtual HRESULT CreateDefaultChild(void* parent, void** retOut) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             NSView* view = [NSView new];
@@ -28,7 +26,7 @@ public:
         }
     };
     
-    virtual IFrnNativeControlHostTopLevelAttachment* CreateAttachment() override
+    virtual ComPtr<IFrnNativeControlHostTopLevelAttachment> CreateAttachment() override
     {
         return ::CreateAttachment();
     };
@@ -77,8 +75,6 @@ public:
     
     virtual HRESULT InitializeWithChildHandle(void* child) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             if(_child != nil)
@@ -92,20 +88,18 @@ public:
         }
     };
     
-    virtual HRESULT AttachTo(IFrnNativeControlHost* host) override
+    virtual HRESULT AttachTo(const ComPtr<IFrnNativeControlHost>& host) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
-            if(host == nil)
+            if(host == nullptr)
             {
                 [_holder removeFromSuperview];
                 [_holder setHidden: true];
             }
             else
             {
-                FrnNativeControlHost* chost = dynamic_cast<FrnNativeControlHost*>(host);
+                auto chost = host.dynamicCast<FrnNativeControlHost>();
                 if(chost == nil || chost->View == nil)
                     return E_FAIL;
                 [_holder setHidden:true];
@@ -121,11 +115,9 @@ public:
             return;
         if(FrnInsidePotentialDeadlock::IsInside())
         {
-            IFrnNativeControlHostTopLevelAttachment* slf = this;
-            slf->AddRef();
+            auto slf = comself(this);
             dispatch_async(dispatch_get_main_queue(), ^{
                 slf->ShowInBounds(x, y, width, height);
-                slf->Release();
             });
             return;
         }
@@ -146,11 +138,9 @@ public:
             return;
         if(FrnInsidePotentialDeadlock::IsInside())
         {
-            IFrnNativeControlHostTopLevelAttachment* slf = this;
-            slf->AddRef();
+            auto slf = comself(this);
             dispatch_async(dispatch_get_main_queue(), ^{
                 slf->HideWithSize(width, height);
-                slf->Release();
             });
             return;
         }
@@ -167,12 +157,12 @@ public:
     }
 };
 
-IFrnNativeControlHostTopLevelAttachment* CreateAttachment()
+static ComPtr<IFrnNativeControlHostTopLevelAttachment> CreateAttachment()
 {
-    return new FrnNativeControlHostTopLevelAttachment();
+    return comnew<FrnNativeControlHostTopLevelAttachment>();
 }
 
-extern IFrnNativeControlHost* CreateNativeControlHost(NSView* parent)
+extern ComPtr<IFrnNativeControlHost> CreateNativeControlHost(NSView* parent)
 {
-    return new FrnNativeControlHost(parent);
+    return comnew<FrnNativeControlHost>(parent);
 }

@@ -19,9 +19,7 @@ bool FrnTextInputMethod::IsActive() {
     return Client != nullptr;
 }
 
-HRESULT FrnTextInputMethod::SetClient(IFrnTextInputMethodClient *client) {
-    START_COM_CALL;
-    
+HRESULT FrnTextInputMethod::SetClient(const ComPtr<IFrnTextInputMethodClient>& client) {
     Client = client;
     
     return S_OK;

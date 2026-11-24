@@ -40,8 +40,6 @@ public:
     
     virtual HRESULT Pointer(void**retOut) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             if(retOut == nullptr)
@@ -57,8 +55,6 @@ public:
     
     virtual HRESULT Length(int*retOut) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             if(retOut == nullptr)
@@ -106,63 +102,41 @@ public:
         return (unsigned int)_list.size();
     }
     
-    virtual HRESULT Get(unsigned int index, IFrnString**ppv) override
+    virtual HRESULT Get(unsigned int index, ComPtr<IFrnString>& ppv) override
     {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            if(_list.size() <= index)
-                return E_INVALIDARG;
-            *ppv = _list[index].getRetainedReference();
-            return S_OK;
-        }
+        if(_list.size() <= index)
+            return E_INVALIDARG;
+        ppv = _list[index];
+        return S_OK;
     }
 };
 
-IFrnString* CreateFrnString(NSString* string)
+ComPtr<IFrnString> CreateFrnString(NSString* string)
 {
-    return new FrnStringImpl(string);
+    return comnew<FrnStringImpl>(string);
 }
 
-
-IFrnStringArray* CreateFrnStringArray(NSArray<NSString*> * array)
+ComPtr<IFrnStringArray> CreateFrnStringArray(NSArray<NSString*> * array)
 {
-    return new FrnStringArrayImpl(array);
+    return comnew<FrnStringArrayImpl>(array);
 }
 
-IFrnStringArray* CreateFrnStringArray(NSArray<NSURL*> * array)
+ComPtr<IFrnStringArray> CreateFrnStringArray(NSArray<NSURL*> * array)
 {
-    return new FrnStringArrayImpl(array);
+    return comnew<FrnStringArrayImpl>(array);
 }
 
-IFrnStringArray* CreateFrnStringArray(NSString* string)
+ComPtr<IFrnStringArray> CreateFrnStringArray(NSString* string)
 {
-    return new FrnStringArrayImpl(string);
+    return comnew<FrnStringArrayImpl>(string);
 }
 
-IFrnString* CreateByteArray(void* data, int len)
+ComPtr<IFrnString> CreateByteArray(void* data, int len)
 {
-    return new FrnStringImpl(data, len);
+    return comnew<FrnStringImpl>(data, len);
 }
 
-NSString* GetNSStringAndRelease(IFrnString* s)
-{
-    NSString* result = nil;
-    
-    if (s != nullptr)
-    {
-        char* p;
-        if (s->Pointer((void**)&p) == S_OK && p != nullptr)
-            result = [NSString stringWithUTF8String:p];
-        
-        s->Release();
-    }
-    
-    return result;
-}
-
-NSString* GetNSStringWithoutRelease(IFrnString* s)
+NSString* GetNSString(const ComPtr<IFrnString>& s)
 {
     NSString* result = nil;
     
@@ -176,20 +150,19 @@ NSString* GetNSStringWithoutRelease(IFrnString* s)
     return result;
 }
 
-NSArray<NSString*>* GetNSArrayOfStringsAndRelease(IFrnStringArray* array)
+NSArray<NSString*>* GetNSArrayOfStrings(const ComPtr<IFrnStringArray>& array)
 {
     auto output = [NSMutableArray array];
     if (array)
     {
-        IFrnString* arrayItem;
         for (int i = 0; i < array->GetCount(); i++)
         {
-            if (array->Get(i, &arrayItem) == 0) {
-                NSString* ext = GetNSStringAndRelease(arrayItem);
+            ComPtr<IFrnString> arrayItem;
+            if (array->Get(i, arrayItem) == 0) {
+                NSString* ext = GetNSString(arrayItem);
                 [output addObject:ext];
             }
         }
-        array->Release();
     }
     return output;
 }

@@ -18,24 +18,17 @@ public:
         _pasteboard = pasteboard;
     }
     
-    virtual HRESULT GetFormats(int64_t changeCount, IFrnStringArray** ret) override
+    virtual HRESULT GetFormats(int64_t changeCount, ComPtr<IFrnStringArray>& ret) override
     {
-        START_COM_ARP_CALL;
-        
-        if (ret == nullptr)
-            return E_POINTER;
-        
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
 
-        *ret = ConvertPasteboardTypes([_pasteboard types]);
+        ret = ConvertPasteboardTypes([_pasteboard types]);
         return S_OK;
     }
 
     virtual HRESULT GetItemCount(int64_t changeCount, int* ret) override
     {
-        START_COM_ARP_CALL;
-        
         if (ret == nullptr)
             return E_POINTER;
         
@@ -47,23 +40,18 @@ public:
         return S_OK;
     }
     
-    virtual HRESULT GetItemFormats(int index, int64_t changeCount, IFrnStringArray** ret) override
+    virtual HRESULT GetItemFormats(int index, int64_t changeCount, ComPtr<IFrnStringArray>& ret) override
     {
-        START_COM_ARP_CALL;
-        
-        if (ret == nullptr)
-            return E_POINTER;
-        
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
 
         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
         
-        *ret = ConvertPasteboardTypes([item types]);
+        ret = ConvertPasteboardTypes([item types]);
         return S_OK;
     }
 
-    static IFrnStringArray* ConvertPasteboardTypes(NSArray<NSPasteboardType> *types)
+    static ComPtr<IFrnStringArray> ConvertPasteboardTypes(NSArray<NSPasteboardType> *types)
     {
         if (types != nil)
         {
@@ -83,32 +71,22 @@ public:
             return CreateFrnStringArray(mutableTypes);
         }
 
-        return nil;
+        return nullptr;
     }
 
-    virtual HRESULT GetItemValueAsString(int index, int64_t changeCount, const char* format, IFrnString** ret) override
+    virtual HRESULT GetItemValueAsString(int index, int64_t changeCount, const char* format, ComPtr<IFrnString>& ret) override
     {
-        START_COM_ARP_CALL;
-        
-        if (ret == nullptr)
-            return E_POINTER;
-        
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
         
         auto item = [[_pasteboard pasteboardItems] objectAtIndex:index];
         auto value = [item stringForType:[NSString stringWithUTF8String:format]];
-        *ret = value == nil ? nullptr : CreateFrnString(value);
+        ret = value == nil ? nullptr : CreateFrnString(value);
         return S_OK;
     }
     
-    virtual HRESULT GetItemValueAsBytes(int index, int64_t changeCount, const char* format, IFrnString** ret) override
+    virtual HRESULT GetItemValueAsBytes(int index, int64_t changeCount, const char* format, ComPtr<IFrnString>& ret) override
     {
-        START_COM_ARP_CALL;
-        
-        if (ret == nullptr)
-            return E_POINTER;
-        
         if (changeCount != [_pasteboard changeCount])
             return COR_E_OBJECTDISPOSED;
         
@@ -152,7 +130,7 @@ public:
             }
         }
 
-        *ret = value == nil || [value length] == 0
+        ret = value == nil || [value length] == 0
             ? nullptr
             : CreateByteArray((void*)[value bytes], (int)[value length]);
         return S_OK;
@@ -160,31 +138,25 @@ public:
 
     virtual HRESULT Clear(int64_t* ret) override
     {
-        START_COM_ARP_CALL;
-        
         *ret = [_pasteboard clearContents];
         return S_OK;
     }
     
     virtual HRESULT GetChangeCount(int64_t* ret) override
     {
-        START_COM_ARP_CALL;
-        
         *ret = [_pasteboard changeCount];
         return S_OK;
     }
     
-    virtual HRESULT SetData(IFrnClipboardDataSource* source) override
+    virtual HRESULT SetData(const ComPtr<IFrnClipboardDataSource>& source) override
     {
-        START_COM_ARP_CALL;
-        
         auto count = source->GetItemCount();
         auto writeableItems = [NSMutableArray<WriteableClipboardItem*> arrayWithCapacity:count];
         
         for (auto i = 0; i < count; ++i)
         {
             ComPtr<IFrnClipboardDataItem> item;
-            if(S_OK != source->GetItem(i, item.getPPV()))
+            if(S_OK != source->GetItem(i, item))
                 continue;
             auto writeableItem = [[WriteableClipboardItem alloc] initWithItem:item source:source];
             [writeableItems addObject:writeableItem];
@@ -196,8 +168,6 @@ public:
     
     virtual bool IsTextFormat(const char *format) override
     {
-        START_COM_ARP_CALL;
-        
         auto formatString = [NSString stringWithUTF8String:format];
         
         if (@available(macOS 11.0, *))
@@ -213,9 +183,9 @@ public:
 };
 
 
-extern IFrnClipboard* CreateClipboard(NSPasteboard* pb)
+extern ComPtr<IFrnClipboard> CreateClipboard(NSPasteboard* pb)
 {
-    return new Clipboard(pb);
+    return comnew<Clipboard>(pb);
 }
 
 
@@ -225,7 +195,7 @@ extern IFrnClipboard* CreateClipboard(NSPasteboard* pb)
     ComPtr<IFrnClipboardDataSource> _source;
 }
     
-- (nonnull WriteableClipboardItem*) initWithItem:(nonnull IFrnClipboardDataItem*)item source:(nonnull IFrnClipboardDataSource*)source
+- (nonnull WriteableClipboardItem*) initWithItem:(const ComPtr<IFrnClipboardDataItem>&)item source:(const ComPtr<IFrnClipboardDataSource>&)source
 {
     self = [super init];
     _item = item;
@@ -283,7 +253,7 @@ NSString* TryConvertFormatToUti(NSString* format)
 - (nonnull NSArray<NSPasteboardType>*) writableTypesForPasteboard:(nonnull NSPasteboard*)pasteboard
 {
     ComPtr<IFrnStringArray> formats;
-    auto hr = _item->ProvideFormats(formats.getPPV());
+    auto hr = _item->ProvideFormats(formats);
     if (hr != S_OK || formats == nullptr)
         return [NSArray array];
     
@@ -292,14 +262,14 @@ NSString* TryConvertFormatToUti(NSString* format)
         return [NSArray array];
     
     auto utis = [NSMutableArray arrayWithCapacity:count];
-    IFrnString* format;
     for (auto i = 0; i < count; ++i)
     {
-        if (formats->Get(i, &format) != S_OK)
+        ComPtr<IFrnString> format;
+        if (formats->Get(i, format) != S_OK)
             continue;
     
         // Only UTIs must be returned from writableTypesForPasteboard or an exception will be thrown
-        auto formatString = GetNSStringAndRelease(format);
+        auto formatString = GetNSString(format);
         auto uti = TryConvertFormatToUti(formatString);
         if (uti != nil)
             [utis addObject:uti];
@@ -323,12 +293,12 @@ NSString* TryConvertFormatToUti(NSString* format)
         return @"";
     
     ComPtr<IFrnClipboardDataValue> value;
-    HRESULT hr = _item->GetValue([type UTF8String], value.getPPV());
-    if (hr != S_OK || value.getRaw() == nullptr)
+    HRESULT hr = _item->GetValue([type UTF8String], value);
+    if (hr != S_OK || value == nullptr)
         return nil;
     
     if (value->IsString())
-        return GetNSStringAndRelease(value->AsString());
+        return GetNSString(value->AsString());
     
     auto length = value->GetByteLength();
     auto buffer = malloc(length);

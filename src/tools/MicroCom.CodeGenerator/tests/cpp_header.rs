@@ -69,10 +69,19 @@ fn current_idl_generates() {
     };
     let idl = microcom_codegen::parse(&src).expect("parse");
     let h = microcom_codegen::cpp::generate(&idl).expect("generate");
-    assert!(h.starts_with("#pragma once\n#include \"com.h\""));
+    assert!(h.starts_with("#pragma once\n#include \"comimpl.h\""));
     assert!(h.contains("COMINTERFACE(IFerroNativeFactory, 809c652e, 7396, 11d2, 97, 71, 00, a0, c9, b4, d5, 0c) : IUnknown"));
     assert!(h.contains(": virtual IFrnWindowBase"));
     assert!(h.contains("virtual FrnShutdownReply TryShutdown (\n        bool isOSShutdown\n    ) = 0;"));
+    // The smart pointer wrapper mode the native sources are built with.
+    let options = microcom_codegen::cpp::CppOptions { smart_pointer_wrappers: true };
+    let smart = microcom_codegen::cpp::generate_with(&idl, &options).expect("generate smart");
+    assert!(smart.contains("struct MicroComImplBase"));
+    assert!(smart.contains(
+        "struct MicroComImpl<IFrnWindow> : public MicroComImplBase<IFrnWindow>, public virtual IFrnWindow, \
+         public virtual MicroComImpl<IFrnWindowBase>"
+    ));
+    assert!(smart.contains("        START_ARP_CALL;\n        ComPtr<IFrnWindow> __microcom_self;"));
     let rs = microcom_codegen::rust::generate(&idl, &Default::default()).expect("rust");
     assert!(rs.contains("pub trait IFrnWindowEventsImpl: IFrnWindowBaseEventsImpl"));
 }

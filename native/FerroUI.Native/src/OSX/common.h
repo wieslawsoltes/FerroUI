@@ -8,40 +8,40 @@
 #include <pthread.h>
 #include "noarc.h"
 
-extern IFrnPlatformThreadingInterface* CreatePlatformThreading();
+extern ComPtr<IFrnPlatformThreadingInterface> CreatePlatformThreading();
 extern void FreeFrnGCHandle(void* handle);
-extern void PostDispatcherCallback(IFrnActionCallback* cb);
-extern IFrnTopLevel* CreateFrnTopLevel(IFrnTopLevelEvents* events);
-extern IFrnWindow* CreateFrnWindow(IFrnWindowEvents*events);
-extern IFrnPopup* CreateFrnPopup(IFrnWindowEvents*events);
-extern IFrnStorageProvider* CreateStorageProvider();
-extern IFrnScreens* CreateScreens(IFrnScreenEvents* cb);
-extern IFrnClipboard* CreateClipboard(NSPasteboard* pb);
-extern NSObject<NSDraggingSource>* CreateDraggingSource(NSDragOperation op, IFrnDndResultCallback* cb, void* handle);
+extern void PostDispatcherCallback(const ComPtr<IFrnActionCallback>& cb);
+extern ComPtr<IFrnTopLevel> CreateFrnTopLevel(const ComPtr<IFrnTopLevelEvents>& events);
+extern ComPtr<IFrnWindow> CreateFrnWindow(const ComPtr<IFrnWindowEvents>& events);
+extern ComPtr<IFrnPopup> CreateFrnPopup(const ComPtr<IFrnWindowEvents>& events);
+extern ComPtr<IFrnStorageProvider> CreateStorageProvider();
+extern ComPtr<IFrnScreens> CreateScreens(const ComPtr<IFrnScreenEvents>& cb);
+extern ComPtr<IFrnClipboard> CreateClipboard(NSPasteboard* pb);
+extern NSObject<NSDraggingSource>* CreateDraggingSource(NSDragOperation op, const ComPtr<IFrnDndResultCallback>& cb, void* handle);
 extern void* GetFrnDataObjectHandleFromDraggingInfo(NSObject<NSDraggingInfo>* info);
 extern NSString* GetFrnCustomDataType();
 extern FrnDragDropEffects ConvertDragDropEffects(NSDragOperation nsop);
-extern IFrnCursorFactory* CreateCursorFactory();
-extern IFrnGlDisplay* GetGlDisplay();
-extern IFrnMetalDisplay* GetMetalDisplay();
-extern IFrnMenu* CreateAppMenu(IFrnMenuEvents* events);
-extern IFrnTrayIcon* CreateTrayIcon();
-extern IFrnMenuItem* CreateAppMenuItem();
-extern IFrnMenuItem* CreateAppMenuItemSeparator();
-extern IFrnApplicationCommands* CreateApplicationCommands();
-extern IFrnPlatformBehaviorInhibition* CreatePlatformBehaviorInhibition();
-extern IFrnNativeControlHost* CreateNativeControlHost(NSView* parent);
-extern IFrnPlatformSettings* CreatePlatformSettings();
-extern IFrnPlatformRenderTimer* CreatePlatformRenderTimer();
-extern IFrnNativeObjectsMemoryManagement* CreateMemoryManagementHelper();
-extern void SetAppMenu(IFrnMenu *menu);
-extern void SetServicesMenu (IFrnMenu* menu);
+extern ComPtr<IFrnCursorFactory> CreateCursorFactory();
+extern ComPtr<IFrnGlDisplay> GetGlDisplay();
+extern ComPtr<IFrnMetalDisplay> GetMetalDisplay();
+extern ComPtr<IFrnMenu> CreateAppMenu(const ComPtr<IFrnMenuEvents>& events);
+extern ComPtr<IFrnTrayIcon> CreateTrayIcon();
+extern ComPtr<IFrnMenuItem> CreateAppMenuItem();
+extern ComPtr<IFrnMenuItem> CreateAppMenuItemSeparator();
+extern ComPtr<IFrnApplicationCommands> CreateApplicationCommands();
+extern ComPtr<IFrnPlatformBehaviorInhibition> CreatePlatformBehaviorInhibition();
+extern ComPtr<IFrnNativeControlHost> CreateNativeControlHost(NSView* parent);
+extern ComPtr<IFrnPlatformSettings> CreatePlatformSettings();
+extern ComPtr<IFrnPlatformRenderTimer> CreatePlatformRenderTimer();
+extern ComPtr<IFrnNativeObjectsMemoryManagement> CreateMemoryManagementHelper();
+extern void SetAppMenu(const ComPtr<IFrnMenu>& menu);
+extern void SetServicesMenu(const ComPtr<IFrnMenu>& menu);
 class FrnAppMenu;
-extern FrnAppMenu* GetAppMenu ();
+extern ComPtr<FrnAppMenu> GetAppMenu();
 extern NSMenuItem* GetAppMenuItem ();
 extern void SetDockMenu(NSMenu* menu);
 
-extern void InitializeFrnApp(IFrnApplicationEvents* events, bool disableAppDelegate);
+extern void InitializeFrnApp(const ComPtr<IFrnApplicationEvents>& events, bool disableAppDelegate);
 extern void ReleaseFrnAppEvents();
 extern NSApplicationActivationPolicy FrnDesiredActivationPolicy;
 extern NSPoint ToNSPoint (FrnPoint p);
@@ -50,7 +50,7 @@ extern FrnPoint ToFrnPoint (NSPoint p);
 extern FrnPoint ConvertPointY (FrnPoint p);
 extern NSSize ToNSSize (FrnSize s);
 extern FrnSize FromNSSize (NSSize s);
-extern IFrnMTLSharedEvent* ImportMTLSharedEvent(void* object);
+extern ComPtr<IFrnMTLSharedEvent> ImportMTLSharedEvent(void* object);
 #ifdef DEBUG
 #define NSDebugLog(...) NSLog(__VA_ARGS__)
 #else
@@ -88,7 +88,7 @@ public:
 };
 
 @interface ActionCallback : NSObject
-- (ActionCallback*) initWithCallback: (IFrnActionCallback*) callback;
+- (ActionCallback*) initWithCallback: (const ComPtr<IFrnActionCallback>&) callback;
 - (void) action;
 @end
 
@@ -121,6 +121,5 @@ public:
 };
 #define NSApp [NSApplication sharedApplication]
 
-#define START_COM_ARP_CALL START_ARP_CALL; START_COM_CALL
 
 #endif

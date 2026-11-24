@@ -11,7 +11,7 @@
 
 @interface FrnView : NSView<NSTextInputClient, NSTextContent, NSDraggingDestination, FrnTextInputMethodDelegate, CALayerDelegate>
 @property (copy, nullable) NSTextContentType contentType;
--(FrnView* _Nonnull) initWithParent: (TopLevelImpl* _Nonnull) parent;
+-(FrnView* _Nonnull) initWithParent: (const ComPtr<TopLevelImpl>&) parent;
 -(NSEvent* _Nonnull) lastMouseDownEvent;
 -(FrnPoint) translateLocalPoint:(FrnPoint)pt;
 -(void) onClosed;

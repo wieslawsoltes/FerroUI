@@ -86,7 +86,7 @@ static double distantFutureInterval = (double)50*365*24*3600;
 @end
 
 @interface Signaler : NSObject
--(void) setEvents:(IFrnPlatformThreadingInterfaceEvents*) events;
+-(void) setEvents:(const ComPtr<IFrnPlatformThreadingInterfaceEvents>&) events;
 -(void) updateTimer:(int)ms;
 -(Signaler*) init;
 -(void) destroyObserver;
@@ -179,7 +179,7 @@ static double distantFutureInterval = (double)50*365*24*3600;
     CFRunLoopTimerSetNextFireDate(_timer, CFAbsoluteTimeGetCurrent() + interval);
 }
 
-- (void) setEvents: (IFrnPlatformThreadingInterfaceEvents*) events
+- (void) setEvents: (const ComPtr<IFrnPlatformThreadingInterfaceEvents>&) events
 {
     _events = events;
 }
@@ -240,22 +240,21 @@ public:
     
     
     
-    void SetEvents(IFrnPlatformThreadingInterfaceEvents *cb) override
+    void SetEvents(const ComPtr<IFrnPlatformThreadingInterfaceEvents>& cb) override
     {
         _events = cb;
         [_signaler setEvents:cb];
     };
     
-    IFrnLoopCancellation *CreateLoopCancellation() override
+    ComPtr<IFrnLoopCancellation> CreateLoopCancellation() override
     {
-        return new LoopCancellation();
+        return comnew<LoopCancellation>();
     };
     
-    void RunLoop(IFrnLoopCancellation *cancel) override
+    void RunLoop(const ComPtr<IFrnLoopCancellation>& cancel) override
     {
-        START_COM_CALL;
-        auto can = dynamic_cast<LoopCancellation*>(cancel);
-        if(can->Cancelled)
+        auto can = cancel.dynamicCast<LoopCancellation>();
+        if(can == nullptr || can->Cancelled)
             return;
         can->Running = true;
         if(![NSApp isRunning])
@@ -306,7 +305,7 @@ public:
     
 };
 
-extern IFrnPlatformThreadingInterface* CreatePlatformThreading()
+extern ComPtr<IFrnPlatformThreadingInterface> CreatePlatformThreading()
 {
-    return new PlatformThreadingInterface();
+    return comnew<PlatformThreadingInterface>();
 }

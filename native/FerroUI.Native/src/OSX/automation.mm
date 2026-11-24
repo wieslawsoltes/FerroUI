@@ -2,27 +2,27 @@
 #include "automation.h"
 #include "FrnAutomationNode.h"
 #include "FrnString.h"
-#include "INSWindowHolder.h"
+#include "TopLevelImpl.h"
 #include "FrnView.h"
 #include "WindowInterfaces.h"
 
 @implementation FrnAccessibilityElement
 {
     ComPtr<IFrnAutomationPeer> _peer;
-    FrnAutomationNode* _node;
+    ComPtr<FrnAutomationNode> _node;
     NSMutableArray* _children;
     NSArray<NSString*>* _attributeNames;
 }
 
-+ (NSAccessibilityElement *)acquire:(IFrnAutomationPeer *)peer
++ (NSAccessibilityElement *)acquire:(const ComPtr<IFrnAutomationPeer>&)peer
 {
     if (peer == nullptr)
         return nil;
     
-    auto instance = peer->GetNode();
+    auto instance = peer->GetNode().dynamicCast<FrnAutomationNode>();
     
     if (instance != nullptr)
-        return dynamic_cast<FrnAutomationNode*>(instance)->GetOwner();
+        return instance->GetOwner();
     
     if (peer->IsInteropPeer())
     {
@@ -39,9 +39,10 @@
             return nil;
         }
         
-        auto holder = dynamic_cast<INSViewHolder*>(window);
-        auto view = holder->GetNSView();
-        return (NSAccessibilityElement*)[view window];
+        auto topLevel = window.dynamicCast<TopLevelImpl>();
+        if (topLevel == nullptr)
+            return nil;
+        return (NSAccessibilityElement*)[topLevel->GetNSView() window];
     }
     else
     {
@@ -49,31 +50,24 @@
     }
 }
 
-- (FrnAccessibilityElement *)initWithPeer:(IFrnAutomationPeer *)peer
+- (FrnAccessibilityElement *)initWithPeer:(const ComPtr<IFrnAutomationPeer>&)peer
 {
     self = [super init];
     _peer = peer;
-    _node = new FrnAutomationNode(self);
+    _node = comnew<FrnAutomationNode>(self);
     _peer->SetNode(_node);
     return self;
-}
-
-- (void)dealloc
-{
-    if (_node)
-        delete _node;
-    _node = nullptr;
 }
 
 - (NSString *)description
 {
     return [NSString stringWithFormat:@"%@ '%@' (%p)",
-        GetNSStringAndRelease(_peer->GetClassName()),
-        GetNSStringAndRelease(_peer->GetName()),
-        _peer.getRaw()];
+        GetNSString(_peer->GetClassName()),
+        GetNSString(_peer->GetName()),
+        (__bridge void*)self];
 }
 
-- (IFrnAutomationPeer *)peer
+- (ComPtr<IFrnAutomationPeer>)peer
 {
     return _peer;
 }
@@ -205,7 +199,7 @@
 
 - (NSString *)accessibilityIdentifier
 {
-    return GetNSStringAndRelease(_peer->GetAutomationId());
+    return GetNSString(_peer->GetAutomationId());
 }
 
 - (NSString *)accessibilityTitle
@@ -213,7 +207,7 @@
     // StaticText exposes its text via the value property.
     if (_peer->GetAutomationControlType() != AutomationText)
     {
-        return GetNSStringAndRelease(_peer->GetName());
+        return GetNSString(_peer->GetName());
     }
     
     return [super accessibilityTitle];
@@ -221,12 +215,12 @@
 
 - (NSString *)accessibilityHelp
 {
-    return GetNSStringAndRelease(_peer->GetHelpText()); 
+    return GetNSString(_peer->GetHelpText()); 
 }
 
 - (NSString *)accessibilityPlaceholderValue
 {
-    return GetNSStringAndRelease(_peer->GetPlaceholderText());
+    return GetNSString(_peer->GetPlaceholderText());
 }
 
 - (id)accessibilityValue
@@ -245,11 +239,11 @@
     }
     else if (_peer->IsValueProvider())
     {
-        return GetNSStringAndRelease(_peer->ValueProvider_GetValue());
+        return GetNSString(_peer->ValueProvider_GetValue());
     }
     else if (_peer->GetAutomationControlType() == AutomationText)
     {
-        return GetNSStringAndRelease(_peer->GetName());
+        return GetNSString(_peer->GetName());
     }
     else if (_peer->GetAutomationControlType() == AutomationHeader)
     {
@@ -360,9 +354,9 @@
         auto window = parentPeer->RootProvider_GetWindow();
         if (window != nullptr)
         {
-            auto holder = dynamic_cast<INSViewHolder*>(window);
-            if (holder != nullptr)
-                return holder->GetNSView();
+            auto topLevel = window.dynamicCast<TopLevelImpl>();
+            if (topLevel != nullptr)
+                return topLevel->GetNSView();
         }
     }
 
@@ -642,7 +636,7 @@
     auto name = _peer->GetName();
     if (name != nullptr)
     {
-        NSString* announcement = GetNSStringAndRelease(name);
+        NSString* announcement = GetNSString(name);
         if (announcement.length == 0)
             return;
 
@@ -689,9 +683,9 @@
         
         for (int i = 0; i < childCount; ++i)
         {
-            IFrnAutomationPeer* child;
+            ComPtr<IFrnAutomationPeer> child;
             
-            if (childPeers->Get(i, &child) == S_OK)
+            if (childPeers->Get(i, child) == S_OK)
             {
                 id element = [FrnAccessibilityElement acquire:child];
                 [_children addObject:element];

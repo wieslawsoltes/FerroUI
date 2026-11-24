@@ -38,7 +38,7 @@
     ComObjectWeakPtr<FrnAppMenuItem> _item;
 }
 
-- (id) initWithFrnAppMenuItem: (FrnAppMenuItem*)menuItem
+- (id) initWithFrnAppMenuItem: (const ComPtr<FrnAppMenuItem>&)menuItem
 {
     if(self != nil)
     {
@@ -87,7 +87,7 @@ FrnAppMenuItem::FrnAppMenuItem(bool isSeparator)
     }
     else
     {
-        _native = [[FrnMenuItem alloc] initWithFrnAppMenuItem: this];
+        _native = [[FrnMenuItem alloc] initWithFrnAppMenuItem: comself(this)];
     }
     
     _callback = nullptr;
@@ -98,17 +98,14 @@ NSMenuItem* FrnAppMenuItem::GetNative()
     return _native;
 }
 
-HRESULT FrnAppMenuItem::SetSubMenu (IFrnMenu* menu)
+HRESULT FrnAppMenuItem::SetSubMenu (const ComPtr<IFrnMenu>& menu)
 {
-    START_COM_CALL;
-
     @autoreleasepool
     {
-        if(menu != nullptr)
+        auto frnMenu = menu.dynamicCast<FrnAppMenu>();
+        if(frnMenu != nullptr)
         {
-            auto nsMenu = dynamic_cast<FrnAppMenu*>(menu)->GetNative();
-
-            [_native setSubmenu: nsMenu];
+            [_native setSubmenu: frnMenu->GetNative()];
 
             // Parity with -[NSMenu setSubmenu:forItem:]: without submenuAction: a click is dispatched to
             // didSelectItem: and dismisses the menu instead of opening the submenu.
@@ -130,8 +127,6 @@ HRESULT FrnAppMenuItem::SetSubMenu (IFrnMenu* menu)
 
 HRESULT FrnAppMenuItem::SetTitle (char* utf8String)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if (utf8String != nullptr)
@@ -145,8 +140,6 @@ HRESULT FrnAppMenuItem::SetTitle (char* utf8String)
 
 HRESULT FrnAppMenuItem::SetToolTip (char* utf8String)
 {
-    START_COM_CALL;
-
     @autoreleasepool
     {
         if (utf8String != nullptr)
@@ -160,8 +153,6 @@ HRESULT FrnAppMenuItem::SetToolTip (char* utf8String)
 
 HRESULT FrnAppMenuItem::SetGesture (FrnKey key, FrnInputModifiers modifiers)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if(key != FrnKeyNone)
@@ -198,10 +189,8 @@ HRESULT FrnAppMenuItem::SetGesture (FrnKey key, FrnInputModifiers modifiers)
     }
 }
 
-HRESULT FrnAppMenuItem::SetAction (IFrnPredicateCallback* predicate, IFrnActionCallback* callback)
+HRESULT FrnAppMenuItem::SetAction (const ComPtr<IFrnPredicateCallback>& predicate, const ComPtr<IFrnActionCallback>& callback)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         _predicate = predicate;
@@ -212,8 +201,6 @@ HRESULT FrnAppMenuItem::SetAction (IFrnPredicateCallback* predicate, IFrnActionC
 
 HRESULT FrnAppMenuItem::SetIsChecked (bool isChecked)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         [_native setState:(isChecked && _isCheckable ? NSOnState : NSOffState)];
@@ -223,8 +210,6 @@ HRESULT FrnAppMenuItem::SetIsChecked (bool isChecked)
 
 HRESULT FrnAppMenuItem::SetIsVisible (bool isVisible)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         [_native setHidden:!isVisible];
@@ -234,8 +219,6 @@ HRESULT FrnAppMenuItem::SetIsVisible (bool isVisible)
 
 HRESULT FrnAppMenuItem::SetToggleType(FrnMenuItemToggleType toggleType)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         switch(toggleType)
@@ -265,8 +248,6 @@ HRESULT FrnAppMenuItem::SetToggleType(FrnMenuItemToggleType toggleType)
 
 HRESULT FrnAppMenuItem::SetIcon(void *data, size_t length)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if(data != nullptr)
@@ -313,16 +294,11 @@ void FrnAppMenuItem::RaiseOnClicked()
     }
 }
 
-FrnAppMenu::FrnAppMenu(IFrnMenuEvents* events)
+FrnAppMenu::FrnAppMenu(const ComPtr<IFrnMenuEvents>& events)
 {
     _baseEvents = events;
-    _delegate = [[FrnMenuDelegate alloc] initWithParent: this];
+    _delegate = [[FrnMenuDelegate alloc] initWithParent: comself(this)];
     _native = [[FrnMenu alloc] initWithDelegate: _delegate];
-}
-
-FrnAppMenu::~FrnAppMenu()
-{
-    [_delegate parentDestroyed];
 }
 
 
@@ -356,10 +332,8 @@ void FrnAppMenu::RaiseClosed()
 }
 
 
-HRESULT FrnAppMenu::InsertItem(int index, IFrnMenuItem *item)
+HRESULT FrnAppMenu::InsertItem(int index, const ComPtr<IFrnMenuItem>& item)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if([_native hasGlobalMenuItem])
@@ -367,7 +341,7 @@ HRESULT FrnAppMenu::InsertItem(int index, IFrnMenuItem *item)
             index++;
         }
         
-        auto frnMenuItem = dynamic_cast<FrnAppMenuItem*>(item);
+        auto frnMenuItem = item.dynamicCast<FrnAppMenuItem>();
         
         if(frnMenuItem != nullptr)
         {
@@ -378,13 +352,11 @@ HRESULT FrnAppMenu::InsertItem(int index, IFrnMenuItem *item)
     }
 }
 
-HRESULT FrnAppMenu::RemoveItem (IFrnMenuItem* item)
+HRESULT FrnAppMenu::RemoveItem (const ComPtr<IFrnMenuItem>& item)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
-        auto frnMenuItem = dynamic_cast<FrnAppMenuItem*>(item);
+        auto frnMenuItem = item.dynamicCast<FrnAppMenuItem>();
         
         if(frnMenuItem != nullptr)
         {
@@ -397,8 +369,6 @@ HRESULT FrnAppMenu::RemoveItem (IFrnMenuItem* item)
 
 HRESULT FrnAppMenu::SetTitle (char* utf8String)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if (utf8String != nullptr)
@@ -412,8 +382,6 @@ HRESULT FrnAppMenu::SetTitle (char* utf8String)
 
 HRESULT FrnAppMenu::Clear()
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         [_native removeAllItems];
@@ -423,18 +391,13 @@ HRESULT FrnAppMenu::Clear()
 
 @implementation FrnMenuDelegate
 {
-    FrnAppMenu* _parent;
+    ComObjectWeakPtr<FrnAppMenu> _parent;
 }
-- (id) initWithParent:(FrnAppMenu *)parent
+- (id) initWithParent:(const ComPtr<FrnAppMenu>&)parent
 {
     self = [super init];
     _parent = parent;
     return self;
-}
-
-- (void) parentDestroyed
-{
-    _parent = nullptr;
 }
 
 - (BOOL)menu:(NSMenu *)menu updateItem:(NSMenuItem *)item atIndex:(NSInteger)index shouldCancel:(BOOL)shouldCancel
@@ -451,56 +414,47 @@ HRESULT FrnAppMenu::Clear()
 
 - (void)menuNeedsUpdate:(NSMenu *)menu
 {
-    if(_parent)
-        _parent->RaiseNeedsUpdate();
+    if(auto parent = _parent.tryGet())
+        parent->RaiseNeedsUpdate();
 }
 
 - (void)menuWillOpen:(NSMenu *)menu
 {
-    if(_parent)
-        _parent->RaiseOpening();
+    if(auto parent = _parent.tryGet())
+        parent->RaiseOpening();
 }
 
 - (void)menuDidClose:(NSMenu *)menu
 {
-    if(_parent)
-        _parent->RaiseClosed();
+    if(auto parent = _parent.tryGet())
+        parent->RaiseClosed();
 }
 
 @end
 
-extern IFrnMenu* CreateAppMenu(IFrnMenuEvents* cb)
+extern ComPtr<IFrnMenu> CreateAppMenu(const ComPtr<IFrnMenuEvents>& cb)
 {
-    @autoreleasepool
-    {
-        return new FrnAppMenu(cb);
-    }
+    return comnew<FrnAppMenu>(cb);
 }
 
-extern IFrnMenuItem* CreateAppMenuItem()
+extern ComPtr<IFrnMenuItem> CreateAppMenuItem()
 {
-    @autoreleasepool
-    {
-        return new FrnAppMenuItem(false);
-    }
+    return comnew<FrnAppMenuItem>(false);
 }
 
-extern IFrnMenuItem* CreateAppMenuItemSeparator()
+extern ComPtr<IFrnMenuItem> CreateAppMenuItemSeparator()
 {
-    @autoreleasepool
-    {
-        return new FrnAppMenuItem(true);
-    }
+    return comnew<FrnAppMenuItem>(true);
 }
 
 static ComStaticPtr<FrnAppMenu> s_appMenu;
 static NSMenuItem* s_appMenuItem = nullptr;
 
-extern void SetAppMenu(IFrnMenu *menu)
+extern void SetAppMenu(const ComPtr<IFrnMenu>& menu)
 {
-    s_appMenu.set(dynamic_cast<FrnAppMenu*>(menu));
+    s_appMenu.set(menu.dynamicCast<FrnAppMenu>());
     
-    if(s_appMenu != nullptr)
+    if(s_appMenu)
     {
         auto currentMenu = [s_appMenuItem menu];
         
@@ -531,15 +485,15 @@ extern void SetAppMenu(IFrnMenu *menu)
     }
 }
 
-extern void SetServicesMenu (IFrnMenu* menu)
+extern void SetServicesMenu(const ComPtr<IFrnMenu>& menu)
 {
-    auto nativeMenu = dynamic_cast<FrnAppMenu*>(menu);
-    [NSApplication sharedApplication].servicesMenu = nativeMenu->GetNative();
+    auto nativeMenu = menu.dynamicCast<FrnAppMenu>();
+    [NSApplication sharedApplication].servicesMenu = nativeMenu ? nativeMenu->GetNative() : nil;
 }
 
-extern FrnAppMenu* GetAppMenu ()
+extern ComPtr<FrnAppMenu> GetAppMenu()
 {
-    return s_appMenu.getRaw();
+    return s_appMenu;
 }
 
 extern NSMenuItem* GetAppMenuItem ()

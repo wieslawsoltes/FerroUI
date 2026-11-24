@@ -13,16 +13,14 @@ TopLevelImpl::~TopLevelImpl() {
     View = nullptr;
 }
 
-TopLevelImpl::TopLevelImpl(IFrnTopLevelEvents *events) {
+TopLevelImpl::TopLevelImpl(const ComPtr<IFrnTopLevelEvents>& events) {
     TopLevelEvents = events;
     
-    View = [[FrnView alloc] initWithParent:this];
-    InputMethod = new FrnTextInputMethod(View);
+    View = [[FrnView alloc] initWithParent:comself(this)];
+    InputMethod = comnew<FrnTextInputMethod>(View);
 }
 
 HRESULT TopLevelImpl::GetScaling(double *ret) {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (ret == nullptr)
             return E_POINTER;
@@ -39,8 +37,6 @@ HRESULT TopLevelImpl::GetScaling(double *ret) {
 }
 
 HRESULT TopLevelImpl::GetClientSize(FrnSize *ret) {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (ret == nullptr)
             return E_POINTER;
@@ -54,17 +50,13 @@ HRESULT TopLevelImpl::GetClientSize(FrnSize *ret) {
     }
 }
 
-HRESULT TopLevelImpl::GetInputMethod(IFrnTextInputMethod **retOut) {
-    START_COM_CALL;
-
-    *retOut = InputMethod;
+HRESULT TopLevelImpl::GetInputMethod(ComPtr<IFrnTextInputMethod>& retOut) {
+    retOut = InputMethod;
 
     return S_OK;
 }
 
 HRESULT TopLevelImpl::ObtainNSViewHandle(void **ret) {
-    START_COM_CALL;
-
     if (ret == nullptr) {
         return E_POINTER;
     }
@@ -75,8 +67,6 @@ HRESULT TopLevelImpl::ObtainNSViewHandle(void **ret) {
 }
 
 HRESULT TopLevelImpl::ObtainNSViewHandleRetained(void **ret) {
-    START_COM_CALL;
-
     if (ret == nullptr) {
         return E_POINTER;
     }
@@ -86,11 +76,11 @@ HRESULT TopLevelImpl::ObtainNSViewHandleRetained(void **ret) {
     return S_OK;
 }
 
-HRESULT TopLevelImpl::SetCursor(IFrnCursor *cursor) {
-    START_COM_CALL;
-
+HRESULT TopLevelImpl::SetCursor(const ComPtr<IFrnCursor>& cursor) {
     @autoreleasepool {
-        Cursor *frnCursor = dynamic_cast<Cursor *>(cursor);
+        auto frnCursor = cursor.dynamicCast<Cursor>();
+        if (!frnCursor)
+            return E_INVALIDARG;
         this->cursor = frnCursor->GetNative();
         UpdateCursor();
 
@@ -110,9 +100,7 @@ void TopLevelImpl::UpdateCursor() {
     }
 }
 
-HRESULT TopLevelImpl::CreateSoftwareRenderTarget(IFrnSoftwareRenderTarget **ppv) {
-    START_COM_CALL;
-
+HRESULT TopLevelImpl::CreateSoftwareRenderTarget(ComPtr<IFrnSoftwareRenderTarget>& ppv) {
     if(![NSThread isMainThread])
         return COR_E_INVALIDOPERATION;
 
@@ -120,14 +108,12 @@ HRESULT TopLevelImpl::CreateSoftwareRenderTarget(IFrnSoftwareRenderTarget **ppv)
         return E_FAIL;
 
     auto target = [[IOSurfaceRenderTarget alloc] initWithOpenGlContext: nil];
-    *ppv = [target createSoftwareRenderTarget];
+    ppv = [target createSoftwareRenderTarget];
     [View setRenderTarget: target];
     return S_OK;
 }
 
-HRESULT TopLevelImpl::CreateGlRenderTarget(IFrnGlContext* glContext, IFrnGlSurfaceRenderTarget **ppv) {
-    START_COM_CALL;
-
+HRESULT TopLevelImpl::CreateGlRenderTarget(const ComPtr<IFrnGlContext>& glContext, ComPtr<IFrnGlSurfaceRenderTarget>& ppv) {
     if(![NSThread isMainThread])
         return COR_E_INVALIDOPERATION;
 
@@ -135,14 +121,12 @@ HRESULT TopLevelImpl::CreateGlRenderTarget(IFrnGlContext* glContext, IFrnGlSurfa
         return E_FAIL;
 
     auto target = [[IOSurfaceRenderTarget alloc] initWithOpenGlContext: glContext];
-    *ppv = [target createSurfaceRenderTarget];
+    ppv = [target createSurfaceRenderTarget];
     [View setRenderTarget: target];
     return S_OK;
 }
 
-HRESULT TopLevelImpl::CreateMetalRenderTarget(IFrnMetalDevice* device, IFrnMetalRenderTarget **ppv) {
-    START_COM_CALL;
-
+HRESULT TopLevelImpl::CreateMetalRenderTarget(const ComPtr<IFrnMetalDevice>& device, ComPtr<IFrnMetalRenderTarget>& ppv) {
     if(![NSThread isMainThread])
         return COR_E_INVALIDOPERATION;
 
@@ -150,17 +134,17 @@ HRESULT TopLevelImpl::CreateMetalRenderTarget(IFrnMetalDevice* device, IFrnMetal
         return E_FAIL;
 
     auto target = [[MetalRenderTarget alloc] initWithDevice: device];
+    if (target == nil)
+        return E_INVALIDARG;
     [View setRenderTarget: target];
-    [target getRenderTarget: ppv];
+    ppv = [target createRenderTarget];
     return S_OK;
 }
 
-HRESULT TopLevelImpl::CreateNativeControlHost(IFrnNativeControlHost **retOut) {
-    START_COM_CALL;
-
+HRESULT TopLevelImpl::CreateNativeControlHost(ComPtr<IFrnNativeControlHost>& retOut) {
     if (View == NULL)
         return E_FAIL;
-    *retOut = ::CreateNativeControlHost(View);
+    retOut = ::CreateNativeControlHost(View);
     return S_OK;
 }
 
@@ -169,8 +153,6 @@ FrnView *TopLevelImpl::GetNSView() {
 }
 
 HRESULT TopLevelImpl::Invalidate() {
-    START_COM_CALL;
-
     @autoreleasepool {
         [View setNeedsDisplayInRect:[View frame]];
 
@@ -179,8 +161,6 @@ HRESULT TopLevelImpl::Invalidate() {
 }
 
 HRESULT TopLevelImpl::PointToClient(FrnPoint point, FrnPoint *ret) {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (ret == nullptr) {
             return E_POINTER;
@@ -217,8 +197,6 @@ HRESULT TopLevelImpl::PointToClient(FrnPoint point, FrnPoint *ret) {
 }
 
 HRESULT TopLevelImpl::PointToScreen(FrnPoint point, FrnPoint *ret) {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (ret == nullptr) {
             return E_POINTER;
@@ -255,14 +233,10 @@ HRESULT TopLevelImpl::PointToScreen(FrnPoint point, FrnPoint *ret) {
 }
 
 HRESULT TopLevelImpl::SetTransparencyMode(FrnWindowTransparencyMode mode) {
-    START_COM_CALL;
-
     return S_OK;
 }
 
 HRESULT TopLevelImpl::GetCurrentDisplayId (CGDirectDisplayID* ret) {
-    START_COM_CALL;
-
     auto window = [View window];
     *ret = [window.screen av_displayId];
 
@@ -276,12 +250,10 @@ void TopLevelImpl::UpdateAppearance() {
 HRESULT TopLevelImpl::BeginDragAndDropOperation(
     FrnDragDropEffects effects,
     FrnPoint point,
-    IFrnClipboardDataSource* source,
-    IFrnDndResultCallback* callback,
+    const ComPtr<IFrnClipboardDataSource>& source,
+    const ComPtr<IFrnDndResultCallback>& callback,
     void* sourceHandle)
 {
-    START_COM_CALL;
-
     if (View == NULL)
         return E_FAIL;
 
@@ -312,7 +284,7 @@ HRESULT TopLevelImpl::BeginDragAndDropOperation(
     for (auto i = 0; i < itemCount; ++i)
     {
         ComPtr<IFrnClipboardDataItem> item;
-        if(S_OK != source->GetItem(i, item.getPPV()))
+        if(S_OK != source->GetItem(i, item))
             continue;
         auto writeableItem = [[WriteableClipboardItem alloc] initWithItem:item source:source];
         auto draggingItem = [[NSDraggingItem alloc] initWithPasteboardWriter:writeableItem];
@@ -339,11 +311,7 @@ void TopLevelImpl::SetClientSize(NSSize size){
     [View setFrameSize:size];
 }
 
-extern IFrnTopLevel* CreateFrnTopLevel(IFrnTopLevelEvents* events)
+extern ComPtr<IFrnTopLevel> CreateFrnTopLevel(const ComPtr<IFrnTopLevelEvents>& events)
 {
-    @autoreleasepool
-    {
-        IFrnTopLevel* ptr = (IFrnTopLevel*)new TopLevelImpl(events);
-        return ptr;
-    }
+    return comnew<TopLevelImpl>(events);
 }

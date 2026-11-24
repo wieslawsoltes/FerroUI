@@ -48,7 +48,10 @@ fn main() {
     let idl_src = fs::read_to_string(&idl_path).expect("read frn.idl");
     let idl = microcom_codegen::parse(&idl_src)
         .unwrap_or_else(|e| panic!("{}:{e}", idl_path.display()));
-    let header = microcom_codegen::cpp::generate(&idl).expect("generate C++ header");
+    // The smart pointer wrapper mode of MicroCom 0.11.7: the native sources implement the
+    // `ComPtr` shaped methods of `MicroComImpl<I>` (native/FerroUI.Native/README.md).
+    let options = microcom_codegen::cpp::CppOptions { smart_pointer_wrappers: true };
+    let header = microcom_codegen::cpp::generate_with(&idl, &options).expect("generate C++ header");
     let bindings = microcom_codegen::rust::generate(&idl, &Default::default())
         .expect("generate Rust bindings");
     let gen_inc_dir = out_dir.join("inc");

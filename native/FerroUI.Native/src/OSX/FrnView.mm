@@ -98,7 +98,7 @@
     [self updateLayer];
 }
 
--(FrnView*)  initWithParent: (TopLevelImpl*) parent
+-(FrnView*)  initWithParent: (const ComPtr<TopLevelImpl>&) parent
 {
     self = [super init];
     [self setWantsLayer:YES];
@@ -1241,9 +1241,9 @@ static bool KeyboardInputSourceComposes(NSString* sourceId)
     {
         for (int i = 0; i < childCount; ++i)
         {
-            IFrnAutomationPeer* child;
+            ComPtr<IFrnAutomationPeer> child;
 
-            if (childPeers->Get(i, &child) == S_OK)
+            if (childPeers->Get(i, child) == S_OK)
             {
                 id element = [FrnAccessibilityElement acquire:child];
                 [_accessibilityChildren addObject:element];

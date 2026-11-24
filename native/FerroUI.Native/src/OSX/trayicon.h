@@ -23,7 +23,7 @@ public:
     
     virtual HRESULT SetIcon (void* data, size_t length) override;
     
-    virtual HRESULT SetMenu (IFrnMenu* menu) override;
+    virtual HRESULT SetMenu (const ComPtr<IFrnMenu>& menu) override;
     
     virtual HRESULT SetIsVisible (bool isVisible) override;
 

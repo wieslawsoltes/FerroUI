@@ -2,7 +2,7 @@
 #include "FrnString.h"
 #include "menu.h"
 @interface FrnAppDelegate : NSObject<NSApplicationDelegate>
--(FrnAppDelegate* _Nonnull) initWithEvents: (IFrnApplicationEvents* _Nonnull) events;
+-(FrnAppDelegate* _Nonnull) initWithEvents: (const ComPtr<IFrnApplicationEvents>&) events;
 -(void) releaseEvents;
 @end
 
@@ -38,17 +38,18 @@ static bool IsOSShutdown()
 }
 
 @implementation FrnAppDelegate
-ComPtr<IFrnApplicationEvents> _events;
+// Not released at exit: .NET is already shut down by then
+ComStaticPtr<IFrnApplicationEvents> _events;
 
-- (FrnAppDelegate *)initWithEvents:(IFrnApplicationEvents *)events
+- (FrnAppDelegate *)initWithEvents:(const ComPtr<IFrnApplicationEvents>&)events
 {
-    _events = events;
+    _events.set(events);
     return self;
 }
 
 - (void)releaseEvents
 {
-    _events = nil;
+    _events.reset();
 }
 
 - (void)applicationWillFinishLaunching:(NSNotification *)notification
@@ -186,52 +187,50 @@ ComPtr<IFrnApplicationEvents> _events;
 }
 @end
 
-extern void InitializeFrnApp(IFrnApplicationEvents* events, bool disableAppDelegate)
+// NSApplication.delegate is weak
+static FrnAppDelegate* s_appDelegate;
+
+extern void InitializeFrnApp(const ComPtr<IFrnApplicationEvents>& events, bool disableAppDelegate)
 {
     if(!disableAppDelegate)
     {
         NSApplication* app = [FrnApplication sharedApplication];
-        id delegate = [[FrnAppDelegate alloc] initWithEvents:events];
-        [app setDelegate:delegate];
+        s_appDelegate = [[FrnAppDelegate alloc] initWithEvents:events];
+        [app setDelegate:s_appDelegate];
     }
 }
 
 extern void ReleaseFrnAppEvents()
 {
+    if (s_appDelegate == nil)
+        return;
     NSApplication* app = [FrnApplication sharedApplication];
-    id delegate = [app delegate];
-    if ([delegate isMemberOfClass:[FrnAppDelegate class]])
-    {
-        FrnAppDelegate* frnDelegate = delegate;
-        [frnDelegate releaseEvents];
+    if ([app delegate] == s_appDelegate)
         [app setDelegate:nil];
-    }
+    [s_appDelegate releaseEvents];
+    s_appDelegate = nil;
 }
 
 HRESULT FrnApplicationCommands::UnhideApp()
 {
-    START_COM_CALL;
     [[NSApplication sharedApplication] unhide:[NSApp delegate]];
     return S_OK;
 }
 
 HRESULT FrnApplicationCommands::HideApp()
 {
-    START_COM_CALL;
     [[NSApplication sharedApplication] hide:[NSApp delegate]];
     return S_OK;
 }
 
 HRESULT FrnApplicationCommands::ShowAll()
 {
-    START_COM_CALL;
     [[NSApplication sharedApplication] unhideAllApplications:[NSApp delegate]];
     return S_OK;
 }
 
 HRESULT FrnApplicationCommands::HideOthers()
 {
-    START_COM_CALL;
     [[NSApplication sharedApplication] hideOtherApplications:[NSApp delegate]];
     return S_OK;
 }
@@ -240,7 +239,6 @@ HRESULT FrnApplicationCommands::HideOthers()
 // menu names the framework there); the icon is the application's.
 HRESULT FrnApplicationCommands::ShowAboutPanel(const char* applicationName, const char* version)
 {
-    START_COM_CALL;
     @autoreleasepool
     {
         NSMutableDictionary* options = [NSMutableDictionary dictionary];
@@ -259,9 +257,9 @@ HRESULT FrnApplicationCommands::ShowAboutPanel(const char* applicationName, cons
 }
 
 
-extern IFrnApplicationCommands* CreateApplicationCommands()
+extern ComPtr<IFrnApplicationCommands> CreateApplicationCommands()
 {
-    return new FrnApplicationCommands();
+    return comnew<FrnApplicationCommands>();
 }
 
 extern void SetDockMenu(NSMenu* menu)

@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (124 done, 0 planned) | 124 |
+| `port` (125 done, 0 planned) | 125 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 2 |
+| `deferred` | 1 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -75,7 +75,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-browser | 3 | 2 |  |  | 1 |  | 6 |
 | platform-ios | 5 |  |  |  |  |  | 5 |
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
-| platform-macos | 8 | 1 |  |  |  | 1 | 10 |
+| platform-macos | 9 | 1 |  |  |  |  | 10 |
 | platform-win32 | 7 | 2 |  |  |  |  | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 13 | 3 |  |  | 2 |  | 18 |
@@ -144,7 +144,6 @@ are part of the base that the previous sync tracked, so they are not inventoried
 <!-- generated:deferred -->
 | Commit | PR | Date | Area | Part | Note |
 |---|---:|---|---|---|---|
-| `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
 | `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
 <!-- /generated:deferred -->
 
@@ -187,7 +186,7 @@ left out only with a recorded performance or better-code reason.
 | `ae55790316` | #22526 | 2026-10-20 | platform-ios | `port` (done) | ios2 | Touches in progress are cancelled when the view leaves its window or is disposed. |
 | `45693b1713` | #22196 | 2026-10-20 | build | `not-applicable` |  | .NET 11 SDK and .NET WebAssembly runtime. |
 | `fa6d6f069e` | #22532 | 2026-10-20 | platform-macos | `port` (done) | macos | `automation.mm`: AXFocused settable only on keyboard-focusable elements. |
-| `dc0105179b` | #22519 | 2026-10-20 | platform-macos | `deferred` |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
+| `dc0105179b` | #22519 | 2026-10-20 | platform-macos | `port` (done) | native-com | microcom-codegen gets the smart pointer wrapper mode of MicroCom 0.11.7 (raw `impl_*` slots, `ComPtr` wrappers, `MicroComImpl<I>` adapters with `@cpp-call-preamble`), reproduced from the text templates of the published 0.11.7 generator package (read as data, not committed) and the upstream sources; ferroui-native generates in that mode. The native sources took the commit by a three-way merge (8 files with conflicts, resolved), and the FerroUI additions moved to `MicroComImpl` and `ComPtr` signatures. Not compiled locally (`ferroui-native` has a Skia edge): CI is the first compile. |
 | `1fd3c0830e` | #22227 | 2026-10-20 | data | `port` (done) | data | Indexer bindings refresh on `Item[]` and `Item[key]`. |
 | `06c2072375` | #22531 | 2026-10-20 | platform-win32 | `port` (done) | win32 | OLE data object accepts a combination of media. |
 | `5eedd4afe5` | #22463 | 2026-10-20 | platform-macos | `port` (done) | macos | `automation.mm`: no announcement for an empty live region. |

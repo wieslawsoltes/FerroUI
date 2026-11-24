@@ -44,7 +44,7 @@ extern NSString* GetFrnCustomDataType()
 }
 
 - (FrnDndSource*) initWithOperation: (NSDragOperation)operation
-                        andCallback: (IFrnDndResultCallback*) cb
+                        andCallback: (const ComPtr<IFrnDndResultCallback>&) cb
                     andSourceHandle: (void*) handle
 {
     self = [super init];
@@ -78,7 +78,7 @@ extern NSString* GetFrnCustomDataType()
 
 @end
 
-extern NSObject<NSDraggingSource>* CreateDraggingSource(NSDragOperation op, IFrnDndResultCallback* cb, void* handle)
+extern NSObject<NSDraggingSource>* CreateDraggingSource(NSDragOperation op, const ComPtr<IFrnDndResultCallback>& cb, void* handle)
 {
     return [[FrnDndSource alloc] initWithOperation:op andCallback:cb andSourceHandle:handle];
 };

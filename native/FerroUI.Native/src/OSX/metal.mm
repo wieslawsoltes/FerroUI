@@ -87,8 +87,7 @@ public:
         return (__bridge void*) queue;
     }
     
-    HRESULT ImportIOSurface(void *handle, FrnPixelFormat pixelFormat, IFrnMetalTexture **ppv) override {
-        START_COM_ARP_CALL;
+    HRESULT ImportIOSurface(void *handle, FrnPixelFormat pixelFormat, ComPtr<IFrnMetalTexture>& ppv) override {
         auto surf = (IOSurfaceRef)handle;
         auto width = IOSurfaceGetWidth(surf);
         auto height = IOSurfaceGetHeight(surf);
@@ -111,16 +110,16 @@ public:
         auto texture = [device newTextureWithDescriptor:desc iosurface:surf plane:0];
         if(texture == nullptr)
             return E_FAIL;
-        *ppv = new FrnMetalTexture(texture);
+        ppv = comnew<FrnMetalTexture>(texture);
         return S_OK;
     }
     
-    HRESULT ImportSharedEvent(void *mtlSharedEventInstance, IFrnMTLSharedEvent**ppv) override {
+    HRESULT ImportSharedEvent(void *mtlSharedEventInstance, ComPtr<IFrnMTLSharedEvent>& ppv) override {
         if (@available(macOS 12.0, *)) {
             auto external = (__bridge id<MTLSharedEvent>)mtlSharedEventInstance;
             auto handle = external.newSharedEventHandle;
             auto imported = [device newSharedEventWithHandle: handle];
-            *ppv = new FrnMTLSharedEvent(imported);
+            ppv = comnew<FrnMTLSharedEvent>(imported);
             return S_OK;
         } 
         else
@@ -130,12 +129,11 @@ public:
     }
     
     
-    HRESULT SignalOrWait(IFrnMTLSharedEvent *ev, uint64_t value, bool wait)
+    HRESULT SignalOrWait(const ComPtr<IFrnMTLSharedEvent>& ev, uint64_t value, bool wait)
     {
-        START_ARP_CALL;
         if (@available(macOS 12.0, *))
         {
-            auto e = dynamic_cast<FrnMTLSharedEvent*>(ev);
+            auto e = ev.dynamicCast<FrnMTLSharedEvent>();
             if(e == nullptr)
                 return E_FAIL;
             auto buf = [queue commandBuffer];
@@ -150,11 +148,11 @@ public:
             return E_FAIL;
     }
     
-    HRESULT SubmitWait(IFrnMTLSharedEvent *ev, uint64_t value) override {
+    HRESULT SubmitWait(const ComPtr<IFrnMTLSharedEvent>& ev, uint64_t value) override {
         return SignalOrWait(ev, value, true);
     }
     
-    HRESULT SubmitSignal(IFrnMTLSharedEvent *ev, uint64_t value) override { 
+    HRESULT SubmitSignal(const ComPtr<IFrnMTLSharedEvent>& ev, uint64_t value) override {
         return SignalOrWait(ev, value, false);
     }
     
@@ -185,7 +183,7 @@ class FrnMetalRenderSession : public ComSingleObject<IFrnMetalRenderingSession, 
 public:
     FORWARD_IUNKNOWN()
 
-    FrnMetalRenderSession(FrnMetalDevice* device, CAMetalLayer* layer, id <CAMetalDrawable> drawable, const FrnPixelSize &size, double scaling, bool presentWithTransaction)
+    FrnMetalRenderSession(const ComPtr<FrnMetalDevice>& device, CAMetalLayer* layer, id <CAMetalDrawable> drawable, const FrnPixelSize &size, double scaling, bool presentWithTransaction)
             : _drawable(drawable), _size(size), _scaling(scaling), _queue(device->queue),
             _texture([drawable texture]), _presentWithTransaction(presentWithTransaction) {
         _layer = layer;
@@ -236,14 +234,13 @@ public:
     // The frames begun on the main thread: read and written by that thread alone.
     uint64_t MainThreadFrames = 0;
     FORWARD_IUNKNOWN()
-    FrnMetalRenderTarget(CAMetalLayer* layer, ComPtr<FrnMetalDevice> device)
+    FrnMetalRenderTarget(CAMetalLayer* layer, const ComPtr<FrnMetalDevice>& device)
     {
         _layer = layer;
         _device = device;
     }
 
-    HRESULT BeginDrawing(IFrnMetalRenderingSession **ret) override {
-        START_COM_ARP_CALL;
+    HRESULT BeginDrawing(ComPtr<IFrnMetalRenderingSession>& ret) override {
         bool onMainThread = [NSThread isMainThread];
         if(onMainThread)
         {
@@ -266,12 +263,12 @@ public:
         {
             if(onMainThread)
                 _layer.presentsWithTransaction = NO;
-            *ret = nullptr;
+            ret = nullptr;
             return E_FAIL;
         }
         if(onMainThread)
             MainThreadFrames++;
-        *ret = new FrnMetalRenderSession(_device, _layer, drawable, _size, _scaling, onMainThread);
+        ret = comnew<FrnMetalRenderSession>(_device, _layer, drawable, _size, _scaling, onMainThread);
         return 0;
     }
 };
@@ -282,8 +279,10 @@ public:
     CAMetalLayer* _layer;
     ComPtr<FrnMetalRenderTarget> _target;
 }
-- (MetalRenderTarget *)initWithDevice:(IFrnMetalDevice *)device {
-    _device = dynamic_cast<FrnMetalDevice*>(device);
+- (MetalRenderTarget *)initWithDevice:(const ComPtr<IFrnMetalDevice>&)device {
+    _device = device.dynamicCast<FrnMetalDevice>();
+    if(!_device)
+        return nil;
     _layer = [CAMetalLayer new];
     // Skia's untagged SDR render targets contain sRGB values. Leaving the
     // layer untagged makes WindowServer interpret them in the monitor's
@@ -293,14 +292,14 @@ public:
     CGColorSpaceRelease(colorSpace);
     _layer.opaque = false;
     _layer.device = _device->device;
-    _target.setNoAddRef(new FrnMetalRenderTarget(_layer, _device));
+    _target = comnew<FrnMetalRenderTarget>(_layer, _device);
     return self;
 }
 
 
--(void) getRenderTarget: (IFrnMetalRenderTarget**) ppv
+-(ComPtr<IFrnMetalRenderTarget>) createRenderTarget
 {
-    *ppv = static_cast<IFrnMetalRenderTarget*>(_target.getRetainedReference());
+    return _target;
 }
 
 - (void)resize:(FrnPixelSize)size withScale:(float)scale {
@@ -327,42 +326,41 @@ class FrnMetalDisplay : public ComSingleObject<IFrnMetalDisplay, &IID_IFrnMetalD
 {
 public:
     FORWARD_IUNKNOWN()
-    HRESULT CreateDevice(IFrnMetalDevice **ret) override {
-        START_COM_ARP_CALL;
+    HRESULT CreateDevice(ComPtr<IFrnMetalDevice>& ret) override {
         auto device = MTLCreateSystemDefaultDevice();
         if(device == nil) {
-            ret = nil;
+            ret = nullptr;
             return E_FAIL;
         }
         auto queue = [device newCommandQueue];
-        *ret = new FrnMetalDevice(device, queue);
+        ret = comnew<FrnMetalDevice>(device, queue);
         return S_OK;
     }
 };
 
 static ComStaticPtr<FrnMetalDisplay> _display(comnew<FrnMetalDisplay>());
 
-extern IFrnMetalDisplay* GetMetalDisplay()
+extern ComPtr<IFrnMetalDisplay> GetMetalDisplay()
 {
-    return _display;
+    return _display.get();
 }
 
 
-extern IFrnMTLSharedEvent* ImportMTLSharedEvent(void* object)
+extern ComPtr<IFrnMTLSharedEvent> ImportMTLSharedEvent(void* object)
 {
     if (@available(macOS 12.0, *)) {
     if(object == nullptr)
-        return nil;
+        return nullptr;
     auto evId = (__bridge id<MTLSharedEvent>)object;
     
     if(evId == nil)
-        return nil;
+        return nullptr;
     
     
-    return new FrnMTLSharedEvent(evId);
+    return comnew<FrnMTLSharedEvent>(evId);
     } 
     else
     {
-        return nil;
+        return nullptr;
     }
 }

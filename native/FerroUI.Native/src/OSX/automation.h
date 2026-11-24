@@ -4,10 +4,8 @@
 #include "FrnAccessibility.h"
 NS_ASSUME_NONNULL_BEGIN
 
-class IFrnAutomationPeer;
-
 @interface FrnAccessibilityElement : NSAccessibilityElement <FrnAccessibility>
-+ (id _Nullable) acquire:(IFrnAutomationPeer *) peer;
++ (id _Nullable) acquire:(const ComPtr<IFrnAutomationPeer>&) peer;
 @end
 
 NS_ASSUME_NONNULL_END

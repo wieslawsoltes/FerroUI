@@ -18,7 +18,7 @@
 
 - (IOSurfaceHolder*) initWithSize: (FrnPixelSize) size
                         withScale: (float)scale
-                withOpenGlContext: (IFrnGlContext*) context
+                withOpenGlContext: (const ComPtr<IFrnGlContext>&) context
 {
     long bytesPerRow = IOSurfaceAlignProperty(kIOSurfaceBytesPerRow, size.Width * 4);
     long allocSize = IOSurfaceAlignProperty(kIOSurfaceAllocSize, size.Height * bytesPerRow);
@@ -124,8 +124,8 @@
 @end
 
 
-static IFrnGlSurfaceRenderTarget* CreateGlRenderTarget(IOSurfaceRenderTarget* target);
-static IFrnSoftwareRenderTarget* CreateSoftwareRenderTarget(IOSurfaceRenderTarget* target);
+static ComPtr<IFrnGlSurfaceRenderTarget> CreateGlRenderTarget(IOSurfaceRenderTarget* target);
+static ComPtr<IFrnSoftwareRenderTarget> CreateSoftwareRenderTarget(IOSurfaceRenderTarget* target);
 
 static bool SizeEquals(FrnPixelSize& left, FrnPixelSize& right)
 {
@@ -159,7 +159,7 @@ public:
     float _scale;
 }
 
-- (IOSurfaceRenderTarget*) initWithOpenGlContext: (IFrnGlContext*) context;
+- (IOSurfaceRenderTarget*) initWithOpenGlContext: (const ComPtr<IFrnGlContext>&) context;
 {
     self = [super init];
     _glContext = context;
@@ -275,8 +275,7 @@ public:
             return;
         _consumeSurfacesScheduled = true;
         __block auto strongSelf = self;
-        ComPtr<ConsumeSurfacesCallback> cb(new ConsumeSurfacesCallback(self), true);
-        PostDispatcherCallback(cb);
+        PostDispatcherCallback(comnew<ConsumeSurfacesCallback>(self));
     }
 }
 
@@ -313,12 +312,12 @@ public:
     }
 }
 
--(IFrnGlSurfaceRenderTarget*) createSurfaceRenderTarget
+-(ComPtr<IFrnGlSurfaceRenderTarget>) createSurfaceRenderTarget
 {
     return CreateGlRenderTarget(self);
 }
 
--(IFrnSoftwareRenderTarget*) createSoftwareRenderTarget
+-(ComPtr<IFrnSoftwareRenderTarget>) createSoftwareRenderTarget
 {
     return CreateSoftwareRenderTarget(self);
 }
@@ -332,7 +331,7 @@ class FrnGlRenderingSession : public ComSingleObject<IFrnGlSurfaceRenderingSessi
     IOSurfaceHolder* _surface;
 public:
     FORWARD_IUNKNOWN()
-    FrnGlRenderingSession(IOSurfaceRenderTarget* target, IOSurfaceHolder* surface, ComPtr<IUnknown> releaseContext)
+    FrnGlRenderingSession(IOSurfaceRenderTarget* target, IOSurfaceHolder* surface, const ComPtr<IUnknown>& releaseContext)
     {
         _target = target;
         // This happens in a synchronized block set up by FrnRenderTarget, so we take the current surface for this
@@ -343,8 +342,6 @@ public:
     
     virtual HRESULT GetPixelSize(FrnPixelSize* ret)  override
     {
-        START_COM_CALL;
-        
         if(!_surface)
             return E_FAIL;
         *ret = _surface->size;
@@ -353,8 +350,6 @@ public:
     
     virtual HRESULT GetScaling(double* ret)  override
     {
-        START_COM_CALL;
-        
         if(!_surface)
             return E_FAIL;
         *ret = _surface->scale;
@@ -380,26 +375,25 @@ public:
         _target = target;
     }
     
-    virtual HRESULT BeginDrawing(IFrnGlSurfaceRenderingSession** ret)  override
+    virtual HRESULT BeginDrawing(ComPtr<IFrnGlSurfaceRenderingSession>& ret)  override
     {
-        START_COM_ARP_CALL;
         ComPtr<IUnknown> releaseContext;
         @synchronized (_target->lock) {
             auto surface = [_target getNextSurfaceInSafeContext];
-            _target->_glContext->MakeCurrent(releaseContext.getPPV());
+            _target->_glContext->MakeCurrent(releaseContext);
             HRESULT res = [surface prepareForGlRender];
             if(res)
                 return res;
-            *ret = new FrnGlRenderingSession(_target, surface, releaseContext);
+            ret = comnew<FrnGlRenderingSession>(_target, surface, releaseContext);
             return S_OK;
         }
     }
 };
 
 
-static IFrnGlSurfaceRenderTarget* CreateGlRenderTarget(IOSurfaceRenderTarget* target)
+static ComPtr<IFrnGlSurfaceRenderTarget> CreateGlRenderTarget(IOSurfaceRenderTarget* target)
 {
-    return new FrnGlRenderTarget(target);
+    return comnew<FrnGlRenderTarget>(target);
 };
 
 
@@ -414,13 +408,12 @@ public:
     }
 
     HRESULT SetFrame(FrnFramebuffer *fb) override {
-        START_COM_ARP_CALL;
         [_target setSwFrame: fb];
         return 0;
     }
 };
 
-static IFrnSoftwareRenderTarget* CreateSoftwareRenderTarget(IOSurfaceRenderTarget* target)
+static ComPtr<IFrnSoftwareRenderTarget> CreateSoftwareRenderTarget(IOSurfaceRenderTarget* target)
 {
-    return new FrnSoftwareRenderTarget(target);
+    return comnew<FrnSoftwareRenderTarget>(target);
 };
