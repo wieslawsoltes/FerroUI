@@ -23,10 +23,10 @@ fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs
 // `PART_TextPresenter` (a [`TextPresenter`], required) and `PART_ScrollViewer` (a
 // [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every text position
 // (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code unit index.
-fn textBox(attrs) = Element { elementType: 431, elementAttrs: attrs, elementChildren: [] }
+fn textBox(attrs) = Element { elementType: 432, elementAttrs: attrs, elementChildren: [] }
 // window(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Window. A top-level window.
-fn window(attrs, children) = Element { elementType: 497, elementAttrs: attrs, elementChildren: children }
+fn window(attrs, children) = Element { elementType: 498, elementAttrs: attrs, elementChildren: children }
 
 // ---- attributes of properties ----------------------------------------------------------------
 
