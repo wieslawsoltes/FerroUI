@@ -369,6 +369,16 @@ fn frames_are_presented_through_a_swap_chain_and_the_swap_chain_follows_the_surf
     let session = target.begin_draw();
     assert_eq!(session.size(), PixelSize::new(400, 240));
     assert_eq!(session.image_info().pixel_size, PixelSize::new(400, 240));
+    let usage = session.image_info().usage_flags;
+    session.dispose();
+
+    // A consumer asks for more usage flags (Graphite: input attachment): the next image has them, besides the
+    // default ones.
+    target.request_image_usage(vk::ImageUsageFlags::INPUT_ATTACHMENT.as_raw());
+    let session = target.begin_draw();
+    let flags = vk::ImageUsageFlags::from_raw(session.image_info().usage_flags);
+    assert!(flags.contains(vk::ImageUsageFlags::INPUT_ATTACHMENT));
+    assert!(flags.contains(vk::ImageUsageFlags::from_raw(usage)));
     session.dispose();
 
     target.dispose();
