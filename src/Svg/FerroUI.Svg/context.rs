@@ -6,10 +6,11 @@
 //! destination-dependent blends and avoids silently dropping drawing commands.
 
 use ferroui_base::media::effects::IEffect;
-use ferroui_base::media::imaging::BitmapBlendingMode;
+use ferroui_base::media::imaging::{BitmapBlendingMode, BitmapInterpolationMode};
 use ferroui_base::media::{
-    BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix, GradientSpreadMethod,
-    IBrush, IExperimentalAcrylicMaterial, IPen, ITileBrush, RenderOptions, TextOptions,
+    BoxShadows, Color, ColorMatrix, ColorMatrixAlphaMode, ConvolveMatrix, EdgeMode,
+    GradientSpreadMethod, IBrush, IExperimentalAcrylicMaterial, IPen, ITileBrush, RenderOptions,
+    TextOptions,
 };
 use ferroui_base::platform::{
     IBitmapImpl, IDrawingContextImpl, IDrawingContextImplWithEffects,
@@ -251,6 +252,33 @@ impl SvgDrawingContext {
 
     fn count_draw(&self) {
         self.audit.borrow_mut().draw_calls += 1;
+    }
+
+    fn audit_primitive_render_options(&mut self, bitmap: bool) {
+        // Read the actual native state so initial configuration, inheritance
+        // and independent render-option restores use Skia's exact semantics.
+        // State changes alone do not rasterize an otherwise vector recording.
+        let options = self
+            .inner
+            .as_any_mut()
+            .downcast_mut::<ferroui_skia::DrawingContextImpl>()
+            .map(|context| context.render_options());
+        if let Some(options) = options {
+            if options.edge_mode == EdgeMode::Aliased {
+                self.reason("Aliased primitive edges require composed raster output");
+            }
+            if bitmap
+                && !matches!(
+                    options.bitmap_interpolation_mode,
+                    BitmapInterpolationMode::Unspecified | BitmapInterpolationMode::LowQuality
+                )
+            {
+                // Skia's SVG writer ignores its image SamplingOptions. SVG
+                // image-rendering hints cannot preserve native nearest,
+                // mipmap or cubic sampling consistently across consumers.
+                self.reason("Bitmap interpolation mode requires composed raster output");
+            }
+        }
     }
 
     fn push_state(&mut self, state: State, forwarded: bool) {
@@ -626,6 +654,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
         {
             return;
         }
+        self.audit_primitive_render_options(true);
         self.count_draw();
         self.audit.borrow_mut().embedded_images += 1;
         self.inner
@@ -661,6 +690,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
         {
             return;
         }
+        self.audit_primitive_render_options(false);
         self.count_draw();
         self.inner.draw_line(pen, p1, p2);
     }
@@ -683,6 +713,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
         {
             return;
         }
+        self.audit_primitive_render_options(false);
         self.count_draw();
         self.inner.draw_geometry(brush, pen, geometry);
     }
@@ -716,6 +747,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
         if shadows.count() != 0 {
             self.reason("Box shadow mask filter");
         }
+        self.audit_primitive_render_options(false);
         self.count_draw();
         self.inner.draw_rectangle(brush, pen, rect, shadows);
     }
@@ -738,6 +770,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
         {
             return;
         }
+        self.audit_primitive_render_options(false);
         self.count_draw();
         self.inner.draw_region(brush, pen, region);
     }
@@ -753,6 +786,7 @@ impl IDrawingContextImpl for SvgDrawingContext {
         {
             return;
         }
+        self.audit_primitive_render_options(false);
         self.count_draw();
         self.inner.draw_ellipse(brush, pen, rect);
     }

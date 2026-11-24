@@ -18,7 +18,8 @@ pub enum SvgFidelity {
 /// Text portability versus editability.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum SvgTextMode {
-    /// Preserve the actual shaped glyph outlines, independent of installed fonts.
+    /// Preserve shaped glyph outlines and positions, independent of installed fonts.
+    /// Device font hinting, baseline snapping and LCD coverage are not encoded in paths.
     #[default]
     Outlines,
     /// Ask Skia to reconstruct text from glyph IDs. This is lossy for some scripts and fonts;

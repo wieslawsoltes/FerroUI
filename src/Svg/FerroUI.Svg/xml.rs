@@ -166,7 +166,7 @@ pub fn optimize(svg: &str, options: &XmlOptions) -> Result<OptimizedSvg, XmlErro
     Ok(OptimizedSvg { svg: result, stats })
 }
 
-/// Extract the contents of a complete Skia SVG document for composition into
+/// Extract the contents of a complete SVG document for composition into
 /// another SVG, giving *every* identifier a private namespace. All namespace
 /// declarations required by the resulting fragment are retained, so several
 /// recordings can be joined without collisions or unbound prefixes.
@@ -175,12 +175,37 @@ pub fn optimize(svg: &str, options: &XmlOptions) -> Result<OptimizedSvg, XmlErro
 /// root `viewBox` viewport mapping. The caller owns the destination viewport.
 /// Root presentation attributes are retained in an enclosing group when
 /// needed. `style` changes visible graphics while preserving resource shapes.
+#[cfg(test)]
 pub fn fragment(svg: &str, prefix: &str, style: &InspectionStyle) -> Result<String, XmlError> {
+    fragment_impl(svg, prefix, style, false)
+}
+
+/// Prepare a fragment produced by the pinned Skia SVG writer. Skia emits the
+/// image paint's alpha as `fill-opacity` on its image `<use>` elements, where
+/// SVG does not apply it to pixels. Normalize that producer-specific encoding
+/// before ordinary composition; generic SVG input retains its own semantics.
+pub(crate) fn skia_fragment(
+    svg: &str,
+    prefix: &str,
+    style: &InspectionStyle,
+) -> Result<String, XmlError> {
+    fragment_impl(svg, prefix, style, true)
+}
+
+fn fragment_impl(
+    svg: &str,
+    prefix: &str,
+    style: &InspectionStyle,
+    normalize_skia_images: bool,
+) -> Result<String, XmlError> {
     validate_prefix(prefix)?;
     validate_inspection(style)?;
     let mut root = parse(svg)?;
     let ids = collect_ids(&root)?;
     validate_references(&root, &ids)?;
+    if normalize_skia_images {
+        normalize_skia_image_opacity(&mut root)?;
+    }
     let names = assign_ids(&root, prefix, false);
     rewrite(&mut root, &names)?;
     if !matches!(style, InspectionStyle::Normal) {
@@ -223,6 +248,76 @@ pub fn fragment(svg: &str, prefix: &str, style: &InspectionStyle) -> Result<Stri
         write_element(&root, &[], false, false, 0, &mut result, &mut elements);
     }
     Ok(result)
+}
+
+fn normalize_skia_image_opacity(root: &mut Element) -> Result<(), XmlError> {
+    fn collect_images(element: &Element, images: &mut HashSet<String>) {
+        if element.namespace == SVG_NS && element.local == "image" {
+            if let Some(id) = element.id() {
+                images.insert(id.into());
+            }
+        }
+        for child in &element.children {
+            if let Child::Element(child) = child {
+                collect_images(child, images);
+            }
+        }
+    }
+
+    fn alpha(value: &str) -> Result<f64, XmlError> {
+        value
+            .trim()
+            .parse::<f64>()
+            .ok()
+            .filter(|value| value.is_finite() && (0.0..=1.0).contains(value))
+            .ok_or_else(|| XmlError::new("Skia image opacity must be finite and between 0 and 1"))
+    }
+
+    fn visit(element: &mut Element, images: &HashSet<String>) -> Result<(), XmlError> {
+        let image_use = element.namespace == SVG_NS
+            && element.local == "use"
+            && element
+                .href()
+                .and_then(|href| href.trim().strip_prefix('#'))
+                .is_some_and(|id| images.contains(id));
+        if image_use {
+            if let Some(paint_alpha) = element.get("fill-opacity") {
+                // The native writer uses presentation attributes, never inline
+                // CSS. Do not silently override an unexpected CSS cascade.
+                if element
+                    .get("style")
+                    .is_some_and(|style| !style.trim().is_empty())
+                {
+                    return Err(XmlError::new(
+                        "Skia image paint alpha cannot be combined with inline CSS",
+                    ));
+                }
+                let opacity = alpha(paint_alpha)?
+                    * element
+                        .get("opacity")
+                        .map(alpha)
+                        .transpose()?
+                        .unwrap_or(1.0);
+                element.set("opacity", opacity.to_string());
+                element.attributes.retain(|attribute| {
+                    attribute.namespace.is_some() || attribute.local != "fill-opacity"
+                });
+            }
+        }
+        for child in &mut element.children {
+            if let Child::Element(child) = child {
+                visit(child, images)?;
+            }
+        }
+        Ok(())
+    }
+
+    let mut images = HashSet::new();
+    collect_images(root, &mut images);
+    if images.is_empty() {
+        return Ok(());
+    }
+    visit(root, &images)
 }
 
 #[derive(Clone, Debug, PartialEq, Eq)]

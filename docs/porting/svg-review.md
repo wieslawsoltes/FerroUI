@@ -22,6 +22,10 @@ baseline.
 | Numeric precision | Adjacent tokens could merge after rounding: `1+2` could become `12`, or `1-0.001` could become `10`. Foreign metadata was also rounded by attribute name. | Preserve numeric token boundaries, including scientific notation, and limit SVG numeric normalization to SVG elements. Paths and matrices remain exact. |
 | CSS resource parsing | URL-like strings and comments were treated as references; quoted parentheses were mishandled; unquoted rewritten semantic IDs could become invalid CSS. | Use CSS-aware token boundaries, comments and strings; preserve required quoting; reject malformed strings containing raw line breaks. Tests include repeat-optimization stability. |
 | Inspection CSS | Comments around inline paint property names could prevent inspection overrides. | Parse declaration names through comments while preserving unrelated declarations. |
+| Native image opacity | The pinned Skia SVG writer put image paint alpha in `fill-opacity` on an image `<use>`, which does not modulate SVG image pixels. A cropped bitmap recorded at 0.85 opacity became opaque. | A producer-specific normalization converts that attribute to element opacity only for verified references to image resources. It preserves the embedded PNG, intrinsic pixel alpha, crop and transforms. Generic SVG processing retains SVG's ordinary semantics. Native-recording tests cover opaque and translucent pixels at three draw opacities. |
+| Independent coverage comparison | Comparing only RGB composited on white could miss opacity loss, for example an opaque white image against transparent white pixels. | The independent validator now reports alpha MAE/RMSE and changed coverage in addition to composited RGB. An optional alpha gate and dependency-free PNG tests exercise the previously invisible failure. |
+| Outlined text versus device text | Small outlined glyphs differed from native raster text; a pixel comparison alone could not distinguish displacement from font hinting. | A regression compares actual exported contours with the recorded glyph IDs, fractional advances, offsets and baseline. Strong/aligned and unhinted/unaligned recordings produce identical vector paths. Documentation distinguishes portable outlines from device-specific hinting and baseline snapping. |
+| Explicit image sampling and edge policy | The pinned SVG writer ignores native image sampling and primitive antialias flags, so explicit nearest/mipmap/cubic sampling or aliased geometry could silently change appearance. | Read the native context's effective render options at actual draws. Classify unsupported bitmap sampling and explicit aliased non-text primitives as composed fallback. Tests cover all sampling modes, inherited and restored options, preconfigured contexts, unused sampling scopes, a nearest-neighbor pixel edge and an aliased ellipse's binary coverage. |
 
 The changes preserve explicit errors for unsupported resources and the existing whole-layer
 compositing fallback. They do not replace missing GPU resources with transparent pixels or relax
@@ -40,18 +44,42 @@ the manual render loop, the Skia platform adapter and `SvgSurface`. It checks:
 This complements the lower-level render-target and drawing-context tests. It does not rely on
 manually calling only the target's drawing methods.
 
+## Independent rendering and text diagnostics
+
+The benchmark fixtures exercise geometry, repeated definitions, HarfBuzz-shaped Inter text,
+cropped translucent bitmaps and composed raster layers. Each workload has normal, x-ray,
+wireframe, cutaway and exploded views, plus a Skia raster reference. The validator checks the
+resource graph before rendering with Inkscape, then compares normal output against that
+reference. Timing excludes fixture generation, rendering, parsing checks and pixel comparisons.
+
+The bitmap fixture exposed the native image-opacity defect above. With the correction, mean
+absolute RGB error decreased from **13.8267 to 0.2705 / 255**, and the alpha channels agreed at
+every pixel (**0.0000 / 255** mean and maximum error). It retained eight vector layers and 128
+editable embedded image elements; the correction does not rasterize the scene. Residual RGB
+differences occur at independently sampled image edges.
+
+The dense 14-pixel Inter text fixture has **6.5707 / 255** mean RGB error at one pixel per logical
+pixel, primarily from the different hinted raster and unhinted outline representations. At four
+pixels per logical pixel this decreases to **1.2355 / 255**; using unhinted, unaligned source text
+in that diagnostic gives **0.8428 / 255**. The vector SVG is byte-identical across those text-option
+and reference-density variations. The fractional-position regression establishes geometry
+preservation independently of raster coverage. These figures describe that fixture, not a
+universal tolerance for text. The selected raster fidelity policy is the route to the recorded
+Skia pixel appearance at a specified density.
+
 ## Reproducing the checks
 
 The correctness checkpoint on Linux x86_64 passed the following checks before optimization:
 
 | Check | Result |
 | --- | --- |
-| SVG default build | 89 passed |
-| SVG `media3d` build | 89 passed |
+| SVG default build | 99 passed |
+| SVG `media3d` build | 99 passed |
 | Complete Skia library suite with the controlled Noto font setup | 603 passed, 9 existing ignored |
 | Native lease regressions, included in the Skia suite | 7 passed |
 | Existing native transform regressions, included in the Skia suite | 3 passed |
 | Base compositor full-frame regressions | 3 passed |
+| Independent validator alpha/PNG regressions | 3 passed |
 | Strict SVG Clippy, all targets and all features | Passed with `-D warnings` |
 | SVG formatting and `git diff --check` | Passed |
 | Generated API model, private-reference and idiom conventions | Passed |
@@ -66,6 +94,7 @@ cargo test --locked -p ferroui-skia --lib
 cargo test --locked -p ferroui-base --lib full_frame_render_tests
 cargo clippy --locked -p ferroui-svg --all-targets --all-features --no-deps -- -D warnings
 cargo fmt -p ferroui-svg --check
+python3 -m unittest discover -s src/Svg/FerroUI.Svg/examples -p test_validate_exports.py
 python3 scripts/generate_api_model.py --check
 python3 scripts/conventions/private-references.py
 python3 scripts/idioms/inventory.py --check

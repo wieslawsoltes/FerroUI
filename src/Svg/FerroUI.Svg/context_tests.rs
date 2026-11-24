@@ -43,6 +43,236 @@ fn pixel(pixels: &[u8], x: usize, y: usize) -> [u8; 4] {
         .unwrap()
 }
 
+fn pixel_art_bitmap() -> ferroui_skia::ImmutableBitmap {
+    let mut surface = skia_safe::surfaces::raster_n32_premul((2, 1)).unwrap();
+    surface.canvas().clear(skia_safe::Color::BLACK);
+    let mut paint = skia_safe::Paint::default();
+    paint.set_color(skia_safe::Color::WHITE);
+    surface
+        .canvas()
+        .draw_rect(skia_safe::Rect::from_xywh(1.0, 0.0, 1.0, 1.0), &paint);
+    ferroui_skia::ImmutableBitmap::from_image(surface.image_snapshot(), None)
+}
+
+#[test]
+fn explicit_bitmap_sampling_uses_raster_fallback_with_native_option_inheritance() {
+    use crate::{SvgDocument, SvgError, SvgExportOptions, SvgFidelity, SvgLayerOptions};
+    let bitmap = pixel_art_bitmap();
+    for mode in [
+        BitmapInterpolationMode::Unspecified,
+        BitmapInterpolationMode::LowQuality,
+        BitmapInterpolationMode::None,
+        BitmapInterpolationMode::MediumQuality,
+        BitmapInterpolationMode::HighQuality,
+    ] {
+        let mut document = SvgDocument::new(Size::new(64.0, 64.0)).unwrap();
+        document
+            .record_layer(SvgLayerOptions::new("bitmap", "Pixel art"), |context| {
+                context.push_render_options(RenderOptions {
+                    bitmap_interpolation_mode: mode,
+                    ..Default::default()
+                });
+                // The native merge preserves an already specified outer
+                // value. This inner preference cannot replace nearest/cubic.
+                context.push_render_options(RenderOptions {
+                    bitmap_interpolation_mode: BitmapInterpolationMode::LowQuality,
+                    ..Default::default()
+                });
+                context.draw_bitmap(
+                    &bitmap,
+                    1.0,
+                    Rect::new(0.0, 0.0, 2.0, 1.0),
+                    Rect::new(8.0, 8.0, 32.0, 16.0),
+                );
+                context.pop_render_options();
+                context.pop_render_options();
+            })
+            .unwrap();
+        let unsupported = !matches!(
+            mode,
+            BitmapInterpolationMode::Unspecified | BitmapInterpolationMode::LowQuality
+        );
+        let strict = document.export(&SvgExportOptions {
+            fidelity: SvgFidelity::VectorOnly,
+            ..Default::default()
+        });
+        if unsupported {
+            assert!(
+                matches!(strict, Err(SvgError::VectorFidelity { .. })),
+                "{mode:?}"
+            );
+        } else {
+            assert_eq!(1, strict.unwrap().report.vector_layers, "{mode:?}");
+        }
+        let automatic = document.export(&SvgExportOptions::default()).unwrap();
+        assert_eq!(
+            usize::from(unsupported),
+            automatic.report.raster_layers,
+            "{mode:?}"
+        );
+        if mode == BitmapInterpolationMode::None {
+            let image = pixels(&document.layers()[0].picture);
+            // A linear or cubic replacement would soften this pixel-art edge.
+            assert_eq!([0, 0, 0, 255], pixel(&image, 23, 12));
+            assert_eq!([255, 255, 255, 255], pixel(&image, 24, 12));
+        }
+    }
+}
+
+#[test]
+fn sampling_options_without_bitmap_draws_and_restored_defaults_remain_vector() {
+    let bitmap = pixel_art_bitmap();
+    for mode in [
+        BitmapInterpolationMode::None,
+        BitmapInterpolationMode::MediumQuality,
+        BitmapInterpolationMode::HighQuality,
+    ] {
+        let (_, mut context) = recording();
+        context.push_render_options(RenderOptions {
+            bitmap_interpolation_mode: mode,
+            ..Default::default()
+        });
+        context.push_clip(Rect::new(0.0, 0.0, 64.0, 64.0));
+        context.push_render_options(RenderOptions::default());
+        fill(&mut context, Colors::RED, Rect::new(0.0, 0.0, 8.0, 8.0));
+        context.pop_render_options();
+        context.pop_render_options();
+        // Render options have their own native stack: restoring them while
+        // the clip remains active must restore default image sampling too.
+        context.draw_bitmap(
+            &bitmap,
+            1.0,
+            Rect::new(0.0, 0.0, 2.0, 1.0),
+            Rect::new(8.0, 8.0, 32.0, 16.0),
+        );
+        context.pop_clip();
+        context.push_render_options(RenderOptions {
+            bitmap_interpolation_mode: BitmapInterpolationMode::LowQuality,
+            ..Default::default()
+        });
+        context.push_render_options(RenderOptions {
+            bitmap_interpolation_mode: mode,
+            ..Default::default()
+        });
+        context.draw_bitmap(
+            &bitmap,
+            1.0,
+            Rect::new(0.0, 0.0, 2.0, 1.0),
+            Rect::new(8.0, 32.0, 32.0, 16.0),
+        );
+        context.pop_render_options();
+        context.pop_render_options();
+        context.finish();
+        assert!(
+            context.audit().raster_reasons.is_empty(),
+            "{mode:?}: {:?}",
+            context.audit()
+        );
+        assert!(context.audit().errors.is_empty());
+    }
+
+    let target = PictureRenderTarget::new(None, None, Vector::new(96.0, 96.0));
+    let mut inner = target.create_export_drawing_context(Size::new(64.0, 64.0), false);
+    inner.set_render_options(RenderOptions {
+        bitmap_interpolation_mode: BitmapInterpolationMode::None,
+        ..Default::default()
+    });
+    let mut context = SvgDrawingContext::new(Box::new(inner));
+    context.draw_bitmap(
+        &bitmap,
+        1.0,
+        Rect::new(0.0, 0.0, 2.0, 1.0),
+        Rect::new(8.0, 8.0, 32.0, 16.0),
+    );
+    context.finish();
+    assert_eq!(
+        vec!["Bitmap interpolation mode requires composed raster output"],
+        context.audit().raster_reasons,
+    );
+}
+
+#[test]
+fn aliased_non_text_primitives_are_classified_at_the_draw() {
+    use ferroui_base::media::immutable::ImmutablePen;
+    use ferroui_base::platform::{IPlatformRenderInterface, LtrbPixelRect};
+    let brush = ImmutableSolidColorBrush::new(Colors::RED);
+    let pen = ImmutablePen::with_brush(Some(Rc::new(brush.clone())), 2.0);
+    let bounds = Rect::new(8.25, 8.25, 32.0, 32.0);
+    let geometry = crate::SvgPlatformRenderInterface::default().create_rectangle_geometry(bounds);
+    let region = ferroui_skia::SkiaRegionImpl::new();
+    region.add_rect(LtrbPixelRect::new(8, 8, 40, 40));
+    let bitmap = pixel_art_bitmap();
+    for operation in 0..6 {
+        let (target, mut context) = recording();
+        context.push_render_options(RenderOptions {
+            edge_mode: EdgeMode::Aliased,
+            ..Default::default()
+        });
+        context.push_render_options(RenderOptions::default());
+        assert!(context.audit().raster_reasons.is_empty());
+        match operation {
+            0 => context.draw_line(Some(&pen), Point::new(8.25, 8.25), Point::new(40.25, 40.25)),
+            1 => context.draw_geometry(Some(&brush), None, &*geometry),
+            2 => context.draw_rectangle(Some(&brush), None, bounds.into(), &BoxShadows::default()),
+            3 => context.draw_region(Some(&brush), None, &region),
+            4 => context.draw_ellipse(Some(&brush), None, bounds),
+            5 => context.draw_bitmap(&bitmap, 1.0, Rect::new(0.0, 0.0, 2.0, 1.0), bounds),
+            _ => unreachable!(),
+        }
+        context.pop_render_options();
+        context.pop_render_options();
+        context.finish();
+        assert_eq!(
+            vec!["Aliased primitive edges require composed raster output"],
+            context.audit().raster_reasons,
+            "operation {operation}"
+        );
+        assert!(context.audit().errors.is_empty());
+        if operation == 4 {
+            let image = pixels(&target.get_picture());
+            assert!(image
+                .as_chunks::<4>()
+                .0
+                .iter()
+                .all(|pixel| matches!(pixel[3], 0 | 255)));
+            assert_eq!([255, 0, 0, 255], pixel(&image, 24, 24));
+        }
+    }
+}
+
+#[test]
+fn aliased_options_restored_or_overridden_by_outer_antialias_do_not_force_fallback() {
+    let (_, mut context) = recording();
+    context.push_render_options(RenderOptions {
+        edge_mode: EdgeMode::Aliased,
+        ..Default::default()
+    });
+    context.pop_render_options();
+    fill(&mut context, Colors::RED, Rect::new(0.25, 0.25, 8.0, 8.0));
+    context.push_render_options(RenderOptions {
+        edge_mode: EdgeMode::Antialias,
+        ..Default::default()
+    });
+    context.push_render_options(RenderOptions {
+        edge_mode: EdgeMode::Aliased,
+        ..Default::default()
+    });
+    context.draw_ellipse(
+        Some(&ImmutableSolidColorBrush::new(Colors::BLUE)),
+        None,
+        Rect::new(12.25, 12.25, 24.0, 24.0),
+    );
+    context.pop_render_options();
+    context.pop_render_options();
+    context.finish();
+    assert!(
+        context.audit().raster_reasons.is_empty(),
+        "{:?}",
+        context.audit()
+    );
+    assert!(context.audit().errors.is_empty());
+}
+
 #[test]
 fn ordinary_vectors_remain_vector_and_clip_state_is_restored() {
     let (target, mut context) = recording();

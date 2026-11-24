@@ -1,5 +1,5 @@
-//! Reproducible export benchmarks with separate recording, cache-cold export,
-//! warm export, view switching, definition processing and compression phases.
+//! Reproducible export benchmarks with separate recording, fresh-document export,
+//! cache-cold export, warm export, view switching, definition processing and compression phases.
 //!
 //! Run `cargo run --release -p ferroui-svg --example export_bench -- --help`.
 //! CSV is written to stdout (or --output); setup information goes to stderr.
@@ -9,8 +9,8 @@ use ferroui_base::media::immutable::{
     ImmutableGradientStop, ImmutableLinearGradientBrush, ImmutablePen, ImmutableSolidColorBrush,
 };
 use ferroui_base::media::{
-    BoxShadows, Colors, DrawingContext, FlowDirection, FontFamily, FontManager, FormattedText,
-    PlatformDrawingContext, Typeface,
+    BaselinePixelAlignment, BoxShadows, Colors, DrawingContext, FlowDirection, FontFamily,
+    FontManager, FormattedText, PlatformDrawingContext, TextHintingMode, TextOptions, Typeface,
 };
 use ferroui_base::platform::{
     IAssetLoader, IGeometryContext, IGeometryImpl, IStreamGeometryBuilder, StandardAssetLoader,
@@ -72,6 +72,8 @@ struct Arguments {
     only: Option<Workload>,
     output: Option<PathBuf>,
     fixtures: Option<PathBuf>,
+    reference_scale: f64,
+    unhinted_text: bool,
 }
 
 impl Arguments {
@@ -83,19 +85,29 @@ impl Arguments {
             only: None,
             output: None,
             fixtures: None,
+            reference_scale: 1.0,
+            unhinted_text: false,
         };
         let mut arguments = std::env::args().skip(1);
         while let Some(argument) = arguments.next() {
             if argument == "--help" || argument == "-h" {
                 println!("export_bench [--iterations N] [--cold-iterations N] [--warmup N] \
-                    [--only geometry|definitions|text|bitmap|raster] [--output FILE] [--fixtures DIR]\n\n\
-                    Defaults: 40 warm iterations, 8 cache-cold/recording iterations, 5 warmups.\n\
+                    [--only geometry|definitions|text|bitmap|raster] [--output FILE] [--fixtures DIR] \
+                    [--reference-scale N] [--unhinted-text]\n\n\
+                    Defaults: 40 warm iterations, 8 cache-cold/fresh-document/recording iterations, 5 warmups.\n\
+                    Fresh-document times recording plus export as one operation using prepared assets.\n\
                     Cold means cleared document export caches, not a new process or font cache.\n\
                     Each multi_view sample exports normal, x-ray, wireframe, cutaway and exploded views.\n\
                     Linux RSS fields are process-wide measurements taken outside timed loops.\n\
                     Prepared fonts, shaped text and bitmap input creation are excluded from recording.\n\
-                    --fixtures writes each normal SVG, Skia raster reference and inspection variants.");
+                    --fixtures writes each normal SVG, Skia raster reference and inspection variants.\n\
+                    --reference-scale changes only the diagnostic raster reference (default 1, maximum 8).\n\
+                    --unhinted-text records text with no hinting or baseline pixel alignment for geometry comparisons.");
                 std::process::exit(0);
+            }
+            if argument == "--unhinted-text" {
+                result.unhinted_text = true;
+                continue;
             }
             let value = arguments
                 .next()
@@ -106,6 +118,15 @@ impl Arguments {
                 "--warmup" => result.warmup = parse_count(&value, true)?,
                 "--output" => result.output = Some(value.into()),
                 "--fixtures" => result.fixtures = Some(value.into()),
+                "--reference-scale" => {
+                    let scale: f64 = value
+                        .parse()
+                        .map_err(|_| invalid("reference scale must be a number"))?;
+                    if !scale.is_finite() || !(0.0 < scale && scale <= 8.0) {
+                        return Err(invalid("reference scale must be finite and in (0,8]").into());
+                    }
+                    result.reference_scale = scale;
+                }
                 "--only" => {
                     result.only = Some(
                         Workload::ALL
@@ -218,7 +239,7 @@ impl Assets {
     }
 }
 
-fn record(workload: Workload, assets: &Assets) -> Result<SvgDocument> {
+fn record(workload: Workload, assets: &Assets, unhinted_text: bool) -> Result<SvgDocument> {
     use ferroui_base::platform::IDrawingContextImpl;
     let mut document = SvgDocument::new(SIZE)?;
     for layer in 0..LAYERS {
@@ -232,12 +253,24 @@ fn record(workload: Workload, assets: &Assets) -> Result<SvgDocument> {
                 .with_tags(["assembly"]),
             |context| {
                 if workload == Workload::Text {
-                    let mut platform = PlatformDrawingContext::borrowed(context);
-                    let mut drawing = DrawingContext::new(&mut platform);
-                    for (line, text) in assets.text.iter().enumerate() {
-                        drawing.draw_text(text, Point::new(8.0, 8.0 + line as f64 * 22.0));
+                    if unhinted_text {
+                        context.push_text_options(TextOptions {
+                            text_hinting_mode: TextHintingMode::None,
+                            baseline_pixel_alignment: BaselinePixelAlignment::Unaligned,
+                            ..TextOptions::default()
+                        });
                     }
-                    drawing.dispose();
+                    {
+                        let mut platform = PlatformDrawingContext::borrowed(context);
+                        let mut drawing = DrawingContext::new(&mut platform);
+                        for (line, text) in assets.text.iter().enumerate() {
+                            drawing.draw_text(text, Point::new(8.0, 8.0 + line as f64 * 22.0));
+                        }
+                        drawing.dispose();
+                    }
+                    if unhinted_text {
+                        context.pop_text_options();
+                    }
                     return;
                 }
                 if workload == Workload::Bitmap {
@@ -581,6 +614,7 @@ fn fixtures(
     workload: Workload,
     document: &SvgDocument,
     normal: &SvgExportOptions,
+    reference_scale: f64,
 ) -> Result<()> {
     std::fs::create_dir_all(directory)?;
     for (view, options) in views(normal) {
@@ -590,6 +624,7 @@ fn fixtures(
     document
         .export(&SvgExportOptions {
             fidelity: SvgFidelity::Raster,
+            raster_scale: reference_scale,
             ..normal.clone()
         })?
         .save(directory.join(format!("{}-raster-reference.svg", workload.name())))?;
@@ -604,13 +639,14 @@ fn main() -> Result<()> {
         None => Box::new(BufWriter::new(io::stdout())),
     };
     eprintln!(
-        "SVG export benchmark; {} {}; debug_assertions={}; warm={} cold={} warmup={}",
+        "SVG export benchmark; {} {}; debug_assertions={}; warm={} cold={} warmup={}; unhinted_text={}",
         std::env::consts::OS,
         std::env::consts::ARCH,
         cfg!(debug_assertions),
         args.iterations,
         args.cold_iterations,
-        args.warmup
+        args.warmup,
+        args.unhinted_text
     );
     writeln!(writer, "workload,phase,samples,exports_per_operation,min_ms,median_ms,p95_ms,output_bytes,scene_layers,scene_draw_calls,exported_layers,images,definitions_deduplicated,vector_cache_hits,raster_cache_hits,recording_bytes,rss_kib,peak_rss_kib")?;
     for workload in Workload::ALL
@@ -621,7 +657,7 @@ fn main() -> Result<()> {
         let mut recorded = None;
         for _ in 0..args.cold_iterations {
             let start = Instant::now();
-            let document = record(workload, &assets)?;
+            let document = record(workload, &assets, args.unhinted_text)?;
             samples.push(start.elapsed().as_secs_f64() * 1000.0);
             recorded = Some(document);
         }
@@ -637,6 +673,30 @@ fn main() -> Result<()> {
             Observation::default(),
         )?;
         let normal = options(workload);
+        let mut fresh_times = Vec::with_capacity(args.cold_iterations);
+        let mut observation = Observation::default();
+        for sample in 0..args.cold_iterations {
+            let start = Instant::now();
+            let fresh = record(workload, &assets, args.unhinted_text)?;
+            let output = fresh.export(&normal)?;
+            fresh_times.push(start.elapsed().as_secs_f64() * 1000.0);
+            if sample + 1 == args.cold_iterations {
+                observation.add(output.as_bytes().len(), &output.report);
+            }
+            // Destruction remains outside the timed operation, matching the
+            // separate recording/export phases and an export retained by its caller.
+            black_box((fresh, output));
+        }
+        write_row(
+            &mut *writer,
+            workload,
+            "fresh_document",
+            args.cold_iterations,
+            1,
+            Distribution::new(fresh_times),
+            &document,
+            observation,
+        )?;
         let variants = [("normal", normal.clone())];
         let (times, observation) =
             export_distribution(&document, &variants, args.cold_iterations, 0, true)?;
@@ -721,7 +781,13 @@ fn main() -> Result<()> {
         )?;
         validate_views(&document, &normal)?;
         if let Some(directory) = &args.fixtures {
-            fixtures(directory, workload, &document, &normal)?;
+            fixtures(
+                directory,
+                workload,
+                &document,
+                &normal,
+                args.reference_scale,
+            )?;
         }
         writer.flush()?;
         eprintln!("Completed {}", workload.name());

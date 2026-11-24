@@ -17,6 +17,123 @@ fn rectangle(context: &mut dyn IDrawingContextImpl, color: ferroui_base::media::
     );
 }
 
+#[test]
+fn outlined_text_preserves_fractional_glyph_positions_independently_of_device_hinting() {
+    use ferroui_base::media::text_formatting::GlyphInfo;
+    use ferroui_base::media::{
+        BaselinePixelAlignment, TextHintingMode, TextOptions, TextRenderingMode,
+    };
+    use ferroui_base::platform::{IAssetLoader, StandardAssetLoader};
+    use ferroui_base::utilities::UriRef;
+    use skia_safe as sk;
+
+    ferroui_fonts_inter::register_assets();
+    let uri = UriRef::parse("ferres://FerroUI.Fonts.Inter/Assets/Inter-Regular.ttf").unwrap();
+    let mut font_data = Vec::new();
+    StandardAssetLoader::new(None)
+        .open(&uri, None)
+        .unwrap()
+        .read_to_end(&mut font_data)
+        .unwrap();
+    let face = sk::FontMgr::new()
+        .new_from_data(sk::Data::new_copy(&font_data), None)
+        .unwrap();
+    let font = sk::Font::new(face, 19.5);
+    let glyphs = [
+        GlyphInfo::with_offset(
+            font.unichar_to_glyph('A' as i32),
+            0,
+            13.25,
+            Vector::new(0.125, -0.375),
+        ),
+        GlyphInfo::with_offset(
+            font.unichar_to_glyph('g' as i32),
+            1,
+            12.75,
+            Vector::new(-0.25, 1.25),
+        ),
+        GlyphInfo::with_offset(
+            font.unichar_to_glyph('0' as i32),
+            2,
+            11.0,
+            Vector::new(0.625, -0.75),
+        ),
+    ];
+    assert!(glyphs.iter().all(|glyph| glyph.glyph_index != 0));
+    let baseline = Point::new(13.5, 30.25);
+    let run = ferroui_skia::GlyphRunImpl::from_font(&font, 19.5, &glyphs, baseline);
+
+    // The oracle uses the actual captured glyph IDs, advances and offsets.
+    // It does not reconstruct Unicode or rely on device-pixel glyph coverage.
+    let mut expected = sk::PathBuilder::new();
+    let mut advance = 0.0;
+    for glyph in glyphs {
+        expected.add_path_with_offset(
+            &font.get_path(glyph.glyph_index).unwrap(),
+            (
+                (advance + glyph.glyph_offset.x) as f32 + baseline.x as f32,
+                glyph.glyph_offset.y as f32 + baseline.y as f32,
+            ),
+            None,
+        );
+        advance += glyph.glyph_advance;
+    }
+    // Canonicalize close commands exactly as SVG path interchange does.
+    let expected = sk::Path::from_svg(expected.detach().to_svg()).unwrap();
+    let mut previous = None;
+    for (hinting, alignment) in [
+        (TextHintingMode::Strong, BaselinePixelAlignment::Aligned),
+        (TextHintingMode::None, BaselinePixelAlignment::Unaligned),
+    ] {
+        let mut document = SvgDocument::new(Size::new(100.0, 60.0)).unwrap();
+        document
+            .record_layer(
+                SvgLayerOptions::new("text", "Positioned glyphs"),
+                |context| {
+                    context.push_text_options(TextOptions {
+                        text_rendering_mode: TextRenderingMode::Antialias,
+                        text_hinting_mode: hinting,
+                        baseline_pixel_alignment: alignment,
+                    });
+                    context
+                        .draw_glyph_run(Some(&ImmutableSolidColorBrush::new(Colors::BLACK)), &run);
+                    context.pop_text_options();
+                },
+            )
+            .unwrap();
+        let output = document
+            .export(&SvgExportOptions {
+                fidelity: SvgFidelity::VectorOnly,
+                ..Default::default()
+            })
+            .unwrap();
+        let xml = roxmltree::Document::parse(&output.svg).unwrap();
+        let paths = xml
+            .descendants()
+            .filter(|node| node.has_tag_name("path"))
+            .collect::<Vec<_>>();
+        assert_eq!(paths.len(), 1);
+        assert!(paths[0].attribute("transform").is_none());
+        let actual = sk::Path::from_svg(paths[0].attribute("d").unwrap()).unwrap();
+        assert_eq!(actual.count_points(), expected.count_points());
+        for (actual, expected) in actual.points().iter().zip(expected.points()) {
+            assert!(
+                (actual.x - expected.x).abs() <= 0.0001 && (actual.y - expected.y).abs() <= 0.0001,
+                "glyph outline point {actual:?} differs from positioned source {expected:?}"
+            );
+        }
+        assert_eq!(output.report.vector_layers, 1);
+        assert_eq!(output.report.raster_layers, 0);
+        if let Some(previous) = previous {
+            assert_eq!(
+                output.svg, previous,
+                "font device hinting must not reshape portable outlines"
+            );
+        }
+        previous = Some(output.svg);
+    }
+}
+
 fn scene() -> SvgDocument {
     let mut document = SvgDocument::new(Size::new(100.0, 80.0)).unwrap();
     document

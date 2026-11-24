@@ -11,6 +11,110 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 #[test]
+fn cropped_vector_bitmaps_preserve_draw_opacity_and_intrinsic_pixel_alpha() {
+    use base64::Engine;
+
+    fn embedded_image(svg: &str) -> skia_safe::Image {
+        let xml = roxmltree::Document::parse(svg).unwrap();
+        let href = xml
+            .descendants()
+            .find(|node| node.has_tag_name("image"))
+            .unwrap()
+            .attributes()
+            .find(|attribute| attribute.name() == "href")
+            .unwrap()
+            .value();
+        let png = base64::engine::general_purpose::STANDARD
+            .decode(href.strip_prefix("data:image/png;base64,").unwrap())
+            .unwrap();
+        skia_safe::Image::from_encoded(skia_safe::Data::new_copy(&png))
+            .unwrap()
+            .make_raster_image(None, skia_safe::image::CachingHint::Allow)
+            .unwrap()
+    }
+
+    for draw_opacity in [1.0, 0.85, 0.5] {
+        let mut source = skia_safe::surfaces::raster_n32_premul((8, 4)).unwrap();
+        source.canvas().clear(skia_safe::Color::RED);
+        let mut paint = skia_safe::Paint::default();
+        paint.set_color(skia_safe::Color::from_argb(128, 0, 0, 255));
+        paint.set_blend_mode(skia_safe::BlendMode::Src);
+        source
+            .canvas()
+            .draw_rect(skia_safe::Rect::from_xywh(4.0, 0.0, 4.0, 4.0), &paint);
+        let bitmap = ferroui_skia::ImmutableBitmap::from_image(source.image_snapshot(), None);
+        let mut document = SvgDocument::new(Size::new(40.0, 24.0)).unwrap();
+        document
+            .record_layer(SvgLayerOptions::new("image", "Cropped bitmap"), |context| {
+                context.draw_bitmap(
+                    &bitmap,
+                    draw_opacity,
+                    Rect::new(1.0, 1.0, 6.0, 2.0),
+                    Rect::new(8.0, 8.0, 24.0, 8.0),
+                );
+            })
+            .unwrap();
+        drop(bitmap);
+        drop(source);
+
+        let vector = document
+            .export(&SvgExportOptions {
+                fidelity: SvgFidelity::VectorOnly,
+                ..Default::default()
+            })
+            .unwrap();
+        assert_eq!(1, vector.report.vector_layers);
+        assert_eq!(0, vector.report.raster_layers);
+        assert_eq!(1, vector.report.embedded_images);
+        let xml = roxmltree::Document::parse(&vector.svg).unwrap();
+        let instance = xml
+            .descendants()
+            .find(|node| node.has_tag_name("use"))
+            .unwrap();
+        assert_eq!(None, instance.attribute("fill-opacity"));
+        let opacity = instance
+            .attribute("opacity")
+            .map(|value| value.parse::<f64>().unwrap())
+            .unwrap_or(1.0);
+        // FerroUI's native draw_bitmap quantizes its paint alpha to eight bits.
+        // The SVG must apply that same multiplier to the retained source PNG.
+        let native_alpha = (draw_opacity * 255.0) as u8;
+        assert!((opacity - f64::from(native_alpha) / 255.0).abs() < 1e-7);
+
+        let source = embedded_image(&vector.svg);
+        let source_pixels = source.peek_pixels().unwrap();
+        assert_eq!((8, 4), (source_pixels.width(), source_pixels.height()));
+        assert_eq!(255, source_pixels.get_color((2, 2)).a());
+        assert_eq!(128, source_pixels.get_color((6, 2)).a());
+        let raster = document
+            .export(&SvgExportOptions {
+                fidelity: SvgFidelity::Raster,
+                raster_scale: 1.0,
+                ..Default::default()
+            })
+            .unwrap();
+        let reference = embedded_image(&raster.svg);
+        let reference_pixels = reference.peek_pixels().unwrap();
+        assert_eq!(
+            (40, 24),
+            (reference_pixels.width(), reference_pixels.height())
+        );
+        assert_eq!(0, reference_pixels.get_color((4, 12)).a());
+        assert_eq!(0, reference_pixels.get_color((36, 12)).a());
+        for (source_point, output_point) in [((2, 2), (12, 12)), ((6, 2), (28, 12))] {
+            let source_alpha = source_pixels.get_color(source_point).a();
+            let svg_alpha = (f64::from(source_alpha) * opacity).round() as i16;
+            let reference_alpha = i16::from(reference_pixels.get_color(output_point).a());
+            assert!(
+                (svg_alpha - reference_alpha).abs() <= 1,
+                "draw opacity {draw_opacity}, source alpha {source_alpha}: SVG {svg_alpha}, Skia {reference_alpha}"
+            );
+        }
+        assert_eq!(native_alpha, reference_pixels.get_color((12, 12)).a());
+    }
+}
+
+#[test]
 fn platform_surface_publishes_vectors_and_policy_revisions_without_a_window() {
     fn assert_send_sync<T: Send + Sync>() {}
     assert_send_sync::<SvgSurface>();

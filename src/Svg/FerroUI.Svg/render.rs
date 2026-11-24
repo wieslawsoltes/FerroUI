@@ -208,7 +208,7 @@ pub(crate) fn export(
             report.vector_layers += 1;
             let (raw, hit) = vector_layer(layer, options)?;
             report.vector_cache_hits += usize::from(hit);
-            let fragment = xml::fragment(&raw, &prefix, layer_inspection)
+            let fragment = xml::skia_fragment(&raw, &prefix, layer_inspection)
                 .map_err(|error| SvgError::Xml(error.to_string()))?;
             if layer.bounds.x != 0.0 || layer.bounds.y != 0.0 {
                 format!(

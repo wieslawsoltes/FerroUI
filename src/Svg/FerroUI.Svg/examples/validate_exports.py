@@ -94,8 +94,8 @@ def paeth(left: int, up: int, upper_left: int) -> int:
     return up if du <= dul else upper_left
 
 
-def read_png_stdlib(path: Path) -> tuple[tuple[int, int], bytes]:
-    """Decode noninterlaced 8-bit PNG and composite it on white, without extras."""
+def read_png_rgba_stdlib(path: Path) -> tuple[tuple[int, int], bytes]:
+    """Decode noninterlaced 8-bit PNG to straight RGBA, without extras."""
     data = path.read_bytes()
     if not data.startswith(b"\x89PNG\r\n\x1a\n"):
         raise ValueError(f"{path.name}: not a PNG image")
@@ -136,7 +136,7 @@ def read_png_stdlib(path: Path) -> tuple[tuple[int, int], bytes]:
     rows = zlib.decompress(payload)
     if len(rows) != (stride + 1) * height:
         raise ValueError(f"{path.name}: incorrect PNG scanline length")
-    rgb = bytearray(width * height * 3)
+    rgba = bytearray(width * height * 4)
     previous = bytearray(stride)
     for y in range(height):
         start = y * (stride + 1)
@@ -174,11 +174,33 @@ def read_png_stdlib(path: Path) -> tuple[tuple[int, int], bytes]:
                 r, g, b = palette[index * 3:index * 3 + 3]
                 if index < len(transparency):
                     alpha = transparency[index]
-            target = (y * width + x) * 3
-            rgb[target:target + 3] = bytes((value * alpha + 255 * (255 - alpha) + 127) // 255
-                                         for value in (r, g, b))
+            target = (y * width + x) * 4
+            rgba[target:target + 4] = bytes((r, g, b, alpha))
         previous = row
-    return (width, height), bytes(rgb)
+    return (width, height), bytes(rgba)
+
+
+def read_png_stdlib(path: Path) -> tuple[tuple[int, int], bytes]:
+    """Composite the dependency-free PNG decoder's RGBA result on white."""
+    size, rgba = read_png_rgba_stdlib(path)
+    rgb = bytearray(size[0] * size[1] * 3)
+    for source in range(0, len(rgba), 4):
+        alpha = rgba[source + 3]
+        target = source // 4 * 3
+        rgb[target:target + 3] = bytes(
+            (value * alpha + 255 * (255 - alpha) + 127) // 255
+            for value in rgba[source:source + 3]
+        )
+    return size, bytes(rgb)
+
+
+def read_rgba(path: Path) -> tuple[tuple[int, int], bytes]:
+    try:
+        from PIL import Image
+    except ImportError:
+        return read_png_rgba_stdlib(path)
+    with Image.open(path) as image:
+        return image.size, image.convert("RGBA").tobytes()
 
 
 def read_rgb(path: Path) -> tuple[tuple[int, int], bytes]:
@@ -217,6 +239,31 @@ def compare(actual: Path, reference: Path, threshold: int) -> tuple[float, float
     return mean, rmse, changed
 
 
+def compare_alpha(actual: Path, reference: Path, threshold: int) -> tuple[float, float, float]:
+    """Compare coverage directly; transparent RGB payloads are deliberately ignored."""
+    size, actual_rgba = read_rgba(actual)
+    reference_size, reference_rgba = read_rgba(reference)
+    if size != reference_size:
+        raise ValueError(f"Different image dimensions: {size} versus {reference_size}")
+    actual_alpha, reference_alpha = actual_rgba[3::4], reference_rgba[3::4]
+    pixels = size[0] * size[1]
+    try:
+        import numpy as np
+    except ImportError:
+        total = squares = changed = 0
+        for actual_value, reference_value in zip(actual_alpha, reference_alpha):
+            difference = abs(actual_value - reference_value)
+            total += difference
+            squares += difference * difference
+            changed += difference > threshold
+        return total / pixels, math.sqrt(squares / pixels), changed * 100 / pixels
+    difference = np.abs(np.frombuffer(actual_alpha, dtype=np.uint8).astype(np.int16)
+                        - np.frombuffer(reference_alpha, dtype=np.uint8).astype(np.int16))
+    return (float(difference.mean()),
+            float(np.sqrt(np.square(difference.astype(np.float64)).mean())),
+            float((difference > threshold).mean() * 100))
+
+
 def validate_directory(args: argparse.Namespace, previews: Path, renderer: str) -> None:
     paths = sorted(args.directory.glob("*.svg"))
     if not paths:
@@ -239,10 +286,16 @@ def validate_directory(args: argparse.Namespace, previews: Path, renderer: str) 
             raise ValueError(f"{reference.name}: matching {normal.name} is missing")
         mean, rmse, changed = compare(previews / f"{normal.stem}.png",
                                       previews / f"{reference.stem}.png", args.channel_threshold)
+        alpha_mean, alpha_rmse, alpha_changed = compare_alpha(
+            previews / f"{normal.stem}.png", previews / f"{reference.stem}.png", args.channel_threshold)
         print(f"{prefix} vs Skia replay: mean absolute RGB error {mean:.4f}/255, "
               f"RMSE {rmse:.4f}/255, pixels with any channel >{args.channel_threshold}: {changed:.4f}%")
+        print(f"{prefix} alpha vs Skia replay: mean absolute error {alpha_mean:.4f}/255, "
+              f"RMSE {alpha_rmse:.4f}/255, pixels >{args.channel_threshold}: {alpha_changed:.4f}%")
         if args.max_mean_error is not None and mean > args.max_mean_error:
             raise ValueError(f"Mean RGB error {mean:.4f} exceeds {args.max_mean_error}")
+        if args.max_alpha_error is not None and alpha_mean > args.max_alpha_error:
+            raise ValueError(f"Mean alpha error {alpha_mean:.4f} exceeds {args.max_alpha_error}")
         compared += 1
     print(f"Validated {len(paths)} SVGs; {compared} pixel comparison(s).")
     if not compared:
@@ -256,11 +309,14 @@ def main() -> int:
     parser.add_argument("--preview-dir", type=Path, help="keep PNG previews here; otherwise use temporary files")
     parser.add_argument("--channel-threshold", type=int, default=16, help="per-channel difference for changed-pixel count (0..255)")
     parser.add_argument("--max-mean-error", type=float, help="optional mean RGB error gate, in 0..255 channel values")
+    parser.add_argument("--max-alpha-error", type=float, help="optional mean alpha error gate, in 0..255 channel values")
     args = parser.parse_args()
     if not 0 <= args.channel_threshold <= 255:
         parser.error("--channel-threshold must be in 0..255")
     if args.max_mean_error is not None and (not math.isfinite(args.max_mean_error) or args.max_mean_error < 0):
         parser.error("--max-mean-error must be finite and nonnegative")
+    if args.max_alpha_error is not None and (not math.isfinite(args.max_alpha_error) or args.max_alpha_error < 0):
+        parser.error("--max-alpha-error must be finite and nonnegative")
     renderer = shutil.which(args.renderer)
     if renderer is None:
         parser.error("Inkscape was not found; install it or provide --renderer /path/to/inkscape")

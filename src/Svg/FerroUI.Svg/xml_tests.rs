@@ -183,6 +183,131 @@ fn fragments_are_collision_free_and_keep_namespace_bindings() {
 }
 
 #[test]
+fn skia_image_paint_alpha_is_composed_without_changing_image_resources_or_geometry() {
+    let input = svg(
+        r##"<defs><image id="pixels" width="32" height="24" xlink:href="data:image/png;base64,AAAA"/><path id="shape" d="M0 0L12 9"/><clipPath id="crop"><rect x="4" y="5" width="12" height="9"/></clipPath></defs><g opacity="0.6" clip-path="url(#crop)"><use xlink:href="#pixels" fill="white" fill-opacity="0.5" opacity="0.8" transform="matrix(2 0 0 3 -4 -5)" x="1" y="2" width="11" height="13"/><use href="#shape" fill-opacity="0.3"/></g>"##,
+    );
+    let result = skia_fragment(&input, "native", &InspectionStyle::Normal).unwrap();
+    let wrapped = svg(&result);
+    let document = Document::parse(&wrapped).unwrap();
+    let image = document
+        .descendants()
+        .find(|node| node.has_tag_name("image"))
+        .unwrap();
+    assert_eq!(Some("32"), image.attribute("width"));
+    assert_eq!(Some("24"), image.attribute("height"));
+    assert_eq!(
+        Some("data:image/png;base64,AAAA"),
+        image.attribute((XLINK_NS, "href"))
+    );
+    assert_eq!(None, image.attribute("opacity"));
+    let instances = document
+        .descendants()
+        .filter(|node| node.has_tag_name("use"))
+        .collect::<Vec<_>>();
+    let image_use = instances[0];
+    assert_eq!(Some("0.4"), image_use.attribute("opacity"));
+    assert_eq!(None, image_use.attribute("fill-opacity"));
+    assert_eq!(Some("white"), image_use.attribute("fill"));
+    assert_eq!(
+        Some("matrix(2 0 0 3 -4 -5)"),
+        image_use.attribute("transform")
+    );
+    for (name, value) in [("x", "1"), ("y", "2"), ("width", "11"), ("height", "13")] {
+        assert_eq!(Some(value), image_use.attribute(name));
+    }
+    assert_eq!(
+        Some(format!("#{}", image.attribute("id").unwrap()).as_str()),
+        image_use.attribute((XLINK_NS, "href"))
+    );
+    assert_eq!(
+        Some("0.6"),
+        image_use.parent_element().unwrap().attribute("opacity")
+    );
+    assert!(image_use
+        .parent_element()
+        .unwrap()
+        .attribute("clip-path")
+        .is_some());
+    assert_eq!(Some("0.3"), instances[1].attribute("fill-opacity"));
+    assert_eq!(None, instances[1].attribute("opacity"));
+}
+
+#[test]
+fn generic_svg_processing_does_not_reinterpret_image_fill_opacity() {
+    let input = svg(
+        r##"<defs><image id="pixels" width="32" height="24" href="data:image/png;base64,AAAA"/></defs><use href="#pixels" fill-opacity="0.5" opacity="0.8"/>"##,
+    );
+    let fragment = fragment(&input, "generic", &InspectionStyle::Normal).unwrap();
+    let optimized = optimize(&input, &XmlOptions::default()).unwrap();
+    for result in [svg(&fragment), optimized.svg] {
+        let document = Document::parse(&result).unwrap();
+        let instance = document
+            .descendants()
+            .find(|node| node.has_tag_name("use"))
+            .unwrap();
+        assert_eq!(Some("0.5"), instance.attribute("fill-opacity"));
+        assert_eq!(Some("0.8"), instance.attribute("opacity"));
+    }
+}
+
+#[test]
+fn skia_image_opacity_validation_prevents_silent_native_format_changes() {
+    for attribute in ["fill-opacity", "opacity"] {
+        for value in ["-0.1", "1.1", "NaN", "inf", "50%", ""] {
+            let attributes = if attribute == "opacity" {
+                format!("fill-opacity=\"0.5\" opacity=\"{value}\"")
+            } else {
+                format!("fill-opacity=\"{value}\"")
+            };
+            let input = svg(&format!(
+                r##"<image id="pixels" width="1" height="1" href="data:image/png;base64,AAAA"/><use href="#pixels" {attributes}/>"##,
+            ));
+            let error = skia_fragment(&input, "native", &InspectionStyle::Normal).unwrap_err();
+            assert!(
+                error.to_string().contains("Skia image opacity"),
+                "{attribute}={value}: {error}"
+            );
+        }
+    }
+    let input = svg(
+        r##"<image id="pixels" width="1" height="1" href="data:image/png;base64,AAAA"/><use href="#pixels" fill-opacity="0.5" style="opacity:0.8"/>"##,
+    );
+    assert!(skia_fragment(&input, "native", &InspectionStyle::Normal).is_err());
+    assert!(fragment(&input, "generic", &InspectionStyle::Normal).is_ok());
+}
+
+#[test]
+fn native_image_opacity_is_applied_before_inspection_multiplication() {
+    let input = svg(
+        r##"<defs><image id="pixels" width="32" height="24" href="data:image/png;base64,AAAA"/></defs><use href="#pixels" fill-opacity="0.5" opacity="0.8"/>"##,
+    );
+    let result = skia_fragment(
+        &input,
+        "native",
+        &InspectionStyle::XRay {
+            fill_opacity: 0.25,
+            stroke: "blue".into(),
+            stroke_width: 1.0,
+            stroke_opacity: 1.0,
+        },
+    )
+    .unwrap();
+    let wrapped = svg(&result);
+    let document = Document::parse(&wrapped).unwrap();
+    let instance = document
+        .descendants()
+        .find(|node| node.has_tag_name("use"))
+        .unwrap();
+    assert_eq!(Some("0.4"), instance.attribute("opacity"));
+    assert_eq!(
+        Some("0.25"),
+        instance.parent_element().unwrap().attribute("opacity")
+    );
+    assert_eq!(None, instance.attribute("fill-opacity"));
+}
+
+#[test]
 fn fragment_preserves_root_presentation_in_a_group() {
     let result = fragment(r#"<svg xmlns="http://www.w3.org/2000/svg" fill="red" opacity="0.5" width="20" height="10"><rect width="10"/></svg>"#, "part", &InspectionStyle::Normal).unwrap();
     let wrapped = svg(&result);

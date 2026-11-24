@@ -110,6 +110,8 @@ brush callbacks must likewise supply CPU-compatible resources inside their own d
 | Conic/sweep and focal radial shaders | Conservative raster fallback. |
 | Image brushes and scene brushes | Classified fallback where shader/content fidelity cannot be established. |
 | Images, source rectangles and image opacity | CPU-readable images become embedded PNG resources; resource sharing preserves references. GPU-only sources require an application-provided CPU snapshot. |
+| Bitmap sampling | Default/low-quality sampling retains editable images. Effective nearest-neighbor, mipmapped or high-quality sampling on a bitmap draw uses composed fallback because the pinned SVG writer drops the native sampling policy. |
+| Explicit aliased primitive edges | Non-text primitive draws with effective `EdgeMode::Aliased` use composed fallback, preserving the requested device-pixel edge policy. Unused or restored option scopes do not force fallback. |
 | Shaped glyph runs | Outlined vector glyphs by default; color/bitmap/non-outline glyphs use fallback. |
 | Rectangular, rounded, path and region clips | Native clips where supported; unequal-corner rounded and inverse clips use fallback. |
 | Opacity layers, compositing layers and bitmap blend modes | Forwarded to Skia; nontrivial isolation/blending conservatively triggers fallback. |
@@ -128,6 +130,12 @@ acrylic and scene interfaces. Extending the underlying contract creates a compil
 for new required members. New optional/default methods still require a fidelity audit when added.
 Brush validation includes resolved gradient coordinates and stroke-expanded bounds, so otherwise
 finite inputs that overflow Skia's scalar range fail before native recording.
+
+Render-option auditing reads the native context's effective state, including initial configuration,
+inheritance and restoration. A sampling preference around only vector geometry does not trigger
+image fallback. Default editable image export retains crop geometry, intrinsic PNG alpha and the
+native draw-opacity multiplier. A producer-specific normalization repairs the pinned Skia writer's
+`fill-opacity` encoding on image instances; it does not reinterpret arbitrary SVG input.
 
 ### Visual trees versus compositor frames
 
@@ -169,6 +177,16 @@ mapping can lose ligatures, contextual glyphs and bidi meaning, and the target c
 font. Outlines preserve the captured glyph shapes. The backend does not claim a proprietary Figma
 or Illustrator document round trip, and those applications' import behavior must be verified
 against the versions in the intended workflow.
+
+Outlined text preserves the shaped glyph IDs, advances and offsets as scalable geometry. It does
+not preserve device-specific font hinting, baseline pixel snapping or LCD coverage. The pinned
+Skia writer obtains paths through [`SkFont::getPaths`](https://github.com/rust-skia/skia/blob/m153-0.101.2/src/core/SkFont.cpp), whose `setupForAsPaths` disables font hinting;
+the ordinary Skia raster text path can use hinted glyph masks and snapped baselines. Consequently,
+small outlined text can differ visibly in stroke coverage from a native pixel snapshot even when
+every glyph position and contour is correct. `SvgFidelity::Raster` and `raster_scale` provide the
+recorded Skia text appearance at a chosen pixel density. Changing application `TextOptions` to
+unhinted, unaligned text is useful for geometry comparisons, but is not required for vector export
+and does not make independent rasterizers' antialiasing identical.
 
 ## 5. Inspection views
 
@@ -345,6 +363,8 @@ substitute for the repository's separate cross-platform CI.
 - [SVG painting](https://www.w3.org/TR/SVG2/painting.html): fills, strokes and paint servers.
 - [Pinned Skia SVG writer](https://github.com/rust-skia/skia/blob/m153-0.101.2/src/svg/SkSVGDevice.cpp):
   the implementation behind `skia-safe = 0.153.3`; native SVG capabilities and omissions.
+- [Pinned Skia glyph path conversion](https://github.com/rust-skia/skia/blob/m153-0.101.2/src/core/SkFont.cpp):
+  `getPaths` and `setupForAsPaths` define the unhinted geometry used by outlined text.
 - [Pinned Rust SVG canvas wrapper](https://github.com/rust-skia/rust-skia/blob/b7f043e0b1e2a850e702245de811f01df1f6b0ff/skia-safe/src/svg/canvas.rs):
   finalization and text/path encoding flags.
 
