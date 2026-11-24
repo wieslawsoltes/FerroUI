@@ -212,7 +212,7 @@ fn get_keysym_text_xkb(display: XDisplay, x11_key: X11Key) -> Option<String> {
 fn lookup_alternate_key_text_x_core(key_event: &XKeyEvent) -> Option<String> {
     const BUFFER_SIZE: usize = 16;
     let mut key_event = *key_event;
-    key_event.state &= !((XModifierMask::CONTROL_MASK | XModifierMask::MOD1_MASK).bits() as u32 as _);
+    key_event.state &= !((XModifierMask::CONTROL_MASK | XModifierMask::MOD1_MASK).bits() as std::ffi::c_uint);
     let (bytes, _) = xlib::x_lookup_string(&mut key_event, BUFFER_SIZE);
     (!bytes.is_empty()).then(|| String::from_utf8_lossy(&bytes).into_owned())
 }
