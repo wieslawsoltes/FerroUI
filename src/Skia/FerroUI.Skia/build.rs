@@ -67,6 +67,15 @@ fn main() {
         println!("cargo:rustc-cfg=ferro_skia_vulkan");
     }
 
+    // Graphite (`gpu/graphite`): on Metal for Apple targets without `ferro_skia_apple_ganesh`, and
+    // on Vulkan with the feature `graphite-vulkan` (#1365).
+    println!("cargo:rustc-check-cfg=cfg(ferro_skia_graphite)");
+    let apple_graphite = env::var("CARGO_CFG_TARGET_VENDOR").as_deref() == Ok("apple")
+        && env::var("CARGO_CFG_FERRO_SKIA_APPLE_GANESH").is_err();
+    if apple_graphite || env::var("CARGO_FEATURE_GRAPHITE_VULKAN").is_ok() {
+        println!("cargo:rustc-cfg=ferro_skia_graphite");
+    }
+
     if env::var("CARGO_CFG_TARGET_VENDOR").as_deref() != Ok("apple") {
         return;
     }

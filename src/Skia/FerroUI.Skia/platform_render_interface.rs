@@ -79,12 +79,21 @@ impl PlatformRenderInterface {
         panic!("Graphics context of type is not supported");
     }
 
+    /// Ganesh on Vulkan; with the feature `graphite-vulkan` Graphite first (#1365), unless
+    /// `FERROUI_SKIA_VULKAN=ganesh` asks for Ganesh, and Ganesh when Skia makes no Graphite context
+    /// for the device: the fallback is a GPU, never the CPU.
     #[cfg(ferro_skia_vulkan)]
     fn create_vulkan_gpu(
         vulkan: Rc<dyn IVulkanPlatformGraphicsContext>,
         max_resource_bytes: Option<i64>,
         use_stencil_buffers: Option<bool>,
     ) -> Rc<dyn ISkiaGpu> {
+        #[cfg(feature = "graphite-vulkan")]
+        if crate::gpu::vulkan::selects_graphite(std::env::var("FERROUI_SKIA_VULKAN").ok().as_deref()) {
+            if let Some(gpu) = crate::gpu::vulkan::GraphiteVulkanSkiaGpu::try_new(vulkan.clone(), max_resource_bytes) {
+                return gpu;
+            }
+        }
         crate::gpu::vulkan::VulkanSkiaGpu::new(vulkan, max_resource_bytes, use_stencil_buffers)
     }
 

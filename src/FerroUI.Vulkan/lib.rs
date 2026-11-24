@@ -40,6 +40,7 @@ mod vulkan_exception;
 mod vulkan_external_objects_feature;
 mod vulkan_image_info;
 mod vulkan_khr_surface_render_target;
+mod vulkan_offscreen_image;
 mod vulkan_options;
 mod vulkan_platform_graphics;
 
@@ -62,6 +63,7 @@ pub use vulkan_exception::{VulkanError, VulkanExceptionExtensions, VulkanResultE
 #[allow(deprecated)]
 pub use vulkan_exception::VulkanException;
 pub use vulkan_image_info::VulkanImageInfo;
+pub use vulkan_offscreen_image::VulkanOffscreenImage;
 pub use vulkan_options::{
     Version, VkGetInstanceProcAddressDelegate, VulkanDeviceCheckSurfaceFactory, VulkanDeviceCreationOptions,
     VulkanInstanceCreationOptions, VulkanOptions, VulkanPlatformSpecificOptions,

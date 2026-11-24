@@ -160,8 +160,8 @@ impl PrewarmCompile {
     /// was made.
     fn run(self) -> bool {
         let PrewarmCompile { mut recorder, recorded } = self;
-        // The Metal objects Skia autoreleases on this thread.
-        let pool = crate::gpu::metal::AutoReleasePool::new();
+        // The Metal objects Skia autoreleases on this thread (nothing on other backends).
+        let pool = super::AutoReleasePool::new();
         let started = Instant::now();
         let recording = recorder.snap();
         let compiled = started.elapsed();

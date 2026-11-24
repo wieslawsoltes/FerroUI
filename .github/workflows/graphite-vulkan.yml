@@ -11,15 +11,20 @@ name: Skia Graphite on Vulkan (Linux)
 # after the build lists what `git-sync-deps` fetched and how large the folders are.
 #
 # It does not run on ordinary pull requests: only by hand, and on a pull request that changes the
-# Graphite Vulkan files or the patch of the bindings. The feature is off by default, so the default
+# Graphite Vulkan files (with the parts of the Graphite backend that Vulkan shares with Metal) or the
+# patch of the bindings. The feature is off by default, so the default
 # builds and hello world are not changed by it.
 
 on:
   workflow_dispatch:
   pull_request:
     paths:
-      - 'src/Skia/FerroUI.Skia/gpu/vulkan/graphite_vulkan.rs'
-      - 'src/Skia/FerroUI.Skia/gpu/vulkan/graphite_vulkan_test.rs'
+      - 'src/Skia/FerroUI.Skia/gpu/vulkan/graphite_vulkan*.rs'
+      - 'src/Skia/FerroUI.Skia/gpu/graphite/graphite_gr_context.rs'
+      - 'src/Skia/FerroUI.Skia/gpu/graphite/pipelined_layer.rs'
+      - 'src/Skia/FerroUI.Skia/gpu/graphite/mod.rs'
+      - 'src/Skia/FerroUI.Skia/build.rs'
+      - 'src/FerroUI.Vulkan/vulkan_offscreen_image.rs'
       - 'external/rust-skia-bindings/src/graphite.cpp'
       - 'external/rust-skia-bindings/FERROUI-PATCH.md'
       - '.github/workflows/graphite-vulkan.yml'
@@ -75,7 +80,7 @@ jobs:
       - name: Build ferroui-skia with the feature graphite-vulkan
         run: |
           start=$(date +%s)
-          cargo test --locked -p ferroui-skia --features graphite-vulkan --test graphite_vulkan --no-run
+          cargo test --locked -p ferroui-skia --features graphite-vulkan --lib --test graphite_vulkan --no-run
           echo "::notice::the build with the feature graphite-vulkan took $(( $(date +%s) - start )) s"
       # What the build script of the bindings downloaded: the Skia sources of the pinned revision
       # and the third-party repositories `git-sync-deps` fetched (its output is in the output file
@@ -92,3 +97,9 @@ jobs:
         env:
           FERROUI_VULKAN_TEST_REQUIRE: 1
         run: cargo test --locked -p ferroui-skia --features graphite-vulkan --test graphite_vulkan -- --nocapture
+      # The window target and the pipelined layers of the Graphite GPU (`gpu/vulkan/graphite_vulkan_*`), and the
+      # rule that the band threads draw on no shared target on Vulkan (`gpu/graphite/pipelined_layer.rs`).
+      - name: The Graphite GPU on Vulkan against lavapipe
+        env:
+          FERROUI_VULKAN_TEST_REQUIRE: 1
+        run: cargo test --locked -p ferroui-skia --features graphite-vulkan --lib graphite -- --nocapture

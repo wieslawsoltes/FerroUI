@@ -74,10 +74,26 @@ impl VulkanSkiaGpu {
         self.gr_context.clone()
     }
 
-    fn surface_factory(&self) -> Option<Arc<dyn IVulkanKhrSurfacePlatformSurfaceFactory>> {
-        let features: &dyn IOptionalFeatureProvider = &*self.vulkan;
-        features.try_get_shared::<dyn IVulkanKhrSurfacePlatformSurfaceFactory>()
+}
+
+/// Whether the first of `surfaces` that the device of `vulkan` can render to is ready: what the
+/// Ganesh and the Graphite GPU of a Vulkan device answer.
+pub(super) fn is_ready_to_render(
+    vulkan: &dyn IVulkanPlatformGraphicsContext,
+    surfaces: &[Arc<dyn IPlatformRenderSurface>],
+) -> bool {
+    let features: &dyn IOptionalFeatureProvider = vulkan;
+    let factory = features.try_get_shared::<dyn IVulkanKhrSurfacePlatformSurfaceFactory>();
+    for surface in surfaces {
+        if try_get_vulkan_khr_surface(&**surface).is_some()
+            || try_get_vulkan_render_target_surface(&**surface).is_some()
+            || factory.as_ref().is_some_and(|factory| factory.can_render_to_surface(vulkan, surface))
+        {
+            return surface.is_ready();
+        }
     }
+
+    false
 }
 
 impl IOptionalFeatureProvider for VulkanSkiaGpu {
@@ -132,17 +148,7 @@ impl ISkiaGpu for VulkanSkiaGpu {
     }
 
     fn is_ready_to_create_render_target(&self, surfaces: &[Arc<dyn IPlatformRenderSurface>]) -> bool {
-        let factory = self.surface_factory();
-        for surface in surfaces {
-            if try_get_vulkan_khr_surface(&**surface).is_some()
-                || try_get_vulkan_render_target_surface(&**surface).is_some()
-                || factory.as_ref().is_some_and(|factory| factory.can_render_to_surface(&*self.vulkan, surface))
-            {
-                return surface.is_ready();
-            }
-        }
-
-        false
+        is_ready_to_render(&*self.vulkan, surfaces)
     }
 
     fn try_create_surface(

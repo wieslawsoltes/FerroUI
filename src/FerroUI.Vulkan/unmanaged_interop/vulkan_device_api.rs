@@ -203,6 +203,12 @@ impl VulkanDeviceApi {
         unsafe { (self.fp.destroy_image)(device, image, ptr::null()) };
     }
 
+    /// The entry points `vkDestroyImage` and `vkFreeMemory`, for a value that releases its image
+    /// on another thread than the one of the context (`VulkanOffscreenImage`).
+    pub(crate) fn destroy_entry_points(&self) -> (vk::PFN_vkDestroyImage, vk::PFN_vkFreeMemory) {
+        (self.fp.destroy_image, self.fp.free_memory)
+    }
+
     /// `vkGetImageMemoryRequirements`.
     pub fn get_image_memory_requirements(&self, device: vk::Device, image: vk::Image) -> vk::MemoryRequirements {
         let mut requirements = vk::MemoryRequirements::default();
