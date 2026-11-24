@@ -470,7 +470,13 @@ mod imp {
                 let scene_info =
                     RenderTargetSceneInfo::new(self.pixel_size(), 1.0, CompositionTransparencyLevel::None);
                 for _ in 0..2 {
-                    let target = RenderTarget { parent: self.this(), egl: state.clone() };
+                    // The swaps of the start present whole frames.
+                    let target = RenderTarget {
+                        parent: self.this(),
+                        egl: state.clone(),
+                        partial_presentation: None,
+                        corrupted: Rc::new(Cell::new(false)),
+                    };
                     let session = target.begin_draw(&scene_info);
                     let gl = state.deferred_context.gl_interface();
                     gl.clear_color(

@@ -693,7 +693,7 @@ impl ServerCompositionTarget {
                 let mut history_slot = self.partial_presentation_history.borrow_mut();
                 let history = partial_presentation.as_ref().map(|feature| {
                     let history = history_slot.get_or_insert_with(PartialPresentationDirtyRectHistory::new);
-                    history.before_draw(feature.clone(), &**self.dirty_rects);
+                    history.before_draw(feature.clone(), &*self.dirty_rects);
                     history
                 });
                 match layer {
@@ -716,7 +716,7 @@ impl ServerCompositionTarget {
                             // framebuffer without a stencil, and a blit could ignore the clip.
                             Some(history) => {
                                 refused =
-                                    !history.before_target_draw(&**self.dirty_rects, render_bounds, output_transform);
+                                    !history.before_target_draw(&*self.dirty_rects, render_bounds, output_transform);
                                 for dirty_rect in history.buffer_dirty_rects().iter().filter(|_| !refused) {
                                     render_target_context.set_transform(Matrix::IDENTITY);
                                     render_target_context.push_clip(dirty_rect.to_rect(1.0));
@@ -745,7 +745,7 @@ impl ServerCompositionTarget {
                     None => {
                         // The tracker is extended with what the buffer missed before the draw.
                         if let Some(history) = history {
-                            refused = !history.before_target_draw(&**self.dirty_rects, render_bounds, output_transform);
+                            refused = !history.before_target_draw(&*self.dirty_rects, render_bounds, output_transform);
                         }
                         if !refused {
                             self.render_root_to_context_with_clip(&compositor, &mut *render_target_context, &root);

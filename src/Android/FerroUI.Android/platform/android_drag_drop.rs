@@ -14,7 +14,7 @@ use crate::interop::java::{
 use crate::interop::natives::FERRO_DRAG_LISTENER;
 use ferroui_base::input::raw::{IDragDropDevice, RawDragEvent, RawDragEventType};
 use ferroui_base::input::{DragDropEffects, IAsyncDataTransfer, IDataTransfer, LocalBoxFuture, RawInputModifiers};
-use ferroui_base::{FerroLocator, Point};
+use ferroui_base::{FerroLocator, LocatorExtensions, Point};
 use ferroui_system::task::oneshot;
 use std::cell::RefCell;
 use std::rc::{Rc, Weak};
