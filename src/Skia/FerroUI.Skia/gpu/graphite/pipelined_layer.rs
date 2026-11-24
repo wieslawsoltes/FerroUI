@@ -1118,6 +1118,7 @@ impl BandWorker {
                     let played = catch_unwind(AssertUnwindSafe(|| {
                         if own {
                             play_band_texture(&mut recorder, &mut band_textures, &band)
+                                .map(|(copies, recording, image)| (copies, recording, Some(image)))
                         } else if direct {
                             play(&mut recorder, &mut surfaces, &band).map(|recording| (None, recording, None))
                         } else {
