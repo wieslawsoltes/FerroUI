@@ -49,14 +49,15 @@ mod imp {
     use crate::i_blur_host::BlurEffect;
     use crate::sync_root::SharedCom;
     use crate::win_rt::numerics::Vector2;
+    use crate::direct_x::{IDXGISwapChain1, ISwapchainVisualHost};
     use crate::win_rt::{
-        ICompositionBrush, ICompositionRoundedRectangleGeometry, ICompositionSurface, ICompositionSurfaceBrush,
-        ICompositionTarget, IVisual, IVisual2,
+        CompositionStretch, ICompositionBrush, ICompositionRoundedRectangleGeometry, ICompositionSurface,
+        ICompositionSurfaceBrush, ICompositionTarget, ICompositorInterop, IVisual, IVisual2,
     };
     use ferroui_base::platform::PlatformThemeVariant;
     use ferroui_base::rendering::composition::CompositionTransparencyLevel;
     use ferroui_base::PixelSize;
-    use ferroui_microcom::HResult;
+    use ferroui_microcom::{ComPtr, HResult, IUnknown};
     use ferroui_opengl::egl::IEglWindowGlPlatformSurfaceInfo;
     use std::sync::{Arc, Mutex, PoisonError};
 
@@ -71,6 +72,11 @@ mod imp {
         _target: SharedCom<ICompositionTarget>,
     }
 
+    /// The surface of the swap chain the brush shows, with the
+    /// composition swap chain (released inside the lock of the shared
+    /// state, with the tree).
+    struct SwapchainSurface(Option<SharedCom<ICompositionSurface>>);
+
     #[derive(Default)]
     struct State {
         size: PixelSize,
@@ -83,6 +89,7 @@ mod imp {
         /// `None` once disposed.
         objects: Mutex<Option<Objects>>,
         state: Mutex<State>,
+        swapchain_surface: Mutex<SwapchainSurface>,
     }
 
     impl WinUiCompositedWindow {
@@ -154,6 +161,7 @@ mod imp {
                 shared,
                 objects: Mutex::new(Some(objects)),
                 state: Mutex::new(State::default()),
+                swapchain_surface: Mutex::new(SwapchainSurface(None)),
             }))
         }
 
@@ -164,6 +172,8 @@ mod imp {
         /// Releases the tree, inside the lock of the shared state.
         pub fn dispose(&self) {
             let _lock = self.shared.sync_root().lock();
+            let swapchain_surface = self.swapchain_surface.lock().unwrap_or_else(PoisonError::into_inner).0.take();
+            drop(swapchain_surface);
             let objects = self.objects.lock().unwrap_or_else(PoisonError::into_inner).take();
             drop(objects);
         }
@@ -236,6 +246,60 @@ mod imp {
                 state.size = size;
             }
             Ok(())
+        }
+    }
+
+    /// The window shows a swap chain for composition through its surface
+    /// brush (`Win32PlatformOptions::use_composition_swap_chain`).
+    impl ISwapchainVisualHost for WinUiCompositedWindow {
+        fn window_size(&self) -> PixelSize {
+            self.window_info.size()
+        }
+
+        fn window_scaling(&self) -> f64 {
+            self.window_info.scaling()
+        }
+
+        fn begin_transaction(&self) {
+            self.shared.sync_root().enter();
+        }
+
+        fn end_transaction(&self) {
+            self.shared.sync_root().exit();
+        }
+
+        fn set_swapchain_content(&self, swap_chain: &ComPtr<IDXGISwapChain1>) -> Result<(), HResult> {
+            debug_assert!(self.shared.sync_root().is_entered());
+
+            let interop = self.shared.compositor().cast::<ICompositorInterop>()?;
+            let swap_chain: &IUnknown = swap_chain;
+            let surface = interop.create_composition_surface_for_swap_chain(Some(swap_chain)).required()?;
+            self.with_objects(|objects| {
+                objects.surface_brush.set_surface(Some(&surface))?;
+                // Not from upstream: a frame of the old size is shown at its own size from the
+                // top left corner while the visual takes the new size, not stretched to it (the
+                // cooperative resize of the other swap chains, issue 476).
+                objects.surface_brush.set_stretch(CompositionStretch::None)?;
+                objects.surface_brush.set_horizontal_alignment_ratio(0.0)?;
+                objects.surface_brush.set_vertical_alignment_ratio(0.0)
+            })?;
+            // SAFETY: an object of the Windows Runtime composition, which is agile; it is
+            // released inside the lock of the shared state.
+            self.swapchain_surface.lock().unwrap_or_else(PoisonError::into_inner).0 =
+                Some(unsafe { SharedCom::new(surface) });
+            Ok(())
+        }
+
+        fn resize_if_needed(&self, size: PixelSize) -> Result<(), HResult> {
+            WinUiCompositedWindow::resize_if_needed(self, size)
+        }
+
+        fn apply_effects(
+            &self,
+            transparency_level: CompositionTransparencyLevel,
+            theme_variant: PlatformThemeVariant,
+        ) -> Result<(), HResult> {
+            WinUiCompositedWindow::apply_effects(self, transparency_level, theme_variant)
         }
     }
 

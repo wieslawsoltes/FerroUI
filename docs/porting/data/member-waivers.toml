@@ -5664,9 +5664,8 @@ reason = "the base member is not ported: the objects of the OpenGL crate belong 
 
 [[waive]]
 project = "Avalonia.Win32"
-type = "Avalonia.Win32.OpenGl.Angle.SwapChainGlRenderTarget"
-member = "SwapChainGlRenderTarget(*"
-reason = "created with a structure literal by `SwapChainGlSurface::create_gl_render_target`, which holds what the constructor takes (the context, the swap chain and the size and scaling of the surface)"
+type = "Avalonia.Win32.OpenGl.Angle.SwapChainGl*"
+reason = "removed with `SwapChainGlSurface` by upstream db0a9a9cdb (12.2.0): the swap chain panel renders through `CompositionSwapchainSurface` (`direct_x/composition_swapchain_render_target.rs`)"
 
 [[waive]]
 project = "Avalonia.Win32"

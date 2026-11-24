@@ -117,7 +117,11 @@ impl IRenderTimer for DirectCompositionConnection {
 /// The connection as the surface factory of the UI thread. The reference
 /// binds the connection itself; here the connection is shared with its
 /// thread, and the factory is the handle of the UI thread to it.
-pub(crate) struct DirectCompositionSurfaceFactory(pub Arc<DirectCompositionConnection>);
+pub(crate) struct DirectCompositionSurfaceFactory {
+    pub connection: Arc<DirectCompositionConnection>,
+    /// `Win32PlatformOptions::use_composition_swap_chain`.
+    pub use_composition_swap_chain: bool,
+}
 
 impl IWindowsSurfaceFactory for DirectCompositionSurfaceFactory {
     fn requires_no_redirection_bitmap(&self) -> bool {
@@ -125,7 +129,8 @@ impl IWindowsSurfaceFactory for DirectCompositionSurfaceFactory {
     }
 
     fn create_surface(&self, info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>) -> WindowsSurface {
-        let surface = DirectCompositedWindowSurface::new(self.0.shared.clone(), info);
+        let surface =
+            DirectCompositedWindowSurface::new(self.connection.shared.clone(), info, self.use_composition_swap_chain);
         let render_surface: Arc<dyn IPlatformRenderSurface> = surface.clone();
         let effects: Arc<dyn ICompositionEffectsSurface> = surface.clone();
         WindowsSurface { surface: render_surface, effects: Some(effects), dispose: Some(Arc::new(move || surface.dispose())) }
@@ -183,7 +188,11 @@ mod imp {
                 .map_err(|_| HResult::FAIL)?;
 
             let connect = result.recv().map_err(|_| HResult::FAIL)??;
-            let factory: Rc<dyn IWindowsSurfaceFactory> = Rc::new(DirectCompositionSurfaceFactory(connect.clone()));
+            let use_composition_swap_chain = Win32Platform::options().use_composition_swap_chain.unwrap_or(false);
+            let factory: Rc<dyn IWindowsSurfaceFactory> = Rc::new(DirectCompositionSurfaceFactory {
+                connection: connect.clone(),
+                use_composition_swap_chain,
+            });
             let render_loop: Arc<dyn IRenderLoop> = RenderLoop::from_timer(connect);
             FerroLocator::current_mutable()
                 .bind::<dyn IWindowsSurfaceFactory>()

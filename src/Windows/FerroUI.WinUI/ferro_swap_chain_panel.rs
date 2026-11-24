@@ -117,8 +117,15 @@ mod imp {
     use ferroui_controls::platform::ITopLevelImpl;
     use ferroui_controls::Control;
     use ferroui_microcom::{ComPtr, HResult};
-    use ferroui_win32::open_gl::angle::SwapChainGlSurface;
+    use ferroui_base::platform::PlatformThemeVariant;
+    use ferroui_base::rendering::composition::CompositionTransparencyLevel;
+    use ferroui_microcom::{IUnknown, RawHResult};
+    use ferroui_win32::direct_x::{
+        inverse_scale_transform, CompositionSwapchainSurface, IDXGISwapChain1, ISwapchainVisualHost, DXGI_MATRIX_3X2_F,
+        IDXGI_SWAP_CHAIN3_GUID, SET_MATRIX_TRANSFORM_SLOT,
+    };
     use ferroui_win32::SwapChainTopLevelImpl;
+    use std::sync::{Mutex, PoisonError};
     use ferroui_base::Ref;
     use std::any::Any;
     use std::cell::{Cell, RefCell};
@@ -296,6 +303,116 @@ mod imp {
         }
     }
 
+    /// The third version of the swap chain the panel shows, for its
+    /// transform. DXGI objects are free-threaded.
+    struct SwapChain3(ComPtr<IUnknown>);
+
+    // SAFETY: a counted reference to a DXGI swap chain, an object of no thread.
+    unsafe impl Send for SwapChain3 {}
+
+    #[derive(Default)]
+    struct HostState {
+        swap_chain3: Option<SwapChain3>,
+        /// The scaling the transform of the swap chain undoes; zero before
+        /// the first frame of a swap chain.
+        applied_scaling: f64,
+    }
+
+    /// Shows the swap chain of the composition swap chain render target in
+    /// the panel (`SwapChainPanelHost` of upstream): hands it to
+    /// `ISwapChainPanelNative::SetSwapChain` on the UI thread and undoes the
+    /// scaling of the panel, which composes it in device-independent units.
+    /// Called on the thread that renders.
+    struct SwapChainPanelHost {
+        id: u64,
+        dispatcher_queue: Option<AgileComPtr<IDispatcherQueue>>,
+        cached_size: Arc<CachedSize>,
+        state: Mutex<HostState>,
+    }
+
+    impl SwapChainPanelHost {
+        fn dispose(&self) {
+            let swap_chain3 = self.state.lock().unwrap_or_else(PoisonError::into_inner).swap_chain3.take();
+            drop(swap_chain3);
+        }
+    }
+
+    impl ISwapchainVisualHost for SwapChainPanelHost {
+        fn window_size(&self) -> PixelSize {
+            self.cached_size.pixel_size()
+        }
+
+        fn window_scaling(&self) -> f64 {
+            self.cached_size.scaling()
+        }
+
+        // The lock of the state is enough: the panel has no batch of its own to commit.
+        fn begin_transaction(&self) {}
+
+        fn end_transaction(&self) {}
+
+        fn set_swapchain_content(&self, swap_chain: &ComPtr<IDXGISwapChain1>) -> Result<(), HResult> {
+            let swap_chain_unknown: &IUnknown = swap_chain;
+            let mut swap_chain3 = std::ptr::null_mut::<std::ffi::c_void>();
+            // SAFETY: a live object, an identifier of this frame and the place of one pointer.
+            HResult::check(unsafe { swap_chain_unknown.query_interface_raw(&IDXGI_SWAP_CHAIN3_GUID, &mut swap_chain3) })?;
+            // SAFETY: a successful query answers with a counted reference.
+            let swap_chain3 = unsafe { ComPtr::<IUnknown>::from_raw(swap_chain3.cast()) }.ok_or(HResult::POINTER)?;
+            {
+                let mut state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
+                state.swap_chain3 = Some(SwapChain3(swap_chain3));
+                state.applied_scaling = 0.0;
+            }
+
+            // `ISwapChainPanelNative::SetSwapChain` is called on the UI thread.
+            FerroSwapChainPanel::on_swap_chain_created(
+                self.dispatcher_queue.as_ref(),
+                self.id,
+                swap_chain.as_ptr() as isize,
+            );
+            Ok(())
+        }
+
+        /// The panel composes the swap chain in device-independent units, so the buffers of
+        /// the size in pixels get an inverse scale transform.
+        fn resize_if_needed(&self, _size: PixelSize) -> Result<(), HResult> {
+            let scaling = self.cached_size.scaling();
+            let mut state = self.state.lock().unwrap_or_else(PoisonError::into_inner);
+            let applied_scaling = state.applied_scaling;
+            let (Some(swap_chain3), Some(mut transform)) = (state.swap_chain3.as_ref(), inverse_scale_transform(scaling))
+            else {
+                return Ok(());
+            };
+            if scaling == applied_scaling {
+                return Ok(());
+            }
+
+            let this = swap_chain3.0.as_ptr().cast::<std::ffi::c_void>();
+            // SAFETY: the pointer is a live `IDXGISwapChain3` (the query for that interface
+            // answered with it), whose vtable has `SetMatrixTransform` of the second version at
+            // the slot named above, with this signature; the matrix lives through the call.
+            HResult::check(unsafe {
+                let vtable = *this.cast::<*const *const std::ffi::c_void>();
+                let set_matrix_transform: unsafe extern "system" fn(
+                    *mut std::ffi::c_void,
+                    *mut DXGI_MATRIX_3X2_F,
+                ) -> RawHResult = std::mem::transmute(*vtable.add(SET_MATRIX_TRANSFORM_SLOT));
+                set_matrix_transform(this, &mut transform)
+            })?;
+            state.applied_scaling = scaling;
+            Ok(())
+        }
+
+        /// No composition effects for embedded content.
+        fn apply_effects(
+            &self,
+            _transparency_level: CompositionTransparencyLevel,
+            _theme_variant: PlatformThemeVariant,
+        ) -> Result<(), HResult> {
+            Ok(())
+        }
+    }
+
     /// The device of a pointer event.
     #[derive(Clone)]
     enum PointerDevice {
@@ -349,7 +466,7 @@ mod imp {
         framework_element: ComPtr<IFrameworkElement>,
         swap_chain_panel: ComPtr<ISwapChainPanel>,
 
-        gl_surface: RefCell<Option<Arc<SwapChainGlSurface>>>,
+        host: RefCell<Option<Arc<SwapChainPanelHost>>>,
         top_level_impl: RefCell<Option<Rc<SwapChainTopLevelImpl>>>,
         root: RefCell<Option<Ref<EmbeddableControlRoot>>>,
         content: RefCell<Option<Ref<Control>>>,
@@ -423,7 +540,7 @@ mod imp {
                 element,
                 framework_element,
                 swap_chain_panel,
-                gl_surface: RefCell::new(None),
+                host: RefCell::new(None),
                 top_level_impl: RefCell::new(None),
                 root: RefCell::new(None),
                 content: RefCell::new(None),
@@ -601,40 +718,27 @@ mod imp {
             self.cached_size.scaling.store(scale_x.to_bits(), Ordering::Relaxed);
         }
 
-        fn get_pixel_size(cached_size: &CachedSize) -> PixelSize {
-            cached_size.pixel_size()
-        }
-
-        fn get_scaling(cached_size: &CachedSize) -> f64 {
-            cached_size.scaling()
-        }
-
         fn on_loaded(&self) {
-            if self.gl_surface.borrow().is_some() {
+            if self.host.borrow().is_some() {
                 return;
             }
 
             self.update_cached_size();
 
-            // Create the GL surface — swap chain creation is deferred to
-            // CreateGlRenderTarget where we have the actual rendering
-            // context's D3D device.
-            let size = self.cached_size.clone();
-            let scaling = self.cached_size.clone();
-            let dispatcher_queue = self.dispatcher_queue();
-            let id = self.id;
-            let gl_surface = SwapChainGlSurface::new(
-                Arc::new(move || Self::get_pixel_size(&size)),
-                Arc::new(move || Self::get_scaling(&scaling)),
-                Arc::new(move |swap_chain| Self::on_swap_chain_created(dispatcher_queue.as_ref(), id, swap_chain)),
-            );
-            let top_level_impl = SwapChainTopLevelImpl::new(gl_surface.clone());
+            // The swap chain itself is created by the render target on the render thread.
+            let host = Arc::new(SwapChainPanelHost {
+                id: self.id,
+                dispatcher_queue: self.dispatcher_queue(),
+                cached_size: self.cached_size.clone(),
+                state: Mutex::new(HostState::default()),
+            });
+            let top_level_impl = SwapChainTopLevelImpl::new(CompositionSwapchainSurface::new(host.clone()));
             top_level_impl.set_client_size(FerroSize::new(
                 self.framework_element.actual_width().unwrap_or(0.0),
                 self.framework_element.actual_height().unwrap_or(0.0),
             ));
             top_level_impl.set_render_scaling(f64::from(self.swap_chain_panel.composition_scale_x().unwrap_or(1.0)));
-            *self.gl_surface.borrow_mut() = Some(gl_surface);
+            *self.host.borrow_mut() = Some(host);
             *self.top_level_impl.borrow_mut() = Some(top_level_impl.clone());
 
             let text_input_method = {
@@ -721,8 +825,8 @@ mod imp {
                 root.dispose();
             }
             drop(top_level_impl);
-            if let Some(gl_surface) = self.gl_surface.borrow_mut().take() {
-                gl_surface.dispose_swap_chain();
+            if let Some(host) = self.host.borrow_mut().take() {
+                host.dispose();
             }
             self.mouse_device.dispose();
             self.touch_device.dispose();

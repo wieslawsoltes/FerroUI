@@ -27,6 +27,10 @@ pub(crate) const IID_ID3D11_TEXTURE2D: Guid = crate::direct_x::ID3D11Texture2D::
 struct Inner {
     info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
     shared: Arc<DirectCompositionShared>,
+    /// `Win32PlatformOptions::use_composition_swap_chain`, read on the UI
+    /// thread when the mode is registered (the reference reads the options
+    /// when a render target is created).
+    use_composition_swap_chain: bool,
     window: Mutex<Option<Arc<DirectCompositedWindow>>>,
 }
 
@@ -43,8 +47,24 @@ impl DirectCompositedWindowSurface {
     pub fn new(
         shared: Arc<DirectCompositionShared>,
         info: Arc<dyn IEglWindowGlPlatformSurfaceInfo>,
+        use_composition_swap_chain: bool,
     ) -> Arc<DirectCompositedWindowSurface> {
-        Arc::new(DirectCompositedWindowSurface { inner: Arc::new(Inner { info, shared, window: Mutex::new(None) }) })
+        Arc::new(DirectCompositedWindowSurface {
+            inner: Arc::new(Inner { info, shared, use_composition_swap_chain, window: Mutex::new(None) }),
+        })
+    }
+
+    /// The composition tree of the window, made by the first render target.
+    fn window(&self) -> Result<Arc<DirectCompositedWindow>, HResult> {
+        let mut window = self.inner.window.lock().unwrap_or_else(PoisonError::into_inner);
+        match &*window {
+            Some(window) => Ok(window.clone()),
+            None => {
+                let created = DirectCompositedWindow::new(self.inner.info.clone(), self.inner.shared.clone())?;
+                *window = Some(created.clone());
+                Ok(created)
+            }
+        }
     }
 
     fn create_target(
@@ -52,18 +72,33 @@ impl DirectCompositedWindowSurface {
         context: &Rc<dyn IPlatformGraphicsContext>,
         d3d_device: isize,
     ) -> Result<Rc<DirectCompositedWindowRenderTarget>, HResult> {
-        let window = {
-            let mut window = self.inner.window.lock().unwrap_or_else(PoisonError::into_inner);
-            match &*window {
-                Some(window) => window.clone(),
-                None => {
-                    let created = DirectCompositedWindow::new(self.inner.info.clone(), self.inner.shared.clone())?;
-                    *window = Some(created.clone());
-                    created
-                }
-            }
-        };
+        let window = self.window()?;
         DirectCompositedWindowRenderTarget::new(context.clone(), d3d_device, self.inner.shared.clone(), window)
+    }
+
+    /// The render target of a swap chain for composition, when the options
+    /// ask for one.
+    #[cfg(windows)]
+    fn create_swapchain_target(
+        &self,
+        context: &Rc<dyn IPlatformGraphicsContext>,
+        d3d_device: isize,
+    ) -> Option<Result<Rc<crate::direct_x::CompositionSwapchainRenderTarget>, HResult>> {
+        if !self.inner.use_composition_swap_chain {
+            return None;
+        }
+        Some(self.window().and_then(|window| {
+            crate::direct_x::CompositionSwapchainRenderTarget::new(context.clone(), d3d_device, window)
+        }))
+    }
+
+    #[cfg(not(windows))]
+    fn create_swapchain_target(
+        &self,
+        _context: &Rc<dyn IPlatformGraphicsContext>,
+        _d3d_device: isize,
+    ) -> Option<Result<Rc<DirectCompositedWindowRenderTarget>, HResult>> {
+        None
     }
 
     /// Releases the composition tree of the window.
@@ -100,6 +135,9 @@ impl IDirect3D11TexturePlatformSurface for DirectCompositedWindowSurface {
         context: &Rc<dyn IPlatformGraphicsContext>,
         d3d_device: isize,
     ) -> Result<Rc<dyn IDirect3D11TextureRenderTarget>, HResult> {
+        if let Some(target) = self.create_swapchain_target(context, d3d_device) {
+            return Ok(target?);
+        }
         Ok(self.create_target(context, d3d_device)?)
     }
 }
@@ -110,6 +148,9 @@ impl IDirect3D11TexturePlatformSurface2 for DirectCompositedWindowSurface {
         context: &Rc<dyn IPlatformGraphicsContext>,
         d3d_device: isize,
     ) -> Result<Rc<dyn IDirect3D11TextureRenderTarget2>, HResult> {
+        if let Some(target) = self.create_swapchain_target(context, d3d_device) {
+            return Ok(target?);
+        }
         Ok(self.create_target(context, d3d_device)?)
     }
 }

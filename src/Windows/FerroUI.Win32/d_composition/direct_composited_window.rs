@@ -70,6 +70,66 @@ impl DirectCompositedWindow {
         self.shared.sync_root().enter();
         Transaction { window: self.clone() }
     }
+
+    /// Commits the batch of the device and leaves the lock of the shared
+    /// state: the end of a transaction.
+    fn end_transaction(&self) {
+        {
+            let objects = self.objects.lock().unwrap_or_else(PoisonError::into_inner);
+            if let Some(objects) = objects.as_ref() {
+                // The reference ignores nothing here: a failing commit
+                // throws out of the disposal. A failure cannot leave a
+                // destructor, and the next frame commits again.
+                let _ = objects.device.commit();
+            }
+        }
+        self.shared.sync_root().exit();
+    }
+}
+
+/// The window shows a swap chain for composition as the content of its
+/// visual (`Win32PlatformOptions::use_composition_swap_chain`).
+#[cfg(windows)]
+impl crate::direct_x::ISwapchainVisualHost for DirectCompositedWindow {
+    fn window_size(&self) -> ferroui_base::PixelSize {
+        self.window_info.size()
+    }
+
+    fn window_scaling(&self) -> f64 {
+        self.window_info.scaling()
+    }
+
+    fn begin_transaction(&self) {
+        self.shared.sync_root().enter();
+    }
+
+    fn end_transaction(&self) {
+        DirectCompositedWindow::end_transaction(self);
+    }
+
+    fn set_swapchain_content(
+        &self,
+        swap_chain: &ferroui_microcom::ComPtr<crate::direct_x::IDXGISwapChain1>,
+    ) -> Result<(), HResult> {
+        let objects = self.objects.lock().unwrap_or_else(PoisonError::into_inner);
+        let objects = objects.as_ref().ok_or(HResult::OBJECTDISPOSED)?;
+        let content: &ferroui_microcom::IUnknown = swap_chain;
+        objects.container.set_content(Some(content))
+    }
+
+    /// A visual of DirectComposition shows its content at its own size.
+    fn resize_if_needed(&self, _size: ferroui_base::PixelSize) -> Result<(), HResult> {
+        Ok(())
+    }
+
+    /// The mode has no composition effects.
+    fn apply_effects(
+        &self,
+        _transparency_level: ferroui_base::rendering::composition::CompositionTransparencyLevel,
+        _theme_variant: ferroui_base::platform::PlatformThemeVariant,
+    ) -> Result<(), HResult> {
+        Ok(())
+    }
 }
 
 impl Drop for DirectCompositedWindow {
@@ -96,15 +156,6 @@ pub(crate) struct Transaction {
 
 impl Drop for Transaction {
     fn drop(&mut self) {
-        {
-            let objects = self.window.objects.lock().unwrap_or_else(PoisonError::into_inner);
-            if let Some(objects) = objects.as_ref() {
-                // The reference ignores nothing here: a failing commit
-                // throws out of the disposal. A failure cannot leave a
-                // destructor, and the next frame commits again.
-                let _ = objects.device.commit();
-            }
-        }
-        self.window.shared.sync_root().exit();
+        self.window.end_transaction();
     }
 }
