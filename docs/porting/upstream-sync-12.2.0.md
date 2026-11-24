@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (120 done, 0 planned) | 120 |
+| `port` (121 done, 0 planned) | 121 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 6 |
+| `deferred` | 5 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -71,7 +71,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | layout | 1 |  |  |  |  |  | 1 |
 | markup | 2 |  |  |  | 3 |  | 5 |
 | platform | 3 |  |  |  |  |  | 3 |
-| platform-android | 8 | 1 |  |  |  | 1 | 10 |
+| platform-android | 9 | 1 |  |  |  |  | 10 |
 | platform-browser | 3 | 2 |  |  | 1 |  | 6 |
 | platform-ios | 5 |  |  |  |  |  | 5 |
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
@@ -120,7 +120,7 @@ Features merged in this range:
 | Key text, consumed modifiers, native key data | #22628, #22782 | `port` (PR 1409): Windows, macOS, X11, Wayland |
 | Opt-in EGL partial presentation | #22501 | `deferred` |
 | `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `deferred` |
-| Android desktop drag and drop | #22451 | `deferred` |
+| Android desktop drag and drop | #22451 | `port` (part `android-dnd`): drops from other applications and drags of the application; to validate on a device with a pointer |
 | Platform-simulated typefaces | #22773 | `deferred`: follows the web fonts stack |
 | Compositor output rotation | #22499 | `port` (PR 1398) |
 | Android cursors and TalkBack roles | #22438, #22681 | `port` |
@@ -143,7 +143,6 @@ are part of the base that the previous sync tracked, so they are not inventoried
 | Commit | PR | Date | Area | Part | Note |
 |---|---:|---|---|---|---|
 | `dc0105179b` | #22519 | 2026-10-20 | platform-macos |  | Needs the C++ output of the MicroCom 0.11.7 generator (`MicroComImpl<T>`, `@cpp-call-preamble`), which `microcom-codegen` reproduces from MicroCom's inputs and outputs: no 0.11.7 output is in the repository (a download, which needs the owner's approval). A three-way merge of the native sources onto 12.2.0 gave 17 conflicts in 10 files, all resolvable; it waits for the generator. |
-| `78316701f3` | #22451 | 2026-10-22 | platform-android |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
 | `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
@@ -208,7 +207,7 @@ left out only with a recorded performance or better-code reason.
 | `26b4ed5b35` | #22491 | 2026-10-21 | layout | `port` (done) | controls | Layout pass tolerates a control moved to another top level. |
 | `9135170769` | #22557 | 2026-10-21 | rendering | `port` (done) | rendering | `ICustomHitTest` documentation: local coordinates. |
 | `74c62ffd26` | #22552 | 2026-10-22 | input | `port` (done) | input | Gesture unit tests that replace the removed integration tests. |
-| `78316701f3` | #22451 | 2026-10-22 | platform-android | `deferred` |  | Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation. |
+| `78316701f3` | #22451 | 2026-10-22 | platform-android | `port` (done) | android-dnd | Desktop drag and drop on Android: `FerroDragListener` (Java) forwards the drag events of the surface view; `AndroidDragDrop` raises enter, over, leave and drop (the description's formats before the drop, the clip data with the drop permissions held during the drop), `AndroidDragSource` starts a drag with `View.startDragAndDrop`; the clip data building moved to `ClipDataHelper`. Written without a device: the drag needs an emulator or device with a pointer. |
 | `103cf72903` | #22520 | 2026-10-22 | platform-win32 | `port` (done) | win32 | Alt+Space opens the system menu unless handled. |
 | `52c057b1cd` | #22556 | 2026-10-22 | themes | `port` (done) | themes2 | CommandBar overflow scrolls in Fluent and Simple. |
 | `f874d44497` | #22435 | 2026-10-22 | platform-android | `port` (done) | android | `ACTION_SET_TEXT` replaces the text. |

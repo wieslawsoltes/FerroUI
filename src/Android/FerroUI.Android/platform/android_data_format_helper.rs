@@ -66,6 +66,29 @@ impl AndroidDataFormatHelper {
     pub fn is_text_mime_type(mime_type: &str) -> bool {
         starts_with_ignore_case(mime_type, "text/")
     }
+
+    /// The formats of the MIME types of a clip description, with the bitmap
+    /// format added once when one of them is an image: what the clipboard,
+    /// the dragged data and the description of a drag in progress list.
+    pub fn mime_types_to_data_formats<'a>(mime_types: impl ExactSizeIterator<Item = &'a str>) -> Vec<DataFormat> {
+        let mut formats = Vec::with_capacity(mime_types.len() + 1);
+
+        let mut has_image = false;
+        for mime_type in mime_types {
+            let format = Self::mime_type_to_data_format(mime_type);
+
+            if !has_image {
+                has_image = starts_with_ignore_case(format.identifier(), "image/");
+            }
+            formats.push(format);
+        }
+
+        if has_image {
+            formats.push(DataFormat::bitmap().into());
+        }
+
+        formats
+    }
 }
 
 #[cfg(test)]
@@ -105,6 +128,22 @@ mod tests {
         let bytes = AndroidDataFormatHelper::mime_type_to_data_format("application/octet-stream");
         assert_eq!(bytes.kind(), DataFormatKind::Platform);
         assert_eq!(bytes.identifier(), "application/octet-stream");
+    }
+
+    #[test]
+    fn the_formats_of_a_description_list_the_bitmap_once() {
+        let formats = |mime_types: &[&str]| {
+            AndroidDataFormatHelper::mime_types_to_data_formats(mime_types.iter().copied())
+        };
+        assert!(formats(&[]).is_empty());
+        let text: DataFormat = DataFormat::text().into();
+        let bitmap: DataFormat = DataFormat::bitmap().into();
+        assert_eq!(formats(&["text/plain"]), vec![text.clone()]);
+
+        // An image MIME type is the bitmap format already, whose identifier is not a MIME type:
+        // the bitmap is not listed twice.
+        let image = formats(&["text/plain", "image/png"]);
+        assert_eq!(image, vec![text, bitmap]);
     }
 
     #[test]

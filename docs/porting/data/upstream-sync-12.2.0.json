@@ -388,8 +388,10 @@
    "pr": 22451,
    "date": "2026-10-22",
    "area": "platform-android",
-   "class": "deferred",
-   "note": "Desktop drag and drop on Android (549 lines of JNI). Needs a device or emulator with a pointer for validation."
+   "class": "port",
+   "note": "Desktop drag and drop on Android: `FerroDragListener` (Java) forwards the drag events of the surface view; `AndroidDragDrop` raises enter, over, leave and drop (the description's formats before the drop, the clip data with the drop permissions held during the drop), `AndroidDragSource` starts a drag with `View.startDragAndDrop`; the clip data building moved to `ClipDataHelper`. Written without a device: the drag needs an emulator or device with a pointer.",
+   "part": "android-dnd",
+   "state": "done"
   },
   {
    "hash": "103cf7290371d43c4af65705335718aa195fcac4",

@@ -54,6 +54,7 @@ pub(crate) const FERRO_SURFACE_VIEW: &str = "org/ferroui/android/FerroSurfaceVie
 pub(crate) const MAIN_LOOPER_BRIDGE: &str = "org/ferroui/android/MainLooperBridge";
 pub(crate) const FERRO_INPUT_CONNECTION: &str = "org/ferroui/android/FerroInputConnection";
 pub(crate) const NATIVE_CLICK_LISTENER: &str = "org/ferroui/android/NativeClickListener";
+pub(crate) const FERRO_DRAG_LISTENER: &str = "org/ferroui/android/FerroDragListener";
 pub(crate) const PLATFORM_HELPER: &str = "org/ferroui/android/PlatformHelper";
 pub(crate) const CONFIGURATION_CHANGED_RECEIVER: &str = "org/ferroui/android/ConfigurationChangedReceiver";
 
@@ -128,6 +129,7 @@ pub unsafe fn on_load(vm: *mut c_void, build: fn() -> AppBuilder) -> i32 {
             MAIN_LOOPER_BRIDGE,
             FERRO_INPUT_CONNECTION,
             NATIVE_CLICK_LISTENER,
+            FERRO_DRAG_LISTENER,
             crate::platform::storage::android_storage_item::STORAGE_HELPER,
             PLATFORM_HELPER,
             CONFIGURATION_CHANGED_RECEIVER,
@@ -399,6 +401,16 @@ fn register_all() {
         register_natives(
             &JavaClass::find(NATIVE_CLICK_LISTENER),
             &[native!(c"nativeOnClick", c"(J)V", click_listener_on_click as unsafe extern "system" fn(_, _, _))],
+        );
+    }
+    unsafe {
+        register_natives(
+            &JavaClass::find(FERRO_DRAG_LISTENER),
+            &[native!(
+                c"nativeOnDrag",
+                c"(JIFFZZLandroid/view/DragEvent;)Z",
+                drag_listener_on_drag as unsafe extern "system" fn(_, _, _, _, _, _, _, _, _) -> _
+            )],
         );
     }
     unsafe {
@@ -1033,6 +1045,34 @@ unsafe extern "system" fn connection_send_key_event(
 
 unsafe extern "system" fn click_listener_on_click(_env: *mut JNIEnv, _class: jobject, handle: jlong) {
     guard((), || super::listeners::on_click(handle));
+}
+
+// ---- FerroDragListener -------------------------------------------------------------------
+
+#[allow(clippy::too_many_arguments)]
+unsafe extern "system" fn drag_listener_on_drag(
+    _env: *mut JNIEnv,
+    _class: jobject,
+    handle: jlong,
+    action: jint,
+    x: jfloat,
+    y: jfloat,
+    result: JBoolean,
+    is_own_drag: JBoolean,
+    event: jobject,
+) -> JBoolean {
+    guard(1, || {
+        // SAFETY: `event` is the argument of the method, a reference or null.
+        let Some(event) = (unsafe { JavaObject::from_raw(event) }) else {
+            return 0;
+        };
+        if let Some(drag_drop) = TopLevelImpl::from_handle(handle).and_then(|top_level| top_level.drag_drop()) {
+            drag_drop.on_drag(action, x, y, result != 0, is_own_drag != 0, &event);
+        }
+        // As the reference: every event of a view that listens is taken, so the view receives
+        // the locations and the drop.
+        1
+    })
 }
 
 // ---- ConfigurationChangedReceiver ---------------------------------------------------------

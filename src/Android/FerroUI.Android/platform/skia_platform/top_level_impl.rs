@@ -25,6 +25,7 @@ use crate::ferro_activity::FerroActivity;
 use crate::i_android_navigation_service::IActivityNavigationService;
 use crate::platform::android_launcher::AndroidLauncher;
 use crate::platform::android_platform_feedback::{AndroidPlatformFeedback, ViewFeedback};
+use crate::platform::android_drag_drop::AndroidDragDrop;
 use crate::platform::clipboard_impl::ClipboardImpl;
 use crate::platform::storage::android_storage_provider::AndroidStorageProvider;
 use ferroui_base::input::platform::{Clipboard, IClipboard};
@@ -141,6 +142,8 @@ pub struct TopLevelImpl {
     native_control_host: Rc<AndroidNativeControlHostImpl>,
     feedback: Rc<AndroidPlatformFeedback>,
     clipboard: Rc<Clipboard>,
+    /// The drags over the surface view and the drags it starts.
+    drag_drop: RefCell<Option<Rc<AndroidDragDrop>>>,
     storage_provider: Option<Rc<dyn IStorageProvider>>,
     launcher: Option<Rc<AndroidLauncher>>,
     pointer_helper: AndroidMotionEventsHelper,
@@ -236,6 +239,7 @@ impl TopLevelImpl {
                 native_control_host,
                 feedback,
                 clipboard,
+                drag_drop: RefCell::new(None),
                 storage_provider,
                 launcher,
                 pointer_helper: AndroidMotionEventsHelper::new(motion_top_level),
@@ -260,7 +264,15 @@ impl TopLevelImpl {
             }
         });
         TOP_LEVELS.with(|top_levels| top_levels.borrow_mut().insert(id, Rc::downgrade(&this)));
+        if let Some(view) = this.view() {
+            *this.drag_drop.borrow_mut() = Some(AndroidDragDrop::new(Rc::downgrade(&this), id, &view, context));
+        }
         this
+    }
+
+    /// The drag and drop of the surface view; `None` once disposed.
+    pub(crate) fn drag_drop(&self) -> Option<Rc<AndroidDragDrop>> {
+        self.drag_drop.borrow().clone()
     }
 
     /// The top-level whose surface view calls back with `handle`.
@@ -548,6 +560,10 @@ impl IDisposable for TopLevelImpl {
     fn dispose(&self) {
         self.system_navigation_manager.dispose();
         self.pointer_helper.dispose();
+        let drag_drop = self.drag_drop.borrow_mut().take();
+        if let Some(drag_drop) = drag_drop {
+            drag_drop.dispose();
+        }
         let view = self.view.borrow_mut().take();
         if let Some(view) = view {
             view.dispose();

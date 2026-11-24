@@ -2,7 +2,7 @@
 
 use super::android_data_format_helper::AndroidDataFormatHelper;
 use super::clip_data_item_to_data_transfer_item_wrapper::ClipDataItemToDataTransferItemWrapper;
-use crate::interop::java::{call_int, call_object, string_of, JavaObject, JavaValue};
+use crate::interop::java::{call_int, call_object, string_of, JavaObject, JavaRef, JavaValue};
 use ferroui_base::input::platform::{
     ClipboardError, PlatformDataTransfer, PlatformDataTransferImpl, PlatformDataTransferItem,
 };
@@ -24,47 +24,28 @@ impl ClipDataOwner {
 
     /// The MIME types of the description of the clip data.
     pub fn mime_types(&self) -> Vec<String> {
-        let Some(description) =
-            call_object(&self.clip_data, "getDescription", "()Landroid/content/ClipDescription;", &[])
-        else {
-            return Vec::new();
-        };
-        let count = call_int(&description, "getMimeTypeCount", "()I", &[]);
-        (0..count.max(0))
-            .map(|i| {
-                call_object(&description, "getMimeType", "(I)Ljava/lang/String;", &[JavaValue::Int(i)])
-                    .map(|mime_type| string_of(&mime_type))
-                    .unwrap_or_default()
-            })
-            .collect()
+        call_object(&self.clip_data, "getDescription", "()Landroid/content/ClipDescription;", &[])
+            .map(|description| description_mime_types(&description))
+            .unwrap_or_default()
     }
 
     /// `Formats` of the data transfer.
     pub fn formats(&self) -> Vec<DataFormat> {
         let mime_types = self.mime_types();
-        if mime_types.is_empty() {
-            return Vec::new();
-        }
-
-        let mut formats = Vec::with_capacity(mime_types.len() + 1);
-
-        let mut has_image = false;
-        for mime_type in &mime_types {
-            let format = AndroidDataFormatHelper::mime_type_to_data_format(mime_type);
-
-            if !has_image {
-                has_image =
-                    format.identifier().as_bytes().get(..6).is_some_and(|start| start.eq_ignore_ascii_case(b"image/"));
-            }
-            formats.push(format);
-        }
-
-        if has_image {
-            formats.push(DataFormat::bitmap().into());
-        }
-
-        formats
+        AndroidDataFormatHelper::mime_types_to_data_formats(mime_types.iter().map(String::as_str))
     }
+}
+
+/// The MIME types of a `ClipDescription`.
+pub(crate) fn description_mime_types(description: &dyn JavaRef) -> Vec<String> {
+    let count = call_int(description, "getMimeTypeCount", "()I", &[]);
+    (0..count.max(0))
+        .map(|i| {
+            call_object(description, "getMimeType", "(I)Ljava/lang/String;", &[JavaValue::Int(i)])
+                .map(|mime_type| string_of(&mime_type))
+                .unwrap_or_default()
+        })
+        .collect()
 }
 
 pub(crate) struct ClipDataToDataTransferWrapper {
