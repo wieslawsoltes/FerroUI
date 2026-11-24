@@ -262,6 +262,27 @@ impl GraphiteGrContext {
             .expect("the Graphite context has been disposed"))
     }
 
+    /// Submits the band recordings the threads of the pipelined layers inserted since the last
+    /// submit, without waiting for anything (the threads may still be inserting the rest of a
+    /// frame; those go with the next submit). Called at the start of a frame, so that the GPU
+    /// draws the bands of the frame before while this one is recorded. Nothing happens when no
+    /// band was inserted, or when the context is in use.
+    pub(crate) fn submit_inserted_bands(&self) {
+        let Ok(state) = self.state.try_borrow() else { return };
+        let Some(state) = state.as_ref() else { return };
+        if state.bands.take_unsubmitted() == 0 {
+            return;
+        }
+        let _ = state.context.lock().submit(None);
+    }
+
+    /// How many band recordings the threads inserted that no submit has taken (for the tests;
+    /// reading it takes them).
+    #[cfg(test)]
+    pub(crate) fn take_unsubmitted_band_inserts(&self) -> usize {
+        self.state.borrow().as_ref().map_or(0, |state| state.bands.take_unsubmitted())
+    }
+
     /// Runs `f` with the recorder, for creating surfaces that wrap platform
     /// textures.
     pub fn with_recorder<R>(&self, f: impl FnOnce(&mut graphite::Recorder) -> R) -> R {
@@ -312,6 +333,8 @@ impl GraphiteGrContext {
             let (inserted, submitted) = {
                 let mut context = state.context.lock();
                 let inserted = context.insert_recording(&info) == graphite::InsertStatus::Success;
+                // The submit takes the band recordings inserted before it too.
+                state.bands.take_unsubmitted();
                 let submitted = context.submit(Some(&submit_info));
                 if flush % DEFERRED_CLEANUP_INTERVAL == 0 {
                     perform_deferred_cleanup(&mut context, &mut state.recorder);
@@ -334,6 +357,7 @@ impl GraphiteGrContext {
         } else {
             // Preserve the context's ordinary empty-flush processing too.
             let mut context = state.context.lock();
+            state.bands.take_unsubmitted();
             let _ = context.submit(Some(&submit_info));
             if flush % DEFERRED_CLEANUP_INTERVAL == 0 {
                 perform_deferred_cleanup(&mut context, &mut state.recorder);

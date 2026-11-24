@@ -656,13 +656,17 @@ impl ServerCompositionTarget {
                         }
                         self.layer_unpresented.set(false);
 
-                        render_target_context.clear(Colors::TRANSPARENT);
                         render_target_context.set_transform(Matrix::IDENTITY);
-                        if layer.can_blit() {
-                            layer.blit(&mut *render_target_context);
-                        } else {
-                            let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
-                            render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                        // A layer that covers the target replaces its pixels, which are those of a clear to
+                        // transparent and the layer over it: no clear, and no read of the target.
+                        if !(layer.can_blit() && layer.blit_replacing(&mut *render_target_context)) {
+                            render_target_context.clear(Colors::TRANSPARENT);
+                            if layer.can_blit() {
+                                layer.blit(&mut *render_target_context);
+                            } else {
+                                let rect = PixelRect::from_size(pixel_size).to_rect(1.0);
+                                render_target_context.draw_bitmap(&*layer, 1.0, rect, rect);
+                            }
                         }
                         self.overlays.draw(self, &mut *render_target_context, true);
                     }
