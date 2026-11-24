@@ -47,7 +47,7 @@ fn image_uri_failures_leave_overflow_commands_usable() {
         let load_error = || {
             let icon = Control::from_boxed(&entry.icon().unwrap())
                 .unwrap()
-                .cast::<ImageIcon>()
+                .cast::<crate::primitives::RibbonImageElement>()
                 .unwrap();
             let source = icon.source().unwrap();
             let failed = source

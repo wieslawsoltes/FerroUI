@@ -86,9 +86,14 @@ fn compiled_runtime_image_icons_and_attached_menu_conversion_share_native_source
                 .unwrap()
                 .child()
                 .unwrap()
-                .cast::<ImageIcon>()
+                .cast::<ferroribbon::primitives::RibbonImageElement>()
                 .unwrap();
-            assert!(!clone.ptr_eq(&original));
+            assert!(
+                !clone
+                    .clone()
+                    .upcast::<ferroui_controls::IconElement>()
+                    .ptr_eq(&original.clone().upcast::<ferroui_controls::IconElement>())
+            );
             assert!(Rc::ptr_eq(&clone.source().unwrap(), &bitmap));
             assert_eq!((clone.width(), clone.height()), (22., 22.));
             let menu = host.children().get(1).cast::<MenuFlyoutItem>().unwrap();

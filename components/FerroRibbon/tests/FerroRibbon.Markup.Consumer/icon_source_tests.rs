@@ -198,7 +198,7 @@ fn independent_icon_sources_initialize_before_snapshots_in_compiled_and_runtime_
             assert!(
                 ValueTypes::as_object(&*menu.icon().unwrap())
                     .unwrap()
-                    .cast::<ImageIcon>()
+                    .cast::<ferroribbon::primitives::RibbonImageElement>()
                     .unwrap()
                     .source()
                     .is_none()

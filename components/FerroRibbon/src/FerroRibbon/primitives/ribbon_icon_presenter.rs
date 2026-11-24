@@ -3,7 +3,7 @@ use crate::compat::{
     BitmapIcon, BitmapIconSource, FontIcon, FontIconSource, IconSource, ImageIcon, ImageIconSource,
     PathIconSource, SymbolIcon, SymbolIconSource,
 };
-use super::RibbonBitmapElement;
+use super::{RibbonBitmapElement, RibbonImageElement};
 use ferroribbon_core::{
     RibbonString,
     model::{RibbonIcon, RibbonIconKind, RibbonIconLayer},
@@ -339,6 +339,20 @@ fn convert<T: ferroui_base::PropertyValue>(value: &BoxedValue) -> Option<T> {
             .and_then(|v| v.downcast_ref::<T>().cloned())
     })
 }
+/// The font of the ribbon's symbols, bundled so that they draw on every platform.
+const SYMBOL_FONT: &str = "ferres://FerroRibbon/Assets/Fonts/uno-fluentui-assets.ttf#Symbols";
+
+/// A symbol icon of the ribbon: the framework's control, with the ribbon's font in its own scope,
+/// so that an application's `SymbolThemeFontFamily` and its other icons are not affected.
+pub(crate) fn ribbon_symbol_icon(symbol: ferroui_controls::Symbol) -> Ref<SymbolIcon> {
+    let icon = SymbolIcon::with_symbol(symbol);
+    icon.resources().set(
+        "SymbolThemeFontFamily",
+        Some(Rc::new(FontFamily::new(SYMBOL_FONT))),
+    );
+    icon
+}
+
 /// Whether the presenter shows a copy of `icon`, which markup may still be filling in.
 fn is_copied_icon(icon: &BoxedValue) -> bool {
     convert::<Ref<Control>>(icon).is_some_and(|control| {
@@ -395,7 +409,7 @@ fn create_element(value: &BoxedValue, size: f64) -> (Option<Ref<Control>>, bool)
                 clone.set_font_style(font.font_style());
                 clone.upcast::<IconElement>()
             } else if let Some(symbol) = icon.cast::<SymbolIcon>() {
-                SymbolIcon::with_symbol(symbol.symbol()).upcast::<IconElement>()
+                ribbon_symbol_icon(symbol.symbol()).upcast::<IconElement>()
             } else if let Some(path) = icon.cast::<PathIcon>() {
                 let clone = PathIcon::new();
                 clone.set_data(path.data());
@@ -403,9 +417,7 @@ fn create_element(value: &BoxedValue, size: f64) -> (Option<Ref<Control>>, bool)
             } else if let Some(bitmap) = icon.cast::<BitmapIcon>() {
                 RibbonBitmapElement::for_icon(&bitmap)
             } else if let Some(image) = icon.cast::<ImageIcon>() {
-                let clone = ImageIcon::new();
-                clone.set_source(image.source());
-                clone.upcast::<IconElement>()
+                RibbonImageElement::with_source(image.source())
             } else if free(&icon) {
                 icon.clone()
             } else {
@@ -454,7 +466,7 @@ fn create_from_icon_source(source: &IconSource, size: f64) -> (Option<Ref<Contro
     } else if let Some(bitmap) = source.to_ref().cast::<BitmapIconSource>() {
         RibbonBitmapElement::for_source(&bitmap).upcast::<Control>()
     } else if let Some(symbol) = source.to_ref().cast::<SymbolIconSource>() {
-        SymbolIcon::with_symbol(symbol.symbol()).upcast()
+        ribbon_symbol_icon(symbol.symbol()).upcast()
     } else if let Some(path) = source.to_ref().cast::<PathIconSource>() {
         let icon = PathIcon::new();
         icon.set_data(path.data());

@@ -1,5 +1,5 @@
 //! Public native asset lookup assertions shared by library, consumer and real Skia.
-use ferroui_controls_icons::ImageIcon;
+use ferroribbon::primitives::RibbonImageElement as ImageIcon;
 use ferroribbon::{controls::RibbonItemHelper, primitives::RibbonIconPresenter};
 use ferroribbon_core::model::RibbonIcon;
 use ferroui_base::{

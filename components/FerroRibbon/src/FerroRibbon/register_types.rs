@@ -24,6 +24,14 @@ const NAMESPACES: &[(&str, &str)] = &[
         "ferroribbon::compat::ribbon_input_text_box",
         "FerroRibbon.Internal",
     ),
+    (
+        "ferroribbon::primitives::ribbon_bitmap_element",
+        "FerroRibbon.Internal",
+    ),
+    (
+        "ferroribbon::primitives::ribbon_image_element",
+        "FerroRibbon.Internal",
+    ),
     ("ferroribbon::compat", "FerroRibbon.Compatibility"),
     ("ferroribbon::primitives", "FerroRibbon.Controls.Primitives"),
     ("ferroribbon::controls", "FerroRibbon.Controls"),

@@ -417,7 +417,7 @@ fn source_circle_menu_markup_and_linked_last_choice() {
                     let converted = RibbonItemHelper::create_menu_icon(choice.icon())
                         .unwrap()
                         .unwrap()
-                        .cast::<ImageIcon>()
+                        .cast::<ferroribbon::primitives::RibbonImageElement>()
                         .unwrap();
                     assert!(!converted.ptr_eq(&image));
                     assert!(Rc::ptr_eq(

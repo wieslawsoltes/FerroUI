@@ -590,7 +590,7 @@ fn menu_icons_convert_paths_images_and_use_the_converter() {
             )))
             .unwrap()
             .unwrap()
-            .is::<ImageIcon>()
+            .is::<crate::primitives::RibbonImageElement>()
         );
         let entry = crate::compat::MenuFlyoutItem::new();
         entry.set_text(Some("Open".into()));

@@ -64,7 +64,7 @@ fn image_icon_presenter_and_menu_clones_share_images_without_stealing_controls()
             .unwrap()
             .child()
             .unwrap()
-            .cast::<ImageIcon>()
+            .cast::<crate::primitives::RibbonImageElement>()
             .unwrap();
         assert!(!clone.ptr_eq(&source));
         assert!(source.parent().unwrap().ptr_eq(&parent));
@@ -73,7 +73,7 @@ fn image_icon_presenter_and_menu_clones_share_images_without_stealing_controls()
         let menu = RibbonItemHelper::create_menu_icon(Some(Control::boxed(source.clone())))
             .unwrap()
             .unwrap()
-            .cast::<ImageIcon>()
+            .cast::<crate::primitives::RibbonImageElement>()
             .unwrap();
         assert!(!menu.ptr_eq(&source));
         assert!(menu.width().is_nan() && menu.height().is_nan());
@@ -88,7 +88,7 @@ fn image_icon_presenter_and_menu_clones_share_images_without_stealing_controls()
             .unwrap()
             .child()
             .unwrap()
-            .cast::<ImageIcon>()
+            .cast::<crate::primitives::RibbonImageElement>()
             .unwrap();
         assert!(resized.source().is_none());
         assert_eq!((resized.width(), resized.height()), (24., 24.));
@@ -256,7 +256,7 @@ fn uri_controls_use_deferred_provider_results_and_cancel_released_sources() {
         )))
         .unwrap()
         .unwrap()
-        .cast::<ImageIcon>()
+        .cast::<crate::primitives::RibbonImageElement>()
         .unwrap();
         let menu_source = menu.source().unwrap();
         settle();

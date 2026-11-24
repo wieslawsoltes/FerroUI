@@ -138,7 +138,7 @@ fn public_menu_static_overloads_are_invocable_from_dependency_metadata() {
         let icon = from_markup_value::<Option<Ref<IconElement>>>(&value)
             .unwrap()
             .unwrap()
-            .cast::<ImageIcon>()
+            .cast::<ferroribbon::primitives::RibbonImageElement>()
             .unwrap();
         let source = icon.source().unwrap();
         let failed = source

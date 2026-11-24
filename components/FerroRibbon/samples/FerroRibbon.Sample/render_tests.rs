@@ -1176,7 +1176,7 @@ fn native_bitmap_uri_loading_uses_real_skia_assets_files_and_errors() {
                     )
                     .unwrap()
                     .unwrap()
-                    .cast::<ferroui_controls_icons::ImageIcon>()
+                    .cast::<ferroribbon::primitives::RibbonImageElement>()
                     .unwrap();
                     assert_pixels(
                         menu_icon
@@ -1289,7 +1289,7 @@ fn native_bitmap_uri_loading_uses_real_skia_assets_files_and_errors() {
                     ))
                     .unwrap()
                     .unwrap()
-                    .cast::<ferroui_controls_icons::ImageIcon>()
+                    .cast::<ferroribbon::primitives::RibbonImageElement>()
                     .unwrap();
                     let source = icon.source().unwrap();
                     assert_pixels(source.as_any().downcast_ref::<Bitmap>().unwrap());

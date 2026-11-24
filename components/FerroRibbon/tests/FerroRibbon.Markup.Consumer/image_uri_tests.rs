@@ -147,7 +147,7 @@ fn assert_image_load_observation(image: &Image) {
         )))
         .unwrap()
         .unwrap()
-        .cast::<ImageIcon>()
+        .cast::<ferroribbon::primitives::RibbonImageElement>()
         .unwrap()
         .source()
         .unwrap()

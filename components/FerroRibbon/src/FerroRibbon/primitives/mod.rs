@@ -9,9 +9,14 @@ pub use ribbon_metrics::{RibbonMetrics, RibbonMetricsValues};
 mod ribbon_scroll_panel;
 pub use ribbon_scroll_panel::{IRibbonScrollContent, RibbonScrollPanel};
 mod ribbon_bitmap_element;
-pub(crate) use ribbon_bitmap_element::RibbonBitmapElement;
+#[doc(hidden)]
+pub use ribbon_bitmap_element::RibbonBitmapElement;
+mod ribbon_image_element;
+#[doc(hidden)]
+pub use ribbon_image_element::RibbonImageElement;
 mod ribbon_icon_presenter;
 pub use ribbon_icon_presenter::RibbonIconPresenter;
+pub(crate) use ribbon_icon_presenter::ribbon_symbol_icon;
 #[cfg(any(not(target_arch = "wasm32"), target_os = "emscripten"))]
 mod ribbon_http_images;
 mod ribbon_icon_images;

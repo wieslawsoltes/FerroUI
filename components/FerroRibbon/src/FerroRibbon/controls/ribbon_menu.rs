@@ -1,6 +1,6 @@
 //! RibbonButton.cs Menu helpers and RibbonItemHelper.cs menu conversion/projection.
 use super::RibbonItemHelper;
-use crate::primitives::RibbonBitmapElement;
+use crate::primitives::{RibbonBitmapElement, RibbonImageElement, ribbon_symbol_icon};
 use crate::compat::{
     BitmapIcon, BitmapIconSource, FontIcon, FontIconSource, ImageIcon, ImageIconSource,
     MenuFlyoutItem, MenuFlyoutSubItem, PathIconSource, SymbolIcon, SymbolIconSource,
@@ -200,15 +200,13 @@ impl RibbonItemHelper {
                 return Ok(Some(result.upcast()));
             }
             if let Some(symbol) = object.cast::<SymbolIconSource>() {
-                return Ok(Some(SymbolIcon::with_symbol(symbol.symbol()).upcast()));
+                return Ok(Some(ribbon_symbol_icon(symbol.symbol()).upcast()));
             }
             if let Some(bitmap) = object.cast::<BitmapIconSource>() {
                 return Ok(Some(RibbonBitmapElement::for_source(&bitmap)));
             }
             if let Some(image) = object.cast::<ImageIconSource>() {
-                let result = ImageIcon::new();
-                result.set_source(image.image_source());
-                return Ok(Some(result.upcast()));
+                return Ok(Some(RibbonImageElement::with_source(image.image_source())));
             }
             if let Some(font) = object.cast::<FontIcon>() {
                 let result = FontIcon::new();
@@ -219,12 +217,10 @@ impl RibbonItemHelper {
                 return Ok(Some(RibbonBitmapElement::for_icon(&bitmap)));
             }
             if let Some(image) = object.cast::<ImageIcon>() {
-                let result = ImageIcon::new();
-                result.set_source(image.source());
-                return Ok(Some(result.upcast()));
+                return Ok(Some(RibbonImageElement::with_source(image.source())));
             }
             if let Some(symbol) = object.cast::<SymbolIcon>() {
-                return Ok(Some(SymbolIcon::with_symbol(symbol.symbol()).upcast()));
+                return Ok(Some(ribbon_symbol_icon(symbol.symbol()).upcast()));
             }
         }
         Ok(None)
@@ -300,9 +296,7 @@ fn create_description(
         else {
             return Ok(None);
         };
-        let image = ImageIcon::new();
-        image.set_source(Some(source));
-        return Ok(Some(image.upcast()));
+        return Ok(Some(RibbonImageElement::with_source(Some(source))));
     }
     Ok(None)
 }

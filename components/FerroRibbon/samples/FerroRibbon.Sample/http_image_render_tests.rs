@@ -1,5 +1,6 @@
 use super::build;
-use ferroui_controls_icons::{BitmapIcon, ImageIcon};
+// The elements the ribbon shows for image URIs, with the ribbon's image pipeline.
+use ferroribbon::primitives::{RibbonBitmapElement as BitmapIcon, RibbonImageElement as ImageIcon};
 use ferroribbon::{controls::RibbonItemHelper,
     primitives::{RibbonDeferredImage, RibbonIconPresenter, RibbonImageLoadError}};
 use ferroui_base::{

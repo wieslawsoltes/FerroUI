@@ -1,6 +1,7 @@
 //! Native Skia decoding, opacity-mask tint, identity and incremental property state.
 use super::*;
-use ferroui_controls_icons::BitmapIcon;
+// The element the ribbon shows for a bitmap URI, with the ribbon's image pipeline.
+use ferroribbon::primitives::RibbonBitmapElement as BitmapIcon;
 use ferroui_base::{
     PixelRect, PixelSize, Rect, Size,
     media::{

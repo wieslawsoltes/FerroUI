@@ -32,7 +32,7 @@ fn snapshot(
     let font = element.as_ref().and_then(|e| e.cast::<FontIcon>());
     let path = element.as_ref().and_then(|e| e.cast::<PathIcon>());
     let plain = element.as_ref().and_then(|e| e.cast::<Image>());
-    let menu_image = element.as_ref().and_then(|e| e.cast::<ImageIcon>());
+    let menu_image = element.as_ref().and_then(|e| e.cast::<crate::primitives::RibbonImageElement>());
     let kind = if font.is_some() {
         Some("FontIcon")
     } else if path.is_some() {

@@ -264,7 +264,7 @@ fn source_complete_cad_menu_inventory_workspace_rebuild_and_converter_lifetimes(
         let converted = RibbonItemHelper::create_menu_icon(Some(Rc::new(icon.clone())))
             .unwrap()
             .unwrap()
-            .cast::<ferroui_controls_icons::ImageIcon>()
+            .cast::<ferroribbon::primitives::RibbonImageElement>()
             .unwrap();
         let direct = crate::cad::CadMenuIcons::create(&icon, false)
             .unwrap()

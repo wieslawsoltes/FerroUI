@@ -86,7 +86,7 @@ impl VisualImpl for BitmapIconImage {
 }
 
 #[repr(C)]
-pub(crate) struct RibbonBitmapElement {
+pub struct RibbonBitmapElement {
     base: IconElement,
     root: OnceCell<Ref<Grid>>,
     image: OnceCell<Ref<BitmapIconImage>>,
