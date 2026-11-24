@@ -88,6 +88,7 @@ impl BidiReorderer {
                 text_source_character_index: first_text_source_index,
                 run_index: Cell::new(i as i32),
                 next_run_index: Cell::new(i as i32 + 1),
+                bidi_level: self.runs[i].level,
             });
 
             first_text_source_index += current_run.length();
@@ -127,8 +128,10 @@ impl BidiReorderer {
 
         let default_level: i8 = if flow_direction == FlowDirection::LeftToRight { 0 } else { 1 };
 
+        // Rule L1 gives a paragraph separator the paragraph embedding level, which places it at
+        // the visual end of the paragraph's direction: the left edge of a right-to-left line.
         if run.as_text_end_of_line().is_some() {
-            return 0;
+            return default_level;
         }
 
         if let Some(previous_level) = previous_level {

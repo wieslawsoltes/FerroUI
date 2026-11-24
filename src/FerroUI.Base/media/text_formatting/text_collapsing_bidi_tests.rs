@@ -13,7 +13,7 @@ use crate::media::text_formatting::{
     DrawableTextRun, ITextSource, ShapedTextRun, TextCharacters, TextCollapsingProperties, TextLeadingPrefixCharacterEllipsis,
     TextLine, TextLineImpl, TextRun, TextRunProperties, TextTrailingCharacterEllipsis, TextTrailingWordEllipsis,
 };
-use crate::media::{FlowDirection, TextAlignment, TextPathSegmentEllipsis, TextWrapping};
+use crate::media::{CharacterHit, FlowDirection, TextAlignment, TextPathSegmentEllipsis, TextWrapping};
 
 const ELLIPSIS: &str = "\u{2026}";
 const ARABIC: &str = "\u{0627}\u{0644}\u{0633}\u{0644}\u{0627}\u{0645} \u{0639}\u{0644}\u{064A}\u{0643}\u{0645} \u{0648}\u{0631}\u{062D}\u{0645}\u{0629} \u{0627}\u{0644}\u{0644}\u{0647} \u{0648}\u{0628}\u{0631}\u{0643}\u{0627}\u{062A}\u{0647}";
@@ -106,6 +106,99 @@ fn build_line_of_runs(texts: &[&str]) -> Rc<dyn TextLine> {
         paragraph_properties_with(&props, TextWrapping::NoWrap, TextAlignment::Left, FlowDirection::LeftToRight);
 
     format_line(&source, 0, f64::INFINITY, &paragraph_props, None).unwrap()
+}
+
+fn line_with_end(text: &str, flow: FlowDirection, end: bool) -> Rc<dyn TextLine> {
+    let props = properties();
+    let paragraph_props = paragraph_properties_with(&props, TextWrapping::NoWrap, TextAlignment::Left, flow);
+    let source = SingleBufferTextSource::with_end_of_paragraph(text, props, end);
+
+    format_line(&source, 0, f64::INFINITY, &paragraph_props, None).unwrap()
+}
+
+#[test]
+fn end_of_paragraph_does_not_change_hit_testing() {
+    let _scope = TextTestScope::new();
+
+    for text in ["abc אבג", "אבג", "אבג abc", "abc"] {
+        for flow in [FlowDirection::LeftToRight, FlowDirection::RightToLeft] {
+            let with_end = line_with_end(text, flow, true);
+            let without_end = line_with_end(text, flow, false);
+            let length = text.encode_utf16().count() as i32;
+
+            for start in 0..length {
+                for run_length in 1..=length - start {
+                    let expected = without_end.get_text_bounds(start, run_length);
+                    let actual = with_end.get_text_bounds(start, run_length);
+
+                    assert_eq!(expected.len(), actual.len(), "{text} {start} {run_length}");
+                    for (expected, actual) in expected.iter().zip(&actual) {
+                        assert!((expected.rectangle().x - actual.rectangle().x).abs() < 1e-5);
+                        assert!((expected.rectangle().right() - actual.rectangle().right()).abs() < 1e-5);
+                        assert_eq!(expected.flow_direction(), actual.flow_direction());
+                    }
+                }
+
+                let hit = CharacterHit::new(start);
+                let distance = without_end.get_distance_from_character_hit(hit);
+                assert!((distance - with_end.get_distance_from_character_hit(hit)).abs() < 1e-5, "{text} {start}");
+            }
+        }
+    }
+}
+
+#[test]
+fn end_of_paragraph_is_at_the_visual_end_of_the_paragraph_direction() {
+    let _scope = TextTestScope::new();
+
+    for text in ["abc אבג", "אבג", "אבג abc", "abc"] {
+        let line = line_with_end(text, FlowDirection::RightToLeft, true);
+        assert!(line.text_runs()[0].as_text_end_of_line().is_some(), "{text}: leftmost in a right-to-left line");
+        assert!(line.text_line_break().is_some(), "{text}");
+
+        let line = line_with_end(text, FlowDirection::LeftToRight, true);
+        let runs = line.text_runs();
+        assert!(runs[runs.len() - 1].as_text_end_of_line().is_some(), "{text}: rightmost in a left-to-right line");
+    }
+}
+
+/// The glyphs a line can still draw: a disposed run has none.
+fn glyph_count(line: &dyn TextLine) -> usize {
+    line.text_runs()
+        .iter()
+        .filter_map(|run| run.downcast_ref::<ShapedTextRun>())
+        .map(|run| run.shaped_buffer().length())
+        .sum()
+}
+
+#[test]
+fn collapsing_leaves_the_source_line_intact_and_the_collapsed_line_outlives_it() {
+    let _scope = TextTestScope::new();
+
+    type Collapser = fn(f64) -> Rc<dyn TextCollapsingProperties>;
+    let collapsers: [Collapser; 4] = [
+        |width| trailing_char(width, FlowDirection::LeftToRight),
+        |width| trailing_word(width, FlowDirection::LeftToRight),
+        |width| leading_prefix(2, width, FlowDirection::LeftToRight),
+        |width| path_segment(width, FlowDirection::LeftToRight),
+    ];
+
+    for collapser in collapsers {
+        let line = build_line("Hello/wonderful/world of text", FlowDirection::LeftToRight);
+        let source_glyphs = glyph_count(&*line);
+
+        let collapsed = collapse(&line, collapser(line.width() / 2.0));
+        assert_collapsed(&collapsed, &line);
+
+        assert_eq!(glyph_count(&*line), source_glyphs, "a split must not empty the source line");
+
+        let collapsed_glyphs = glyph_count(&*collapsed);
+        assert!(collapsed_glyphs > 0);
+
+        line.dispose();
+
+        assert_eq!(glyph_count(&*collapsed), collapsed_glyphs, "the collapsed line owns its runs");
+    }
 }
 
 #[test]

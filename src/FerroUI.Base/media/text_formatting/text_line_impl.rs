@@ -23,6 +23,8 @@ pub struct TextLineImpl {
     indexed_text_runs: RefCell<Option<Rc<[IndexedTextRun]>>>,
     text_runs: RefCell<Vec<Rc<dyn TextRun>>>,
     paragraph_width: f64,
+    /// The distance from the leading edge of the paragraph at which the box of the line starts.
+    line_indent: f64,
     paragraph_properties: Rc<dyn TextParagraphProperties>,
     text_line_metrics: Cell<TextLineMetrics>,
     text_line_break: RefCell<Option<Rc<TextLineBreak>>>,
@@ -47,10 +49,38 @@ impl TextLineImpl {
         line_break: Option<Rc<TextLineBreak>>,
         has_collapsed: bool,
     ) -> Rc<Self> {
+        Self::with_line_indent(
+            text_runs,
+            first_text_source_index,
+            length,
+            paragraph_width,
+            paragraph_properties,
+            resolved_flow_direction,
+            line_break,
+            has_collapsed,
+            0.0,
+        )
+    }
+
+    /// A line whose box starts `line_indent` from the leading edge of the paragraph and is aligned
+    /// within the paragraph width minus that indent.
+    #[allow(clippy::too_many_arguments)]
+    pub(crate) fn with_line_indent(
+        text_runs: Vec<Rc<dyn TextRun>>,
+        first_text_source_index: i32,
+        length: i32,
+        paragraph_width: f64,
+        paragraph_properties: Rc<dyn TextParagraphProperties>,
+        resolved_flow_direction: FlowDirection,
+        line_break: Option<Rc<TextLineBreak>>,
+        has_collapsed: bool,
+        line_indent: f64,
+    ) -> Rc<Self> {
         Rc::new(Self {
             indexed_text_runs: RefCell::new(None),
             text_runs: RefCell::new(text_runs),
             paragraph_width,
+            line_indent,
             paragraph_properties,
             text_line_metrics: Cell::new(TextLineMetrics::default()),
             text_line_break: RefCell::new(line_break),
@@ -69,6 +99,11 @@ impl TextLineImpl {
     }
 
     /// The logical run table of the line; `None` before [`TextLineImpl::finalize_line`].
+    /// The distance from the leading edge of the paragraph at which the box of the line starts.
+    pub(crate) fn line_indent(&self) -> f64 {
+        self.line_indent
+    }
+
     pub(crate) fn indexed_text_runs(&self) -> Option<Rc<[IndexedTextRun]>> {
         self.indexed_text_runs.borrow().clone()
     }
@@ -193,16 +228,29 @@ impl TextLineImpl {
         distance
     }
 
-    fn get_run_direction(text_run: Option<&dyn TextRun>, current_direction: FlowDirection) -> FlowDirection {
-        if let Some(shaped_text_run) = text_run.and_then(|text_run| text_run.downcast_ref::<ShapedTextRun>()) {
-            return if shaped_text_run.shaped_buffer().is_left_to_right() {
-                FlowDirection::LeftToRight
-            } else {
-                FlowDirection::RightToLeft
-            };
+    /// The direction of a run, from the bidi level it was reordered with. A run without glyphs
+    /// reports the direction it was placed with: the visual walk over a directional span assumes
+    /// that visual order matches logical order, so a run that borrows the direction of its
+    /// neighbour is consumed out of order and shifts every index after it.
+    fn get_run_direction(indexed_text_run: &IndexedTextRun) -> FlowDirection {
+        if indexed_text_run.bidi_level & 1 == 0 {
+            FlowDirection::LeftToRight
+        } else {
+            FlowDirection::RightToLeft
         }
+    }
 
-        current_direction
+    /// The visual index of the end of line run, or -1 when the line does not end with one. The
+    /// runs are in visual order, so in a right-to-left paragraph the last of them is not the end
+    /// of the line: the logical order is read instead.
+    fn get_end_of_line_run_index(&self) -> i32 {
+        let indexed_text_runs = self.indexed_text_runs.borrow();
+        match indexed_text_runs.as_ref().and_then(|runs| runs.last()) {
+            Some(last) if last.text_run.borrow().as_ref().is_some_and(|run| run.as_text_end_of_line().is_some()) => {
+                last.run_index.get()
+            }
+            _ => -1,
+        }
     }
 
     fn get_run_text_source_position(&self, visual_run_index: usize) -> i32 {
@@ -258,7 +306,7 @@ impl TextLineImpl {
                 break;
             }
 
-            let next_direction = Self::get_run_direction(Some(&**next_run), flow_direction);
+            let next_direction = Self::get_run_direction(next_indexed_run);
 
             if next_direction != flow_direction {
                 break;
@@ -715,14 +763,18 @@ impl TextLineImpl {
 
         if self.text_line_break.borrow().is_none() {
             let text_runs = self.text_runs.borrow();
+            let end_of_line_index = self.get_end_of_line_run_index();
 
-            if text_runs.len() > 1 {
-                let last_run = &text_runs[text_runs.len() - 1];
+            if text_runs.len() > 1 && end_of_line_index >= 0 {
+                let end_of_line = text_runs[end_of_line_index as usize].clone();
 
-                if last_run.as_text_end_of_line().is_some() {
-                    *self.text_line_break.borrow_mut() =
-                        Some(Rc::new(TextLineBreak::new(Some(last_run.clone()), FlowDirection::LeftToRight, false)));
-                }
+                *self.text_line_break.borrow_mut() =
+                    Some(Rc::new(TextLineBreak::new(Some(end_of_line), FlowDirection::LeftToRight, false)));
+            } else if self.text_line_metrics.get().newline_length > 0 {
+                // A line that ends at a newline character continues its paragraph. Without a break
+                // the next line would look like the first of a paragraph and take the first-line indent.
+                *self.text_line_break.borrow_mut() =
+                    Some(Rc::new(TextLineBreak::new(None, self.resolved_flow_direction, false)));
             }
         }
     }
@@ -953,7 +1005,7 @@ impl TextLineImpl {
         let overhang_leading = ink_bounds.left();
         // The width of overhanging pixels at the end of the natural bounds. Positive value means we are inside.
         let overhang_trailing = width_including_whitespace - ink_bounds.right();
-        let has_overflowed = MathUtilities::greater_than(width, self.paragraph_width);
+        let has_overflowed = MathUtilities::greater_than(width, self.paragraph_width - self.line_indent);
 
         let start = self.get_paragraph_offset_x(width, width_including_whitespace);
 
@@ -1027,7 +1079,25 @@ impl TextLineImpl {
     /// * `width` — the line width.
     /// * `width_including_trailing_whitespace` — the paragraph width including whitespace.
     fn get_paragraph_offset_x(&self, width: f64, width_including_trailing_whitespace: f64) -> f64 {
-        if self.paragraph_width == f64::INFINITY {
+        // The indent narrows the box on the leading side of the paragraph: a left-to-right box
+        // starts at the indent, a right-to-left box ends at the paragraph width minus the indent.
+        let leading_offset = if self.paragraph_properties.flow_direction() == FlowDirection::LeftToRight {
+            self.line_indent
+        } else {
+            0.0
+        };
+
+        leading_offset
+            + self.get_alignment_offset_x(
+                self.paragraph_width - self.line_indent,
+                width,
+                width_including_trailing_whitespace,
+            )
+    }
+
+    /// The offset of the line within a box of `box_width` for the text alignment of the paragraph.
+    fn get_alignment_offset_x(&self, box_width: f64, width: f64, width_including_trailing_whitespace: f64) -> f64 {
+        if box_width == f64::INFINITY {
             return 0.0;
         }
 
@@ -1065,7 +1135,7 @@ impl TextLineImpl {
 
         match text_alignment {
             TextAlignment::Center => {
-                let mut start = (self.paragraph_width - width) / 2.0;
+                let mut start = (box_width - width) / 2.0;
 
                 if paragraph_flow_direction == FlowDirection::RightToLeft {
                     start -= width_including_trailing_whitespace - width;
@@ -1073,7 +1143,7 @@ impl TextLineImpl {
 
                 start.max(0.0)
             }
-            TextAlignment::Right => (self.paragraph_width - width_including_trailing_whitespace).max(0.0),
+            TextAlignment::Right => (box_width - width_including_trailing_whitespace).max(0.0),
             _ => 0.0,
         }
     }
@@ -1209,13 +1279,39 @@ impl TextLine for TextLineImpl {
             return self;
         };
 
-        let Some(collapsed_runs) = collapsing_properties.collapse(&*self) else {
+        // Both lines dispose their runs, and a collapser may split a run of this line, which
+        // releases one reference to it. So the collapsed line gets its own reference to each run
+        // it reuses, and a run that was split stays valid in this line.
+        let source_runs: Vec<(Rc<dyn TextRun>, i32)> = self
+            .text_runs
+            .borrow()
+            .iter()
+            .filter_map(|run| {
+                let shaped = run.downcast_ref::<ShapedTextRun>()?;
+                let count = shaped.reference_count();
+                shaped.add_reference();
+                Some((run.clone(), count))
+            })
+            .collect();
+
+        let collapsed_runs = collapsing_properties.collapse(&*self);
+
+        for (run, count) in &source_runs {
+            let is_reused = collapsed_runs.as_ref().is_some_and(|runs| runs.iter().any(|other| same_run(other, run)));
+            if let Some(shaped) = run.downcast_ref::<ShapedTextRun>() {
+                if !is_reused && shaped.reference_count() > *count {
+                    shaped.dispose();
+                }
+            }
+        }
+
+        let Some(collapsed_runs) = collapsed_runs else {
             return self;
         };
 
         let has_runs = !collapsed_runs.is_empty();
 
-        let collapsed_line = TextLineImpl::new(
+        let collapsed_line = TextLineImpl::with_line_indent(
             collapsed_runs,
             self.first_text_source_index,
             self.length,
@@ -1224,6 +1320,7 @@ impl TextLine for TextLineImpl {
             self.resolved_flow_direction,
             self.text_line_break(),
             true,
+            self.line_indent,
         );
 
         if has_runs {
@@ -1250,18 +1347,26 @@ impl TextLine for TextLineImpl {
 
         let text_runs_length = text_runs.len();
 
+        let mut first_index = 0i32;
         let mut last_index = text_runs_length as i32 - 1;
 
-        if text_runs[last_index as usize].as_text_end_of_line().is_some() {
+        // The end of line run has no width and is never hit. It sits at the visual end of the
+        // paragraph direction, so it is the first run of a right-to-left line.
+        let end_of_line_index = self.get_end_of_line_run_index();
+
+        if end_of_line_index == last_index {
             last_index -= 1;
+        } else if end_of_line_index == first_index {
+            first_index += 1;
         }
 
-        if last_index < 0 {
+        if last_index < first_index {
             return CharacterHit::new(self.first_text_source_index);
         }
 
         if distance <= 0.0 {
-            return Self::get_run_character_hit(&*text_runs[0], self.get_run_text_source_position(0), 0.0);
+            let first = first_index as usize;
+            return Self::get_run_character_hit(&*text_runs[first], self.get_run_text_source_position(first), 0.0);
         }
 
         if distance >= self.width_including_trailing_whitespace() {
@@ -1276,7 +1381,7 @@ impl TextLine for TextLineImpl {
         let mut character_hit = CharacterHit::default();
         let mut current_distance = 0.0;
 
-        let mut i = 0usize;
+        let mut i = first_index as usize;
 
         while i as i32 <= last_index {
             let mut current_run = &text_runs[i];
@@ -1424,7 +1529,7 @@ impl TextLine for TextLineImpl {
         let mut directional_width = 0.0;
         let first_run_index = current_indexed_run.run_index.get();
 
-        let current_direction = Self::get_run_direction(Some(&*current_text_run), self.resolved_flow_direction);
+        let current_direction = Self::get_run_direction(current_indexed_run);
 
         let current_x = self.start() + self.get_preceding_distance(first_run_index);
 
@@ -1550,8 +1655,7 @@ impl TextLine for TextLineImpl {
         // We can return early if the requested text range is before the line's text range.
         if first_text_source_index + text_length < self.first_text_source_index {
             let indexed_text_run = &indexed_text_runs[0];
-            let current_direction =
-                Self::get_run_direction(indexed_text_run.text_run.borrow().as_deref(), self.resolved_flow_direction);
+            let current_direction = Self::get_run_direction(indexed_text_run);
 
             return vec![TextBounds::new(Rect::new(0.0, 0.0, 0.0, self.height()), current_direction, Vec::new())];
         }
@@ -1559,8 +1663,7 @@ impl TextLine for TextLineImpl {
         // We can return early if the requested text range is after the line's text range.
         if first_text_source_index >= line_end {
             let indexed_text_run = &indexed_text_runs[indexed_text_runs.len() - 1];
-            let current_direction =
-                Self::get_run_direction(indexed_text_run.text_run.borrow().as_deref(), self.resolved_flow_direction);
+            let current_direction = Self::get_run_direction(indexed_text_run);
 
             return vec![TextBounds::new(
                 Rect::new(self.width_including_trailing_whitespace(), 0.0, 0.0, self.height()),
@@ -1580,7 +1683,7 @@ impl TextLine for TextLineImpl {
                 break;
             };
 
-            let current_direction = Self::get_run_direction(Some(&*current_text_run), self.resolved_flow_direction);
+            let current_direction = Self::get_run_direction(current_indexed_run);
 
             if current_indexed_run.text_source_character_index + current_text_run.length() <= first_text_source_index {
                 current_position += current_text_run.length();

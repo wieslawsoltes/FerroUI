@@ -197,8 +197,9 @@ fn should_format_text_line_with_non_text_text_runs_right_to_left() {
     assert_eq!(runs.len(), 5);
     assert_eq!(text_line.length(), 14);
 
-    assert_eq!(shaped(&runs[0]).text().to_string_lossy(), "Hello");
-    assert!(runs[4].is::<TextEndOfParagraph>());
+    // The paragraph end takes the paragraph level, so it is visually first in a right-to-left line.
+    assert!(runs[0].is::<TextEndOfParagraph>());
+    assert_eq!(shaped(&runs[1]).text().to_string_lossy(), "Hello");
 }
 
 #[test]
@@ -1038,6 +1039,68 @@ impl TextParagraphProperties for IncrementalTabProperties {
     }
 }
 
+/// Wrapping properties with a first-line indent and a paragraph indent.
+struct IndentedProperties {
+    default_text_run_properties: Rc<dyn TextRunProperties>,
+}
+
+impl TextParagraphProperties for IndentedProperties {
+    fn flow_direction(&self) -> FlowDirection {
+        FlowDirection::LeftToRight
+    }
+
+    fn text_alignment(&self) -> TextAlignment {
+        TextAlignment::Left
+    }
+
+    fn line_height(&self) -> f64 {
+        0.0
+    }
+
+    fn first_line_in_paragraph(&self) -> bool {
+        true
+    }
+
+    fn default_text_run_properties(&self) -> &Rc<dyn TextRunProperties> {
+        &self.default_text_run_properties
+    }
+
+    fn text_wrapping(&self) -> TextWrapping {
+        TextWrapping::Wrap
+    }
+
+    fn indent(&self) -> f64 {
+        20.0
+    }
+
+    fn paragraph_indent(&self) -> f64 {
+        5.0
+    }
+
+    fn default_incremental_tab(&self) -> f64 {
+        64.0
+    }
+}
+
+#[test]
+fn indents_shift_and_narrow_the_first_line_and_the_paragraph() {
+    let _scope = TextTestScope::new();
+
+    let default_run_properties = default_properties();
+    let paragraph_properties: Rc<dyn TextParagraphProperties> =
+        Rc::new(IndentedProperties { default_text_run_properties: default_run_properties.clone() });
+
+    let text = "aaaa aaaa aaaa";
+    let text_source = simple_source(text, &default_run_properties);
+
+    // 60 fits ten glyphs; the first line has 35 of it, the others 55.
+    let lines = format_lines(&text_source, text.len() as i32, 60.0, &paragraph_properties);
+
+    assert_eq!(lines.iter().map(|line| line_text(&**line)).collect::<Vec<_>>(), ["aaaa ", "aaaa aaaa"]);
+    assert_eq!(lines[0].start(), 25.0);
+    assert_eq!(lines[1].start(), 5.0);
+}
+
 #[test]
 fn line_with_incremental_tab_should_return_correct_backspace_position() {
     let _scope = TextTestScope::new();
@@ -1171,6 +1234,37 @@ fn wrapped_lines_continue_through_the_line_breaks() {
     );
 
     assert_eq!(lines.iter().map(|line| line.first_text_source_index()).collect::<Vec<_>>(), [0, 10, 20]);
+}
+
+#[test]
+fn wrap_with_overflow_breaks_a_word_without_an_opportunity_in_reach_at_the_fitting_length() {
+    let _scope = TextTestScope::new();
+
+    let default_run_properties = default_properties();
+    let paragraph_properties = paragraph_properties(&default_run_properties, TextWrapping::WrapWithOverflow);
+
+    let text = format!("{} b", "a".repeat(5000));
+    let text_source = simple_source(&text, &default_run_properties);
+
+    // 60 fits ten glyphs; the only opportunity is 5000 characters away.
+    let lines = format_lines(&text_source, text.len() as i32, 60.0, &paragraph_properties);
+
+    assert_eq!(lines[0].length(), 10);
+}
+
+#[test]
+fn wrap_with_overflow_still_overflows_a_short_word() {
+    let _scope = TextTestScope::new();
+
+    let default_run_properties = default_properties();
+    let paragraph_properties = paragraph_properties(&default_run_properties, TextWrapping::WrapWithOverflow);
+
+    let text = format!("{} b", "a".repeat(30));
+    let text_source = simple_source(&text, &default_run_properties);
+
+    let lines = format_lines(&text_source, text.len() as i32, 60.0, &paragraph_properties);
+
+    assert_eq!(lines[0].length(), 31);
 }
 
 // ── a run that shapes to no glyphs (upstream's EmptyShapedBufferTests) ──

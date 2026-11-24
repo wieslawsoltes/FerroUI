@@ -6,11 +6,11 @@ use crate::media::text_formatting::shaping_edit;
 use crate::media::text_formatting::text_line_impl::TextLineImpl;
 use crate::media::text_formatting::text_run_cache::CachedShapingResult;
 use crate::media::text_formatting::unicode::{
-    BidiAlgorithm, BidiData, Codepoint, GraphemeEnumerator, LineBreak, LineBreakEnumerator,
+    BidiAlgorithm, BidiData, Codepoint, GraphemeEnumerator, LineBreak, LineBreakClass, LineBreakEnumerator, Script,
 };
 use crate::media::text_formatting::wrapping_text_line_break::WrappingTextLineBreak;
 use crate::media::text_formatting::{
-    GlyphInfo, ITextSource, ShapedBuffer, ShapedTextRun, SplitResult, TextCharacters,
+    GlyphInfo, ITextSource, ShapedBuffer, ShapedTextRun, SplitResult, TextCharacters, TextEndOfParagraph,
     TextFormatter, TextLine, TextLineBreak, TextLineMetricsMode, TextParagraphProperties, TextRun, TextRunCache,
     TextRunProperties, TextShaper, TextShaperOptions, UnshapedTextRun, DEFAULT_TEXT_SOURCE_LENGTH,
 };
@@ -41,6 +41,7 @@ impl TextFormatterImpl {
         cached: &CachedShapingResult,
         first_text_source_index: i32,
         paragraph_width: f64,
+        line_indent: f64,
         paragraph_properties: &Rc<dyn TextParagraphProperties>,
         object_pool: &FormattingObjectPool,
         text_run_cache: &TextRunCache,
@@ -57,7 +58,7 @@ impl TextFormatterImpl {
                 let mut line_runs = Self::add_ref_shaped_runs(&cached.shaped_runs);
                 super::text_tab_layout::resolve_tabs(&mut line_runs, &**paragraph_properties, paragraph_width);
 
-                let text_line = TextLineImpl::new(
+                let text_line = TextLineImpl::with_line_indent(
                     line_runs,
                     first_text_source_index,
                     cached.text_source_length,
@@ -66,6 +67,7 @@ impl TextFormatterImpl {
                     resolved_flow_direction,
                     next_line_break,
                     false,
+                    line_indent,
                 );
 
                 Self::finalize_line(&text_line, Some(text_run_cache));
@@ -80,6 +82,7 @@ impl TextFormatterImpl {
                     false,
                     first_text_source_index,
                     paragraph_width,
+                    line_indent,
                     paragraph_properties,
                     resolved_flow_direction,
                     next_line_break.as_ref(),
@@ -341,6 +344,7 @@ impl TextFormatterImpl {
 
                     let mut text = shapeable_run.text();
                     let properties = shapeable_run.run_properties().clone();
+                    let mut script = shapeable_run.script();
 
                     while index + 1 < processed_runs.len() {
                         let Some(next_run) = processed_runs[index + 1].clone().downcast_rc::<UnshapedTextRun>() else {
@@ -349,15 +353,19 @@ impl TextFormatterImpl {
 
                         if shapeable_run.bidi_level() == next_run.bidi_level() {
                             if let Some(joined_text) = Self::try_join_contiguous_memories(&text, &next_run.text()) {
-                                if Self::can_shape_together(
-                                    &*properties,
-                                    &**next_run.run_properties(),
-                                    paragraph_properties.line_metrics_mode(),
-                                ) {
+                                let joined_script = Self::try_join_scripts(script, next_run.script());
+                                if joined_script.is_some()
+                                    && Self::can_shape_together(
+                                        &*properties,
+                                        &**next_run.run_properties(),
+                                        paragraph_properties.line_metrics_mode(),
+                                    )
+                                {
                                     grouped_runs.push(next_run.clone());
                                     index += 1;
                                     shapeable_run = next_run;
                                     text = joined_text;
+                                    script = joined_script.unwrap_or(script);
                                     continue;
                                 }
                             }
@@ -420,6 +428,19 @@ impl TextFormatterImpl {
         }
 
         None
+    }
+
+    /// Joins the scripts of two neighbouring runs. Runs of two different scripts do not share a
+    /// buffer: the shaper picks one script for the whole buffer, so the other one would be shaped
+    /// without its complex-script rules.
+    fn try_join_scripts(x: Script, y: Script) -> Option<Script> {
+        if x == y || matches!(y, Script::Common | Script::Unknown) {
+            Some(x)
+        } else if matches!(x, Script::Common | Script::Unknown) {
+            Some(y)
+        } else {
+            None
+        }
     }
 
     // Deviation (DEVIATIONS.md, Text formatting): `TextFormatterImpl.CanShapeTogether` compares the em size,
@@ -753,11 +774,45 @@ impl TextFormatterImpl {
         measured_length
     }
 
+    /// The distance from the leading edge of the paragraph at which a line starts. Every line is
+    /// offset by the paragraph indent; the first line of a paragraph also by the first-line
+    /// indent. A line is the first one when the properties say so and nothing precedes it or
+    /// the line before ended the paragraph: a line after a wrap or a hard line break continues
+    /// the paragraph. A negative first-line indent makes the first line hang past the edge.
+    pub(crate) fn get_line_indent(
+        paragraph_properties: &dyn TextParagraphProperties,
+        previous_line_break: Option<&Rc<TextLineBreak>>,
+    ) -> f64 {
+        let sanitize = |value: f64| if value.is_finite() { value } else { 0.0 };
+        let mut line_indent = sanitize(paragraph_properties.paragraph_indent());
+
+        let is_first_line = paragraph_properties.first_line_in_paragraph()
+            && previous_line_break.is_none_or(|line_break| {
+                line_break.text_end_of_line().is_some_and(|run| run.is::<TextEndOfParagraph>())
+            });
+
+        if is_first_line {
+            line_indent += sanitize(paragraph_properties.indent());
+        }
+
+        line_indent
+    }
+
     /// Creates an empty text line.
     pub fn create_empty_text_line(
         first_text_source_index: i32,
         paragraph_width: f64,
         paragraph_properties: &Rc<dyn TextParagraphProperties>,
+    ) -> Rc<TextLineImpl> {
+        Self::create_indented_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties, 0.0)
+    }
+
+    /// Creates an empty text line with the indent `line_indent`.
+    pub(crate) fn create_indented_empty_text_line(
+        first_text_source_index: i32,
+        paragraph_width: f64,
+        paragraph_properties: &Rc<dyn TextParagraphProperties>,
+        line_indent: f64,
     ) -> Rc<TextLineImpl> {
         let flow_direction = paragraph_properties.flow_direction();
         let properties = paragraph_properties.default_text_run_properties();
@@ -775,7 +830,7 @@ impl TextFormatterImpl {
 
         let text_runs: Vec<Rc<dyn TextRun>> = vec![Rc::new(ShapedTextRun::new(shaped_buffer, properties.clone()))];
 
-        let line = TextLineImpl::new(
+        let line = TextLineImpl::with_line_indent(
             text_runs,
             first_text_source_index,
             0,
@@ -784,6 +839,7 @@ impl TextFormatterImpl {
             flow_direction,
             None,
             false,
+            line_indent,
         );
 
         line.finalize_line();
@@ -807,6 +863,7 @@ impl TextFormatterImpl {
         can_reuse_text_run_list: bool,
         first_text_source_index: i32,
         paragraph_width: f64,
+        line_indent: f64,
         paragraph_properties: &Rc<dyn TextParagraphProperties>,
         resolved_flow_direction: FlowDirection,
         current_line_break: Option<&Rc<TextLineBreak>>,
@@ -814,11 +871,17 @@ impl TextFormatterImpl {
         text_run_cache: Option<&TextRunCache>,
     ) -> Rc<TextLineImpl> {
         if text_runs.is_empty() {
-            return Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties);
+            return Self::create_indented_empty_text_line(
+                first_text_source_index,
+                paragraph_width,
+                paragraph_properties,
+                line_indent,
+            );
         }
 
         super::text_tab_layout::resolve_tabs(text_runs, &**paragraph_properties, paragraph_width);
-        let measured_length = Self::find_wrap_length(text_runs, paragraph_width, &**paragraph_properties);
+        let measured_length =
+            Self::find_wrap_length(text_runs, paragraph_width - line_indent, &**paragraph_properties);
 
         let (split, mut split_length) = Self::split_text_runs_with_length(text_runs, measured_length, object_pool);
 
@@ -834,7 +897,8 @@ impl TextFormatterImpl {
             if !super::text_tab_layout::resolve_tabs(pre_split, &**paragraph_properties, paragraph_width) {
                 break;
             }
-            let adjusted_length = Self::find_wrap_length(pre_split, paragraph_width, &**paragraph_properties);
+            let adjusted_length =
+                Self::find_wrap_length(pre_split, paragraph_width - line_indent, &**paragraph_properties);
             if adjusted_length >= split_length {
                 break;
             }
@@ -887,7 +951,12 @@ impl TextFormatterImpl {
         };
 
         let text_line = match &mut pre_split_runs {
-            None => Self::create_empty_text_line(first_text_source_index, paragraph_width, paragraph_properties),
+            None => Self::create_indented_empty_text_line(
+                first_text_source_index,
+                paragraph_width,
+                paragraph_properties,
+                line_indent,
+            ),
             Some(pre_split_runs) => {
                 if has_post_split_runs {
                     Self::reset_trailing_whitespace_bidi_levels(
@@ -903,7 +972,7 @@ impl TextFormatterImpl {
                 // no second-pass length sum required.
                 let remaining_text_runs: Vec<Rc<dyn TextRun>> = pre_split_runs.drain(..).collect();
 
-                let text_line = TextLineImpl::new(
+                let text_line = TextLineImpl::with_line_indent(
                     remaining_text_runs,
                     first_text_source_index,
                     split_length,
@@ -912,6 +981,7 @@ impl TextFormatterImpl {
                     resolved_flow_direction,
                     text_line_break,
                     false,
+                    line_indent,
                 );
 
                 Self::finalize_line(&text_line, text_run_cache);
@@ -962,6 +1032,9 @@ impl TextFormatterImpl {
 
         let mut current_position = 0;
 
+        // Where the whitespace that ends the previous runs starts.
+        let mut whitespace_start = 0;
+
         let wrapping_mode = paragraph_properties.text_wrapping();
         let run_count = text_runs.len();
 
@@ -976,10 +1049,26 @@ impl TextFormatterImpl {
             if current_run.is::<ShapedTextRun>() {
                 // The run's break opportunities, from the table of the text it was split from
                 // (section 9.16).
-                let mut line_breaker = Self::run_line_breaks(&**current_run);
+                let mut line_breaker = Self::run_line_breaks(&**current_run, measured_length - current_length);
+
+                // Shaping splits runs at every script change, which in Japanese text happens
+                // between nearly every Han and kana character, so the end of a run followed by
+                // another one is an opportunity only if the characters on both sides allow it.
+                let mut end_is_opportunity = text_runs.get(index + 1).is_some_and(|next| {
+                    next.is::<ShapedTextRun>()
+                        && !next.text_span().is_empty()
+                        && Self::is_break_between(current_run.text_span(), next.text_span())
+                });
 
                 while let Some(mut line_break) = line_breaker.move_next() {
-                    if line_break.required() && current_length + line_break.position_measure() as i32 <= measured_length {
+                    // Whitespace at the start of the run continues that of the previous runs.
+                    let measure_position = if line_break.position_measure() == 0 {
+                        whitespace_start
+                    } else {
+                        current_length + line_break.position_measure() as i32
+                    };
+
+                    if line_break.required() && measure_position <= measured_length {
                         // Explicit break found
                         break_found = true;
 
@@ -988,7 +1077,7 @@ impl TextFormatterImpl {
                         break;
                     }
 
-                    if current_length + line_break.position_measure() as i32 > measured_length {
+                    if measure_position > measured_length {
                         if wrapping_mode == TextWrapping::WrapWithOverflow {
                             if last_wrap_position > 0 {
                                 current_position = last_wrap_position;
@@ -1000,7 +1089,7 @@ impl TextFormatterImpl {
 
                             // Find next possible wrap position (overflow)
                             if index < run_count - 1 {
-                                if line_break.position_wrap() as i32 != current_run_length {
+                                if end_is_opportunity || line_break.position_wrap() as i32 != current_run_length {
                                     // We already found the next possible wrap position.
                                     break_found = true;
 
@@ -1027,7 +1116,13 @@ impl TextFormatterImpl {
                                     current_run = &text_runs[index];
                                     current_run_length = current_run.length();
 
-                                    line_breaker = Self::run_line_breaks(&**current_run);
+                                    line_breaker =
+                                        Self::run_line_breaks(&**current_run, measured_length - current_length);
+                                    end_is_opportunity = text_runs.get(index + 1).is_some_and(|next| {
+                                        next.is::<ShapedTextRun>()
+                                            && !next.text_span().is_empty()
+                                            && Self::is_break_between(current_run.text_span(), next.text_span())
+                                    });
                                 }
                             } else {
                                 current_position = current_length + line_break.position_wrap() as i32;
@@ -1050,15 +1145,34 @@ impl TextFormatterImpl {
                         break;
                     }
 
-                    if line_break.position_measure() != line_break.position_wrap()
+                    if end_is_opportunity
+                        || line_break.position_measure() != line_break.position_wrap()
                         || line_break.position_wrap() as i32 != current_run_length
                     {
                         last_wrap_position = current_length + line_break.position_wrap() as i32;
                     }
                 }
+
+                if !break_found && line_breaker.limit_reached() {
+                    // No opportunity in reach of the line: the last one, or the fitting length.
+                    current_position = if last_wrap_position == 0 { measured_length } else { last_wrap_position };
+
+                    break_found = true;
+                }
             }
 
             if !break_found {
+                if current_run.is::<ShapedTextRun>() {
+                    let trailing_whitespace_start = Self::find_trailing_whitespace_start(current_run.text_span());
+
+                    // A run of only whitespace leaves the start of the previous runs in place.
+                    if trailing_whitespace_start > 0 {
+                        whitespace_start = current_length + trailing_whitespace_start as i32;
+                    }
+                } else {
+                    whitespace_start = current_length + current_run_length;
+                }
+
                 current_length += current_run_length;
 
                 index += 1;
@@ -1074,10 +1188,56 @@ impl TextFormatterImpl {
         measured_length
     }
 
+    /// Whether the line break rules allow a break between the end of `before` and the start of
+    /// `after`. The rules look at a few characters on each side, so a short window of both is
+    /// enough, and the break tables of the runs stay valid for everything inside them.
+    fn is_break_between(before: &[u16], after: &[u16]) -> bool {
+        const WINDOW: usize = 16;
+        let is_low_surrogate = |unit: u16| (0xDC00..=0xDFFF).contains(&unit);
+
+        let mut start = before.len().saturating_sub(WINDOW);
+        if start > 0 && is_low_surrogate(before[start]) {
+            start -= 1;
+        }
+        let mut end = after.len().min(WINDOW);
+        if end < after.len() && is_low_surrogate(after[end]) {
+            end += 1;
+        }
+
+        let boundary = before.len() - start;
+        let mut window = [0u16; 2 * WINDOW + 2];
+        window[..boundary].copy_from_slice(&before[start..]);
+        window[boundary..boundary + end].copy_from_slice(&after[..end]);
+
+        let mut enumerator = LineBreakEnumerator::new(&window[..boundary + end]);
+        while let Some(line_break) = enumerator.move_next() {
+            match line_break.position_wrap().cmp(&boundary) {
+                std::cmp::Ordering::Less => {}
+                std::cmp::Ordering::Equal => return true,
+                std::cmp::Ordering::Greater => return false,
+            }
+        }
+        false
+    }
+
+    /// The index of the first of the spaces that end `text`, or its length when it does not end
+    /// in a space, so that whitespace continued from a previous run hangs on the line.
+    fn find_trailing_whitespace_start(text: &[u16]) -> usize {
+        let mut position = text.len();
+        while position > 0 {
+            let (codepoint, count) = Codepoint::read_at(text, position - 1);
+            if codepoint.line_break_class() != LineBreakClass::Space {
+                break;
+            }
+            position -= count;
+        }
+        position
+    }
+
     /// The break opportunities of a shaped run's text.
-    fn run_line_breaks(run: &dyn TextRun) -> super::shaped_buffer::RunLineBreaks<'_> {
+    fn run_line_breaks(run: &dyn TextRun, measured_length: i32) -> super::shaped_buffer::RunLineBreaks<'_> {
         match run.downcast_ref::<ShapedTextRun>() {
-            Some(shaped) => shaped.shaped_buffer().line_breaks(),
+            Some(shaped) => shaped.shaped_buffer().line_breaks(measured_length),
             None => super::shaped_buffer::RunLineBreaks::Enumerator(LineBreakEnumerator::new(run.text_span())),
         }
     }
@@ -1185,6 +1345,7 @@ impl TextFormatter for TextFormatterImpl {
         crate::perf_count!(TextLinesFormatted);
         let object_pool = FormattingObjectPool::instance();
         let font_manager = FontManager::current();
+        let line_indent = Self::get_line_indent(&**paragraph_properties, previous_line_break);
 
         // we've wrapped the previous line and need to continue wrapping: ignore the text source and do that instead
         if let Some(previous_line_break) = previous_line_break {
@@ -1198,6 +1359,7 @@ impl TextFormatter for TextFormatterImpl {
                             true,
                             first_text_source_index,
                             paragraph_width,
+                            line_indent,
                             paragraph_properties,
                             previous_line_break.flow_direction(),
                             Some(previous_line_break),
@@ -1220,6 +1382,7 @@ impl TextFormatter for TextFormatterImpl {
                     &cached,
                     first_text_source_index,
                     paragraph_width,
+                    line_indent,
                     paragraph_properties,
                     object_pool,
                     text_run_cache,
@@ -1265,7 +1428,7 @@ impl TextFormatter for TextFormatterImpl {
                 let mut line_runs: Vec<Rc<dyn TextRun>> = shaped_text_runs.drain(..).collect();
                 super::text_tab_layout::resolve_tabs(&mut line_runs, &**paragraph_properties, paragraph_width);
 
-                let text_line = TextLineImpl::new(
+                let text_line = TextLineImpl::with_line_indent(
                     line_runs,
                     first_text_source_index,
                     text_source_length,
@@ -1274,6 +1437,7 @@ impl TextFormatter for TextFormatterImpl {
                     resolved_flow_direction,
                     next_line_break,
                     false,
+                    line_indent,
                 );
 
                 Self::finalize_line(&text_line, text_run_cache);
@@ -1285,6 +1449,7 @@ impl TextFormatter for TextFormatterImpl {
                 false,
                 first_text_source_index,
                 paragraph_width,
+                line_indent,
                 paragraph_properties,
                 resolved_flow_direction,
                 next_line_break.as_ref(),

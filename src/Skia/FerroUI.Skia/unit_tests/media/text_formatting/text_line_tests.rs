@@ -1926,9 +1926,18 @@ fn should_get_text_bounds_bidi() {
 
     bounds = text_line.get_text_bounds(0, 25);
 
-    assert_eq!(4, bounds.len());
+    assert_eq!(5, bounds.len());
 
     assert_eq!(text_line.width_including_trailing_whitespace(), bounds.last().unwrap().rectangle().right());
+
+    // The paragraph end takes the left-to-right paragraph level, so it closes the line as an empty
+    // left-to-right span after the trailing Hebrew word instead of joining it.
+    let end_of_paragraph_bounds = bounds.last().unwrap();
+    assert_eq!(FlowDirection::LeftToRight, end_of_paragraph_bounds.flow_direction());
+    assert_eq!(0.0, end_of_paragraph_bounds.rectangle().width);
+    let run_bounds = end_of_paragraph_bounds.text_run_bounds();
+    assert_eq!(1, run_bounds.len());
+    assert!(run_bounds[0].text_run().downcast_ref::<TextEndOfParagraph>().is_some());
 }
 
 #[test]

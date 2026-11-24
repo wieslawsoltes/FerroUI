@@ -292,7 +292,7 @@ impl TextCharacters {
                 let require_full_cluster = pass == 0;
 
                 if default_can_shape {
-                    if let Some(count) = Self::try_get_shapeable_length(
+                    if let Some((count, script)) = Self::try_get_shapeable_length_and_script(
                         text_span,
                         &default_glyph_typeface,
                         None,
@@ -302,7 +302,9 @@ impl TextCharacters {
                         // Primary font: the properties already carry this typeface, so reuse them
                         // directly. This avoids a needless copy and preserves a custom
                         // TextRunProperties implementation that with_typeface would otherwise flatten.
-                        return UnshapedTextRun::new(text.slice(0, count), default_properties.clone(), bidi_level);
+                        return UnshapedTextRun::with_script(
+                            text.slice(0, count), default_properties.clone(), bidi_level, script,
+                        );
                     }
                 }
 
@@ -311,17 +313,18 @@ impl TextCharacters {
                         (&previous_glyph_typeface, previous_typeface)
                     {
                         if !require_shaping_capability || previous_glyph_typeface.can_shape_script(first_script) {
-                            if let Some(count) = Self::try_get_shapeable_length(
+                            if let Some((count, script)) = Self::try_get_shapeable_length_and_script(
                                 text_span,
                                 previous_glyph_typeface,
                                 Some(&default_glyph_typeface),
                                 default_can_shape,
                                 require_full_cluster,
                             ) {
-                                return UnshapedTextRun::new(
+                                return UnshapedTextRun::with_script(
                                     text.slice(0, count),
                                     default_properties.with_typeface(previous_typeface),
                                     bidi_level,
+                                    script,
                                 );
                             }
                         }
@@ -367,17 +370,18 @@ impl TextCharacters {
                 if let (Some(fallback_glyph_typeface), Some(fallback_typeface)) =
                     (&fallback_glyph_typeface, &fallback_typeface)
                 {
-                    if let Some(count) = Self::try_get_shapeable_length(
+                    if let Some((count, script)) = Self::try_get_shapeable_length_and_script(
                         text_span,
                         fallback_glyph_typeface,
                         Some(&default_glyph_typeface),
                         default_can_shape,
                         require_full_cluster,
                     ) {
-                        return UnshapedTextRun::new(
+                        return UnshapedTextRun::with_script(
                             text.slice(0, count),
                             default_properties.with_typeface(fallback_typeface),
                             bidi_level,
+                            script,
                         );
                     }
                 }
@@ -447,6 +451,25 @@ impl TextCharacters {
         default_can_shape_script: bool,
         require_full_cluster: bool,
     ) -> Option<usize> {
+        Self::try_get_shapeable_length_and_script(
+            text,
+            glyph_typeface,
+            default_glyph_typeface,
+            default_can_shape_script,
+            require_full_cluster,
+        )
+        .map(|(length, _)| length)
+    }
+
+    /// [`try_get_shapeable_length`](Self::try_get_shapeable_length) with the script of the
+    /// shapeable text: its first script other than common or inherited, or common when it has none.
+    fn try_get_shapeable_length_and_script(
+        text: &[u16],
+        glyph_typeface: &GlyphTypeface,
+        default_glyph_typeface: Option<&GlyphTypeface>,
+        default_can_shape_script: bool,
+        require_full_cluster: bool,
+    ) -> Option<(usize, Script)> {
         let mut length = 0usize;
         let mut script = Script::Unknown;
 
@@ -549,7 +572,8 @@ impl TextCharacters {
             }
         }
 
-        (length > 0).then_some(length)
+        let script = if script == Script::Inherited { Script::Common } else { script };
+        (length > 0).then_some((length, script))
     }
 
     /// Whether a character of script `current` continues a run whose script so far is `script`
