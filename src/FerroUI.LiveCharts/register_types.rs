@@ -1,14 +1,14 @@
-use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition};
+use ferroui_base::metadata::{MarkupAssembly, MarkupType, MarkupTyped, XmlnsDefinition, FERRO_XML_NAMESPACE};
 use ferroui_base::TypeInfo;
 
 const NAMESPACES: &[(&str, &str)] = &[("ferroui_livecharts", "FerroUI.LiveCharts.Core")];
 pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
     name: "FerroUI.LiveCharts",
     crate_name: "ferroui_livecharts",
-    xmlns_definitions: &[XmlnsDefinition {
-        xml_namespace: "https://ferroui.dev/livecharts/core",
-        namespace: "FerroUI.LiveCharts.Core",
-    }],
+    xmlns_definitions: &[
+        XmlnsDefinition { xml_namespace: "https://ferroui.dev/livecharts/core", namespace: "FerroUI.LiveCharts.Core" },
+        XmlnsDefinition { xml_namespace: FERRO_XML_NAMESPACE, namespace: "FerroUI.LiveCharts.Core" },
+    ],
     xmlns_prefixes: &[],
     metadata: &[],
 };

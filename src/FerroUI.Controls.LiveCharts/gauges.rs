@@ -2,7 +2,7 @@
 //! `PieChartExtensions.AsSeries` with `GaugeOptions`): the pie series of a solid gauge or of the
 //! sections of an angular gauge, and the fill series behind them. The theme's gauge rules
 //! (`HasRuleForGaugeSeries`, `HasRuleForGaugeFillSeries`) are applied by the chart to every gauge
-//! series (`Chart`), so a gauge built here or by hand looks the same.
+//! series (`LiveChart`), so a gauge built here or by hand looks the same.
 
 use crate::{ChartPoint, ChartPoints, PieSeries};
 use ferroui_base::Ref;

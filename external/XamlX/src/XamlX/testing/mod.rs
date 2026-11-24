@@ -26,7 +26,7 @@ use crate::exceptions::{XamlError, XamlResult};
 use crate::type_system::{
     xaml_types_sequence_equal, IXamlAssembly, IXamlConstructor, IXamlCustomAttribute,
     IXamlEventInfo, IXamlField, IXamlMember, IXamlMethod, IXamlParameterInfo, IXamlProperty,
-    IXamlType, IXamlTypeSystem, XamlPseudoType, XamlTypeId, XamlTypeWellKnownTypes, XamlValue,
+    IXamlType, IXamlTypeSystem, XamlPseudoType, XamlTypeId, XamlTypeWellKnownTypes, XmlnsTypeAlias, XamlValue,
 };
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq)]
@@ -1288,9 +1288,19 @@ pub struct FakeAssembly {
     name: String,
     types: RefCell<Vec<Rc<FakeType>>>,
     custom_attributes: RefCell<Vec<Rc<dyn IXamlCustomAttribute>>>,
+    xmlns_type_aliases: RefCell<Vec<XmlnsTypeAlias>>,
 }
 
 impl FakeAssembly {
+    /// States a name `xml_namespace` keeps for the type `type_name`.
+    pub fn add_xmlns_type_alias(&self, xml_namespace: &str, name: &str, type_name: &str) {
+        self.xmlns_type_aliases.borrow_mut().push(XmlnsTypeAlias {
+            xml_namespace: xml_namespace.to_string(),
+            name: name.to_string(),
+            type_name: type_name.to_string(),
+        });
+    }
+
     fn define(
         &self,
         namespace: &str,
@@ -1401,6 +1411,9 @@ impl IXamlAssembly for FakeAssembly {
     fn name(&self) -> String {
         self.name.clone()
     }
+    fn xmlns_type_aliases(&self) -> Vec<XmlnsTypeAlias> {
+        self.xmlns_type_aliases.borrow().clone()
+    }
     fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
         self.custom_attributes.borrow().clone()
     }
@@ -1448,6 +1461,7 @@ impl FakeTypeSystem {
             name: name.to_string(),
             types: RefCell::new(Vec::new()),
             custom_attributes: RefCell::new(Vec::new()),
+            xmlns_type_aliases: RefCell::new(Vec::new()),
         });
         self.assemblies.borrow_mut().push(assembly.clone());
         assembly

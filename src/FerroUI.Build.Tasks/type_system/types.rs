@@ -16,7 +16,7 @@ use std::rc::{Rc, Weak};
 
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::type_system::{
-    AnonymousParameterInfo, IXamlAssembly, IXamlConstructor, IXamlCustomAttribute, IXamlEventInfo, IXamlField, IXamlMember, IXamlMethod,
+    XmlnsTypeAlias, AnonymousParameterInfo, IXamlAssembly, IXamlConstructor, IXamlCustomAttribute, IXamlEventInfo, IXamlField, IXamlMember, IXamlMethod,
     IXamlParameterInfo, IXamlProperty, IXamlType, XamlPseudoType, XamlTypeId, XamlValue,
 };
 
@@ -1040,6 +1040,9 @@ impl IXamlAssembly for ModelAssembly {
         };
         *self.attributes.borrow_mut() = Some(attributes.clone());
         attributes
+    }
+    fn xmlns_type_aliases(&self) -> Vec<XmlnsTypeAlias> {
+        self.system.upgrade().map_or_else(Vec::new, |system| system.assembly_type_aliases(self))
     }
     fn find_type(&self, full_name: &str) -> Option<Rc<dyn IXamlType>> {
         let system = self.system.upgrade()?;

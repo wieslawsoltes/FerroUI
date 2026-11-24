@@ -21,9 +21,9 @@ use ferroui_base::{Point, Ref, Size};
 use ferroui_base::animation::SignedDuration;
 use ferroui_base::utilities::DateTime;
 use ferroui_controls_livecharts::{
-    AngularTicksVisual, Axis, BoxSeries, CandlesticksSeries, CartesianChart, Chart, ChartPoint,
-    ChartSeries, ChartVisualElement, ColumnSeries, DateTimeAxis, GeoMap, GeoMarker, HeatLand,
-    HeatLandSeries, HeatLands, HeatLegend, HeatSeries, Labeler, LegendPosition, LineSeries,
+    AngularTicksVisual, LiveAxis, BoxSeries, CandlesticksSeries, CartesianChart, LiveChart, ChartPoint,
+    ChartSeries, ChartVisualElement, ColumnSeries, LiveDateTimeAxis, GeoMap, GeoMarker, HeatLand,
+    HeatLandSeries, HeatLands, HeatLegend, HeatSeries, Labeler, LegendPosition, LiveLineSeries,
     MapProjection,
     Maps, NeedleVisual, OhlcSeries, PieChart, PieSeries, PolarChart, PolarLabelsPosition,
     PolarLineSeries, RangeColumnSeries, RangeLineSeries, RangeRowSeries, RowSeries, SankeyChart,
@@ -41,13 +41,13 @@ use ferroui_livecharts::{COTANGENT_ANGLE, TANGENT_ANGLE};
 pub struct Scenario {
     pub name: &'static str,
     pub size: Size,
-    pub build: fn() -> Ref<Chart>,
-    pub then: Option<fn(&Chart)>,
+    pub build: fn() -> Ref<LiveChart>,
+    pub then: Option<fn(&LiveChart)>,
 }
 
 const SQUARE: Size = Size::new(600.0, 600.0);
 
-fn scenario(name: &'static str, build: fn() -> Ref<Chart>) -> Scenario {
+fn scenario(name: &'static str, build: fn() -> Ref<LiveChart>) -> Scenario {
     Scenario {
         name,
         size: SQUARE,
@@ -56,7 +56,7 @@ fn scenario(name: &'static str, build: fn() -> Ref<Chart>) -> Scenario {
     }
 }
 
-fn changed(name: &'static str, build: fn() -> Ref<Chart>, then: fn(&Chart)) -> Scenario {
+fn changed(name: &'static str, build: fn() -> Ref<LiveChart>, then: fn(&LiveChart)) -> Scenario {
     Scenario {
         name,
         size: SQUARE,
@@ -65,7 +65,7 @@ fn changed(name: &'static str, build: fn() -> Ref<Chart>, then: fn(&Chart)) -> S
     }
 }
 
-fn sized(name: &'static str, width: f64, height: f64, build: fn() -> Ref<Chart>) -> Scenario {
+fn sized(name: &'static str, width: f64, height: f64, build: fn() -> Ref<LiveChart>) -> Scenario {
     Scenario {
         name,
         size: Size::new(width, height),
@@ -257,8 +257,8 @@ pub fn scenarios() -> Vec<Scenario> {
 
 // Construction helpers.
 
-fn cartesian(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
-    let chart = CartesianChart::new().upcast::<Chart>();
+fn cartesian(series: Vec<Ref<ChartSeries>>) -> Ref<LiveChart> {
+    let chart = CartesianChart::new().upcast::<LiveChart>();
     for s in series {
         chart.series().add(s);
     }
@@ -266,8 +266,8 @@ fn cartesian(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
     chart
 }
 
-fn pie_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
-    let chart = PieChart::new().upcast::<Chart>();
+fn pie_chart(series: Vec<Ref<ChartSeries>>) -> Ref<LiveChart> {
+    let chart = PieChart::new().upcast::<LiveChart>();
     for s in series {
         chart.series().add(s);
     }
@@ -276,8 +276,8 @@ fn pie_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
 }
 
 /// A polar chart: its X axes are the angle axes, its Y axes the radius axes.
-fn polar_chart(series: Vec<Ref<ChartSeries>>) -> Ref<Chart> {
-    let chart = PolarChart::new().upcast::<Chart>();
+fn polar_chart(series: Vec<Ref<ChartSeries>>) -> Ref<LiveChart> {
+    let chart = PolarChart::new().upcast::<LiveChart>();
     for s in series {
         chart.series().add(s);
     }
@@ -320,8 +320,8 @@ fn coordinates<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(
     series
 }
 
-fn axis(configure: impl FnOnce(&Axis)) -> Ref<Axis> {
-    let axis = Axis::new();
+fn axis(configure: impl FnOnce(&LiveAxis)) -> Ref<LiveAxis> {
+    let axis = LiveAxis::new();
     configure(&axis);
     axis
 }
@@ -336,7 +336,7 @@ fn rgb(hex: u32) -> Color {
 
 /// The source's numeric values map to their index; after an edit of the collection the native
 /// points, which carry their X, get the index again.
-fn edit(chart: &Chart, change: impl FnOnce(&ferroui_controls_livecharts::ChartPoints)) {
+fn edit(chart: &LiveChart, change: impl FnOnce(&ferroui_controls_livecharts::ChartPoints)) {
     let points = chart.series().get(0).values();
     change(&points);
     for (i, p) in points.to_vec().iter().enumerate() {
@@ -346,7 +346,7 @@ fn edit(chart: &Chart, change: impl FnOnce(&ferroui_controls_livecharts::ChartPo
 
 // ColumnSeriesTests and RowSeriesTests.
 
-fn column_basic() -> Ref<Chart> {
+fn column_basic() -> Ref<LiveChart> {
     let chart = cartesian(vec![
         values(ColumnSeries::new(), &[1., 5., 6.]),
         values(ColumnSeries::new(), &[4., 2., 3.]),
@@ -360,7 +360,7 @@ fn column_basic() -> Ref<Chart> {
     chart
 }
 
-fn layered<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make: fn() -> Ref<T>) -> Ref<Chart> {
+fn layered<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make: fn() -> Ref<T>) -> Ref<LiveChart> {
     let a = values(make(), &[6., 3., 5., 7., 3., 4., 6., 3.]);
     a.set_max_bar_width(999_999.);
     a.set_ignores_bar_position(true);
@@ -370,14 +370,14 @@ fn layered<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make
     cartesian(vec![a, b])
 }
 
-fn spacing<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make: fn() -> Ref<T>) -> Ref<Chart> {
+fn spacing<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make: fn() -> Ref<T>) -> Ref<LiveChart> {
     let a = values(make(), &[6., 3., 5.]);
     a.set_padding(0.);
     a.set_max_bar_width(999_999.);
     cartesian(vec![a])
 }
 
-fn background<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make: fn() -> Ref<T>) -> Ref<Chart> {
+fn background<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make: fn() -> Ref<T>) -> Ref<LiveChart> {
     // IsHoverable has no native counterpart.
     let back = values(make(), &[10., 10., 10.]);
     back.set_fill(Some(Color::from_argb(50, 180, 180, 180)));
@@ -387,17 +387,17 @@ fn background<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(m
     cartesian(vec![back, front])
 }
 
-fn column_layered() -> Ref<Chart> {
+fn column_layered() -> Ref<LiveChart> {
     layered(ColumnSeries::new)
 }
-fn column_spacing() -> Ref<Chart> {
+fn column_spacing() -> Ref<LiveChart> {
     spacing(ColumnSeries::new)
 }
-fn column_background() -> Ref<Chart> {
+fn column_background() -> Ref<LiveChart> {
     background(ColumnSeries::new)
 }
 
-fn row_basic() -> Ref<Chart> {
+fn row_basic() -> Ref<LiveChart> {
     let chart = cartesian(vec![
         values(RowSeries::new(), &[1., 5., 6.]),
         values(RowSeries::new(), &[4., 2., 3.]),
@@ -409,29 +409,29 @@ fn row_basic() -> Ref<Chart> {
     }));
     chart
 }
-fn row_layered() -> Ref<Chart> {
+fn row_layered() -> Ref<LiveChart> {
     layered(RowSeries::new)
 }
-fn row_spacing() -> Ref<Chart> {
+fn row_spacing() -> Ref<LiveChart> {
     spacing(RowSeries::new)
 }
-fn row_background() -> Ref<Chart> {
+fn row_background() -> Ref<LiveChart> {
     background(RowSeries::new)
 }
 
 // LineSeriesTests.
 
-fn line_basic() -> Ref<Chart> {
+fn line_basic() -> Ref<LiveChart> {
     cartesian(vec![
-        values(LineSeries::new(), &[1., 5., 7., 3.]),
-        values(LineSeries::new(), &[4., 2., 8., 6.]),
-        values(LineSeries::new(), &[2., 6., 4., 8.]),
+        values(LiveLineSeries::new(), &[1., 5., 7., 3.]),
+        values(LiveLineSeries::new(), &[4., 2., 8., 6.]),
+        values(LiveLineSeries::new(), &[2., 6., 4., 8.]),
     ])
 }
 
-fn line_area() -> Ref<Chart> {
+fn line_area() -> Ref<LiveChart> {
     // GeometryFill and GeometryStroke null: no markers.
-    let s = values(LineSeries::new(), &[1., 5., 7., 3.]);
+    let s = values(LiveLineSeries::new(), &[1., 5., 7., 3.]);
     s.set_fill(Some(rgb(0x6495ED)));
     s.set_stroke(None);
     s.set_stroke_width(0.);
@@ -439,15 +439,15 @@ fn line_area() -> Ref<Chart> {
     cartesian(vec![s])
 }
 
-fn line_smoothness(smoothness: f64) -> Ref<Chart> {
-    let s = values(LineSeries::new(), &[0., 10., 0., 10., 0.]);
+fn line_smoothness(smoothness: f64) -> Ref<LiveChart> {
+    let s = values(LiveLineSeries::new(), &[0., 10., 0., 10., 0.]);
     s.set_line_smoothness(smoothness);
     cartesian(vec![s])
 }
-fn line_straight() -> Ref<Chart> {
+fn line_straight() -> Ref<LiveChart> {
     line_smoothness(0.)
 }
-fn line_curved() -> Ref<Chart> {
+fn line_curved() -> Ref<LiveChart> {
     line_smoothness(1.)
 }
 
@@ -458,16 +458,16 @@ fn no_fill(series: Ref<ChartSeries>) -> Ref<ChartSeries> {
     series
 }
 
-fn line_vector() -> Ref<Chart> {
-    cartesian(vec![no_fill(values(LineSeries::new(), &[1., 2., 3., 4., 5.]))])
+fn line_vector() -> Ref<LiveChart> {
+    cartesian(vec![no_fill(values(LiveLineSeries::new(), &[1., 2., 3., 4., 5.]))])
 }
 
-fn line_gaps() -> Ref<Chart> {
-    cartesian(vec![no_fill(nullable(LineSeries::new(), &[Some(1.), Some(1.)]))])
+fn line_gaps() -> Ref<LiveChart> {
+    cartesian(vec![no_fill(nullable(LiveLineSeries::new(), &[Some(1.), Some(1.)]))])
 }
 
 /// Four pushes of `[null, 1]`, each adding a point and removing the first, as the source.
-fn line_gaps_push(chart: &Chart) {
+fn line_gaps_push(chart: &LiveChart) {
     let to_add = [None, Some(1.)];
     for count in 0..4 {
         let points = chart.series().get(0).values();
@@ -480,16 +480,16 @@ fn line_gaps_push(chart: &Chart) {
     }
 }
 
-fn line_interpolated() -> Ref<Chart> {
+fn line_interpolated() -> Ref<LiveChart> {
     let s = coordinates(
-        LineSeries::new(),
+        LiveLineSeries::new(),
         [(0., 1.), (1., 2.), (2., 3.), (3., 4.)].map(|(x, y)| Coordinate::new(x, y)),
     );
     cartesian(vec![no_fill(s)])
 }
 
 /// Three passes of midpoint inserts with the source's Y sequence (values above 6 are nulls).
-fn line_interpolated_inserts(chart: &Chart) {
+fn line_interpolated_inserts(chart: &LiveChart) {
     let sequence = [
         Some(6.),
         Some(1.),
@@ -531,7 +531,7 @@ fn line_interpolated_inserts(chart: &Chart) {
 
 // StepLineSeriesTests.
 
-fn step_basic() -> Ref<Chart> {
+fn step_basic() -> Ref<LiveChart> {
     cartesian(vec![
         values(StepLineSeries::new(), &[1., 5., 7., 3.]),
         values(StepLineSeries::new(), &[4., 2., 8., 6.]),
@@ -539,7 +539,7 @@ fn step_basic() -> Ref<Chart> {
     ])
 }
 
-fn step_area() -> Ref<Chart> {
+fn step_area() -> Ref<LiveChart> {
     let area = |v: &[f64], fill: u32| {
         let s = values(StepLineSeries::new(), v);
         s.set_fill(Some(rgb(fill)));
@@ -554,7 +554,7 @@ fn step_area() -> Ref<Chart> {
     ])
 }
 
-fn step_styled() -> Ref<Chart> {
+fn step_styled() -> Ref<LiveChart> {
     // The white geometry fill and its stroke paint are the native marker defaults.
     let s = values(StepLineSeries::new(), &[1., 5., 7., 3., 6.]);
     s.set_stroke(Some(rgb(0x0000FF)));
@@ -564,7 +564,7 @@ fn step_styled() -> Ref<Chart> {
     cartesian(vec![s])
 }
 
-fn step_labels() -> Ref<Chart> {
+fn step_labels() -> Ref<LiveChart> {
     let s = values(StepLineSeries::new(), &[3., 7., 2., 5., 4.]);
     s.set_data_labels(true);
     s.set_data_labels_size(14.);
@@ -572,7 +572,7 @@ fn step_labels() -> Ref<Chart> {
     cartesian(vec![s])
 }
 
-fn step_gaps() -> Ref<Chart> {
+fn step_gaps() -> Ref<LiveChart> {
     cartesian(vec![nullable(
         StepLineSeries::new(),
         &[Some(1.), Some(5.), None, Some(3.), Some(7.), None, Some(2.)],
@@ -581,7 +581,7 @@ fn step_gaps() -> Ref<Chart> {
 
 // ScatterSeriesTests.
 
-fn scatter_basic() -> Ref<Chart> {
+fn scatter_basic() -> Ref<LiveChart> {
     cartesian(vec![coordinates(
         ScatterSeries::new(),
         [(2.2, 5.4), (3.6, 9.6), (9.9, 5.2), (8.1, 4.7), (5.3, 7.1)]
@@ -589,7 +589,7 @@ fn scatter_basic() -> Ref<Chart> {
     )])
 }
 
-fn scatter_bubbles() -> Ref<Chart> {
+fn scatter_bubbles() -> Ref<LiveChart> {
     let bubbles = |points: [(f64, f64, f64); 5]| {
         let s = coordinates(
             ScatterSeries::new(),
@@ -630,7 +630,7 @@ const STACK_1: [f64; 7] = [3., 2., 3., 5., 3., 4., 6.];
 const STACK_2: [f64; 7] = [6., 5., 6., 3., 8., 5., 2.];
 const STACK_3: [f64; 7] = [4., 8., 2., 8., 9., 5., 3.];
 
-fn stacked_area_basic() -> Ref<Chart> {
+fn stacked_area_basic() -> Ref<LiveChart> {
     cartesian(vec![
         values(StackedAreaSeries::new(), &STACK_1),
         values(StackedAreaSeries::new(), &STACK_2),
@@ -638,7 +638,7 @@ fn stacked_area_basic() -> Ref<Chart> {
     ])
 }
 
-fn stacked_area_step() -> Ref<Chart> {
+fn stacked_area_step() -> Ref<LiveChart> {
     cartesian(vec![
         values(StackedStepAreaSeries::new(), &STACK_1),
         values(StackedStepAreaSeries::new(), &STACK_2),
@@ -646,7 +646,7 @@ fn stacked_area_step() -> Ref<Chart> {
     ])
 }
 
-fn stacked_area_mixed() -> Ref<Chart> {
+fn stacked_area_mixed() -> Ref<LiveChart> {
     cartesian(vec![
         values(
             StackedAreaSeries::new(),
@@ -659,8 +659,8 @@ fn stacked_area_mixed() -> Ref<Chart> {
     ])
 }
 
-fn stacked_area_line_over() -> Ref<Chart> {
-    let line = no_fill(values(LineSeries::new(), &[8., 6., 9., 7., 10., 6., 8.]));
+fn stacked_area_line_over() -> Ref<LiveChart> {
+    let line = no_fill(values(LiveLineSeries::new(), &[8., 6., 9., 7., 10., 6., 8.]));
     line.set_stroke(Some(rgb(0xFF0000)));
     line.set_stroke_width(6.);
     line.set_geometry_size(0.);
@@ -678,7 +678,7 @@ const MIXED_1: [f64; 7] = [3., 5., -3., 2., 5., -4., -2.];
 const MIXED_2: [f64; 7] = [4., 2., -3., 2., 3., 4., -2.];
 const MIXED_3: [f64; 7] = [-2., 6., 6., 5., 4., 3., -2.];
 
-fn stacked_columns_basic() -> Ref<Chart> {
+fn stacked_columns_basic() -> Ref<LiveChart> {
     // The tooltip label formatter has no native counterpart.
     let labelled = |v: &[f64]| {
         let s = values(StackedColumnSeries::new(), v);
@@ -705,7 +705,7 @@ fn grouped<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(make
     .collect()
 }
 
-fn stacked_columns_groups() -> Ref<Chart> {
+fn stacked_columns_groups() -> Ref<LiveChart> {
     let chart = cartesian(grouped(StackedColumnSeries::new, false));
     chart.x_axes().add(axis(|a| {
         a.set_labels_rotation(-15.);
@@ -716,7 +716,7 @@ fn stacked_columns_groups() -> Ref<Chart> {
     chart
 }
 
-fn stacked_rows_basic() -> Ref<Chart> {
+fn stacked_rows_basic() -> Ref<LiveChart> {
     cartesian(vec![
         values(StackedRowSeries::new(), &STACK_1),
         values(StackedRowSeries::new(), &STACK_2),
@@ -724,11 +724,11 @@ fn stacked_rows_basic() -> Ref<Chart> {
     ])
 }
 
-fn stacked_rows_groups() -> Ref<Chart> {
+fn stacked_rows_groups() -> Ref<LiveChart> {
     cartesian(grouped(StackedRowSeries::new, true))
 }
 
-fn stacked_rows_mixed() -> Ref<Chart> {
+fn stacked_rows_mixed() -> Ref<LiveChart> {
     cartesian(vec![
         values(StackedRowSeries::new(), &MIXED_1),
         values(StackedRowSeries::new(), &MIXED_2),
@@ -738,7 +738,7 @@ fn stacked_rows_mixed() -> Ref<Chart> {
 
 // BoxSeriesTests and CandlesticksSeriesTests.
 
-fn box_basic() -> Ref<Chart> {
+fn box_basic() -> Ref<LiveChart> {
     // BoxValue(max, third quartile, first quartile, min, median).
     let boxes = |name: &str, v: [[f64; 5]; 3]| {
         let s = coordinates(
@@ -784,7 +784,7 @@ fn box_basic() -> Ref<Chart> {
     chart
 }
 
-fn candlesticks_basic() -> Ref<Chart> {
+fn candlesticks_basic() -> Ref<LiveChart> {
     // FinancialPointI: high, open, close, low, at the index.
     cartesian(vec![coordinates(
         CandlesticksSeries::new(),
@@ -832,14 +832,14 @@ fn prices<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(
 
 /// The X axis of the financial date scenarios: a unit width of a day and the labeler
 /// `new DateTime((long)value).ToString("MM dd")`.
-fn daily_axis() -> Ref<Axis> {
+fn daily_axis() -> Ref<LiveAxis> {
     axis(|a| {
         a.set_unit_width(SignedDuration::TICKS_PER_DAY as f64);
         a.set_labeler(Some(Labeler::date_time_format("MM dd")));
     })
 }
 
-fn candlesticks_date_time() -> Ref<Chart> {
+fn candlesticks_date_time() -> Ref<LiveChart> {
     let chart = cartesian(vec![prices(CandlesticksSeries::new(), day)]);
     chart.x_axes().add(daily_axis());
     chart
@@ -847,12 +847,12 @@ fn candlesticks_date_time() -> Ref<Chart> {
 
 // OhlcSeriesTests.
 
-fn ohlc_basic() -> Ref<Chart> {
+fn ohlc_basic() -> Ref<LiveChart> {
     // FinancialPointI: high, open, close, low, at the index.
     cartesian(vec![prices(OhlcSeries::new(), |i| i as f64)])
 }
 
-fn ohlc_date_time() -> Ref<Chart> {
+fn ohlc_date_time() -> Ref<LiveChart> {
     let chart = cartesian(vec![prices(OhlcSeries::new(), day)]);
     chart.x_axes().add(daily_axis());
     chart
@@ -860,7 +860,7 @@ fn ohlc_date_time() -> Ref<Chart> {
 
 // AxesTests.DateTimeScaled: a DateTimeAxis of a day, labelled "MM dd".
 
-fn axes_date_time_scaled() -> Ref<Chart> {
+fn axes_date_time_scaled() -> Ref<LiveChart> {
     let series = coordinates(
         ColumnSeries::new(),
         [3., 6., 5., 3., 5., 8., 6.]
@@ -869,10 +869,10 @@ fn axes_date_time_scaled() -> Ref<Chart> {
             .map(|(i, y)| Coordinate::new(day(i), *y)),
     );
     let chart = cartesian(vec![series]);
-    let x = DateTimeAxis::new();
+    let x = LiveDateTimeAxis::new();
     x.set_date_format("MM dd".into());
-    chart.x_axes().add(x.upcast::<Axis>());
-    chart.y_axes().add(Axis::new());
+    chart.x_axes().add(x.upcast::<LiveAxis>());
+    chart.y_axes().add(LiveAxis::new());
     chart
 }
 
@@ -921,21 +921,21 @@ fn showing_errors(series: Ref<ChartSeries>) -> Ref<ChartSeries> {
     series
 }
 
-fn errors_column() -> Ref<Chart> {
+fn errors_column() -> Ref<LiveChart> {
     cartesian(vec![
         showing_errors(coordinates(ColumnSeries::new(), error_values())),
         showing_errors(coordinates(ColumnSeries::new(), error_points(|i| i as f64))),
     ])
 }
 
-fn errors_row() -> Ref<Chart> {
+fn errors_row() -> Ref<LiveChart> {
     cartesian(vec![
         showing_errors(coordinates(RowSeries::new(), error_values())),
         showing_errors(coordinates(RowSeries::new(), error_points(|i| i as f64))),
     ])
 }
 
-fn errors_line() -> Ref<Chart> {
+fn errors_line() -> Ref<LiveChart> {
     // The source's LineWithError draws a column series of ErrorValues.
     cartesian(vec![showing_errors(coordinates(
         ColumnSeries::new(),
@@ -943,7 +943,7 @@ fn errors_line() -> Ref<Chart> {
     ))])
 }
 
-fn errors_scatter() -> Ref<Chart> {
+fn errors_scatter() -> Ref<LiveChart> {
     // ErrorDateTimePoints from DateTime.Today: the first date of the date suites here, on a
     // hidden X axis, so the image does not depend on the day it is drawn.
     let chart = cartesian(vec![showing_errors(coordinates(
@@ -962,7 +962,7 @@ fn heat(values: impl IntoIterator<Item = Coordinate>, map: &[u32]) -> Ref<ChartS
     series
 }
 
-fn heat_basic() -> Ref<Chart> {
+fn heat_basic() -> Ref<LiveChart> {
     let weights: [[f64; 6]; 4] = [
         [150., 123., 310., 225., 473., 373.],
         [432., 312., 135., 78., 124., 423.],
@@ -1014,18 +1014,18 @@ fn fractional_heat() -> Ref<ChartSeries> {
     series
 }
 
-fn heat_fractional_limits() -> Ref<Chart> {
+fn heat_fractional_limits() -> Ref<LiveChart> {
     let chart = cartesian(vec![fractional_heat()]);
     chart.x_axes().add(limits(0., 15.));
     chart.y_axes().add(limits(0.5, 1.));
     chart
 }
 
-fn heat_fractional_auto() -> Ref<Chart> {
+fn heat_fractional_auto() -> Ref<LiveChart> {
     cartesian(vec![fractional_heat()])
 }
 
-fn heat_empty_points() -> Ref<Chart> {
+fn heat_empty_points() -> Ref<LiveChart> {
     // The first point is empty (`WeightedPoint(null, null, null)`).
     let mut values = vec![Coordinate::EMPTY];
     for x in 0..6 {
@@ -1045,7 +1045,7 @@ fn heat_empty_points() -> Ref<Chart> {
     chart
 }
 
-fn heat_with_labels() -> Ref<Chart> {
+fn heat_with_labels() -> Ref<LiveChart> {
     let series = coordinates(
         HeatSeries::new(),
         (0..9).map(|i| Coordinate::weighted((i / 3) as f64, (i % 3) as f64, 5. + i as f64 * 5.)),
@@ -1077,26 +1077,26 @@ fn ranges<T: ferroui_base::ObjectType + ferroui_base::Upcast<ChartSeries>>(serie
     )
 }
 
-fn limits(min: f64, max: f64) -> Ref<Axis> {
+fn limits(min: f64, max: f64) -> Ref<LiveAxis> {
     axis(|a| {
         a.set_min_limit(Some(min));
         a.set_max_limit(Some(max));
     })
 }
 
-fn range_column() -> Ref<Chart> {
+fn range_column() -> Ref<LiveChart> {
     let chart = cartesian(vec![ranges(RangeColumnSeries::new(), &RANGES)]);
     chart.y_axes().add(limits(0., 60.));
     chart
 }
 
-fn range_row() -> Ref<Chart> {
+fn range_row() -> Ref<LiveChart> {
     let chart = cartesian(vec![ranges(RangeRowSeries::new(), &RANGES)]);
     chart.x_axes().add(limits(0., 60.));
     chart
 }
 
-fn range_column_swapped() -> Ref<Chart> {
+fn range_column_swapped() -> Ref<LiveChart> {
     let chart = cartesian(vec![ranges(
         RangeColumnSeries::new(),
         &[(35., 10.), (25., 20.), (45., 5.)],
@@ -1105,13 +1105,13 @@ fn range_column_swapped() -> Ref<Chart> {
     chart
 }
 
-fn range_line() -> Ref<Chart> {
+fn range_line() -> Ref<LiveChart> {
     let chart = cartesian(vec![ranges(RangeLineSeries::new(), &RANGES)]);
     chart.y_axes().add(limits(0., 60.));
     chart
 }
 
-fn range_line_swapped() -> Ref<Chart> {
+fn range_line_swapped() -> Ref<LiveChart> {
     let chart = cartesian(vec![ranges(
         RangeLineSeries::new(),
         &[(35., 10.), (20., 25.), (45., 5.), (15., 40.)],
@@ -1134,11 +1134,11 @@ fn as_pie_series(data: &[f64], style: impl Fn(f64, &ChartSeries)) -> Vec<Ref<Cha
         .collect()
 }
 
-fn pie_basic() -> Ref<Chart> {
+fn pie_basic() -> Ref<LiveChart> {
     pie_chart(as_pie_series(&[2., 4., 1., 4., 3.], |_, _| {}))
 }
 
-fn pie_outer_radius() -> Ref<Chart> {
+fn pie_outer_radius() -> Ref<LiveChart> {
     let outer = std::cell::Cell::new(0.);
     pie_chart(as_pie_series(&[6., 5., 4., 3.], |_, s| {
         s.set_outer_radius_offset(outer.get());
@@ -1146,13 +1146,13 @@ fn pie_outer_radius() -> Ref<Chart> {
     }))
 }
 
-fn pie_inner_radius() -> Ref<Chart> {
+fn pie_inner_radius() -> Ref<LiveChart> {
     pie_chart(as_pie_series(&[2., 4., 1., 4., 3.], |_, s| {
         s.set_max_radial_column_width(60.)
     }))
 }
 
-fn pie_pushout() -> Ref<Chart> {
+fn pie_pushout() -> Ref<LiveChart> {
     pie_chart(as_pie_series(&[6., 5., 4., 3., 2.], |v, s| {
         if v == 6. {
             s.set_push_out(30.)
@@ -1200,7 +1200,7 @@ fn gauge_theme(s: &ChartSeries) {
     s.set_corner_radius(8.);
 }
 
-fn gauge(value: f64, min: f64, max: f64) -> Ref<Chart> {
+fn gauge(value: f64, min: f64, max: f64) -> Ref<LiveChart> {
     let style = |s: &ChartSeries| {
         s.set_max_radial_column_width(50.);
         s.set_data_labels(true);
@@ -1213,17 +1213,17 @@ fn gauge(value: f64, min: f64, max: f64) -> Ref<Chart> {
     chart
 }
 
-fn pie_gauge() -> Ref<Chart> {
+fn pie_gauge() -> Ref<LiveChart> {
     gauge(30., 0., 100.)
 }
-fn pie_gauge_over() -> Ref<Chart> {
+fn pie_gauge_over() -> Ref<LiveChart> {
     gauge(150., 0., 100.)
 }
-fn pie_gauge_over_with_min() -> Ref<Chart> {
+fn pie_gauge_over_with_min() -> Ref<LiveChart> {
     gauge(150., 30., 100.)
 }
 
-fn pie_gauge_multiple() -> Ref<Chart> {
+fn pie_gauge_multiple() -> Ref<LiveChart> {
     // The data label formatter ("<value> <name>") has no native counterpart; labels show values.
     let named = |name: &'static str| {
         move |s: &ChartSeries| {
@@ -1247,7 +1247,7 @@ fn pie_gauge_multiple() -> Ref<Chart> {
     chart
 }
 
-fn pie_gauge_tight() -> Ref<Chart> {
+fn pie_gauge_tight() -> Ref<LiveChart> {
     let value = |s: &ChartSeries| {
         s.set_inner_radius(38.);
         s.set_relative_inner_radius(-4.);
@@ -1269,7 +1269,7 @@ fn pie_gauge_tight() -> Ref<Chart> {
 // AngularGaugeTests: GaugeGenerator.BuildAngularGaugeSections of 60, 30 and 10 with an outer
 // offset of 130 and a radial width of 20, the ticks of the test and a needle.
 
-fn angular_gauge_chart(needle: f64) -> Ref<Chart> {
+fn angular_gauge_chart(needle: f64) -> Ref<LiveChart> {
     // BuildAngularGaugeSections: each section a gauge series relative to the minimum, without
     // data labels or a hover push-out; the theme's gauge rule (no stroke, corner radius 8),
     // which the native controls do not apply by themselves yet.
@@ -1308,17 +1308,17 @@ fn angular_gauge_chart(needle: f64) -> Ref<Chart> {
     chart
 }
 
-fn angular_gauge() -> Ref<Chart> {
+fn angular_gauge() -> Ref<LiveChart> {
     angular_gauge_chart(45.)
 }
 
-fn angular_gauge_at_min() -> Ref<Chart> {
+fn angular_gauge_at_min() -> Ref<LiveChart> {
     angular_gauge_chart(0.)
 }
 
 // PolarChartTests.
 
-fn polar_basic() -> Ref<Chart> {
+fn polar_basic() -> Ref<LiveChart> {
     let s = values(
         PolarLineSeries::new(),
         &[
@@ -1344,12 +1344,12 @@ const POLAR_1: [f64; 6] = [10., 8., 12., 6., 14., 4.];
 const POLAR_2: [f64; 6] = [6., 14., 4., 10., 8., 12.];
 const POLAR_3: [f64; 6] = [12., 6., 10., 14., 4., 8.];
 
-fn radius_to_20(chart: Ref<Chart>) -> Ref<Chart> {
+fn radius_to_20(chart: Ref<LiveChart>) -> Ref<LiveChart> {
     chart.y_axes().add(axis(|a| a.set_max_limit(Some(20.))));
     chart
 }
 
-fn polar_multiple() -> Ref<Chart> {
+fn polar_multiple() -> Ref<LiveChart> {
     radius_to_20(polar_chart(vec![
         values(PolarLineSeries::new(), &POLAR_1),
         values(PolarLineSeries::new(), &POLAR_2),
@@ -1357,7 +1357,7 @@ fn polar_multiple() -> Ref<Chart> {
     ]))
 }
 
-fn polar_filled() -> Ref<Chart> {
+fn polar_filled() -> Ref<LiveChart> {
     let filled = |v: &[f64], fill: Color| {
         let s = values(PolarLineSeries::new(), v);
         s.set_fill(Some(fill));
@@ -1370,13 +1370,13 @@ fn polar_filled() -> Ref<Chart> {
     ]))
 }
 
-fn polar_inner_radius() -> Ref<Chart> {
+fn polar_inner_radius() -> Ref<LiveChart> {
     let chart = radius_to_20(polar_chart(vec![values(PolarLineSeries::new(), &POLAR_1)]));
     chart.set_inner_radius(50.);
     chart
 }
 
-fn polar_open_line() -> Ref<Chart> {
+fn polar_open_line() -> Ref<LiveChart> {
     // GeometryFill and GeometryStroke have no native counterpart; the markers take the series
     // paint.
     let s = values(PolarLineSeries::new(), &POLAR_1);
@@ -1392,8 +1392,8 @@ const SANKEY_LINK: Color = Color::from_argb(90, 96, 138, 218);
 const BLACK: Color = Color::from_rgb(0, 0, 0);
 const WHITE: Color = Color::from_rgb(255, 255, 255);
 
-fn sankey_chart(series: Ref<SankeySeries>) -> Ref<Chart> {
-    let chart = SankeyChart::new().upcast::<Chart>();
+fn sankey_chart(series: Ref<SankeySeries>) -> Ref<LiveChart> {
+    let chart = SankeyChart::new().upcast::<LiveChart>();
     chart.series().add(series.upcast());
     chart.set_animations_speed(0.0);
     chart
@@ -1434,7 +1434,7 @@ fn sankey_labels(series: &SankeySeries, colour: Color, size: f64) {
 const TWO_LEVEL: [(usize, usize, f64); 5] =
     [(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (1, 4, 2.), (2, 4, 10.)];
 
-fn sankey_two_level() -> Ref<Chart> {
+fn sankey_two_level() -> Ref<LiveChart> {
     let s = sankey(
         &["A", "B", "C", "X", "Y"],
         &TWO_LEVEL,
@@ -1445,7 +1445,7 @@ fn sankey_two_level() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_with_labels() -> Ref<Chart> {
+fn sankey_with_labels() -> Ref<LiveChart> {
     let s = sankey(
         &["Alice", "Bob", "Carol", "Trips", "Other"],
         &TWO_LEVEL,
@@ -1457,7 +1457,7 @@ fn sankey_with_labels() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_funnel() -> Ref<Chart> {
+fn sankey_funnel() -> Ref<LiveChart> {
     // The source's LabelMapper writes the node value before the name; the names say it here.
     let s = sankey(
         &[
@@ -1509,7 +1509,7 @@ fn sankey_funnel() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_bipartite_arc() -> Ref<Chart> {
+fn sankey_bipartite_arc() -> Ref<LiveChart> {
     let s = sankey(
         &[
             "Furniture",
@@ -1553,7 +1553,7 @@ fn sankey_bipartite_arc() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_bipartite_arc_labels() -> Ref<Chart> {
+fn sankey_bipartite_arc_labels() -> Ref<LiveChart> {
     let s = sankey(
         &["Alpha", "Beta", "Gamma", "Xenon", "Yttrium", "Zinc"],
         &[(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (1, 5, 5.), (2, 4, 10.), (2, 5, 3.)],
@@ -1566,7 +1566,7 @@ fn sankey_bipartite_arc_labels() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_hover_vertical() -> Ref<Chart> {
+fn sankey_hover_vertical() -> Ref<LiveChart> {
     let s = sankey(
         &["A", "B", "C", "X", "Y"],
         &[(0, 3, 8.), (0, 4, 4.), (1, 3, 6.), (2, 4, 10.)],
@@ -1577,7 +1577,7 @@ fn sankey_hover_vertical() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_hover_arc() -> Ref<Chart> {
+fn sankey_hover_arc() -> Ref<LiveChart> {
     let s = sankey(
         &["Furniture", "Technology", "Chairs", "Phones", "Storage"],
         &[(0, 2, 12.), (1, 3, 14.), (1, 4, 8.)],
@@ -1589,7 +1589,7 @@ fn sankey_hover_arc() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_theme() -> Ref<Chart> {
+fn sankey_theme() -> Ref<LiveChart> {
     // No fill and no link fill: the theme's palette colour and its LinkFill at alpha 90.
     let s = sankey(
         &["A", "B", "X", "Y"],
@@ -1601,7 +1601,7 @@ fn sankey_theme() -> Ref<Chart> {
     sankey_chart(s)
 }
 
-fn sankey_three_columns() -> Ref<Chart> {
+fn sankey_three_columns() -> Ref<LiveChart> {
     let s = sankey(
         &["A", "B", "C", "M", "N", "P", "Q"],
         &[
@@ -1624,8 +1624,8 @@ fn sankey_three_columns() -> Ref<Chart> {
 
 // TreemapSeriesTests.
 
-fn treemap_chart(series: Vec<Ref<TreemapSeries>>) -> Ref<Chart> {
-    let chart = TreemapChart::new().upcast::<Chart>();
+fn treemap_chart(series: Vec<Ref<TreemapSeries>>) -> Ref<LiveChart> {
+    let chart = TreemapChart::new().upcast::<LiveChart>();
     for s in series {
         chart.series().add(s.upcast());
     }
@@ -1655,7 +1655,7 @@ fn branch(name: &str, values: &[(f64, &str)]) -> Ref<TreemapNode> {
     TreemapNode::with_children(name, TreemapNodes::from_items(leaves(values)))
 }
 
-fn treemap_flat() -> Ref<Chart> {
+fn treemap_flat() -> Ref<LiveChart> {
     // The default padding of 2.
     treemap_chart(vec![treemap(
         leaves(&[(40., "A"), (25., "B"), (15., "C"), (10., "D"), (7., "E"), (3., "F")]),
@@ -1664,7 +1664,7 @@ fn treemap_flat() -> Ref<Chart> {
     )])
 }
 
-fn treemap_labels() -> Ref<Chart> {
+fn treemap_labels() -> Ref<LiveChart> {
     let s = treemap(
         leaves(&[
             (40., "Asia"),
@@ -1696,7 +1696,7 @@ const EUROPE: [(f64, &str); 4] = [
     (46., "Spain"),
 ];
 
-fn treemap_population() -> Ref<Chart> {
+fn treemap_population() -> Ref<LiveChart> {
     treemap_chart(vec![treemap(
         vec![branch("Asia", &ASIA), branch("Europe", &EUROPE)],
         4.,
@@ -1704,7 +1704,7 @@ fn treemap_population() -> Ref<Chart> {
     )])
 }
 
-fn treemap_two_series() -> Ref<Chart> {
+fn treemap_two_series() -> Ref<LiveChart> {
     let year = |name: &str, values: &[(f64, &str)], fill: Color| {
         let s = treemap(leaves(values), 4., fill);
         s.set_name(name.into());
@@ -1732,7 +1732,7 @@ fn treemap_two_series() -> Ref<Chart> {
     chart
 }
 
-fn treemap_hierarchical() -> Ref<Chart> {
+fn treemap_hierarchical() -> Ref<LiveChart> {
     let s = treemap(
         vec![
             branch("Asia", &ASIA),
@@ -1777,23 +1777,23 @@ fn heat_series(lands: &[(&str, f64)]) -> Ref<ChartSeries> {
 }
 
 /// A map of the source's heat series on the bundled world map.
-fn map(projection: MapProjection) -> Ref<Chart> {
-    let chart = GeoMap::new().upcast::<Chart>();
+fn map(projection: MapProjection) -> Ref<LiveChart> {
+    let chart = GeoMap::new().upcast::<LiveChart>();
     chart.set_animations_speed(0.0);
     chart.set_map_projection(projection);
     chart.series().add(heat_series(&MAP_LANDS));
     chart
 }
 
-fn map_basic() -> Ref<Chart> {
+fn map_basic() -> Ref<LiveChart> {
     map(MapProjection::Mercator)
 }
 
-fn map_orthographic() -> Ref<Chart> {
+fn map_orthographic() -> Ref<LiveChart> {
     map(MapProjection::Orthographic)
 }
 
-fn globe(longitude: f64, latitude: f64) -> Ref<Chart> {
+fn globe(longitude: f64, latitude: f64) -> Ref<LiveChart> {
     let chart = map(MapProjection::Orthographic);
     chart.set_center_longitude(longitude);
     chart.set_center_latitude(latitude);
@@ -1801,16 +1801,16 @@ fn globe(longitude: f64, latitude: f64) -> Ref<Chart> {
 }
 
 /// Centred on Europe and Africa.
-fn map_orthographic_rotated() -> Ref<Chart> {
+fn map_orthographic_rotated() -> Ref<LiveChart> {
     globe(15., 20.)
 }
 
 /// Centred on Central Asia: Russia, China and India cross the horizon.
-fn map_horizon() -> Ref<Chart> {
+fn map_horizon() -> Ref<LiveChart> {
     globe(80., 20.)
 }
 
-fn map_title_and_legend() -> Ref<Chart> {
+fn map_title_and_legend() -> Ref<LiveChart> {
     // The source title is a 20 px label with a padding of 12 in black; its legend is the
     // gradient bar of an SKHeatLegend on the right.
     let chart = map(MapProjection::Mercator);
@@ -1821,12 +1821,12 @@ fn map_title_and_legend() -> Ref<Chart> {
     chart
 }
 
-fn map_default() -> Ref<Chart> {
+fn map_default() -> Ref<LiveChart> {
     map(MapProjection::Default)
 }
 
 /// Iceland to the Caucasus, North Africa to the North Cape.
-fn europe(projection: MapProjection) -> Ref<Chart> {
+fn europe(projection: MapProjection) -> Ref<LiveChart> {
     let chart = map(projection);
     chart.set_min_latitude(Some(35.));
     chart.set_max_latitude(Some(72.));
@@ -1835,11 +1835,11 @@ fn europe(projection: MapProjection) -> Ref<Chart> {
     chart
 }
 
-fn map_mercator_europe() -> Ref<Chart> {
+fn map_mercator_europe() -> Ref<LiveChart> {
     europe(MapProjection::Mercator)
 }
 
-fn map_default_europe() -> Ref<Chart> {
+fn map_default_europe() -> Ref<LiveChart> {
     europe(MapProjection::Default)
 }
 
@@ -1853,7 +1853,7 @@ const CITIES: [(f64, f64); 5] = [
 ];
 
 /// The source's 14 px orange red markers with a white outline of 2, the native defaults.
-fn with_markers(cities: &[(f64, f64)]) -> Ref<Chart> {
+fn with_markers(cities: &[(f64, f64)]) -> Ref<LiveChart> {
     let chart = map(MapProjection::Mercator);
     for &(longitude, latitude) in cities {
         chart.markers().add(GeoMarker::at(longitude, latitude));
@@ -1861,18 +1861,18 @@ fn with_markers(cities: &[(f64, f64)]) -> Ref<Chart> {
     chart
 }
 
-fn map_markers() -> Ref<Chart> {
+fn map_markers() -> Ref<LiveChart> {
     with_markers(&CITIES)
 }
 
-fn map_two_markers() -> Ref<Chart> {
+fn map_two_markers() -> Ref<LiveChart> {
     with_markers(&CITIES[..2])
 }
 
 /// The states of Mexico of the source sample, keyed by their ISO 3166-2 codes, framed on Mexico.
 /// The source's `cmx` matches no state of the file (Mexico City is `dif`), as upstream.
-fn map_mexico() -> Ref<Chart> {
-    let chart = GeoMap::new().upcast::<Chart>();
+fn map_mexico() -> Ref<LiveChart> {
+    let chart = GeoMap::new().upcast::<LiveChart>();
     chart.set_animations_speed(0.0);
     let mexico = Maps::map_from_geojson(include_str!("mexico-states.geojson"))
         .expect("the sample map is valid GeoJSON");
@@ -1896,7 +1896,7 @@ fn map_mexico() -> Ref<Chart> {
 }
 
 /// Builds a scenario and measures it at its size, applying its change after a first measure.
-pub fn measure(scenario: &Scenario) -> Result<Ref<Chart>, ferroui_livecharts::ChartError> {
+pub fn measure(scenario: &Scenario) -> Result<Ref<LiveChart>, ferroui_livecharts::ChartError> {
     let chart = (scenario.build)();
     chart.scene(scenario.size)?;
     if let Some(then) = scenario.then {

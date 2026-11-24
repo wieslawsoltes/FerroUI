@@ -112,6 +112,11 @@ impl TypeReferenceResolver {
         };
 
         let configuration = context.configuration();
+        // A name the XML namespace keeps for a type that was renamed.
+        let name = xmlns
+            .and_then(|xmlns| configuration.xmlns_mappings.type_aliases.get(xmlns))
+            .and_then(|aliases| aliases.get(name))
+            .map_or(name, String::as_str);
         let mut found: Option<Rc<dyn IXamlType>> = None;
 
         // Try to resolve from system

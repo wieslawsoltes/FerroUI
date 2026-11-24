@@ -14,7 +14,7 @@ use ferroui_markup_xaml_loader::core_table::{
     FERRO_LIST_DEFINITION, KNOWN_ATTRIBUTES, LIST_DEFINITION, PROPERTY_NAMESPACE,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
-use xamlx::type_system::{IXamlAssembly, IXamlCustomAttribute, IXamlType, IXamlTypeSystem, XamlPseudoType, XamlTypeWellKnownTypes, XamlValue};
+use xamlx::type_system::{XmlnsTypeAlias, IXamlAssembly, IXamlCustomAttribute, IXamlType, IXamlTypeSystem, XamlPseudoType, XamlTypeWellKnownTypes, XamlValue};
 
 use crate::model::{
     AssemblyModel, AttributeModel, AttributeValueModel, MemberModel, PropertyModel, RegisteredKind, RegisteredModel, RegistrationModel, TypeKind,
@@ -294,6 +294,13 @@ impl ModelTypeSystem {
                 )
             })
             .collect()
+    }
+
+    /// The names XML namespaces keep for the renamed types of an assembly.
+    pub(crate) fn assembly_type_aliases(&self, assembly: &ModelAssembly) -> Vec<XmlnsTypeAlias> {
+        let Some(model) = assembly.model else { return Vec::new() };
+        let metadata = &self.set.models()[model].metadata;
+        metadata.iter().filter_map(|(key, value)| XmlnsTypeAlias::from_metadata(key, value)).collect()
     }
 
     // --- type shells --------------------------------------------------------

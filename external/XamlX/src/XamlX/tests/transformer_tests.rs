@@ -65,6 +65,63 @@ fn types_are_resolved_through_xmlns_definitions_and_clr_namespaces() {
     );
 }
 
+/// A host where the XML namespaces `new` and `old` map to one namespace with the class `Renamed`,
+/// and `old` keeps the name `Former` for it.
+fn host_with_a_renamed_type() -> TestHost {
+    let options = TestHostOptions { errors_are_fatal: false, custom_value_converter: None };
+    TestHost::with_setup(options, |ts, _| {
+        let attribute = ts.get("XamlParserTests.XmlnsDefinitionAttribute");
+        let assembly = ts.define_assembly("Library");
+        assembly.define_class("Library", "Renamed").add_constructor(vec![]);
+        for xmlns in ["new", "old"] {
+            assembly.add_attribute(crate::testing::FakeCustomAttribute::new(
+                attribute.clone(),
+                vec![
+                    crate::type_system::XamlValue::String(xmlns.to_string()),
+                    crate::type_system::XamlValue::String("Library".to_string()),
+                ],
+            ));
+        }
+        assembly.add_xmlns_type_alias("old", "Former", "Renamed");
+    })
+}
+
+#[test]
+fn an_xml_namespace_keeps_the_old_name_of_a_renamed_type() {
+    for xaml in ["<Former xmlns='old'/>", "<Renamed xmlns='old'/>", "<Renamed xmlns='new'/>"] {
+        let host = host_with_a_renamed_type();
+        let node = host.transform_root(xaml);
+        assert_eq!(root_type_name(&node), "Library.Renamed", "{xaml}");
+        assert!(host.errors().is_empty(), "{xaml}");
+    }
+}
+
+#[test]
+fn the_old_name_of_a_type_is_only_in_the_xml_namespace_that_keeps_it() {
+    let host = host_with_a_renamed_type();
+    host.transform("<ContentControl xmlns='test' xmlns:n='new'>\n  <n:Former/>\n</ContentControl>")
+        .expect("non-fatal");
+    assert_eq!(host.errors().len(), 1);
+    assert!(host.errors()[0].title.contains("Unable to resolve type Former"));
+}
+
+#[test]
+fn an_alias_is_read_from_the_metadata_of_an_assembly() {
+    use crate::type_system::XmlnsTypeAlias;
+    let alias = XmlnsTypeAlias::from_metadata("FerroXmlnsTypeAlias https://example.org/a Chart", "LiveChart");
+    assert_eq!(
+        alias,
+        Some(XmlnsTypeAlias {
+            xml_namespace: "https://example.org/a".to_string(),
+            name: "Chart".to_string(),
+            type_name: "LiveChart".to_string(),
+        })
+    );
+    assert_eq!(XmlnsTypeAlias::from_metadata("FerroXamlCreateSourceInfo", "true"), None);
+    assert_eq!(XmlnsTypeAlias::from_metadata("FerroXmlnsTypeAliasOther a b", "c"), None);
+    assert_eq!(XmlnsTypeAlias::from_metadata("FerroXmlnsTypeAlias noname", "c"), None);
+}
+
 #[test]
 fn unresolved_types_are_reported() {
     let host = TestHost::new();

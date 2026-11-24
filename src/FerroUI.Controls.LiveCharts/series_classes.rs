@@ -11,31 +11,31 @@ use ferroui_livecharts::{
 };
 
 #[repr(C)]
-pub struct LineSeries {
+pub struct LiveLineSeries {
     base: ChartSeries,
 }
-ferro_class!(LineSeries: ChartSeries);
-ferro_class_info!(LineSeries {
-    new: LineSeries::new
+ferro_class!(LiveLineSeries: ChartSeries);
+ferro_class_info!(LiveLineSeries {
+    new: LiveLineSeries::new
 });
-impl FerroObjectImpl for LineSeries {
+impl FerroObjectImpl for LiveLineSeries {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_kind(SeriesKind::Line);
     }
 }
-impl LineSeries {
+impl LiveLineSeries {
     fn static_constructor() {
         // The family defaults of the source series and its theme live in the core snapshot.
         let defaults = ferroui_livecharts::Series::new(SeriesKind::Line);
-        ChartSeries::kind_property().override_default_value::<LineSeries>(SeriesKind::Line);
+        ChartSeries::kind_property().override_default_value::<LiveLineSeries>(SeriesKind::Line);
         ChartSeries::data_padding_property()
-            .override_default_value::<LineSeries>(defaults.data_padding);
+            .override_default_value::<LiveLineSeries>(defaults.data_padding);
         ChartSeries::geometry_size_property()
-            .override_default_value::<LineSeries>(defaults.geometry_size);
-        ChartSeries::padding_property().override_default_value::<LineSeries>(defaults.padding);
+            .override_default_value::<LiveLineSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<LiveLineSeries>(defaults.padding);
         ChartSeries::max_bar_width_property()
-            .override_default_value::<LineSeries>(defaults.max_bar_width);
+            .override_default_value::<LiveLineSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -85,31 +85,31 @@ impl StepLineSeries {
 }
 
 #[repr(C)]
-pub struct AreaSeries {
+pub struct LiveAreaSeries {
     base: ChartSeries,
 }
-ferro_class!(AreaSeries: ChartSeries);
-ferro_class_info!(AreaSeries {
-    new: AreaSeries::new
+ferro_class!(LiveAreaSeries: ChartSeries);
+ferro_class_info!(LiveAreaSeries {
+    new: LiveAreaSeries::new
 });
-impl FerroObjectImpl for AreaSeries {
+impl FerroObjectImpl for LiveAreaSeries {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.set_kind(SeriesKind::Area);
     }
 }
-impl AreaSeries {
+impl LiveAreaSeries {
     fn static_constructor() {
         // The family defaults of the source series and its theme live in the core snapshot.
         let defaults = ferroui_livecharts::Series::new(SeriesKind::Area);
-        ChartSeries::kind_property().override_default_value::<AreaSeries>(SeriesKind::Area);
+        ChartSeries::kind_property().override_default_value::<LiveAreaSeries>(SeriesKind::Area);
         ChartSeries::data_padding_property()
-            .override_default_value::<AreaSeries>(defaults.data_padding);
+            .override_default_value::<LiveAreaSeries>(defaults.data_padding);
         ChartSeries::geometry_size_property()
-            .override_default_value::<AreaSeries>(defaults.geometry_size);
-        ChartSeries::padding_property().override_default_value::<AreaSeries>(defaults.padding);
+            .override_default_value::<LiveAreaSeries>(defaults.geometry_size);
+        ChartSeries::padding_property().override_default_value::<LiveAreaSeries>(defaults.padding);
         ChartSeries::max_bar_width_property()
-            .override_default_value::<AreaSeries>(defaults.max_bar_width);
+            .override_default_value::<LiveAreaSeries>(defaults.max_bar_width);
     }
     pub fn construct() -> Self {
         Self {
@@ -1068,12 +1068,12 @@ impl HeatSeries {
     }
 }
 
-ferro_properties! { impl LineSeries {
+ferro_properties! { impl LiveLineSeries {
     pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
-        FerroProperty::register::<LineSeries, _>("GeometrySvg", None)
+        FerroProperty::register::<LiveLineSeries, _>("GeometrySvg", None)
     }
 } }
-impl LineSeries {
+impl LiveLineSeries {
     pub fn geometry_svg(&self) -> Option<String> {
         self.get_value(Self::geometry_svg_property())
     }
@@ -1082,12 +1082,12 @@ impl LineSeries {
     }
 }
 
-ferro_properties! { impl AreaSeries {
+ferro_properties! { impl LiveAreaSeries {
     pub fn geometry_svg_property() -> StyledProperty<Option<String>> {
-        FerroProperty::register::<AreaSeries, _>("GeometrySvg", None)
+        FerroProperty::register::<LiveAreaSeries, _>("GeometrySvg", None)
     }
 } }
-impl AreaSeries {
+impl LiveAreaSeries {
     pub fn geometry_svg(&self) -> Option<String> {
         self.get_value(Self::geometry_svg_property())
     }
