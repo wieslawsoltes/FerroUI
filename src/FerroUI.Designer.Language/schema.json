@@ -599,6 +599,16 @@
         "values": [],
         "attached": false
       },
+      "UseFloatingPlaceholder": {
+        "name": "UseFloatingPlaceholder",
+        "type_name": "bool",
+        "documentation": "AutoCompleteBox.UseFloatingPlaceholder: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "MinimumPrefixLength": {
         "name": "MinimumPrefixLength",
         "type_name": "i32",
@@ -24016,7 +24026,22 @@
     "documentation": "ferroui_controls::primitives::TabStripItem",
     "base": "ListBoxItem",
     "constructible": true,
-    "properties": {},
+    "properties": {
+      "Icon": {
+        "name": "Icon",
+        "type_name": "Option<BoxedValue>",
+        "documentation": "TabStripItem.Icon: Option<BoxedValue>",
+        "values": [],
+        "attached": false
+      },
+      "IconTemplate": {
+        "name": "IconTemplate",
+        "type_name": "Option<Rc<dyn IDataTemplate>>",
+        "documentation": "TabStripItem.IconTemplate: Option<Rc<dyn IDataTemplate>>",
+        "values": [],
+        "attached": false
+      }
+    },
     "namespace_aliases": [
       "using:FerroUI.Controls.Primitives",
       "clr-namespace:FerroUI.Controls.Primitives;assembly=FerroUI.Controls"
@@ -24212,6 +24237,20 @@
         "name": "Width",
         "type_name": "GridLength",
         "documentation": "TableViewColumn.Width: GridLength",
+        "values": [],
+        "attached": false
+      },
+      "MinWidth": {
+        "name": "MinWidth",
+        "type_name": "f64",
+        "documentation": "TableViewColumn.MinWidth: f64",
+        "values": [],
+        "attached": false
+      },
+      "MaxWidth": {
+        "name": "MaxWidth",
+        "type_name": "f64",
+        "documentation": "TableViewColumn.MaxWidth: f64",
         "values": [],
         "attached": false
       },
