@@ -5,6 +5,7 @@ import * as vscode from 'vscode';
 import type { ReloadRecord } from '../src/reloadHistory';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import type { RuntimeNode, RuntimeViewSnapshot } from '../src/runtimeProtocol';
+import { fileKey } from '../src/workspacePaths';
 import { runtimeApp } from './browserMcp';
 import { browserBuildTimeout, waitFor } from './browserTestSupport';
 import { openEditorMcp } from './mcpFixture';
@@ -52,14 +53,20 @@ export async function verifyBrowserReload(): Promise<void> {
             const session = await current();
             if (session?.status === label) return session;
         }, label, timeout);
-        const ready = (older: RuntimeSummary | undefined, timeout = buildTimeout) => waitFor(async () => {
+        const history = async () => content<{ records: ReloadRecord[] }>(await invoke('ferroui_reload_history', { app_session: runtime })).records;
+        const latestSave = async () => (await history())[0]?.id ?? 0;
+        const ready = (older: RuntimeSummary | undefined, timeout = buildTimeout, expectedSave?: { uri: vscode.Uri; after: number }) => waitFor(async () => {
             const session = await current();
             if (session?.available && session.generation !== older?.generation) return session;
-            if (!older && session?.status === 'Browser launch failed') throw new Error(await output());
+            if (!older && session?.status === 'Browser launch failed') throw new Error('The initial browser build failed.');
+            if (expectedSave && session?.status === 'Browser update failed') {
+                const failed = (await history()).find(record => record.id > expectedSave.after && record.outcome === 'buildFailed'
+                    && fileKey(record.file) === fileKey(expectedSave.uri.fsPath));
+                if (failed) throw new Error(failed.message ?? 'The browser could not apply the saved changes.');
+            }
         }, 'a new browser generation', timeout).catch(async error => {
             throw new Error(`${error.message}\n${await output()}`, { cause: error });
         });
-        const history = async () => content<{ records: ReloadRecord[] }>(await invoke('ferroui_reload_history', { app_session: runtime })).records;
         const windows = async (app: ReturnType<typeof runtimeApp>) => (await app.result<RuntimeNode[]>('list_windows'))[0];
         const frame = async (app: ReturnType<typeof runtimeApp>) =>
             createHash('sha256').update(await app.frame((await windows(app)).node_id)).digest('hex');
@@ -97,8 +104,9 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 2');
         assert.ok((await history()).some(record => record.file.endsWith('Instructions.xaml') && record.outcome === 'buildFailed'));
 
+        const invalidXaml = await latestSave();
         await save(xaml, originalXaml.replace('Confirm the orders ready for pickup', 'Review the outgoing routes'));
-        const xamlAccepted = await ready(initial);
+        const xamlAccepted = await ready(initial, buildTimeout, { uri: xaml, after: invalidXaml });
         const xamlApp = runtimeApp(mcp, xamlAccepted);
         assert.equal(xamlAccepted.runtime, runtime);
         assert.equal(xamlAccepted.pid, initial.pid);
@@ -124,11 +132,12 @@ export async function verifyBrowserReload(): Promise<void> {
         ]);
         await status('Starting browser candidate', buildTimeout);
         assert.equal((await current())?.generation, xamlAccepted.generation);
+        const supersededRust = await latestSave();
         await Promise.all([
             save(host, originalHost),
             save(rust, originalRust.replace('text: "Dispatch desk"', 'text: "Routes ready"')),
         ]);
-        const rustAccepted = await ready(xamlAccepted);
+        const rustAccepted = await ready(xamlAccepted, buildTimeout, { uri: rust, after: supersededRust });
         const rustApp = runtimeApp(mcp, rustAccepted);
         assert.equal(rustAccepted.runtime, runtime);
         assert.equal(rustAccepted.pid, initial.pid);
