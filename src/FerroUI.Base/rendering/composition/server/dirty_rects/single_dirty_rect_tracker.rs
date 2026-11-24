@@ -5,7 +5,7 @@ use super::{IDirtyRectCollector, IDirtyRectTracker};
 use crate::media::immutable::ImmutableSolidColorBrush;
 use crate::media::{BoxShadows, Color};
 use crate::platform::{IDrawingContextImpl, LtrbRect};
-use crate::Thickness;
+use crate::{PixelRect, Thickness};
 use std::cell::Cell;
 
 /// Tracks the dirty area as a single bounding rectangle.
@@ -87,6 +87,20 @@ impl IDirtyRectTracker for SingleDirtyRectTracker {
 
     fn combined_rect(&self) -> LtrbRect {
         self.extended_rect.get()
+    }
+
+    fn copy_rects(&self, rects: &mut Vec<PixelRect>) {
+        rects.clear();
+        if !self.is_empty() {
+            rects.push(pixel_rect_from_rect_unscaled(self.extended_rect.get()).to_pixel_rect());
+        }
+    }
+
+    fn copy_uninflated_rects(&self, rects: &mut Vec<LtrbRect>) {
+        rects.clear();
+        if let Some(rect) = self.rect.get().filter(|_| !self.is_empty()) {
+            rects.push(rect);
+        }
     }
 }
 

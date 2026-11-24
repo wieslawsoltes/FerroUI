@@ -23,11 +23,12 @@ mod egl_gl_platform_surface;
 mod egl_gl_platform_surface_base;
 mod egl_image;
 mod egl_interface;
+mod egl_partial_presentation;
 mod egl_platform_graphics;
 mod egl_surface;
 
 pub use egl_context::{EglContext, MakeCurrentError};
-pub use egl_display::EglDisplay;
+pub use egl_display::{EglDisplay, EglPartialPresentationSupport};
 pub use egl_display_options::{
     EglConfigProbeCallback, EglContextFeature, EglContextFeatureFactory, EglContextOptions, EglDisplayCreationOptions,
     EglDisplayOptions,
@@ -44,6 +45,7 @@ pub use egl_gl_platform_surface_base::{
     EglGlPlatformSurfaceBase, EglPlatformSurfaceRenderTarget, EglPlatformSurfaceRenderTargetBase,
 };
 pub use egl_image::EglImage;
+pub use egl_partial_presentation::{EglPartialPresentation, EglPartialSession};
 pub use egl_interface::EglInterface;
 pub use egl_platform_graphics::EglPlatformGraphics;
 pub use egl_surface::EglSurface;

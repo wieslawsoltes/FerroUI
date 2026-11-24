@@ -1302,8 +1302,10 @@
    "pr": 22501,
    "date": "2026-11-12",
    "area": "rendering",
-   "class": "deferred",
-   "note": "Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android."
+   "class": "port",
+   "note": "Opt-in EGL partial presentation: `IPartialPresentationFeature`/`IPartialPresentationBuffer`, `RenderTargetProperties::supports_partial_presentation`, `PartialPresentationDirtyRectHistory` in the composition target (replay of the frames a buffer missed, rotated output rectangles), tracker `copy_rects`/`copy_uninflated_rects` and the region tracker inflation fix; EGL buffer age, `eglSetDamageRegionKHR`, swap with damage (KHR/EXT) in `EglPlatformSurfaceRenderTargetBase` and the DRM output; Skia GL forwards the feature; `use_partial_presentation` of X11, Wayland (aborted frame callback) and DRM. Vello GL targets do not take it. Linux/Android GPU validation owed.",
+   "part": "egl-partial",
+   "state": "done"
   },
   {
    "hash": "ca61365d753e4f01c4ff7605f3d32c410b2aae3c",

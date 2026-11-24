@@ -1,8 +1,10 @@
 use crate::gpu::ganesh::GaneshGrContext;
 use crate::gpu::{ISkiaGpuRenderSession, ISkiaGpuRenderTarget, ISkiaGrContext, SkiaSurfaceOrigin};
 use ferroui_base::platform::{
-    PlatformRenderTargetState, RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,
+    IPartialPresentationBuffer, IPartialPresentationFeature, PlatformRenderTargetState, RenderTargetError,
+    RenderTargetProperties, RenderTargetSceneInfo,
 };
+use ferroui_base::PixelRect;
 use ferroui_opengl::gl_consts::{GL_FRAMEBUFFER_BINDING, GL_RGBA8};
 use ferroui_opengl::surfaces::{
     IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession,
@@ -31,7 +33,30 @@ impl GlRenderTarget {
 }
 
 /// One frame rendered with Skia to an OpenGL framebuffer.
+/// The partial presentation of the OpenGL session, which says the drawing succeeded only
+/// once the flush of the frame did (upstream: the flush can fail during the disposal).
+struct GlPartialPresentation {
+    inner: Rc<dyn IPartialPresentationFeature>,
+    succeeded: Cell<bool>,
+}
+
+impl IPartialPresentationFeature for GlPartialPresentation {
+    fn buffer(&self) -> Option<Rc<dyn IPartialPresentationBuffer>> {
+        self.inner.buffer()
+    }
+
+    fn set_dirty_rects(&self, frame_dirty_rects: &[PixelRect], buffer_dirty_rects: &[PixelRect]) -> bool {
+        self.inner.set_dirty_rects(frame_dirty_rects, buffer_dirty_rects)
+    }
+
+    fn succeeded(&self) {
+        self.succeeded.set(true);
+    }
+}
+
 struct GlGpuSession {
+    /// Taken from the OpenGL session when the drawing context is asked for it.
+    partial_presentation: RefCell<Option<Rc<GlPartialPresentation>>>,
     gr_context: Rc<GaneshGrContext>,
     backend_render_target: RefCell<Option<BackendRenderTarget>>,
     surface: RefCell<Option<Surface>>,
@@ -50,6 +75,7 @@ impl GlGpuSession {
         let surface_origin =
             if gl_session.is_y_flipped() { SkiaSurfaceOrigin::TopLeft } else { SkiaSurfaceOrigin::BottomLeft };
         Self {
+            partial_presentation: RefCell::new(None),
             gr_context,
             backend_render_target: RefCell::new(Some(backend_render_target)),
             surface: RefCell::new(Some(surface)),
@@ -91,7 +117,21 @@ impl ISkiaGpuRenderSession for GlGpuSession {
         }
         self.backend_render_target.borrow_mut().take();
         self.gr_context.flush();
+        // The frame is complete once it is flushed.
+        if let Some(partial) = self.partial_presentation.borrow().as_ref().filter(|partial| partial.succeeded.get()) {
+            partial.inner.succeeded();
+        }
         self.gl_session.dispose();
+    }
+
+    fn partial_presentation(&self) -> Option<Rc<dyn IPartialPresentationFeature>> {
+        if let Some(partial) = self.partial_presentation.borrow().as_ref() {
+            return Some(partial.clone());
+        }
+        let inner = self.gl_session.partial_presentation()?;
+        let partial = Rc::new(GlPartialPresentation { inner, succeeded: Cell::new(false) });
+        *self.partial_presentation.borrow_mut() = Some(partial.clone());
+        Some(partial)
     }
 }
 

@@ -194,6 +194,10 @@ impl IRenderTarget for VelloGlGpuRenderTarget {
         let target = self.target.borrow();
         let rotation = target.as_ref().map(|target| target.properties().required_rotation_for_orientation);
         RenderTargetProperties {
+            // The frame is drawn into a retained texture that is copied whole into the
+            // framebuffer: the partial presentation of the EGL surface is not taken (its
+            // session then presents the whole buffer).
+            supports_partial_presentation: false,
             retains_previous_frame_contents: true,
             is_suitable_for_direct_rendering: true,
             required_rotation_for_orientation: rotation.unwrap_or_default(),

@@ -35,6 +35,10 @@ pub struct DrmOutputOptions {
     /// Specifies the connector type ID used with [`connector_type`](Self::connector_type).
     /// If null, the preferred connector type ID will be used.
     pub connector_type_id: Option<u32>,
+    /// Enables partial presentation where EGL supports it, rotated outputs included: a frame
+    /// repaints what changed in its buffer and is presented with the region that changed
+    /// (upstream 070c3be990). `None`, the default, lets the platform decide (currently: off).
+    pub use_partial_presentation: Option<bool>,
 }
 
 impl Default for DrmOutputOptions {
@@ -47,6 +51,7 @@ impl Default for DrmOutputOptions {
             video_mode: None,
             connector_type: None,
             connector_type_id: None,
+            use_partial_presentation: None,
         }
     }
 }

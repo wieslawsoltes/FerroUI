@@ -567,6 +567,12 @@ mod imp {
             self.frame_callback = Some(wl_surface.frame(globals.queue_handle(), self.id));
         }
 
+        /// A frame callback staged before an EGL swap that failed is never committed: it is
+        /// dropped, so the next frame stages one again (upstream 070c3be990).
+        pub fn on_buffer_attach_aborted(&mut self) {
+            self.frame_callback = None;
+        }
+
         fn on_frame_done(&mut self, callback: &WlCallback) {
             self.worker.wakeup_render_loop();
             // A popup that was created again has dropped the callback of its last frame: the
@@ -1226,6 +1232,10 @@ mod imp {
             self.shell.on_before_new_buffer_attached(globals, scene_info);
         }
 
+        fn on_buffer_attach_aborted(&mut self) {
+            self.shell.surface.on_buffer_attach_aborted();
+        }
+
         // Toplevels/popups attach one buffer per frame inside the throttled render loop, which flushes
         // naturally, so no eager roundtrip is needed (it would stall the render loop).
         fn enforce_buffer_creation_roundtrip(&self) -> bool {
@@ -1572,6 +1582,10 @@ mod imp {
 
         fn on_before_new_buffer_attached(&mut self, globals: &WaylandGlobals, scene_info: &RenderTargetSceneInfo) {
             self.shell.on_before_new_buffer_attached(globals, scene_info);
+        }
+
+        fn on_buffer_attach_aborted(&mut self) {
+            self.shell.surface.on_buffer_attach_aborted();
         }
 
         fn enforce_buffer_creation_roundtrip(&self) -> bool {

@@ -14,6 +14,7 @@ mod i_platform_gpu;
 mod i_platform_render_interface;
 mod i_platform_render_interface_region;
 mod i_platform_threading_interface;
+mod i_partial_presentation_feature;
 mod i_render_target;
 mod i_scoped_resource;
 mod i_surface_orientation;
@@ -54,6 +55,7 @@ pub use i_platform_gpu::PlatformGraphicsContextLostException;
 pub use i_platform_render_interface::{IPlatformRenderInterface, IPlatformRenderInterfaceContext};
 pub use i_platform_render_interface_region::IPlatformRenderInterfaceRegion;
 pub use i_platform_threading_interface::{IPlatformThreadingInterface, PlatformTimerHandle};
+pub use i_partial_presentation_feature::{IPartialPresentationBuffer, IPartialPresentationFeature};
 pub use i_render_target::{
     IRenderTarget, PlatformRenderTargetState, RenderTargetDrawingContextProperties,
     RenderTargetError, RenderTargetProperties, RenderTargetSceneInfo,

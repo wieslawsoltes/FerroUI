@@ -48,6 +48,12 @@ pub struct WaylandPlatformOptions {
     /// decides based on compositor and driver capabilities.
     pub use_dmabuf_swapchain: Option<bool>,
 
+    /// Enables partial presentation where the rendering backend supports it: with the EGL
+    /// window surface, a frame repaints what changed in its buffer and is presented with the
+    /// region that changed (upstream 070c3be990). `None`, the default, lets the platform
+    /// decide (currently: off).
+    pub use_partial_presentation: Option<bool>,
+
     /// If this option is set to true, a GMainLoop and GSource based dispatcher implementation will be used for the
     /// UI thread instead of the default managed one.
     /// Use this if you need to use GLib-based libraries on the main thread.
@@ -79,6 +85,7 @@ impl WaylandPlatformOptions {
                 GlVersion::new(GlProfileType::OpenGLES, 2, 0),
             ],
             use_dmabuf_swapchain: None,
+            use_partial_presentation: None,
             use_g_lib_main_loop: false,
             external_g_lib_main_loop_exception_logger: None,
         }
@@ -104,6 +111,7 @@ impl WaylandPlatformOptions {
             force_drawn_decorations: self.force_drawn_decorations_internal(),
             gl_profiles: self.gl_profiles.clone(),
             use_dmabuf_swapchain: self.use_dmabuf_swapchain,
+            use_partial_presentation: self.use_partial_presentation.unwrap_or(false),
             app_id: self.app_id.clone(),
         }
     }
@@ -125,6 +133,7 @@ pub struct WaylandWorkerOptions {
     pub force_drawn_decorations: bool,
     pub gl_profiles: Vec<GlVersion>,
     pub use_dmabuf_swapchain: Option<bool>,
+    pub use_partial_presentation: bool,
     pub app_id: Option<String>,
 }
 

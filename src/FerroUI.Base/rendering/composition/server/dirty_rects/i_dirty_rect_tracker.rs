@@ -1,4 +1,5 @@
 use crate::platform::{IDrawingContextImpl, LtrbPixelRect, LtrbRect};
+use crate::PixelRect;
 use smallvec::SmallVec;
 use std::cell::Cell;
 use std::hash::{BuildHasher, Hasher};
@@ -40,6 +41,17 @@ pub trait IDirtyRectTracker: IDirtyRectCollector {
     fn visualize(&self, context: &mut dyn IDrawingContextImpl);
 
     fn combined_rect(&self) -> LtrbRect;
+
+    /// The finalized rectangles of the frame in whole pixels, put into `rects` in place of
+    /// what it holds: what partial presentation declares to the platform (upstream
+    /// 070c3be990).
+    fn copy_rects(&self, rects: &mut Vec<PixelRect>);
+
+    /// The rectangles added since the tracker was initialized, before the inflation for
+    /// antialiasing, put into `rects` in place of what it holds: what partial presentation
+    /// replays through `add_rect` and `finalize_frame` for an older buffer, so a rectangle
+    /// is never inflated twice.
+    fn copy_uninflated_rects(&self, rects: &mut Vec<LtrbRect>);
 
     /// The dirty area of the finalized frame as rectangles of whole pixels
     /// that do not overlap, put into `rects` in place of what it holds: the

@@ -104,15 +104,18 @@ mod imp {
     use crate::DrmOutputOptions;
     use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
     use ferroui_base::platform::{
-        IPlatformGraphics, IPlatformGraphicsContext, ISurfaceOrientation, PlatformRenderTargetState,
-        RenderTargetProperties, RenderTargetSceneInfo, SurfaceOrientation,
+        IPartialPresentationFeature, IPlatformGraphics, IPlatformGraphicsContext, ISurfaceOrientation,
+        PlatformRenderTargetState, RenderTargetProperties, RenderTargetSceneInfo, SurfaceOrientation,
     };
     use ferroui_base::reactive::IDisposable;
     use ferroui_base::rendering::composition::CompositionTransparencyLevel;
     use ferroui_base::utilities::ThreadBound;
     use ferroui_base::PixelSize;
     use ferroui_opengl::egl::egl_consts::EGL_NONE;
-    use ferroui_opengl::egl::{EglContext, EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface, EglSurface};
+    use ferroui_opengl::egl::{
+        EglContext, EglDisplay, EglDisplayCreationOptions, EglDisplayOptions, EglInterface, EglPartialPresentation,
+        EglPartialSession, EglSurface,
+    };
     use ferroui_opengl::gl_consts::*;
     use ferroui_opengl::surfaces::{IGlPlatformSurface, IGlPlatformSurfaceRenderTarget, IGlPlatformSurfaceRenderingSession};
     use ferroui_opengl::{GetProcAddress, IGlContext, OpenGlError};
@@ -467,7 +470,13 @@ mod imp {
                 let scene_info =
                     RenderTargetSceneInfo::new(self.pixel_size(), 1.0, CompositionTransparencyLevel::None);
                 for _ in 0..2 {
-                    let target = RenderTarget { parent: self.this(), egl: state.clone() };
+                    // The swaps of the start present whole frames.
+                    let target = RenderTarget {
+                        parent: self.this(),
+                        egl: state.clone(),
+                        partial_presentation: None,
+                        corrupted: Rc::new(Cell::new(false)),
+                    };
                     let session = target.begin_draw(&scene_info);
                     let gl = state.deferred_context.gl_interface();
                     gl.clear_color(
@@ -653,7 +662,22 @@ mod imp {
         /// platform graphics: the call creates the EGL objects when this
         /// is the first.
         pub fn create_gl_render_target_of_primary_context(&self) -> Rc<dyn IGlPlatformSurfaceRenderTarget> {
-            Rc::new(RenderTarget { parent: self.inner.clone(), egl: self.inner.egl_state() })
+            let egl = self.inner.egl_state();
+            // Partial presentation (upstream 070c3be990): per render target, so a target that
+            // failed and is made again starts from a whole repaint.
+            let use_partial_presentation = self.inner.options().use_partial_presentation.unwrap_or(false)
+                && egl.egl_display.partial_presentation_support().buffer_age;
+            let corrupted = Rc::new(Cell::new(false));
+            let partial_presentation = use_partial_presentation.then(|| {
+                let display = &egl.egl_display;
+                EglPartialPresentation::new(
+                    display.egl_interface().clone(),
+                    display.handle(),
+                    display.partial_presentation_support(),
+                    corrupted.clone(),
+                )
+            });
+            Rc::new(RenderTarget { parent: self.inner.clone(), egl, partial_presentation, corrupted })
         }
 
         /// # Panics
@@ -737,11 +761,18 @@ mod imp {
     struct RenderTarget {
         parent: Arc<Inner>,
         egl: Rc<EglState>,
+        partial_presentation: Option<Rc<EglPartialPresentation>>,
+        /// Set when a declared region or a swap of a partial frame failed.
+        corrupted: Rc<Cell<bool>>,
     }
 
     impl IPlatformRenderSurfaceRenderTarget for RenderTarget {
         fn state(&self) -> PlatformRenderTargetState {
-            PlatformRenderTargetState::READY
+            if self.corrupted.get() {
+                PlatformRenderTargetState::CORRUPTED
+            } else {
+                PlatformRenderTargetState::READY
+            }
         }
     }
 
@@ -762,11 +793,25 @@ mod imp {
             let resolution = self.parent.resolution();
             gl.viewport(0, 0, resolution.width, resolution.height);
 
+            // The rectangles of partial presentation are in the pixels of the framebuffer, the
+            // compositor rotates them with the scene.
+            let partial = self.partial_presentation.as_ref().and_then(|partial| {
+                match partial.begin_draw(self.egl.egl_surface.dangerous_get_handle(), resolution, false) {
+                    Ok(session) => Some(session),
+                    Err(error) => {
+                        partial.invalidate();
+                        println!("Partial presentation is not used for the frame: {}", error.message());
+                        None
+                    }
+                }
+            });
+
             Rc::new(RenderSession {
                 parent: self.parent.clone(),
                 egl: self.egl.clone(),
                 clear_context,
                 disposed: Cell::new(false),
+                partial,
             })
         }
 
@@ -774,7 +819,14 @@ mod imp {
         /// it into the framebuffer, overlays included (upstream 9b3e9c881b replaced the
         /// rotation framebuffer and shaders of the output with it).
         fn properties(&self) -> RenderTargetProperties {
+            // Direct rendering needs a stencil buffer (the clip of several rectangles) and a
+            // driver that gives back buffers with contents.
+            let supports_partial_presentation = self.partial_presentation.is_some();
             RenderTargetProperties {
+                supports_partial_presentation,
+                is_suitable_for_direct_rendering: supports_partial_presentation
+                    && self.egl.deferred_context.stencil_size() >= 8
+                    && !self.partial_presentation.as_ref().is_some_and(|partial| partial.prefer_retained_layer()),
                 required_rotation_for_orientation: self.parent.orientation(),
                 ..RenderTargetProperties::default()
             }
@@ -782,6 +834,9 @@ mod imp {
 
         fn dispose(&self) {
             // We are wrapping GBM buffer chain associated with CRTC, and don't free it on a whim
+            if let Some(partial) = &self.partial_presentation {
+                partial.invalidate();
+            }
         }
     }
 
@@ -790,6 +845,37 @@ mod imp {
         egl: Rc<EglState>,
         clear_context: Rc<dyn IDisposable>,
         disposed: Cell<bool>,
+        partial: Option<Rc<EglPartialSession>>,
+    }
+
+    impl RenderSession {
+        /// Swaps the buffers of the frame; `false` when it was not presented (a partial frame
+        /// that did not succeed, or whose swap failed), so nothing is flipped.
+        fn swap(&self) -> bool {
+            match &self.partial {
+                Some(partial) if partial.is_taken() => {
+                    if !partial.can_present() {
+                        partial.cancel();
+                        return false;
+                    }
+                    match partial.present() {
+                        Ok(presented) => presented,
+                        Err(error) => {
+                            println!("{}", error.message());
+                            false
+                        }
+                    }
+                }
+                Some(untaken) => {
+                    untaken.present_whole(|| self.egl.egl_surface.swap_buffers());
+                    true
+                }
+                None => {
+                    self.egl.egl_surface.swap_buffers();
+                    true
+                }
+            }
+        }
     }
 
     impl IGlPlatformSurfaceRenderingSession for RenderSession {
@@ -810,6 +896,12 @@ mod imp {
             false
         }
 
+        fn partial_presentation(&self) -> Option<Rc<dyn IPartialPresentationFeature>> {
+            let partial = self.partial.as_ref()?;
+            partial.take();
+            Some(partial.clone())
+        }
+
         /// # Panics
         /// When the DRM framebuffer of the new front buffer cannot be made
         /// (the exception of the reference).
@@ -823,7 +915,10 @@ mod imp {
             let gl = egl.deferred_context.gl_interface();
 
             gl.flush();
-            egl.egl_surface.swap_buffers();
+            if !self.swap() {
+                self.clear_context.dispose();
+                return;
+            }
 
             let lib = parent.lib;
             let surface = parent.gbm_target_surface.0;

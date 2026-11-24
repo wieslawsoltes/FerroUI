@@ -68,6 +68,11 @@ impl PlatformRenderTargetState {
 /// Static properties of a render target.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub struct RenderTargetProperties {
+    /// Whether the drawing contexts of the target answer [`IPartialPresentationFeature`]
+    /// (upstream 070c3be990). It does not promise that a buffer has contents to reuse.
+    ///
+    /// [`IPartialPresentationFeature`]: super::IPartialPresentationFeature
+    pub supports_partial_presentation: bool,
     /// Whether the render target retains the contents of the previous frame
     /// when a new drawing context is created.
     pub retains_previous_frame_contents: bool,
@@ -78,7 +83,8 @@ pub struct RenderTargetProperties {
     /// framebuffer of the target (upstream 9b3e9c881b): a display mounted in another
     /// orientation. A rotation other than `Rotation0` makes the compositor draw the scene into
     /// a layer and draw that layer, and the overlays, rotated; the scene keeps its size in
-    /// scene pixels, the drawing context of the target is in framebuffer pixels.
+    /// scene pixels; the drawing context of the target and the rectangles of partial
+    /// presentation are in framebuffer pixels.
     pub required_rotation_for_orientation: SurfaceOrientation,
 }
 

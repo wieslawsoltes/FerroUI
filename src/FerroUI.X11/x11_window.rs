@@ -791,12 +791,15 @@ impl X11Window {
         if egl.is_some() {
             surfaces.insert(
                 0,
-                EglGlPlatformSurface::new(Arc::new(SurfaceInfo {
-                    shared: window.shared.clone(),
-                    display: x11.deferred_display(),
-                    parent: handle,
-                    handle: render_handle,
-                })),
+                EglGlPlatformSurface::new_with_partial_presentation(
+                    Arc::new(SurfaceInfo {
+                        shared: window.shared.clone(),
+                        display: x11.deferred_display(),
+                        parent: handle,
+                        handle: render_handle,
+                    }),
+                    platform.options().use_partial_presentation.unwrap_or(false),
+                ),
             );
         }
         if glx.is_some() {

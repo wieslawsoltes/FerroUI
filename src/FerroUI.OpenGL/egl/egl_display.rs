@@ -24,6 +24,40 @@ pub struct EglDisplay {
     is_lost: Cell<bool>,
     supports_sharing: bool,
     contexts: RefCell<Vec<Rc<EglContext>>>,
+    partial_presentation_support: EglPartialPresentationSupport,
+}
+
+/// What the display offers for partial presentation (upstream 070c3be990): the extensions,
+/// with the entry points they need.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub struct EglPartialPresentationSupport {
+    /// `EGL_EXT_buffer_age`.
+    pub buffer_age: bool,
+    /// `EGL_KHR_partial_update` with `eglSetDamageRegionKHR`.
+    pub partial_update: bool,
+    /// `EGL_KHR_swap_buffers_with_damage` with its entry point.
+    pub swap_buffers_with_damage_khr: bool,
+    /// `EGL_EXT_swap_buffers_with_damage` with its entry point.
+    pub swap_buffers_with_damage_ext: bool,
+}
+
+impl EglPartialPresentationSupport {
+    /// The support of the extension string of a display (names separated by spaces) with the
+    /// entry points the library has.
+    pub fn from_extensions(
+        extensions: &str,
+        has_set_damage_region: bool,
+        has_swap_with_damage_khr: bool,
+        has_swap_with_damage_ext: bool,
+    ) -> Self {
+        let has = |name: &str| extensions.split_ascii_whitespace().any(|extension| extension == name);
+        Self {
+            buffer_age: has("EGL_EXT_buffer_age"),
+            partial_update: has("EGL_KHR_partial_update") && has_set_damage_region,
+            swap_buffers_with_damage_khr: has("EGL_KHR_swap_buffers_with_damage") && has_swap_with_damage_khr,
+            swap_buffers_with_damage_ext: has("EGL_EXT_swap_buffers_with_damage") && has_swap_with_damage_ext,
+        }
+    }
 }
 
 impl EglDisplay {
@@ -62,6 +96,13 @@ impl EglDisplay {
             options.allow_pbuffer_only_configs,
         )?;
 
+        let partial_presentation_support = EglPartialPresentationSupport::from_extensions(
+            &egl.query_string(display, EGL_EXTENSIONS).unwrap_or_default(),
+            egl.is_set_damage_region_khr_available(),
+            egl.is_swap_buffers_with_damage_khr_available(),
+            egl.is_swap_buffers_with_damage_ext_available(),
+        );
+
         Ok(Rc::new_cyclic(|this| Self {
             this: this.clone(),
             egl,
@@ -71,7 +112,13 @@ impl EglDisplay {
             is_lost: Cell::new(false),
             supports_sharing,
             contexts: RefCell::new(Vec::new()),
+            partial_presentation_support,
         }))
+    }
+
+    /// What the display offers for partial presentation.
+    pub fn partial_presentation_support(&self) -> EglPartialPresentationSupport {
+        self.partial_presentation_support
     }
 
     fn this(&self) -> Rc<EglDisplay> {
@@ -408,6 +455,20 @@ mod tests {
     }
 
     #[cfg(target_os = "linux")]
+    #[test]
+    fn partial_presentation_needs_the_extension_and_its_entry_point() {
+        let extensions = "EGL_KHR_image_base EGL_EXT_buffer_age EGL_KHR_partial_update EGL_EXT_swap_buffers_with_damage";
+        let support = EglPartialPresentationSupport::from_extensions(extensions, true, true, false);
+        assert!(support.buffer_age);
+        assert!(support.partial_update);
+        // The extension of the other vendor is not named; the one named has no entry point.
+        assert!(!support.swap_buffers_with_damage_khr);
+        assert!(!support.swap_buffers_with_damage_ext);
+        assert_eq!(EglPartialPresentationSupport::from_extensions("", true, true, true), Default::default());
+        // A name is matched whole.
+        assert!(!EglPartialPresentationSupport::from_extensions("EGL_EXT_buffer_age2", true, true, true).buffer_age);
+    }
+
     #[test]
     #[ignore = "requires a native EGL/GLES display"]
     fn native_current_context_is_unbound_on_disposal() {

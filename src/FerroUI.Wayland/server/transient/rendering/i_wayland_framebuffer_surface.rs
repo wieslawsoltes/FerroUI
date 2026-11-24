@@ -38,6 +38,10 @@ pub trait IWaylandFramebufferSurface {
     fn unregister_render_target(&mut self, render_target: &Rc<dyn IWaylandSurfaceRenderTarget>);
     fn on_before_new_buffer_attached(&mut self, globals: &WaylandGlobals, scene_info: &RenderTargetSceneInfo);
 
+    /// The swap that would have committed the buffer failed (upstream 070c3be990). Nothing
+    /// by default.
+    fn on_buffer_attach_aborted(&mut self) {}
+
     /// When `true`, the framebuffer render target does a wayland roundtrip right after committing
     /// each new buffer, flushing the buffer's fd to the compositor immediately.
     ///
