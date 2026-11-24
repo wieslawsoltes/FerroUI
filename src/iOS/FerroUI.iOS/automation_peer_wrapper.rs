@@ -10,7 +10,7 @@
 //! question of the accessibility protocol from its wrapper.
 
 use ferroui_base::reactive::Subscription;
-use ferroui_base::platform::IPlatformHandle;
+use ferroui_controls::platform::IPlatformHandle;
 use ferroui_base::{PixelPoint, PixelRect, Point, Rect, Ref};
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, InteropAutomationPeer};
 use ferroui_controls::automation::provider::{
@@ -697,7 +697,7 @@ mod uikit {
     use super::{AccessibilityChild, AccessibilityScrollDirection, AutomationPeerWrapper, IWrapperView, NOT_FOUND};
     use crate::ferro_view::FerroView;
     use crate::native_control_host_impl::UIViewControlHandle;
-    use ferroui_base::platform::IPlatformHandle;
+    use ferroui_controls::platform::IPlatformHandle;
     use ferroui_base::{PixelPoint, Point};
     use objc2::rc::{Retained, Weak as ObjcWeak};
     use objc2::runtime::AnyObject;
