@@ -127,11 +127,16 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 2');
 
         await Promise.all([
-            save(host, 'await new Promise(resolve => setTimeout(resolve, 3500));\n' + originalHost),
+            save(host, 'await new Promise(resolve => setTimeout(resolve, 8000));\n' + originalHost),
             save(rust, originalRust.replace('text: "Dispatch desk"', 'text: "An intermediate page"')),
         ]);
         await status('Starting browser candidate', buildTimeout);
         assert.equal((await current())?.generation, xamlAccepted.generation);
+        const beforeSuperseding = await frame(xamlApp);
+        await xamlApp.click((await xamlApp.find('DispatchOrder')).node_id);
+        await waitFor(async () => await frame(xamlApp) !== beforeSuperseding ? true : undefined,
+            'a new frame from the accepted page during candidate startup', 3_000);
+        assert.equal((await xamlApp.find('DispatchedCount')).text, 'Dispatched orders: 3');
         const supersededRust = await latestSave();
         await Promise.all([
             save(host, originalHost),
@@ -142,7 +147,7 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal(rustAccepted.runtime, runtime);
         assert.equal(rustAccepted.pid, initial.pid);
         assert.equal((await rustApp.find('Heading')).text, 'Routes ready');
-        assert.equal((await rustApp.find('DispatchedCount')).text, 'Dispatched orders: 2');
+        assert.equal((await rustApp.find('DispatchedCount')).text, 'Dispatched orders: 3');
         assert.ok((await history()).some(record => record.file.endsWith('main.rs') && record.outcome === 'superseded'));
         const heading = await rustApp.find('Heading');
         const source = content<{ source?: { uri: string; canApply: boolean; version: number } }>(await invoke('ferroui_runtime_source',

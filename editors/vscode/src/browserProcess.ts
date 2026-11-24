@@ -97,6 +97,9 @@ export class ManagedBrowser {
             await cdp.request('Emulation.setDeviceMetricsOverride', {
                 width: viewport.width, height: viewport.height, deviceScaleFactor: 1, mobile: false,
             }, active, sessionId);
+            // Chromium can hide a headless window during candidate replacement.
+            // Keep both development pages producing frames during a checked handoff.
+            if (!ownsBrowser) await cdp.request('Emulation.setFocusEmulationEnabled', { enabled: true }, active, sessionId);
             const result = await cdp.request<{ errorText?: string }>('Page.navigate', { url }, active, sessionId);
             if (result.errorText) throw new Error('Chromium could not open the configured app URL.');
             return page;

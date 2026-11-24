@@ -10,10 +10,21 @@ interface Evaluation { result?: { objectId?: string; value?: unknown }; exceptio
 interface InspectionReply { ok: boolean; value?: unknown; error?: string }
 
 const bridge = 'Object.getOwnPropertyDescriptor(globalThis, "__ferrouiLiveApp")?.value ?? null';
-const presentedBridge = `(() => { const app = (${bridge}); return app?.version === 1 && app.ready() ? app : null; })()`;
+const presentedBridge = `(() => {
+    const app = (${bridge});
+    if (app?.version !== 1) return 'inspector';
+    if (app.ready()) return app;
+    return document.hidden ? 'hidden' : 'frame';
+})()`;
 const connected = `this === (${bridge}) && this.version === 1`;
 const dispatch = `function (request) { return (${connected}) ? this.dispatch(request) : null; }`;
 const frameBounds = `function () { return (${connected}) ? this.bounds() : null; }`;
+const startupErrors = {
+    navigation: 'Timed out loading the configured Chromium app URL.',
+    inspector: 'Timed out waiting for the Live App inspector. Serve a debug build with the inspector enabled.',
+    frame: 'Timed out waiting for the Live App inspector’s first frame.',
+    hidden: 'Timed out waiting for the browser inspector’s first frame while its tab was hidden.',
+};
 
 /** One channel per Chromium document. Reopening a tab creates a new runtime generation. */
 export class BrowserInspection implements RuntimeInspectionChannel {
@@ -29,6 +40,7 @@ export class BrowserInspection implements RuntimeInspectionChannel {
     static async open(page: BrowserPage, url: string, signal: AbortSignal, report?: (message: string) => void): Promise<BrowserInspection> {
         const inspection = new BrowserInspection(page);
         const deadline = AbortSignal.any([signal, page.signal, AbortSignal.timeout(15_000)]);
+        let pending: keyof typeof startupErrors = 'navigation';
         const unsubscribe = report && page.cdp.onEvent(event => {
             if (event.sessionId !== page.sessionId || event.method !== 'Runtime.exceptionThrown') return;
             const details = (event.params as { exceptionDetails?: { exception?: { description?: string }; text?: string } })?.exceptionDetails;
@@ -43,9 +55,12 @@ export class BrowserInspection implements RuntimeInspectionChannel {
                 const location = await inspection.location(deadline);
                 if (location === url) {
                     const result = await inspection.request<Evaluation>('Runtime.evaluate', { expression: presentedBridge, silent: true }, deadline);
-                    if (!result.exceptionDetails && result.result?.objectId && inspection.navigation === revision) {
-                        if (await inspection.location(deadline) === url && inspection.navigation === revision) {
-                            inspection.objectId = result.result.objectId;
+                    if (!result.exceptionDetails && inspection.navigation === revision) {
+                        const state = result.result?.value;
+                        pending = state === 'frame' || state === 'hidden' ? state : 'inspector';
+                        const objectId = result.result?.objectId;
+                        if (objectId && await inspection.location(deadline) === url && inspection.navigation === revision) {
+                            inspection.objectId = objectId;
                             return inspection;
                         }
                     }
@@ -59,7 +74,7 @@ export class BrowserInspection implements RuntimeInspectionChannel {
             page.signal.throwIfAborted();
             if (!deadline.aborted) throw error;
         } finally { unsubscribe?.(); }
-        throw new Error('The browser app did not provide a Live App inspector. Serve a debug build with the inspector installed.');
+        throw new Error(startupErrors[pending]);
     }
 
     async tools(signal: AbortSignal): Promise<RuntimeToolDefinition[]> {
