@@ -5,36 +5,46 @@ use crate::css::{FontFaceDescriptors, FontVariationSetting};
 use crate::matching::{FontMatchRequest, FontStyleRequest};
 use crate::sfnt::{ReadBe, Tag};
 
+// The records of `fvar` as this crate reads them, before a backend has the font. The public model
+// of a variation space is `FontVariationDesign` of `ferroui-base`, which `ferroui-fonts-web` makes
+// from these; the names of a named instance stay here, for `font-named-instance`.
+
 /// An axis of `fvar`, in its own units.
-#[derive(Clone, Copy, Debug, PartialEq)]
-pub struct FontAxis {
+#[derive(Clone, Debug, PartialEq)]
+pub struct FvarAxis {
     pub tag: Tag,
     pub min: f32,
     pub default: f32,
     pub max: f32,
+    /// The font asks for the axis not to be shown in user interfaces.
+    pub hidden: bool,
+    /// The name of the axis, the first the `name` table gives.
+    pub name: Option<String>,
 }
 
-impl FontAxis {
+impl FvarAxis {
     fn clamp(&self, value: f32) -> f32 {
         value.clamp(self.min, self.max)
     }
 }
 
-/// A named instance of `fvar`: its names, and the position of each axis.
+/// A named instance of `fvar`: its names in every language of the `name` table, which
+/// `font-named-instance` is matched against, its PostScript name, and the position of each axis.
 #[derive(Clone, Debug, PartialEq)]
-pub struct FontNamedInstance {
+pub struct FvarNamedInstance {
     pub names: Vec<String>,
+    pub postscript_name: Option<String>,
     pub coordinates: Vec<f32>,
 }
 
 /// The variation space of a font.
 #[derive(Clone, Debug, Default, PartialEq)]
-pub struct FontAxes {
-    pub axes: Vec<FontAxis>,
-    pub instances: Vec<FontNamedInstance>,
+pub struct FvarTable {
+    pub axes: Vec<FvarAxis>,
+    pub instances: Vec<FvarNamedInstance>,
 }
 
-impl FontAxes {
+impl FvarTable {
     pub fn has(&self, tag: &Tag) -> bool {
         self.axes.iter().any(|axis| axis.tag == *tag)
     }
@@ -90,40 +100,50 @@ fn names_of(name: &[u8], id: u16) -> Vec<String> {
 }
 
 /// The variation space of a sanitized font; `None` for a font that is not variable.
-pub fn read_font_axes(font: &[u8]) -> Option<FontAxes> {
+pub fn read_fvar(font: &[u8]) -> Option<FvarTable> {
     let fvar = table(font, b"fvar")?;
     let axes_offset = fvar.u16_at(4)? as usize;
     let axis_count = fvar.u16_at(8)? as usize;
     let instance_count = fvar.u16_at(12)? as usize;
     let instance_size = fvar.u16_at(14)? as usize;
+    let name = table(font, b"name").unwrap_or(&[]);
     let mut axes = Vec::with_capacity(axis_count);
     for index in 0..axis_count {
         let at = axes_offset + index * 20;
         let tag: Tag = fvar.get(at..at + 4)?.try_into().ok()?;
-        axes.push(FontAxis {
+        axes.push(FvarAxis {
             tag,
             min: fixed(fvar.u32_at(at + 4)?),
             default: fixed(fvar.u32_at(at + 8)?),
             max: fixed(fvar.u32_at(at + 12)?),
+            hidden: fvar.u16_at(at + 16)? & 1 != 0,
+            name: names_of(name, fvar.u16_at(at + 18)?).into_iter().next(),
         });
     }
-    let name = table(font, b"name").unwrap_or(&[]);
     let first = axes_offset + axis_count * 20;
     let mut instances = Vec::with_capacity(instance_count);
     for index in 0..instance_count {
         let at = first + index * instance_size;
         let coordinates =
             (0..axis_count).map(|axis| fvar.u32_at(at + 4 + axis * 4).map(fixed)).collect::<Option<Vec<f32>>>()?;
-        instances.push(FontNamedInstance { names: names_of(name, fvar.u16_at(at)?), coordinates });
+        // The PostScript name follows the coordinates when the record is long enough for it.
+        let postscript_at = at + 4 + axis_count * 4;
+        let postscript_name = (instance_size >= axis_count * 4 + 6)
+            .then(|| fvar.u16_at(postscript_at))
+            .flatten()
+            .filter(|id| *id != 0xFFFF)
+            .and_then(|id| names_of(name, id).into_iter().next());
+        let names = names_of(name, fvar.u16_at(at)?);
+        instances.push(FvarNamedInstance { names, postscript_name, coordinates });
     }
-    Some(FontAxes { axes, instances })
+    Some(FvarTable { axes, instances })
 }
 
 /// The position in the variation space for a request, in the order of the standard: weight,
 /// width and style clamped to the descriptors and the axes, then the named instance, then the
 /// `font-variation-settings` descriptor. Empty for a font without axes.
 pub fn resolve_font_variations(
-    space: &FontAxes,
+    space: &FvarTable,
     face: &FontFaceDescriptors,
     request: &FontMatchRequest,
 ) -> Vec<FontVariationSetting> {
@@ -175,17 +195,18 @@ mod tests {
         parse_font_face_block(&format!("font-family: F; src: url(a); {descriptors}")).unwrap()
     }
 
-    fn space() -> FontAxes {
-        let axis = |tag: &Tag, min, default, max| FontAxis { tag: *tag, min, default, max };
-        FontAxes {
+    fn space() -> FvarTable {
+        let axis = |tag: &Tag, min, default, max| FvarAxis { tag: *tag, min, default, max, hidden: false, name: None };
+        FvarTable {
             axes: vec![
                 axis(b"wght", 100.0, 400.0, 900.0),
                 axis(b"wdth", 75.0, 100.0, 125.0),
                 axis(b"slnt", -10.0, 0.0, 0.0),
                 axis(b"XHGT", 0.0, 0.5, 1.0),
             ],
-            instances: vec![FontNamedInstance {
+            instances: vec![FvarNamedInstance {
                 names: vec!["Display".into()],
+                postscript_name: None,
                 coordinates: vec![250.0, 90.0, -5.0, 0.25],
             }],
         }
@@ -249,12 +270,12 @@ mod tests {
         let path =
             PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../FerroUI.Base/test_assets/fonts/InterVariable.ttf");
         let data = std::fs::read(path).unwrap();
-        let space = read_font_axes(&data).expect("a variable font");
+        let space = read_fvar(&data).expect("a variable font");
         assert!(space.has(b"wght"));
         assert!(!space.instances.is_empty());
         assert!(space.instances.iter().any(|instance| instance.names.iter().any(|name| name.contains("Bold"))));
         let plain =
             PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../FerroUI.Base/test_assets/fonts/Inter-Regular.ttf");
-        assert!(read_font_axes(&std::fs::read(plain).unwrap()).is_none());
+        assert!(read_fvar(&std::fs::read(plain).unwrap()).is_none());
     }
 }

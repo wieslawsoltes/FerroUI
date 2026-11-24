@@ -23,7 +23,7 @@ use ferroui_fonts_web_core::loading::{
 };
 use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMatchRequest, FontStyleRequest};
 use ferroui_fonts_web_core::sfnt::{apply_metric_overrides, make_invisible_font, SanitizeOptions};
-use ferroui_fonts_web_core::variations::{read_font_axes, resolve_font_variations, FontAxes};
+use ferroui_fonts_web_core::variations::{read_fvar, resolve_font_variations, FvarTable};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -74,7 +74,7 @@ struct Slot {
     /// Whether the font arrived in time to replace the fallback.
     usable: bool,
     /// The variation space of the font, for a variable font.
-    axes: Option<Rc<FontAxes>>,
+    axes: Option<Rc<FvarTable>>,
     /// The instances of the font made for requests, by what they were made for.
     instances: Vec<(InstanceKey, Rc<GlyphTypeface>)>,
     /// The size of the decoded font.
@@ -157,7 +157,7 @@ fn match_request(style: FontStyle, weight: FontWeight, stretch: FontStretch) -> 
 fn simulations_for(
     base: &GlyphTypeface,
     face: &FontFaceDescriptors,
-    axes: Option<&FontAxes>,
+    axes: Option<&FvarTable>,
     request: &FontMatchRequest,
 ) -> FontSimulations {
     let has = |tag: &[u8; 4]| axes.is_some_and(|axes| axes.has(tag));
@@ -419,7 +419,7 @@ impl Shared {
                 // A font that cannot take the overrides is used as it is.
                 let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
                 size = font.len();
-                axes = read_font_axes(&font).map(Rc::new);
+                axes = read_fvar(&font).map(Rc::new);
                 let mut stream = FontDataStream::new(font);
                 let typeface =
                     this.platform.try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)?;
