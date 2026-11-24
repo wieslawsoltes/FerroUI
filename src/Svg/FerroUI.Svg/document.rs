@@ -140,6 +140,8 @@ impl SvgLayerOptions {
     }
 }
 
+type RasterCacheEntry = (i32, i32, Rc<[u8]>);
+
 /// A retained Skia recording with its semantic identity and capability audit.
 pub struct SvgLayer {
     pub(crate) options: SvgLayerOptions,
@@ -147,7 +149,7 @@ pub struct SvgLayer {
     pub(crate) audit: RecordingAudit,
     pub(crate) bounds: Rect,
     pub(crate) vector_cache: RefCell<Option<(bool, bool, Rc<str>)>>,
-    pub(crate) raster_cache: RefCell<Option<(i32, i32, Rc<[u8]>)>>,
+    pub(crate) raster_cache: RefCell<Option<RasterCacheEntry>>,
 }
 
 impl SvgLayer {

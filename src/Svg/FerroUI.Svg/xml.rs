@@ -86,8 +86,9 @@ impl std::error::Error for XmlError {}
 
 /// A technical illustration treatment applied to visible graphics only.
 /// Definitions, clips, masks and filter inputs retain their original meaning.
-#[derive(Clone, Debug, PartialEq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub enum InspectionStyle {
+    #[default]
     Normal,
     XRay {
         fill_opacity: f64,
@@ -100,12 +101,6 @@ pub enum InspectionStyle {
         stroke_width: f64,
         stroke_opacity: f64,
     },
-}
-
-impl Default for InspectionStyle {
-    fn default() -> Self {
-        Self::Normal
-    }
 }
 
 /// Validate and optimize internally generated SVG. IDs beginning with

@@ -567,7 +567,7 @@ fn affine_gradient_transforms_and_elliptic_radial_gradients_are_preserved_as_vec
         skia_safe::Rect::from_wh(64.0, 64.0),
         skia_safe::svg::canvas::Flags::empty(),
     );
-    canvas.draw_picture(&target.get_picture(), None, None);
+    canvas.draw_picture(target.get_picture(), None, None);
     let data = canvas.end();
     let svg = std::str::from_utf8(data.as_bytes()).unwrap();
     let parsed = roxmltree::Document::parse(svg).unwrap();
