@@ -1,0 +1,31 @@
+diff --git a/native/FerroUI.Native/src/OSX/FrnView.mm b/native/FerroUI.Native/src/OSX/FrnView.mm
+index 01ce3c8c3e..7f96b7e70c 100644
+--- a/native/FerroUI.Native/src/OSX/FrnView.mm
++++ b/native/FerroUI.Native/src/OSX/FrnView.mm
+@@ -196,14 +196,6 @@
+         return;
+     }
+ 
+-    parent->TopLevelEvents->RunRenderPriorityJobs();
+-
+-    parent = _parent.tryGet();
+-    if (parent == nullptr)
+-    {
+-        return;
+-    }
+-
+     bool wasPainting = _painting;
+     _painting = true;
+     parent->TopLevelEvents->Paint();
+diff --git a/src/FerroUI.Native/frn.idl b/src/FerroUI.Native/frn.idl
+index a500de796d..d7385e6d46 100644
+--- a/src/FerroUI.Native/frn.idl
++++ b/src/FerroUI.Native/frn.idl
+@@ -834,7 +834,6 @@ interface IFrnTopLevelEvents : IUnknown
+                           FrnKey key, FrnPhysicalKey physicalKey, [const] char* keySymbol);
+     bool RawTextInputEvent(u_int64_t timeStamp, [const] char* text);
+     void ScalingChanged(double scaling);
+-    void RunRenderPriorityJobs();
+     void LostFocus();
+     
+     IFrnAutomationPeer* GetAutomationPeer();

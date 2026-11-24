@@ -160,3 +160,42 @@ fn registered_as_the_global_clock_the_context_pulses_animation_clocks() {
     // The stopped clock unsubscribed from the global clock on that tick.
     assert!(!context.media_context_clock().has_subscriptions());
 }
+
+#[test]
+fn a_paint_with_a_render_pass_runs_the_pass_without_dispatcher_jobs() {
+    let _scope = Scope::new();
+    let context = MediaContext::instance();
+    let order = Rc::new(RefCell::new(Vec::new()));
+
+    let job = order.clone();
+    Dispatcher::ui_thread().post(move || job.borrow_mut().push("job"), crate::threading::DispatcherPriority::NORMAL);
+    let callback = order.clone();
+    context.begin_invoke_on_render(Rc::new(move || callback.borrow_mut().push("layout")));
+    assert!(context.is_render_scheduled());
+
+    let painted = order.clone();
+    context.paint_with_render_pass(|| painted.borrow_mut().push("paint"));
+    assert_eq!(*order.borrow(), ["layout", "paint"]);
+    assert!(!context.is_render_scheduled(), "the queued pass ran here");
+
+    Dispatcher::ui_thread().run_jobs(None);
+    assert_eq!(*order.borrow(), ["layout", "paint", "job"]);
+}
+
+#[test]
+fn a_paint_inside_a_render_pass_only_paints() {
+    let _scope = Scope::new();
+    let context = MediaContext::instance();
+    let order = Rc::new(RefCell::new(Vec::new()));
+
+    let (outer, late) = (order.clone(), order.clone());
+    context.begin_invoke_on_render(Rc::new(move || {
+        let queued = late.clone();
+        MediaContext::instance().begin_invoke_on_render(Rc::new(move || queued.borrow_mut().push("queued")));
+        let painted = outer.clone();
+        MediaContext::instance().paint_with_render_pass(move || painted.borrow_mut().push("paint"));
+    }));
+
+    context.render();
+    assert_eq!(*order.borrow(), ["paint", "queued"]);
+}

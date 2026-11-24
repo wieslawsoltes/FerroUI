@@ -486,7 +486,7 @@ impl ILayoutManager for LayoutManager {
 
             self.running.set(true);
             {
-                let _guard = RunningGuard(&self.running);
+                let _guard = RunningGuard::new(&self.running);
                 self.total_pass_count.set(self.total_pass_count.get() + 1);
 
                 for _ in 0..MAX_PASSES {
@@ -561,7 +561,7 @@ impl ILayoutManager for LayoutManager {
 
         self.running.set(true);
         {
-            let _guard = RunningGuard(&self.running);
+            let _guard = RunningGuard::new(&self.running);
             Self::measure(&root);
             Self::arrange(&root);
         }
@@ -632,10 +632,28 @@ impl IBringIntoViewLayoutManager for LayoutManager {
     }
 }
 
+crate::ferro_thread_local! {
+    /// The layout passes in progress on this thread, of any layout manager.
+    static LAYOUT_PASSES_RUNNING: Cell<u32> = const { Cell::new(0) };
+}
+
+/// Whether any layout manager of this thread is inside a layout pass.
+pub(crate) fn any_layout_pass_running() -> bool {
+    LAYOUT_PASSES_RUNNING.with(|running| running.get() > 0)
+}
+
 struct RunningGuard<'a>(&'a Cell<bool>);
+
+impl<'a> RunningGuard<'a> {
+    fn new(running: &'a Cell<bool>) -> Self {
+        LAYOUT_PASSES_RUNNING.with(|count| count.set(count.get() + 1));
+        Self(running)
+    }
+}
 
 impl Drop for RunningGuard<'_> {
     fn drop(&mut self) {
+        LAYOUT_PASSES_RUNNING.with(|count| count.set(count.get() - 1));
         self.0.set(false);
     }
 }

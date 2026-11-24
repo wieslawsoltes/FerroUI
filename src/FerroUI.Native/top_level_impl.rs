@@ -21,6 +21,7 @@ use ferroui_base::input::raw::{
     RawPointerGestureEventArgs, RawPointerPoint, RawTextInputEventArgs,
 };
 use ferroui_base::input::text_input::ITextInputMethodImpl;
+use ferroui_base::media::MediaContext;
 use ferroui_base::input::{
     DragDropEffects, IDataTransfer, CaptureSource, IInputDevice, IInputRoot, IKeyboardDevice, IPointer, KeyDeviceType, MouseDevice, PenDevice,
     StandardCursorType,
@@ -794,12 +795,14 @@ impl TopLevelImpl {
 
     // --- the native events that only touch the shared state ---------------
 
+    /// Called from `updateLayer`, where dispatcher jobs must not run.
     fn on_paint(&self) {
-        Dispatcher::ui_thread().run_jobs(Some(DispatcherPriority::UI_THREAD_RENDER));
-        let s = self.client_size();
         let paint = self.paint.borrow().clone();
         if let Some(paint) = paint {
-            paint(Rect::new(0.0, 0.0, s.width, s.height));
+            MediaContext::instance().paint_with_render_pass(|| {
+                let s = self.client_size();
+                paint(Rect::new(0.0, 0.0, s.width, s.height));
+            });
         }
     }
 
@@ -1222,12 +1225,6 @@ impl<P: TopLevelParent> IFrnTopLevelEventsImpl for TopLevelEvents<P> {
 
     fn scaling_changed(&self, scaling: f64) {
         crate::callback_base::guard((), || self.0.top_level().on_scaling_changed(scaling))
-    }
-
-    fn run_render_priority_jobs(&self) {
-        crate::callback_base::guard((), || {
-            Dispatcher::ui_thread().run_jobs(Some(DispatcherPriority::UI_THREAD_RENDER));
-        })
     }
 
     fn lost_focus(&self) {

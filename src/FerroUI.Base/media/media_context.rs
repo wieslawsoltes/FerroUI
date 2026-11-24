@@ -213,7 +213,9 @@ impl MediaContext {
         *last = Some(now);
     }
 
-    fn render_core(&self) {
+    /// Pulses the animations, unless they wait for a composition batch, and runs what was
+    /// queued for the next render, layout included.
+    fn pulse_and_fire_invoke_on_render_callbacks(&self) {
         let now = self.elapsed();
         if !self.animations_are_waiting_for_composition.get() {
             self.clock.pulse(SignedDuration::from(now));
@@ -231,6 +233,10 @@ impl MediaContext {
 
             break;
         }
+    }
+
+    fn render_core(&self) {
+        self.pulse_and_fire_invoke_on_render_callbacks();
 
         if !self.requested_commits.borrow().is_empty() || self.clock.has_subscriptions() {
             self.animations_are_waiting_for_composition.set(self.commit_compositors_with_throttling());
@@ -458,6 +464,47 @@ impl MediaContext {
     /// renders it.
     pub fn immediate_render_requested(&self, compositor: &Rc<Compositor>) {
         self.sync_commit(compositor, true);
+    }
+
+    /// Runs `paint` inside a render pass of its own, for a platform that needs an up-to-date
+    /// frame right now and must not run dispatcher jobs from its paint callback (`updateLayer`
+    /// on macOS: application code at normal priority could show or close a window or start a
+    /// nested loop there, which AppKit does not allow).
+    ///
+    /// The queued render pass is aborted; animations and layout run here with dispatcher
+    /// processing disabled, then `paint` commits. Inside a render or a layout pass, `paint` runs
+    /// on its own.
+    pub fn paint_with_render_pass(&self, paint: impl FnOnce()) {
+        if self.is_rendering.get() || crate::layout::any_layout_pass_running() {
+            paint();
+            return;
+        }
+
+        if let Some(queued) = self.next_render_op.borrow_mut().take() {
+            queued.abort();
+        }
+
+        {
+            struct Finally<'a>(&'a MediaContext);
+            impl Drop for Finally<'_> {
+                fn drop(&mut self) {
+                    self.0.is_rendering.set(false);
+                }
+            }
+
+            let _no_processing = self.dispatcher.disable_processing();
+            self.is_rendering.set(true);
+            let _finally = Finally(self);
+            self.pulse_and_fire_invoke_on_render_callbacks();
+            paint();
+        }
+
+        // `composition_batch_finished` schedules the next pass for what waits on the batch.
+        let waiting = !self.pending_composition_batches.borrow().is_empty();
+        self.animations_are_waiting_for_composition.set(waiting);
+        if !waiting && (!self.requested_commits.borrow().is_empty() || self.clock.has_subscriptions()) {
+            self.schedule_render(false);
+        }
     }
 
     /// Commits the compositor of a composition target right away and asks
