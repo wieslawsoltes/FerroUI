@@ -1,0 +1,3 @@
+# Prefixes `cargo run -p ferroui-build-scan --example xml_prefix_cleanup` leaves in place, though
+# the default XML namespace makes them redundant: one entry a line, `path` for every prefix of a
+# file or `path prefix` for one, then `#` and why.
