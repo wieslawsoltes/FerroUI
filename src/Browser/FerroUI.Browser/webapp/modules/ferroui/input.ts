@@ -117,9 +117,11 @@ export class InputHelper {
             // file items move to a copy that stays readable after the event.
             const clipboardData = args.clipboardData;
             const files = clipboardData == null ? null : this.copyFileItems(clipboardData);
-            const strings: ReadableDataItem[] = this.getDataTransferItems(clipboardData)
-                .filter((item) => item.kind === "string" && clipboardData != null)
-                .map((item) => ({ type: "string", value: clipboardData!.getData(item.type), format: item.type }));
+            const strings: ReadableDataItem[] = clipboardData == null
+                ? []
+                : this.getDataTransferItems(clipboardData)
+                    .filter((item) => item.kind === "string")
+                    .map((item) => ({ type: "string", value: clipboardData.getData(item.type), format: item.type }));
             const fileItems: ReadableDataItem[] = this.getDataTransferItems(files)
                 .map((item) => ({ type: "dataTransferItem", value: item }));
             const items: ReadableDataItem[] = [...strings, ...fileItems];
