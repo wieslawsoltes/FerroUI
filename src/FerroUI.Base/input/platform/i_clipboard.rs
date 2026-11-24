@@ -1,4 +1,4 @@
-use super::ClipboardError;
+use super::{ClipboardContentOptions, ClipboardError, ClipboardHistoryItemsResult, ClipboardHistoryItemsResultStatus};
 use crate::input::{IAsyncDataTransfer, LocalBoxFuture};
 use crate::reactive::Subscription;
 use std::rc::Rc;
@@ -64,5 +64,36 @@ pub trait IClipboard {
     /// applications on this platform.
     fn is_content_changed_supported(&self) -> bool {
         false
+    }
+
+    /// Whether the user has the clipboard history turned on (WinUI's `Clipboard.IsHistoryEnabled`);
+    /// false on a platform without history.
+    fn is_history_enabled(&self) -> bool {
+        false
+    }
+
+    /// Whether the user has the synchronization of the clipboard to their other devices turned on
+    /// (WinUI's `Clipboard.IsRoamingEnabled`); false on a platform without it.
+    fn is_roaming_enabled(&self) -> bool {
+        false
+    }
+
+    /// Places a data object on the clipboard with `options` (WinUI's
+    /// `Clipboard.SetContentWithOptions`). A platform without history or roaming ignores them.
+    fn set_data_with_options_async(
+        &self,
+        data_transfer: Option<Rc<dyn IAsyncDataTransfer>>,
+        _options: ClipboardContentOptions,
+    ) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        self.set_data_async(data_transfer)
+    }
+
+    /// Reads the clipboard history of the system (WinUI's `Clipboard.GetHistoryItemsAsync`). The
+    /// history is the user's data: it is read only when the application calls this, and a
+    /// platform without history answers `NotSupported`.
+    fn get_history_items_async(&self) -> LocalBoxFuture<Result<ClipboardHistoryItemsResult, ClipboardError>> {
+        Box::pin(std::future::ready(Ok(ClipboardHistoryItemsResult::empty(
+            ClipboardHistoryItemsResultStatus::NotSupported,
+        ))))
     }
 }

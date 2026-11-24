@@ -11,7 +11,8 @@ use crate::interop::unmanaged_methods::{
 };
 use crate::ole_data_object_to_data_transfer_wrapper::OleDataObjectToDataTransferWrapper;
 use crate::win32_com::IDataObject;
-use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::platform::{ClipboardContentOptions, ClipboardError, ClipboardHistoryItemsResult, IClipboardChangeImpl, IClipboardHistoryImpl,
+    IClipboardImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{IAsyncDataTransfer, LocalBoxFuture};
 use ferroui_base::logging::LogArea;
 use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
@@ -154,6 +155,28 @@ pub(crate) fn on_clipboard_update() {
     }
 }
 
+impl IClipboardHistoryImpl for ClipboardImpl {
+    fn is_history_enabled(&self) -> bool {
+        crate::clipboard_history::is_history_enabled()
+    }
+
+    fn is_roaming_enabled(&self) -> bool {
+        crate::clipboard_history::is_roaming_enabled()
+    }
+
+    fn set_data_with_options_async(
+        &self,
+        data_transfer: Rc<dyn IAsyncDataTransfer>,
+        options: ClipboardContentOptions,
+    ) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        self.set_data_async(crate::clipboard_history::with_options(data_transfer, options))
+    }
+
+    fn get_history_items_async(&self) -> LocalBoxFuture<Result<ClipboardHistoryItemsResult, ClipboardError>> {
+        crate::clipboard_history::get_history_items_async()
+    }
+}
+
 impl IClipboardChangeImpl for ClipboardImpl {
     fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
         let first = CONTENT_CHANGED.with(|handlers| handlers.is_empty());
@@ -271,6 +294,10 @@ impl IClipboardImpl for ClipboardImpl {
     }
 
     fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
+        Some(self)
+    }
+
+    fn as_clipboard_history_impl(&self) -> Option<&dyn IClipboardHistoryImpl> {
         Some(self)
     }
 }

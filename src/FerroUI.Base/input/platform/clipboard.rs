@@ -1,4 +1,7 @@
-use super::{ClipboardError, IClipboard, IClipboardImpl};
+use super::{
+    ClipboardContentOptions, ClipboardError, ClipboardHistoryItemsResult, ClipboardHistoryItemsResultStatus, IClipboard,
+    IClipboardImpl,
+};
 use crate::input::{IAsyncDataTransfer, LocalBoxFuture};
 use crate::reactive::{Disposable, Subscription};
 use crate::utilities::HandlerList;
@@ -162,5 +165,37 @@ impl IClipboard for Clipboard {
 
     fn is_content_changed_supported(&self) -> bool {
         self.clipboard_impl.as_clipboard_change_impl().is_some()
+    }
+
+    fn is_history_enabled(&self) -> bool {
+        self.clipboard_impl.as_clipboard_history_impl().is_some_and(|history| history.is_history_enabled())
+    }
+
+    fn is_roaming_enabled(&self) -> bool {
+        self.clipboard_impl.as_clipboard_history_impl().is_some_and(|history| history.is_roaming_enabled())
+    }
+
+    fn set_data_with_options_async(
+        &self,
+        data_transfer: Option<Rc<dyn IAsyncDataTransfer>>,
+        options: ClipboardContentOptions,
+    ) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        let (Some(data_transfer), Some(history)) = (data_transfer.clone(), self.clipboard_impl.as_clipboard_history_impl())
+        else {
+            return self.set_data_async(data_transfer);
+        };
+        if self.clipboard_impl.as_owned_clipboard_impl().is_some() {
+            drop(self.last_data_transfer.replace(Some(data_transfer.clone())));
+        }
+        self.report_own_change(history.set_data_with_options_async(data_transfer, options))
+    }
+
+    fn get_history_items_async(&self) -> LocalBoxFuture<Result<ClipboardHistoryItemsResult, ClipboardError>> {
+        match self.clipboard_impl.as_clipboard_history_impl() {
+            Some(history) => history.get_history_items_async(),
+            None => Box::pin(std::future::ready(Ok(ClipboardHistoryItemsResult::empty(
+                ClipboardHistoryItemsResultStatus::NotSupported,
+            )))),
+        }
     }
 }

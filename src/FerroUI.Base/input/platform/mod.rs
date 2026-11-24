@@ -9,6 +9,7 @@ pub use platform_hotkey_configuration::PlatformHotkeyConfiguration;
 mod clipboard;
 mod clipboard_error;
 mod clipboard_extensions;
+mod clipboard_history;
 mod clipboard_type;
 mod i_clipboard;
 mod i_clipboard_change_impl;
@@ -26,6 +27,10 @@ mod platform_data_transfer_item;
 pub use clipboard::Clipboard;
 pub use clipboard_error::{ClipboardError, ClipboardErrorKind};
 pub use clipboard_extensions::ClipboardExtensions;
+pub use clipboard_history::{
+    ClipboardContentOptions, ClipboardHistoryItemsResult, ClipboardHistoryItemsResultStatus, IClipboardHistoryImpl,
+    IClipboardHistoryItem,
+};
 pub use clipboard_type::ClipboardType;
 pub use i_clipboard::IClipboard;
 pub use i_clipboard_change_impl::IClipboardChangeImpl;

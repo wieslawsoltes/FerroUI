@@ -935,3 +935,77 @@ interface IApiInformationStatics : IInspectable
     int IsApiContractPresentByMajor(HSTRING contractName, UINT16 majorVersion, boolean* result);
     int IsApiContractPresentByMajorAndMinor(HSTRING contractName, UINT16 majorVersion, UINT16 minorVersion, boolean* result);
 }
+
+// The clipboard history of Windows (Windows.ApplicationModel.DataTransfer.Clipboard), #1264.
+// The identifiers of the parameterized interfaces are those of their WinRT signatures; only the
+// members the backend calls are declared, in the order of the vtable.
+[uuid(00000036-0000-0000-C000-000000000046)]
+interface IAsyncInfo : IInspectable
+{
+    [propget] HRESULT Id([out, retval] UINT32* value);
+    [propget] HRESULT Status([out, retval] AsyncStatus* value);
+    [propget] HRESULT ErrorCode([out, retval] INT32* value);
+    HRESULT Cancel();
+    HRESULT Close();
+}
+
+[uuid(3e1fe603-f897-5263-b328-0806426b8a79)]
+interface IAsyncOperationHSTRING : IInspectable
+{
+    HRESULT SetCompleted([in] IInspectable* handler);
+    HRESULT GetCompleted([out, retval] IInspectable** handler);
+    HRESULT GetResults([out, retval] HSTRING* results);
+}
+
+[uuid(7b840471-5900-4d85-a90b-10cb85fe3552)]
+interface IDataPackageView : IInspectable
+{
+    [propget] HRESULT Properties([out, retval] IInspectable** value);
+    [propget] HRESULT RequestedOperation([out, retval] INT32* value);
+    HRESULT ReportOperationCompleted([in] INT32 value);
+    [propget] HRESULT AvailableFormats([out, retval] IVectorViewHSTRING** value);
+    HRESULT Contains([in] HSTRING formatId, [out, retval] boolean* value);
+    HRESULT GetDataAsync([in] HSTRING formatId, [out, retval] IInspectable** operation);
+    HRESULT GetTextAsync([out, retval] IAsyncOperationHSTRING** operation);
+}
+
+[uuid(0173bd8a-afff-5c50-ab92-3d19f481ec58)]
+interface IClipboardHistoryItem : IInspectable
+{
+    [propget] HRESULT Id([out, retval] HSTRING* value);
+    [propget] HRESULT Timestamp([out, retval] INT64* value);
+    [propget] HRESULT Content([out, retval] IDataPackageView** value);
+}
+
+[uuid(c91de16d-13ff-55b0-897d-18a131d57ac9)]
+interface IVectorViewClipboardHistoryItem : IInspectable
+{
+    HRESULT GetAt([in] UINT32 index, [out, retval] IClipboardHistoryItem** value);
+    [propget] HRESULT Size([out, retval] UINT32* value);
+}
+
+[uuid(e6dfdee6-0ee2-52e3-852b-f295db65939a)]
+interface IClipboardHistoryItemsResult : IInspectable
+{
+    [propget] HRESULT Status([out, retval] INT32* value);
+    [propget] HRESULT Items([out, retval] IVectorViewClipboardHistoryItem** value);
+}
+
+[uuid(677b06b8-0134-5692-b487-4c8e2408ca01)]
+interface IAsyncOperationClipboardHistoryItemsResult : IInspectable
+{
+    HRESULT SetCompleted([in] IInspectable* handler);
+    HRESULT GetCompleted([out, retval] IInspectable** handler);
+    HRESULT GetResults([out, retval] IClipboardHistoryItemsResult** results);
+}
+
+[uuid(d2ac1b6a-d29f-554b-b303-f0452345fe02)]
+interface IClipboardStatics2 : IInspectable
+{
+    HRESULT GetHistoryItemsAsync([out, retval] IAsyncOperationClipboardHistoryItemsResult** operation);
+    HRESULT ClearHistory([out, retval] boolean* result);
+    HRESULT DeleteItemFromHistory([in] IClipboardHistoryItem* item, [out, retval] boolean* result);
+    HRESULT SetHistoryItemAsContent([in] IClipboardHistoryItem* item, [out, retval] INT32* result);
+    HRESULT IsHistoryEnabled([out, retval] boolean* result);
+    HRESULT IsRoamingEnabled([out, retval] boolean* result);
+}

@@ -688,7 +688,10 @@ fn clipboard_sample_uses_host_service_for_text_images_files_formats_and_clear() 
     } else {
         assert_eq!(text("ImageStatusText").as_deref(), Some("Error copying image to clipboard."));
     }
-    // CopyWithOptions_Click copies the text without the Windows history and roaming options.
+    // The test clipboard has no history or roaming.
+    assert_eq!(text("HistoryEnabledText").as_deref(), Some("Clipboard history enabled: No"));
+    assert_eq!(text("RoamingEnabledText").as_deref(), Some("Clipboard roaming enabled: No"));
+    // CopyWithOptions_Click copies the text; a clipboard without history ignores the options.
     click("CopyWithOptions");
     assert_eq!(clipboard.text().as_deref(), Some("Text with clipboard options"));
     assert!(text("HistoryRoamingStatusText").unwrap().starts_with("Text copied to clipboard."));
