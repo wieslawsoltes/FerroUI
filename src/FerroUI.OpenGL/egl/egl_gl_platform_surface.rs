@@ -7,7 +7,7 @@ use crate::IGlContext;
 use ferroui_base::platform::surfaces::{IPlatformRenderSurface, IPlatformRenderSurfaceRenderTarget};
 use ferroui_base::platform::{PlatformRenderTargetState, RenderTargetError, RenderTargetSceneInfo};
 use ferroui_base::reactive::IDisposable;
-use ferroui_base::PixelSize;
+use ferroui_base::{PixelSize, RenderTargetNotReadyError};
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -155,8 +155,20 @@ impl EglPlatformSurfaceRenderTarget for RenderTarget {
 
     /// # Panics
     /// Panics when the window surface cannot be created or the context cannot be made
-    /// current with it (the exceptions of the original).
-    fn begin_draw_core(&self, _scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
+    /// current with it (the exceptions of the original), and without a window.
+    fn begin_draw_core(&self, scene_info: &RenderTargetSceneInfo) -> Rc<dyn IGlPlatformSurfaceRenderingSession> {
+        match self.try_begin_draw_core(scene_info) {
+            Ok(session) => session,
+            Err(error) => panic!("{error}"),
+        }
+    }
+
+    /// Says that the target is not ready when the window surface has to be made and there is
+    /// no window (a surface of Android between its destruction and the next creation).
+    fn try_begin_draw_core(
+        &self,
+        _scene_info: &RenderTargetSceneInfo,
+    ) -> Result<Rc<dyn IGlPlatformSurfaceRenderingSession>, RenderTargetError> {
         // TODO: use expectedPixelSize
         let handle = self.info.handle();
         let size = self.info.size();
@@ -168,16 +180,19 @@ impl EglPlatformSurfaceRenderTarget for RenderTarget {
                     old.dispose();
                 }
                 *self.gl_surface.borrow_mut() = None;
-                let gl_surface = create_window_surface(self.base.context(), self.info.as_ref(), handle);
-                *self.gl_surface.borrow_mut() = Some(gl_surface.clone());
                 self.current_size.set(size);
                 self.handle.set(handle);
+                if handle == 0 {
+                    return Err(RenderTargetNotReadyError::new().into());
+                }
+                let gl_surface = create_window_surface(self.base.context(), self.info.as_ref(), handle);
+                *self.gl_surface.borrow_mut() = Some(gl_surface.clone());
                 gl_surface
             }
         };
 
         match self.base.begin_draw(&gl_surface, size, self.info.scaling(), None, false, None, self.skip_waits) {
-            Ok(session) => session,
+            Ok(session) => Ok(session),
             Err(error) => panic!("{error}"),
         }
     }

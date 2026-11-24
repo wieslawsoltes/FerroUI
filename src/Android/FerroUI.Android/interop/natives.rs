@@ -224,6 +224,11 @@ fn register_all() {
                 native!(c"nativeDispose", c"(J)V", view_dispose as unsafe extern "system" fn(_, _, _)),
                 native!(c"nativeGlobalLayout", c"(J)V", view_global_layout as unsafe extern "system" fn(_, _, _)),
                 native!(
+                    c"nativeLocationOnScreen",
+                    c"(JII)V",
+                    view_location_on_screen as unsafe extern "system" fn(_, _, _, _, _)
+                ),
+                native!(
                     c"nativeVisibilityChanged",
                     c"(JZ)V",
                     view_visibility_changed as unsafe extern "system" fn(_, _, _, _)
@@ -599,6 +604,14 @@ unsafe extern "system" fn view_global_layout(_env: *mut JNIEnv, _class: jobject,
     guard((), || {
         if let Some(view) = FerroView::from_handle(handle) {
             view.on_global_layout();
+        }
+    });
+}
+
+unsafe extern "system" fn view_location_on_screen(_env: *mut JNIEnv, _class: jobject, handle: jlong, x: jint, y: jint) {
+    guard((), || {
+        if let Some(view) = FerroView::from_handle(handle) {
+            view.on_location_on_screen(x, y);
         }
     });
 }

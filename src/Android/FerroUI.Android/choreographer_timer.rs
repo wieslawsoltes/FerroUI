@@ -6,9 +6,19 @@
 
 use crate::interop::ndk::{looper_loop, looper_prepare, Choreographer, IFrameCallback};
 use ferroui_base::rendering::{IRenderTimer, RenderTimerTick};
-use std::sync::{Condvar, Mutex, PoisonError};
+use std::sync::{Condvar, Mutex, MutexGuard, PoisonError};
 use std::thread;
 use std::time::Duration;
+
+/// Held by a render tick and by the creation, the change and the destruction of a surface, so
+/// that the surface of a view never goes away while a frame draws into it: once
+/// `surfaceDestroyed` returns, the surface must no longer be used.
+static SHARED_RENDER_LOCK: Mutex<()> = Mutex::new(());
+
+/// Takes the lock of rendering and of the surfaces (`SharedRenderLock` of the reference).
+pub(crate) fn shared_render_lock() -> MutexGuard<'static, ()> {
+    SHARED_RENDER_LOCK.lock().unwrap_or_else(PoisonError::into_inner)
+}
 
 /// What the reference guards with its lock.
 #[derive(Default)]
@@ -101,6 +111,7 @@ impl Shared {
                 (state.last_time, state.tick.clone())
             };
             if let Some(tick) = tick {
+                let _render = shared_render_lock();
                 tick(Duration::from_nanos(time.max(0) as u64));
             }
         }
