@@ -804,6 +804,9 @@ struct Held {
     turn: Option<Turn>,
     /// The rows of the layer the recording may write: the band's, a hard boundary at the insertion.
     clip: IRect,
+    /// The recording was drawn on the shared texture of the layer ([`BandInsert::Direct`]) and goes in
+    /// as it is.
+    direct: bool,
 }
 
 /// How the threads insert the recordings of the bands of a frame (#1363, a prototype: the order
@@ -819,6 +822,12 @@ pub(crate) enum BandInsert {
     /// the recordings go in as they are ready, with no turn to wait for. Asked for with
     /// `FERROUI_SKIA_BAND_INSERT=deferred`.
     Deferred,
+    /// The path before the bands were bounded to their rows at the insertion, kept for the gate to
+    /// compare with: each band draws on the layer's texture, shared by the threads, under the clip
+    /// of the band alone, and the recordings go in in the order the bands were sent. A band whose
+    /// draws reach a row across that clip makes the frame depend on the order. Asked for with
+    /// `FERROUI_SKIA_BAND_INSERT=direct`.
+    Direct,
 }
 
 impl BandInsert {
@@ -826,6 +835,7 @@ impl BandInsert {
     fn from_environment() -> Self {
         match std::env::var("FERROUI_SKIA_BAND_INSERT") {
             Ok(value) if value.trim() == "deferred" => Self::Deferred,
+            Ok(value) if value.trim() == "direct" => Self::Direct,
             _ => Self::Ordered,
         }
     }
@@ -921,18 +931,25 @@ impl BandWorker {
                 BandJob::Play(band) => {
                     let started = Instant::now();
                     let deferred = insert_mode == BandInsert::Deferred;
+                    let direct = insert_mode == BandInsert::Direct;
                     let turn = (!deferred).then(|| Turn { order: order.clone(), number: band.turn });
                     // A panic would leave the render thread waiting for an
                     // answer that never comes; it is reported as a band
                     // that failed, which ends the threads.
-                    // Both modes record on a deferred canvas, which the insertion bounds to the band's rows
-                    // (`insert_at`); they differ in the order the recordings go in.
-                    let recording =
-                        catch_unwind(AssertUnwindSafe(|| play_deferred(&mut recorder, &mut surfaces, &band)))
-                            .unwrap_or(None);
+                    // The ordered and the completion-order insertion record on a deferred canvas, which the
+                    // insertion bounds to the band's rows (`insert_at`); they differ in the order the recordings
+                    // go in. The direct path draws on the shared texture of the layer.
+                    let recording = catch_unwind(AssertUnwindSafe(|| {
+                        if direct {
+                            play(&mut recorder, &mut surfaces, &band)
+                        } else {
+                            play_deferred(&mut recorder, &mut surfaces, &band)
+                        }
+                    }))
+                    .unwrap_or(None);
                     let busy = started.elapsed();
                     let (layer, index, clip) = (band.layer, band.index, band.clip);
-                    held.push(Held { layer, index, recording, busy, turn, clip });
+                    held.push(Held { layer, index, recording, busy, turn, clip, direct });
                     // The reference of the render thread outlives this one
                     // (see `Band`).
                     drop(band);
@@ -940,16 +957,17 @@ impl BandWorker {
                 BandJob::Forget { layer } => surfaces.retain(|(id, _)| *id != layer),
                 BandJob::Insert => {
                     let mut gone = false;
-                    for Held { layer, index, recording, busy, turn, clip } in held.drain(..) {
+                    for Held { layer, index, recording, busy, turn, clip, direct } in held.drain(..) {
                         let recorded = recording.is_some();
                         if let Some(turn) = &turn {
                             drop(turn.wait());
                         }
                         let target = surfaces.iter().find(|(id, _)| *id == layer).map(|(_, surface)| surface);
                         let inserted = recording.is_some_and(|mut recording| {
-                            catch_unwind(AssertUnwindSafe(|| match target {
-                                Some(target) => insert_at(&mut context.lock(), &mut recording, target, clip),
-                                None => false,
+                            catch_unwind(AssertUnwindSafe(|| match (direct, target) {
+                                (true, _) => insert(&mut context.lock(), &mut recording),
+                                (false, Some(target)) => insert_at(&mut context.lock(), &mut recording, target, clip),
+                                (false, None) => false,
                             }))
                             .unwrap_or(false)
                         });
@@ -974,6 +992,25 @@ impl BandWorker {
         drop(recorder);
         pool.dispose();
     }
+}
+
+/// Plays a band on the shared texture of the layer, under the clip of the band alone, on the recorder of its
+/// thread and snaps the recorder ([`BandInsert::Direct`], the path before the bands were bounded to their rows).
+fn play(
+    recorder: &mut graphite::Recorder,
+    surfaces: &mut Vec<(u64, Surface)>,
+    band: &Band,
+) -> Option<graphite::Recording> {
+    let position = match surfaces.iter().position(|(layer, _)| *layer == band.layer) {
+        Some(position) => position,
+        None => {
+            let surface = wrap_texture(recorder, &band.texture, band.size, band.color_type, &band.props)?;
+            surfaces.push((band.layer, surface));
+            surfaces.len() - 1
+        }
+    };
+    draw_band(surfaces[position].1.canvas(), &band.picture, band.clip);
+    recorder.snap()
 }
 
 /// Plays a band on a deferred canvas of the layer's size under the clip of the band, as the band of an
