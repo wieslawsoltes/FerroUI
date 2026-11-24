@@ -43,6 +43,7 @@ macro_rules! page {
 }
 
 pub static ADAPTATIONS: &[PageAdaptation] = &[
+    page!(ported "ScratchPad", "The source page with the code behind of ScratchPadPage.xaml.cs and XamlTextFormatter in Rust (scratch_pad_samples.rs): a native RichEditBox over the default markup, Load (the button and F5) through the WinUI XAML importer with its diagnostics in the status, the formatter's colours in both themes, Enter keeping the indent, the close tag and the quotes added while typing, Tab and Shift+Tab on the selected lines, and Reset behind the source's ContentDialog. The default markup has a Border around its StackPanel, because a FerroUI panel has no border or padding and the importer does not rewrite them; markup that uses them on a panel reports the importer's error in the status. Unindenting removes only leading whitespace, where the source can delete text. The importer's limits are those of WinUI XAML in FerroUI, reported as diagnostics."),
     page!(ported "ContentDialog", "Both source examples use the native ContentDialog with ShowDialog_Click and ShowDialogNoDefault_Click of ContentDialogPage.xaml.cs in Rust (content_dialog_samples.rs): the title, the three buttons, the default button, the content of ContentDialogContent.xaml, the requested theme of the page and the result text in a polite live region. ShowAsync takes the element whose window hosts the dialog (the source's XamlRoot)."),
     page!(ported "SelectorBar", "All three source examples use the native SelectorBar with the code behind of SelectorBarPage.xaml.cs in Rust (selector_bar_samples.rs): the items with their text and icons, SelectorBar2_SelectionChanged navigating a Frame with a slide in the direction of the selection, and SelectorBar3_SelectionChanged with PopulateColorCollections. The icons are property elements. The third example's ItemsView is an ItemsControl with a horizontal panel and the source's coloured tiles."),
     page!(ported "MediaPlayerElement", "Both compositions use the existing portable MediaPlayerElement. The shared bundled H.264/AAC Sintel excerpt replaces unbundled WMV assets. Open File uses the host storage picker; AutoPlay, poster, stretch, transport options and full-window use native controls. Platform acceptance is recorded separately in docs/media/ISSUE-561.md."),
@@ -170,6 +171,7 @@ pub fn create(sample: &PageAdaptation) -> Result<Ref<Control>, XamlLoadError> {
     crate::navigation_view_samples::wire(&root)?;
     crate::selector_bar_samples::wire(&root)?;
     crate::content_dialog_samples::wire(&root);
+    crate::scratch_pad_samples::wire(&root);
     crate::sizing_sample::wire(&root)?;
     crate::platform_samples::wire(&root);
     crate::input_samples::wire(&root);

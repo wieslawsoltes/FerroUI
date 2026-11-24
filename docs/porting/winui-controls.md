@@ -451,6 +451,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
 | RadioButton | 2 of 2 | ported | `examples.rs` | `tests.rs` |
+| ScratchPad | the page and its code behind; unindent keeps non-whitespace text | ported | `scratch_pad_samples.rs` | `scratch_pad_samples_tests.rs` |
 | SelectorBar | 3 of 3; the third example's ItemsView is an ItemsControl | ported | `selector_bar_samples.rs` | `selector_bar_samples_tests.rs` |
 | Slider | 2 ported, 2 partial: no StepFrequency, SnapsTo or Header | partial | `button_samples.rs` | `button_samples_tests.rs` |
 | ToggleSwitch | 2 of 2 | ported | `Pages/ToggleSwitch.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
@@ -495,7 +496,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | Typography | 1 partial: no TeachingTip (a Flyout) | partial | `brush_samples.rs` | `brush_samples_tests.rs` |
 | Binding | 7 of 7 | ported | `binding_samples.rs` | `x_bind_tests.rs`, `binding_samples_tests.rs` |
 | Templates | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
-| CustomUserControls | 2 ported, 1 partial: no PasswordBox (a TextBox with a PasswordChar) | partial | `custom_controls.rs` | `custom_controls_tests.rs` |
+| CustomUserControls | 3 of 3 | ported | `custom_controls.rs` | `custom_controls_tests.rs` |
 | XamlResources | 4 of 4 | ported | `binding_samples.rs` | `binding_samples_tests.rs` |
 | XamlStyles | 2 of 2 | ported | `Pages/XamlStyles.xaml` (no code-behind upstream) | `binding_samples_tests.rs` |
 | PageTransition | 1 ported: `Frame::navigate_with_transition` plays the selected `NavigationTransitionInfo`, reversed going back | ported | `frame_sample.rs` | `tests.rs` |
