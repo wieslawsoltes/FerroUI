@@ -258,7 +258,7 @@ fn list_view_context_menu_delete_removes_the_contact() {
 #[cfg(feature = "theme")]
 #[test]
 fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
-    use ferroui_controls::{MenuItem, NumberBox, ScrollViewer, Window};
+    use ferroui_controls::{MenuItem, NumberBox, Window};
     let _application = crate::tests::start_winui();
     let root = page();
     let window = Window::new();
