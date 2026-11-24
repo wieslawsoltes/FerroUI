@@ -466,12 +466,12 @@ fn vector_layer(layer: &SvgLayer, options: &SvgExportOptions) -> Result<(Rc<str>
         std::str::from_utf8(data.as_bytes()).map_err(|error| SvgError::Xml(error.to_string()))?;
     let data: Rc<str> = Rc::from(text);
     if options.cache_native_svg {
-        *layer.vector_cache.borrow_mut() = Some(VectorCacheEntry {
+        *layer.vector_cache.borrow_mut() = Some(Box::new(VectorCacheEntry {
             outlined,
             relative_paths: options.relative_paths,
             data: data.clone(),
             prepared: None,
-        });
+        }));
     }
     Ok((data, false))
 }

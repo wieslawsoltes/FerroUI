@@ -213,7 +213,7 @@ pub struct SvgLayer {
     pub(crate) picture: skia_safe::Picture,
     pub(crate) audit: RecordingAudit,
     pub(crate) bounds: Rect,
-    pub(crate) vector_cache: RefCell<Option<VectorCacheEntry>>,
+    pub(crate) vector_cache: RefCell<Option<Box<VectorCacheEntry>>>,
     pub(crate) raster_cache: RefCell<Option<RasterCacheEntry>>,
 }
 
