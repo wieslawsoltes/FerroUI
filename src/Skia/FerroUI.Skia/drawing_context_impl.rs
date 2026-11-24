@@ -627,6 +627,12 @@ pub(crate) fn effective_text_options(
 /// Skia based drawing context.
 pub struct DrawingContextImpl {
     disposables: Vec<Box<dyn FnOnce()>>,
+    /// What the end of the frame does, run before `disposables`.
+    frame_end: Option<FrameEnd>,
+    /// The paint of `draw_bitmap`, kept with its values (`image_state`): an image draw sets only the values that
+    /// differ from the last one's.
+    image_paint: sk::Paint,
+    image_state: Option<ImagePaintState>,
     // TODO: Get rid of this value, it's currently used to calculate
     // intermediate sizes for tile brushes but does so ignoring the current
     // transform.
@@ -684,6 +690,16 @@ impl DrawingContextImpl {
     /// # Panics
     /// Panics when the create info holds neither a canvas nor a surface.
     pub fn new(create_info: CreateInfo, disposables: Vec<Box<dyn FnOnce()>>) -> Self {
+        Self::with_frame_end(create_info, disposables, None)
+    }
+
+    /// [`new`](Self::new) for a frame, which the context ends with `frame_end` (before the disposables) when it
+    /// is disposed.
+    pub(crate) fn with_frame_end(
+        create_info: CreateInfo,
+        disposables: Vec<Box<dyn FnOnce()>>,
+        frame_end: Option<FrameEnd>,
+    ) -> Self {
         let canvas = match (create_info.canvas, &create_info.surface) {
             (Some(canvas), _) => canvas,
             (None, Some(surface)) => CanvasSource::Surface(surface.clone()),
@@ -711,6 +727,9 @@ impl DrawingContextImpl {
 
         let mut context = Self {
             disposables,
+            frame_end,
+            image_paint: sk::Paint::default(),
+            image_state: None,
             intermediate_surface_dpi: create_info.dpi,
             mask_stack: Vec::new(),
             multiply_stack: Vec::new(),
@@ -937,9 +956,10 @@ impl DrawingContextImpl {
     fn configure_gradient_brush(paint: &mut sk::Paint, target_rect: Rect, gradient_brush: &dyn IGradientBrush) {
         let tile_mode = to_sk_shader_tile_mode(gradient_brush.spread_method());
         let gradient_stops = gradient_brush.gradient_stops();
-        let mut stop_colors: Vec<sk::Color4f> =
+        // On the stack up to GRADIENT_STOPS_ON_STACK stops.
+        let mut stop_colors: GradientColors =
             gradient_stops.iter().map(|s| sk::Color4f::from(to_sk_color(s.color()))).collect();
-        let mut stop_offsets: Vec<f32> = gradient_stops.iter().map(|s| s.offset() as f32).collect();
+        let mut stop_offsets: GradientOffsets = gradient_stops.iter().map(|s| s.offset() as f32).collect();
 
         if stop_colors.is_empty() {
             // Skia cannot build a gradient without stops.
@@ -1032,9 +1052,10 @@ impl DrawingContextImpl {
 
                     let count = stop_offsets.len();
 
-                    let mut reversed_colors = vec![sk::Color4f::new(0.0, 0.0, 0.0, 0.0); count];
+                    let mut reversed_colors: GradientColors =
+                        smallvec::smallvec![sk::Color4f::new(0.0, 0.0, 0.0, 0.0); count];
                     // And then reverse the reference point of the stops.
-                    let mut reversed_stops = vec![0f32; count];
+                    let mut reversed_stops: GradientOffsets = smallvec::smallvec![0f32; count];
 
                     for i in 0..count {
                         let mut offset = 1.0 - gradient_stops[i].offset();
@@ -1800,16 +1821,19 @@ impl IDrawingContextImpl for DrawingContextImpl {
         let d = to_sk_rect(dest_rect);
         let is_upscaling = d.width() > s.width() || d.height() > s.height();
 
-        let mut paint = SkPaintCache::get();
         let sampling_options =
             to_sk_sampling_options_scaled(self.render_options.bitmap_interpolation_mode, is_upscaling);
 
-        paint.set_color(sk::Color::from_argb((255.0 * opacity * self.current_opacity) as u8, 255, 255, 255));
-        paint.set_blend_mode(to_sk_blend_mode(self.render_options.bitmap_blending_mode));
-        paint.set_anti_alias(self.render_options.edge_mode != EdgeMode::Aliased);
+        let wanted = ImagePaintState {
+            color: sk::Color::from_argb((255.0 * opacity * self.current_opacity) as u8, 255, 255, 255),
+            blend_mode: to_sk_blend_mode(self.render_options.bitmap_blending_mode),
+            anti_alias: self.render_options.edge_mode != EdgeMode::Aliased,
+        };
+        wanted.apply(&mut self.image_paint, self.image_state);
+        self.image_state = Some(wanted);
 
-        drawable_image.draw(self.gr_context.as_deref(), self.canvas.get(), &s, &d, sampling_options, &paint);
-        SkPaintCache::return_reset(paint);
+        let canvas = self.canvas.get();
+        drawable_image.draw(self.gr_context.as_deref(), canvas, &s, &d, sampling_options, &self.image_paint);
     }
 
     fn draw_bitmap_with_mask(
@@ -2373,6 +2397,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
 
         self.gr_context = None;
 
+        if let Some(frame_end) = self.frame_end.take() {
+            frame_end.run();
+        }
         for disposable in std::mem::take(&mut self.disposables) {
             disposable();
         }
@@ -3038,6 +3065,58 @@ fn color_matrix_filter(
         .with(|effect| effect.as_ref().and_then(|effect| effect.make_color_filter(sk::Data::new_copy(&uniforms), None)))
         // Without runtime effects the matrix is applied to straight colours.
         .unwrap_or_else(|| sk::color_filters::matrix_row_major(&matrix.to_row_major_4x5(), None))
+}
+
+/// The number of gradient stops a gradient brush is configured with on the stack; more take the heap.
+const GRADIENT_STOPS_ON_STACK: usize = 16;
+type GradientColors = smallvec::SmallVec<[sk::Color4f; GRADIENT_STOPS_ON_STACK]>;
+type GradientOffsets = smallvec::SmallVec<[f32; GRADIENT_STOPS_ON_STACK]>;
+
+/// The values `draw_bitmap` sets on its paint, which has no others: the image draws only read it.
+#[derive(Clone, Copy, Debug, PartialEq)]
+pub(crate) struct ImagePaintState {
+    color: sk::Color,
+    blend_mode: sk::BlendMode,
+    anti_alias: bool,
+}
+
+impl ImagePaintState {
+    /// Sets the values on `paint` whose values are `known` (none known: every value).
+    fn apply(self, paint: &mut sk::Paint, known: Option<Self>) {
+        if known.map(|known| known.color) != Some(self.color) {
+            paint.set_color(self.color);
+        }
+        if known.map(|known| known.blend_mode) != Some(self.blend_mode) {
+            paint.set_blend_mode(self.blend_mode);
+        }
+        if known.map(|known| known.anti_alias) != Some(self.anti_alias) {
+            paint.set_anti_alias(self.anti_alias);
+        }
+    }
+}
+
+/// What the end of a frame does when its drawing context is disposed, before the disposables: typed, so that the
+/// drawing context of a frame needs no boxed closure and no vector of them.
+pub(crate) enum FrameEnd {
+    /// A frame of a [`SurfaceRenderTarget`]: its version goes up, and a surface the frame was drawn on directly
+    /// (not recorded) is told the frame ended.
+    Surface { version: Rc<Cell<i32>>, drawn: Option<Rc<dyn crate::gpu::ISkiaSurface>> },
+    /// A frame of a GPU render target: its rendering session ends.
+    Session(Rc<dyn ISkiaGpuRenderSession>),
+}
+
+impl FrameEnd {
+    fn run(self) {
+        match self {
+            Self::Surface { version, drawn } => {
+                version.set(version.get() + 1);
+                if let Some(drawn) = drawn {
+                    drawn.end_drawn_frame();
+                }
+            }
+            Self::Session(session) => session.dispose(),
+        }
+    }
 }
 
 /// The values a solid fill sets on a paint that is otherwise a reset paint.

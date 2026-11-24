@@ -1,4 +1,4 @@
-use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl};
+use crate::drawing_context_impl::{CreateInfo, DrawingContextImpl, FrameEnd};
 use crate::gpu::{drawable_image, needs_mipmaps, ISkiaGpu, ISkiaGpuRenderSession, ISkiaGrContext, ISkiaSurface};
 use crate::helpers::image_saving_helper;
 use crate::helpers::pixel_format_helper;
@@ -321,8 +321,8 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
     fn create_drawing_context(&self) -> Box<dyn IDrawingContextImpl> {
         // A surface that records its frames gives the canvas of the frame by
         // itself, and draws the frame when the drawing context is disposed.
-        let version = self.version.clone();
-        let mut disposables: Vec<Box<dyn FnOnce()>> = vec![Box::new(move || version.set(version.get() + 1))];
+        // The end of the frame: the version goes up, and a surface drawn on directly is told the frame ended.
+        let mut drawn = None;
 
         let (canvas, surface) = match self.surface.begin_recorded_frame() {
             Some(canvas) => (Some(canvas), None),
@@ -333,9 +333,7 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
                     canvas.restore_to_count(1);
                     canvas.reset_matrix();
                 }
-                // The surface is told when the frame drawn on its canvas ends.
-                let drawn = self.surface.clone();
-                disposables.push(Box::new(move || drawn.end_drawn_frame()));
+                drawn = Some(self.surface.clone());
                 (None, Some(surface))
             }
         };
@@ -353,7 +351,8 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
             ..CreateInfo::default()
         };
 
-        Box::new(DrawingContextImpl::new(create_info, disposables))
+        let frame_end = FrameEnd::Surface { version: self.version.clone(), drawn };
+        Box::new(DrawingContextImpl::with_frame_end(create_info, Vec::new(), Some(frame_end)))
     }
 
     fn has_pending_frame(&self) -> bool {
