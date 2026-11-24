@@ -1070,10 +1070,8 @@
    "pr": 22688,
    "date": "2026-11-09",
    "area": "platform-android",
-   "class": "port",
-   "note": "Storage cursors closed.",
-   "part": "android",
-   "state": "planned"
+   "class": "already",
+   "note": "`StorageHelper.java` runs every query in try-with-resources, so the cursors are closed."
   },
   {
    "hash": "5bbaa8e33189a06d6ecbc8ce816ac227fde91279",
