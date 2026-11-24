@@ -2,22 +2,22 @@
 #include "FrnString.h"
 
 @interface CocoaThemeObserver : NSObject
--(id)initWithCallback:(IFrnActionCallback *)callback;
+-(id)initWithCallback:(const ComPtr<IFrnActionCallback>&)callback;
 @end
 
 @interface CocoaLocaleObserver : NSObject
--(id)initWithCallback:(IFrnActionCallback *)callback;
+-(id)initWithCallback:(const ComPtr<IFrnActionCallback>&)callback;
 -(void)localeDidChange:(NSNotification *)notification;
 @end
 
 @interface CocoaAccessibilityObserver : NSObject
--(id)initWithCallback:(IFrnActionCallback *)callback;
+-(id)initWithCallback:(const ComPtr<IFrnActionCallback>&)callback;
 -(void)accessibilityOptionsDidChange:(NSNotification *)notification;
 -(void)invalidate;
 @end
 
 @interface CocoaPowerObserver : NSObject
--(id)initWithCallback:(IFrnActionCallback *)callback;
+-(id)initWithCallback:(const ComPtr<IFrnActionCallback>&)callback;
 -(void)powerStateDidChange:(NSNotification *)notification;
 -(void)invalidate;
 @end
@@ -25,10 +25,10 @@
 // Keep IFrnPlatformSettings' original vtable intact. New runtimes discover the
 // optional interface with QueryInterface and can still load an older native lib.
 class PlatformSettings : public ComObject,
-                         public virtual IFrnPlatformSettings,
-                         public virtual IFrnAccessibilitySettings,
-                         public virtual IFrnPowerSettings,
-                         public virtual IFrnContrastSettings
+                         public virtual MicroComImpl<IFrnPlatformSettings>,
+                         public virtual MicroComImpl<IFrnAccessibilitySettings>,
+                         public virtual MicroComImpl<IFrnPowerSettings>,
+                         public virtual MicroComImpl<IFrnContrastSettings>
 {
     CocoaThemeObserver* observer = nil;
     CocoaLocaleObserver* localeObserver = nil;
@@ -104,7 +104,7 @@ public:
         }
     }
     
-    virtual void RegisterColorsChange(IFrnActionCallback *callback) override
+    virtual void RegisterColorsChange(const ComPtr<IFrnActionCallback>& callback) override
     {
         if (@available(macOS 10.14, *))
         {
@@ -121,20 +121,17 @@ public:
         }
     }
 
-    virtual HRESULT GetPreferredLanguage(IFrnString** ret) override
+    virtual HRESULT GetPreferredLanguage(ComPtr<IFrnString>& ret) override
     {
         @autoreleasepool
         {
-            if (ret == nullptr)
-                return E_POINTER;
-
             auto language = [[NSLocale preferredLanguages] firstObject];
-            *ret = language == nil ? nullptr : CreateFrnString(language);
+            ret = language == nil ? nullptr : CreateFrnString(language);
             return S_OK;
         }
     }
 
-    virtual void RegisterLanguageChange(IFrnActionCallback *callback) override
+    virtual void RegisterLanguageChange(const ComPtr<IFrnActionCallback>& callback) override
     {
         if (localeObserver != nil)
         {
@@ -161,7 +158,7 @@ public:
         return NSWorkspace.sharedWorkspace.accessibilityDisplayShouldReduceTransparency;
     }
 
-    virtual void RegisterAccessibilityChange(IFrnActionCallback *callback) override
+    virtual void RegisterAccessibilityChange(const ComPtr<IFrnActionCallback>& callback) override
     {
         auto center = NSWorkspace.sharedWorkspace.notificationCenter;
         if (accessibilityObserver != nil)
@@ -189,7 +186,7 @@ public:
         return false;
     }
 
-    virtual void RegisterPowerChange(IFrnActionCallback *callback) override
+    virtual void RegisterPowerChange(const ComPtr<IFrnActionCallback>& callback) override
     {
         auto center = NSNotificationCenter.defaultCenter;
         if (powerObserver != nil)
@@ -279,7 +276,7 @@ private:
 {
     ComPtr<IFrnActionCallback> _callback;
 }
-- (id) initWithCallback:(IFrnActionCallback *)callback{
+- (id) initWithCallback:(const ComPtr<IFrnActionCallback>&)callback{
     self = [super init];
     if (self) {
         _callback = callback;
@@ -316,7 +313,7 @@ private:
 {
     ComPtr<IFrnActionCallback> _callback;
 }
-- (id) initWithCallback:(IFrnActionCallback *)callback {
+- (id) initWithCallback:(const ComPtr<IFrnActionCallback>&)callback {
     self = [super init];
     if (self) {
         _callback = callback;
@@ -335,7 +332,7 @@ private:
     ComPtr<IFrnActionCallback> _callback;
 }
 
-- (id)initWithCallback:(IFrnActionCallback *)callback {
+- (id)initWithCallback:(const ComPtr<IFrnActionCallback>&)callback {
     self = [super init];
     if (self) {
         _callback = callback;
@@ -374,7 +371,7 @@ private:
     ComPtr<IFrnActionCallback> _callback;
 }
 
-- (id)initWithCallback:(IFrnActionCallback *)callback {
+- (id)initWithCallback:(const ComPtr<IFrnActionCallback>&)callback {
     self = [super init];
     if (self) {
         _callback = callback;
@@ -406,7 +403,7 @@ private:
 }
 @end
 
-extern IFrnPlatformSettings* CreatePlatformSettings()
+extern ComPtr<IFrnPlatformSettings> CreatePlatformSettings()
 {
-    return new PlatformSettings();
+    return comnew<PlatformSettings>();
 }

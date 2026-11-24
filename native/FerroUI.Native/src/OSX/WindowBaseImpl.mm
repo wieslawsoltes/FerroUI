@@ -40,7 +40,7 @@ WindowBaseImpl::~WindowBaseImpl() {
     Window = nullptr;
 }
 
-WindowBaseImpl::WindowBaseImpl(IFrnWindowBaseEvents *events, bool usePanel) : TopLevelImpl(events) {
+WindowBaseImpl::WindowBaseImpl(const ComPtr<IFrnWindowBaseEvents>& events, bool usePanel) : TopLevelImpl(events) {
     _children = std::list<ComObjectWeakPtr<WindowBaseImpl>>();
     _shown = false;
     _inResize = false;
@@ -69,8 +69,6 @@ NSWindow *WindowBaseImpl::GetNSWindow() {
 }
 
 HRESULT WindowBaseImpl::ObtainNSWindowHandleRetained(void **ret) {
-    START_COM_CALL;
-
     if (ret == nullptr) {
         return E_POINTER;
     }
@@ -81,8 +79,6 @@ HRESULT WindowBaseImpl::ObtainNSWindowHandleRetained(void **ret) {
 }
 
 HRESULT WindowBaseImpl::Show(bool activate, bool isDialog) {
-    START_COM_CALL;
-
     @autoreleasepool {
         [Window setContentSize:lastSize];
 
@@ -141,8 +137,6 @@ bool WindowBaseImpl::ShouldTakeFocusOnShow() {
 }
 
 HRESULT WindowBaseImpl::ObtainNSWindowHandle(void **ret) {
-    START_COM_CALL;
-
     if (ret == nullptr) {
         return E_POINTER;
     }
@@ -153,8 +147,6 @@ HRESULT WindowBaseImpl::ObtainNSWindowHandle(void **ret) {
 }
 
 HRESULT WindowBaseImpl::Hide() {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (Window != nullptr) {
 
@@ -186,8 +178,6 @@ HRESULT WindowBaseImpl::Hide() {
 }
 
 HRESULT WindowBaseImpl::Activate() {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (Window != nullptr) {
             [Window makeKeyAndOrderFront:nil];
@@ -199,8 +189,6 @@ HRESULT WindowBaseImpl::Activate() {
 }
 
 HRESULT WindowBaseImpl::SetTopMost(bool value) {
-    START_COM_CALL;
-
     @autoreleasepool {
         _isTopmost = value;
 
@@ -238,8 +226,6 @@ void WindowBaseImpl::UpdateWindowLevel() {
 }
 
 HRESULT WindowBaseImpl::Close() {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (Window != nullptr) {
             auto window = Window;
@@ -257,8 +243,6 @@ HRESULT WindowBaseImpl::Close() {
 }
 
 HRESULT WindowBaseImpl::GetFrameSize(FrnSize *ret) {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (ret == nullptr)
             return E_POINTER;
@@ -274,8 +258,6 @@ HRESULT WindowBaseImpl::GetFrameSize(FrnSize *ret) {
 }
 
 HRESULT WindowBaseImpl::SetMinMaxSize(FrnSize minSize, FrnSize maxSize) {
-    START_COM_CALL;
-
     @autoreleasepool {
         lastMinSize = ToNSSize(minSize);
         lastMaxSize = ToNSSize(maxSize);
@@ -296,7 +278,6 @@ HRESULT WindowBaseImpl::Resize(double x, double y, FrnPlatformResizeReason reaso
 
     _inResize = true;
 
-    START_COM_CALL;
     auto resizeBlock = ResizeScope(View, reason);
 
     @autoreleasepool {
@@ -348,12 +329,10 @@ HRESULT WindowBaseImpl::Resize(double x, double y, FrnPlatformResizeReason reaso
     }
 }
 
-HRESULT WindowBaseImpl::SetMainMenu(IFrnMenu *menu) {
-    START_COM_CALL;
+HRESULT WindowBaseImpl::SetMainMenu(const ComPtr<IFrnMenu>& menu) {
+    auto nativeMenu = menu.dynamicCast<FrnAppMenu>();
 
-    auto nativeMenu = dynamic_cast<FrnAppMenu *>(menu);
-
-    lastMenu = nativeMenu->GetNative();
+    lastMenu = nativeMenu ? nativeMenu->GetNative() : nil;
 
     if(Window != nullptr) {
         [GetWindowProtocol() applyMenu:lastMenu];
@@ -367,8 +346,6 @@ HRESULT WindowBaseImpl::SetMainMenu(IFrnMenu *menu) {
 }
 
 HRESULT WindowBaseImpl::BeginMoveDrag() {
-    START_COM_CALL;
-
     @autoreleasepool {
         auto lastEvent = [View lastMouseDownEvent];
 
@@ -398,14 +375,10 @@ HRESULT WindowBaseImpl::BeginMoveDrag() {
 }
 
 HRESULT WindowBaseImpl::BeginResizeDrag(__attribute__((unused)) FrnWindowEdge edge) {
-    START_COM_CALL;
-
     return S_OK;
 }
 
 HRESULT WindowBaseImpl::GetPosition(FrnPoint *ret) {
-    START_COM_CALL;
-
     @autoreleasepool {
         if (ret == nullptr) {
             return E_POINTER;
@@ -428,8 +401,6 @@ HRESULT WindowBaseImpl::GetPosition(FrnPoint *ret) {
 }
 
 HRESULT WindowBaseImpl::SetPosition(FrnPoint point) {
-    START_COM_CALL;
-
     @autoreleasepool {
         lastPositionSet = point;
         hasPosition = true;
@@ -443,8 +414,6 @@ HRESULT WindowBaseImpl::SetPosition(FrnPoint point) {
 }
 
 HRESULT WindowBaseImpl::SetTransparencyMode(FrnWindowTransparencyMode mode) {
-    START_COM_CALL;
-
     [Window setBackgroundColor: (mode != Transparent ? [NSColor windowBackgroundColor] : [NSColor clearColor])];
     [StandardContainer ShowBlur: mode == Blur];
 
@@ -452,16 +421,12 @@ HRESULT WindowBaseImpl::SetTransparencyMode(FrnWindowTransparencyMode mode) {
 }
 
 HRESULT WindowBaseImpl::SetBlurMaterial(int material, int appearance) {
-    START_COM_CALL;
-
     [StandardContainer SetBlurMaterial: material appearance: appearance];
 
     return S_OK;
 }
 
 HRESULT WindowBaseImpl::SetFrameThemeVariant(FrnPlatformThemeVariant variant) {
-    START_COM_CALL;
-
     NSAppearanceName appearanceName;
     if (@available(macOS 10.14, *))
     {
@@ -509,10 +474,10 @@ void WindowBaseImpl::CreateNSWindow(bool usePanel) {
     NSRect contentRect = NSRect { origin.x, origin.y, lastSize };
 
     if (usePanel) {
-        Window = [[FrnPanel alloc] initWithParent:this contentRect:contentRect styleMask:NSWindowStyleMaskBorderless];
+        Window = [[FrnPanel alloc] initWithParent:comself(this) contentRect:contentRect styleMask:NSWindowStyleMaskBorderless];
         [Window setHidesOnDeactivate:false];
     } else {
-        Window = [[FrnWindow alloc] initWithParent:this contentRect:contentRect styleMask:NSWindowStyleMaskBorderless];
+        Window = [[FrnWindow alloc] initWithParent:comself(this) contentRect:contentRect styleMask:NSWindowStyleMaskBorderless];
     }
 }
 
@@ -530,19 +495,17 @@ void WindowBaseImpl::BringToFront()
     // do nothing.
 }
 
-HRESULT WindowBaseImpl::SetParent(IFrnWindowBase *parent) {
-    START_COM_CALL;
-
+HRESULT WindowBaseImpl::SetParent(const ComPtr<IFrnWindowBase>& parent) {
     @autoreleasepool {
 
         auto oldParent = Parent.tryGet();
 
         if(oldParent != nullptr)
         {
-            oldParent->_children.remove(this);
+            oldParent->_children.remove(comself(this));
         }
 
-        auto cparent = dynamic_cast<WindowImpl *>(parent);
+        auto cparent = parent.dynamicCast<WindowImpl>();
 
         Parent = cparent;
 
@@ -555,7 +518,7 @@ HRESULT WindowBaseImpl::SetParent(IFrnWindowBase *parent) {
 
             [Window setCollectionBehavior:NSWindowCollectionBehaviorFullScreenAuxiliary];
 
-            cparent->_children.push_back(this);
+            cparent->_children.push_back(comself(this));
 
             UpdateAppearance();
         }

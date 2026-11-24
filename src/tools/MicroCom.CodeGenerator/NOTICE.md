@@ -7,6 +7,11 @@ license). No MicroCom source code is included; the IDL grammar and the shape of
 the generated C++ header were reproduced from MicroCom's inputs and outputs so
 that the same IDL files produce an equivalent header.
 
+The smart pointer wrapper mode (`CppOptions::smart_pointer_wrappers`) follows MicroCom 0.11.7
+(`CppSmartPointerWrappers`). Its shape was taken from the text templates of the published
+`MicroCom.CodeGenerator` 0.11.7 package, read as data, and from the upstream native sources
+that are built against it; no code of the package is included or run.
+
 The test fixtures in `tests/fixtures/` are an IDL file from the Avalonia
 project (<https://github.com/AvaloniaUI/Avalonia>, MIT license, Copyright (c)
 AvaloniaUI OÜ — see `native/FerroUI.Native/NOTICE.md` for the full license

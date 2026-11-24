@@ -109,8 +109,6 @@ public:
     
     virtual HRESULT SetApplicationTitle(char* utf8String) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             auto appTitle = [NSString stringWithUTF8String: utf8String];
@@ -132,8 +130,6 @@ public:
     
     virtual HRESULT SetShowInDock(int show) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             NSApplication* app = [NSApplication sharedApplication];
@@ -152,8 +148,6 @@ public:
     
     virtual HRESULT SetDisableSetProcessName(int disable)  override
     {
-        START_COM_CALL;
-        
         @autoreleasepool
         {
             disableSetProcessName = disable;
@@ -163,8 +157,6 @@ public:
     
     virtual HRESULT SetDisableAppDelegate(int disable) override
     {
-        START_COM_CALL;
-        
         @autoreleasepool {
             disableAppDelegate = disable;
             return S_OK;
@@ -199,8 +191,9 @@ public:
 }
 @end
 
-static ComPtr<IFrnGCHandleDeallocatorCallback> _deallocator;
-static ComPtr<IFrnDispatcher> _dispatcher;
+// Not released at exit: .NET is already shut down by then
+static ComStaticPtr<IFrnGCHandleDeallocatorCallback> _deallocator;
+static ComStaticPtr<IFrnDispatcher> _dispatcher;
 class FerroNative : public ComSingleObject<IFerroNativeFactory, &IID_IFerroNativeFactory>
 {
     
@@ -210,18 +203,16 @@ public:
     virtual ~FerroNative() override
     {
         ReleaseFrnAppEvents();
-        _deallocator = nullptr;
-        _dispatcher = nullptr;
+        _deallocator.reset();
+        _dispatcher.reset();
     }
     
-    virtual HRESULT Initialize(IFrnGCHandleDeallocatorCallback* deallocator,
-            IFrnApplicationEvents* events,
-            IFrnDispatcher* dispatcher) override
+    virtual HRESULT Initialize(const ComPtr<IFrnGCHandleDeallocatorCallback>& deallocator,
+            const ComPtr<IFrnApplicationEvents>& events,
+            const ComPtr<IFrnDispatcher>& dispatcher) override
     {
-        START_COM_CALL;
-        
-        _deallocator = deallocator;
-        _dispatcher = dispatcher;
+        _deallocator.set(deallocator);
+        _dispatcher.set(dispatcher);
         @autoreleasepool{
             [[ThreadingInitializer new] do];
         }
@@ -229,285 +220,171 @@ public:
         return S_OK;
     };
     
-    virtual IFrnMacOptions* GetMacOptions()  override
+    virtual ComPtr<IFrnMacOptions> GetMacOptions() override
     {
-        return (IFrnMacOptions*)new MacOptions();
+        return comnew<MacOptions>();
     }
     
-    virtual HRESULT CreateTopLevel(IFrnTopLevelEvents* cb,
-                                           IFrnTopLevel** ppv) override {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            if(cb == nullptr || ppv == nullptr)
-                return E_POINTER;
-            *ppv = CreateFrnTopLevel(cb);
-            return S_OK;
-        }
+    virtual HRESULT CreateTopLevel(const ComPtr<IFrnTopLevelEvents>& cb, ComPtr<IFrnTopLevel>& ppv) override
+    {
+        if(cb == nullptr)
+            return E_POINTER;
+        ppv = CreateFrnTopLevel(cb);
+        return S_OK;
     }
     
-    virtual HRESULT CreateWindow(IFrnWindowEvents* cb, IFrnWindow** ppv)  override
+    virtual HRESULT CreateWindow(const ComPtr<IFrnWindowEvents>& cb, ComPtr<IFrnWindow>& ppv) override
     {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            if(cb == nullptr || ppv == nullptr)
-                return E_POINTER;
-            *ppv = CreateFrnWindow(cb);
-            return S_OK;
-        }
+        if(cb == nullptr)
+            return E_POINTER;
+        ppv = CreateFrnWindow(cb);
+        return S_OK;
     };
     
-    virtual HRESULT CreatePopup(IFrnWindowEvents* cb, IFrnPopup** ppv) override
+    virtual HRESULT CreatePopup(const ComPtr<IFrnWindowEvents>& cb, ComPtr<IFrnPopup>& ppv) override
     {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            if(cb == nullptr || ppv == nullptr)
-                return E_POINTER;
-            
-            *ppv = CreateFrnPopup(cb);
-            return S_OK;
-        }
+        if(cb == nullptr)
+            return E_POINTER;
+        ppv = CreateFrnPopup(cb);
+        return S_OK;
     }
     
-    virtual HRESULT CreatePlatformThreadingInterface(IFrnPlatformThreadingInterface** ppv)  override
+    virtual HRESULT CreatePlatformThreadingInterface(ComPtr<IFrnPlatformThreadingInterface>& ppv) override
     {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = CreatePlatformThreading();
-            return S_OK;
-        }
+        ppv = CreatePlatformThreading();
+        return S_OK;
     }
     
-    virtual HRESULT CreateStorageProvider(IFrnStorageProvider** ppv) override
+    virtual HRESULT CreateStorageProvider(ComPtr<IFrnStorageProvider>& ppv) override
     {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateStorageProvider();
-            return  S_OK;
-        }
+        ppv = ::CreateStorageProvider();
+        return S_OK;
     }
     
-    virtual HRESULT CreateScreens (IFrnScreenEvents* cb, IFrnScreens** ppv) override
+    virtual HRESULT CreateScreens(const ComPtr<IFrnScreenEvents>& cb, ComPtr<IFrnScreens>& ppv) override
     {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateScreens (cb);
-            return S_OK;
-        }
-    }
-
-    virtual HRESULT CreateClipboard(IFrnClipboard** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateClipboard(nil);
-            return S_OK;
-        }
-    }
-
-    virtual HRESULT CreateCursorFactory(IFrnCursorFactory** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateCursorFactory();
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT ObtainGlDisplay(IFrnGlDisplay** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            auto rv = ::GetGlDisplay();
-            if(rv == NULL)
-                return E_FAIL;
-            rv->AddRef();
-            *ppv = rv;
-            return S_OK;
-        }
-    }
-
-    virtual HRESULT ObtainMetalDisplay(IFrnMetalDisplay** ppv) override
-    {
-        START_COM_CALL;
-        @autoreleasepool
-        {
-            auto rv = ::GetMetalDisplay();
-            if(rv == NULL)
-                return E_FAIL;
-            rv->AddRef();
-            *ppv = rv;
-            return S_OK;
-        }
-    }
-
-
-    virtual HRESULT CreateTrayIcon (IFrnTrayIcon** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateTrayIcon();
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT CreateMenu (IFrnMenuEvents* cb, IFrnMenu** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateAppMenu(cb);
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT CreateMenuItem (IFrnMenuItem** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateAppMenuItem();
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT CreateMenuItemSeparator (IFrnMenuItem** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateAppMenuItemSeparator();
-            return S_OK;
-        }
-    }
-        
-    virtual HRESULT SetAppMenu (IFrnMenu* appMenu) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            ::SetAppMenu(appMenu);
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT SetServicesMenu (IFrnMenu* servicesMenu) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            ::SetServicesMenu(servicesMenu);
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT CreateApplicationCommands (IFrnApplicationCommands** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreateApplicationCommands();
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT CreatePlatformSettings (IFrnPlatformSettings** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreatePlatformSettings();
-            return S_OK;
-        }
-    }
-
-    virtual HRESULT CreatePlatformBehaviorInhibition(IFrnPlatformBehaviorInhibition** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreatePlatformBehaviorInhibition();
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT CreatePlatformRenderTimer(IFrnPlatformRenderTimer** ppv) override
-    {
-        START_COM_CALL;
-        
-        @autoreleasepool
-        {
-            *ppv = ::CreatePlatformRenderTimer();
-            return S_OK;
-        }
-    }
-    
-    virtual HRESULT ImportMTLSharedEvent(void* event, IFrnMTLSharedEvent** ppv) override
-    {
-        START_COM_CALL;
-        *ppv = ::ImportMTLSharedEvent(event);
-        return *ppv != nullptr ? S_OK : E_FAIL;
-    }
-    
-    HRESULT CreateMemoryManagementHelper(IFrnNativeObjectsMemoryManagement **ppv) override {
-        START_COM_CALL;
-        *ppv = ::CreateMemoryManagementHelper();
+        ppv = ::CreateScreens(cb);
         return S_OK;
     }
 
-    virtual HRESULT SetDockMenu(IFrnMenu* dockMenu) override
+    virtual HRESULT CreateClipboard(ComPtr<IFrnClipboard>& ppv) override
     {
-        START_COM_CALL;
+        ppv = ::CreateClipboard(nil);
+        return S_OK;
+    }
 
-        @autoreleasepool
-        {
-            auto nativeMenu = dynamic_cast<FrnAppMenu*>(dockMenu);
-            ::SetDockMenu(nativeMenu != nullptr ? nativeMenu->GetNative() : nil);
-            return S_OK;
-        }
+    virtual HRESULT CreateCursorFactory(ComPtr<IFrnCursorFactory>& ppv) override
+    {
+        ppv = ::CreateCursorFactory();
+        return S_OK;
+    }
+    
+    virtual HRESULT ObtainGlDisplay(ComPtr<IFrnGlDisplay>& ppv) override
+    {
+        ppv = ::GetGlDisplay();
+        return ppv ? S_OK : E_FAIL;
+    }
+
+    virtual HRESULT ObtainMetalDisplay(ComPtr<IFrnMetalDisplay>& ppv) override
+    {
+        ppv = ::GetMetalDisplay();
+        return ppv ? S_OK : E_FAIL;
+    }
+
+    virtual HRESULT CreateTrayIcon(ComPtr<IFrnTrayIcon>& ppv) override
+    {
+        ppv = ::CreateTrayIcon();
+        return S_OK;
+    }
+    
+    virtual HRESULT CreateMenu(const ComPtr<IFrnMenuEvents>& cb, ComPtr<IFrnMenu>& ppv) override
+    {
+        ppv = ::CreateAppMenu(cb);
+        return S_OK;
+    }
+    
+    virtual HRESULT CreateMenuItem(ComPtr<IFrnMenuItem>& ppv) override
+    {
+        ppv = ::CreateAppMenuItem();
+        return S_OK;
+    }
+    
+    virtual HRESULT CreateMenuItemSeparator(ComPtr<IFrnMenuItem>& ppv) override
+    {
+        ppv = ::CreateAppMenuItemSeparator();
+        return S_OK;
+    }
+        
+    virtual HRESULT SetAppMenu(const ComPtr<IFrnMenu>& appMenu) override
+    {
+        ::SetAppMenu(appMenu);
+        return S_OK;
+    }
+    
+    virtual HRESULT SetServicesMenu(const ComPtr<IFrnMenu>& servicesMenu) override
+    {
+        ::SetServicesMenu(servicesMenu);
+        return S_OK;
+    }
+    
+    virtual HRESULT CreateApplicationCommands(ComPtr<IFrnApplicationCommands>& ppv) override
+    {
+        ppv = ::CreateApplicationCommands();
+        return S_OK;
+    }
+    
+    virtual HRESULT CreatePlatformSettings(ComPtr<IFrnPlatformSettings>& ppv) override
+    {
+        ppv = ::CreatePlatformSettings();
+        return S_OK;
+    }
+
+    virtual HRESULT CreatePlatformBehaviorInhibition(ComPtr<IFrnPlatformBehaviorInhibition>& ppv) override
+    {
+        ppv = ::CreatePlatformBehaviorInhibition();
+        return S_OK;
+    }
+    
+    virtual HRESULT CreatePlatformRenderTimer(ComPtr<IFrnPlatformRenderTimer>& ppv) override
+    {
+        ppv = ::CreatePlatformRenderTimer();
+        return S_OK;
+    }
+    
+    virtual HRESULT ImportMTLSharedEvent(void* event, ComPtr<IFrnMTLSharedEvent>& ppv) override
+    {
+        ppv = ::ImportMTLSharedEvent(event);
+        return ppv ? S_OK : E_FAIL;
+    }
+    
+    virtual HRESULT CreateMemoryManagementHelper(ComPtr<IFrnNativeObjectsMemoryManagement>& ppv) override
+    {
+        ppv = ::CreateMemoryManagementHelper();
+        return S_OK;
+    }
+
+    virtual HRESULT SetDockMenu(const ComPtr<IFrnMenu>& dockMenu) override
+    {
+        auto nativeMenu = dockMenu.dynamicCast<FrnAppMenu>();
+        ::SetDockMenu(nativeMenu ? nativeMenu->GetNative() : nil);
+        return S_OK;
     }
 
 };
 
+// C ABI entry point: the caller takes ownership of the returned reference
 extern "C" IFerroNativeFactory* CreateFerroNative()
 {
-    return new FerroNative();
+    return comnew<FerroNative>().getRetainedReference();
 };
 
 extern void FreeFrnGCHandle(void* handle)
 {
-    if(_deallocator != nil)
+    if(_deallocator)
         _deallocator->FreeGCHandle(handle);
 }
 
-extern void PostDispatcherCallback(IFrnActionCallback* cb)
+extern void PostDispatcherCallback(const ComPtr<IFrnActionCallback>& cb)
 {
     _dispatcher->Post(cb);
 }

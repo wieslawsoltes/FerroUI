@@ -15,7 +15,8 @@
 #include "ferro-native.h"
 #import "FrnTextInputMethodDelegate.h"
 
-class FrnTextInputMethod: public virtual ComObject, public virtual IFrnTextInputMethod, public virtual IFrnTextInputMethodOptions{
+class FrnTextInputMethod: public virtual ComObject, public virtual MicroComImpl<IFrnTextInputMethod>,
+    public virtual MicroComImpl<IFrnTextInputMethodOptions>{
 private:
     id<FrnTextInputMethodDelegate> _inputMethodDelegate;
 public:
@@ -32,7 +33,7 @@ public:
     
     bool IsActive ();
     
-    HRESULT SetClient (IFrnTextInputMethodClient* client) override;
+    HRESULT SetClient (const ComPtr<IFrnTextInputMethodClient>& client) override;
     
     virtual void Reset () override;
     

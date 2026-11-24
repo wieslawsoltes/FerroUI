@@ -1,6 +1,7 @@
 #pragma once
 
 #import <AppKit/AppKit.h>
+#include "comimpl.h"
 
 @class FrnMenu;
 struct IFrnAutomationPeer;
@@ -12,7 +13,7 @@ struct IFrnAutomationPeer;
 -(void) showAppMenuOnly;
 -(void) showWindowMenuWithAppMenu;
 -(void) applyMenu:(FrnMenu* _Nullable)menu;
--(IFrnAutomationPeer* _Nullable) automationPeer;
+-(ComPtr<IFrnAutomationPeer>) automationPeer;
 
 -(double) getExtendedTitleBarHeight;
 -(void) setIsExtended:(bool)value;

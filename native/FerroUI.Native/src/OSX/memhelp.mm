@@ -1,6 +1,7 @@
 #include "common.h"
 class MemHelper : public ComSingleObject<IFrnNativeObjectsMemoryManagement, &IID_IFrnNativeObjectsMemoryManagement>
 {
+public:
     FORWARD_IUNKNOWN()
     void RetainNSObject(void *object) override
     {
@@ -34,7 +35,7 @@ class MemHelper : public ComSingleObject<IFrnNativeObjectsMemoryManagement, &IID
 };
 
 
-extern IFrnNativeObjectsMemoryManagement* CreateMemoryManagementHelper()
+extern ComPtr<IFrnNativeObjectsMemoryManagement> CreateMemoryManagementHelper()
 {
-    return new MemHelper();
+    return comnew<MemHelper>();
 }

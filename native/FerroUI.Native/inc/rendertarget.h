@@ -19,14 +19,14 @@
 @end
 
 @interface IOSurfaceRenderTarget : NSObject<IRenderTarget>
--(IOSurfaceRenderTarget*) initWithOpenGlContext: (IFrnGlContext*) context;
--(IFrnGlSurfaceRenderTarget*) createSurfaceRenderTarget;
--(IFrnSoftwareRenderTarget*) createSoftwareRenderTarget;
+-(IOSurfaceRenderTarget*) initWithOpenGlContext: (const ComPtr<IFrnGlContext>&) context;
+-(ComPtr<IFrnGlSurfaceRenderTarget>) createSurfaceRenderTarget;
+-(ComPtr<IFrnSoftwareRenderTarget>) createSoftwareRenderTarget;
 -(HRESULT) setSwFrame: (FrnFramebuffer*) fb;
 -(void)consumeSurfaces;
 @end
 
 @interface MetalRenderTarget : NSObject<IRenderTarget>
--(MetalRenderTarget*) initWithDevice: (IFrnMetalDevice*) device;
--(void) getRenderTarget: (IFrnMetalRenderTarget**) ppv;
+-(MetalRenderTarget*) initWithDevice: (const ComPtr<IFrnMetalDevice>&) device;
+-(ComPtr<IFrnMetalRenderTarget>) createRenderTarget;
 @end

@@ -11,8 +11,8 @@
 @protocol FrnWindowProtocol;
 
 class WindowBaseImpl : public virtual TopLevelImpl,
-                       public virtual IFrnWindowBase,
-                       public virtual IFrnWindowBlurMaterial,
+                       public virtual MicroComImpl<IFrnWindowBase>,
+                       public virtual MicroComImpl<IFrnWindowBlurMaterial>,
                        public INSWindowHolder {
 
 public:
@@ -26,7 +26,7 @@ public:
 
     virtual ~WindowBaseImpl();
 
-    WindowBaseImpl(IFrnWindowBaseEvents *events, bool usePanel = false);
+    WindowBaseImpl(const ComPtr<IFrnWindowBaseEvents>& events, bool usePanel = false);
 
     virtual HRESULT ObtainNSWindowHandle(void **ret) override;
 
@@ -54,7 +54,7 @@ public:
 
     virtual HRESULT Resize(double x, double y, FrnPlatformResizeReason reason) override;
 
-    virtual HRESULT SetMainMenu(IFrnMenu *menu) override;
+    virtual HRESULT SetMainMenu(const ComPtr<IFrnMenu>& menu) override;
 
     virtual HRESULT BeginMoveDrag() override;
 
@@ -77,7 +77,7 @@ public:
 
     virtual bool CanZoom() { return false; }
                            
-    virtual HRESULT SetParent(IFrnWindowBase* parent) override;
+    virtual HRESULT SetParent(const ComPtr<IFrnWindowBase>& parent) override;
 
     void UpdateWindowLevel();
 

@@ -2,12 +2,9 @@
 #include "trayicon.h"
 #include "menu.h"
 
-extern IFrnTrayIcon* CreateTrayIcon()
+extern ComPtr<IFrnTrayIcon> CreateTrayIcon()
 {
-    @autoreleasepool
-    {
-        return new FrnTrayIcon();
-    }
+    return comnew<FrnTrayIcon>();
 }
 
 FrnTrayIcon::FrnTrayIcon()
@@ -27,8 +24,6 @@ FrnTrayIcon::~FrnTrayIcon()
 
 HRESULT FrnTrayIcon::SetIcon (void* data, size_t length)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if(data != nullptr)
@@ -56,13 +51,11 @@ HRESULT FrnTrayIcon::SetIcon (void* data, size_t length)
     }
 }
 
-HRESULT FrnTrayIcon::SetMenu (IFrnMenu* menu)
+HRESULT FrnTrayIcon::SetMenu (const ComPtr<IFrnMenu>& menu)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
-        auto appMenu = dynamic_cast<FrnAppMenu*>(menu);
+        auto appMenu = menu.dynamicCast<FrnAppMenu>();
         
         if(appMenu != nullptr)
         {
@@ -75,8 +68,6 @@ HRESULT FrnTrayIcon::SetMenu (IFrnMenu* menu)
 
 HRESULT FrnTrayIcon::SetIsVisible(bool isVisible)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         [_native setVisible:isVisible];
@@ -87,8 +78,6 @@ HRESULT FrnTrayIcon::SetIsVisible(bool isVisible)
 
 HRESULT FrnTrayIcon::SetToolTipText(char* text)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if (text != nullptr)
@@ -102,8 +91,6 @@ HRESULT FrnTrayIcon::SetToolTipText(char* text)
 
 HRESULT FrnTrayIcon::SetIsTemplateIcon(bool isTemplateIcon)
 {
-    START_COM_CALL;
-    
     @autoreleasepool
     {
         if (_isTemplateIcon != isTemplateIcon)

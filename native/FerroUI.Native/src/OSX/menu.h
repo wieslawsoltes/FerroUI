@@ -18,7 +18,7 @@ class FrnAppMenu;
 @end
 
 @interface FrnMenuItem : NSMenuItem
-- (id) initWithFrnAppMenuItem: (FrnAppMenuItem*)menuItem;
+- (id) initWithFrnAppMenuItem: (const ComPtr<FrnAppMenuItem>&)menuItem;
 - (void)didSelectItem:(id)sender;
 @end
 
@@ -37,7 +37,7 @@ public:
     
     NSMenuItem* GetNative();
     
-    virtual HRESULT SetSubMenu (IFrnMenu* menu) override;
+    virtual HRESULT SetSubMenu (const ComPtr<IFrnMenu>& menu) override;
     
     virtual HRESULT SetTitle (char* utf8String) override;
 
@@ -45,7 +45,7 @@ public:
 
     virtual HRESULT SetGesture (FrnKey key, FrnInputModifiers modifiers) override;
     
-    virtual HRESULT SetAction (IFrnPredicateCallback* predicate, IFrnActionCallback* callback) override;
+    virtual HRESULT SetAction (const ComPtr<IFrnPredicateCallback>& predicate, const ComPtr<IFrnActionCallback>& callback) override;
     
     virtual HRESULT SetIsChecked (bool isChecked) override;
 
@@ -63,8 +63,7 @@ public:
 class FrnAppMenu;
 
 @interface FrnMenuDelegate : NSObject<NSMenuDelegate>
-- (id) initWithParent: (FrnAppMenu*) parent;
-- (void) parentDestroyed;
+- (id) initWithParent: (const ComPtr<FrnAppMenu>&) parent;
 @end
 
 
@@ -78,7 +77,7 @@ private:
 public:
     FORWARD_IUNKNOWN()
     
-    FrnAppMenu(IFrnMenuEvents* events);
+    FrnAppMenu(const ComPtr<IFrnMenuEvents>& events);
 
     FrnMenu* GetNative();
     
@@ -86,14 +85,13 @@ public:
     void RaiseOpening();
     void RaiseClosed();
     
-    virtual HRESULT InsertItem (int index, IFrnMenuItem* item) override;
+    virtual HRESULT InsertItem (int index, const ComPtr<IFrnMenuItem>& item) override;
     
-    virtual HRESULT RemoveItem (IFrnMenuItem* item) override;
+    virtual HRESULT RemoveItem (const ComPtr<IFrnMenuItem>& item) override;
     
     virtual HRESULT SetTitle (char* utf8String) override;
     
     virtual HRESULT Clear () override;
-    virtual ~FrnAppMenu() override;
 };
 
 

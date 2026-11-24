@@ -15,7 +15,7 @@
 #include <list>
 
 class TopLevelImpl : public virtual ComObject,
-                     public virtual IFrnTopLevel,
+                     public virtual MicroComImpl<IFrnTopLevel>,
                      public INSViewHolder{
     
 public:
@@ -26,29 +26,29 @@ public:
     
     virtual ~TopLevelImpl();
     
-    TopLevelImpl(IFrnTopLevelEvents* events);
+    TopLevelImpl(const ComPtr<IFrnTopLevelEvents>& events);
                          
     virtual FrnView *GetNSView() override;
                          
-    virtual HRESULT SetCursor(IFrnCursor* cursor) override;
+    virtual HRESULT SetCursor(const ComPtr<IFrnCursor>& cursor) override;
                          
     virtual HRESULT GetScaling(double*ret) override;
                          
     virtual HRESULT GetClientSize(FrnSize *ret) override;
                            
-    virtual HRESULT GetInputMethod(IFrnTextInputMethod **ppv) override;
+    virtual HRESULT GetInputMethod(ComPtr<IFrnTextInputMethod>& ppv) override;
                            
     virtual HRESULT ObtainNSViewHandle(void** retOut) override;
                                                   
     virtual HRESULT ObtainNSViewHandleRetained(void** retOut) override;
                            
-    virtual HRESULT CreateSoftwareRenderTarget(IFrnSoftwareRenderTarget** ret) override;
+    virtual HRESULT CreateSoftwareRenderTarget(ComPtr<IFrnSoftwareRenderTarget>& ret) override;
                                                   
-    virtual HRESULT CreateMetalRenderTarget(IFrnMetalDevice* device, IFrnMetalRenderTarget** ret) override;
+    virtual HRESULT CreateMetalRenderTarget(const ComPtr<IFrnMetalDevice>& device, ComPtr<IFrnMetalRenderTarget>& ret) override;
                            
-    virtual HRESULT CreateGlRenderTarget(IFrnGlContext* context, IFrnGlSurfaceRenderTarget** ret) override;
+    virtual HRESULT CreateGlRenderTarget(const ComPtr<IFrnGlContext>& context, ComPtr<IFrnGlSurfaceRenderTarget>& ret) override;
 
-    virtual HRESULT CreateNativeControlHost(IFrnNativeControlHost **retOut) override;
+    virtual HRESULT CreateNativeControlHost(ComPtr<IFrnNativeControlHost>& retOut) override;
                          
     virtual HRESULT Invalidate() override;
                          
@@ -63,8 +63,8 @@ public:
     virtual HRESULT BeginDragAndDropOperation(
         FrnDragDropEffects effects,
         FrnPoint point,
-        IFrnClipboardDataSource* source,
-        IFrnDndResultCallback* callback,
+        const ComPtr<IFrnClipboardDataSource>& source,
+        const ComPtr<IFrnDndResultCallback>& callback,
         void* sourceHandle) override;
 
 protected:

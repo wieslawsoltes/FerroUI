@@ -8,7 +8,7 @@
 #import "WindowProtocol.h"
 #import <AppKit/AppKit.h>
 
-class PopupImpl : public virtual WindowBaseImpl, public IFrnPopup
+class PopupImpl : public virtual WindowBaseImpl, public virtual MicroComImpl<IFrnPopup>
 {
 private:
     BEGIN_INTERFACE_MAP()
@@ -17,7 +17,7 @@ private:
     END_INTERFACE_MAP()
     virtual ~PopupImpl(){}
     ComPtr<IFrnWindowEvents> WindowEvents;
-    PopupImpl(IFrnWindowEvents* events) : TopLevelImpl(events), WindowBaseImpl(events)
+    PopupImpl(const ComPtr<IFrnWindowEvents>& events) : TopLevelImpl(events), WindowBaseImpl(events)
     {
         WindowEvents = events;
         UpdateWindowLevel();
@@ -45,13 +45,8 @@ public:
     
     virtual HRESULT SetHitTestVisible(bool value) override
     {
-        START_COM_CALL;
-
-        @autoreleasepool
-        {
-            [Window setIgnoresMouseEvents:!value];
-            return S_OK;
-        }
+        [Window setIgnoresMouseEvents:!value];
+        return S_OK;
     }
 
     virtual bool ShouldTakeFocusOnShow() override
@@ -66,11 +61,7 @@ public:
 };
 
 
-extern IFrnPopup* CreateFrnPopup(IFrnWindowEvents*events)
+extern ComPtr<IFrnPopup> CreateFrnPopup(const ComPtr<IFrnWindowEvents>& events)
 {
-    @autoreleasepool
-    {
-        IFrnPopup* ptr = dynamic_cast<IFrnPopup*>(new PopupImpl(events));
-        return ptr;
-    }
+    return comnew<PopupImpl>(events);
 }
