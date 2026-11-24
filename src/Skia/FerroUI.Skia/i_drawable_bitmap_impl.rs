@@ -49,3 +49,38 @@ pub fn try_get_drawable_bitmap(bitmap: &dyn IBitmapImpl) -> Option<&dyn IDrawabl
 
     None
 }
+
+/// Whether a Skia bitmap can be drawn by a CPU export recording without a GPU
+/// context. `None` means the bitmap belongs to another backend. This performs
+/// no GPU readback or transfer: callers must obtain an explicit CPU snapshot
+/// before exporting a GPU-only frame or texture-backed surface.
+///
+/// Being a drawable Skia bitmap is not sufficient: a leased GPU frame silently
+/// skips drawing without its owning GPU context, and GPU images cannot be
+/// serialized by a CPU SVG or raster canvas.
+pub fn is_bitmap_cpu_readable(bitmap: &dyn IBitmapImpl) -> Option<bool> {
+    let any = bitmap.as_any();
+    if any.is::<crate::leased_gpu_bitmap::LeasedGpuBitmap>() {
+        return Some(false);
+    }
+    // Do not use is_valid(None): with the pinned Skia recorder API a null
+    // recorder rejects ordinary raster images too. Encoded/lazy CPU images
+    // remain valid export inputs even before their pixels are decoded.
+    let readable = |image: skia_safe::Image| !image.is_texture_backed();
+    if let Some(bitmap) = any.downcast_ref::<ImmutableBitmap>() {
+        return Some(readable(bitmap.image()));
+    }
+    if let Some(bitmap) = any.downcast_ref::<SurfaceRenderTarget>() {
+        // A surface with context affinity must not even be snapshotted from
+        // an export recording that does not own its GPU context.
+        return Some(!bitmap.has_render_context_affinity() && readable(bitmap.snapshot_image()));
+    }
+    if any.is::<WriteableBitmapImpl>() || any.is::<RenderTargetBitmapImpl>() {
+        return Some(true);
+    }
+    None
+}
+
+#[cfg(test)]
+#[path = "bitmap_cpu_export_tests.rs"]
+mod bitmap_cpu_export_tests;
