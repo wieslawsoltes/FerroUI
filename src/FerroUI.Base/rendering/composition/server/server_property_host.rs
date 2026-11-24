@@ -177,6 +177,8 @@ impl_server_property_value!(
     crate::media::AlignmentY,
     crate::media::Stretch,
     crate::media::TileMode,
+    crate::media::BackdropEffectBoundsSource,
+    crate::media::BackdropEffectCache,
     crate::rendering::RendererDebugOverlays,
     crate::rendering::LayoutPassTiming,
     crate::rendering::composition::CompositionTransparencyLevel,
