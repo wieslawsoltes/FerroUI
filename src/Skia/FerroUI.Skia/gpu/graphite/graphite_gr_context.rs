@@ -276,6 +276,14 @@ impl GraphiteGrContext {
         let _ = state.context.lock().submit(None);
     }
 
+    /// Chooses how the band threads, when they are made, insert (for the tests; #1363).
+    #[cfg(test)]
+    pub(crate) fn set_band_insert_for_tests(&self, mode: super::pipelined_layer::BandInsert) {
+        if let Some(state) = self.state.borrow_mut().as_mut() {
+            state.bands.set_insert_mode(mode);
+        }
+    }
+
     /// How many band recordings the threads inserted that no submit has taken (for the tests;
     /// reading it takes them).
     #[cfg(test)]
