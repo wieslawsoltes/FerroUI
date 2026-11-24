@@ -799,7 +799,7 @@ struct Held {
     /// The turn of an ordered insertion; `None` for a band recorded on a deferred canvas, which is
     /// inserted when it is ready ([`BandInsert::Deferred`]).
     turn: Option<Turn>,
-    /// The first row of the band: where a deferred recording is placed in the layer.
+    /// The row of the layer where a deferred recording is placed: 0, since it covers the layer.
     top: i32,
 }
 
@@ -810,9 +810,9 @@ pub(crate) enum BandInsert {
     /// Each band draws on the layer's texture and the recordings go in in the order the bands
     /// were sent ([`InsertOrder`]).
     Ordered,
-    /// Each band records on a deferred canvas of its own size, which the insertion places on the
-    /// layer's texture at the band's row: no shared target while the threads record, and the
-    /// recordings go in as they are ready, with no turn to wait for. Asked for with
+    /// Each band records on a deferred canvas of the layer's size under the clip of the band, which
+    /// the insertion places on the layer's texture: no shared target while the threads record, and
+    /// the recordings go in as they are ready, with no turn to wait for. Asked for with
     /// `FERROUI_SKIA_BAND_INSERT=deferred`.
     Deferred,
 }
@@ -930,7 +930,8 @@ impl BandWorker {
                     }))
                     .unwrap_or(None);
                     let busy = started.elapsed();
-                    let (layer, index, top) = (band.layer, band.index, band.clip.top);
+                    // A deferred recording covers the whole layer (`play_deferred`): it is placed at the top.
+                    let (layer, index, top) = (band.layer, band.index, 0);
                     held.push(Held { layer, index, recording, busy, turn, top });
                     // The reference of the render thread outlives this one
                     // (see `Band`).
@@ -994,9 +995,17 @@ fn play(
     recorder.snap()
 }
 
-/// Plays a band on a deferred canvas of the band's size, its rows moved to the top, and snaps the
-/// recorder; [`insert_at`] places the recording on the layer's texture. The surface that wraps the
-/// texture is made for the insertion if the thread has none yet.
+/// Plays a band on a deferred canvas of the layer's size under the clip of the band, as the band of an
+/// ordinary layer is drawn, and snaps the recorder; [`insert_at`] places the recording on the layer's
+/// texture. The surface that wraps the texture is made for the insertion if the thread has none yet.
+///
+/// The canvas has the size of the layer, not of the band: a shape that crosses the row where two bands
+/// meet is then cut by the clip, inside the target, as on an ordinary layer. On a canvas of the band's
+/// size the shape crosses the edge of the target instead, which Graphite draws another way: on Graphite
+/// Vulkan (lavapipe) the antialiased edges of such shapes (a stroked line across the layer, a rounded
+/// rectangle across a band edge) came out up to 19 steps apart along the whole shape, while one band, which
+/// has no edge, matched the ordinary layer exactly. The canvas only records: no texture of the layer's size
+/// is made for it.
 fn play_deferred(
     recorder: &mut graphite::Recorder,
     surfaces: &mut Vec<(u64, Surface)>,
@@ -1009,11 +1018,9 @@ fn play_deferred(
     // SAFETY: as in `wrap_texture`: the texture is alive for the call, and only its description
     // is read from the backend texture.
     let texture_info = unsafe { backend_textures::make_metal(band.size, band.texture.0) }.info();
-    let image_info =
-        skia_safe::ImageInfo::new((band.clip.width(), band.clip.height()), band.color_type, AlphaType::Premul, None);
+    let image_info = skia_safe::ImageInfo::new(band.size, band.color_type, AlphaType::Premul, None);
     {
         let canvas = recorder.make_deferred_canvas(&image_info, &texture_info)?;
-        canvas.translate((0.0, -(band.clip.top as f32)));
         canvas.clip_rect(Rect::from(band.clip), ClipOp::Intersect, false);
         canvas.draw_picture(&band.picture, None, None);
     }
