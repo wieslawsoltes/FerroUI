@@ -1941,3 +1941,31 @@ fn text_blocks_of_the_same_font_and_brush_share_their_run_properties() {
     assert!(same(&second.default_run_properties(), &larger.default_run_properties()));
     assert!(same(&first.default_run_properties(), &before));
 }
+
+/// WinUI's `IsTextTrimmed` (#1258): set from the layout of the last measure or arrange, with one
+/// `IsTextTrimmedChanged` for each change, and false for text that is clipped without trimming.
+#[test]
+fn is_text_trimmed_follows_the_layout_and_is_raised_on_each_change() {
+    let _scope = test_scope();
+    let block = text_block("Lorem ipsum dolor sit amet elit");
+    block.set_text_trimming(<dyn TextTrimming>::character_ellipsis());
+    let changes = std::rc::Rc::new(std::cell::Cell::new(0));
+    let counter = changes.clone();
+    block.add_handler(TextBlock::is_text_trimmed_changed_event(), move |_, _| {
+        counter.set(counter.get() + 1);
+    });
+
+    block.measure(Size::new(30.0, f64::INFINITY));
+    assert!(block.is_text_trimmed());
+    assert_eq!(changes.get(), 1);
+    // Another measure that trims as well changes nothing.
+    block.measure(Size::new(31.0, f64::INFINITY));
+    assert_eq!(changes.get(), 1);
+    block.measure(Size::INFINITY);
+    assert!(!block.is_text_trimmed());
+    assert_eq!(changes.get(), 2);
+
+    let clipped = text_block("Lorem ipsum dolor sit amet elit");
+    clipped.measure(Size::new(30.0, f64::INFINITY));
+    assert!(!clipped.is_text_trimmed(), "without trimming the text is clipped, not trimmed");
+}
