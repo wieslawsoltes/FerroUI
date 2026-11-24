@@ -749,10 +749,10 @@ fn css_urls_are_parsed_outside_comments_strings_and_other_function_names() {
         )
     );
     assert!(result.svg.contains("font-family:'url(#literal)'"));
-    assert_eq!(
-        map_urls("custom-url(#literal)", |_| panic!("not a CSS url function")).unwrap(),
-        "custom-url(#literal)"
-    );
+    visit_urls("custom-url(#literal)", |_, _, _| {
+        panic!("not a CSS url function")
+    })
+    .unwrap();
 }
 
 #[test]
@@ -785,4 +785,123 @@ fn inspection_overrides_css_paint_with_comments_in_declaration_names() {
     assert_eq!(path.attribute("style"), Some("filter:none"));
     assert_eq!(path.attribute("fill"), Some("none"));
     assert_eq!(path.attribute("stroke"), Some("blue"));
+}
+
+#[test]
+fn css_rewriting_borrows_canonical_values_and_retains_unchanged_spans() {
+    let names = HashMap::from([
+        ("change".into(), "r-1".into()),
+        ("stay".into(), "stay".into()),
+        ("apostrophe".into(), "ferro-mark('a)".into()),
+    ]);
+    for value in [
+        "#aabbcc",
+        "url(#stay)",
+        "url('#ferro-shape(1)')",
+        "font-family:'Zażółć url(#literal)';stroke:url(#stay)",
+        "/* url(https://example.com/unused) */ none",
+    ] {
+        assert!(
+            matches!(rewrite_urls(value, &names).unwrap(), Cow::Borrowed(original) if original == value)
+        );
+    }
+    let input = "font-family:'Zażółć url(#literal)';fill:URL ( '#change' );stroke:url(#stay);mask:url('#ferro-shape(1)');filter:url(#change) /* url(https://example.com/unused) */;clip-path:url('#apostrophe')";
+    let expected = "font-family:'Zażółć url(#literal)';fill:url(#r-1);stroke:url(#stay);mask:url('#ferro-shape(1)');filter:url(#r-1) /* url(https://example.com/unused) */;clip-path:url(\"#ferro-mark('a)\")";
+    let result = rewrite_urls(input, &names).unwrap();
+    assert_eq!(result, expected);
+    assert!(matches!(
+        rewrite_urls(&result, &names).unwrap(),
+        Cow::Borrowed(_)
+    ));
+    // Normalization still applies without an ID change: case, spacing and
+    // unnecessary quotes are part of the existing canonical output contract.
+    assert_eq!(
+        rewrite_urls("URL ( '#stay' )", &names).unwrap(),
+        "url(#stay)"
+    );
+}
+
+#[test]
+fn invalid_url_identifiers_cannot_be_repaired_by_id_reassignment() {
+    let input = svg(
+        r#"<linearGradient id="a&apos;&quot;b"><stop stop-color="red"/></linearGradient><rect fill="url(#a&apos;&quot;b)"/>"#,
+    );
+    // The definition's nonsemantic ID would become svg-0, but validation must
+    // reject the original malformed reference before any such rewriting.
+    assert!(optimize(&input, &XmlOptions::default()).is_err());
+    assert!(fragment(&input, "safe", &InspectionStyle::Normal).is_err());
+    assert!(skia_fragment(&input, "safe", &InspectionStyle::Normal).is_err());
+}
+
+#[test]
+fn no_alias_optimization_prunes_only_unidentified_empty_definitions() {
+    let input = svg(
+        r#"<defs/><defs id="kept"/><g id="first"/><defs><defs/></defs><rect id="second" fill="url('#ferro-paint(1)')"/><linearGradient id="ferro-paint(1)"><stop stop-color="red"/></linearGradient>"#,
+    );
+    let first = optimize(&input, &XmlOptions::default()).unwrap();
+    assert_eq!(first.stats.definitions_deduplicated, 0);
+    let document = Document::parse(&first.svg).unwrap();
+    let definitions = document
+        .descendants()
+        .filter(|node| node.has_tag_name("defs"))
+        .collect::<Vec<_>>();
+    assert_eq!(definitions.len(), 1);
+    assert_eq!(definitions[0].attribute("id"), Some("svg-0"));
+    let ids = document
+        .descendants()
+        .filter_map(|node| node.attribute("id"))
+        .collect::<Vec<_>>();
+    assert_eq!(ids, ["svg-0", "svg-1", "svg-2", "ferro-paint(1)"]);
+    assert!(first.svg.contains("fill=\"url('#ferro-paint(1)')\""));
+    assert_eq!(
+        first.svg,
+        optimize(&first.svg, &XmlOptions::default()).unwrap().svg
+    );
+}
+
+#[test]
+fn chunked_xml_escaping_preserves_multilingual_text_attributes_and_line_endings() {
+    let value = "Zażółć 世界 e\u{301} 🦀 &<>\"'\r\n\t fin";
+    let mut attribute = String::from("prefix:");
+    escape(&mut attribute, value, true);
+    assert_eq!(
+        attribute,
+        "prefix:Zażółć 世界 e\u{301} 🦀 &amp;&lt;&gt;&quot;'&#13;&#10;&#9; fin"
+    );
+    let mut text = String::from("prefix:");
+    escape(&mut text, value, false);
+    assert_eq!(
+        text,
+        "prefix:Zażółć 世界 e\u{301} 🦀 &amp;&lt;&gt;\"'&#13;\n\t fin"
+    );
+    let input = svg(&format!(
+        "<g data-value=\"{}\"><title>{}</title></g>",
+        &attribute[7..],
+        &text[7..]
+    ));
+    let output = optimize(
+        &input,
+        &XmlOptions {
+            pretty: true,
+            ..Default::default()
+        },
+    )
+    .unwrap();
+    let document = Document::parse(&output.svg).unwrap();
+    assert_eq!(
+        document
+            .descendants()
+            .find(|node| node.has_tag_name("g"))
+            .unwrap()
+            .attribute("data-value"),
+        Some(value)
+    );
+    assert_eq!(
+        document
+            .descendants()
+            .find(|node| node.has_tag_name("title"))
+            .unwrap()
+            .text(),
+        Some(value)
+    );
 }

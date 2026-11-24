@@ -8,6 +8,7 @@
 //! or transformation matrices.
 
 use roxmltree::{Document, Node, ParsingOptions};
+use std::borrow::Cow;
 use std::collections::{HashMap, HashSet};
 use std::fmt::{self, Write};
 use std::hash::{Hash, Hasher};
@@ -132,11 +133,14 @@ pub fn optimize(svg: &str, options: &XmlOptions) -> Result<OptimizedSvg, XmlErro
         let mut resources = HashMap::new();
         find_duplicates(&root, &mut Vec::new(), false, &mut resources, &mut aliases);
         drop_duplicates(&mut root, &aliases);
-        rewrite(&mut root, &aliases)?;
-        // Removing resources can leave holes in encounter-order identifiers.
-        // A final assignment makes optimization idempotent as well as stable.
-        let names = assign_ids(&root, &options.id_prefix, true);
-        rewrite(&mut root, &names)?;
+        if !aliases.is_empty() {
+            rewrite(&mut root, &aliases)?;
+            // Removing resources can leave holes in encounter-order identifiers.
+            // Empty-def pruning cannot: it only removes elements without attributes.
+            // Reassign only when an ID-bearing resource was actually removed.
+            let names = assign_ids(&root, &options.id_prefix, true);
+            rewrite(&mut root, &names)?;
+        }
         aliases.len()
     } else {
         0
@@ -652,7 +656,7 @@ fn validate_attribute(
         {
             return Err(XmlError::new("Escaped or active SVG CSS is not allowed"));
         }
-        map_urls(value, |id| Ok(id.to_owned()))?;
+        visit_urls(value, |_, _, _| Ok(()))?;
     }
     Ok(())
 }
@@ -683,7 +687,7 @@ fn validate_references(element: &Element, ids: &HashSet<String>) -> Result<(), X
         if !ids.contains(id) {
             Err(XmlError::new(format!("Unresolved SVG reference: #{id}")))
         } else {
-            Ok(id.to_owned())
+            Ok(())
         }
     };
     for attribute in &element.attributes {
@@ -694,7 +698,7 @@ fn validate_references(element: &Element, ids: &HashSet<String>) -> Result<(), X
                 check(id)?;
             }
         } else if url_attribute(&attribute.local) {
-            map_urls(&attribute.value, check)?;
+            visit_urls(&attribute.value, |_, _, id| check(id))?;
         }
     }
     for child in &element.children {
@@ -749,20 +753,24 @@ fn rewrite(element: &mut Element, names: &HashMap<String, String>) -> Result<(),
     for attribute in &mut element.attributes {
         if attribute.namespace.is_none() && attribute.local == "id" {
             if let Some(replacement) = names.get(&attribute.value) {
-                attribute.value = replacement.clone();
+                if replacement != &attribute.value {
+                    attribute.value = replacement.clone();
+                }
             }
         } else if attribute.local == "href"
             && (attribute.namespace.is_none() || attribute.namespace.as_deref() == Some(XLINK_NS))
         {
             if let Some(id) = attribute.value.trim().strip_prefix('#') {
                 if let Some(replacement) = names.get(id) {
-                    attribute.value = format!("#{replacement}");
+                    if attribute.value.strip_prefix('#') != Some(replacement.as_str()) {
+                        attribute.value = format!("#{replacement}");
+                    }
                 }
             }
         } else if url_attribute(&attribute.local) {
-            attribute.value = map_urls(&attribute.value, |id| {
-                Ok(names.get(id).cloned().unwrap_or_else(|| id.into()))
-            })?;
+            if let Cow::Owned(replacement) = rewrite_urls(&attribute.value, names)? {
+                attribute.value = replacement;
+            }
         } else if matches!(
             attribute.local.as_str(),
             "aria-labelledby" | "aria-describedby"
@@ -783,15 +791,14 @@ fn rewrite(element: &mut Element, names: &HashMap<String, String>) -> Result<(),
     Ok(())
 }
 
-/// Parse CSS URL tokens instead of substituting substrings: #fff is a color,
-/// #a and #ab are distinct IDs, and quoted local references are valid.
-fn map_urls(
-    value: &str,
-    mut map: impl FnMut(&str) -> Result<String, XmlError>,
-) -> Result<String, XmlError> {
+/// Visit CSS URL tokens without copying their text. The callback receives the
+/// complete token's start/end byte offsets and its borrowed fragment ID.
+/// #fff is a color, #a and #ab are distinct IDs, and quoted references are valid.
+fn visit_urls<'a>(
+    value: &'a str,
+    mut visit: impl FnMut(usize, usize, &'a str) -> Result<(), XmlError>,
+) -> Result<(), XmlError> {
     let bytes = value.as_bytes();
-    let mut output = String::with_capacity(value.len());
-    let mut copied = 0;
     let mut index = 0;
     while index + 3 <= bytes.len() {
         if bytes[index..].starts_with(b"/*") {
@@ -848,38 +855,67 @@ fn map_urls(
             .strip_prefix('#')
             .filter(|id| !id.is_empty() && !id.chars().any(char::is_whitespace))
             .ok_or_else(|| XmlError::new("SVG URL resources must be local fragment references"))?;
-        output.push_str(&value[copied..index]);
-        let replacement = map(id)?;
+        // Validate the original target before ID reassignment can make it safe.
+        // Canonical URL output has no CSS escapes, so one quote type must remain
+        // available as a delimiter when quoted syntax is needed.
+        if id.contains('\'') && id.contains('"') {
+            return Err(XmlError::new(
+                "SVG URL identifiers cannot contain both quote types",
+            ));
+        }
+        visit(index, end + 1, id)?;
+        index = end + 1;
+    }
+    Ok(())
+}
+
+/// Preserve already-canonical attributes in place. Most paint attributes have
+/// no resource reference; even referenced attributes often need no changes in
+/// the alias/final-ID passes. Allocate once, at the first changed token only.
+fn rewrite_urls<'a>(
+    value: &'a str,
+    names: &HashMap<String, String>,
+) -> Result<Cow<'a, str>, XmlError> {
+    let mut output: Option<String> = None;
+    let mut copied = 0;
+    visit_urls(value, |start, end, id| {
+        let replacement = names.get(id).map(String::as_str).unwrap_or(id);
         // Semantic IDs are retained verbatim and may contain parentheses or
         // quotes. Keep the CSS reference quoted when unquoted syntax is invalid.
-        let quote = if replacement.contains(['\'', '"', '(', ')']) {
+        let (prefix, suffix) = if replacement.contains(['\'', '"', '(', ')']) {
             if !replacement.contains('\'') {
-                Some('\'')
+                ("url('#", "')")
             } else if !replacement.contains('"') {
-                Some('"')
+                ("url(\"#", "\")")
             } else {
                 return Err(XmlError::new(
                     "SVG URL identifiers cannot contain both quote types",
                 ));
             }
         } else {
-            None
+            ("url(#", ")")
         };
-        output.push_str("url(");
-        if let Some(quote) = quote {
-            output.push(quote);
+        if value[start..end]
+            .strip_prefix(prefix)
+            .and_then(|target| target.strip_suffix(suffix))
+            == Some(replacement)
+        {
+            return Ok(());
         }
-        output.push('#');
-        output.push_str(&replacement);
-        if let Some(quote) = quote {
-            output.push(quote);
-        }
-        output.push(')');
-        copied = end + 1;
-        index = copied;
+        let output = output.get_or_insert_with(|| String::with_capacity(value.len()));
+        output.push_str(&value[copied..start]);
+        output.push_str(prefix);
+        output.push_str(replacement);
+        output.push_str(suffix);
+        copied = end;
+        Ok(())
+    })?;
+    if let Some(mut output) = output {
+        output.push_str(&value[copied..]);
+        Ok(Cow::Owned(output))
+    } else {
+        Ok(Cow::Borrowed(value))
     }
-    output.push_str(&value[copied..]);
-    Ok(output)
 }
 
 fn css_comment_end(value: &str, start: usize) -> Result<usize, XmlError> {
@@ -1439,18 +1475,25 @@ fn inspect(
 }
 
 fn escape(output: &mut String, value: &str, attribute: bool) {
-    for character in value.chars() {
-        match character {
-            '&' => output.push_str("&amp;"),
-            '<' => output.push_str("&lt;"),
-            '>' => output.push_str("&gt;"),
-            '"' if attribute => output.push_str("&quot;"),
-            '\n' if attribute => output.push_str("&#10;"),
-            '\t' if attribute => output.push_str("&#9;"),
-            '\r' => output.push_str("&#13;"),
-            _ => output.push(character),
-        }
+    let mut copied = 0;
+    for (index, byte) in value.bytes().enumerate() {
+        let replacement = match byte {
+            b'&' => "&amp;",
+            b'<' => "&lt;",
+            b'>' => "&gt;",
+            b'"' if attribute => "&quot;",
+            b'\n' if attribute => "&#10;",
+            b'\t' if attribute => "&#9;",
+            b'\r' => "&#13;",
+            _ => continue,
+        };
+        // Every escape byte is ASCII, hence both ends of these slices are
+        // UTF-8 boundaries. Large path/image payloads usually need one copy.
+        output.push_str(&value[copied..index]);
+        output.push_str(replacement);
+        copied = index + 1;
     }
+    output.push_str(&value[copied..]);
 }
 
 fn write_child(
