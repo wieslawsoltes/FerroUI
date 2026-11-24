@@ -39,6 +39,25 @@ use std::rc::Rc;
 use std::sync::Arc;
 
 const WIDTH: i32 = 320;
+
+ferroui_base::ferro_thread_local! {
+    /// The tests of this thread draw with the band textures (`BandInsert::BandTextures`, #1363).
+    static BAND_TEXTURES: std::cell::Cell<bool> = std::cell::Cell::new(false);
+}
+
+fn band_textures() -> bool {
+    BAND_TEXTURES.with(std::cell::Cell::get)
+}
+
+/// Runs `test` once with the insertion of Vulkan (deferred canvases) and once with the band textures, each on a
+/// context of its own (the threads choose how they insert when they are made).
+fn in_both_modes(test: impl Fn()) {
+    for textures in [false, true] {
+        BAND_TEXTURES.with(|cell| cell.set(textures));
+        test();
+    }
+    BAND_TEXTURES.with(|cell| cell.set(false));
+}
 const HEIGHT: i32 = 256;
 
 fn skip(reason: &str) {
@@ -133,6 +152,10 @@ struct Layers {
 impl Layers {
     fn new(gpu: &Rc<GraphiteVulkanSkiaGpu>, bands: usize, width: i32, height: i32) -> Self {
         let gr_context = gpu.gr_context();
+        if band_textures() {
+            // Before the first pipelined frame of the context makes the threads.
+            gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::BandTextures);
+        }
         let skia_gpu: Rc<dyn ISkiaGpu> = gpu.clone();
         let context = crate::SkiaContext::new(Some(skia_gpu.clone()));
         let ordinary = SurfaceRenderTarget::new(create_info(&skia_gpu, &gr_context, width, height));
@@ -289,6 +312,10 @@ fn draw_update(context: &mut dyn IDrawingContextImpl) {
 
 #[test]
 fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames() {
+    in_both_modes(|| bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mode());
+}
+
+fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mode() {
     let Some((context, gpu)) = graphite_gpu() else { return };
     for bands in [2, 4] {
         let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
@@ -306,6 +333,10 @@ fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames() {
 
 #[test]
 fn a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of() {
+    in_both_modes(|| a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of_in_a_mode());
+}
+
+fn a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of_in_a_mode() {
     let Some((context, gpu)) = graphite_gpu() else { return };
     // A window that grows and shrinks: each size a layer of its own, on an image of its own, and the
     // image of the layer before goes with the flush after it was let go of.

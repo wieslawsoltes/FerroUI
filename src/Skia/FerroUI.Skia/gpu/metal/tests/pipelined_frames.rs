@@ -1039,3 +1039,85 @@ fn bands_inserted_from_deferred_canvases_in_completion_order_show_the_frames() {
         layers.dispose();
     }
 }
+
+/// The layers with the band textures (#1363, variant B): each band draws on a texture of its own.
+fn band_texture_layers(device: &Rc<TestMetalDevice>, bands: usize) -> Layers {
+    let layers = Layers::with_bands(device, SkiaFramePipelining::On, bands);
+    // Before the first pipelined frame makes the threads.
+    layers.gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::BandTextures);
+    layers
+}
+
+#[test]
+fn bands_on_textures_of_their_own_show_the_frames() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    for bands in [2, 4] {
+        let layers = band_texture_layers(&device, bands);
+        // Antialiased edges and text across the rows the bands meet at: each band is a recording on a texture
+        // of its own size, so a pixel at an edge may differ as between any two clipped frames.
+        let tolerance = WIDTH as usize * (bands - 1);
+        layers.draw(draw_scene);
+        layers.assert_pixels_within(&format!("the first frame in {bands} bands"), tolerance, 8);
+        // The read above copied the textures of the bands onto the layer's texture; the bands keep theirs.
+        layers.draw(draw_update);
+        layers.draw(draw_update);
+        layers.assert_pixels_within(&format!("the third frame in {bands} bands"), tolerance, 8);
+        layers.dispose();
+    }
+}
+
+#[test]
+fn a_frame_on_band_textures_that_changes_one_band_keeps_the_textures_of_the_others() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = band_texture_layers(&device, BANDS);
+    layers.draw(draw_scene);
+    let frames: [(f64, f64, u32); 3] =
+        [(10.0, 60.0, 0xFF2563EB), (150.0, 200.0, 0xFFDC2626), (100.0, 160.0, 0xFF16A34A)];
+    for (frame, (top, bottom, color)) in frames.into_iter().enumerate() {
+        layers.pipelined.set_frame_dirty_rows(Some((top as i32 - 1, bottom as i32 + 1)));
+        layers.draw(draw_rows(top, bottom, color));
+        layers.pipelined.complete_pending_frame();
+        layers.assert_pixels_within(&format!("frame {frame} of rows {top} to {bottom}"), WIDTH as usize, 8);
+    }
+    layers.dispose();
+}
+
+#[test]
+fn when_the_bands_move_their_new_textures_start_from_the_rows_of_the_textures_before() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = band_texture_layers(&device, BANDS);
+    let equal = band_clips((WIDTH, HEIGHT), BANDS);
+    assert_eq!(layers.surface.band_clips(), equal, "a layer begins with equal bands");
+
+    // Frames whose lower part costs, until the bands move; the frames are not read in between, so the textures of
+    // the bands stay the only copy of what the layer shows.
+    let mut moved = false;
+    for _ in 0..24 {
+        let before = layers.surface.band_clips();
+        layers.draw(draw_scene_with_a_heavy_lower_part);
+        layers.pipelined.complete_pending_frame();
+        if layers.surface.band_clips() != before {
+            moved = true;
+            break;
+        }
+    }
+    assert!(moved, "the bands moved: {:?}", layers.surface.band_clips());
+
+    // The first frame under the moved bands changes rows of the lower band only: the upper band, whose rows moved,
+    // is played for the copy of its rows from the textures before, and shows the frame before in all of them.
+    let top = HEIGHT as f64 - 50.0;
+    layers.pipelined.set_frame_dirty_rows(Some((top as i32 - 1, HEIGHT)));
+    layers.draw(draw_rows(top, HEIGHT as f64 - 4.0, 0xFF9333EA));
+    layers.pipelined.complete_pending_frame();
+    layers.assert_pixels_within("a frame after the bands moved", WIDTH as usize, 8);
+    layers.dispose();
+}

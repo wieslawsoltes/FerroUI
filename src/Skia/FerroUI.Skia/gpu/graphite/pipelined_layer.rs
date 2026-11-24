@@ -88,7 +88,7 @@ use ferroui_base::PixelSize;
 use skia_safe::gpu::graphite::mtl::backend_textures;
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::{
-    AlphaType, BlendMode, Canvas, ClipOp, Color, ColorType, IRect, Paint, Picture, Point, Rect,
+    AlphaType, BlendMode, Canvas, ClipOp, Color, ColorType, IRect, Image, Paint, Picture, Point, Rect,
     SamplingOptions, Surface, SurfaceProps,
 };
 use std::cell::{Cell, RefCell};
@@ -862,6 +862,10 @@ struct Band {
     /// The place of the recording of the band among the recordings of the
     /// threads ([`InsertOrder`]).
     turn: u64,
+    /// With the band textures: the band's texture is new (its rows moved, or the layer's texture holds
+    /// a frame the textures of the bands do not), and starts from these images, each with the rows of
+    /// the layer it holds; drawn before the band's part of the picture.
+    sources: Option<Vec<(IRect, BandImage)>>,
 }
 
 // SAFETY: a band is made on the render thread and used by the one thread it
@@ -893,6 +897,8 @@ struct BandOutput {
     inserted: bool,
     /// How long the thread worked on the band.
     busy: Duration,
+    /// The texture of the band, once its recording is in the context (`BandInsert::BandTextures`).
+    image: Option<BandImage>,
 }
 
 /// A recording a thread keeps until it is told to insert it.
@@ -901,12 +907,43 @@ struct Held {
     index: usize,
     recording: Option<graphite::Recording>,
     busy: Duration,
-    /// The turn of an ordered insertion; `None` for a band recorded on a deferred canvas, which is
-    /// inserted when it is ready ([`BandInsert::Deferred`]).
-    turn: Option<Turn>,
-    /// The first row of the band: where a deferred recording is placed in the layer.
-    top: i32,
+    /// Where and when the recording goes in.
+    placement: Placement,
+    /// The texture the band was drawn on (`BandInsert::BandTextures`).
+    image: Option<Image>,
 }
+
+/// Where and when a thread inserts the recording of a band.
+enum Placement {
+    /// In the order the bands were sent ([`BandInsert::Ordered`]).
+    Turn(Turn),
+    /// On the layer's texture at row `top` of the layer, when it is ready ([`BandInsert::Deferred`]).
+    At { top: i32 },
+    /// As it is, on the band's own texture, when it is ready ([`BandInsert::BandTextures`]).
+    Own,
+}
+
+/// The texture of a band of a layer on the thread that draws it (`BandInsert::BandTextures`): a
+/// surface of the thread's recorder of the band's size, kept while the band keeps its rows.
+struct BandTexture {
+    layer: u64,
+    index: usize,
+    /// The rows of the layer the texture holds.
+    rows: IRect,
+    surface: Surface,
+}
+
+/// The image of the texture of a band, on its way between the thread of the band and the render
+/// thread (`BandInsert::BandTextures`).
+struct BandImage(Image);
+
+// SAFETY: an image is immutable and reference counted atomically, as every Skia object a picture
+// holds is. The texture of a band's image is drawn on only by the thread of the band, and read by
+// another recorder (the render thread's, or another band's when the bands move) only after the
+// recording that drew it was inserted, which the order of the frame gives (see the module): the
+// render thread reads it after it received the band's answer, and sends it to another band only with
+// a later frame.
+unsafe impl Send for BandImage {}
 
 /// How the threads insert the recordings of the bands of a frame (#1363, a prototype: the order
 /// stays the default until the deferred insertion passes the gate and the pixel tests).
@@ -920,6 +957,13 @@ pub(crate) enum BandInsert {
     /// recordings go in as they are ready, with no turn to wait for. Asked for with
     /// `FERROUI_SKIA_BAND_INSERT=deferred`.
     Deferred,
+    /// Each band draws on a texture of its own, of its size, kept from frame to frame while the band
+    /// keeps its rows, and its recording goes in as it is ready. The layer is the bands' textures
+    /// side by side: it is blitted band by band, and copied onto the layer's texture only to be read
+    /// or drawn directly. When the bands move, a band's new texture starts from a copy, on the GPU,
+    /// of the rows it takes over from the textures of the bands before. Asked for with
+    /// `FERROUI_SKIA_BAND_INSERT=textures` (#1363, variant B).
+    BandTextures,
 }
 
 impl BandInsert {
@@ -927,6 +971,7 @@ impl BandInsert {
     fn from_environment() -> Self {
         match std::env::var("FERROUI_SKIA_BAND_INSERT") {
             Ok(value) if value.trim() == "deferred" => Self::Deferred,
+            Ok(value) if value.trim() == "textures" => Self::BandTextures,
             _ => Self::Ordered,
         }
     }
@@ -1027,54 +1072,75 @@ impl BandWorker {
         // the surfaces that wrap them). They
         // belong to the recorder, so they are made, used and dropped here.
         let mut surfaces: BandSurfaces = Vec::new();
+        // The textures of the bands of the layers this thread plays, with the band textures
+        // (`BandInsert::BandTextures`): made, drawn and dropped here.
+        let mut band_textures: Vec<BandTexture> = Vec::new();
 
         while let Some(job) = jobs.recv() {
             let pool = AutoReleasePool::new();
             match job {
                 BandJob::Play(band) => {
                     let started = Instant::now();
-                    let deferred = insert_mode == BandInsert::Deferred;
-                    let turn = (!deferred).then(|| Turn { order: order.clone(), number: band.turn });
+                    let placement = match insert_mode {
+                        BandInsert::Ordered => Placement::Turn(Turn { order: order.clone(), number: band.turn }),
+                        BandInsert::Deferred => Placement::At { top: band.clip.top },
+                        BandInsert::BandTextures => Placement::Own,
+                    };
                     // A panic would leave the render thread waiting for an
                     // answer that never comes; it is reported as a band
                     // that failed, which ends the threads.
-                    let recording = catch_unwind(AssertUnwindSafe(|| {
-                        if deferred {
-                            play_deferred(&mut recorder, &mut surfaces, &band)
-                        } else {
-                            play(&mut recorder, &mut surfaces, &band)
+                    let played = catch_unwind(AssertUnwindSafe(|| match insert_mode {
+                        BandInsert::Ordered => {
+                            play(&mut recorder, &mut surfaces, &band).map(|recording| (recording, None))
                         }
+                        BandInsert::Deferred => {
+                            play_deferred(&mut recorder, &mut surfaces, &band).map(|recording| (recording, None))
+                        }
+                        BandInsert::BandTextures => play_band_texture(&mut recorder, &mut band_textures, &band)
+                            .map(|(recording, image)| (recording, Some(image))),
                     }))
                     .unwrap_or(None);
+                    let (recording, image) = match played {
+                        Some((recording, image)) => (Some(recording), image),
+                        None => (None, None),
+                    };
                     let busy = started.elapsed();
-                    let (layer, index, top) = (band.layer, band.index, band.clip.top);
-                    held.push(Held { layer, index, recording, busy, turn, top });
+                    let (layer, index) = (band.layer, band.index);
+                    held.push(Held { layer, index, recording, busy, placement, image });
                     // The reference of the render thread outlives this one
                     // (see `Band`).
                     drop(band);
                 }
-                BandJob::Forget { layer } => surfaces.retain(|(id, ..)| *id != layer),
+                BandJob::Forget { layer } => {
+                    surfaces.retain(|(id, ..)| *id != layer);
+                    band_textures.retain(|texture| texture.layer != layer);
+                }
                 BandJob::Insert => {
                     let mut gone = false;
-                    for Held { layer, index, recording, busy, turn, top } in held.drain(..) {
+                    for Held { layer, index, recording, busy, placement, image } in held.drain(..) {
                         let recorded = recording.is_some();
-                        if let Some(turn) = &turn {
+                        if let Placement::Turn(turn) = &placement {
                             drop(turn.wait());
                         }
                         let target = surfaces.iter().find(|(id, ..)| *id == layer).map(|(_, surface, _)| surface);
                         let inserted = recording.is_some_and(|mut recording| {
-                            catch_unwind(AssertUnwindSafe(|| match (&turn, target) {
-                                (Some(_), _) => insert(&mut context.lock(), &mut recording),
-                                (None, Some(target)) => insert_at(&mut context.lock(), &mut recording, target, top),
-                                (None, None) => false,
+                            catch_unwind(AssertUnwindSafe(|| match (&placement, target) {
+                                (Placement::Turn(_) | Placement::Own, _) => insert(&mut context.lock(), &mut recording),
+                                (Placement::At { top }, Some(target)) => {
+                                    insert_at(&mut context.lock(), &mut recording, target, *top)
+                                }
+                                (Placement::At { .. }, None) => false,
                             }))
                             .unwrap_or(false)
                         });
                         if inserted {
                             unsubmitted.fetch_add(1, Ordering::Release);
                         }
-                        drop(turn);
-                        gone |= results.send(BandOutput { layer, index, recorded, inserted, busy }).is_err();
+                        // The turn passes on whatever became of the recording.
+                        drop(placement);
+                        // The texture of a band whose recording is not in the context shows nothing of the frame.
+                        let image = image.filter(|_| inserted).map(BandImage);
+                        gone |= results.send(BandOutput { layer, index, recorded, inserted, busy, image }).is_err();
                     }
                     if gone {
                         pool.dispose();
@@ -1088,6 +1154,7 @@ impl BandWorker {
         let pool = AutoReleasePool::new();
         drop(held);
         drop(surfaces);
+        drop(band_textures);
         drop(recorder);
         pool.dispose();
     }
@@ -1137,6 +1204,61 @@ fn play_deferred(
         canvas.draw_picture(&band.picture, None, None);
     }
     recorder.snap()
+}
+
+/// Plays a band on its own texture (`BandInsert::BandTextures`) and snaps the recorder: the texture
+/// the thread keeps for the band while it keeps its rows, or a new one of the band's size when the
+/// band has sources, which are copied onto it first (a draw that replaces the pixels, on the GPU).
+/// Returns the recording and the image of the texture.
+fn play_band_texture(
+    recorder: &mut graphite::Recorder,
+    textures: &mut Vec<BandTexture>,
+    band: &Band,
+) -> Option<(graphite::Recording, Image)> {
+    let kept = textures.iter().position(|texture| {
+        texture.layer == band.layer && texture.index == band.index && texture.rows == band.clip
+    });
+    let position = match (kept, &band.sources) {
+        (Some(position), None) => position,
+        _ => {
+            // A band without a kept texture always has sources; one without is drawn on a cleared texture.
+            textures.retain(|texture| !(texture.layer == band.layer && texture.index == band.index));
+            let info = skia_safe::ImageInfo::new(
+                (band.clip.width(), band.clip.height()),
+                band.color_type,
+                AlphaType::Premul,
+                None,
+            );
+            let mipmapped = skia_safe::gpu::Mipmapped::No;
+            let surface = graphite::surfaces::render_target(recorder, &info, mipmapped, Some(&band.props), None)?;
+            textures.push(BandTexture { layer: band.layer, index: band.index, rows: band.clip, surface });
+            textures.len() - 1
+        }
+    };
+    let surface = &mut textures[position].surface;
+    let canvas = surface.canvas();
+    canvas.save();
+    canvas.translate((0.0, -(band.clip.top as f32)));
+    if let Some(sources) = &band.sources {
+        canvas.clear(Color::TRANSPARENT);
+        let mut copy = Paint::default();
+        copy.set_blend_mode(BlendMode::Src);
+        for (rows, image) in sources {
+            canvas.draw_image_with_sampling_options(
+                &image.0,
+                Point::new(rows.left as f32, rows.top as f32),
+                SamplingOptions::default(),
+                Some(&copy),
+            );
+        }
+    }
+    canvas.clip_rect(Rect::from(band.clip), ClipOp::Intersect, false);
+    canvas.draw_picture(&band.picture, None, None);
+    canvas.restore();
+    let recording = recorder.snap()?;
+    let surface = &textures[position].surface;
+    let image = graphite::surfaces::as_image(surface)?;
+    Some((recording, image))
 }
 
 /// Inserts a recording of a deferred canvas onto `target` at row `top` (`fTargetSurface`,
@@ -1201,6 +1323,11 @@ impl BandPool {
     /// sends to the GPU (`GraphiteGrContext::submit_inserted_bands`, and every flush).
     pub(super) fn take_unsubmitted(&self) -> usize {
         self.unsubmitted.swap(0, Ordering::Acquire)
+    }
+
+    /// How the threads insert, once they were made.
+    pub(super) fn insert_mode(&self) -> Option<BandInsert> {
+        self.insert_mode.map(|mode| mode.with_shared_target(!self.no_shared_target))
     }
 
     /// Tells the pool that the recorders of its threads may not draw on one target at the same
@@ -1390,6 +1517,32 @@ struct PendingFrame {
     /// Held until the bands have answered, so that what the picture holds is
     /// released on the render thread, and for the bands that fail.
     picture: Picture,
+    /// The bands drew on textures of their own (`BandInsert::BandTextures`).
+    band_textures: bool,
+}
+
+/// With the band textures: the bands of a frame that its dirty rows touch, and those whose texture is
+/// new (`fresh`: their rows moved, or the textures do not hold the frame the layer shows), which are
+/// played to fill it. A band that keeps its texture and that the frame cannot change is left out.
+fn band_texture_clips(
+    mut clips: Vec<(usize, IRect)>,
+    rows: Option<(i32, i32)>,
+    fresh: impl Fn(usize, IRect) -> bool,
+) -> Vec<(usize, IRect)> {
+    clips.retain(|(index, clip)| {
+        rows.is_none_or(|(top, bottom)| clip.top < bottom && clip.bottom > top) || fresh(*index, *clip)
+    });
+    clips
+}
+
+/// With the band textures: the band textures of the frame before (by band, each with the rows it
+/// holds) that a new texture of `rows` copies from: those that hold any of its rows.
+fn band_texture_sources(kept: &[Option<(IRect, Image)>], rows: IRect) -> Vec<(IRect, BandImage)> {
+    kept.iter()
+        .flatten()
+        .filter(|(held, _)| held.top < rows.bottom && held.bottom > rows.top)
+        .map(|(held, image)| (*held, BandImage(image.clone())))
+        .collect()
 }
 
 /// The bands of a frame that its dirty rows touch, all of them without rows.
@@ -1441,6 +1594,7 @@ fn collect_bands(
     recording_failed: &mut bool,
     layer: u64,
     pending: &PendingFrame,
+    images: &mut Vec<(usize, Image)>,
 ) -> (Vec<IRect>, BandTimes) {
     // The bands of a frame that no flush has told to insert yet: a frame
     // that was drawn and not shown.
@@ -1457,6 +1611,9 @@ fn collect_bands(
         };
         if let Some(band) = busy.times[..bands].get_mut(output.index) {
             *band = output.busy;
+        }
+        if let Some(image) = output.image {
+            images.push((output.index, image.0));
         }
         if output.inserted {
             if let Some(done) = inserted.get_mut(output.index) {
@@ -1553,6 +1710,24 @@ struct PipelinedLayer {
     leases: RefCell<Option<Rc<RecordedLeases>>>,
     /// The device rows of the draws of the recorded frame (with the feature `perf-counters`).
     draw_rows: RefCell<Vec<(f32, f32)>>,
+    /// With the band textures (`BandInsert::BandTextures`): the texture of each band, by band, with
+    /// the rows of the layer it holds.
+    band_images: RefCell<Vec<Option<(IRect, Image)>>>,
+    /// Where the frame the layer shows is: on the layer's texture, on the textures of the bands, or
+    /// on both.
+    latest: Cell<Latest>,
+}
+
+/// Where the frame a layer shows is.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+enum Latest {
+    /// On the layer's texture (every mode but the band textures, and a band-texture layer after a frame
+    /// drawn directly).
+    Surface,
+    /// On the textures of the bands only.
+    Bands,
+    /// On both: the textures of the bands were copied onto the layer's texture for a read.
+    Both,
 }
 
 impl PipelinedLayer {
@@ -1564,6 +1739,15 @@ impl PipelinedLayer {
         let Some(mut surface) = self.surface.borrow().clone() else {
             return;
         };
+        if self.latest.get() == Latest::Bands {
+            // The textures of the bands side by side, not a copy of them.
+            self.context.note_layer_blit();
+            let old_matrix = canvas.local_to_device();
+            canvas.reset_matrix();
+            self.draw_band_images(canvas, paint);
+            canvas.set_matrix(&old_matrix);
+            return;
+        }
         let image = match graphite::surfaces::as_image(&surface) {
             Some(image) => image,
             None => surface.image_snapshot(),
@@ -1575,8 +1759,36 @@ impl PipelinedLayer {
         canvas.set_matrix(&old_matrix);
     }
 
+    /// Draws the textures of the bands at their rows onto `canvas`, whose matrix is the identity.
+    fn draw_band_images(&self, canvas: &Canvas, paint: Option<&Paint>) {
+        for (rows, image) in self.band_images.borrow().iter().flatten() {
+            let at = Point::new(rows.left as f32, rows.top as f32);
+            canvas.draw_image_with_sampling_options(image, at, SamplingOptions::default(), paint);
+        }
+    }
+
+    /// Makes the layer's texture hold the frame the layer shows, for a read of it (`drawn`: false) or a
+    /// frame drawn on it: the textures of the bands are copied onto it (on the GPU, replacing its pixels)
+    /// when only they hold the frame. A frame drawn on the texture leaves the bands' textures behind.
+    fn make_surface_latest(&self, drawn: bool) {
+        let latest = self.latest.get();
+        if latest == Latest::Bands {
+            if let Some(mut surface) = self.surface.borrow().clone() {
+                let canvas = surface.canvas();
+                canvas.restore_to_count(1);
+                canvas.reset_matrix();
+                self.draw_band_images(canvas, Some(&self.src_paint));
+            }
+        }
+        if latest != Latest::Surface {
+            self.latest.set(if drawn { Latest::Surface } else { Latest::Both });
+        }
+    }
+
     fn release(&self) {
         self.flush_pending();
+        self.band_images.borrow_mut().clear();
+        self.latest.set(Latest::Surface);
         let had_surface = self.surface.borrow_mut().take().is_some();
         if had_surface {
             let _ = self.context.with_band_parts(|parts| parts.pool.forget(self.id));
@@ -1669,14 +1881,18 @@ impl PipelinedLayer {
         let Some(previous) = self.pending.borrow_mut().take() else {
             return;
         };
-        let collected = self
-            .context
-            .with_band_parts(|parts| collect_bands(parts.pool, parts.recording_failed, self.id, &previous));
+        let mut images = Vec::new();
+        let collected = self.context.with_band_parts(|parts| {
+            collect_bands(parts.pool, parts.recording_failed, self.id, &previous, &mut images)
+        });
         // `None`: the context is gone, and the threads with it.
         let Some((missing, busy)) = collected else {
             return;
         };
         self.busy.set(busy.as_slice().iter().sum());
+        if previous.band_textures {
+            self.take_band_images(&previous, images, missing.is_empty());
+        }
         if !missing.is_empty() {
             self.play_on_main(&previous.picture, Some(missing.as_slice()));
             self.policy.borrow_mut().frame_needed_direct();
@@ -1687,6 +1903,40 @@ impl PipelinedLayer {
         }
         // The vector of the bands goes back to the layer for the next frame.
         *self.clips_scratch.borrow_mut() = previous.clips;
+    }
+
+    /// Keeps the textures the bands of a frame drew on (`BandInsert::BandTextures`): the textures of the
+    /// layer from now on, with those of the bands the frame left out. When a band is missing, the frame
+    /// goes on on the layer's texture instead: the textures of the frame before, then those of this
+    /// frame are copied onto it, and the missing bands are played on it after.
+    fn take_band_images(&self, frame: &PendingFrame, images: Vec<(usize, Image)>, complete: bool) {
+        let rows_of = |index: usize| frame.clips.iter().find(|(band, _)| *band == index).map(|(_, rows)| *rows);
+        if !complete {
+            self.make_surface_latest(true);
+            if let Some(mut surface) = self.surface.borrow().clone() {
+                let canvas = surface.canvas();
+                for (index, image) in &images {
+                    if let Some(rows) = rows_of(*index) {
+                        let at = Point::new(rows.left as f32, rows.top as f32);
+                        let sampling = SamplingOptions::default();
+                        canvas.draw_image_with_sampling_options(image, at, sampling, Some(&self.src_paint));
+                    }
+                }
+            }
+            self.band_images.borrow_mut().clear();
+            return;
+        }
+        let mut kept = self.band_images.borrow_mut();
+        for (index, image) in images {
+            let Some(rows) = rows_of(index) else { continue };
+            if kept.len() <= index {
+                kept.resize(index + 1, None);
+            }
+            kept[index] = Some((rows, image));
+        }
+        // A layer with fewer bands than before keeps no texture of the bands it no longer has.
+        kept.truncate(frame.bands);
+        self.latest.set(Latest::Bands);
     }
 
     /// Hands the picture to the threads. `Err` tells why it was not.
@@ -1714,6 +1964,7 @@ impl PipelinedLayer {
             if threads == 0 {
                 return Err(Fallback::PoolUnavailable);
             }
+            let band_textures = pool.insert_mode() == Some(BandInsert::BandTextures);
             // A band has a thread of its own: a layer that asks for more
             // bands than the first pipelined layer of the context did has
             // as many as there are threads.
@@ -1726,9 +1977,22 @@ impl PipelinedLayer {
                 let mut clips = std::mem::take(&mut *self.clips_scratch.borrow_mut());
                 balance.clips_into(self.size.0, &mut clips);
                 let bands = clips.len();
-                // The bands the frame cannot change keep their pixels: the layer has one texture, which every frame
-                // draws on, so a band left out still shows the frame before, and every frame since that drew it.
-                (dirty_band_clips(clips, self.frame_rows.take()), bands)
+                let rows = self.frame_rows.take();
+                if band_textures {
+                    // A band keeps its texture while it keeps its rows and the textures hold the frame the layer
+                    // shows; the bands the frame cannot change are left out then, as on one texture.
+                    let current = self.latest.get() != Latest::Surface;
+                    let kept = self.band_images.borrow();
+                    let fresh = |index: usize, clip: IRect| {
+                        !current || kept.get(index).and_then(Option::as_ref).is_none_or(|(rows, _)| *rows != clip)
+                    };
+                    (band_texture_clips(clips, rows, fresh), bands)
+                } else {
+                    // The bands the frame cannot change keep their pixels: the layer has one texture, which every
+                    // frame draws on, so a band left out still shows the frame before, and every frame since that
+                    // drew it.
+                    (dirty_band_clips(clips, rows), bands)
+                }
             };
 
             // What the recorder of the context has pending comes before the
@@ -1746,8 +2010,29 @@ impl PipelinedLayer {
                 return Err(Fallback::MainRecording);
             }
 
+            // With the band textures, what a new texture of a band starts from: the textures of the bands before
+            // when they hold the frame the layer shows, else the layer's texture.
+            let current = self.latest.get() != Latest::Surface;
+            let layer_image = (band_textures && !current)
+                .then(|| self.surface.borrow().as_ref().and_then(graphite::surfaces::as_image))
+                .flatten();
             let mut sent = 0;
             for (index, clip) in &clips {
+                let sources = band_textures
+                    .then(|| {
+                        let kept = self.band_images.borrow();
+                        let kept_rows = kept.get(*index).and_then(Option::as_ref).map(|(rows, _)| *rows);
+                        let keeps = current && kept_rows == Some(*clip);
+                        match (keeps, &layer_image) {
+                            (true, _) => None,
+                            (false, Some(image)) if !current => {
+                                let all = IRect::from_wh(self.size.0, self.size.1);
+                                Some(vec![(all, BandImage(image.clone()))])
+                            }
+                            (false, _) => Some(band_texture_sources(&kept, *clip)),
+                        }
+                    })
+                    .flatten();
                 let band = Band {
                     layer: self.id,
                     texture: texture.clone(),
@@ -1758,6 +2043,7 @@ impl PipelinedLayer {
                     clip: *clip,
                     index: *index,
                     turn: 0,
+                    sources,
                 };
                 if pool.play(band) {
                     sent += 1;
@@ -1773,7 +2059,8 @@ impl PipelinedLayer {
             }
             // A band that was not sent is found missing when the frame is
             // collected, and played on the recorder of the context then.
-            *self.pending.borrow_mut() = Some(PendingFrame { clips, bands, sent, period, picture: picture.clone() });
+            *self.pending.borrow_mut() =
+                Some(PendingFrame { clips, bands, sent, period, picture: picture.clone(), band_textures });
             Ok(())
         });
 
@@ -1783,6 +2070,7 @@ impl PipelinedLayer {
     /// Plays the picture on the recorder of the context, as an ordinary
     /// layer draws its frame: all of it, or the given bands of it.
     fn play_on_main(&self, picture: &Picture, bands: Option<&[IRect]>) {
+        self.make_surface_latest(true);
         let Some(mut surface) = self.surface.borrow().clone() else {
             return;
         };
@@ -1896,6 +2184,8 @@ impl PipelinedLayerSurface {
             clips_scratch: RefCell::new(Vec::new()),
             leases: RefCell::new(None),
             draw_rows: RefCell::new(Vec::new()),
+            band_images: RefCell::new(Vec::new()),
+            latest: Cell::new(Latest::Surface),
             src_paint: {
                 let mut paint = Paint::default();
                 paint.set_blend_mode(BlendMode::Src);
@@ -1929,11 +2219,18 @@ impl ISkiaSurface for PipelinedLayerSurface {
     fn surface(&self) -> Surface {
         let layer = &self.0;
         match layer.frame.get() {
-            Frame::DirectBegun => layer.frame.set(Frame::Direct),
-            Frame::None => layer.flush_pending(),
+            Frame::DirectBegun => {
+                layer.frame.set(Frame::Direct);
+                layer.make_surface_latest(true);
+            }
+            Frame::None => {
+                layer.flush_pending();
+                layer.make_surface_latest(false);
+            }
             Frame::Direct | Frame::Recorded => {
                 ferroui_base::perf_count!(SkiaPipelinedLayerReadsInFrames);
                 layer.flush_pending();
+                layer.make_surface_latest(true);
                 layer.policy.borrow_mut().frame_needed_direct();
             }
         }
@@ -2031,6 +2328,49 @@ impl ISkiaSurface for PipelinedLayerSurface {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn with_band_textures_a_band_is_played_when_the_frame_changes_it_or_its_texture_is_new() {
+        let clips = band_clips((320, 256), 4);
+        let rows = |index: usize| clips[index].1;
+        // Nothing new: the dirty rows choose (the rows of the third band only).
+        let played = band_texture_clips(clips.clone(), Some((150, 160)), |_, _| false);
+        assert_eq!(played, vec![(2, rows(2))]);
+        // A band whose texture is new is played although the frame does not change it.
+        let played = band_texture_clips(clips.clone(), Some((150, 160)), |index, _| index == 0);
+        assert_eq!(played, vec![(0, rows(0)), (2, rows(2))]);
+        // A frame without rows plays every band.
+        assert_eq!(band_texture_clips(clips.clone(), None, |_, _| false), clips);
+    }
+
+    #[test]
+    fn a_new_band_texture_copies_from_the_textures_that_held_its_rows() {
+        let image = skia_safe::surfaces::raster_n32_premul((4, 4)).expect("a raster surface").image_snapshot();
+        let kept = vec![
+            Some((IRect::from_ltrb(0, 0, 320, 100), image.clone())),
+            None,
+            Some((IRect::from_ltrb(0, 100, 320, 256), image)),
+        ];
+        let rows = |sources: Vec<(IRect, BandImage)>| sources.into_iter().map(|(rows, _)| rows).collect::<Vec<_>>();
+        // A band that grew into the rows of the one below copies from both.
+        assert_eq!(
+            rows(band_texture_sources(&kept, IRect::from_ltrb(0, 0, 320, 140))),
+            vec![IRect::from_ltrb(0, 0, 320, 100), IRect::from_ltrb(0, 100, 320, 256)]
+        );
+        // A band inside the rows of one texture copies from that one; rows that meet at an edge are not shared.
+        assert_eq!(rows(band_texture_sources(&kept, IRect::from_ltrb(0, 140, 320, 256))), vec![
+            IRect::from_ltrb(0, 100, 320, 256)
+        ]);
+        assert_eq!(rows(band_texture_sources(&kept, IRect::from_ltrb(0, 0, 320, 100))), vec![
+            IRect::from_ltrb(0, 0, 320, 100)
+        ]);
+    }
+
+    #[test]
+    fn the_band_textures_are_asked_for_by_the_environment_and_draw_on_no_shared_target() {
+        assert_eq!(BandInsert::BandTextures.with_shared_target(true), BandInsert::BandTextures);
+        assert_eq!(BandInsert::BandTextures.with_shared_target(false), BandInsert::BandTextures);
+    }
 
     #[test]
     fn without_a_shared_target_the_ordered_insertion_becomes_the_deferred_one() {
