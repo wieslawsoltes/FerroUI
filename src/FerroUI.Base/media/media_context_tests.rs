@@ -168,7 +168,8 @@ fn a_paint_with_a_render_pass_runs_the_pass_without_dispatcher_jobs() {
     let order = Rc::new(RefCell::new(Vec::new()));
 
     let job = order.clone();
-    Dispatcher::ui_thread().post(move || job.borrow_mut().push("job"), crate::threading::DispatcherPriority::NORMAL);
+    let normal = crate::threading::DispatcherPriority::NORMAL;
+    Dispatcher::ui_thread().post_local(move || job.borrow_mut().push("job"), normal);
     let callback = order.clone();
     context.begin_invoke_on_render(Rc::new(move || callback.borrow_mut().push("layout")));
     assert!(context.is_render_scheduled());
