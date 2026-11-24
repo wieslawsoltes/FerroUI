@@ -40,4 +40,3 @@ pub use data_template_selector::{
 
 mod event_args;
 pub(crate) use event_args::empty_event_args;
-
