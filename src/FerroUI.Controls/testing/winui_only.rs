@@ -6,10 +6,10 @@
 //! (`winui_only_tests`).
 
 use crate::{
-    AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem, NavigationViewItemHeader,
-    GridView, GridViewItem, ListView, ListViewItem, NavigationViewItemSeparator, NumberBox, PagerControl, PersonPicture,
-    Pivot, PivotHeaderItem, PivotItem, ProgressRing, RadioButtons, RatingControl, RichEditBox, SwipeControl, SymbolIcon,
-    TitleBar,
+    AutoSuggestBox, FontIcon, Frame, InfoBadge, InfoBar, NavigationView, NavigationViewItem,
+    NavigationViewItemHeader, GridView, GridViewItem, ListView, ListViewHeaderItem, ListViewItem,
+    NavigationViewItemSeparator, NumberBox, PagerControl, PersonPicture, Pivot, PivotHeaderItem, PivotItem,
+    ProgressRing, RadioButtons, RatingControl, RichEditBox, SwipeControl, SymbolIcon, TitleBar,
 };
 use ferroui_base::TypeInfo;
 
@@ -34,6 +34,10 @@ pub const WINUI_ONLY_CONTROLS: &[(&TypeInfo, &str)] = &[
     (RichEditBox::TYPE, "WinUI's RichEditBox: its template is ported from WinUI's RichEditBox_themeresources.xaml into the WinUI theme (docs/porting/winui-rich-text.md, decision D4)"),
     (TitleBar::TYPE, "WinUI's TitleBar: its template is converted from WinUI's TitleBar.xaml into the WinUI theme and its derived themes"),
     (ListView::TYPE, "WinUI's ListView: its template is ported from the ListView style of WinUI's generic.xaml into the WinUI theme and its derived themes"),
+    (
+        ListViewHeaderItem::TYPE,
+        "WinUI's ListViewHeaderItem: its template is ported from generic.xaml into the WinUI-derived themes",
+    ),
     (ListViewItem::TYPE, "WinUI's ListViewItem: its implicit theme is DefaultListViewItemStyle of the WinUI theme and its derived themes"),
     (GridView::TYPE, "WinUI's GridView: its template is ported from the GridView style of WinUI's generic.xaml into the WinUI theme and its derived themes"),
     (GridViewItem::TYPE, "WinUI's GridViewItem: its template is ported from WinUI's GridViewItem_themeresources.xaml into the WinUI theme and its derived themes"),
