@@ -148,6 +148,28 @@ impl IFontMemory for Typeface {
     }
     fn dispose(&self) {}
 }
+/// The simulations of a typeface are applied by the drawing of this backend, not by Core Text, so
+/// every variant can be made; it shares the native font and its data.
+impl IPlatformTypefaceSimulator for Typeface {
+    fn try_create_simulated_typeface(
+        &self,
+        font_simulations: FontSimulations,
+        style: FontStyle,
+        weight: FontWeight,
+        stretch: FontStretch,
+    ) -> Option<Rc<dyn IPlatformTypeface>> {
+        let typeface: Rc<dyn IPlatformTypeface> = Rc::new(Self {
+            font: self.font.clone(),
+            weight,
+            style,
+            stretch,
+            simulations: font_simulations,
+            data: self.data.clone(),
+        });
+        Some(typeface)
+    }
+}
+
 impl IPlatformTypeface for Typeface {
     fn family_name(&self) -> String {
         self.font.name.clone()
@@ -163,6 +185,9 @@ impl IPlatformTypeface for Typeface {
     }
     fn font_simulations(&self) -> FontSimulations {
         self.simulations
+    }
+    fn as_simulator(&self) -> Option<&dyn IPlatformTypefaceSimulator> {
+        Some(self)
     }
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
         self.data

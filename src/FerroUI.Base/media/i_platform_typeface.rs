@@ -3,6 +3,7 @@ use std::io::Read;
 
 use crate::media::{
     FontSimulations, FontStretch, FontStyle, FontVariationDesign, FontVariationSettings, FontWeight, IFontMemory,
+    IPlatformTypefaceSimulator,
 };
 
 /// Represents a platform-specific typeface: a font face as loaded by the
@@ -46,6 +47,13 @@ pub trait IPlatformTypeface: IFontMemory {
     /// is `None` there).
     fn variation_design(&self) -> FontVariationDesign {
         FontVariationDesign::default()
+    }
+
+    /// The simulator of the typeface, which makes variants of it with other simulations that
+    /// share its font data. `None`, the default, where the backend has none: a font collection
+    /// then makes a simulated face from [`try_get_stream`](Self::try_get_stream).
+    fn as_simulator(&self) -> Option<&dyn IPlatformTypefaceSimulator> {
+        None
     }
 
     /// Attempts to obtain a stream over the raw font data.
