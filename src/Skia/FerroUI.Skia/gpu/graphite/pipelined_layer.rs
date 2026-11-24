@@ -272,7 +272,12 @@ enum LayerTextureKind {
     /// the GPU has finished with it. The backend texture is declared first:
     /// it goes before the image it describes.
     #[cfg(feature = "graphite-vulkan")]
-    Vulkan { texture: graphite::BackendTexture, image: ferroui_vulkan::VulkanOffscreenImage },
+    Vulkan {
+        texture: graphite::BackendTexture,
+        /// Held for its lifetime: the image the backend texture describes.
+        #[allow(dead_code)]
+        image: ferroui_vulkan::VulkanOffscreenImage,
+    },
 }
 
 // SAFETY: on Metal the pointer is an `id<MTLTexture>`, an object Metal lets
