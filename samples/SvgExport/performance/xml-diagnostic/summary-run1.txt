@@ -1,0 +1,12 @@
+repeated_dedup       baseline     median=0.807034 ms p95=1.228027 ms bytes=26840 aliases=7
+repeated_dedup       current      median=0.764433 ms p95=1.220967 ms bytes=26840 aliases=7
+repeated_dedup       old_escape   median=0.809302 ms p95=1.283061 ms bytes=26840 aliases=7
+repeated_dedup       old_rewrite  median=0.783241 ms p95=1.177962 ms bytes=26840 aliases=7
+repeated_no_dedup    baseline     median=1.291024 ms p95=1.659692 ms bytes=198354 aliases=0
+repeated_no_dedup    current      median=0.828826 ms p95=1.102303 ms bytes=198354 aliases=0
+repeated_no_dedup    old_escape   median=1.222789 ms p95=1.605085 ms bytes=198354 aliases=0
+repeated_no_dedup    old_rewrite  median=0.862159 ms p95=1.133140 ms bytes=198354 aliases=0
+normalized_dedup     baseline     median=0.240518 ms p95=0.367541 ms bytes=26840 aliases=0
+normalized_dedup     current      median=0.191119 ms p95=0.300826 ms bytes=26840 aliases=0
+normalized_dedup     old_escape   median=0.224785 ms p95=0.317505 ms bytes=26840 aliases=0
+normalized_dedup     old_rewrite  median=0.198381 ms p95=0.295843 ms bytes=26840 aliases=0

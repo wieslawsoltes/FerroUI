@@ -1,0 +1,17 @@
+{
+  "baseline_revision": "7e2d2cd899cac0b6a1a6f887e3e5ebba15ffb2f6",
+  "fixture": "/workspace/scratch/c60814d4a6a9/svg-perf-baseline-fixtures/raster-normal.svg",
+  "normal_bytes": 26840,
+  "expanded_bytes": 198450,
+  "variants_sha256": {
+    "baseline": "2fdf19f12f430fcb99ce34c5fe87de5f24ca75686c297866d7283195ef0580ac",
+    "current": "2077e7c057f13e4d1006c6fcf4f18e017bb2492d76df0745cddacc27ee956afb",
+    "old_escape": "b43ee411948b3f823fc0e767b597fc5264d5b21a7753b7507fed29b1574559db",
+    "old_rewrite": "ea6d749746685e5ec9165716d0716829688a01b8d94d4dc798581ef2b15cd2b9"
+  },
+  "input_sha256": {
+    "normal": "a6502ac2ee2d1668a1e1703947e8a85d44a7e0c4db7f37ae22847817a62fb273",
+    "expanded": "8c4341755939ee435ef25efb3d3b3cfa46cc612c402d5d694e28a91be1380b4a"
+  },
+  "restoration": "Restore one document-scope defs/image before each of the 8 semantic layer groups, using the exact embedded PNG and per-layer href. Optimizing must exactly reproduce raster-normal.svg."
+}

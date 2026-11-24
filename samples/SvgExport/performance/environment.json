@@ -1,0 +1,67 @@
+{
+  "platform": "Linux-6.18.57-x86_64-with-glibc2.41",
+  "cpu_model": "INTEL(R) XEON(R) PLATINUM 8573C",
+  "allowed_logical_cpus": [
+    0,
+    1,
+    2,
+    3,
+    4,
+    5,
+    6,
+    7,
+    8
+  ],
+  "selected_cpu": 0,
+  "rustc": "1.100.0 (0ef1bc386 2026-11-09)",
+  "cargo": "1.100.0 (3acc79c0c 2026-11-05)",
+  "inkscape": "1.4 (e7c3feb100, 2024-10-09)",
+  "profile": {
+    "name": "release",
+    "opt_level": 3,
+    "lto": "thin",
+    "codegen_units": 16,
+    "panic": "abort",
+    "package_overrides": null
+  },
+  "native_archive": {
+    "name": "skia-binaries-b7f043e0b1e2a850e702-x86_64-unknown-linux-gnu-ganesh-gl-jpegd-jpege-pdf-vulkan.tar.gz",
+    "bytes": 6772869,
+    "sha256": "9ebe4c448cc9f789bad241cbd11739cdf759e27db5719c23a7635e096d5807b3"
+  },
+  "fontconfig_override": null,
+  "method": {
+    "warm_samples": 40,
+    "cache_cold_samples": 8,
+    "warmups": 5,
+    "independent_runs": 3,
+    "per_workload_process": true,
+    "cpu_affinity": 0,
+    "comparison": "three interleaved baseline/optimized process pairs per workload",
+    "execution_order": "baseline then optimized in repetitions 1 and 3; reversed in repetition 2",
+    "primary_baseline_data": "baseline-paired",
+    "primary_optimized_data": "optimized",
+    "latency_aggregation": "median of three process medians per executable",
+    "paired_speedup_aggregation": "median of three within-pair baseline/optimized median-latency ratios",
+    "memory_aggregation": "median of three per-process maximum observed VmHWM snapshots; approximate whole-process KiB"
+  },
+  "build_jobs": 2,
+  "baseline_revision": "7e2d2cd899cac0b6a1a6f887e3e5ebba15ffb2f6",
+  "baseline_tree": "ee9ea64da744651aa0c2f6a91cacea2c67455645",
+  "baseline_binary": {
+    "bytes": 20006696,
+    "sha256": "33f174198de3c190a10dd66a1a3a36b24b120f85af7dbeea70069ae0fbdac7df"
+  },
+  "optimized_revision": "553b2e75b930079c2c8535e6256c8c4263b05aaa",
+  "optimized_tree": "be5c3911c73e5c146ab38e9770da1c94eb6f973d",
+  "optimized_binary": {
+    "bytes": 20005392,
+    "sha256": "1c295b86df4b19957116efe22b4346f3cdb8b2c381c5944dc19851a3fc12ba50"
+  },
+  "initial_optimized_revision": "447cef96e659fe5d579fd69d2d17afad2b631761",
+  "initial_optimized_tree": "1259f283a200853baabd0d1c2dec55cb2f50c2b9",
+  "initial_optimized_binary": {
+    "bytes": 20005624,
+    "sha256": "702331d0adf8f571d23420a225cf4912b2eeab24ae8acb993d8dc4b5fac4f0af"
+  }
+}

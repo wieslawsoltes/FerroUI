@@ -1,0 +1,1975 @@
+warning: unused workspace dependency `ferroui`
+   --> Cargo.toml:406:1
+    |
+406 | ferroui = { version = "=0.6.0-preview.1", path = "src/FerroUI" }
+    | ^^^^^^^
+    |
+    = note: `cargo::unused_workspace_dependencies` is set to `warn` by default
+help: consider removing the workspace dependency `ferroui`
+warning: unused workspace dependency `ferroui-headless-vnc`
+   --> Cargo.toml:404:1
+    |
+404 | ferroui-headless-vnc = { version = "=0.6.0-preview.1", path = "src/Headless/FerroUI.Headless.Vnc" }
+    | ^^^^^^^^^^^^^^^^^^^^
+    |
+help: consider removing the workspace dependency `ferroui-headless-vnc`
+warning: unused workspace dependency `ferroui-protranslate-studio`
+   --> Cargo.toml:353:1
+    |
+353 | ferroui-protranslate-studio = { version = "=0.6.0-preview.1", path = "src/ProTranslate/FerroUI.ProTranslate.Studio" }
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: consider removing the workspace dependency `ferroui-protranslate-studio`
+warning: unused workspace dependency `ferroui-svg`
+   --> Cargo.toml:435:1
+    |
+435 | ferroui-svg = { version = "=0.6.0-preview.1", path = "src/Svg/FerroUI.Svg" }
+    | ^^^^^^^^^^^
+    |
+help: consider removing the workspace dependency `ferroui-svg`
+warning: unused workspace dependency `ferroui-xaml-behaviors`
+   --> Cargo.toml:418:1
+    |
+418 | ferroui-xaml-behaviors = { version = "=0.6.0-preview.1", path = "src/Behaviors/FerroUI.Xaml.Behaviors" }
+    | ^^^^^^^^^^^^^^^^^^^^^^
+    |
+help: consider removing the workspace dependency `ferroui-xaml-behaviors`
+warning: workspace (manifest) generated 5 warnings
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Markup/FerroUI.Markup.Xaml/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-markup-xaml` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Apple/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-apple` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Vello/FerroUI.Vello/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-vello` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Markup/FerroUI.Markup.Xaml.Loader/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-markup-xaml-loader` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Collaboration/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-collaboration` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Metal/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-metal` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera.Apple/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera-apple` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.DesignerSupport/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-support` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Android/FerroUI.Android/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-android` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Project/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-project` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera.Linux/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera-linux` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.ReactiveUI.Testing/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-reactiveui-testing` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Fonts.Inter/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-fonts-inter` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/StaticViewLocator/FerroUI.StaticViewLocator/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-static-view-locator` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Build.Scan/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-build-scan` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> external/XamlX/src/XamlX/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `xamlx` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Collaboration.Host/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-collaboration-host` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Controls.Inking/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls-inking` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/TreeDataGrid/FerroUI.Controls.TreeDataGrid/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls-treedatagrid` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/ProTranslate/FerroUI.ProTranslate/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-protranslate` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+  --> src/FerroUI.Media/Cargo.toml:10:1
+   |
+ 9 | repository.workspace = true
+   | ----------
+10 | homepage.workspace = true
+   | ^^^^^^^^
+   |
+   = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.DynamicData/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-dynamic-data` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Core/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-core` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Markup/FerroUI.Markup.Xaml.WinUI/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-markup-xaml-winui` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Themes.WinUI/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-themes-winui` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Qr.Android/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-qr-android` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Windows/FerroUI.WinUI/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-winui` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.OpenGL/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-opengl` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video.Browser/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video-browser` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/ProTranslate/FerroUI.ProTranslate.Core/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-protranslate-core` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions.Responsive/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions-responsive` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.OpenGL/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-opengl` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/StaticViewLocator/FerroUI.StaticViewLocator.Macros/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-static-view-locator-macros` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Controls/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.ReactiveUI.Controls/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-reactiveui-controls` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.DevTools/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-devtools` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.System/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-system` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions-draganddrop` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Linux/FerroUI.LinuxFramebuffer/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-linuxframebuffer` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Pretext/FerroUI.Pretext.Layout/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-pretext-layout` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Windows/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-windows` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Headless/FerroUI.Headless/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-headless` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video.Linux/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video-linux` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Skia/FerroUI.Skia/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-skia` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Android/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-android` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Behaviors.Animations/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-behaviors-animations` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Themes.Fluent/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-themes-fluent` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Controls.Charts/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls-charts` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Build.Tasks/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-build` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Svg/FerroUI.Svg/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-svg` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Controls/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-controls` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Windows/FerroUI.Direct2D/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-direct2d` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Animation/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-animation` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Themes.Material/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-themes-material` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/TreeDataGrid/FerroUI.TreeDataGrid.Core/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-treedatagrid-core` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/HarfBuzz/FerroUI.HarfBuzz/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-harfbuzz` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.FreeDesktop/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-freedesktop` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Themes.Simple/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-themes-simple` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Language/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-language` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.X11/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-x11` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.MicroCom/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-microcom` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.LiveCharts/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-livecharts` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactivity/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactivity` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/iOS/FerroUI.iOS/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-ios` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/ProTranslate/FerroUI.ProTranslate.Build/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-protranslate-build` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera.Windows/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera-windows` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Windows/FerroUI.Win32/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-win32` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Themes.MacOS/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-themes-macos` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions.Events/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions-events` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Desktop/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-desktop` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Qr.Apple/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-qr-apple` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Mcp/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-mcp` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video.Apple/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video-apple` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera.Controls/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera-controls` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Rendering3D/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-render3d` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Linux/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-linux` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Browser/FerroUI.Browser/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-browser` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Base/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-base` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions.ReactiveUI/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions-reactiveui` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Splat/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-splat` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.HotReload/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-hot-reload` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Behaviors/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-behaviors` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Native/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-native` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Remote.Protocol/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-remote-protocol` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.View/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-view` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/StaticViewLocator/FerroUI.StaticViewLocator.Build/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-static-view-locator-build` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Metal/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-metal` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Dialogs/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-dialogs` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Inspect/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-inspect` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Qr/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-qr` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Reactive.Testing/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-reactive-testing` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer.Tools/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer-tools` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Vulkan/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-vulkan` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions.Custom/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions-custom` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Ident.Macros/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-ident-macros` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/ProTranslate/FerroUI.ProTranslate.Studio/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-protranslate-studio` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/tools/MicroCom.CodeGenerator/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `microcom-codegen` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Reactive/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-reactive` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.HotPatch/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-hot-patch` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Headless/FerroUI.Headless.Vnc/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-headless-vnc` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video.Controls/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video-controls` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.OspreyNative/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-osprey-native` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.CApi/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-capi` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+  --> src/FerroUI.Media3D/Cargo.toml:10:1
+   |
+ 9 | repository.workspace = true
+   | ----------
+10 | homepage.workspace = true
+   | ^^^^^^^^
+   |
+   = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media3d` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Controls.ColorPicker/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls-color-picker` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Quartz/FerroUI.Quartz/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-quartz` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Browser/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-browser` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/ProTranslate/FerroUI.ProTranslate.Formats/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-protranslate-formats` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Controls.Repeater/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls-repeater` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera.Android/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera-android` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Behaviors/FerroUI.Xaml.Interactions.Draggable/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-xaml-interactions-draggable` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video.Android/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video-android` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Wayland/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-wayland` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Markup/FerroUI.Markup/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-markup` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Pretext/FerroUI.Pretext.Media/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-pretext-media` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Pretext/FerroUI.Pretext.Contracts/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-pretext-contracts` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Designer/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-designer` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Video.Windows/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-video-windows` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/Pretext/FerroUI.Pretext/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-pretext` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.DependencyInjection/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-dependency-injection` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Controls.LiveCharts/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-controls-livecharts` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.ReactiveUI/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-reactiveui` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Media.Camera.Browser/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-media-camera-browser` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.View.Macros/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-view-macros` (manifest) generated 1 warning
+warning: `package.homepage` is redundant with `package.repository`
+ --> src/FerroUI.Diagnostics/Cargo.toml:9:1
+  |
+8 | repository.workspace = true
+  | ----------
+9 | homepage.workspace = true
+  | ^^^^^^^^
+  |
+  = note: `cargo::redundant_homepage` is set to `warn` by default
+help: consider removing `package.homepage`
+warning: `ferroui-diagnostics` (manifest) generated 1 warning
+warning: unused import: `Cell`
+ --> src/FerroUI.Base/rendering/composition/server/server_composition_visual_collection.rs:8:17
+  |
+8 | use std::cell::{Cell, RefCell};
+  |                 ^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused attribute
+   --> src/FerroUI.Base/ferro_property.rs:836:5
+    |
+836 |     #[inline]
+    |     ^^^^^^^^^ help: remove this attribute
+    |
+note: attribute also specified here
+   --> src/FerroUI.Base/ferro_property.rs:834:5
+    |
+834 |     #[inline]
+    |     ^^^^^^^^^
+    = warning: this was previously accepted by the compiler but is being phased out; it will become a hard error in a future release!
+    = note: `#[warn(unused_attributes)]` (part of `#[warn(unused)]`) on by default
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> src/FerroUI.Base/rendering/composition/frames/lifetime.rs:280:18
+    |
+280 |                 .fetch_update(Ordering::AcqRel, Ordering::Acquire, |reads| {
+    |                  ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+280 -                 .fetch_update(Ordering::AcqRel, Ordering::Acquire, |reads| {
+280 +                 .try_update(Ordering::AcqRel, Ordering::Acquire, |reads| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> src/FerroUI.Base/rendering/composition/frames/lifetime.rs:499:14
+    |
+499 |             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |value| {
+    |              ^^^^^^^^^^^^
+    |
+help: replace the use of the deprecated method
+    |
+499 -             .fetch_update(Ordering::AcqRel, Ordering::Acquire, |value| {
+499 +             .try_update(Ordering::AcqRel, Ordering::Acquire, |value| {
+    |
+
+warning: use of deprecated method `std::sync::atomic::Atomic::<u32>::fetch_update`: renamed to `try_update` for consistency
+  --> src/FerroUI.Base/property_store/hot_value.rs:36:10
+   |
+36 |         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |generation| Some(generation.wrapping_add(1).max(1)));
+   |          ^^^^^^^^^^^^
+   |
+help: replace the use of the deprecated method
+   |
+36 -         .fetch_update(Ordering::Relaxed, Ordering::Relaxed, |generation| Some(generation.wrapping_add(1).max(1)));
+36 +         .try_update(Ordering::Relaxed, Ordering::Relaxed, |generation| Some(generation.wrapping_add(1).max(1)));
+   |
+
+warning: unused import: `IBitmapImpl`
+ --> src/FerroUI.Base/media/imaging/render_target_bitmap.rs:3:29
+  |
+3 | use crate::platform::{self, IBitmapImpl, IDrawingContextImpl, IRenderTargetBitmapImpl};
+  |                             ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src/FerroUI.Base/media/imaging/writeable_bitmap.rs:5:42
+  |
+5 | use crate::platform::{self, AlphaFormat, IBitmapImpl, ILockedFramebuffer, IWriteableBitmapImpl, PixelFormat};
+  |                                          ^^^^^^^^^^^
+
+warning: unused import: `IServerAnimatedPropertyHost`
+ --> src/FerroUI.Base/rendering/composition/animations/animation_instance_base.rs:6:49
+  |
+6 |     CompositionProperty, IAnimatedServerObject, IServerAnimatedPropertyHost, IServerClockItem, ServerCompositor,
+  |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `crate::platform::IBitmapImpl`
+ --> src/FerroUI.Base/rendering/composition/brushes/server_simple_image_brush.rs:8:5
+  |
+8 | use crate::platform::IBitmapImpl;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src/FerroUI.Base/rendering/composition/server/server_composition_drawing_surface.rs:2:23
+  |
+2 | use crate::platform::{IBitmapImpl, IPlatformRenderInterfaceContext, PlatformGraphicsContextLostError};
+  |                       ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src/FerroUI.Base/rendering/composition/server/server_composition_surface.rs:2:23
+  |
+2 | use crate::platform::{IBitmapImpl, IDrawingContextImpl};
+  |                       ^^^^^^^^^^^
+
+warning: unused import: `IBitmapImpl`
+ --> src/FerroUI.Base/rendering/composition/server/server_compositor.rs:6:23
+  |
+6 | use crate::platform::{IBitmapImpl, IPlatformGraphics, IRenderTarget, LtrbRect};
+  |                       ^^^^^^^^^^^
+
+warning: method `notifier` is never used
+   --> src/FerroUI.Base/data/core/typed_binding_expression.rs:190:19
+    |
+ 82 | impl<TSource: 'static, TValue: PropertyValue> TypedClrPropertyInfo<TSource, TValue> {
+    | ----------------------------------------------------------------------------------- method in this implementation
+...
+190 |     pub(crate) fn notifier<'a>(&self, source: &'a TSource) -> Option<&'a dyn INotifyPropertyChanged> {
+    |                   ^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `is_disposed` is never used
+   --> src/FerroUI.Base/rendering/composition/server/server_composition_target.rs:146:19
+    |
+143 | impl ServerCompositionTarget {
+    | ---------------------------- method in this implementation
+...
+146 |     pub(crate) fn is_disposed(&self) -> bool {
+    |                   ^^^^^^^^^^^
+
+warning: associated function `new_shared` is never used
+  --> src/FerroUI.Base/property_store/value_frame.rs:32:12
+   |
+19 | impl ValueFrameBase {
+   | ------------------- associated function in this implementation
+...
+32 |     pub fn new_shared(priority: BindingPriority, type_: FrameType) -> Self {
+   |            ^^^^^^^^^^
+
+warning: methods `is_evaluating`, `remove_frame`, and `get_priority` are never used
+    --> src/FerroUI.Base/property_store/value_store.rs:183:12
+     |
+ 130 | impl ValueStore {
+     | --------------- methods in this implementation
+...
+ 183 |     pub fn is_evaluating(&self) -> bool {
+     |            ^^^^^^^^^^^^^
+...
+1042 |     pub fn remove_frame(&self, owner: &FerroObject, frame: &Rc<dyn ValueFrame>) -> bool {
+     |            ^^^^^^^^^^^^
+...
+1090 |     pub fn get_priority(&self, property: &FerroProperty) -> BindingPriority {
+     |            ^^^^^^^^^^^^
+
+warning: method `create_effective_value` is never used
+   --> src/FerroUI.Base/ferro_property.rs:284:8
+    |
+283 | pub(crate) trait PropertyRoutes {
+    |                  -------------- method in this trait
+284 |     fn create_effective_value(&'static self, o: &FerroObject) -> Rc<dyn EffectiveValueDyn>;
+    |        ^^^^^^^^^^^^^^^^^^^^^^
+
+warning: method `with_sender` is never used
+   --> src/FerroUI.Base/ferro_property_changed_event_args.rs:146:19
+    |
+ 20 | impl<'a> FerroPropertyChangedEventArgs<'a> {
+    | ------------------------------------------ method in this implementation
+...
+146 |     pub(crate) fn with_sender<'b>(&'b self, sender: &'b FerroObject) -> FerroPropertyChangedEventArgs<'b> {
+    |                   ^^^^^^^^^^^
+
+warning: method `base` is never used
+   --> src/FerroUI.Base/ferro_property_metadata.rs:483:8
+    |
+482 | pub trait PropertyMetadata: Sized + 'static {
+    |           ---------------- method in this trait
+483 |     fn base(&self) -> &FerroPropertyMetadata;
+    |        ^^^^
+
+warning: method `default_metadata` is never used
+   --> src/FerroUI.Base/ferro_property_metadata.rs:845:12
+    |
+827 | impl<M: PropertyMetadata> MetadataTable<M> {
+    | ------------------------------------------ method in this implementation
+...
+845 |     pub fn default_metadata(&self) -> &Rc<M> {
+    |            ^^^^^^^^^^^^^^^^
+
+warning: method `properties` is never used
+  --> src/FerroUI.Base/ferro_property_registry.rs:77:19
+   |
+67 | impl FerroPropertyRegistry {
+   | -------------------------- method in this implementation
+...
+77 |     pub(crate) fn properties(&self) -> Vec<&'static FerroProperty> {
+   |                   ^^^^^^^^^^
+
+warning: associated function `rooted_visual_children_count` is never used
+    --> src/FerroUI.Base/visual.rs:2523:19
+     |
+1078 | impl Visual {
+     | ----------- associated function in this implementation
+...
+2523 |     pub(crate) fn rooted_visual_children_count() -> i32 {
+     |                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: `ferroui-base` (lib) generated 22 warnings (run `cargo fix --lib -p ferroui-base` to apply 5 suggestions)
+warning: unused doc comment
+   --> src/FerroUI.Controls/markup_types/contracts.rs:180:1
+    |
+180 | /// The types declared in this file.
+    | ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ rustdoc does not generate documentation for macro invocations
+    |
+    = help: to document an item produced by a macro, the macro must produce the documentation as part of its expansion
+    = note: `#[warn(unused_doc_comments)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `IDisposable`
+  --> src/FerroUI.Controls/combo_box.rs:26:63
+   |
+26 | use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
+   |                                                               ^^^^^^^^^^^
+   |
+   = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `is_disposed` is never used
+   --> src/FerroUI.Controls/animation/connected_animation.rs:355:19
+    |
+132 | impl ConnectedAnimation {
+    | ----------------------- method in this implementation
+...
+355 |     pub(crate) fn is_disposed(&self) -> bool {
+    |                   ^^^^^^^^^^^
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: field `sprite` is never read
+   --> src/FerroUI.Controls/media/reveal_focus.rs:163:5
+    |
+159 | struct ShownGlow {
+    |        --------- field in this struct
+...
+163 |     sprite: Option<SpriteVisual>,
+    |     ^^^^^^
+
+warning: field `icon` is never read
+  --> src/FerroUI.Controls/title_bar.rs:52:5
+   |
+47 | struct Parts {
+   |        ----- field in this struct
+...
+52 |     icon: Option<Ref<Control>>,
+   |     ^^^^
+
+warning: field `presenter` is never read
+   --> src/FerroUI.Controls/navigation_view_item.rs:134:5
+    |
+132 | struct Parts {
+    |        ----- field in this struct
+133 |     root_grid: Option<Ref<Panel>>,
+134 |     presenter: Option<Ref<Control>>,
+    |     ^^^^^^^^^
+    |
+    = note: `Parts` has a derived impl for the trait `Clone`, but this is intentionally ignored during dead code analysis
+
+warning: associated function `with_behavior_from` is never used
+   --> src/FerroUI.Controls/documents/hyperlink.rs:225:19
+    |
+176 | impl Hyperlink {
+    | -------------- associated function in this implementation
+...
+225 |     pub(crate) fn with_behavior_from(source: &Self) -> Ref<Self> {
+    |                   ^^^^^^^^^^^^^^^^^^
+
+warning: associated items `new`, `from_fields`, `visible_text`, `same_snapshot`, and `visible_slice` are never used
+   --> src/FerroUI.Controls/rich_text/rich_text_field_story.rs:285:19
+    |
+281 | impl FieldStory {
+    | --------------- associated items in this implementation
+...
+285 |     pub(crate) fn new(
+    |                   ^^^
+...
+292 |     pub(crate) fn from_fields(
+    |                   ^^^^^^^^^^^
+...
+453 |     pub(crate) fn visible_text(&self) -> &str {
+    |                   ^^^^^^^^^^^^
+...
+471 |     pub(crate) fn same_snapshot(&self, other: &Self) -> bool {
+    |                   ^^^^^^^^^^^^^
+...
+670 |     pub(super) fn visible_slice(
+    |                   ^^^^^^^^^^^^^
+
+warning: method `set_root` is never used
+   --> src/FerroUI.Controls/calendar/calendar.rs:576:19
+    |
+468 | impl Calendar {
+    | ------------- method in this implementation
+...
+576 |     pub(crate) fn set_root(&self, value: Option<Ref<Panel>>) {
+    |                   ^^^^^^^^
+
+warning: method `set_month_view` is never used
+   --> src/FerroUI.Controls/calendar/calendar_item.rs:338:19
+    |
+195 | impl CalendarItem {
+    | ----------------- method in this implementation
+...
+338 |     pub(crate) fn set_month_view(&self, value: Option<Ref<Grid>>) {
+    |                   ^^^^^^^^^^^^^^
+
+warning: bounds on generic parameters in type aliases are not enforced
+  --> src/FerroUI.Controls/platform/win32_properties.rs:48:25
+   |
+48 | type InvocationLists<F: ?Sized> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+   |                         ^^^^^^ will not be checked at usage sites of the type alias
+   |
+   = note: this is a known limitation of the type checker that may be lifted in a future edition.
+           see issue #112792 <https://github.com/rust-lang/rust/issues/112792> for more information
+   = note: `#[warn(type_alias_bounds)]` on by default
+help: remove this bound
+   |
+48 - type InvocationLists<F: ?Sized> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+48 + type InvocationLists<F> = RefCell<Vec<(Weak<F>, Vec<Rc<F>>)>>;
+   |
+
+warning: `ferroui-controls` (lib) generated 11 warnings (run `cargo fix --lib -p ferroui-controls` to apply 1 suggestion)
+warning: unused import: `std::error::Error`
+ --> src/FerroUI.OpenGL/composition/task_support.rs:9:5
+  |
+9 | use std::error::Error;
+  |     ^^^^^^^^^^^^^^^^^
+  |
+  = note: `#[warn(unused_imports)]` (part of `#[warn(unused)]`) on by default
+
+warning: unused import: `std::rc::Rc`
+  --> src/FerroUI.OpenGL/composition/task_support.rs:12:5
+   |
+12 | use std::rc::Rc;
+   |     ^^^^^^^^^^^
+
+warning: unused import: `ferroui_base::reactive::IDisposable`
+ --> src/FerroUI.OpenGL/controls/open_gl_control_base.rs:9:5
+  |
+9 | use ferroui_base::reactive::IDisposable;
+  |     ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+warning: methods `is_import_memory_fd_ext_available` and `is_import_semaphore_fd_ext_available` are never used
+   --> src/FerroUI.OpenGL/entry_points.rs:122:21
+    |
+ 56 |   macro_rules! gl_entry_points {
+...
+100 |           impl $Owner {
+    |           ----------- methods in this implementation
+...
+122 |               $vis fn [<is_ $name _available>](&self) -> bool {
+    |                       ^^^^^^^^^^^^^^^^^^^^^^^^
+    |
+   ::: src/FerroUI.OpenGL/features/external_objects_open_gl_extension_feature.rs:24:1
+    |
+ 24 | / gl_entry_points! {
+ 25 | |     table ExternalObjectsEntryPoints for ExternalObjectsInterface.ext(get, info: ());
+ 26 | |
+ 27 | |     optional safe pub(crate) fn import_memory_fd_ext(memory: u32, size: u64, handle_type: i32, fd: i32)
+...   |
+ 74 | |     optional unsafe pub(crate) fn get_unsigned_bytev_ext(target: i32, data: *mut u8) = get("glGetUnsignedBytevEXT");
+ 75 | | }
+    | |_- in this macro invocation
+    |
+    = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ferroui-opengl` (lib) generated 4 warnings (run `cargo fix --lib -p ferroui-opengl` to apply 2 suggestions)
+warning: use of deprecated method `std::sync::atomic::Atomic::<u64>::fetch_update`: renamed to `try_update` for consistency
+   --> src/Skia/FerroUI.Skia/gpu/i_skia_gr_context.rs:138:10
+    |
+138 |     NEXT.fetch_update(
+    |          ^^^^^^^^^^^^
+    |
+    = note: `#[warn(deprecated)]` on by default
+help: replace the use of the deprecated method
+    |
+138 -     NEXT.fetch_update(
+138 +     NEXT.try_update(
+    |
+
+warning: unreachable pattern
+   --> src/Skia/FerroUI.Skia/gpu/open_gl/gl_skia_external_objects_feature.rs:621:49
+    |
+617 |             ImportedImageSource::External(image) | ImportedImageSource::ExternalFrame(image, _) => image.dispose(),
+    |                                                    -------------------------------------------- matches all the relevant values
+...
+621 |             ImportedImageSource::Frame { .. } | ImportedImageSource::ExternalFrame(..) => {} // The frame lease owns storage.
+    |                                                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^ no value can reach this
+    |
+    = note: `#[warn(unreachable_patterns)]` (part of `#[warn(unused)]`) on by default
+
+warning: method `set` is never used
+  --> src/Skia/FerroUI.Skia/geometry_impl.rs:87:12
+   |
+75 | impl<T: Clone> Shared<T> {
+   | ------------------------ method in this implementation
+...
+87 |     pub fn set(&self, value: T) {
+   |            ^^^
+   |
+   = note: `#[warn(dead_code)]` (part of `#[warn(unused)]`) on by default
+
+warning: `ferroui-skia` (lib) generated 3 warnings (run `cargo fix --lib -p ferroui-skia` to apply 1 suggestion)
+   Compiling ferroui-svg v0.6.0-preview.1 (/workspace/scratch/c60814d4a6a9/FerroUI/src/Svg/FerroUI.Svg)
+    Finished `test` profile [unoptimized + debuginfo] target(s) in 11.24s
+     Running unittests lib.rs (/workspace/scratch/c60814d4a6a9/target/debug/build/ferroui-svg/edecc5bdb24da035/out/ferroui_svg-edecc5bdb24da035)
+
+running 112 tests
+test cache_tests::prepared_fragments_use_the_inspection_applied_to_each_layer ... ok
+test context::tests::affine_gradient_transforms_and_elliptic_radial_gradients_are_preserved_as_vectors ... ok
+test context::tests::aliased_non_text_primitives_are_classified_at_the_draw ... ok
+test context::tests::aliased_options_restored_or_overridden_by_outer_antialias_do_not_force_fallback ... ok
+test cache_tests::disabling_and_clearing_vector_caches_controls_both_tiers ... ok
+test context::tests::asymmetric_rounded_draws_stay_vector_but_asymmetric_clips_request_fallback ... ok
+test cache_tests::prepared_fragment_float_keys_preserve_negative_zero_serialization ... ok
+test context::tests::clearing_a_drawn_recording_is_not_mistaken_for_a_source_over_fill ... ok
+test context::tests::dropping_the_adapter_finalizes_the_recording ... ok
+test context::tests::effects_are_forwarded_and_diagnostics_are_deduplicated ... ok
+test cache_tests::a_single_prepared_slot_is_bounded_across_repeated_view_switches ... ok
+test cache_tests::warm_vector_fragments_do_not_bypass_validation_or_raster_policy ... ok
+test context::tests::completion_callback_runs_once_after_the_picture_is_available ... ok
+test context::tests::first_transparent_clear_under_a_dirty_clip_does_not_force_raster_output ... ok
+test context::tests::glyph_outline_capability_accepts_whitespace_and_rejects_drawable_only_glyphs ... ok
+test context::tests::gpu_affined_layer_blits_are_rejected_before_native_context_access ... ok
+test context::tests::gradient_strokes_and_region_fills_validate_the_same_bounds_as_native_skia ... ok
+test context::tests::image_tile_brushes_reject_nonfinite_raw_and_resolved_viewports ... ok
+test cache_tests::removing_a_layer_invalidates_changed_resource_prefixes_without_collisions ... ok
+test context::tests::initial_clear_ignores_the_transform_in_svg_and_preserves_it_for_following_draws ... ok
+test context::tests::invalid_inputs_and_unbalanced_state_fail_without_calling_skia_with_nan ... ok
+test context::tests::native_lease_drawing_is_captured_at_disposal_and_classified ... ok
+test context::tests::isolated_opacity_composes_the_overlap_once ... ok
+test context::tests::offset_recording_bounds_do_not_change_the_drawing_transform ... ok
+test context::tests::executable_custom_shader_reaches_the_recording_and_restores_siblings ... ok
+test context::tests::opacity_mask_preserves_alpha_and_siblings ... ok
+test context::tests::original_recordings_still_do_not_advertise_a_native_lease ... ok
+test context::tests::ordinary_vectors_remain_vector_and_clip_state_is_restored ... ok
+test context::tests::rejected_compositing_layer_does_not_change_stack_or_audit ... ok
+test context::tests::reflected_and_repeating_gradients_request_fallback_but_padded_gradients_remain_vector ... ok
+test context::tests::relative_radial_and_conic_centers_are_validated_after_resolving_bounds ... ok
+test context::tests::render_and_text_options_keep_their_independent_platform_stacks ... ok
+test context::tests::opaque_clear_of_offset_bounds_requires_fallback_and_covers_every_raster_edge ... ok
+test context::tests::sampling_options_without_bitmap_draws_and_restored_defaults_remain_vector ... ok
+test context::tests::skia_layer_blits_reach_the_underlying_context_without_a_downcast_panic ... ok
+test context::tests::shader_images_distinguish_empty_and_readable_inputs_from_silently_missing_pixels ... ok
+test context::tests::tile_source_validation_uses_context_dpi_and_keeps_empty_viewports_valid ... ok
+test context::tests::transparent_clear_after_unclassified_native_drawing_still_erases_it ... ok
+test context::tests::unsupported_custom_effects_are_errors_instead_of_unchanged_content_fallback ... ok
+test integration_tests::a_surface_failure_replaces_the_previous_result_instead_of_publishing_stale_artwork ... ok
+test cache_tests::warm_fragments_still_apply_all_outer_document_and_view_options ... ok
+test context::tests::explicit_bitmap_sampling_uses_raster_fallback_with_native_option_inheritance ... ok
+test integration_tests::caches_reuse_recordings_and_respect_stricter_limits_on_every_export ... ok
+test cache_tests::native_writer_flag_changes_replace_both_cache_tiers ... ok
+test integration_tests::platform_surface_publishes_vectors_and_policy_revisions_without_a_window ... ok
+test integration_tests::cropped_vector_bitmaps_preserve_draw_opacity_and_intrinsic_pixel_alpha ... ok
+test context::tests::scene3d_capability_draws_pixels_or_reports_a_missing_executor ... ok
+test render::regression_tests::completion_exports_finalized_frames_and_never_publishes_disposed_frames ... ok
+test render::regression_tests::composed_transform_and_bounds_overflow_are_errors ... ok
+test integration_tests::laid_out_controls_use_the_existing_immediate_rendering_path ... ok
+test render::regression_tests::exploded_annotations_are_painted_after_all_scene_layers ... ok
+test render::regression_tests::inspection_respects_stroke_alpha_and_the_selected_layers ... ok
+test cache_tests::prepared_fragments_include_every_effective_inspection_parameter ... ok
+test render::regression_tests::label_and_metadata_whitespace_round_trips ... ok
+test render::regression_tests::raster_mapping_rejects_nonfinite_native_scale_and_translation_before_replay ... ok
+test render::regression_tests::raster_wireframe_emits_only_bounds_and_keeps_unselected_pixels ... ok
+test render::regression_tests::target_accepts_pixel_sized_compositor_layer_blits_and_preserves_rounded_logical_size ... ok
+test render::regression_tests::repeated_raster_payloads_are_interned_across_transformed_layers ... ok
+test render::regression_tests::target_clip_survives_exporting_a_larger_viewport ... ok
+test render::regression_tests::target_rejects_invalid_device_scaling_before_recording ... ok
+test render::regression_tests::target_records_device_pixels_and_converts_to_logical_coordinates_once ... ok
+test tests::bounds_with_nonzero_origin_preserve_absolute_transform_semantics ... ok
+test tests::destination_dependent_blend_rasterizes_the_whole_island_and_strict_mode_refuses ... ok
+test tests::duplicate_ids_invalid_metadata_and_unbalanced_callbacks_are_errors ... ok
+test tests::finite_dimensions_and_raster_budgets_are_checked_before_allocating ... ok
+test tests::cutaway_explosion_and_selection_do_not_rerecord_or_mutate_the_document ... ok
+test tests::supported_layers_remain_vectors_with_stable_ids_and_self_contained_references ... ok
+test tests::svgz_is_deterministic_and_round_trips ... ok
+test tests::target_finalizes_frames_on_dispose_or_drop_and_does_not_retain_pixels ... ok
+test tests::outlined_text_preserves_fractional_glyph_positions_independently_of_device_hinting ... ok
+test xml::tests::accessibility_references_follow_id_reassignment ... ok
+test xml::tests::attribute_newlines_round_trip_without_xml_normalization_loss ... ok
+test xml::tests::chunked_xml_escaping_preserves_multilingual_text_attributes_and_line_endings ... ok
+test xml::tests::css_rewriting_borrows_canonical_values_and_retains_unchanged_spans ... ok
+test xml::tests::css_urls_are_parsed_outside_comments_strings_and_other_function_names ... ok
+test xml::tests::descendants_with_independent_ids_are_not_removed_by_interning ... ok
+test xml::tests::fragment_preserves_root_presentation_in_a_group ... ok
+test xml::tests::disabled_deduplication_preserves_repeated_definitions ... ok
+test xml::tests::generic_svg_processing_does_not_reinterpret_image_fill_opacity ... ok
+test xml::tests::fragments_are_collision_free_and_keep_namespace_bindings ... ok
+test xml::tests::identically_named_designer_groups_do_not_prevent_safe_resource_sharing ... ok
+test xml::tests::inspection_overrides_css_paint_with_comments_in_declaration_names ... ok
+test xml::tests::identical_resources_share_one_definition_without_losing_references ... ok
+test xml::tests::invalid_options_are_errors ... ok
+test xml::tests::inspection_overrides_inline_paint_without_destroying_other_style ... ok
+test xml::tests::invalid_url_identifiers_cannot_be_repaired_by_id_reassignment ... ok
+test xml::tests::native_image_opacity_is_applied_before_inspection_multiplication ... ok
+test xml::tests::numeric_precision_leaves_foreign_metadata_attributes_unchanged ... ok
+test xml::tests::no_alias_optimization_prunes_only_unidentified_empty_definitions ... ok
+test xml::tests::preserve_ids_cannot_collide_with_generated_ids ... ok
+test xml::tests::optimization_is_idempotent_after_resource_interning ... ok
+test xml::tests::references_are_tokenized_and_semantic_ids_survive ... ok
+test xml::tests::resource_inheritance_and_semantic_definition_identity_are_preserved ... ok
+test xml::tests::pretty_printing_preserves_unicode_and_every_text_position ... ok
+test xml::tests::rounded_adjacent_numbers_never_merge_into_a_different_coordinate ... ok
+test xml::tests::semantic_ids_with_parentheses_keep_valid_quoted_css_references ... ok
+test xml::tests::skia_generation_ids_do_not_affect_output ... ok
+test xml::tests::rounding_is_explicit_and_does_not_rewrite_paths_or_transforms ... ok
+test xml::tests::skia_image_paint_alpha_is_composed_without_changing_image_resources_or_geometry ... ok
+test xml::tests::skia_image_opacity_validation_prevents_silent_native_format_changes ... ok
+test xml::tests::wireframe_draws_bitmap_bounds_and_retains_the_source_resource ... ok
+test xml::tests::unsafe_and_unresolved_documents_are_rejected ... ok
+test xml::tests::xray_does_not_corrupt_clips_masks_or_gradient_definitions ... ok
+test xml::tests::wireframe_image_instances_preserve_source_and_instance_layout ... ok
+test xml::tests::xray_multiplies_bitmap_opacity_without_overriding_inline_css ... ok
+test render::regression_tests::outlined_exports_also_outline_generated_exploded_labels ... ok
+test integration_tests::real_compositor_captures_complete_hidpi_frames_and_isolated_opacity ... ok
+test integration_tests::harfbuzz_shaped_ligatures_combining_marks_and_polish_text_export_as_paths ... ok
+test context::tests::failed_native_finalization_is_not_retried_and_releases_target_readiness ... ok
+test integration_tests::unwinding_a_frame_publishes_a_recording_failure_and_allows_the_next_frame ... ok
+test context::tests::completion_callbacks_keep_the_finalized_picture_guarantee_during_unwind ... ok
+test integration_tests::producer_panic_with_an_active_native_lease_publishes_failure_without_double_unwind ... ok
+
+test result: ok. 112 passed; 0 failed; 0 ignored; 0 measured; 0 filtered out; finished in 0.20s

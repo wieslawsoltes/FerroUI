@@ -1,0 +1,31 @@
+{
+  "source_revision": "553b2e75b930079c2c8535e6256c8c4263b05aaa",
+  "default_lib_tests": {
+    "passed": 112,
+    "failed": 0,
+    "command": "cargo test --locked -p ferroui-svg --lib"
+  },
+  "media3d_lib_tests": {
+    "passed": 112,
+    "failed": 0,
+    "command": "cargo test --locked -p ferroui-svg --lib --features media3d"
+  },
+  "clippy": {
+    "passed": true,
+    "command": "cargo clippy --locked -p ferroui-svg --all-targets --all-features --no-deps -- -D warnings"
+  },
+  "doc_tests": {
+    "passed": 0,
+    "failed": 0
+  },
+  "python_validator_tests": {
+    "passed": 3,
+    "failed": 0
+  },
+  "format_and_diff_checks_passed": true,
+  "benchmark_svg_files_byte_identical": 30,
+  "independent_renderer_png_files_byte_identical": 30,
+  "decoded_rgba_hashes_identical": 30,
+  "aeris_svg_and_svgz_files_byte_identical": 6,
+  "release_binary_source_patch_verified": true
+}
