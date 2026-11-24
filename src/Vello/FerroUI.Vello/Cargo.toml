@@ -41,30 +41,36 @@ wgpu = { workspace = true, optional = true }
 ferroui-opengl = { workspace = true, optional = true }
 wasm-bindgen = { workspace = true, optional = true }
 js-sys = { workspace = true, optional = true }
-web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlTexture"] }
+web-sys = { workspace = true, optional = true, features = ["HtmlCanvasElement", "WebGl2RenderingContext", "WebGlBuffer", "WebGlTexture", "WebGlFramebuffer", "WebGlProgram", "WebGlShader", "WebGlUniformLocation", "WebGlVertexArrayObject"] }
 
 # The CPU mode is always built. An application states the GPU modes it uses: each brings its renderer
 # and `wgpu` (docs/porting/vello-backend.md, section 2).
+[build-dependencies]
+# The GLSL ES of the shader effects of the library for the WebGL2 route (feature `hybrid-webgl`),
+# translated from their WGSL at build time: the browser module carries no translator.
+ferroui-build = { workspace = true, optional = true, features = ["shader-effects"] }
+
 [features]
 default = []
 # The sparse-strips renderer with the strips drawn on the GPU (`vello_gpu`).
 hybrid = ["dep:vello_gpu", "vello_gpu/wgpu", "wgpu-device"]
 # The same renderer over the WebGL2 context of a canvas of a web page, without `wgpu` (`vello_gpu`
 # with its `webgl` feature): the hybrid mode of the browser platform (gpu_web_gl/).
-hybrid-webgl = ["dep:vello_gpu", "vello_gpu/webgl", "dep:ferroui-opengl", "dep:wasm-bindgen", "dep:js-sys", "dep:web-sys"]
+hybrid-webgl = ["dep:vello_gpu", "vello_gpu/webgl", "dep:ferroui-opengl", "dep:wasm-bindgen", "dep:js-sys", "dep:web-sys", "dep:ferroui-build"]
 # The compute renderer (`vello`).
 gpu = ["dep:vello", "wgpu-device"]
 # What both GPU modes need: `wgpu`, and on macOS the Metal contracts of the platform with the bindings
 # that turn their handles into objects of `wgpu`. Not a feature to state: `hybrid` and `gpu` state it.
 # With `media3d`, the wgpu executor of 3D scenes (`ferroui-render3d/wgpu`).
-wgpu-device = ["dep:wgpu", "dep:ferroui-metal", "dep:objc2", "dep:objc2-metal", "dep:x11-dl", "ferroui-render3d?/wgpu"]
+wgpu-device = ["dep:wgpu", "dep:ferroui-metal", "dep:objc2", "dep:objc2-metal", "dep:x11-dl", "dep:ash", "dep:windows", "ferroui-render3d?/wgpu"]
 # 3D scenes (`DrawScene3D` of `Viewport3D`, #608, docs/porting/media3d.md): drawn on the device by the
 # wgpu executor of `ferroui-render3d` in the hybrid and GPU modes (gpu/scene3d_passes.rs), and by its
 # CPU reference as an image in the CPU mode, in a scene of the CPU renderer, and as the counted last
 # resort where the executor fails. Off by default, so an application without 3D links none of it;
-# the facade's `media3d` turns it on. Without it a scene draws nothing and is counted
+# the facade's `media3d` turns it on. On WebGL2 the GL executor of `ferroui-opengl` draws them
+# (`web_gl/scene3d.rs`). Without it a scene draws nothing and is counted
 # (`rendering::scene3d::scenes_not_drawn`).
-media3d = ["dep:ferroui-render3d"]
+media3d = ["dep:ferroui-render3d", "ferroui-opengl?/scene3d"]
 
 # The window of the macOS platform is drawn on the Metal device of the platform (gpu/metal.rs). The
 # bindings are the crates `wgpu` itself links for Metal, at the versions it asks for, so that the
@@ -75,10 +81,16 @@ media3d = ["dep:ferroui-render3d"]
 # server of the backend's own, through the Xlib the X11 platform loads too.
 [target.'cfg(target_os = "linux")'.dependencies]
 wgpu = { workspace = true, optional = true, features = ["vulkan", "gles"] }
+# The import of DMA-BUF frames on the Vulkan device (#575, gpu/dma_buf_external_objects.rs): the
+# bindings `wgpu` itself links.
+ash = { workspace = true, optional = true }
 x11-dl = { workspace = true, optional = true }
 
 [target.'cfg(windows)'.dependencies]
 wgpu = { workspace = true, optional = true, features = ["dx12", "gles"] }
+# The import of shared frames on the Direct3D 12 device (#575, gpu/d3d12_external_objects.rs): the
+# bindings `wgpu` itself links.
+windows = { version = "=0.62.2", optional = true, features = ["Win32_Foundation", "Win32_Graphics_Direct3D12", "Win32_Graphics_Dxgi_Common"] }
 
 [target.'cfg(target_os = "macos")'.dependencies]
 ferroui-metal = { workspace = true, optional = true, features = ["offscreen"] }

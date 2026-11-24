@@ -27,6 +27,11 @@ ferroui-render3d = { workspace = true, features = ["wgpu"] }
 ferroui-harfbuzz.workspace = true
 skia-safe.workspace = true
 
+# Skia on Graphite (Metal) for the 3D scenes (`scene3d_graphite_tests.rs`, step D5 of #608): a Graphite
+# context on an offscreen Metal device, and the uniform slots of the Metal executor.
+[target.'cfg(target_os = "macos")'.dependencies]
+ferroui-metal = { workspace = true, features = ["offscreen", "scene3d"] }
+
 # The application on each backend (`application_tests.rs`): the headless
 # platform, the controls and the Fluent theme.
 [dev-dependencies]

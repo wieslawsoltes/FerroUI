@@ -154,6 +154,12 @@ pub struct VelloSurfaceGpu {
     retired: RefCell<Vec<WindowSwapChain>>,
     #[cfg(target_os = "linux")]
     x_connection: Arc<XConnection>,
+    /// The import of DMA-BUF frames, on a device made with it (#575).
+    #[cfg(target_os = "linux")]
+    external_objects: Option<Rc<crate::gpu::dma_buf_external_objects::VelloDmaBufExternalObjectsFeature>>,
+    /// The import of frames shared by an NT handle, when it is turned on (#575).
+    #[cfg(windows)]
+    external_objects: Option<Rc<crate::gpu::d3d12_external_objects::VelloD3d12ExternalObjectsFeature>>,
 }
 
 impl VelloSurfaceGpu {
@@ -223,9 +229,30 @@ impl VelloSurfaceGpu {
             })?;
         let info = adapter.get_info();
 
-        let (device, queue) = block_on(adapter.request_device(&device_descriptor(&adapter)))
-            .map_err(|error| unavailable(format!("the adapter {} gave no device ({error})", info.name)))?;
+        let descriptor = device_descriptor(&adapter);
+        // The import of DMA-BUF frames is optional and off by default (#575): without it the device
+        // is made as it always is.
+        #[cfg(target_os = "linux")]
+        let with_import = crate::gpu::dma_buf_external_objects::request_device(&adapter, &descriptor);
+        #[cfg(not(target_os = "linux"))]
+        let with_import: Option<(wgpu::Device, wgpu::Queue)> = None;
+        #[cfg(target_os = "linux")]
+        let imports_frames = with_import.is_some();
+        let (device, queue) = match with_import {
+            Some(opened) => opened,
+            None => block_on(adapter.request_device(&descriptor))
+                .map_err(|error| unavailable(format!("the adapter {} gave no device ({error})", info.name)))?,
+        };
         let device = VelloWgpuDevice::new(&adapter, device, queue);
+        #[cfg(target_os = "linux")]
+        let external_objects = imports_frames
+            .then(|| crate::gpu::dma_buf_external_objects::VelloDmaBufExternalObjectsFeature::new(device.clone()))
+            .flatten()
+            .map(Rc::new);
+        // The import of shared frames is off by default, and the device is made the same way (#575).
+        #[cfg(windows)]
+        let external_objects =
+            crate::gpu::d3d12_external_objects::VelloD3d12ExternalObjectsFeature::new(device.clone()).map(Rc::new);
         // Layers and bitmaps of the GPU modes are drawn on this device too.
         device.prefer();
 
@@ -237,6 +264,7 @@ impl VelloSurfaceGpu {
             retired: RefCell::new(Vec::new()),
             #[cfg(target_os = "linux")]
             x_connection,
+            external_objects,
         }))
     }
 
@@ -289,6 +317,16 @@ impl Drop for VelloSurfaceGpu {
 impl IVelloGpu for VelloSurfaceGpu {
     fn device(&self) -> &Arc<VelloWgpuDevice> {
         &self.device
+    }
+
+    /// The import of the frames of producers, on a device that has it (#575).
+    fn try_get_feature(&self, feature_type: TypeId) -> Option<Rc<dyn std::any::Any>> {
+        use ferroui_base::platform::IExternalObjectsRenderInterfaceContextFeature;
+        if feature_type == TypeId::of::<dyn IExternalObjectsRenderInterfaceContextFeature>() {
+            let feature: Rc<dyn IExternalObjectsRenderInterfaceContextFeature> = self.external_objects.clone()?;
+            return Some(Rc::new(feature));
+        }
+        None
     }
 
     fn platform_graphics_context(&self) -> Rc<dyn IPlatformGraphicsContext> {

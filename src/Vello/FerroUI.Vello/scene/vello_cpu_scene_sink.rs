@@ -143,6 +143,15 @@ ferroui_base::ferro_thread_local! {
     static CPU_SCENES_MADE: std::cell::Cell<usize> = const { std::cell::Cell::new(0) };
 }
 
+/// What the closed form of a blurred rounded rectangle of every renderer is given for a Gaussian
+/// of `std_deviation`. The renderers evaluate `erf(distance / std_dev)` where the blur of an edge
+/// by a Gaussian of deviation s is `erf(distance / (s √2))`: what they call the standard deviation
+/// is √2 times the Gaussian's (measured against the blur filter of the CPU renderer: with the
+/// factor the two agree to 5 of 255 on a rectangle, without it they are 21 apart).
+pub(crate) fn closed_form_std_dev(std_deviation: f64) -> f64 {
+    std_deviation * std::f64::consts::SQRT_2
+}
+
 /// The scenes of the CPU renderer this thread has made so far.
 #[cfg(test)]
 pub(crate) fn cpu_scenes_made() -> usize {
@@ -766,12 +775,7 @@ impl IVelloSceneSink for VelloCpuSceneSink {
         self.context.set_paint_transform(Affine::IDENTITY);
         self.context.set_transform(transform);
         self.context.set_fill_rule(Fill::NonZero);
-        // The renderer evaluates `erf(distance / std_dev)` where the blur of
-        // an edge by a Gaussian of deviation s is `erf(distance / (s √2))`:
-        // what it calls the standard deviation is √2 times the Gaussian's
-        // (measured against its own blur filter: with the factor the two
-        // agree to 5 of 255 on a rectangle, without it they are 21 apart).
-        let std_dev = std_deviation * std::f64::consts::SQRT_2;
+        let std_dev = closed_form_std_dev(std_deviation);
         self.context.fill_blurred_rounded_rect(&rect, radius as f32, std_dev as f32, invert);
     }
 }

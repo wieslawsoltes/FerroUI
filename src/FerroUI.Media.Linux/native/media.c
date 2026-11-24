@@ -1,6 +1,7 @@
 /* System GStreamer. Preview admits no CPU video map, conversion, or upload. */
 #define _GNU_SOURCE
 #include "media.h"
+#include <poll.h>
 #include <gst/app/gstappsink.h>
 #include <gst/app/gstappsrc.h>
 #include <gst/allocators/gstdmabuf.h>
@@ -60,6 +61,16 @@ void ferro_linux_frame_release(FerroLinuxFrame *f) {
     gst_sample_unref(f->sample); g_free(f);
 }
 void ferro_linux_frame_info(FerroLinuxFrame *f, FerroLinuxFrameInfo *out) { *out = f->info; }
+int ferro_linux_frame_ready(FerroLinuxFrame *f) {
+    /* POLLIN on a dma-buf signals once its write fences have: the implicit sync of the kernel. */
+    struct pollfd fds[4];
+    nfds_t count = f->info.plane_count > 4 ? 4 : f->info.plane_count;
+    for (nfds_t p = 0; p < count; p++) { fds[p].fd = f->info.fds[p]; fds[p].events = POLLIN; fds[p].revents = 0; }
+    int ready = poll(fds, count, 0);
+    if (ready < 0 || (nfds_t)ready != count) return 0;
+    for (nfds_t p = 0; p < count; p++) if (!(fds[p].revents & POLLIN)) return 0;
+    return 1;
+}
 static FerroLinuxFrame *admit_sample(GstSample *sample) {
     GstCaps *caps = gst_sample_get_caps(sample);
     GstBuffer *buffer = gst_sample_get_buffer(sample);

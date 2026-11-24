@@ -152,7 +152,7 @@ the 3D executor of this design closes it later (step D13).
   script translates the WGSL with naga. The executors are features: `wgpu` (used by
   `ferroui-vello`), `gl`, `metal` and `vulkan`, whose `unsafe` parts live in or next to the FFI
   crates `ferroui-opengl`, `ferroui-metal` and `ferroui-vulkan` (ground rule 4).
-- **Backend glue:** `ferroui-skia` (`gpu/scene3d.rs`) and `ferroui-vello` (`gpu/scene3d_passes.rs`)
+- **Backend glue:** `ferroui-skia` (`scene3d.rs`) and `ferroui-vello` (`gpu/scene3d_passes.rs`)
   implement one optional capability of the drawing context,
   `IDrawingContextImplWithScene3D::draw_scene_3d(&Scene3DFrame) -> bool`, in
   `src/FerroUI.Base/platform/`; `false` means "not drawn on the GPU", and the caller draws the CPU
@@ -403,6 +403,54 @@ no frame routes of its own: it consumes what the 2D media path admits and report
 Vulkan and GLES, browser WebGPU, the threaded browser until #601, AHardwareBuffer, and no direct NV12
 sampling).
 
+**Built so far (D7, part 1: Vello).** The wgpu executor takes textures the renderer already has on
+the device (`Scene3DDeviceTextures`, `Scene3DWgpuExecutor::render_with_textures`): it samples them,
+never writes them, and keeps their owner while it keeps the bind group. An image brush whose bitmap
+is a `VelloSharedFrameBitmap` of the device samples the frame's converted texture, the one
+conversion the 2D path draws from, so a frame shown flat and on a mesh is converted once. A new
+frame is a new render with no mesh or texture upload. Without a texture for it, the layer is drawn
+with its colour and counted, as for any bitmap whose pixels cannot be read; the CPU reference does
+not sample frames.
+
+**Built so far (D7, part 2: `VideoBrush`).** `ferroui_media_controls::VideoBrush` follows a
+`FrameMailbox`. Give `brush()` to a material and `attach` the element that shows the scene. Each new
+frame is imported as for a `TexturePresenter` and put into a `Scene3DFrameSlot` on the render thread;
+the snapshot holds the slot, so a new frame draws the same snapshot again with no mesh or record
+upload, and an unchanged slot draws the kept output. The material shows the frame as the 2D path
+does: its visible region, turned and mirrored by `FrameMetadata::orient`. A frame that is turned or
+mirrored is drawn as one tile (the tile modes are not applied to it). A frame that is not on the
+device of the renderer is never read back: the material is drawn with its colour and counted.
+
+**On Vello (WebGL2).** The same executor draws on the context of the canvas (`web_gl/scene3d.rs` of
+`ferroui-vello`). The renderer of Vello names its objects through `web-sys` and the executor through
+the OpenGL contracts, so an output is read through a framebuffer of the contracts and copied with
+`copyTexSubImage2D` into a texture of the pool, which the scene paints with. Each render takes a new
+texture of the pool, so a scene of the same frame that already paints the old copy keeps it.
+
+The render thread acquires a frame once while something shows it, by `FrameIdentity`, device
+generation and context, so a frame shown flat and on a mesh shares one bitmap, which is disposed
+when the last holder lets it go.
+
+**Built so far (D7, part 3: Graphite).** The Metal executor takes the same kind of texture from its
+renderer (`Scene3DMetalDeviceTextures`, `render_with_textures`). On Graphite it samples the frame's
+own texture as the producer stored it, with no conversion pass: for full-range Rec. 709 the image
+shader applies the transfer of the 2D path (`frame_transfer` in `scene3d.wgsl`, selected by the third
+component of the brush metadata). Each render that samples a frame keeps its storage with
+`retain_frame`, as a 2D draw does, until the GPU has done what the context submits next; the 3D pass
+is committed to the same queue before that.
+
+**Built so far (D7, part 4: the visual brush).** WPF's form works: a `VisualBrush` whose `Visual` is,
+or contains, an element that shows a video or a camera (`MediaPlayerElement`, a camera preview, a
+`TexturePresenter`) samples the frame instead of rendering the element. The presenter registers
+itself as an `IScene3DFrameProvider`; its slot is filled only once a material asks for it, so a video
+without a 3D material does no extra work. A new frame raises `Scene3DChange::Output`, which bumps no
+generation and keeps the snapshot: the scene is only drawn again.
+
+`samples/PortableMedia` shows it: built with the feature `video-cube` and run with `--cube`, a
+`VisualBrush` over the `MediaPlayerElement` paints a turning cube over the flat video.
+
+Not built yet: the GL route (D8).
+
 ### 3.12 The values as built (D1)
 
 `src/FerroUI.Media3D`, crate `ferroui-media3d`: one file per value with its tests beside it
@@ -645,7 +693,7 @@ kept image lives), on Vello an image paint of the scene (CPU, hybrid and GPU). S
 context and the CPU mode of Vello draw the reference by definition; Skia with a GPU context and the
 hybrid and GPU modes of Vello count every such scene (`ferroui_render3d::scenes_drawn_on_cpu`) and
 log the first, the gap D4 and later close (D4 closes it for the hybrid and GPU modes of Vello,
-section 3.15). The headless platform's own drawing context draws
+section 3.15, and D5 for Skia on Graphite, section 3.19). The headless platform's own drawing context draws
 nothing at all (also no 2D) and has no 3D capability; the headless platform with Skia draws through
 Skia raster.
 
@@ -1066,6 +1114,126 @@ with the four brush shaders; the unit tests of `wgpu_executor.rs`: the brush str
 uploaded once per key and device and a new version into the same texture, a change of a brush
 writing only the uniforms of its draw.
 
+### 3.19 The Metal executor as built (D5)
+
+**The decision.** The executor is the native Metal executor of decision B, not a route through
+Skia's own drawing: an SkSL runtime effect or an `SkMesh` has no depth buffer, no per-draw
+culling and no MSAA target of its own, and would repeat in SkSL what the one shader already is;
+wgpu would link wgpu into every Skia build. Skia's part is what it has for an image of the
+GPU: the output is a Metal texture of the device the Graphite context draws with, wrapped once
+(`backend_textures::make_metal`, `graphite::images::wrap_texture`) and drawn as any image.
+
+**The shader** (`ferroui-render3d`, feature `msl`). The build script translates
+`scene3d.wgsl` with naga to the Metal Shading Language 2.1 (the first with `[[invariant]]`
+positions) into `$OUT_DIR`, and `shader::msl` includes it: the source, the name of each
+function and the slots of the argument tables, the same in every function (the frame, draw and
+brush uniforms at buffers 0, 1 and 2, the vertices at buffer 3 through the vertex descriptor,
+the texture of a brush at texture 0, the resolved colour at texture 1). The sampler of the
+brush textures (linear, the edges clamped, no mipmaps) is inlined into the functions. A missing
+binding is an error of the build. Nothing of naga is linked.
+
+**Where it lives.** `ferroui-metal`, module `scene3d`, feature `scene3d` (Apple targets), next
+to the Metal contracts and their `unsafe` calls; `ferroui-render3d` keeps
+`forbid(unsafe_code)`. `ferroui-skia`'s feature `media3d` turns it on.
+
+**The executor** (`Scene3DMetalExecutor`, one per device, queue and thread):
+
+- **Compiled once.** The library is compiled from the source when the executor is made
+  (`newLibraryWithSource`, with `preserveInvariance` where the system has it: the layers of a
+  material test `LessEqual` against the depth of the first), with the vertex descriptor and the
+  two depth states (`Less` with depth written, `LessEqual` without). Pipelines are made on
+  first demand by `(blend, sample count, brush shader)` and kept: culling and the depth test are
+  state of the encoder in Metal, so at most eight pipelines per sample count and the resolve.
+  `ferroui_metal::scene3d::counters` counts libraries, pipelines and the rest.
+- **Draws** as the wgpu executor draws them (section 3.15): one per layer, front then back,
+  counterclockwise front faces, the first diffuse layer of a side writing depth.
+- **Meshes** are uploaded once per `(id, version)` into buffers shared with the CPU; a new
+  version is a new pair of buffers (Metal keeps those of the version a submitted render reads
+  until it ran), not written into the old ones as wgpu's ordered queue writes allow.
+- **Brush textures** are private textures uploaded once per `BrushTextureKey` by a copy encoded
+  in the command buffer of the render that first draws them; a new version of a bitmap of the
+  same size is copied into the texture it replaces, after the renders that read it (Metal tracks
+  the hazard). A texture larger than 8192 texels a side or without readable texels is refused,
+  counted, and its layer drawn with its colour.
+- **Uniforms.** A `Scene3DMetalViewport` has three slots of uniform buffers (frame, draws,
+  brushes, at a stride of 256 bytes) used in turn, so that the CPU never writes a buffer a
+  submitted render reads; a slot whose last render has not run is waited for (counted as
+  `uniform_waits`). The buffers of the three slots are made together by the first render that
+  needs them (and grown together), so the renders after it make none. A render writes into its
+  slot only the bytes that differ from what the slot holds: once each slot holds the draws (the
+  first three renders), a moving camera writes the 1376 bytes of the frame uniforms alone.
+- **Targets.** The multisampled colour, the depth (`Depth32Float`) and the resolved colour are
+  private textures pooled by the size of the output and the sample count; depth is cleared once
+  per render and not stored. 4x MSAA where the device takes it, one sample for `EdgeMode`
+  `Aliased`, the resolve of decision N as in section 3.15.
+- **Failures.** A library or a pipeline that cannot be made, and a command buffer that failed on
+  the GPU (seen by the next render), are the error the caller reports once; a pipeline that
+  fails with four samples is reported once and the executor draws with one from then on.
+
+**Skia** (`scene3d.rs`). With a Graphite context (`GraphiteGrContext`) the scene is drawn by the
+executor of the context, made on the context's first scene from the Metal device and command
+queue of the GPU (`IMetalDevice`). Each context keeps up to eight outputs, each a texture of the
+scene's size rounded up to 32 pixels with its image and its viewport, chosen as in section 3.15
+(a kept output of the same snapshot, generations, size, scale, edge mode and brush textures is
+drawn again with no 3D pass; otherwise the output of the same viewport, of a scene that is gone,
+a new one, or the least recently used). The image is drawn over the bounds with the part of the
+texture the scene covers (a strict source rectangle), bilinearly, under the transform, clip and
+opacity of the canvas.
+
+**Order on the queue.** The 3D pass is a command buffer committed to the queue the Graphite
+context submits to, when the scene is drawn; the recording of the frame that draws its output is
+submitted at the next flush of the context, so it runs after the pass. An output drawn since the
+last flush (`GraphiteGrContext::flush_count`) is read by that recording and is never drawn over:
+a scene drawn again before the flush takes another texture. A frame that draws a scene is one
+only the recorder of the context draws (`note_direct_only_draw`), so the threads of a pipelined
+frame layer never read an output. The outputs and the executor of a context are released when it
+is disposed. A prewarm of pipelines (`GraphitePrewarmContext`) draws no 3D scene.
+
+**Counters.** `ferroui_skia::scene3d_counters()` (`SkiaScene3DCounters`): pipelines, libraries,
+mesh and brush texture uploads, uniform-only frames, kept-output frames, 3D passes, textures and
+buffers made, uniform bytes and the scenes drawn on the GPU of the thread.
+
+**Tests.** `ferroui-metal` (`scene3d_tests.rs`, on the system's device): the scenes against the
+CPU reference (exact with one sample a pixel; with 4x MSAA within three levels but for the
+edges), an empty scene, pipelines made once, a moving camera writing only the frame uniforms, a
+brush texture uploaded once. `ferroui-skia` (`gpu/metal/scene3d_tests.rs`): a scene on Graphite
+as its CPU reference, an unchanged scene drawn from its kept output, the steady state of a moving
+camera. `tests/FerroUI.RenderBackends.Comparison/scene3d_graphite_tests.rs` (macOS): every scene
+of section 3.14 and 3.18 against its CPU reference within the bounds of the Vello GPU modes, the
+golden properties, the steady state of a moving camera over a cube and over brushes, a static
+viewport without a 3D pass, the library and the pipelines made once per context, a new version
+of a bitmap uploading its texture alone. `vello.yml` runs them on the Metal device of the
+runner.
+
+**Not in D5.** iOS on device and simulator (the executor is built for every Apple target; the
+measurements of the step are the main validation's), the prewarm of the 3D pipelines on the
+pipeline pool, a metallib built ahead instead of the source compiled on the first scene, and
+memoryless MSAA and depth targets on Apple GPUs.
+
+### 3.20 The GL executor as built (D8)
+
+`ferroui_opengl::scene3d` (feature `scene3d`) draws the one shader on a GL or GLES context of version
+3: OpenGL 3.3 or OpenGL ES 3.0, so ANGLE, EGL, Android GLES, CGL and WebGL2.
+
+- **One shader source.** `scene3d.wgsl` is translated by naga to GLSL ES 3.00 at build time (feature
+  `glsl` of `ferroui-render3d`, `shader::glsl`), one source per entry point, with the names of its
+  uniform blocks and samplers. Nothing of naga is linked. On desktop GL the version line is replaced
+  by `#version 330 core`.
+- **The clip space** is GL's with y flipped (`ADJUST_COORDINATE_SPACE`): the first row of an output is
+  the top of the scene, so a renderer wraps it with a top left origin, and a front face is clockwise
+  in window coordinates.
+- **Compiled once, uniforms per frame.** Programs are linked once per context and brush shader, on
+  first demand. Meshes are uploaded once per `(id, version)` and brush textures once per key. Uniforms
+  are written only in the ranges whose bytes differ.
+- **Targets.** A multisampled colour and a depth renderbuffer, pooled by size and sample count, with a
+  blit into the output. A scene with additive layers goes through the resolved colour and
+  `fs_resolve` (decision N), as on the other executors.
+- **The state of the context.** A render changes the bindings and the fixed-function state and does
+  not restore them; the renderer is told afterwards (Skia's `DirectContext::reset`). GL names are
+  deleted by `Scene3DGlExecutor::dispose` with the context current, never on drop.
+- **Frames.** `Scene3DGlDeviceTextures` gives the executor a `GL_TEXTURE_2D` a renderer already has, as
+  on Metal.
+
 ## 4. Steps
 
 Each step is one pull request from main. Each updates the row "3D scenes (Viewport3D)" of
@@ -1079,10 +1247,10 @@ this page.
 | D2 | The scene model (section 3.13): transforms, rotations, cameras, lights, materials, `Geometry3D` and `MeshGeometry3D` with the collections, models, `Visual3D`, `ModelVisual3D`, `Viewport3DVisual`, the control `Viewport3D`; `Scene3DSnapshot` with the fitted planes and the generations; the render-data operation `DrawScene3D` and the capability `IDrawingContextImplWithScene3D`; XAML registration and the namespace mapping; the facade feature `media3d`. Tests: the snapshot of nested `Model3DGroup`s with transforms, a camera change bumping only `camera_generation`, a mesh edit bumping the structure, a light colour bumping the records, the fitted planes, `Bounds`, the text forms of the collections, a cube scene loaded from XAML, the operation recorded, sent and replayed with and without the capability | additions | medium: the namespace clash of `Vector3D`; the shape of the snapshot fixes every executor's input | in review |
 | D3 | The CPU reference rasterizer (`src/FerroUI.Rendering3D/cpu`) and 11 comparison scenes in `tests/FerroUI.RenderBackends.Comparison` (`scene3d_scenes.rs`, `scene3d_tests.rs`; 100 pixels, scales 1 and 2): a lit cube (ambient and directional), a point light with attenuation and range, a spot light cone, the orthographic camera, the matrix camera, front and back materials with culling, `MaterialGroup` with specular and emissive, transparent overlap in tree order, near and far clipping, `ClipToBounds` with opacity and a rotated viewport, the empty scene. Every backend draws the CPU reference from here, recorded as a gap | additions | medium | in review |
 | D4 | `scene3d.wgsl` and the wgpu executor (section 3.15): `ferroui-render3d`'s `shader` module and feature `wgpu` (the pipeline cache by a `Copy` key, the mesh cache by `(id, version)`, uniform buffers with dynamic offsets written only where they changed, the depth, MSAA and resolve pools, the fallback to one sample), and Vello's hybrid and GPU modes drawing on the device (`gpu/scene3d_passes.rs`: the outputs kept per device, painted as textures of the device, the CPU reference as the reported and counted last resort). Tests: `every_scene_3d_matches_its_cpu_reference_in_every_backend_and_mode` and `the_backends_draw_every_scene_3d_alike` with the GPU modes, `steady_frames_of_a_moving_camera_upload_only_uniforms_and_allocate_no_texture`, `a_static_viewport_issues_no_3d_pass`, `pipelines_are_created_once_per_device`, the naga validation and GLSL ES 3.00 of the shader; run by `vello.yml` on Metal (its paths now include `src/FerroUI.Rendering3D/`), Vulkan with D9 | additions (the module `wgpu_executor`, `ferroui_vello::gpu::scene3d_counters`) | high: the first GPU route; the uniform layout and alignment (dynamic offsets at the device's alignment) | in review |
-| D5 | Skia Graphite on Metal: the Metal executor (MSL from naga at build time) in or next to `ferroui-metal`, `ferroui-skia/gpu/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, ordered before `insert_recording`, the prewarm hook. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` (`gpu/metal/tests.rs`), the steady state, compile once; iOS simulator and device measurements | none new | high: cross-API ordering on Apple | planned |
+| D5 | Skia Graphite on Metal (section 3.19): the Metal executor (MSL from naga at build time, `ferroui-render3d` feature `msl`) in `ferroui-metal` (feature `scene3d`), `ferroui-skia/scene3d.rs`, the output wrapped by `backend_textures::make_metal` and `wrap_texture`, committed before the recording that reads it is submitted. Tests: `graphite_draws_every_scene_3d_as_its_cpu_reference` and the steady state and compile-once tests (`scene3d_graphite_tests.rs`), the unit tests of the executor and of the glue. Left: iOS simulator and device measurements, the prewarm of the 3D pipelines | additions (`ferroui_metal::scene3d`, `shader::msl`, `report_layer_with_unsampled_brush`, `ferroui_skia::scene3d_counters`, `SkiaScene3DCounters`) | high: cross-API ordering on Apple | in review |
 | D6 | Materials from brushes (section 3.18): gradients (inline stops and the lookup texture), `ImageBrush` (the backend image caches), `VisualBrush` and `DrawingBrush` (offscreen renders, again only when dirty), WPF's texture-coordinate mapping, the specular and emissive passes. Tests: a comparison scene per brush, an image uploaded once per device, a visual brush rendered again only when its visual changes | additions (the module `brush`, `cpu::brush_textures_read`, `lighting::shade_color`) | medium | in review, in three parts: the description and the CPU reference (part 1); the shader and the wgpu executor (part 2: `brush_uniforms_stride`, `texture_counters`, `Scene3DTextureCounters`, `Scene3DWgpuExecutor::texture_count`, the entry points of `shader`); visual and drawing brushes (part 3: the model side and the CPU reference's hook, `Scene3DBrushContent`, `SharedBrush::from_scene_content` and `scene_content`, `ISceneBrush::subscribe_content_changed`, `cpu::ContentRenderer`, `set_content_renderer`; the backends' offscreen renders left, section 3.18) |
-| D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | planned |
-| D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | planned |
+| D7 | Video and shared-texture materials, Metal routes first: `ISharedGpuTexture` and `GpuTextureRef` in `src/FerroUI.Base/platform/`, the accessors of `LeasedGpuBitmap`, `VelloSharedFrameBitmap` and `SharedFrameTexture`, the import cache by `FrameIdentity` that `TexturePresenter` also uses, `VideoBrush` and the visual-brush fast path, `sample_frame()`. Tests: `a_video_material_samples_the_frame_without_a_copy` (`FrameTransferCounters`: `gpu_import` only on Graphite, one shared `gpu_conversion` on Vello), one import for a frame shown flat and on a cube, the lease released after GPU completion, no mesh or record upload for a new frame; a "video on a cube" scene in `samples/PortableMedia` | additions | high: lifetimes across 2D and 3D | in review, parts 1 to 4 (frames sampled from the device on Vello and Graphite, `VideoBrush`, one acquisition per frame, the visual-brush fast path, the sample); the GL route planned |
+| D8 | The GL executor (Skia Ganesh GL everywhere: ANGLE, EGL, Android GLES, CGL, WebGL2): GLSL ES 3.00 from naga at build time, framebuffer, depth renderbuffer and MSAA resolve, the reset of Skia's GL state after drawing, video through `SharedFrameTexture` ids on the same context. Tests: the comparison scenes under ANGLE on WARP (Windows CI), llvmpipe EGL (Linux CI), the Android emulator, a browser smoke run; browser and Android frame times | none new | high: Skia's GL state | in review, part 1 (the GLSL at build time and the executor, section 3.20); the Skia glue, video and the device tests planned |
 | D9 | Vello on Vulkan, DX12 and GLES, validated in the Windows and Linux virtual machines (one at a time); the Vulkan executor (SPIR-V) for Skia Vulkan with lavapipe in CI. The video gaps of those routes stay recorded gaps | none new | medium | planned |
 | D10 | Hit testing (section 3.16, `src/FerroUI.Media3D/hit_testing/`): the ray from the camera with the fitted planes of the snapshot, the hierarchy per mesh by `(id, version)`, Moller-Trumbore with weights and distance, WPF's front and back material rules, the transforms of the tree, `RayMeshGeometry3DHitTestResult` and its base types, `VisualTreeHelper::hit_test`, `hit_test_point` and `hit_test_ray` with the filter and result callbacks. Tests: hits on known triangles with weights and distance, the front and back material rules, nested transforms, the order of the hits, misses, degenerate triangles, the filters, the cameras, picks that match the rendered pixels of the CPU reference, a 100k-triangle mesh | additions (`VisualTreeHelper`, `RayHitTestParameters`, the result types and behaviours, `Viewport3DHitTestTarget`) | medium | in review |
 | D11 | Interactive 3D (section 3.17): `UIElement3D`, `ModelUIElement3D` and `ContainerUIElement3D` with their pointer events (entered, exited, moved, pressed, released, capture lost) routed from a `Viewport3D` through the D10 hit test, pointer over and capture; the 2D hit test of `Viewport3D` over its models. Left for after D6: `Viewport2DVisual3D` rendering (the D6 path) and input routing (pointer events reaching a `Button` on a rotated `Viewport2DVisual3D` plane), and focus | additions (the three classes, `Pointer3DEventArgs`) | high: a transformed hit-test path in the input system (for `Viewport2DVisual3D`) | in review (the model part); `Viewport2DVisual3D` planned after D6 |

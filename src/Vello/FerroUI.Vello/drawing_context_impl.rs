@@ -273,7 +273,7 @@ pub struct DrawingContextImpl {
     color_matrix_stack: Vec<effects::ColorMatrixFrame>,
     /// The pixel operations that are pushed (on the device), innermost
     /// last.
-    #[cfg_attr(not(feature = "hybrid"), allow(dead_code))]
+    #[cfg_attr(not(any(feature = "hybrid", feature = "gpu")), allow(dead_code))]
     pixel_operation_stack: Vec<effects::PixelOperationFrame>,
     /// The clips that are open in the scene of the context.
     open_clips: usize,
@@ -1268,6 +1268,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
                     self.draw_device_texture(texture, opacity, source_rect, dest_rect);
                 }
             }
+            return;
+        }
+
+        // A frame of a producer in a web page is drawn on its context only.
+        #[cfg(feature = "hybrid-webgl")]
+        if let Some(frame) = source.as_any().downcast_ref::<crate::web_gl::VelloWebGlFrameBitmap>() {
+            self.draw_web_gl_frame(frame, opacity, source_rect, dest_rect);
             return;
         }
 

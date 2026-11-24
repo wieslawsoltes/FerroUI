@@ -205,6 +205,10 @@ extern "C" {
     fn ferro_windows_take(s: *mut c_void) -> *mut c_void;
     fn ferro_windows_frame_info(f: *mut c_void, out: *mut FrameInfo);
     fn ferro_windows_frame_release(f: *mut c_void);
+    fn ferro_windows_device_for_luid(luid: *const u8) -> *mut c_void;
+    fn ferro_windows_frame_share(f: *mut c_void, handle: *mut isize) -> *mut c_void;
+    fn ferro_windows_share_ready(copy: *mut c_void) -> i32;
+    fn ferro_windows_share_release(copy: *mut c_void);
     fn ferro_windows_alias(
         f: *mut c_void,
         display: isize,
@@ -294,6 +298,15 @@ impl NativeDevice {
         }
         Ok(values)
     }
+    /// A device of its own on the adapter of `luid`, for a renderer on another API (#575).
+    pub(crate) fn for_luid(luid: &[u8]) -> Result<Self, MediaError> {
+        if luid.len() != 8 {
+            return Err(unsupported("An adapter LUID has eight bytes"));
+        }
+        NonNull::new(unsafe { ferro_windows_device_for_luid(luid.as_ptr()) })
+            .map(|p| Self(Arc::new(Device(p))))
+            .ok_or_else(|| unsupported("No hardware D3D11 device on the renderer's adapter"))
+    }
     pub fn from_renderer(producer: &NativeGlFrameProducer) -> MediaFuture<Self> {
         producer.invoke(|context| {
             let (display, egl) = Egl::current(context)?;
@@ -301,6 +314,33 @@ impl NativeDevice {
                 .map(|p| Self(Arc::new(Device(p))))
                 .ok_or_else(|| unsupported("Active ANGLE device cannot share native D3D11 images"))
         })
+    }
+}
+/// A frame copied into a texture shared by an NT handle, which it owns (#575).
+pub(crate) struct SharedFrameCopy {
+    copy: NonNull<c_void>,
+    handle: isize,
+}
+// The native object is immutable after the copy is submitted; its context is multithread protected.
+unsafe impl Send for SharedFrameCopy {}
+unsafe impl Sync for SharedFrameCopy {}
+impl Drop for SharedFrameCopy {
+    fn drop(&mut self) {
+        unsafe { ferro_windows_share_release(self.copy.as_ptr()) }
+    }
+}
+impl SharedFrameCopy {
+    /// The NT handle of the texture, valid as long as this copy.
+    pub(crate) fn handle(&self) -> isize {
+        self.handle
+    }
+    /// Whether the copy has completed on the GPU.
+    pub(crate) fn is_ready(&self) -> Result<bool, MediaError> {
+        match unsafe { ferro_windows_share_ready(self.copy.as_ptr()) } {
+            1 => Ok(true),
+            0 => Ok(false),
+            _ => Err(failure("The GPU copy of a shared frame failed")),
+        }
     }
 }
 struct Session(NonNull<c_void>);
@@ -549,6 +589,14 @@ impl NativeFrame {
             ferroui_direct2d::D3D11Texture::from_texture(texture,slice,self.clone())
                 .ok_or_else(|| unsupported("Media texture is incompatible with native Direct2D device"))
         }
+    }
+    /// The frame copied on the GPU into a texture shared by an NT handle.
+    pub(crate) fn share(&self) -> Result<SharedFrameCopy, MediaError> {
+        let mut handle = 0;
+        let copy = unsafe { ferro_windows_frame_share(self.0 .0.as_ptr(), &mut handle) };
+        NonNull::new(copy)
+            .map(|copy| SharedFrameCopy { copy, handle })
+            .ok_or_else(|| unsupported("The frame could not be shared by an NT handle"))
     }
     pub fn info(&self) -> FrameInfo {
         let mut v = FrameInfo::default();

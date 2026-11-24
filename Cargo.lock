@@ -2374,6 +2374,7 @@ dependencies = [
  "cc",
  "ferroui-base",
  "ferroui-media",
+ "ferroui-media-controls",
  "ferroui-media-opengl",
  "ferroui-opengl",
  "pkg-config",
@@ -2510,6 +2511,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-direct2d",
  "ferroui-media",
+ "ferroui-media-controls",
  "ferroui-media-opengl",
  "ferroui-opengl",
  "ferroui-win32",
@@ -2531,7 +2533,9 @@ name = "ferroui-metal"
 version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
+ "ferroui-render3d",
  "objc2",
+ "objc2-foundation",
  "objc2-metal",
 ]
 
@@ -2565,6 +2569,7 @@ dependencies = [
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+ "ferroui-render3d",
  "libc",
 ]
 
@@ -2786,6 +2791,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-harfbuzz",
  "ferroui-headless",
+ "ferroui-metal",
  "ferroui-render3d",
  "ferroui-skia",
  "ferroui-svg",
@@ -3066,6 +3072,7 @@ dependencies = [
 name = "ferroui-vello"
 version = "0.6.0-preview.1"
 dependencies = [
+ "ash",
  "ferroui-base",
  "ferroui-build",
  "ferroui-controls",
@@ -3095,6 +3102,7 @@ dependencies = [
  "wasm-bindgen",
  "web-sys",
  "wgpu",
+ "windows 0.62.2",
  "x11-dl",
  "zune-bmp",
  "zune-core",
@@ -5257,6 +5265,7 @@ dependencies = [
  "ferroui-media-video-linux",
  "ferroui-media-video-windows",
  "ferroui-media-windows",
+ "ferroui-media3d",
  "ferroui-native",
  "ferroui-opengl",
  "ferroui-skia",
