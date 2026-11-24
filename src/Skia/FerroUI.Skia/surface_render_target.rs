@@ -330,6 +330,10 @@ impl IDrawingContextLayerImpl for SurfaceRenderTarget {
         true
     }
 
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        self.surface.set_frame_dirty_rows(rows);
+    }
+
     fn is_corrupted(&self) -> bool {
         // Deviation (DEVIATIONS.md, Skia backend): a layer of the render target of a window is
         // also stale when the text rendering of the window's frames is no longer the one its

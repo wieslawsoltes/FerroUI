@@ -647,6 +647,11 @@ impl ServerCompositionTarget {
                 match layer {
                     Some(layer) => {
                         if draws {
+                            // The rows the frame can change: those of the dirty area, a row more on each side for
+                            // the antialiased edges at its border.
+                            let dirty = self.dirty_rects.combined_rect().intersect_or_empty(render_bounds);
+                            let rows = (dirty.top.floor() as i32 - 1, dirty.bottom.ceil() as i32 + 1);
+                            layer.set_frame_dirty_rows(Some(rows));
                             let mut context = layer.create_drawing_context();
                             self.render_root_to_context_with_clip(&compositor, &mut *context, &root);
                             context.dispose();

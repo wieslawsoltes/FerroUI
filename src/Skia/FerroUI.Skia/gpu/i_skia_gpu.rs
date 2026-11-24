@@ -61,6 +61,13 @@ pub trait ISkiaSurface {
         false
     }
 
+    /// The rows of pixels the next frame drawn on the surface can change
+    /// (`IDrawingContextLayerImpl::set_frame_dirty_rows`); a surface that draws its frames whole
+    /// ignores it.
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        let _ = rows;
+    }
+
     /// Begins a frame that the drawing context records as a picture, which the surface draws
     /// by itself when the drawing context is disposed, instead of a frame drawn on the canvas
     /// of [`surface`](Self::surface). `None` (the default): the frame is drawn on that canvas,
