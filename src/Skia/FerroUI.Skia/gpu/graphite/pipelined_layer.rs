@@ -19,8 +19,9 @@
 //! picture is handed to the threads of the bands, one per horizontal strip
 //! of the layer ([`SkiaOptions::frame_pipelining_bands`](crate::SkiaOptions::frame_pipelining_bands),
 //! two by default). Each owns a recorder: it plays the picture clipped to its
-//! band onto a surface that wraps the texture of the layer, snaps its
-//! recorder and keeps the recording. The render thread does not wait. It
+//! band onto a deferred canvas of the layer's size, snaps its recorder and
+//! keeps the recording, which its insertion places on the texture of the
+//! layer bounded to the band's rows. The render thread does not wait. It
 //! draws the layer onto the target as the frame before left it, and after
 //! the flush that puts this draw into the context it tells the threads to
 //! insert their recordings, which each does under the lock of the context.
@@ -54,9 +55,11 @@
 //!   a resource provider of its own: each band rasterizes and uploads the
 //!   glyphs it draws, and the caches of the bands do not see each other.
 //!   The strike cache of the CPU side is shared and locked.
-//! - A surface that wraps a texture loads the texture when it is first drawn
-//!   to, and the clip of a band is not the whole surface, so a band never
-//!   clears or discards what the other bands drew.
+//! - A recording replayed onto a texture loads the texture, and the
+//!   insertion bounds it to its band's rows (`fTargetClip`), so a band never
+//!   clears, discards or touches what the other bands drew; the clip of the
+//!   band on its canvas alone did not keep every pixel inside (an
+//!   antialiased clip combined with it reached one row across).
 //! - An image of one recorder drawn by another shows the texture as the
 //!   order of insertion left it; nothing is flushed for it. That is why the
 //!   recorder of the context is snapped and inserted before the bands are
@@ -799,22 +802,32 @@ struct Held {
     /// The turn of an ordered insertion; `None` for a band recorded on a deferred canvas, which is
     /// inserted when it is ready ([`BandInsert::Deferred`]).
     turn: Option<Turn>,
-    /// The row of the layer where a deferred recording is placed: 0, since it covers the layer.
-    top: i32,
+    /// The rows of the layer the recording may write: the band's, a hard boundary at the insertion.
+    clip: IRect,
+    /// The recording was drawn on the shared texture of the layer ([`BandInsert::Direct`]) and goes in
+    /// as it is.
+    direct: bool,
 }
 
 /// How the threads insert the recordings of the bands of a frame (#1363, a prototype: the order
 /// stays the default until the deferred insertion passes the gate and the pixel tests).
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub(crate) enum BandInsert {
-    /// Each band draws on the layer's texture and the recordings go in in the order the bands
-    /// were sent ([`InsertOrder`]).
+    /// Each band records on a deferred canvas of the layer's size under the clip of the band, and
+    /// the recordings go in in the order the bands were sent ([`InsertOrder`]), each bounded to its
+    /// band's rows (`insert_at`).
     Ordered,
     /// Each band records on a deferred canvas of the layer's size under the clip of the band, which
     /// the insertion places on the layer's texture: no shared target while the threads record, and
     /// the recordings go in as they are ready, with no turn to wait for. Asked for with
     /// `FERROUI_SKIA_BAND_INSERT=deferred`.
     Deferred,
+    /// The path before the bands were bounded to their rows at the insertion, kept for the gate to
+    /// compare with: each band draws on the layer's texture, shared by the threads, under the clip
+    /// of the band alone, and the recordings go in in the order the bands were sent. A band whose
+    /// draws reach a row across that clip makes the frame depend on the order. Asked for with
+    /// `FERROUI_SKIA_BAND_INSERT=direct`.
+    Direct,
 }
 
 impl BandInsert {
@@ -822,6 +835,7 @@ impl BandInsert {
     fn from_environment() -> Self {
         match std::env::var("FERROUI_SKIA_BAND_INSERT") {
             Ok(value) if value.trim() == "deferred" => Self::Deferred,
+            Ok(value) if value.trim() == "direct" => Self::Direct,
             _ => Self::Ordered,
         }
     }
@@ -831,14 +845,14 @@ impl BandInsert {
 /// bands were sent in, so the bands of a frame from the top, frame after
 /// frame.
 ///
-/// The bands of a frame write disjoint pixels, and still the frame is not
-/// the same in every order: where an antialiased edge crosses the row two
-/// bands meet at, Graphite covers the pixel at the crossing a little
-/// differently in the band that is drawn first (measured: one pixel, six of
-/// 255 in a channel). A fixed order makes a frame the same every time it is
-/// drawn, and the same as the frame the recorder of the context draws band
-/// by band. It costs nothing: the threads insert under the lock of the
-/// context, one at a time in any case.
+/// The bands of a frame write disjoint pixels: the insertion bounds each
+/// recording to the band's rows (`insert_at`). Before it did, a band could
+/// write one pixel across the row two bands meet at (an antialiased clip
+/// combined with the band's), and the frame depended on which band went in
+/// last; the order kept that the same from frame to frame. The order stays
+/// the default until the completion-order insertion has passed the gate. It
+/// costs nothing: the threads insert under the lock of the context, one at a
+/// time in any case.
 #[derive(Default)]
 struct InsertOrder {
     /// The turn of the recording that is inserted next.
@@ -917,22 +931,25 @@ impl BandWorker {
                 BandJob::Play(band) => {
                     let started = Instant::now();
                     let deferred = insert_mode == BandInsert::Deferred;
+                    let direct = insert_mode == BandInsert::Direct;
                     let turn = (!deferred).then(|| Turn { order: order.clone(), number: band.turn });
                     // A panic would leave the render thread waiting for an
                     // answer that never comes; it is reported as a band
                     // that failed, which ends the threads.
+                    // The ordered and the completion-order insertion record on a deferred canvas, which the
+                    // insertion bounds to the band's rows (`insert_at`); they differ in the order the recordings
+                    // go in. The direct path draws on the shared texture of the layer.
                     let recording = catch_unwind(AssertUnwindSafe(|| {
-                        if deferred {
-                            play_deferred(&mut recorder, &mut surfaces, &band)
-                        } else {
+                        if direct {
                             play(&mut recorder, &mut surfaces, &band)
+                        } else {
+                            play_deferred(&mut recorder, &mut surfaces, &band)
                         }
                     }))
                     .unwrap_or(None);
                     let busy = started.elapsed();
-                    // A deferred recording covers the whole layer (`play_deferred`): it is placed at the top.
-                    let (layer, index, top) = (band.layer, band.index, 0);
-                    held.push(Held { layer, index, recording, busy, turn, top });
+                    let (layer, index, clip) = (band.layer, band.index, band.clip);
+                    held.push(Held { layer, index, recording, busy, turn, clip, direct });
                     // The reference of the render thread outlives this one
                     // (see `Band`).
                     drop(band);
@@ -940,17 +957,17 @@ impl BandWorker {
                 BandJob::Forget { layer } => surfaces.retain(|(id, _)| *id != layer),
                 BandJob::Insert => {
                     let mut gone = false;
-                    for Held { layer, index, recording, busy, turn, top } in held.drain(..) {
+                    for Held { layer, index, recording, busy, turn, clip, direct } in held.drain(..) {
                         let recorded = recording.is_some();
                         if let Some(turn) = &turn {
                             drop(turn.wait());
                         }
                         let target = surfaces.iter().find(|(id, _)| *id == layer).map(|(_, surface)| surface);
                         let inserted = recording.is_some_and(|mut recording| {
-                            catch_unwind(AssertUnwindSafe(|| match (&turn, target) {
-                                (Some(_), _) => insert(&mut context.lock(), &mut recording),
-                                (None, Some(target)) => insert_at(&mut context.lock(), &mut recording, target, top),
-                                (None, None) => false,
+                            catch_unwind(AssertUnwindSafe(|| match (direct, target) {
+                                (true, _) => insert(&mut context.lock(), &mut recording),
+                                (false, Some(target)) => insert_at(&mut context.lock(), &mut recording, target, clip),
+                                (false, None) => false,
                             }))
                             .unwrap_or(false)
                         });
@@ -977,7 +994,8 @@ impl BandWorker {
     }
 }
 
-/// Plays a band on the recorder of its thread and snaps the recorder.
+/// Plays a band on the shared texture of the layer, under the clip of the band alone, on the recorder of its
+/// thread and snaps the recorder ([`BandInsert::Direct`], the path before the bands were bounded to their rows).
 fn play(
     recorder: &mut graphite::Recorder,
     surfaces: &mut Vec<(u64, Surface)>,
@@ -1027,10 +1045,20 @@ fn play_deferred(
     recorder.snap()
 }
 
-/// Inserts a recording of a deferred canvas onto `target` at row `top` (`fTargetSurface`,
-/// `fTargetTranslation`, which skia-safe does not set; through `skia-bindings`, as for
-/// `fRequireOrderedRecordings`, desktop-performance.md section 9.17).
-fn insert_at(context: &mut graphite::Context, recording: &mut graphite::Recording, target: &Surface, top: i32) -> bool {
+/// Inserts a recording of a deferred canvas onto `target`, bounded to the band's rows `clip` (`fTargetSurface`,
+/// `fTargetClip`, which skia-safe does not set; through `skia-bindings`, as for `fRequireOrderedRecordings`,
+/// desktop-performance.md section 9.17).
+///
+/// The clip of the insertion is a hard boundary of the replay: whatever clips the recording combines, it writes
+/// no pixel outside the band's rows. The clip of the band on the canvas alone is not one. On Graphite Vulkan a
+/// band whose draws combined it with an antialiased rounded clip wrote one pixel into the first row of the band
+/// next to it, so the band inserted last won that pixel and the frame depended on the order of the insertions.
+fn insert_at(
+    context: &mut graphite::Context,
+    recording: &mut graphite::Recording,
+    target: &Surface,
+    clip: IRect,
+) -> bool {
     // The wrapper holds the pointer to the native structure and a marker of no size: of the size of a pointer,
     // the pointer is at offset 0. A surface handle is `repr(transparent)` over the pointer to its native surface.
     const _: () = assert!(
@@ -1043,7 +1071,10 @@ fn insert_at(context: &mut graphite::Context, recording: &mut graphite::Recordin
         let native =
             *(&mut info as *mut InsertRecordingInfo).cast::<*mut skia_bindings::skgpu_graphite_InsertRecordingInfo>();
         (*native).fTargetSurface = *(target as *const Surface).cast::<*mut skia_bindings::SkSurface>();
-        (*native).fTargetTranslation = skia_bindings::SkIPoint { fX: 0, fY: top };
+        // The canvas has the layer's size: no translation.
+        (*native).fTargetTranslation = skia_bindings::SkIPoint { fX: 0, fY: 0 };
+        (*native).fTargetClip =
+            skia_bindings::SkIRect { fLeft: clip.left, fTop: clip.top, fRight: clip.right, fBottom: clip.bottom };
     }
     context.insert_recording(&info) == graphite::InsertStatus::Success
 }
