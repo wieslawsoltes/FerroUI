@@ -47,6 +47,7 @@ ferroui-controls-repeater = { workspace = true }
 ferroui-markup-xaml = { workspace = true }
 ferroui-markup-xaml-loader = { workspace = true, features = ["runtime"] }
 ferroui-markup-xaml-winui = { workspace = true }
+ferroui-svg.workspace = true
 ferroui-desktop = { workspace = true, optional = true }
 ferroui-themes-winui = { workspace = true, optional = true }
 ferroui-headless = { workspace = true, optional = true }

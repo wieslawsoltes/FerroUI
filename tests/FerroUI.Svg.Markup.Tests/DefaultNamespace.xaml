@@ -1,0 +1,5 @@
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+  <Image x:Name="Short" Source="{SvgImage ferres://SvgMarkupTests/square.svg}" />
+  <Image x:Name="Named" Source="{SvgImage Source=ferres://SvgMarkupTests/square.svg}" />
+</StackPanel>

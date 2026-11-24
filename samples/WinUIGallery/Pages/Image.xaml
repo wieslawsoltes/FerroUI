@@ -1,6 +1,7 @@
 <!-- Adapted from all six original Image page compositions; see ../NOTICE.md.
      Decode size uses Bitmap::decode_to_height; nine-grid uses native drawing objects.
-     SVG and animated playback remain explicit unsupported source features. -->
+     The SVG image is drawn as vectors by {SvgImage}; animated playback remains an explicit
+     unsupported source feature. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="20">
   <StackPanel x:Name="ImageExample1" Spacing="8">
@@ -35,9 +36,8 @@
   </StackPanel>
   <StackPanel x:Name="ImageExample5" Spacing="8">
     <TextBlock Text="An SVG image" FontSize="18" />
-    <Image x:Name="SvgImage" Height="100" AutomationProperties.Name="Mirror PC consent SVG, unavailable" />
-    <TextBlock x:Name="SvgImageDiagnostic" TextWrapping="Wrap"
-               Text="The original MirrorPCConsent.svg is preserved. SVG image decoding is not available in this Gallery host." />
+    <Image x:Name="SvgImage" Height="100" AutomationProperties.Name="Mirror PC consent SVG"
+           Source="{SvgImage ferres://WinUIGallery/Assets/SampleMedia/MirrorPCConsent.svg}" />
   </StackPanel>
   <StackPanel x:Name="ImageExample6" Spacing="12">
     <TextBlock Text="An animated GIF image" FontSize="18" />

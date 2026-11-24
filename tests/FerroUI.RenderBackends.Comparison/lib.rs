@@ -216,6 +216,8 @@ mod custom_effect_tests;
 #[cfg(test)]
 mod effect_tests;
 #[cfg(test)]
+mod svg_tests;
+#[cfg(test)]
 mod scene3d_tests;
 #[cfg(test)]
 mod tests;

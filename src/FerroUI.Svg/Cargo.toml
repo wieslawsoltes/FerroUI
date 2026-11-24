@@ -1,0 +1,34 @@
+[package]
+name = "ferroui-svg"
+description = "SVG images for FerroUI: untrusted documents converted to geometry and brushes drawn as vectors on every backend"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme.workspace = true
+keywords.workspace = true
+categories.workspace = true
+build = "build.rs"
+links = "ferroui_svg_xaml"
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-markup-xaml.workspace = true
+roxmltree.workspace = true
+url.workspace = true
+
+[build-dependencies]
+ferroui-build-scan.workspace = true
+
+[dev-dependencies]
+ferroui-base = { workspace = true, features = ["testing"] }
+# The images in pixels, in every rendering mode of the backend.
+ferroui-vello = { workspace = true, features = ["hybrid", "gpu"] }
+
+[package.metadata.release]
+group = "controls"
