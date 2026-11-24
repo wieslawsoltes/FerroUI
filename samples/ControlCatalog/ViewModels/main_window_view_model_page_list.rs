@@ -159,6 +159,7 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/CustomDrawing.xaml", "Custom Drawing", Icons::BRUSH, "Render custom geometry in code");
             s.add_page(|| crate::pages::implicit_transitions_page::page().upcast(), "Implicit transitions", Icons::BRUSH, "Opacity, rotation, scale and translation that animate when they change");
             s.add_page(|| crate::pages::parallax_view_page::page().upcast(), "ParallaxView", Icons::BRUSH, "A background that moves more slowly than its scrolling source");
+            s.add_page(|| crate::pages::theme_transitions_page::page().upcast(), "Theme transitions", Icons::BRUSH, "Elements that enter, leave and move with the theme animations");
             s.add_page(|| crate::pages::renderer_parity_page::page().upcast(), "Renderer parity", Icons::BRUSH, "Drawing contracts, native text selection and bitmap inputs");
             // Not from upstream: SymbolIcon and FontIcon of WinUI (docs/porting/winui-controls.md) and PathIcon.
             s.add("/Pages/IconElementPage.xaml", "IconElement", Icons::SPARKLE, "Symbol, font and path icons");

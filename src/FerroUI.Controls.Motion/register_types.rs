@@ -23,6 +23,9 @@ pub static ASSEMBLY: MarkupAssembly = MarkupAssembly {
         ("FerroXamlPropertyAlias", "FerroUI.Controls.Border.BackgroundTransition=FerroUI.Controls.ImplicitTransitions.BackgroundTransition"),
         ("FerroXamlPropertyAlias", "FerroUI.Controls.Panel.BackgroundTransition=FerroUI.Controls.ImplicitTransitions.BackgroundTransition"),
         ("FerroXamlPropertyAlias", "FerroUI.Controls.Presenters.ContentPresenter.BackgroundTransition=FerroUI.Controls.ImplicitTransitions.BackgroundTransition"),
+        ("FerroXamlPropertyAlias", "FerroUI.Controls.Panel.ChildrenTransitions=FerroUI.Controls.ThemeTransitions.ChildrenTransitions"),
+        ("FerroXamlPropertyAlias", "FerroUI.Controls.ItemsControl.ItemContainerTransitions=FerroUI.Controls.ThemeTransitions.ItemContainerTransitions"),
+        ("FerroXamlPropertyAlias", "FerroUI.Controls.Primitives.Popup.ChildTransitions=FerroUI.Controls.ThemeTransitions.ChildTransitions"),
     ],
 };
 
@@ -31,11 +34,25 @@ const TYPES: &[&TypeInfo] = &[
     <crate::ImplicitTransitions as StaticType>::TYPE,
     <crate::ScalarTransition as StaticType>::TYPE,
     <crate::Vector3Transition as StaticType>::TYPE,
+    <crate::ThemeTransitions as StaticType>::TYPE,
+    <crate::ThemeTransition as StaticType>::TYPE,
+    <crate::EntranceThemeTransition as StaticType>::TYPE,
+    <crate::RepositionThemeTransition as StaticType>::TYPE,
+    <crate::ContentThemeTransition as StaticType>::TYPE,
+    <crate::AddDeleteThemeTransition as StaticType>::TYPE,
+    <crate::PopupThemeTransition as StaticType>::TYPE,
 ];
 
 ferroui_base::ferro_rust_paths! {
-    classes: [crate::ParallaxView, crate::ScalarTransition, crate::Vector3Transition],
-    types: [crate::ParallaxSourceOffsetKind, crate::ImplicitTransitions, crate::Vector3TransitionComponents],
+    classes: [
+        crate::ParallaxView, crate::ScalarTransition, crate::Vector3Transition, crate::ThemeTransition,
+        crate::EntranceThemeTransition, crate::RepositionThemeTransition, crate::ContentThemeTransition,
+        crate::AddDeleteThemeTransition, crate::PopupThemeTransition,
+    ],
+    types: [
+        crate::ParallaxSourceOffsetKind, crate::ImplicitTransitions, crate::Vector3TransitionComponents,
+        crate::ThemeTransitions, crate::TransitionCollection,
+    ],
     contracts: [], generics: [], generic_contracts: [],
 }
 
@@ -46,7 +63,14 @@ pub fn register_types() {
         ferroui_controls::register_types();
         TypeInfo::register_namespaces(NAMESPACES);
         TypeInfo::register_table(TYPES);
-        MarkupType::register_table(&[crate::ParallaxSourceOffsetKind::MARKUP, crate::Vector3TransitionComponents::MARKUP]);
+        MarkupType::register_table(&[
+            crate::ParallaxSourceOffsetKind::MARKUP,
+            crate::Vector3TransitionComponents::MARKUP,
+            <crate::TransitionCollection as MarkupTyped>::MARKUP,
+        ]);
+        ferroui_base::data::core::ValueTypes::register_global(|| {
+            ferroui_base::data::core::ValueTypes::register_nullable::<crate::TransitionCollection>();
+        });
         register_rust_paths();
         MarkupAssembly::register_table(&ASSEMBLY);
     });

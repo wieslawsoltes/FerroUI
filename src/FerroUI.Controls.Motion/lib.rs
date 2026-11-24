@@ -18,12 +18,19 @@ mod implicit_transitions;
 mod parallax_expressions;
 mod parallax_view;
 mod register_types;
+mod theme_transitions;
 
 pub use implicit_transitions::{ImplicitTransitions, ScalarTransition, Vector3Transition, Vector3TransitionComponents};
 pub use parallax_view::{ParallaxSourceOffsetKind, ParallaxView};
 pub use register_types::{register_types, ASSEMBLY};
+pub use theme_transitions::{
+    AddDeleteThemeTransition, ContentThemeTransition, EntranceThemeTransition, PopupThemeTransition,
+    RepositionThemeTransition, ThemeTransition, ThemeTransitions, TransitionCollection,
+};
 
 #[cfg(test)]
 mod implicit_transitions_tests;
 #[cfg(test)]
 mod parallax_view_tests;
+#[cfg(test)]
+mod theme_transitions_tests;

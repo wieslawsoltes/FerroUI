@@ -33,4 +33,33 @@
   <ParallaxView x:Name="Parallax" VerticalShift="100" HorizontalSourceOffsetKind="Absolute">
     <Border />
   </ParallaxView>
+  <StackPanel x:Name="ThemeChildren">
+    <StackPanel.ChildrenTransitions>
+      <TransitionCollection>
+        <EntranceThemeTransition IsStaggeringEnabled="True" FromVerticalOffset="12" />
+        <AddDeleteThemeTransition />
+      </TransitionCollection>
+    </StackPanel.ChildrenTransitions>
+  </StackPanel>
+  <Rectangle x:Name="ThemeOwn" Width="50" Height="50">
+    <ThemeTransitions.Transitions>
+      <TransitionCollection>
+        <RepositionThemeTransition IsStaggeringEnabled="False" />
+      </TransitionCollection>
+    </ThemeTransitions.Transitions>
+  </Rectangle>
+  <ListBox x:Name="ThemeItems">
+    <ListBox.ItemContainerTransitions>
+      <TransitionCollection>
+        <ContentThemeTransition VerticalOffset="10" />
+      </TransitionCollection>
+    </ListBox.ItemContainerTransitions>
+  </ListBox>
+  <Popup x:Name="ThemePopup">
+    <Popup.ChildTransitions>
+      <TransitionCollection>
+        <PopupThemeTransition FromVerticalOffset="16" />
+      </TransitionCollection>
+    </Popup.ChildTransitions>
+  </Popup>
 </StackPanel>

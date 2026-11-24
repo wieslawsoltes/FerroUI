@@ -41,6 +41,7 @@ pub(crate) mod custom_effects_pages;
 mod custom_drawing_example_control;
 pub(crate) mod implicit_transitions_page;
 pub(crate) mod parallax_view_page;
+pub(crate) mod theme_transitions_page;
 pub(crate) mod renderer_parity_page;
 mod data_validation_page;
 mod dialogs_page;
