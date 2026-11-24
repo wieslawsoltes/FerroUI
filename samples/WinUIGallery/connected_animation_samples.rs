@@ -169,7 +169,7 @@ pub(crate) fn item_control<T: ferroui_base::ObjectType>(
         .find(|child| child.name().as_deref() == Some(name))
         .and_then(|child| child.cast::<T>())
         .or_else(|| {
-            let repeater = root.find_control::<ItemsRepeater>("CollectionItems")?;
+            let repeater = root.find_control::<Control>("CollectionItems")?.cast::<ItemsRepeater>()?;
             let source = repeater.items_source()?;
             (0..source.count())
                 .filter_map(|index| source.get_at(index))
@@ -222,9 +222,19 @@ fn wire_tile_activation(tile: &Ref<Control>, index: usize, activate: &Rc<dyn Fn(
         on_tap(index);
         e.set_handled(true);
     });
+    // As a button: Enter activates on the way down, Space on the way up.
     let on_key = activate.clone();
     tile.add_handler(InputElement::key_down_event(), move |_, e: &KeyEventArgs| {
-        if matches!(e.key, Key::Enter | Key::Space) {
+        if e.key == Key::Enter {
+            on_key(index);
+            e.set_handled(true);
+        } else if e.key == Key::Space {
+            e.set_handled(true);
+        }
+    });
+    let on_key = activate.clone();
+    tile.add_handler(InputElement::key_up_event(), move |_, e: &KeyEventArgs| {
+        if e.key == Key::Space {
             on_key(index);
             e.set_handled(true);
         }

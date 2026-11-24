@@ -2463,7 +2463,7 @@
       ]
     },
     "ConnectedAnimation": {
-      "status": "partial",
+      "status": "ported",
       "source_page": {
         "path": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationPage.xaml",
         "sha256": "001900e418d2b94c79981cb97e74543a9d2dafe7e11b07173c4b9fc32a94fdb3"
@@ -2478,6 +2478,7 @@
         "samples/WinUIGallery/Pages/ConnectedCards.xaml",
         "samples/WinUIGallery/Pages/ConnectedDetail.xaml",
         "samples/WinUIGallery/Pages/ConnectedTiles.xaml",
+        "samples/WinUIGallery/Pages/ConnectedTile.xaml",
         "samples/WinUIGallery/Pages/NavigationSample1.xaml",
         "samples/WinUIGallery/Pages/NavigationSample2.xaml",
         "samples/WinUIGallery/connected_animation_samples.rs",
@@ -2526,7 +2527,7 @@
           "name": "connected_collection_description_tooltip_tracks_real_trimming_and_releases_its_control"
         }
       ],
-      "notes": "All four source compositions use native Frame/FramePage navigation and ConnectedAnimationService directly. Original collection, card and manual-item counts are 8, 13 and 13, with original landscape assets, item order, descriptions, selected data and randomized view/like ranges. Native StackPanel/WrapPanel plus Button compositions explicitly adapt ListView, GridView and ItemsRepeater containers; no container compatibility shims are introduced. Native collection rows stretch their content, apply character ellipsis and use collapsed text-layout lines to conditionally expose full-description ToolTips. Cache/history, configuration choices, coordinated detail elements, direct return animation, scroll/focus restoration and animation disposal have authored logical coverage. Container virtualization, full WinUI item-container semantics, acrylic, EntranceThemeTransition and exact native-host/input/rendering/accessibility parity remain pending. Named test anchors describe the intended logical coverage; this entry asserts no successful execution record or full page, rendering, input or accessibility parity.",
+      "notes": "All four source compositions use native Frame/FramePage navigation and ConnectedAnimationService directly. Original collection, card and manual-item counts are 8, 13 and 13, with original landscape assets, item order, descriptions, selected data and randomized view/like ranges. The collection is a ListView with IsItemClickEnabled, the cards a GridView and the manual items an ItemsRepeater with a UniformGridLayout, XYFocus.NavigationModes and focusable tiles that Enter (down) and Space (up) activate, as in CollectionPage.xaml, CardPage.xaml and ItemsRepeaterCollectionPage.xaml. Cache/history, configuration choices, coordinated detail elements, direct return animation (scrolling the container into view), scroll/focus restoration and animation disposal are covered by the tests. The acrylic of the tiles is the theme's AcrylicBackgroundFillColorBaseBrush (its fallback colour until #325).",
       "examples": [
         {
           "source": "WinUIGallery/Samples/ConnectedAnimation/ConnectedAnimationListPage.txt",
