@@ -572,6 +572,33 @@ fn graphite_draws_raster_bitmaps() {
 }
 
 #[test]
+fn graphite_drops_a_released_texture_within_the_sweep_interval_when_nothing_is_uploaded() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let target = GraphiteTarget::new(&device);
+    let immutable = two_tone_bitmap();
+    let source = Rect::new(0.0, 0.0, 4.0, 4.0);
+    target.draw(|context| context.draw_bitmap(&*immutable, 1.0, source, Rect::new(8.0, 8.0, 16.0, 16.0)));
+    assert_eq!(1, target.gr_context.uploaded_image_count());
+    // Long enough without an upload that the flushes walk the images only every interval.
+    let interval = crate::gpu::graphite::UPLOADED_IMAGE_SWEEP_INTERVAL;
+    for _ in 0..=interval {
+        target.gr_context.flush();
+    }
+    assert_eq!(1, target.gr_context.uploaded_image_count(), "the image is still held");
+    immutable.dispose();
+    let mut flushes = 0;
+    while target.gr_context.uploaded_image_count() != 0 {
+        target.gr_context.flush();
+        flushes += 1;
+        assert!(flushes <= interval, "the texture is not released within {interval} flushes");
+    }
+    target.dispose();
+}
+
+#[test]
 fn graphite_draws_an_in_memory_render_target() {
     let Some(device) = TestMetalDevice::try_new() else {
         eprintln!("skipped: no Metal device available");
