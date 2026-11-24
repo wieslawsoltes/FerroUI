@@ -1,16 +1,21 @@
 use std::hash::{Hash, Hasher};
 use std::rc::Rc;
 
-use crate::media::{FontFamily, FontManager, FontStretch, FontStyle, FontWeight, GlyphTypeface};
+use crate::media::{FontFamily, FontManager, FontStretch, FontStyle, FontVariationSettings, FontWeight, GlyphTypeface};
 use crate::utilities::SpanStringTokenizer;
 
-/// Represents a typeface: a font family with a style, weight and stretch.
+/// Represents a typeface: a font family with a style, weight and stretch, and the values of
+/// the variation axes of a variable font (`FontVariations`, upstream dfee7f224b).
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Typeface {
     font_family: FontFamily,
     style: FontStyle,
     weight: FontWeight,
     stretch: FontStretch,
+    /// The axis values; `None` for the design defaults (empty settings are stored as `None`, so
+    /// that equality and hashing do not tell the two spellings apart). Behind an `Rc`, so that
+    /// a typeface without variations grows by one pointer only.
+    font_variations: Option<Rc<FontVariationSettings>>,
 }
 
 impl Typeface {
@@ -31,7 +36,26 @@ impl Typeface {
             panic!("Font stretch must be > 1.");
         }
 
-        Self { font_family, style, weight, stretch }
+        Self { font_family, style, weight, stretch, font_variations: None }
+    }
+
+    /// The same typeface with the values of the variation axes of a variable font: the font
+    /// manager resolves it to the instance of the font at those values, each value clamped to
+    /// its axis and the axes the font does not have ignored. `None` or empty settings give the
+    /// design defaults.
+    pub fn with_font_variations(mut self, font_variations: Option<FontVariationSettings>) -> Self {
+        self.font_variations = font_variations.filter(|settings| !settings.is_empty()).map(Rc::new);
+        self
+    }
+
+    /// The values of the variation axes, `None` for the design defaults.
+    pub fn font_variations(&self) -> Option<&FontVariationSettings> {
+        self.font_variations.as_deref()
+    }
+
+    /// The same typeface at the design defaults of its font.
+    pub(crate) fn without_font_variations(&self) -> Typeface {
+        Typeface { font_variations: None, ..self.clone() }
     }
 
     /// Creates a normal typeface from a font family name; an empty name gives
@@ -163,7 +187,8 @@ impl Typeface {
             .to_owned();
 
         // Preserve old font source
-        (Typeface::with_style(self.font_family.clone(), style, weight, stretch), normalized)
+        let typeface = Typeface::with_style(self.font_family.clone(), style, weight, stretch);
+        (Typeface { font_variations: self.font_variations.clone(), ..typeface }, normalized)
     }
 }
 
@@ -179,6 +204,7 @@ impl Hash for Typeface {
         (self.style as i32).hash(state);
         self.weight.value().hash(state);
         (self.stretch as i32).hash(state);
+        self.font_variations.hash(state);
     }
 }
 
@@ -244,5 +270,34 @@ mod tests {
     fn an_empty_name_gives_the_default_font_family() {
         assert_eq!(Typeface::from_name("").font_family(), &FontFamily::default_family());
         assert_eq!(Typeface::default(), Typeface::new(FontFamily::default_family()));
+    }
+
+    #[test]
+    fn font_variations_take_part_in_equality_and_empty_settings_are_the_defaults() {
+        let hash_of = |typeface: &Typeface| {
+            let mut hasher = DefaultHasher::new();
+            typeface.hash(&mut hasher);
+            hasher.finish()
+        };
+        let plain = Typeface::from_name("Font A");
+        let bold = plain.clone().with_font_variations(Some("wght=700".parse().unwrap()));
+        let same_bold = plain.clone().with_font_variations(Some("wght=700".parse().unwrap()));
+        assert_ne!(plain, bold);
+        assert_eq!(bold, same_bold);
+        assert_eq!(hash_of(&bold), hash_of(&same_bold));
+        assert_eq!(bold.font_variations().map(ToString::to_string).as_deref(), Some("wght=700"));
+        let empty = plain.clone().with_font_variations(Some(FontVariationSettings::empty()));
+        assert_eq!(empty, plain);
+        assert!(empty.font_variations().is_none());
+        assert_eq!(bold.without_font_variations(), plain);
+    }
+
+    #[test]
+    fn normalize_keeps_the_font_variations() {
+        let typeface = Typeface::from_name("Font A Bold").with_font_variations(Some("wdth=85".parse().unwrap()));
+        let (normalized, name) = typeface.normalize();
+        assert_eq!(name, "Font A");
+        assert_eq!(normalized.weight(), FontWeight::Bold);
+        assert_eq!(normalized.font_variations(), typeface.font_variations());
     }
 }

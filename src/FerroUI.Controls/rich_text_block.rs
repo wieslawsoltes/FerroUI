@@ -25,8 +25,8 @@ use ferroui_base::layout::{LayoutableImpl, LayoutableImplExt};
 use ferroui_base::media::text_formatting::unicode::GraphemeEnumerator;
 use ferroui_base::media::{
     subscribe_invalidated, Brushes, DrawingContext, FontFamily, FontFeatureCollection, FontStretch,
-    FontStyle, FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds,
-    TextTrimming, TextWrapping,
+    FontStyle, FontVariationSettings, FontWeight, IBrush, TextAlignment, TextDecorationCollection,
+    TextLineBounds, TextTrimming, TextWrapping,
 };
 use ferroui_base::reactive::{Disposable, Subscription};
 use ferroui_base::utilities::HandlerList;
@@ -182,6 +182,7 @@ impl FerroObjectImpl for RichTextBlock {
             | "FontStyle"
             | "FontWeight"
             | "FontStretch"
+            | "FontVariations"
             | "FontFeatures"
             | "Language"
             | "Foreground"
@@ -851,6 +852,9 @@ ferroui_base::ferro_properties! {
         pub fn font_weight_property() -> StyledProperty<FontWeight> { TextElement::font_weight_property().add_owner::<RichTextBlock>() }
         pub fn font_stretch_property() -> StyledProperty<FontStretch> { TextElement::font_stretch_property().add_owner::<RichTextBlock>() }
         pub fn font_features_property() -> StyledProperty<Option<FontFeatureCollection>> { TextElement::font_features_property().add_owner::<RichTextBlock>() }
+        pub fn font_variations_property() -> StyledProperty<Option<FontVariationSettings>> {
+            TextElement::font_variations_property().add_owner::<RichTextBlock>()
+        }
         pub fn language_property() -> StyledProperty<ferroui_base::utilities::Locale> { TextElement::language_property().add_owner::<RichTextBlock>() }
         pub fn foreground_property() -> StyledProperty<Option<Rc<dyn IBrush>>> { TextElement::foreground_property().add_owner::<RichTextBlock>() }
         pub fn letter_spacing_property() -> StyledProperty<f64> { TextElement::letter_spacing_property().add_owner::<RichTextBlock>() }
@@ -1643,6 +1647,12 @@ impl RichTextBlock {
     }
     pub fn set_font_features(&self, value: Option<FontFeatureCollection>) {
         self.set_value(Self::font_features_property(), value);
+    }
+    pub fn font_variations(&self) -> Option<FontVariationSettings> {
+        self.get_value(Self::font_variations_property())
+    }
+    pub fn set_font_variations(&self, value: Option<FontVariationSettings>) {
+        self.set_value(Self::font_variations_property(), value);
     }
     pub fn foreground(&self) -> Option<Rc<dyn IBrush>> {
         self.get_value(Self::foreground_property())

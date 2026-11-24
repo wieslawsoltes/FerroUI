@@ -14,11 +14,16 @@
 //! ([`IPlatformTypeface::with_variation_settings`](crate::media::IPlatformTypeface)), and a
 //! family whose name names an optical size (`Segoe UI Variable Display`) keep the typeface they
 //! have. Not from upstream, which draws a typeface at the instance it was made at.
+//!
+//! The instances at the `FontVariations` of texts (`Typeface::font_variations`) are kept here
+//! too ([`GlyphTypeface::instance_with_variations`]).
 
 use std::rc::Rc;
 
 use crate::media::fonts::OpenTypeTag;
-use crate::media::{FontFamily, FontVariation, FontVariationSettings, GlyphTypeface};
+use crate::media::{
+    FontFamily, FontVariation, FontVariationAxis, FontVariationInstance, FontVariationSettings, GlyphTypeface,
+};
 
 /// The optical size axis.
 const OPSZ: OpenTypeTag = OpenTypeTag::from_chars('o', 'p', 's', 'z');
@@ -91,6 +96,28 @@ impl GlyphTypeface {
         })
     }
 
+    /// The axes of the variation space of the font (`fvar`), as the backend reports them; empty
+    /// for a font that is not variable and on a backend that makes no instances.
+    pub fn variation_axes(&self) -> Vec<FontVariationAxis> {
+        self.platform_typeface().variation_design().axes
+    }
+
+    /// The named instances of the font (`fvar`), as the backend reports them.
+    pub fn named_instances(&self) -> Vec<FontVariationInstance> {
+        self.platform_typeface().variation_design().named_instances
+    }
+
+    /// The typeface of the same font at another position of its variation space: the axes of
+    /// `settings` take their values (clamped to the axes by the backend), the others keep the
+    /// values of this typeface. `None` where the backend makes no instance.
+    pub fn with_variation(&self, settings: &FontVariationSettings) -> Option<Rc<GlyphTypeface>> {
+        if settings.is_empty() {
+            return None;
+        }
+        let platform_typeface = self.platform_typeface().with_variation_settings(settings)?;
+        GlyphTypeface::new(platform_typeface, self.font_simulations()).ok()
+    }
+
     /// The typeface at the optical size of a text of `em_size` (in points: device-independent
     /// pixels), rounded to a whole point and clamped to the optical size axis of the font. The
     /// typeface itself for a font without the axis, for a typeface at that optical size already,
@@ -120,7 +147,43 @@ impl GlyphTypeface {
         self.optical_sizes.borrow_mut().push((optical_size, instance.clone()));
         instance
     }
+
+    /// The instance of this typeface at the `FontVariations` of a text (upstream dfee7f224b):
+    /// the axes of `settings` take their values, clamped to the axes by the backend, and the
+    /// axes the font does not have are ignored. The typeface itself where the backend makes no
+    /// instance. The instances are kept by this typeface, at most
+    /// [`MAX_VARIATION_INSTANCES`] of them, the least recent dropped first, so that an
+    /// animated axis does not grow the cache without bound. A text that sets the optical size
+    /// axis itself keeps it: the instance is not moved to the optical size of the text.
+    pub(crate) fn instance_with_variations(self: &Rc<Self>, settings: &FontVariationSettings) -> Rc<GlyphTypeface> {
+        {
+            let mut instances = self.variation_instances.borrow_mut();
+            if let Some(index) = instances.iter().position(|(key, _)| key == settings) {
+                let entry = instances.remove(index);
+                let instance = entry.1.clone();
+                instances.push(entry);
+                return instance;
+            }
+        }
+        let Some(instance) = self.with_variation(settings) else { return self.clone() };
+        if settings.try_get_value(OPSZ).is_some() {
+            let _ = instance.optical_size_axis.set(None);
+        }
+        let mut instances = self.variation_instances.borrow_mut();
+        if instances.len() >= MAX_VARIATION_INSTANCES {
+            instances.remove(0);
+        }
+        instances.push((settings.clone(), instance.clone()));
+        instance
+    }
 }
+
+/// The number of `FontVariations` instances a typeface keeps.
+pub(crate) const MAX_VARIATION_INSTANCES: usize = 32;
+
+#[cfg(test)]
+#[path = "glyph_typeface_variation_tests.rs"]
+mod variation_tests;
 
 #[cfg(test)]
 mod tests {

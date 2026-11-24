@@ -1,7 +1,7 @@
 use ferroui_base::media::fonts::OpenTypeTag;
 use ferroui_base::media::{
-    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationSettings, FontWeight, IFontMemory,
-    IPlatformTypeface,
+    FontSimulations, FontStretch, FontStyle, FontVariation, FontVariationAxis, FontVariationDesign,
+    FontVariationInstance, FontVariationSettings, FontWeight, IFontMemory, IPlatformTypeface,
 };
 use ferroui_base::utilities::ReadOnlyMemory;
 use kurbo::{Affine, BezPath, Diagonal2, Join, Shape};
@@ -476,6 +476,45 @@ impl IPlatformTypeface for VelloTypeface {
         }
 
         FontVariationSettings::new(self.variations.iter().copied())
+    }
+
+    /// The axes and the named instances of the font, read with `skrifa` (`fvar` and the `name`
+    /// table).
+    fn variation_design(&self) -> FontVariationDesign {
+        let font = self.face.font_ref();
+        let string = |id: StringId| -> Option<String> {
+            font.localized_strings(id).english_or_first().map(|name| name.chars().collect())
+        };
+        let axes: Vec<_> = font.axes().iter().collect();
+        FontVariationDesign {
+            axes: axes
+                .iter()
+                .map(|axis| FontVariationAxis {
+                    tag: OpenTypeTag::new(u32::from_be_bytes(axis.tag().to_be_bytes())),
+                    name: string(axis.name_id()),
+                    min_value: axis.min_value() as f64,
+                    default_value: axis.default_value() as f64,
+                    max_value: axis.max_value() as f64,
+                    is_hidden: axis.is_hidden(),
+                })
+                .collect(),
+            named_instances: font
+                .named_instances()
+                .iter()
+                .map(|instance| FontVariationInstance {
+                    name: string(instance.subfamily_name_id()),
+                    postscript_name: instance.postscript_name_id().and_then(|id| string(id)),
+                    coordinates: FontVariationSettings::new(axes.iter().zip(instance.user_coords()).map(
+                        |(axis, value)| {
+                            FontVariation::new(
+                                OpenTypeTag::new(u32::from_be_bytes(axis.tag().to_be_bytes())),
+                                value as f64,
+                            )
+                        },
+                    )),
+                })
+                .collect(),
+        }
     }
 
     /// The typeface of the same font data at the position: the axes of `settings` take their

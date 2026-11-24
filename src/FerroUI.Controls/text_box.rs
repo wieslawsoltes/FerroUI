@@ -3035,6 +3035,7 @@ impl TextBox {
         let font_size = self.font_size();
         let typeface =
             Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
+        let typeface = crate::documents::TextElement::with_font_variations_of(typeface, self);
 
         let text_run_style: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
             typeface,

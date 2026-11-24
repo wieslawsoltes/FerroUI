@@ -11,8 +11,8 @@ use ferroui_base::media::text_formatting::{
     TextRunProperties,
 };
 use ferroui_base::media::{
-    DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush, TextAlignment,
-    TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
+    DrawingContext, FlowDirection, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontVariationSettings,
+    FontWeight, IBrush, TextAlignment, TextDecorationCollection, TextLineBounds, TextTrimming, TextWrapping, Typeface,
 };
 use ferroui_base::reactive::Subscription;
 use ferroui_base::utilities::{MathUtilities, OptionCell, ReadOnlyMemory, ValueSpan};
@@ -111,6 +111,7 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
                     | "FontStyle"
                     | "FontFamily"
                     | "FontStretch"
+                    | "FontVariations"
                     | "FlowDirection"
                     | "LetterSpacing"
                     | "TextDecorations"
@@ -160,8 +161,8 @@ ferroui_base::ferro_overrides! { impl FerroObjectImpl for TextBlock {
         // A name added here is added to `inherited_reactions` above.
         match change.property().name() {
             // Properties that affect shaping: invalidate the run cache + layout.
-            "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FlowDirection"
-            | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
+            "FontSize" | "FontWeight" | "FontStyle" | "FontFamily" | "FontStretch" | "FontVariations"
+            | "FlowDirection" | "LetterSpacing" | "TextDecorations" | "FontFeatures" | "Foreground" => {
                 this.invalidate_text_layout();
             }
             // The text: the shaped runs go, the run and paragraph properties are not made of it.
@@ -786,6 +787,14 @@ ferroui_base::ferro_properties! { impl TextBlock {
     );
 
     ferro_property!(
+        /// Defines the `FontVariations` property: the values of the variation axes of a
+        /// variable font ([`TextElement::font_variations_property`]).
+        pub fn font_variations_property() -> StyledProperty<Option<FontVariationSettings>> {
+            TextElement::font_variations_property().add_owner::<TextBlock>()
+        }
+    );
+
+    ferro_property!(
         /// Defines the `Inlines` property.
         pub fn inlines_property() -> DirectProperty<TextBlock, Option<InlineCollection>> {
             FerroProperty::register_direct::<TextBlock, _>(
@@ -1112,6 +1121,15 @@ impl TextBlock {
         self.set_value(Self::font_features_property(), value)
     }
 
+    /// The values of the variation axes of a variable font.
+    pub fn font_variations(&self) -> Option<FontVariationSettings> {
+        self.get_value(Self::font_variations_property())
+    }
+
+    pub fn set_font_variations(&self, value: Option<FontVariationSettings>) {
+        self.set_value(Self::font_variations_property(), value)
+    }
+
     /// The inlines.
     pub fn inlines(&self) -> Option<InlineCollection> {
         if !self.inlines_made.get() {
@@ -1353,6 +1371,7 @@ impl TextBlock {
         }
         let typeface =
             Typeface::with_style(self.font_family(), self.font_style(), self.font_weight(), self.font_stretch());
+        let typeface = crate::documents::TextElement::with_font_variations_of(typeface, self);
         let properties = shared_run_properties(
             typeface,
             self.font_size(),

@@ -10,8 +10,8 @@ use crate::utilities::{CultureInfo, DateTime, DateTimeKind, DateTimeOffset, DayO
 use crate::{ferro_markup_enum, ferro_markup_type};
 use crate::input::{Cursor, Key, KeyGesture, KeyModifiers, StandardCursorType};
 use crate::media::{
-    BoxShadow, BoxShadows, Color, FontFamily, FontFeature, FontFeatureCollection, FontWeight, HslColor, HsvColor,
-    TextDecorationCollection, TextDecorations, TextLineBounds,
+    BoxShadow, BoxShadows, Color, FontFamily, FontFeature, FontFeatureCollection, FontVariationSettings, FontWeight,
+    HslColor, HsvColor, TextDecorationCollection, TextDecorations, TextLineBounds,
 };
 use crate::metadata::{MarkupType, MarkupTyped};
 use crate::styling::ThemeVariant;
@@ -408,6 +408,12 @@ ferro_markup_type!(class FontFeatureCollection {
     methods: [fn Add(FontFeature) => |c: &FontFeatureCollection, item: FontFeature| c.add(item)],
 });
 
+ferro_markup_type!(class FontVariationSettings {
+    namespace: "FerroUI.Media",
+    handles: [FontVariationSettings, Option<FontVariationSettings>],
+    parse: FontVariationSettings::parse,
+});
+
 ferro_markup_type!(class TextDecorationCollection {
     namespace: "FerroUI.Media",
     handles: [TextDecorationCollection, Option<TextDecorationCollection>],
@@ -670,6 +676,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FontFamily as MarkupTyped>::MARKUP,
     <FontFeature as MarkupTyped>::MARKUP,
     <FontFeatureCollection as MarkupTyped>::MARKUP,
+    <FontVariationSettings as MarkupTyped>::MARKUP,
     <TextDecorationCollection as MarkupTyped>::MARKUP,
     <TextDecorations as MarkupTyped>::MARKUP,
     <BoxShadow as MarkupTyped>::MARKUP,
@@ -707,6 +714,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<Thickness>();
     ValueTypes::register_nullable::<Rect>();
     ValueTypes::register_nullable::<FontFeatureCollection>();
+    ValueTypes::register_nullable::<FontVariationSettings>();
     ValueTypes::register_nullable::<TextDecorationCollection>();
     ValueTypes::register_nullable::<KeyGesture>();
     ValueTypes::register_nullable::<Easing>();
@@ -737,6 +745,7 @@ pub(super) fn register_value_type_table() {
     ValueTypes::register_used::<FontWeight>();
     ValueTypes::register_used::<FontFamily>();
     ValueTypes::register_used::<FontFeature>();
+    ValueTypes::register_used::<FontVariationSettings>();
     ValueTypes::register_used::<BoxShadow>();
     ValueTypes::register_used::<BoxShadows>();
     ValueTypes::register_used::<Cue>();
@@ -898,6 +907,13 @@ impl crate::data::core::ValueTypeRegistration for FontFeature {
     fn register_value_conversions() {
         ValueTypes::register_nullable::<FontFeature>();
         ValueTypes::register_display::<FontFeature>();
+    }
+}
+
+impl crate::data::core::ValueTypeRegistration for FontVariationSettings {
+    fn register_value_conversions() {
+        ValueTypes::register_nullable::<FontVariationSettings>();
+        ValueTypes::register_display::<FontVariationSettings>();
     }
 }
 

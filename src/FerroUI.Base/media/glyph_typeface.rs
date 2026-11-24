@@ -18,8 +18,8 @@ use crate::media::fonts::tables::{
 use crate::media::fonts::{FontCodePageCoverage, FontFallbackScriptHints, OpenTypeTag};
 use crate::media::text_formatting::unicode::Script;
 use crate::media::{
-    FontMetrics, FontSimulations, FontStretch, FontStyle, FontWeight, GlyphBounds, GlyphMetrics, IFontMemory,
-    IPlatformTypeface, ITextShaperTypeface, UnicodeRange, UnicodeRangeSegment,
+    FontMetrics, FontSimulations, FontStretch, FontStyle, FontVariationSettings, FontWeight, GlyphBounds, GlyphMetrics,
+    IFontMemory, IPlatformTypeface, ITextShaperTypeface, UnicodeRange, UnicodeRangeSegment,
 };
 use crate::platform::{self, IGeometryImpl, ITextShaperImpl};
 use crate::utilities::{CultureInfo, Locale};
@@ -79,6 +79,9 @@ pub struct GlyphTypeface {
     pub(crate) optical_size_axis: OnceCell<Option<(f64, f64)>>,
     /// The instances of the typeface at the optical sizes of texts, by optical size.
     pub(crate) optical_sizes: RefCell<Vec<(i32, Rc<GlyphTypeface>)>>,
+    /// The instances of the typeface at the `FontVariations` of texts, the most recent last
+    /// (`glyph_typeface_optical_size.rs`).
+    pub(crate) variation_instances: RefCell<Vec<(FontVariationSettings, Rc<GlyphTypeface>)>>,
 }
 
 impl GlyphTypeface {
@@ -275,6 +278,7 @@ impl GlyphTypeface {
             shaping_script_tags: OnceCell::new(),
             optical_size_axis: OnceCell::new(),
             optical_sizes: RefCell::new(Vec::new()),
+            variation_instances: RefCell::new(Vec::new()),
         }))
     }
 

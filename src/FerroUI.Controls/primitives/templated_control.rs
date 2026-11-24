@@ -8,7 +8,8 @@ use ferroui_base::interactivity::{Interactive, InteractiveImpl, RoutedEvent, Rou
 use ferroui_base::layout::LayoutableImpl;
 use ferroui_base::logical_tree::LogicalTreeAttachmentEventArgs;
 use ferroui_base::media::{
-    BackgroundSizing, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontWeight, IBrush,
+    BackgroundSizing, FontFamily, FontFeatureCollection, FontStretch, FontStyle, FontVariationSettings, FontWeight,
+    IBrush,
 };
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_property, ferro_routed_event, instantiate, AttachedProperty,
@@ -201,6 +202,14 @@ ferroui_base::ferro_properties! { impl TemplatedControl {
     );
 
     ferro_property!(
+        /// Defines the `FontVariations` property: the values of the variation axes of a
+        /// variable font ([`TextElement::font_variations_property`]).
+        pub fn font_variations_property() -> StyledProperty<Option<FontVariationSettings>> {
+            TextElement::font_variations_property().add_owner::<TemplatedControl>()
+        }
+    );
+
+    ferro_property!(
         /// Defines the `FontSize` property.
         pub fn font_size_property() -> StyledProperty<f64> {
             TextElement::font_size_property().add_owner::<TemplatedControl>()
@@ -356,6 +365,15 @@ impl TemplatedControl {
 
     pub fn set_font_features(&self, value: Option<FontFeatureCollection>) {
         self.set_value(Self::font_features_property(), value)
+    }
+
+    /// The values of the variation axes of a variable font.
+    pub fn font_variations(&self) -> Option<FontVariationSettings> {
+        self.get_value(Self::font_variations_property())
+    }
+
+    pub fn set_font_variations(&self, value: Option<FontVariationSettings>) {
+        self.set_value(Self::font_variations_property(), value)
     }
 
     /// The size of the control's text in points.

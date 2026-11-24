@@ -117,6 +117,7 @@ const TYPES: &[&TypeInfo] = types![
     crate::animation::DoubleTransition,
     crate::animation::EffectTransition,
     crate::animation::FloatTransition,
+    crate::animation::FontVariationSettingsTransition,
     crate::animation::IntegerTransition,
     crate::animation::PointTransition,
     crate::animation::RelativePointTransition,

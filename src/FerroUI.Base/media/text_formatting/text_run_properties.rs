@@ -102,8 +102,15 @@ impl PartialEq for dyn TextRunProperties {
 
 impl dyn TextRunProperties {
     pub(crate) fn with_font_mapping(self: &Rc<Self>, mapping: &FontFallbackMapping) -> Rc<dyn TextRunProperties> {
+        // The fallback face renders at the axis values of the text, each clamped to its own axes
+        // (upstream dfee7f224b, as CSS).
+        let font_variations = self.typeface().font_variations();
+        let glyph_typeface = match font_variations {
+            Some(font_variations) => mapping.glyph_typeface().instance_with_variations(font_variations),
+            None => mapping.glyph_typeface().clone(),
+        };
         Rc::new(GenericTextRunProperties::with_all(
-            mapping.typeface().clone(),
+            mapping.typeface().clone().with_font_variations(font_variations.cloned()),
             self.font_rendering_em_size(),
             self.text_decorations().cloned(),
             self.foreground_brush().cloned(),
@@ -115,14 +122,25 @@ impl dyn TextRunProperties {
         .with_requested_font_family(self.requested_font_family().clone())
         .with_font_scale(mapping.scale())
         .with_cached_glyph_typeface(crate::media::glyph_typeface_optical_size::glyph_typeface_for_text(
-            mapping.glyph_typeface().clone(),
+            glyph_typeface,
             mapping.typeface().font_family(),
             self.font_rendering_em_size() * mapping.scale(),
         )))
     }
 
     /// The same properties with another typeface.
+    ///
+    /// The `FontVariations` of these properties carry over to a typeface without its own (a
+    /// fallback family renders at the axis values of the text, upstream dfee7f224b).
     pub(crate) fn with_typeface(self: &Rc<Self>, typeface: &Typeface) -> Rc<dyn TextRunProperties> {
+        let carried;
+        let typeface = match self.typeface().font_variations() {
+            Some(font_variations) if typeface.font_variations().is_none() => {
+                carried = typeface.clone().with_font_variations(Some(font_variations.clone()));
+                &carried
+            }
+            _ => typeface,
+        };
         if self.typeface() == typeface {
             return self.clone();
         }

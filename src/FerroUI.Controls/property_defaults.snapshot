@@ -283,6 +283,7 @@ FerroUI.Controls.Documents.TextElement.FontFeatures: Option<FontFeatureCollectio
 FerroUI.Controls.Documents.TextElement.FontSize: f64 = 12; OneWay; inherits; attached
 FerroUI.Controls.Documents.TextElement.FontStretch: FontStretch = Normal; OneWay; inherits; attached
 FerroUI.Controls.Documents.TextElement.FontStyle: FontStyle = Normal; OneWay; inherits; attached
+FerroUI.Controls.Documents.TextElement.FontVariations: Option<FontVariationSettings> = (null); OneWay; inherits; attached
 FerroUI.Controls.Documents.TextElement.FontWeight: FontWeight = Normal; OneWay; inherits; attached
 FerroUI.Controls.Documents.TextElement.Foreground: Option<Rc<dyn IBrush>> = FerroUI.Media.IBrush; OneWay; inherits; attached
 FerroUI.Controls.Documents.TextElement.Language: Locale = en-US; OneWay; inherits; attached
