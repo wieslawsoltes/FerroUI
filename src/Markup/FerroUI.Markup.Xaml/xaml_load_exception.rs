@@ -11,10 +11,6 @@ pub struct XamlLoadError {
     inner: Option<Rc<dyn std::error::Error>>,
 }
 
-/// The name of [`XamlLoadError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `XamlLoadError`")]
-pub type XamlLoadException = XamlLoadError;
-
 impl XamlLoadError {
     /// An error without a message.
     pub fn new() -> Self {

@@ -37,8 +37,6 @@ pub use remote_clipboard_changed_event_args::RemoteClipboardChangedEventArgs;
 pub use version::Version;
 pub use vnc_encoding::VncEncoding;
 pub use vnc_exception::VncError;
-#[allow(deprecated)]
-pub use vnc_exception::VncException;
 pub use vnc_failure_reason::VncFailureReason;
 pub use vnc_framebuffer::VncFramebuffer;
 pub use vnc_password_challenge::VncPasswordChallenge;

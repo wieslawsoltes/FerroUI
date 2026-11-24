@@ -21,7 +21,6 @@ pub mod activatable_lifetime;
 pub mod automation_peer_wrapper;
 pub mod clipboard;
 pub mod combined_span3;
-pub mod completion;
 pub mod extensions;
 pub mod ferro_app_delegate;
 pub mod input_handler;

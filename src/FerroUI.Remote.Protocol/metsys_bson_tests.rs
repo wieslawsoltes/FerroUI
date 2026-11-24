@@ -230,38 +230,6 @@ fn guid_is_binary_of_subtype_3() {
     assert_eq!(read_a(&bytes), Value::Guid(GUID));
 }
 
-#[derive(Clone, Debug, Default, PartialEq)]
-#[allow(deprecated)]
-struct WithPortGuid {
-    id: crate::guid::Guid,
-}
-
-#[allow(deprecated)]
-mod with_port_guid {
-    use super::WithPortGuid;
-    use crate::guid::Guid;
-
-    crate::bson_class!(WithPortGuid as "WithPortGuid" {
-        "Id" => id: Guid,
-    });
-}
-
-#[test]
-#[allow(deprecated)]
-fn a_property_of_the_deprecated_guid_has_the_layout_of_a_uuid() {
-    let value = WithPortGuid { id: crate::guid::Guid::from(GUID) };
-    let bytes = Serializer::serialize(&value).unwrap();
-    assert_eq!(
-        bytes,
-        [
-            0x1E, 0, 0, 0, 0x05, 0x49, 0x64, 0, 16, 0, 0, 0, 0x03, 0x10, 0x53, 0x3C, 0x6E, 0xB1, 0xE2, 0x3D, 0x4C,
-            0x86, 0x88, 0x01, 0x18, 0x3A, 0xA4, 0x8C, 0x5B, 0
-        ]
-    );
-    assert_eq!(bytes, document("Id", Value::Guid(GUID)));
-    assert_eq!(Deserializer::deserialize::<WithPortGuid>(&bytes, None).unwrap(), value);
-}
-
 #[test]
 fn object_id_is_type_7_and_twelve_bytes() {
     let id = ObjectId::from_string("0102030405060708090a0b0c").unwrap();

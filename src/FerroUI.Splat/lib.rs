@@ -33,7 +33,7 @@ pub mod service_location;
 pub use application_performance_monitoring::{
     DefaultFeatureUsageTrackingManager, DefaultFeatureUsageTrackingSession,
     EnableFeatureUsageTrackingExt, FeatureUsageTrackingSessionExt, FuncFeatureUsageTrackingManager,
-    Guid, IEnableFeatureUsageTracking, IFeatureUsageTrackingManager, IFeatureUsageTrackingSession,
+    IEnableFeatureUsageTracking, IFeatureUsageTrackingManager, IFeatureUsageTrackingSession,
     IFeatureUsageTrackingSessionOf, IViewTracking,
 };
 pub use builder::{AppBuilder, IAppBuilder, IAppInstance, IModule, ModuleExt, SplatBuilderExt};
@@ -44,8 +44,6 @@ pub use logging::{
     MemoizingMRUCache, NullLogger, SplatLogManagerModule, SplatLoggerModule, StaticFullLogger,
     StaticFullLoggerExt, WrappingFullLogger, WrappingLogLevelLogger, WrappingPrefixLogger,
 };
-#[allow(deprecated)]
-pub use logging::LoggingException;
 pub use mode_detection::{DefaultModeDetector, IModeDetector, Mode, ModeDetector};
 pub use service_location::{
     AppLocator, DependencyResolverMixins, ErasedService, GlobalGenericFirstDependencyResolver,

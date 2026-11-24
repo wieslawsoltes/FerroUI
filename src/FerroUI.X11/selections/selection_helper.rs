@@ -6,7 +6,7 @@
 //! - [`ISelectionConnection`]: the calls of the protocol a transfer makes
 //!   between two waits, so that a transfer can run against a connection
 //!   that is not a server (the tests);
-//! - [`TaskCompletionSource`]: the completion a waiting transfer awaits
+//! - [`ResultSource`]: the completion a waiting transfer awaits
 //!   (the class of that name of the reference's base library), deprecated
 //!   for the one-shot channel of `ferroui_system::task::oneshot`, which it
 //!   wraps;
@@ -114,18 +114,14 @@ pub fn create_event_window(platform: &FerroX11Platform, handler: EventHandler) -
 }
 
 /// A result that is set once and that any number of futures wait for: a one-shot channel
-/// ([`oneshot`]) whose receiver is shared by the futures of [`task`](Self::task).
-#[deprecated(
-    since = "0.5.0",
-    note = "use `ferroui_system::task::oneshot::channel`, with `Receiver::shared` for several waiters"
-)]
-pub struct TaskCompletionSource<T> {
+/// ([`oneshot`]) whose receiver is shared by the futures of [`task`](Self::task)
+/// (`TaskCompletionSource` of the reference).
+pub(crate) struct ResultSource<T> {
     sender: RefCell<Option<oneshot::Sender<T>>>,
     receiver: oneshot::SharedReceiver<T>,
 }
 
-#[allow(deprecated)]
-impl<T: Clone> TaskCompletionSource<T> {
+impl<T: Clone> ResultSource<T> {
     pub fn new() -> Rc<Self> {
         let (sender, receiver) = oneshot::channel();
         Rc::new(Self { sender: RefCell::new(Some(sender)), receiver: receiver.shared() })
@@ -152,23 +148,20 @@ impl<T: Clone> TaskCompletionSource<T> {
     }
 
     /// The future that resolves to the result.
-    pub fn task(self: &Rc<Self>) -> TaskCompletionFuture<T> {
-        TaskCompletionFuture { _source: self.clone(), receiver: self.receiver.clone() }
+    pub fn task(self: &Rc<Self>) -> ResultFuture<T> {
+        ResultFuture { _source: self.clone(), receiver: self.receiver.clone() }
     }
 }
 
-/// The future of a [`TaskCompletionSource`].
-#[deprecated(since = "0.5.0", note = "use `ferroui_system::task::oneshot::SharedReceiver`")]
-#[allow(deprecated)]
-pub struct TaskCompletionFuture<T> {
+/// The future of a [`ResultSource`].
+pub(crate) struct ResultFuture<T> {
     /// Keeps the sender of the source: the future waits for the result, never for a
     /// cancellation, as the source it ports.
-    _source: Rc<TaskCompletionSource<T>>,
+    _source: Rc<ResultSource<T>>,
     receiver: oneshot::SharedReceiver<T>,
 }
 
-#[allow(deprecated)]
-impl<T: Clone> Future for TaskCompletionFuture<T> {
+impl<T: Clone> Future for ResultFuture<T> {
     type Output = T;
 
     fn poll(self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<T> {
@@ -339,7 +332,6 @@ pub(crate) mod test_support {
 }
 
 #[cfg(test)]
-#[allow(deprecated)]
 mod tests {
     // Not from the reference, which has no tests for this file.
     use super::*;
@@ -362,7 +354,7 @@ mod tests {
 
     #[test]
     fn a_completion_wakes_its_waiters_once_and_keeps_its_result() {
-        let source = TaskCompletionSource::<u32>::new();
+        let source = ResultSource::<u32>::new();
         let counter = Arc::new(CountingWaker(AtomicUsize::new(0)));
         let waker = Waker::from(counter.clone());
         let mut context = Context::from_waker(&waker);

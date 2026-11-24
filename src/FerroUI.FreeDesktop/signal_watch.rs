@@ -62,8 +62,8 @@ impl CancellationFlag {
     }
 
     /// Resolves when the flag is set.
-    pub fn cancelled(&self) -> Cancelled {
-        Cancelled(self.token.cancelled())
+    pub fn cancelled(&self) -> WaitForCancellation {
+        self.token.cancelled()
     }
 
     /// Runs `future` until it completes or the flag is set; `None` when
@@ -78,19 +78,6 @@ impl CancellationFlag {
 impl From<CancellationFlag> for CancellationToken {
     fn from(flag: CancellationFlag) -> Self {
         flag.token
-    }
-}
-
-/// The future of [`CancellationFlag::cancelled`].
-#[deprecated(since = "0.5.0", note = "use `CancellationToken::cancelled`")]
-pub struct Cancelled(WaitForCancellation);
-
-#[allow(deprecated)]
-impl Future for Cancelled {
-    type Output = ();
-
-    fn poll(mut self: Pin<&mut Self>, cx: &mut Context<'_>) -> Poll<()> {
-        Pin::new(&mut self.0).poll(cx)
     }
 }
 

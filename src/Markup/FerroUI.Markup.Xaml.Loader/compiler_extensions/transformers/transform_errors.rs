@@ -218,10 +218,7 @@ mod tests {
     #[test]
     #[allow(deprecated)]
     fn the_deprecated_factories_give_the_errors_of_the_constructors() {
-        use crate::compiler_extensions::transformers::{
-            XamlBindingsTransformException, XamlDataContextException, XamlPropertyPathException,
-            XamlSelectorsTransformException, XamlStyleTransformException,
-        };
+        
         let line = XamlLineInfo::new(2, 4);
         let pairs = [
             (

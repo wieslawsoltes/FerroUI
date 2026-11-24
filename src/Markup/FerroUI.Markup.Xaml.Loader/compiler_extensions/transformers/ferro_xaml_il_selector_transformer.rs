@@ -46,37 +46,6 @@ use crate::compiler_extensions::transformers::{
 };
 use crate::compiler_extensions::XamlIlFerroPropertyHelper;
 
-/// `XamlSelectorsTransformException : XamlTransformException`.
-///
-/// Errors are values of the single [`XamlError`] type; the derived class is represented by a
-/// `XamlError::Transform` tagged with the class name, which is what
-/// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` and [`Self::is`] look at.
-#[deprecated(
-    since = "0.5.1",
-    note = "use `XamlError::selectors_transform` (`FerroTransformErrors`) and `FerroTransformErrorKind::Selectors`"
-)]
-pub struct XamlSelectorsTransformException;
-
-#[allow(deprecated)]
-impl XamlSelectorsTransformException {
-    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::Selectors.type_name();
-
-    /// `new XamlSelectorsTransformException(message, lineInfo, innerException)`, now
-    /// [`XamlError::selectors_transform`](super::FerroTransformErrors::selectors_transform).
-    pub fn new(
-        message: impl Into<String>,
-        line_info: &dyn IXamlLineInfo,
-        inner_exception: Option<XamlError>,
-    ) -> XamlError {
-        super::FerroTransformErrorKind::Selectors.error(message, line_info, inner_exception)
-    }
-
-    /// `e is XamlSelectorsTransformException`.
-    pub fn is(error: &XamlError) -> bool {
-        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::Selectors)
-    }
-}
-
 /// `new XamlAstClrTypeReference(lineInfo, type, false)` for a `type` that may be `null`.
 ///
 /// Upstream stores a `null` type in the target-type scope of a style whose selector has no

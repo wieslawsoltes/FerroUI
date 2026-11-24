@@ -15,38 +15,6 @@ use xamlx::{xaml_ast_node_members, xaml_line_info_impl, XamlNamespaces};
 
 use super::FERRO_XML_NAMESPACE;
 
-/// `XamlBindingsTransformException : XamlTransformException`.
-///
-/// Errors are values of the single [`XamlError`] type; the derived class is represented by a
-/// `XamlError::Transform` tagged with the class name, which is what
-/// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` (code `FRN2100`) and
-/// [`Self::is`] look at.
-#[deprecated(
-    since = "0.5.1",
-    note = "use `XamlError::bindings_transform` (`FerroTransformErrors`) and `FerroTransformErrorKind::Bindings`"
-)]
-pub struct XamlBindingsTransformException;
-
-#[allow(deprecated)]
-impl XamlBindingsTransformException {
-    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::Bindings.type_name();
-
-    /// `new XamlBindingsTransformException(message, lineInfo, innerException)`, now
-    /// [`XamlError::bindings_transform`](super::FerroTransformErrors::bindings_transform).
-    pub fn new(
-        message: impl Into<String>,
-        line_info: &dyn IXamlLineInfo,
-        inner_exception: Option<XamlError>,
-    ) -> XamlError {
-        super::FerroTransformErrorKind::Bindings.error(message, line_info, inner_exception)
-    }
-
-    /// `e is XamlBindingsTransformException`.
-    pub fn is(error: &XamlError) -> bool {
-        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::Bindings)
-    }
-}
-
 /// Handles the `x:CompileBindings` directive and turns the `Binding` type reference into
 /// `CompiledBinding` or `ReflectionBinding`.
 #[derive(Default)]

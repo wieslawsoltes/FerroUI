@@ -10,10 +10,6 @@ pub struct X11Error {
     message: String,
 }
 
-/// The name of [`X11Error`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `X11Error`")]
-pub type X11Exception = X11Error;
-
 impl X11Error {
     pub fn new(message: impl Into<String>) -> Self {
         Self { message: message.into() }

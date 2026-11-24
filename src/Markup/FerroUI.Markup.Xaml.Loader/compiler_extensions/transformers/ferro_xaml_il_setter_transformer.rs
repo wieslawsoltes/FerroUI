@@ -22,37 +22,6 @@ use crate::compiler_extensions::transformers::{
 };
 use crate::compiler_extensions::{IXamlIlFerroPropertyNode, XamlIlFerroPropertyHelper};
 
-/// `XamlStyleTransformException : XamlTransformException`.
-///
-/// Errors are values of the single [`XamlError`] type; the derived class is represented by a
-/// `XamlError::Transform` tagged with the class name, which is what
-/// `FerroXamlDiagnosticCodes::xaml_x_diagnostic_code_to_ferro` and [`Self::is`] look at.
-#[deprecated(
-    since = "0.5.1",
-    note = "use `XamlError::style_transform` (`FerroTransformErrors`) and `FerroTransformErrorKind::Style`"
-)]
-pub struct XamlStyleTransformException;
-
-#[allow(deprecated)]
-impl XamlStyleTransformException {
-    pub const TYPE_NAME: &'static str = super::FerroTransformErrorKind::Style.type_name();
-
-    /// `new XamlStyleTransformException(message, lineInfo, innerException)`, now
-    /// [`XamlError::style_transform`](super::FerroTransformErrors::style_transform).
-    pub fn new(
-        message: impl Into<String>,
-        line_info: &dyn IXamlLineInfo,
-        inner_exception: Option<XamlError>,
-    ) -> XamlError {
-        super::FerroTransformErrorKind::Style.error(message, line_info, inner_exception)
-    }
-
-    /// `e is XamlStyleTransformException`.
-    pub fn is(error: &XamlError) -> bool {
-        super::FerroTransformErrorKind::of(error) == Some(super::FerroTransformErrorKind::Style)
-    }
-}
-
 pub struct FerroXamlIlSetterTransformer;
 
 impl IXamlAstTransformer for FerroXamlIlSetterTransformer {

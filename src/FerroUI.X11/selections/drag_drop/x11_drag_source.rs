@@ -18,8 +18,7 @@ use crate::selections::drag_drop::i_xdnd_window::IXdndWindow;
 use crate::selections::drag_drop::x11_drop_target::send_xdnd_message;
 use crate::selections::drag_drop::xdnd_action_helper::XdndActions;
 use crate::selections::drag_drop::xdnd_constants::{MIN_XDND_VERSION, XDND_VERSION};
-#[allow(deprecated)]
-use crate::selections::selection_helper::{self, TaskCompletionSource};
+use crate::selections::selection_helper::{self, ResultSource};
 use crate::x11_atoms::X11Atoms;
 use crate::x11_cursor_factory::X11CursorFactory;
 use crate::x11_enum_extensions::X11EnumExtensions;
@@ -283,8 +282,7 @@ pub(crate) struct Handler {
     /// pointer input from it.
     xi_opcode: Option<c_int>,
     log: bool,
-    #[allow(deprecated)]
-    completion_source: Rc<TaskCompletionSource<DragDropEffects>>,
+    completion_source: Rc<ResultSource<DragDropEffects>>,
     format_atoms: RefCell<Vec<Atom>>,
     pointer_grabbed: Cell<bool>,
     current_effects: Cell<DragDropEffects>,
@@ -293,7 +291,6 @@ pub(crate) struct Handler {
 }
 
 impl Handler {
-    #[allow(deprecated)]
     pub(crate) fn new(
         host: Rc<dyn IDragSourceHost>,
         source_window: XID,
@@ -309,7 +306,7 @@ impl Handler {
             atoms,
             xi_opcode,
             log: Logger::try_get(LogEventLevel::Verbose, LogArea::X11_PLATFORM).is_some(),
-            completion_source: TaskCompletionSource::new(),
+            completion_source: ResultSource::new(),
             format_atoms: RefCell::new(Vec::new()),
             pointer_grabbed: Cell::new(false),
             current_effects: Cell::new(DragDropEffects::NONE),

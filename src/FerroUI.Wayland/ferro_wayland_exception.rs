@@ -14,10 +14,6 @@ pub struct FerroWaylandError {
     inner: Option<String>,
 }
 
-/// The name of [`FerroWaylandError`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `FerroWaylandError`")]
-pub type FerroWaylandException = FerroWaylandError;
-
 /// Which class of the reference an error is.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub enum FerroWaylandErrorKind {
@@ -34,10 +30,6 @@ pub enum FerroWaylandErrorKind {
     /// The compositor reported a protocol error.
     ProtocolError { error_code: u32, error_message: Option<String> },
 }
-
-/// The name of [`FerroWaylandErrorKind`] before 0.5.
-#[deprecated(since = "0.5.0", note = "use `FerroWaylandErrorKind`")]
-pub type FerroWaylandExceptionKind = FerroWaylandErrorKind;
 
 impl FerroWaylandError {
     pub fn new(message: impl Into<String>) -> Self {
@@ -141,84 +133,6 @@ impl std::error::Error for FerroWaylandError {}
 // The factories of the derived classes of the reference, before 0.5.1: each is a unit struct
 // whose `new` gives the one error type. The constructors of `FerroWaylandError` replace them
 // (#423, C3); they are removed after 0.5 with the other deprecated forms.
-
-/// `poll` failed.
-#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::poll`")]
-pub struct FerroWaylandPollException;
-
-#[allow(deprecated)]
-impl FerroWaylandPollException {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> FerroWaylandError {
-        FerroWaylandError::poll()
-    }
-}
-
-/// An error of the socket.
-#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::network`")]
-pub struct FerroWaylandNetworkException;
-
-#[allow(deprecated)]
-impl FerroWaylandNetworkException {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::network(message)
-    }
-}
-
-/// The requests could not be written to the socket.
-#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::flush` and `FerroWaylandError::flush_errno`")]
-pub struct FerroWaylandFlushException;
-
-#[allow(deprecated)]
-impl FerroWaylandFlushException {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::flush(message)
-    }
-
-    /// The error for an error number of the C library.
-    pub fn from_errno(errno: i32) -> FerroWaylandError {
-        FerroWaylandError::flush_errno(errno)
-    }
-}
-
-/// The events could not be read from the socket.
-#[deprecated(since = "0.5.1", note = "use `FerroWaylandError::read` and `FerroWaylandError::read_errno`")]
-pub struct FerroWaylandReadException;
-
-#[allow(deprecated)]
-impl FerroWaylandReadException {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new(message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::read(message)
-    }
-
-    /// The error for an error number of the C library.
-    pub fn from_errno(errno: i32) -> FerroWaylandError {
-        FerroWaylandError::read_errno(errno)
-    }
-}
-
-/// The compositor reported a protocol error.
-#[deprecated(
-    since = "0.5.1",
-    note = "use `FerroWaylandError::protocol_error` and `FerroWaylandError::protocol_error_with_code`"
-)]
-pub struct FerroWaylandProtocolErrorException;
-
-#[allow(deprecated)]
-impl FerroWaylandProtocolErrorException {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> FerroWaylandError {
-        FerroWaylandError::protocol_error()
-    }
-
-    /// The error with the code and the message of the compositor.
-    pub fn with_code(error_code: u32, error_message: impl Into<String>) -> FerroWaylandError {
-        FerroWaylandError::protocol_error_with_code(error_code, error_message)
-    }
-}
 
 #[cfg(test)]
 mod tests {

@@ -50,8 +50,6 @@ pub use runtime_xaml_loader_configuration::{
 };
 pub use runtime_xaml_loader_document::RuntimeXamlLoaderDocument;
 pub use xaml_load_exception::XamlLoadError;
-#[allow(deprecated)]
-pub use xaml_load_exception::XamlLoadException;
 pub use xaml_types::{IProvideValueTarget, IRootObjectProvider, IUriContext, IXamlTypeResolver};
 
 /// Includes the compiled markup the build script of the crate generated
