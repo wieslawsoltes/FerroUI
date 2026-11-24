@@ -11,6 +11,7 @@ mod clipboard_error;
 mod clipboard_extensions;
 mod clipboard_type;
 mod i_clipboard;
+mod i_clipboard_change_impl;
 mod i_clipboard_impl;
 mod i_flushable_clipboard_impl;
 mod i_owned_clipboard_impl;
@@ -27,6 +28,7 @@ pub use clipboard_error::{ClipboardError, ClipboardErrorKind};
 pub use clipboard_extensions::ClipboardExtensions;
 pub use clipboard_type::ClipboardType;
 pub use i_clipboard::IClipboard;
+pub use i_clipboard_change_impl::IClipboardChangeImpl;
 pub use i_clipboard_impl::IClipboardImpl;
 pub use i_flushable_clipboard_impl::IFlushableClipboardImpl;
 pub use i_owned_clipboard_impl::IOwnedClipboardImpl;
@@ -37,3 +39,6 @@ pub use platform_async_data_transfer_item::{PlatformAsyncDataTransferItem, Platf
 pub use platform_clipboard_manager::PlatformClipboardManager;
 pub use platform_data_transfer::{PlatformDataTransfer, PlatformDataTransferImpl};
 pub use platform_data_transfer_item::{PlatformDataTransferItem, PlatformDataTransferItemImpl};
+
+#[cfg(test)]
+mod clipboard_change_tests;

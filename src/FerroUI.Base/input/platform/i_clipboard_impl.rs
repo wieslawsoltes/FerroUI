@@ -1,4 +1,4 @@
-use super::{ClipboardError, IFlushableClipboardImpl, IOwnedClipboardImpl};
+use super::{ClipboardError, IClipboardChangeImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
 use crate::input::{IAsyncDataTransfer, LocalBoxFuture};
 use std::rc::Rc;
 
@@ -25,6 +25,11 @@ pub trait IClipboardImpl {
 
     /// The implementation as an owned clipboard, if it is one.
     fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
+        None
+    }
+
+    /// The implementation as a clipboard that reports changes of its content, if it is one.
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
         None
     }
 }

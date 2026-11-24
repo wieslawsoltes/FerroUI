@@ -3,14 +3,16 @@ use crate::clipboard_read_session::ClipboardReadSession;
 use crate::data_transfer_to_frn_clipboard_data_source_wrapper::DataTransferToFrnClipboardDataSourceWrapper;
 use crate::helpers::ClipboardResultExt;
 use crate::interop::*;
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{IAsyncDataTransfer, LocalBoxFuture};
 use ferroui_base::logging::LogArea;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
 use std::panic::{catch_unwind, resume_unwind, AssertUnwindSafe};
 use std::rc::Rc;
+use std::time::Duration;
 
 /// The system clipboard.
 pub struct ClipboardImpl {
@@ -80,6 +82,30 @@ impl ClipboardImpl {
     }
 }
 
+/// How often the change count of the pasteboard is compared while the application listens.
+const CHANGE_POLL_INTERVAL: Duration = Duration::from_millis(500);
+
+impl IClipboardChangeImpl for ClipboardImpl {
+    // NSPasteboard posts no notification of a change: its change count is compared while the
+    // application listens, and only then.
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let native = self.native();
+        let last = Cell::new(native.get_change_count().clipboard_check().unwrap_or(i64::MIN));
+        DispatcherTimer::run(
+            move || {
+                if let Ok(count) = native.get_change_count().clipboard_check() {
+                    if count != last.replace(count) {
+                        handler();
+                    }
+                }
+                true
+            },
+            CHANGE_POLL_INTERVAL,
+            DispatcherPriority::BACKGROUND,
+        )
+    }
+}
+
 impl IClipboardImpl for ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         completed(|| self.try_get_data())
@@ -94,6 +120,10 @@ impl IClipboardImpl for ClipboardImpl {
     }
 
     fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
+        Some(self)
+    }
+
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
         Some(self)
     }
 }

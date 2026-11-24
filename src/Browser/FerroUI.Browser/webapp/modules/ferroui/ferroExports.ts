@@ -130,7 +130,9 @@ export class FerroExports {
             OnWheel: "InputHelper_OnWheel",
             OnKeyboardGeometryChange: "InputHelper_OnKeyboardGeometryChange",
             OnLostFocus: "InputHelper_OnLostFocus",
-            OnDragDrop: "InputHelper_OnDragDrop"
+            OnDragDrop: "InputHelper_OnDragDrop",
+            // Not in the original: the clipboardchange event of the Clipboard API.
+            OnClipboardChange: "InputHelper_OnClipboardChange"
         });
     }
 
