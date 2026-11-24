@@ -1136,7 +1136,10 @@ pub(super) struct BandParts<'a> {
 
 /// A frame whose bands were sent and whose answers were not received yet.
 struct PendingFrame {
+    /// The bands of the frame that were played: those the frame's dirty rows touch.
     clips: Vec<(usize, IRect)>,
+    /// How many bands the layer has; `clips` has fewer when the frame left clean bands out.
+    bands: usize,
     sent: usize,
     /// The time since the frame before this one was handed to the threads, when the two follow each
     /// other.
@@ -1144,6 +1147,19 @@ struct PendingFrame {
     /// Held until the bands have answered, so that what the picture holds is
     /// released on the render thread, and for the bands that fail.
     picture: Picture,
+}
+
+/// The bands of a frame that its dirty rows touch, all of them without rows.
+fn dirty_band_clips(clips: Vec<(usize, IRect)>, rows: Option<(i32, i32)>) -> Vec<(usize, IRect)> {
+    let Some((top, bottom)) = rows else { return clips };
+    clips.into_iter().filter(|(_, clip)| clip.top < bottom && clip.bottom > top).collect()
+}
+
+/// Whether the times of a collected frame move the bands: only a frame of which every band was
+/// played and sent. A band left out because the frame did not change it took no time, and is not
+/// a cheap band; counting it would move the band edges back and forth.
+fn feeds_balance(frame: &PendingFrame) -> bool {
+    frame.clips.len() == frame.bands && frame.sent == frame.bands
 }
 
 /// Receives the answers for the bands of a frame, which waits until the
@@ -1160,8 +1176,8 @@ fn collect_bands(
     pool.release();
     // By the index of the band; the indices of the bands of a frame are
     // below their number.
-    let mut inserted = vec![false; pending.clips.len()];
-    let mut busy = vec![Duration::ZERO; pending.clips.len()];
+    let mut inserted = vec![false; pending.bands];
+    let mut busy = vec![Duration::ZERO; pending.bands];
     for _ in 0..pending.sent {
         let Some(output) = pool.receive(layer) else {
             break;
@@ -1252,6 +1268,11 @@ struct PipelinedLayer {
     pending: RefCell<Option<PendingFrame>>,
     /// The paint of a blit that replaces the target's pixels (`BlendMode::Src`), made once.
     src_paint: Paint,
+    /// The rows the next frame can change, as the compositor tells them
+    /// (`ISkiaSurface::set_frame_dirty_rows`); taken by the frame when it begins.
+    dirty_rows: Cell<Option<(i32, i32)>>,
+    /// The rows the recorded frame can change: the bands outside them are not played.
+    frame_rows: Cell<Option<(i32, i32)>>,
 }
 
 impl PipelinedLayer {
@@ -1370,7 +1391,7 @@ impl PipelinedLayer {
         if !missing.is_empty() {
             self.play_on_main(&previous.picture, Some(missing.as_slice()));
             self.policy.borrow_mut().frame_needed_direct();
-        } else if previous.sent == busy.len() && self.balance.borrow_mut().frame_after(&busy, previous.period) {
+        } else if feeds_balance(&previous) && self.balance.borrow_mut().frame_after(&busy, previous.period) {
             ferroui_base::perf_count!(SkiaBandsMoved);
         }
     }
@@ -1403,13 +1424,17 @@ impl PipelinedLayer {
             // A band has a thread of its own: a layer that asks for more
             // bands than the first pipelined layer of the context did has
             // as many as there are threads.
-            let clips = {
+            let (clips, bands) = {
                 let mut balance = self.balance.borrow_mut();
                 let (least, most) = (self.bands.min(threads), self.most.min(threads));
                 if !balance.follows(least, most) {
                     *balance = BandBalance::following(self.size.1, least, most);
                 }
-                balance.clips(self.size.0)
+                let clips = balance.clips(self.size.0);
+                let bands = clips.len();
+                // The bands the frame cannot change keep their pixels: the layer has one texture, which every frame
+                // draws on, so a band left out still shows the frame before, and every frame since that drew it.
+                (dirty_band_clips(clips, self.frame_rows.take()), bands)
             };
 
             // What the recorder of the context has pending comes before the
@@ -1446,7 +1471,7 @@ impl PipelinedLayer {
             }
             // A band that was not sent is found missing when the frame is
             // collected, and played on the recorder of the context then.
-            *self.pending.borrow_mut() = Some(PendingFrame { clips, sent, period, picture: picture.clone() });
+            *self.pending.borrow_mut() = Some(PendingFrame { clips, bands, sent, period, picture: picture.clone() });
             Ok(())
         });
 
@@ -1554,6 +1579,8 @@ impl PipelinedLayerSurface {
             busy: Cell::new(Duration::ZERO),
             balance: RefCell::new(BandBalance::following(height, bands, most)),
             pending: RefCell::new(None),
+            dirty_rows: Cell::new(None),
+            frame_rows: Cell::new(None),
             src_paint: {
                 let mut paint = Paint::default();
                 paint.set_blend_mode(BlendMode::Src);
@@ -1618,6 +1645,10 @@ impl ISkiaSurface for PipelinedLayerSurface {
         true
     }
 
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        self.0.dirty_rows.set(rows);
+    }
+
     fn dispose(&self) {
         self.0.release();
     }
@@ -1628,9 +1659,12 @@ impl ISkiaSurface for PipelinedLayerSurface {
             return None;
         }
         let started = Instant::now();
+        // The rows belong to this frame alone, whether it is recorded or drawn directly.
+        let rows = layer.dirty_rows.take();
         if !layer.begin_frame(started) {
             return None;
         }
+        layer.frame_rows.set(rows);
 
         let (width, height) = layer.size;
         let bounds = Rect::new(0.0, 0.0, width as f32, height as f32);
@@ -2000,6 +2034,37 @@ mod tests {
 
         let mut policy = PipelinePolicy::new(SkiaFramePipelining::Off);
         assert!(!run(&mut policy, &mut now, 10, FRAME, Duration::from_millis(30)).iter().any(|pipelined| *pipelined));
+    }
+
+    #[test]
+    fn a_frame_plays_the_bands_its_dirty_rows_touch() {
+        let clips = band_clips((100, 256), 4);
+        let rows = |rows| dirty_band_clips(clips.clone(), rows).iter().map(|(index, _)| *index).collect::<Vec<_>>();
+        assert_eq!(rows(None), vec![0, 1, 2, 3], "no rows: every band");
+        assert_eq!(rows(Some((0, 10))), vec![0], "a clock at the top");
+        assert_eq!(rows(Some((60, 70))), vec![0, 1], "rows across an edge");
+        assert_eq!(rows(Some((200, 256))), vec![3]);
+        assert_eq!(rows(Some((0, 256))), vec![0, 1, 2, 3]);
+        assert!(rows(Some((300, 310))).is_empty(), "rows below the layer");
+    }
+
+    #[test]
+    fn only_frames_of_which_every_band_was_played_move_the_bands() {
+        let picture = {
+            let mut recorder = PictureRecorder::new();
+            recorder.begin_recording(Rect::from_wh(1.0, 1.0), false);
+            recorder.finish_recording_as_picture(None).expect("a picture")
+        };
+        let frame = |played: usize, sent: usize| PendingFrame {
+            clips: band_clips((100, 256), 4).into_iter().take(played).collect(),
+            bands: 4,
+            sent,
+            period: None,
+            picture: picture.clone(),
+        };
+        assert!(feeds_balance(&frame(4, 4)));
+        assert!(!feeds_balance(&frame(1, 1)), "a frame that left bands out");
+        assert!(!feeds_balance(&frame(4, 3)), "a band that was not sent");
     }
 
     #[test]

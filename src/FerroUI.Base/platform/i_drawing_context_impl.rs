@@ -221,6 +221,14 @@ pub trait IDrawingContextLayerImpl: IBitmapImpl {
         false
     }
 
+    /// Tells the layer which rows of pixels the next frame drawn on it can change, from `top` to
+    /// `bottom` (exclusive): the frame draws nothing outside them, and the layer keeps its pixels
+    /// there. `None`: any row. A layer that draws its frames in parts (the bands of a pipelined
+    /// layer) leaves out the parts outside the rows; any other layer ignores it.
+    fn set_frame_dirty_rows(&self, rows: Option<(i32, i32)>) {
+        let _ = rows;
+    }
+
     /// Whether the layer's contents have been lost.
     fn is_corrupted(&self) -> bool;
 

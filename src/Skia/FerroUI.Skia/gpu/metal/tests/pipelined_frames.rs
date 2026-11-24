@@ -979,3 +979,41 @@ fn a_layer_that_does_not_cover_its_target_is_cleared_and_blitted_as_before() {
     layers.dispose();
 }
 
+/// A frame that changes the rows from `top` to `bottom` only: what it draws is clipped to them, as
+/// the compositor clips a frame to its dirty area.
+fn draw_rows(top: f64, bottom: f64, color: u32) -> impl Fn(&mut dyn IDrawingContextImpl) {
+    move |context: &mut dyn IDrawingContextImpl| {
+        let rows = Rect::new(0.0, top, WIDTH as f64, bottom - top);
+        context.push_clip(rows);
+        context.clear(Colors::TRANSPARENT);
+        let brush = solid(color);
+        let rect = RoundedRect::from(Rect::new(20.0, top + 2.0, 120.0, 40.0));
+        context.draw_rectangle(Some(&brush), None, rect, &BoxShadows::default());
+        context.pop_clip();
+    }
+}
+
+#[test]
+fn a_frame_that_changes_one_band_plays_that_band_and_keeps_the_others() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    let layers = Layers::new(&device, SkiaFramePipelining::On);
+    layers.draw(draw_scene);
+
+    // A change in the top band, then in the bottom band, then in both, frame after frame, each frame told the rows
+    // it changes: the bands it does not touch keep what the frames before drew.
+    let frames: [(f64, f64, u32); 4] =
+        [(10.0, 60.0, 0xFF2563EB), (150.0, 200.0, 0xFFDC2626), (100.0, 160.0, 0xFF16A34A), (12.0, 58.0, 0xFF9333EA)];
+    for (frame, (top, bottom, color)) in frames.into_iter().enumerate() {
+        layers.pipelined.set_frame_dirty_rows(Some((top as i32 - 1, bottom as i32 + 1)));
+        layers.draw(draw_rows(top, bottom, color));
+        layers.assert_same_pixels(&format!("frame {frame} of rows {top} to {bottom}"));
+    }
+    // And a frame without rows plays every band.
+    layers.draw(draw_update);
+    layers.assert_same_pixels("a frame of every band");
+    layers.dispose();
+}
+
