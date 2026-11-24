@@ -1622,6 +1622,15 @@ mod tests {
             FrnKey::FrnKeyA,
             FrnPhysicalKey::FrnPhysicalKeyA,
             Some("a".to_string()),
+            None,
+            None,
+            FrnKeyEventInfo {
+                has_consumed_modifiers: false,
+                consumed_modifiers: FrnInputModifiers::FrnInputModifiersNone,
+                has_native_key_code: false,
+                native_key_code: 0,
+                native_modifiers: 0,
+            },
         );
         assert!(!handled);
         assert!(!top_level.raw_text_input_event(8, "ä"));
@@ -1647,6 +1656,15 @@ mod tests {
             FrnKey::FrnKeyEscape,
             FrnPhysicalKey::FrnPhysicalKeyNone,
             None,
+            None,
+            None,
+            FrnKeyEventInfo {
+                has_consumed_modifiers: false,
+                consumed_modifiers: FrnInputModifiers::FrnInputModifiersNone,
+                has_native_key_code: false,
+                native_key_code: 0,
+                native_modifiers: 0,
+            },
         ));
         assert!(top_level.raw_text_input_event(10, "x"));
     }
@@ -1684,6 +1702,15 @@ mod tests {
             FrnKey::FrnKeyA,
             FrnPhysicalKey::FrnPhysicalKeyA,
             None,
+            None,
+            None,
+            FrnKeyEventInfo {
+                has_consumed_modifiers: false,
+                consumed_modifiers: FrnInputModifiers::FrnInputModifiersNone,
+                has_native_key_code: false,
+                native_key_code: 0,
+                native_modifiers: 0,
+            },
         ));
         assert!(received.borrow().is_empty());
     }
