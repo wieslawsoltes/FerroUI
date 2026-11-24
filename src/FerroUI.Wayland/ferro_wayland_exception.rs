@@ -157,22 +157,6 @@ mod tests {
         );
     }
 
-    /// Not from the reference: the deprecated factories give the errors of the constructors.
-    #[test]
-    #[allow(deprecated)]
-    fn the_deprecated_factories_give_the_errors_of_the_constructors() {
-        assert_eq!(FerroWaylandPollException::new(), FerroWaylandError::poll());
-        assert_eq!(FerroWaylandNetworkException::new("x"), FerroWaylandError::network("x"));
-        assert_eq!(FerroWaylandFlushException::new("x"), FerroWaylandError::flush("x"));
-        assert_eq!(FerroWaylandFlushException::from_errno(32), FerroWaylandError::flush_errno(32));
-        assert_eq!(FerroWaylandReadException::new("x"), FerroWaylandError::read("x"));
-        assert_eq!(FerroWaylandReadException::from_errno(104), FerroWaylandError::read_errno(104));
-        assert_eq!(FerroWaylandProtocolErrorException::new(), FerroWaylandError::protocol_error());
-        assert_eq!(
-            FerroWaylandProtocolErrorException::with_code(3, "bad surface"),
-            FerroWaylandError::protocol_error_with_code(3, "bad surface")
-        );
-    }
 
     #[test]
     fn an_error_shows_what_caused_it() {

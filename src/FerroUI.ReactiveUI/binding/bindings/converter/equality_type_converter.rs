@@ -46,8 +46,6 @@ fn as_str(value: &dyn Any) -> Option<&str> {
 
 /// `Object.Equals(left, right)` for the values whose equality is known (see
 /// [`EqualityTypeConverter`]).
-// The deprecated `ferroui_splat::Guid` is compared until it is removed after 0.5.
-#[allow(deprecated)]
 fn values_equal(left: Option<&dyn Any>, right: Option<&dyn Any>) -> bool {
     let (left, right) = match (left, right) {
         (None, None) => return true,
@@ -91,7 +89,6 @@ fn values_equal(left: Option<&dyn Any>, right: Option<&dyn Any>) -> bool {
     }
 
     equal_as!(i8, i16, i32, i64, i128, isize, u8, u16, u32, u64, u128, usize, bool, char, (), Uuid, Duration);
-    equal_as!(ferroui_splat::Guid);
     equal_as_float!(f32, f64);
     false
 }

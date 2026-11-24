@@ -6,4 +6,3 @@ mod service_location;
 
 // The identifier on top of the `uuid` crate (#423, C1).
 #[allow(deprecated)]
-mod guid_tests;
