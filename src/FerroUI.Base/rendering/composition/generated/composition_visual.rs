@@ -10,6 +10,8 @@ use bitflags::bitflags;
 use crate::Matrix;
 use crate::Vector;
 use crate::Vector3D;
+use crate::media::BackdropEffectBoundsSource;
+use crate::media::BackdropEffectCache;
 use crate::media::IBrush;
 use crate::media::IImmutableEffect;
 use crate::media::RenderOptions;
@@ -85,22 +87,25 @@ bitflags! {
         const ADORNER_IS_CLIPPED = 268435456;
         const OPACITY_MASK_BRUSH = 536870912;
         const EFFECT = 1073741824;
-        const RENDER_OPTIONS = 2147483648;
-        const TEXT_OPTIONS = 4294967296;
-        const CACHE_MODE = 8589934592;
-        const COMPOSITION_CLIP = 17179869184;
-        const ROTATION_AXIS = 34359738368;
-        const ROTATION_AXIS_ANIMATED = 68719476736;
-        const RELATIVE_OFFSET_ADJUSTMENT = 137438953472;
-        const RELATIVE_OFFSET_ADJUSTMENT_ANIMATED = 274877906944;
-        const RELATIVE_SIZE_ADJUSTMENT = 549755813888;
-        const RELATIVE_SIZE_ADJUSTMENT_ANIMATED = 1099511627776;
-        const IS_HIT_TEST_VISIBLE = 2199023255552;
-        const IS_PIXEL_SNAPPING_ENABLED = 4398046511104;
-        const BORDER_MODE = 8796093022208;
-        const BACKFACE_VISIBILITY = 17592186044416;
-        const COMPOSITE_MODE = 35184372088832;
-        const PARENT_FOR_TRANSFORM = 70368744177664;
+        const BACKDROP_EFFECT = 2147483648;
+        const BACKDROP_EFFECT_BOUNDS_SOURCE = 4294967296;
+        const BACKDROP_EFFECT_CACHE = 8589934592;
+        const RENDER_OPTIONS = 17179869184;
+        const TEXT_OPTIONS = 34359738368;
+        const CACHE_MODE = 68719476736;
+        const COMPOSITION_CLIP = 137438953472;
+        const ROTATION_AXIS = 274877906944;
+        const ROTATION_AXIS_ANIMATED = 549755813888;
+        const RELATIVE_OFFSET_ADJUSTMENT = 1099511627776;
+        const RELATIVE_OFFSET_ADJUSTMENT_ANIMATED = 2199023255552;
+        const RELATIVE_SIZE_ADJUSTMENT = 4398046511104;
+        const RELATIVE_SIZE_ADJUSTMENT_ANIMATED = 8796093022208;
+        const IS_HIT_TEST_VISIBLE = 17592186044416;
+        const IS_PIXEL_SNAPPING_ENABLED = 35184372088832;
+        const BORDER_MODE = 70368744177664;
+        const BACKFACE_VISIBILITY = 140737488355328;
+        const COMPOSITE_MODE = 281474976710656;
+        const PARENT_FOR_TRANSFORM = 562949953421312;
     }
 }
 
@@ -198,6 +203,18 @@ pub trait CompositionVisualHooks: ICompositionObjectHost {
     fn validate_effect_change(&self, _old_value: &Option<Arc<dyn IImmutableEffect>>, _new_value: &Option<Arc<dyn IImmutableEffect>>) {}
     fn on_effect_changed(&self) {}
     fn on_effect_changing(&self) {}
+
+    fn validate_backdrop_effect_change(&self, _old_value: &Option<Arc<dyn IImmutableEffect>>, _new_value: &Option<Arc<dyn IImmutableEffect>>) {}
+    fn on_backdrop_effect_changed(&self) {}
+    fn on_backdrop_effect_changing(&self) {}
+
+    fn validate_backdrop_effect_bounds_source_change(&self, _old_value: BackdropEffectBoundsSource, _new_value: BackdropEffectBoundsSource) {}
+    fn on_backdrop_effect_bounds_source_changed(&self) {}
+    fn on_backdrop_effect_bounds_source_changing(&self) {}
+
+    fn validate_backdrop_effect_cache_change(&self, _old_value: BackdropEffectCache, _new_value: BackdropEffectCache) {}
+    fn on_backdrop_effect_cache_changed(&self) {}
+    fn on_backdrop_effect_cache_changing(&self) {}
 
     fn validate_render_options_change(&self, _old_value: RenderOptions, _new_value: RenderOptions) {}
     fn on_render_options_changed(&self) {}
@@ -1102,6 +1119,81 @@ impl CompositionVisualProps {
         }
     }
 
+    /// `BackdropEffect` (internal).
+    pub fn backdrop_effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
+        self.rare_backdrop_effect()
+    }
+
+    /// Sets `BackdropEffect` (internal).
+    pub fn set_backdrop_effect(&self, host: &dyn CompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
+        let mut changed = false;
+        let old_value = self.rare_backdrop_effect();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_backdrop_effect_change(host, &old_value, &value);
+            CompositionVisualHooks::on_backdrop_effect_changing(host);
+            changed = true;
+            // Update the backing value
+            self.store_rare_backdrop_effect(value.clone());
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BACKDROP_EFFECT);
+            host.register_for_serialization();
+        }
+        self.store_rare_backdrop_effect(value);
+        if changed {
+            CompositionVisualHooks::on_backdrop_effect_changed(host);
+        }
+    }
+
+    /// `BackdropEffectBoundsSource` (internal).
+    pub fn backdrop_effect_bounds_source(&self) -> BackdropEffectBoundsSource {
+        self.rare_backdrop_effect_bounds_source()
+    }
+
+    /// Sets `BackdropEffectBoundsSource` (internal).
+    pub fn set_backdrop_effect_bounds_source(&self, host: &dyn CompositionVisualHooks, value: BackdropEffectBoundsSource) {
+        let mut changed = false;
+        let old_value = self.rare_backdrop_effect_bounds_source();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_backdrop_effect_bounds_source_change(host, old_value, value);
+            CompositionVisualHooks::on_backdrop_effect_bounds_source_changing(host);
+            changed = true;
+            // Update the backing value
+            self.store_rare_backdrop_effect_bounds_source(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BACKDROP_EFFECT_BOUNDS_SOURCE);
+            host.register_for_serialization();
+        }
+        self.store_rare_backdrop_effect_bounds_source(value);
+        if changed {
+            CompositionVisualHooks::on_backdrop_effect_bounds_source_changed(host);
+        }
+    }
+
+    /// `BackdropEffectCache` (internal).
+    pub fn backdrop_effect_cache(&self) -> BackdropEffectCache {
+        self.rare_backdrop_effect_cache()
+    }
+
+    /// Sets `BackdropEffectCache` (internal).
+    pub fn set_backdrop_effect_cache(&self, host: &dyn CompositionVisualHooks, value: BackdropEffectCache) {
+        let mut changed = false;
+        let old_value = self.rare_backdrop_effect_cache();
+        if old_value.differs(&value) {
+            CompositionVisualHooks::validate_backdrop_effect_cache_change(host, old_value, value);
+            CompositionVisualHooks::on_backdrop_effect_cache_changing(host);
+            changed = true;
+            // Update the backing value
+            self.store_rare_backdrop_effect_cache(value);
+            // Register object for serialization in the next batch
+            self.changed_fields_of_composition_visual.set(self.changed_fields_of_composition_visual.get() | CompositionVisualChangedFields::BACKDROP_EFFECT_CACHE);
+            host.register_for_serialization();
+        }
+        self.store_rare_backdrop_effect_cache(value);
+        if changed {
+            CompositionVisualHooks::on_backdrop_effect_cache_changed(host);
+        }
+    }
+
     /// `RenderOptions`.
     pub fn render_options(&self) -> RenderOptions {
         self.render_options.get()
@@ -1721,6 +1813,15 @@ impl CompositionVisualProps {
         if changed.contains(CompositionVisualChangedFields::EFFECT) {
             writer.write_value(self.rare_effect());
         }
+        if changed.contains(CompositionVisualChangedFields::BACKDROP_EFFECT) {
+            writer.write_value(self.rare_backdrop_effect());
+        }
+        if changed.contains(CompositionVisualChangedFields::BACKDROP_EFFECT_BOUNDS_SOURCE) {
+            writer.write(self.rare_backdrop_effect_bounds_source());
+        }
+        if changed.contains(CompositionVisualChangedFields::BACKDROP_EFFECT_CACHE) {
+            writer.write(self.rare_backdrop_effect_cache());
+        }
         if changed.contains(CompositionVisualChangedFields::RENDER_OPTIONS) {
             writer.write(self.render_options.get());
         }
@@ -1788,6 +1889,9 @@ struct CompositionVisualRareProps {
     adorner_is_clipped: Cell<bool>,
     opacity_mask_brush: OptionCell<BatchResource<dyn IBrush>>,
     effect: OptionCell<Arc<dyn IImmutableEffect>>,
+    backdrop_effect: OptionCell<Arc<dyn IImmutableEffect>>,
+    backdrop_effect_bounds_source: Cell<BackdropEffectBoundsSource>,
+    backdrop_effect_cache: Cell<BackdropEffectCache>,
     cache_mode: OptionCell<Rc<dyn ICompositionObject>>,
     composition_clip: OptionCell<Rc<dyn ICompositionObject>>,
     rotation_axis: Cell<Vector3D>,
@@ -1814,6 +1918,9 @@ impl CompositionVisualRareProps {
             adorner_is_clipped: Cell::new(Default::default()),
             opacity_mask_brush: OptionCell::new(),
             effect: OptionCell::new(),
+            backdrop_effect: OptionCell::new(),
+            backdrop_effect_bounds_source: Cell::new(Default::default()),
+            backdrop_effect_cache: Cell::new(Default::default()),
             cache_mode: OptionCell::new(),
             composition_clip: OptionCell::new(),
             rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
@@ -2088,6 +2195,68 @@ impl CompositionVisualProps {
     }
 
     #[inline]
+    fn rare_backdrop_effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_backdrop_effect(&self, value: Option<Arc<dyn IImmutableEffect>>) {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().backdrop_effect.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backdrop_effect_bounds_source(&self) -> BackdropEffectBoundsSource {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_bounds_source.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_backdrop_effect_bounds_source(&self, value: BackdropEffectBoundsSource) {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_bounds_source.set(value),
+            None => {
+                let initial: BackdropEffectBoundsSource = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().backdrop_effect_bounds_source.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backdrop_effect_cache(&self) -> BackdropEffectCache {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_cache.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_backdrop_effect_cache(&self, value: BackdropEffectCache) {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_cache.set(value),
+            None => {
+                let initial: BackdropEffectCache = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().backdrop_effect_cache.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
     fn rare_cache_mode(&self) -> Option<Rc<dyn ICompositionObject>> {
         match self.rare.get() {
             Some(rare) => rare.cache_mode.get(),
@@ -2300,6 +2469,15 @@ pub trait ServerCompositionVisualHooks: IServerAnimatedPropertyHost {
 
     fn on_effect_changed(&self) {}
     fn on_effect_changing(&self) {}
+
+    fn on_backdrop_effect_changed(&self) {}
+    fn on_backdrop_effect_changing(&self) {}
+
+    fn on_backdrop_effect_bounds_source_changed(&self) {}
+    fn on_backdrop_effect_bounds_source_changing(&self) {}
+
+    fn on_backdrop_effect_cache_changed(&self) {}
+    fn on_backdrop_effect_cache_changing(&self) {}
 
     fn on_render_options_changed(&self) {}
     fn on_render_options_changing(&self) {}
@@ -2987,6 +3165,129 @@ impl ServerCompositionVisualProps {
         );
         if changed {
             ServerCompositionVisualHooks::on_effect_changed(host);
+        }
+    }
+
+    /// The composition property of `BackdropEffect`.
+    pub fn id_of_backdrop_effect_property() -> &'static CompositionPropertyOf<Option<Arc<dyn IImmutableEffect>>> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<Option<Arc<dyn IImmutableEffect>>>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, Option<Arc<dyn IImmutableEffect>>>(
+                "BackdropEffect",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_backdrop_effect(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_backdrop_effect(v),
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `BackdropEffect`.
+    pub fn backdrop_effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
+        self.rare_backdrop_effect()
+    }
+
+    pub fn set_backdrop_effect(&self, host: &dyn ServerCompositionVisualHooks, value: Option<Arc<dyn IImmutableEffect>>) {
+        let old_value = self.rare_backdrop_effect();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_backdrop_effect_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_backdrop_effect_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.store_rare_backdrop_effect(value.clone()),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_backdrop_effect_changed(host);
+        }
+    }
+
+    /// The composition property of `BackdropEffectBoundsSource`.
+    pub fn id_of_backdrop_effect_bounds_source_property() -> &'static CompositionPropertyOf<BackdropEffectBoundsSource> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<BackdropEffectBoundsSource>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, BackdropEffectBoundsSource>(
+                "BackdropEffectBoundsSource",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_backdrop_effect_bounds_source(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_backdrop_effect_bounds_source(v),
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `BackdropEffectBoundsSource`.
+    pub fn backdrop_effect_bounds_source(&self) -> BackdropEffectBoundsSource {
+        self.rare_backdrop_effect_bounds_source()
+    }
+
+    pub fn set_backdrop_effect_bounds_source(&self, host: &dyn ServerCompositionVisualHooks, value: BackdropEffectBoundsSource) {
+        let old_value = self.rare_backdrop_effect_bounds_source();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_backdrop_effect_bounds_source_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_backdrop_effect_bounds_source_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.store_rare_backdrop_effect_bounds_source(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_backdrop_effect_bounds_source_changed(host);
+        }
+    }
+
+    /// The composition property of `BackdropEffectCache`.
+    pub fn id_of_backdrop_effect_cache_property() -> &'static CompositionPropertyOf<BackdropEffectCache> {
+        static PROPERTY: OnceLock<CompositionPropertyOf<BackdropEffectCache>> = OnceLock::new();
+        PROPERTY.get_or_init(|| {
+            CompositionProperty::register::<ServerCompositionVisualProps, BackdropEffectCache>(
+                "BackdropEffectCache",
+                "ServerCompositionVisual",
+                |obj| props_of::<ServerCompositionVisualProps>(obj).rare_backdrop_effect_cache(),
+                |obj, v| props_of::<ServerCompositionVisualProps>(obj).store_rare_backdrop_effect_cache(v),
+                None,
+                None,
+            )
+        })
+    }
+
+    /// `BackdropEffectCache`.
+    pub fn backdrop_effect_cache(&self) -> BackdropEffectCache {
+        self.rare_backdrop_effect_cache()
+    }
+
+    pub fn set_backdrop_effect_cache(&self, host: &dyn ServerCompositionVisualHooks, value: BackdropEffectCache) {
+        let old_value = self.rare_backdrop_effect_cache();
+        let mut changed = false;
+        if old_value.differs(&value) {
+            ServerCompositionVisualHooks::on_backdrop_effect_cache_changing(host);
+            changed = true;
+        }
+        host.set_value(
+            Self::id_of_backdrop_effect_cache_property().base(),
+            ServerValueChange {
+                equal: old_value.default_equals(&value),
+                old_resource: None,
+                new_resource: None,
+                assign: &mut || self.store_rare_backdrop_effect_cache(value),
+            },
+        );
+        if changed {
+            ServerCompositionVisualHooks::on_backdrop_effect_cache_changed(host);
         }
     }
 
@@ -3694,6 +3995,18 @@ impl ServerCompositionVisualProps {
             let value = reader.read_value::<Arc<dyn IImmutableEffect>>();
             self.set_effect(host, value);
         }
+        if changed.contains(CompositionVisualChangedFields::BACKDROP_EFFECT) {
+            let value = reader.read_value::<Arc<dyn IImmutableEffect>>();
+            self.set_backdrop_effect(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::BACKDROP_EFFECT_BOUNDS_SOURCE) {
+            let value = reader.read::<BackdropEffectBoundsSource>();
+            self.set_backdrop_effect_bounds_source(host, value);
+        }
+        if changed.contains(CompositionVisualChangedFields::BACKDROP_EFFECT_CACHE) {
+            let value = reader.read::<BackdropEffectCache>();
+            self.set_backdrop_effect_cache(host, value);
+        }
         if changed.contains(CompositionVisualChangedFields::RENDER_OPTIONS) {
             let value = reader.read::<RenderOptions>();
             self.set_render_options(host, value);
@@ -3857,6 +4170,9 @@ struct ServerCompositionVisualRareProps {
     adorner_is_clipped: Cell<bool>,
     opacity_mask_brush: OptionCell<ServerResourceRef<dyn IBrush>>,
     effect: OptionCell<Arc<dyn IImmutableEffect>>,
+    backdrop_effect: OptionCell<Arc<dyn IImmutableEffect>>,
+    backdrop_effect_bounds_source: Cell<BackdropEffectBoundsSource>,
+    backdrop_effect_cache: Cell<BackdropEffectCache>,
     cache_mode: OptionCell<Rc<dyn IServerObject>>,
     composition_clip: OptionCell<Rc<dyn IServerObject>>,
     rotation_axis: Cell<Vector3D>,
@@ -3883,6 +4199,9 @@ impl ServerCompositionVisualRareProps {
             adorner_is_clipped: Cell::new(Default::default()),
             opacity_mask_brush: OptionCell::new(),
             effect: OptionCell::new(),
+            backdrop_effect: OptionCell::new(),
+            backdrop_effect_bounds_source: Cell::new(Default::default()),
+            backdrop_effect_cache: Cell::new(Default::default()),
             cache_mode: OptionCell::new(),
             composition_clip: OptionCell::new(),
             rotation_axis: Cell::new(Vector3D::new(0.0, 0.0, 1.0)),
@@ -4151,6 +4470,68 @@ impl ServerCompositionVisualProps {
             None => {
                 if value.is_some() {
                     self.rare_block().effect.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backdrop_effect(&self) -> Option<Arc<dyn IImmutableEffect>> {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect.get(),
+            None => None,
+        }
+    }
+
+    #[inline]
+    fn store_rare_backdrop_effect(&self, value: Option<Arc<dyn IImmutableEffect>>) {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect.set(value),
+            None => {
+                if value.is_some() {
+                    self.rare_block().backdrop_effect.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backdrop_effect_bounds_source(&self) -> BackdropEffectBoundsSource {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_bounds_source.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_backdrop_effect_bounds_source(&self, value: BackdropEffectBoundsSource) {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_bounds_source.set(value),
+            None => {
+                let initial: BackdropEffectBoundsSource = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().backdrop_effect_bounds_source.set(value);
+                }
+            }
+        }
+    }
+
+    #[inline]
+    fn rare_backdrop_effect_cache(&self) -> BackdropEffectCache {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_cache.get(),
+            None => Default::default(),
+        }
+    }
+
+    #[inline]
+    fn store_rare_backdrop_effect_cache(&self, value: BackdropEffectCache) {
+        match self.rare.get() {
+            Some(rare) => rare.backdrop_effect_cache.set(value),
+            None => {
+                let initial: BackdropEffectCache = Default::default();
+                if value.differs(&initial) {
+                    self.rare_block().backdrop_effect_cache.set(value);
                 }
             }
         }
