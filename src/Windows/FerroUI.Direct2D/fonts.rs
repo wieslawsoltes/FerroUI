@@ -36,6 +36,8 @@ pub struct Typeface {
     style: FontStyle,
     stretch: FontStretch,
     simulations: FontSimulations,
+    /// The simulations DirectWrite applies inside the face: reported, not applied again.
+    platform_simulations: FontSimulations,
     data: Option<Vec<u8>>,
 }
 impl Typeface {
@@ -51,8 +53,26 @@ impl Typeface {
             style,
             stretch,
             simulations: FontSimulations::None,
+            platform_simulations: FontSimulations::None,
             data: None,
         }
+    }
+}
+impl Typeface {
+    /// A face the system matched to a request (upstream 80659c4c3e): it reports the
+    /// simulations DirectWrite applies inside it, which DirectWrite draws itself, with the
+    /// attributes of the request, as before.
+    fn matched(font: Arc<NativeFont>, weight: FontWeight, style: FontStyle, stretch: FontStretch) -> Self {
+        let simulations = FontSimulations::from_bits_truncate(unsafe { ffi::d2_font_simulations(font.raw()) } as _);
+        let mut face = Self::new(font, weight, style, stretch);
+        // Reported, not applied again: the face is drawn as DirectWrite simulates it.
+        face.platform_simulations = simulations;
+        face
+    }
+
+    /// The simulations applied when the face is drawn.
+    pub fn applied_simulations(&self) -> FontSimulations {
+        self.simulations
     }
 }
 impl IFontMemory for Typeface {
@@ -78,7 +98,7 @@ impl IPlatformTypeface for Typeface {
         self.stretch
     }
     fn font_simulations(&self) -> FontSimulations {
-        self.simulations
+        self.simulations | self.platform_simulations
     }
     fn try_get_stream(&self) -> Option<Box<dyn Read>> {
         self.data
@@ -271,7 +291,7 @@ impl IFontManagerImpl for FontManager {
         let font = Self::system(name, weight, style, stretch)?;
         // The native lookup rejects absent families. Do not compare the returned
         // English display name with a valid localized name accepted by DirectWrite.
-        Some(Rc::new(Typeface::new(font, weight, style, stretch)))
+        Some(Rc::new(Typeface::matched(font, weight, style, stretch)))
     }
     fn try_match_character(
         &self,
@@ -296,12 +316,7 @@ impl IFontManagerImpl for FontManager {
             if p.is_null() {
                 return None;
             }
-            Some(Rc::new(Typeface::new(
-                NativeFont::from_raw(p),
-                weight,
-                style,
-                stretch,
-            )))
+            Some(Rc::new(Typeface::matched(NativeFont::from_raw(p), weight, style, stretch)))
         }
     }
     fn try_create_glyph_typeface_from_stream(

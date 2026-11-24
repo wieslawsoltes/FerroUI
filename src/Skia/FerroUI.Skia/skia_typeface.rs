@@ -14,7 +14,11 @@ use std::rc::Rc;
 /// A platform typeface over a Skia typeface.
 pub struct SkiaTypeface {
     sk_typeface: Typeface,
+    /// The simulations applied when a font is created from the typeface.
     font_simulations: FontSimulations,
+    /// The simulations the platform applied inside the typeface (DirectWrite, fontconfig):
+    /// reported, never applied again (upstream 80659c4c3e).
+    platform_simulations: FontSimulations,
     weight: FontWeight,
     style: FontStyle,
     stretch: FontStretch,
@@ -26,16 +30,46 @@ impl SkiaTypeface {
     /// Wraps a Skia typeface, applying the given style simulations when
     /// fonts are created from it.
     pub fn new(typeface: Typeface, font_simulations: FontSimulations) -> Rc<Self> {
+        Self::matched(typeface, font_simulations, FontSimulations::None, None)
+    }
+
+    /// Wraps a Skia typeface that a font manager matched to a request (upstream 80659c4c3e):
+    /// `font_simulations` are applied, `platform_simulations` were applied by the platform
+    /// inside the typeface and are only reported. With the `requested` weight and style, a
+    /// simulated face reports the requested weight (bold) or style (oblique) for what is
+    /// simulated; the stretch is always the face's own.
+    pub fn matched(
+        typeface: Typeface,
+        font_simulations: FontSimulations,
+        platform_simulations: FontSimulations,
+        requested: Option<(FontWeight, FontStyle)>,
+    ) -> Rc<Self> {
         let font_style = typeface.font_style();
+        let mut weight = FontWeight(*font_style.weight());
+        let mut style = slant_to_font_style(font_style.slant());
+        if let Some((requested_weight, requested_style)) = requested {
+            if font_simulations.contains(FontSimulations::Bold) && requested_weight.0 > weight.0 {
+                weight = requested_weight;
+            }
+            if font_simulations.contains(FontSimulations::Oblique) && requested_style != FontStyle::Normal {
+                style = requested_style;
+            }
+        }
 
         Rc::new(Self {
-            weight: FontWeight(*font_style.weight()),
-            style: slant_to_font_style(font_style.slant()),
+            weight,
+            style,
             stretch: FontStretch::from_i32(*font_style.width()).unwrap_or(FontStretch::Normal),
             sk_typeface: typeface,
             font_simulations,
+            platform_simulations,
             glyph_bounds: GlyphBoundsCache::default(),
         })
+    }
+
+    /// The simulations the platform applied inside the typeface.
+    pub fn platform_simulations(&self) -> FontSimulations {
+        self.platform_simulations
     }
 
     /// The Skia typeface.
@@ -98,8 +132,10 @@ impl IPlatformTypeface for SkiaTypeface {
         self.stretch
     }
 
+    /// The simulations of the face: those applied when a font is created, and those the
+    /// platform applied inside the typeface.
     fn font_simulations(&self) -> FontSimulations {
-        self.font_simulations
+        self.font_simulations | self.platform_simulations
     }
 
     /// The position Skia reports for the typeface (`SkTypeface::getVariationDesignPosition`): a
@@ -156,7 +192,8 @@ impl IPlatformTypeface for SkiaTypeface {
         let position = VariationPosition { coordinates: &coordinates };
         let arguments = FontArguments::new().set_variation_design_position(position);
         let typeface = self.sk_typeface.clone_with_arguments(&arguments)?;
-        let typeface: Rc<dyn IPlatformTypeface> = SkiaTypeface::new(typeface, self.font_simulations);
+        let typeface: Rc<dyn IPlatformTypeface> =
+            SkiaTypeface::matched(typeface, self.font_simulations, self.platform_simulations, None);
         Some(typeface)
     }
 

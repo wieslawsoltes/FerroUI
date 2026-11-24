@@ -87,6 +87,7 @@ extern "C" {
     pub fn d2_font_data(data: *const u8, n: usize) -> Ptr;
     pub fn d2_font_name(font: Ptr, out: *mut u8, n: usize);
     pub fn d2_font_table(font: Ptr, tag: u32) -> Ptr;
+    pub fn d2_font_simulations(font: Ptr) -> i32;
     pub fn d2_font_names() -> Ptr;
     pub fn d2_font_match(font: Ptr, text: *const u16, n: usize, locale: *const i8) -> Ptr;
     pub fn d2_data_len(data: Ptr) -> usize;
