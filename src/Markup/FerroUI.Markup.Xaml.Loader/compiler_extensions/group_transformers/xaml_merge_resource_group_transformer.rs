@@ -5,11 +5,12 @@ use std::collections::HashMap;
 use std::rc::Rc;
 
 use xamlx::ast::{
-    IXamlAstManipulationNode, IXamlAstNode, IXamlAstValueNode, XamlAstExtensions,
+    visit_node, IXamlAstManipulationNode, IXamlAstNode, IXamlAstValueNode, IXamlAstVisitor, XamlAstExtensions,
     XamlAstNewClrObjectNode, XamlAstNodeExtensions, XamlConstantNode, XamlManipulationGroupNode,
     XamlObjectInitializationNode, XamlPropertyAssignmentNode, XamlStaticExtensionNode,
 };
 use xamlx::exceptions::{XamlError, XamlResult};
+use xamlx::type_system::IXamlType;
 
 use super::{
     AstGroupTransformationContext, FerroXamlIncludeTransformer, IXamlAstGroupTransformer, XamlRuntimeIncludeFallback,
@@ -18,7 +19,7 @@ use crate::compiler_extensions::transformers::{
     EnsureCapacityNode, FerroXamlIlEnsureResourceDictionaryCapacityTransformer,
     FerroXamlIlWellKnownTypesExtensions,
 };
-use crate::compiler_extensions::XamlDocumentUsage;
+use crate::compiler_extensions::{IXamlDocumentResource, XamlDocumentUsage};
 
 /// The documents the entries a merge inlined come from (#568, step 2 of
 /// docs/porting/theme-trimming.md): for every entry of an included dictionary that
@@ -269,6 +270,24 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
         context: &AstGroupTransformationContext,
         node: Rc<dyn IXamlAstNode>,
     ) -> XamlResult<Rc<dyn IXamlAstNode>> {
+        let current_document = context.current_document();
+        let document_uri = current_document.as_ref().and_then(|d| d.uri());
+        let mut merging_documents: Vec<Rc<dyn IXamlDocumentResource>> = current_document.into_iter().collect();
+        Self::merge_resources(context, node, document_uri.as_deref(), &mut merging_documents)
+    }
+}
+
+impl XamlMergeResourceGroupTransformer {
+    /// `MergeResources(context, node, documentUri, mergingDocuments)`: inlines the
+    /// `MergeResourceInclude` entries of the dictionary `node`, a dictionary of the document
+    /// `document_uri`. `merging_documents` are the documents whose merge is in progress, the
+    /// current one first: a document met again is a circular merge.
+    fn merge_resources(
+        context: &AstGroupTransformationContext,
+        node: Rc<dyn IXamlAstNode>,
+        document_uri: Option<&str>,
+        merging_documents: &mut Vec<Rc<dyn IXamlDocumentResource>>,
+    ) -> XamlResult<Rc<dyn IXamlAstNode>> {
         let ferro_types = context.try_get_ferro_types()?;
         let resource_dictionary_type = ferro_types.resource_dictionary.clone();
         let Some(resource_dictionary_node) = node.cast::<XamlObjectInitializationNode>() else {
@@ -354,6 +373,7 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                     "MergeResourceInclude",
                     source_node,
                     true,
+                    document_uri,
                 )?;
             let Some(original_asset_path) = original_asset_path else {
                 return context.report_transform_error(
@@ -399,6 +419,44 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
                     node,
                 );
             };
+
+            if merging_documents.iter().any(|d| Rc::ptr_eq(d, &target_document)) {
+                return context.report_transform_error(
+                    &format!(
+                        "Node MergeResourceInclude has a circular reference to \"{original_asset_path}\"."
+                    ),
+                    property_node
+                        .as_deref()
+                        .map(|n| n as &dyn xamlx::ast::IXamlLineInfo),
+                    node,
+                );
+            }
+
+            // Documents are transformed in order, so the merged document might not be transformed
+            // yet. Its own `MergeResourceInclude` nodes are merged first, otherwise they would be
+            // inlined unprocessed (and its entries recorded as merged from the outer document).
+            // Merging is idempotent: it does nothing when the document is transformed later.
+            if let Some(root) = &target_document_root {
+                let mut dictionaries = ResourceDictionaryFinder {
+                    resource_dictionary_type: resource_dictionary_type.clone(),
+                    found: Vec::new(),
+                };
+                visit_node(root, &mut dictionaries)?;
+                let target_uri = target_document.uri();
+                merging_documents.push(target_document.clone());
+                // Nested dictionaries first: they are found after their parents.
+                let mut nested = Ok(());
+                for dictionary in dictionaries.found.into_iter().rev() {
+                    if let Err(error) =
+                        Self::merge_resources(context, dictionary, target_uri.as_deref(), merging_documents)
+                    {
+                        nested = Err(error);
+                        break;
+                    }
+                }
+                merging_documents.pop();
+                nested?;
+            }
 
             // As upstream: a cast of the manipulation (a null one casts, and its children
             // are then a null reference).
@@ -548,4 +606,26 @@ impl IXamlAstGroupTransformer for XamlMergeResourceGroupTransformer {
 
         Ok(node)
     }
+}
+
+/// `ResourceDictionaryFinder`: the `ResourceDictionary` initialization nodes of a document,
+/// parents before their children.
+struct ResourceDictionaryFinder {
+    resource_dictionary_type: Rc<dyn IXamlType>,
+    found: Vec<Rc<dyn IXamlAstNode>>,
+}
+
+impl IXamlAstVisitor for ResourceDictionaryFinder {
+    fn visit(&mut self, node: Rc<dyn IXamlAstNode>) -> XamlResult<Rc<dyn IXamlAstNode>> {
+        if let Some(initialization) = node.cast::<XamlObjectInitializationNode>() {
+            if initialization.type_.borrow().equals(&*self.resource_dictionary_type) {
+                self.found.push(node.clone());
+            }
+        }
+        Ok(node)
+    }
+
+    fn push(&mut self, _node: Rc<dyn IXamlAstNode>) {}
+
+    fn pop(&mut self) {}
 }

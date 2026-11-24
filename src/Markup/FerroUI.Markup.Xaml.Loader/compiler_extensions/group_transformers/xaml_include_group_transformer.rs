@@ -283,7 +283,7 @@ impl IXamlAstGroupTransformer for FerroXamlIncludeTransformer {
         };
 
         let (asset_path_uri, source_uri_node) =
-            Self::resolve_source_from_xaml_include(context, &node_type_name, &source_property, false)?;
+            Self::resolve_source_from_xaml_include(context, &node_type_name, &source_property, false, None)?;
         let Some(asset_path_uri) = asset_path_uri else {
             return Ok(node);
         };
@@ -509,15 +509,18 @@ impl FerroXamlIncludeTransformer {
     }
 
     /// `ResolveSourceFromXamlInclude(context, nodeTypeName, sourceProperty,
-    /// strictSourceValueType)`: the absolute, unescaped URI of the included document and the
-    /// node the source came from. The URI is `None` when the source cannot be resolved at
+    /// strictSourceValueType, documentUri)`: the absolute, unescaped URI of the included document
+    /// and the node the source came from. The URI is `None` when the source cannot be resolved at
     /// compile time (a diagnostic has been reported: an error when
-    /// `strict_source_value_type`, a warning otherwise).
+    /// `strict_source_value_type`, a warning otherwise). A relative source is resolved against
+    /// `document_uri`, or the current document when it is `None` (a merged document is
+    /// flattened before it is the current one, with its own URI as the base).
     pub fn resolve_source_from_xaml_include(
         context: &AstGroupTransformationContext,
         node_type_name: &str,
         source_property: &Rc<XamlPropertyAssignmentNode>,
         strict_source_value_type: bool,
+        document_uri: Option<&str>,
     ) -> XamlResult<(Option<String>, Option<Rc<dyn IXamlAstNode>>)> {
         let on_invalid_source = |node: &Option<Rc<dyn IXamlAstNode>>| -> XamlResult<()> {
             context.report_diagnostic_at(
@@ -603,9 +606,9 @@ impl FerroXamlIncludeTransformer {
             }
             Some(url) => url.clone(),
             None => {
-                let base_url = context
-                    .current_document()
-                    .and_then(|d| d.uri())
+                let base_url = document_uri
+                    .map(str::to_string)
+                    .or_else(|| context.current_document().and_then(|d| d.uri()))
                     .ok_or_else(|| XamlError::invalid_operation("CurrentDocument URI is null."))?;
                 let base_url = UriRef::parse_absolute(&base_url).map_err(uri_format_exception)?;
                 reference.resolve(&base_url).map_err(uri_format_exception)?

@@ -536,6 +536,118 @@ fn merge_resource_include_merges_theme_dictionaries() {
     assert_eq!(capacity[0].capacity, 4);
 }
 
+/// The upstream nested merge of 12.2.0: a merged document is flattened before it is inlined,
+/// whatever the order of the documents, with its relative sources resolved against its own URI.
+fn nested_merge(parent_first: bool) {
+    let fw = create_objects_test_framework();
+    let origins = fw.configuration.get_or_create_extra::<MergedEntryOrigins>();
+    let compiler = compiler(&fw);
+    let theme = |key: &str| {
+        format!(
+            "<ResourceDictionary.ThemeDictionaries><ResourceDictionary x:Key='Dark'><x:String x:Key='{key}'>t</x:String></ResourceDictionary></ResourceDictionary.ThemeDictionaries>"
+        )
+    };
+    let parent = resource(
+        &fw,
+        &compiler,
+        "A",
+        &dictionary(
+            "<ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='/Sub/Nested.xaml'/></ResourceDictionary.MergedDictionaries><x:String x:Key='brush5'>5</x:String>",
+        ),
+        true,
+        None,
+    );
+    // `Leaf.xaml` is relative: it is `Sub/Leaf.xaml` against the nested document, and a
+    // document that does not exist against the parent.
+    let nested = resource(
+        &fw,
+        &compiler,
+        "Sub/Nested",
+        &dictionary(&format!(
+            "<ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='Leaf.xaml'/></ResourceDictionary.MergedDictionaries><x:String x:Key='brush2'>2</x:String>{}",
+            theme("brush3")
+        )),
+        true,
+        None,
+    );
+    let leaf = resource(
+        &fw,
+        &compiler,
+        "Sub/Leaf",
+        &dictionary(&format!("<x:String x:Key='brush1'>1</x:String>{}", theme("brush4"))),
+        true,
+        None,
+    );
+    assert_eq!(errors(&fw), Vec::<String>::new());
+    let documents = if parent_first {
+        [parent.clone(), nested.clone(), leaf.clone()]
+    } else {
+        [leaf.clone(), nested.clone(), parent.clone()]
+    };
+    compiler.transform_group(&documents).expect("group");
+    assert_eq!(errors(&fw), Vec::<String>::new());
+
+    let root = root_of(&parent);
+    assert!(assignments(&root, "MergedDictionaries").is_empty(), "{}", dump_tree(&root));
+    let themes = assignments(&root, "ThemeDictionaries");
+    assert_eq!(themes.len(), 1, "{}", dump_tree(&root));
+    let mut dark = content_keys(&themes[0].as_node());
+    dark.sort();
+    assert_eq!(dark, ["brush3", "brush4"]);
+    let mut all = content_keys(&root);
+    all.sort();
+    assert_eq!(all, ["brush1", "brush2", "brush3", "brush4", "brush5"]);
+    assert_eq!(nested.usage(), XamlDocumentUsage::Merged);
+    assert_eq!(leaf.usage(), XamlDocumentUsage::Merged);
+    assert_eq!(parent.usage(), XamlDocumentUsage::Unknown);
+    // The entries of the leaf are recorded as merged from the leaf, not from the nested
+    // document that inlined them.
+    let origin = |key: &str| {
+        let entry = assignments(&root, "Content")
+            .into_iter()
+            .find(|c| text_of(&c.values.borrow()[0]) == key)
+            .expect("the entry");
+        origins.origin_of(&entry.as_node())
+    };
+    assert_eq!(origin("brush1").as_deref(), Some("ferres://Tests/Sub/Leaf.xaml"));
+    assert_eq!(origin("brush2").as_deref(), Some("ferres://Tests/Sub/Nested.xaml"));
+    assert_eq!(origin("brush5"), None);
+}
+
+#[test]
+fn merge_resource_include_merges_a_nested_include_when_the_parent_is_first() {
+    nested_merge(true);
+}
+
+#[test]
+fn merge_resource_include_merges_a_nested_include_when_the_parent_is_last() {
+    nested_merge(false);
+}
+
+#[test]
+fn merge_resource_include_reports_a_circular_merge() {
+    let fw = create_objects_test_framework();
+    let compiler = compiler(&fw);
+    let merge = |source: &str| {
+        dictionary(&format!(
+            "<ResourceDictionary.MergedDictionaries><MergeResourceInclude Source='{source}'/></ResourceDictionary.MergedDictionaries>"
+        ))
+    };
+    let first = resource(&fw, &compiler, "Resources1", &merge("/Resources2.xaml"), true, None);
+    let second = resource(&fw, &compiler, "Resources2", &merge("/Resources1.xaml"), true, None);
+    assert_eq!(errors(&fw), Vec::<String>::new());
+    compiler.transform_group(&[first, second]).expect("group");
+    assert!(
+        errors(&fw)
+            .iter()
+            .any(|e| e.starts_with(
+                "Node MergeResourceInclude has a circular reference to \"ferres://tests/Resources1.xaml\"."
+            )),
+        "{:?}",
+        errors(&fw)
+    );
+}
+
 /// An inline dictionary that merges a document (#633): `<ResourceDictionary>` with only a
 /// `MergeResourceInclude` in its merged dictionaries, as a merged dictionary of another one.
 fn inline_merge(source: &str, own: &str) -> String {
