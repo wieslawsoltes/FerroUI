@@ -122,5 +122,5 @@ fn kept_paints_draw_what_fresh_paints_draw_through_solid_gradient_dashed_and_opt
         draw(&mut context);
     }
     context.dispose();
-    assert!(pixels(&kept) == pixels(&fresh));
+    assert!(pixels(&mut kept) == pixels(&mut fresh));
 }
