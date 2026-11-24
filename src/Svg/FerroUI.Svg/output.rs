@@ -18,7 +18,12 @@ pub struct SvgExportReport {
     pub raster_layers: usize,
     pub draw_calls: u64,
     pub embedded_images: u64,
+    /// Vector layers reused without replaying the native SVG writer, including
+    /// layers whose prepared fragment was reused as well.
     pub vector_cache_hits: usize,
+    /// Vector layers whose namespaced, inspected fragment was reused. These
+    /// hits are a subset of `vector_cache_hits`; final document processing still runs.
+    pub prepared_vector_cache_hits: usize,
     pub raster_cache_hits: usize,
     pub unoptimized_bytes: usize,
     pub output_bytes: usize,

@@ -175,7 +175,11 @@ pub struct SvgExportOptions {
     pub pretty: bool,
     pub deduplicate: bool,
     pub relative_paths: bool,
-    /// Keep the most recent native SVG per layer for repeated/inspection exports.
+    /// Cache the most recent native SVG and one prepared inspection fragment per layer.
+    /// False disables reads and writes for both tiers without releasing existing entries;
+    /// use `SvgDocument::clear_export_cache` to release them. Changing native writer flags
+    /// replaces both tiers; changing the effective inspection or resource prefix replaces
+    /// only the prepared fragment. Viewport and outer-layer policies are never cached.
     pub cache_native_svg: bool,
     /// Keep the most recent encoded fallback PNG per layer. Budgets still apply on reuse.
     pub cache_raster_images: bool,

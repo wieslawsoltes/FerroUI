@@ -230,11 +230,39 @@ Recording uses the existing Skia picture pipeline and existing geometry/text cac
 owns its recording and image references until removed/dropped. There is no layout, UI-thread
 callback or glyph shaping replay for another export view.
 
-The most recent native SVG and encoded fallback PNG can be cached per layer. Cache keys include
-the text/path policy or raster dimensions; a different key replaces the previous value, so each
-layer retains at most one representation of each kind. `cache_native_svg` and
-`cache_raster_images` disable reuse, and `clear_export_cache` releases both while retaining the
-pictures. Cache hits are reported. Raster limits are checked even when a cached image exists.
+Each layer can cache one native SVG, one prepared vector fragment within that native entry, and
+one encoded fallback PNG. The native key includes outlined/editable text and relative-path
+encoding. The prepared key includes the exact resource prefix and effective inspection style,
+including every color, opacity and stroke-width component. Floating-point values use bitwise
+equality so serialized `0` and `-0` remain distinct. Native-entry replacement invalidates its
+prepared fragment atomically; layer removal also changes the resource prefix of shifted layers.
+
+Warm reuse avoids native replay and repeated fragment parsing, reference namespacing, image-alpha
+normalization and inspection transformation. It shares the prepared string through `Rc<str>`;
+the complete fragment is not cloned into another intermediate `String` for a hit. Document-level
+transforms, selection, clipping, annotations and metadata are applied on each export. The complete
+composed document still passes reference validation, resource optimization and serialization.
+
+The prepared cache has one slot per layer, independent of how many inspection settings the caller
+tries. A style change replaces that slot. This trades one additional retained fragment for reuse
+without retaining an unbounded history of views. A repeating normal/x-ray/wireframe/cutaway/
+exploded sequence can reuse the prepared normal fragment for its initial normal and final
+exploded export; switching inspection styles performs new preparation.
+
+`cache_native_svg = false` disables both reads and writes of the native and prepared vector
+caches. `cache_raster_images` controls encoded PNG reuse. `clear_export_cache` releases all three
+representations while retaining the pictures. `vector_cache_hits` counts avoided native writer
+replays; `prepared_vector_cache_hits` separately counts avoided fragment preparations.
+`raster_cache_hits` counts encoded PNG reuse. Raster limits are checked even on a cache hit.
+
+The XML hot path scans CSS references without constructing discarded replacement strings,
+allocates URL replacements only when canonical output changes, and escapes contiguous UTF-8
+slices between characters needing XML entities. A deduplication pass with no aliases retains
+empty-definition cleanup and skips the unnecessary alias rewrite and ID reassignment. These
+optimizations preserve the validated output bytes and designer-facing structure.
+
+See the [review and validation findings](svg-review.md) and the [release performance report](svg-performance.md)
+for the corrected baseline, workload definitions, measurements, memory tradeoffs and fixture checks.
 
 Resource interning uses hashed structural keys with equality checks. It considers inherited
 context and independent child IDs before deduplicating definitions. Hash-map iteration never

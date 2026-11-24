@@ -1,3 +1,4 @@
+use crate::xml::InspectionStyle;
 use crate::{RecordingAudit, SvgDrawingContext, SvgError, SvgExportOptions, SvgOutput};
 use ferroui_base::media::{DrawingContext, PlatformDrawingContext};
 use ferroui_base::platform::IDrawingContextImpl;
@@ -142,13 +143,77 @@ impl SvgLayerOptions {
 
 type RasterCacheEntry = (i32, i32, Rc<[u8]>);
 
+/// Replacing the native representation also invalidates its prepared fragment.
+/// A layer retains one native variant and at most one prepared view of it.
+pub(crate) struct VectorCacheEntry {
+    pub outlined: bool,
+    pub relative_paths: bool,
+    pub data: Rc<str>,
+    pub prepared: Option<PreparedVectorCacheEntry>,
+}
+
+pub(crate) struct PreparedVectorCacheEntry {
+    pub prefix: String,
+    pub inspection: InspectionStyle,
+    pub data: Rc<str>,
+}
+
+impl PreparedVectorCacheEntry {
+    pub fn matches(&self, prefix: &str, inspection: &InspectionStyle) -> bool {
+        if self.prefix != prefix {
+            return false;
+        }
+        // Ordinary f64 equality would alias -0.0 and 0.0 even though the
+        // fragment serializer preserves their distinct lexical values.
+        match (&self.inspection, inspection) {
+            (InspectionStyle::Normal, InspectionStyle::Normal) => true,
+            (
+                InspectionStyle::XRay {
+                    fill_opacity: cached_fill,
+                    stroke: cached_stroke,
+                    stroke_width: cached_width,
+                    stroke_opacity: cached_alpha,
+                },
+                InspectionStyle::XRay {
+                    fill_opacity,
+                    stroke,
+                    stroke_width,
+                    stroke_opacity,
+                },
+            ) => {
+                cached_fill.to_bits() == fill_opacity.to_bits()
+                    && cached_stroke == stroke
+                    && cached_width.to_bits() == stroke_width.to_bits()
+                    && cached_alpha.to_bits() == stroke_opacity.to_bits()
+            }
+            (
+                InspectionStyle::Wireframe {
+                    stroke: cached_stroke,
+                    stroke_width: cached_width,
+                    stroke_opacity: cached_alpha,
+                },
+                InspectionStyle::Wireframe {
+                    stroke,
+                    stroke_width,
+                    stroke_opacity,
+                },
+            ) => {
+                cached_stroke == stroke
+                    && cached_width.to_bits() == stroke_width.to_bits()
+                    && cached_alpha.to_bits() == stroke_opacity.to_bits()
+            }
+            _ => false,
+        }
+    }
+}
+
 /// A retained Skia recording with its semantic identity and capability audit.
 pub struct SvgLayer {
     pub(crate) options: SvgLayerOptions,
     pub(crate) picture: skia_safe::Picture,
     pub(crate) audit: RecordingAudit,
     pub(crate) bounds: Rect,
-    pub(crate) vector_cache: RefCell<Option<(bool, bool, Rc<str>)>>,
+    pub(crate) vector_cache: RefCell<Option<VectorCacheEntry>>,
     pub(crate) raster_cache: RefCell<Option<RasterCacheEntry>>,
 }
 
@@ -295,8 +360,8 @@ impl SvgDocument {
         count != self.layers.len()
     }
 
-    /// Release native SVG/PNG caches while retaining the pictures and semantic layer data.
-    /// Each layer otherwise caches at most one representation of each type.
+    /// Release native SVG, prepared fragments and PNG caches while retaining the pictures
+    /// and semantic layer data. Each layer retains at most one representation of each type.
     pub fn clear_export_cache(&self) {
         for layer in &self.layers {
             layer.vector_cache.borrow_mut().take();

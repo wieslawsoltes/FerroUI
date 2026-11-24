@@ -447,6 +447,7 @@ struct Observation {
     images: u64,
     definitions_deduplicated: usize,
     vector_cache_hits: usize,
+    prepared_vector_cache_hits: usize,
     raster_cache_hits: usize,
 }
 
@@ -457,6 +458,7 @@ impl Observation {
         self.images += report.embedded_images;
         self.definitions_deduplicated += report.definitions_deduplicated;
         self.vector_cache_hits += report.vector_cache_hits;
+        self.prepared_vector_cache_hits += report.prepared_vector_cache_hits;
         self.raster_cache_hits += report.raster_cache_hits;
     }
 }
@@ -519,7 +521,7 @@ fn write_row(
         .sum();
     writeln!(
         writer,
-        "{},{},{},{},{:.6},{:.6},{:.6},{},{},{},{},{},{},{},{},{},{},{}",
+        "{},{},{},{},{:.6},{:.6},{:.6},{},{},{},{},{},{},{},{},{},{},{},{}",
         workload.name(),
         phase,
         samples,
@@ -534,6 +536,7 @@ fn write_row(
         observation.images,
         observation.definitions_deduplicated,
         observation.vector_cache_hits,
+        observation.prepared_vector_cache_hits,
         observation.raster_cache_hits,
         recording_bytes,
         rss,
@@ -648,7 +651,7 @@ fn main() -> Result<()> {
         args.warmup,
         args.unhinted_text
     );
-    writeln!(writer, "workload,phase,samples,exports_per_operation,min_ms,median_ms,p95_ms,output_bytes,scene_layers,scene_draw_calls,exported_layers,images,definitions_deduplicated,vector_cache_hits,raster_cache_hits,recording_bytes,rss_kib,peak_rss_kib")?;
+    writeln!(writer, "workload,phase,samples,exports_per_operation,min_ms,median_ms,p95_ms,output_bytes,scene_layers,scene_draw_calls,exported_layers,images,definitions_deduplicated,vector_cache_hits,prepared_vector_cache_hits,raster_cache_hits,recording_bytes,rss_kib,peak_rss_kib")?;
     for workload in Workload::ALL
         .into_iter()
         .filter(|case| args.only.is_none_or(|selected| selected == *case))

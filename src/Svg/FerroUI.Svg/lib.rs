@@ -34,6 +34,8 @@ pub use render_target::SvgRenderTarget;
 pub use surface::{SvgSurface, SvgSurfaceFrame};
 
 #[cfg(test)]
+mod cache_tests;
+#[cfg(test)]
 mod integration_tests;
 #[cfg(test)]
 mod tests;

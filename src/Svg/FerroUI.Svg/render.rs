@@ -1,3 +1,4 @@
+use crate::document::{PreparedVectorCacheEntry, VectorCacheEntry};
 use crate::xml::{self, InspectionStyle, XmlOptions};
 use crate::{
     SvgCutawayMode, SvgDiagnostic, SvgDocument, SvgError, SvgExportOptions, SvgExportReport,
@@ -9,6 +10,20 @@ use ferroui_base::{Matrix, Rect, Vector};
 use skia_safe as sk;
 use std::fmt::Write;
 use std::rc::Rc;
+
+enum LayerBody {
+    Owned(String),
+    Shared(Rc<str>),
+}
+
+impl AsRef<str> for LayerBody {
+    fn as_ref(&self) -> &str {
+        match self {
+            Self::Owned(body) => body.as_str(),
+            Self::Shared(body) => body.as_ref(),
+        }
+    }
+}
 
 pub(crate) fn export(
     document: &SvgDocument,
@@ -148,6 +163,8 @@ pub(crate) fn export(
         report.layers += 1;
         report.draw_calls += layer.audit.draw_calls;
         let prefix = format!("r{index}-");
+        // A warm vector fragment stays shared until composition. Uncached
+        // fragments and raster markup retain their already owned String.
         let body = if raster {
             report.raster_layers += 1;
             if needs_raster {
@@ -203,21 +220,14 @@ pub(crate) fn export(
                     ),
                 );
             }
-            body
+            LayerBody::Owned(body)
         } else {
             report.vector_layers += 1;
-            let (raw, hit) = vector_layer(layer, options)?;
-            report.vector_cache_hits += usize::from(hit);
-            let fragment = xml::skia_fragment(&raw, &prefix, layer_inspection)
-                .map_err(|error| SvgError::Xml(error.to_string()))?;
-            if layer.bounds.x != 0.0 || layer.bounds.y != 0.0 {
-                format!(
-                    "<g transform=\"translate({} {})\">{fragment}</g>",
-                    layer.bounds.x, layer.bounds.y
-                )
-            } else {
-                fragment
-            }
+            let (fragment, native_hit, prepared_hit) =
+                prepared_vector_layer(layer, options, &prefix, layer_inspection)?;
+            report.vector_cache_hits += usize::from(native_hit);
+            report.prepared_vector_cache_hits += usize::from(prepared_hit);
+            fragment
         };
 
         let offset = options
@@ -298,7 +308,7 @@ pub(crate) fn export(
         if let Some(description) = &properties.description {
             write!(svg, "<desc>{}</desc>", escape(description)).unwrap();
         }
-        svg.push_str(&body);
+        svg.push_str(body.as_ref());
         if options.view.show_bounds {
             write_rect(
                 &mut svg,
@@ -380,13 +390,61 @@ pub(crate) fn export(
     })
 }
 
+fn prepared_vector_layer(
+    layer: &SvgLayer,
+    options: &SvgExportOptions,
+    prefix: &str,
+    inspection: &InspectionStyle,
+) -> Result<(LayerBody, bool, bool), SvgError> {
+    let outlined = options.text == SvgTextMode::Outlines;
+    if options.cache_native_svg {
+        if let Some(cache) = &*layer.vector_cache.borrow() {
+            if cache.outlined == outlined && cache.relative_paths == options.relative_paths {
+                if let Some(prepared) = &cache.prepared {
+                    if prepared.matches(prefix, inspection) {
+                        // Prepared reuse also avoids invoking the native writer.
+                        return Ok((LayerBody::Shared(prepared.data.clone()), true, true));
+                    }
+                }
+            }
+        }
+    }
+    let (raw, native_hit) = vector_layer(layer, options)?;
+    let fragment = xml::skia_fragment(&raw, prefix, inspection)
+        .map_err(|error| SvgError::Xml(error.to_string()))?;
+    // Bounds and the recording are immutable. Their origin mapping belongs
+    // to the fragment, while layer transforms, clipping and viewport policy
+    // remain outside it and are applied on every export.
+    let fragment = if layer.bounds.x != 0.0 || layer.bounds.y != 0.0 {
+        format!(
+            "<g transform=\"translate({} {})\">{fragment}</g>",
+            layer.bounds.x, layer.bounds.y
+        )
+    } else {
+        fragment
+    };
+    if options.cache_native_svg {
+        let data: Rc<str> = fragment.into();
+        if let Some(cache) = &mut *layer.vector_cache.borrow_mut() {
+            cache.prepared = Some(PreparedVectorCacheEntry {
+                prefix: prefix.into(),
+                inspection: inspection.clone(),
+                data: data.clone(),
+            });
+        }
+        Ok((LayerBody::Shared(data), native_hit, false))
+    } else {
+        Ok((LayerBody::Owned(fragment), native_hit, false))
+    }
+}
+
 fn vector_layer(layer: &SvgLayer, options: &SvgExportOptions) -> Result<(Rc<str>, bool), SvgError> {
     use sk::svg::canvas::Flags;
     let outlined = options.text == SvgTextMode::Outlines;
     if options.cache_native_svg {
-        if let Some((cached_outlined, cached_relative, data)) = &*layer.vector_cache.borrow() {
-            if *cached_outlined == outlined && *cached_relative == options.relative_paths {
-                return Ok((data.clone(), true));
+        if let Some(cache) = &*layer.vector_cache.borrow() {
+            if cache.outlined == outlined && cache.relative_paths == options.relative_paths {
+                return Ok((cache.data.clone(), true));
             }
         }
     }
@@ -408,7 +466,12 @@ fn vector_layer(layer: &SvgLayer, options: &SvgExportOptions) -> Result<(Rc<str>
         std::str::from_utf8(data.as_bytes()).map_err(|error| SvgError::Xml(error.to_string()))?;
     let data: Rc<str> = Rc::from(text);
     if options.cache_native_svg {
-        *layer.vector_cache.borrow_mut() = Some((outlined, options.relative_paths, data.clone()));
+        *layer.vector_cache.borrow_mut() = Some(VectorCacheEntry {
+            outlined,
+            relative_paths: options.relative_paths,
+            data: data.clone(),
+            prepared: None,
+        });
     }
     Ok((data, false))
 }

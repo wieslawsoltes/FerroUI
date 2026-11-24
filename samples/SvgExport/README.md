@@ -76,9 +76,12 @@ python3 src/Svg/FerroUI.Svg/examples/validate_exports.py target/svg-validation -
 The reference exports every recorded layer through Skia's raster renderer
 at one pixel per logical pixel. Inkscape composites that reference and
 independently renders the vector SVG. The validator compares the resulting
-full-page RGB pixels after compositing transparency on white. The optional
-mean-error gate uses 0–255 channel values. Antialiasing differences between
-renderers are expected; the gate is a chosen tolerance for this fixture.
+full-page RGB pixels after compositing transparency on white and compares the
+alpha channels separately. `--max-mean-error` and `--max-alpha-error` set
+independent gates in 0–255 channel values. The alpha check detects coverage
+loss even when white pixels would disappear in the composited RGB comparison.
+Antialiasing differences between renderers are expected; the gates are chosen
+tolerances for this fixture.
 
 Pillow and NumPy accelerate the comparison when installed. Both are optional:
 the script also includes a standard-library reader for the noninterlaced
@@ -97,6 +100,7 @@ outlined. Each document's local references resolved to unique IDs.
 | Mean absolute RGB channel error | 0.4837 / 255 |
 | Root mean square RGB channel error | 4.8593 / 255 |
 | Pixels with any channel difference greater than 16 | 0.9321% |
+| Mean absolute alpha error | 0.0000 / 255 |
 
 The Pillow/NumPy and standard-library comparison paths produced the same
 reported metrics. The normal, x-ray, section, exploded and wireframe previews
@@ -105,52 +109,50 @@ Inkscape; direct Figma and Illustrator import checks remain separate work.
 
 ## Measure export performance
 
-The optional benchmark performs five warm-up exports and then times 100
-compact exports of the retained document. All five layers reuse their cached
-native SVG fragments after warm-up. The timed loop includes fragment parsing,
-XML optimization, serialization and output allocation; it does not replay
-the Skia pictures into native SVG again. It does not rerun layout, text shaping
-or the render callbacks. Recording, font discovery, filesystem writes and
-gzip compression are also outside the timed loop.
+The dedicated [`export_bench.rs`](../../src/Svg/FerroUI.Svg/examples/export_bench.rs)
+benchmark covers geometry, repeated definitions, shaped text, cropped translucent
+bitmaps and composed raster layers. It measures recording, recording plus first
+export, cache-cold export, warm export, a five-view batch, export with deduplication
+disabled, and gzip compression separately. Its inputs and defaults are documented
+in the [release performance report](../../docs/porting/svg-performance.md), with
+raw before/after measurements and the validation evidence in
+[`performance/`](performance/).
+
+```sh
+cargo run --locked --release -p ferroui-svg --example export_bench -- \
+  --iterations 40 --cold-iterations 8 --warmup 5 --output svg-benchmark.csv
+```
+
+Run individual workloads in separate processes with `--only geometry`,
+`--only definitions`, `--only text`, `--only bitmap` or `--only raster` when
+comparing process memory. Add `--fixtures target/svg-benchmark-fixtures` to
+produce normal, x-ray, wireframe, cutaway, exploded and Skia-reference SVGs.
+Fixture generation and structural validation are outside the timing windows.
+
+The recording phases use prepared fonts, shaped text and bitmap inputs. They
+measure this backend's capture/export path; application layout, font discovery
+and initial text shaping precede the timer. Cache-cold export clears the
+retained document's export caches. It does not restart the operating system,
+font manager or process. The five-view timing is the cost of all five exports
+in sequence.
+
+For the Aeris illustration alone, the example also supports five warmups and
+100 compact exports of its retained document:
 
 ```sh
 cargo run --locked --release -p ferroui-svg --example layered_export -- target/svg-benchmark --benchmark
 ```
 
-For a smaller local build that optimizes the export and XML hot path while
-reusing an existing development build of FerroUI:
+Warm export can reuse both the native SVG and the most recently prepared
+fragment of each layer. Whole-document reference validation, resource
+optimization, serialization and output allocation still execute. Recording,
+font discovery, filesystem writes and gzip are outside this warm-export timer.
+The release performance report compares the corrected implementation against
+the optimized implementation using the same complete release profile. The
+original mixed development-profile example timing is retained in Git history
+and is not used as the optimization baseline.
 
-```sh
-cargo --config 'profile.dev.package.ferroui-svg.opt-level=3' \
-      --config 'profile.dev.package.roxmltree.opt-level=3' \
-      run --locked -p ferroui-svg --example layered_export -- target/svg-benchmark --benchmark
-```
-
-This second command uses a mixed profile: `ferroui-svg` and `roxmltree` are
-compiled at optimization level 3, the remaining Rust dependencies retain
-their development profile, and Skia uses its prebuilt native archive. Debug
-assertions remain enabled, so the executable labels the run `debug`. It is
-an export-focused measurement and should not be presented as a full-framework
-release benchmark.
-
-### Recorded measurement
-
-The final generation on the Linux x86_64 validation host used the mixed
-profile command above and the absolute-path compact output:
-
-| Measurement | Result |
-| --- | ---: |
-| Warm compact export, minimum of 100 | 8.955 ms |
-| Warm compact export, median of 100 | 10.768 ms |
-| Warm compact export, 95th percentile of 100 | 14.415 ms |
-| Compact SVG before gzip | 557,836 bytes |
-| Compact SVGZ | 140,877 bytes |
-
-For context, initial scene recording took 13.64 ms, and the first normal SVG
-export took 110.93 ms, including native Skia SVG replay and writing the file.
-Those are separate one-shot observations, not warmed export measurements.
-The warm timing does not describe cold end-to-end rendering or a full release
-build, and it is specific to this scene and validation host.
+### Path encoding and compression
 
 Compact output removes formatting whitespace while preserving numeric
 precision and absolute path encoding. `relative_paths` is an explicit

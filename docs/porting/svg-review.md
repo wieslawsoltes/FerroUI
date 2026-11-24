@@ -108,6 +108,24 @@ This changes the test process's font environment, not the framework or its asser
 benchmark prepares its embedded Inter text independently and records the font environment used
 for both measurements.
 
+The nine pre-existing ignored Skia tests comprise seven installed/Windows-font-dependent cases,
+one profiling-only wrapping test and one platform-dependent glyph-overhang expectation. This
+review did not add ignores or weaken those assertions.
+
+## Optimization regression coverage
+
+The performance round adds nine prepared-cache regressions and four XML regressions. Both the
+default and `media3d` SVG configurations pass **112 tests** after these changes. The cache tests
+compare warmed output against fresh cache-disabled output while varying inspection parameters,
+native writer flags, per-layer selection, resource-prefix shifts, cache controls and outer document
+options. They also verify supported signed-zero opacity values, bounded view switching, and
+continued validation of invalid options and raster budgets. Zero stroke widths remain invalid.
+
+The XML regressions check borrowed versus rewritten CSS tokens, pre-rename rejection of malformed
+references, empty-definition pruning with stable IDs, and exact multilingual escaping. The
+independent XML harness passes all **35 tests**. The [release performance report](svg-performance.md)
+records the before/after measurements and the complete fixture invariance checks.
+
 The tests involving a synthetic GPU interface validate resource affinity and lifetime contracts.
 They do not establish real GPU import, device-loss or readback behavior. Figma and Illustrator
 import remain separate application-specific validation; independent SVG raster comparisons do
