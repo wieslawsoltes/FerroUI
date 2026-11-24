@@ -2,8 +2,9 @@
 //! document `Pages/CalendarDatePickerPage.xaml`.
 
 use crate::markup::{content_page_class, xaml_class};
+use crate::view_models::CalendarDatePickerViewModel;
 use ferroui_base::utilities::DateTime;
-use ferroui_base::{ferro_class_info, instantiate, Ref};
+use ferroui_base::{ferro_class_info, instantiate, BoxedValue, Ref};
 use ferroui_controls::{CalendarDatePicker, ContentPage};
 
 #[repr(C)]
@@ -23,6 +24,7 @@ impl CalendarDatePickerPage {
     pub fn new() -> Ref<Self> {
         let this = instantiate(Self::construct());
         this.initialize_component();
+        this.set_data_context(Some(CalendarDatePickerViewModel::new() as BoxedValue));
 
         this.date_picker("DatePicker1").set_selected_date(Some(DateTime::today()));
         this.date_picker("DatePicker2").set_selected_date(Some(DateTime::today().add_days(10.0)));

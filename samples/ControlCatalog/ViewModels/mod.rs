@@ -7,6 +7,7 @@ use ferroui_base::TypeInfo;
 
 mod application_view_model;
 mod combo_box_page_view_model;
+mod calendar_date_picker_view_model;
 mod context_page_view_model;
 mod cursor_page_view_model;
 mod data_validation_view_model;
@@ -37,6 +38,7 @@ pub use combo_box_page_view_model::{ComboBoxPageViewModel, IdAndName};
 pub use context_page_view_model::ContextPageViewModel;
 pub use cursor_page_view_model::{CursorPageViewModel, StandardCursorList, StandardCursorModel};
 pub use data_validation_view_model::DataValidationViewModel;
+pub use calendar_date_picker_view_model::CalendarDatePickerViewModel;
 pub use expander_page_view_model::ExpanderPageViewModel;
 pub use flex_item_view_model::FlexItemViewModel;
 pub use flex_view_model::FlexViewModel;
@@ -75,6 +77,7 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <ApplicationViewModel as MarkupTyped>::MARKUP,
     <ComboBoxPageViewModel as MarkupTyped>::MARKUP,
     <ContextPageViewModel as MarkupTyped>::MARKUP,
+    <CalendarDatePickerViewModel as MarkupTyped>::MARKUP,
     <Country as MarkupTyped>::MARKUP,
     <CursorPageViewModel as MarkupTyped>::MARKUP,
     <DataValidationViewModel as MarkupTyped>::MARKUP,
@@ -113,6 +116,7 @@ pub(crate) fn register_value_types() {
     ValueTypes::register_reference::<ApplicationViewModel>();
     ValueTypes::register_reference::<ComboBoxPageViewModel>();
     ValueTypes::register_reference::<ContextPageViewModel>();
+    ValueTypes::register_reference::<CalendarDatePickerViewModel>();
     ValueTypes::register_reference::<Country>();
     ValueTypes::register_reference::<CursorPageViewModel>();
     ValueTypes::register_reference::<DataValidationViewModel>();

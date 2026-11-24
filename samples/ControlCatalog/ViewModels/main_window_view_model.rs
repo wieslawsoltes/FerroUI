@@ -2,9 +2,7 @@
 //! other part of the partial class) is in
 //! `main_window_view_model_page_list.rs`.
 //!
-//! Not ported, because what it names does not exist in the framework yet:
-//! the `[Required]` validation attribute of `ValidatedDateExample` (data
-//! annotations).
+//! `ValidatedDateExample` moved to `CalendarDatePickerViewModel` (upstream e61863dff7).
 
 use crate::icons::Icons;
 use crate::models::{HomeSection, PageItem};
@@ -16,7 +14,6 @@ use ferroui_base::data::model::{Event, INotifyPropertyChanged};
 use ferroui_base::input::ICommand;
 use ferroui_base::media::StreamGeometry;
 use ferroui_base::styling::ControlTheme;
-use ferroui_base::utilities::DateTime;
 use ferroui_base::{ferro_markup_type, Ref, Thickness};
 use ferroui_controls::chrome::TitleBarDecorations;
 use ferroui_controls::platform::WindowCornerPreference;
@@ -58,7 +55,6 @@ pub struct MainWindowViewModel {
     is_drawer_opened: Cell<bool>,
     display_mode: Cell<SplitViewDisplayMode>,
     query: RefCell<Option<String>>,
-    validated_date_example: Cell<Option<DateTime>>,
     win32_window_corner_preference: Cell<WindowCornerPreference>,
     about_command: Rc<MiniCommand>,
     exit_command: Rc<MiniCommand>,
@@ -187,7 +183,6 @@ impl MainWindowViewModel {
                 is_drawer_opened: Cell::new(true),
                 display_mode: Cell::new(SplitViewDisplayMode::default()),
                 query: RefCell::new(Some(String::new())),
-                validated_date_example: Cell::new(None),
                 win32_window_corner_preference: Cell::new(WindowCornerPreference::Default),
                 about_command,
                 exit_command,
@@ -459,15 +454,6 @@ impl MainWindowViewModel {
         self.home_command.clone()
     }
 
-    /// A required date which demonstrates validation for the date picker.
-    pub fn validated_date_example(&self) -> Option<DateTime> {
-        self.validated_date_example.get()
-    }
-
-    pub fn set_validated_date_example(&self, value: Option<DateTime>) {
-        self.base.raise_and_set_if_changed_cell(&self.validated_date_example, value, "ValidatedDateExample");
-    }
-
     pub fn win32_window_corner_preferences(&self) -> &'static [WindowCornerPreference] {
         &WIN32_WINDOW_CORNER_PREFERENCES
     }
@@ -679,10 +665,6 @@ ferro_markup_type!(class MainWindowViewModel {
             set: |this: &Vm, value: SplitViewDisplayMode| this.set_display_mode(value)
         },
         Query: Option<String> { get: |this: &Vm| this.query(), set: |this: &Vm, value: Option<String>| this.set_query(value) },
-        ValidatedDateExample: Option<DateTime> {
-            get: |this: &Vm| this.validated_date_example(),
-            set: |this: &Vm, value: Option<DateTime>| this.set_validated_date_example(value)
-        },
         // A list a binding delivers to an items source property.
         Win32WindowCornerPreferences: ItemsSource {
             get: |this: &Vm| ItemsSource::from_values(this.win32_window_corner_preferences().iter().copied())
