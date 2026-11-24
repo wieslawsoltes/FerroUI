@@ -56,7 +56,8 @@ export class AndroidBridge {
         if (!apk || path.extname(apk).toLowerCase() !== '.apk' || !(await stat(apk).catch(() => undefined))?.isFile()) {
             throw new Error(`Build or select the APK for ${app.packageId}.`);
         }
-        const installed = await this.command(['install', '-r', '-t', '--pkg', app.packageId, apk], signal, 25_000);
+        // The process and debugger need the full APK after installation, including its native libraries.
+        const installed = await this.command(['install', '--no-incremental', '-r', '-t', '--pkg', app.packageId, apk], signal, 25_000);
         if (!/^Success\s*$/m.test(installed)) throw new Error(`Android could not install the APK for ${app.packageId}.`);
     }
 

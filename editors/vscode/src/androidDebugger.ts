@@ -1,4 +1,5 @@
-import type * as vscode from 'vscode';
+import { join } from 'node:path';
+import * as vscode from 'vscode';
 import type { AndroidBridge, AndroidReceipt } from './androidBridge';
 import { startAndroidDebugServer, type AndroidDebugServer } from './androidDebugServer';
 import { androidDebugSymbols } from './androidDebugSymbols';
@@ -32,9 +33,13 @@ export class AndroidDebugger {
             if (file !== program) load.push(`target modules add ${quoted}`);
             load.push(`target modules load --file ${quoted} --slide ${slide}`);
         }
-        const config = load.length
-            ? { ...configuration, program, postRunCommands: [...load, ...(configuration.postRunCommands ?? [])] }
-            : configuration;
+        const passArtSignals = vscode.workspace.getConfiguration('ferroui.android', folder.uri).get('passArtSignals', true);
+        if (passArtSignals) {
+            const script = join(__dirname, 'ferroui_android_art.py');
+            load.push(`command script import ${JSON.stringify(process.platform === 'win32' ? script.replaceAll('\\', '/') : script)}`,
+                'target stop-hook add -P ferroui_android_art.PassThroughArtSignals');
+        }
+        const config = { ...configuration, program, postRunCommands: [...load, ...(configuration.postRunCommands ?? [])] };
         const server = this.server = await startAndroidDebugServer(this.bridge, this.packageId, this.receipt, report, signal);
         const ended = () => this.retire();
         void server.closed.then(ended, ended);

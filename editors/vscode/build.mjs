@@ -29,6 +29,7 @@ const [host] = await Promise.all([
 const codicons = 'node_modules/@vscode/codicons';
 await mkdir('dist/icons', { recursive: true });
 await Promise.all([
+    copyFile('debugger/ferroui_android_art.py', 'dist/ferroui_android_art.py'),
     ...['codicon.css', 'codicon.ttf'].map(file => copyFile(`${codicons}/dist/${file}`, `dist/icons/${file}`)),
     ...['preview.svg', 'list-tree.svg', 'settings-gear.svg', 'extensions.svg', 'symbol-event.svg', 'library.svg', 'file-media.svg', 'history.svg', 'table.svg', 'paintcan.svg', 'account.svg']
         .map(file => copyFile(`${codicons}/src/icons/${file}`, `dist/icons/${file}`)),

@@ -1682,6 +1682,12 @@
           "scope": "machine",
           "description": "Absolute path to the Android Debug Bridge executable on the workspace host."
         },
+        "ferroui.android.passArtSignals": {
+          "type": "boolean",
+          "default": true,
+          "scope": "resource",
+          "description": "Let Android Runtime handle SIGSEGV and SIGBUS raised in its managed code regions during LLDB debugging. Requires LLDB Python support."
+        },
         "ferroui.android.apps": {
           "type": "array",
           "default": [],

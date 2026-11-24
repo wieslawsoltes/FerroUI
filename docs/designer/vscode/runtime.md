@@ -277,7 +277,7 @@ Add a profile to the owning workspace folder. Set `apkPath` to install the built
 }
 ```
 
-1. In **App Sessions**, choose **Open Mobile App**, then **Run Android App**. Select the profile and the authorized device. If set, VS Code installs the APK, and then launches or restarts the selected app.
+1. In **App Sessions**, choose **Open Mobile App**, then **Run Android App**. Select the profile and the authorized device. If the profile specifies an APK, VS Code completes the full installation before it launches or restarts the app.
 2. Use **Inspect** in Live App to read the app’s tree, properties, and accessibility or reveal mapped source. **Interact** sends input when the app enabled it. Verified Rust source comes from the debug build’s compiler locations and matching workspace files.
 3. To inspect an app that is already running, choose **Attach to Android App**. **Stop or Disconnect This App** stops an app started from its App Sessions row. For an attached app, it closes the editor connection and leaves the app running.
 
@@ -345,6 +345,8 @@ Add an attach configuration to `.vscode/launch.json` in the app’s workspace fo
 2. Choose the attach configuration if VS Code lists several. FerroUI uses the debugger installed with the app and a temporary ADB forward for the verified process. Once the breakpoint binds, click **Complete review** in the app or in **Live App → Interact**.
 3. Use **Continue** to resume the app and its inspector. Use **Stop Debugging** to keep the app and Live App connected. **Stop or Disconnect This App** also closes the debugger. The session still follows the ownership rules for apps you ran or attached to independently.
 4. If attaching fails, open **Show App Output** on the App Sessions row for the Android debugger log. A library mismatch calls for the unstripped output of the exact installed build. If a matched breakpoint stays unbound, check the source paths recorded by the Rust compiler. LLDB DAP’s `sourceMap` can map a different build machine’s source paths to your workspace. [LLDB DAP configuration](https://lldb.llvm.org/use/lldbdap.html)
+
+With an LLDB build that supports Python, FerroUI lets Android Runtime handle `SIGSEGV` and `SIGBUS` raised from its managed code regions. Native breakpoints and faults keep their ordinary stop behavior. Turn off `ferroui.android.passArtSignals` in workspace settings to inspect those managed-code signals in LLDB. With an adapter that lacks Python, use **Continue** when LLDB stops on a managed Android Runtime signal. [Android Runtime signal handling](https://developer.android.com/studio/platform/releases)
 
 [Android debugger MCP actions](reference.md#run-or-attach-an-android-app-with-mcp)
 
