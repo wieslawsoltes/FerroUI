@@ -587,9 +587,9 @@
    "date": "2026-10-27",
    "area": "samples",
    "class": "port",
-   "note": "Catalog date picker sample validation.",
-   "part": "samples",
-   "state": "planned"
+   "note": "The calendar date picker page has its own view model; `[Required]` is still not ported.",
+   "part": "samples2",
+   "state": "done"
   },
   {
    "hash": "0a728569fca5c31a84278646bb976f30afe75f5e",
@@ -654,8 +654,8 @@
    "pr": 22307,
    "date": "2026-10-27",
    "area": "samples",
-   "class": "deferred",
-   "note": "Catalog theme switching. Depends on the Fluent 2 decision."
+   "class": "not-applicable",
+   "note": "Catalog switching to the Fluent 2 theme: owner decision, no Fluent 2 theme crate."
   },
   {
    "hash": "b6fa4b12eab4efb0f1aecee690c08553b0b32fde",
@@ -811,9 +811,9 @@
    "date": "2026-10-29",
    "area": "themes",
    "class": "port",
-   "note": "ColorPicker fixes backported to the Fluent and Simple themes.",
-   "part": "themes",
-   "state": "planned"
+   "note": "ColorPicker Fluent 2 fixes in the Fluent and Simple colour picker themes (theme dictionaries for the base resources).",
+   "part": "themes3",
+   "state": "done"
   },
   {
    "hash": "719787dc699b48b1d6d91d538fb56224ee0f667a",
@@ -848,48 +848,52 @@
    "pr": 22179,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "Variable fonts: fvar and avar axis API. `FontVariationSettings` and backend variation exist; needs a design on top of them and PR 1252."
+   "class": "port",
+   "note": "Public axis API (`FontVariationAxis`, `FontVariationInstance`, `GlyphTypeface::variation_axes`, `named_instances`) on the Skia and Vello axis queries; PR 1376 (0.6.0). No managed fvar or avar parser.",
+   "state": "done",
+   "part": "variation-axes"
   },
   {
    "hash": "d2ee79eb4620943466e998ccd8704e64450c4704",
    "pr": 22180,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "Variable fonts: `GlyphTypeface` variation clones."
+   "class": "port",
+   "note": "`GlyphTypeface::with_variation` on `IPlatformTypeface::with_variation_settings`; PR 1376 (0.6.0).",
+   "state": "done",
+   "part": "variation-axes"
   },
   {
    "hash": "64b21ba1cc4ae2039018a13a09a88724396d5bf9",
    "pr": 22181,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "Variable fonts: gvar outlines for managed glyph geometry. Skia and Vello already apply variations when drawing."
+   "class": "skip-better",
+   "note": "Managed gvar outlines: Skia and Vello draw variable outlines natively at the position of the typeface."
   },
   {
    "hash": "9ce8ffda396149ed656d2f94570a2225a3afb108",
    "pr": 22182,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "Variable fonts: HVAR advances."
+   "class": "skip-better",
+   "note": "Managed HVAR advances: HarfBuzz, Skia and Vello apply them natively."
   },
   {
    "hash": "ee4f35bfdd5841dda194f1f1aaab4e8ec72b85aa",
    "pr": 22183,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "Variable fonts: MVAR metrics."
+   "class": "skip-better",
+   "note": "Managed MVAR metrics: the backends read varied metrics natively."
   },
   {
    "hash": "408f2494f09c1c530ab4bca8b0e84e9d52e736eb",
    "pr": 22184,
    "date": "2026-10-30",
    "area": "text",
-   "class": "deferred",
-   "note": "Variable fonts: VVAR advances."
+   "class": "skip-better",
+   "note": "Managed VVAR advances: HarfBuzz applies them natively."
   },
   {
    "hash": "dfee7f224b3e61ba4ee3ec8bbe32b5fad9bbdbb5",
@@ -897,7 +901,7 @@
    "date": "2026-10-30",
    "area": "text",
    "class": "deferred",
-   "note": "Variable fonts: `FontVariations` property, markup and animation."
+   "note": "`FontVariations` property: register like `FontFeatures` in `documents/text_element.rs` (same owners, inheritance, no new storage), reach shaping by making the run glyph typeface `with_variation` (HarfBuzz, Skia, Vello follow the platform typeface), XAML through `FontVariationSettings::from_str`, a per-axis animator. Builds on PR 1376."
   },
   {
    "hash": "37279ab42060546f6a33b0b9b61fe6c384129fc9",
@@ -951,9 +955,9 @@
    "date": "2026-11-05",
    "area": "markup",
    "class": "port",
-   "note": "XamlX update: inline generics in `x:Type` and `x:Static`; compare with the FerroUI compiler.",
-   "part": "markup",
-   "state": "planned"
+   "note": "Inline generic arguments and nullable indicators in `x:Type` and `x:Static`, Nullable checks, in the Rust port of XamlX.",
+   "part": "xamlx",
+   "state": "done"
   },
   {
    "hash": "c9188ebe5f602f9b8de64b347784b33bf322a911",
@@ -997,9 +1001,9 @@
    "date": "2026-11-06",
    "area": "automation",
    "class": "port",
-   "note": "TableView row automation name from visible cells.",
-   "part": "automation",
-   "state": "planned"
+   "note": "`TableViewRowAutomationPeer`: a data item named after its visible cells.",
+   "part": "automation2",
+   "state": "done"
   },
   {
    "hash": "727fea612519de34c84851172f71b3966aaf24e8",
@@ -1213,9 +1217,9 @@
    "date": "2026-11-12",
    "area": "markup",
    "class": "port",
-   "note": "Compact IL names do not apply; the enum whitespace fix in its XamlX update does.",
-   "part": "markup",
-   "state": "planned"
+   "note": "The enum whitespace trim of its XamlX update is ported; compact IL identifiers do not apply (the Rust emitter writes no IL).",
+   "part": "xamlx",
+   "state": "done"
   },
   {
    "hash": "27b11793211138273e4721bccddd972da3fda1ff",

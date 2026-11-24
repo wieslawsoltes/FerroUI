@@ -7,8 +7,14 @@ merge commit. The inventory has one entry per commit, in
 generated from it by `scripts/port-status/upstream_sync.py`, which also refuses a commit that
 is missing, listed twice or without a class.
 
-This work targets milestone 0.7.0 as a stack of draft pull requests. Nothing in it is merged
-or marked ready.
+This work targets milestone 0.7.0 as a stack of draft pull requests (#1329), with two
+exceptions in 0.6.0: the security fix of #1317 and the variation axis API of #1376, which the
+web fonts stack maps onto. Nothing in it is merged or marked ready.
+
+`TRACKING.md` and `REMAINING.md` are generated from an extraction of the upstream sources
+(`scripts/port-status/run.sh`, which needs a checkout of the tracked commit and the .NET
+extractor). They still describe `66b7273b9a`; they are regenerated at `12.2.0` once the stack
+lands, so that their numbers describe what is merged.
 
 ## How a commit is classified
 
@@ -36,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (104 done, 6 planned) | 110 |
+| `port` (111 done, 1 planned) | 112 |
 | `already` | 19 |
 | `skip-performance` | 0 |
-| `skip-better` | 1 |
-| `not-applicable` | 27 |
-| `deferred` | 25 |
+| `skip-better` | 5 |
+| `not-applicable` | 28 |
+| `deferred` | 18 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -73,9 +79,9 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-win32 | 5 | 2 |  |  |  | 2 | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
-| samples | 1 |  |  |  |  | 2 | 3 |
+| samples | 1 |  |  |  | 1 | 1 | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
-| text | 7 | 2 |  |  | 1 | 8 | 18 |
+| text | 9 | 2 |  | 4 | 1 | 2 | 18 |
 | themes | 5 | 2 |  |  |  | 8 | 15 |
 | threading |  | 1 |  |  |  |  | 1 |
 <!-- /generated:areas -->
@@ -107,15 +113,15 @@ Features merged in this range:
 
 | Feature | Upstream PR | State |
 |---|---|---|
-| Fluent 2 theme with its ColorPicker themes | #21771, #22569, #22611 | `deferred`: owner decision below |
-| Variable fonts: axes, instances, gvar, HVAR, MVAR, VVAR, `FontVariations` | #22179 to #22185 | `deferred`: owner decision below |
+| Fluent 2 theme with its ColorPicker themes | #21771, #22569, #22611 | `deferred`: owner decision below; the ColorPicker fixes are ported to Fluent and Simple (#22578) |
+| Variable fonts: axes, instances, gvar, HVAR, MVAR, VVAR, `FontVariations` | #22179 to #22185 | axes, instances and instance clones `port` (PR 1376, 0.6.0); gvar, HVAR, MVAR, VVAR `skip-better`; `FontVariations` `deferred` |
 | Backdrop effects | #21826 | `deferred`: needs a GPU path in Skia and Vello |
 | Key text, consumed modifiers, native key data | #22628 | `deferred` |
 | Opt-in EGL partial presentation | #22501 | `deferred` |
 | `Win32PlatformOptions.UseCompositionSwapchain` | #22115 | `deferred` |
 | Android desktop drag and drop | #22451 | `deferred` |
 | Platform-simulated typefaces | #22773 | `deferred`: follows the web fonts stack |
-| Compositor output rotation | #22499 | `port` |
+| Compositor output rotation | #22499 | `port` (planned, not written yet) |
 | Android cursors and TalkBack roles | #22438, #22681 | `port` |
 | Paragraph and first-line indents | #22870 | `port` |
 | TableView column limits and row automation name | #22707, #22709 | `port` |
@@ -140,19 +146,12 @@ are part of the base that the previous sync tracked, so they are not inventoried
 | `bd835340fb` | #21771 | 2026-10-22 | themes |  | Fluent 2 theme (16,105 lines). Owner decision: no new theme crate. Fixes that apply to the existing Fluent or WinUI themes are ported; the rest gets a recorded class. |
 | `74b4e97962` | #22400 | 2026-10-23 | samples |  | Catalog ColorPicker page redesign. Rerun `scripts/sync-control-catalog.sh` after the ColorPicker theme work. |
 | `db0a9a9cdb` | #22115 | 2026-10-27 | platform-win32 |  | `UseCompositionSwapchain` (769 lines). Needs the Windows VM and a frame-pacing measurement. |
-| `f3eca207d0` | #22307 | 2026-10-27 | samples |  | Catalog theme switching. Depends on the Fluent 2 decision. |
 | `5d6b56563b` | #22630 | 2026-10-28 | themes |  | Fluent 2 resource providers; follows the Fluent 2 decision. |
 | `725b5975e4` | #22611 | 2026-10-28 | themes |  | Fluent 2 brushes; follows the Fluent 2 decision. |
 | `1c82a11d87` | #22636 | 2026-10-28 | themes |  | Fluent 2 resources; follows the Fluent 2 decision. |
 | `23dce09edc` | #22569 | 2026-10-29 | themes |  | Fluent 2 ColorPicker themes; follows the Fluent 2 decision. |
 | `719787dc69` | #22637 | 2026-10-29 | themes |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
-| `eae84c1403` | #22179 | 2026-10-30 | text |  | Variable fonts: fvar and avar axis API. `FontVariationSettings` and backend variation exist; needs a design on top of them and PR 1252. |
-| `d2ee79eb46` | #22180 | 2026-10-30 | text |  | Variable fonts: `GlyphTypeface` variation clones. |
-| `64b21ba1cc` | #22181 | 2026-10-30 | text |  | Variable fonts: gvar outlines for managed glyph geometry. Skia and Vello already apply variations when drawing. |
-| `9ce8ffda39` | #22182 | 2026-10-30 | text |  | Variable fonts: HVAR advances. |
-| `ee4f35bfdd` | #22183 | 2026-10-30 | text |  | Variable fonts: MVAR metrics. |
-| `408f2494f0` | #22184 | 2026-10-30 | text |  | Variable fonts: VVAR advances. |
-| `dfee7f224b` | #22185 | 2026-10-30 | text |  | Variable fonts: `FontVariations` property, markup and animation. |
+| `dfee7f224b` | #22185 | 2026-10-30 | text |  | `FontVariations` property: register like `FontFeatures` in `documents/text_element.rs` (same owners, inheritance, no new storage), reach shaping by making the run glyph typeface `with_variation` (HarfBuzz, Skia, Vello follow the platform typeface), XAML through `FontVariationSettings::from_str`, a per-axis animator. Builds on PR 1376. |
 | `37279ab420` | #22650 | 2026-10-30 | themes |  | Fluent 2 embedded root; follows the Fluent 2 decision. |
 | `9186fcf61f` | #22756 | 2026-11-09 | themes |  | Fluent 2 calendar; follows the Fluent 2 decision. |
 | `8dae868308` | #22628 | 2026-11-10 | input |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
@@ -241,7 +240,7 @@ left out only with a recorded performance or better-code reason.
 | `6b6c573a03` | #22579 | 2026-10-25 | controls | `port` (done) | controls2 | ColorPicker fixes. |
 | `99086ac183` | #22356 | 2026-10-26 | controls | `port` (done) | controls2 | AutoCompleteBox keeps focus when an item is picked. |
 | `fb506057ea` | #22608 | 2026-10-26 | automation | `port` (done) | automation | Automation peers use `set_current_value`, so bindings survive. |
-| `e61863dff7` | #22612 | 2026-10-27 | samples | `port` | samples | Catalog date picker sample validation. |
+| `e61863dff7` | #22612 | 2026-10-27 | samples | `port` (done) | samples2 | The calendar date picker page has its own view model; `[Required]` is still not ported. |
 | `0a728569fc` | #22619 | 2026-10-27 | tests | `not-applicable` |  | Dispatcher leak in the upstream xUnit fixtures. |
 | `c67550d9ec` | #22604 | 2026-10-27 | base | `already` |  | Rust `str` comparisons are ordinal (`iteration_count.rs`, `classes.rs`). |
 | `6b41bcb0be` | #22593 | 2026-10-27 | platform-win32 | `already` |  | `query_active_display_paths` in `interop/unmanaged_methods.rs` passes a null topology. |
@@ -249,7 +248,7 @@ left out only with a recorded performance or better-code reason.
 | `75ea7e186c` | #22549 | 2026-10-27 | build | `not-applicable` |  | Roslyn analyzer. Rust has no unchecked cast to warn about. |
 | `951ee3f067` | #22609 | 2026-10-27 | controls | `port` (done) | controls | Calendar waits for a whole wheel notch. |
 | `626c94d77c` | #22545 | 2026-10-27 | text | `already` |  | `bidi_algorithm.rs` already resolves W2 in one forward pass. |
-| `f3eca207d0` | #22307 | 2026-10-27 | samples | `deferred` |  | Catalog theme switching. Depends on the Fluent 2 decision. |
+| `f3eca207d0` | #22307 | 2026-10-27 | samples | `not-applicable` |  | Catalog switching to the Fluent 2 theme: owner decision, no Fluent 2 theme crate. |
 | `b6fa4b12ea` | #22621 | 2026-10-27 | controls | `port` (done) | controls2 | DrawerPage and NavigationPage template parts relaxed to Decorator. |
 | `7e8b76db3c` | #22379 | 2026-10-27 | platform-x11 | `already` |  | `X11AtSpiAccessibility` starts its server and adds the tracked windows in a task on the UI thread (`spawn_local_with_priority`). |
 | `a9d935b5c7` | #22423 | 2026-10-27 | controls | `port` (done) | controls | `ComboBox.WrapSelection` with nothing to select. |
@@ -267,28 +266,28 @@ left out only with a recorded performance or better-code reason.
 | `23dce09edc` | #22569 | 2026-10-29 | themes | `deferred` |  | Fluent 2 ColorPicker themes; follows the Fluent 2 decision. |
 | `c9c7b90053` | #22641 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: popups report the window role. |
 | `5aa47e4f7f` | #22642 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: active state only for the active window. |
-| `1968b08e18` | #22578 | 2026-10-29 | themes | `port` | themes | ColorPicker fixes backported to the Fluent and Simple themes. |
+| `1968b08e18` | #22578 | 2026-10-29 | themes | `port` (done) | themes3 | ColorPicker Fluent 2 fixes in the Fluent and Simple colour picker themes (theme dictionaries for the base resources). |
 | `719787dc69` | #22637 | 2026-10-29 | themes | `deferred` |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
 | `55129e0659` | #22229 | 2026-10-30 | platform-win32 | `port` (done) | win32b | Move and resize drags wait for the emulated left button of touch and pen. |
 | `2a38dc63eb` | #22624 | 2026-10-30 | controls | `port` (done) | controls2 | Popup with pointer placement resizes with its content. |
-| `eae84c1403` | #22179 | 2026-10-30 | text | `deferred` |  | Variable fonts: fvar and avar axis API. `FontVariationSettings` and backend variation exist; needs a design on top of them and PR 1252. |
-| `d2ee79eb46` | #22180 | 2026-10-30 | text | `deferred` |  | Variable fonts: `GlyphTypeface` variation clones. |
-| `64b21ba1cc` | #22181 | 2026-10-30 | text | `deferred` |  | Variable fonts: gvar outlines for managed glyph geometry. Skia and Vello already apply variations when drawing. |
-| `9ce8ffda39` | #22182 | 2026-10-30 | text | `deferred` |  | Variable fonts: HVAR advances. |
-| `ee4f35bfdd` | #22183 | 2026-10-30 | text | `deferred` |  | Variable fonts: MVAR metrics. |
-| `408f2494f0` | #22184 | 2026-10-30 | text | `deferred` |  | Variable fonts: VVAR advances. |
-| `dfee7f224b` | #22185 | 2026-10-30 | text | `deferred` |  | Variable fonts: `FontVariations` property, markup and animation. |
+| `eae84c1403` | #22179 | 2026-10-30 | text | `port` (done) | variation-axes | Public axis API (`FontVariationAxis`, `FontVariationInstance`, `GlyphTypeface::variation_axes`, `named_instances`) on the Skia and Vello axis queries; PR 1376 (0.6.0). No managed fvar or avar parser. |
+| `d2ee79eb46` | #22180 | 2026-10-30 | text | `port` (done) | variation-axes | `GlyphTypeface::with_variation` on `IPlatformTypeface::with_variation_settings`; PR 1376 (0.6.0). |
+| `64b21ba1cc` | #22181 | 2026-10-30 | text | `skip-better` |  | Managed gvar outlines: Skia and Vello draw variable outlines natively at the position of the typeface. |
+| `9ce8ffda39` | #22182 | 2026-10-30 | text | `skip-better` |  | Managed HVAR advances: HarfBuzz, Skia and Vello apply them natively. |
+| `ee4f35bfdd` | #22183 | 2026-10-30 | text | `skip-better` |  | Managed MVAR metrics: the backends read varied metrics natively. |
+| `408f2494f0` | #22184 | 2026-10-30 | text | `skip-better` |  | Managed VVAR advances: HarfBuzz applies them natively. |
+| `dfee7f224b` | #22185 | 2026-10-30 | text | `deferred` |  | `FontVariations` property: register like `FontFeatures` in `documents/text_element.rs` (same owners, inheritance, no new storage), reach shaping by making the run glyph typeface `with_variation` (HarfBuzz, Skia, Vello follow the platform typeface), XAML through `FontVariationSettings::from_str`, a per-axis animator. Builds on PR 1376. |
 | `37279ab420` | #22650 | 2026-10-30 | themes | `deferred` |  | Fluent 2 embedded root; follows the Fluent 2 decision. |
 | `432480ae82` | #22574 | 2026-10-30 | controls | `port` (done) | controls2 | `TabStripItem.Icon` and `IconTemplate`; icon presenter in the Fluent tab templates (two more elements per tab: start-up check owed). |
 | `5b36bbe0ad` | #22683 | 2026-11-03 | platform-ios | `port` (done) | platforms2 | Accessibility traversal skips interop peers. |
 | `99b0962977` | #22686 | 2026-11-03 | rendering | `already` |  | `immutable_bitmap.rs` returns an error from `Codec::from_data` on null. |
 | `0a53cc4730` | #22687 | 2026-11-03 | platform-linux | `port` (done) | linux | AT-SPI: X11 window id attribute. |
-| `c3b6f5cf61` | #22710 | 2026-11-05 | markup | `port` | markup | XamlX update: inline generics in `x:Type` and `x:Static`; compare with the FerroUI compiler. |
+| `c3b6f5cf61` | #22710 | 2026-11-05 | markup | `port` (done) | xamlx | Inline generic arguments and nullable indicators in `x:Type` and `x:Static`, Nullable checks, in the Rust port of XamlX. |
 | `c9188ebe5f` | #22724 | 2026-11-05 | markup | `not-applicable` |  | IL emitter overload choice on Mono. |
 | `330e602179` | #22652 | 2026-11-05 | input | `port` (done) | input | Alt with another modifier does not open the menu. |
 | `60cb9d62b2` | #22731 | 2026-11-06 | build | `not-applicable` |  | Upstream package feeds. |
 | `f5af0ebf98` | #22707 | 2026-11-06 | controls | `port` (done) | controls2 | TableViewColumn minimum and maximum widths. |
-| `c4d24e9dab` | #22709 | 2026-11-06 | automation | `port` | automation | TableView row automation name from visible cells. |
+| `c4d24e9dab` | #22709 | 2026-11-06 | automation | `port` (done) | automation2 | `TableViewRowAutomationPeer`: a data item named after its visible cells. |
 | `727fea6125` | #22741 | 2026-11-07 | platform-browser | `already` |  | `webapp/modules/ferroui/dom.ts` already returns left, top, right, bottom. |
 | `a81ceeaf3c` | #22656 | 2026-11-09 | platform-browser | `port` (done) | platforms2 | Browser clipboard works without `navigator.clipboard` (non-secure contexts); file items of a paste event are copied before the event ends. |
 | `48132c0500` | #22716 | 2026-11-09 | controls | `port` (done) | controls | `IsActive` set before `Activated` is raised. |
@@ -312,7 +311,7 @@ left out only with a recorded performance or better-code reason.
 | `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `deferred` |  | Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit. |
 | `3ecf2a3fd8` | #22777 | 2026-11-12 | build | `not-applicable` |  | Empty upstream CI commit. |
 | `b04cec5ef5` | #22801 | 2026-11-12 | build | `not-applicable` |  | .NET SDK update. |
-| `dc2253658c` | #22674 | 2026-11-12 | markup | `port` | markup | Compact IL names do not apply; the enum whitespace fix in its XamlX update does. |
+| `dc2253658c` | #22674 | 2026-11-12 | markup | `port` (done) | xamlx | The enum whitespace trim of its XamlX update is ported; compact IL identifiers do not apply (the Rust emitter writes no IL). |
 | `27b1179321` | #22558 | 2026-11-12 | platform-linux | `port` (done) | linux | StatusNotifierItem tooltip text. |
 | `22e9912b75` | #22725 | 2026-11-12 | markup | `not-applicable` |  | Exact signature lookups in the IL compiler. |
 | `050d3fb941` | #22798 | 2026-11-12 | rendering | `port` (done) | rendering | Skia: one layer less for each opacity mask. Performance gain. |
