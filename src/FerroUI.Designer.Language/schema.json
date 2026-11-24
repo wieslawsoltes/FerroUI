@@ -7764,6 +7764,30 @@
     ]
   },
   {
+    "name": "FontVariationSettings",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::media::FontVariationSettings",
+    "base": null,
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Media",
+      "clr-namespace:FerroUI.Media;assembly=FerroUI.Base"
+    ]
+  },
+  {
+    "name": "FontVariationSettingsTransition",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "ferroui_base::animation::FontVariationSettingsTransition",
+    "base": "TransitionBase",
+    "constructible": true,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Animation",
+      "clr-namespace:FerroUI.Animation;assembly=FerroUI.Base"
+    ]
+  },
+  {
     "name": "Frame",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_controls::Frame",
@@ -20285,6 +20309,13 @@
         "values": [],
         "attached": false
       },
+      "FontVariations": {
+        "name": "FontVariations",
+        "type_name": "Option<FontVariationSettings>",
+        "documentation": "RichTextBlock.FontVariations: Option<FontVariationSettings>",
+        "values": [],
+        "attached": false
+      },
       "Language": {
         "name": "Language",
         "type_name": "ferroui_base::utilities::Locale",
@@ -24337,6 +24368,18 @@
     ]
   },
   {
+    "name": "TableViewRowAutomationPeer",
+    "namespace": "https://github.com/ferroui",
+    "documentation": "TableViewRowAutomationPeer",
+    "base": "ListItemAutomationPeer",
+    "constructible": false,
+    "properties": {},
+    "namespace_aliases": [
+      "using:FerroUI.Automation.Peers",
+      "clr-namespace:FerroUI.Automation.Peers;assembly=FerroUI.Controls"
+    ]
+  },
+  {
     "name": "TappedEventArgs",
     "namespace": "https://github.com/ferroui",
     "documentation": "ferroui_base::input::TappedEventArgs",
@@ -24535,6 +24578,13 @@
         "name": "FontFeatures",
         "type_name": "Option<FontFeatureCollection>",
         "documentation": "TemplatedControl.FontFeatures: Option<FontFeatureCollection>",
+        "values": [],
+        "attached": false
+      },
+      "FontVariations": {
+        "name": "FontVariations",
+        "type_name": "Option<FontVariationSettings>",
+        "documentation": "TemplatedControl.FontVariations: Option<FontVariationSettings>",
         "values": [],
         "attached": false
       },
@@ -24946,6 +24996,13 @@
         "name": "FontFeatures",
         "type_name": "Option<FontFeatureCollection>",
         "documentation": "TextBlock.FontFeatures: Option<FontFeatureCollection>",
+        "values": [],
+        "attached": false
+      },
+      "FontVariations": {
+        "name": "FontVariations",
+        "type_name": "Option<FontVariationSettings>",
+        "documentation": "TextBlock.FontVariations: Option<FontVariationSettings>",
         "values": [],
         "attached": false
       },
@@ -25476,6 +25533,13 @@
         "values": [],
         "attached": true
       },
+      "FontVariations": {
+        "name": "FontVariations",
+        "type_name": "Option<FontVariationSettings>",
+        "documentation": "TextElement.FontVariations: Option<FontVariationSettings>",
+        "values": [],
+        "attached": true
+      },
       "FontSize": {
         "name": "FontSize",
         "type_name": "f64",
@@ -25913,6 +25977,12 @@
         "name": "FontFeatures",
         "type_name": "Option<FontFeatureCollection>",
         "documentation": "TextPresenter.FontFeatures: Option<FontFeatureCollection>",
+        "values": []
+      },
+      "FontVariations": {
+        "name": "FontVariations",
+        "type_name": "Option<FontVariationSettings>",
+        "documentation": "TextPresenter.FontVariations: Option<FontVariationSettings>",
         "values": []
       },
       "FontSize": {

@@ -7849,6 +7849,11 @@ pub trait RichTextBlockProps: ElementBuilder {
         self.prop(<ferroui_controls::RichTextBlock>::font_features_property(), value)
     }
 
+    /// Sets [`RichTextBlock::font_variations_property`](ferroui_controls::RichTextBlock::font_variations_property).
+    fn font_variations<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontVariationSettings>, M>) -> Self {
+        self.prop(<ferroui_controls::RichTextBlock>::font_variations_property(), value)
+    }
+
     /// Sets [`RichTextBlock::foreground_property`](ferroui_controls::RichTextBlock::foreground_property).
     fn foreground<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_controls::RichTextBlock>::foreground_property(), value)
@@ -9042,6 +9047,11 @@ pub trait TemplatedControlProps: ElementBuilder {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_features_property(), value)
     }
 
+    /// Sets [`TemplatedControl::font_variations_property`](ferroui_controls::primitives::TemplatedControl::font_variations_property).
+    fn font_variations<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontVariationSettings>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::TemplatedControl>::font_variations_property(), value)
+    }
+
     /// Sets [`TemplatedControl::font_size_property`](ferroui_controls::primitives::TemplatedControl::font_size_property).
     fn font_size<M>(self, value: impl IntoProp<f64, M>) -> Self {
         self.prop(<ferroui_controls::primitives::TemplatedControl>::font_size_property(), value)
@@ -9199,6 +9209,11 @@ pub trait TextBlockProps: ElementBuilder {
     /// Sets [`TextBlock::font_features_property`](ferroui_controls::TextBlock::font_features_property).
     fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::TextBlock>::font_features_property(), value)
+    }
+
+    /// Sets [`TextBlock::font_variations_property`](ferroui_controls::TextBlock::font_variations_property).
+    fn font_variations<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontVariationSettings>, M>) -> Self {
+        self.prop(<ferroui_controls::TextBlock>::font_variations_property(), value)
     }
 
     /// Sets [`TextBlock::inlines_property`](ferroui_controls::TextBlock::inlines_property).
@@ -9461,6 +9476,11 @@ pub trait TextElementProps: ElementBuilder {
     /// Sets [`TextElement::font_features_property`](ferroui_controls::documents::TextElement::font_features_property).
     fn font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_features_property(), value)
+    }
+
+    /// Sets [`TextElement::font_variations_property`](ferroui_controls::documents::TextElement::font_variations_property).
+    fn font_variations<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontVariationSettings>, M>) -> Self {
+        self.prop(<ferroui_controls::documents::TextElement>::font_variations_property(), value)
     }
 
     /// Sets [`TextElement::font_size_property`](ferroui_controls::documents::TextElement::font_size_property).
@@ -11196,6 +11216,11 @@ pub trait AttachedProps: ElementBuilder {
     /// Sets the attached [`TextElement::font_features_property`](ferroui_controls::documents::TextElement::font_features_property).
     fn text_element_font_features<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontFeatureCollection>, M>) -> Self {
         self.prop(<ferroui_controls::documents::TextElement>::font_features_property(), value)
+    }
+
+    /// Sets the attached [`TextElement::font_variations_property`](ferroui_controls::documents::TextElement::font_variations_property).
+    fn text_element_font_variations<M>(self, value: impl IntoProp<Option<ferroui_base::media::FontVariationSettings>, M>) -> Self {
+        self.prop(<ferroui_controls::documents::TextElement>::font_variations_property(), value)
     }
 
     /// Sets the attached [`TextElement::font_size_property`](ferroui_controls::documents::TextElement::font_size_property).
