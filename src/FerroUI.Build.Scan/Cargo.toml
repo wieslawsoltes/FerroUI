@@ -17,6 +17,11 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+# Removes the XML prefixes the default XML namespace makes redundant (#1282, #1283, #1284).
+[[example]]
+name = "xml_prefix_cleanup"
+path = "examples/xml_prefix_cleanup.rs"
+
 # The crate is a build dependency of the framework crates themselves (the base crate, the controls,
 # the XAML runtime library), so it depends on nothing of the framework: the standard library and the
 # three crates the scanner reads Rust source with (docs/porting/xaml.md, 9.5.13).
