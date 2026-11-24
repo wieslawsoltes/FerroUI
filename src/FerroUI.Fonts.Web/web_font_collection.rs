@@ -219,21 +219,10 @@ fn simulations_for(
     if request.style != FontStyleRequest::Normal && upright && !has(b"ital") && !has(b"slnt") {
         simulations |= FontSimulations::Oblique;
     }
-    // The glyphs of a colour font are artwork: emboldened or slanted they are only damaged. The
-    // tables are looked at only when a simulation would apply.
-    if simulations != FontSimulations::None && is_colour_face(base) {
-        return FontSimulations::None;
-    }
+    // A face with colour glyphs is simulated like any other: its outline glyphs need the bold or
+    // the slant, and whether a simulation reaches a colour glyph is a question for the backend
+    // that draws it.
     simulations
-}
-
-/// Whether a face draws colour glyphs: it has a `COLR`, `sbix`, `CBDT` or `SVG ` table. The test is
-/// per face, as simulations are.
-fn is_colour_face(typeface: &GlyphTypeface) -> bool {
-    let platform = typeface.platform_typeface();
-    [*b"COLR", *b"sbix", *b"CBDT", *b"SVG "]
-        .iter()
-        .any(|tag| platform.try_get_table(OpenTypeTag::new(u32::from_be_bytes(*tag))).is_some())
 }
 
 /// What `tech()` answers by default. Palettes are applied to the font itself, so every backend has
@@ -1669,17 +1658,22 @@ mod tests {
     }
 
     #[test]
-    fn a_colour_face_is_never_emboldened_or_slanted() {
+    fn a_colour_face_is_simulated_like_any_other_face() {
         let harness = Harness::new();
         harness.collection.add_style_sheet("@font-face { font-family: E; src: url(e.ttf) }");
         harness.lookup("E");
         let emoji = font("../samples/ControlCatalog/Assets/FallbackFonts/NotoColorEmoji-Catalog.ttf");
         harness.finish(&HashMap::from([("e.ttf", Ok(emoji))]));
         let regular = lookup_with(&harness, "E", FontStyle::Normal, 400).expect("the font");
-        for (style, weight) in [(FontStyle::Normal, 700), (FontStyle::Italic, 400), (FontStyle::Italic, 800)] {
+        assert_eq!(regular.font_simulations(), FontSimulations::None);
+        let both = FontSimulations::Bold | FontSimulations::Oblique;
+        for (style, weight, simulations) in [
+            (FontStyle::Normal, 700, FontSimulations::Bold),
+            (FontStyle::Italic, 400, FontSimulations::Oblique),
+            (FontStyle::Italic, 800, both),
+        ] {
             let found = lookup_with(&harness, "E", style, weight).expect("the font");
-            assert_eq!(found.font_simulations(), FontSimulations::None, "{style:?} {weight}");
-            assert!(Rc::ptr_eq(&found, &regular), "no copy of the font is made for it");
+            assert_eq!(found.font_simulations(), simulations, "{style:?} {weight}");
         }
     }
 
