@@ -198,6 +198,34 @@ A launch starts or restarts the chosen bundle on the selected simulator. Multipl
 
 ![The Contact Review app on iOS 26.4 in App Sessions, with its Rust source, portrait Live App frame, and visual tree](../images/vscode-ios-simulator-live-app.png)
 
+#### Build and redeploy simulator apps from source
+
+Use a trusted workspace on the Mac running Xcode. Install the matching iOS Simulator Rust target and boot a simulator. Replace `appPath` with `build` in the profile. This profile builds Contact Review from the FerroUI workspace.
+
+```json
+{
+  "ferroui.iosSimulator.apps": [
+    {
+      "id": "contact-review",
+      "label": "Contact Review",
+      "bundleId": "org.ferroui.simulator-inspector",
+      "args": ["--mcp", "--mcp-input"],
+      "build": {
+        "application": "contact-review",
+        "reloadOnSave": true
+      }
+    }
+  ]
+}
+```
+
+1. Choose **Run iOS Simulator App** or **Run and Debug iOS Simulator App**. App Sessions opens the pinned Live App editor while Cargo builds. FerroUI then installs the simulator bundle and verifies its inspector, process and first frame.
+2. Choose **Rebuild This App** on the session row. With `reloadOnSave` enabled, saving Rust, XAML, or Cargo inputs owned by the selected package or a local dependency queues the same build. The running app stays available during compilation. Source saved again during compilation takes precedence before deployment.
+3. Check **Show App Output** for compiler, deployment and debugger output. **Diagnostics → Hot Reload History** records the outcome of each queued save. A failed compile leaves the running process available. If a deployment replaces the process and fails to start, FerroUI tries to restore the last accepted bundle. Live App keeps its last frame through the restart.
+4. An attached debugger detaches before deployment and follows the next accepted process. Choose **Stop Debugging** to stop following replacements and leave the app running.
+
+For your own app, set `build.package` and either `build.binary` or `build.example`. Set `build.toolchain` to the FerroUI checkout that supplies `scripts/ios/bundle.sh`. Use `build.manifestPath` for a nested Cargo workspace, and configure `build.features` and `build.noDefaultFeatures` as needed. The package uses the workspace lockfile and Cargo output directory. Set `build.target` if the default for the VS Code workspace host differs from the simulator target you need. [Rust iOS targets](https://doc.rust-lang.org/rustc/platform-support/apple-ios.html) · [iOS simulator MCP tools](reference.md#run-an-ios-simulator-app-with-mcp)
+
 #### Debug Rust on an iOS simulator
 
 Build the simulator bundle with Rust debug symbols, such as the Contact Review example’s default `dev` build. Keep the matching build outputs for source breakpoints. Install **LLDB DAP** in VS Code on the workspace Mac. If the adapter needs an explicit executable path, run `xcrun --find lldb-dap` and use that path in `lldb-dap.executable-path`. [LLDB DAP setup](https://lldb.llvm.org/use/lldbdap.html)
@@ -221,7 +249,7 @@ Add an attach configuration to the app’s workspace folder in `.vscode/launch.j
 1. Choose **FerroUI: Run and Debug iOS Simulator App** from the Command Palette or **Open Mobile App**. Pick the app profile and booted simulator. For a running simulator session, use **Attach Debugger to This App** in its App Sessions context menu.
 2. If several attach configurations are available, choose the one for the app’s workspace folder. FerroUI waits for the app’s first frame and supplies the PID of the installed app that owns the session’s authenticated inspector.
 3. Set a breakpoint in an event handler in your Rust source. In Contact Review, set it inside `review_next_contact` and choose **Review next contact** in Simulator or through **Live App → Interact**. Use **Continue** to resume the app and its inspector.
-4. Use **Stop Debugging** to detach and keep the simulator app running. To end both the debugger and the app, choose **Stop or Disconnect This App**. To deploy a new build, stop the session before running the updated bundle.
+4. Use **Stop Debugging** to detach and keep the simulator app running. To end both the debugger and the app, choose **Stop or Disconnect This App**. For a prebuilt bundle, stop the session before running the updated bundle. For a source profile, choose **Rebuild This App**.
 
 [Attach a simulator debugger from an agent](reference.md#run-an-ios-simulator-app-with-mcp)
 

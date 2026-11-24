@@ -2,9 +2,11 @@ import { execFile, spawn } from 'node:child_process';
 import { realpath, stat } from 'node:fs/promises';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
+import { simulatorAppPid } from './iosSimulatorDebug';
 import { OwnedProcess } from './ownedProcess';
 import { runtimeEndpointReader, type RuntimeMcpEndpoint } from './runtimeMcp';
 import type { IosSimulator, IosSimulatorApp } from './iosSimulatorTargets';
+import { verifyRuntime } from './runtimeReady';
 
 const xcrun = '/usr/bin/xcrun';
 const execute = promisify(execFile);
@@ -61,6 +63,29 @@ export function launchSimulatorApp(device: IosSimulator, app: IosSimulatorApp, s
     const consoleProcess = new OwnedProcess(child);
     const endpoint = awaitEndpoint([child.stdout, child.stderr], consoleProcess, signal);
     return { process: consoleProcess, endpoint };
+}
+
+export interface ManagedSimulatorProcess {
+    pid: number;
+    endpoint: RuntimeMcpEndpoint;
+    console: OwnedProcess;
+    close(): Promise<void>;
+}
+
+export async function deploySimulatorApp(device: IosSimulator, app: IosSimulatorApp, signal: AbortSignal): Promise<ManagedSimulatorProcess> {
+    await installSimulatorApp(device, app, signal);
+    const started = launchSimulatorApp(device, app, signal);
+    try {
+        const endpoint = await started.endpoint;
+        await verifyRuntime(endpoint, signal);
+        const pid = await simulatorAppPid(device.id, app.bundleId, endpoint, signal);
+        signal.throwIfAborted();
+        if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
+        return { pid, endpoint, console: started.process, close: () => started.process.stop() };
+    } catch (error) {
+        await started.process.stop();
+        throw error;
+    }
 }
 
 function awaitEndpoint(streams: NodeJS.ReadableStream[], process: OwnedProcess, signal: AbortSignal): Promise<RuntimeMcpEndpoint> {

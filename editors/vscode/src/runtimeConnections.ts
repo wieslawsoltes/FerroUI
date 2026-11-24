@@ -59,7 +59,8 @@ export class RuntimeConnections implements vscode.Disposable {
         return managed.concat([...this.external.values()].map(({ runtime, label, connection, status, target }): RuntimeSummary => ({
             ...target, runtime, label, generation: connection?.generation ?? null, available: Boolean(connection),
             status: status ?? externalStatus(target),
-            ...(target.kind === 'android' ? { pid: target.android.pid } : target.kind === 'browser' ? { pid: target.browser.pid } : {}),
+            ...(target.kind === 'android' ? { pid: target.android.pid } : target.kind === 'browser' ? { pid: target.browser.pid }
+                : target.kind === 'simulator' ? { pid: target.simulator.pid } : {}),
         })));
     }
 
@@ -151,6 +152,21 @@ export class RuntimeConnections implements vscode.Disposable {
 
     beginAndroid(target: AndroidRuntimeTarget, label: string): RuntimeSummary {
         return this.addExternal({ kind: 'android', android: target }, label, undefined, 'Android build queued');
+    }
+
+    beginSimulator(target: IosRuntimeTarget, label: string): RuntimeSummary {
+        return this.addExternal({ kind: 'simulator', simulator: target }, label, undefined, 'iOS simulator build queued');
+    }
+
+    updateSimulator(runtime: AppRuntime, status: string, process?: { pid: number; endpoint: RuntimeEndpoint } | null): void {
+        const item = this.external.get(runtime);
+        if (item?.target.kind !== 'simulator') return;
+        item.status = status;
+        if (process !== undefined) {
+            item.connection = process ? { endpoint: process.endpoint, generation: ++this.nextGeneration } : undefined;
+            item.target = { kind: 'simulator', simulator: { ...item.target.simulator, pid: process?.pid } };
+        }
+        this.changed.fire();
     }
 
     updateAndroid(runtime: AppRuntime, status: string, process?: { pid: number; debuggable: boolean; endpoint: RuntimeEndpoint } | null): void {

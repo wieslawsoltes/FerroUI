@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { simulatorBuildProfile, type SimulatorBuildProfile } from './iosSimulatorBuildProfile';
 import { workspaceFolders } from './workspacePaths';
 
 export interface IosSimulator {
@@ -16,6 +17,7 @@ export interface IosSimulatorApp {
     folder: string;
     args: string[];
     bundlePath?: string;
+    build?: SimulatorBuildProfile;
 }
 
 export interface IosSimulatorRun {
@@ -37,7 +39,7 @@ export function iosSimulatorApps(folder?: string): IosSimulatorApp[] {
 }
 
 function simulatorApp(value: unknown, folder: vscode.WorkspaceFolder): IosSimulatorApp {
-    const { id, bundleId, label, args = [], appPath } = (value ?? {}) as Record<string, unknown>;
+    const { id, bundleId, label, args = [], appPath, build } = (value ?? {}) as Record<string, unknown>;
     if (typeof id !== 'string' || !/^[a-zA-Z0-9][a-zA-Z0-9_-]{0,63}$/.test(id)
         || typeof bundleId !== 'string' || bundleId.length > 255 || !/^[a-zA-Z0-9][a-zA-Z0-9-]*(?:\.[a-zA-Z0-9][a-zA-Z0-9-]*)+$/.test(bundleId)
         || label !== undefined && (typeof label !== 'string' || !label.trim() || label.length > 96)
@@ -45,6 +47,8 @@ function simulatorApp(value: unknown, folder: vscode.WorkspaceFolder): IosSimula
         || appPath !== undefined && (typeof appPath !== 'string' || path.extname(appPath).toLowerCase() !== '.app' || appPath.includes('\0'))) {
         throw new Error(`Check the iOS simulator launch profile in ${folder.name}. Use an ID, an iOS bundle ID and an optional .app path.`);
     }
+    if (build !== undefined && appPath !== undefined) throw new Error(`Choose build or appPath for iOS simulator profile ${id}.`);
     return { id, bundleId, label: typeof label === 'string' ? label.trim() : bundleId, folder: folder.uri.toString(),
-        args, bundlePath: typeof appPath === 'string' ? path.resolve(folder.uri.fsPath, appPath) : undefined };
+        args, bundlePath: typeof appPath === 'string' ? path.resolve(folder.uri.fsPath, appPath) : undefined,
+        build: simulatorBuildProfile(build, id) };
 }

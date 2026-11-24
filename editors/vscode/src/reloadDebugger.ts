@@ -93,6 +93,13 @@ export class ReloadDebugger implements vscode.Disposable {
         if (active) this.transition = this.transition.then(() => this.stop(active));
     }
 
+    detachForReplacement(): Promise<void> {
+        const attachment = this.attachment;
+        this.detach();
+        if (attachment) this.attachment = { ...attachment, id: randomUUID(), target: undefined };
+        return this.transition;
+    }
+
     private async stop(session: vscode.DebugSession): Promise<void> {
         try { await vscode.debug.stopDebugging(session); }
         catch (error) { this.output.appendLine(`FerroUI debugger: ${String(error)}`); }

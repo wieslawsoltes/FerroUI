@@ -247,11 +247,13 @@ export class AgentTools {
         if (tool === 'ferroui_ios_simulator_targets') return this.appSessions.simulators.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal);
         if (tool === 'ferroui_ios_simulator_debug') return this.appSessions.simulators.debug(args.runtime as AppRuntime,
-            args.expected_generation, { configuration: args.debug_configuration, signal });
+            args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
         if (tool === 'ferroui_ios_simulator_stop') {
             await this.appSessions.simulators.stop(args.runtime as AppRuntime);
             return { stopped: true };
         }
+        if (tool === 'ferroui_ios_simulator_rebuild') return this.appSessions.simulators.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_ios_simulator_output') return { output: this.appSessions.simulators.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
         if (tool === 'ferroui_android_targets') return this.appSessions.android.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_android_run' || tool === 'ferroui_android_attach') {
             return this.appSessions.android.open(input as AndroidRequest, tool === 'ferroui_android_run' ? 'run' : 'attach', signal);

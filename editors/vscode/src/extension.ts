@@ -82,7 +82,7 @@ export function activate(context: vscode.ExtensionContext) {
     const reload = new HotReload();
     const projectView = new ProjectView(inventory, projects, reload, projectSetup);
     const runtimes = new RuntimeConnections(reload);
-    const simulatorSessions = new IosSimulatorSessions(runtimes);
+    const simulatorSessions = new IosSimulatorSessions(runtimes, reload.history);
     const androidSessions = new AndroidSessions(runtimes, reload.history);
     const browserSessions = new BrowserSessions(runtimes, reload.history, publish);
     stopProcesses = async () => {

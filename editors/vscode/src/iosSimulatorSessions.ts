@@ -1,13 +1,17 @@
 import * as vscode from 'vscode';
-import { simulatorAppPid } from './iosSimulatorDebug';
-import { installSimulatorApp, iosSimulators, launchSimulatorApp } from './iosSimulatorProcess';
+import { buildSimulatorApp, type SimulatorBundle } from './iosSimulatorBuild';
+import { simulatorAppIsRunning, simulatorAppPid } from './iosSimulatorDebug';
+import { deploySimulatorApp, installSimulatorApp, iosSimulators, launchSimulatorApp, type ManagedSimulatorProcess } from './iosSimulatorProcess';
 import { iosSimulatorApps, type IosSimulator, type IosSimulatorApp, type IosSimulatorRun } from './iosSimulatorTargets';
+import { MobileDevelopment } from './mobileDevelopment';
 import type { OwnedProcess } from './ownedProcess';
 import { selectDebugConfiguration } from './reloadDebugConfiguration';
 import { ReloadDebugger } from './reloadDebugger';
+import type { ReloadHistory } from './reloadHistory';
+import { ReloadLog } from './reloadLog';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import { verifyRuntime } from './runtimeReady';
-import type { AppRuntime } from './runtimeTargets';
+import type { AppRuntime, IosRuntimeTarget } from './runtimeTargets';
 import { workspaceFolders } from './workspacePaths';
 
 interface Launch {
@@ -17,17 +21,22 @@ interface Launch {
     process?: OwnedProcess;
     runtime?: AppRuntime;
     debugger?: ReloadDebugger;
+    development?: MobileDevelopment<SimulatorBundle, ManagedSimulatorProcess>;
+    output?: { channel: vscode.OutputChannel; log: ReloadLog };
     attaching?: boolean;
     stopping?: Promise<void>;
 }
 
-interface DebugOptions { configuration?: string; interactive?: boolean; signal?: AbortSignal }
+interface DebugOptions { configuration?: string; interactive?: boolean; detach?: boolean; signal?: AbortSignal }
 
 export class IosSimulatorSessions implements vscode.Disposable {
     readonly supported = process.platform === 'darwin';
     private readonly lifetime = new AbortController();
     private readonly launches = new Map<string, Launch>();
-    private debugOutput?: vscode.OutputChannel;
+    private readonly saves = vscode.workspace.onDidSaveTextDocument(document => {
+        if (document.uri.scheme !== 'file') return;
+        for (const launch of this.launches.values()) launch.development?.observe(document.uri.fsPath, () => document.getText());
+    });
     private readonly folders = vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
         const closed = new Set(removed.map(folder => folder.uri.toString()));
         for (const [key, launch] of this.launches) {
@@ -35,15 +44,15 @@ export class IosSimulatorSessions implements vscode.Disposable {
         }
     });
 
-    constructor(private readonly connections: RuntimeConnections) {}
+    constructor(private readonly connections: RuntimeConnections, private readonly history: ReloadHistory) {}
 
     async targets(folder: string | undefined, signal: AbortSignal) {
         if (!this.supported) return { supported: false, devices: [], apps: [] };
         this.requireWorkspace();
         const profiles = iosSimulatorApps(folder);
         const devices = await iosSimulators(AbortSignal.any([signal, this.lifetime.signal]));
-        return { supported: true, devices, apps: profiles.map(({ id, bundleId, label, folder, bundlePath }) => ({
-            id, bundleId, label, folder, installsBundle: bundlePath !== undefined,
+        return { supported: true, devices, apps: profiles.map(({ id, bundleId, label, folder, bundlePath, build }) => ({
+            id, bundleId, label, folder, installsBundle: bundlePath !== undefined || build !== undefined, buildsBundle: Boolean(build),
         })) };
     }
 
@@ -63,6 +72,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
         if (existing) {
             const prior = existing.app;
             if (prior.folder !== app.folder || prior.id !== app.id || prior.bundlePath !== app.bundlePath
+                || JSON.stringify(prior.build) !== JSON.stringify(app.build)
                 || prior.args.length !== app.args.length || prior.args.some((arg, index) => arg !== app.args[index])) {
                 throw new Error('Stop the current session for this bundle and simulator before launching it with another configuration.');
             }
@@ -75,6 +85,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
         this.launches.set(key, launch);
         const startup = AbortSignal.any([active, launch.cancellation.signal]);
         try {
+            if (app.build) return this.startDevelopment(launch);
             await installSimulatorApp(device, app, startup);
             const started = launchSimulatorApp(device, app, startup);
             launch.process = started.process;
@@ -85,8 +96,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             startup.throwIfAborted();
             workspaceFolders(app.folder);
             if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
-            const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: { device: device.id, name: device.name,
-                system: device.system, profile: app.id, bundleId: app.bundleId } }, `${app.label} · ${device.name}`, endpoint);
+            const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: this.target(launch) }, this.label(launch), endpoint);
             launch.runtime = runtime.runtime;
             return runtime;
         } catch (error) {
@@ -100,20 +110,28 @@ export class IosSimulatorSessions implements vscode.Disposable {
 
     async debug(runtime: AppRuntime, generation: number, options: DebugOptions = {}) {
         this.requireWorkspace();
-        const launch = [...this.launches.values()].find(item => item.runtime === runtime);
+        const launch = this.launch(runtime);
         const { endpoint, current, generation: acceptedGeneration } = this.connections.session(runtime);
-        if (!launch || !('url' in endpoint) || acceptedGeneration !== generation) {
+        if (!('url' in endpoint) || acceptedGeneration !== generation) {
             throw new Error('Use the current accepted iOS simulator generation.');
         }
         if (launch.attaching) throw new Error('The debugger is already connecting to this simulator app.');
         const signal = options.signal ? AbortSignal.any([launch.cancellation.signal, options.signal]) : launch.cancellation.signal;
         const requireCurrent = () => {
             signal.throwIfAborted();
-            if (!current() || launch.process?.hasExited) throw new Error('The iOS simulator session ended while attaching the debugger.');
+            if (!current() || launch.process?.hasExited || launch.development?.deploying) {
+                throw new Error('The iOS simulator connection changed while attaching the debugger.');
+            }
         };
         launch.attaching = true;
         try {
             requireCurrent();
+            if (options.detach) {
+                const debuggerSession = launch.debugger;
+                launch.debugger = undefined;
+                await debuggerSession?.close();
+                return { runtime, generation, attached: false };
+            }
             const [folder] = workspaceFolders(launch.app.folder);
             const configuration = await selectDebugConfiguration(folder, { interactive: options.interactive ?? false,
                 name: options.configuration, target: 'simulator' });
@@ -121,7 +139,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             requireCurrent();
             const pid = await simulatorAppPid(launch.device.id, launch.app.bundleId, endpoint, signal);
             requireCurrent();
-            const output = this.debugOutput ??= vscode.window.createOutputChannel('FerroUI iOS Simulator');
+            const output = this.output(launch).log;
             const debuggerSession = launch.debugger ??= new ReloadDebugger(output, 'The configured Rust debugger could not attach to this simulator app.');
             if (!debuggerSession.follows(pid)) await debuggerSession.attach(folder, configuration, pid);
             try { requireCurrent(); }
@@ -129,6 +147,25 @@ export class IosSimulatorSessions implements vscode.Disposable {
             return { runtime, generation, pid, attached: true };
         } finally { launch.attaching = false; }
     }
+
+    rebuild(runtime: AppRuntime): RuntimeSummary {
+        this.requireWorkspace();
+        const launch = this.launch(runtime);
+        if (!launch.development) throw new Error('Choose a source-built iOS simulator app session.');
+        launch.development.rebuild();
+        return this.connections.describe(runtime)!;
+    }
+
+    async waitForDebuggerTarget(runtime: AppRuntime): Promise<void> {
+        await this.launch(runtime).development?.ready();
+    }
+
+    recentOutput(runtime: AppRuntime, lines: number): string {
+        this.requireWorkspace();
+        return this.launch(runtime).output?.log.tail(lines) ?? '';
+    }
+
+    showOutput(runtime: AppRuntime): void { this.output(this.launch(runtime)).channel.show(); }
 
     async stop(runtime: AppRuntime): Promise<void> {
         const entry = [...this.launches.entries()].find(([, launch]) => launch.runtime === runtime);
@@ -140,6 +177,65 @@ export class IosSimulatorSessions implements vscode.Disposable {
         void this.stopLaunch(key, launch).catch(error => console.warn(error));
     }
 
+    private startDevelopment(launch: Launch): RuntimeSummary {
+        const { app, device, cancellation } = launch;
+        const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch));
+        const { runtime } = pending;
+        launch.runtime = runtime;
+        const output = this.output(launch).log;
+        const development = new MobileDevelopment<SimulatorBundle, ManagedSimulatorProcess>({
+            platform: 'iOS simulator',
+            label: app.label,
+            reloadOnSave: app.build?.reloadOnSave ?? false,
+            build: (signal, starting) => buildSimulatorApp(app, output, signal, starting),
+            install: (artifact, signal) => deploySimulatorApp(device, { ...app, bundlePath: artifact.bundlePath }, signal),
+            owns: async (process, signal) => {
+                if (process.console.hasExited) return false;
+                return await simulatorAppPid(device.id, app.bundleId, process.endpoint, signal).catch(() => {
+                    signal.throwIfAborted();
+                    return undefined;
+                }) === process.pid;
+            },
+            running: signal => simulatorAppIsRunning(device.id, app.bundleId, signal),
+            beforeInstall: async () => { await launch.debugger?.detachForReplacement(); },
+            publish: (status, process) => {
+                this.connections.updateSimulator(runtime, status, process);
+                if (process) {
+                    const ended = () => {
+                        if (development.current !== process || development.deploying || cancellation.signal.aborted) return;
+                        launch.debugger?.detach();
+                        void development.exited(process).catch(error => output.appendLine(String(error)));
+                    };
+                    void process.console.closed.then(ended, ended);
+                }
+            },
+            resumeDebugger: process => launch.debugger?.activated(process.pid),
+        }, runtime, this.history, output, cancellation.signal);
+        launch.development = development;
+        development.rebuild();
+        return pending;
+    }
+
+    private launch(runtime: AppRuntime): Launch {
+        const launch = [...this.launches.values()].find(item => item.runtime === runtime);
+        if (!launch) throw new Error('Choose a current iOS simulator app session.');
+        return launch;
+    }
+
+    private label({ app, device }: Launch): string { return `${app.label} · ${device.name}`; }
+
+    private target({ app, device }: Launch): IosRuntimeTarget {
+        return { device: device.id, name: device.name, system: device.system, profile: app.id, bundleId: app.bundleId };
+    }
+
+    private output(launch: Launch) {
+        if (!launch.output) {
+            const channel = vscode.window.createOutputChannel(`FerroUI iOS Simulator · ${this.label(launch)}`);
+            launch.output = { channel, log: new ReloadLog(channel) };
+        }
+        return launch.output;
+    }
+
     private stopLaunch(key: string, launch: Launch): Promise<void> {
         if (launch.stopping) return launch.stopping;
         launch.cancellation.abort(new Error('The simulator launch stopped.'));
@@ -147,8 +243,13 @@ export class IosSimulatorSessions implements vscode.Disposable {
         return launch.stopping = (async () => {
             try { await launch.debugger?.close(); }
             finally {
-                try { await launch.process?.stop(); }
-                finally { if (this.launches.get(key) === launch) this.launches.delete(key); }
+                try {
+                    if (launch.development) await launch.development.close(true);
+                    else await launch.process?.stop();
+                } finally {
+                    launch.output?.channel.dispose();
+                    if (this.launches.get(key) === launch) this.launches.delete(key);
+                }
             }
         })();
     }
@@ -162,9 +263,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
     async shutdown(): Promise<void> {
         this.lifetime.abort();
         await Promise.allSettled([...this.launches].map(([key, launch]) => this.stopLaunch(key, launch)));
-        this.debugOutput?.dispose();
-        this.debugOutput = undefined;
     }
 
-    dispose(): void { this.folders.dispose(); void this.shutdown(); }
+    dispose(): void { this.folders.dispose(); this.saves.dispose(); void this.shutdown(); }
 }

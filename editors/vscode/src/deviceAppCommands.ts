@@ -18,6 +18,7 @@ export class DeviceAppCommands implements vscode.Disposable {
             open(runtime);
             if (debug) {
                 if (runtime.startsWith('android:')) await this.android.waitForDebuggerTarget(runtime);
+                else if (runtime.startsWith('simulator:')) await this.ios.waitForDebuggerTarget(runtime);
                 await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
             }
         };
@@ -28,7 +29,7 @@ export class DeviceAppCommands implements vscode.Disposable {
             vscode.workspace.onDidChangeConfiguration(event => { if (event.affectsConfiguration('ferroui.android.apps')) context(); }),
             vscode.commands.registerCommand('ferroui.appSessions.mobile', () => this.chooseAction()),
             ...(['run', 'debug'] as const).map(mode => vscode.commands.registerCommand(`ferroui.iosSimulator.${mode}`, (selection?: IosSimulatorRun) =>
-                connectApp('Connecting to the iOS simulator app', () => selection ?? this.chooseIosApp(mode),
+                connectApp('Starting the iOS simulator app', () => selection ?? this.chooseIosApp(mode),
                     (request, signal) => this.ios.start(request, signal), runtime => present(runtime, mode === 'debug')))),
             ...(['run', 'debug', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
                 connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode),
@@ -60,7 +61,7 @@ export class DeviceAppCommands implements vscode.Disposable {
         const booted = devices.filter(device => device.booted);
         if (!booted.length) throw new Error('Boot an iOS simulator in Xcode or Simulator on the workspace Mac.');
         const app = await vscode.window.showQuickPick(apps.map(app => ({
-            label: app.label, description: app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
+            label: app.label, description: app.buildsBundle ? 'Build from Cargo' : app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
         })), { title: mode === 'debug' ? 'Run and Debug iOS Simulator App' : 'Run iOS Simulator App',
             placeHolder: 'Choose the configured app' });
         if (!app) return;

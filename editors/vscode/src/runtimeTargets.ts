@@ -8,6 +8,8 @@ export interface IosRuntimeTarget {
     system: string;
     profile: string;
     bundleId: string;
+    pid?: number;
+    development?: boolean;
 }
 
 export interface AndroidRuntimeTarget {

@@ -60,11 +60,13 @@ export class AppSessions implements vscode.Disposable {
             managed('select'),
             command('debug', session => this.debug(session)),
             command('rebuild', session => {
+                if (session.simulator?.development) return this.simulators.rebuild(session.runtime);
                 if (session.android?.development) return this.android.rebuild(session.runtime);
                 if (session.browser?.development) return this.browser.rebuild(session.runtime);
                 if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session);
             }),
             command('showOutput', session => {
+                if (session.simulator) return this.simulators.showOutput(session.runtime);
                 if (session.android) return this.android.showOutput(session.runtime);
                 if (session.browser?.development || session.browser?.debuggable) return this.browser.showOutput();
                 if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session);
@@ -110,10 +112,12 @@ export class AppSessions implements vscode.Disposable {
         item.tooltip = `${session.label}\n${item.description}${selected ? '\nSelected managed app' : ''}`;
         item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
         const problem = (run && 'problem' in run && run.problem)
-            || ((session.browser?.development || session.android?.development) && session.status.includes(' failed'));
+            || ((session.browser?.development || session.android?.development || session.simulator?.development) && session.status.includes(' failed'));
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : session.browser?.paused ? 'debug-pause' : selected ? 'play-circle'
             : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
-        if (session.browser) {
+        if (session.simulator?.development) {
+            item.contextValue = session.available ? 'app-session-simulator-development-debug' : 'app-session-simulator-development';
+        } else if (session.browser) {
             const development = session.browser.development ? '-development' : '';
             const debug = session.browser.debuggable && session.available ? '-debug' : '';
             item.contextValue = `app-session-browser${development}${debug}`;

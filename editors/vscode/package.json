@@ -1410,17 +1410,17 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-development)?(-debug)?|browser(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|android|browser)(-development)?(-debug)?)$/",
           "group": "inline@1"
         },
         {
           "command": "ferroui.appSessions.rebuild",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|(android|browser)-development(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|(simulator|android|browser)-development(-debug)?)$/",
           "group": "inline@2"
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-development)?(-debug)?|browser(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|android|browser)(-development)?(-debug)?)$/",
           "group": "inline@3"
         },
         {
@@ -1430,12 +1430,12 @@
         },
         {
           "command": "ferroui.appSessions.debug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|(android|browser)(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|(simulator|android|browser)(-development)?-debug)$/",
           "group": "1_apps@2"
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|android(-development)?(-debug)?|browser-development(-debug)?|browser-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|android)(-development)?(-debug)?|browser-development(-debug)?|browser-debug)$/",
           "group": "1_apps@3"
         },
         {
@@ -1750,6 +1750,24 @@
               "appPath": {
                 "type": "string",
                 "description": "Optional path to a built simulator .app bundle. Relative paths start at this workspace folder."
+              },
+              "build": {
+                "type": "object",
+                "description": "Build an iOS simulator bundle from Cargo. Use this in place of appPath.",
+                "additionalProperties": false,
+                "oneOf": [{ "required": ["application"] }, { "required": ["package", "binary"] }, { "required": ["package", "example"] }],
+                "properties": {
+                  "application": { "type": "string", "enum": ["contact-review"], "description": "The bundled Contact Review example in the FerroUI workspace." },
+                  "package": { "type": "string", "description": "The selected Cargo package." },
+                  "binary": { "type": "string", "description": "A binary target in the selected package." },
+                  "example": { "type": "string", "description": "An example target in the selected package." },
+                  "toolchain": { "type": "string", "default": ".", "description": "FerroUI checkout containing scripts/ios/bundle.sh." },
+                  "manifestPath": { "type": "string", "default": "Cargo.toml", "description": "The Cargo manifest relative to the workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Cargo features for the simulator build." },
+                  "noDefaultFeatures": { "type": "boolean", "default": false, "description": "Exclude default Cargo features for a custom application." },
+                  "target": { "type": "string", "enum": ["aarch64-apple-ios-sim", "x86_64-apple-ios"], "description": "Simulator Rust target. Defaults to the workspace host architecture." },
+                  "reloadOnSave": { "type": "boolean", "default": false, "description": "Build and redeploy after saves to this app's Rust or XAML sources." }
+                }
               },
               "args": {
                 "type": "array",
