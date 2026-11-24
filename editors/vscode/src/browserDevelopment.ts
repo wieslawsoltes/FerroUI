@@ -4,6 +4,7 @@ import { Uri } from 'vscode';
 import { buildBrowserSite, resolveBrowserBuild, type BrowserBuildTarget, type BuiltBrowserSite } from './browserBuild';
 import type { BrowserDebugger } from './browserDebug';
 import { BrowserInspection } from './browserInspection';
+import { BrowserPause } from './browserPause';
 import { ManagedBrowser, type BrowserPage } from './browserProcess';
 import { BrowserSites, type PublishedBrowserSite } from './browserSites';
 import type { DevelopmentBrowserApp } from './browserTargets';
@@ -130,7 +131,8 @@ export class BrowserDevelopment {
             published = await this.sites!.publish(artifact.site, this.app.build.threads);
             page = await browser.openPage(published.url, this.app, active);
             this.status('Starting browser candidate');
-            const channel = await BrowserInspection.open(page, published.url, active, message => this.output.appendLine(message));
+            const pause = this.appDebugger && new BrowserPause();
+            const channel = await BrowserInspection.open(page, published.url, active, message => this.output.appendLine(message), pause);
             await verifyRuntime({ channel }, active);
             const presented = Date.now();
             while (this.reads.size) await Promise.all(this.reads.values());
@@ -145,9 +147,10 @@ export class BrowserDevelopment {
             this.connections.updateBrowser(this.runtime, previous ? 'Browser reloaded' : 'Watching browser saves',
                 { url: published.url, pid: browser.pid, endpoint: { channel } });
             const acceptedGeneration = this.connections.revision(this.runtime);
-            if (browser.debugPort && acceptedGeneration !== undefined) {
+            if (browser.debugPort && pause && acceptedGeneration !== undefined) {
                 this.appDebugger?.accepted({ generation: acceptedGeneration, port: browser.debugPort,
-                    url: published.url, hostPage: this.target.hostPage });
+                    url: published.url, hostPage: this.target.hostPage, pause,
+                    onPause: paused => this.connections.setBrowserPaused(this.runtime, acceptedGeneration, paused) });
             }
             this.history.observeFrame(generation, { frame: 1, batch: 1, status: 'rendered', unixMs: presented, afterAcknowledgementMs: 0 });
             for (const record of this.changes.values()) {

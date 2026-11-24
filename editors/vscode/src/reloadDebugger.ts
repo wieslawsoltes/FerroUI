@@ -44,6 +44,16 @@ export class ReloadDebugger implements vscode.Disposable {
 
     follows(target: number): boolean { return this.attachment?.target === target; }
 
+    owns(session: vscode.DebugSession, target: number): boolean {
+        const attachment = this.attachment;
+        if (attachment?.target !== target) return false;
+        for (let owner: vscode.DebugSession | undefined = session; owner; owner = owner.parentSession) {
+            if (owner.configuration.ferrouiManagedInstance === this.instance
+                && owner.configuration.ferrouiManagedSession === attachment.id) return true;
+        }
+        return false;
+    }
+
     activated(target: number, configuration?: vscode.DebugConfiguration): void {
         void this.activate(target, configuration).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
     }

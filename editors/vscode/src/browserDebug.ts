@@ -1,4 +1,6 @@
 import * as vscode from 'vscode';
+import { trackBrowserPause } from './browserDebugTracker';
+import type { BrowserPause } from './browserPause';
 import type { BrowserApp } from './browserTargets';
 import { errorMessage } from './protocol';
 import { ReloadDebugger } from './reloadDebugger';
@@ -10,20 +12,32 @@ interface BrowserDebugFrame {
     port: number;
     url: string;
     hostPage?: string;
+    pause: BrowserPause;
+    onPause(paused: boolean): void;
 }
 
 /** Attach JS Debug to accepted browser documents and follow their generation on reload. */
 export class BrowserDebugger {
     private readonly debug: ReloadDebugger;
+    private readonly tracker: vscode.Disposable;
     private frame?: BrowserDebugFrame;
+    private stopWatching?: () => void;
     private startOnFirstFrame = true;
 
     constructor(private readonly app: BrowserApp, private readonly output: ProcessOutput) {
-        this.debug = new ReloadDebugger(output, 'VS Code JavaScript Debug could not attach to the browser app.');
+        this.debug = new ReloadDebugger(output, 'VS Code JavaScript Debug could not attach to the browser app.',
+            () => this.frame?.pause.clear());
+        this.tracker = vscode.debug.registerDebugAdapterTrackerFactory('*', { createDebugAdapterTracker: session => {
+            const frame = this.frame;
+            const current = () => this.frame === frame && frame !== undefined && this.debug.owns(session, frame.generation);
+            return frame && current() ? trackBrowserPause(frame.pause, current) : undefined;
+        } });
     }
 
     accepted(frame: BrowserDebugFrame): void {
+        this.stopWatching?.();
         this.frame = frame;
+        this.stopWatching = frame.pause.onDidChange(frame.onPause);
         if (this.startOnFirstFrame) {
             this.startOnFirstFrame = false;
             void this.attach(frame.generation).catch(error => this.output.appendLine(errorMessage(error)));
@@ -52,6 +66,16 @@ export class BrowserDebugger {
         };
     }
 
-    retire(): void { this.frame = undefined; this.debug.detach(); }
-    close(): Promise<void> { this.frame = undefined; return this.debug.close(); }
+    retire(): void {
+        this.stopWatching?.();
+        this.stopWatching = undefined;
+        this.frame = undefined;
+        this.debug.detach();
+    }
+
+    close(): Promise<void> {
+        this.retire();
+        this.tracker.dispose();
+        return this.debug.close();
+    }
 }

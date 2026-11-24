@@ -171,8 +171,16 @@ export class RuntimeConnections implements vscode.Disposable {
         item.status = status;
         if (page !== undefined) {
             item.connection = page ? { endpoint: page.endpoint, generation: ++this.nextGeneration } : undefined;
-            item.target = { kind: 'browser', browser: { ...item.target.browser, url: page?.url, pid: page?.pid } };
+            item.target = { kind: 'browser', browser: { ...item.target.browser, url: page?.url, pid: page?.pid, paused: undefined } };
         }
+        this.changed.fire();
+    }
+
+    setBrowserPaused(runtime: AppRuntime, generation: number, paused: boolean): void {
+        const item = this.external.get(runtime);
+        if (item?.target.kind !== 'browser' || item.connection?.generation !== generation
+            || Boolean(item.target.browser.paused) === paused) return;
+        item.target = { kind: 'browser', browser: { ...item.target.browser, paused: paused || undefined } };
         this.changed.fire();
     }
 

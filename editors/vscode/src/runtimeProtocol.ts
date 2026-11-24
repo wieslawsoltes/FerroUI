@@ -78,6 +78,7 @@ export interface RuntimeViewSnapshot extends RuntimePresentation {
     generation: number;
     revision: number;
     frame: number | null;
+    debuggerPaused: boolean;
     window: number | null;
     windows: RuntimeNode[];
     selection: RuntimeSelection | null;

@@ -397,6 +397,8 @@ For a separate app repository, set `build.toolchain` to the FerroUI checkout tha
 
 The same Run and Debug command can launch a served profile. It uses the workspace folder as the JavaScript source root. For an independently started Chromium profile, use VS Code's standard Chrome attach configuration. [VS Code browser debugging](https://code.visualstudio.com/docs/nodejs/browser-debugging) · [Browser debugger MCP tools](reference.md#debug-a-browser-app-with-mcp)
 
+When a browser app launched with **Run and Debug** pauses, Live App keeps its last frame and shows **Paused in debugger**. Use **Continue** or step through the callback in VS Code. Resume the app to send new inspector requests. An action that triggered the breakpoint can finish after you continue. If its request expires during a longer pause, check the app after continuing before you repeat the action.
+
 ![VS Code paused at a JavaScript breakpoint in the workspace while Live App shows the accepted Chromium replacement and its visual tree](../images/vscode-browser-debugger.png)
 
 ### Debug Rust code in a browser app

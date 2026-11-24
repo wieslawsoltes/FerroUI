@@ -21,6 +21,7 @@ import { verifyBrowserMcp } from './browserMcp';
 import { verifyBrowserReload } from './browserReloadMcp';
 import { verifyBrowserBuildTarget } from './browserBuildTarget';
 import { verifyBrowserDebug } from './browserDebugMcp';
+import { verifyBrowserPause } from './browserPause';
 import { verifyBrowserRustDebug } from './browserRustDebugMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
@@ -66,6 +67,7 @@ export async function run(): Promise<void> {
         await verifyBrowserRustDebug();
         return;
     }
+    verifyBrowserPause();
     await verifyBrowserBuildTarget(workspace);
     await verifyRsxRecovery(workspace);
     verifyTimelineViewport();

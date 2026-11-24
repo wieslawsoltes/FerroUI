@@ -29,6 +29,7 @@ export interface BrowserRuntimeTarget {
     launched: boolean;
     development?: boolean;
     debuggable?: boolean;
+    paused?: boolean;
     pid?: number;
 }
 

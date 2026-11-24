@@ -56,6 +56,10 @@ export async function verifyBrowserDebug(): Promise<void> {
         assert.equal(queued.browser?.debuggable, true);
         const initial = await accepted();
         const old = await breakpoint(0, initial);
+        assert.equal((await current())?.browser?.paused, true, 'The accepted Chromium page reports its debugger pause.');
+        const blocked = await invoke('ferroui_runtime_query', { runtime, expected_generation: initial.generation, tool: 'list_windows' });
+        assert.ok(blocked.isError);
+        assert.match(blocked.content[0]?.text ?? '', /paused in the debugger/);
         const duplicate = content<RuntimeSummary>(await invoke('ferroui_browser_run', { profile: 'debug-dispatch', folder: workspace.toString(), debug: true }));
         assert.equal(duplicate.generation, initial.generation);
         assert.ok(!terminated.has(old.id));
@@ -83,6 +87,7 @@ export async function verifyBrowserDebug(): Promise<void> {
         await vscode.debug.stopDebugging(next);
         await until(() => terminated.has(next.id));
         assert.equal((await current())?.generation, replacement.generation);
+        assert.ok(!(await current())?.browser?.paused);
         const live = runtimeApp(mcp, replacement);
         await live.click((await live.find('DispatchOrder')).node_id);
         assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 1');

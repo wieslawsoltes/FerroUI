@@ -1,5 +1,6 @@
 import * as vscode from 'vscode';
 import { validate } from './agentSchema';
+import { continueBrowserMessage } from './browserPause';
 import type { HotReload } from './hotReload';
 import { errorMessage } from './protocol';
 import { RuntimeClient } from './runtimeClient';
@@ -34,6 +35,7 @@ export class RuntimePanel implements vscode.Disposable {
     private refreshRequested = false;
     private pending = false;
     private ready = false;
+    private debuggerPaused = false;
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly connections: RuntimeConnections,
         reload: HotReload, private readonly authoredSource: RuntimeSourceEditor,
@@ -75,6 +77,7 @@ export class RuntimePanel implements vscode.Disposable {
         }
         return {
             runtime: this.target, generation: this.generation, revision: this.revision, frame: this.frame?.token ?? null,
+            debuggerPaused: this.debuggerPaused,
             window: this.windowId ?? null, windows: this.windows, ...this.presentation,
             selection: this.inspection ? { node: this.inspection.node, view: this.inspection.view } : null,
         };
@@ -133,11 +136,16 @@ export class RuntimePanel implements vscode.Disposable {
         const options = targets.map(target => ({ runtime: target.runtime,
             label: targets.some(other => other !== target && other.label === target.label)
                 ? `${target.label} · ${target.pid ?? target.runtime.split(':')[1].slice(0, 8)}` : target.label }));
+        const paused = Boolean(summary?.browser?.paused);
+        if (paused !== this.debuggerPaused) {
+            this.debuggerPaused = paused;
+            this.schedule(0);
+        }
         const status = summary ? `${summary.status}${summary.pid && !summary.available ? ' · Inspector unavailable' : ''}`
             : this.pinned ? 'App session ended.' : 'Run a FerroUI app with MCP enabled, or connect to a running app.';
         this.post({ type: 'state', target: summary?.runtime, targets: options, generation: summary?.generation ?? undefined,
             windows: this.windows, root: this.windowId,
-            status });
+            status: paused ? `${status} · Paused in debugger` : status });
     }
 
     private schedule(delay = refreshInterval, force = false): void {
@@ -147,7 +155,7 @@ export class RuntimePanel implements vscode.Disposable {
     }
 
     private canPoll(): boolean {
-        return Boolean(this.panel && (this.refreshRequested || this.ready && this.panel.visible));
+        return Boolean(!this.debuggerPaused && this.panel && (this.refreshRequested || this.ready && this.panel.visible));
     }
 
     private async tick(): Promise<void> {
@@ -187,7 +195,7 @@ export class RuntimePanel implements vscode.Disposable {
             }
             this.postFrame();
         } catch (error) {
-            if (epoch === this.epoch) this.post({ type: 'problem', message: errorMessage(error) });
+            if (epoch === this.epoch && !this.debuggerPaused) this.post({ type: 'problem', message: errorMessage(error) });
         } finally {
             this.pending = false;
             this.schedule(epoch === this.epoch && !this.refreshRequested ? refreshInterval : 0);
@@ -197,6 +205,7 @@ export class RuntimePanel implements vscode.Disposable {
     private async updateView(change: RuntimeViewChange, signal?: AbortSignal, echoFilters = true): Promise<void> {
         switch (change.action) {
             case 'refresh':
+                if (this.debuggerPaused) throw new Error(continueBrowserMessage);
                 this.reset(true);
                 return;
             case 'mode':

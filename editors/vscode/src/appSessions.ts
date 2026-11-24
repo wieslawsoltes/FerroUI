@@ -105,12 +105,13 @@ export class AppSessions implements vscode.Disposable {
         const run = session.app_session ? this.reload.stateFor(session.app_session) : undefined;
         const selected = session.app_session !== undefined && session.app_session === this.reload.active;
         item.id = session.runtime;
-        item.description = [session.pid ? `PID ${session.pid}` : undefined, session.status].filter(Boolean).join(' · ');
+        item.description = [session.pid ? `PID ${session.pid}` : undefined, session.status,
+            session.browser?.paused ? 'Paused in debugger' : undefined].filter(Boolean).join(' · ');
         item.tooltip = `${session.label}\n${item.description}${selected ? '\nSelected managed app' : ''}`;
         item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
         const problem = (run && 'problem' in run && run.problem)
             || ((session.browser?.development || session.android?.development) && session.status.includes(' failed'));
-        item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : selected ? 'play-circle'
+        item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : session.browser?.paused ? 'debug-pause' : selected ? 'play-circle'
             : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
         if (session.browser) {
             const development = session.browser.development ? '-development' : '';

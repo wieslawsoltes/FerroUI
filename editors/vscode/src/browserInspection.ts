@@ -1,5 +1,6 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import type { BrowserEvent } from './browserCdp';
+import type { BrowserPause } from './browserPause';
 import type { BrowserPage } from './browserProcess';
 import type { Bounds } from './protocol';
 import type { RuntimeInspectionChannel, RuntimeToolDefinition, RuntimeToolResult } from './runtimeClient';
@@ -32,13 +33,14 @@ export class BrowserInspection implements RuntimeInspectionChannel {
     private root?: number;
     private navigation = 0;
 
-    private constructor(private readonly page: BrowserPage) {
+    private constructor(private readonly page: BrowserPage, private readonly pause?: BrowserPause) {
         const unsubscribe = this.page.cdp.onEvent(event => this.onEvent(event));
         this.page.signal.addEventListener('abort', unsubscribe, { once: true });
     }
 
-    static async open(page: BrowserPage, url: string, signal: AbortSignal, report?: (message: string) => void): Promise<BrowserInspection> {
-        const inspection = new BrowserInspection(page);
+    static async open(page: BrowserPage, url: string, signal: AbortSignal, report?: (message: string) => void,
+        pause?: BrowserPause): Promise<BrowserInspection> {
+        const inspection = new BrowserInspection(page, pause);
         const deadline = AbortSignal.any([signal, page.signal, AbortSignal.timeout(15_000)]);
         let pending: keyof typeof startupErrors = 'navigation';
         const unsubscribe = report && page.cdp.onEvent(event => {
@@ -135,9 +137,12 @@ export class BrowserInspection implements RuntimeInspectionChannel {
     }
 
     private async evaluate(functionDeclaration: string, args: { value: string }[], signal: AbortSignal): Promise<unknown> {
-        const response = await this.request<Evaluation>('Runtime.callFunctionOn', {
+        const params = {
             objectId: this.objectId, functionDeclaration, arguments: args, returnByValue: true, silent: true,
-        }, signal);
+        };
+        const response = this.pause
+            ? await this.pause.inspect(signal, active => this.request<Evaluation>('Runtime.callFunctionOn', params, active, null))
+            : await this.request<Evaluation>('Runtime.callFunctionOn', params, signal);
         if (response.exceptionDetails) throw new Error('The browser could not run the FerroUI inspector.');
         return response.result?.value;
     }
@@ -147,10 +152,10 @@ export class BrowserInspection implements RuntimeInspectionChannel {
         return frame.url + (frame.urlFragment ?? '');
     }
 
-    private async request<T>(method: string, args: object, signal: AbortSignal): Promise<T> {
+    private async request<T>(method: string, args: object, signal: AbortSignal, timeout?: number | null): Promise<T> {
         const revision = this.navigation;
         const active = AbortSignal.any([signal, this.page.signal]);
-        const response = await this.page.cdp.request<T>(method, args, active, this.page.sessionId);
+        const response = await this.page.cdp.request<T>(method, args, active, this.page.sessionId, timeout);
         active.throwIfAborted();
         if (this.objectId && this.navigation !== revision) throw new Error('The Chromium app document has changed.');
         return response;

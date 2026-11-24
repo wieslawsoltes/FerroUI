@@ -1,6 +1,8 @@
 import { strict as assert } from 'node:assert';
+import { setTimeout as delay } from 'node:timers/promises';
 import * as vscode from 'vscode';
 import type { RuntimeSummary } from '../src/runtimeConnections';
+import type { RuntimeViewSnapshot } from '../src/runtimeProtocol';
 import { fileKey } from '../src/workspacePaths';
 import { runtimeApp } from './browserMcp';
 import { browserBuildTimeout, waitFor } from './browserTestSupport';
@@ -75,19 +77,47 @@ export async function verifyBrowserRustDebug(): Promise<void> {
         const app = runtimeApp(mcp, page);
         const button = await app.find('DispatchOrder');
         assert.ok(button);
-        const click = app.click(button.node_id).then(() => undefined, (error: unknown) => error);
+        const view = async () => {
+            const response = await invoke('ferroui_live_app_view', { runtime });
+            return response.isError ? undefined : content<RuntimeViewSnapshot>(response);
+        };
+        const visible = await waitFor(async () => {
+            const snapshot = await view();
+            if (snapshot?.generation === page.generation && snapshot.frame !== null) return snapshot.frame;
+        }, 'the accepted Live App frame');
+        const began = Date.now();
+        const completion: { elapsed?: number; error?: unknown } = {};
+        const click = app.click(button.node_id).then(() => undefined, (error: unknown) => error).then(error => {
+            completion.elapsed = Date.now() - began;
+            completion.error = error;
+            return error;
+        });
         const { session, threadId } = await waitFor(() => hits.get(url), 'the dispatch callback breakpoint');
         try {
-            const { stackFrames: [frame] } = await session.customRequest('stackTrace', { threadId });
+            const { stackFrames: [frame] } = await session.customRequest('stackTrace', { threadId, startFrame: 0, levels: 1 });
             assert.match(frame.name, /mark_dispatched/);
             assert.equal(fileKey(frame.source.path), fileKey(source.uri.fsPath));
             assert.equal(frame.line, operation.lineNumber + 1);
+            const paused = await waitFor(async () => {
+                const snapshot = await view();
+                if (snapshot?.debuggerPaused) return snapshot;
+            }, 'the paused Live App editor');
+            assert.equal(paused.frame, visible);
+            assert.equal(paused.generation, page.generation);
+            const secondClick = await invoke('ferroui_runtime_call', { runtime, expected_generation: page.generation,
+                tool: 'click', arguments: { node_id: button.node_id } });
+            assert.ok(secondClick.isError);
+            assert.match(secondClick.content[0]?.text ?? '', /paused in the debugger/);
+            await delay(Math.max(0, 6_300 - (Date.now() - began)));
+            assert.equal(completion.elapsed, undefined,
+                `A click that hit a breakpoint waits for Continue. It settled after ${completion.elapsed} ms. ${String(completion.error ?? '')}`);
         } finally {
             await session.customRequest('continue', { threadId });
         }
         assert.equal(await click, undefined);
         const result = await app.result<{ matched: boolean }>('wait_for', { name: 'DispatchedCount', text: `Dispatched orders: ${count}` });
         assert.ok(result.matched, 'Continuing the debugger completes the app action.');
+        assert.equal((await view())?.debuggerPaused, false);
         return debug;
     };
 
@@ -115,7 +145,7 @@ export async function verifyBrowserRustDebug(): Promise<void> {
         assert.equal((await app.find('DispatchedCount')).text, 'Dispatched orders: 1');
         assert.notEqual((await dispatch(replacement, 2)).id, originalDebug.id);
         assert.ok((await invoke('ferroui_browser_debug', { runtime, expected_generation: first.generation })).isError);
-        console.log('Managed Chromium Rust source breakpoints, native dispatch, saved app replacement, and debugger reattachment passed');
+        console.log('Managed Chromium Rust source breakpoints, paused input and frame retention, saved app replacement, and debugger reattachment passed');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         tracker.dispose();

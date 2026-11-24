@@ -2,6 +2,7 @@ import * as vscode from 'vscode';
 import { BrowserDebugger } from './browserDebug';
 import { BrowserDevelopment } from './browserDevelopment';
 import { BrowserInspection } from './browserInspection';
+import { BrowserPause } from './browserPause';
 import { attachBrowser, launchBrowser, type BrowserPage } from './browserProcess';
 import { browserProfiles, type BrowserApp, type BrowserMode, type BrowserRequest, type ServedBrowserApp } from './browserTargets';
 import type { ReloadHistory } from './reloadHistory';
@@ -93,7 +94,8 @@ export class BrowserSessions implements vscode.Disposable {
         try {
             const browser = await page;
             void browser.closed.then(() => this.retire(key, session));
-            const channel = await BrowserInspection.open(browser, app.url, active);
+            const pause = appDebugger && new BrowserPause();
+            const channel = await BrowserInspection.open(browser, app.url, active, undefined, pause);
             await verifyRuntime({ channel }, active);
             active.throwIfAborted();
             const runtime = this.connections.addPlatform({ kind: 'browser', browser: {
@@ -101,8 +103,10 @@ export class BrowserSessions implements vscode.Disposable {
                 ...(appDebugger ? { debuggable: true } : {}),
             } }, app.label, { channel });
             session.runtime = runtime.runtime;
-            if (browser.debugPort && runtime.generation !== null) appDebugger?.accepted({
-                port: browser.debugPort, url: app.url, generation: runtime.generation,
+            const generation = runtime.generation;
+            if (browser.debugPort && pause && generation !== null) appDebugger?.accepted({
+                port: browser.debugPort, url: app.url, generation, pause,
+                onPause: paused => this.connections.setBrowserPaused(runtime.runtime, generation, paused),
             });
             return runtime;
         } catch (error) {

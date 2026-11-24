@@ -1,4 +1,5 @@
 export const cdpMessageLimit = 24 * 1024 * 1024;
+export const browserRequestTimeout = 6_000;
 
 export interface BrowserEvent {
     method: string;
@@ -25,8 +26,11 @@ export class BrowserCdp {
         this.closed = new Promise(resolve => { this.ended = resolve; });
     }
 
-    request<T>(method: string, params: object, signal: AbortSignal, sessionId?: string): Promise<T> {
-        const deadline = AbortSignal.any([this.life.signal, signal, AbortSignal.timeout(6_000)]);
+    request<T>(method: string, params: object, signal: AbortSignal, sessionId?: string,
+        timeout: number | null = browserRequestTimeout): Promise<T> {
+        const deadline = AbortSignal.any(timeout === null
+            ? [this.life.signal, signal]
+            : [this.life.signal, signal, AbortSignal.timeout(timeout)]);
         deadline.throwIfAborted();
         const id = ++this.next;
         return new Promise<T>((resolve, reject) => {
