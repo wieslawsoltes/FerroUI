@@ -83,6 +83,44 @@ fn host_with_a_shared_name(setup: impl FnOnce(&mut crate::transform::XamlLanguag
             ));
         }
         setup(mappings);
+    })
+}
+
+#[test]
+fn without_the_check_the_first_assembly_takes_a_shared_name_and_nothing_is_said() {
+    let host = host_with_a_shared_name(|_| {});
+    let node = host.transform_root("<Widget xmlns='shared'/>");
+    assert_eq!(root_type_name(&node), "First.Widget");
+    assert!(host.errors().is_empty());
+}
+
+#[test]
+fn a_name_two_namespaces_share_is_an_error_that_names_both_types() {
+    let host = host_with_a_shared_name(|mappings| mappings.unambiguous_xml_namespaces.push("shared".to_string()));
+    host.transform("<ContentControl xmlns='test' xmlns:s='shared'>\n  <s:Widget/>\n</ContentControl>")
+        .expect("non-fatal");
+    let errors = host.errors();
+    assert_eq!(errors.len(), 1, "{:?}", errors.iter().map(|error| &error.title).collect::<Vec<_>>());
+    for part in ["Widget", "shared", "First.Widget (assembly First)", "Second.Widget (assembly Second)"] {
+        assert!(errors[0].title.contains(part), "{part} in {}", errors[0].title);
+    }
+}
+
+#[test]
+fn a_prefix_for_one_namespace_settles_a_shared_name() {
+    let host = host_with_a_shared_name(|mappings| mappings.unambiguous_xml_namespaces.push("shared".to_string()));
+    let node = host.transform_root("<Widget xmlns='using:Second'/>");
+    assert_eq!(root_type_name(&node), "Second.Widget");
+    assert!(host.errors().is_empty());
+}
+
+#[test]
+fn a_name_only_one_namespace_has_is_not_ambiguous() {
+    let host = host_with_a_shared_name(|mappings| mappings.unambiguous_xml_namespaces.push("test".to_string()));
+    let node = host.transform_root("<Control xmlns='test'/>");
+    assert_eq!(root_type_name(&node), "XamlParserTests.Control");
+    assert!(host.errors().is_empty());
+}
 
 /// A host where the XML namespaces `new` and `old` map to one namespace with the class `Renamed`,
 /// and `old` keeps the name `Former` for it.
@@ -106,23 +144,6 @@ fn host_with_a_renamed_type() -> TestHost {
 }
 
 #[test]
-fn without_the_check_the_first_assembly_takes_a_shared_name_and_nothing_is_said() {
-    let host = host_with_a_shared_name(|_| {});
-    let node = host.transform_root("<Widget xmlns='shared'/>");
-    assert_eq!(root_type_name(&node), "First.Widget");
-    assert!(host.errors().is_empty());
-}
-
-#[test]
-fn a_name_two_namespaces_share_is_an_error_that_names_both_types() {
-    let host = host_with_a_shared_name(|mappings| mappings.unambiguous_xml_namespaces.push("shared".to_string()));
-    host.transform("<ContentControl xmlns='test' xmlns:s='shared'>\n  <s:Widget/>\n</ContentControl>")
-        .expect("non-fatal");
-    let errors = host.errors();
-    assert_eq!(errors.len(), 1, "{:?}", errors.iter().map(|error| &error.title).collect::<Vec<_>>());
-    for part in ["Widget", "shared", "First.Widget (assembly First)", "Second.Widget (assembly Second)"] {
-        assert!(errors[0].title.contains(part), "{part} in {}", errors[0].title);
-
 fn an_xml_namespace_keeps_the_old_name_of_a_renamed_type() {
     for xaml in ["<Former xmlns='old'/>", "<Renamed xmlns='old'/>", "<Renamed xmlns='new'/>"] {
         let host = host_with_a_renamed_type();
@@ -133,20 +154,6 @@ fn an_xml_namespace_keeps_the_old_name_of_a_renamed_type() {
 }
 
 #[test]
-fn a_prefix_for_one_namespace_settles_a_shared_name() {
-    let host = host_with_a_shared_name(|mappings| mappings.unambiguous_xml_namespaces.push("shared".to_string()));
-    let node = host.transform_root("<Widget xmlns='using:Second'/>");
-    assert_eq!(root_type_name(&node), "Second.Widget");
-    assert!(host.errors().is_empty());
-}
-
-#[test]
-fn a_name_only_one_namespace_has_is_not_ambiguous() {
-    let host = host_with_a_shared_name(|mappings| mappings.unambiguous_xml_namespaces.push("test".to_string()));
-    let node = host.transform_root("<Control xmlns='test'/>");
-    assert_eq!(root_type_name(&node), "XamlParserTests.Control");
-    assert!(host.errors().is_empty());
-
 fn the_old_name_of_a_type_is_only_in_the_xml_namespace_that_keeps_it() {
     let host = host_with_a_renamed_type();
     host.transform("<ContentControl xmlns='test' xmlns:n='new'>\n  <n:Former/>\n</ContentControl>")
