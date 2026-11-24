@@ -15,6 +15,7 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
     const point = new vscode.SourceBreakpoint(new vscode.Location(document.uri, position));
     const sessions = new Map<string, vscode.DebugSession>();
     const started = new Set<string>();
+    const verified = new Set<string>();
     const hits = new Map<string, number>();
     const terminated = vscode.debug.onDidTerminateDebugSession(session => { sessions.delete(session.id); });
     const tracker = vscode.debug.registerDebugAdapterTrackerFactory('lldb-dap', {
@@ -23,6 +24,8 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
             sessions.set(session.id, session);
             return { onDidSendMessage(message) {
                 if (message.type === 'response' && message.command === 'attach' && message.success) started.add(session.id);
+                if ((message.command === 'setBreakpoints' && message.body?.breakpoints?.some((point: { verified: boolean }) => point.verified))
+                    || (message.event === 'breakpoint' && message.body?.breakpoint?.verified)) verified.add(session.id);
                 if (message.event === 'stopped' && message.body?.reason === 'breakpoint') hits.set(session.id, message.body.threadId);
             } };
         },
@@ -32,6 +35,7 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         await until(() => Boolean(find()));
         const session = find()!;
         assert.equal(session.configuration.pid, pid, 'LLDB attaches to the process verified by FerroUI.');
+        await until(() => verified.has(session.id));
         return session;
     };
     const readCount = async () => mcp.content<{ result: { text: string }[] }>(await mcp.invoke('ferroui_runtime_query', {
