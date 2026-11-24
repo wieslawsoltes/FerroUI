@@ -10,6 +10,7 @@
 //! question of the accessibility protocol from its wrapper.
 
 use ferroui_base::reactive::Subscription;
+use ferroui_base::platform::IPlatformHandle;
 use ferroui_base::{PixelPoint, PixelRect, Point, Rect, Ref};
 use ferroui_controls::automation::peers::{AutomationControlType, AutomationPeer, InteropAutomationPeer};
 use ferroui_controls::automation::provider::{
@@ -193,6 +194,19 @@ pub(crate) trait IWrapperView {
     /// The view, as the accessibility container of the root wrapper.
     #[cfg(target_os = "ios")]
     fn native_view(&self) -> Option<objc2::rc::Retained<objc2_ui_kit::UIView>>;
+
+    /// The address of the view of a native control the view hosts, when the view of `handle`
+    /// is a subview of it and is not hidden; `None` for a detached or hidden one.
+    fn native_control_view(&self, handle: &dyn IPlatformHandle) -> Option<usize>;
+}
+
+/// An accessibility element of a container: the wrapper of a peer, or the view of a native
+/// control, which is listed in place of its interop peer.
+#[derive(Clone)]
+pub(crate) enum AccessibilityChild {
+    Wrapper(Rc<AutomationPeerWrapper>),
+    /// The view, by its address.
+    NativeView(usize),
 }
 
 /// The setters of the properties of an element, in the order the
@@ -233,7 +247,7 @@ pub(crate) struct AutomationPeerWrapper {
     view: Rc<dyn IWrapperView>,
     peer: Ref<AutomationPeer>,
     parent: Option<Weak<AutomationPeerWrapper>>,
-    children_list: RefCell<Vec<Ref<AutomationPeer>>>,
+    children_list: RefCell<Vec<AccessibilityChild>>,
     /// The wrapper of each child, by the address of its peer, which the
     /// entry keeps alive.
     children_map: RefCell<HashMap<usize, (Ref<AutomationPeer>, Rc<AutomationPeerWrapper>)>>,
@@ -368,13 +382,20 @@ impl AutomationPeerWrapper {
         self.children_list.borrow().len() as isize
     }
 
-    /// The wrapper of the accessibility element at an index. The reference
-    /// fails for an index outside of the list, which would end the
-    /// process from a method UIKit calls; the port answers with nothing.
+    /// The accessibility element at an index. The reference fails for an index outside of the
+    /// list, which would end the process from a method UIKit calls; the port answers with
+    /// nothing.
+    pub(crate) fn get_accessibility_child_at(&self, index: isize) -> Option<AccessibilityChild> {
+        self.children_list.borrow().get(usize::try_from(index).ok()?).cloned()
+    }
+
+    /// The wrapper of the accessibility element at an index; nothing for the view of a native
+    /// control or an index outside of the list.
     pub(crate) fn get_accessibility_element_at(&self, index: isize) -> Option<Rc<AutomationPeerWrapper>> {
-        let children_list = self.children_list.borrow();
-        let child = children_list.get(usize::try_from(index).ok()?)?;
-        self.children_map.borrow().get(&peer_key(child)).map(|(_, wrapper)| wrapper.clone())
+        match self.get_accessibility_child_at(index)? {
+            AccessibilityChild::Wrapper(wrapper) => Some(wrapper),
+            AccessibilityChild::NativeView(_) => None,
+        }
     }
 
     /// The index of the accessibility element of a wrapper, or
@@ -383,8 +404,16 @@ impl AutomationPeerWrapper {
         let Some(wrapper) = element else {
             return NOT_FOUND;
         };
+        self.index_of(|child| matches!(child, AccessibilityChild::Wrapper(child) if child.peer == wrapper.peer))
+    }
 
-        match self.children_list.borrow().iter().position(|child| *child == wrapper.peer) {
+    /// The index of the view of a native control, by its address, or [`NOT_FOUND`].
+    pub(crate) fn get_index_of_native_view(&self, address: usize) -> isize {
+        self.index_of(|child| matches!(child, AccessibilityChild::NativeView(view) if *view == address))
+    }
+
+    fn index_of(&self, found: impl Fn(&AccessibilityChild) -> bool) -> isize {
+        match self.children_list.borrow().iter().position(found) {
             Some(index_of) => index_of as isize,
             None => NOT_FOUND,
         }
@@ -401,8 +430,16 @@ impl AutomationPeerWrapper {
         let mut children = Vec::new();
         let mut retained_children = HashSet::new();
         for child in self.peer.get_children().iter() {
-            // The peer of a native control answers almost no member: it is never wrapped.
-            if child.cast::<InteropAutomationPeer>().is_some() || child.is_offscreen() {
+            // The peer of a native control answers almost no member, so its view is listed
+            // instead of a wrapper.
+            if let Some(interop) = child.cast::<InteropAutomationPeer>() {
+                if let Some(view) = self.view.native_control_view(&*interop.native_control_handle()) {
+                    children.push(AccessibilityChild::NativeView(view));
+                }
+                continue;
+            }
+
+            if child.is_offscreen() {
                 continue;
             }
 
@@ -417,10 +454,10 @@ impl AutomationPeerWrapper {
                 }
             };
 
-            children.push(child.clone());
             retained_children.insert(key);
             wrapper.update_all_properties();
             wrapper.update_traits();
+            children.push(AccessibilityChild::Wrapper(wrapper));
         }
 
         let removed: Vec<Rc<AutomationPeerWrapper>> = {
@@ -653,18 +690,20 @@ impl From<&AutomationPeerWrapper> for Ref<AutomationPeer> {
 }
 
 #[cfg(target_os = "ios")]
-pub(crate) use uikit::{element_object_of, wrapper_of, ViewWrapperHost};
+pub(crate) use uikit::{accessibility_elements_of, index_of_element, object_of_child, ViewWrapperHost};
 
 #[cfg(target_os = "ios")]
 mod uikit {
-    use super::{AccessibilityScrollDirection, AutomationPeerWrapper, IWrapperView, NOT_FOUND};
+    use super::{AccessibilityChild, AccessibilityScrollDirection, AutomationPeerWrapper, IWrapperView, NOT_FOUND};
     use crate::ferro_view::FerroView;
+    use crate::native_control_host_impl::UIViewControlHandle;
+    use ferroui_base::platform::IPlatformHandle;
     use ferroui_base::{PixelPoint, Point};
     use objc2::rc::{Retained, Weak as ObjcWeak};
     use objc2::runtime::AnyObject;
     use objc2::{define_class, msg_send, DefinedClass, MainThreadMarker, MainThreadOnly};
     use objc2_core_foundation::{CGPoint, CGRect, CGSize};
-    use objc2_foundation::{NSInteger, NSObjectProtocol, NSString};
+    use objc2_foundation::{NSArray, NSInteger, NSObjectProtocol, NSString};
     use objc2_ui_kit::{
         UIAccessibilityElement, UIAccessibilityPageScrolledNotification, UIAccessibilityPostNotification,
         UIAccessibilityScrollDirection, UIView,
@@ -697,6 +736,46 @@ mod uikit {
         fn native_view(&self) -> Option<Retained<UIView>> {
             self.view.load().map(Retained::into_super)
         }
+
+        fn native_control_view(&self, handle: &dyn IPlatformHandle) -> Option<usize> {
+            if handle.handle_descriptor() != Some(UIViewControlHandle::UI_VIEW_DESCRIPTOR) || handle.handle() == 0 {
+                return None;
+            }
+            let view = self.view.load()?;
+            let subviews = view.subviews();
+            let subview = subviews.iter().find(|subview| Retained::as_ptr(subview) as isize == handle.handle())?;
+            (!subview.isHidden()).then_some(handle.handle() as usize)
+        }
+    }
+
+    /// The object UIKit is given for an accessibility element.
+    pub(crate) fn object_of_child(child: &AccessibilityChild) -> Option<Retained<AnyObject>> {
+        match child {
+            AccessibilityChild::Wrapper(wrapper) => element_object_of(wrapper),
+            // SAFETY: the address is of a subview of the view, found in its subviews on this
+            // call of UIKit on the main thread, which the view retains.
+            AccessibilityChild::NativeView(view) => unsafe { Retained::retain(*view as *mut AnyObject) },
+        }
+    }
+
+    /// The index of an element UIKit asks for: a wrapper of the port or the view of a native
+    /// control.
+    pub(crate) fn index_of_element(wrapper: &AutomationPeerWrapper, element: &AnyObject) -> NSInteger {
+        match wrapper_of(element) {
+            Some(child) => wrapper.get_index_of_accessibility_element(Some(&child)),
+            None => wrapper.get_index_of_native_view(element as *const AnyObject as usize),
+        }
+    }
+
+    /// The elements of a container, in order: without this list VoiceOver cannot swipe out of
+    /// the view of a native control; the count and the index alone are not enough.
+    pub(crate) fn accessibility_elements_of(wrapper: &AutomationPeerWrapper) -> Retained<NSArray<AnyObject>> {
+        let count = wrapper.accessibility_element_count();
+        let elements: Vec<Retained<AnyObject>> = (0..count)
+            .filter_map(|index| wrapper.get_accessibility_child_at(index))
+            .filter_map(|child| object_of_child(&child))
+            .collect();
+        NSArray::from_retained_slice(&elements)
     }
 
     /// The instance variables of an element: its wrapper, which owns the
@@ -724,16 +803,18 @@ mod uikit {
 
             #[unsafe(method_id(accessibilityElementAtIndex:))]
             fn get_accessibility_element_at(&self, index: NSInteger) -> Option<Retained<AnyObject>> {
-                let child = self.wrapper().and_then(|wrapper| wrapper.get_accessibility_element_at(index));
-                child.and_then(|child| element_object_of(&child))
+                let child = self.wrapper().and_then(|wrapper| wrapper.get_accessibility_child_at(index));
+                child.and_then(|child| object_of_child(&child))
             }
 
             #[unsafe(method(indexOfAccessibilityElement:))]
             fn get_index_of_accessibility_element(&self, element: &AnyObject) -> NSInteger {
-                let Some(wrapper) = self.wrapper() else {
-                    return NOT_FOUND;
-                };
-                wrapper.get_index_of_accessibility_element(wrapper_of(element).as_deref())
+                self.wrapper().map_or(NOT_FOUND, |wrapper| index_of_element(&wrapper, element))
+            }
+
+            #[unsafe(method_id(accessibilityElements))]
+            fn accessibility_elements(&self) -> Option<Retained<NSArray<AnyObject>>> {
+                self.wrapper().map(|wrapper| accessibility_elements_of(&wrapper))
             }
 
             #[unsafe(method(accessibilityContainerType))]
@@ -926,6 +1007,11 @@ mod tests {
         #[cfg(target_os = "ios")]
         fn native_view(&self) -> Option<objc2::rc::Retained<objc2_ui_kit::UIView>> {
             None
+        }
+
+        /// A native control of the tests is attached when its handle is odd.
+        fn native_control_view(&self, handle: &dyn IPlatformHandle) -> Option<usize> {
+            (handle.handle() % 2 == 1).then_some(handle.handle() as usize)
         }
     }
 

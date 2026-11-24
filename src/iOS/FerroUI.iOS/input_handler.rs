@@ -375,8 +375,11 @@ pub fn press_is_text_input(handled: bool, phase: isize, characters: Option<&str>
     !handled && phase == press_phase::BEGAN && characters.is_some_and(|characters| !characters.is_empty())
 }
 
-/// The rate the velocity of inertia scrolling falls by at every frame.
+/// The rate the velocity of inertia scrolling falls by at every 60 Hz frame.
 pub const DECELERATION_RATE: f64 = 0.95;
+
+/// The most 60 Hz frames one tick of inertia covers, so that a stall makes no big jump.
+const MAX_FRAMES_PER_TICK: f64 = 4.0;
 
 /// The wheel delta of active scrolling at a velocity (points per second).
 /// A much more sensitive scaling than the one of inertia, to match AppKit:
@@ -393,6 +396,8 @@ pub struct MomentumScrolling {
     cached_scroll_location: Option<Point>,
     momentum_velocity_x: f64,
     momentum_velocity_y: f64,
+    /// The target timestamp of the last tick of inertia, 0 before the first.
+    last_timestamp: f64,
 }
 
 impl MomentumScrolling {
@@ -413,6 +418,15 @@ impl MomentumScrolling {
         let scale_factor = 800.0;
         self.momentum_velocity_x = velocity.x / scale_factor;
         self.momentum_velocity_y = velocity.y / scale_factor;
+        self.last_timestamp = 0.0;
+    }
+
+    /// The 60 Hz frames since the last tick, for a tick of a display link with `timestamp` and
+    /// `target_timestamp` (the first tick counts from `timestamp`), at most four.
+    pub fn frames_until(&mut self, timestamp: f64, target_timestamp: f64) -> f64 {
+        let since = if self.last_timestamp > 0.0 { self.last_timestamp } else { timestamp };
+        self.last_timestamp = target_timestamp;
+        ((target_timestamp - since) * 60.0).clamp(0.0, MAX_FRAMES_PER_TICK)
     }
 
     /// Forgets the velocity and the location.
@@ -420,23 +434,27 @@ impl MomentumScrolling {
         self.momentum_velocity_x = 0.0;
         self.momentum_velocity_y = 0.0;
         self.cached_scroll_location = None;
+        self.last_timestamp = 0.0;
     }
 
-    /// A frame of inertia: the location and the delta of the wheel event
-    /// to send, or nothing when the inertia is over (the state is then
-    /// stopped).
-    pub fn update(&mut self) -> Option<(Point, Vector)> {
-        self.momentum_velocity_x *= DECELERATION_RATE;
-        self.momentum_velocity_y *= DECELERATION_RATE;
+    /// A tick of inertia that covers `frames` 60 Hz frames: the location and the delta of the
+    /// wheel event to send, or nothing when the inertia is over (the state is then stopped). The
+    /// deceleration rate and the velocity are per 60 Hz frame, so a display link at a higher
+    /// rate scrolls as far in the same time.
+    pub fn update(&mut self, frames: f64) -> Option<(Point, Vector)> {
+        let deceleration = DECELERATION_RATE.powf(frames);
+        // The distance the steps of one frame each would have covered.
+        let distance = DECELERATION_RATE * (1.0 - deceleration) / (1.0 - DECELERATION_RATE);
+        let delta = Vector::new(self.momentum_velocity_x * distance, self.momentum_velocity_y * distance);
+        self.momentum_velocity_x *= deceleration;
+        self.momentum_velocity_y *= deceleration;
 
         let current_magnitude = (self.momentum_velocity_x * self.momentum_velocity_x
             + self.momentum_velocity_y * self.momentum_velocity_y)
             .sqrt();
 
         match self.cached_scroll_location {
-            Some(location) if current_magnitude >= 0.0001 => {
-                Some((location, Vector::new(self.momentum_velocity_x, self.momentum_velocity_y)))
-            }
+            Some(location) if current_magnitude >= 0.0001 => Some((location, delta)),
             _ => {
                 self.stop();
                 None
@@ -461,9 +479,10 @@ mod uikit {
         IInputDevice, IntermediatePoints, KeyboardDevice, MouseDevice, PenDevice, TouchDevice,
     };
     use ferroui_controls::platform::ITopLevelImpl;
+    use crate::display_link_timer::DisplayLinkTimer;
     use objc2::rc::{Retained, Weak};
-    use objc2::{sel, MainThreadOnly, Message};
-    use objc2_foundation::{NSProcessInfo, NSRunLoop, NSRunLoopCommonModes, NSSet};
+    use objc2::{define_class, msg_send, sel, MainThreadMarker, MainThreadOnly, Message};
+    use objc2_foundation::{NSObject, NSObjectProtocol, NSProcessInfo, NSRunLoop, NSRunLoopCommonModes, NSSet};
     use objc2_quartz_core::CADisplayLink;
     use objc2_ui_kit::{
         UIEvent, UIEventButtonMask, UIPanGestureRecognizer, UIPress, UIPressesEvent, UITouch,
@@ -476,6 +495,48 @@ mod uikit {
         /// The identifier of the next touch, across the views of the
         /// application.
         static NEXT_TOUCH_POINT_ID: Cell<i64> = const { Cell::new(1) };
+
+        /// The display link that keeps touches at the display rate, and the views that hold it.
+        static TOUCH_DISPLAY_LINK: RefCell<TouchDisplayLink> = const {
+            RefCell::new(TouchDisplayLink { link: None, touching_views: 0 })
+        };
+    }
+
+    struct TouchDisplayLink {
+        link: Option<Retained<CADisplayLink>>,
+        touching_views: u32,
+    }
+
+    define_class!(
+        /// The target of the display link of touches, which only has to tick.
+        #[unsafe(super(NSObject))]
+        #[thread_kind = MainThreadOnly]
+        #[name = "FerroTouchDisplayLinkTarget"]
+        struct TouchDisplayLinkTarget;
+
+        impl TouchDisplayLinkTarget {
+            #[unsafe(method(onTouchFrame:))]
+            fn on_touch_frame(&self, _link: &CADisplayLink) {}
+        }
+
+        unsafe impl NSObjectProtocol for TouchDisplayLinkTarget {}
+    );
+
+    /// A display link of the main thread at the display rate, with a target that does nothing:
+    /// UIKit then delivers touches at that rate.
+    fn touch_display_link(mtm: MainThreadMarker) -> Retained<CADisplayLink> {
+        // SAFETY: `init` of NSObject on an object that was just allocated.
+        let target: Retained<TouchDisplayLinkTarget> = unsafe { msg_send![TouchDisplayLinkTarget::alloc(mtm), init] };
+        // SAFETY: the target responds to the selector (`onTouchFrame:` above takes the link, the
+        // one argument a display link passes) and is retained by the link until it is
+        // invalidated. The link is created, added and invalidated on the main thread; the mode
+        // is a constant of Foundation.
+        unsafe {
+            let link = CADisplayLink::displayLinkWithTarget_selector(&target, sel!(onTouchFrame:));
+            DisplayLinkTimer::set_preferred_frame_rate_range(&link);
+            link.addToRunLoop_forMode(&NSRunLoop::mainRunLoop(), NSRunLoopCommonModes);
+            link
+        }
     }
 
     const _: () = {
@@ -533,9 +594,14 @@ mod uikit {
         touch_device: Rc<TouchDevice>,
         mouse_device: Rc<MouseDevice>,
         pen_device: Rc<PenDevice>,
-        /// The identifiers of the touches that are down, by the address of
+        /// The touches that are down and their identifiers, by the address of
         /// the touch object, which UIKit keeps for the life of a touch.
-        known_touches: RefCell<HashMap<usize, i64>>,
+        known_touches: RefCell<HashMap<usize, (Retained<UITouch>, i64)>>,
+        /// Counts the calls of `reset_touches`, so that a loop over touches stops
+        /// once a handler removed the view.
+        reset_count: Cell<u64>,
+        /// This view holds the display link that keeps touches at the display rate.
+        holds_touch_display_link: Cell<bool>,
         momentum: Cell<MomentumScrolling>,
         momentum_display_link: RefCell<Option<Retained<CADisplayLink>>>,
     }
@@ -549,6 +615,8 @@ mod uikit {
                 mouse_device: MouseDevice::new(),
                 pen_device: PenDevice::new(true),
                 known_touches: RefCell::new(HashMap::new()),
+                reset_count: Cell::new(0),
+                holds_touch_display_link: Cell::new(false),
                 momentum: Cell::new(MomentumScrolling::default()),
                 momentum_display_link: RefCell::new(None),
             }
@@ -567,7 +635,13 @@ mod uikit {
                 return;
             };
 
+            let reset_count = self.reset_count.get();
             for t in touches.iter() {
+                // Stop once a handler removed the view: the remaining touches were cancelled.
+                if reset_count != self.reset_count.get() {
+                    break;
+                }
+
                 let Some(kind) = device_kind(t.r#type().0) else {
                     // Ignore indirect input, like the trackpad of a remote
                     // controller, which is handled with gestures.
@@ -575,19 +649,21 @@ mod uikit {
                 };
 
                 let key = Retained::as_ptr(&t) as usize;
-                let id = *self.known_touches.borrow_mut().entry(key).or_insert_with(|| {
-                    NEXT_TOUCH_POINT_ID.with(|next| {
-                        let id = next.get();
-                        next.set(id + 1);
-                        id
+                let id = self
+                    .known_touches
+                    .borrow_mut()
+                    .entry(key)
+                    .or_insert_with(|| {
+                        let id = NEXT_TOUCH_POINT_ID.with(|next| {
+                            let id = next.get();
+                            next.set(id + 1);
+                            id
+                        });
+                        (t.clone(), id)
                     })
-                });
+                    .1;
 
-                let device: Rc<dyn IInputDevice> = match kind {
-                    TouchDeviceKind::Pen => self.pen_device.clone(),
-                    TouchDeviceKind::Mouse => self.mouse_device.clone(),
-                    TouchDeviceKind::Touch => self.touch_device.clone(),
-                };
+                let device = self.device(kind);
 
                 let modifiers = convert_modifier_keys(evt.map(|evt| evt.modifierFlags().0));
                 let is_right_click = evt.is_some_and(|evt| evt.buttonMask().contains(UIEventButtonMask::Secondary));
@@ -631,15 +707,102 @@ mod uikit {
                     ev.set_intermediate_points(Some(intermediate_points));
                 }
 
+                // Forgotten first: the handlers may remove the view.
+                if is_final_phase(phase) {
+                    self.known_touches.borrow_mut().remove(&key);
+                }
+
                 let args: Rc<dyn IRawInputEventArgs> = Rc::new(ev);
                 if let Some(input) = self.tl.input() {
                     input(args);
                 }
+            }
 
-                if is_final_phase(phase) {
-                    self.known_touches.borrow_mut().remove(&key);
+            self.update_touch_display_link(&view);
+        }
+
+        fn device(&self, kind: TouchDeviceKind) -> Rc<dyn IInputDevice> {
+            match kind {
+                TouchDeviceKind::Pen => self.pen_device.clone(),
+                TouchDeviceKind::Mouse => self.mouse_device.clone(),
+                TouchDeviceKind::Touch => self.touch_device.clone(),
+            }
+        }
+
+        /// Cancels the touches in progress, for when the view leaves its window or is disposed:
+        /// UIKit does not report the end of those touches then.
+        pub(crate) fn reset_touches(&self) {
+            self.reset_count.set(self.reset_count.get() + 1);
+            // Taken out, as the handlers may remove the view again.
+            let touches: Vec<_> = self.known_touches.borrow_mut().drain().map(|(_, touch)| touch).collect();
+            let view = self.view.load();
+            if let Some(view) = &view {
+                for (touch, id) in touches {
+                    let kind = device_kind(touch.r#type().0).unwrap_or(TouchDeviceKind::Touch);
+                    let event_type = match kind {
+                        TouchDeviceKind::Touch => RawPointerEventType::TouchCancel,
+                        _ => RawPointerEventType::LeaveWindow,
+                    };
+                    let mut point = RawPointerPoint::new();
+                    point.position = to_point(touch.locationInView(Some(view)));
+                    let ev = RawTouchEventArgs::with_point(
+                        self.device(kind),
+                        0,
+                        view.input_root(),
+                        event_type,
+                        point,
+                        RawInputModifiers::NONE,
+                        id,
+                    );
+                    self.invoke_input(Rc::new(ev));
                 }
             }
+            self.release_touch_display_link();
+        }
+
+        /// UIKit delivers touches at the display link rate of the main thread, which stays at
+        /// 60 Hz on ProMotion displays unless a display link of the main thread asks for more.
+        /// One link for the process is kept while any view that can go faster has touches down.
+        fn update_touch_display_link(&self, view: &FerroView) {
+            let holds = !self.known_touches.borrow().is_empty()
+                && (self.holds_touch_display_link.get() || {
+                    let screen = view.window().and_then(|window| window.windowScene()).map(|scene| scene.screen());
+                    DisplayLinkTimer::can_exceed_60_hz(view.mtm(), screen.as_deref())
+                });
+            self.set_holds_touch_display_link(holds, Some(view.mtm()));
+        }
+
+        fn release_touch_display_link(&self) {
+            match self.view.load() {
+                Some(view) => self.update_touch_display_link(&view),
+                None => self.set_holds_touch_display_link(false, None),
+            }
+        }
+
+        /// Takes or gives back this view's share of the display link of touches; a link is
+        /// only created with a marker of the main thread.
+        fn set_holds_touch_display_link(&self, holds: bool, mtm: Option<MainThreadMarker>) {
+            if holds == self.holds_touch_display_link.get() {
+                return;
+            }
+            self.holds_touch_display_link.set(holds);
+            TOUCH_DISPLAY_LINK.with(|shared| {
+                let mut shared = shared.borrow_mut();
+                if holds {
+                    shared.touching_views += 1;
+                    if shared.link.is_none() {
+                        shared.link = mtm.map(touch_display_link);
+                    }
+                } else {
+                    shared.touching_views -= 1;
+                    if shared.touching_views == 0 {
+                        if let Some(link) = shared.link.take() {
+                            // Invalidating removes the link from all run loops.
+                            link.invalidate();
+                        }
+                    }
+                }
+            });
         }
 
         /// Handles the presses of a `pressesBegan:withEvent:` and of the
@@ -772,6 +935,7 @@ mod uikit {
             // invalidated there; the mode is a constant of Foundation.
             let link = unsafe {
                 let link = CADisplayLink::displayLinkWithTarget_selector(view, sel!(ferroUpdateInertiaScrolling:));
+                DisplayLinkTimer::set_preferred_frame_rate_range(&link);
                 link.addToRunLoop_forMode(&NSRunLoop::mainRunLoop(), NSRunLoopCommonModes);
                 link
             };
@@ -797,9 +961,10 @@ mod uikit {
         }
 
         /// A frame of inertia scrolling, from the display link.
-        pub(crate) fn update_inertia_scrolling(&self) {
+        pub(crate) fn update_inertia_scrolling(&self, link: &CADisplayLink) {
             let mut momentum = self.momentum.get();
-            let event = momentum.update();
+            let frames = momentum.frames_until(link.timestamp(), link.targetTimestamp());
+            let event = momentum.update(frames);
             self.momentum.set(momentum);
 
             match (event, self.view.load()) {
@@ -1011,22 +1176,22 @@ mod tests {
         let mut momentum = MomentumScrolling::default();
         // No inertia without a location.
         momentum.start_inertia(Point::new(800.0, 0.0));
-        assert_eq!(None, momentum.update());
+        assert_eq!(None, momentum.update(1.0));
 
         momentum.begin(Point::new(10.0, 20.0));
         assert_eq!(Some(Point::new(10.0, 20.0)), momentum.cached_scroll_location());
         momentum.start_inertia(Point::new(800.0, -1600.0));
-        let (location, delta) = momentum.update().unwrap();
+        let (location, delta) = momentum.update(1.0).unwrap();
         assert_eq!(Point::new(10.0, 20.0), location);
-        assert_eq!(Vector::new(0.95, -1.9), delta);
-        let (location, delta) = momentum.update().unwrap();
+        assert!((delta.x - 0.95).abs() < 1e-12 && (delta.y + 1.9).abs() < 1e-12);
+        let (location, delta) = momentum.update(1.0).unwrap();
         assert_eq!(Point::new(10.0, 20.0), location);
         assert!((delta.x - 0.9025).abs() < 1e-12 && (delta.y + 1.805).abs() < 1e-12);
 
         // The velocity falls below the threshold after a number of
         // frames, and the state is then as it was at the start.
         let mut frames = 2;
-        while momentum.update().is_some() {
+        while momentum.update(1.0).is_some() {
             frames += 1;
             assert!(frames < 1000);
         }
@@ -1042,6 +1207,30 @@ mod tests {
         momentum.begin(Point::new(5.0, 6.0));
         assert_eq!(Some(Point::new(5.0, 6.0)), momentum.cached_scroll_location());
         // The velocity of the last scroll is gone.
-        assert_eq!(None, momentum.update());
+        assert_eq!(None, momentum.update(1.0));
+    }
+
+    #[test]
+    fn inertia_covers_the_same_distance_at_any_frame_rate() {
+        let mut at_60 = MomentumScrolling::default();
+        at_60.begin(Point::new(0.0, 0.0));
+        at_60.start_inertia(Point::new(800.0, 0.0));
+        let mut at_120 = at_60;
+
+        let two_frames: f64 = (0..2).map(|_| at_60.update(1.0).unwrap().1.x).sum();
+        let four_halves: f64 = (0..4).map(|_| at_120.update(0.5).unwrap().1.x).sum();
+        assert!((two_frames - four_halves).abs() < 1e-12, "{two_frames} {four_halves}");
+        assert!((at_60.momentum_velocity_x - at_120.momentum_velocity_x).abs() < 1e-12);
+    }
+
+    #[test]
+    fn ticks_count_frames_from_the_last_target_and_stalls_make_no_jump() {
+        let mut momentum = MomentumScrolling::default();
+        // The first tick counts from the timestamp of the link.
+        assert!((momentum.frames_until(10.0, 10.0 + 1.0 / 120.0) - 0.5).abs() < 1e-9);
+        assert!((momentum.frames_until(10.5, 10.0 + 2.0 / 120.0) - 0.5).abs() < 1e-9);
+        assert_eq!(MAX_FRAMES_PER_TICK, momentum.frames_until(11.0, 12.0));
+        momentum.stop();
+        assert_eq!(MomentumScrolling::default(), momentum);
     }
 }
