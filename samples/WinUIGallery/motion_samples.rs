@@ -4,19 +4,22 @@ use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::immutable::ImmutableSolidColorBrush;
-use ferroui_base::media::{Colors, IImage};
+use ferroui_base::media::{Brushes, Colors, IImage};
 use ferroui_base::styling::ThemeVariant;
-use ferroui_base::{BoxedValue, FerroObject, Ref, Vector3D};
+use ferroui_base::{BoxedValue, FerroObject, Ref, Thickness, Vector3D};
 use ferroui_controls::animation::{
     BackEase, BounceEase, CircleEase, CubicEase, DoubleAnimation, EasingFunctionBase, EasingMode, ElasticEase,
     ExponentialEase, PowerEase, QuadraticEase, QuarticEase, QuinticEase, SineEase, Storyboard,
 };
 use ferroui_base::media::TranslateTransform;
 use ferroui_controls::presenters::ContentPresenter;
-use ferroui_controls::primitives::SelectingItemsControl;
+use ferroui_controls::primitives::{Popup, SelectingItemsControl};
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Button, ComboBox, Control, Grid, Image, ItemsSource, ListView, NumberBox, RadioButton, ThemeVariantScope};
+use ferroui_controls::{
+    Button, ComboBox, Control, Grid, Image, ItemsSource, ListView, NumberBox, RadioButton, StackPanel, ThemeVariantScope,
+};
 use ferroui_controls_motion::ImplicitTransitions;
+use std::cell::Cell;
 use std::rc::Rc;
 
 /// The image both examples of the ParallaxView page move.
@@ -27,6 +30,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
         "EasingFunction" => wire_easing_functions(root),
         "ParallaxView" => wire_parallax_view(root),
         "ImplicitTransition" => wire_implicit_transitions(root),
+        "ThemeTransition" => wire_theme_transitions(root),
         _ => {}
     }
 }
@@ -100,6 +104,62 @@ fn wire_implicit_transitions(root: &Ref<Control>) {
         let is_dark = scope.requested_theme_variant().is_some_and(|theme| theme == ThemeVariant::dark());
         scope.set_requested_theme_variant(Some(if is_dark { ThemeVariant::light() } else { ThemeVariant::dark() }));
     });
+}
+
+fn list_item(text: String) -> Option<BoxedValue> {
+    Some(Rc::new(text) as BoxedValue)
+}
+
+/// `button` runs `apply` with the page.
+fn on_press(root: &Ref<Control>, button: &str, apply: impl Fn(&Ref<Control>) + 'static) {
+    let weak = root.downgrade();
+    root.get_control::<Button>(button).click(move |_, _| {
+        if let Some(root) = weak.upgrade() {
+            apply(&root);
+        }
+    });
+}
+
+/// The handlers of the five examples of the ThemeTransition page.
+fn wire_theme_transitions(root: &Ref<Control>) {
+    on_press(root, "EntranceButton", |root| {
+        let panel = root.get_control::<StackPanel>("EntranceStackPanel");
+        panel.children().clear();
+        for _ in 0..5 {
+            let rectangle = Rectangle::new();
+            rectangle.set_width(50.0);
+            rectangle.set_height(50.0);
+            rectangle.set_margin(Thickness::uniform(5.0));
+            rectangle.set_fill(Some(Brushes::light_blue()));
+            panel.children().add(rectangle.upcast::<Control>());
+        }
+    });
+    on_press(root, "RepositionButton", |root| {
+        let left = root.get_control::<Rectangle>("LeftRectangle");
+        left.set_width(if left.width() == 100.0 { 200.0 } else { 100.0 });
+    });
+    let refresh = |root: &Ref<Control>| {
+        let items = root.get_control::<ListView>("ContentList").items();
+        items.clear();
+        for index in 1..=4 {
+            items.add(list_item(format!("Item {index}")));
+        }
+    };
+    refresh(root);
+    on_press(root, "ContentButton", refresh);
+    let next = Rc::new(Cell::new(1));
+    on_press(root, "AddItemButton", move |root| {
+        let value = next.replace(next.get() + 1);
+        root.get_control::<ListView>("AddDeleteList").items().add(list_item(format!("Item {value}")));
+    });
+    on_press(root, "RemoveItemButton", |root| {
+        let items = root.get_control::<ListView>("AddDeleteList").items();
+        if items.count() > 0 {
+            items.remove_at(items.count() - 1);
+        }
+    });
+    on_press(root, "OpenPopupButton", |root| root.get_control::<Popup>("ExamplePopup").set_is_open(true));
+    on_press(root, "ClosePopupButton", |root| root.get_control::<Popup>("ExamplePopup").set_is_open(false));
 }
 
 /// The storyboard of an example, with its animation aimed at the transform of the rectangle.

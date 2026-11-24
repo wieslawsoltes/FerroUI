@@ -1,0 +1,84 @@
+<!-- Ported from the five examples of the pinned ThemeTransition page of WinUI Gallery (14061eea)
+     and their sample text in the catalog; see ../NOTICE.md. The transitions are the WinUI names on
+     ferroui-controls-motion and run as composition animations. UIElement.Transitions of the second
+     example is written ThemeTransitions.Transitions (docs/porting/DEVIATIONS.md). -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Use the EntranceThemeTransition when adding items to your page." FontSize="18" TextWrapping="Wrap" />
+    <Button x:Name="EntranceButton" Content="Add rectangles" AutomationProperties.Name="Add rectangles" />
+    <StackPanel x:Name="EntranceStackPanel" Orientation="Horizontal" MinHeight="60">
+      <StackPanel.ChildrenTransitions>
+        <TransitionCollection>
+          <EntranceThemeTransition IsStaggeringEnabled="True" />
+        </TransitionCollection>
+      </StackPanel.ChildrenTransitions>
+      <Rectangle Width="50" Height="50" Margin="5" Fill="LightBlue" />
+      <Rectangle Width="50" Height="50" Margin="5" Fill="LightBlue" />
+      <Rectangle Width="50" Height="50" Margin="5" Fill="LightBlue" />
+      <Rectangle Width="50" Height="50" Margin="5" Fill="LightBlue" />
+      <Rectangle Width="50" Height="50" Margin="5" Fill="LightBlue" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Use the RepositionThemeTransition to react to layout changes." FontSize="18" TextWrapping="Wrap" />
+    <Button x:Name="RepositionButton" Content="Resize the left rectangle" AutomationProperties.Name="Resize the left rectangle" />
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Rectangle x:Name="LeftRectangle" Width="100" Height="50" Fill="LightBlue" />
+      <Rectangle x:Name="RightRectangle" Width="100" Height="50" Fill="Blue">
+        <ThemeTransitions.Transitions>
+          <TransitionCollection>
+            <RepositionThemeTransition />
+          </TransitionCollection>
+        </ThemeTransitions.Transitions>
+      </Rectangle>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Use ContentThemeTransition to animate content refreshes." FontSize="18" TextWrapping="Wrap" />
+    <Button x:Name="ContentButton" Content="Refresh" AutomationProperties.Name="Refresh the list" />
+    <ListView x:Name="ContentList" Height="160" AutomationProperties.Name="Refreshed items">
+      <ListView.ItemContainerTransitions>
+        <TransitionCollection>
+          <ContentThemeTransition />
+        </TransitionCollection>
+      </ListView.ItemContainerTransitions>
+    </ListView>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Use AddDeleteThemeTransition to animate adding and removing items from a collection." FontSize="18" TextWrapping="Wrap" />
+    <StackPanel Orientation="Horizontal" Spacing="8">
+      <Button x:Name="AddItemButton" Content="Add item" AutomationProperties.Name="Add item" />
+      <Button x:Name="RemoveItemButton" Content="Remove item" AutomationProperties.Name="Remove item" />
+    </StackPanel>
+    <ListView x:Name="AddDeleteList" Height="160" AutomationProperties.Name="Added items">
+      <ListView.ItemContainerTransitions>
+        <TransitionCollection>
+          <AddDeleteThemeTransition />
+        </TransitionCollection>
+      </ListView.ItemContainerTransitions>
+    </ListView>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Use PopupThemeTransition to animate opening and closing a popup." FontSize="18" TextWrapping="Wrap" />
+    <Button x:Name="OpenPopupButton" Content="Open popup" AutomationProperties.Name="Open popup" />
+    <Popup x:Name="ExamplePopup" PlacementTarget="{Binding ElementName=OpenPopupButton}">
+      <Popup.ChildTransitions>
+        <TransitionCollection>
+          <PopupThemeTransition />
+        </TransitionCollection>
+      </Popup.ChildTransitions>
+      <Border Background="{DynamicResource FlyoutBackgroundThemeBrush}" BorderThickness="2"
+              BorderBrush="{DynamicResource SystemControlForegroundChromeGrayBrush}">
+        <StackPanel Margin="10" Spacing="8">
+          <TextBlock Text="This is a popup using PopupThemeTransition" />
+          <Button x:Name="ClosePopupButton" Content="Close Popup" AutomationProperties.Name="Close popup" />
+        </StackPanel>
+      </Border>
+    </Popup>
+  </StackPanel>
+</StackPanel>

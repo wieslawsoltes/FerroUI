@@ -1,8 +1,12 @@
 use ferroui_base::numerics::Vector3;
 use ferroui_base::{Ref, Vector3D};
 use ferroui_controls::testing::{TestServices, UnitTestApplication};
-use ferroui_controls::{Control, StackPanel};
-use ferroui_controls_motion::{ImplicitTransitions, ParallaxSourceOffsetKind, ParallaxView};
+use ferroui_controls::primitives::Popup;
+use ferroui_controls::{Control, ItemsControl, StackPanel};
+use ferroui_controls_motion::{
+    AddDeleteThemeTransition, ContentThemeTransition, EntranceThemeTransition, ImplicitTransitions,
+    ParallaxSourceOffsetKind, ParallaxView, PopupThemeTransition, RepositionThemeTransition, ThemeTransitions,
+};
 use ferroui_markup_xaml_loader::FerroRuntimeXamlLoader;
 use std::time::Duration;
 
@@ -32,6 +36,28 @@ fn assert_page(root: &Ref<StackPanel>) {
     assert_eq!(parallax.vertical_shift(), 100.0);
     assert_eq!(parallax.horizontal_source_offset_kind(), ParallaxSourceOffsetKind::Absolute);
     assert!(parallax.child().is_some());
+
+    let children = named(root, "ThemeChildren").cast::<StackPanel>().expect("a stack panel");
+    let transitions = ThemeTransitions::get_children_transitions(&children).expect("the children transitions");
+    assert_eq!(transitions.count(), 2);
+    let entrance = transitions.get(0).cast::<EntranceThemeTransition>().expect("an entrance transition");
+    assert!(entrance.is_staggering_enabled());
+    assert_eq!(entrance.from_vertical_offset(), 12.0);
+    assert!(transitions.get(1).cast::<AddDeleteThemeTransition>().is_some());
+
+    let own = ThemeTransitions::get_transitions(&named(root, "ThemeOwn")).expect("the transitions of the element");
+    let reposition = own.get(0).cast::<RepositionThemeTransition>().expect("a reposition transition");
+    assert!(!reposition.is_staggering_enabled());
+
+    let items = named(root, "ThemeItems").cast::<ItemsControl>().expect("an items control");
+    let containers = ThemeTransitions::get_item_container_transitions(&items).expect("the container transitions");
+    let content = containers.get(0).cast::<ContentThemeTransition>().expect("a content transition");
+    assert_eq!(content.vertical_offset(), 10.0);
+
+    let popup = named(root, "ThemePopup").cast::<Popup>().expect("a popup");
+    let child = ThemeTransitions::get_child_transitions(&popup).expect("the child transitions");
+    let opening = child.get(0).cast::<PopupThemeTransition>().expect("a popup transition");
+    assert_eq!(opening.from_vertical_offset(), 16.0);
 }
 
 #[test]

@@ -15,10 +15,11 @@ use ferroui_base::styling::ThemeVariant;
 use ferroui_base::{Ref, Vector3D};
 use ferroui_controls::animation::{DoubleAnimation, EasingMode, ElasticEase, ExponentialEase, Storyboard};
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Button, ComboBox, Control, Grid, ListView, NumberBox, RadioButton};
+use ferroui_controls::primitives::Popup;
+use ferroui_controls::{Button, ComboBox, Control, Grid, ListView, NumberBox, RadioButton, StackPanel};
 use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::ThemeVariantScope;
-use ferroui_controls_motion::{ImplicitTransitions, ParallaxView};
+use ferroui_controls_motion::{ImplicitTransitions, ParallaxView, ThemeTransitions};
 
 fn page() -> Ref<Control> {
     examples::create(examples::find("EasingFunction").unwrap()).unwrap()
@@ -164,4 +165,37 @@ fn the_background_examples_change_their_brush_and_their_theme() {
     assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::light()));
     press(&root, "ThemeButton");
     assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::dark()));
+}
+
+#[test]
+fn each_theme_transition_example_has_its_collection_and_its_handlers() {
+    let _application = start();
+    let root = examples::create(examples::find("ThemeTransition").unwrap()).unwrap();
+
+    let entrance = root.get_control::<StackPanel>("EntranceStackPanel");
+    assert_eq!(ThemeTransitions::get_children_transitions(&entrance).map(|items| items.count()), Some(1));
+    press(&root, "EntranceButton");
+    assert_eq!(entrance.children().count(), 5);
+
+    let right = root.get_control::<Rectangle>("RightRectangle");
+    assert_eq!(ThemeTransitions::get_transitions(&right).map(|items| items.count()), Some(1));
+    let left = root.get_control::<Rectangle>("LeftRectangle");
+    press(&root, "RepositionButton");
+    assert_eq!(left.width(), 200.0);
+
+    let content = root.get_control::<ListView>("ContentList");
+    assert_eq!(ThemeTransitions::get_item_container_transitions(&content).map(|items| items.count()), Some(1));
+    assert_eq!(content.items().count(), 4);
+    press(&root, "ContentButton");
+    assert_eq!(content.items().count(), 4);
+
+    let added = root.get_control::<ListView>("AddDeleteList");
+    assert_eq!(ThemeTransitions::get_item_container_transitions(&added).map(|items| items.count()), Some(1));
+    press(&root, "AddItemButton");
+    press(&root, "AddItemButton");
+    press(&root, "RemoveItemButton");
+    assert_eq!(added.items().count(), 1);
+
+    let popup = root.get_control::<Popup>("ExamplePopup");
+    assert_eq!(ThemeTransitions::get_child_transitions(&popup).map(|items| items.count()), Some(1));
 }

@@ -905,6 +905,113 @@
         }
       ]
     },
+    "ThemeTransition": {
+      "status": "partial",
+      "implementation": [
+        "samples/WinUIGallery/Pages/ThemeTransition.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/motion_samples.rs",
+        "src/FerroUI.Controls.Motion/theme_transitions.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/motion_samples_tests.rs",
+          "name": "each_theme_transition_example_has_its_collection_and_its_handlers"
+        }
+      ],
+      "notes": "Four of the five source examples are ported on the composition API. The popup example animates the opening only: the popup root is released when the popup closes. UIElement.Transitions of the second example is written ThemeTransitions.Transitions, and the timings are this port's, because WinUI reads them from the system theme (docs/porting/DEVIATIONS.md, Theme transitions). The markup follows the catalog's sample text.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/ThemeTransition/EntrancethemetransitionAddingItemsYour.txt",
+          "source_sha256": "3d501fc5db09852b3d7d93224cd851e7c881955c1b43654e231f4a311f51ed75",
+          "status": "ported",
+          "target_control": "Example1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_theme_transition_example_has_its_collection_and_its_handlers"
+            }
+          ],
+          "notes": "EntranceThemeTransition with IsStaggeringEnabled in ChildrenTransitions; the button adds the rectangles again."
+        },
+        {
+          "source": "WinUIGallery/Samples/ThemeTransition/RepositionthemetransitionReactLayoutChanges.txt",
+          "source_sha256": "0ffb4a9e1d6a36651bedd91f1c33e20d24fd52933a3169312e965c5a234d59a7",
+          "status": "ported",
+          "target_control": "Example2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_theme_transition_example_has_its_collection_and_its_handlers"
+            }
+          ],
+          "notes": "RepositionThemeTransition through ThemeTransitions.Transitions; the button resizes the rectangle beside it."
+        },
+        {
+          "source": "WinUIGallery/Samples/ThemeTransition/ContentthemetransitionAnimateContentRefreshes.txt",
+          "source_sha256": "347b00c7fe10c4bb3afa0ecff7e95f2ace7ed44071aea97bd405755978cc7ba6",
+          "status": "ported",
+          "target_control": "Example3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_theme_transition_example_has_its_collection_and_its_handlers"
+            }
+          ],
+          "notes": "ContentThemeTransition in ItemContainerTransitions; the button refreshes the items."
+        },
+        {
+          "source": "WinUIGallery/Samples/ThemeTransition/AdddeletethemetransitionAnimateAddingRemoving.txt",
+          "source_sha256": "4d53c55b4b372a36792a4c7e1fe7d0946bcd1ae0f6b6e50b7c978cd3764643bb",
+          "status": "ported",
+          "target_control": "Example4",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_theme_transition_example_has_its_collection_and_its_handlers"
+            }
+          ],
+          "notes": "AddDeleteThemeTransition in ItemContainerTransitions: items fade in and out and the others slide; the scale of WinUI is left out."
+        },
+        {
+          "source": "WinUIGallery/Samples/ThemeTransition/PopupthemetransitionAnimateOpeningClosing.txt",
+          "source_sha256": "69c5f27a3a8fb5b08763778b8e747a06120697d202851b0a3a95130006e8db81",
+          "status": "partial",
+          "target_control": "Example5",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/motion_samples_tests.rs",
+              "name": "each_theme_transition_example_has_its_collection_and_its_handlers"
+            }
+          ],
+          "notes": "PopupThemeTransition in ChildTransitions animates the opening. The closing is not animated."
+        }
+      ]
+    },
     "Expander": {
       "status": "ported",
       "implementation": [
