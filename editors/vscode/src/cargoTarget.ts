@@ -73,7 +73,9 @@ export interface CargoSelection {
     features?: string[];
 }
 
-export type DiscoveredCargoTarget = CargoTarget & { kind: 'bin' | 'example' };
+type CargoTargetKind = 'bin' | 'example' | 'cdylib';
+export type DiscoveredCargoTarget = CargoTarget & { kind: CargoTargetKind };
+interface TargetResolution { signal?: AbortSignal; exampleWorkspace?: string; kind?: CargoTargetKind }
 
 export async function selectCargoTarget(placeHolder = 'Select a Cargo binary with FerroUI hot reload enabled'): Promise<CargoTarget | undefined> {
     if (!vscode.workspace.isTrusted) throw new Error('Trust the workspace before running a FerroUI application.');
@@ -141,19 +143,27 @@ async function targetsIn(folder: vscode.WorkspaceFolder, manifest?: string) {
 
 export async function browserCargoTarget(folder: vscode.WorkspaceFolder, target: Required<Pick<ConfiguredTarget, 'label' | 'manifestPath' | 'package' | 'binary' | 'features'>>,
     exampleWorkspace: string | undefined, signal: AbortSignal): Promise<DiscoveredCargoTarget> {
-    const matches = await listTargets(folder, 'cargo', target, exampleWorkspace, signal);
+    const matches = await listTargets(folder, 'cargo', target, { exampleWorkspace, signal });
     if (matches.length !== 1) throw new Error('Choose a browser example or binary package in the selected Cargo workspace.');
     return matches[0];
 }
 
+export async function androidCargoTarget(folder: vscode.WorkspaceFolder, target: Required<Pick<ConfiguredTarget, 'label' | 'manifestPath' | 'package' | 'binary' | 'features'>>,
+    kind: 'example' | 'cdylib', signal: AbortSignal): Promise<DiscoveredCargoTarget> {
+    const matches = await listTargets(folder, 'cargo', target, { kind, signal });
+    if (matches.length !== 1) throw new Error('Choose an Android cdylib package or the bundled inspector example in the selected Cargo workspace.');
+    return matches[0];
+}
+
 async function listTargets(folder: vscode.WorkspaceFolder, cargo: string, target: ConfiguredTarget,
-    exampleWorkspace?: string, signal?: AbortSignal): Promise<DiscoveredCargoTarget[]> {
+    resolution: TargetResolution = {}): Promise<DiscoveredCargoTarget[]> {
     const root = folder.uri.fsPath;
     const manifest = path.resolve(root, target.manifestPath || 'Cargo.toml');
-    const { metadata, physicalRoot } = await readMetadata(folder, cargo, manifest, false, signal);
+    const { metadata, physicalRoot } = await readMetadata(folder, cargo, manifest, false, resolution.signal);
     const cwd = path.dirname(manifest);
-    const kind = exampleWorkspace && fileKey(metadata.workspace_root ?? cwd) === fileKey(exampleWorkspace) ? 'example' : 'bin';
-    const packageName = kind === 'example' ? 'ferroui-browser' : target.package;
+    const example = resolution.exampleWorkspace && fileKey(metadata.workspace_root ?? cwd) === fileKey(resolution.exampleWorkspace);
+    const kind = resolution.kind ?? (example ? 'example' : 'bin');
+    const packageName = example ? 'ferroui-browser' : target.package;
     return metadata.packages.filter(pkg => metadata.workspace_members.includes(pkg.id)
         && (isInside(root, pkg.manifest_path) || isInside(physicalRoot, pkg.manifest_path))
         && (!packageName || packageName === pkg.name))

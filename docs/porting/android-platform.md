@@ -317,6 +317,8 @@ Nothing of this writes outside the build directory. A release configuration (`--
 
 Use `--debugger` with a debuggable `dev` APK to package the NDK’s `lldb-server` for the selected ABI as `libferroui_lldb_server.so`. Android extracts the helper with the app’s native libraries. The build adds an ELF build ID to the application library so LLDB can match its local symbols. Keep the original Cargo library for source debugging. [Debug Rust on Android in VS Code](../designer/vscode/runtime.md#debug-rust-on-android)
 
+Set `FERROUI_ANDROID_DEBUG_KEYSTORE` to share the packager’s debug signing key across output directories. Managed VS Code builds use this to stage each APK separately and update the same installed package. [Build and redeploy Android source in VS Code](../designer/vscode/runtime.md#build-and-redeploy-android-source-in-vs-code)
+
 ## 10. Verification
 
 Three levels, because nothing of Android runs on the development machine without the emulator, and the emulator may only run while no virtual machine does (the orchestrator serialises it).

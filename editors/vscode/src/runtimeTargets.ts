@@ -17,8 +17,9 @@ export interface AndroidRuntimeTarget {
     profile: string;
     packageId: string;
     launched: boolean;
-    pid: number;
+    pid?: number;
     debuggable: boolean;
+    development?: boolean;
 }
 
 export interface BrowserRuntimeTarget {

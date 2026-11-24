@@ -59,10 +59,13 @@ export class AppSessions implements vscode.Disposable {
             command('preview', session => this.open(session.runtime)),
             managed('select'),
             command('debug', session => this.debug(session)),
-            command('rebuild', session => session.browser?.development ? this.browser.rebuild(session.runtime)
-                : session.app_session && vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session)),
+            command('rebuild', session => {
+                if (session.android?.development) return this.android.rebuild(session.runtime);
+                if (session.browser?.development) return this.browser.rebuild(session.runtime);
+                if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.rebuild', session.app_session);
+            }),
             command('showOutput', session => {
-                if (session.android) return this.android.showDebugOutput();
+                if (session.android) return this.android.showOutput(session.runtime);
                 if (session.browser?.development || session.browser?.debuggable) return this.browser.showOutput();
                 if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session);
             }),
@@ -105,15 +108,18 @@ export class AppSessions implements vscode.Disposable {
         item.description = [session.pid ? `PID ${session.pid}` : undefined, session.status].filter(Boolean).join(' · ');
         item.tooltip = `${session.label}\n${item.description}${selected ? '\nSelected managed app' : ''}`;
         item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
-        const problem = (run && 'problem' in run && run.problem) || (session.browser?.development && session.status.endsWith('failed'));
+        const problem = (run && 'problem' in run && run.problem)
+            || ((session.browser?.development || session.android?.development) && session.status.includes(' failed'));
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : selected ? 'play-circle'
             : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
         if (session.browser) {
             const development = session.browser.development ? '-development' : '';
             const debug = session.browser.debuggable && session.available ? '-debug' : '';
             item.contextValue = `app-session-browser${development}${debug}`;
-        } else if (session.android?.debuggable) {
-            item.contextValue = 'app-session-android-debug';
+        } else if (session.android) {
+            const development = session.android.development ? '-development' : '';
+            const debug = session.android.debuggable && session.available ? '-debug' : '';
+            item.contextValue = `app-session-android${development}${debug}`;
         } else {
             item.contextValue = run && 'kind' in run && run.kind === 'registered' ? 'app-session-registered' : `app-session-${session.kind}`;
         }

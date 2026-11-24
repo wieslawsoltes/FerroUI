@@ -149,6 +149,21 @@ export class RuntimeConnections implements vscode.Disposable {
         return this.addExternal({ kind: 'browser', browser: target }, label, undefined, 'Browser build queued');
     }
 
+    beginAndroid(target: AndroidRuntimeTarget, label: string): RuntimeSummary {
+        return this.addExternal({ kind: 'android', android: target }, label, undefined, 'Android build queued');
+    }
+
+    updateAndroid(runtime: AppRuntime, status: string, process?: { pid: number; debuggable: boolean; endpoint: RuntimeEndpoint } | null): void {
+        const item = this.external.get(runtime);
+        if (item?.target.kind !== 'android') return;
+        item.status = status;
+        if (process !== undefined) {
+            item.connection = process ? { endpoint: process.endpoint, generation: ++this.nextGeneration } : undefined;
+            item.target = { kind: 'android', android: { ...item.target.android, pid: process?.pid, debuggable: process?.debuggable ?? false } };
+        }
+        this.changed.fire();
+    }
+
     /** Status updates preserve the exact inspector identity. Swapping a page retires that connection. */
     updateBrowser(runtime: AppRuntime, status: string, page?: { url: string; pid?: number; endpoint: RuntimeEndpoint } | null): void {
         const item = this.external.get(runtime);

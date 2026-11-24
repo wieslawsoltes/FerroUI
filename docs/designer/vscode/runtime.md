@@ -259,6 +259,36 @@ For your own app, enable the `live-inspector` feature of `ferroui-android` and i
 
 ![Service Review running on the Android 16 emulator, beside its Rust source and native visual tree in VS Code](../images/vscode-android-live-app.png)
 
+#### Build and redeploy Android source in VS Code
+
+Use a trusted workspace host with the Android SDK, NDK, Java, Bash, and the Rust target for the device ABI. Add a `build` object in place of `apkPath`. This profile builds the bundled Service Review example on the selected ADB device.
+
+```json
+{
+  "ferroui.android.apps": [
+    {
+      "id": "service-review",
+      "label": "Service Review",
+      "packageId": "org.ferroui.androidinspector",
+      "build": {
+        "application": "inspector",
+        "debugger": true,
+        "reloadOnSave": true
+      }
+    }
+  ]
+}
+```
+
+1. Choose **Run Android App** in **App Sessions**, select the profile, and then choose the device. The pinned Live App editor opens while Cargo builds. After the APK installs, FerroUI verifies the inspector and waits for a native frame.
+2. Use **Rebuild This App** to queue another build. With `reloadOnSave` enabled, saves to the selected package and its local Cargo dependencies also queue builds. This includes XAML, Rust, and the workspace’s Cargo inputs. The running app continues accepting input while Cargo compiles. A source revision superseded during compilation is skipped before deployment.
+3. Android restarts the app to deploy the new APK. The Live App tab retains the last accepted frame while the new process starts. A failed compile leaves the running generation available. If a deployment replaces the process and fails to start, FerroUI tries to reinstall the session’s last accepted APK and verifies its frame. **Show App Output** has the build and deployment details. **Diagnostics → Hot Reload History** records the outcomes for saved sources.
+4. `build.debugger` packages the NDK debugger and stages the unstripped application library for each accepted installation. **Run and Debug Android App** waits for the first frame before attaching. The debugger detaches when deployment begins. Use **Attach Debugger to This App** for the replacement.
+
+For your own app, set `build.package` to the Cargo `cdylib` package in place of `build.application`. Use the package name with underscores as its library name. Set `build.toolchain` to the FerroUI checkout that supplies `scripts/android/apk.sh` and `build.manifestPath` if the Cargo workspace is nested. Add features with `build.features`.
+
+The managed packager reuses `android/debug.keystore` in the Cargo target directory. If you installed an APK signed with another FerroUI debug key, set `build.debugKeystore` to that key. Android keeps the installed app’s data when updating an APK with the same package ID and signing certificate. [Android app updates](https://developer.android.com/google/play/app-updates) · [Android MCP build actions](reference.md#run-or-attach-an-android-app-with-mcp)
+
 #### Debug Rust on Android
 
 Install the **LLDB DAP** extension on the workspace host. Build Service Review with `scripts/android/apk.sh inspector --debugger` to include the NDK debugger server in the debuggable APK. Update the profile’s `apkPath` if you built to a different output directory. [Android native debugging](https://developer.android.com/studio/debug) · [LLDB DAP setup](https://lldb.llvm.org/use/lldbdap.html)

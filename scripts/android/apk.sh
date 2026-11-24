@@ -36,7 +36,8 @@
 #   --permission NAME        a permission of the manifest (repeatable)
 #   --java-source-dir DIR    Java sources of an optional framework crate (repeatable)
 #
-# Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; see scripts/android/env.sh for
+# Environment: ANDROID_HOME (the SDK); CARGO_TARGET_DIR is honoured; FERROUI_ANDROID_DEBUG_KEYSTORE
+# can share a debug signing key across output directories. See scripts/android/env.sh for
 # the pinned versions of the NDK, the build tools and the platform. The native library is built with
 # the stable Rust toolchain and its target (rustup target add aarch64-linux-android).
 #
@@ -314,10 +315,17 @@ apk="$out/$app-$abi-$profile_dir.apk"
 rm -f "$apk"
 "$FERROUI_ANDROID_BUILD_TOOLS/zipalign" -f 4 "$work/unaligned.apk" "$apk"
 
-keystore="$out/debug.keystore"
+keystore="${FERROUI_ANDROID_DEBUG_KEYSTORE:-$out/debug.keystore}"
 if [ ! -f "$keystore" ]; then
-    keytool -genkeypair -keystore "$keystore" -storepass android -keypass android -alias androiddebugkey \
-        -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+    (
+        signing_parent="$(dirname "$keystore")"
+        mkdir -p "$signing_parent"
+        signing_stage="$(mktemp -d "$signing_parent/.ferroui-android-key.XXXXXX")"
+        trap 'rm -rf -- "$signing_stage"' EXIT
+        keytool -genkeypair -keystore "$signing_stage/debug.keystore" -storepass android -keypass android -alias androiddebugkey \
+            -keyalg RSA -keysize 2048 -validity 10000 -dname "CN=Android Debug,O=Android,C=US" >/dev/null 2>&1
+        ln "$signing_stage/debug.keystore" "$keystore" 2>/dev/null || test -f "$keystore"
+    )
 fi
 "$FERROUI_ANDROID_BUILD_TOOLS/apksigner" sign --ks "$keystore" --ks-pass pass:android --key-pass pass:android \
     --ks-key-alias androiddebugkey "$apk"

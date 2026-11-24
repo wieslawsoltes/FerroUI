@@ -262,6 +262,8 @@ export class AgentTools {
             await this.appSessions.android.stop(args.runtime as AppRuntime);
             return { closed: true };
         }
+        if (tool === 'ferroui_android_rebuild') return this.appSessions.android.rebuild(args.runtime as AppRuntime);
+        if (tool === 'ferroui_android_output') return { output: this.appSessions.android.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
         if (tool === 'ferroui_browser_targets') return this.appSessions.browser.targets((input as { folder?: string }).folder);
         if (tool === 'ferroui_browser_run' || tool === 'ferroui_browser_attach') {
             const request = input as BrowserRequest & { debug?: boolean };

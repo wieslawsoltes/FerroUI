@@ -1410,17 +1410,17 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-debug)?|browser(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-development)?(-debug)?|browser(-development)?(-debug)?)$/",
           "group": "inline@1"
         },
         {
           "command": "ferroui.appSessions.rebuild",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|browser-development(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|(android|browser)-development(-debug)?)$/",
           "group": "inline@2"
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-debug)?|browser(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|simulator|android(-development)?(-debug)?|browser(-development)?(-debug)?)$/",
           "group": "inline@3"
         },
         {
@@ -1430,12 +1430,12 @@
         },
         {
           "command": "ferroui.appSessions.debug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|android-debug|browser(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|(android|browser)(-development)?-debug)$/",
           "group": "1_apps@2"
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|android-debug|browser-development(-debug)?|browser-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|android(-development)?(-debug)?|browser-development(-debug)?|browser-debug)$/",
           "group": "1_apps@3"
         },
         {
@@ -1705,6 +1705,22 @@
                 "type": "array",
                 "items": { "type": "string" },
                 "description": "Optional unstripped native libraries from the installed debug APK's build and ABI. Relative paths start at this workspace folder."
+              },
+              "build": {
+                "type": "object",
+                "description": "Build and deploy from a Cargo workspace. Use this in place of apkPath.",
+                "additionalProperties": false,
+                "oneOf": [{ "required": ["application"] }, { "required": ["package"] }],
+                "properties": {
+                  "application": { "type": "string", "enum": ["inspector"], "description": "The bundled Service Review example in the FerroUI workspace." },
+                  "package": { "type": "string", "description": "The name of a custom Android cdylib package." },
+                  "toolchain": { "type": "string", "default": ".", "description": "FerroUI checkout containing scripts/android/apk.sh." },
+                  "manifestPath": { "type": "string", "default": "Cargo.toml", "description": "The owning Cargo manifest, relative to the workspace folder." },
+                  "features": { "type": "array", "items": { "type": "string" }, "description": "Extra Cargo features passed to the Android build." },
+                  "debugger": { "type": "boolean", "default": false, "description": "Package the NDK LLDB server and retain matching Rust symbols." },
+                  "debugKeystore": { "type": "string", "description": "Optional existing FerroUI-compatible debug signing key. Relative paths start at this workspace folder." },
+                  "reloadOnSave": { "type": "boolean", "default": false, "description": "Build and redeploy after saves to this Cargo app's Rust or XAML sources." }
+                }
               }
             }
           }

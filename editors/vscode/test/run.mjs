@@ -4,6 +4,7 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { androidManagedWorkspace } from './androidManagedWorkspace.mjs';
 import { testVSCodeExecutable } from './vscodeDownload.mjs';
 import { browserBuildWorkspace } from './browserBuildWorkspace.mjs';
 import { browserDebugWorkspace } from './browserDebugWorkspace.mjs';
@@ -18,6 +19,7 @@ const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const simulatorDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const androidDebugExtensions = process.env.FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS;
+const androidManaged = process.env.FERROUI_TEST_ANDROID_MANAGED === '1';
 const browser = process.env.FERROUI_TEST_BROWSER_URL;
 const browserBuild = process.env.FERROUI_TEST_BROWSER_BUILD;
 const browserDebugSite = process.env.FERROUI_TEST_BROWSER_DEBUG_SITE;
@@ -28,7 +30,7 @@ try {
     let targetEnv;
     if (simulatorDebugExtensions && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for simulator debugger acceptance.');
     if (androidDebugExtensions && !android) throw new Error('Set FERROUI_TEST_ANDROID_DEVICE for Android debugger acceptance.');
-    if ([simulator, android, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
+    if ([simulator, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
         throw new Error('Choose one platform acceptance fixture per run.');
     }
     if (simulator) {
@@ -48,6 +50,10 @@ try {
                 pid: '${command:ferroui.hotReload.processId}' }] };
             targetEnv.FERROUI_TEST_IOS_DEBUG = '1';
         }
+    } else if (androidManaged) {
+        const fixture = await androidManagedWorkspace(workspace, sandbox);
+        targetSettings = fixture.settings;
+        targetEnv = fixture.env;
     } else if (android) {
         const apkPath = process.env.FERROUI_TEST_ANDROID_APK;
         const adbPath = process.env.FERROUI_TEST_ANDROID_ADB;

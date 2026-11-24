@@ -16,7 +16,10 @@ export class DeviceAppCommands implements vscode.Disposable {
         };
         const present = async (runtime: AppRuntime, debug: boolean) => {
             open(runtime);
-            if (debug) await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
+            if (debug) {
+                if (runtime.startsWith('android:')) await this.android.waitForDebuggerTarget(runtime);
+                await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
+            }
         };
         void vscode.commands.executeCommand('setContext', 'ferroui.iosSimulatorHost', ios.supported);
         context();

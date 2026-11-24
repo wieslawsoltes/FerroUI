@@ -1,5 +1,6 @@
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import { androidBuildProfile, type AndroidBuildProfile } from './androidBuildProfile';
 import { workspaceFolders } from './workspacePaths';
 
 export interface AndroidDevice {
@@ -17,6 +18,7 @@ export interface AndroidApp {
     label: string;
     apkPath?: string;
     symbolFiles: string[];
+    build?: AndroidBuildProfile;
 }
 
 export interface AndroidRequest {
@@ -47,7 +49,7 @@ function androidSettings(folder: vscode.WorkspaceFolder): unknown[] {
 }
 
 function androidApp(value: unknown, folder: vscode.WorkspaceFolder): AndroidApp {
-    const { id, packageId, activity = 'org.ferroui.android.FerroMainActivity', label, apkPath, symbolFiles = [] } = (
+    const { id, packageId, activity = 'org.ferroui.android.FerroMainActivity', label, apkPath, symbolFiles = [], build } = (
         value ?? {}) as Record<string, unknown>;
     if (typeof id !== 'string' || !/^[A-Za-z0-9][A-Za-z0-9_-]{0,63}$/.test(id)
         || typeof packageId !== 'string' || packageId.length > 255 || !/^[A-Za-z][A-Za-z0-9_]*(?:\.[A-Za-z][A-Za-z0-9_]*)+$/.test(packageId)
@@ -63,7 +65,9 @@ function androidApp(value: unknown, folder: vscode.WorkspaceFolder): AndroidApp 
     if (new Set(symbolFiles.map(file => path.basename(file))).size !== symbolFiles.length) {
         throw new Error(`List one symbol file per installed library in the Android profile ${id}.`);
     }
+    if (build !== undefined && apkPath !== undefined) throw new Error(`Choose build or apkPath for the Android profile ${id}.`);
     return { id, folder: folder.uri.toString(), packageId, activity, label: typeof label === 'string' ? label.trim() : packageId,
         apkPath: typeof apkPath === 'string' ? path.resolve(folder.uri.fsPath, apkPath) : undefined,
-        symbolFiles: symbolFiles.map(file => path.resolve(folder.uri.fsPath, file)) };
+        symbolFiles: symbolFiles.map(file => path.resolve(folder.uri.fsPath, file)),
+        build: androidBuildProfile(build, packageId, id) };
 }

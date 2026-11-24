@@ -13,7 +13,7 @@ export class AndroidDebugger {
     private closing?: Promise<void>;
 
     constructor(private readonly bridge: AndroidBridge, private readonly packageId: string, private readonly receipt: AndroidReceipt,
-        private readonly output: vscode.OutputChannel, private readonly onClose: () => void, private readonly symbols: readonly string[] = []) {
+        private readonly output: Pick<vscode.OutputChannel, 'appendLine'>, private readonly onClose: () => void, private readonly symbols: readonly string[] = []) {
         this.debugger = new ReloadDebugger(output, 'LLDB DAP could not attach to the Android app.', () => this.retire());
     }
 
