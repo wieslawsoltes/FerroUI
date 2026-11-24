@@ -6,14 +6,16 @@
 
 use crate::data_transfer_to_ole_data_object_wrapper::DataTransferToOleDataObjectWrapper;
 use crate::interop::unmanaged_methods::{
-    self, close_clipboard, empty_clipboard, ole_flush_clipboard, ole_get_clipboard, open_clipboard, HRESULT,
+    self, add_clipboard_format_listener, close_clipboard, empty_clipboard, ole_flush_clipboard, ole_get_clipboard,
+    open_clipboard, remove_clipboard_format_listener, HRESULT,
 };
 use crate::ole_data_object_to_data_transfer_wrapper::OleDataObjectToDataTransferWrapper;
 use crate::win32_com::IDataObject;
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, IFlushableClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{IAsyncDataTransfer, LocalBoxFuture};
 use ferroui_base::logging::LogArea;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{Disposable, IDisposable, Subscription};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_microcom::ComPtr;
 use std::cell::{Cell, RefCell};
@@ -139,6 +141,38 @@ impl ClipboardImpl {
     }
 }
 
+ferroui_base::ferro_thread_local! {
+    /// The handlers of the changes of the clipboard; the message window listens while there is one.
+    static CONTENT_CHANGED: HandlerList<dyn Fn()> = HandlerList::new();
+}
+
+/// What the message window does with `WM_CLIPBOARDUPDATE`.
+pub(crate) fn on_clipboard_update() {
+    let handlers = CONTENT_CHANGED.with(|handlers| handlers.snapshot());
+    for (_, handler) in handlers.iter() {
+        handler();
+    }
+}
+
+impl IClipboardChangeImpl for ClipboardImpl {
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let first = CONTENT_CHANGED.with(|handlers| handlers.is_empty());
+        let token = CONTENT_CHANGED.with(|handlers| handlers.add(handler));
+        if first {
+            add_clipboard_format_listener(crate::win32_platform::Win32Platform::message_window());
+        }
+        Subscription::new(Disposable::create(move || {
+            let empty = CONTENT_CHANGED.with(|handlers| {
+                handlers.remove(token);
+                handlers.is_empty()
+            });
+            if empty {
+                remove_clipboard_format_listener(crate::win32_platform::Win32Platform::message_window());
+            }
+        }))
+    }
+}
+
 impl IClipboardImpl for ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         Box::pin(async {
@@ -233,6 +267,10 @@ impl IClipboardImpl for ClipboardImpl {
     }
 
     fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
+        Some(self)
+    }
+
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
         Some(self)
     }
 }

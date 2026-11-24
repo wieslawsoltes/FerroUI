@@ -2,20 +2,22 @@
 
 use crate::clipboard::clipboard_data_format_helper::to_system_type;
 use crate::clipboard::pasteboard_to_data_transfer_wrapper::PasteboardToDataTransferWrapper;
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl, IOwnedClipboardImpl};
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl, IOwnedClipboardImpl};
 use ferroui_base::input::{
     AsyncDataTransferItemExtensions, DataFormat, DataFormatKind, IAsyncDataTransfer, IAsyncDataTransferItem,
     LocalBoxFuture,
 };
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
 use ferroui_base::media::imaging::PngBitmapEncoderOptions;
-use ferroui_base::reactive::IDisposable;
+use ferroui_base::reactive::{IDisposable, Subscription};
+use ferroui_base::threading::{DispatcherPriority, DispatcherTimer};
 use objc2::rc::Retained;
 use objc2::runtime::AnyObject;
 use objc2_foundation::{NSArray, NSData, NSDictionary, NSMutableDictionary, NSString};
 use objc2_ui_kit::{UIImage, UIPasteboard};
 use std::cell::Cell;
 use std::rc::Rc;
+use std::time::Duration;
 
 struct State {
     pasteboard: Retained<UIPasteboard>,
@@ -131,6 +133,29 @@ impl ClipboardImpl {
     }
 }
 
+/// How often the change count of the pasteboard is compared while the application listens.
+const CHANGE_POLL_INTERVAL: Duration = Duration::from_millis(500);
+
+impl IClipboardChangeImpl for ClipboardImpl {
+    // The change count of the pasteboard also tells about the changes of other applications, which
+    // `UIPasteboardChangedNotification` does not: it is compared while the application listens.
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let state = self.state.clone();
+        let last = Cell::new(state.change_count());
+        DispatcherTimer::run(
+            move || {
+                let count = state.change_count();
+                if count != last.replace(count) {
+                    handler();
+                }
+                true
+            },
+            CHANGE_POLL_INTERVAL,
+            DispatcherPriority::BACKGROUND,
+        )
+    }
+}
+
 impl IClipboardImpl for ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         Box::pin(std::future::ready(self.try_get_data()))
@@ -158,6 +183,10 @@ impl IClipboardImpl for ClipboardImpl {
     }
 
     fn as_owned_clipboard_impl(&self) -> Option<&dyn IOwnedClipboardImpl> {
+        Some(self)
+    }
+
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
         Some(self)
     }
 }

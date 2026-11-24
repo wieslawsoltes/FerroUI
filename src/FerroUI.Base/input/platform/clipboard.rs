@@ -1,6 +1,9 @@
 use super::{ClipboardError, IClipboard, IClipboardImpl};
 use crate::input::{IAsyncDataTransfer, LocalBoxFuture};
+use crate::reactive::{Disposable, Subscription};
+use crate::utilities::HandlerList;
 use std::cell::RefCell;
+use std::future::Future;
 use std::rc::{Rc, Weak};
 
 /// Implementation of [`IClipboard`] on top of a platform clipboard.
@@ -8,16 +11,62 @@ pub struct Clipboard {
     this: Weak<Clipboard>,
     clipboard_impl: Rc<dyn IClipboardImpl>,
     last_data_transfer: RefCell<Option<Rc<dyn IAsyncDataTransfer>>>,
+    /// The handlers of `content_changed`.
+    content_changed: HandlerList<dyn Fn()>,
+    /// The subscription to the platform's changes while `content_changed` has a handler.
+    platform_changes: RefCell<Option<Subscription>>,
 }
 
 impl Clipboard {
     /// Creates the clipboard for a platform implementation.
     pub fn new(clipboard_impl: Rc<dyn IClipboardImpl>) -> Rc<Clipboard> {
-        Rc::new_cyclic(|this| Clipboard { this: this.clone(), clipboard_impl, last_data_transfer: RefCell::new(None) })
+        Rc::new_cyclic(|this| Clipboard {
+            this: this.clone(),
+            clipboard_impl,
+            content_changed: HandlerList::new(),
+            platform_changes: RefCell::new(None),
+            last_data_transfer: RefCell::new(None) })
     }
 
     fn take_last_data_transfer(&self) -> Option<Rc<dyn IAsyncDataTransfer>> {
         self.last_data_transfer.borrow_mut().take()
+    }
+
+    fn raise_content_changed(&self) {
+        for (_, handler) in self.content_changed.snapshot().iter() {
+            handler();
+        }
+    }
+
+    /// Reports a change this clipboard made, where the platform does not report it: what
+    /// `operation` resolves to, once it succeeded.
+    fn report_own_change(
+        &self,
+        operation: LocalBoxFuture<Result<(), ClipboardError>>,
+    ) -> LocalBoxFuture<Result<(), ClipboardError>> {
+        if self.clipboard_impl.as_clipboard_change_impl().is_some() || self.content_changed.is_empty() {
+            return operation;
+        }
+        let this = self.this.clone();
+        Box::pin(ReportOwnChange { operation, this })
+    }
+}
+
+/// An operation of the clipboard that reports the change it made when it succeeds.
+struct ReportOwnChange {
+    operation: LocalBoxFuture<Result<(), ClipboardError>>,
+    this: Weak<Clipboard>,
+}
+
+impl Future for ReportOwnChange {
+    type Output = Result<(), ClipboardError>;
+
+    fn poll(mut self: std::pin::Pin<&mut Self>, cx: &mut std::task::Context<'_>) -> std::task::Poll<Self::Output> {
+        let result = std::task::ready!(self.operation.as_mut().poll(cx));
+        if let (true, Some(this)) = (result.is_ok(), self.this.upgrade()) {
+            this.raise_content_changed();
+        }
+        std::task::Poll::Ready(result)
     }
 }
 
@@ -27,7 +76,7 @@ impl IClipboard for Clipboard {
             last_data_transfer.dispose();
         }
 
-        self.clipboard_impl.clear_async()
+        self.report_own_change(self.clipboard_impl.clear_async())
     }
 
     fn set_data_async(
@@ -43,7 +92,7 @@ impl IClipboard for Clipboard {
             drop(old);
         }
 
-        self.clipboard_impl.set_data_async(data_transfer)
+        self.report_own_change(self.clipboard_impl.set_data_async(data_transfer))
     }
 
     fn flush_async(&self) -> LocalBoxFuture<Result<(), ClipboardError>> {
@@ -85,5 +134,33 @@ impl IClipboard for Clipboard {
             let result = this.last_data_transfer.borrow().clone();
             Ok(result)
         })
+    }
+
+    fn content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let first = self.content_changed.is_empty();
+        let token = self.content_changed.add(handler);
+        let changes = if first { self.clipboard_impl.as_clipboard_change_impl() } else { None };
+        if let Some(changes) = changes {
+            let this = self.this.clone();
+            let subscription = changes.subscribe_content_changed(Rc::new(move || {
+                if let Some(this) = this.upgrade() {
+                    this.raise_content_changed();
+                }
+            }));
+            self.platform_changes.replace(Some(subscription));
+        }
+        let this = self.this.clone();
+        Subscription::new(Disposable::create(move || {
+            let Some(this) = this.upgrade() else { return };
+            this.content_changed.remove(token);
+            if this.content_changed.is_empty() {
+                // The platform stops observing the clipboard.
+                drop(this.platform_changes.take());
+            }
+        }))
+    }
+
+    fn is_content_changed_supported(&self) -> bool {
+        self.clipboard_impl.as_clipboard_change_impl().is_some()
     }
 }

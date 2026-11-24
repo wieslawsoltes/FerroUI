@@ -4,7 +4,9 @@ use crate::browser_data_transfer_helper::{IReadableDataItems, JsReadableDataItem
 use crate::interop::completion_helper::PromiseError;
 use crate::interop::input_helper;
 use crate::windowing_platform::BrowserWindowingPlatform;
-use ferroui_base::input::platform::{ClipboardError, IClipboardImpl};
+use ferroui_base::input::platform::{ClipboardError, IClipboardChangeImpl, IClipboardImpl};
+use ferroui_base::reactive::{Disposable, Subscription};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::input::{
     AsyncDataTransferItemExtensions, DataFormat, DataFormatKind, IAsyncDataTransfer, IAsyncDataTransferItem,
     LocalBoxFuture,
@@ -46,13 +48,40 @@ pub(crate) trait IClipboardPage {
     fn is_clipboard_format_supported(&self, format: &str) -> bool;
     fn read_clipboard(&self) -> LocalBoxFuture<Result<ClipboardRead, PromiseError>>;
     fn write_clipboard(&self, source: Option<WriteableClipboardSource>) -> LocalBoxFuture<Result<String, PromiseError>>;
+    /// Whether the page has the `clipboardchange` event of the Clipboard API.
+    fn is_change_event_supported(&self) -> bool {
+        false
+    }
+    /// Starts or stops listening to `clipboardchange`.
+    fn listen_to_changes(&self, _listen: bool) {}
 }
 
 struct ClipboardPage;
 
+ferroui_base::ferro_thread_local! {
+    /// The handlers of `clipboardchange` while the page listens.
+    static CONTENT_CHANGED: HandlerList<dyn Fn()> = HandlerList::new();
+}
+
+/// What the page calls for `clipboardchange`.
+pub(crate) fn on_clipboard_change() {
+    let handlers = CONTENT_CHANGED.with(|handlers| handlers.snapshot());
+    for (_, handler) in handlers.iter() {
+        handler();
+    }
+}
+
 impl IClipboardPage for ClipboardPage {
     fn is_clipboard_format_supported(&self, format: &str) -> bool {
         input_helper::is_clipboard_format_supported(format)
+    }
+
+    fn is_change_event_supported(&self) -> bool {
+        input_helper::is_clipboard_change_supported(&BrowserWindowingPlatform::global_this())
+    }
+
+    fn listen_to_changes(&self, listen: bool) {
+        input_helper::listen_to_clipboard_changes(&BrowserWindowingPlatform::global_this(), listen);
     }
 
     fn read_clipboard(&self) -> LocalBoxFuture<Result<ClipboardRead, PromiseError>> {
@@ -211,6 +240,26 @@ fn to_clipboard_error(error: PromiseError) -> ClipboardError {
     ClipboardError::other(error.to_string())
 }
 
+impl IClipboardChangeImpl for ClipboardImpl {
+    fn subscribe_content_changed(&self, handler: Rc<dyn Fn()>) -> Subscription {
+        let first = CONTENT_CHANGED.with(|handlers| handlers.is_empty());
+        let token = CONTENT_CHANGED.with(|handlers| handlers.add(handler));
+        if first {
+            self.page.listen_to_changes(true);
+        }
+        let page = self.page.clone();
+        Subscription::new(Disposable::create(move || {
+            let empty = CONTENT_CHANGED.with(|handlers| {
+                handlers.remove(token);
+                handlers.is_empty()
+            });
+            if empty {
+                page.listen_to_changes(false);
+            }
+        }))
+    }
+}
+
 impl IClipboardImpl for ClipboardImpl {
     fn try_get_data_async(&self) -> LocalBoxFuture<Result<Option<Rc<dyn IAsyncDataTransfer>>, ClipboardError>> {
         let read = self.page.read_clipboard();
@@ -245,6 +294,12 @@ impl IClipboardImpl for ClipboardImpl {
     fn clear_async(&self) -> LocalBoxFuture<Result<(), ClipboardError>> {
         let page = self.page.clone();
         Box::pin(async move { Self::write_clipboard_async(&*page, None).await })
+    }
+
+    // The page reports the changes of other applications where it has `clipboardchange` (the
+    // Clipboard API; in Chromium-based browsers, not yet in Firefox or Safari).
+    fn as_clipboard_change_impl(&self) -> Option<&dyn IClipboardChangeImpl> {
+        self.page.is_change_event_supported().then_some(self as &dyn IClipboardChangeImpl)
     }
 }
 

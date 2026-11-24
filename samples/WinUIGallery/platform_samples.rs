@@ -6,6 +6,7 @@ use ferroui_base::input::platform::{ClipboardExtensions, IClipboard};
 use ferroui_base::input::{DataFormat, DataTransfer, DataTransferItem, IAsyncDataTransfer};
 use ferroui_base::media::IImage;
 use ferroui_base::platform::storage::{FilePickerOpenOptions, IStorageItem};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority, DispatcherTimer};
 use ferroui_base::{BoxedValue, ObjectType, Ref, WeakRef};
 use ferroui_controls::primitives::{Popup, ToggleButton};
@@ -13,6 +14,7 @@ use ferroui_controls::pull_to_refresh::{RefreshCompletionDeferral, RefreshContai
 use ferroui_controls::{
     Button, Control, Image, ListBox, RichEditBox, TextBlock, TextBox, ToggleSwitch, TopLevel,
 };
+use std::cell::RefCell;
 use std::rc::Rc;
 use std::time::Duration;
 
@@ -110,8 +112,8 @@ fn set_status(root: &WeakRef<Control>, name: &str, text: &str) {
 /// `CopyImage_Click` and `PasteImage_Click` with the source's rainier.jpg; `CopyFiles_Click`, with
 /// the files of the window's storage provider, and `PasteFiles_Click`; `CopyWithOptions_Click`,
 /// whose history and roaming options FerroUI's clipboard does not have; `ShowFormats_Click` and
-/// `ClearClipboard_Click`; and `ContentChangedToggle_Toggled`, for a ContentChanged event that
-/// FerroUI's clipboard does not raise.
+/// `ClearClipboard_Click`; and `ContentChangedToggle_Toggled`, over the clipboard's
+/// `content_changed`, which reads nothing until the application asks.
 fn wire_clipboard(root: &Ref<Control>) {
     let Some(editor) = find::<RichEditBox>(root, "richEditBox") else {
         return;
@@ -308,18 +310,33 @@ fn wire_clipboard(root: &Ref<Control>) {
     let toggle = root.get_control::<ToggleSwitch>("ContentChangedToggle");
     let weak_toggle = toggle.downgrade();
     let weak_root = root.downgrade();
+    // The subscription of the monitor while the switch is on.
+    let monitor: Rc<RefCell<Option<Subscription>>> = Rc::default();
     toggle.property_changed(move |change| {
         if change.property() != ToggleButton::is_checked_property().as_property() {
             return;
         }
-        if let Some(toggle) = weak_toggle.upgrade() {
-            let message = if toggle.is_checked() == Some(true) {
-                "This platform's clipboard raises no ContentChanged: changes cannot be monitored."
-            } else {
-                "Stopped monitoring clipboard changes."
-            };
-            set_status(&weak_root, "OtherOperationsStatusText", message);
+        let Some(toggle) = weak_toggle.upgrade() else { return };
+        if toggle.is_checked() != Some(true) {
+            drop(monitor.take());
+            set_status(&weak_root, "OtherOperationsStatusText", "Stopped monitoring clipboard changes.");
+            return;
         }
+        let Some(clipboard) = weak_root.upgrade().and_then(|root| clipboard_of(&root)) else {
+            set_status(&weak_root, "OtherOperationsStatusText", "This window has no clipboard.");
+            return;
+        };
+        let changed_root = weak_root.clone();
+        let subscription = clipboard.content_changed(Rc::new(move || {
+            set_status(&changed_root, "OtherOperationsStatusText", "Clipboard content changed.");
+        }));
+        monitor.replace(Some(subscription));
+        let message = if clipboard.is_content_changed_supported() {
+            "Monitoring clipboard changes."
+        } else {
+            "Monitoring the clipboard changes of this application: this platform does not report the changes of other applications."
+        };
+        set_status(&weak_root, "OtherOperationsStatusText", message);
     });
 }
 

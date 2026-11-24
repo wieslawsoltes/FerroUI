@@ -141,6 +141,29 @@ export class InputHelper {
         return format === "text/plain" || format === "text/html" || format === "image/png";
     }
 
+    private static clipboardChangeListener?: () => void;
+
+    // The clipboardchange event of the Clipboard API: in Chromium-based browsers, not yet in
+    // Firefox or Safari. Nothing is read: the application asks for the data when it wants it.
+    public static isClipboardChangeSupported(globalThis: any): boolean {
+        const clipboard = globalThis?.navigator?.clipboard;
+        return clipboard != null && "onclipboardchange" in clipboard;
+    }
+
+    public static listenToClipboardChanges(globalThis: any, listen: boolean): void {
+        const clipboard = globalThis?.navigator?.clipboard;
+        if (clipboard == null) {
+            return;
+        }
+        if (listen && InputHelper.clipboardChangeListener === undefined) {
+            InputHelper.clipboardChangeListener = () => FerroExports.InputHelper?.OnClipboardChange();
+            clipboard.addEventListener("clipboardchange", InputHelper.clipboardChangeListener);
+        } else if (!listen && InputHelper.clipboardChangeListener !== undefined) {
+            clipboard.removeEventListener("clipboardchange", InputHelper.clipboardChangeListener);
+            InputHelper.clipboardChangeListener = undefined;
+        }
+    }
+
     public static createWriteableClipboardSource(): WriteableClipboardSource {
         return { items: [] };
     }
