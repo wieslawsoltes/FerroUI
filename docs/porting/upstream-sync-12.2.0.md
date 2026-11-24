@@ -36,12 +36,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (93 done, 18 planned) | 111 |
+| `port` (104 done, 6 planned) | 110 |
 | `already` | 19 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
 | `not-applicable` | 27 |
-| `deferred` | 24 |
+| `deferred` | 25 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -70,7 +70,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | platform-ios | 5 |  |  |  |  |  | 5 |
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
 | platform-macos | 8 | 1 |  |  |  | 1 | 10 |
-| platform-win32 | 6 | 2 |  |  |  | 1 | 9 |
+| platform-win32 | 5 | 2 |  |  |  | 2 | 9 |
 | platform-x11 | 5 | 1 |  |  |  |  | 6 |
 | rendering | 11 | 3 |  |  | 2 | 2 | 18 |
 | samples | 1 |  |  |  |  | 2 | 3 |
@@ -156,6 +156,7 @@ are part of the base that the previous sync tracked, so they are not inventoried
 | `37279ab420` | #22650 | 2026-10-30 | themes |  | Fluent 2 embedded root; follows the Fluent 2 decision. |
 | `9186fcf61f` | #22756 | 2026-11-09 | themes |  | Fluent 2 calendar; follows the Fluent 2 decision. |
 | `8dae868308` | #22628 | 2026-11-10 | input |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
+| `5ef345810e` | #22782 | 2026-11-12 | platform-win32 |  | Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering |  | Backdrop effects (1,786 lines). Needs a GPU path in Skia and in Vello; must reuse the WinUI composition backdrop code. |
 | `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces. Touches font matching beside the open web fonts stack; follows that stack. |
@@ -180,15 +181,15 @@ left out only with a recorded performance or better-code reason.
 | Commit | PR | Date | Area | Class | Part | Note |
 |---|---:|---|---|---|---|---|
 | `dd91d9dc44` | #22448 | 2026-10-19 | platform-x11 | `port` (done) | x11 | Read _NET_WORKAREA through the typed property helper; `update_work_area` still asks for any type. |
-| `612785a8e2` | #22468 | 2026-10-19 | platform-browser | `port` | browser | Command-based hotkeys on Apple platforms in the browser; shared Apple gesture tables. |
+| `612785a8e2` | #22468 | 2026-10-19 | platform-browser | `port` (done) | browser2 | `PlatformHotkeyConfiguration::apple` and `KeyGestureFormatInfo::apple`; the browser on Apple platforms and iOS use Command. |
 | `f5807681dc` | #22488 | 2026-10-19 | controls | `port` (done) | controls2 | Window content measured again when the platform constrains the size. |
 | `d931166834` | #22337 | 2026-10-19 | controls | `port` (done) | controls2 | TabbedPage leaves arrow keys to a focused child. |
-| `edc20c924d` | #22412 | 2026-10-19 | platform-ios | `port` | ios | Touch drags and trackpad momentum at the display refresh rate. |
+| `edc20c924d` | #22412 | 2026-10-19 | platform-ios | `port` (done) | ios2 | Touch display link at the display rate, inertia scaled by elapsed time, 60 Hz warning per screen. |
 | `82c96fe15d` | #22419 | 2026-10-19 | platform-win32 | `already` |  | `get_dpi_for_monitor` in `interop/unmanaged_methods.rs` already declares the 32-bit HRESULT. |
 | `33371cbfb7` | #22517 | 2026-10-19 | platform-macos | `port` (done) | macos | `automation.mm`: menu role for context menus. |
 | `19952840c5` | #22478 | 2026-10-19 | platform-browser | `not-applicable` |  | Queue between a managed UI thread and the DOM thread. FerroUI dispatches input inside the DOM event (`browser-render-worker.md`, `browser_input_handler.rs`). |
 | `da7ea04e6d` | #22497 | 2026-10-19 | controls | `already` |  | `ClassicDesktopStyleApplicationLifetime::start` takes the token after showing the window and skips the loop when it is gone. |
-| `b72f1fd4d8` | #22470 | 2026-10-19 | platform-browser | `port` | browser | Blob stream: seeking, bounded reads, write position. |
+| `b72f1fd4d8` | #22470 | 2026-10-19 | platform-browser | `port` (done) | browser2 | Blob streams seek and read in place; the write, seek and length fixes were already in FerroUI. |
 | `b6ed89b8d9` | #22457 | 2026-10-19 | controls | `port` (done) | controls | `Popup`: the Y scale read M11/M12. |
 | `b13194be25` | #22453 | 2026-10-19 | platform-x11 | `port` (done) | x11b | The X11 run loop implements explicit background processing, with the restructured wait of upstream. |
 | `f547369621` | #22496 | 2026-10-19 | threading | `already` |  | `Dispatcher::replace_implementation` already moves the due times of the queue and of every timer by the difference of the two clocks. |
@@ -197,7 +198,7 @@ left out only with a recorded performance or better-code reason.
 | `be0c42891f` | #22522 | 2026-10-19 | build | `not-applicable` |  | Upstream repository workflow. |
 | `b515c3ae17` | #22523 | 2026-10-20 | controls | `port` (done) | controls2 | Per-area log verbosity for `log_to_trace` and `log_to_delegate`. |
 | `ba4fedb31e` | #22529 | 2026-10-20 | platform-ios | `port` (done) | platforms2 | Keyboard stays up when focus moves between text boxes. |
-| `ae55790316` | #22526 | 2026-10-20 | platform-ios | `port` | ios | Touches in progress are cancelled when the view leaves its window. |
+| `ae55790316` | #22526 | 2026-10-20 | platform-ios | `port` (done) | ios2 | Touches in progress are cancelled when the view leaves its window or is disposed. |
 | `45693b1713` | #22196 | 2026-10-20 | build | `not-applicable` |  | .NET 11 SDK and .NET WebAssembly runtime. |
 | `fa6d6f069e` | #22532 | 2026-10-20 | platform-macos | `port` (done) | macos | `automation.mm`: AXFocused settable only on keyboard-focusable elements. |
 | `dc0105179b` | #22519 | 2026-10-20 | platform-macos | `deferred` |  | Reference-counting refactor of the whole native layer (1,844 lines). Needs smart-pointer output from the FerroUI IDL generator and a macOS hand check. |
@@ -214,7 +215,7 @@ left out only with a recorded performance or better-code reason.
 | `4573d1f752` | #22455 | 2026-10-21 | controls | `port` (done) | controls | NUL characters removed from window titles. |
 | `c4dfde67c3` | #22456 | 2026-10-21 | controls | `port` (done) | controls | Space key up clicks only a pressed button. |
 | `c2a6e2916e` | #22555 | 2026-10-21 | platform-x11 | `port` (done) | x11 | Window position read again after reparenting. |
-| `72ebf9aad9` | #22438 | 2026-10-21 | platform-android | `port` | android | Cursors on Android (`cursor_factory.rs` is a stub). |
+| `72ebf9aad9` | #22438 | 2026-10-21 | platform-android | `port` (done) | android2 | Pointer icons for standard and bitmap cursors (API 24). |
 | `0d6c2aaa81` | #22433 | 2026-10-21 | text | `already` |  | `TextLayout::hit_test_point` already passes a point relative to the line origin and subtracts `start`; upstream's cases are added as tests in `text_layout_tests.rs`. |
 | `26b4ed5b35` | #22491 | 2026-10-21 | layout | `port` (done) | controls | Layout pass tolerates a control moved to another top level. |
 | `9135170769` | #22557 | 2026-10-21 | rendering | `port` (done) | rendering | `ICustomHitTest` documentation: local coordinates. |
@@ -268,7 +269,7 @@ left out only with a recorded performance or better-code reason.
 | `5aa47e4f7f` | #22642 | 2026-10-29 | platform-linux | `port` (done) | linux | AT-SPI: active state only for the active window. |
 | `1968b08e18` | #22578 | 2026-10-29 | themes | `port` | themes | ColorPicker fixes backported to the Fluent and Simple themes. |
 | `719787dc69` | #22637 | 2026-10-29 | themes | `deferred` |  | Theme resources merged into one dictionary. Changes lookup order and generated theme code; needs the theme size and start-up check first. |
-| `55129e0659` | #22229 | 2026-10-30 | platform-win32 | `port` | win32 | Move and resize drags work with touch. |
+| `55129e0659` | #22229 | 2026-10-30 | platform-win32 | `port` (done) | win32b | Move and resize drags wait for the emulated left button of touch and pen. |
 | `2a38dc63eb` | #22624 | 2026-10-30 | controls | `port` (done) | controls2 | Popup with pointer placement resizes with its content. |
 | `eae84c1403` | #22179 | 2026-10-30 | text | `deferred` |  | Variable fonts: fvar and avar axis API. `FontVariationSettings` and backend variation exist; needs a design on top of them and PR 1252. |
 | `d2ee79eb46` | #22180 | 2026-10-30 | text | `deferred` |  | Variable fonts: `GlyphTypeface` variation clones. |
@@ -293,7 +294,7 @@ left out only with a recorded performance or better-code reason.
 | `48132c0500` | #22716 | 2026-11-09 | controls | `port` (done) | controls | `IsActive` set before `Activated` is raised. |
 | `69be03931f` | #22736 | 2026-11-09 | platform | `port` (done) | controls | Documentation of glob patterns. |
 | `c9b5ae7b21` | #22746 | 2026-11-09 | controls | `already` |  | `Span::on_property_changed` compares the property, so `on_inlines_changed` runs. |
-| `ae5ae6124e` | #22757 | 2026-11-09 | rendering | `port` | rendering | Bitmap copy guards and destination stride, pixel writer reset, EDID length are ported (`rendering`). Win32 icon mask and GDI handle lifetimes in OLE are still to port. |
+| `ae5ae6124e` | #22757 | 2026-11-09 | rendering | `port` (done) | rendering | Bitmap copy guards, pixel writer reset and EDID length (`rendering`); Win32 icon mask layout (`win32b`). GDI handle lifetimes in OLE were already owned by `ScreenContexts`. |
 | `dc061bc3ef` | #22698 | 2026-11-09 | rendering | `already` |  | `sk_round_rect_cache.rs` passes the radii without a heap array. |
 | `1b53d56525` | #22688 | 2026-11-09 | platform-android | `already` |  | `StorageHelper.java` runs every query in try-with-resources, so the cursors are closed. |
 | `5bbaa8e331` | #22743 | 2026-11-09 | rendering | `already` |  | `LockGuard` in `vulkan_khr_surface_render_target.rs` releases the lock on every exit. |
@@ -304,11 +305,11 @@ left out only with a recorded performance or better-code reason.
 | `b6a5fbc191` | #22740 | 2026-11-09 | rendering | `not-applicable` |  | `GC.KeepAlive`. Rust borrows keep the bitmap alive. |
 | `b490bc6733` | #22748 | 2026-11-10 | platform-x11 | `port` (done) | x11 | Two-finger scrolling with the synaptics driver. |
 | `2061fb5090` | #22760 | 2026-11-10 | text | `port` (done) | text | Wrap opportunity between shaped runs, decided from a window of both runs. The per-run break tables stay, so multi-run lines do not fall back to the enumerator. |
-| `bdeeeef0a7` | #22693 | 2026-11-10 | platform-ios | `port` | ios | Embedded native controls in accessibility. |
+| `bdeeeef0a7` | #22693 | 2026-11-10 | platform-ios | `port` (done) | ios2 | Native control views listed for VoiceOver; `accessibilityElements`. |
 | `80c4f31848` | #22462 | 2026-11-10 | platform-x11 | `port` (done) | x11 | ConfigureNotify older than our last resize ignored. |
 | `0dc28102b4` | #22566 | 2026-11-10 | platform-linux | `port` (done) | x11b | DRM output: the next frame renders while the flip just queued waits for vblank; the wait happens before the next flip, or at once when no free buffer is left. |
 | `8dae868308` | #22628 | 2026-11-10 | input | `deferred` |  | Key text, consumed modifiers and native key data (1,258 lines on every platform). Public event API; needs each platform checked. |
-| `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `port` | win32 | Virtual key mapping behind the keyboard layout tests. |
+| `5ef345810e` | #22782 | 2026-11-12 | platform-win32 | `deferred` |  | Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit. |
 | `3ecf2a3fd8` | #22777 | 2026-11-12 | build | `not-applicable` |  | Empty upstream CI commit. |
 | `b04cec5ef5` | #22801 | 2026-11-12 | build | `not-applicable` |  | .NET SDK update. |
 | `dc2253658c` | #22674 | 2026-11-12 | markup | `port` | markup | Compact IL names do not apply; the enum whitespace fix in its XamlX update does. |
@@ -317,7 +318,7 @@ left out only with a recorded performance or better-code reason.
 | `050d3fb941` | #22798 | 2026-11-12 | rendering | `port` (done) | rendering | Skia: one layer less for each opacity mask. Performance gain. |
 | `ee79f65f26` | #22685 | 2026-11-12 | platform-android | `port` (done) | android | Input type no longer forced to a password variation. |
 | `84f262c218` | #22676 | 2026-11-12 | markup | `not-applicable` |  | Function-pointer factories for IL-compiled property info. FerroUI generates Rust. |
-| `24b6c7b410` | #22610 | 2026-11-12 | platform-macos | `port` | macos | `updateLayer` flushes the render pass synchronously. |
+| `24b6c7b410` | #22610 | 2026-11-12 | platform-macos | `port` (done) | render-flush | `updateLayer` runs the render pass with dispatcher processing disabled (`MediaContext::paint_with_render_pass`); not skip-better: FerroUI ran the same jobs, and the cooperative resize (#476) keeps its frame. Native patch 0008. |
 | `070c3be990` | #22501 | 2026-11-12 | rendering | `deferred` |  | Opt-in EGL partial presentation (1,390 lines). Needs GPU validation on Linux and Android. |
 | `ca61365d75` | #22538 | 2026-11-12 | rendering | `port` (done) | rendering | Animated value written even when an expression has read it. |
 | `61c3aaa876` | #22810 | 2026-11-13 | rendering | `port` (done) | rendering | Remove `CompositorDrawingContextProxy`: on main only its own tests construct it. |
@@ -349,7 +350,7 @@ left out only with a recorded performance or better-code reason.
 | `281e59e138` | #22866 | 2026-11-17 | build | `not-applicable` |  | Upstream contribution bot. |
 | `fda56217a5` | #22872 | 2026-11-18 | build | `not-applicable` |  | Upstream workflows. |
 | `251fda6155` |  | 2026-11-18 | build | `not-applicable` |  | Upstream contribution bot. |
-| `a096f9bbde` | #22862 | 2026-11-18 | platform-android | `port` | android | Accessibility node position. |
+| `a096f9bbde` | #22862 | 2026-11-18 | platform-android | `port` (done) | android2 | The view position on the screen translates accessibility bounds. |
 | `92dc2b7207` | #22849 | 2026-11-18 | platform-android | `port` (done) | platforms3 | The root peer reports focus changes to TalkBack: the focused virtual view is invalidated and takes the keyboard focus. An interop peer counts as no focus. |
 | `7007223002` | #22871 | 2026-11-18 | controls | `port` (done) | controls | FlexPanel relative basis is a fraction. Parsed percentages were divided by 100 twice; code passing `50` must pass `0.5`. |
 | `192e7a0ba5` | #22880 | 2026-11-18 | platform-macos | `port` (done) | macos | Leaf nodes are not reported as expandable. |
@@ -358,7 +359,7 @@ left out only with a recorded performance or better-code reason.
 | `5032926e38` | #22865 | 2026-11-19 | build | `not-applicable` |  | Upstream readme. |
 | `3f984fa0d9` | #22870 | 2026-11-19 | text | `port` (done) | text | `ParagraphIndent` and first-line `Indent` honoured by the formatter, beside the paragraph styles of `TextLayout`. |
 | `debc815ba9` | #22914 | 2026-11-21 | build | `not-applicable` |  | Upstream build services package. |
-| `605e161019` | #22738 | 2026-11-23 | platform-android | `port` | android | Render call synchronized with surface create and destroy. |
+| `605e161019` | #22738 | 2026-11-23 | platform-android | `port` (done) | android2 | One render lock for ticks and surface changes; EGL without a window is not ready. The software framebuffer already discarded such frames. |
 | `51dae7305e` | #22681 | 2026-11-23 | platform-android | `port` (done) | platforms3 | `android_access_role_helper.rs` maps controls to Android widget classes, so TalkBack announces their role. |
 | `5d9e6d1b0e` |  | 2026-11-23 | build | `not-applicable` |  | Upstream version number. |
 <!-- /generated:inventory -->

@@ -180,28 +180,19 @@ pub(crate) fn framebuffer_stride(width: i32, bits_per_pixel: i32) -> i32 {
     (width * bits_per_pixel + 7) / 8
 }
 
-/// The mask bitmap of an icon made from a bitmap: one bit per pixel, rows
-/// of `framebuffer_stride(width, 1)` bytes.
-///
-/// `source` is the pixels of the bitmap as BGRA without premultiplied
-/// alpha, rows of `source_row_bytes` bytes, or `None` for a bitmap without
-/// an alpha channel, whose mask has every bit set.
-///
-/// As the reference does, a bit is set for a pixel whose first byte (its
-/// blue) is zero, and the bits of a byte are filled from the lowest.
-pub(crate) fn alpha_to_mask(source: Option<(&[u8], usize)>, width: i32, height: i32) -> Vec<u8> {
-    let row_bytes = framebuffer_stride(width, 1) as usize;
-    let Some((source, source_row_bytes)) = source else {
-        return vec![0xff; row_bytes * height as usize];
-    };
-
-    let mut mask = vec![0u8; row_bytes * height as usize];
-    for y in 0..height as usize {
-        let p_source = &source[y * source_row_bytes..];
-        let p_dest = &mut mask[y * row_bytes..];
-        for x in 0..width as usize {
-            if p_source[x * 4] == 0 {
-                p_dest[x / 8] |= 1 << (x % 8);
+/// The mask bitmap of an icon made from the unpremultiplied BGRA pixels `source` (rows of
+/// `source_row_bytes` bytes): one bit per pixel, set where the pixel is transparent (alpha 0),
+/// in the layout `CreateBitmap` expects: rows aligned to two bytes, the first pixel in the most
+/// significant bit.
+pub(crate) fn alpha_to_mask(source: &[u8], source_row_bytes: usize, width: i32, height: i32) -> Vec<u8> {
+    let (width, height) = (width.max(0) as usize, height.max(0) as usize);
+    let mask_stride = width.div_ceil(16) * 2;
+    let mut mask = vec![0u8; mask_stride * height];
+    for y in 0..height {
+        let row = &source[y * source_row_bytes..];
+        for x in 0..width {
+            if row[x * 4 + 3] == 0 {
+                mask[y * mask_stride + x / 8] |= 0x80 >> (x % 8);
             }
         }
     }
@@ -375,14 +366,11 @@ mod imp {
                 panic!("the size of an icon bitmap is out of range: {size:?}");
             }
 
-            let mask = if !source.format().is_some_and(|format| format.has_alpha()) {
-                super::alpha_to_mask(None, size.width, size.height)
-            } else {
-                let argb_buffer = alloc_framebuffer(size, PixelFormat::BGRA8888, AlphaFormat::Unpremul);
-                source.copy_pixels_to_framebuffer(&argb_buffer);
-                let data = argb_buffer.data.borrow();
-                super::alpha_to_mask(Some((&data, argb_buffer.row_bytes as usize)), size.width, size.height)
-            };
+            // Without alpha, every pixel is opaque after the copy and no bit is set.
+            let argb_buffer = alloc_framebuffer(size, PixelFormat::BGRA8888, AlphaFormat::Unpremul);
+            source.copy_pixels_to_framebuffer(&argb_buffer);
+            let data = argb_buffer.data.borrow();
+            let mask = super::alpha_to_mask(&data, argb_buffer.row_bytes as usize, size.width, size.height);
 
             create_bitmap(size.width, size.height, 1, 1, &mask)
         }
@@ -555,19 +543,22 @@ mod tests {
     }
 
     #[test]
-    fn the_mask_of_a_bitmap_without_alpha_has_every_bit_set() {
-        assert_eq!(alpha_to_mask(None, 9, 2), vec![0xff; 4]);
+    fn the_mask_marks_the_transparent_pixels_msb_first_in_word_aligned_rows() {
+        // Two rows of nine pixels; rows of the source are 40 bytes long, fully opaque.
+        let mut source = vec![0xffu8; 80];
+        source[3] = 0; // row 0, pixel 0
+        source[3 * 4 + 3] = 0; // row 0, pixel 3
+        source[8 * 4 + 3] = 0; // row 0, pixel 8
+        source[40 + 7 * 4 + 3] = 0; // row 1, pixel 7
+        source[40 + 2 * 4] = 0; // row 1, pixel 2: a blue byte of zero is still opaque
+        let mask = alpha_to_mask(&source, 40, 9, 2);
+        assert_eq!(mask, vec![0b1001_0000, 0b1000_0000, 0b0000_0001, 0]);
     }
 
     #[test]
-    fn the_mask_marks_the_pixels_whose_first_byte_is_zero() {
-        // Two rows of nine pixels; rows of the source are 40 bytes long.
-        let mut source = vec![0xffu8; 80];
-        source[0] = 0; // row 0, pixel 0
-        source[3 * 4] = 0; // row 0, pixel 3
-        source[8 * 4] = 0; // row 0, pixel 8
-        source[40 + 7 * 4] = 0; // row 1, pixel 7
-        let mask = alpha_to_mask(Some((&source, 40)), 9, 2);
-        assert_eq!(mask, vec![0b0000_1001, 0b0000_0001, 0b1000_0000, 0]);
+    fn the_rows_of_a_mask_are_aligned_to_two_bytes() {
+        assert_eq!(alpha_to_mask(&[0xff; 4 * 17], 4 * 17, 17, 1).len(), 4);
+        assert_eq!(alpha_to_mask(&[0xff; 4 * 16], 4 * 16, 16, 1).len(), 2);
+        assert_eq!(alpha_to_mask(&[0xff; 4], 4, 1, 1), vec![0, 0]);
     }
 }

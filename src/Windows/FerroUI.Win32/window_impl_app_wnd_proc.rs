@@ -852,6 +852,13 @@ mod imp {
                         if !should_ignore_touch_emulated_message(get_message_extra_info() as i64) {
                             let type_ = button_event_type(message, w_param).expect("a button message");
                             e = Some(self.pointer_event(timestamp, type_, self.dip_from_l_param(l_param), w_param));
+                        } else if message == WindowsMessage::WM_LBUTTONDOWN {
+                            // The left button the system emulates for a touch or a pen: the drag
+                            // that waited for it starts now.
+                            if let (Some(drag), Some(this)) = (self.take_pending_drag(), self.this()) {
+                                Dispatcher::ui_thread()
+                                    .post_local(move || this.start_drag(drag), DispatcherPriority::SEND);
+                            }
                         }
                     }
                 }
@@ -1024,6 +1031,9 @@ mod imp {
                 | WindowsMessage::WM_POINTERUP
                 | WindowsMessage::WM_POINTERUPDATE => {
                     if self.wm_pointer_enabled() {
+                        if matches!(message, WindowsMessage::WM_POINTERUP | WindowsMessage::WM_NCPOINTERUP) {
+                            self.clear_pending_drag();
+                        }
                         let pointer = self.get_device_pointer_info(w_param, timestamp);
                         let event_type = get_event_type(message, &pointer.info);
 
@@ -1049,6 +1059,7 @@ mod imp {
 
                 WindowsMessage::WM_POINTERCAPTURECHANGED => {
                     if self.wm_pointer_enabled() {
+                        self.clear_pending_drag();
                         let pointer = self.get_device_pointer_info(w_param, timestamp);
                         let event_type = if pointer.device == PointerDeviceKind::Touch {
                             RawPointerEventType::TouchCancel
@@ -1403,7 +1414,12 @@ mod imp {
                         }
                     }
 
-                    if args.handled() {
+                    // A drag that waits for the emulated left button needs the default handling
+                    // of the pointer down message, which produces it.
+                    let awaiting_drag_message = self.take_drag_requested_from_pointer()
+                        && matches!(message, WindowsMessage::WM_POINTERDOWN | WindowsMessage::WM_NCPOINTERDOWN);
+
+                    if args.handled() && !awaiting_drag_message {
                         return 0;
                     }
                 }
