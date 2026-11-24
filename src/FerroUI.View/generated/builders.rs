@@ -10323,6 +10323,21 @@ pub trait VisualProps: ElementBuilder {
         self.prop(<ferroui_base::Visual>::effect_property(), value)
     }
 
+    /// Sets [`Visual::backdrop_effect_property`](ferroui_base::Visual::backdrop_effect_property).
+    fn backdrop_effect<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IEffect>>, M>) -> Self {
+        self.prop(<ferroui_base::Visual>::backdrop_effect_property(), value)
+    }
+
+    /// Sets [`Visual::backdrop_effect_bounds_source_property`](ferroui_base::Visual::backdrop_effect_bounds_source_property).
+    fn backdrop_effect_bounds_source<M>(self, value: impl IntoProp<ferroui_base::media::BackdropEffectBoundsSource, M>) -> Self {
+        self.prop(<ferroui_base::Visual>::backdrop_effect_bounds_source_property(), value)
+    }
+
+    /// Sets [`Visual::backdrop_effect_cache_property`](ferroui_base::Visual::backdrop_effect_cache_property).
+    fn backdrop_effect_cache<M>(self, value: impl IntoProp<ferroui_base::media::BackdropEffectCache, M>) -> Self {
+        self.prop(<ferroui_base::Visual>::backdrop_effect_cache_property(), value)
+    }
+
     /// Sets [`Visual::opacity_mask_property`](ferroui_base::Visual::opacity_mask_property).
     fn opacity_mask<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_base::media::IBrush>>, M>) -> Self {
         self.prop(<ferroui_base::Visual>::opacity_mask_property(), value)
