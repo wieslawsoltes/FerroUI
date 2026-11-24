@@ -1,0 +1,80 @@
+<!-- Ported from the six examples of the pinned ImplicitTransition page of WinUI Gallery (14061eea)
+     and their handlers (motion_samples.rs); see ../NOTICE.md. The transitions are the WinUI names,
+     markup aliases of ferroui-controls-motion, and run as composition animations of the element.
+     The theme of the last example is a ThemeVariantScope around its grid. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Automatically animate changes to Opacity" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <Button x:Name="OpacityButton" Content="Set opacity" AutomationProperties.Name="Set opacity" />
+      <Rectangle x:Name="OpacityRectangle" Width="50" Height="50" Opacity="0.5">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.OpacityTransition><ScalarTransition /></Rectangle.OpacityTransition>
+      </Rectangle>
+      <NumberBox x:Name="OpacityNumberBox" Header="Opacity" Minimum="0" Maximum="1" SmallChange="0.1" Value="1" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Automatically animate changes to Rotation" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <Button x:Name="RotationButton" Content="Set rotation" AutomationProperties.Name="Set rotation" />
+      <Rectangle x:Name="RotationRectangle" Width="50" Height="50" Rotation="0">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.RotationTransition><ScalarTransition /></Rectangle.RotationTransition>
+      </Rectangle>
+      <NumberBox x:Name="RotationNumberBox" Header="Rotation (degrees)" SmallChange="15" Value="45" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example3" Spacing="8">
+    <TextBlock Text="Automatically animate changes to Scale" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <Button x:Name="ScaleButton" Content="Set scale" AutomationProperties.Name="Set scale" />
+      <Rectangle x:Name="ScaleRectangle" Width="50" Height="50" Scale="1,1,1">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.ScaleTransition><Vector3Transition /></Rectangle.ScaleTransition>
+      </Rectangle>
+      <NumberBox x:Name="ScaleNumberBox" Header="Scale" Minimum="0" SmallChange="0.5" Value="2" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example4" Spacing="8">
+    <TextBlock Text="Automatically animate changes to Translation" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <Button x:Name="TranslationButton" Content="Set translation" AutomationProperties.Name="Set translation" />
+      <Rectangle x:Name="TranslationRectangle" Width="50" Height="50" Translation="0,0,0">
+        <Rectangle.Fill><SolidColorBrush Color="{DynamicResource SystemAccentColor}" /></Rectangle.Fill>
+        <Rectangle.TranslationTransition><Vector3Transition /></Rectangle.TranslationTransition>
+      </Rectangle>
+      <NumberBox x:Name="TranslationNumberBox" Header="Translation" SmallChange="10" Value="20" />
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example5" Spacing="8">
+    <TextBlock Text="Implicitly animate when the Background changes" FontSize="18" />
+    <StackPanel Orientation="Horizontal" Spacing="16">
+      <Button x:Name="BrushButton" Content="Change background" AutomationProperties.Name="Change background" />
+      <ContentPresenter x:Name="BrushPresenter" Background="Blue" Width="50" Height="50">
+        <ContentPresenter.BackgroundTransition><BrushTransition /></ContentPresenter.BackgroundTransition>
+      </ContentPresenter>
+    </StackPanel>
+  </StackPanel>
+
+  <StackPanel x:Name="Example6" Spacing="8">
+    <TextBlock Text="Implicitly animate when the Grid's theme changes" FontSize="18" />
+    <Button x:Name="ThemeButton" Content="Change theme" AutomationProperties.Name="Change theme" />
+    <ThemeVariantScope x:Name="ThemeExampleScope" RequestedThemeVariant="Dark">
+      <Grid x:Name="ThemeExampleGrid" Background="{DynamicResource SolidBackgroundFillColorBaseBrush}">
+        <Grid.BackgroundTransition><BrushTransition /></Grid.BackgroundTransition>
+        <StackPanel Margin="12" Spacing="6">
+          <TextBlock Text="Lorem Ipsum" FontSize="20" />
+          <TextBlock Text="The background of this grid animates when the theme changes." TextWrapping="Wrap" />
+          <Button Content="Action" />
+          <CheckBox Content="Option" />
+        </StackPanel>
+      </Grid>
+    </ThemeVariantScope>
+  </StackPanel>
+</StackPanel>

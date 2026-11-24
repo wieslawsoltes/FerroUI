@@ -3,16 +3,20 @@
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::data::core::ValueTypes;
 use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
-use ferroui_base::media::IImage;
-use ferroui_base::{BoxedValue, FerroObject, Ref};
+use ferroui_base::media::immutable::ImmutableSolidColorBrush;
+use ferroui_base::media::{Colors, IImage};
+use ferroui_base::styling::ThemeVariant;
+use ferroui_base::{BoxedValue, FerroObject, Ref, Vector3D};
 use ferroui_controls::animation::{
     BackEase, BounceEase, CircleEase, CubicEase, DoubleAnimation, EasingFunctionBase, EasingMode, ElasticEase,
     ExponentialEase, PowerEase, QuadraticEase, QuarticEase, QuinticEase, SineEase, Storyboard,
 };
 use ferroui_base::media::TranslateTransform;
+use ferroui_controls::presenters::ContentPresenter;
 use ferroui_controls::primitives::SelectingItemsControl;
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Button, ComboBox, Control, Grid, Image, ItemsSource, ListView, NumberBox, RadioButton};
+use ferroui_controls::{Button, ComboBox, Control, Grid, Image, ItemsSource, ListView, NumberBox, RadioButton, ThemeVariantScope};
+use ferroui_controls_motion::ImplicitTransitions;
 use std::rc::Rc;
 
 /// The image both examples of the ParallaxView page move.
@@ -22,6 +26,7 @@ pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
     match page_id {
         "EasingFunction" => wire_easing_functions(root),
         "ParallaxView" => wire_parallax_view(root),
+        "ImplicitTransition" => wire_implicit_transitions(root),
         _ => {}
     }
 }
@@ -46,6 +51,55 @@ fn wire_parallax_view(root: &Ref<Control>) {
     titles.sort_unstable();
     let items = titles.into_iter().map(|title| Some(Rc::new(title.to_owned()) as BoxedValue));
     root.get_control::<ListView>("ParallaxList").set_items_source(Some(ItemsSource::from_items(items)));
+}
+
+/// `button` runs `apply` with the page and the value of its number box.
+fn on_click(root: &Ref<Control>, button: &str, number: &str, apply: fn(&Ref<Control>, f64)) {
+    let weak = root.downgrade();
+    let number = number.to_owned();
+    root.get_control::<Button>(button).click(move |_, _| {
+        if let Some(root) = weak.upgrade() {
+            let value = root.get_control::<NumberBox>(&number).value();
+            if value.is_finite() {
+                apply(&root, value);
+            }
+        }
+    });
+}
+
+/// The handlers of the ImplicitTransition page: each sets the facade whose transition animates.
+fn wire_implicit_transitions(root: &Ref<Control>) {
+    on_click(root, "OpacityButton", "OpacityNumberBox", |root, value| {
+        root.get_control::<Rectangle>("OpacityRectangle").set_opacity(value);
+    });
+    on_click(root, "RotationButton", "RotationNumberBox", |root, value| {
+        ImplicitTransitions::set_rotation(&root.get_control::<Rectangle>("RotationRectangle"), value);
+    });
+    on_click(root, "ScaleButton", "ScaleNumberBox", |root, value| {
+        ImplicitTransitions::set_scale(&root.get_control::<Rectangle>("ScaleRectangle"), Vector3D::new(value, value, value));
+    });
+    on_click(root, "TranslationButton", "TranslationNumberBox", |root, value| {
+        root.get_control::<Rectangle>("TranslationRectangle").set_translation(Vector3D::new(value, value, value));
+    });
+    // A new brush each time, as the source does: not a new color on the same brush.
+    let weak = root.downgrade();
+    root.get_control::<Button>("BrushButton").click(move |_, _| {
+        let Some(root) = weak.upgrade() else { return };
+        let presenter = root.get_control::<ContentPresenter>("BrushPresenter");
+        let is_blue = presenter
+            .background()
+            .and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color()))
+            .is_some_and(|color| color == Colors::BLUE);
+        let next = if is_blue { Colors::YELLOW } else { Colors::BLUE };
+        presenter.set_background(Some(Rc::new(ImmutableSolidColorBrush::new(next))));
+    });
+    let weak = root.downgrade();
+    root.get_control::<Button>("ThemeButton").click(move |_, _| {
+        let Some(root) = weak.upgrade() else { return };
+        let scope = root.get_control::<ThemeVariantScope>("ThemeExampleScope");
+        let is_dark = scope.requested_theme_variant().is_some_and(|theme| theme == ThemeVariant::dark());
+        scope.set_requested_theme_variant(Some(if is_dark { ThemeVariant::light() } else { ThemeVariant::dark() }));
+    });
 }
 
 /// The storyboard of an example, with its animation aimed at the transform of the rectangle.

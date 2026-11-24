@@ -1666,9 +1666,22 @@ dependencies = [
 name = "ferroui-controls-motion"
 version = "0.6.0-preview.1"
 dependencies = [
+ "bitflags 2.13.2",
  "ferroui-base",
  "ferroui-build-scan",
  "ferroui-controls",
+]
+
+[[package]]
+name = "ferroui-controls-motion-markup-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-motion",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
 ]
 
 [[package]]

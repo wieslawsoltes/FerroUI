@@ -9,11 +9,16 @@ use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::TranslateTransform;
 use ferroui_base::platform::AssetLoader;
 use ferroui_base::utilities::UriRef;
-use ferroui_base::Ref;
+use ferroui_base::media::Colors;
+use ferroui_base::numerics::Vector3;
+use ferroui_base::styling::ThemeVariant;
+use ferroui_base::{Ref, Vector3D};
 use ferroui_controls::animation::{DoubleAnimation, EasingMode, ElasticEase, ExponentialEase, Storyboard};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{Button, ComboBox, Control, Grid, ListView, NumberBox, RadioButton};
-use ferroui_controls_motion::ParallaxView;
+use ferroui_controls::presenters::ContentPresenter;
+use ferroui_controls::ThemeVariantScope;
+use ferroui_controls_motion::{ImplicitTransitions, ParallaxView};
 
 fn page() -> Ref<Control> {
     examples::create(examples::find("EasingFunction").unwrap()).unwrap()
@@ -104,4 +109,59 @@ fn both_parallax_examples_follow_their_scrolling_source() {
     }
     let list = root.get_control::<ListView>("ParallaxList");
     assert_eq!(list.item_count() as usize, crate::catalog_data::CATALOG.len());
+}
+
+fn press(root: &Ref<Control>, name: &str) {
+    root.get_control::<Button>(name).raise_event(&RoutedEventArgs::with_event(&Button::click_event()));
+}
+
+#[test]
+fn each_implicit_transition_example_sets_its_facade_through_its_transition() {
+    let _application = start();
+    let root = examples::create(examples::find("ImplicitTransition").unwrap()).unwrap();
+
+    let opacity = root.get_control::<Rectangle>("OpacityRectangle");
+    assert!(opacity.opacity_transition().is_some());
+    assert_eq!(opacity.opacity(), 0.5);
+    press(&root, "OpacityButton");
+    assert_eq!(opacity.opacity(), 1.0);
+
+    let rotation = root.get_control::<Rectangle>("RotationRectangle");
+    assert!(rotation.rotation_transition().is_some());
+    press(&root, "RotationButton");
+    assert_eq!(ImplicitTransitions::get_rotation(&rotation), 45.0);
+    assert_eq!(rotation.rotation(), 45.0);
+
+    let scale = root.get_control::<Rectangle>("ScaleRectangle");
+    assert!(scale.scale_transition().is_some());
+    press(&root, "ScaleButton");
+    assert_eq!(scale.scale(), Vector3::new(2.0, 2.0, 2.0));
+
+    let translation = root.get_control::<Rectangle>("TranslationRectangle");
+    assert!(translation.translation_transition().is_some());
+    press(&root, "TranslationButton");
+    assert_eq!(translation.translation(), Vector3D::new(20.0, 20.0, 20.0));
+}
+
+#[test]
+fn the_background_examples_change_their_brush_and_their_theme() {
+    let _application = start();
+    let root = examples::create(examples::find("ImplicitTransition").unwrap()).unwrap();
+    let presenter = root.get_control::<ContentPresenter>("BrushPresenter");
+    assert!(ImplicitTransitions::get_background_transition(&presenter).is_some());
+    let color = || presenter.background().and_then(|brush| brush.as_solid_color_brush().map(|solid| solid.color()));
+    assert_eq!(color(), Some(Colors::BLUE));
+    press(&root, "BrushButton");
+    assert_eq!(color(), Some(Colors::YELLOW));
+    press(&root, "BrushButton");
+    assert_eq!(color(), Some(Colors::BLUE));
+
+    let grid = root.get_control::<Grid>("ThemeExampleGrid");
+    assert!(ImplicitTransitions::get_background_transition(&grid).is_some());
+    let scope = root.get_control::<ThemeVariantScope>("ThemeExampleScope");
+    assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::dark()));
+    press(&root, "ThemeButton");
+    assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::light()));
+    press(&root, "ThemeButton");
+    assert_eq!(scope.requested_theme_variant(), Some(ThemeVariant::dark()));
 }
