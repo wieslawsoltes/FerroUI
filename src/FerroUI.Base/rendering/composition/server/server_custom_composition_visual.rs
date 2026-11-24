@@ -5,7 +5,6 @@ use super::{
 use crate::logging::{LogArea, LogEventLevel, Logger};
 use crate::media::ImmediateDrawingContext;
 use crate::platform::LtrbRect;
-use crate::rendering::composition::server::CompositorDrawingContextProxy;
 use crate::rendering::composition::{CompositionCustomVisualHandler, ICompositionCustomVisualHandler};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -146,15 +145,6 @@ impl IServerVisualContent for ServerCompositionCustomVisual {
         current_transformed_clip: LtrbRect,
     ) {
         let canvas = context.canvas();
-        let is_proxy = match canvas.as_any_mut().downcast_mut::<CompositorDrawingContextProxy>() {
-            Some(proxy) => {
-                proxy.set_auto_flush(true);
-                proxy.flush();
-                true
-            }
-            None => false,
-        };
-
         {
             let transform = canvas.transform();
             let mut context = ImmediateDrawingContext::borrowed_with_transform(&mut *canvas, transform);
@@ -163,11 +153,6 @@ impl IServerVisualContent for ServerCompositionCustomVisual {
             });
         }
 
-        if is_proxy {
-            if let Some(proxy) = canvas.as_any_mut().downcast_mut::<CompositorDrawingContextProxy>() {
-                proxy.set_auto_flush(false);
-            }
-        }
     }
 
     fn as_any(&self) -> &dyn Any {

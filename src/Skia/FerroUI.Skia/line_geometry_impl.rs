@@ -1,4 +1,6 @@
-use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared};
+use crate::geometry_impl::{
+    cache_path_bounds, impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared,
+};
 use crate::skia_sharp_extensions::to_sk_point;
 use ferroui_base::{Point, Rect};
 use skia_safe::{Path, PathBuilder};
@@ -23,7 +25,11 @@ impl LineGeometryImpl {
             Point::new(p1.x.max(p2.x), p1.y.max(p2.y)),
         );
 
-        register(Self { base: GeometryImplBase::new(), bounds, stroke_path: Shared::new(path.detach()) })
+        register(Self {
+            base: GeometryImplBase::new(),
+            bounds,
+            stroke_path: Shared::new(cache_path_bounds(path.detach())),
+        })
     }
 
     fn geometry_bounds(&self) -> Rect {

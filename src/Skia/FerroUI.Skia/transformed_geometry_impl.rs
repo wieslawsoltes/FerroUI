@@ -1,4 +1,6 @@
-use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared};
+use crate::geometry_impl::{
+    cache_path_bounds, impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared,
+};
 use crate::skia_sharp_extensions::{to_rect, to_sk_matrix};
 use ferroui_base::platform::{IGeometryImpl, ITransformedGeometryImpl};
 use ferroui_base::{Matrix, Rect};
@@ -20,12 +22,12 @@ impl TransformedGeometryImpl {
     pub fn new(source: Arc<dyn GeometryImpl>, transform: Matrix) -> Arc<Self> {
         let matrix = to_sk_matrix(transform);
 
-        let stroke_path = source.stroke_path().map(|path| path.make_transform(&matrix));
+        let stroke_path = source.stroke_path().map(|path| cache_path_bounds(path.make_transform(&matrix)));
         let bounds = stroke_path.as_ref().map(|path| to_rect(crate::skia_sharp_extensions::tight_bounds(path))).unwrap_or_default();
 
         let fill = match source.fill() {
             FillPath::SameAsStroke if stroke_path.is_some() => FillPath::SameAsStroke,
-            FillPath::Separate(fill_path) => FillPath::Separate(fill_path.make_transform(&matrix)),
+            FillPath::Separate(fill_path) => FillPath::Separate(cache_path_bounds(fill_path.make_transform(&matrix))),
             _ => FillPath::None,
         };
 

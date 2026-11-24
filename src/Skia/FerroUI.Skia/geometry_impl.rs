@@ -9,6 +9,14 @@ use ferroui_base::{Matrix, Point, Rect};
 use skia_safe::{Path, PathBuilder, PathMeasure, Region, RoundOut};
 use std::sync::{Arc, Mutex, Weak};
 
+/// Reads the bounds of `path`, which Skia caches lazily, even for read-only calls such as
+/// `contains`: done before the path is shared with the render thread, so that the two threads
+/// never compute them at the same time.
+pub(crate) fn cache_path_bounds(path: Path) -> Path {
+    let _ = path.bounds();
+    path
+}
+
 /// The fill path of a geometry in relation to its stroke path.
 ///
 /// Many geometries fill exactly what they stroke; keeping that fact explicit

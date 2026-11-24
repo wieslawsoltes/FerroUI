@@ -2064,37 +2064,35 @@ impl IDrawingContextImpl for DrawingContextImpl {
     fn push_opacity_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {
         self.check_lease();
 
-        let paint = SkPaintCache::get();
-
         let sk_bounds = to_sk_rect(bounds);
         let canvas = self.canvas.get();
-        canvas.save_layer(&SaveLayerRec::default().bounds(&sk_bounds).paint(&paint));
+        canvas.save_layer(&SaveLayerRec::default().bounds(&sk_bounds));
         let total_matrix = canvas.local_to_device();
 
-        let mask_paint = self.create_paint(paint, mask, bounds);
+        // The content of the layer takes the multiply opacity when it is drawn, so the mask must
+        // not apply it a second time.
+        let content_opacity = std::mem::replace(&mut self.current_opacity, 1.0);
+        let mut mask_paint = self.create_paint(SkPaintCache::get(), mask, bounds);
+        self.current_opacity = content_opacity;
+
+        // Mask paints are a plain color or a shader, so DstIn applies the mask straight to the
+        // layer: one layer less for each opacity mask.
+        mask_paint.paint_mut().set_blend_mode(sk::BlendMode::DstIn);
         self.mask_stack.push((total_matrix, mask_paint));
     }
 
     fn pop_opacity_mask(&mut self) {
         self.check_lease();
 
-        let mut paint = SkPaintCache::get();
-        paint.set_blend_mode(sk::BlendMode::DstIn);
-
         let (transform, paint_wrapper) =
             self.mask_stack.pop().unwrap_or_else(|| panic!("The opacity mask stack is empty"));
 
         let canvas = self.canvas.get();
-        canvas.save_layer(&SaveLayerRec::default().paint(&paint));
-        SkPaintCache::return_reset(paint);
-
         canvas.set_matrix(&transform);
         canvas.draw_paint(paint_wrapper.paint());
 
         // The wrapper resets the paint when it is disposed.
         SkPaintCache::return_item(paint_wrapper.dispose());
-
-        self.restore_canvas();
 
         self.restore_canvas();
     }

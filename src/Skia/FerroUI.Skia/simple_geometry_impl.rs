@@ -1,4 +1,6 @@
-use crate::geometry_impl::{impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared};
+use crate::geometry_impl::{
+    cache_path_bounds, impl_geometry_impl, register, FillPath, GeometryImpl, GeometryImplBase, Shared,
+};
 use crate::skia_sharp_extensions::{tight_bounds, to_rect};
 use ferroui_base::Rect;
 use skia_safe::Path;
@@ -18,10 +20,15 @@ impl SimpleGeometryImpl {
     pub fn new(stroke_path: Path, fill: FillPath, bounds: Option<Rect>) -> Arc<Self> {
         let bounds = bounds.unwrap_or_else(|| to_rect(tight_bounds(&stroke_path)));
 
+        let fill = match fill {
+            FillPath::Separate(path) => FillPath::Separate(cache_path_bounds(path)),
+            other => other,
+        };
+
         register(Self {
             base: GeometryImplBase::new(),
             bounds,
-            stroke_path: Shared::new(stroke_path),
+            stroke_path: Shared::new(cache_path_bounds(stroke_path)),
             fill: Shared::new(fill),
         })
     }
