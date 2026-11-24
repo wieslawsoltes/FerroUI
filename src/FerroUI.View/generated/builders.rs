@@ -2425,6 +2425,11 @@ pub trait AutoCompleteBoxProps: ElementBuilder {
         self.prop(<ferroui_controls::AutoCompleteBox>::placeholder_foreground_property(), value)
     }
 
+    /// Sets [`AutoCompleteBox::use_floating_placeholder_property`](ferroui_controls::AutoCompleteBox::use_floating_placeholder_property).
+    fn use_floating_placeholder<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::AutoCompleteBox>::use_floating_placeholder_property(), value)
+    }
+
     /// Sets [`AutoCompleteBox::minimum_prefix_length_property`](ferroui_controls::AutoCompleteBox::minimum_prefix_length_property).
     fn minimum_prefix_length<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::AutoCompleteBox>::minimum_prefix_length_property(), value)
@@ -8879,6 +8884,20 @@ pub trait TabItemProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::TabItem>> TabItemProps for El<T> {}
 
+/// The properties and routed events of [`TabStripItem`](ferroui_controls::primitives::TabStripItem).
+pub trait TabStripItemProps: ElementBuilder {
+    /// Sets [`TabStripItem::icon_property`](ferroui_controls::primitives::TabStripItem::icon_property).
+    fn icon<M>(self, value: impl IntoProp<Option<ferroui_base::BoxedValue>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::TabStripItem>::icon_property(), value)
+    }
+
+    /// Sets [`TabStripItem::icon_template_property`](ferroui_controls::primitives::TabStripItem::icon_template_property).
+    fn icon_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::primitives::TabStripItem>::icon_template_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::primitives::TabStripItem>> TabStripItemProps for El<T> {}
+
 /// The properties and routed events of [`TabbedPage`](ferroui_controls::TabbedPage).
 pub trait TabbedPageProps: ElementBuilder {
     /// Sets [`TabbedPage::tab_placement_property`](ferroui_controls::TabbedPage::tab_placement_property).
@@ -8952,6 +8971,16 @@ pub trait TableViewColumnProps: ElementBuilder {
     /// Sets [`TableViewColumn::width_property`](ferroui_controls::TableViewColumn::width_property).
     fn width<M>(self, value: impl IntoProp<ferroui_controls::GridLength, M>) -> Self {
         self.prop(<ferroui_controls::TableViewColumn>::width_property(), value)
+    }
+
+    /// Sets [`TableViewColumn::min_width_property`](ferroui_controls::TableViewColumn::min_width_property).
+    fn min_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::TableViewColumn>::min_width_property(), value)
+    }
+
+    /// Sets [`TableViewColumn::max_width_property`](ferroui_controls::TableViewColumn::max_width_property).
+    fn max_width<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::TableViewColumn>::max_width_property(), value)
     }
 
     /// Sets [`TableViewColumn::cell_theme_property`](ferroui_controls::TableViewColumn::cell_theme_property).
