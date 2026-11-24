@@ -4,11 +4,17 @@
 //!
 //! On Vulkan the band threads draw on no shared target: whatever mode the environment asks for,
 //! the ordered insertion becomes the deferred one (`BandInsert::with_shared_target`), so each band
-//! is a recording of its own size placed on the layer's image when it is ready. The frames are
-//! compared with the ordinary layer drawing the same frame band by band, each band a recording of
-//! its own; where an antialiased edge crosses the row two bands meet at, a pixel may differ as
-//! between any two clipped frames (`gpu/metal/tests/pipelined_frames.rs`), so at most a row of
-//! pixels per edge may differ, by at most [`STEP`].
+//! is a recording of its own, on a deferred canvas of the layer's size under the band's clip, placed
+//! on the layer's image when it is ready. The frames are compared with the ordinary layer drawing the
+//! same frame band by band, each band a recording of its own under the same clip, within the
+//! tolerance of the Metal tests: at most a row of pixels per band edge, by at most [`STEP`].
+//!
+//! What the first runs on lavapipe showed (`diagnostic_where_the_frames_of_lavapipe_differ`): the
+//! ordinary path draws a frame the same way twice, band by band and in one recording, and a pipelined
+//! layer of one band matches the ordinary layer exactly. With 2 and 4 bands on canvases of the band's
+//! size, the shapes that cross a band edge (the stroked line across the layer, a rounded rectangle)
+//! were antialiased up to 19 steps apart along the whole shape; the canvases have the layer's size
+//! since, so that such a shape is cut by the clip inside the target, as on the ordinary layer.
 //!
 //! Without a Vulkan loader or device the tests print why they do nothing and pass; with
 //! `FERROUI_VULKAN_TEST_REQUIRE=1` they fail instead.
