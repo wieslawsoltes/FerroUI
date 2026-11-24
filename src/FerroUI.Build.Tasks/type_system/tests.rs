@@ -100,6 +100,23 @@ fn method(type_: &Rc<dyn IXamlType>, name: &str) -> Rc<dyn IXamlMethod> {
 /// The runtime library types are the ones of the shared table, with their members, and the
 /// Rust types the table lists are values of them.
 #[test]
+fn the_old_names_of_renamed_types_survive_the_model_file() {
+    let mut assembly = AssemblyModel::new("Example", "fixture");
+    assembly.metadata = vec![
+        ("FerroXmlnsTypeAlias https://example.org/old Chart".to_string(), "LiveChart".to_string()),
+        ("FerroXamlCreateSourceInfo".to_string(), "true".to_string()),
+    ];
+    let assembly = AssemblyModel::parse(&assembly.to_json()).unwrap();
+    let system = ModelTypeSystem::new(vec![assembly]);
+    let aliases = system.find_assembly("Example").expect("the assembly").xmlns_type_aliases();
+    assert_eq!(aliases.len(), 1);
+    assert_eq!(
+        (aliases[0].xml_namespace.as_str(), aliases[0].name.as_str(), aliases[0].type_name.as_str()),
+        ("https://example.org/old", "Chart", "LiveChart")
+    );
+}
+
+#[test]
 fn runtime_library_types_are_defined_from_the_table() {
     let system = fixture();
     let well_known = system.well_known_types();

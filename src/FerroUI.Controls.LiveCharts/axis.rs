@@ -8,13 +8,13 @@ use ferroui_base::{
 use ferroui_base::{FerroObjectImplExt, FerroPropertyChangedEventArgs};
 use ferroui_livecharts::{Axis as AxisSnapshot, AxisPosition, Labeler};
 #[repr(C)]
-pub struct Axis {
+pub struct LiveAxis {
     base: FerroObject,
 }
-ferro_class!(Axis: FerroObject);
-ferro_class_info!(Axis { new: Axis::new });
-impl FerroObjectImpl for Axis {}
-impl Axis {
+ferro_class!(LiveAxis: FerroObject);
+ferro_class_info!(LiveAxis { new: LiveAxis::new });
+impl FerroObjectImpl for LiveAxis {}
+impl LiveAxis {
     pub fn construct() -> Self {
         Self {
             base: FerroObject::construct(),
@@ -52,81 +52,81 @@ impl Axis {
         }
     }
 }
-ferro_properties! { impl Axis {
+ferro_properties! { impl LiveAxis {
     pub fn name_property() -> StyledProperty<String> {
-        FerroProperty::register::<Axis, _>("Name", String::new())
+        FerroProperty::register::<LiveAxis, _>("Name", String::new())
     }
     pub fn labels_property() -> StyledProperty<Vec<String>> {
-        FerroProperty::register::<Axis, _>("Labels", Vec::new())
+        FerroProperty::register::<LiveAxis, _>("Labels", Vec::new())
     }
     pub fn min_limit_property() -> StyledProperty<Option<f64>> {
-        FerroProperty::register::<Axis, _>("MinLimit", None)
+        FerroProperty::register::<LiveAxis, _>("MinLimit", None)
     }
     pub fn max_limit_property() -> StyledProperty<Option<f64>> {
-        FerroProperty::register::<Axis, _>("MaxLimit", None)
+        FerroProperty::register::<LiveAxis, _>("MaxLimit", None)
     }
     pub fn min_step_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("MinStep", 0.0)
+        FerroProperty::register::<LiveAxis, _>("MinStep", 0.0)
     }
     pub fn force_step_property() -> StyledProperty<bool> {
-        FerroProperty::register::<Axis, _>("ForceStep", false)
+        FerroProperty::register::<LiveAxis, _>("ForceStep", false)
     }
     pub fn unit_width_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("UnitWidth", 1.0)
+        FerroProperty::register::<LiveAxis, _>("UnitWidth", 1.0)
     }
     pub fn inverted_property() -> StyledProperty<bool> {
-        FerroProperty::register::<Axis, _>("IsInverted", false)
+        FerroProperty::register::<LiveAxis, _>("IsInverted", false)
     }
     pub fn visible_property() -> StyledProperty<bool> {
-        FerroProperty::register::<Axis, _>("IsVisible", true)
+        FerroProperty::register::<LiveAxis, _>("IsVisible", true)
     }
     pub fn show_separator_lines_property() -> StyledProperty<bool> {
-        FerroProperty::register::<Axis, _>("ShowSeparatorLines", true)
+        FerroProperty::register::<LiveAxis, _>("ShowSeparatorLines", true)
     }
     pub fn position_property() -> StyledProperty<AxisPosition> {
-        FerroProperty::register::<Axis, _>("Position", AxisPosition::Start)
+        FerroProperty::register::<LiveAxis, _>("Position", AxisPosition::Start)
     }
     pub fn text_size_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("TextSize", 16.0)
+        FerroProperty::register::<LiveAxis, _>("TextSize", 16.0)
     }
     pub fn labels_rotation_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("LabelsRotation", 0.0)
+        FerroProperty::register::<LiveAxis, _>("LabelsRotation", 0.0)
     }
     pub fn labels_color_property() -> StyledProperty<Color> {
-        FerroProperty::register::<Axis, _>("LabelsColor", Color::from_rgb(75,85,99))
+        FerroProperty::register::<LiveAxis, _>("LabelsColor", Color::from_rgb(75,85,99))
     }
     pub fn separators_color_property() -> StyledProperty<Color> {
-        FerroProperty::register::<Axis, _>("SeparatorsColor", Color::from_argb(50,107,114,128))
+        FerroProperty::register::<LiveAxis, _>("SeparatorsColor", Color::from_argb(50,107,114,128))
     }
     pub fn logarithmic_base_property() -> StyledProperty<Option<f64>> {
-        FerroProperty::register::<Axis, _>("LogarithmicBase", None)
+        FerroProperty::register::<LiveAxis, _>("LogarithmicBase", None)
     }
     pub fn padding_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("Padding", 0.0)
+        FerroProperty::register::<LiveAxis, _>("Padding", 0.0)
     }
     pub fn min_separators_property() -> StyledProperty<u32> {
-        FerroProperty::register::<Axis, _>("MinSeparators", 3)
+        FerroProperty::register::<LiveAxis, _>("MinSeparators", 3)
     }
     pub fn labels_angle_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("LabelsAngle", 0.0)
+        FerroProperty::register::<LiveAxis, _>("LabelsAngle", 0.0)
     }
     pub fn custom_separators_property() -> StyledProperty<Vec<f64>> {
-        FerroProperty::register::<Axis, _>("CustomSeparators", Vec::new())
+        FerroProperty::register::<LiveAxis, _>("CustomSeparators", Vec::new())
     }
     pub fn labels_padding_property() -> StyledProperty<Option<f64>> {
-        FerroProperty::register::<Axis, _>("LabelsPadding", None)
+        FerroProperty::register::<LiveAxis, _>("LabelsPadding", None)
     }
     pub fn labels_density_property() -> StyledProperty<f64> {
-        FerroProperty::register::<Axis, _>("LabelsDensity", 0.85)
+        FerroProperty::register::<LiveAxis, _>("LabelsDensity", 0.85)
     }
     pub fn labeler_property() -> StyledProperty<Option<Labeler>> {
-        FerroProperty::register::<Axis, _>("Labeler", None)
+        FerroProperty::register::<LiveAxis, _>("Labeler", None)
     }
     pub fn labels_background_property() -> StyledProperty<Option<Color>> {
-        FerroProperty::register::<Axis, _>("LabelsBackground", None)
+        FerroProperty::register::<LiveAxis, _>("LabelsBackground", None)
     }
 } }
-impl Axis {
+impl LiveAxis {
     pub fn name(&self) -> String {
         self.get_value(Self::name_property())
     }
@@ -274,14 +274,14 @@ impl Axis {
 }
 
 #[repr(C)]
-pub struct DateTimeAxis {
-    base: Axis,
+pub struct LiveDateTimeAxis {
+    base: LiveAxis,
 }
-ferro_class!(DateTimeAxis: Axis);
-ferro_class_info!(DateTimeAxis {
-    new: DateTimeAxis::new
+ferro_class!(LiveDateTimeAxis: LiveAxis);
+ferro_class_info!(LiveDateTimeAxis {
+    new: LiveDateTimeAxis::new
 });
-impl FerroObjectImpl for DateTimeAxis {
+impl FerroObjectImpl for LiveDateTimeAxis {
     fn constructed(this: &Self) {
         Self::parent_constructed(this);
         this.apply_interval();
@@ -297,10 +297,10 @@ impl FerroObjectImpl for DateTimeAxis {
         }
     }
 }
-impl DateTimeAxis {
+impl LiveDateTimeAxis {
     pub fn construct() -> Self {
         Self {
-            base: Axis::construct(),
+            base: LiveAxis::construct(),
         }
     }
     pub fn new() -> Ref<Self> {
@@ -315,15 +315,15 @@ impl DateTimeAxis {
         self.set_labeler(Some(Labeler::date_time_format(self.date_format())));
     }
 }
-ferro_properties! { impl DateTimeAxis {
+ferro_properties! { impl LiveDateTimeAxis {
     pub fn interval_property() -> StyledProperty<SignedDuration> {
-        FerroProperty::register::<DateTimeAxis, _>("Interval", SignedDuration::from_ticks(SignedDuration::TICKS_PER_DAY))
+        FerroProperty::register::<LiveDateTimeAxis, _>("Interval", SignedDuration::from_ticks(SignedDuration::TICKS_PER_DAY))
     }
     pub fn date_format_property() -> StyledProperty<String> {
-        FerroProperty::register::<DateTimeAxis, _>("DateFormat", String::from("d"))
+        FerroProperty::register::<LiveDateTimeAxis, _>("DateFormat", String::from("d"))
     }
 } }
-impl DateTimeAxis {
+impl LiveDateTimeAxis {
     pub fn interval(&self) -> SignedDuration {
         self.get_value(Self::interval_property())
     }
@@ -340,9 +340,9 @@ impl DateTimeAxis {
 
 #[repr(C)]
 pub struct TimeSpanAxis {
-    base: Axis,
+    base: LiveAxis,
 }
-ferro_class!(TimeSpanAxis: Axis);
+ferro_class!(TimeSpanAxis: LiveAxis);
 ferro_class_info!(TimeSpanAxis {
     new: TimeSpanAxis::new
 });
@@ -365,7 +365,7 @@ impl FerroObjectImpl for TimeSpanAxis {
 impl TimeSpanAxis {
     pub fn construct() -> Self {
         Self {
-            base: Axis::construct(),
+            base: LiveAxis::construct(),
         }
     }
     pub fn new() -> Ref<Self> {

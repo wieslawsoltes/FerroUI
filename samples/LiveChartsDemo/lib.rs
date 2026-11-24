@@ -11,7 +11,7 @@ use ferroui_base::media::FontManagerOptions;
 use ferroui_base::metadata::MarkupAssembly;
 use ferroui_base::{Ref, Size};
 use ferroui_controls::{AppBuilder, Application, Button, Control, Grid, TextBlock, Window};
-use ferroui_controls_livecharts::{Chart, ChartKind};
+use ferroui_controls_livecharts::{LiveChart, ChartKind};
 use ferroui_fonts_inter::AppBuilderExtension;
 use ferroui_livecharts::kernel::Coordinate;
 use ferroui_markup_xaml::xaml_il::runtime::XamlIlRuntimeHelpers;
@@ -105,7 +105,7 @@ impl DemoView {
         Self { root, step }
     }
 
-    pub fn chart(&self, index: usize) -> Ref<Chart> {
+    pub fn chart(&self, index: usize) -> Ref<LiveChart> {
         self.root.get_control(CHART_NAMES[index])
     }
 
@@ -151,7 +151,7 @@ impl DemoView {
     }
 }
 
-fn chart(root: &Grid, name: &str) -> Ref<Chart> {
+fn chart(root: &Grid, name: &str) -> Ref<LiveChart> {
     root.get_control(name)
 }
 

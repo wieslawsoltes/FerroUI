@@ -18,7 +18,7 @@ use ferroui_base::metadata::{MarkupInvoke, MarkupInvokeError, MarkupType, Markup
 use ferroui_base::{BoxedValue, FerroProperty, TypeInfo};
 use xamlx::exceptions::{XamlError, XamlResult};
 use xamlx::type_system::{
-    AnonymousParameterInfo, IXamlAssembly, IXamlConstructor, IXamlCustomAttribute, IXamlEventInfo,
+    XmlnsTypeAlias, AnonymousParameterInfo, IXamlAssembly, IXamlConstructor, IXamlCustomAttribute, IXamlEventInfo,
     IXamlField, IXamlMember, IXamlMethod, IXamlParameterInfo, IXamlProperty, IXamlType,
     XamlPseudoType, XamlTypeId, XamlValue,
 };
@@ -1334,6 +1334,10 @@ impl IXamlAssembly for RuntimeAssembly {
     }
     fn custom_attributes(&self) -> Vec<Rc<dyn IXamlCustomAttribute>> {
         self.attributes.borrow().clone()
+    }
+    fn xmlns_type_aliases(&self) -> Vec<XmlnsTypeAlias> {
+        let Some(assembly) = ferroui_base::metadata::MarkupAssembly::find(&self.name) else { return Vec::new() };
+        assembly.metadata.iter().filter_map(|(key, value)| XmlnsTypeAlias::from_metadata(key, value)).collect()
     }
     fn find_type(&self, full_name: &str) -> Option<Rc<dyn IXamlType>> {
         let system = self.system.upgrade()?;

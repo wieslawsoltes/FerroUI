@@ -58,8 +58,6 @@ open FerroUI.Diagnostics.ViewModels # #1280
 open FerroUI.Diagnostics.Views # #1280
 open FerroUI.Dialogs # #1280
 open FerroUI.Interactivity # #1280
-open FerroUI.LiveCharts # #1281
-open FerroUI.LiveCharts.Core # #1281
 open FerroUI.Markup.Xaml # #1280
 open FerroUI.Markup.Xaml.Converters # #1280
 open FerroUI.Markup.Xaml.Diagnostics # #1280
@@ -76,19 +74,12 @@ open FerroUI.Rendering # #1280
 open FerroUI.Utilities # #1280
 open FerroUI.View # #1280
 open FerroUI.Xaml.Interactions.DragAndDrop.Controls # #1280
-open ReactiveUI.FerroUI # #1281
 
-# Other XML namespaces, kept as aliases once their types are mapped (#1281).
-uri http://reactiveui.net # #1281
-uri https://ferroui.dev/livecharts # #1281
-uri https://ferroui.dev/livecharts/core # #1281
-uri https://github.com/ferroui/charts # #1281
-uri https://github.com/protranslate/xaml # #1281
+# Other XML namespaces: existing markup keeps working through them (#1281).
+uri http://reactiveui.net # kept as an alias of the default XML namespace (#1281)
+uri https://ferroui.dev/livecharts # kept as an alias of the default XML namespace (#1281)
+uri https://ferroui.dev/livecharts/core # kept as an alias of the default XML namespace (#1281)
+uri https://github.com/ferroui/charts # kept as an alias of the default XML namespace (#1281)
+uri https://github.com/protranslate/xaml # kept as an alias of the default XML namespace (#1281)
 
 # Names in two namespaces. The decisions are in docs/porting/default-xml-namespace.md.
-collision AreaSeries # decision 3
-collision Axis # decision 3
-collision Chart # decision 3
-collision ChartSeriesCollection # decision 3
-collision DateTimeAxis # decision 3
-collision LineSeries # decision 3

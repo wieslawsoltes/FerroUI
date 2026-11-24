@@ -10,7 +10,7 @@ use ferroui_base::interactivity::RoutedEventArgs;
 use ferroui_base::media::Color;
 use ferroui_base::Ref;
 use ferroui_controls::{Button, CheckBox, ComboBox, Control, Grid, Slider, TextBlock, ToggleSwitch};
-use ferroui_controls_livecharts::{Axis, CartesianChart, ChartSeries, LegendPosition, SeriesKind};
+use ferroui_controls_livecharts::{LiveAxis, CartesianChart, ChartSeries, LegendPosition, SeriesKind};
 
 fn page() -> Ref<Control> {
     examples::create(examples::find("Chart").unwrap()).unwrap()
@@ -24,11 +24,11 @@ fn series(chart: &CartesianChart, index: usize) -> Ref<ChartSeries> {
     chart.series().get(index)
 }
 
-fn x_axis(chart: &CartesianChart) -> Ref<Axis> {
+fn x_axis(chart: &CartesianChart) -> Ref<LiveAxis> {
     chart.x_axes().get(0)
 }
 
-fn y_axis(chart: &CartesianChart) -> Ref<Axis> {
+fn y_axis(chart: &CartesianChart) -> Ref<LiveAxis> {
     chart.y_axes().get(0)
 }
 

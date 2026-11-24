@@ -12,8 +12,8 @@ use ferroui_controls::testing::{MockWindowingPlatform, TestServices, UnitTestApp
 use ferroui_controls::Window;
 use ferroui_livecharts::SeriesKind;
 
-fn cartesian() -> Ref<Chart> {
-    let chart = Chart::new();
+fn cartesian() -> Ref<LiveChart> {
+    let chart = LiveChart::new();
     chart.set_animations_speed(0.0);
     chart.set_zoom_mode(ZoomAndPanMode::BOTH);
     chart.set_draw_margin(Some(Rect::new(20.0, 20.0, 600.0, 320.0)));
@@ -22,7 +22,7 @@ fn cartesian() -> Ref<Chart> {
     series.set_numeric_values([0.0, 10.0]);
     chart.series().add(series);
     for axes in [chart.x_axes(), chart.y_axes()] {
-        axes.add(Axis::new());
+        axes.add(LiveAxis::new());
         axes.get(0).set_min_limit(Some(0.0));
         axes.get(0).set_max_limit(Some(10.0));
         axes.get(0).set_padding(0.0);
@@ -33,7 +33,7 @@ fn cartesian() -> Ref<Chart> {
 fn mouse() -> Rc<dyn IPointer> {
     Pointer::new(Pointer::get_next_free_id(), PointerType::Mouse, true)
 }
-fn attach(chart: &Ref<Chart>) -> Ref<Window> {
+fn attach(chart: &Ref<LiveChart>) -> Ref<Window> {
     let window = Window::with_impl(MockWindowingPlatform::create_window_mock_with_size(
         640.0, 360.0,
     ));
@@ -43,7 +43,7 @@ fn attach(chart: &Ref<Chart>) -> Ref<Window> {
     assert!(chart.presentation_source().is_some());
     window
 }
-fn press(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, kind: PointerUpdateKind, position: Point) {
+fn press(chart: &Ref<LiveChart>, pointer: &Rc<dyn IPointer>, kind: PointerUpdateKind, position: Point) {
     let root = chart.visual_root().expect("pointer fixture is attached");
     let position = chart.translate_point(position, &root).unwrap();
     let args = PointerPressedEventArgs::new(
@@ -56,9 +56,9 @@ fn press(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, kind: PointerUpdateKind
         KeyModifiers::NONE,
         1,
     );
-    <Chart as InputElementImpl>::on_pointer_pressed(chart, &args);
+    <LiveChart as InputElementImpl>::on_pointer_pressed(chart, &args);
 }
-fn release(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, button: MouseButton, position: Point) {
+fn release(chart: &Ref<LiveChart>, pointer: &Rc<dyn IPointer>, button: MouseButton, position: Point) {
     let root = chart.visual_root().expect("pointer fixture is attached");
     let position = chart.translate_point(position, &root).unwrap();
     let kind = if button == MouseButton::Right {
@@ -76,7 +76,7 @@ fn release(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, button: MouseButton, 
         KeyModifiers::NONE,
         button,
     );
-    <Chart as InputElementImpl>::on_pointer_released(chart, &args);
+    <LiveChart as InputElementImpl>::on_pointer_released(chart, &args);
 }
 
 #[test]
@@ -100,7 +100,7 @@ fn wheel_and_programmatic_zoom_ignore_axis_labels_and_outside_plot() {
         KeyModifiers::NONE,
         Vector::new(0.0, 1.0),
     );
-    <Chart as InputElementImpl>::on_pointer_wheel_changed(&chart, &args);
+    <LiveChart as InputElementImpl>::on_pointer_wheel_changed(&chart, &args);
     assert!(!args.handled());
     assert_eq!(axis.max_limit(), Some(10.0));
 }
@@ -147,19 +147,19 @@ fn logarithmic_inverted_zoom_keeps_pointer_value_fixed() {
 #[test]
 fn polar_multiple_axes_convert_in_control_coordinates_with_title_layout() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let chart = Chart::new();
+    let chart = LiveChart::new();
     chart.set_chart_kind(ChartKind::Polar);
     chart.set_title("Independent polar axes".into());
     chart.set_initial_rotation(-90.0);
     chart.set_animations_speed(0.0);
-    chart.x_axes().add(Axis::new());
-    chart.y_axes().add(Axis::new());
-    let angle = Axis::new();
+    chart.x_axes().add(LiveAxis::new());
+    chart.y_axes().add(LiveAxis::new());
+    let angle = LiveAxis::new();
     angle.set_min_limit(Some(0.0));
     angle.set_max_limit(Some(8.0));
     angle.set_inverted(true);
     chart.x_axes().add(angle);
-    let radius = Axis::new();
+    let radius = LiveAxis::new();
     radius.set_min_limit(Some(0.0));
     radius.set_max_limit(Some(100.0));
     chart.y_axes().add(radius);
@@ -195,11 +195,11 @@ fn polar_multiple_axes_convert_in_control_coordinates_with_title_layout() {
 #[test]
 fn virtual_axes_support_input_without_mutating_the_declared_collections() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let chart = Chart::new();
+    let chart = LiveChart::new();
     chart.set_animations_speed(0.0);
     chart.set_zoom_mode(ZoomAndPanMode::BOTH);
     chart.set_draw_margin(Some(Rect::new(20.0, 20.0, 600.0, 320.0)));
-    let series = crate::LineSeries::new();
+    let series = crate::LiveLineSeries::new();
     series.set_numeric_values([0.0, 10.0]);
     chart.series().add(series.upcast());
     let size = Size::new(640.0, 360.0);
@@ -216,7 +216,7 @@ fn virtual_axes_support_input_without_mutating_the_declared_collections() {
     chart.scene(size).unwrap();
     assert_eq!(chart.axis_scales().0[0], before);
 
-    let declared = Axis::new();
+    let declared = LiveAxis::new();
     declared.set_min_limit(Some(20.0));
     declared.set_max_limit(Some(40.0));
     chart.x_axes().add(declared.clone());
@@ -299,7 +299,7 @@ fn middle_button_is_ignored_and_escape_releases_real_pointer_capture() {
     assert!(chart.pointer_down.get().is_some());
     let mut escape = KeyEventArgs::new();
     escape.key = Key::Escape;
-    <Chart as InputElementImpl>::on_key_down(&chart, &escape);
+    <LiveChart as InputElementImpl>::on_key_down(&chart, &escape);
     assert!(escape.handled());
     assert!(pointer.captured().is_none());
     assert!(chart.pointer_down.get().is_none());
@@ -365,15 +365,15 @@ fn right_button_section_and_inverted_trigger_use_distinct_gestures() {
 // GeoMapReattachTests, GeoMapAnimationTests and ChartInteractiveApiTests that need a host.
 
 /// The fixture of GeoMapEventsTests: a Mercator map with Russia at 42.
-fn geo_map() -> Ref<Chart> {
-    let chart = crate::GeoMap::new().upcast::<Chart>();
+fn geo_map() -> Ref<LiveChart> {
+    let chart = crate::GeoMap::new().upcast::<LiveChart>();
     chart.set_map_projection(ferroui_livecharts::MapProjection::Mercator);
     let series = crate::HeatLandSeries::new();
     series.lands().add(crate::HeatLand::with_value("rus", 42.0));
     chart.series().add(series.upcast());
     chart
 }
-fn moved(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, position: Point) {
+fn moved(chart: &Ref<LiveChart>, pointer: &Rc<dyn IPointer>, position: Point) {
     let root = chart.visual_root().expect("pointer fixture is attached");
     let position = chart.translate_point(position, &root).unwrap();
     let args = PointerEventArgs::new(
@@ -386,9 +386,9 @@ fn moved(chart: &Ref<Chart>, pointer: &Rc<dyn IPointer>, position: Point) {
         PointerPointProperties::new(RawInputModifiers::NONE, PointerUpdateKind::Other),
         KeyModifiers::NONE,
     );
-    <Chart as InputElementImpl>::on_pointer_moved(chart, &args);
+    <LiveChart as InputElementImpl>::on_pointer_moved(chart, &args);
 }
-fn clicks(chart: &Ref<Chart>) -> (Rc<RefCell<Vec<ChartPointerEventArgs>>>, Subscription) {
+fn clicks(chart: &Ref<LiveChart>) -> (Rc<RefCell<Vec<ChartPointerEventArgs>>>, Subscription) {
     let captured = Rc::new(RefCell::new(Vec::new()));
     let sink = captured.clone();
     let subscription = Subscription::new(
@@ -470,7 +470,7 @@ fn geo_map_hover_transitions_report_each_land() {
     let mouse = mouse();
     moved(&chart, &mouse, paris);
     moved(&chart, &mouse, berlin);
-    <Chart as InputElementImpl>::on_pointer_exited(
+    <LiveChart as InputElementImpl>::on_pointer_exited(
         &chart,
         &PointerEventArgs::new(
             Some(&ferroui_base::input::InputElement::pointer_exited_event()),
@@ -498,7 +498,7 @@ fn geo_map_hover_transitions_report_each_land() {
 #[test]
 fn geo_map_tooltip_formatter_writes_each_value_of_the_hovered_land() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let chart = crate::GeoMap::new().upcast::<Chart>();
+    let chart = crate::GeoMap::new().upcast::<LiveChart>();
     chart.set_map_projection(ferroui_livecharts::MapProjection::Mercator);
     for (name, value) in [("Pop", 67.5), ("GDP", 2937.0)] {
         let series = crate::HeatLandSeries::new();
@@ -622,7 +622,7 @@ fn geo_map_wheel_zoom_and_drag_pan_follow_the_interaction_mode() {
             KeyModifiers::NONE,
             Vector::new(0.0, delta),
         );
-        <Chart as InputElementImpl>::on_pointer_wheel_changed(&chart, &args);
+        <LiveChart as InputElementImpl>::on_pointer_wheel_changed(&chart, &args);
         args.handled()
     };
     // MapInteractionMode.None by default.
@@ -655,7 +655,7 @@ fn geo_map_wheel_zoom_and_drag_pan_follow_the_interaction_mode() {
 #[test]
 fn a_needle_turns_to_its_new_value() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let chart = Chart::new();
+    let chart = LiveChart::new();
     chart.set_chart_kind(ChartKind::Pie);
     chart.set_animations_speed(1000.0);
     chart.set_initial_rotation(-225.0);
@@ -708,7 +708,7 @@ fn a_needle_turns_to_its_new_value() {
 #[test]
 fn heat_cells_take_their_colours_at_the_first_draw() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
-    let chart = Chart::new();
+    let chart = LiveChart::new();
     chart.set_animations_speed(1000.0);
     let series = crate::HeatSeries::new();
     series.set_coordinates([
@@ -719,7 +719,7 @@ fn heat_cells_take_their_colours_at_the_first_draw() {
     ]);
     chart.series().add(series.upcast());
     for axes in [chart.x_axes(), chart.y_axes()] {
-        axes.add(Axis::new());
+        axes.add(LiveAxis::new());
         axes.get(0).set_min_limit(Some(-0.5));
         axes.get(0).set_max_limit(Some(1.5));
     }
@@ -764,7 +764,7 @@ fn heat_cells_take_their_colours_at_the_first_draw() {
 fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let size = Size::new(300.0, 300.0);
-    let chart = Chart::new();
+    let chart = LiveChart::new();
     chart.set_animations_speed(0.0);
     let series = ChartSeries::new();
     series.set_kind(SeriesKind::Column);
@@ -772,7 +772,7 @@ fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
     series.set_data_padding(Point::new(0.0, 0.0));
     chart.series().add(series);
     for axes in [chart.x_axes(), chart.y_axes()] {
-        axes.add(Axis::new());
+        axes.add(LiveAxis::new());
         axes.get(0).set_visible(false);
     }
     let scene = chart.scene(size).unwrap();
@@ -793,7 +793,7 @@ fn tooltip_is_placed_by_the_hover_areas_of_the_found_points() {
     let bottom = chart.tooltip_origin(&hovered, tooltip, size);
     assert!((bottom.y - bar.y).abs() < 1e-6, "the source anchors at the end of the bar");
     // A map anchors at the centre of the land.
-    let map = Chart::new();
+    let map = LiveChart::new();
     map.set_chart_kind(ChartKind::GeoMap);
     map.set_tooltip_position(TooltipPosition::Auto);
     let land = HitRegion {

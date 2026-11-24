@@ -12,6 +12,8 @@ use super::XamlLanguageTypeMappings;
 pub struct XamlXmlnsMappings {
     /// XML namespace -> list of (assembly, CLR namespace).
     pub namespaces: HashMap<String, Vec<(Rc<dyn IXamlAssembly>, String)>>,
+    /// XML namespace -> the names it keeps for renamed types -> the names of the types.
+    pub type_aliases: HashMap<String, HashMap<String, String>>,
 }
 
 impl XamlXmlnsMappings {
@@ -25,6 +27,9 @@ impl XamlXmlnsMappings {
     ) -> XamlResult<Self> {
         let mut rv = XamlXmlnsMappings::new();
         for asm in type_system.assemblies() {
+            for alias in asm.xmlns_type_aliases() {
+                rv.type_aliases.entry(alias.xml_namespace).or_default().insert(alias.name, alias.type_name);
+            }
             for attr in asm.custom_attributes() {
                 for xmlns_type in &type_mappings.xmlns_attributes {
                     if attr.type_().equals(&**xmlns_type) {

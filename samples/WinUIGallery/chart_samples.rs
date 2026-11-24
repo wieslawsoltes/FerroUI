@@ -4,7 +4,7 @@
 //!
 //! The source binds its arrays with `x:Bind` (`Months`, `Profits` and the others) into
 //! `charts:Samples`; the port sets the values of the series and the labels of the category axes
-//! from the same arrays. The `DateTimeAxis` of the time series is an axis over the days of the
+//! from the same arrays. The `LiveDateTimeAxis` of the time series is an axis over the days of the
 //! range, labelled per day, whose separators are the ticks of the interval type.
 
 use ferroui_base::media::Color;
@@ -12,7 +12,7 @@ use ferroui_base::{ObjectType, Ref, WeakRef};
 use ferroui_controls::primitives::{RangeBase, SelectingItemsControl, ToggleButton};
 use ferroui_controls::{Button, CheckBox, ComboBox, Control, Slider, TextBlock, ToggleSwitch};
 use ferroui_controls_livecharts::{
-    AreaSeries, Axis, CartesianChart, ChartPoint, ChartPoints, ChartSeries, LegendPosition,
+    LiveAreaSeries, LiveAxis, CartesianChart, ChartPoint, ChartPoints, ChartSeries, LegendPosition,
     SeriesKind,
 };
 use std::cell::{Cell, RefCell};
@@ -91,8 +91,8 @@ fn is_checked(check: &WeakRef<CheckBox>) -> bool {
 /// The series and the first axes of a chart of the page.
 struct ChartParts {
     series: Vec<Ref<ChartSeries>>,
-    x: Ref<Axis>,
-    y: Ref<Axis>,
+    x: Ref<LiveAxis>,
+    y: Ref<LiveAxis>,
 }
 
 fn parts(chart: &CartesianChart) -> Option<ChartParts> {
@@ -217,7 +217,7 @@ fn wire_bar(root: &Ref<Control>) {
 
 /// The separators of the visitors axis for a `GridLines` option: none, the major interval (the
 /// forced step of 20, `Spacing`), or the minor interval of 10 as well.
-fn apply_grid_lines(axis: &Axis, index: i32) {
+fn apply_grid_lines(axis: &LiveAxis, index: i32) {
     match index {
         0 => {
             axis.set_show_separator_lines(false);
@@ -436,14 +436,14 @@ fn wire_time_series(root: &Ref<Control>) {
     let interval = root.get_control::<ComboBox>("IntervalTypeComboBox");
     let format = root.get_control::<ComboBox>("LabelFormatComboBox");
     // CreateTimeSeriesChart.
-    let time_axis = Axis::new();
+    let time_axis = LiveAxis::new();
     time_axis.set_name("Date".to_owned());
     time_axis.set_min_limit(Some(0.0));
     time_axis.set_max_limit(Some(TIME_AXIS_DAYS as f64));
-    let temperature = Axis::new();
+    let temperature = LiveAxis::new();
     temperature.set_name("Temperature (\u{b0}F)".to_owned());
     temperature.set_show_separator_lines(true);
-    let series = AreaSeries::new();
+    let series = LiveAreaSeries::new();
     series.set_name("Temperature".to_owned());
     series.set_line_smoothness(0.0);
     series.set_geometry_size(0.0);

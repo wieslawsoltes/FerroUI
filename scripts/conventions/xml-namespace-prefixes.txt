@@ -1,5 +1,7 @@
 # Prefixes for mapped built-in namespaces still in markup and docs (#1282, #1283, #1284).
 # Generated: cargo run -p ferroui-build-scan --example xml_namespaces -- --write-prefixes
+CHANGELOG.md	https://ferroui.dev/livecharts	1
+docs/mvvm.md	ReactiveUI.FerroUI	1
 docs/porting/macos26-theme.md	FerroUI.Themes.MacOS	1
 docs/porting/material-chips.md	FerroUI.Themes.Material	1
 docs/porting/material-theme.md	FerroUI.Themes.Material	3
@@ -7,11 +9,14 @@ docs/porting/winui-theme.md	FerroUI.Themes.WinUI	1
 docs/protranslate.md	https://github.com/protranslate/xaml	1
 samples/BehaviorsGallery/pages/AttentionAnimationsView.xaml	FerroUI.Xaml.Interactions.Custom	1
 samples/BehaviorsGallery/pages/ClickEventTriggerView.xaml	FerroUI.Controls.Primitives	1
+samples/BehaviorsGallery/pages/DetailPageView.xaml	ReactiveUI.FerroUI	1
 samples/BehaviorsGallery/pages/EntranceAnimationsView.xaml	FerroUI.Xaml.Interactions.Custom	1
 samples/BehaviorsGallery/pages/ExitAnimationsView.xaml	FerroUI.Xaml.Interactions.Custom	1
 samples/BehaviorsGallery/pages/FadeAnimationView.xaml	FerroUI.Xaml.Interactions.Custom	1
 samples/BehaviorsGallery/pages/FramerMotionAnimationsView.xaml	FerroUI.Xaml.Interactions.Custom	1
+samples/BehaviorsGallery/pages/HomePageView.xaml	ReactiveUI.FerroUI	1
 samples/BehaviorsGallery/pages/PropertyValidationBehaviorView.xaml	FerroUI.Xaml.Interactions.Custom	1
+samples/BehaviorsGallery/pages/ReactiveNavigationView.xaml	ReactiveUI.FerroUI	1
 samples/BehaviorsGallery/pages/RotateAnimationView.xaml	FerroUI.Xaml.Interactions.Custom	1
 samples/BehaviorsGallery/pages/ScaleAnimationView.xaml	FerroUI.Xaml.Interactions.Custom	1
 samples/BehaviorsGallery/pages/SpecialAnimationsView.xaml	FerroUI.Xaml.Interactions.Custom	1
@@ -40,6 +45,15 @@ samples/MaterialThemeGallery/Pages/TimePickersPage.xaml	FerroUI.Themes.Material	
 samples/ProTranslateDemo/MainWindow.xaml	https://github.com/protranslate/xaml	1
 samples/ReactiveDemo/CrateDetailsView.xaml	http://reactiveui.net	1
 samples/ReactiveDemo/MainWindow.xaml	http://reactiveui.net	1
+samples/ReactiveUIExample/Views/CommandLabView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/DynamicDataView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/FeatureView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/MainView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/MainWindow.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/MemoryMetricCardView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/MetricsView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/OverviewView.xaml	ReactiveUI.FerroUI	1
+samples/ReactiveUIExample/Views/PerformanceMetricCardView.xaml	ReactiveUI.FerroUI	1
 samples/WinUIGallery/Pages/Chart.xaml	https://ferroui.dev/livecharts	1
 samples/WinUIGallery/Pages/ColorPicker.xaml	FerroUI.Controls.Primitives	1
 samples/WinUIThemeGallery/Pages/ComboBoxPage.xaml	FerroUI.Data	1
