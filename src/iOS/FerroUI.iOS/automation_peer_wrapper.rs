@@ -209,11 +209,13 @@ enum PropertySetter {
 }
 
 /// The automation properties a wrapper follows, each with its setter.
-fn property_setters() -> [(&'static AutomationProperty, PropertySetter); 9] {
+fn property_setters() -> [(&'static AutomationProperty, PropertySetter); 10] {
     [
         (AutomationElementIdentifiers::automation_id_property(), PropertySetter::AutomationId),
         (AutomationElementIdentifiers::name_property(), PropertySetter::Name),
         (AutomationElementIdentifiers::help_text_property(), PropertySetter::HelpText),
+        // The hint carries the full description after the help text.
+        (AutomationElementIdentifiers::full_description_property(), PropertySetter::HelpText),
         (AutomationElementIdentifiers::bounding_rectangle_property(), PropertySetter::BoundingRectangle),
         (RangeValuePatternIdentifiers::is_read_only_property(), PropertySetter::IsReadOnly),
         (RangeValuePatternIdentifiers::value_property(), PropertySetter::Value),
@@ -274,7 +276,10 @@ impl AutomationPeerWrapper {
 
     fn create(parent: Option<Weak<AutomationPeerWrapper>>, view: Rc<dyn IWrapperView>, peer: Ref<AutomationPeer>) -> Rc<Self> {
         let control_type = peer.get_automation_control_type();
-        let is_container = is_container_type(control_type);
+        // Deviation (DEVIATIONS.md, Automation peers): an element with a landmark type is a
+        // landmark container, which the reference does not have.
+        let is_landmark = peer.get_landmark_type().is_some();
+        let is_container = is_container_type(control_type) || is_landmark;
 
         let this = Rc::new_cyclic(|this: &Weak<Self>| Self {
             this: this.clone(),
@@ -295,7 +300,9 @@ impl AutomationPeerWrapper {
             // told otherwise.
             accessibility_responds_to_user_interaction: Cell::new(true),
             is_accessibility_element: Cell::new(!is_container),
-            accessibility_container_type: Cell::new(if is_container {
+            accessibility_container_type: Cell::new(if is_landmark {
+                AccessibilityContainerType::Landmark
+            } else if is_container {
                 AccessibilityContainerType::SemanticGroup
             } else {
                 AccessibilityContainerType::None
@@ -442,8 +449,16 @@ impl AutomationPeerWrapper {
         *self.accessibility_label.borrow_mut() = Some(self.peer.get_name());
     }
 
+    /// The help text, then the full description (AutomationProperties.FullDescription), each when
+    /// the element has it: UIKit has one hint.
     fn update_help_text(&self) {
-        *self.accessibility_hint.borrow_mut() = Some(self.peer.get_help_text());
+        let help = self.peer.get_help_text();
+        let hint = match self.peer.get_full_description() {
+            Some(description) if help.is_empty() => description,
+            Some(description) => format!("{help}\n{description}"),
+            None => help,
+        };
+        *self.accessibility_hint.borrow_mut() = Some(hint);
     }
 
     fn update_bounding_rectangle(&self) {
@@ -530,6 +545,8 @@ impl AutomationPeerWrapper {
                 && !self.peer.get_name().chars().all(char::is_whitespace);
             self.set_accessibility_container_type(if is_named_selection_item {
                 AccessibilityContainerType::None
+            } else if self.peer.get_landmark_type().is_some() {
+                AccessibilityContainerType::Landmark
             } else {
                 AccessibilityContainerType::SemanticGroup
             });
@@ -1083,6 +1100,25 @@ mod tests {
         // A child that is off the screen is passed over.
         AutomationProperties::set_is_offscreen_behavior(&check_box, IsOffscreenBehavior::Offscreen);
         assert_eq!(2, wrapper.accessibility_element_count());
+    }
+
+    #[test]
+    fn a_landmark_is_a_landmark_container_and_the_hint_has_the_full_description() {
+        use ferroui_controls::automation::peers::AutomationLandmarkType;
+        let _scope = Dispatcher::unit_test_scope();
+        let panel = onscreen!(StackPanel::new(), "Viewers");
+        AutomationProperties::set_landmark_type(&panel, Some(AutomationLandmarkType::Custom));
+        let button = onscreen!(Button::new(), "Clear");
+        AutomationProperties::set_help_text(&button, Some("Help"));
+        AutomationProperties::set_full_description(&button, Some("Removes the saved files"));
+        panel.children().add(button.clone());
+
+        let (wrapper, _view) = wrapper_of_control(&panel);
+        wrapper.update_all_properties();
+        assert_eq!(AccessibilityContainerType::Landmark, wrapper.accessibility_container_type());
+        let (button_wrapper, _view) = wrapper_of_control(&button);
+        button_wrapper.update_all_properties();
+        assert_eq!(Some("Help\nRemoves the saved files".to_owned()), button_wrapper.accessibility_hint());
     }
 
     #[test]

@@ -10,6 +10,11 @@ impl AtSpiNode {
         if peer.is_some_and(|peer| peer.get_heading_level() > 0) {
             return AtSpiRole::Heading;
         }
+        // Deviation (DEVIATIONS.md, Automation peers): AutomationProperties.LandmarkType
+        // makes the element a landmark, which the reference does not map.
+        if peer.is_some_and(|peer| peer.get_landmark_type().is_some()) {
+            return AtSpiRole::Landmark;
+        }
 
         Self::to_at_spi_role_with(control_type, || {
             peer.is_some_and(|peer| peer.get_provider::<dyn IToggleProvider>().is_some())
@@ -98,6 +103,7 @@ impl AtSpiNode {
             AtSpiRole::Slider => "slider",
             AtSpiRole::SpinButton => "spin button",
             AtSpiRole::StatusBar => "status bar",
+            AtSpiRole::Landmark => "landmark",
             AtSpiRole::PageTab => "page tab",
             AtSpiRole::PageTabList => "page tab list",
             AtSpiRole::ToolBar => "tool bar",

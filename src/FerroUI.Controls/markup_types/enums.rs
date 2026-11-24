@@ -43,7 +43,7 @@ ferro_markup_enum!(
 );
 ferro_markup_enum!(
     AutomationLandmarkType {
-        Banner, Complementary, ContentInfo, Region, Form, Main, Navigation, Search,
+        Banner, Complementary, ContentInfo, Region, Form, Main, Navigation, Search, Custom,
     },
     { namespace: "FerroUI.Automation.Peers" }
 );

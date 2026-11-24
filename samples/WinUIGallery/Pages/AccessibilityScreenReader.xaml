@@ -6,9 +6,7 @@
      ListView is FerroUI's ListBox, and StackPanels with padding, background and corners are
      Borders (ControlCornerRadius is 4). The x:Bind of an element (LabeledBy) is a Binding of the
      element by name. FerroUI's TextBox has no Header: each header is a TextBlock above the box
-     that labels it (LabeledBy). FerroUI's automation has no FullDescription (the description is
-     HelpText) and no Custom landmark with a LocalizedLandmarkType (the sidebar is a named Region):
-     the page is partial. -->
+     that labels it (LabeledBy). -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
 
@@ -130,11 +128,10 @@
   <StackPanel x:Name="Example6" Spacing="8">
     <TextBlock Text="Description and help text: add descriptions and help text to controls" FontSize="18" />
     <StackPanel Spacing="8">
-      <!-- Use FullDescription to connect visible descriptions to their controls: FerroUI's
-           automation has HelpText for the description. -->
+      <!-- Use FullDescription to connect visible descriptions to their controls. -->
       <StackPanel Spacing="8">
         <CheckBox x:Name="ClearCacheCheckBox" Content="Clear cache on exit"
-                  AutomationProperties.HelpText="{Binding #ClearCacheDescription.Text}" />
+                  AutomationProperties.FullDescription="{Binding #ClearCacheDescription.Text}" />
         <TextBlock x:Name="ClearCacheDescription" AutomationProperties.AccessibilityView="Raw"
                    Foreground="{DynamicResource TextFillColorSecondaryBrush}" TextWrapping="Wrap"
                    Text="Deletes all cached items when closing the browser. This includes cookies, images, and browsing history." />
@@ -223,10 +220,9 @@
           <TextBlock TextWrapping="WrapWithOverflow"
                      Text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua. Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur. Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum" />
         </Border>
-        <!-- A custom sidebar with a custom landmark name: FerroUI has no Custom landmark or
-             LocalizedLandmarkType, so it is a named Region. -->
-        <Border x:Name="ViewersLandmark" Grid.Column="2" Padding="6" AutomationProperties.LandmarkType="Region"
-                AutomationProperties.Name="Current viewers"
+        <!-- A custom sidebar with a custom landmark name. -->
+        <Border x:Name="ViewersLandmark" Grid.Column="2" Padding="6" AutomationProperties.LandmarkType="Custom"
+                AutomationProperties.LocalizedLandmarkType="Current viewers"
                 Background="{DynamicResource CardStrokeColorDefaultBrush}" CornerRadius="4">
           <StackPanel Spacing="8">
             <TextBlock AutomationProperties.HeadingLevel="1" Theme="{DynamicResource BodyStrongTextBlockStyle}"

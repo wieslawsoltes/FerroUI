@@ -10599,6 +10599,16 @@ pub trait AttachedProps: ElementBuilder {
         self.prop(<ferroui_controls::automation::AutomationProperties>::landmark_type_property(), value)
     }
 
+    /// Sets the attached [`AutomationProperties::localized_landmark_type_property`](ferroui_controls::automation::AutomationProperties::localized_landmark_type_property).
+    fn automation_properties_localized_landmark_type<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::automation::AutomationProperties>::localized_landmark_type_property(), value)
+    }
+
+    /// Sets the attached [`AutomationProperties::full_description_property`](ferroui_controls::automation::AutomationProperties::full_description_property).
+    fn automation_properties_full_description<M>(self, value: impl IntoProp<Option<String>, M>) -> Self {
+        self.prop(<ferroui_controls::automation::AutomationProperties>::full_description_property(), value)
+    }
+
     /// Sets the attached [`AutomationProperties::heading_level_property`](ferroui_controls::automation::AutomationProperties::heading_level_property).
     fn automation_properties_heading_level<M>(self, value: impl IntoProp<i32, M>) -> Self {
         self.prop(<ferroui_controls::automation::AutomationProperties>::heading_level_property(), value)

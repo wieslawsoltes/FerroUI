@@ -25,8 +25,9 @@ impl AtSpiAccessibleHandler {
         ACCESSIBLE_VERSION
     }
 
+    /// The extended description (AutomationProperties.FullDescription), else the help text.
     pub(crate) fn description(node: &AtSpiNode) -> String {
-        node.peer().get_help_text()
+        node.peer().get_full_description().unwrap_or_else(|| node.peer().get_help_text())
     }
 
     pub(crate) fn child_count(node: &AtSpiNode) -> i32 {
@@ -45,8 +46,14 @@ impl AtSpiAccessibleHandler {
         node.peer().get_help_text()
     }
 
-    pub(crate) fn get_localized_role_name_async(node: &AtSpiNode) -> &'static str {
-        Self::get_role_name_async(node)
+    /// The name of the role; for a landmark, the name the application gives it
+    /// (AutomationProperties.LocalizedLandmarkType).
+    pub(crate) fn get_localized_role_name_async(node: &AtSpiNode) -> String {
+        let peer = node.peer();
+        match peer.get_landmark_type().and_then(|_| peer.get_localized_landmark_type()) {
+            Some(name) => name,
+            None => Self::get_role_name_async(node).to_owned(),
+        }
     }
 
     pub(crate) fn get_state_async(node: &AtSpiNode) -> Vec<u32> {

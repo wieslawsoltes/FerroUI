@@ -664,6 +664,7 @@ enum FrnLandmarkType
     LandmarkMain,
     LandmarkNavigation,
     LandmarkSearch,
+    LandmarkCustom,
 }
 
 enum FrnWindowTransparencyMode
@@ -1371,6 +1372,9 @@ interface IFrnAutomationPeer : IUnknown
      int GetHeadingLevel();
 
      FrnLiveSetting GetLiveSetting();
+
+     IFrnString* GetFullDescription();
+     IFrnString* GetLocalizedLandmarkType();
 }
 
 [uuid(b00af5da-78af-4b33-bfff-4ce13a6239a9)]

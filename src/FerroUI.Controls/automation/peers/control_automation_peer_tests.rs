@@ -263,6 +263,37 @@ mod text_notifications {
     }
 
     #[test]
+    fn full_description_and_a_named_custom_landmark_reach_an_existing_peer() {
+        use crate::automation::peers::AutomationLandmarkType;
+        let _scope = test_scope();
+        let button = Button::new();
+        let peer = create_peer(&button);
+        assert_eq!(None, peer.get_full_description());
+        assert_eq!(None, peer.get_localized_landmark_type());
+        let raised = record(&peer);
+
+        AutomationProperties::set_full_description(&button, Some("Removes the saved files"));
+        AutomationProperties::set_landmark_type(&button, Some(AutomationLandmarkType::Custom));
+        AutomationProperties::set_localized_landmark_type(&button, Some("Current viewers"));
+        // An empty value is no value.
+        AutomationProperties::set_full_description(&button, Some(""));
+
+        assert_eq!(None, peer.get_full_description());
+        assert_eq!(Some(AutomationLandmarkType::Custom), peer.get_landmark_type());
+        assert_eq!(Some("Current viewers".to_owned()), peer.get_localized_landmark_type());
+        let raised = raised.borrow();
+        let properties: Vec<_> = raised.iter().map(|change| change.property()).collect();
+        assert_eq!(4, properties.len());
+        assert!(properties[0] == AutomationElementIdentifiers::full_description_property());
+        assert_eq!(Some("Removes the saved files".to_owned()), string_value(&raised[0]));
+        assert!(properties[1] == AutomationElementIdentifiers::landmark_type_property());
+        assert!(properties[2] == AutomationElementIdentifiers::localized_landmark_type_property());
+        assert_eq!(Some("Current viewers".to_owned()), string_value(&raised[2]));
+        assert!(properties[3] == AutomationElementIdentifiers::full_description_property());
+        assert!(raised[3].new_value().is_none());
+    }
+
+    #[test]
     fn tooltip_changes_update_and_clear_help_text_without_recreating_the_peer() {
         let _scope = test_scope();
         let button = Button::new();

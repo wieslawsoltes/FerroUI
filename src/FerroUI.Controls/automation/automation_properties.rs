@@ -98,6 +98,22 @@ ferro_properties! {
             FerroProperty::register_attached::<AutomationProperties, StyledElement, _>("LandmarkType", None)
         }
 
+        /// Defines the AutomationProperties.LocalizedLandmarkType attached property: the name of
+        /// the landmark the element is, for a `Custom` landmark or to rename a standard one.
+        ///
+        /// This property affects the default value for `AutomationPeer::get_localized_landmark_type`.
+        pub fn localized_landmark_type_property() -> AttachedProperty<Option<String>> {
+            FerroProperty::register_attached::<AutomationProperties, StyledElement, _>("LocalizedLandmarkType", None)
+        }
+
+        /// Defines the AutomationProperties.FullDescription attached property: an extended
+        /// description of the element, which a screen reader reads after its name and help text.
+        ///
+        /// This property affects the default value for `AutomationPeer::get_full_description`.
+        pub fn full_description_property() -> AttachedProperty<Option<String>> {
+            FerroProperty::register_attached::<AutomationProperties, StyledElement, _>("FullDescription", None)
+        }
+
         /// Defines the AutomationProperties.HeadingLevel attached property.
         ///
         /// This property affects the default value for `AutomationPeer::get_heading_level`.
@@ -288,6 +304,30 @@ impl AutomationProperties {
     /// Helper for reading the value of the [`landmark_type_property`](Self::landmark_type_property) on a StyledElement.
     pub fn get_landmark_type(element: &StyledElement) -> Option<AutomationLandmarkType> {
         element.get_value(Self::landmark_type_property())
+    }
+
+    /// Helper for setting the value of the
+    /// [`localized_landmark_type_property`](Self::localized_landmark_type_property) on a StyledElement.
+    pub fn set_localized_landmark_type(element: &StyledElement, value: Option<&str>) {
+        element.set_value(Self::localized_landmark_type_property(), value.map(str::to_owned))
+    }
+
+    /// Helper for reading the value of the
+    /// [`localized_landmark_type_property`](Self::localized_landmark_type_property) on a StyledElement.
+    pub fn get_localized_landmark_type(element: &StyledElement) -> Option<String> {
+        element.get_value(Self::localized_landmark_type_property())
+    }
+
+    /// Helper for setting the value of the [`full_description_property`](Self::full_description_property)
+    /// on a StyledElement.
+    pub fn set_full_description(element: &StyledElement, value: Option<&str>) {
+        element.set_value(Self::full_description_property(), value.map(str::to_owned))
+    }
+
+    /// Helper for reading the value of the [`full_description_property`](Self::full_description_property)
+    /// on a StyledElement.
+    pub fn get_full_description(element: &StyledElement) -> Option<String> {
+        element.get_value(Self::full_description_property())
     }
 
     /// Helper for setting the value of the [`heading_level_property`](Self::heading_level_property) on a StyledElement.

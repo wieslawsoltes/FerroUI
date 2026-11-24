@@ -65,6 +65,8 @@ fn default_values() {
     assert_eq!(AutomationProperties::get_is_control_element_override(e), None);
     assert_eq!(AutomationProperties::get_help_text(e), None);
     assert_eq!(AutomationProperties::get_landmark_type(e), None);
+    assert_eq!(AutomationProperties::get_localized_landmark_type(e), None);
+    assert_eq!(AutomationProperties::get_full_description(e), None);
     assert_eq!(AutomationProperties::get_heading_level(e), 0);
     assert!(!AutomationProperties::get_is_column_header(e));
     assert!(!AutomationProperties::get_is_required_for_form(e));
@@ -93,6 +95,8 @@ fn helpers_set_and_get_values() {
     AutomationProperties::set_is_control_element_override(e, Some(false));
     AutomationProperties::set_help_text(e, Some("help"));
     AutomationProperties::set_landmark_type(e, Some(AutomationLandmarkType::Main));
+    AutomationProperties::set_localized_landmark_type(e, Some("landmark"));
+    AutomationProperties::set_full_description(e, Some("description"));
     AutomationProperties::set_heading_level(e, 2);
     AutomationProperties::set_is_column_header(e, true);
     AutomationProperties::set_is_required_for_form(e, true);
@@ -114,6 +118,8 @@ fn helpers_set_and_get_values() {
     assert_eq!(AutomationProperties::get_is_control_element_override(e), Some(false));
     assert_eq!(AutomationProperties::get_help_text(e).as_deref(), Some("help"));
     assert_eq!(AutomationProperties::get_landmark_type(e), Some(AutomationLandmarkType::Main));
+    assert_eq!(AutomationProperties::get_localized_landmark_type(e).as_deref(), Some("landmark"));
+    assert_eq!(AutomationProperties::get_full_description(e).as_deref(), Some("description"));
     assert_eq!(AutomationProperties::get_heading_level(e), 2);
     assert!(AutomationProperties::get_is_column_header(e));
     assert!(AutomationProperties::get_is_required_for_form(e));

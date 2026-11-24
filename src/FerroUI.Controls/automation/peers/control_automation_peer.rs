@@ -158,6 +158,14 @@ impl AutomationPeerImpl for ControlAutomationPeer {
         AutomationProperties::get_landmark_type(&this.owner())
     }
 
+    fn get_localized_landmark_type_core(this: &Self) -> Option<String> {
+        AutomationProperties::get_localized_landmark_type(&this.owner())
+    }
+
+    fn get_full_description_core(this: &Self) -> Option<String> {
+        AutomationProperties::get_full_description(&this.owner())
+    }
+
     fn get_heading_level_core(this: &Self) -> i32 {
         AutomationProperties::get_heading_level(&this.owner())
     }
@@ -474,6 +482,24 @@ impl ControlAutomationPeer {
                 AutomationElementIdentifiers::item_status_property(),
                 old_value.map(|v| Rc::new(v) as BoxedValue),
                 new_value.map(|v| Rc::new(v) as BoxedValue),
+            );
+        } else if property == AutomationProperties::full_description_property().as_property() {
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::full_description_property(),
+                None,
+                self.get_full_description().map(|v| Rc::new(v) as BoxedValue),
+            );
+        } else if property == AutomationProperties::landmark_type_property().as_property() {
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::landmark_type_property(),
+                None,
+                self.get_landmark_type().map(|v| Rc::new(v) as BoxedValue),
+            );
+        } else if property == AutomationProperties::localized_landmark_type_property().as_property() {
+            self.raise_property_changed_event(
+                AutomationElementIdentifiers::localized_landmark_type_property(),
+                None,
+                self.get_localized_landmark_type().map(|v| Rc::new(v) as BoxedValue),
             );
         } else if property == AutomationProperties::automation_id_property().as_property() {
             self.raise_property_changed_event(

@@ -1,5 +1,6 @@
 use crate::interop::AutomationControlType as XamlControlType;
 use ferroui_controls::automation::peers::AutomationControlType as FerroControlType;
+use ferroui_controls::automation::peers::AutomationLandmarkType as FerroLandmarkType;
 
 pub(crate) struct ControlTypeMap;
 
@@ -49,6 +50,37 @@ impl ControlTypeMap {
             _ => XamlControlType::Custom,
         }
     }
+
+    /// WinUI's `AutomationLandmarkType`: None 0, Custom 1, Form 2, Main 3, Navigation 4, Search 5.
+    /// The landmark types WinUI does not have are its custom one, named by
+    /// [`landmark_name`](Self::landmark_name).
+    pub(crate) fn landmark_to_xaml(landmark: Option<FerroLandmarkType>) -> i32 {
+        match landmark {
+            None => 0,
+            Some(
+                FerroLandmarkType::Banner
+                | FerroLandmarkType::Complementary
+                | FerroLandmarkType::ContentInfo
+                | FerroLandmarkType::Region
+                | FerroLandmarkType::Custom,
+            ) => 1,
+            Some(FerroLandmarkType::Form) => 2,
+            Some(FerroLandmarkType::Main) => 3,
+            Some(FerroLandmarkType::Navigation) => 4,
+            Some(FerroLandmarkType::Search) => 5,
+        }
+    }
+
+    /// The name of a landmark type WinUI has no value for; `None` for one it names itself.
+    pub(crate) fn landmark_name(landmark: Option<FerroLandmarkType>) -> Option<&'static str> {
+        Some(match landmark? {
+            FerroLandmarkType::Banner => "banner",
+            FerroLandmarkType::Complementary => "complementary",
+            FerroLandmarkType::ContentInfo => "content information",
+            FerroLandmarkType::Region => "region",
+            _ => return None,
+        })
+    }
 }
 
 #[cfg(test)]
@@ -69,5 +101,20 @@ mod tests {
         assert_eq!(25, XamlControlType::Custom.0);
         assert_eq!(33, XamlControlType::Pane.0);
         assert_eq!(38, XamlControlType::Separator.0);
+    }
+
+    #[test]
+    fn landmarks_are_winui_values_with_names_for_the_others() {
+        use super::FerroLandmarkType as L;
+        assert_eq!(ControlTypeMap::landmark_to_xaml(None), 0);
+        assert_eq!(ControlTypeMap::landmark_to_xaml(Some(L::Custom)), 1);
+        assert_eq!(ControlTypeMap::landmark_to_xaml(Some(L::Banner)), 1);
+        assert_eq!(ControlTypeMap::landmark_to_xaml(Some(L::Form)), 2);
+        assert_eq!(ControlTypeMap::landmark_to_xaml(Some(L::Main)), 3);
+        assert_eq!(ControlTypeMap::landmark_to_xaml(Some(L::Navigation)), 4);
+        assert_eq!(ControlTypeMap::landmark_to_xaml(Some(L::Search)), 5);
+        assert_eq!(ControlTypeMap::landmark_name(Some(L::Banner)), Some("banner"));
+        assert_eq!(ControlTypeMap::landmark_name(Some(L::Custom)), None);
+        assert_eq!(ControlTypeMap::landmark_name(Some(L::Main)), None);
     }
 }

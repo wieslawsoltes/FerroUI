@@ -580,6 +580,14 @@ impl IFrnAutomationPeerImpl for FrnAutomationPeer {
     fn get_live_setting(&self) -> FrnLiveSetting {
         self.guard_live(FrnLiveSetting::default(), || FrnLiveSetting(self.inner.get_live_setting() as i32))
     }
+
+    fn get_full_description(&self) -> Option<ComPtr<IFrnString>> {
+        self.guard_live(None, || to_frn_string(self.inner.get_full_description().as_deref()))
+    }
+
+    fn get_localized_landmark_type(&self) -> Option<ComPtr<IFrnString>> {
+        self.guard_live(None, || to_frn_string(self.inner.get_localized_landmark_type().as_deref()))
+    }
 }
 
 /// A list of automation peers exposed to native code.

@@ -411,6 +411,27 @@ fn the_tree_is_walked_in_every_direction_and_a_peer_has_one_node() {
 }
 
 #[test]
+fn a_custom_landmark_and_a_full_description_reach_the_system() {
+    use ferroui_controls::automation::peers::AutomationLandmarkType;
+    use ferroui_controls::automation::AutomationProperties;
+    let _app = UnitTestApplication::start(TestServices::styled_window());
+    let ui = ui();
+    AutomationProperties::set_landmark_type(&ui.panel, Some(AutomationLandmarkType::Custom));
+    AutomationProperties::set_localized_landmark_type(&ui.panel, Some("Current viewers"));
+    AutomationProperties::set_full_description(&ui.button, Some("Removes the saved files"));
+    let panel = ui.node_of(&ui.panel);
+    let button = ui.node_of(&ui.button);
+    assert_eq!(Some(VariantValue::I4(80000)), value(&panel, UiaPropertyId::LandmarkType));
+    assert_eq!(Some("Current viewers".to_owned()), text(&panel, UiaPropertyId::LocalizedLandmarkType));
+    assert_eq!(Some("Removes the saved files".to_owned()), text(&button, UiaPropertyId::FullDescription));
+    // A standard landmark the system has no identifier for keeps its name, unless the application
+    // gives one.
+    AutomationProperties::set_landmark_type(&ui.panel, Some(AutomationLandmarkType::Banner));
+    AutomationProperties::set_localized_landmark_type(&ui.panel, None);
+    assert_eq!(Some("banner".to_owned()), text(&panel, UiaPropertyId::LocalizedLandmarkType));
+}
+
+#[test]
 fn the_properties_of_the_controls() {
     let _app = UnitTestApplication::start(TestServices::styled_window());
     let ui = ui();
@@ -436,6 +457,7 @@ fn the_properties_of_the_controls() {
     assert_eq!(None, value(&button, UiaPropertyId::ItemStatus));
     assert_eq!(None, value(&button, UiaPropertyId::LandmarkType));
     assert_eq!(None, value(&button, UiaPropertyId::LocalizedLandmarkType));
+    assert_eq!(None, value(&button, UiaPropertyId::FullDescription));
     assert_eq!(None, value(&button, UiaPropertyId::ToggleToggleState));
     assert_eq!(None, value(&button, UiaPropertyId::NativeWindowHandle));
 
@@ -706,6 +728,9 @@ fn the_control_types_the_landmarks_and_the_heading_levels_of_the_system() {
         AutomationNode::to_uia_localized_landmark_type(Some(AutomationLandmarkType::ContentInfo))
     );
     assert_eq!(None, AutomationNode::to_uia_localized_landmark_type(Some(AutomationLandmarkType::Main)));
+    // A custom landmark is the system's custom one, named by the application.
+    assert_eq!(Some(80000), AutomationNode::to_uia_landmark_type(Some(AutomationLandmarkType::Custom)).map(|x| x.0));
+    assert_eq!(None, AutomationNode::to_uia_localized_landmark_type(Some(AutomationLandmarkType::Custom)));
 
     assert_eq!(80050, AutomationNode::to_uia_heading_level(0).0);
     assert_eq!(80051, AutomationNode::to_uia_heading_level(1).0);

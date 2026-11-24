@@ -991,6 +991,7 @@ fn automation_properties_and_their_enumerations_are_known_to_markup() {
         ("FerroUI.Automation", "IsOffscreenBehavior", "Offscreen"),
         ("FerroUI.Automation.Peers", "AutomationControlType", "Button"),
         ("FerroUI.Automation.Peers", "AutomationLandmarkType", "Navigation"),
+        ("FerroUI.Automation.Peers", "AutomationLandmarkType", "Custom"),
     ] {
         let type_ = MarkupType::find(namespace, name).unwrap_or_else(|| panic!("{namespace}.{name}"));
         assert_eq!(type_.kind, MarkupTypeKind::Enum);
