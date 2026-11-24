@@ -122,6 +122,16 @@ impl Layers {
     /// (Graphite draws a recording in passes of its own, and what it draws
     /// at an antialiased edge depends on the draws that share the pass: a
     /// pass with a draw that needs multisampling is multisampled as a whole).
+    ///
+    /// That is also why the reference on Metal cannot be the frame drawn in one
+    /// recording with no band clip: its passes hold the draws of every band, so
+    /// an antialiased edge in one band can come out differently from the edge
+    /// of the band recording (measured: 103 pixels by up to 41 steps, along a
+    /// line far from the band edges). And the reference bands are bounded to
+    /// their rows as the pipelined bands are ([`Layers::draw_ordinary_band`]):
+    /// a band of the ordinary layer drawn under its clip alone wrote one pixel
+    /// into the next band on Metal and on lavapipe, so the band drawn last won
+    /// it and the reference depended on the order of its bands.
     fn draw(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
         self.draw_ordinary_in_clips(&self.surface.band_clips(), true, &draw);
 
@@ -144,9 +154,13 @@ impl Layers {
         apart: bool,
         draw: &impl Fn(&mut dyn IDrawingContextImpl),
     ) {
-        let recordings: Vec<&[(usize, skia_safe::IRect)]> =
-            if apart { clips.chunks(1).collect() } else { vec![clips] };
-        for clips in recordings {
+        if apart {
+            for (_, clip) in clips {
+                self.draw_ordinary_band(*clip, draw);
+            }
+            return;
+        }
+        for clips in [clips] {
             let mut drawing_context = self.ordinary.create_drawing_context();
             let feature = drawing_context
                 .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
@@ -172,21 +186,59 @@ impl Layers {
         }
     }
 
-    /// Draws one frame of each layer, the ordinary one as it always draws: a
-    /// frame the pipelined layer draws directly.
-    /// Draws one frame of each layer: the pipelined one hands it to its threads, the ordinary one draws it in
-    /// one recording with no band clip, the true frame (`gpu/graphite/pipelined_layer.rs`, `insert_at`).
-    fn draw_against_one_recording(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
-        let mut drawing_context = self.ordinary.create_drawing_context();
-        draw(&mut *drawing_context);
+    /// Draws one band of a frame on the ordinary layer as a band of the pipelined layer is drawn: in a recording of
+    /// its own, under the clip of the band, on a layer that holds what the ordinary layer holds, and of what it
+    /// draws only the band's rows go onto the ordinary layer. A pixel the band's draws write across its clip
+    /// (see [`Layers::draw`]) is left out, so the reference does not depend on the order of the bands.
+    fn draw_ordinary_band(&self, clip: skia_safe::IRect, draw: &impl Fn(&mut dyn IDrawingContextImpl)) {
+        let whole = Rect::new(0.0, 0.0, WIDTH as f64, HEIGHT as f64);
+        // What the ordinary layer holds, copied onto a scratch layer of the context (premultiplied, onto
+        // transparent pixels: the same bytes).
+        let scratch = SurfaceRenderTarget::new(create_info(&self.gpu, &self.gr_context));
+        let before = self.ordinary.create_non_affined_snapshot();
+        let mut drawing_context = scratch.create_drawing_context();
+        drawing_context.clear(Colors::TRANSPARENT);
+        drawing_context.draw_bitmap(&*before, 1.0, whole, whole);
         drawing_context.dispose();
         self.gr_context.flush();
 
-        let mut drawing_context = self.pipelined.create_drawing_context();
+        // The band, in a recording of its own under its clip.
+        let mut drawing_context = scratch.create_drawing_context();
+        let feature = drawing_context
+            .get_feature(TypeId::of::<dyn ISkiaApiLeaseFeature>())
+            .and_then(|feature| feature.downcast_ref::<Rc<dyn ISkiaApiLeaseFeature>>().cloned())
+            .expect("the drawing context of a layer leases the Skia API");
+        let with_canvas = |use_canvas: &mut dyn FnMut(&skia_safe::Canvas)| {
+            let lease = feature.lease();
+            lease.with_sk_canvas(use_canvas);
+            lease.dispose();
+        };
+        with_canvas(&mut |canvas| {
+            canvas.save();
+            canvas.clip_rect(skia_safe::Rect::from(clip), skia_safe::ClipOp::Intersect, false);
+        });
         draw(&mut *drawing_context);
+        with_canvas(&mut |canvas| {
+            canvas.restore();
+        });
         drawing_context.dispose();
+        self.gr_context.flush();
+
+        // The band's rows of the scratch layer onto the ordinary layer, replacing its pixels there.
+        let after = scratch.create_non_affined_snapshot();
+        let rows = Rect::new(clip.left as f64, clip.top as f64, clip.width() as f64, clip.height() as f64);
+        let mut drawing_context = self.ordinary.create_drawing_context();
+        drawing_context.push_clip(rows);
+        drawing_context.clear(Colors::TRANSPARENT);
+        drawing_context.draw_bitmap(&*after, 1.0, whole, whole);
+        drawing_context.pop_clip();
+        drawing_context.dispose();
+        self.gr_context.flush();
+        scratch.dispose();
     }
 
+    /// Draws one frame of each layer, the ordinary one as it always draws: a
+    /// frame the pipelined layer draws directly.
     fn draw_unclipped(&self, draw: impl Fn(&mut dyn IDrawingContextImpl)) {
         for layer in [&self.ordinary, &self.pipelined] {
             let mut drawing_context = layer.create_drawing_context();
@@ -1086,12 +1138,12 @@ fn draw_shapes_across_the_band_edges(context: &mut dyn IDrawingContextImpl) {
     }
 }
 
-/// A shape that crosses a band edge is drawn by the bands as the true frame shows it, the frame drawn in one
-/// recording with no band clip, in both insertion orders (#1363): on a canvas of the band's size such shapes
-/// differed along their whole length on Graphite Vulkan, and a band whose draws reached a row across its clip
-/// made the frame depend on the order of the insertions.
+/// A shape that crosses a band edge is drawn by the bands of the pipelined layer as the bands of the reference
+/// draw it, each in a recording of its own and bounded to its rows ([`Layers::draw`]), in both insertion orders
+/// (#1363): on a canvas of the band's size such shapes differed along their whole length on Graphite Vulkan, and a
+/// band whose draws reached a row across its clip made the frame depend on the order of the insertions.
 #[test]
-fn bands_draw_the_shapes_across_their_edges_as_the_true_frame() {
+fn bands_draw_the_shapes_across_their_edges_as_the_bands_of_the_reference() {
     let Some(device) = TestMetalDevice::try_new() else {
         eprintln!("skipped: no Metal device available");
         return;
@@ -1104,9 +1156,9 @@ fn bands_draw_the_shapes_across_their_edges_as_the_true_frame() {
             let scenes: [(&str, &dyn Fn(&mut dyn IDrawingContextImpl)); 2] =
                 [("shapes across the edges", &draw_shapes_across_the_band_edges), ("the scene", &draw_scene)];
             for (name, scene) in scenes {
-                layers.draw_against_one_recording(scene);
+                layers.draw(scene);
                 layers.pipelined.complete_pending_frame();
-                let what = format!("{insert:?}: {name} in {bands} bands against one recording");
+                let what = format!("{insert:?}: {name} in {bands} bands against the reference bands");
                 layers.assert_pixels_within(&what, WIDTH as usize * (bands - 1), 8);
             }
             layers.dispose();
