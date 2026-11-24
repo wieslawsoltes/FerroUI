@@ -25,7 +25,7 @@ use ferroui_base::media::text_formatting::GlyphInfo;
 use ferroui_base::media::{BoxShadows, Colors};
 use ferroui_base::platform::{
     IBitmapImpl, IDrawingContextImpl, IDrawingContextLayerImpl, IOptionalFeatureProvider, IPlatformGraphics,
-    IPlatformGraphicsContext, IPlatformRenderInterfaceContext,
+    IPlatformRenderInterfaceContext,
 };
 use ferroui_base::{PixelSize, Point, Rect, RoundedRect, Vector};
 use ferroui_vulkan::ash::{self, vk};
@@ -83,8 +83,9 @@ fn loader() -> Result<VkGetInstanceProcAddressDelegate, String> {
     }))
 }
 
-/// A Vulkan context of the machine without a window system, and the Graphite GPU of its device.
-fn graphite_gpu() -> Option<(Rc<dyn IPlatformGraphicsContext>, Rc<GraphiteVulkanSkiaGpu>)> {
+/// A Vulkan context of the machine without a window system, the Graphite GPU of its device and the
+/// Skia context of the GPU, which disposes the GPU (and the Vulkan context with it) when it is disposed.
+fn graphite_gpu() -> Option<(crate::SkiaContext, Rc<GraphiteVulkanSkiaGpu>)> {
     let loader = match loader() {
         Ok(loader) => loader,
         Err(reason) => {
@@ -114,7 +115,8 @@ fn graphite_gpu() -> Option<(Rc<dyn IPlatformGraphicsContext>, Rc<GraphiteVulkan
         skip("Skia makes no Graphite context for the device");
         return None;
     };
-    Some((context, gpu))
+    let skia_gpu: Rc<dyn ISkiaGpu> = gpu.clone();
+    Some((crate::SkiaContext::new(Some(skia_gpu)), gpu))
 }
 
 fn create_info(
@@ -141,7 +143,6 @@ fn create_info(
 
 /// An ordinary layer and a pipelined layer of one Graphite Vulkan context.
 struct Layers {
-    context: crate::SkiaContext,
     gr_context: Rc<GraphiteGrContext>,
     size: (i32, i32),
     ordinary: SurfaceRenderTarget,
@@ -157,7 +158,6 @@ impl Layers {
             gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::BandTextures);
         }
         let skia_gpu: Rc<dyn ISkiaGpu> = gpu.clone();
-        let context = crate::SkiaContext::new(Some(skia_gpu.clone()));
         let ordinary = SurfaceRenderTarget::new(create_info(&skia_gpu, &gr_context, width, height));
         let info = create_info(&skia_gpu, &gr_context, width, height);
         let surface = Rc::new(
@@ -170,7 +170,7 @@ impl Layers {
             .expect("a layer that can be divided, on an image of the device"),
         );
         let pipelined = SurfaceRenderTarget::with_surface(info, surface.clone());
-        Self { context, gr_context, size: (width, height), ordinary, pipelined, surface }
+        Self { gr_context, size: (width, height), ordinary, pipelined, surface }
     }
 
     /// One frame of each layer: the pipelined one hands it to its threads, the ordinary one draws it
@@ -235,7 +235,6 @@ impl Layers {
         self.ordinary.dispose();
         // The flush after a layer was let go of destroys its image once the GPU has finished with it.
         self.gr_context.flush();
-        self.context.dispose();
     }
 }
 
@@ -316,8 +315,9 @@ fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames() {
 }
 
 fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mode() {
-    let Some((context, gpu)) = graphite_gpu() else { return };
     for bands in [2, 4] {
+        // A context of its own for each count: the threads of a context are as many as its first layer asked for.
+        let Some((context, gpu)) = graphite_gpu() else { return };
         let layers = Layers::new(&gpu, bands, WIDTH, HEIGHT);
         let tolerance = WIDTH as usize * (bands - 1);
         layers.draw(draw_scene);
@@ -326,9 +326,8 @@ fn bands_on_graphite_vulkan_draw_on_no_shared_target_and_show_the_frames_in_a_mo
         layers.draw(draw_update);
         layers.assert_pixels_within(&format!("the third frame in {bands} bands"), tolerance, 8);
         layers.dispose();
+        context.dispose();
     }
-    gpu.dispose();
-    drop(context);
 }
 
 #[test]
@@ -353,8 +352,7 @@ fn a_resized_layer_is_drawn_on_a_new_image_after_the_old_one_was_let_go_of_in_a_
     layers.assert_pixels_within("a frame after the resizes", WIDTH as usize, 8);
     layers.dispose();
     assert!(!gpu.gr_context().is_lost());
-    gpu.dispose();
-    drop(context);
+    context.dispose();
 }
 
 #[test]
@@ -370,6 +368,5 @@ fn a_layer_disposed_with_a_frame_pending_leaves_the_vulkan_context_usable() {
     layers.draw(draw_scene);
     layers.assert_pixels_within("a frame of a new layer", WIDTH as usize, 8);
     layers.dispose();
-    gpu.dispose();
-    drop(context);
+    context.dispose();
 }
