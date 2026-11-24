@@ -339,3 +339,53 @@ fn a_layer_disposed_with_a_frame_pending_leaves_the_vulkan_context_usable() {
     layers.dispose();
     context.dispose();
 }
+
+/// Two pipelined layers of one context (two windows of one compositor): the one that goes releases its own image
+/// and the surfaces the threads wrapped it in, and the other keeps drawing on the same threads.
+#[test]
+fn a_layer_that_goes_leaves_the_other_layer_of_the_context_drawing() {
+    let Some((context, gpu)) = graphite_gpu() else { return };
+    let staying = Layers::new(&gpu, 2, WIDTH, HEIGHT);
+    let going = Layers::new(&gpu, 2, WIDTH - 32, HEIGHT - 16);
+    staying.draw(draw_scene);
+    going.draw(draw_scene);
+    // The layer goes with a frame in the threads.
+    let mut drawing_context = going.pipelined.create_drawing_context();
+    draw_update(&mut *drawing_context);
+    drawing_context.dispose();
+    going.dispose();
+    for frame in 0..3 {
+        staying.draw(draw_update);
+        staying.assert_pixels_within(&format!("frame {frame} of the layer that stays"), WIDTH as usize, 8);
+    }
+    staying.dispose();
+    assert!(!gpu.gr_context().is_lost());
+    context.dispose();
+}
+
+/// Two Skia contexts on one Vulkan device (two compositors whose platform shares its device): each has a GPU, a
+/// Graphite context and band threads of its own, and disposing one leaves the other drawing. Here both share
+/// even the Vulkan context object, whose disposal releases only what the context made for itself (its external
+/// objects feature, which the Graphite GPU does not use); the device stays.
+#[test]
+fn disposing_one_skia_context_leaves_another_on_the_same_device_drawing() {
+    let Some((first, first_gpu)) = graphite_gpu() else { return };
+    let Some(second_gpu) = GraphiteVulkanSkiaGpu::try_new(first_gpu.vulkan().clone(), None) else {
+        return skip("Skia makes no second Graphite context for the device");
+    };
+    let skia_gpu: Rc<dyn ISkiaGpu> = second_gpu.clone();
+    let second = crate::SkiaContext::new(Some(skia_gpu));
+    let first_layers = Layers::new(&first_gpu, 2, WIDTH, HEIGHT);
+    let second_layers = Layers::new(&second_gpu, 2, WIDTH, HEIGHT);
+    first_layers.draw(draw_scene);
+    second_layers.draw(draw_scene);
+    first_layers.dispose();
+    first.dispose();
+    for frame in 0..3 {
+        second_layers.draw(draw_update);
+        second_layers.assert_pixels_within(&format!("frame {frame} of the context that stays"), WIDTH as usize, 8);
+    }
+    second_layers.dispose();
+    assert!(!second_gpu.gr_context().is_lost());
+    second.dispose();
+}
