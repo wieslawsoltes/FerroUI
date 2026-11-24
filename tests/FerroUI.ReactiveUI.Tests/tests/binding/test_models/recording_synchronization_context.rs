@@ -1,10 +1,9 @@
 //! `RecordingSynchronizationContext` (`TestModels/RecordingSynchronizationContext.cs`).
 //!
-//! `BindingSchedulers::use_synchronization_context` and `SynchronizationContext` are deprecated
-//! since 0.5.0 (step A5 of phase C4 of #423); these tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! The context is a schedule of `ferroui-system`, given with `BindingSchedulers::use_schedule`
+//! (`UseSynchronizationContext`).
 
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use std::sync::atomic::{AtomicUsize, Ordering};
 use std::sync::Arc;
 
@@ -27,22 +26,14 @@ impl RecordingSynchronizationContext {
     }
 }
 
-impl SynchronizationContext for RecordingSynchronizationContext {
-    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+impl Schedule for RecordingSynchronizationContext {
+    fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
         self.post_count.fetch_add(1, Ordering::SeqCst);
         work();
     }
 
-    fn send(&self, work: Box<dyn FnOnce() + Send>) {
-        work();
-    }
-
-    fn post_local(&self, work: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
         self.post_count.fetch_add(1, Ordering::SeqCst);
-        work();
-    }
-
-    fn send_local(&self, work: Box<dyn FnOnce()>) {
         work();
     }
 }

@@ -3,16 +3,12 @@
 //! Adapted: the context `MyCtx`, which schedules the work it is posted on the test scheduler, keeps
 //! the scheduler in a slot of the thread that made it, since a context is shared between threads
 //! and a scheduler is not; it is used on that thread only. `ObserveOn(SynchronizationContext)` is
-//! `observe_on_context`.
-//!
-//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
-//! of #423); the tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! `observe_on_schedule`, and `MyCtx` is a schedule of `ferroui-system`.
 
 use ferroui_reactive::concurrency::{IScheduler, SchedulerExt};
 use ferroui_reactive::ObservableExt;
 use ferroui_reactive_testing::{assert_messages, assert_subscriptions, new_error, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::Arc;
@@ -130,7 +126,7 @@ fn observe_on_synchronization_context_simple() {
     ]);
 
     let (source, context) = (xs.as_observable(), MyCtx::new(scheduler.scheduler()));
-    let results = scheduler.start(move || source.observe_on_context(context));
+    let results = scheduler.start(move || source.observe_on_schedule(context));
 
     assert_messages!(
         results.messages(),
@@ -168,22 +164,13 @@ impl MyCtx {
     }
 }
 
-impl SynchronizationContext for MyCtx {
-    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+impl Schedule for MyCtx {
+    fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
         self.scheduler().schedule_action(work);
     }
 
-    /// The `Send` of the base class: the work runs at once.
-    fn send(&self, work: Box<dyn FnOnce() + Send>) {
-        work();
-    }
-
-    fn post_local(&self, work: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
         self.scheduler().schedule_action(work);
-    }
-
-    fn send_local(&self, work: Box<dyn FnOnce()>) {
-        work();
     }
 }
 

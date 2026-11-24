@@ -5,13 +5,9 @@
 //! where upstream throws `ArgumentOutOfRangeException`; the `ICancelable`
 //! side of `Disposable.Create` is checked on `AnonymousDisposable::new`, since `Disposable::create`
 //! returns a plain `Rc<dyn IDisposable>`; null-argument lines inside ported tests are dropped. The
-//! context `MySync` of `ContextDisposable` runs the work it is posted at once, from `post` and
-//! `post_local` alike (the disposal is posted with `post_local`), and records it in an atomic flag,
-//! since a context is shared between threads.
-//!
-//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
-//! of #423); the tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! context `MySync` of `ContextDisposable` is a schedule of `ferroui-system` that runs the work it
+//! is given at once, from `schedule` and `schedule_local` alike (the disposal is posted with
+//! `schedule_local`), and records it in an atomic flag, since a schedule is shared between threads.
 
 use ferroui_reactive::concurrency::{IScheduler, Scheduler};
 use ferroui_reactive::disposables::{
@@ -21,7 +17,8 @@ use ferroui_reactive::disposables::{
 };
 use ferroui_reactive::IDisposable;
 use ferroui_reactive_testing::assert_throws;
-use ferroui_system::threading::{CancellationToken, SynchronizationContext};
+use ferroui_system::task::Schedule;
+use ferroui_system::threading::CancellationToken;
 use std::cell::{Cell, RefCell};
 use std::collections::HashMap;
 use std::rc::Rc;
@@ -456,9 +453,9 @@ fn context_disposable() {
     let disp = Rc::new(Cell::new(false));
     let m = Arc::new(MySync::default());
     let d = disp.clone();
-    let c = ContextDisposable::new(m.clone(), Disposable::create(move || d.set(true)));
-    let context: Arc<dyn SynchronizationContext> = m.clone();
-    assert!(std::ptr::addr_eq(Arc::as_ptr(&context), Arc::as_ptr(c.context())));
+    let c = ContextDisposable::with_schedule(m.clone(), Disposable::create(move || d.set(true)));
+    let context: Arc<dyn Schedule> = m.clone();
+    assert!(std::ptr::addr_eq(Arc::as_ptr(&context), Arc::as_ptr(c.schedule())));
     assert!(!m.disposed.load(Ordering::SeqCst));
     assert!(!disp.get());
     c.dispose();
@@ -473,23 +470,15 @@ struct MySync {
     disposed: AtomicBool,
 }
 
-impl SynchronizationContext for MySync {
-    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+impl Schedule for MySync {
+    fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
         work();
         self.disposed.store(true, Ordering::SeqCst);
     }
 
-    fn send(&self, work: Box<dyn FnOnce() + Send>) {
-        work();
-    }
-
-    fn post_local(&self, work: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
         work();
         self.disposed.store(true, Ordering::SeqCst);
-    }
-
-    fn send_local(&self, work: Box<dyn FnOnce()>) {
-        work();
     }
 }
 

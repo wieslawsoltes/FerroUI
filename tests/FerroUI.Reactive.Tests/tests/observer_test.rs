@@ -7,18 +7,14 @@
 //! `Rc<dyn Any>`), `synchronize_prevent_reentrancy` and `synchronize_with_lock` of `ObserverExt`.
 //! `Observer.ToProgress` is `to_progress` and `to_progress_on` of `ObserverExt`, and
 //! `Observer.ToObserver(IProgress<T>)` is `to_observer` of `ProgressExt`; the list the observers add
-//! to is a shared `RefCell`. `NotifyOn(SynchronizationContext)` is `notify_on_context`; the context
-//! `MySyncCtx` of `NotifyOn_SyncCtx`, which posts to the task pool upstream, posts its `Send` work
-//! to a new thread.
-//!
-//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
-//! of #423); the tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! to is a shared `RefCell`. `NotifyOn(SynchronizationContext)` is `notify_on_schedule`; the context
+//! `MySyncCtx` of `NotifyOn_SyncCtx`, which posts to the task pool upstream, is a schedule that
+//! runs its `Send` work on a new thread.
 
 use ferroui_reactive::concurrency::AsyncLock;
 use ferroui_reactive::{IObserver, Notification, NotificationKind, ObservableError, Observer, ObserverExt, ProgressExt};
 use ferroui_reactive_testing::{assert_messages, assert_throws, new_error, ReactiveTest as RT, TestScheduler};
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::IProgress;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
@@ -645,7 +641,7 @@ fn notify_on_sync_ctx() {
         Observer::create_all(move |x: i32| lst.borrow_mut().push(x), |_| panic!("unexpected OnError"), move || don.set(true))
     };
     let ctx = Arc::new(MySyncCtx);
-    let _res = obs.notify_on_context(ctx);
+    let _res = obs.notify_on_schedule(ctx);
 
     // As upstream, the notifications go to `obs` itself, not to the observer of the context.
     for i in 0..100 {
@@ -662,20 +658,12 @@ fn notify_on_sync_ctx() {
 /// cannot leave the thread of the context, and runs at once.
 struct MySyncCtx;
 
-impl SynchronizationContext for MySyncCtx {
-    fn post(&self, work: Box<dyn FnOnce() + Send>) {
+impl Schedule for MySyncCtx {
+    fn schedule(&self, work: Box<dyn FnOnce() + Send>) {
         std::thread::spawn(work);
     }
 
-    fn send(&self, work: Box<dyn FnOnce() + Send>) {
-        work();
-    }
-
-    fn post_local(&self, work: Box<dyn FnOnce()>) {
-        work();
-    }
-
-    fn send_local(&self, work: Box<dyn FnOnce()>) {
+    fn schedule_local(&self, work: Box<dyn FnOnce()>) {
         work();
     }
 }

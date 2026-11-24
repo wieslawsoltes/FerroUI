@@ -1,11 +1,7 @@
 //! Ported from `Tests.System.Reactive/Tests/Linq/Observable/SubscribeOnTest.cs` of Rx.NET.
 //! Adapted: the variables that the subscription and its disposal assign are shared cells.
-//! `SubscribeOn(SynchronizationContext)` is `subscribe_on_context`, with the context `MyCtx` of
+//! `SubscribeOn(SynchronizationContext)` is `subscribe_on_schedule`, with the context `MyCtx` of
 //! `ObserveOnTest.cs` (`observe_on_test.rs`).
-//!
-//! The forms that take a `SynchronizationContext` are deprecated since 0.5.0 (step A5 of phase C4
-//! of #423); the tests of them keep them, with their assertions.
-#![allow(deprecated)]
 
 use super::observe_on_test::MyCtx;
 use ferroui_reactive::disposables::Disposable;
@@ -98,7 +94,7 @@ fn subscribe_on_synchronization_context_simple() {
     ]);
 
     let (source, context) = (xs.as_observable(), MyCtx::new(scheduler.scheduler()));
-    let results = scheduler.start(move || source.subscribe_on_context(context));
+    let results = scheduler.start(move || source.subscribe_on_schedule(context));
 
     assert_messages!(
         results.messages(),

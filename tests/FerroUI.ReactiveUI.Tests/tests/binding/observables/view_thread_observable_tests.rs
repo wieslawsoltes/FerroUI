@@ -3,13 +3,12 @@
 //! "Another thread" is a call while the stub invoker answers that the calling thread has no
 //! access, as upstream's stub does.
 //!
-//! `BindingSchedulers::use_synchronization_context` and `SynchronizationContext` are deprecated
-//! since 0.5.0 (step A5 of phase C4 of #423); these tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! The context is a schedule of `ferroui-system`, given with `BindingSchedulers::use_schedule`
+//! (`UseSynchronizationContext`).
 
 use crate::tests::binding::test_models::{ManualObservable, ManualSequencer, RecordingObserver, RecordingSynchronizationContext, StubViewThreadInvoker};
 use ferroui_reactiveui::*;
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::{IDisposable, IObservable, IObserver, ObservableError};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -287,7 +286,7 @@ fn on_next_from_another_thread_when_the_host_sets_a_main_thread_drains_there() {
     let host = RecordingSynchronizationContext::new();
     let (source, observer, subscription) = subscribe(&invoker);
 
-    BindingSchedulers::use_synchronization_context(Some(host.clone() as Arc<dyn SynchronizationContext>));
+    BindingSchedulers::use_schedule(Some(host.clone() as Arc<dyn Schedule>));
 
     send(&source, FIRST);
 
@@ -295,7 +294,7 @@ fn on_next_from_another_thread_when_the_host_sets_a_main_thread_drains_there() {
     assert_eq!(invoker.post_count(), 0);
     assert_eq!(joined(&observer), FIRST);
     subscription.dispose();
-    BindingSchedulers::use_synchronization_context(None);
+    BindingSchedulers::use_schedule(None);
 }
 
 #[test]

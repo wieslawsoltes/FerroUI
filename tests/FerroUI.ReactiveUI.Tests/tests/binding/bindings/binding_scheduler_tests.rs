@@ -3,14 +3,13 @@
 //! "Another thread" is a call while the stub invoker answers that the calling thread has no
 //! access. The invokers are registered per thread, and each test runs on a thread of its own.
 //!
-//! `BindingSchedulers::use_synchronization_context` and `SynchronizationContext` are deprecated
-//! since 0.5.0 (step A5 of phase C4 of #423); these tests of them keep them, with their assertions.
-#![allow(deprecated)]
+//! The context is a schedule of `ferroui-system`, given with `BindingSchedulers::use_schedule`
+//! (`UseSynchronizationContext`).
 
 use crate::tests::binding::test_models::{ManualObservable, RecordingObserver, RecordingSynchronizationContext, StubViewThreadInvoker};
 use ferroui_reactiveui::*;
 use ferroui_splat::AppLocator;
-use ferroui_system::threading::SynchronizationContext;
+use ferroui_system::task::Schedule;
 use ferroui_system::IObservable;
 use std::any::Any;
 use std::rc::Rc;
@@ -31,7 +30,7 @@ fn register_invoker(invoker: &Rc<StubViewThreadInvoker>) {
 
 /// Delivers through `context` (`UseMainThread`).
 fn use_main_thread(context: &Arc<RecordingSynchronizationContext>) {
-    BindingSchedulers::use_synchronization_context(Some(context.clone() as Arc<dyn SynchronizationContext>));
+    BindingSchedulers::use_schedule(Some(context.clone() as Arc<dyn Schedule>));
 }
 
 fn same_source<T: 'static>(routed: &Rc<dyn IObservable<T>>, source: &Rc<ManualObservable<T>>) -> bool {
@@ -57,7 +56,7 @@ fn observe_on_view_thread_on_the_owning_thread_writes_inline() {
     assert_eq!(invoker.post_count(), 0);
     assert_eq!(host.post_count(), 0);
     subscription.dispose();
-    BindingSchedulers::use_synchronization_context(None);
+    BindingSchedulers::use_schedule(None);
     ViewThreadInvokers::refresh();
 }
 
@@ -101,7 +100,7 @@ fn observe_on_view_thread_from_another_thread_when_the_host_sets_a_main_thread_d
     assert_eq!(invoker.post_count(), 0);
     assert_eq!(observer.values().join(","), WRITTEN);
     subscription.dispose();
-    BindingSchedulers::use_synchronization_context(None);
+    BindingSchedulers::use_schedule(None);
     ViewThreadInvokers::refresh();
 }
 
@@ -114,7 +113,7 @@ fn observe_on_view_thread_when_nothing_claims_the_target_hands_back_the_source()
 
     let routed = BindingSchedulers::observe_on_view_thread(source.clone(), Some(unclaimed_target()));
     assert!(same_source(&routed, &source));
-    BindingSchedulers::use_synchronization_context(None);
+    BindingSchedulers::use_schedule(None);
     ViewThreadInvokers::refresh();
 }
 
@@ -209,8 +208,8 @@ fn for_target_with_no_target_claims_nothing() {
 
 #[test]
 fn use_synchronization_context_with_no_context_clears_the_main_thread() {
-    BindingSchedulers::use_synchronization_context(Some(RecordingSynchronizationContext::new() as Arc<dyn SynchronizationContext>));
-    BindingSchedulers::use_synchronization_context(None);
+    BindingSchedulers::use_schedule(Some(RecordingSynchronizationContext::new() as Arc<dyn Schedule>));
+    BindingSchedulers::use_schedule(None);
 
     assert!(BindingSchedulers::main_thread().is_none());
 }
