@@ -69,14 +69,10 @@ impl GlyphRun {
         glyphs: &[text_formatting::GlyphInfo],
         origin: Point,
     ) -> Self {
-        let simulations = face.platform_typeface().font_simulations();
-        let font = face
-            .platform_typeface()
-            .as_any()
-            .downcast_ref::<Typeface>()
-            .expect("Direct2D typeface")
-            .font
-            .clone();
+        let typeface = face.platform_typeface().as_any().downcast_ref::<Typeface>().expect("Direct2D typeface");
+        // The simulations to apply: not those DirectWrite applies inside the face.
+        let simulations = typeface.applied_simulations();
+        let font = typeface.font.clone();
         let mut ids = Vec::with_capacity(glyphs.len());
         let mut positions = Vec::with_capacity(glyphs.len().saturating_mul(2));
         let mut advances = Vec::with_capacity(glyphs.len());

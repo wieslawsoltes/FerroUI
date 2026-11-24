@@ -1452,8 +1452,10 @@
    "pr": 22773,
    "date": "2026-11-13",
    "area": "text",
-   "class": "deferred",
-   "note": "Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser)."
+   "class": "port",
+   "note": "Split by the web fonts stack: ported there (PR 1417): no bold or oblique simulation on a colour face. Already: an oblique face answers an italic request, and fallback faces are not matched again. Skip-better: emboldening a real Bold face for ExtraBold (CSS synthesizes bold only for a face below 600). Deferred to the web fonts work: platform typeface simulation without copying the font (`IPlatformTypefaceSimulator`, the `FontCollectionBase` and `SystemFontCollection` changes). Ported here (backends): Skia family matches and character fallbacks share one wrapper that computes the simulations of the request (a fallback keeps them, oblique as italic), the simulations DirectWrite or fontconfig applied inside a typeface are detected from its OS/2 table and its variation axes, reported and not applied twice, and a simulated face reports the requested weight or style; Direct2D reports the simulations DirectWrite applies inside a system face (`d2_font_simulations`) and no longer applies them again.",
+   "part": "typeface-sim",
+   "state": "done"
   },
   {
    "hash": "02d7bc35e34fa1207a93d540b1639e42e4e88f57",

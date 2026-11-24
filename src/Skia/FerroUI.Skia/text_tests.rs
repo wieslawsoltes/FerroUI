@@ -902,3 +902,41 @@ fn the_cap_height_of_a_font_is_the_one_of_its_os2_table() {
 
     scope.dispose();
 }
+
+/// Upstream 80659c4c3e: a character fallback keeps the simulations of its request, an oblique
+/// request is simulated like an italic one, and a simulated face reports the requested weight
+/// and style for what is simulated.
+#[test]
+fn fallback_and_oblique_requests_keep_their_simulations() {
+    let font_manager = FontManagerImpl::new();
+    let regular = font_manager
+        .try_match_character('a' as i32, FontStyle::Normal, FontWeight::Normal, FontStretch::Normal, None, None)
+        .expect("a system font covers Latin");
+    let family = regular.family_name();
+    let upright = SkiaTypeface::try_get(&*regular).unwrap().sk_typeface().font_style();
+    // Only a family without a designed bold or slanted face shows the simulation.
+    let bold = font_manager
+        .try_match_character(
+            'a' as i32,
+            FontStyle::Normal,
+            FontWeight::Bold,
+            FontStretch::Normal,
+            Some(family.as_str()),
+            None,
+        )
+        .expect("a bold match");
+    let bold_face = SkiaTypeface::try_get(&*bold).unwrap();
+    if *bold_face.sk_typeface().font_style().weight() < 600 {
+        assert!(bold.font_simulations().contains(FontSimulations::Bold));
+        assert_eq!(FontWeight::Bold, bold.weight());
+    }
+    let oblique = font_manager
+        .try_create_glyph_typeface(&family, FontStyle::Oblique, FontWeight::Normal, FontStretch::Normal)
+        .expect("an oblique match");
+    let oblique_face = SkiaTypeface::try_get(&*oblique).unwrap();
+    if oblique_face.sk_typeface().font_style().slant() == skia_safe::font_style::Slant::Upright {
+        assert!(oblique.font_simulations().contains(FontSimulations::Oblique));
+        assert_eq!(FontStyle::Oblique, oblique.style());
+    }
+    assert_eq!(upright.width(), oblique_face.sk_typeface().font_style().width());
+}

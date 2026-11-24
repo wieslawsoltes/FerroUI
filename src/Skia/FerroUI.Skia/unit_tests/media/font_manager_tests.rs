@@ -677,7 +677,9 @@ fn should_get_regular_font_after_matching_italic_font() {
         .try_match_character('こ' as i32, FontStyle::Italic, FontWeight::Normal, FontStretch::Normal, None, None)
         .expect("an italic match");
 
-    assert_eq!(FontSimulations::None, italic_typeface.glyph_typeface().font_simulations());
+    // Yu Gothic UI has no italic face; DirectWrite answers with a simulated oblique, which the
+    // match reports (upstream 80659c4c3e).
+    assert_eq!(FontSimulations::Oblique, italic_typeface.glyph_typeface().font_simulations());
 
     assert_eq!("Yu Gothic UI", italic_typeface.glyph_typeface().family_name());
 

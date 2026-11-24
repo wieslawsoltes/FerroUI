@@ -657,6 +657,11 @@ API Ptr d2_font_variations(Ptr p,const uint32_t* tags,const double* values,size_
     }
     return result.release();
 } CATCH_PTR
+// The simulations DirectWrite applies inside the face (DWRITE_FONT_SIMULATIONS: bold 1, oblique 2),
+// which it draws itself (upstream 80659c4c3e).
+API int d2_font_simulations(Ptr p) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
+    return (int)static_cast<Font*>(p)->face->GetSimulations();
+} catch(...) { return 0; }
 API Ptr d2_font_table(Ptr p,uint32_t tag) try { std::lock_guard<std::recursive_mutex> nativeGuard(nativeMutex);
     auto f=static_cast<Font*>(p); const void* data=nullptr; UINT32 n=0; void* context=nullptr; BOOL exists=FALSE;
     check(f->face->TryGetFontTable(_byteswap_ulong(tag),&data,&n,&context,&exists));
