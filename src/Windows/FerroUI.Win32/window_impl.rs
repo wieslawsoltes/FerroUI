@@ -243,7 +243,7 @@ mod imp {
     use ferroui_base::input::raw::IRawInputEventArgs;
     use crate::i_blur_host::{BlurEffect, ICompositionEffectsSurface};
     use crate::i_windows_surface_factory::{IWindowsSurfaceFactory, WindowsSurface};
-    use ferroui_base::input::{IInputRoot, PenDevice, PointerPressedEventArgs, TouchDevice};
+    use ferroui_base::input::{IInputRoot, PenDevice, PointerPressedEventArgs, PointerType, TouchDevice};
     use ferroui_base::logging::{LogArea, LogEventLevel, Logger};
     use ferroui_base::platform::surfaces::{IPlatformRenderSurface, PlatformTextRenderingParameters};
     use ferroui_opengl::egl::{EglGlPlatformSurface, IEglWindowGlPlatformSurfaceInfo};
@@ -424,6 +424,14 @@ mod imp {
     const MIN_HOST_BACKDROP_VERSION: Version = Version { major: 10, minor: 0, build: 22000 };
 
     /// Window implementation for the Win32 platform.
+    /// A drag of the window that waits for the left button the system emulates for a touch or a
+    /// pen.
+    #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+    pub(crate) enum PendingDrag {
+        Move,
+        Resize(WindowEdge),
+    }
+
     pub struct WindowImpl {
         this: Weak<WindowImpl>,
         kind: WindowKind,
@@ -478,6 +486,12 @@ mod imp {
         shown: Cell<bool>,
         hidden_window_is_parent: Cell<bool>,
         ignore_wm_char: Cell<bool>,
+        /// A move or resize drag that a touch or a pen asked for before the system emulated the
+        /// left button: it starts with that button (`_pendingDrag` of upstream).
+        pending_drag: Cell<Option<PendingDrag>>,
+        /// The last pointer that asked for a drag is no mouse, so its pointer down message needs
+        /// the default handling that emulates the button.
+        drag_requested_from_pointer: Cell<bool>,
         /// The language of the keyboard layout the input method was last
         /// given for this window.
         langid: Cell<u32>,
@@ -621,6 +635,8 @@ mod imp {
                 shown: Cell::new(false),
                 hidden_window_is_parent: Cell::new(false),
                 ignore_wm_char: Cell::new(false),
+                pending_drag: Cell::new(None),
+                drag_requested_from_pointer: Cell::new(false),
                 langid: Cell::new(0),
                 kill_focus_requested: Cell::new(false),
                 input_pane: RefCell::new(None),
@@ -796,6 +812,47 @@ mod imp {
 
         pub(crate) fn set_ignore_wm_char(&self, value: bool) {
             self.ignore_wm_char.set(value);
+        }
+
+        /// Takes the drag that waits on the emulated left button.
+        pub(crate) fn take_pending_drag(&self) -> Option<PendingDrag> {
+            self.pending_drag.take()
+        }
+
+        /// Forgets the drag that waits on the emulated left button: the pointer went up or lost
+        /// its capture first.
+        pub(crate) fn clear_pending_drag(&self) {
+            self.pending_drag.set(None);
+        }
+
+        /// Whether the pointer down message being handled needs the default handling for a drag,
+        /// which the next message no longer does.
+        pub(crate) fn take_drag_requested_from_pointer(&self) -> bool {
+            self.drag_requested_from_pointer.replace(false)
+        }
+
+        /// Starts a drag of the window: the move loop of the system, or the resize loop of an
+        /// edge.
+        pub(crate) fn start_drag(&self, drag: PendingDrag) {
+            let hwnd = self.hwnd.get();
+            match drag {
+                PendingDrag::Move => {
+                    // SendMessage's return value is dependent on the message send.  WM_SYSCOMMAND
+                    // and WM_LBUTTONUP return value just signify whether the WndProc handled the
+                    // message or not, so they are not interesting
+                    send_message(hwnd, WindowsMessage::WM_SYSCOMMAND, SC_MOUSEMOVE as usize, 0);
+                    send_message(hwnd, WindowsMessage::WM_LBUTTONUP, 0, 0);
+                }
+                PendingDrag::Resize(edge) => {
+                    def_window_proc(hwnd, WindowsMessage::WM_NCLBUTTONDOWN, hit_test_from_edge(edge) as usize, 0);
+                }
+            }
+        }
+
+        /// A touch or a pen asks for a drag before the system emulated the left button: the drag
+        /// waits for that button, which the move and resize loops of the system need.
+        fn waits_for_emulated_button(e: &PointerPressedEventArgs) -> bool {
+            e.pointer().type_() != PointerType::Mouse && get_key_state(VirtualKeyStates::VK_LBUTTON) >= 0
         }
 
         pub(crate) fn kill_focus_requested(&self) -> bool {
@@ -2679,15 +2736,17 @@ mod imp {
                 panic!("BeginMoveDrag Failed");
             }
 
-            let hwnd = self.hwnd.get();
+            self.drag_requested_from_pointer.set(e.pointer().type_() != PointerType::Mouse);
+            let waits = Self::waits_for_emulated_button(e);
+            let this = self.this.clone();
             Dispatcher::ui_thread().post_local(
                 move || {
-                    // SendMessage's return value is dependent on the message send.  WM_SYSCOMMAND
-                    // and WM_LBUTTONUP return value just signify whether the WndProc handled the
-                    // message or not, so they are not interesting
-
-                    send_message(hwnd, WindowsMessage::WM_SYSCOMMAND, SC_MOUSEMOVE as usize, 0);
-                    send_message(hwnd, WindowsMessage::WM_LBUTTONUP, 0, 0);
+                    let Some(this) = this.upgrade() else { return };
+                    if waits {
+                        this.pending_drag.set(Some(PendingDrag::Move));
+                    } else {
+                        this.start_drag(PendingDrag::Move);
+                    }
                 },
                 DispatcherPriority::SEND,
             );
@@ -2696,7 +2755,12 @@ mod imp {
         fn begin_resize_drag(&self, edge: WindowEdge, e: &PointerPressedEventArgs) {
             if self.window_properties.get().is_resizable {
                 e.pointer().capture(None);
-                def_window_proc(self.hwnd.get(), WindowsMessage::WM_NCLBUTTONDOWN, hit_test_from_edge(edge) as usize, 0);
+                if Self::waits_for_emulated_button(e) {
+                    self.drag_requested_from_pointer.set(true);
+                    self.pending_drag.set(Some(PendingDrag::Resize(edge)));
+                } else {
+                    self.start_drag(PendingDrag::Resize(edge));
+                }
             }
         }
 

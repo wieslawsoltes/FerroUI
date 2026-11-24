@@ -4010,6 +4010,13 @@ mod native {
         unsafe { kbm::ReleaseCapture() != 0 }
     }
 
+    /// `GetKeyState`: the state of a virtual key as the messages of the thread have seen it,
+    /// negative while the key is down.
+    pub fn get_key_state(virtual_key: i32) -> i16 {
+        // SAFETY: a plain value.
+        unsafe { kbm::GetKeyState(virtual_key) }
+    }
+
     /// The state of the 256 virtual keys as the thread has seen it.
     pub fn get_keyboard_state() -> [u8; 256] {
         let mut state = [0u8; 256];
