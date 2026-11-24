@@ -298,10 +298,7 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
         .set_selected_index(1);
     click(&root, "ScrollIntoViewButton");
     window.update_layout();
-    let viewer = scroll
-        .scroll()
-        .and_then(|scroll| scroll.cast::<ScrollViewer>())
-        .unwrap();
+    let viewer = scroll.scroll_viewer().unwrap();
     assert!(viewer.offset().y > 0.0);
     let item = scroll.container_from_index(100).expect("the item is realized");
     let top = item
@@ -311,10 +308,7 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
     assert!(top.abs() < 1.0, "the item's top is at the viewport's top: {top}");
     // Save, scroll away, restore.
     let restore = root.get_control::<ListView>("RestoreScrollListView");
-    let restore_viewer = restore
-        .scroll()
-        .and_then(|scroll| scroll.cast::<ScrollViewer>())
-        .unwrap();
+    let restore_viewer = restore.scroll_viewer().unwrap();
     restore.scroll_into_view(20);
     window.update_layout();
     let saved = restore_viewer.offset().y;
