@@ -97,7 +97,10 @@ fn a_reflection_binding_path_names_its_type_in_the_matching_namespace_entry() {
     let typed = "(\"FerroUI.Controls\", \"FerroUI.Controls\", &[(\"TextBox\", || ::ferroui_base::data::core::expression_nodes::CastTarget::Class(<::ferroui_controls::TextBox as ::ferroui_base::StaticType>::TYPE))])";
     assert_eq!(source.matches(typed).count(), 1, "{source}");
     assert_eq!(source.matches("(\"TextBox\", ||").count(), 1, "{source}");
-    assert!(source.contains("(\"FerroUI.Controls\", \"FerroUI.Base\", &[])"), "{source}");
+    // The other namespaces of an assembly are one reference to it, which the type resolver
+    // expands from the registered metadata.
+    assert!(source.contains("(\"https://github.com/ferroui\", \"FerroUI.Base\", &[])"), "{source}");
+    assert!(!source.contains("(\"FerroUI.Controls\", \"FerroUI.Base\", &[])"), "{source}");
 }
 
 /// Not from upstream (#603): a binding whose path the compiler resolves (the templated parent

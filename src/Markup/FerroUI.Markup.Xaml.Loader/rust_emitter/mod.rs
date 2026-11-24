@@ -125,7 +125,7 @@ pub use compiled::{
 #[cfg(any(feature = "emitter", all(test, feature = "runtime")))]
 pub use runtime_host::{compile_documents, generate_class_file, generate_file, generate_file_with_runtime_types};
 #[cfg(all(any(test, feature = "testing"), any(feature = "emitter", all(test, feature = "runtime"))))]
-pub use runtime_host::{transformed_class_group, transformed_tree};
+pub use runtime_host::{transformed_class_group, transformed_namespace_table, transformed_tree};
 pub use transform::{
     transform_group, DiagnosticHandler, DocumentSource, NamespaceTable, ThemePartsTables, TransformOptions,
     TransformedDocument, XamlBackend, METHOD_NOT_FOUND, PARTS_CONSTRUCTOR, with_xaml_backend,

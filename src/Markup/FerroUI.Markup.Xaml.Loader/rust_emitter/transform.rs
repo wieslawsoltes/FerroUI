@@ -497,7 +497,8 @@ pub(crate) struct PathType {
 /// order, the namespaces and the assemblies it maps to.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct NamespaceTable {
-    entries: Vec<(String, Vec<(String, String)>)>,
+    /// For each prefix: the XML namespace, when the assemblies map it, and what it resolves to.
+    entries: Vec<(String, Option<String>, Vec<(String, String)>)>,
 }
 
 impl NamespaceTable {
@@ -508,14 +509,66 @@ impl NamespaceTable {
         let entries: Vec<String> = self
             .entries
             .iter()
-            .map(|(prefix, infos)| {
-                let infos: Vec<String> =
-                    infos.iter().map(|(clr_namespace, assembly)| namespace_entry(clr_namespace, assembly, path_types)).collect();
+            .map(|(prefix, xml_namespace, infos)| {
+                let infos: Vec<String> = table_entries(xml_namespace.as_deref(), infos, path_types)
+                    .into_iter()
+                    .map(|(clr_namespace, assembly)| namespace_entry(clr_namespace, assembly, path_types))
+                    .collect();
                 format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
             })
             .collect();
         format!("&[\n{}]", entries.concat())
     }
+
+    /// For each prefix, what the compiler resolved it to: the namespaces and assemblies the
+    /// run-time loader gives the same document.
+    pub fn resolved(&self) -> Vec<(String, Vec<(String, String)>)> {
+        self.entries.iter().map(|(prefix, _, infos)| (prefix.clone(), infos.clone())).collect()
+    }
+
+    /// For each prefix, the entries the table is written with when no entry has types.
+    pub fn written(&self) -> Vec<(String, Vec<(String, String)>)> {
+        self.entries
+            .iter()
+            .map(|(prefix, xml_namespace, infos)| {
+                let entries = table_entries(xml_namespace.as_deref(), infos, &[]);
+                (prefix.clone(), entries.into_iter().map(|(a, b)| (a.to_owned(), b.to_owned())).collect())
+            })
+            .collect()
+    }
+}
+
+/// The XML namespace of a prefix when the entries of the table can refer to it: the assemblies
+/// map it, and its name cannot be taken for a dotted namespace.
+fn referable_xml_namespace<'a>(configuration: &TransformerConfiguration, xmlns: &'a str) -> Option<&'a str> {
+    (xmlns.contains(':') && configuration.xmlns_mappings.namespaces.contains_key(xmlns)).then_some(xmlns)
+}
+
+/// What a table holds for a prefix. An XML namespace that assemblies map is written as one
+/// reference per assembly, `(XML namespace, assembly)`, followed by only the entries of that
+/// assembly that carry types of reflection-binding paths; `rt::expand_xml_namespace_entries`
+/// gives the full list, in the same order, to whatever asks for it at run time. So the table of
+/// a document does not grow with the namespaces an assembly maps.
+fn table_entries<'a>(
+    xml_namespace: Option<&'a str>,
+    infos: &'a [(String, String)],
+    path_types: &[PathType],
+) -> Vec<(&'a str, &'a str)> {
+    let Some(xml_namespace) = xml_namespace else {
+        return infos.iter().map(|(clr_namespace, assembly)| (clr_namespace.as_str(), assembly.as_str())).collect();
+    };
+    let mut entries = Vec::new();
+    let mut current: Option<&str> = None;
+    for (clr_namespace, assembly) in infos {
+        if current != Some(assembly.as_str()) {
+            entries.push((xml_namespace, assembly.as_str()));
+            current = Some(assembly.as_str());
+        }
+        if path_types.iter().any(|path| path.clr_namespace == *clr_namespace && path.assembly == *assembly) {
+            entries.push((clr_namespace.as_str(), assembly.as_str()));
+        }
+    }
+    entries
 }
 
 /// One entry of a namespace table: the namespace, the assembly and the types of
@@ -543,7 +596,12 @@ pub fn namespace_table(configuration: &Rc<TransformerConfiguration>, document: &
                 .iter()
                 .map(|info| (info.clr_namespace.clone(), info.clr_assembly_name.clone().unwrap_or_default()))
                 .collect();
-            (prefix.clone(), infos)
+            let xml_namespace = document
+                .namespace_aliases
+                .get(prefix)
+                .and_then(|xmlns| referable_xml_namespace(configuration, xmlns))
+                .map(str::to_owned);
+            (prefix.clone(), xml_namespace, infos)
         })
         .collect();
     NamespaceTable { entries }
@@ -563,10 +621,15 @@ pub(crate) fn namespace_table_for_aliases(
     let entries: Vec<_> = prefixes.into_iter().map(|prefix| {
         let resolved = xamlx::transform::NamespaceInfoHelper::try_resolve(configuration, Some(&aliases[prefix]))
             .unwrap_or_default();
-        let infos: Vec<_> = resolved.into_iter().map(|info| {
+        let resolved: Vec<(String, String)> = resolved.into_iter().map(|info| {
             let assembly = info.assembly_name.or_else(|| info.assembly.map(|assembly| assembly.name())).unwrap_or_default();
-            namespace_entry(&info.clr_namespace, &assembly, path_types)
+            (info.clr_namespace, assembly)
         }).collect();
+        let xml_namespace = referable_xml_namespace(configuration, &aliases[prefix]);
+        let infos: Vec<_> = table_entries(xml_namespace, &resolved, path_types)
+            .into_iter()
+            .map(|(clr_namespace, assembly)| namespace_entry(clr_namespace, assembly, path_types))
+            .collect();
         format!("    ({}, &[{}]),\n", rust_string_literal(prefix), infos.join(", "))
     }).collect();
     format!("&[\n{}]", entries.concat())
