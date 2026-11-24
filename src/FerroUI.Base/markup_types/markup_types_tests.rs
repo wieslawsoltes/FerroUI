@@ -254,6 +254,7 @@ const PARSE_SAMPLES: &[(&str, &str)] = &[
     ("FerroUI.Media.FontFamily", "Arial"),
     ("FerroUI.Media.FontFeature", "+kern"),
     ("FerroUI.Media.FontFeatureCollection", "+kern, -liga"),
+    ("FerroUI.Media.FontVariationSettings", "wght=650,wdth=85"),
     ("FerroUI.Media.TextDecorationCollection", "Underline"),
     ("FerroUI.Media.BoxShadow", "5 5 10 0 Red"),
     ("FerroUI.Media.BoxShadows", "5 5 10 0 Red, inset 1 1 2 0 Blue"),
