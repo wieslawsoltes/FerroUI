@@ -52,13 +52,26 @@ impl VulkanImageBase {
         size: PixelSize,
         mip_levels: u32,
     ) -> Self {
+        Self::with_usage(context, command_buffer_pool, format, size, mip_levels, vk::ImageUsageFlags::empty())
+    }
+
+    /// [`new`](Self::new) with usage flags beyond the default ones.
+    pub fn with_usage(
+        context: Rc<dyn IVulkanPlatformGraphicsContext>,
+        command_buffer_pool: Rc<VulkanCommandBufferPool>,
+        format: vk::Format,
+        size: PixelSize,
+        mip_levels: u32,
+        extra_usage: vk::ImageUsageFlags,
+    ) -> Self {
         Self {
             context,
             current_access_flags: Cell::new(vk::AccessFlags::empty()),
             usage_flags: vk::ImageUsageFlags::COLOR_ATTACHMENT
                 | vk::ImageUsageFlags::TRANSFER_DST
                 | vk::ImageUsageFlags::TRANSFER_SRC
-                | vk::ImageUsageFlags::SAMPLED,
+                | vk::ImageUsageFlags::SAMPLED
+                | extra_usage,
             image_view: Cell::new(vk::ImageView::null()),
             image_memory: Cell::new(vk::DeviceMemory::null()),
             handle: Cell::new(vk::Image::null()),
@@ -73,7 +86,6 @@ impl VulkanImageBase {
         }
     }
 
-    #[allow(dead_code)] // Read by the tests.
     pub fn usage_flags(&self) -> vk::ImageUsageFlags {
         self.usage_flags
     }
@@ -354,7 +366,19 @@ impl VulkanImage {
         size: PixelSize,
         mip_levels: u32,
     ) -> Result<Self, VulkanError> {
-        let base = VulkanImageBase::new(context, command_buffer_pool, format, size, mip_levels);
+        Self::with_usage(context, command_buffer_pool, format, size, mip_levels, vk::ImageUsageFlags::empty())
+    }
+
+    /// [`new`](Self::new) with usage flags beyond the default ones.
+    pub fn with_usage(
+        context: Rc<dyn IVulkanPlatformGraphicsContext>,
+        command_buffer_pool: Rc<VulkanCommandBufferPool>,
+        format: vk::Format,
+        size: PixelSize,
+        mip_levels: u32,
+        extra_usage: vk::ImageUsageFlags,
+    ) -> Result<Self, VulkanError> {
+        let base = VulkanImageBase::with_usage(context, command_buffer_pool, format, size, mip_levels, extra_usage);
         base.initialize(None, None)?;
         base.transition_layout(vk::ImageLayout::COLOR_ATTACHMENT_OPTIMAL, vk::AccessFlags::NONE_KHR)?;
         Ok(Self { base })

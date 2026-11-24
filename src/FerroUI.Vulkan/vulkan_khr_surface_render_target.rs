@@ -21,6 +21,8 @@ pub(crate) struct VulkanKhrRenderTarget {
     platform_surface: Rc<dyn IVulkanKhrSurfacePlatformSurface>,
     format: vk::Format,
     is_rgba: bool,
+    /// The usage flags asked for beyond the default ones (`request_image_usage`).
+    extra_usage: Cell<vk::ImageUsageFlags>,
 }
 
 /// Whether a surface of the given format has its channels in the order red,
@@ -46,6 +48,7 @@ impl VulkanKhrRenderTarget {
             platform_surface: surface,
             format,
             is_rgba,
+            extra_usage: Cell::new(vk::ImageUsageFlags::empty()),
         })
     }
 
@@ -60,12 +63,13 @@ impl VulkanKhrRenderTarget {
 
     fn create_image(&self, display: &VulkanDisplay) -> Result<(), VulkanError> {
         // One mip level: the image is rendered to and copied to the swap chain, never sampled with mips.
-        let image = VulkanImage::new(
+        let image = VulkanImage::with_usage(
             self.context.clone(),
             display.command_buffer_pool().clone(),
             self.format,
             display.size(),
             1,
+            self.extra_usage.get(),
         )?;
         *self.image.borrow_mut() = Some(Rc::new(image));
         Ok(())
@@ -89,7 +93,10 @@ impl VulkanKhrRenderTarget {
         let recreated = display.ensure_swapchain_available()?;
         // A kept image is in the layout of a colour attachment: it was created in it, and the copy of every frame
         // to the swap chain returns it there. Only a new swap chain or the first frame makes a new image.
-        if recreated || self.image.borrow().is_none() {
+        // An image without the usage flags asked for since it was made is made again.
+        let wanted = self.extra_usage.get();
+        let lacks_usage = self.image.borrow().as_ref().is_some_and(|image| !image.usage_flags().contains(wanted));
+        if recreated || lacks_usage || self.image.borrow().is_none() {
             self.destroy_image();
             self.create_image(&display)?;
         }
@@ -121,6 +128,11 @@ impl IVulkanRenderTarget for VulkanKhrRenderTarget {
         if let Some(display) = self.display.borrow_mut().take() {
             display.dispose();
         }
+    }
+
+    fn request_image_usage(&self, usage: u32) {
+        let usage = self.extra_usage.get() | vk::ImageUsageFlags::from_raw(usage);
+        self.extra_usage.set(usage);
     }
 
     fn begin_draw(&self) -> Rc<dyn IVulkanRenderSession> {
