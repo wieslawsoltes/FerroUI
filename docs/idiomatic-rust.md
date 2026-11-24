@@ -168,9 +168,9 @@ stacks are in, rather than edits made now:
    the compiler's `deprecated` warnings for FerroUI items in `samples/`. A deprecated type alias is
    replaced by its type; every other use is listed for a person.
    `scripts/idioms/deprecated-uses.txt` is its last output: no uses, from the Linux workspace build
-   of CI on `main` at `336498e69` (the library and test targets of the samples) and from a local
-   check of the two samples that are only binaries and build without Skia.
+   of CI on `main` at `336498e69` (the library and test targets of the samples) and from local
+   checks of the five samples that are only binaries and build on macOS.
 
-That output does not cover the binary-only samples that need Skia or another target (iOS, the
-browser): running the command where they build adds them. The application repositories are not
+That output does not cover the binary-only samples of other targets (iOS, the browser): running
+the command where they build adds them. The application repositories are not
 changed from here.
