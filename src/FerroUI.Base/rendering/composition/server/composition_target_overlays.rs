@@ -114,9 +114,18 @@ impl CompositionTargetOverlays {
         Self::now(target).saturating_sub(self.update_started.get()).as_secs_f64() * 1000.0
     }
 
-    pub fn draw(&self, target: &ServerCompositionTarget, target_context: &mut dyn IDrawingContextImpl, has_layer: bool) {
+    /// Draws the overlays into the target; `output_transform` is the rotation of the scene into
+    /// the framebuffer of the target (identity mostly, upstream 9b3e9c881b).
+    pub fn draw(
+        &self,
+        target: &ServerCompositionTarget,
+        target_context: &mut dyn IDrawingContextImpl,
+        has_layer: bool,
+        output_transform: Matrix,
+    ) {
         let debug_overlays = self.debug_overlays.get();
         if debug_overlays != RendererDebugOverlays::NONE {
+            target_context.set_transform(output_transform);
             if self.capture_timing() {
                 let elapsed = self.elapsed_ms(target);
                 if let Some(graph) = self.render_time_graph() {
@@ -129,7 +138,7 @@ impl CompositionTargetOverlays {
             }
 
             let scaling = target.scaling();
-            target_context.set_transform(Matrix::create_scale(scaling, scaling));
+            target_context.set_transform(Matrix::create_scale(scaling, scaling) * output_transform);
 
             self.draw_overlays(target, target_context, has_layer, target.size());
         }

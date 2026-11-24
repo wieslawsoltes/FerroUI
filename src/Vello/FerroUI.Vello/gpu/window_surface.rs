@@ -450,7 +450,11 @@ impl IRenderTarget for VelloSurfaceRenderTarget {
         // The frame of the window is kept by the render target (a texture of
         // the swap chain holds nothing of the frame before), and the
         // compositor draws into it directly.
-        RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }
+        RenderTargetProperties {
+            retains_previous_frame_contents: true,
+            is_suitable_for_direct_rendering: true,
+            ..Default::default()
+        }
     }
 
     /// Not ready while the window has a size other than the one the scene was laid out for

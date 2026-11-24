@@ -456,7 +456,11 @@ impl IRenderTarget for VelloMetalRenderTarget {
         // The frame of the window is kept by the render target (a drawable
         // holds nothing of the frame before), and the compositor draws into
         // it directly.
-        RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true }
+        RenderTargetProperties {
+            retains_previous_frame_contents: true,
+            is_suitable_for_direct_rendering: true,
+            ..Default::default()
+        }
     }
 
     fn create_drawing_context(

@@ -172,7 +172,11 @@ impl IRenderTarget for FramebufferRenderTarget {
     fn properties(&self) -> RenderTargetProperties {
         // The framebuffer of a window: the frame is the target's own.
         if self.presents_frames {
-            return RenderTargetProperties { retains_previous_frame_contents: true, is_suitable_for_direct_rendering: true };
+            return RenderTargetProperties {
+                retains_previous_frame_contents: true,
+                is_suitable_for_direct_rendering: true,
+                ..Default::default()
+            };
         }
         RenderTargetProperties {
             retains_previous_frame_contents: self
@@ -181,6 +185,7 @@ impl IRenderTarget for FramebufferRenderTarget {
                 .as_ref()
                 .is_some_and(|target| target.retains_frame_contents()),
             is_suitable_for_direct_rendering: true,
+            ..Default::default()
         }
     }
 

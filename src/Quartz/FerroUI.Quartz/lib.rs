@@ -355,6 +355,7 @@ impl IRenderTarget for Target {
         RenderTargetProperties {
             retains_previous_frame_contents: self.0.retains_frame_contents(),
             is_suitable_for_direct_rendering: true,
+            ..Default::default()
         }
     }
     fn create_drawing_context(

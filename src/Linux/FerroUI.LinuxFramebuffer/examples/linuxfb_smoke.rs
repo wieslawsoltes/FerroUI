@@ -24,7 +24,8 @@
 //!   one given (`vkms` for the virtual KMS driver). The frame is read back
 //!   from the framebuffer the CRTC scans out (`output::drm_scanout`), so
 //!   the check sees what the card shows. With `--orientation=90|180|270`
-//!   the scene is drawn rotated (the rotation pass of the output), and the
+//!   the scene is drawn rotated (by the compositor, which turns its layer
+//!   into the framebuffer), and the
 //!   check expects the marker in the corner of the card's frame that the
 //!   rotation turns the scene's top-left corner into.
 //! - `--direct`, `--async`: draw directly into the mapped memory; copy
@@ -552,9 +553,9 @@ mod app {
     }
 
     /// The corner of the device's frame the scene's top-left corner is
-    /// shown in: the DRM output turns the scene clockwise by its
-    /// orientation (`rotation_vertices` of `drm_output.rs`); the other
-    /// outputs do not turn it.
+    /// shown in: the compositor turns the scene clockwise by the
+    /// orientation the DRM output reports (`required_rotation_for_orientation`
+    /// of its render target); the other outputs do not turn it.
     fn marker_corner(orientation: SurfaceOrientation) -> Corner {
         match orientation {
             SurfaceOrientation::Rotation0 => Corner::TopLeft,
