@@ -151,6 +151,8 @@ pub struct TopLevelImpl {
     surfaces: Vec<Arc<dyn IPlatformRenderSurface>>,
     handle: Rc<dyn IPlatformHandle>,
     input_root: RefCell<Option<Rc<dyn IInputRoot>>>,
+    /// Where the view is on the screen, in pixels, from its last layout.
+    position: Cell<PixelPoint>,
     // The two fields of the surface view class of the reference.
     old_size: Cell<Size>,
     old_scaling: Cell<f64>,
@@ -166,6 +168,12 @@ pub struct TopLevelImpl {
 }
 
 impl TopLevelImpl {
+    /// The view was laid out at `position` on the screen (`getLocationOnScreen`), which the
+    /// conversions between the screen and the client area use.
+    pub(crate) fn set_position_on_screen(&self, position: PixelPoint) {
+        self.position.set(position);
+    }
+
     /// Creates the top-level of the Java view `ferro_view` in `context`,
     /// with its surface view.
     pub(crate) fn new(ferro_view: &JavaObject, context: &JavaObject, place_on_top: bool) -> Rc<TopLevelImpl> {
@@ -238,6 +246,7 @@ impl TopLevelImpl {
                 transparency_level: Cell::new(WindowTransparencyLevel::none()),
                 surfaces: vec![gl, framebuffer, native_window],
                 input_root: RefCell::new(None),
+                position: Cell::new(PixelPoint::default()),
                 old_size: Cell::new(Size::default()),
                 old_scaling: Cell::new(0.0),
                 focus_change: RefCell::new(None),
@@ -672,15 +681,33 @@ impl ITopLevelImpl for TopLevelImpl {
     }
 
     fn point_to_client(&self, point: PixelPoint) -> Point {
-        point.to_point(self.render_scaling())
+        (point - self.position.get()).to_point(self.render_scaling())
     }
 
     fn point_to_screen(&self, point: Point) -> PixelPoint {
-        PixelPoint::from_point(point, self.render_scaling())
+        self.position.get() + PixelPoint::from_point(point, self.render_scaling())
     }
 
-    fn set_cursor(&self, _cursor: Option<Rc<dyn ICursorImpl>>) {
-        //still not implemented
+    fn set_cursor(&self, cursor: Option<Rc<dyn ICursorImpl>>) {
+        let Some(view) = self.view.borrow().clone() else {
+            return;
+        };
+        // No cursor is the arrow, which is the default icon of the view.
+        let icon = cursor.as_ref().and_then(|cursor| {
+            cursor.as_any().downcast_ref::<crate::cursor_factory::CursorImpl>()?.pointer_icon.clone()
+        });
+        call_static_void(
+            &JavaClass::find(PLATFORM_HELPER),
+            "setPointerIcon",
+            "(Landroid/view/View;Ljava/lang/Object;)V",
+            &[
+                JavaValue::Object(Some(view.view())),
+                JavaValue::Object(match &icon {
+                    Some(icon) => Some(icon),
+                    None => None,
+                }),
+            ],
+        );
     }
 
     fn closed(&self) -> Option<Rc<dyn Fn()>> {

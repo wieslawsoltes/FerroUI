@@ -8,7 +8,7 @@ use crate::ferro_access_helper::{FerroAccessHelper, JavaAccessibilityHost, TopLe
 use crate::interop::java::{call_int, call_long, call_void, new_object, JavaClass, JavaObject, JavaValue};
 use crate::interop::natives::{next_handle, FERRO_ACCESS_HELPER, FERRO_VIEW};
 use crate::platform::skia_platform::TopLevelImpl;
-use ferroui_base::{BoxedValue, Ref};
+use ferroui_base::{BoxedValue, PixelPoint, Ref};
 use ferroui_controls::automation::peers::ControlAutomationPeer;
 use ferroui_controls::embedding::EmbeddableControlRoot;
 use ferroui_controls::Control;
@@ -250,5 +250,10 @@ impl FerroView {
     /// activity in the reference).
     pub(crate) fn on_global_layout(&self) {
         self.view.resize(ITopLevelImpl::client_size(&*self.view));
+    }
+
+    /// The view was laid out at a position on the screen, in pixels.
+    pub(crate) fn on_location_on_screen(&self, x: i32, y: i32) {
+        self.view.set_position_on_screen(PixelPoint::new(x, y));
     }
 }

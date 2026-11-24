@@ -257,6 +257,18 @@ pub fn new_string(text: &str) -> JavaLocal {
     new_string_local(env(), text)
 }
 
+/// A new `int[]` with the given values.
+pub fn new_int_array(values: &[i32]) -> JavaLocal {
+    let env = env();
+    // SAFETY: the length is not negative.
+    let array = unsafe { JavaLocal::from_raw(jni!(env, NewIntArray, values.len() as jsize)) };
+    check_exception(env, &|| "the creation of an array of int".to_string());
+    let array = array.unwrap_or_else(|| panic!("The Java virtual machine is out of memory (NewIntArray)."));
+    // SAFETY: the array has `values.len()` elements, and the buffer that many values.
+    unsafe { jni!(env, SetIntArrayRegion, array.raw, 0, values.len() as jsize, values.as_ptr()) };
+    array
+}
+
 /// A new `String[]` with the given elements.
 pub fn new_string_array(elements: &[String]) -> JavaLocal {
     let env = env();

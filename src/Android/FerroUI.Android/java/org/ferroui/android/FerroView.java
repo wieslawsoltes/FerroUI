@@ -31,6 +31,7 @@ public final class FerroView extends FrameLayout implements ViewTreeObserver.OnG
     private static final int CALL_BASE = 4;
 
     private long nativeHandle;
+    private final int[] location = new int[2];
 
     public FerroView(Context context) {
         super(context);
@@ -63,6 +64,14 @@ public final class FerroView extends FrameLayout implements ViewTreeObserver.OnG
     @Override
     public void onGlobalLayout() {
         nativeGlobalLayout(nativeHandle);
+    }
+
+    @Override
+    protected void onLayout(boolean changed, int left, int top, int right, int bottom) {
+        super.onLayout(changed, left, top, right, bottom);
+        // The conversions between the screen and the view, for accessibility bounds.
+        getLocationOnScreen(location);
+        nativeLocationOnScreen(nativeHandle, location[0], location[1]);
     }
 
     @Override
@@ -228,6 +237,8 @@ public final class FerroView extends FrameLayout implements ViewTreeObserver.OnG
     private static native void nativeDispose(long handle);
 
     private static native void nativeGlobalLayout(long handle);
+
+    private static native void nativeLocationOnScreen(long handle, int x, int y);
 
     private static native void nativeVisibilityChanged(long handle, boolean isVisible);
 

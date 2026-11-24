@@ -78,7 +78,8 @@ pub(crate) fn bounds_in_screen_of(top_left: PixelPoint, bottom_right: PixelPoint
 
 /// What the helper asks of the view it belongs to and of its top-level.
 pub(crate) trait IAccessHelperView {
-    /// A pixel of the view as a point of the client area of the top-level.
+    /// A pixel of the view (not of the screen: hover events are relative to the view) as a
+    /// point of the client area of the top-level.
     fn point_to_client(&self, point: PixelPoint) -> Point;
 
     /// A point of the root element of the top-level on the screen, or
@@ -534,7 +535,7 @@ mod jni {
     impl IAccessHelperView for TopLevelAccessView {
         fn point_to_client(&self, point: PixelPoint) -> Point {
             match self.top_level_impl.upgrade() {
-                Some(top_level_impl) => ITopLevelImpl::point_to_client(&*top_level_impl, point),
+                Some(top_level_impl) => point.to_point(ITopLevelImpl::render_scaling(&*top_level_impl)),
                 None => Point::default(),
             }
         }

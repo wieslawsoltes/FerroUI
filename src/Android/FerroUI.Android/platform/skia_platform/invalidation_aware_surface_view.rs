@@ -156,6 +156,7 @@ impl InvalidationAwareSurfaceView {
         if let Some(logger) = Logger::try_get(LogEventLevel::Verbose, LogArea::ANDROID_PLATFORM) {
             logger.log(None, &format!("InvalidationAwareSurfaceView Changed. Format:{format} Size:{width} x {height}"));
         }
+        let _render = crate::choreographer_timer::shared_render_lock();
         self.cache_surface_properties(properties);
     }
 
@@ -163,7 +164,10 @@ impl InvalidationAwareSurfaceView {
         if let Some(logger) = Logger::try_get(LogEventLevel::Verbose, LogArea::ANDROID_PLATFORM) {
             logger.log(None, "InvalidationAwareSurfaceView Created");
         }
-        self.cache_surface_properties(properties);
+        {
+            let _render = crate::choreographer_timer::shared_render_lock();
+            self.cache_surface_properties(properties);
+        }
         Self::raise(&self.surface_window_created);
     }
 
@@ -171,8 +175,11 @@ impl InvalidationAwareSurfaceView {
         if let Some(logger) = Logger::try_get(LogEventLevel::Verbose, LogArea::ANDROID_PLATFORM) {
             logger.log(None, "InvalidationAwareSurfaceView Destroyed");
         }
-        self.release_native_window_handle();
-        self.shared.set_size(PixelSize::new(1, 1));
+        {
+            let _render = crate::choreographer_timer::shared_render_lock();
+            self.release_native_window_handle();
+            self.shared.set_size(PixelSize::new(1, 1));
+        }
         Self::raise(&self.surface_window_destroyed);
     }
 

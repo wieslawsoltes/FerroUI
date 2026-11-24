@@ -7,6 +7,7 @@ import android.content.Intent;
 import android.content.res.Configuration;
 import android.content.res.Resources;
 import android.content.res.TypedArray;
+import android.graphics.Bitmap;
 import android.graphics.Color;
 import android.graphics.Insets;
 import android.graphics.Rect;
@@ -19,6 +20,7 @@ import android.provider.Settings;
 import android.util.DisplayMetrics;
 import android.view.Display;
 import android.view.DisplayCutout;
+import android.view.PointerIcon;
 import android.view.View;
 import android.view.ViewConfiguration;
 import android.view.Window;
@@ -334,6 +336,32 @@ final class PlatformHelper {
             WindowManager.LayoutParams attributes = window.getAttributes();
             attributes.setBlurBehindRadius(radius);
             window.setAttributes(attributes);
+        }
+    }
+
+    // ---- pointer icons ------------------------------------------------------------------------
+
+    /** The pointer icon of the system of a type of PointerIcon, or null below API 24. */
+    static Object systemPointerIcon(Context context, int type) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N) {
+            return null;
+        }
+        return PointerIcon.getSystemIcon(context, type);
+    }
+
+    /** A pointer icon of unpremultiplied ARGB pixels, or null below API 24. */
+    static Object bitmapPointerIcon(int[] pixels, int width, int height, int hotSpotX, int hotSpotY) {
+        if (Build.VERSION.SDK_INT < Build.VERSION_CODES.N || width <= 0 || height <= 0) {
+            return null;
+        }
+        Bitmap bitmap = Bitmap.createBitmap(pixels, width, height, Bitmap.Config.ARGB_8888);
+        return PointerIcon.create(bitmap, hotSpotX, hotSpotY);
+    }
+
+    /** Shows a pointer icon over a view; null shows the default one. Nothing below API 24. */
+    static void setPointerIcon(View view, Object icon) {
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) {
+            view.setPointerIcon((PointerIcon) icon);
         }
     }
 
