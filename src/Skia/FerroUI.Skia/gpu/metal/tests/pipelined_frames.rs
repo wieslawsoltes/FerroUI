@@ -1017,3 +1017,25 @@ fn a_frame_that_changes_one_band_plays_that_band_and_keeps_the_others() {
     layers.dispose();
 }
 
+
+#[test]
+fn bands_inserted_from_deferred_canvases_in_completion_order_show_the_frames() {
+    let Some(device) = TestMetalDevice::try_new() else {
+        eprintln!("skipped: no Metal device available");
+        return;
+    };
+    for bands in [2, 4] {
+        let layers = Layers::with_bands(&device, SkiaFramePipelining::On, bands);
+        // Before the first pipelined frame makes the threads.
+        layers.gr_context.set_band_insert_for_tests(crate::gpu::graphite::BandInsert::Deferred);
+        // The scene has antialiased edges and text across the rows the bands meet at; each band is its own
+        // recording on a target of its own size, so a pixel at an edge may differ as between any two clipped
+        // frames (the module's note): at most a row of them, by a few steps.
+        layers.draw(draw_scene);
+        layers.assert_pixels_within(&format!("the first frame in {bands} bands"), WIDTH as usize * (bands - 1), 8);
+        layers.draw(draw_update);
+        layers.draw(draw_update);
+        layers.assert_pixels_within(&format!("the third frame in {bands} bands"), WIDTH as usize * (bands - 1), 8);
+        layers.dispose();
+    }
+}

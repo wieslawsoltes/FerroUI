@@ -82,7 +82,7 @@ use ferroui_base::PixelSize;
 use skia_safe::gpu::graphite::mtl::backend_textures;
 use skia_safe::gpu::graphite::{self, InsertRecordingInfo};
 use skia_safe::{
-    BlendMode, Canvas, ClipOp, Color, ColorType, IRect, Paint, Picture, Point, Rect,
+    AlphaType, BlendMode, Canvas, ClipOp, Color, ColorType, IRect, Paint, Picture, Point, Rect,
     SamplingOptions, Surface, SurfaceProps,
 };
 use std::cell::{Cell, RefCell};
@@ -796,7 +796,35 @@ struct Held {
     index: usize,
     recording: Option<graphite::Recording>,
     busy: Duration,
-    turn: Turn,
+    /// The turn of an ordered insertion; `None` for a band recorded on a deferred canvas, which is
+    /// inserted when it is ready ([`BandInsert::Deferred`]).
+    turn: Option<Turn>,
+    /// The first row of the band: where a deferred recording is placed in the layer.
+    top: i32,
+}
+
+/// How the threads insert the recordings of the bands of a frame (#1363, a prototype: the order
+/// stays the default until the deferred insertion passes the gate and the pixel tests).
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub(crate) enum BandInsert {
+    /// Each band draws on the layer's texture and the recordings go in in the order the bands
+    /// were sent ([`InsertOrder`]).
+    Ordered,
+    /// Each band records on a deferred canvas of its own size, which the insertion places on the
+    /// layer's texture at the band's row: no shared target while the threads record, and the
+    /// recordings go in as they are ready, with no turn to wait for. Asked for with
+    /// `FERROUI_SKIA_BAND_INSERT=deferred`.
+    Deferred,
+}
+
+impl BandInsert {
+    /// What the environment asks for when the threads are made; ordered unless it says otherwise.
+    fn from_environment() -> Self {
+        match std::env::var("FERROUI_SKIA_BAND_INSERT") {
+            Ok(value) if value.trim() == "deferred" => Self::Deferred,
+            _ => Self::Ordered,
+        }
+    }
 }
 
 /// The order in which the threads insert their recordings: the order the
@@ -871,11 +899,12 @@ struct BandWorker {
     order: Arc<InsertOrder>,
     /// Counts the recordings this thread inserted, until a submit takes them.
     unsubmitted: Arc<AtomicUsize>,
+    insert_mode: BandInsert,
 }
 
 impl BandWorker {
     fn run(self) {
-        let BandWorker { recorder, jobs, results, context, order, unsubmitted } = self;
+        let BandWorker { recorder, jobs, results, context, order, unsubmitted, insert_mode } = self;
         let mut recorder = recorder.0;
         let mut held: Vec<Held> = Vec::new();
         // The surfaces that wrap the textures of the layers, by layer. They
@@ -887,13 +916,22 @@ impl BandWorker {
             match job {
                 BandJob::Play(band) => {
                     let started = Instant::now();
-                    let turn = Turn { order: order.clone(), number: band.turn };
+                    let deferred = insert_mode == BandInsert::Deferred;
+                    let turn = (!deferred).then(|| Turn { order: order.clone(), number: band.turn });
                     // A panic would leave the render thread waiting for an
                     // answer that never comes; it is reported as a band
                     // that failed, which ends the threads.
-                    let recording =
-                        catch_unwind(AssertUnwindSafe(|| play(&mut recorder, &mut surfaces, &band))).unwrap_or(None);
-                    held.push(Held { layer: band.layer, index: band.index, recording, busy: started.elapsed(), turn });
+                    let recording = catch_unwind(AssertUnwindSafe(|| {
+                        if deferred {
+                            play_deferred(&mut recorder, &mut surfaces, &band)
+                        } else {
+                            play(&mut recorder, &mut surfaces, &band)
+                        }
+                    }))
+                    .unwrap_or(None);
+                    let busy = started.elapsed();
+                    let (layer, index, top) = (band.layer, band.index, band.clip.top);
+                    held.push(Held { layer, index, recording, busy, turn, top });
                     // The reference of the render thread outlives this one
                     // (see `Band`).
                     drop(band);
@@ -901,12 +939,19 @@ impl BandWorker {
                 BandJob::Forget { layer } => surfaces.retain(|(id, _)| *id != layer),
                 BandJob::Insert => {
                     let mut gone = false;
-                    for Held { layer, index, recording, busy, turn } in held.drain(..) {
+                    for Held { layer, index, recording, busy, turn, top } in held.drain(..) {
                         let recorded = recording.is_some();
-                        drop(turn.wait());
+                        if let Some(turn) = &turn {
+                            drop(turn.wait());
+                        }
+                        let target = surfaces.iter().find(|(id, _)| *id == layer).map(|(_, surface)| surface);
                         let inserted = recording.is_some_and(|mut recording| {
-                            catch_unwind(AssertUnwindSafe(|| insert(&mut context.lock(), &mut recording)))
-                                .unwrap_or(false)
+                            catch_unwind(AssertUnwindSafe(|| match (&turn, target) {
+                                (Some(_), _) => insert(&mut context.lock(), &mut recording),
+                                (None, Some(target)) => insert_at(&mut context.lock(), &mut recording, target, top),
+                                (None, None) => false,
+                            }))
+                            .unwrap_or(false)
                         });
                         if inserted {
                             unsubmitted.fetch_add(1, Ordering::Release);
@@ -949,6 +994,53 @@ fn play(
     recorder.snap()
 }
 
+/// Plays a band on a deferred canvas of the band's size, its rows moved to the top, and snaps the
+/// recorder; [`insert_at`] places the recording on the layer's texture. The surface that wraps the
+/// texture is made for the insertion if the thread has none yet.
+fn play_deferred(
+    recorder: &mut graphite::Recorder,
+    surfaces: &mut Vec<(u64, Surface)>,
+    band: &Band,
+) -> Option<graphite::Recording> {
+    if !surfaces.iter().any(|(layer, _)| *layer == band.layer) {
+        let surface = wrap_texture(recorder, &band.texture, band.size, band.color_type, &band.props)?;
+        surfaces.push((band.layer, surface));
+    }
+    // SAFETY: as in `wrap_texture`: the texture is alive for the call, and only its description
+    // is read from the backend texture.
+    let texture_info = unsafe { backend_textures::make_metal(band.size, band.texture.0) }.info();
+    let image_info =
+        skia_safe::ImageInfo::new((band.clip.width(), band.clip.height()), band.color_type, AlphaType::Premul, None);
+    {
+        let canvas = recorder.make_deferred_canvas(&image_info, &texture_info)?;
+        canvas.translate((0.0, -(band.clip.top as f32)));
+        canvas.clip_rect(Rect::from(band.clip), ClipOp::Intersect, false);
+        canvas.draw_picture(&band.picture, None, None);
+    }
+    recorder.snap()
+}
+
+/// Inserts a recording of a deferred canvas onto `target` at row `top` (`fTargetSurface`,
+/// `fTargetTranslation`, which skia-safe does not set; through `skia-bindings`, as for
+/// `fRequireOrderedRecordings`, desktop-performance.md section 9.17).
+fn insert_at(context: &mut graphite::Context, recording: &mut graphite::Recording, target: &Surface, top: i32) -> bool {
+    // The wrapper holds the pointer to the native structure and a marker of no size: of the size of a pointer,
+    // the pointer is at offset 0. A surface handle is `repr(transparent)` over the pointer to its native surface.
+    const _: () = assert!(
+        std::mem::size_of::<InsertRecordingInfo<'static>>() == std::mem::size_of::<*mut ()>()
+    );
+    let mut info = InsertRecordingInfo::new(recording);
+    // SAFETY: by the assertion the first word of the wrapper is the native structure it owns; the target surface
+    // outlives the insertion, which takes a reference of its own.
+    unsafe {
+        let native =
+            *(&mut info as *mut InsertRecordingInfo).cast::<*mut skia_bindings::skgpu_graphite_InsertRecordingInfo>();
+        (*native).fTargetSurface = *(target as *const Surface).cast::<*mut skia_bindings::SkSurface>();
+        (*native).fTargetTranslation = skia_bindings::SkIPoint { fX: 0, fY: top };
+    }
+    context.insert_recording(&info) == graphite::InsertStatus::Success
+}
+
 struct WorkerHandle {
     jobs: band_queue::Sender<BandJob>,
     thread: thread::JoinHandle<()>,
@@ -977,6 +1069,9 @@ pub(super) struct BandPool {
     next_turn: u64,
     /// The band recordings the threads inserted that no submit has taken yet.
     unsubmitted: Arc<AtomicUsize>,
+    /// How the threads insert, chosen when they are made (`BandInsert::from_environment`), unless
+    /// a test chose before.
+    insert_mode: Option<BandInsert>,
 }
 
 impl BandPool {
@@ -984,6 +1079,12 @@ impl BandPool {
     /// sends to the GPU (`GraphiteGrContext::submit_inserted_bands`, and every flush).
     pub(super) fn take_unsubmitted(&self) -> usize {
         self.unsubmitted.swap(0, Ordering::Acquire)
+    }
+
+    /// Chooses how threads made from now on insert (for the tests).
+    #[cfg(test)]
+    pub(super) fn set_insert_mode(&mut self, mode: BandInsert) {
+        self.insert_mode = Some(mode);
     }
 
     /// Makes the threads, each with a recorder of the context: `bands` of
@@ -999,6 +1100,7 @@ impl BandPool {
         }
 
         let (results_sender, results) = band_queue::channel();
+        let insert_mode = *self.insert_mode.get_or_insert_with(BandInsert::from_environment);
         for index in 0..bands.max(1) {
             let Some(recorder) = context.lock().make_recorder(None) else {
                 self.disable();
@@ -1012,6 +1114,7 @@ impl BandPool {
                 context: context.clone(),
                 order: self.order.clone(),
                 unsubmitted: self.unsubmitted.clone(),
+                insert_mode,
             };
             let spawned =
                 thread::Builder::new().name(format!("ferroui-skia-band-{index}")).spawn(move || worker.run());
