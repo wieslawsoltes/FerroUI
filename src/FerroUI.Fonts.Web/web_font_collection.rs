@@ -25,7 +25,7 @@ use ferroui_fonts_web_core::matching::{family_matches, match_font_faces, FontMat
 use ferroui_fonts_web_core::sfnt::{
     apply_metric_overrides, has_metric_overrides, make_invisible_font, SanitizeOptions,
 };
-use ferroui_fonts_web_core::variations::{names_of, read_font_axes, resolve_font_variations, FontAxes};
+use ferroui_fonts_web_core::variations::{names_of, read_fvar, resolve_font_variations, FvarTable};
 use ferroui_fonts_web_core::{FontDecodeError, FontDecoder};
 use std::any::Any;
 use std::cell::{Cell, RefCell};
@@ -77,7 +77,7 @@ struct Slot {
     /// Whether the font arrived in time to replace the fallback.
     usable: bool,
     /// The variation space of the font, for a variable font.
-    axes: Option<Rc<FontAxes>>,
+    axes: Option<Rc<FvarTable>>,
     /// The instances of the font made for requests, by what they were made for.
     instances: Vec<(InstanceKey, Rc<GlyphTypeface>)>,
     /// The size of the decoded font.
@@ -168,7 +168,7 @@ fn has_local_name(typeface: &GlyphTypeface, name: &str) -> bool {
 fn simulations_for(
     base: &GlyphTypeface,
     face: &FontFaceDescriptors,
-    axes: Option<&FontAxes>,
+    axes: Option<&FvarTable>,
     request: &FontMatchRequest,
 ) -> FontSimulations {
     let has = |tag: &[u8; 4]| axes.is_some_and(|axes| axes.has(tag));
@@ -335,7 +335,7 @@ impl Shared {
             let mut bytes = Vec::new();
             let read = typeface.platform_typeface().try_get_stream().map(|mut stream| stream.read_to_end(&mut bytes));
             if matches!(read, Some(Ok(_))) && apply_metric_overrides(&mut bytes, &descriptors).is_ok() {
-                axes = read_font_axes(&bytes).map(Rc::new);
+                axes = read_fvar(&bytes).map(Rc::new);
                 size = bytes.len();
                 let mut stream = FontDataStream::new(bytes);
                 let adjusted = this
@@ -501,7 +501,7 @@ impl Shared {
                 // A font that cannot take the overrides is used as it is.
                 let _ = this.with_slot(id, |slot| apply_metric_overrides(&mut font, &slot.descriptors));
                 size = font.len();
-                axes = read_font_axes(&font).map(Rc::new);
+                axes = read_fvar(&font).map(Rc::new);
                 let mut stream = FontDataStream::new(font);
                 let typeface =
                     this.platform.try_create_glyph_typeface_from_stream(&mut stream, FontSimulations::None)?;
