@@ -137,7 +137,7 @@ impl TypeSystemHelpers {
                 .map(|x| dotnet_trim(x).to_string())
                 .collect()
         } else {
-            vec![value.to_string()]
+            vec![dotnet_trim(value).to_string()]
         };
 
         let mut cv: Option<XamlValue> = None;

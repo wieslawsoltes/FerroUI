@@ -156,11 +156,25 @@ impl TypeReferenceResolver {
             }
         }
 
-        if !type_arguments.is_empty() {
-            found = match found {
-                Some(f) => Some(f.make_generic_type(&targs)?),
-                None => None,
-            };
+        if let Some(f) = found.clone() {
+            if !targs.is_empty() {
+                // Nullable<T> only accepts non-nullable value types.
+                let nullable_t = &context.configuration().well_known_types().nullable_t;
+                if f.equals(&**nullable_t) && (!targs[0].is_value_type() || targs[0].is_nullable()) {
+                    let arguments: Vec<String> = targs.iter().map(|a| a.get_full_name()).collect();
+                    return Err(XamlError::transform_exception(
+                        format!(
+                            "Unable to construct generic type {} with arguments {}: type argument {} must be a \
+                             non-nullable value type",
+                            f.get_full_name(),
+                            arguments.join(", "),
+                            targs[0].get_full_name()
+                        ),
+                        Some(line_info),
+                    ));
+                }
+                found = Some(f.make_generic_type(&targs)?);
+            }
         }
         if let Some(found) = found {
             let is_markup_extension = is_markup_extension || found.name().ends_with("Extension");

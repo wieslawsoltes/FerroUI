@@ -973,3 +973,61 @@ fn visitors_replace_children_in_place_and_track_parents() {
         other => panic!("Expected an invalid cast, got {:?}", other.map(|_| ())),
     }
 }
+
+// Upstream XamlX: inline generic arguments and nullable indicators in x:Type and x:Static.
+const SCG: &str = "xmlns:scg='clr-namespace:System.Collections.Generic;assembly=System.Runtime' \
+                   xmlns:sys='clr-namespace:System;assembly=System.Runtime'";
+
+#[test]
+fn type_extension_resolves_inline_generic_and_nullable_types() {
+    for (expected, type_ext) in [
+        (
+            "System.Collections.Generic.Dictionary`2[System.String,System.String]",
+            "{x:Type 'scg:Dictionary(x:String, x:String)'}",
+        ),
+        (
+            "System.Collections.Generic.Dictionary`2[System.String,System.Collections.Generic.List`1[System.Int32]]",
+            "{x:Type TypeName='scg:Dictionary(x:String, scg:List(x:Int32))'}",
+        ),
+        ("System.Nullable`1[System.Int32]", "{x:Type x:Int32?}"),
+        ("System.Nullable`1[System.Int32]", "{x:Type 'sys:Nullable(x:Int32)'}"),
+        ("System.String", "{x:Type x:String?}"),
+        ("System.Collections.Generic.List`1[System.Nullable`1[System.Int32]]", "{x:Type 'scg:List(x:Int32?)'}"),
+    ] {
+        let node = intrinsics(&format!("{SCG} TypeProperty=\"{type_ext}\""));
+        assert_eq!(assigned(&node, "TypeProperty"), format!("(TypeExt clr!!{expected})"), "{type_ext}");
+    }
+}
+
+fn fatal_error(attributes: &str) -> String {
+    let fatal = TestHost::with_options(TestHostOptions { errors_are_fatal: true, custom_value_converter: None });
+    match fatal.transform(&format!("<IntrinsicsTestsClass xmlns='test' {X} {SCG} {attributes}/>")) {
+        Err(XamlError::Transform(e)) => e.title,
+        other => panic!("expected a transform error for {attributes}, got {:?}", other.map(|_| ())),
+    }
+}
+
+#[test]
+fn type_extension_reports_malformed_inline_generics() {
+    let mixed = fatal_error(
+        "TypeProperty=\"{x:Type TypeName='scg:Dictionary(x:String, x:String)', x:TypeArguments='x:String, x:String'}\"",
+    );
+    assert!(mixed.contains("both inline and in x:TypeArguments"), "{mixed}");
+    let unbalanced = fatal_error("TypeProperty=\"{x:Type TypeName='scg:List(x:String'}\"");
+    assert!(unbalanced.contains("Unable to parse x:Type") && unbalanced.contains("Unmatched '('"), "{unbalanced}");
+    let twice = fatal_error("TypeProperty=\"{x:Type x:Int32??}\"");
+    assert!(twice.contains("multiple nullable indicators"), "{twice}");
+    let reference = fatal_error("TypeProperty=\"{x:Type 'sys:Nullable(x:String)'}\"");
+    assert!(reference.contains("must be a non-nullable value type"), "{reference}");
+}
+
+#[test]
+fn nullable_indicators_follow_a_generic_type() {
+    use crate::parsers::CommaSeparatedParenthesesTreeParser;
+    let tree = CommaSeparatedParenthesesTreeParser::parse("scg:KeyValuePair(x:Int32?, x:String?)?").unwrap();
+    assert_eq!(tree.len(), 1);
+    assert_eq!(tree[0].value.as_deref(), Some("scg:KeyValuePair?"));
+    assert_eq!(tree[0].children.len(), 2);
+    assert!(CommaSeparatedParenthesesTreeParser::parse("a(b").is_err());
+    assert!(CommaSeparatedParenthesesTreeParser::parse("a(b)c").is_err());
+}
