@@ -633,6 +633,91 @@
       "notes": "Both source examples use native DropDownButton with a MenuFlyout placed BottomEdgeAlignedLeft: the text button and the icon button, with the source's FontIcon glyphs on the button and on the items. WinUI's MenuFlyoutItem is MenuItem (Text is Header). The page has no code-behind upstream. The glyphs need the symbol font of the platform (Segoe Fluent Icons on Windows).",
       "examples": []
     },
+    "GridView": {
+      "status": "ported",
+      "implementation": [
+        "samples/WinUIGallery/Pages/GridView.xaml",
+        "samples/WinUIGallery/examples.rs",
+        "samples/WinUIGallery/grid_view_samples.rs",
+        "samples/WinUIGallery/list_samples.rs"
+      ],
+      "tests": [
+        {
+          "path": "samples/WinUIGallery/tests.rs",
+          "name": "all_reviewed_native_adaptations_load_real_controls"
+        },
+        {
+          "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+          "name": "each_grid_gets_the_data_objects_of_the_source"
+        }
+      ],
+      "notes": "The three source examples use the native GridView of WinUI with its ItemsWrapGrid. x:Bind becomes {Binding} over CustomDataObject; the option controls stand for the $(...) values of the samples and were not compared with the source page.",
+      "examples": [
+        {
+          "source": "WinUIGallery/Samples/GridView/BasicGridviewSimpleDatatemplate.txt",
+          "source_sha256": "a95a582338730abe871b1d0c6413fc96eb7c5006e451c43f357f0b83f9111d63",
+          "status": "ported",
+          "target_control": "Example1",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+              "name": "each_grid_gets_the_data_objects_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+              "name": "a_click_in_the_basic_grid_shows_the_title_of_the_item"
+            }
+          ],
+          "notes": "ImageTemplate items, single selection; a click shows the title of the item."
+        },
+        {
+          "source": "WinUIGallery/Samples/GridView/GridviewLayoutCustomization.txt",
+          "source_sha256": "a82c237f49cb81b7323677393083303fea43a78e6ea00e6f3abbf675f825d1f7",
+          "status": "ported",
+          "target_control": "Example2",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+              "name": "each_grid_gets_the_data_objects_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+              "name": "the_layout_options_set_the_margins_and_the_items_of_a_row"
+            }
+          ],
+          "notes": "The margins of the ItemContainerStyle are set on each prepared container; MaximumRowsOrColumns of the ItemsWrapGrid follows its option."
+        },
+        {
+          "source": "WinUIGallery/Samples/GridView/ContentInsideGridview.txt",
+          "source_sha256": "6690f33db7361d7c2139eff860108d00134557a497b45f3ead3a8215f7004f19",
+          "status": "ported",
+          "target_control": "Example3",
+          "tests": [
+            {
+              "path": "samples/WinUIGallery/tests.rs",
+              "name": "all_reviewed_native_adaptations_load_real_controls"
+            },
+            {
+              "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+              "name": "each_grid_gets_the_data_objects_of_the_source"
+            },
+            {
+              "path": "samples/WinUIGallery/grid_view_samples_tests.rs",
+              "name": "the_content_options_reach_the_grid"
+            }
+          ],
+          "notes": "Item template, IsItemClickEnabled, CanDragItems, AllowDrop, CanReorderItems, SelectionMode and FlowDirection as options; SelectionChanged and ItemClick write below the grid."
+        }
+      ]
+    },
     "Expander": {
       "status": "ported",
       "implementation": [
