@@ -158,6 +158,7 @@ members = [
     "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop",
     "src/Behaviors/FerroUI.Xaml.Interactions.Events",
     "src/Behaviors/FerroUI.Xaml.Interactions.Responsive",
+    "src/FerroUI.Controls.Motion",
     "src/FerroUI.Themes.Simple",
     "src/FerroUI.Themes.Fluent",
     "src/FerroUI.Themes.WinUI",
@@ -419,6 +420,7 @@ ferroui-xaml-interactions-draggable = { version = "=0.6.0-preview.1", path = "sr
 ferroui-xaml-interactions-draganddrop = { version = "=0.6.0-preview.1", path = "src/Behaviors/FerroUI.Xaml.Interactions.DragAndDrop" }
 ferroui-xaml-interactions-events = { version = "=0.6.0-preview.1", path = "src/Behaviors/FerroUI.Xaml.Interactions.Events" }
 ferroui-xaml-interactions-responsive = { version = "=0.6.0-preview.1", path = "src/Behaviors/FerroUI.Xaml.Interactions.Responsive" }
+ferroui-controls-motion = { version = "=0.6.0-preview.1", path = "src/FerroUI.Controls.Motion" }
 ferroui-themes-simple = { version = "=0.6.0-preview.1", path = "src/FerroUI.Themes.Simple" }
 ferroui-themes-fluent = { version = "=0.6.0-preview.1", path = "src/FerroUI.Themes.Fluent" }
 ferroui-themes-winui = { version = "=0.6.0-preview.1", path = "src/FerroUI.Themes.WinUI" }

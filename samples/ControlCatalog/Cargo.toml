@@ -86,6 +86,7 @@ treedatagrid-demo = { path = "../TreeDataGridDemo", default-features = false }
 custom-effects = { path = "../CustomEffects", default-features = false }
 # The ItemsRepeater (the page ItemsRepeater, not in the original).
 ferroui-controls-repeater = { workspace = true }
+ferroui-controls-motion = { workspace = true }
 # The inking controls and their WinUI styles (the page Inking, not in the original).
 ferroui-controls-inking = { workspace = true }
 # The Cartesian, pie, polar, Sankey and treemap charts and the geographic map of the LiveCharts2

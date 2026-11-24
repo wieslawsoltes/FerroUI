@@ -457,6 +457,7 @@ dependencies = [
  "ferroui-controls-color-picker",
  "ferroui-controls-inking",
  "ferroui-controls-livecharts",
+ "ferroui-controls-motion",
  "ferroui-controls-repeater",
  "ferroui-controls-treedatagrid",
  "ferroui-dialogs",
@@ -1659,6 +1660,15 @@ dependencies = [
  "ferroui-controls",
  "ferroui-livecharts",
  "ferroui-markup-xaml-loader",
+]
+
+[[package]]
+name = "ferroui-controls-motion"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build-scan",
+ "ferroui-controls",
 ]
 
 [[package]]
@@ -7972,6 +7982,7 @@ dependencies = [
  "ferroui-controls-color-picker",
  "ferroui-controls-inking",
  "ferroui-controls-livecharts",
+ "ferroui-controls-motion",
  "ferroui-controls-repeater",
  "ferroui-desktop",
  "ferroui-harfbuzz",

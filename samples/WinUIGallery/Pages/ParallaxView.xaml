@@ -1,0 +1,54 @@
+<!-- Ported from the pinned ParallaxView page of WinUI Gallery (14061eea); see ../NOTICE.md. The
+     image of each example moves through the composition visual of the ParallaxView as its source
+     scrolls. The ScrollView of the second example is a ScrollViewer. -->
+<StackPanel xmlns="https://github.com/ferroui"
+            xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
+  <StackPanel x:Name="Example1" Spacing="8">
+    <TextBlock Text="Parallax on a ListView" FontSize="18" />
+    <Grid Height="600" ClipToBounds="True">
+      <ParallaxView x:Name="ListParallax" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Source="{Binding ElementName=ParallaxList}" VerticalShift="500">
+        <Image x:Name="ListParallaxImage" />
+      </ParallaxView>
+      <ListView x:Name="ParallaxList" HorizontalAlignment="Stretch" VerticalAlignment="Stretch"
+                AutomationProperties.Name="all samples" Background="#80000000" Foreground="White" />
+      <TextBlock MaxWidth="280" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="28" Foreground="White"
+                 IsHitTestVisible="False" Text="Scroll the list to see parallaxing of image" TextWrapping="Wrap" />
+    </Grid>
+  </StackPanel>
+
+  <StackPanel x:Name="Example2" Spacing="8">
+    <TextBlock Text="Parallax with a ScrollView" FontSize="18" />
+    <Grid Height="600" ClipToBounds="True">
+      <ParallaxView x:Name="ScrollParallax" HorizontalAlignment="Left" VerticalAlignment="Top"
+                    Source="{Binding ElementName=ParallaxScroll}" VerticalShift="500">
+        <Image x:Name="ScrollParallaxImage" />
+      </ParallaxView>
+      <TextBlock MaxWidth="280" HorizontalAlignment="Center" VerticalAlignment="Top" FontSize="28" Foreground="White"
+                 Text="Scroll the rectangles to see parallaxing of image" TextWrapping="Wrap" />
+      <ScrollViewer x:Name="ParallaxScroll" Width="150" HorizontalAlignment="Left">
+        <StackPanel>
+          <Rectangle Height="150" Fill="AliceBlue" />
+          <Rectangle Height="150" Fill="AntiqueWhite" />
+          <Rectangle Height="150" Fill="Aqua" />
+          <Rectangle Height="150" Fill="Aquamarine" />
+          <Rectangle Height="150" Fill="Azure" />
+          <Rectangle Height="150" Fill="Beige" />
+          <Rectangle Height="150" Fill="Bisque" />
+          <Rectangle Height="150" Fill="BlanchedAlmond" />
+          <Rectangle Height="150" Fill="BlueViolet" />
+          <Rectangle Height="150" Fill="Brown" />
+          <Rectangle Height="150" Fill="BurlyWood" />
+          <Rectangle Height="150" Fill="CadetBlue" />
+          <Rectangle Height="150" Fill="Chartreuse" />
+          <Rectangle Height="150" Fill="Chocolate" />
+          <Rectangle Height="150" Fill="Coral" />
+          <Rectangle Height="150" Fill="CornflowerBlue" />
+          <Rectangle Height="150" Fill="Cornsilk" />
+          <Rectangle Height="150" Fill="Crimson" />
+          <Rectangle Height="150" Fill="Cyan" />
+        </StackPanel>
+      </ScrollViewer>
+    </Grid>
+  </StackPanel>
+</StackPanel>
