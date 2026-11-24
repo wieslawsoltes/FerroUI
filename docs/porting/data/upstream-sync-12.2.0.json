@@ -19,9 +19,9 @@
    "date": "2026-10-19",
    "area": "platform-browser",
    "class": "port",
-   "note": "Command-based hotkeys on Apple platforms in the browser; shared Apple gesture tables.",
-   "part": "browser",
-   "state": "planned"
+   "note": "`PlatformHotkeyConfiguration::apple` and `KeyGestureFormatInfo::apple`; the browser on Apple platforms and iOS use Command.",
+   "part": "browser2",
+   "state": "done"
   },
   {
    "hash": "f5807681dcad9dd2a4da9fe92354a5b88d60cba4",
@@ -49,9 +49,9 @@
    "date": "2026-10-19",
    "area": "platform-ios",
    "class": "port",
-   "note": "Touch drags and trackpad momentum at the display refresh rate.",
-   "part": "ios",
-   "state": "planned"
+   "note": "Touch display link at the display rate, inertia scaled by elapsed time, 60 Hz warning per screen.",
+   "part": "ios2",
+   "state": "done"
   },
   {
    "hash": "82c96fe15daaead9c53d28b2f71a4791fec43859",
@@ -93,9 +93,9 @@
    "date": "2026-10-19",
    "area": "platform-browser",
    "class": "port",
-   "note": "Blob stream: seeking, bounded reads, write position.",
-   "part": "browser",
-   "state": "planned"
+   "note": "Blob streams seek and read in place; the write, seek and length fixes were already in FerroUI.",
+   "part": "browser2",
+   "state": "done"
   },
   {
    "hash": "b6ed89b8d946a2fd1481995c971c2a59899049bd",
@@ -179,9 +179,9 @@
    "date": "2026-10-20",
    "area": "platform-ios",
    "class": "port",
-   "note": "Touches in progress are cancelled when the view leaves its window.",
-   "part": "ios",
-   "state": "planned"
+   "note": "Touches in progress are cancelled when the view leaves its window or is disposed.",
+   "part": "ios2",
+   "state": "done"
   },
   {
    "hash": "45693b17133ed792ada8e35dce95d945c8f9ac42",
@@ -341,9 +341,9 @@
    "date": "2026-10-21",
    "area": "platform-android",
    "class": "port",
-   "note": "Cursors on Android (`cursor_factory.rs` is a stub).",
-   "part": "android",
-   "state": "planned"
+   "note": "Pointer icons for standard and bitmap cursors (API 24).",
+   "part": "android2",
+   "state": "done"
   },
   {
    "hash": "0d6c2aaa816eb0c992c5785f74843b0e73c939e6",
@@ -829,9 +829,9 @@
    "date": "2026-10-30",
    "area": "platform-win32",
    "class": "port",
-   "note": "Move and resize drags work with touch.",
-   "part": "win32",
-   "state": "planned"
+   "note": "Move and resize drags wait for the emulated left button of touch and pen.",
+   "part": "win32b",
+   "state": "done"
   },
   {
    "hash": "2a38dc63ebc69956b0e16e0120a5d2c5709ed155",
@@ -1053,9 +1053,9 @@
    "date": "2026-11-09",
    "area": "rendering",
    "class": "port",
-   "note": "Bitmap copy guards and destination stride, pixel writer reset, EDID length are ported (`rendering`). Win32 icon mask and GDI handle lifetimes in OLE are still to port.",
+   "note": "Bitmap copy guards, pixel writer reset and EDID length (`rendering`); Win32 icon mask layout (`win32b`). GDI handle lifetimes in OLE were already owned by `ScreenContexts`.",
    "part": "rendering",
-   "state": "planned"
+   "state": "done"
   },
   {
    "hash": "dc061bc3ef9f2ba405654f61f9c986b843890070",
@@ -1151,9 +1151,9 @@
    "date": "2026-11-10",
    "area": "platform-ios",
    "class": "port",
-   "note": "Embedded native controls in accessibility.",
-   "part": "ios",
-   "state": "planned"
+   "note": "Native control views listed for VoiceOver; `accessibilityElements`.",
+   "part": "ios2",
+   "state": "done"
   },
   {
    "hash": "80c4f31848f6dd404d497cd7fec8b35fb3b6d795",
@@ -1188,10 +1188,8 @@
    "pr": 22782,
    "date": "2026-11-12",
    "area": "platform-win32",
-   "class": "port",
-   "note": "Virtual key mapping behind the keyboard layout tests.",
-   "part": "win32",
-   "state": "planned"
+   "class": "deferred",
+   "note": "Builds on the keyboard layout table of `8dae868308`, which FerroUI does not have; moves with that commit."
   },
   {
    "hash": "3ecf2a3fd87021335e0896d3f876278af7b90a8f",
@@ -1271,9 +1269,9 @@
    "date": "2026-11-12",
    "area": "platform-macos",
    "class": "port",
-   "note": "`updateLayer` flushes the render pass synchronously.",
-   "part": "macos",
-   "state": "planned"
+   "note": "`updateLayer` runs the render pass with dispatcher processing disabled (`MediaContext::paint_with_render_pass`); not skip-better: FerroUI ran the same jobs, and the cooperative resize (#476) keeps its frame. Native patch 0008.",
+   "part": "render-flush",
+   "state": "done"
   },
   {
    "hash": "070c3be990b3acab48023a65c7373cc7cfd1e58b",
@@ -1575,9 +1573,9 @@
    "date": "2026-11-18",
    "area": "platform-android",
    "class": "port",
-   "note": "Accessibility node position.",
-   "part": "android",
-   "state": "planned"
+   "note": "The view position on the screen translates accessibility bounds.",
+   "part": "android2",
+   "state": "done"
   },
   {
    "hash": "92dc2b7207e63f6a0edf7ee1a2ec458e97cc05b7",
@@ -1659,9 +1657,9 @@
    "date": "2026-11-23",
    "area": "platform-android",
    "class": "port",
-   "note": "Render call synchronized with surface create and destroy.",
-   "part": "android",
-   "state": "planned"
+   "note": "One render lock for ticks and surface changes; EGL without a window is not ready. The software framebuffer already discarded such frames.",
+   "part": "android2",
+   "state": "done"
   },
   {
    "hash": "51dae7305e4e5de4e906cad8f80453605a171d2a",
