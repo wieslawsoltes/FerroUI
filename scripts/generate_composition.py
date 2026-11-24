@@ -319,6 +319,13 @@ TYPES = {
     "Avalonia.Media.AlignmentY": ("value", "AlignmentY", ["crate::media::AlignmentY"]),
     "Avalonia.Media.Stretch": ("value", "Stretch", ["crate::media::Stretch"]),
     "Avalonia.Media.TileMode": ("value", "TileMode", ["crate::media::TileMode"]),
+    "Avalonia.Media.BackdropEffectBoundsSource": (
+        "value",
+        "BackdropEffectBoundsSource",
+        ["crate::media::BackdropEffectBoundsSource"],
+    ),
+    # A value, not upstream's cache objects: the mode is a hint (DEVIATIONS.md).
+    "Avalonia.Media.BackdropEffectCache": ("value", "BackdropEffectCache", ["crate::media::BackdropEffectCache"]),
     "RendererDebugOverlays": ("value", "RendererDebugOverlays", ["crate::rendering::RendererDebugOverlays"]),
     "LayoutPassTiming": ("value", "LayoutPassTiming", ["crate::rendering::LayoutPassTiming"]),
     "CompositionTransparencyLevel": (
@@ -705,6 +712,9 @@ class Generator:
             "AdornerIsClipped",
             "OpacityMaskBrush",
             "Effect",
+            "BackdropEffect",
+            "BackdropEffectBoundsSource",
+            "BackdropEffectCache",
             "CacheMode",
             "CompositionClip",
             "RotationAxis",

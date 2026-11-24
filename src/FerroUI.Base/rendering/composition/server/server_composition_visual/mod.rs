@@ -428,6 +428,37 @@ impl ServerCompositionVisual {
         self.props.base().effect()
     }
 
+    /// The effect applied to what is drawn behind the visual.
+    pub fn backdrop_effect(&self) -> Option<std::sync::Arc<dyn IImmutableEffect>> {
+        self.props.base().backdrop_effect()
+    }
+
+    pub fn backdrop_effect_bounds_source(&self) -> crate::media::BackdropEffectBoundsSource {
+        self.props.base().backdrop_effect_bounds_source()
+    }
+
+    pub fn backdrop_effect_cache(&self) -> crate::media::BackdropEffectCache {
+        self.props.base().backdrop_effect_cache()
+    }
+
+    /// Whether the visual draws a backdrop effect in its layout rect.
+    pub(crate) fn has_layout_bounds_backdrop(&self) -> bool {
+        self.backdrop_effect().is_some()
+            && self.backdrop_effect_bounds_source() == crate::media::BackdropEffectBoundsSource::Layout
+    }
+
+    /// The bounds the backdrop effect is drawn in, in the visual's own space.
+    pub(crate) fn backdrop_effect_bounds(&self) -> Option<LtrbRect> {
+        match self.backdrop_effect_bounds_source() {
+            crate::media::BackdropEffectBoundsSource::Layout => {
+                let size = self.size();
+                Some(LtrbRect::new(0.0, 0.0, size.x, size.y))
+            }
+            crate::media::BackdropEffectBoundsSource::Subtree => self.sub_tree_bounds.get(),
+        }
+        .and_then(LtrbRect::null_if_zero_size)
+    }
+
     pub fn render_options(&self) -> RenderOptions {
         self.props.base().render_options()
     }

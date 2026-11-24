@@ -16,7 +16,16 @@ impl ServerCompositionVisual {
     }
 
     pub fn compute_own_content_bounds(&self) -> Option<LtrbRect> {
-        self.content.compute_own_content_bounds(self)
+        let bounds = self.content.compute_own_content_bounds(self);
+        // The backdrop effect is drawn in the layout rect, also when the visual has no content
+        // there.
+        if self.has_layout_bounds_backdrop() {
+            let size = self.size();
+            if size.x > 0.0 && size.y > 0.0 {
+                return LtrbRect::full_union(bounds, Some(LtrbRect::new(0.0, 0.0, size.x, size.y)));
+            }
+        }
+        bounds
     }
 
     pub fn combined_transform_matrix(&self) -> Matrix {

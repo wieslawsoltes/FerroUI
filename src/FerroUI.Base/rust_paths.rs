@@ -296,6 +296,8 @@ crate::ferro_rust_paths! {
         crate::media::AcrylicBrushBackgroundSource,
         crate::media::AlignmentX,
         crate::media::AlignmentY,
+        crate::media::BackdropEffectBoundsSource,
+        crate::media::BackdropEffectCache,
         crate::media::BackgroundSizing,
         crate::media::BaselineAlignment,
         crate::media::BaselinePixelAlignment,

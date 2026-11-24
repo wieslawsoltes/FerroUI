@@ -108,6 +108,10 @@ visual_value_properties! {
     /// and its ancestors.
     adorner_is_clipped / set_adorner_is_clipped: bool;
     effect / set_effect: Option<std::sync::Arc<dyn IImmutableEffect>>;
+    /// The effect applied to what is drawn behind the visual.
+    backdrop_effect / set_backdrop_effect: Option<std::sync::Arc<dyn IImmutableEffect>>;
+    backdrop_effect_bounds_source / set_backdrop_effect_bounds_source: crate::media::BackdropEffectBoundsSource;
+    backdrop_effect_cache / set_backdrop_effect_cache: crate::media::BackdropEffectCache;
     render_options / set_render_options: RenderOptions;
     text_options / set_text_options: TextOptions;
 }
