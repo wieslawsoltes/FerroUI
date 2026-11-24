@@ -546,6 +546,24 @@ ferro_markup_type!(class FerroListOf<Ref<Timeline>> as "FerroList`1" {
     methods: [fn Add(Ref<Timeline>) => |list: &FerroList<Ref<Timeline>>, item: Ref<Timeline>| list.add(item)],
 });
 
+// The group styles of a list view (`ListViewBase.GroupStyle`, #1258).
+ferro_markup_type!(class FerroListOf<Ref<crate::GroupStyle>> as "FerroList`1" {
+    namespace: "FerroUI.Collections",
+    handles: [FerroList<Ref<crate::GroupStyle>>, Option<FerroList<Ref<crate::GroupStyle>>>],
+    this: FerroList<Ref<crate::GroupStyle>>,
+    generic: "FerroList`1" [Ref<crate::GroupStyle>],
+    constructors: [() => FerroList::<Ref<crate::GroupStyle>>::new],
+    properties: [
+        Capacity: i32 { get: list_capacity, try_set: set_list_capacity },
+        Count: i32 { get: |list: &FerroList<Ref<crate::GroupStyle>>| list.count() as i32 },
+    ],
+    methods: [
+        fn Add(Ref<crate::GroupStyle>) => |list: &FerroList<Ref<crate::GroupStyle>>, item: Ref<crate::GroupStyle>| {
+            list.add(item)
+        }
+    ],
+});
+
 // The key frames of a `DoubleAnimationUsingKeyFrames`.
 ferro_markup_type!(class FerroListOf<Ref<DoubleKeyFrame>> as "FerroList`1" {
     namespace: "FerroUI.Collections",
@@ -679,6 +697,7 @@ pub(super) const TYPES: &[&MarkupType] = &[
     <FerroListOf<Ref<SwipeItem>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<VisualTransition>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<Timeline>> as MarkupTyped>::MARKUP,
+    <FerroListOf<Ref<crate::GroupStyle>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<DoubleKeyFrame>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<ColorKeyFrame>> as MarkupTyped>::MARKUP,
     <FerroListOf<Ref<PointKeyFrame>> as MarkupTyped>::MARKUP,
@@ -707,6 +726,7 @@ pub(super) fn register_value_types() {
     ValueTypes::register_nullable::<FerroList<Ref<SwipeItem>>>();
     ValueTypes::register_nullable::<FerroList<Ref<VisualTransition>>>();
     ValueTypes::register_nullable::<FerroList<Ref<Timeline>>>();
+    ValueTypes::register_nullable::<FerroList<Ref<crate::GroupStyle>>>();
     ValueTypes::register_nullable::<FerroList<Ref<DoubleKeyFrame>>>();
     ValueTypes::register_nullable::<FerroList<Ref<ColorKeyFrame>>>();
     ValueTypes::register_nullable::<FerroList<Ref<PointKeyFrame>>>();
