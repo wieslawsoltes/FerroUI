@@ -42,12 +42,12 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (125 done, 0 planned) | 125 |
+| `port` (126 done, 0 planned) | 126 |
 | `already` | 21 |
 | `skip-performance` | 0 |
 | `skip-better` | 5 |
 | `not-applicable` | 30 |
-| `deferred` | 1 |
+| `deferred` | 0 |
 | **Total** | **182** |
 <!-- /generated:summary -->
 
@@ -81,7 +81,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | rendering | 13 | 3 |  |  | 2 |  | 18 |
 | samples | 2 |  |  |  | 1 |  | 3 |
 | tests |  |  |  |  | 2 |  | 2 |
-| text | 10 | 2 |  | 4 | 1 | 1 | 18 |
+| text | 11 | 2 |  | 4 | 1 |  | 18 |
 | themes | 9 | 4 |  |  | 2 |  | 15 |
 | threading |  | 1 |  |  |  |  | 1 |
 <!-- /generated:areas -->
@@ -144,7 +144,6 @@ are part of the base that the previous sync tracked, so they are not inventoried
 <!-- generated:deferred -->
 | Commit | PR | Date | Area | Part | Note |
 |---|---:|---|---|---|---|
-| `80659c4c3e` | #22773 | 2026-11-13 | text |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
 <!-- /generated:deferred -->
 
 ## Decisions of the owner (2026-11-23)
@@ -319,7 +318,7 @@ left out only with a recorded performance or better-code reason.
 | `ad90a07d03` | #22671 | 2026-11-13 | automation | `port` (done) | platforms2 | `LabeledBy` in Windows UI Automation. |
 | `10a2fb0ac5` | #22682 | 2026-11-13 | platform-win32 | `port` (done) | platforms2 | OLE `GetData` retried for 100 ms while another process holds the clipboard, then a timeout error instead of no data. |
 | `e08cd25212` | #21826 | 2026-11-13 | rendering | `port` (done) | backdrop | Visual.BackdropEffect, BackdropEffectBoundsSource and BackdropEffectCache (default XML namespace), composition fields, own layout bounds, catalog page. Drawn with the WinUI backdrop replay (`render_scope::draw_backdrop`) into `push_effect` of the backend, on the GPU in Skia and Vello (Quartz and Direct2D through their effects too), read beyond the bounds by the sampling radius and cut to them; the dirty area grows over it as for the backdrop brush. Not ported: the retained snapshot (`IDrawingContextImplWithBackdropSupport`, `BackdropVolatilePass`, snapshot dirty tracking): the replay reads no pixels back, works on every backend and is bounded by the dirty area, so the cache mode is a hint (DEVIATIONS.md). |
-| `80659c4c3e` | #22773 | 2026-11-13 | text | `deferred` |  | Platform-simulated typefaces in `FontCollectionBase`, `SystemFontCollection` and the Skia font manager: the font collection and matching code that the open web fonts stack (#1186 to #1321) rewrites (`webfonts/core-matching`, `webfonts/collection`, `webfonts/local`). Written stacked on that stack once its owner agrees, or after it lands; the OS/2 and `fvar` table readers it adds fall under the owner decision of 2026-11-23 (the backends answer, no managed table parser). |
+| `80659c4c3e` | #22773 | 2026-11-13 | text | `port` (done) | typeface-sim | Split by the web fonts stack: ported there (PR 1417): no bold or oblique simulation on a colour face. Already: an oblique face answers an italic request, and fallback faces are not matched again. Skip-better: emboldening a real Bold face for ExtraBold (CSS synthesizes bold only for a face below 600). Deferred to the web fonts work: platform typeface simulation without copying the font (`IPlatformTypefaceSimulator`, the `FontCollectionBase` and `SystemFontCollection` changes). Ported here (backends): Skia family matches and character fallbacks share one wrapper that computes the simulations of the request (a fallback keeps them, oblique as italic), the simulations DirectWrite or fontconfig applied inside a typeface are detected from its OS/2 table and its variation axes, reported and not applied twice, and a simulated face reports the requested weight or style; Direct2D reports the simulations DirectWrite applies inside a system face (`d2_font_simulations`) and no longer applies them again. |
 | `02d7bc35e3` | #22662 | 2026-11-13 | text | `port` (done) | text | Runs of different scripts shaped in separate buffers. |
 | `9d6cb1ea62` | #22015 | 2026-11-13 | rendering | `port` (done) | rendering | `ContentPresenter` and acrylic clip to rounded bounds. A presenter pays for a border visual only when it clips with a corner radius. |
 | `d379b92b87` | #22694 | 2026-11-13 | platform-macos | `port` (done) | macos | `automation.mm`: tab button subrole. |
