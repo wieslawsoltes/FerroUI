@@ -182,6 +182,12 @@ pub(crate) fn item_control<T: ferroui_base::ObjectType>(
 /// the ListView or GridView, or a tap or Enter on an item of the ItemsRepeater.
 struct ItemActivation(Rc<dyn Fn(usize)>);
 
+impl PartialEq for ItemActivation {
+    fn eq(&self, other: &Self) -> bool {
+        Rc::ptr_eq(&self.0, &other.0)
+    }
+}
+
 /// Activates an item as its container would, without needing a realized container.
 #[cfg(test)]
 pub(crate) fn activate_item(form: &Control, index: usize) {
