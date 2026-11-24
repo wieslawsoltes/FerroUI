@@ -334,10 +334,11 @@ fn list_view_context_menu_and_scrolling_act_on_the_realized_items() {
     );
 }
 
+#[cfg(feature = "theme")]
 #[test]
 fn list_view_trimmed_descriptions_show_their_text_as_a_tooltip() {
-    use ferroui_controls::ToolTip;
-    let _application = start();
+    use ferroui_controls::{ToolTip, Window};
+    let _application = crate::tests::start_winui();
     let root = page();
     let window = Window::new();
     window.set_content(Some(Control::boxed(root.clone())));
