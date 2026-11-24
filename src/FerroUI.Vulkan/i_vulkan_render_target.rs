@@ -16,6 +16,14 @@ pub trait IVulkanRenderTarget: IPlatformRenderSurfaceRenderTarget {
 
     /// Releases the render target.
     fn dispose(&self);
+
+    /// Asks for image usage flags (`VkImageUsageFlags`) beyond those the target's images have by
+    /// default (colour attachment, transfer source and destination, sampled): Skia's Graphite needs
+    /// `INPUT_ATTACHMENT` too. The next frame's image has them; a target whose image already has
+    /// them keeps it. The default does nothing.
+    fn request_image_usage(&self, usage: u32) {
+        let _ = usage;
+    }
 }
 
 /// One frame being rendered with Vulkan. Disposing the session presents the
