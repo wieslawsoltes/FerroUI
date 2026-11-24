@@ -1070,10 +1070,8 @@
    "pr": 22688,
    "date": "2026-11-09",
    "area": "platform-android",
-   "class": "port",
-   "note": "Storage cursors closed.",
-   "part": "android",
-   "state": "planned"
+   "class": "already",
+   "note": "`StorageHelper.java` runs every query in try-with-resources, so the cursors are closed."
   },
   {
    "hash": "5bbaa8e33189a06d6ecbc8ce816ac227fde91279",
@@ -1587,9 +1585,9 @@
    "date": "2026-11-18",
    "area": "platform-android",
    "class": "port",
-   "note": "Accessibility focus changes reported.",
-   "part": "android",
-   "state": "planned"
+   "note": "The root peer reports focus changes to TalkBack: the focused virtual view is invalidated and takes the keyboard focus. An interop peer counts as no focus.",
+   "part": "platforms3",
+   "state": "done"
   },
   {
    "hash": "70072230024b4d107304eae788ebdb14c6589e52",
@@ -1671,9 +1669,9 @@
    "date": "2026-11-23",
    "area": "platform-android",
    "class": "port",
-   "note": "TalkBack roles.",
-   "part": "android",
-   "state": "planned"
+   "note": "`android_access_role_helper.rs` maps controls to Android widget classes, so TalkBack announces their role.",
+   "part": "platforms3",
+   "state": "done"
   },
   {
    "hash": "5d9e6d1b0e87337f74f233bead580db186412357",

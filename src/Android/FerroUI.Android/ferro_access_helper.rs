@@ -23,7 +23,7 @@ use crate::automation::{INodeInfoProvider, NodeActionArguments};
 use crate::explore_by_touch_helper::{
     ExploreByTouchHelper, IAccessibilityHost, IExploreByTouchCallbacks, IVirtualViewOwner, INVALID_ID,
 };
-use ferroui_base::reactive::Subscription;
+use ferroui_base::reactive::{IDisposable, Subscription};
 use ferroui_base::{PixelPoint, PixelRect, Point, Ref};
 use ferroui_controls::automation::peers::{
     AutomationControlType, AutomationPeer, ControlAutomationPeer, InteropAutomationPeer,
@@ -121,6 +121,9 @@ pub(crate) struct FerroAccessHelper {
     /// ID that is still in use.
     next_peer_view_id: Cell<i32>,
 
+    /// The subscription to the focus of the root, when the root peer reports it.
+    root_focus_changed: RefCell<Option<Rc<dyn IDisposable>>>,
+
     view: Rc<dyn IAccessHelperView>,
 }
 
@@ -139,12 +142,45 @@ impl FerroAccessHelper {
             peer_ids: RefCell::new(HashMap::new()),
             peer_node_info_providers: RefCell::new(HashMap::new()),
             next_peer_view_id: Cell::new(0),
+            root_focus_changed: RefCell::new(None),
             view,
         });
 
         this.get_or_create_node_info_providers_from_peer(&root_peer);
 
+        if let Some(root_provider) = root_peer.get_provider::<dyn IEmbeddedRootProvider>() {
+            let weak = Rc::downgrade(&this);
+            let subscription = root_provider.focus_changed(Rc::new(move || {
+                if let Some(this) = weak.upgrade() {
+                    this.on_root_focus_changed();
+                }
+            }));
+            *this.root_focus_changed.borrow_mut() = Some(subscription);
+        }
+
         this
+    }
+
+    /// Reports a change of the focus of the root to the accessibility services.
+    fn on_root_focus_changed(&self) {
+        let Some(root_provider) = self.root_peer().and_then(|root| root.get_provider::<dyn IEmbeddedRootProvider>())
+        else {
+            return;
+        };
+
+        match root_provider.get_focus().filter(|focused| !Self::is_interop_peer(focused)) {
+            Some(focused) => {
+                let view_id = self.get_or_create_node_info_providers_from_peer(&focused);
+                self.base.invalidate_virtual_view(view_id);
+                self.base.request_keyboard_focus_for_virtual_view(view_id);
+            }
+            None => {
+                let view_id = self.base.keyboard_focused_virtual_view_id();
+                if view_id != INVALID_ID {
+                    self.base.clear_keyboard_focus_for_virtual_view(view_id);
+                }
+            }
+        }
     }
 
     fn get_node_info_providers_from_virtual_view_id(&self, virtual_view_id: i32) -> Option<Rc<PeerRegistration>> {
@@ -424,7 +460,7 @@ impl IExploreByTouchCallbacks for FerroAccessHelper {
         }
 
         // UI debug metadata
-        node_info.class_name = Some(peer.get_class_name());
+        node_info.class_name = Some(crate::android_access_role_helper::get_class_name(&peer));
         let automation_id = peer.get_automation_id();
         node_info.unique_id = automation_id.clone();
         node_info.view_id_resource_name = automation_id;
@@ -855,7 +891,7 @@ mod tests {
         let fixture = helper_of(&panel);
         let id = id_of(&fixture, &button);
         let node = fixture.helper.create_node_for_virtual_view(id);
-        assert_eq!(Some("Button".to_string()), node.class_name);
+        assert_eq!(Some("android.widget.Button".to_string()), node.class_name);
         assert_eq!(Some("Press".to_string()), node.text);
         assert_eq!(Some("Presses".to_string()), node.content_description);
         assert_eq!(Some("press-button".to_string()), node.unique_id);
@@ -899,7 +935,7 @@ mod tests {
         let fixture = helper_of(&panel);
         let id = id_of(&fixture, &check_box);
         let node = fixture.helper.create_node_for_virtual_view(id);
-        assert_eq!(Some("CheckBox".to_string()), node.class_name);
+        assert_eq!(Some("android.widget.CheckBox".to_string()), node.class_name);
         assert!(node.checkable && node.clickable);
         assert_eq!(CHECKED_STATE_FALSE, node.checked);
         assert!(node.has_action(ACTION_CLICK));
@@ -958,7 +994,7 @@ mod tests {
         let fixture = helper_of(&panel);
         let id = id_of(&fixture, &slider);
         let node = fixture.helper.create_node_for_virtual_view(id);
-        assert_eq!(Some("Slider".to_string()), node.class_name);
+        assert_eq!(Some("android.widget.SeekBar".to_string()), node.class_name);
         assert_eq!(Some("Volume".to_string()), node.text);
         assert_eq!(Some(RangeInfo { range_type: RANGE_TYPE_FLOAT, min: 0.0, max: 10.0, current: 4.0 }), node.range_info);
         // The reference gives a range no action: only the focus actions of the helper.

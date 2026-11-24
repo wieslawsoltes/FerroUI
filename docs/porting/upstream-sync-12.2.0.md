@@ -36,8 +36,8 @@ What decides between them:
 <!-- generated:summary -->
 | Class | Commits |
 |---|---:|
-| `port` (91 done, 21 planned) | 112 |
-| `already` | 18 |
+| `port` (93 done, 18 planned) | 111 |
+| `already` | 19 |
 | `skip-performance` | 0 |
 | `skip-better` | 1 |
 | `not-applicable` | 27 |
@@ -65,7 +65,7 @@ work on a hot path (the animated value write of `ca61365d75`, the TwoWay check o
 | layout | 1 |  |  |  |  |  | 1 |
 | markup | 2 |  |  |  | 3 |  | 5 |
 | platform | 3 |  |  |  |  |  | 3 |
-| platform-android | 9 |  |  |  |  | 1 | 10 |
+| platform-android | 8 | 1 |  |  |  | 1 | 10 |
 | platform-browser | 3 | 2 |  |  | 1 |  | 6 |
 | platform-ios | 5 |  |  |  |  |  | 5 |
 | platform-linux | 6 | 1 |  |  |  |  | 7 |
@@ -295,7 +295,7 @@ left out only with a recorded performance or better-code reason.
 | `c9b5ae7b21` | #22746 | 2026-11-09 | controls | `already` |  | `Span::on_property_changed` compares the property, so `on_inlines_changed` runs. |
 | `ae5ae6124e` | #22757 | 2026-11-09 | rendering | `port` | rendering | Bitmap copy guards and destination stride, pixel writer reset, EDID length are ported (`rendering`). Win32 icon mask and GDI handle lifetimes in OLE are still to port. |
 | `dc061bc3ef` | #22698 | 2026-11-09 | rendering | `already` |  | `sk_round_rect_cache.rs` passes the radii without a heap array. |
-| `1b53d56525` | #22688 | 2026-11-09 | platform-android | `port` | android | Storage cursors closed. |
+| `1b53d56525` | #22688 | 2026-11-09 | platform-android | `already` |  | `StorageHelper.java` runs every query in try-with-resources, so the cursors are closed. |
 | `5bbaa8e331` | #22743 | 2026-11-09 | rendering | `already` |  | `LockGuard` in `vulkan_khr_surface_render_target.rs` releases the lock on every exit. |
 | `9186fcf61f` | #22756 | 2026-11-09 | themes | `deferred` |  | Fluent 2 calendar; follows the Fluent 2 decision. |
 | `66f1f2a9dd` | #22763 | 2026-11-09 | rendering | `port` (done) | rendering | `ImmutableRadialGradientBrush` copied `radius_x` into `radius_y`. |
@@ -350,7 +350,7 @@ left out only with a recorded performance or better-code reason.
 | `fda56217a5` | #22872 | 2026-11-18 | build | `not-applicable` |  | Upstream workflows. |
 | `251fda6155` |  | 2026-11-18 | build | `not-applicable` |  | Upstream contribution bot. |
 | `a096f9bbde` | #22862 | 2026-11-18 | platform-android | `port` | android | Accessibility node position. |
-| `92dc2b7207` | #22849 | 2026-11-18 | platform-android | `port` | android | Accessibility focus changes reported. |
+| `92dc2b7207` | #22849 | 2026-11-18 | platform-android | `port` (done) | platforms3 | The root peer reports focus changes to TalkBack: the focused virtual view is invalidated and takes the keyboard focus. An interop peer counts as no focus. |
 | `7007223002` | #22871 | 2026-11-18 | controls | `port` (done) | controls | FlexPanel relative basis is a fraction. Parsed percentages were divided by 100 twice; code passing `50` must pass `0.5`. |
 | `192e7a0ba5` | #22880 | 2026-11-18 | platform-macos | `port` (done) | macos | Leaf nodes are not reported as expandable. |
 | `2d34086103` | #22883 | 2026-11-19 | build | `not-applicable` |  | Upstream contribution guide. |
@@ -359,6 +359,6 @@ left out only with a recorded performance or better-code reason.
 | `3f984fa0d9` | #22870 | 2026-11-19 | text | `port` (done) | text | `ParagraphIndent` and first-line `Indent` honoured by the formatter, beside the paragraph styles of `TextLayout`. |
 | `debc815ba9` | #22914 | 2026-11-21 | build | `not-applicable` |  | Upstream build services package. |
 | `605e161019` | #22738 | 2026-11-23 | platform-android | `port` | android | Render call synchronized with surface create and destroy. |
-| `51dae7305e` | #22681 | 2026-11-23 | platform-android | `port` | android | TalkBack roles. |
+| `51dae7305e` | #22681 | 2026-11-23 | platform-android | `port` (done) | platforms3 | `android_access_role_helper.rs` maps controls to Android widget classes, so TalkBack announces their role. |
 | `5d9e6d1b0e` |  | 2026-11-23 | build | `not-applicable` |  | Upstream version number. |
 <!-- /generated:inventory -->
