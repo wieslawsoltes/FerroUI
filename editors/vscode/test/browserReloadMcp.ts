@@ -8,7 +8,8 @@ import { runtimeApp } from './browserMcp';
 import { browserBuildTimeout, waitFor } from './browserTestSupport';
 import { openEditorMcp } from './mcpFixture';
 
-async function save(document: vscode.TextDocument, text: string): Promise<void> {
+async function save(uri: vscode.Uri, text: string): Promise<void> {
+    const document = await vscode.workspace.openTextDocument(uri);
     const edit = new vscode.WorkspaceEdit();
     edit.replace(document.uri, new vscode.Range(0, 0, document.lineCount, 0), text);
     assert.ok(await vscode.workspace.applyEdit(edit));
@@ -20,12 +21,10 @@ export async function verifyBrowserReload(): Promise<void> {
     const initialTimeout = Math.max(360_000, buildTimeout);
     const folder = vscode.workspace.workspaceFolders![0].uri;
     const request = { profile: 'dispatch-check', folder: folder.toString() };
-    const [rust, xaml, host] = await Promise.all(['main.rs', 'Instructions.xaml', 'wwwroot/main.js']
-        .map(file => vscode.workspace.openTextDocument(vscode.Uri.joinPath(folder, file))));
-    await vscode.window.showTextDocument(rust);
-    const originalRust = rust.getText();
-    const originalXaml = xaml.getText();
-    const originalHost = host.getText();
+    const [rust, xaml, host] = ['main.rs', 'Instructions.xaml', 'wwwroot/main.js'].map(file => vscode.Uri.joinPath(folder, file));
+    const [originalRust, originalXaml, originalHost] = await Promise.all([rust, xaml, host]
+        .map(async uri => (await vscode.workspace.openTextDocument(uri)).getText()));
+    await vscode.window.showTextDocument(rust, { preview: false });
     const mcp = await openEditorMcp(38_000);
     const { invoke, content } = mcp;
     const config = vscode.workspace.getConfiguration('ferroui.mcp');
@@ -77,7 +76,7 @@ export async function verifyBrowserReload(): Promise<void> {
         assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 1');
         const accepted = await frame(live);
 
-        const notes = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(folder, 'notes/src/lib.rs'));
+        const notes = vscode.Uri.joinPath(folder, 'notes/src/lib.rs');
         await save(notes, 'pub const STATUS: &str = "Updated notes";\n');
         await delay(700);
         assert.equal((await current())?.status, 'Watching browser saves');
@@ -135,16 +134,16 @@ export async function verifyBrowserReload(): Promise<void> {
         const heading = await rustApp.find('Heading');
         const source = content<{ source?: { uri: string; canApply: boolean; version: number } }>(await invoke('ferroui_runtime_source',
             { runtime, node: heading.node_id }));
-        assert.equal(source.source?.uri, rust.uri.toString());
+        assert.equal(source.source?.uri, rust.toString());
         assert.equal(source.source?.canApply, true);
         content(await invoke('ferroui_runtime_apply_source', {
             runtime, node: heading.node_id, property: 'Text', value: 'Source draft',
             expected_generation: rustAccepted.generation, expected_version: source.source?.version,
         }));
-        assert.match(rust.getText(), /text: "Source draft"/);
-        await vscode.window.showTextDocument(rust);
+        const edited = (await vscode.window.showTextDocument(rust, { preview: false })).document;
+        assert.match(edited.getText(), /text: "Source draft"/);
         await vscode.commands.executeCommand('undo');
-        await waitFor(async () => rust.getText().includes('text: "Routes ready"') && !rust.isDirty ? true : undefined, 'the grouped source Undo');
+        await waitFor(async () => edited.getText().includes('text: "Routes ready"') && !edited.isDirty ? true : undefined, 'the grouped source Undo');
         assert.equal((await current())?.generation, rustAccepted.generation);
 
         await vscode.commands.executeCommand('ferroui.appSessions.rebuild', runtime);

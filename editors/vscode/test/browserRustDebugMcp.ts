@@ -48,7 +48,7 @@ function sourceLine(document: vscode.TextDocument, text: string): vscode.TextLin
 export async function verifyBrowserRustDebug(): Promise<void> {
     assert.ok(vscode.extensions.getExtension('ms-vscode.wasm-dwarf-debugging'), 'Install WebAssembly DWARF Debugging in the test extensions directory.');
     const workspace = vscode.workspace.workspaceFolders![0].uri;
-    const editor = await vscode.window.showTextDocument(vscode.Uri.joinPath(workspace, 'main.rs'));
+    const editor = await vscode.window.showTextDocument(vscode.Uri.joinPath(workspace, 'main.rs'), { preview: false });
     const source = editor.document;
     const operation = sourceLine(source, '*count = count.saturating_add(1);');
     const position = new vscode.Position(operation.lineNumber, operation.firstNonWhitespaceCharacterIndex);
