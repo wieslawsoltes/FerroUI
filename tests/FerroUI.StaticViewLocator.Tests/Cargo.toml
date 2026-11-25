@@ -17,6 +17,10 @@ autoexamples = false
 [lib]
 path = "lib.rs"
 
+[[test]]
+name = "resolution"
+path = "resolution_test.rs"
+
 [dependencies]
 ferroui-static-view-locator = { workspace = true, features = ["reactiveui"] }
 ferroui-base = { workspace = true }
