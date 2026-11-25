@@ -8,6 +8,8 @@ interface AttachAttempt {
     detail: string;
     error?: string;
     breakpoint?: string;
+    disconnect?: { terminateDebuggee?: boolean; success?: boolean; error?: string };
+    exitCode?: number;
 }
 
 export async function waitForDebuggerAttachment({ invoke, content }: McpFixture, app: RuntimeSummary, attached: boolean): Promise<void> {
@@ -38,6 +40,9 @@ export function trackNativeDebugger(configuration: string) {
                         const file = message.arguments?.source?.path;
                         attempt.breakpoint = file ? `VS Code requested breakpoints in ${file}` : 'VS Code requested source breakpoints';
                     }
+                    if (message.type === 'request' && message.command === 'disconnect') {
+                        attempt.disconnect = { terminateDebuggee: message.arguments?.terminateDebuggee };
+                    }
                 },
                 onDidSendMessage(message) {
                     if (message.type === 'response' && message.command === 'attach') {
@@ -52,6 +57,10 @@ export function trackNativeDebugger(configuration: string) {
                     }
                     if (message.event === 'breakpoint' && message.body?.breakpoint?.verified) verified.add(session.id);
                     if (message.event === 'stopped' && message.body?.reason === 'breakpoint') hits.set(session.id, message.body.threadId);
+                    if (message.type === 'response' && message.command === 'disconnect') {
+                        attempt.disconnect = { ...attempt.disconnect, success: message.success, error: message.message };
+                    }
+                    if (message.event === 'exited') attempt.exitCode = message.body?.exitCode;
                 },
                 onError(error) { if (!attached.has(session.id)) attempt.error ??= error.message; },
                 onExit(code, signal) {
@@ -62,6 +71,10 @@ export function trackNativeDebugger(configuration: string) {
     });
     return {
         sessions,
+        disconnectStatus(session: vscode.DebugSession) {
+            const attempt = attempts.get(session.id);
+            return { disconnect: attempt?.disconnect, debuggeeExitCode: attempt?.exitCode };
+        },
         async accept(previous?: string) {
             const find = () => [...sessions.values()].find(session => session.id !== previous && attached.has(session.id));
             const latest = () => [...attempts].findLast(([id]) => id !== previous)?.[1];

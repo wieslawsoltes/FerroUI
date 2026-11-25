@@ -108,8 +108,8 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         await until(() => !processExists(pid));
         if (debug) {
             await approve(updated);
-            await debug.detach();
-            await expectText(updated, 'SavedCount', 'Reviews saved: 3');
+            const disconnect = await debug.detach();
+            await expectDetachedRuntime(updated, replacement, disconnect);
             assert.equal(await runningPid(), replacement);
             console.log('Installed LLDB verified Rust breakpoints, retained failed candidates, followed the new PID and detached from the live app.');
         }
@@ -171,6 +171,28 @@ async function save(document: vscode.TextDocument, text: string): Promise<void> 
 
 async function expectText(client: RuntimeClient, name: string, text: string): Promise<void> {
     await until(async () => (await client.call<RuntimeNode[]>('find_elements', { name }))[0]?.text === text);
+}
+
+async function expectDetachedRuntime(client: RuntimeClient, pid: number, debuggerStatus: object): Promise<void> {
+    let transportError: unknown;
+    try {
+        await until(async () => {
+            assert.ok(processExists(pid), 'Debugger disconnect keeps the accepted native process alive');
+            try {
+                const [counter] = await client.call<RuntimeNode[]>('find_elements', { name: 'SavedCount' });
+                return counter?.text === 'Reviews saved: 3';
+            } catch (error) {
+                // Connection recovery after resuming the target can take another poll.
+                if (!(error instanceof TypeError) || error.message !== 'fetch failed') throw error;
+                transportError = error.cause;
+                return false;
+            }
+        });
+    } catch (error) {
+        const network = (transportError as { code?: string } | undefined)?.code;
+        const detail = { pid, alive: processExists(pid), debugger: debuggerStatus, network };
+        throw new Error(`The accepted inspector did not respond after debugger disconnect. ${JSON.stringify(detail)}`, { cause: error });
+    }
 }
 
 async function verifyWindowKeyboard(client: RuntimeClient): Promise<void> {

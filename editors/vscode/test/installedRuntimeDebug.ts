@@ -43,6 +43,7 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
             const current = attached();
             await vscode.debug.stopDebugging(current);
             await until(() => !tracker.sessions.has(current.id));
+            return tracker.disconnectStatus(current);
         },
         async close() {
             vscode.debug.removeBreakpoints([point]);
