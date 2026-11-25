@@ -4,7 +4,7 @@ import type { OutlineNode } from '../src/protocol';
 import type { TimelineMarker, TimelinePosition, TimelineProgram } from '../src/timelineProtocol';
 import type { McpFixture } from './mcp';
 import { verifyTimelineGraphMcp, verifyTimelineLayoutMcp } from './timelineGraphMcp';
-import { verifyTimelineTrackMcp } from './timelineTrackMcp';
+import { verifyTimelineTrackMcp, verifyTimelineTrackRefresh } from './timelineTrackMcp';
 import { verifyTimelineTimingMcp } from './timelineTimingMcp';
 import { until } from './wait';
 
@@ -43,6 +43,8 @@ export async function verifyTimelinePlayback({ invoke, content }: McpFixture, se
     await verifyTimelineGraphMcp({ invoke, content }, session, document);
     await verifyTimelineLayoutMcp({ invoke, content }, session, document);
     await verifyTimelineTrackMcp({ invoke, content }, session, document);
+    await verifyTimelineTrackRefresh({ invoke, content }, session, document,
+        scene.replace('<Setter Property="Opacity" Value="1"/>', ''));
     await verifyTimelineTimingMcp({ invoke, content }, session, document);
     frame = await wait();
     let program = (await programs()).find(item => item.selector === 'Button#Lead')!.id;

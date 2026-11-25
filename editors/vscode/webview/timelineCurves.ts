@@ -87,7 +87,7 @@ export class TimelineCurvePlot {
     visible = false;
 
     constructor(readonly lane: HTMLElement, label: HTMLElement, readonly track: TimelineTrack,
-        preferred: CurveChannel | undefined, private readonly changed: (channel: CurveChannel) => void) {
+        preferred: CurveChannel | undefined, private readonly changed: (channel: CurveChannel) => void, pickerId?: string) {
         this.svg.classList.add('timeline-curve-plot');
         this.svg.setAttribute('aria-hidden', 'true');
         this.svg.setAttribute('viewBox', '0 0 100 100');
@@ -108,6 +108,7 @@ export class TimelineCurvePlot {
         if (choices.length > 1 || choices[0]?.startsWith('effect_parameter/')) {
             const select = this.channelPicker = create('select');
             const name = `${track.property} curve channel`;
+            if (pickerId) select.id = pickerId;
             select.setAttribute('aria-label', name);
             select.title = name;
             select.className = 'timeline-curve-channel';
@@ -256,7 +257,7 @@ export class TimelineCurves {
             this.channels.set(identity, channel);
             if (this.range) plot.draw(this.metric, this.range, this.key(plot));
             this.schedule();
-        });
+        }, `timeline-curve-channel-${encodeURIComponent(identity)}`);
         this.plots.set(lane, plot);
         this.observer.observe(lane);
         return plot;

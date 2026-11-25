@@ -206,6 +206,7 @@ body { block-size: 100vh; }
 .timeline-channel-lock { inline-size: 20px; block-size: 20px; min-block-size: 20px; }
 .timeline-channel-lock .codicon { font-size: 13px; }
 .timeline-channel-lock[aria-pressed="false"]:not(:focus-visible):not(:hover) { color: var(--muted); opacity: var(--unlocked-opacity, .55); }
+.timeline-key[aria-disabled="true"], .timeline-channel-lock[aria-disabled="true"] { opacity: .5; cursor: default; }
 .timeline-channel[data-locked] .timeline-key::before { opacity: .62; }
 .vscode-high-contrast .timeline-channel-lock, .vscode-high-contrast-light .timeline-channel-lock { --unlocked-opacity: 1; }
 .timeline-summary { position: relative; margin-inline: var(--lane-inset); pointer-events: none; }

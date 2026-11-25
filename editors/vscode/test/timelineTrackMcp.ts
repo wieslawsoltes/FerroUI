@@ -91,6 +91,41 @@ export async function verifyTimelineTrackMcp(fixture: McpFixture, session: numbe
     console.log('Timeline MCP read back filter, disclosure, lock, and component controls with exact source history');
 }
 
+export async function verifyTimelineTrackRefresh(fixture: McpFixture, session: number, document: vscode.TextDocument,
+    revisedSource: string): Promise<void> {
+    const { invoke, content } = fixture;
+    const original = document.getText();
+    const { read, apply, restore, display } = await openTrackView(fixture, 'designer_timeline', session, false);
+    const before = display.track_view!;
+    const lead = before.groups!.find(group => group.name === 'Lead')!;
+    const command = { program: before.program, target: lead.target };
+    await apply({ ...command, action: 'lock', locked: true });
+    await apply({ ...command, action: 'collapse', collapsed: true });
+    let edited = false;
+    try {
+        content(await invoke('designer_source', { session, expected_version: document.version, source: revisedSource }));
+        edited = true;
+        content(await invoke('designer_wait', { session }));
+        let refreshed = await read();
+        await until(async () => Boolean((refreshed = await read()).track_view));
+        const after = refreshed.track_view!.groups!.find(group => group.name === lead.name)!;
+        assert.notEqual(after.target, lead.target, 'Native IDs can move after changing the authored key list');
+        assert.equal(after.expanded, false);
+        assert.equal(after.locked, true);
+    } finally {
+        if (edited) {
+            content(await invoke('designer_history', { session, expected_version: document.version, action: 'undo' }));
+            content(await invoke('designer_wait', { session }));
+            await until(async () => Boolean((await read()).track_view));
+        }
+        await apply({ ...command, action: 'collapse', collapsed: !lead.expanded });
+        await apply({ ...command, action: 'lock', locked: lead.locked });
+        await restore();
+    }
+    assert.equal(document.getText(), original);
+    console.log('Timeline MCP kept track disclosure and lock on the named target across native renumbering and Undo');
+}
+
 export async function verifyHostedTrackMcp(fixture: McpFixture, session: number, document: vscode.TextDocument): Promise<void> {
     const source = document.getText();
     const version = document.version;

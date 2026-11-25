@@ -17,6 +17,7 @@ import { TimelineNativePreview } from './timelineNativePreview';
 import { TimelineNavigation } from './timelineNavigation';
 import { keyframeId, TimelineSelection } from './timelineSelection';
 import { TimelineStateTransition } from './timelineStateTransition';
+import { preserveTrackFocus, setTrackButtonDisabled } from './timelineTrackFocus';
 import { TimelineTrackFilter } from './timelineTrackFilter';
 import { clamp } from './timelineViewport';
 import { answerTimelinePresentation, type WorkAreaView } from './timelinePresentation';
@@ -53,6 +54,7 @@ const fitKeys = element<HTMLButtonElement>('timeline-fit-keys');
 const slider = element<HTMLInputElement>('timeline-seek');
 const time = element<HTMLOutputElement>('timeline-time');
 const tracks = element<HTMLOListElement>('timeline-tracks');
+const trackFocusFallbacks = [slider, programs];
 const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
 let model: TimelineState = { programs: [], names: {}, writable: false };
 const saved = vscode.getState();
@@ -238,7 +240,10 @@ window.addEventListener('message', event => {
         showTracks();
         seek();
     } else if (message.type === 'animationGraphMode') {
-        if (graph.apply(message.mode)) { saveTimeline(); showCurves(); }
+        if (graph.apply(message.mode)) {
+            saveTimeline();
+            preserveTrackFocus(tracks, trackFocusFallbacks, showCurves);
+        }
     } else if (message.type === 'timelineLayout') {
         if (clips.applyLayout(message.layout)) showTimelineLayout();
     } else if (message.type === 'timelinePresentationRequest') {
@@ -288,6 +293,15 @@ function positionFor(selected: TimelineProgram | undefined) {
 }
 
 function showTracks(): void {
+    const previous = owner;
+    preserveTrackFocus(tracks, trackFocusFallbacks, () => {
+        renderTracks();
+        const selected = current();
+        return Boolean(selected && previous?.session === owner?.session && matchesProgram(previous?.program, selected));
+    });
+}
+
+function renderTracks(): void {
     if (model.transition) {
         toolbar.hidden = container.hidden = true;
         clips.follow({ programs: [] }, false, true, 0);
@@ -357,16 +371,15 @@ function showTracks(): void {
     }
     workArea.follow(canPreviewRange(selected) ? timeline.duration : 0, newProgram);
     const changedViewport = viewport.follow(timeline.duration, newProgram);
-    const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names,
+    const content = JSON.stringify([model.frame?.session ?? owner?.session, selected, model.names, model.namedTargets,
         model.writable, model.canEditKeyframes, model.canEditComponentBatch, model.canAuthorRustKeys]);
     if (lastContent !== content) {
         lastContent = content;
-        const restoreFocus = renderedKeys.some(item => item.button === document.activeElement);
         renderedKeys = [];
         curves.clear();
         slider.max = String(timeline.duration);
         const curveTracks = new Map<string, number>();
-        channels.render(timeline.tracks, model.names, newProgram, (track, index, target) => {
+        channels.render(timeline.tracks, model.names, model.namedTargets, newProgram, (track, index, target, targetKey) => {
             const row = document.createElement('li');
             row.className = 'timeline-track';
             const name = document.createElement('span');
@@ -378,7 +391,7 @@ function showTracks(): void {
             name.title = `${target} · ${track.property}`;
             const lane = document.createElement('div');
             lane.className = 'timeline-lane';
-            const curveTrack = JSON.stringify([model.frame?.session ?? owner?.session, model.names[track.target], track.property]);
+            const curveTrack = JSON.stringify([model.frame?.session ?? owner?.session, targetKey, track.property]);
             const occurrence = curveTracks.get(curveTrack) ?? 0;
             curveTracks.set(curveTrack, occurrence + 1);
             const plot = curveChannels(track).length ? curves.add(lane, name, track, `${curveTrack}:${occurrence}`) : undefined;
@@ -395,6 +408,7 @@ function showTracks(): void {
                 const location = { target: track.target, property: track.property, time: key.time };
                 const rendered = renderKeyframe(location, `${name.title}, ${number.format(key.time)}s · ${key.value_text} · ${key.easing_text}`);
                 const { button } = rendered;
+                button.id = `timeline-key-${encodeURIComponent(JSON.stringify([targetKey, track.property, occurrence, key.time]))}`;
                 const easing = key.easing_text.replace(/\s/g, '').toLowerCase();
                 button.toggleAttribute('data-eased', Boolean(easing && easing !== 'lineareasing' && easing !== '0,0,1,1'));
                 renderedKeys.push(rendered);
@@ -439,10 +453,6 @@ function showTracks(): void {
             return row;
         });
         layoutTracks(newProgram);
-        if (restoreFocus) {
-            const last = visibleKeys.findLast(item => !item.button.hidden && selection.has(item.key));
-            (last?.button ?? slider).focus({ preventScroll: true });
-        }
     } else if (filterChanged) layoutTracks(false);
     else if (changedViewport) viewport.layout();
     showKeySelection();
@@ -450,9 +460,11 @@ function showTracks(): void {
 }
 
 function updateTrackVisibility(): void {
-    layoutTracks(false);
-    showKeySelection();
-    showPosition();
+    preserveTrackFocus(tracks, trackFocusFallbacks, () => {
+        layoutTracks(false);
+        showKeySelection();
+        showPosition();
+    });
 }
 
 function layoutTracks(newProgram: boolean): void {
@@ -665,7 +677,7 @@ function showPosition(): void {
     stop.disabled = !model.frame || !position || editing || (!playing && pending);
     slider.disabled = !model.frame || !timeline || !available || Boolean(clock?.native) || playing || editing;
     navigation.show(seconds, timeline?.duration, preciseClock, time.title);
-    for (const { button } of renderedKeys) button.disabled = pending || editing || !model.frame;
+    for (const { button } of renderedKeys) setTrackButtonDisabled(button, pending || editing || !model.frame);
     keyframeEditor.follow(pending || playing || editing ? undefined : model.frame, model.documentVersion, program);
     showCurves();
 }
@@ -716,7 +728,7 @@ function recordAt(time: number, track?: number): void {
 }
 
 function clipboardShortcut(event: KeyboardEvent, keys: KeyframeLocation[], track?: number): boolean {
-    if (!model.canTransferKeys || !(event.metaKey || event.ctrlKey) || !gestureFrame() || !canRetimeKeys()) return false;
+    if (event.altKey || !model.canTransferKeys || !(event.metaKey || event.ctrlKey) || !gestureFrame() || !canRetimeKeys()) return false;
     const command = event.key.toLowerCase();
     if (command === 'c' && keys.length) editKeys(keys, model.frame, { action: 'copy_keyframes' });
     else if (command === 'v' && channels.editableTracks().length) {
@@ -728,8 +740,8 @@ function clipboardShortcut(event: KeyboardEvent, keys: KeyframeLocation[], track
 }
 
 function keyShortcuts(event: KeyboardEvent, location: KeyframeLocation, duration: number, track: number): void {
-    const found = model.frame;
-    if (!found || pending || keyEdit || channels.isLocked(location.target)) return;
+    const found = gestureFrame();
+    if (event.altKey || !found || channels.isLocked(location.target)) return;
     const modifier = event.metaKey || event.ctrlKey;
     const command = event.key.toLowerCase();
     const keys = selection.size ? selection.keys : [location];

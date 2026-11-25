@@ -111,6 +111,7 @@ export interface TimelineState {
     programs: TimelineProgram[];
     sourceIssues?: AnimationSourceIssue[];
     names: Record<number, string>;
+    namedTargets?: Record<number, string>;
     selectedTargets?: readonly number[];
     markers?: Record<number, TimelineMarker[]>;
     sharedMarkers?: TimelineMarker[];

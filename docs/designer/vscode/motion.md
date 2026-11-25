@@ -75,6 +75,8 @@ The picker follows the open source document and uses the running app's registry.
 
 Escape dismisses the filter popup when it has focus.
 
+When a source edit refreshes the tracks, keyboard focus stays on the same target, curve component picker, or keyframe if it is still visible. If the keyframe was removed, focus returns to its target. Named targets keep their expanded and locked states when the preview rebuilds. VoiceOver’s Control–Option shortcuts remain available while a keyframe has focus.
+
 ### Control Timeline tracks from an agent
 
 Read `designer_timeline_view` while the Timeline shows an animation. The `track_view` reports the program ID, properties, and the target for each track. In VS Code it also reports the active filter and each target group's visibility, expansion, and lock state.

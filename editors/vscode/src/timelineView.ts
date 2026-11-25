@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { availableGraphModes, isAnimationGraphMode, type AnimationGraphMode } from './animationGraph';
 import type { DesignerPanel } from './designerPanel';
 import { DockView } from './dockView';
-import { errorMessage, type FrameTarget } from './protocol';
+import { errorMessage, type FrameTarget, type OutlineNode } from './protocol';
 import type { StateTransitionControl, StateTransitionRoute } from './stateTransitionProtocol';
 import { choose, StudioContext } from './studioContext';
 import { chooseTimelineKeyAction, keyframeOptions } from './studioKeyframes';
@@ -23,15 +23,32 @@ export const TIMELINE_VIEW = 'ferroui.timeline';
 const GRAPH_MODE = 'ferroui.timeline.graphMode';
 const TIMELINE_LAYOUT = 'ferroui.timeline.layout';
 
+interface CatalogFrame {
+    programs: TimelineProgram[];
+    names: Record<number, string>;
+    namedTargets: Record<number, string>;
+}
+
 interface Catalog {
     key: string;
     session: number;
     token: number | undefined;
     pending: Promise<TimelineProgram[]>;
-    programs?: TimelineProgram[];
+    resolved?: CatalogFrame;
     sourceIssues?: AnimationSourceIssue[];
-    retained?: TimelineProgram[];
+    retained?: CatalogFrame;
     error?: string;
+}
+
+function targetNames(nodes: readonly OutlineNode[]): Pick<CatalogFrame, 'names' | 'namedTargets'> {
+    const counts = new Map<string, number>();
+    for (const { name } of nodes) {
+        if (name) counts.set(name, (counts.get(name) ?? 0) + 1);
+    }
+    return {
+        names: Object.fromEntries(nodes.map(node => [node.id, node.name ?? node.label])),
+        namedTargets: Object.fromEntries(nodes.flatMap(({ id, name }) => name && counts.get(name) === 1 ? [[id, name]] : [])),
+    };
 }
 
 export class TimelineView implements vscode.Disposable {
@@ -229,6 +246,7 @@ export class TimelineView implements vscode.Disposable {
         const block = panel.snapshot?.activeBlock?.start;
         const key = `${panel.session}:${panel.document.version}:${block?.line ?? 0}:${block?.character ?? 0}:${panel.timelineCatalogEpoch}`;
         if (this.catalog?.key === key && (!this.catalog.error || this.catalog.token === panel.currentToken)) return this.catalog;
+        const targets = targetNames(panel.nodes);
         const pending = panel.studioQuery('designer_programs', { include_source: false, include_keyframe_text: true },
             undefined, AbortSignal.timeout(15_000)).then(result => {
                 const authored = result as { programs: TimelineProgram[]; sourceIssues?: AnimationSourceIssue[] };
@@ -237,8 +255,8 @@ export class TimelineView implements vscode.Disposable {
             });
         const previous = this.catalog?.session === panel.session ? this.catalog : undefined;
         const catalog: Catalog = this.catalog = { key, session: panel.session, token: panel.currentToken, pending,
-            retained: previous?.programs ?? previous?.retained };
-        void pending.then(programs => { catalog.programs = programs; this.catalogChanged(catalog); },
+            retained: previous?.resolved ?? previous?.retained };
+        void pending.then(programs => { catalog.resolved = { programs, ...targets }; this.catalogChanged(catalog); },
             error => { catalog.error = errorMessage(error); this.catalogChanged(catalog); });
         return catalog;
     }
@@ -274,19 +292,20 @@ export class TimelineView implements vscode.Disposable {
         this.shown = key;
         const catalog = panel && frame && !panel.status ? this.programs(panel) : undefined;
         const retained = panel && this.catalog?.session === panel.session ? this.catalog : undefined;
-        const programs = catalog?.programs ?? retained?.programs ?? retained?.retained ?? [];
+        const display = retained?.resolved ?? retained?.retained;
+        const programs = display?.programs ?? [];
         const message = !panel ? 'Open a FerroUI designer.' : panel.status ?? catalog?.error
-            ?? (catalog?.programs ? undefined : 'Loading animation programs…');
-        const names = Object.fromEntries((panel?.nodes ?? []).map(node => [node.id, node.name ?? node.label]));
+            ?? (catalog?.resolved ? undefined : 'Loading animation programs…');
         const marks = panel && this.markers.get(panel);
-        const markers = panel && marks && catalog?.programs ? Object.fromEntries(programs.map(program => {
+        const markers = panel && marks && catalog?.resolved ? Object.fromEntries(programs.map(program => {
             const clock = markerClock(panel, programs, program.id);
             return [program.id, clock ? marks.list(clock.key, clock.end) : []];
         })) : undefined;
-        const sharedClock = panel && catalog?.programs && markerClock(panel, programs, undefined);
+        const sharedClock = panel && catalog?.resolved && markerClock(panel, programs, undefined);
         const sharedMarkers = sharedClock ? marks?.list(sharedClock.key, sharedClock.end) ?? [] : undefined;
-        this.view.show({ frame: catalog?.programs ? frame : undefined, documentVersion: panel?.document.version,
-            programs, message, names, selectedTargets, markers, sharedMarkers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
+        this.view.show({ frame: catalog?.resolved ? frame : undefined, documentVersion: panel?.document.version,
+            programs, message, names: display?.names ?? {}, namedTargets: display?.namedTargets, selectedTargets,
+            markers, sharedMarkers, writable: panel?.language === 'xaml', position, sourceIssues: catalog?.sourceIssues,
             canEditKeyframes: panel?.supportsTimelineKeyframeDrafts,
             canEditComponentBatch: panel?.supportsTimelineKeyframeComponentBatch,
             canTransferKeys: panel?.supportsTimelineKeyframeTransfer,
@@ -295,10 +314,10 @@ export class TimelineView implements vscode.Disposable {
             preferredProgram: panel?.authoredTimelineProgram,
             canShowCurves: panel?.supportsTimelineCurves,
             canShowVelocity: panel?.supportsTimelineCurveVelocity,
-            curveCatalog: panel?.supportsTimelineCurves && catalog?.programs ? catalog.key : undefined,
+            curveCatalog: panel?.supportsTimelineCurves && catalog?.resolved ? catalog.key : undefined,
             canPlayAll: Boolean(panel?.supportsTimelineCombinedPlayback && programs.some(canPreviewProgram)),
             canPreviewCombinedRanges: panel?.supportsTimelinePreviewRanges,
-            clipScope: panel?.supportsTimelineClipPlacement && catalog?.programs
+            clipScope: panel?.supportsTimelineClipPlacement && catalog?.resolved
                 ? `${panel.session}:${panel.snapshot?.activeBlock?.start.line ?? 0}:${panel.snapshot?.activeBlock?.start.character ?? 0}` : undefined,
             canRecord: panel?.supportsTimelineRecording, canRecordGeometry: panel?.supportsTimelineGeometryRecording,
             recording: this.recordingTime(panel) !== undefined }, this.file);
