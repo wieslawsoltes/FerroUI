@@ -8,6 +8,8 @@ import type { StageField, StageMenu } from './stageMenu';
 export class StageCard {
     readonly element = create('article');
     readonly heading = create('h2');
+    private readonly grip = icon('gripper');
+    private readonly headingLabel = create('span');
     private readonly image = create('img');
     private readonly placeholder = create('div', 'Rendering stage…');
     private readonly status = create('p');
@@ -32,6 +34,9 @@ export class StageCard {
         this.element.className = 'stage-card';
         this.heading.tabIndex = -1;
         this.heading.id = `stage-heading-${stage.id}`;
+        this.headingLabel.className = 'stage-heading-label';
+        this.grip.hidden = true;
+        this.heading.append(this.grip, this.headingLabel);
         this.element.setAttribute('aria-labelledby', this.heading.id);
         const header = create('header');
         header.className = 'stage-card-header';
@@ -71,7 +76,7 @@ export class StageCard {
         this.stage = stage;
         const { configuration, status, layout_size: layout } = stage;
         const { name, environment } = configuration;
-        this.heading.textContent = this.heading.title = name;
+        this.headingLabel.textContent = this.heading.title = name;
         this.image.alt = `${name} preview`;
         this.element.dataset.mode = configuration.mode;
         this.element.dataset.state = status.state;
@@ -108,6 +113,12 @@ export class StageCard {
         this.status.hidden = !message || this.image.hidden;
         this.placeholder.textContent = message ?? 'Rendering stage…';
         this.updateInput();
+    }
+
+    setReorderable(enabled: boolean): void {
+        this.grip.hidden = !enabled;
+        this.heading.classList.toggle('stage-drag-title', enabled);
+        if (enabled) this.heading.title = `${this.stage.configuration.name} · Drag to reorder`;
     }
 
     get imageSource(): string | undefined { return this.image.hidden ? undefined : this.image.src; }

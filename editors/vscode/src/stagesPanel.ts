@@ -460,6 +460,7 @@ class StageSession {
         if (generation !== this.generation || this.disposed) return;
         model.keyboardInput = client.capabilities.stageKeyboard === true;
         model.pointerInput = client.capabilities.stagePointerInput === true;
+        model.stageArrangement = client.capabilities.stageArrangement === true;
         model.prototypeTransitions = client.capabilities.prototypeTransitions === true;
         this.model = model;
         this.modelVersion = this.document.version;
@@ -496,6 +497,11 @@ class StageSession {
         const model = this.model;
         const generation = this.generation;
         try {
+            if (message.type === 'moveStage') {
+                const { epoch, index, target } = message;
+                await this.applyChange({ action: 'move', epoch, index, target }, AbortSignal.timeout(15_000));
+                return;
+            }
             const client = await this.getClient();
             if (message.type === 'prototype') {
                 const command = message.command ?? await this.chooseFlow(model);
@@ -645,9 +651,16 @@ class StageSession {
 
     private async change(client: NativePreview, model: StageModel, message: Extract<FromStages, { type: 'edit' }>): Promise<StageChange | undefined> {
         const { id, field, epoch } = message;
-        const stage = model.stages.find(stage => stage.id === id && stage.epoch === epoch);
+        const index = model.stages.findIndex(stage => stage.id === id && stage.epoch === epoch);
+        const stage = model.stages[index];
         if (!stage) throw new Error('The stage changed. Use its current controls.');
         if (field === 'remove' || field === 'refresh') return { id, epoch: model.epoch, action: field };
+        if (field === 'duplicate') return { target: { id, epoch }, epoch: model.epoch, action: 'duplicate' };
+        if (field === 'moveEarlier' || field === 'moveLater') {
+            const targetIndex = index + (field === 'moveEarlier' ? -1 : 1);
+            if (model.stages[targetIndex]) return { action: 'move', target: { id, epoch }, index: targetIndex, epoch: model.epoch };
+            return;
+        }
         if (field === 'compare') {
             const base = { id, epoch };
             const reviewed = await chooseStageComparison(stage, model,

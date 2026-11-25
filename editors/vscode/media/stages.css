@@ -45,6 +45,11 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     white-space: nowrap;
     font-size: 1em;
 }
+.stage-card h2 { display: flex; align-items: center; gap: 5px; }
+.stage-card h2 .codicon { flex: none; color: var(--muted); font-size: 14px; }
+.stage-heading-label { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
+.stage-drag-title { cursor: grab; touch-action: none; user-select: none; }
+.stage-drag-title:active { cursor: grabbing; }
 .stage-settings {
     grid-column: 1 / -1;
     display: flex;
@@ -139,7 +144,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 .prototype-flow-details > * { min-inline-size: 0; max-inline-size: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .prototype-flow-start { color: var(--muted); }
 .prototype-flow-empty { display: flex; align-items: center; min-block-size: 26px; padding-inline: 4px; color: var(--muted); }
-.prototype-node[data-drop] { outline: 2px solid var(--focus); outline-offset: -2px; }
+.stage-card[data-drop], .prototype-node[data-drop] { outline: 2px solid var(--focus); outline-offset: -2px; }
 .prototype-node header { display: flex; justify-content: space-between; align-items: center; gap: 5px; padding: 5px 7px; }
 .prototype-node h3 button {
     display: flex;

@@ -59,6 +59,13 @@ pub(crate) struct Change {
 enum Action {
     Add(Addition),
     Compare(comparison::Request),
+    Duplicate {
+        target: StageTarget,
+    },
+    Move {
+        target: StageTarget,
+        index: usize,
+    },
     Remove {
         id: PreviewStageId,
     },
@@ -209,6 +216,14 @@ impl Stages {
             Action::Compare(request) => {
                 let plan = self.plan_comparison(request)?;
                 self.board.add_specs(plan.configurations)?;
+            }
+            Action::Duplicate { target } => {
+                self.stage_info(&target)?;
+                self.board.duplicate(target.id)?;
+            }
+            Action::Move { target, index } => {
+                self.stage_info(&target)?;
+                self.board.move_stage(target.id, index)?;
             }
             Action::Remove { id } => self.board.remove(id)?,
             Action::Update { id, configuration } => {

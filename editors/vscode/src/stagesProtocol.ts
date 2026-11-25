@@ -82,8 +82,10 @@ export interface StageModel {
     textEnvironment?: boolean;
     prototypeTransitions?: boolean;
     comparisonSizes?: StageMatrixSize[];
+    stageArrangement?: boolean;
 }
 export interface StageTarget { id: number; epoch: number }
+export interface StageMove { target: StageTarget; index: number }
 export interface StageAccessibleNode {
     runtime_id: number;
     depth: number;
@@ -138,6 +140,8 @@ interface AddStage { action: 'add'; name: string; width: number; height: number;
 type ExistingStageChange = (
     { action: 'remove' | 'refresh'; id: number }
     | { action: 'update'; id: number; configuration: StageConfiguration }
+    | { action: 'duplicate'; target: StageTarget }
+    | ({ action: 'move' } & StageMove)
     | ({ action: 'compare' } & StageComparisonRequest)
     | { action: 'setPrototype'; graph: PrototypeGraph; transitions?: PrototypeLinkTransition[] }) & { epoch: number };
 export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string });
@@ -147,8 +151,10 @@ export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifes
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
     | ({ type: 'keyboard' } & StageKeyboard)
     | ({ type: 'contact' } & StagePointerInput)
-    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' | 'compare' };
+    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause'
+        | 'refresh' | 'remove' | 'export' | 'designData' | 'state' | 'compare' | 'duplicate' | 'moveEarlier' | 'moveLater' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand; frame?: number }
+    | ({ type: 'moveStage'; epoch: number } & StageMove)
     | { type: 'prototypeMotionPreference'; reduced: boolean }
     | { type: 'prototypeInput'; frame: number; input: PrototypeInput }
     | { type: 'editPrototype'; epoch: number; edit: PrototypeEdit }

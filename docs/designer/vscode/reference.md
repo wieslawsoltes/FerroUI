@@ -102,6 +102,12 @@ Studio reports the same support as `text_environment` in `designer_preview_stage
 
 Planning is read-only. Adding stages requires `ferroui.mcp.allowWrites`. Designer Studio exposes the same matrix planner through `designer_preview_matrix` and `compare_matrix` in `designer_preview_stage`. [VS Code workflow](motion.md#build-a-comparison-from-one-stage) · [Studio automation](../xcode-previews.md#automation)
 
+### Duplicate and move stage cards
+
+Read `designer_stages` for the board epoch and the stage’s current ID and epoch. Call `designer_stage_change` with the board epoch as `expected_epoch`. Use `arguments: { action: "duplicate", target: { id, epoch } }` to append a copy, or `arguments: { action: "move", target: { id, epoch }, index: 0 }` to make the card first. The `index` is the card’s position in the resulting board, counting from zero.
+
+The returned model includes the new card order and the remapped prototype references. The calls require `ferroui.mcp.allowWrites` and a preview helper that reports `stageArrangement`. Studio uses the same board operations through `designer_preview_stage`. [Stages guide](motion.md#arrange-stage-cards) · [Studio automation](../xcode-previews.md#automation)
+
 ### Send keyboard input to a stage
 
 1. Read the board with `designer_stages`. Use `designer_stage_change` to set the card's mode to `live`. Read the accepted stage ID and epoch from the returned board.

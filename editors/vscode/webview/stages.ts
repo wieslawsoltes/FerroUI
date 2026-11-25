@@ -4,6 +4,7 @@ import { PrototypeGraphView } from './prototypeGraph';
 import { PrototypePlayer } from './prototypePlayer';
 import { StageCard } from './stageCard';
 import { StageMenu } from './stageMenu';
+import { connectStageOrder, placeStageCard } from './stageOrder';
 
 declare function acquireVsCodeApi(): { postMessage(message: StagesRequest): void; setState(state: { uri: string }): void };
 const vscode = acquireVsCodeApi();
@@ -46,21 +47,25 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     }
     if (data.type === 'model') {
         model = data.model;
-        menu.setComparisons(Boolean(model.comparisonSizes?.length));
+        menu.update(model);
         inputCurrent = true;
         vscode.setState({ uri: data.uri });
         const keep = new Set(model.stages.map(stage => stage.id));
         for (const [id, previous] of cards) {
             if (!keep.has(id)) { previous.cancelContacts(); previous.element.remove(); cards.delete(id); menu.close(); }
         }
+        let previous: HTMLElement | undefined;
         for (const stage of model.stages) {
-            const previous = cards.get(stage.id);
-            if (previous) previous.update(stage);
+            let card = cards.get(stage.id);
+            if (card) card.update(stage);
             else {
-                const card = new StageCard(stage, menu, send, () => scene);
+                card = new StageCard(stage, menu, send, () => scene);
                 cards.set(stage.id, card);
-                root.append(card.element);
+                connectStageOrder(root, card, () => inputCurrent && !graphOpen && !scene ? model : undefined, send);
             }
+            card.setReorderable(model.stageArrangement === true && model.stages.length > 1);
+            placeStageCard(root, card.element, previous);
+            previous = card.element;
         }
         graph.update(model);
         showScene(model.prototype);

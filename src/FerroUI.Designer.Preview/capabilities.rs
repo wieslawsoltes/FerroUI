@@ -16,6 +16,7 @@ pub(crate) fn initialize() -> Value {
         "rsxLanguage",
         "stages",
         "stageComparisons",
+        "stageArrangement",
         "stageKeyboard",
         "stagePointerInput",
         "prototypeNativePlayer",

@@ -31,14 +31,7 @@ impl PreviewStageComparison {
             height,
             ..base
         };
-        let name = |label| {
-            let suffix = format!(" · {label}");
-            let mut end = configuration.name.len().min(128 - suffix.len());
-            while !configuration.name.is_char_boundary(end) {
-                end -= 1;
-            }
-            format!("{}{suffix}", configuration.name[..end].trim_end())
-        };
+        let name = |label| configuration.name_with_suffix(&format!(" · {label}"));
         match self {
             Self::Sizes => SIZES
                 .into_iter()

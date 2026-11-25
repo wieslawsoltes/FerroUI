@@ -57,6 +57,7 @@ pub use accessibility::{PreviewStageAccessibility, PreviewStageAccessibleNode};
 
 pub type PreviewStageId = u64;
 pub const MAX_PREVIEW_STAGES: usize = 16;
+const MAX_STAGE_NAME_BYTES: usize = 128;
 const MAX_MANIFEST_BYTES: usize = 1_048_576;
 static NEXT_STAGE: AtomicU64 = AtomicU64::new(1);
 
@@ -162,7 +163,7 @@ impl PreviewStageConfiguration {
     }
 
     pub fn validate(&self) -> Result<(), String> {
-        bounded(&self.name, 128, "Stage name", false)?;
+        bounded(&self.name, MAX_STAGE_NAME_BYTES, "Stage name", false)?;
         validate_uri(&self.source_uri)?;
         self.environment.validate()?;
         self.text.validate()?;
@@ -193,6 +194,14 @@ impl PreviewStageConfiguration {
             return Err("Preview-stage configuration text exceeds 256 KiB".into());
         }
         Ok(())
+    }
+
+    pub(super) fn name_with_suffix(&self, suffix: &str) -> String {
+        let mut end = self.name.len().min(MAX_STAGE_NAME_BYTES.saturating_sub(suffix.len()));
+        while !self.name.is_char_boundary(end) {
+            end -= 1;
+        }
+        format!("{}{suffix}", self.name[..end].trim_end())
     }
 
     fn text_size(&self) -> usize {
@@ -744,10 +753,7 @@ impl PreviewStageBoard {
 
     pub fn duplicate(&mut self, id: PreviewStageId) -> Result<PreviewStageId, String> {
         let mut spec = self.stages[self.index(id)?].spec.clone();
-        spec.configuration.name = format!(
-            "{} copy",
-            spec.configuration.name.chars().take(120).collect::<String>()
-        );
+        spec.configuration.name = spec.configuration.name_with_suffix(" copy");
         self.add_spec(spec)
     }
 

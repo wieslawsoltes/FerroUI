@@ -1,7 +1,7 @@
 import type { PrototypeAction, PrototypeEdit, SourceAnchor, StageModel, StagesRequest } from '../src/stagesProtocol';
 import { prototypeEffects } from '../src/stagesProtocol';
 import { create, element, icon, iconButton } from './dom';
-import { connectStageDrag } from './prototypeStageDrag';
+import { connectStageDrag } from './stageDrag';
 
 export class PrototypeGraphView {
     private readonly panel = element('prototype-graph');
@@ -99,8 +99,14 @@ export class PrototypeGraphView {
         if (!add.disabled) {
             stageTitle.title = `Show ${name} stage. Drag to connect to another stage.`;
             stageTitle.classList.add('prototype-drag-title');
-            connectStageDrag(stageTitle, source, () => this.model === model,
-                destination => this.edit({ kind: 'interaction', source, destination }));
+            connectStageDrag(stageTitle, () => ({
+                current: () => this.model === model,
+                destination: hit => {
+                    const target = hit?.closest<HTMLElement>('[data-prototype-stage]');
+                    return target && Number(target.dataset.prototypeStage) !== source ? target : undefined;
+                },
+                drop: target => this.edit({ kind: 'interaction', source, destination: Number(target.dataset.prototypeStage) }),
+            }));
         }
         const thumbnail = create('img');
         thumbnail.className = 'prototype-thumbnail';

@@ -808,6 +808,14 @@ Each new card uses the base source, preview definition, layout policy, and setti
 
 [Review the four configurations before adding the cards](../images/vscode-stage-matrix-review.png)
 
+### Arrange stage cards
+
+Open a card’s **More Actions** menu and choose **Duplicate Stage** to copy its source, environment, and other settings into a separate preview. Each copy has its own temporary control values.
+
+Drag a card’s grip or heading over another card to move it to that position. With the keyboard, open **More Actions** and use **Move Earlier** or **Move Later**. The board saves the new reading order with the stage set. Prototype flows and links keep referring to their original views. [Arrange stages with MCP](reference.md#duplicate-and-move-stage-cards)
+
+![The Compact card is outlined as the destination while dragging Desktop to its position](../images/vscode-stage-reorder.png)
+
 ### Compare a high contrast stage
 
 Use the **Environment** icon on one card and choose **High contrast** under **Theme**. Keep another card in Light or Dark to compare how the same view looks and measures under the native contrast palette. The option appears when the preview host supplies a High Contrast variant. **Checks** uses the selected card’s measured layout and colors.

@@ -485,6 +485,9 @@ export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <button type="button" data-stage-action="designData">${icon('database')}Design data…</button>
     <button type="button" data-stage-action="state">${icon('symbol-enum')}Visual states…</button>
     <button type="button" data-stage-action="compare" hidden>${icon('split-horizontal')}Compare variants…</button>
+    <button type="button" data-stage-action="duplicate" hidden>${icon('copy')}Duplicate stage</button>
+    <button type="button" data-stage-action="moveEarlier" hidden>${icon('arrow-up')}Move earlier</button>
+    <button type="button" data-stage-action="moveLater" hidden>${icon('arrow-down')}Move later</button>
     <hr>
     <button type="button" data-stage-action="refresh">${icon('refresh')}Refresh stage</button>
     <button type="button" data-stage-action="export">${icon('file-media')}Save PNG…</button>

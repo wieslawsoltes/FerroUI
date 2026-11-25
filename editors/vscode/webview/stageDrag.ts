@@ -1,10 +1,17 @@
-/** Connect stages inside one webview while preserving the title's click and keyboard actions. */
-export function connectStageDrag(handle: HTMLButtonElement, source: number,
-    current: () => boolean, connect: (destination: number) => void): void {
+interface StageDrag {
+    current(): boolean;
+    destination(hit: Element | null): HTMLElement | undefined;
+    drop(card: HTMLElement): void;
+}
+
+/** Track stage gestures within the webview and preserve the handle's regular click. */
+export function connectStageDrag(handle: HTMLElement, begin: () => StageDrag | undefined): void {
     let suppressClick = false;
     handle.addEventListener('dragstart', event => event.preventDefault());
     handle.addEventListener('pointerdown', event => {
-        if (event.button !== 0 || !event.isPrimary || !current()) return;
+        if (event.button !== 0 || !event.isPrimary) return;
+        const drag = begin();
+        if (!drag?.current()) return;
         event.preventDefault();
         handle.focus({ preventScroll: true });
         suppressClick = false;
@@ -20,33 +27,37 @@ export function connectStageDrag(handle: HTMLButtonElement, source: number,
             highlighted = card;
             if (highlighted) highlighted.dataset.drop = 'true';
         };
-        const destination = (pointer: PointerEvent) => {
-            const card = document.elementFromPoint(pointer.clientX, pointer.clientY)?.closest<HTMLElement>('[data-prototype-stage]');
-            return card && Number(card.dataset.prototypeStage) !== source ? card : undefined;
-        };
+        const destination = (pointer: PointerEvent) => drag.destination(document.elementFromPoint(pointer.clientX, pointer.clientY));
         const passedThreshold = (pointer: PointerEvent) => moved || Math.hypot(pointer.clientX - x, pointer.clientY - y) >= 5;
         const finish = () => {
             listeners.abort();
             highlight();
             if (handle.hasPointerCapture(pointerId)) handle.releasePointerCapture(pointerId);
         };
+        const cancel = () => { suppressClick = moved; finish(); };
         document.addEventListener('pointermove', pointer => {
             if (pointer.pointerId !== pointerId) return;
-            if (!current()) { finish(); return; }
+            if (!drag.current()) { cancel(); return; }
             moved = passedThreshold(pointer);
             if (moved) highlight(destination(pointer));
         }, options);
         document.addEventListener('pointerup', pointer => {
             if (pointer.pointerId !== pointerId) return;
             suppressClick = passedThreshold(pointer);
-            const card = suppressClick && current() ? destination(pointer) : undefined;
+            const card = suppressClick && drag.current() ? destination(pointer) : undefined;
             finish();
-            if (card) connect(Number(card.dataset.prototypeStage));
+            if (card) drag.drop(card);
         }, options);
         document.addEventListener('pointercancel', pointer => {
-            if (pointer.pointerId === pointerId) finish();
+            if (pointer.pointerId === pointerId) cancel();
         }, options);
-        window.addEventListener('blur', finish, options);
+        handle.addEventListener('lostpointercapture', pointer => {
+            if (pointer.pointerId === pointerId) cancel();
+        }, options);
+        window.addEventListener('blur', cancel, options);
+        document.addEventListener('keydown', event => {
+            if (event.key === 'Escape') cancel();
+        }, options);
         handle.setPointerCapture(pointerId);
     });
     handle.addEventListener('click', event => {

@@ -49,7 +49,7 @@ export class NativePreview implements vscode.Disposable {
         hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean;
         hostedPropertyTransitions?: boolean; rsxLanguage?: boolean;
         stages?: boolean; stageKeyboard?: boolean; stagePointerInput?: boolean; prototypeEditing?: boolean; prototypeNativePlayer?: boolean; prototypeTransitions?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean; publishedAssets?: boolean;
-        stageComparisons?: boolean;
+        stageComparisons?: boolean; stageArrangement?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; canvasHighContrast?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; rsxColumnAuthoring?: boolean; itemTemplateAuthoring?: boolean; rsxItemTemplateAuthoring?: boolean;
         behaviorAuthoring?: boolean;
@@ -266,6 +266,9 @@ export class NativePreview implements vscode.Disposable {
 
     editStages(change: NativeStageChange): Promise<StageModel> {
         if (change.action === 'compare' && !this.capabilities.stageComparisons) throw new Error('Update the FerroUI preview helper to compare stages.');
+        if ((change.action === 'move' || change.action === 'duplicate') && !this.capabilities.stageArrangement) {
+            throw new Error('Update the FerroUI preview helper to arrange stages.');
+        }
         if (!this.capabilities.prototypeEditing && (change.action === 'setPrototype' || (change.action === 'add' && change.source))) {
             throw new Error('Update the FerroUI preview helper to edit prototypes and add other documents.');
         }
