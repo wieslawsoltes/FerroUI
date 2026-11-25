@@ -325,6 +325,7 @@ The debugger stops following future replacements after detach. Managed app statu
 1. Call `ferroui_browser_targets` to read the workspace browser profiles. Use `folder` when the same profile ID is present in several workspace folders.
 2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_browser_run` with `profile` and its `folder`, or call `ferroui_browser_attach` for a profile with an independently started Chromium tab and debug port. A served profile returns the exact `runtime` and `generation` after the first browser frame. A managed build profile returns its session while the first build runs.
 3. Use `ferroui_runtime_open` to show the session in Live App. Use `ferroui_runtime_tools`, `ferroui_runtime_query`, and `ferroui_runtime_call` to read the shared FerroUI inspector, capture a PNG, and send input where the app permits it. The browser uses the workspace’s editor MCP server. Use `ferroui_browser_stop` with that exact runtime to release the connection. A newly attached document has a new runtime and generation. [Configure a browser app](runtime.md#run-or-attach-a-browser-app)
+4. Call `ferroui_browser_output` with the exact `runtime` and optional `lines` from 1 to 200. The tool reads recent messages from the same session as **Show App Output**. It works for managed builds, served profiles, and attached tabs while the session exists. Reading output requires a trusted workspace and works with editor writes disabled.
 
 [App Sessions in the workbench](runtime.md#run-several-app-sessions)
 

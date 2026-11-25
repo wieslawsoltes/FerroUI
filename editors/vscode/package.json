@@ -1450,7 +1450,7 @@
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|android)(-development)?(-debug)?|browser-development(-debug)?|browser-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|android|browser)(-development)?(-debug)?)$/",
           "group": "1_apps@4"
         },
         {

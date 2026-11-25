@@ -43,7 +43,7 @@ export async function verifyBrowserMcp(url: string): Promise<void> {
         assert.match((await invoke('ferroui_runtime_detach', { runtime: started.runtime })).content[0]?.text ?? '', /browser session/);
         await vscode.commands.executeCommand('ferroui.appSessions.stop', started.runtime);
         assert.ok(!(await sessions()).some(session => session.runtime === started.runtime));
-        await checkAttach(url, request, mcp, sessions);
+        await verifyBrowserAttach(url, request, label, mcp, sessions);
         console.log('VS Code Browser Live App managed launch, Chromium PNG and input, checked Rust edits and Undo, independent attach and stale navigation passed');
     } finally {
         try {
@@ -124,7 +124,7 @@ async function checkBrowserApp(app: ReturnType<typeof runtimeApp>, { invoke, con
     assert.notDeepEqual(await app.frame(window.node_id), before);
 }
 
-async function checkAttach(url: string, request: { profile: string; folder: string }, { invoke, content }: McpFixture,
+export async function verifyBrowserAttach(url: string, request: { profile: string; folder: string }, appLabel: string, { invoke, content }: McpFixture,
     sessions: () => Promise<RuntimeSummary[]>) {
     const executable = await browserExecutable();
     const directory = await mkdtemp(path.join(tmpdir(), 'ferroui-browser-test-'));
@@ -139,16 +139,21 @@ async function checkAttach(url: string, request: { profile: string; folder: stri
         await until(async () => Boolean((await readFile(portRecord, 'utf8').catch(() => '')).split('\n')[1]));
         const debugPort = Number((await readFile(portRecord, 'utf8')).split('\n')[0]);
         assert.ok(debugPort > 0);
-        await settings.update('apps', [{ id: profile, label, url, debugPort }], vscode.ConfigurationTarget.Global);
+        await settings.update('apps', [{ id: request.profile, label: appLabel, url, debugPort }], vscode.ConfigurationTarget.Global);
         const attached = content<RuntimeSummary>(await invoke('ferroui_browser_attach', request));
         assert.equal(attached.browser?.launched, false);
+        const output = content<{ runtime: string; output: string }>(await invoke('ferroui_browser_output', { runtime: attached.runtime }));
+        assert.equal(output.runtime, attached.runtime);
+        assert.ok(output.output.includes(`${appLabel} · Connecting to Chromium`));
+        assert.ok(output.output.includes(`${appLabel} · inspector ready`));
         const app = runtimeApp({ invoke, content }, attached);
         await app.click((await app.find('DispatchOrder')).node_id);
         content(await invoke('ferroui_browser_stop', { runtime: attached.runtime }));
         assert.ok(!child.hasExited, 'Disconnect leaves the independently started Chromium running');
+        assert.ok((await invoke('ferroui_browser_output', { runtime: attached.runtime })).isError);
 
         await vscode.commands.executeCommand('ferroui.browser.attach', request);
-        const reopened = (await sessions()).find(session => session.browser?.profile === profile);
+        const reopened = (await sessions()).find(session => session.browser?.profile === request.profile);
         assert.ok(reopened && reopened.runtime !== attached.runtime && reopened.generation !== attached.generation);
         assert.equal((await runtimeApp({ invoke, content }, reopened).find('DispatchedCount')).text, 'Dispatched orders: 1');
         const list = await fetch(`http://127.0.0.1:${debugPort}/json/list`, { signal: AbortSignal.timeout(3_000) });

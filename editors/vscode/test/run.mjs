@@ -123,7 +123,8 @@ try {
             const debugToolkit = await browserDebugWorkspace(workspace, sandbox, resolve(browserDebugSite));
             targetSettings['ferroui.browser.apps'] = [{ id: 'debug-dispatch', label: 'Dispatch Desk',
                 build: { application: 'live_inspector', toolchain: debugToolkit } }];
-            targetEnv = { FERROUI_TEST_BROWSER_DEBUG: '1', CARGO_TARGET_DIR: join(sandbox, 'cargo') };
+            targetEnv = { FERROUI_TEST_BROWSER_DEBUG: '1', FERROUI_TEST_BROWSER_DEBUG_SITE: resolve(browserDebugSite),
+                CARGO_TARGET_DIR: join(sandbox, 'cargo') };
         } else {
             target = toolkit;
             targetSettings['ferroui.browser.apps'] = [{ id: 'dispatch-desk', label: 'Dispatch Desk', url: browser }];

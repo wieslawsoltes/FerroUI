@@ -457,7 +457,7 @@ export const agentCatalog = {
         { runtime: runtimeArgument }, ['runtime'], true, false),
     ferroui_browser_debug: tool('Attach or detach VS Code JavaScript Debug for the exact accepted browser generation. Detach keeps Live App running and stops following replacements.',
         { runtime: runtimeArgument, expected_generation: integer(1), action: choice('attach', 'detach') }, ['runtime', 'expected_generation'], true, false),
-    ferroui_browser_output: tool('Read recent build and startup output for one managed browser development session.',
+    ferroui_browser_output: tool('Read recent build, startup and debugger output available for the exact browser app session.',
         { runtime: runtimeArgument, lines: integer(1, 200) }, ['runtime']),
     ferroui_runtime_attach: tool('Connect to a loopback FerroUI app or Studio MCP endpoint. Returns its session identity.', {
         url: { type: 'string', maxLength: 2048 }, token: { type: 'string', maxLength: 64 }, label: { type: 'string', maxLength: 128 },

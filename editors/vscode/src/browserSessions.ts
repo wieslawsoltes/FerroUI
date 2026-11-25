@@ -17,6 +17,7 @@ interface Session {
     app: ServedBrowserApp;
     page: Promise<BrowserPage>;
     stop: AbortController;
+    output: ReloadLog;
     runtime?: AppRuntime;
     appDebugger?: BrowserDebugger;
     closing?: Promise<void>;
@@ -27,7 +28,6 @@ export class BrowserSessions implements vscode.Disposable {
     private readonly sessions = new Map<string, Session>();
     private readonly development = new Map<string, BrowserDevelopment>();
     private readonly subscriptions: vscode.Disposable[];
-    private output?: vscode.OutputChannel;
     private closing?: Promise<void>;
     private readonly folders = vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
         const closed = new Set(removed.map(folder => folder.uri.toString()));
@@ -74,28 +74,34 @@ export class BrowserSessions implements vscode.Disposable {
             }
             throw new Error('Close the current browser session before opening this profile.');
         }
-        const appDebugger = mode === 'debug' ? new BrowserDebugger(app, this.outputChannel()) : undefined;
+        const folder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(app.folder, true))?.name;
+        const profile = folder ? `${folder}/${app.id}` : app.id;
+        const name = `FerroUI Browser · ${app.label} (${profile}${mode === 'attach' ? ', attached' : ''})`;
+        const output = new ReloadLog(vscode.window.createOutputChannel(name));
+        const appDebugger = mode === 'debug' ? new BrowserDebugger(app, output) : undefined;
         if (app.build) {
-            const session = new BrowserDevelopment(app, this.connections, this.history, new ReloadLog(this.outputChannel()), this.publish, appDebugger);
+            const session = new BrowserDevelopment(app, this.connections, this.history, output, this.publish, appDebugger);
             this.development.set(key, session);
             session.rebuild();
             return this.connections.describe(session.runtime)!;
         }
-        return this.openServed(app, key, mode, signal, appDebugger);
+        return this.openServed(app, key, mode, signal, output, appDebugger);
     }
 
-    private async openServed(app: ServedBrowserApp, key: string, mode: BrowserMode, signal: AbortSignal, appDebugger?: BrowserDebugger): Promise<RuntimeSummary> {
+    private async openServed(app: ServedBrowserApp, key: string, mode: BrowserMode, signal: AbortSignal,
+        output: ReloadLog, appDebugger?: BrowserDebugger): Promise<RuntimeSummary> {
         const stop = new AbortController();
         const timeout = AbortSignal.timeout(30_000);
         const active = AbortSignal.any([signal, this.lifetime.signal, stop.signal, timeout]);
         const page = mode === 'attach' ? attachBrowser(app, active) : launchBrowser(app, active, Boolean(appDebugger));
-        const session: Session = { app, page, stop, appDebugger };
+        const session: Session = { app, page, stop, output, appDebugger };
         this.sessions.set(key, session);
+        output.appendLine(`${app.label} · ${mode === 'attach' ? 'Connecting to Chromium' : 'Starting Chromium'}`);
         try {
             const browser = await page;
             void browser.closed.then(() => this.retire(key, session));
             const pause = appDebugger && new BrowserPause();
-            const channel = await BrowserInspection.open(browser, app.url, active, undefined, pause);
+            const channel = await BrowserInspection.open(browser, app.url, active, message => output.appendLine(message), pause);
             await verifyRuntime({ channel }, active);
             active.throwIfAborted();
             const runtime = this.connections.addPlatform({ kind: 'browser', browser: {
@@ -108,6 +114,7 @@ export class BrowserSessions implements vscode.Disposable {
                 port: browser.debugPort, url: app.url, generation, pause,
                 onPause: paused => this.connections.setBrowserPaused(runtime.runtime, generation, paused),
             });
+            output.appendLine(`${app.label} · inspector ready`);
             return runtime;
         } catch (error) {
             await this.close(key, session).catch(problem => console.warn(problem));
@@ -122,7 +129,7 @@ export class BrowserSessions implements vscode.Disposable {
         const session = this.connections.describe(runtime);
         if (session?.kind !== 'browser' || session.generation !== generation) throw new Error('Use the current accepted browser generation.');
         const appDebugger = this.developmentFor(runtime)?.[1].appDebugger
-            ?? [...this.sessions.values()].find(item => item.runtime === runtime)?.appDebugger;
+            ?? this.servedFor(runtime)?.[1].appDebugger;
         if (!appDebugger) throw new Error('Start this profile with Run and Debug Browser App.');
         if (options.detach) await appDebugger.detach(generation);
         else await appDebugger.attach(generation);
@@ -135,7 +142,7 @@ export class BrowserSessions implements vscode.Disposable {
     async stop(runtime: AppRuntime): Promise<void> {
         const development = this.developmentFor(runtime);
         if (development) return this.closeDevelopment(...development);
-        const current = [...this.sessions].find(([, session]) => session.runtime === runtime);
+        const current = this.servedFor(runtime);
         if (!current) throw new Error('Choose a current browser app session.');
         await this.close(...current);
     }
@@ -148,19 +155,25 @@ export class BrowserSessions implements vscode.Disposable {
     }
 
     recentOutput(runtime: AppRuntime, lines: number): { runtime: AppRuntime; output: string } {
-        const session = this.developmentFor(runtime)?.[1];
-        if (!session) throw new Error('Choose a managed browser development session.');
-        return { runtime, output: session.recentOutput(lines) };
+        return { runtime, output: this.outputFor(runtime).tail(lines) };
     }
 
-    showOutput(): void { this.output?.show(true); }
+    showOutput(runtime: AppRuntime): void { this.outputFor(runtime).show(); }
 
-    private outputChannel(): vscode.OutputChannel {
-        return this.output ??= vscode.window.createOutputChannel('FerroUI Browser Reload');
+    private outputFor(runtime: AppRuntime): ReloadLog {
+        this.requireWorkspace();
+        const target = this.connections.describe(runtime);
+        const output = target?.kind === 'browser' && (this.developmentFor(runtime)?.[1].output ?? this.servedFor(runtime)?.[1].output);
+        if (!output) throw new Error('Choose a current browser app session.');
+        return output;
     }
 
     private developmentFor(runtime: AppRuntime) {
         return [...this.development].find(([, session]) => session.runtime === runtime);
+    }
+
+    private servedFor(runtime: AppRuntime) {
+        return [...this.sessions].find(([, session]) => session.runtime === runtime);
     }
 
     private async closeDevelopment(key: string, session: BrowserDevelopment): Promise<void> {
@@ -188,6 +201,7 @@ export class BrowserSessions implements vscode.Disposable {
             finally { await (await session.page.catch(() => undefined))?.close(); }
         })().finally(() => {
             if (this.sessions.get(key) === session) this.sessions.delete(key);
+            session.output.dispose();
         });
         return session.closing;
     }
@@ -199,7 +213,7 @@ export class BrowserSessions implements vscode.Disposable {
         this.closing = Promise.allSettled([
             ...[...this.sessions].map(([key, session]) => this.close(key, session)),
             ...[...this.development].map(([key, session]) => this.closeDevelopment(key, session)),
-        ]).then(() => this.output?.dispose());
+        ]).then(() => undefined);
         return this.closing;
     }
 

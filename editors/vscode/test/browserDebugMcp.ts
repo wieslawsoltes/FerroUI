@@ -1,8 +1,9 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
+import { BrowserSites } from '../src/browserSites';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import { fileKey } from '../src/workspacePaths';
-import { runtimeApp } from './browserMcp';
+import { runtimeApp, verifyBrowserAttach } from './browserMcp';
 import { openEditorMcp } from './mcpFixture';
 import { until } from './wait';
 
@@ -27,9 +28,18 @@ export async function verifyBrowserDebug(): Promise<void> {
     const { invoke, content } = mcp;
     const config = vscode.workspace.getConfiguration('ferroui.mcp');
     const previous = config.inspect<boolean>('allowWrites')?.globalValue;
+    const browser = vscode.workspace.getConfiguration('ferroui.browser');
+    const profiles = browser.inspect<unknown[]>('apps')?.globalValue ?? [];
+    const sites = new BrowserSites();
     let runtime: string | undefined;
-    const current = async () => content<{ runtimes: RuntimeSummary[] }>(await invoke('ferroui_app_sessions')).runtimes
-        .find(session => session.runtime === runtime);
+    let servedRuntime: string | undefined;
+    const readOutput = async (runtime: string, lines = 60) => {
+        const result = content<{ runtime: string; output: string }>(await invoke('ferroui_browser_output', { runtime, lines }));
+        assert.equal(result.runtime, runtime);
+        return result.output;
+    };
+    const sessions = async () => content<{ runtimes: RuntimeSummary[] }>(await invoke('ferroui_app_sessions')).runtimes;
+    const current = async () => (await sessions()).find(session => session.runtime === runtime);
     const accepted = async (previous?: number | null) => {
         let result: RuntimeSummary | undefined;
         await until(async () => {
@@ -64,11 +74,31 @@ export async function verifyBrowserDebug(): Promise<void> {
         assert.equal(duplicate.generation, initial.generation);
         assert.ok(!terminated.has(old.id));
 
+        await sites.listen();
+        const { url } = await sites.publish(process.env.FERROUI_TEST_BROWSER_DEBUG_SITE!, false);
+        const servedProfile = { id: 'served-review', label: 'Review Desk', url };
+        await browser.update('apps', [...profiles, servedProfile], vscode.ConfigurationTarget.Global);
+        const served = content<RuntimeSummary>(await invoke('ferroui_browser_run', { profile: servedProfile.id, folder: workspace.toString() }));
+        servedRuntime = served.runtime;
+        assert.notEqual(served.runtime, runtime);
+        assert.equal(await readOutput(served.runtime, 1), 'Review Desk · inspector ready');
+        await config.update('allowWrites', false, vscode.ConfigurationTarget.Global);
+        try { assert.match(await readOutput(runtime), /Building Dispatch Desk/); }
+        finally { await config.update('allowWrites', true, vscode.ConfigurationTarget.Global); }
+
         await vscode.workspace.fs.writeFile(failMarker, Buffer.from('controlled'));
         content(await invoke('ferroui_browser_rebuild', { runtime }));
         await until(async () => (await current())?.status === 'Browser update failed');
         assert.equal((await current())?.generation, initial.generation);
         assert.ok(!terminated.has(old.id));
+        const diagnostics = await readOutput(runtime);
+        assert.match(diagnostics, /Controlled build failure for the debugger fixture/);
+        assert.doesNotMatch(diagnostics, /Review Desk/);
+        const servedOutput = await readOutput(served.runtime);
+        assert.match(servedOutput, /Review Desk · Starting Chromium/);
+        assert.doesNotMatch(servedOutput, /Building Dispatch Desk|Controlled build failure/);
+        await vscode.commands.executeCommand('ferroui.appSessions.showOutput', runtime);
+        await vscode.commands.executeCommand('ferroui.appSessions.showOutput', served.runtime);
         await vscode.workspace.fs.delete(failMarker);
 
         const line = editor.document.lineAt(2);
@@ -119,14 +149,28 @@ export async function verifyBrowserDebug(): Promise<void> {
         content(await invoke('ferroui_browser_stop', { runtime }));
         await until(() => terminated.has(finalDebugger.id));
         assert.equal(await current(), undefined);
+        assert.ok((await invoke('ferroui_browser_output', { runtime })).isError);
         await assert.rejects(fetch(`http://127.0.0.1:${finalDebugger.configuration.port}/json/version`, { signal: AbortSignal.timeout(2_000) }));
         runtime = undefined;
-        console.log('Managed Chromium verified debugger detach through MCP and App Sessions, generation guards, reload without debugger follow, and scoped cleanup');
+        assert.match(await readOutput(served.runtime), /Review Desk · inspector ready/);
+        assert.equal((await runtimeApp(mcp, served).find('Heading')).text, 'Dispatch desk');
+        content(await invoke('ferroui_browser_stop', { runtime: served.runtime }));
+        assert.ok((await invoke('ferroui_browser_output', { runtime: served.runtime })).isError);
+        servedRuntime = undefined;
+        await verifyBrowserAttach(url, { profile: servedProfile.id, folder: workspace.toString() }, servedProfile.label, mcp, sessions);
+        console.log('Chromium verified scoped managed, served and attached output, debugger detach and reattach, reload without debugger follow, and independent cleanup');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         tracker.dispose();
         ending.dispose();
-        try { if (runtime) await invoke('ferroui_browser_stop', { runtime }); }
-        finally { await config.update('allowWrites', previous, vscode.ConfigurationTarget.Global); mcp.close(); }
+        try {
+            if (runtime) await invoke('ferroui_browser_stop', { runtime });
+            if (servedRuntime) await invoke('ferroui_browser_stop', { runtime: servedRuntime });
+        } finally {
+            await sites.close();
+            await browser.update('apps', profiles, vscode.ConfigurationTarget.Global);
+            await config.update('allowWrites', previous, vscode.ConfigurationTarget.Global);
+            mcp.close();
+        }
     }
 }

@@ -69,7 +69,7 @@ export class AppSessions implements vscode.Disposable {
             command('showOutput', session => {
                 if (session.simulator) return this.simulators.showOutput(session.runtime);
                 if (session.android) return this.android.showOutput(session.runtime);
-                if (session.browser?.development || session.browser?.debuggable) return this.browser.showOutput();
+                if (session.browser) return this.browser.showOutput(session.runtime);
                 if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session);
             }),
             command('stop', session => this.stop(session)),

@@ -14,6 +14,8 @@ export class ReloadLog implements ProcessOutput {
 
     appendLine(value: string): void { this.append(value + '\n'); }
     reset(): void { this.recent = ''; }
+    show(): void { this.channel.show(true); }
+    dispose(): void { this.channel.dispose(); }
 
     tail(lines: number): string {
         return this.recent.replace(/(Authorization:\s*Bearer\s+)\S+/gi, '$1[redacted]')

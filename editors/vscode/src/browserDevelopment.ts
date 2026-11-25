@@ -48,7 +48,7 @@ export class BrowserDevelopment {
     private live?: ActivePage;
 
     constructor(readonly app: DevelopmentBrowserApp, private readonly connections: RuntimeConnections, private readonly history: ReloadHistory,
-        private readonly output: ReloadLog, private readonly publishMetadata: (metadata: ProjectMetadata) => void,
+        readonly output: ReloadLog, private readonly publishMetadata: (metadata: ProjectMetadata) => void,
         readonly appDebugger?: BrowserDebugger) {
         this.discoveryManifest = fileKey(path.resolve(Uri.parse(app.folder, true).fsPath, app.build.manifestPath));
         this.runtime = connections.beginBrowser({ folder: app.folder, profile: app.id, launched: true, development: true,
@@ -62,8 +62,6 @@ export class BrowserDevelopment {
         if (!this.running) this.status('Browser build queued');
         this.schedule(delay);
     }
-
-    recentOutput(lines: number): string { return this.output.tail(lines); }
 
     observe(uri: Uri): void {
         if (uri.scheme !== 'file' || this.lifetime.signal.aborted) return;
@@ -217,7 +215,7 @@ export class BrowserDevelopment {
         clearTimeout(this.timer);
         this.lifetime.abort();
         this.connections.removePlatform(this.runtime);
-        this.closing = this.finish();
+        this.closing = this.finish().finally(() => this.output.dispose());
         return this.closing;
     }
 
