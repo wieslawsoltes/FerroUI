@@ -153,6 +153,18 @@
         "icon": "$(debug-alt)"
       },
       {
+        "command": "ferroui.iosDevice.run",
+        "title": "Run iOS Device App",
+        "category": "FerroUI",
+        "icon": "$(device-mobile)"
+      },
+      {
+        "command": "ferroui.iosDevice.debug",
+        "title": "Run and Debug iOS Device App",
+        "category": "FerroUI",
+        "icon": "$(debug-alt)"
+      },
+      {
         "command": "ferroui.appSessions.mobile",
         "title": "Open Mobile App",
         "category": "FerroUI",
@@ -899,6 +911,14 @@
           "when": "isWorkspaceTrusted && ferroui.iosSimulatorHost"
         },
         {
+          "command": "ferroui.iosDevice.run",
+          "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
+        },
+        {
+          "command": "ferroui.iosDevice.debug",
+          "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
+        },
+        {
           "command": "ferroui.appSessions.mobile",
           "when": "isWorkspaceTrusted && ferroui.mobileAppProfiles"
         },
@@ -1420,7 +1440,7 @@
       "view/item/context": [
         {
           "command": "ferroui.appSessions.preview",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|android|browser)(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|ios-device|(simulator|android|browser)(-development)?(-debug)?)$/",
           "group": "inline@1"
         },
         {
@@ -1430,7 +1450,7 @@
         },
         {
           "command": "ferroui.appSessions.stop",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|(simulator|android|browser)(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|attached|ios-device|(simulator|android|browser)(-development)?(-debug)?)$/",
           "group": "inline@3"
         },
         {
@@ -1440,17 +1460,17 @@
         },
         {
           "command": "ferroui.appSessions.debug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|(simulator|android|browser)(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|ios-device|(simulator|android|browser)(-development)?-debug)$/",
           "group": "1_apps@2"
         },
         {
           "command": "ferroui.appSessions.detachDebug",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|(simulator|android|browser)(-development)?-debug)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|ios-device|(simulator|android|browser)(-development)?-debug)$/",
           "group": "1_apps@3"
         },
         {
           "command": "ferroui.appSessions.showOutput",
-          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|android|browser)(-development)?(-debug)?)$/",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|ios-device|(simulator|android|browser)(-development)?(-debug)?)$/",
           "group": "1_apps@4"
         },
         {
@@ -1794,6 +1814,28 @@
                 "type": "array",
                 "items": { "type": "string" },
                 "description": "Arguments passed to the app, such as --mcp and --mcp-input when the app supports them."
+              }
+            }
+          }
+        },
+        "ferroui.iosDevice.apps": {
+          "type": "array",
+          "default": [],
+          "scope": "resource",
+          "description": "Launch profiles for development-signed FerroUI apps on a paired iPhone or iPad.",
+          "items": {
+            "type": "object",
+            "required": ["id", "bundleId"],
+            "additionalProperties": false,
+            "properties": {
+              "id": { "type": "string", "description": "Unique profile identifier in this workspace folder." },
+              "bundleId": { "type": "string", "description": "Bundle identifier of the development app to launch." },
+              "label": { "type": "string", "description": "App name shown in the profile picker and App Sessions." },
+              "appPath": { "type": "string", "description": "Optional path to a development-signed iPhoneOS .app bundle to install before launch. Relative paths start at this workspace folder." },
+              "args": {
+                "type": "array",
+                "items": { "type": "string" },
+                "description": "App arguments that enable its stdio inspector and any supported input, such as --mcp-stdio and --mcp-input."
               }
             }
           }

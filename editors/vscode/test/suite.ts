@@ -14,7 +14,8 @@ import { verifyHostedPreview } from './hostedPreview';
 import { verifyLiveApp } from './liveApp';
 import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
-import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
+import { verifyIosAppMcp } from './iosAppMcp';
+import { verifyIosDeviceTransport } from './iosDeviceTransport';
 import { verifyManagedSimulator } from './iosManagedMcp';
 import { verifyAndroidMcp } from './androidMcp';
 import { verifyAndroidDevelopment } from './androidManagedMcp';
@@ -46,7 +47,11 @@ export async function run(): Promise<void> {
         const device = process.env.FERROUI_TEST_IOS_SIMULATOR;
         if (process.env.FERROUI_TEST_IOS_MANAGED_NATIVE) await verifyNativeMobileDevelopment('ios_simulator', device);
         else if (process.env.FERROUI_IOS_MANAGED_TEST) await verifyManagedSimulator(device);
-        else await verifyIosSimulatorMcp(device);
+        else await verifyIosAppMcp(device, 'simulator');
+        return;
+    }
+    if (process.env.FERROUI_TEST_IOS_DEVICE) {
+        await verifyIosAppMcp(process.env.FERROUI_TEST_IOS_DEVICE, 'ios-device');
         return;
     }
     if (process.env.FERROUI_TEST_ANDROID_DEVICE) {
@@ -85,6 +90,7 @@ export async function run(): Promise<void> {
     await verifyReloadWatchBoundary(vscode.workspace.workspaceFolders![0]);
     await verifyCargoBuildSlots();
     await verifyRuntimeClient();
+    await verifyIosDeviceTransport();
     await vscode.commands.executeCommand('ferroui.openLiveApp');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'FerroUI Live App')));
     const live = vscode.window.tabGroups.all.flatMap(group => group.tabs).find(tab => tab.label === 'FerroUI Live App');

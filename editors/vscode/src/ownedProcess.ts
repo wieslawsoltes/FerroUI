@@ -23,7 +23,7 @@ export class OwnedProcess {
     get pid(): number | undefined { return this.child.pid; }
     get hasExited(): boolean { return this.exited || this.child.exitCode !== null || this.child.signalCode !== null; }
 
-    stop(): Promise<void> {
+    stop(signal: 'SIGTERM' | 'SIGKILL' = 'SIGTERM'): Promise<void> {
         const stopped = this.closed.then(() => undefined, () => undefined);
         const pid = this.pid;
         if (this.exited || this.stopping || !pid) return stopped;
@@ -34,9 +34,11 @@ export class OwnedProcess {
             shutdown.on('exit', code => { if (code) this.child.kill(); });
             return stopped;
         }
-        this.signalGroup(pid, 'SIGTERM');
-        this.escalation = setTimeout(() => this.signalGroup(pid, 'SIGKILL'), 1500);
-        this.escalation.unref();
+        this.signalGroup(pid, signal);
+        if (signal === 'SIGTERM') {
+            this.escalation = setTimeout(() => this.signalGroup(pid, 'SIGKILL'), 1500);
+            this.escalation.unref();
+        }
         return stopped;
     }
 

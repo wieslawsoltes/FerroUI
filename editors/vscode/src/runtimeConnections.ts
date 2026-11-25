@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
 import { RuntimeClient, type RuntimeEndpoint } from './runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
-import type { AndroidRuntimeTarget, AppRuntime, BrowserRuntimeTarget, IosRuntimeTarget, PlatformRuntime, RuntimeKind, RuntimeTarget } from './runtimeTargets';
+import type { AndroidRuntimeTarget, AppRuntime, BrowserRuntimeTarget, IosDeviceRuntimeTarget, IosRuntimeTarget, PlatformRuntime, RuntimeKind, RuntimeTarget } from './runtimeTargets';
 
 export type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 
@@ -18,6 +18,7 @@ export interface RuntimeSummary {
     pid?: number;
     app_session?: string;
     simulator?: IosRuntimeTarget;
+    iosDevice?: IosDeviceRuntimeTarget;
     android?: AndroidRuntimeTarget;
     browser?: BrowserRuntimeTarget;
 }
@@ -66,7 +67,7 @@ export class RuntimeConnections implements vscode.Disposable {
             ...target, runtime, label, generation: connection?.generation ?? null, available: Boolean(connection),
             status: status ?? externalStatus(target), debuggerAttached: readDebuggerAttachment?.(connection?.generation),
             ...(target.kind === 'android' ? { pid: target.android.pid } : target.kind === 'browser' ? { pid: target.browser.pid }
-                : target.kind === 'simulator' ? { pid: target.simulator.pid } : {}),
+                : target.kind === 'simulator' ? { pid: target.simulator.pid } : target.kind === 'ios-device' ? { pid: target.iosDevice.pid } : {}),
         })));
     }
 
@@ -141,6 +142,7 @@ export class RuntimeConnections implements vscode.Disposable {
         const attachment = this.external.get(runtime);
         if (!attachment) throw new Error('Select an attached app session.');
         if (attachment.target.kind === 'simulator') throw new Error('Stop this iOS simulator app from App Sessions or with ferroui_ios_simulator_stop.');
+        if (attachment.target.kind === 'ios-device') throw new Error('Stop this iOS device app from App Sessions or with ferroui_ios_device_stop.');
         if (attachment.target.kind === 'android') throw new Error('Close this Android session from App Sessions or with ferroui_android_stop.');
         if (attachment.target.kind === 'browser') throw new Error('Close this browser session from App Sessions or with ferroui_browser_stop.');
         this.external.delete(runtime);
@@ -298,6 +300,7 @@ function externalStatus(target: ExternalKind): string {
     switch (target.kind) {
         case 'attached': return 'Attached application';
         case 'simulator': return target.simulator.system;
+        case 'ios-device': return target.iosDevice.system;
         case 'android': return target.android.emulator ? 'Android emulator' : 'Android device';
         case 'browser': return target.browser.launched ? 'Managed Chromium' : 'Attached Chromium tab';
     }

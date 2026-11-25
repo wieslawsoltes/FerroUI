@@ -44,6 +44,13 @@ fn spawn_request(
     });
 }
 pub fn stdio(client: Client, protocol_output: std::fs::File) -> io::Result<()> {
+    let launch = std::env::var("FERROUI_MCP_DEVICE_LAUNCH")
+        .ok()
+        .filter(|launch| launch.len() == 32 && launch.bytes().all(|byte| byte.is_ascii_hexdigit()));
+    if let Some(launch) = launch {
+        let receipt = serde_json::json!({ "launch": launch, "pid": std::process::id() });
+        let _ = writeln!(io::stderr().lock(), "FERROUI_MCP_DEVICE_V1={receipt}");
+    }
     let session = Arc::new(Session::default());
     let output = Arc::new(Mutex::new(protocol_output));
     let workers = Arc::new(AtomicUsize::new(0));

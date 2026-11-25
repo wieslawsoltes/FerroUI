@@ -25,6 +25,7 @@ import type { ResourceMove, ResourceMoveInput } from './resourceMove';
 import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorRun } from './iosSimulatorTargets';
+import type { IosAppRun } from './iosAppProfiles';
 import type { AndroidRequest } from './androidTargets';
 import type { BrowserRequest } from './browserTargets';
 import type { HostedDesign } from './hostedDesign';
@@ -258,6 +259,16 @@ export class AgentTools {
         }
         if (tool === 'ferroui_ios_simulator_rebuild') return this.appSessions.simulators.rebuild(args.runtime as AppRuntime);
         if (tool === 'ferroui_ios_simulator_output') return { output: this.appSessions.simulators.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
+        if (tool === 'ferroui_ios_device_targets') return this.appSessions.iosDevices.targets((input as { folder?: string }).folder, signal);
+        if (tool === 'ferroui_ios_device_run') return this.appSessions.iosDevices.open(input as IosAppRun, signal,
+            args.debug ? { name: args.debug_configuration } : undefined);
+        if (tool === 'ferroui_ios_device_debug') return this.appSessions.iosDevices.debug(args.runtime as AppRuntime,
+            args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
+        if (tool === 'ferroui_ios_device_output') return { output: this.appSessions.iosDevices.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
+        if (tool === 'ferroui_ios_device_stop') {
+            await this.appSessions.iosDevices.stop(args.runtime as AppRuntime);
+            return { stopped: true };
+        }
         if (tool === 'ferroui_android_targets') return this.appSessions.android.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_android_run' || tool === 'ferroui_android_attach') {
             const run = tool === 'ferroui_android_run';

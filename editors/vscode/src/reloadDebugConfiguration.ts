@@ -2,10 +2,21 @@ import * as vscode from 'vscode';
 import { managedProcessVariable } from './reloadDebugger';
 
 export const androidDebugPortVariable = '${command:ferroui.android.debugPort}';
+export const iosDeviceVariable = '${command:ferroui.iosDevice.id}';
+export const iosDeviceAttachCommands = [
+    `!device select ${iosDeviceVariable}`,
+    `!device process attach -p ${managedProcessVariable}`,
+];
 
 const targets = {
-    desktop: (config: vscode.DebugConfiguration) => JSON.stringify(config).includes(managedProcessVariable),
+    desktop: (config: vscode.DebugConfiguration) => {
+        const serialized = JSON.stringify(config);
+        return serialized.includes(managedProcessVariable) && !serialized.includes(iosDeviceVariable);
+    },
     simulator: (config: vscode.DebugConfiguration) => config.pid === managedProcessVariable || config.processId === managedProcessVariable,
+    iosDevice: (config: vscode.DebugConfiguration) => config.type === 'lldb-dap' && Array.isArray(config.attachCommands)
+        && config.attachCommands.length === iosDeviceAttachCommands.length
+        && iosDeviceAttachCommands.every((command, index) => config.attachCommands[index] === command),
     android: (config: vscode.DebugConfiguration) => config.type === 'lldb-dap' && config['gdb-remote-port'] === androidDebugPortVariable
         && config.pid === undefined && config.attachCommands === undefined && config.coreFile === undefined,
 };
@@ -21,6 +32,7 @@ export async function selectDebugConfiguration(folder: vscode.WorkspaceFolder,
         .filter(configuration => configuration?.request === 'attach' && targets[target](configuration));
     if (!configurations.length) throw new Error(target === 'android'
         ? `Add an LLDB DAP attach configuration with ${androidDebugPortVariable} as its gdb-remote-port.`
+        : target === 'iosDevice' ? 'Add an Xcode LLDB DAP configuration with the iOS device and process attach commands.'
         : `Add a Rust attach configuration with ${managedProcessVariable} as its process ID.`);
     if (name !== undefined) {
         const matches = configurations.filter(configuration => configuration.name === name);

@@ -4,6 +4,7 @@ import { BrowserAppCommands } from './browserAppCommands';
 import type { BrowserSessions } from './browserSessions';
 import { DeviceAppCommands } from './deviceAppCommands';
 import type { HotReload } from './hotReload';
+import type { IosDeviceSessions } from './iosDeviceSessions';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
 import { errorMessage } from './protocol';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
@@ -22,7 +23,7 @@ export class AppSessions implements vscode.Disposable {
     readonly mcp: RuntimeMcpActions;
 
     constructor(private readonly reload: HotReload, private readonly connections: RuntimeConnections,
-        private readonly panels: RuntimePanels, readonly simulators: IosSimulatorSessions, readonly android: AndroidSessions,
+        private readonly panels: RuntimePanels, readonly simulators: IosSimulatorSessions, readonly iosDevices: IosDeviceSessions, readonly android: AndroidSessions,
         readonly browser: BrowserSessions) {
         this.mcp = new RuntimeMcpActions(connections);
         const view = vscode.window.createTreeView<AppItem>('ferroui.appSessions', { treeDataProvider: {
@@ -54,7 +55,7 @@ export class AppSessions implements vscode.Disposable {
         this.subscriptions = [view, view.onDidChangeVisibility(({ visible }) => { if (visible) refresh(); }),
             reload.onDidChangeRuns(refresh), connections.onDidChange(refresh), connections.onDidChangeDebugger(() => this.changed.fire()),
             vscode.commands.registerCommand('ferroui.showAppSessions', () => vscode.commands.executeCommand('ferroui.appSessions.focus')),
-            new DeviceAppCommands(simulators, android, runtime => this.open(runtime)),
+            new DeviceAppCommands(simulators, iosDevices, android, runtime => this.open(runtime)),
             new BrowserAppCommands(browser, runtime => this.open(runtime)),
             command('preview', session => this.open(session.runtime)),
             managed('select'),
@@ -68,6 +69,7 @@ export class AppSessions implements vscode.Disposable {
             }),
             command('showOutput', session => {
                 if (session.simulator) return this.simulators.showOutput(session.runtime);
+                if (session.iosDevice) return this.iosDevices.showOutput(session.runtime);
                 if (session.android) return this.android.showOutput(session.runtime);
                 if (session.browser) return this.browser.showOutput(session.runtime);
                 if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.showOutput', session.app_session);
@@ -95,6 +97,7 @@ export class AppSessions implements vscode.Disposable {
                 const options = { interactive: !detach, detach };
                 if (session.browser) await this.browser.debug(session.runtime, session.generation, options);
                 else if (session.simulator) await this.simulators.debug(session.runtime, session.generation, options);
+                else if (session.iosDevice) await this.iosDevices.debug(session.runtime, session.generation, options);
                 else if (session.android) await this.android.debug(session.runtime, session.generation, options);
             }
         } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
@@ -103,6 +106,7 @@ export class AppSessions implements vscode.Disposable {
     private stop(session: RuntimeSummary) {
         if (session.app_session) return vscode.commands.executeCommand('ferroui.hotReload.stop', session.app_session);
         if (session.kind === 'simulator') return this.simulators.stop(session.runtime);
+        if (session.kind === 'ios-device') return this.iosDevices.stop(session.runtime);
         if (session.kind === 'android') return this.android.stop(session.runtime);
         if (session.kind === 'browser') return this.browser.stop(session.runtime);
         return vscode.commands.executeCommand('ferroui.mcp.detach', session.runtime);
@@ -124,7 +128,7 @@ export class AppSessions implements vscode.Disposable {
             || ((session.browser?.development || session.android?.development || session.simulator?.development) && session.status.includes(' failed'));
         const debuggerIcon = session.browser?.paused ? 'debug-pause' : session.debuggerAttached ? 'debug-alt' : undefined;
         const targetIcon = selected ? 'play-circle'
-            : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind];
+            : { attached: 'plug', simulator: 'device-mobile', 'ios-device': 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind];
         item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : debuggerIcon ?? targetIcon);
         if (session.simulator?.development) {
             item.contextValue = session.available ? 'app-session-simulator-development-debug' : 'app-session-simulator-development';

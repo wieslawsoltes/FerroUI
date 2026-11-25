@@ -302,6 +302,7 @@ Use the current session ID and generation for the target. These debugger actions
 | Managed Cargo or registered Rust patches | Read `ferroui_reload_status` with `app_session`. Call `ferroui_reload_control` with `action: "detach_debug"`, that `app_session`, and its `process_generation` as `expected_process_generation`. Use the process generation even for an app without an inspector. |
 | Chromium | Call `ferroui_browser_debug` with `action: "detach"`, the exact `runtime`, and the accepted `generation` as `expected_generation`. |
 | iOS simulator or Android | Use `action: "detach"` in `ferroui_ios_simulator_debug` or `ferroui_android_debug`, with the accepted device session and connection generation. |
+| iPhone or iPad | Call `ferroui_ios_device_debug` with `action: "detach"`, the exact `runtime`, and the accepted `generation` as `expected_generation`. |
 
 The debugger stops following future replacements after detach. Use `ferroui_app_sessions` to read the current `debuggerAttached` value. Read a fresh process or connection generation before attaching again after a rebuild. A managed desktop `attach_debug` call also accepts `expected_process_generation` to constrain attachment to that process. [App Sessions](runtime.md#run-several-app-sessions)
 
@@ -312,6 +313,14 @@ The debugger stops following future replacements after detach. Use `ferroui_app_
 3. Use that runtime ID with `ferroui_runtime_open`, `ferroui_runtime_tools`, and the checked runtime and source tools. The app’s own permissions still apply. For a source profile, use `ferroui_ios_simulator_rebuild` to queue deployment and `ferroui_ios_simulator_output` to read its log. Call `ferroui_reload_history` with the runtime as `app_session` for save outcomes. [Build simulator apps from source](runtime.md#build-and-redeploy-simulator-apps-from-source)
 4. Set `debug: true` on `ferroui_ios_simulator_run` to attach the Rust debugger after the first native frame. For a running app, call `ferroui_ios_simulator_debug` with `runtime` and `expected_generation`. Either call accepts `debug_configuration` for the exact `launch.json` name when there are several configurations. The debugger follows accepted source builds. Use `action: "detach"` with the accepted generation to keep the app running and end the attachment. [Debug Rust on an iOS simulator](runtime.md#debug-rust-on-an-ios-simulator)
 5. Call `ferroui_ios_simulator_stop` with the simulator runtime ID to stop the app and close its debugger. A new launch returns a new runtime identity.
+
+### Run an iOS device app with MCP
+
+1. Call `ferroui_ios_device_targets` in a trusted workspace on the Mac running Xcode. Use `folder` to select a workspace folder. Choose a device with `status: "ready"` and a profile’s `id` and `folder`.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_device_run` with `device`, `profile`, and `folder`. It returns an exact `runtime`, `generation`, and device PID after the recognized app launch and first native frame.
+3. Open that runtime with `ferroui_runtime_open`. The editor MCP server uses the app’s console to run `ferroui_runtime_tools`, `ferroui_runtime_query`, and `ferroui_runtime_call` for the same session. Input and property writes follow the app’s permission settings. Call `ferroui_ios_device_output` with the runtime and optional `lines` from 1 to 200 to read the session’s console.
+4. Set `debug: true` on the run call to attach Xcode LLDB, or call `ferroui_ios_device_debug` with the current runtime and `expected_generation`. Set `debug_configuration` to the attach configuration’s exact name when several are available. Supply `action: "detach"` to leave the app running after the debugger disconnects.
+5. Call `ferroui_ios_device_stop` with the runtime to stop the launched app and close its inspector. [Configure an iOS device app](runtime.md#run-an-app-on-an-iphone-or-ipad)
 
 ### Run or attach an Android app with MCP
 
@@ -578,7 +587,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
-| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run Android App**, **Run and Debug Android App**, **Attach to Android App** |
+| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run iOS Device App**, **Run and Debug iOS Device App**, **Run Android App**, **Run and Debug Android App**, **Attach to Android App** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
 
 ## Configure the workspace
@@ -593,6 +602,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.hostedPreview.assembly` | Empty | Name the application’s markup assembly when its name differs from the selected Cargo package. |
 | `ferroui.hotReload.targets` | `[]` | Offer chosen Cargo binaries and set their package, manifest, features, and arguments. An empty list discovers targets from Cargo. |
 | `ferroui.iosSimulator.apps` | `[]` | Set launch profiles for iOS simulator bundles with an opted-in app inspector. A profile can install the built app before launch. |
+| `ferroui.iosDevice.apps` | `[]` | Set launch profiles for development-signed iPhoneOS apps with a stdio inspector. An optional `appPath` installs the bundle on the selected iPhone or iPad. |
 | `ferroui.android.adbPath` | Empty | Select the Android Debug Bridge executable on the workspace host. |
 | `ferroui.android.apps` | `[]` | Set profiles for debuggable Android apps with an opted-in Live App inspector. A profile can install its APK before launching. |
 | `ferroui.browser.executablePath` | Empty | Select a custom Chrome or Chromium executable on the workspace host. |

@@ -19,6 +19,7 @@ import type { HandlerRequest } from './eventHandlerProtocol';
 import { HotReload } from './hotReload';
 import { HostedDesign } from './hostedDesign';
 import { IosSimulatorSessions } from './iosSimulatorSessions';
+import { IosDeviceSessions } from './iosDeviceSessions';
 import { FerroMcpProvider } from './mcpProvider';
 import { ProjectAssets } from './projectAssets';
 import { ProjectInventory } from './projectInventory';
@@ -83,15 +84,16 @@ export function activate(context: vscode.ExtensionContext) {
     const projectView = new ProjectView(inventory, projects, reload, projectSetup);
     const runtimes = new RuntimeConnections(reload);
     const simulatorSessions = new IosSimulatorSessions(runtimes, reload.history);
+    const iosDeviceSessions = new IosDeviceSessions(runtimes);
     const androidSessions = new AndroidSessions(runtimes, reload.history);
     const browserSessions = new BrowserSessions(runtimes, reload.history, publish);
     stopProcesses = async () => {
-        await Promise.all([reload.stop(), simulatorSessions.shutdown(), androidSessions.shutdown(), browserSessions.shutdown(),
+        await Promise.all([reload.stop(), simulatorSessions.shutdown(), iosDeviceSessions.shutdown(), androidSessions.shutdown(), browserSessions.shutdown(),
             hosted.dispose(), schemaBuild.dispose(), scenarios.shutdown(), collaboration.shutdown()]);
     };
     const runtimeSource = new RuntimeSourceEditor(designer, reload);
     const liveApp = new RuntimePanels(context, runtimes, reload, runtimeSource);
-    const appSessions = new AppSessions(reload, runtimes, liveApp, simulatorSessions, androidSessions, browserSessions);
+    const appSessions = new AppSessions(reload, runtimes, liveApp, simulatorSessions, iosDeviceSessions, androidSessions, browserSessions);
     const runtimeProfiles = new RuntimeProfiles(runtimes, runtimeSource);
     const diagnostics = new DiagnosticsView(reload.history, runtimes, runtimeSource, designer, runtimeProfiles);
     const runtimeTools = new RuntimeSourceTools(runtimes, runtimeSource);
@@ -104,7 +106,7 @@ export function activate(context: vscode.ExtensionContext) {
     context.subscriptions.push(
         designHandoff,
         projectView, diagnostics, runtimeProfiles, projects, schemaBuild, inventory, designTokens, scaffolds, projectSetup, assets, assetMoves, server, rsx, scenarioTesting, scenarioReviews, scenarios, designer, collaboration, extraction, fileMoves, propertyRename, typeRename, resourceRename, resourceMove, hosted, stages, liveApp, appSessions, reload, runtimes, mcp, languageOutput, previewOutput,
-        simulatorSessions, androidSessions, browserSessions, reload.onDidBuild(publish),
+        simulatorSessions, iosDeviceSessions, androidSessions, browserSessions, reload.onDidBuild(publish),
         vscode.workspace.onDidOpenTextDocument(startForXaml),
         vscode.workspace.onDidChangeConfiguration(event => {
             if ((event.affectsConfiguration('ferroui.languageServer.path') || event.affectsConfiguration('ferroui.types'))

@@ -257,6 +257,68 @@ Add an attach configuration to the app’s workspace folder in `.vscode/launch.j
 
 [Attach a simulator debugger from an agent](reference.md#run-an-ios-simulator-app-with-mcp)
 
+### Run an app on an iPhone or iPad
+
+Open a trusted VS Code workspace on the Mac running Xcode. Pair the iPhone or iPad in **Xcode → Window → Devices and Simulators**, enable Developer Mode, and connect the device. Use a development-signed iPhoneOS build with the FerroUI MCP inspector set to `ferroui_mcp::Transport::Stdio`. The Contact Review example enables this transport with `--mcp-stdio` and permits Live App input when you also supply `--mcp-input`. [Xcode command-line tools](https://developer.apple.com/documentation/xcode/xcode-command-line-tool-reference) · [Developer Mode](https://developer.apple.com/documentation/xcode/enabling-developer-mode-on-a-device)
+
+To assemble the Contact Review bundle, run the following from the FerroUI checkout. Replace the example identifier with one in your development provisioning profile.
+
+```sh
+rustup target add aarch64-apple-ios
+scripts/ios/bundle.sh --target aarch64-apple-ios --package ferroui-ios \
+  --example simulator_inspector --no-default-features --features quartz-metal,inspector-example \
+  --bundle-id com.example.ContactReview --out build/device
+```
+
+Sign the resulting bundle with your development certificate, profile, and entitlements. Keep the matching sources and symbols to use Rust breakpoints and reveal controls in Live App. [iOS bundle packaging](../../porting/ios-platform.md#5-packaging-without-an-xcode-project)
+
+Add a profile to the workspace folder’s `.vscode/settings.json`. Match the bundle identifier in your signed build.
+
+```json
+{
+  "ferroui.iosDevice.apps": [
+    {
+      "id": "contact-review-device",
+      "label": "Contact Review",
+      "bundleId": "com.example.ContactReview",
+      "appPath": "build/device/simulator_inspector.app",
+      "args": ["--mcp-stdio", "--mcp-input"]
+    }
+  ]
+}
+```
+
+FerroUI installs the bundle on the chosen device when the profile includes `appPath`. Omit `appPath` to use the development app already installed on the device. Quit any running copy before launching so Xcode can connect the app’s console.
+
+1. Choose **Open Mobile App** in **App Sessions**, then **Run iOS Device App**. Select the profile and a connected device. Live App opens after the app acknowledges the launch and returns a native frame.
+2. Pick a window, inspect the visual tree, or switch to **Interact** to send input when the app permits it. A session belongs to the chosen device and bundle. **Show App Output** opens that session’s console.
+3. Choose **Stop or Disconnect This App** to stop the app started by that session. To deploy a new build, stop the session, replace the signed bundle, and run the profile again.
+
+#### Debug Rust on an iPhone or iPad
+
+Build with debug symbols and keep the symbols for the exact signed app. Install **LLDB DAP** in the VS Code workspace host. Use the Xcode adapter returned by `xcrun --find lldb-dap` if you set `lldb-dap.executable-path`. [LLDB DAP setup](https://lldb.llvm.org/use/lldbdap.html)
+
+Add an attach configuration to the app workspace folder’s `.vscode/launch.json`. FerroUI fills in the selected device and process after Live App accepts the first frame.
+
+```json
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "Attach to Contact Review on Device",
+      "type": "lldb-dap",
+      "request": "attach",
+      "attachCommands": [
+        "!device select ${command:ferroui.iosDevice.id}",
+        "!device process attach -p ${command:ferroui.hotReload.processId}"
+      ]
+    }
+  ]
+}
+```
+
+The `!` prefix stops the LLDB command sequence when device selection fails. Choose **Run and Debug iOS Device App** or use **Attach Debugger to This App** on an existing App Sessions row. **Stop Debugging** or **Detach Debugger from This App** keeps the app and Live App running. If an attachment fails, check the device’s connection, the app’s development provisioning, and that VS Code is using Xcode’s adapter. If a breakpoint uses a different build machine’s paths, configure LLDB DAP’s `sourceMap`. [iOS device MCP tools](reference.md#run-an-ios-device-app-with-mcp)
+
 ### Run or attach an Android app
 
 Install Android SDK Platform Tools on the workspace host. Start an emulator or authorize a connected device in ADB. Use a debuggable APK that enables the FerroUI Live App inspector. To try Service Review on an ARM64 device from the FerroUI checkout, install the SDK and NDK for the Android build and run:

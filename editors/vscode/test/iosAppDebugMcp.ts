@@ -6,9 +6,12 @@ import type { McpFixture } from './mcpFixture';
 import { trackNativeDebugger, waitForDebuggerAttachment } from './nativeDebugFixture';
 import { until } from './wait';
 
-export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSummary, document: vscode.TextDocument, button: number) {
+export async function verifyIosAppDebug(mcp: McpFixture, app: RuntimeSummary, document: vscode.TextDocument, button: number) {
     assert.ok(vscode.extensions.getExtension('llvm-vs-code-extensions.lldb-dap'), 'Install LLVM LLDB DAP in the test extensions directory.');
     const { runtime, generation } = app;
+    const target = app.iosDevice ?? app.simulator;
+    assert.ok(target);
+    const tool = app.iosDevice ? 'ferroui_ios_device' : 'ferroui_ios_simulator';
     const callback = '*reviewed += 1';
     const offset = document.getText().indexOf(callback);
     assert.ok(offset >= 0, 'Find the Contact Review callback.');
@@ -17,7 +20,11 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
     const tracker = trackNativeDebugger('Attach to Contact Review');
     const acceptSession = async (pid: number, previous?: string) => {
         const session = await tracker.accept(previous);
-        assert.equal(session.configuration.pid, pid, 'LLDB attaches to the process verified by FerroUI.');
+        if (app.iosDevice) {
+            assert.deepEqual(session.configuration.attachCommands, [`!device select ${target.device}`, `!device process attach -p ${pid}`]);
+        } else {
+            assert.equal(session.configuration.pid, pid, 'LLDB attaches to the process verified by FerroUI.');
+        }
         return session;
     };
     const readCount = async () => mcp.content<{ result: { text: string }[] }>(await mcp.invoke('ferroui_runtime_query', {
@@ -26,7 +33,7 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
     try {
         assert.equal(app.debuggerAttached, false);
         vscode.debug.addBreakpoints([point]);
-        const debug = mcp.content<{ pid: number; generation: number; attached: boolean }>(await mcp.invoke('ferroui_ios_simulator_debug', {
+        const debug = mcp.content<{ pid: number; generation: number; attached: boolean }>(await mcp.invoke(`${tool}_debug`, {
             runtime, expected_generation: generation, debug_configuration: 'Attach to Contact Review',
         }));
         assert.ok(debug.attached && debug.pid > 0);
@@ -55,15 +62,14 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         await vscode.debug.stopDebugging(reopened);
         await until(() => !tracker.sessions.has(reopened.id));
         await waitForDebuggerAttachment(mcp, app, false);
-        assert.ok(app.simulator);
-        const requested = mcp.content<RuntimeSummary>(await mcp.invoke('ferroui_ios_simulator_run', {
-            device: app.simulator.device, profile: app.simulator.profile, debug: true,
+        const requested = mcp.content<RuntimeSummary>(await mcp.invoke(`${tool}_run`, {
+            device: target.device, profile: target.profile, debug: true,
         }));
         assert.equal(requested.runtime, runtime);
         assert.equal(requested.generation, generation);
         await acceptSession(debug.pid, reopened.id);
         await waitForDebuggerAttachment(mcp, app, true);
-        console.log('iOS simulator Rust breakpoint, exact debugger attachment state, and same-process VS Code and MCP Run and Debug passed');
+        console.log(`iOS ${app.kind} Rust breakpoint, exact debugger attachment state, and same-process VS Code and MCP Run and Debug passed`);
     } finally {
         vscode.debug.removeBreakpoints([point]);
         await tracker.close();

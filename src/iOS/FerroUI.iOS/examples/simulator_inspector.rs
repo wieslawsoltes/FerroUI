@@ -1,4 +1,4 @@
-//! An opted-in Live App and source inspection example for an iOS simulator.
+//! An opted-in Live App and source inspection example for iOS.
 
 #[cfg(not(target_os = "ios"))]
 fn main() {
@@ -71,14 +71,18 @@ mod app {
             }
             Self::parent_on_framework_initialization_completed(this);
 
-            if std::env::args().any(|argument| argument == "--mcp") {
-                let options = ferroui_mcp::Options {
+            let stdio = std::env::args().any(|argument| argument == "--mcp-stdio");
+            if stdio || std::env::args().any(|argument| argument == "--mcp") {
+                let mut options = ferroui_mcp::Options {
                     permissions: ferroui_mcp::Permissions {
                         allow_input: std::env::args().any(|argument| argument == "--mcp-input"),
                         ..Default::default()
                     },
                     ..Default::default()
                 };
+                if stdio {
+                    options.transport = ferroui_mcp::Transport::Stdio;
+                }
                 match ferroui_mcp::serve(options) {
                     Ok(inspector) => {
                         this.inspector.replace(Some(inspector));

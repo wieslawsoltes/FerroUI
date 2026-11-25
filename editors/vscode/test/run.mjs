@@ -19,7 +19,8 @@ const profile = join(sandbox, 'profile');
 const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../target/debug'));
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
-const simulatorDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
+const iosDevice = process.env.FERROUI_TEST_IOS_DEVICE;
+const iosDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
 const simulatorManaged = process.env.FERROUI_TEST_IOS_MANAGED === '1';
 const simulatorNative = process.env.FERROUI_TEST_IOS_MANAGED === 'native';
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
@@ -34,12 +35,12 @@ try {
     let target = workspace;
     let targetSettings = {};
     let targetEnv;
-    if (simulatorDebugExtensions && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for simulator debugger acceptance.');
+    if (iosDebugExtensions && !simulator && !iosDevice) throw new Error('Select an iOS simulator or test device for debugger acceptance.');
     if ((simulatorManaged || simulatorNative) && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for the source-build regression.');
-    if (simulatorNative && !simulatorDebugExtensions) throw new Error('Set FERROUI_TEST_IOS_DEBUG_EXTENSIONS for native iOS source builds.');
+    if (simulatorNative && !iosDebugExtensions) throw new Error('Set FERROUI_TEST_IOS_DEBUG_EXTENSIONS for native iOS source builds.');
     if (androidDebugExtensions && !android) throw new Error('Set FERROUI_TEST_ANDROID_DEVICE for Android debugger acceptance.');
     if (androidNative && !androidDebugExtensions) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS for native Android source builds.');
-    if ([simulator, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
+    if ([simulator, iosDevice, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
         throw new Error('Choose one platform acceptance fixture per run.');
     }
     if (simulator) {
@@ -65,12 +66,18 @@ try {
                 appPath: resolve(appPath), args: ['--mcp', '--mcp-input'],
             }] };
         }
-        if (simulatorDebugExtensions) {
-            targetSettings['lldb-dap.executable-path'] = execFileSync('/usr/bin/xcrun', ['--find', 'lldb-dap'], { encoding: 'utf8' }).trim();
-            targetSettings.launch = { configurations: [{ name: 'Attach to Contact Review', type: 'lldb-dap', request: 'attach',
-                pid: '${command:ferroui.hotReload.processId}' }] };
-            targetEnv.FERROUI_TEST_IOS_DEBUG = '1';
-        }
+    } else if (iosDevice) {
+        if (process.platform !== 'darwin') throw new Error('The iOS device tests require a workspace Mac with Xcode.');
+        const app = process.env.FERROUI_TEST_IOS_DEVICE_APP;
+        if (!app) throw new Error('Set FERROUI_TEST_IOS_DEVICE_APP to the development-signed Contact Review test bundle.');
+        const appPath = resolve(app);
+        const bundleId = execFileSync('/usr/bin/plutil', ['-extract', 'CFBundleIdentifier', 'raw', '-o', '-', join(appPath, 'Info.plist')],
+            { encoding: 'utf8' }).trim();
+        target = resolve(process.env.FERROUI_TEST_IOS_DEVICE_SOURCE ?? join(extension, '../..'));
+        targetSettings = { 'ferroui.iosDevice.apps': [{
+            id: 'contact-review', label: 'Contact Review', bundleId, appPath, args: ['--mcp-stdio', '--mcp-input'],
+        }] };
+        targetEnv = { FERROUI_TEST_IOS_DEVICE: iosDevice };
     } else if (androidManaged) {
         const fixture = await androidManagedWorkspace(workspace, sandbox);
         targetSettings = fixture.settings;
@@ -139,8 +146,17 @@ try {
         await writeFile(join(workspace, 'Assets', 'Preview Image.png'), Buffer.from(
             'iVBORw0KGgoAAAANSUhEUgAAAAQAAAAECAIAAAAmkwkpAAAAE0lEQVR4nGNMjb3OAANMcBZeDgBQdAGhOsFZtwAAAABJRU5ErkJggg==', 'base64'));
     }
+    if (iosDebugExtensions) {
+        targetSettings['lldb-dap.executable-path'] = execFileSync('/usr/bin/xcrun', ['--find', 'lldb-dap'], { encoding: 'utf8' }).trim();
+        const processId = '${command:ferroui.hotReload.processId}';
+        const processTarget = iosDevice
+            ? { attachCommands: ['!device select ${command:ferroui.iosDevice.id}', `!device process attach -p ${processId}`] }
+            : { pid: processId };
+        targetSettings.launch = { configurations: [{ name: 'Attach to Contact Review', type: 'lldb-dap', request: 'attach', ...processTarget }] };
+        targetEnv.FERROUI_TEST_IOS_DEBUG = '1';
+    }
     await mkdir(join(profile, 'User'), { recursive: true });
-    const extensions = simulatorDebugExtensions ?? androidDebugExtensions ?? browserDwarfExtensions;
+    const extensions = iosDebugExtensions ?? androidDebugExtensions ?? browserDwarfExtensions;
     await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
         ...targetSettings,
         'ferroui.languageServer.path': executable('ferroui-xaml-lsp'),
