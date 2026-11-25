@@ -42,7 +42,9 @@ export function trackNativeDebugger(configuration: string) {
         },
         async breakpoint(session: vscode.DebugSession) {
             await until(() => hits.has(session.id));
-            return hits.get(session.id)!;
+            const thread = hits.get(session.id)!;
+            hits.delete(session.id);
+            return thread;
         },
         async close() {
             await Promise.allSettled([...sessions.values()].map(session => vscode.debug.stopDebugging(session)));

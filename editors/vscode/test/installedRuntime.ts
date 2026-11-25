@@ -6,6 +6,7 @@ import { revision } from '../src/reloadProcess';
 import { RuntimeClient } from '../src/runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from '../src/runtimeMcp';
 import type { RuntimeNode, RuntimeSource } from '../src/runtimeProtocol';
+import { installedRuntimeDebug } from './installedRuntimeDebug';
 import { until } from './wait';
 
 export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder): Promise<void> {
@@ -14,6 +15,9 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
     const fixture = vscode.Uri.joinPath(workspace.uri, 'installed-runtime');
     const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(fixture, 'main.rs'));
     const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(fixture, 'Status.xaml'));
+    const debugName = process.env.FERROUI_TEST_RUNTIME_DEBUG;
+    const debug = debugName ? installedRuntimeDebug(rust, debugName) : undefined;
+    let tabs: vscode.Disposable | undefined;
 
     const clients: RuntimeClient[] = [];
     async function inspector(pid: number) {
@@ -25,17 +29,21 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
     }
     try {
         await vscode.commands.executeCommand('ferroui.showAppSessions');
-        await vscode.commands.executeCommand('ferroui.hotReload.start');
+        await vscode.commands.executeCommand(debug ? 'ferroui.hotReload.runAndDebug' : 'ferroui.hotReload.start');
         const pid = await acceptedProcess();
+        await debug?.accept(pid);
         const app = await inspector(pid);
         await expectText(app, 'RsxStatus', 'Initial RSX status');
         await expectText(app, 'XamlStatus', 'Initial XAML status');
         const initialFrame = await screenshot(app);
         await vscode.commands.executeCommand('ferroui.openLiveApp');
         await until(() => Boolean(liveTab()));
-        const tab = liveTab();
-        const [approve] = await app.call<RuntimeNode[]>('find_elements', { name: 'ReviewRecord' });
-        await app.call('click', { node_id: approve.node_id });
+        const tabChanges: string[] = [];
+        tabs = vscode.window.tabGroups.onDidChangeTabs(({ opened, closed }) => {
+            if (opened.some(isLiveTab)) tabChanges.push('opened');
+            if (closed.some(isLiveTab)) tabChanges.push('closed');
+        });
+        await approve(app);
         await expectText(app, 'SavedCount', 'Reviews saved: 1');
 
         const markup = xaml.getText();
@@ -55,6 +63,12 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         assert.notEqual(await screenshot(app), initialFrame);
 
         const liveRust = rust.getText();
+        await save(rust, liveRust + '\ncompile_error!("Rejected installed release build");\n');
+        await until(async () => Number(await readFile(path.join(receipts, 'failed-build'), 'utf8').catch(() => '')) > 0, 90_000);
+        assert.equal(await runningPid(), pid);
+        await expectText(app, 'BuildStatus', 'Original build');
+        debug?.attached();
+
         await save(rust, liveRust.replace('Original build', 'Rejected startup'));
         await until(async () => {
             const rejected = Number(await readFile(path.join(receipts, 'rejected-startup'), 'utf8').catch(() => ''));
@@ -62,32 +76,54 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         }, 90_000);
         assert.equal(await runningPid(), pid);
         await expectText(app, 'BuildStatus', 'Original build');
+        await approve(app);
+        await expectText(app, 'SavedCount', 'Reviews saved: 2');
         await save(rust, liveRust.replace('Original build', 'Accepted replacement'));
         const replacement = await acceptedProcess(pid);
+        await debug?.accept(replacement);
         const updated = await inspector(replacement);
         await expectText(updated, 'BuildStatus', 'Accepted replacement');
         await expectText(updated, 'RsxStatus', 'Approved RSX status');
         await expectText(updated, 'XamlStatus', 'Approved XAML status');
-        await expectText(updated, 'SavedCount', 'Reviews saved: 1');
+        await expectText(updated, 'SavedCount', 'Reviews saved: 2');
         await screenshot(updated);
         const [node] = await updated.call<RuntimeNode[]>('find_elements', { name: 'RsxStatus' });
         const source = await updated.call<RuntimeSource>('get_source', { node_id: node.node_id });
         assert.equal(source.language, 'rust');
         assert.equal(source.revision, revision(Buffer.from(rust.getText())), 'The replacement inspector maps the saved RSX revision');
         await until(() => !processExists(pid));
-        assert.ok(liveTab() === tab, 'Live App keeps its editor through the accepted replacement');
-        console.log('Installed Live App passed in-place XAML and RSX saves, rejected edits and startup, and state restoration after rebuild.');
+        if (debug) {
+            await approve(updated);
+            await debug.detach();
+            await expectText(updated, 'SavedCount', 'Reviews saved: 3');
+            assert.equal(await runningPid(), replacement);
+            console.log('Installed LLDB verified Rust breakpoints, retained failed candidates, followed the new PID and detached from the live app.');
+        }
+        assert.ok(liveTab());
+        assert.deepEqual(tabChanges, [], 'Live App stays open through the accepted replacement');
+        console.log('Installed Live App passed in-place XAML and RSX saves, rejected edits, failed compilation and startup, and state restoration after rebuild.');
     } finally {
+        tabs?.dispose();
+        await debug?.close();
         clients.forEach(client => client.dispose());
         await vscode.commands.executeCommand('ferroui.hotReload.stopAll');
         const tab = liveTab();
         if (tab) await vscode.window.tabGroups.close(tab);
     }
+
+    async function approve(app: RuntimeClient) {
+        const [button] = await app.call<RuntimeNode[]>('find_elements', { name: 'ReviewRecord' });
+        const click = () => app.call('click', { node_id: button.node_id });
+        if (debug) await debug.click(click);
+        else await click();
+    }
 }
 
 function liveTab() {
-    return vscode.window.tabGroups.all.flatMap(group => group.tabs).find(tab => tab.label === 'FerroUI Live App');
+    return vscode.window.tabGroups.all.flatMap(group => group.tabs).find(isLiveTab);
 }
+
+function isLiveTab(tab: vscode.Tab): boolean { return tab.label === 'FerroUI Live App'; }
 
 function processExists(pid: number): boolean {
     try { process.kill(pid, 0); return true; }

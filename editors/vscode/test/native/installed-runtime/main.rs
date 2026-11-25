@@ -3,7 +3,11 @@ mod xaml;
 use ferroui_base::Ref;
 use ferroui_controls::{ContentControl, Window};
 use ferroui_view::prelude::*;
-use std::{cell::RefCell, path::PathBuf, rc::Rc};
+use std::{
+    cell::RefCell,
+    path::{Path, PathBuf},
+    rc::Rc,
+};
 
 const BUILD_LABEL: &str = "Original build";
 
@@ -17,6 +21,28 @@ fn main() {
         )
         .unwrap();
         std::process::exit(1);
+    }
+    #[cfg(target_os = "linux")]
+    if std::env::var_os("FERROUI_TEST_RUNTIME_DEBUG").is_some() {
+        // SAFETY: This test app grants ptrace access to its owning VS Code host and
+        // its debugger children. The zero arguments are unused by PR_SET_PTRACER.
+        let result = unsafe {
+            libc::prctl(
+                libc::PR_SET_PTRACER,
+                libc::getppid() as libc::c_ulong,
+                0 as libc::c_ulong,
+                0 as libc::c_ulong,
+                0 as libc::c_ulong,
+            )
+        };
+        if result == -1 {
+            let error = std::io::Error::last_os_error();
+            assert_eq!(
+                error.raw_os_error(),
+                Some(libc::EINVAL),
+                "scope Linux debugger attachment: {error}"
+            );
+        }
     }
     let state = receipts.join("review-count");
     let host = Rc::new(RefCell::new(None));
@@ -57,11 +83,16 @@ fn Review(content: Ref<ContentControl>, state: PathBuf) -> Element {
             TextBlock { name: "SavedCount", text: format!("Reviews saved: {}", count.get()) }
             Button { name: "ReviewRecord", on_click: move |_| {
                 let next = count.get_untracked() + 1;
-                std::fs::write(&state, next.to_string()).expect("save the review count");
+                save_review(&state, next);
                 count.set(next);
             }, "Approve record" }
         }
     }
+}
+
+#[inline(never)]
+fn save_review(state: &Path, count: u32) {
+    std::fs::write(state, count.to_string()).expect("save the review count");
 }
 
 fn inspect(window: &Ref<Window>, receipts: &std::path::Path) {
