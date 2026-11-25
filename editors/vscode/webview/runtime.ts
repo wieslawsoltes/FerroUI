@@ -13,6 +13,7 @@ const windowChoice = element<HTMLSelectElement>('runtime-window');
 const hierarchy = element<HTMLSelectElement>('runtime-hierarchy');
 const detail = element<HTMLSelectElement>('runtime-detail');
 const refresh = element<HTMLButtonElement>('runtime-refresh');
+const status = element('runtime-status');
 const tree = element('runtime-tree');
 const filter = element<HTMLInputElement>('runtime-filter');
 const propertyFilter = element<HTMLInputElement>('runtime-property-filter');
@@ -212,7 +213,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         windowChoice.disabled = debuggerPaused || windows.length < 2;
         refresh.disabled = hierarchy.disabled = debuggerPaused;
         detail.disabled = debuggerPaused || !frame;
-        element('runtime-status').textContent = message.status;
+        if (status.textContent !== message.status) status.textContent = message.status;
         if (currentTarget !== message.target || currentWindow !== message.root || currentGeneration !== message.generation) {
             if (currentTarget !== message.target) main.hidden = true;
             currentTarget = message.target;
