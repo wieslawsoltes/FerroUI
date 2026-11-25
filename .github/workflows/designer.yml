@@ -196,13 +196,26 @@ jobs:
           fi
           test -x "$adapter"
           printf 'FERROUI_TEST_INSTALLED_LLDB_DAP=%s\n' "$adapter" >> "$GITHUB_ENV"
-      - name: Select the Windows LLDB adapter
+      - name: Install matching LLVM tools for Windows
         if: runner.os == 'Windows'
         shell: pwsh
         run: |
-          $command = Get-Command lldb-dap.exe -ErrorAction SilentlyContinue
-          $adapter = if ($command) { $command.Source } else { Join-Path $env:ProgramFiles 'LLVM/bin/lldb-dap.exe' }
-          if (!(Test-Path -LiteralPath $adapter -PathType Leaf)) { throw "Install the LLVM lldb-dap executable." }
+          # The current MSVC standard library requires Clang 22 or newer for ANGLE's bindings.
+          $version = '23.1.6'
+          $installer = Join-Path $env:RUNNER_TEMP "LLVM-$version-win64.msi"
+          Invoke-WebRequest "https://github.com/llvm/llvm-project/releases/download/llvmorg-$version/LLVM-$version-win64.msi" -OutFile $installer
+          $hash = (Get-FileHash -LiteralPath $installer -Algorithm SHA256).Hash
+          if ($hash -ne '81f7eb520ca698eb2d5cd8bc4b8f24f7add9ed66ed40a6f722a6e6f060737c00') { throw 'Unexpected LLVM installer hash.' }
+          $install = Start-Process msiexec.exe -ArgumentList '/i', "`"$installer`"", '/qn', '/norestart' -PassThru -Wait
+          if ($install.ExitCode -notin 0, 3010) { throw "LLVM installation failed with exit code $($install.ExitCode)." }
+          Remove-Item -LiteralPath $installer
+          $llvm = Join-Path $env:ProgramFiles 'LLVM/bin'
+          $adapter = Join-Path $llvm 'lldb-dap.exe'
+          if (!(Test-Path (Join-Path $llvm 'libclang.dll')) -or !(Test-Path $adapter)) { throw 'The LLVM install is missing its native tools.' }
+          $compiler = & (Join-Path $llvm 'clang.exe') --version | Select-Object -First 1
+          if ($compiler -notlike "*clang version $version *") { throw "Unexpected clang version: $compiler" }
+          Write-Host $compiler
+          "LIBCLANG_PATH=$llvm" >> $env:GITHUB_ENV
           "FERROUI_TEST_INSTALLED_LLDB_DAP=$adapter" >> $env:GITHUB_ENV
       - name: Compile the release helpers for the workspace host
         run: cargo build --locked --profile dist-unwind -p ferroui-designer-language -p ferroui-designer-preview
