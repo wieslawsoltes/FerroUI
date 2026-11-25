@@ -18,7 +18,7 @@ import { verifyIosSimulatorMcp } from './iosSimulatorMcp';
 import { verifyManagedSimulator } from './iosManagedMcp';
 import { verifyAndroidMcp } from './androidMcp';
 import { verifyAndroidDevelopment } from './androidManagedMcp';
-import { verifyNativeAndroidDevelopment } from './androidNativeDevelopmentMcp';
+import { verifyNativeMobileDevelopment } from './mobileNativeMcp';
 import { verifyBrowserMcp } from './browserMcp';
 import { verifyBrowserReload } from './browserReloadMcp';
 import { verifyBrowserBuildTarget } from './browserBuildTarget';
@@ -42,13 +42,15 @@ export async function run(): Promise<void> {
     assert.ok(extension, 'FerroUI extension is installed in the Extension Development Host');
     const { designer, runtimeSource } = await extension.activate();
     if (process.env.FERROUI_TEST_IOS_SIMULATOR) {
-        if (process.env.FERROUI_IOS_MANAGED_TEST) await verifyManagedSimulator(process.env.FERROUI_TEST_IOS_SIMULATOR);
-        else await verifyIosSimulatorMcp(process.env.FERROUI_TEST_IOS_SIMULATOR);
+        const device = process.env.FERROUI_TEST_IOS_SIMULATOR;
+        if (process.env.FERROUI_TEST_IOS_MANAGED_NATIVE) await verifyNativeMobileDevelopment('ios_simulator', device);
+        else if (process.env.FERROUI_IOS_MANAGED_TEST) await verifyManagedSimulator(device);
+        else await verifyIosSimulatorMcp(device);
         return;
     }
     if (process.env.FERROUI_TEST_ANDROID_DEVICE) {
         const device = process.env.FERROUI_TEST_ANDROID_DEVICE;
-        if (process.env.FERROUI_TEST_ANDROID_MANAGED_NATIVE) await verifyNativeAndroidDevelopment(device);
+        if (process.env.FERROUI_TEST_ANDROID_MANAGED_NATIVE) await verifyNativeMobileDevelopment('android', device);
         else await verifyAndroidMcp(device);
         return;
     }

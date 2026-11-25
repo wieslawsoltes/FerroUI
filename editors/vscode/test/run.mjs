@@ -10,6 +10,7 @@ import { testVSCodeExecutable } from './vscodeDownload.mjs';
 import { browserBuildWorkspace } from './browserBuildWorkspace.mjs';
 import { browserDebugWorkspace } from './browserDebugWorkspace.mjs';
 import { iosManagedWorkspace } from './iosManagedWorkspace.mjs';
+import { iosNativeWorkspace } from './iosNativeWorkspace.mjs';
 
 const extension = fileURLToPath(new URL('../', import.meta.url));
 const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-vscode-'));
@@ -20,6 +21,7 @@ const executable = name => join(bin, name + (process.platform === 'win32' ? '.ex
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const simulatorDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
 const simulatorManaged = process.env.FERROUI_TEST_IOS_MANAGED === '1';
+const simulatorNative = process.env.FERROUI_TEST_IOS_MANAGED === 'native';
 const android = process.env.FERROUI_TEST_ANDROID_DEVICE;
 const androidDebugExtensions = process.env.FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS;
 const androidManaged = process.env.FERROUI_TEST_ANDROID_MANAGED === '1';
@@ -33,7 +35,8 @@ try {
     let targetSettings = {};
     let targetEnv;
     if (simulatorDebugExtensions && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for simulator debugger acceptance.');
-    if (simulatorManaged && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for the source-build regression.');
+    if ((simulatorManaged || simulatorNative) && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for the source-build regression.');
+    if (simulatorNative && !simulatorDebugExtensions) throw new Error('Set FERROUI_TEST_IOS_DEBUG_EXTENSIONS for native iOS source builds.');
     if (androidDebugExtensions && !android) throw new Error('Set FERROUI_TEST_ANDROID_DEVICE for Android debugger acceptance.');
     if (androidNative && !androidDebugExtensions) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS for native Android source builds.');
     if ([simulator, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
@@ -41,12 +44,17 @@ try {
     }
     if (simulator) {
         const appPath = process.env.FERROUI_TEST_IOS_SIMULATOR_APP;
-        if (process.platform !== 'darwin' || !appPath) {
+        if (process.platform !== 'darwin') throw new Error('The iOS simulator tests require a workspace Mac with Xcode.');
+        if (!simulatorNative && !appPath) {
             throw new Error('Set FERROUI_TEST_IOS_SIMULATOR_APP to the built Contact Review bundle on the workspace Mac.');
         }
         targetEnv = { FERROUI_TEST_IOS_SIMULATOR: simulator };
         const source = resolve(process.env.FERROUI_TEST_IOS_SIMULATOR_SOURCE ?? join(extension, '../..'));
-        if (simulatorManaged) {
+        if (simulatorNative) {
+            targetSettings = await iosNativeWorkspace(workspace, source);
+            targetEnv.FERROUI_TEST_IOS_MANAGED_NATIVE = '1';
+            targetEnv.CARGO_TARGET_DIR = process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo');
+        } else if (simulatorManaged) {
             const fixture = await iosManagedWorkspace(workspace, sandbox, resolve(appPath));
             targetSettings = fixture.settings;
             Object.assign(targetEnv, fixture.env, { FERROUI_TEST_IOS_SIMULATOR_SOURCE: source });
