@@ -5,6 +5,29 @@ its Skia recording support, and the compositor integration. Correctness fixes an
 tests precede the performance changes so measurements use the corrected implementation as the
 baseline.
 
+## UI semantic extension
+
+The subsequent [UI semantic extension](svg-semantics.md) adds an explicitly captured, immutable
+control graph alongside each selected rendered layer. Review kept the source graph separate from
+Skia's composed artwork and prepared-fragment cache. It corrected logical/template ancestry
+cycles, bounded collections containing empty values, made Grid placement part of the layout
+projection, and resolved relationships against final application-customized IDs.
+
+The completed extension passes **133 SVG tests with default features and 133 with `media3d`**,
+including 21 new regressions for capture, exact immediate-renderer transforms, content selection,
+inert XML escaping, namespace/reference collisions, hidden subtrees, invalid/bounded snapshots,
+layer filtering/removal, raster/inspection output and cache reuse. Strict all-target/all-feature
+Clippy, formatting, API-model, private-reference and idiom checks pass. Its standard-library
+semantic reader passes 12 focused Python tests; the three existing renderer-validator tests also
+pass. The unrelated full Skia/Base suites recorded below were not repeated for this extension.
+
+The [real-control example](../../samples/SvgExport/semantics/README.md) records 20 UI nodes and 15
+draw calls in one vector layer. Semantic and plain exports produce **identical 800 × 540 RGBA
+pixels** through Inkscape 1.4. Their metadata differs while the painted scene does not; a rich
+export after the plain export reports a prepared-vector cache hit. SVGZ decompresses to the exact
+semantic SVG. The example includes a JSON extraction, preview and file/pixel fingerprints. Direct
+Figma/Illustrator retention of the foreign metadata remains untested.
+
 ## Correctness findings and fixes
 
 | Area | Failure found | Resolution and regression coverage |

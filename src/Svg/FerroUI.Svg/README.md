@@ -52,6 +52,26 @@ surfaces continue using Skia. Registration alone does not attach a capture to an
   document title and description, layer names, tags and application metadata.
 - Raster fallback density and allocation limits; reusable native SVG/PNG caches with explicit
   eviction through `clear_export_cache`.
+- Optional immutable UI snapshots: control identity, visual/logical/template relationships,
+  geometry/layout, input state and explicitly selected text/accessibility/source metadata.
+
+## Preserve UI meaning
+
+`record_visual_with_semantics` records a complete visual as one composited layer and attaches an
+immutable snapshot of its control tree. Enable `SvgExportOptions::semantics` to publish that
+snapshot as versioned, namespaced SVG metadata. `SvgSemanticExportOptions::metadata()` includes
+structural information; text, accessibility content and source locations remain explicit opt-ins.
+`SvgSemanticExportOptions::all()` includes every captured field and layer `data-ui-*` attributes.
+
+Applications can supply persistent control keys, design tokens, source locations, command names
+and test selectors through a customization callback. Geometry remains ordinary designer-editable
+SVG, including when its text is outlined. Semantics identify the source UI and its recorded layer;
+they do not invent ownership of individual Skia paths or turn a static SVG into interactive UI.
+Capture is opt-in, and metadata replacement preserves the prepared drawing caches.
+
+See the [UI semantic schema and API guide](../../../docs/porting/svg-semantics.md) and the
+[real-control example](../../../samples/SvgExport/semantics/README.md), including a Python reader
+that extracts the manifest as deterministic JSON.
 
 ## Compositing and scope
 
@@ -76,6 +96,7 @@ snapshot supplied by the application.
 
 ```sh
 cargo run -p ferroui-svg --example layered_export -- samples/SvgExport/output
+cargo run -p ferroui-svg --example semantic_export -- samples/SvgExport/semantics
 cargo test --locked -p ferroui-svg --lib
 cargo test --locked -p ferroui-svg --features media3d --lib
 ```

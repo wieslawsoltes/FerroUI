@@ -1,0 +1,72 @@
+{
+  "renderer": "Inkscape 1.4 (e7c3feb100, 2024-10-09)",
+  "render_dpi": 96,
+  "namespace": "https://wieslawsoltes.github.io/FerroUI/svg/semantics/1",
+  "dimensions": [
+    800,
+    540
+  ],
+  "exact_rgba_equal": true,
+  "rgba_sha256": "86f277d12be16a7ac135f1282d00c38313126e942de7c01336a451cf179f8e6d",
+  "semantic_nodes": 20,
+  "semantic_layers": 1,
+  "draw_calls": 15,
+  "prepared_vector_cache_hits": 1,
+  "files": {
+    "workspace-settings.svg": {
+      "bytes": 237241,
+      "sha256": "a0c19849de302528bb9a670fcf35290675de6b45f5a15d738bda3d880eb55047",
+      "xml_ids": 35,
+      "structure": {
+        "ids": 35,
+        "references": 25,
+        "vector_layers": 1,
+        "raster_layers": 0,
+        "images": 0
+      }
+    },
+    "workspace-settings-plain.svg": {
+      "bytes": 209876,
+      "sha256": "d35027372930b90f9cb5e68c3391fa583c9636e1edb534433cda572c4f6bc685",
+      "xml_ids": 15,
+      "structure": {
+        "ids": 15,
+        "references": 14,
+        "vector_layers": 1,
+        "raster_layers": 0,
+        "images": 0
+      }
+    },
+    "workspace-settings.svgz": {
+      "bytes": 72656,
+      "sha256": "36e38c03a818c424a63c9d92031e3c7c0d79d49612105a5c29b89d1873770ae5"
+    },
+    "workspace-settings.png": {
+      "bytes": 48829,
+      "sha256": "34609683cc663e5f87f2e107a4cb632e51fcdc34e9ac0880fc70dceabbc9850a"
+    },
+    "workspace-settings.ui.json": {
+      "bytes": 53388,
+      "sha256": "c32ad4ffa719aaa65721b576ac267e019e0ff4901531e471e4460cda931c94fb"
+    }
+  },
+  "svgz_matches_semantic_svg": true,
+  "tests": {
+    "rust_default": 133,
+    "rust_media3d": 133,
+    "rust_semantic_regressions": 21,
+    "python_semantic_reader": 12,
+    "python_renderer_validator": 3
+  },
+  "validation_commands": [
+    "cargo test --locked -p ferroui-svg --lib",
+    "cargo test --locked -p ferroui-svg --features media3d --lib",
+    "cargo clippy --locked -p ferroui-svg --all-targets --all-features --no-deps -- -D warnings",
+    "cargo fmt -p ferroui-svg --check",
+    "python3 -m unittest discover -s src/Svg/FerroUI.Svg/examples -p 'test_*.py'",
+    "python3 scripts/generate_api_model.py --check",
+    "python3 scripts/conventions/private-references.py",
+    "python3 scripts/idioms/inventory.py --check"
+  ],
+  "reader_example_validation": true
+}

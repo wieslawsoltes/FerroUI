@@ -12,6 +12,10 @@ The executable source is
 The backend's API, fidelity policy and feature boundaries are described in
 the [SVG backend documentation](../../docs/porting/svg-backend.md).
 
+The [UI semantic example](semantics/README.md) additionally exports a real laid-out control tree
+with control identity, hierarchy, layout, accessibility and application provenance. Its metadata
+can be extracted as JSON while the visible scene remains ordinary outlined vector artwork.
+
 ## Generated examples
 
 | File | View | SVG bytes |

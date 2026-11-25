@@ -158,6 +158,14 @@ application metadata. Optional Inkscape group labels improve layer recognition w
 rendering for consumers that ignore the extension. These groups are ordinary editable SVG
 structure; proprietary editor layer/document data is not fabricated.
 
+For control-level provenance, opt into `record_visual_with_semantics` or attach a validated
+`SvgSemanticTree` to an existing layer. The [UI semantic extension](svg-semantics.md) preserves
+source identities, visual/logical/template hierarchy, layout and selected content in versioned,
+namespaced `<metadata>`, with optional `data-ui-*` layer attributes. It keeps the complete
+compositing island intact and explicitly associates nodes with their layer, rather than assigning
+unverifiable ownership to individual Skia paths. Ordinary exports remain byte-identical with this
+extension disabled; capture and export-time content selection are independent.
+
 The designer controls include:
 
 - `text`: exact shaped outlines (default) or opt-in editable text.
