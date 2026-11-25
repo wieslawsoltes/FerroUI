@@ -824,11 +824,11 @@ Type a name or role to filter the picker. Choose a mapped row to reveal its XAML
 
 ### Use the keyboard in a stage
 
-1. Switch a ready stage to **Interact**. Choose **Keyboard input for** the stage with the **abc** icon, or click a control directly on the artboard.
-2. Use Tab and Shift+Tab to move through its native controls. Press Enter or Space to activate a focused button, or type or paste into a focused text field. The artboard shows the focused control’s name and role when available.
-3. Press Escape to return to the card toolbar. Each card has its own temporary control values. Pausing the card or editing its source ends keyboard input.
+1. Switch a ready stage to **Interact**. Choose the key icon labeled **Keyboard input for** the stage, or click a control directly on the artboard.
+2. Use Tab and Shift+Tab to move through its native controls. Press Enter or Space to activate a focused button, or type or paste into a focused text field. The artboard shows the focused control’s name and role, and exposes them to screen readers.
+3. Press Escape to return to the card toolbar. VoiceOver’s Control–Option shortcuts remain available during keyboard input. Each card has its own temporary control values. Pausing the card or editing its source ends keyboard input.
 
-![The Desktop stage accepts Release review while the Compact stage shows its own text. The status announces SearchInput and the Escape shortcut.](../images/vscode-stage-keyboard.jpg)
+![The Desktop stage accepts Release review while the Compact stage shows its own text. The artboard shows SearchInput and the Escape shortcut.](../images/vscode-stage-keyboard.jpg)
 
 Use an updated preview helper for stage keyboard input. While playing a prototype, use the player’s interaction controls to follow its authored links. [Stage automation](reference.md#send-keyboard-input-to-a-stage)
 

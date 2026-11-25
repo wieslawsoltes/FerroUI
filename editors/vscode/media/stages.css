@@ -78,7 +78,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     outline: 2px solid var(--vscode-focusBorder);
     outline-offset: 1px;
 }
-.stage-keyboard-capture {
+.stage-keyboard-capture, .stage-keyboard-announcement {
     position: absolute;
     inline-size: 1px;
     block-size: 1px;
@@ -87,6 +87,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     clip-path: inset(50%);
     overflow: hidden;
 }
+.stage-keyboard-announcement { margin: 0; }
 .stage-keyboard-status { pointer-events: none; }
 .stage-placeholder { padding: 22px 6px; color: var(--muted); text-align: center; }
 .stage-frame-status {

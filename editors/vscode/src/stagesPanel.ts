@@ -212,13 +212,14 @@ class StageSession {
         }
     }
 
-    private async applyKeyboard(client: NativePreview, model: StageModel, target: StageKeyboard, signal: AbortSignal) {
+    private async applyKeyboard(client: NativePreview, model: StageModel, target: StageKeyboard, signal: AbortSignal,
+        allowPublishing = false) {
         signal.throwIfAborted();
-        const stage = this.currentInputStage(model, target);
+        const stage = this.currentInputStage(model, target, allowPublishing);
         // Pointer and keyboard requests enter the same native stdio queue. A
         // click sent just before a key can establish the native focus target.
         const focus = await client.stageKeyboard(target);
-        this.currentInputStage(model, target);
+        this.currentInputStage(model, target, allowPublishing);
         this.post({ type: 'keyboardFocus', id: stage.id, epoch: stage.epoch, focus });
         this.scheduleInputImage(client, model, stage);
         signal.throwIfAborted();
@@ -512,7 +513,7 @@ class StageSession {
             }
             return;
         }
-        if ((this.busy && message.type !== 'contact') || this.timer || !this.model || this.disposed
+        if ((this.busy && message.type !== 'contact' && message.type !== 'keyboard') || this.timer || !this.model || this.disposed
             || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) return;
         const model = this.model;
         const generation = this.generation;
@@ -542,7 +543,7 @@ class StageSession {
                 return;
             }
             if (message.type === 'keyboard') {
-                await this.applyKeyboard(client, model, message, AbortSignal.timeout(15_000));
+                await this.applyKeyboard(client, model, message, AbortSignal.timeout(15_000), true);
                 return;
             }
             if (message.type === 'contact') {
