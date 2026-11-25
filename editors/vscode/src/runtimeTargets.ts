@@ -12,8 +12,6 @@ export interface IosRuntimeTarget {
     development?: boolean;
 }
 
-export type IosDeviceRuntimeTarget = Omit<IosRuntimeTarget, 'development'>;
-
 export interface AndroidRuntimeTarget {
     device: string;
     name: string;
@@ -38,7 +36,7 @@ export interface BrowserRuntimeTarget {
 }
 
 export type PlatformRuntime = { kind: 'simulator'; simulator: IosRuntimeTarget }
-    | { kind: 'ios-device'; iosDevice: IosDeviceRuntimeTarget }
+    | { kind: 'ios-device'; iosDevice: IosRuntimeTarget }
     | { kind: 'android'; android: AndroidRuntimeTarget } | { kind: 'browser'; browser: BrowserRuntimeTarget };
 
 export function runtimeKind(target: RuntimeTarget): RuntimeKind {

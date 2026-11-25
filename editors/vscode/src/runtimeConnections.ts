@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { HotReload } from './hotReload';
 import { RuntimeClient, type RuntimeEndpoint } from './runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
-import type { AndroidRuntimeTarget, AppRuntime, BrowserRuntimeTarget, IosDeviceRuntimeTarget, IosRuntimeTarget, PlatformRuntime, RuntimeKind, RuntimeTarget } from './runtimeTargets';
+import type { AndroidRuntimeTarget, AppRuntime, BrowserRuntimeTarget, IosRuntimeTarget, PlatformRuntime, RuntimeKind, RuntimeTarget } from './runtimeTargets';
 
 export type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 
@@ -18,7 +18,7 @@ export interface RuntimeSummary {
     pid?: number;
     app_session?: string;
     simulator?: IosRuntimeTarget;
-    iosDevice?: IosDeviceRuntimeTarget;
+    iosDevice?: IosRuntimeTarget;
     android?: AndroidRuntimeTarget;
     browser?: BrowserRuntimeTarget;
 }
@@ -164,6 +164,21 @@ export class RuntimeConnections implements vscode.Disposable {
 
     beginSimulator(target: IosRuntimeTarget, label: string, readDebuggerAttachment: ReadDebuggerAttachment): RuntimeSummary {
         return this.addExternal({ kind: 'simulator', simulator: target }, label, undefined, 'iOS simulator build queued', readDebuggerAttachment);
+    }
+
+    beginIosDevice(target: IosRuntimeTarget, label: string, readDebuggerAttachment: ReadDebuggerAttachment): RuntimeSummary {
+        return this.addExternal({ kind: 'ios-device', iosDevice: target }, label, undefined, 'iOS device build queued', readDebuggerAttachment);
+    }
+
+    updateIosDevice(runtime: AppRuntime, status: string, process?: { pid: number; endpoint: RuntimeEndpoint } | null): void {
+        const item = this.external.get(runtime);
+        if (item?.target.kind !== 'ios-device') return;
+        item.status = status;
+        if (process !== undefined) {
+            item.connection = process ? { endpoint: process.endpoint, generation: ++this.nextGeneration } : undefined;
+            item.target = { kind: 'ios-device', iosDevice: { ...item.target.iosDevice, pid: process?.pid } };
+        }
+        this.changed.fire();
     }
 
     updateSimulator(runtime: AppRuntime, status: string, process?: { pid: number; endpoint: RuntimeEndpoint } | null): void {

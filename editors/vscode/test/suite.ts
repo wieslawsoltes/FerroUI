@@ -15,6 +15,8 @@ import { verifyLiveApp } from './liveApp';
 import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
 import { verifyIosAppMcp } from './iosAppMcp';
+import { verifyIosDeviceDevelopment } from './iosDeviceDevelopment';
+import { verifyIosDeviceSigning } from './iosDeviceSigning';
 import { verifyIosDeviceTransport } from './iosDeviceTransport';
 import { verifyManagedSimulator } from './iosManagedMcp';
 import { verifyAndroidMcp } from './androidMcp';
@@ -51,7 +53,9 @@ export async function run(): Promise<void> {
         return;
     }
     if (process.env.FERROUI_TEST_IOS_DEVICE) {
-        await verifyIosAppMcp(process.env.FERROUI_TEST_IOS_DEVICE, 'ios-device');
+        const device = process.env.FERROUI_TEST_IOS_DEVICE;
+        if (process.env.FERROUI_TEST_IOS_DEVICE_MANAGED_NATIVE) await verifyNativeMobileDevelopment('ios_device', device);
+        else await verifyIosAppMcp(device, 'ios-device');
         return;
     }
     if (process.env.FERROUI_TEST_ANDROID_DEVICE) {
@@ -91,6 +95,8 @@ export async function run(): Promise<void> {
     await verifyCargoBuildSlots();
     await verifyRuntimeClient();
     await verifyIosDeviceTransport();
+    verifyIosDeviceSigning();
+    await verifyIosDeviceDevelopment();
     await vscode.commands.executeCommand('ferroui.openLiveApp');
     await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label === 'FerroUI Live App')));
     const live = vscode.window.tabGroups.all.flatMap(group => group.tabs).find(tab => tab.label === 'FerroUI Live App');

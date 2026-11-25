@@ -9,6 +9,7 @@ interface DebuggerOptions {
     attachError?: string;
     onDetach?(): void;
     onDidChange?(): void;
+    programForGeneration?(generation: number): string | undefined;
 }
 
 export class ReloadDebugger implements vscode.Disposable {
@@ -96,6 +97,8 @@ export class ReloadDebugger implements vscode.Disposable {
     private async start(attachment: Attachment, target: number): Promise<void> {
         const config = JSON.parse(JSON.stringify(attachment.configuration).replaceAll(managedProcessVariable, String(target))) as vscode.DebugConfiguration;
         if (config.type === 'lldb-dap' && attachment.configuration.pid === managedProcessVariable) config.pid = target;
+        const program = attachment.generation === undefined ? undefined : this.options.programForGeneration?.(attachment.generation);
+        if (program) config.program = program;
         config.ferrouiManagedInstance = this.instance;
         config.ferrouiManagedSession = attachment.id;
         try {

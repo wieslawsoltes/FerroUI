@@ -16,6 +16,7 @@ interface Deployment<Bundle, Process> {
     platform: string;
     label: string;
     reloadOnSave: boolean;
+    installTimeoutMs?: number;
     build(signal: AbortSignal, starting: (target: CargoTarget) => void): Promise<Bundle>;
     install(bundle: Bundle, signal: AbortSignal): Promise<Process>;
     owns(process: Process, signal: AbortSignal): Promise<boolean>;
@@ -182,7 +183,7 @@ export class MobileDevelopment<Bundle extends MobileBundle, Process extends Mobi
     }
 
     private launch(artifact: Bundle): Promise<Process> {
-        return this.deployment.install(artifact, AbortSignal.any([this.signal, AbortSignal.timeout(55_000)]));
+        return this.deployment.install(artifact, AbortSignal.any([this.signal, AbortSignal.timeout(this.deployment.installTimeoutMs ?? 55_000)]));
     }
 
     private status(message: string): void { this.deployment.publish(message); }

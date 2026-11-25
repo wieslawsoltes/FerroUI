@@ -7,17 +7,20 @@ import { waitFor } from './browserTestSupport';
 import { openEditorMcp } from './mcpFixture';
 import { trackNativeDebugger, waitForDebuggerAttachment } from './nativeDebugFixture';
 
+const contactReview = {
+    source: 'main.rs', profile: 'contact-review', debugger: 'Attach to Contact Review',
+    statement: '*reviewed += 1;', callback: 'review_next_contact', button: 'ReviewContact',
+    heading: 'Contact review', reviewed: '1 contacts reviewed',
+};
+
 const apps = {
     android: {
         platform: 'Android', source: 'lib.rs', profile: 'service-review', debugger: 'Attach to Service Review', command: 'ferroui.android.debug',
         statement: '*count += 1;', callback: 'complete_review', button: 'ReviewCase',
         heading: 'Service review', reviewed: 'Reviewed cases: 1',
     },
-    ios_simulator: {
-        platform: 'iOS simulator', source: 'main.rs', profile: 'contact-review', debugger: 'Attach to Contact Review', command: 'ferroui.iosSimulator.debug',
-        statement: '*reviewed += 1;', callback: 'review_next_contact', button: 'ReviewContact',
-        heading: 'Contact review', reviewed: '1 contacts reviewed',
-    },
+    ios_simulator: { ...contactReview, platform: 'iOS simulator', command: 'ferroui.iosSimulator.debug' },
+    ios_device: { ...contactReview, platform: 'iOS device', command: 'ferroui.iosDevice.debug' },
 } as const;
 
 export async function verifyNativeMobileDevelopment(platform: keyof typeof apps, device: string): Promise<void> {
@@ -57,6 +60,11 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
         const debuggerSession = await tracker.accept(prior?.id);
         if (prior) await waitFor(() => !tracker.sessions.has(prior.id) ? true : undefined, 'the retired debugger to detach');
         if (app.simulator) assert.equal(debuggerSession.configuration.pid, app.pid);
+        if (app.iosDevice) {
+            assert.deepEqual(debuggerSession.configuration.attachCommands,
+                [`!device select ${app.iosDevice.device}`, `!device process attach -p ${app.pid}`]);
+            assert.match(debuggerSession.configuration.program, /contact-review\.app\/contact-review$/);
+        }
         await waitForDebuggerAttachment({ invoke, content }, app, true);
         return debuggerSession;
     };
@@ -88,7 +96,7 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
         vscode.debug.addBreakpoints([point]);
         const pending = content<RuntimeSummary>(await invoke(tool('run'), runDebug));
         runtime = pending.runtime;
-        assert.ok((pending.android ?? pending.simulator)?.development && !pending.available);
+        assert.ok((pending.android ?? pending.simulator ?? pending.iosDevice)?.development && !pending.available);
         assert.equal(content<RuntimeSummary>(await invoke(tool('run'), runDebug)).runtime, runtime);
         content(await invoke('ferroui_runtime_open', { runtime }));
         const first = await accept();

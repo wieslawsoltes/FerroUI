@@ -294,6 +294,44 @@ FerroUI installs the bundle on the chosen device when the profile includes `appP
 2. Pick a window, inspect the visual tree, or switch to **Interact** to send input when the app permits it. A session belongs to the chosen device and bundle. **Show App Output** opens that session’s console.
 3. Choose **Stop or Disconnect This App** to stop the app started by that session. To deploy a new build, stop the session, replace the signed bundle, and run the profile again.
 
+#### Build and redeploy from Cargo on an iPhone or iPad
+
+Install the `aarch64-apple-ios` Rust target on the workspace Mac. Use an Apple Development certificate with its private key and an iOS development provisioning profile that includes the bundle identifier and selected device. Run `security find-identity -v -p codesigning` to find the certificate fingerprint for `build.signing.identity`. [Apple provisioning profiles](https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles)
+
+Use `build` in place of `appPath`. This example selects Contact Review from a FerroUI checkout. Use your certificate fingerprint, profile path, and bundle identifier.
+
+```json
+{
+  "ferroui.iosDevice.apps": [
+    {
+      "id": "contact-review-device",
+      "label": "Contact Review",
+      "bundleId": "com.example.ContactReview",
+      "args": ["--mcp-stdio", "--mcp-input"],
+      "build": {
+        "application": "contact-review",
+        "reloadOnSave": true,
+        "signing": {
+          "identity": "0123456789ABCDEF0123456789ABCDEF01234567",
+          "provisioningProfile": "/path/to/ContactReview.mobileprovision"
+        }
+      }
+    }
+  ]
+}
+```
+
+For your app, set `build.package` and either `build.binary` or `build.example`. Set `build.toolchain` to the FerroUI checkout with `scripts/ios/bundle.sh`. Use `build.manifestPath` for a nested workspace and configure `build.features` and `build.noDefaultFeatures` as needed. Relative paths resolve from the owning workspace folder. Use `build.signing.entitlements` to supply an optional property list with concrete values for additional entitlements authorized by the profile. FerroUI supplies the app identifier and development debugger entitlements for the signed bundle.
+
+1. Open the profile with **Run iOS Device App** or **Run and Debug iOS Device App**. The pinned Live App editor shows build progress and displays the first accepted native frame when ready. **Show App Output** includes the Cargo, signing, installation, and debugger messages.
+2. Choose **Rebuild This App** from the session row. With `reloadOnSave` enabled, saving Rust, XAML, or Cargo inputs owned by the selected app or a local dependency queues a build. The current app stays available during compilation and signing. Saves received during a build take precedence before deployment.
+3. FerroUI checks the running app against the session’s console and the device’s process list. It retires that inspector generation before installing the signed replacement. Live App retains the last accepted image. **Diagnostics → Hot Reload History** records the save and the replacement’s first frame.
+4. A failed build or signing check leaves the running app available. If installation or startup fails after retiring a process owned by the session, FerroUI tries to restore its last accepted bundle when the device has no independent copy running. The debugger follows the next accepted process using the matching signed executable. **Stop Debugging** detaches it and leaves Live App running.
+
+After changing the launch profile or its signing settings, stop the session and run the profile again.
+
+[iOS device MCP tools](reference.md#run-an-ios-device-app-with-mcp)
+
 #### Debug Rust on an iPhone or iPad
 
 Build with debug symbols and keep the symbols for the exact signed app. Install **LLDB DAP** in the VS Code workspace host. Use the Xcode adapter returned by `xcrun --find lldb-dap` if you set `lldb-dap.executable-path`. [LLDB DAP setup](https://lldb.llvm.org/use/lldbdap.html)

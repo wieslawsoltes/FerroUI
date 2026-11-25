@@ -12,7 +12,8 @@ export interface IosDeviceProcess {
     pid: number;
     endpoint: RuntimeEndpoint;
     console: OwnedProcess;
-    close(): Promise<void>;
+    programPath?: string;
+    close(terminate?: boolean): Promise<void>;
 }
 
 export async function launchIosDeviceApp(executable: string, device: IosDevice, app: IosAppProfile, output: ProcessOutput,
@@ -26,14 +27,14 @@ export async function launchIosDeviceApp(executable: string, device: IosDevice, 
     const console = new OwnedProcess(child);
     const channel = new RuntimeConsole(child.stdin, [child.stdout, child.stderr], launch, line => output.appendLine(line));
     // CoreDevice forwards catchable signals. Its console owns the remote app after its launch receipt.
-    const stop = () => console.stop(channel.pid === undefined ? 'SIGKILL' : 'SIGTERM');
+    const stop = (terminate = true) => console.stop(terminate && channel.pid !== undefined ? 'SIGTERM' : 'SIGKILL');
     channel.signal.addEventListener('abort', () => {
         if (!console.hasExited) void stop();
     }, { once: true });
     const ended = () => channel.close(new Error('The iOS app console exited. Check the device and its launch arguments.'));
     void console.closed.then(ended, ended);
-    const close = async () => {
-        const stopped = stop();
+    const close = async (terminate = true) => {
+        const stopped = stop(terminate);
         channel.close();
         await stopped;
     };

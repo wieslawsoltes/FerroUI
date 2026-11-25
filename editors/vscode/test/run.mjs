@@ -20,6 +20,7 @@ const bin = resolve(process.env.FERROUI_TEST_BIN_DIR ?? join(extension, '../../t
 const executable = name => join(bin, name + (process.platform === 'win32' ? '.exe' : ''));
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const iosDevice = process.env.FERROUI_TEST_IOS_DEVICE;
+const iosDeviceNative = process.env.FERROUI_TEST_IOS_DEVICE_MANAGED === 'native';
 const iosDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
 const simulatorManaged = process.env.FERROUI_TEST_IOS_MANAGED === '1';
 const simulatorNative = process.env.FERROUI_TEST_IOS_MANAGED === 'native';
@@ -38,6 +39,9 @@ try {
     if (iosDebugExtensions && !simulator && !iosDevice) throw new Error('Select an iOS simulator or test device for debugger acceptance.');
     if ((simulatorManaged || simulatorNative) && !simulator) throw new Error('Set FERROUI_TEST_IOS_SIMULATOR for the source-build regression.');
     if (simulatorNative && !iosDebugExtensions) throw new Error('Set FERROUI_TEST_IOS_DEBUG_EXTENSIONS for native iOS source builds.');
+    if (iosDeviceNative && (!iosDevice || !iosDebugExtensions)) {
+        throw new Error('Set FERROUI_TEST_IOS_DEVICE and FERROUI_TEST_IOS_DEBUG_EXTENSIONS for signed iOS source-build acceptance.');
+    }
     if (androidDebugExtensions && !android) throw new Error('Set FERROUI_TEST_ANDROID_DEVICE for Android debugger acceptance.');
     if (androidNative && !androidDebugExtensions) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS for native Android source builds.');
     if ([simulator, iosDevice, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
@@ -68,16 +72,31 @@ try {
         }
     } else if (iosDevice) {
         if (process.platform !== 'darwin') throw new Error('The iOS device tests require a workspace Mac with Xcode.');
-        const app = process.env.FERROUI_TEST_IOS_DEVICE_APP;
-        if (!app) throw new Error('Set FERROUI_TEST_IOS_DEVICE_APP to the development-signed Contact Review test bundle.');
-        const appPath = resolve(app);
-        const bundleId = execFileSync('/usr/bin/plutil', ['-extract', 'CFBundleIdentifier', 'raw', '-o', '-', join(appPath, 'Info.plist')],
-            { encoding: 'utf8' }).trim();
-        target = resolve(process.env.FERROUI_TEST_IOS_DEVICE_SOURCE ?? join(extension, '../..'));
-        targetSettings = { 'ferroui.iosDevice.apps': [{
-            id: 'contact-review', label: 'Contact Review', bundleId, appPath, args: ['--mcp-stdio', '--mcp-input'],
-        }] };
+        const source = resolve(process.env.FERROUI_TEST_IOS_DEVICE_SOURCE ?? join(extension, '../..'));
         targetEnv = { FERROUI_TEST_IOS_DEVICE: iosDevice };
+        if (iosDeviceNative) {
+            const bundleId = process.env.FERROUI_TEST_IOS_DEVICE_BUNDLE_ID;
+            const identity = process.env.FERROUI_TEST_IOS_DEVICE_IDENTITY;
+            const provision = process.env.FERROUI_TEST_IOS_DEVICE_PROVISION;
+            if (!bundleId || !/^[0-9a-f]{40}$/i.test(identity ?? '') || !provision) {
+                throw new Error('Set FERROUI_TEST_IOS_DEVICE_BUNDLE_ID, FERROUI_TEST_IOS_DEVICE_IDENTITY, and FERROUI_TEST_IOS_DEVICE_PROVISION.');
+            }
+            targetSettings = await iosNativeWorkspace(workspace, source, {
+                bundleId, signing: { identity, provisioningProfile: resolve(provision) },
+            });
+            targetEnv.FERROUI_TEST_IOS_DEVICE_MANAGED_NATIVE = '1';
+            targetEnv.CARGO_TARGET_DIR = process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo');
+        } else {
+            const app = process.env.FERROUI_TEST_IOS_DEVICE_APP;
+            if (!app) throw new Error('Set FERROUI_TEST_IOS_DEVICE_APP to the development-signed Contact Review test bundle.');
+            const appPath = resolve(app);
+            const bundleId = execFileSync('/usr/bin/plutil', ['-extract', 'CFBundleIdentifier', 'raw', '-o', '-', join(appPath, 'Info.plist')],
+                { encoding: 'utf8' }).trim();
+            target = source;
+            targetSettings = { 'ferroui.iosDevice.apps': [{
+                id: 'contact-review', label: 'Contact Review', bundleId, appPath, args: ['--mcp-stdio', '--mcp-input'],
+            }] };
+        }
     } else if (androidManaged) {
         const fixture = await androidManagedWorkspace(workspace, sandbox);
         targetSettings = fixture.settings;

@@ -3,7 +3,8 @@ import type { AndroidSessions } from './androidSessions';
 import { hasAndroidProfiles, type AndroidMode, type AndroidRequest } from './androidTargets';
 import { connectApp } from './connectApp';
 import type { IosAppRun } from './iosAppProfiles';
-import { hasIosDeviceProfiles, type IosDeviceSessions } from './iosDeviceSessions';
+import type { IosDeviceSessions } from './iosDeviceSessions';
+import { hasIosDeviceProfiles } from './iosDeviceTargets';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
 import type { IosSimulatorRun } from './iosSimulatorTargets';
 import type { AppRuntime } from './runtimeTargets';
@@ -97,7 +98,7 @@ export class DeviceAppCommands implements vscode.Disposable {
         const available = devices.filter(device => device.status === 'ready');
         if (!available.length) throw new Error('Connect an iPhone or iPad with Developer Mode enabled in Xcode’s Devices and Simulators window.');
         const app = await vscode.window.showQuickPick(apps.map(app => ({
-            label: app.label, description: app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
+            label: app.label, description: app.buildsBundle ? 'Build and sign from Cargo' : app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
         })), { title: mode === 'debug' ? 'Run and Debug iOS Device App' : 'Run iOS Device App', placeHolder: 'Choose the configured app' });
         if (!app) return;
         const device = await vscode.window.showQuickPick(available.map(device => ({

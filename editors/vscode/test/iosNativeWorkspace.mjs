@@ -1,9 +1,9 @@
 import { execFileSync } from 'node:child_process';
 import { writeNativeMobileApp } from './mobileNativeWorkspace.mjs';
 
-export async function iosNativeWorkspace(workspace, toolkit) {
+export async function iosNativeWorkspace(workspace, toolkit, device) {
     const name = 'contact-review';
-    const target = process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-apple-ios';
+    const target = device ? 'aarch64-apple-ios' : process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-apple-ios';
     await writeNativeMobileApp(workspace, toolkit, {
         name, kind: 'bin',
         platform: { 'ferroui-ios': ['src/iOS/FerroUI.iOS', ['quartz-metal'], false] },
@@ -15,8 +15,10 @@ export async function iosNativeWorkspace(workspace, toolkit) {
     execFileSync('cargo', ['metadata', '--format-version', '1', '--filter-platform', target], {
         cwd: workspace, stdio: ['ignore', 'ignore', 'inherit'], timeout: 120_000,
     });
-    return {
-        'ferroui.iosSimulator.apps': [{ id: name, label: 'Managed Contact Review', bundleId: 'org.ferroui.managed-contact-review',
-            args: ['--mcp', '--mcp-input'], build: { package: name, binary: name, toolchain: toolkit, target, reloadOnSave: true } }],
-    };
+    const setting = device ? 'ferroui.iosDevice.apps' : 'ferroui.iosSimulator.apps';
+    return { [setting]: [{
+        id: name, label: 'Managed Contact Review', bundleId: device?.bundleId ?? 'org.ferroui.managed-contact-review',
+        args: [device ? '--mcp-stdio' : '--mcp', '--mcp-input'],
+        build: { package: name, binary: name, toolchain: toolkit, target, reloadOnSave: true, signing: device?.signing },
+    }] };
 }

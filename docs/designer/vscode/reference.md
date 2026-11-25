@@ -317,10 +317,11 @@ The debugger stops following future replacements after detach. Use `ferroui_app_
 ### Run an iOS device app with MCP
 
 1. Call `ferroui_ios_device_targets` in a trusted workspace on the Mac running Xcode. Use `folder` to select a workspace folder. Choose a device with `status: "ready"` and a profile’s `id` and `folder`.
-2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_device_run` with `device`, `profile`, and `folder`. It returns an exact `runtime`, `generation`, and device PID after the recognized app launch and first native frame.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_device_run` with `device`, `profile`, and `folder`. A prebuilt profile returns its `runtime`, `generation`, and device PID after the first native frame. A source build returns a pending runtime. Read `ferroui_app_sessions` for `available: true` and the accepted generation.
 3. Open that runtime with `ferroui_runtime_open`. The editor MCP server uses the app’s console to run `ferroui_runtime_tools`, `ferroui_runtime_query`, and `ferroui_runtime_call` for the same session. Input and property writes follow the app’s permission settings. Call `ferroui_ios_device_output` with the runtime and optional `lines` from 1 to 200 to read the session’s console.
 4. Set `debug: true` on the run call to attach Xcode LLDB, or call `ferroui_ios_device_debug` with the current runtime and `expected_generation`. Set `debug_configuration` to the attach configuration’s exact name when several are available. Supply `action: "detach"` to leave the app running after the debugger disconnects.
 5. Call `ferroui_ios_device_stop` with the runtime to stop the launched app and close its inspector. [Configure an iOS device app](runtime.md#run-an-app-on-an-iphone-or-ipad)
+6. For a source-built profile, call `ferroui_ios_device_rebuild` to queue a build, development signature, and installation for that runtime. Use `ferroui_ios_device_output` for its log and pass the runtime as `app_session` to `ferroui_reload_history` for recorded saves. Read the next accepted generation before issuing runtime input or source edits. [Build a signed iOS device app](runtime.md#build-and-redeploy-from-cargo-on-an-iphone-or-ipad)
 
 ### Run or attach an Android app with MCP
 
@@ -602,7 +603,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.hostedPreview.assembly` | Empty | Name the application’s markup assembly when its name differs from the selected Cargo package. |
 | `ferroui.hotReload.targets` | `[]` | Offer chosen Cargo binaries and set their package, manifest, features, and arguments. An empty list discovers targets from Cargo. |
 | `ferroui.iosSimulator.apps` | `[]` | Set launch profiles for iOS simulator bundles with an opted-in app inspector. A profile can install the built app before launch. |
-| `ferroui.iosDevice.apps` | `[]` | Set launch profiles for development-signed iPhoneOS apps with a stdio inspector. An optional `appPath` installs the bundle on the selected iPhone or iPad. |
+| `ferroui.iosDevice.apps` | `[]` | Set launch profiles for iPhoneOS apps with a stdio inspector. Use `appPath` to install a signed bundle or `build` to compile, sign, and redeploy from Cargo. |
 | `ferroui.android.adbPath` | Empty | Select the Android Debug Bridge executable on the workspace host. |
 | `ferroui.android.apps` | `[]` | Set profiles for debuggable Android apps with an opted-in Live App inspector. A profile can install its APK before launching. |
 | `ferroui.browser.executablePath` | Empty | Select a custom Chrome or Chromium executable on the workspace host. |

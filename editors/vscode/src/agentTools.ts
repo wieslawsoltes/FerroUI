@@ -265,6 +265,7 @@ export class AgentTools {
         if (tool === 'ferroui_ios_device_debug') return this.appSessions.iosDevices.debug(args.runtime as AppRuntime,
             args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
         if (tool === 'ferroui_ios_device_output') return { output: this.appSessions.iosDevices.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
+        if (tool === 'ferroui_ios_device_rebuild') return this.appSessions.iosDevices.rebuild(args.runtime as AppRuntime);
         if (tool === 'ferroui_ios_device_stop') {
             await this.appSessions.iosDevices.stop(args.runtime as AppRuntime);
             return { stopped: true };

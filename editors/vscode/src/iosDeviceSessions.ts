@@ -1,38 +1,41 @@
 import * as vscode from 'vscode';
-import { iosAppProfiles, type IosAppProfile, type IosAppRun } from './iosAppProfiles';
+import type { IosAppRun } from './iosAppProfiles';
+import type { IosBundle } from './iosBuild';
 import { IosDeviceBridge, type IosDevice } from './iosDeviceBridge';
+import { iosDeviceDevelopment } from './iosDeviceDevelopment';
 import { launchIosDeviceApp, type IosDeviceProcess } from './iosDeviceProcess';
+import { iosDeviceApps, type IosDeviceApp } from './iosDeviceTargets';
+import type { MobileDevelopment } from './mobileDevelopment';
 import { iosDeviceAttachCommands, iosDeviceVariable, selectDebugConfiguration, type MobileLaunchDebug } from './reloadDebugConfiguration';
 import { ReloadDebugger } from './reloadDebugger';
+import type { ReloadHistory } from './reloadHistory';
 import { ReloadLog } from './reloadLog';
 import type { RuntimeConnections, RuntimeSummary } from './runtimeConnections';
 import type { AppRuntime } from './runtimeTargets';
 import { workspaceFolders } from './workspacePaths';
 
 interface Launch {
-    app: IosAppProfile;
+    app: IosDeviceApp;
     device: IosDevice;
     stop: AbortController;
     output: ReloadLog;
     runtime?: AppRuntime;
     process?: IosDeviceProcess;
+    development?: MobileDevelopment<IosBundle, IosDeviceProcess>;
     debugger?: ReloadDebugger;
     attaching?: boolean;
     starting?: Promise<RuntimeSummary>;
     closing?: Promise<void>;
 }
 
-export function hasIosDeviceProfiles(): boolean {
-    return workspaceFolders().some(folder => {
-        const profiles = vscode.workspace.getConfiguration('ferroui.iosDevice', folder.uri).get<unknown>('apps');
-        return Array.isArray(profiles) && profiles.length > 0;
-    });
-}
-
 export class IosDeviceSessions implements vscode.Disposable {
     readonly supported = process.platform === 'darwin';
     private readonly lifetime = new AbortController();
     private readonly launches = new Map<string, Launch>();
+    private readonly saves = vscode.workspace.onDidSaveTextDocument(document => {
+        if (document.uri.scheme !== 'file') return;
+        for (const launch of this.launches.values()) launch.development?.observe(document.uri.fsPath, () => document.getText());
+    });
     private readonly folders = vscode.workspace.onDidChangeWorkspaceFolders(({ removed }) => {
         const closed = new Set(removed.map(folder => folder.uri.toString()));
         for (const [key, launch] of this.launches) {
@@ -40,26 +43,26 @@ export class IosDeviceSessions implements vscode.Disposable {
         }
     });
 
-    constructor(private readonly connections: RuntimeConnections, private readonly bridge = new IosDeviceBridge()) {}
+    constructor(private readonly connections: RuntimeConnections, private readonly history: ReloadHistory,
+        private readonly bridge = new IosDeviceBridge()) {}
 
     async targets(folder: string | undefined, signal: AbortSignal) {
         if (!this.supported) return { supported: false, devices: [], apps: [] };
         this.requireWorkspace();
-        const apps = iosAppProfiles('iosDevice', folder).map(({ id, bundleId, label, folder, bundlePath }) => ({
-            id, bundleId, label, folder, installsBundle: bundlePath !== undefined,
+        const apps = iosDeviceApps(folder).map(({ id, bundleId, label, folder, bundlePath, build }) => ({
+            id, bundleId, label, folder, installsBundle: bundlePath !== undefined || build !== undefined, buildsBundle: !!build,
         }));
         const devices = await this.bridge.devices(AbortSignal.any([signal, this.lifetime.signal]));
-        return { supported: true, devices, apps };
+        return { supported: true, devices: devices.map(({ id, name, system, status }) => ({ id, name, system, status })), apps };
     }
 
     async open(request: IosAppRun, signal: AbortSignal, debug?: MobileLaunchDebug): Promise<RuntimeSummary> {
         this.requireWorkspace();
         const active = AbortSignal.any([signal, this.lifetime.signal]);
         active.throwIfAborted();
-        const matches = iosAppProfiles('iosDevice', request.folder).filter(app => app.id === request.profile);
+        const matches = iosDeviceApps(request.folder).filter(app => app.id === request.profile);
         if (matches.length !== 1) throw new Error('Choose an unambiguous iOS device launch profile.');
         const [app] = matches;
-        if (app.build !== undefined) throw new Error('Choose a development-signed app bundle or a development app already installed on the iOS device.');
         const [folder] = workspaceFolders(app.folder);
         const configuration = debug && await selectDebugConfiguration(folder, { interactive: false, ...debug, target: 'iosDevice' });
         const device = (await this.bridge.devices(active)).find(item => item.id.toLowerCase() === request.device.toLowerCase());
@@ -72,6 +75,10 @@ export class IosDeviceSessions implements vscode.Disposable {
             if (!runtime || existing.closing || JSON.stringify(existing.app) !== JSON.stringify(app)) {
                 throw new Error('Close the current iOS session for this bundle and device before starting another.');
             }
+            if (existing.development && (runtime.generation === null || existing.development.deploying)) {
+                if (configuration) this.debuggerSession(existing).prepareIfIdle(folder, this.configuration(existing, configuration));
+                return runtime;
+            }
             if (configuration) await this.debug(runtime.runtime, runtime.generation!, { configuration, signal: active });
             return this.current(runtime.runtime, runtime.generation!);
         }
@@ -79,8 +86,12 @@ export class IosDeviceSessions implements vscode.Disposable {
         const output = new ReloadLog(vscode.window.createOutputChannel(`FerroUI iOS Device · ${label}`));
         const launch: Launch = { app, device, stop: new AbortController(), output };
         this.launches.set(key, launch);
-        launch.starting = this.start(key, launch, label, AbortSignal.any([active, launch.stop.signal]));
         try {
+            if (app.build) {
+                if (configuration) this.debuggerSession(launch).prepareIfIdle(folder, this.configuration(launch, configuration));
+                return this.startDevelopment(launch, label);
+            }
+            launch.starting = this.start(key, launch, label, AbortSignal.any([active, launch.stop.signal]));
             const runtime = await launch.starting;
             if (configuration) await this.debug(runtime.runtime, runtime.generation!, { configuration, signal: active });
             return this.current(runtime.runtime, runtime.generation!);
@@ -97,14 +108,29 @@ export class IosDeviceSessions implements vscode.Disposable {
         output.appendLine(`Starting ${app.label}`);
         const process = launch.process = await launchIosDeviceApp(this.bridge.executable, device, app, output, signal);
         signal.throwIfAborted();
-        const runtime = this.connections.addPlatform({ kind: 'ios-device', iosDevice: {
-            device: device.id, name: device.name, system: device.system, profile: app.id, bundleId: app.bundleId, pid: process.pid,
-        } }, label, process.endpoint, generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
+        const runtime = this.connections.addPlatform({ kind: 'ios-device', iosDevice: { ...this.target(launch), pid: process.pid } },
+            label, process.endpoint, generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
         launch.runtime = runtime.runtime;
         const ended = () => this.retire(key, launch);
         void process.console.closed.then(ended, ended);
         output.appendLine(`${app.label} · PID ${process.pid} · inspector ready`);
         return runtime;
+    }
+
+    private startDevelopment(launch: Launch, label: string): RuntimeSummary {
+        const pending = this.connections.beginIosDevice({ ...this.target(launch), development: true }, label,
+            generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
+        const runtime = launch.runtime = pending.runtime;
+        launch.development = iosDeviceDevelopment({
+            app: launch.app, device: launch.device, bridge: this.bridge, connections: this.connections, runtime,
+            history: this.history, output: launch.output, cancellation: launch.stop.signal, debugger: () => launch.debugger,
+        });
+        launch.development.rebuild();
+        return pending;
+    }
+
+    private target({ app, device }: Launch) {
+        return { device: device.id, name: device.name, system: device.system, profile: app.id, bundleId: app.bundleId };
     }
 
     async debug(runtime: AppRuntime, generation: number, options: {
@@ -136,23 +162,42 @@ export class IosDeviceSessions implements vscode.Disposable {
     private async attachDebugger(launch: Launch, configuration: vscode.DebugConfiguration, generation: number, signal?: AbortSignal): Promise<void> {
         signal?.throwIfAborted();
         launch.stop.signal.throwIfAborted();
-        const { runtime, process } = launch;
-        if (!runtime || !process || process.console.hasExited || this.connections.revision(runtime) !== generation) {
+        const { runtime, development } = launch;
+        const process = development?.current ?? launch.process;
+        if (!runtime || !process || process.console.hasExited || development?.deploying || this.connections.revision(runtime) !== generation) {
             throw new Error('Use the current accepted iOS device process.');
         }
         const [folder] = workspaceFolders(launch.app.folder);
-        const debuggerSession = launch.debugger ??= new ReloadDebugger(launch.output, {
-            attachError: 'Xcode LLDB could not attach to the iOS device app.',
-            onDidChange: () => this.connections.notifyDebuggerChanged(runtime),
-        });
+        const debuggerSession = this.debuggerSession(launch);
         if (debuggerSession.follows(generation)) return;
-        const attachCommands = iosDeviceAttachCommands.map(command => command.replaceAll(iosDeviceVariable, launch.device.id));
-        await debuggerSession.attach(folder, { ...configuration, attachCommands }, process.pid, generation);
+        await debuggerSession.attach(folder, this.configuration(launch, configuration), process.pid, generation);
         if (signal?.aborted || this.connections.revision(runtime) !== generation) {
             await debuggerSession.detach();
             signal?.throwIfAborted();
             throw new Error('The iOS device session changed while attaching the debugger.');
         }
+    }
+
+    private debuggerSession(launch: Launch): ReloadDebugger {
+        return launch.debugger ??= new ReloadDebugger(launch.output, {
+            attachError: 'Xcode LLDB could not attach to the iOS device app.',
+            onDidChange: () => this.connections.notifyDebuggerChanged(launch.runtime),
+            programForGeneration: generation => launch.runtime && this.connections.revision(launch.runtime) === generation
+                ? launch.development?.current?.programPath : undefined,
+        });
+    }
+
+    private configuration(launch: Launch, configuration: vscode.DebugConfiguration): vscode.DebugConfiguration {
+        const attachCommands = iosDeviceAttachCommands.map(command => command.replaceAll(iosDeviceVariable, launch.device.id));
+        return { ...configuration, attachCommands };
+    }
+
+    rebuild(runtime: AppRuntime): RuntimeSummary {
+        this.requireWorkspace();
+        const [, launch] = this.lookup(runtime);
+        if (!launch.development) throw new Error('Choose a source-built iOS device app session.');
+        launch.development.rebuild();
+        return this.connections.describe(runtime)!;
     }
 
     recentOutput(runtime: AppRuntime, lines: number): string { return this.lookup(runtime)[1].output.tail(lines); }
@@ -182,7 +227,10 @@ export class IosDeviceSessions implements vscode.Disposable {
                 await launch.starting?.catch(() => {});
                 await launch.debugger?.close();
             } finally {
-                try { await launch.process?.close(); }
+                try {
+                    if (launch.development) await launch.development.close(true);
+                    else await launch.process?.close();
+                }
                 finally {
                     launch.output.dispose();
                     if (this.launches.get(key) === launch) this.launches.delete(key);
@@ -202,5 +250,5 @@ export class IosDeviceSessions implements vscode.Disposable {
         await Promise.allSettled([...this.launches].map(([key, launch]) => this.close(key, launch)));
     }
 
-    dispose(): void { this.folders.dispose(); void this.shutdown(); }
+    dispose(): void { this.saves.dispose(); this.folders.dispose(); void this.shutdown(); }
 }

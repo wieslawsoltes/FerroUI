@@ -1,5 +1,5 @@
 import { iosAppProfiles, type IosAppProfile, type IosAppRun } from './iosAppProfiles';
-import { simulatorBuildProfile, type SimulatorBuildProfile } from './iosSimulatorBuildProfile';
+import { simulatorBuildProfile, type SimulatorBuildProfile } from './iosBuildProfiles';
 
 export interface IosSimulator {
     id: string;

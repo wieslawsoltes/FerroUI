@@ -1,5 +1,5 @@
 import * as vscode from 'vscode';
-import { buildSimulatorApp, type SimulatorBundle } from './iosSimulatorBuild';
+import { buildIosBundle, type IosBundle } from './iosBuild';
 import { simulatorAppIsRunning, simulatorAppPid } from './iosSimulatorDebug';
 import { deploySimulatorApp, installSimulatorApp, iosSimulators, launchSimulatorApp, type ManagedSimulatorProcess } from './iosSimulatorProcess';
 import { iosSimulatorApps, type IosSimulator, type IosSimulatorApp, type IosSimulatorRun } from './iosSimulatorTargets';
@@ -22,7 +22,7 @@ interface Launch {
     process?: OwnedProcess;
     runtime?: AppRuntime;
     debugger?: ReloadDebugger;
-    development?: MobileDevelopment<SimulatorBundle, ManagedSimulatorProcess>;
+    development?: MobileDevelopment<IosBundle, ManagedSimulatorProcess>;
     output?: { channel: vscode.OutputChannel; log: ReloadLog };
     attaching?: boolean;
     stopping?: Promise<void>;
@@ -188,6 +188,9 @@ export class IosSimulatorSessions implements vscode.Disposable {
 
     private startDevelopment(launch: Launch): RuntimeSummary {
         const { app, device, cancellation } = launch;
+        const build = app.build;
+        if (!build) throw new Error('Choose an iOS simulator source-build profile.');
+        const target = build.target ?? (process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-apple-ios');
         const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch), () => {
             const pid = launch.development?.current?.pid;
             return pid !== undefined && launch.debugger?.isAttachedTo(pid) === true;
@@ -195,11 +198,11 @@ export class IosSimulatorSessions implements vscode.Disposable {
         const { runtime } = pending;
         launch.runtime = runtime;
         const output = this.output(launch).log;
-        const development = new MobileDevelopment<SimulatorBundle, ManagedSimulatorProcess>({
+        const development = new MobileDevelopment<IosBundle, ManagedSimulatorProcess>({
             platform: 'iOS simulator',
             label: app.label,
-            reloadOnSave: app.build?.reloadOnSave ?? false,
-            build: (signal, starting) => buildSimulatorApp(app, output, signal, starting),
+            reloadOnSave: build.reloadOnSave,
+            build: (signal, starting) => buildIosBundle(app, build, target, output, signal, starting),
             install: (artifact, signal) => deploySimulatorApp(device, { ...app, bundlePath: artifact.bundlePath }, signal),
             owns: async (process, signal) => {
                 if (process.console.hasExited) return false;

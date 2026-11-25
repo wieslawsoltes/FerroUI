@@ -4,6 +4,8 @@ import { tmpdir } from 'node:os';
 import * as path from 'node:path';
 import { promisify } from 'node:util';
 import type { IosAppProfile } from './iosAppProfiles';
+import { deviceAppProcesses, installedDeviceBundle } from './iosDeviceProcesses';
+import { appleTool, plistValue } from './iosPlist';
 
 export const xcrun = '/usr/bin/xcrun';
 const execute = promisify(execFile);
@@ -14,11 +16,12 @@ export interface IosDevice {
     name: string;
     system: string;
     status: 'ready' | 'unpaired' | 'developerMode' | 'unavailable';
+    udid?: string;
 }
 
 interface DeviceRecord {
     identifier?: unknown;
-    hardwareProperties?: { platform?: unknown };
+    hardwareProperties?: { platform?: unknown; udid?: unknown };
     deviceProperties?: { name?: unknown; osVersionNumber?: unknown; developerModeStatus?: unknown };
     connectionProperties?: { pairingState?: unknown; tunnelState?: unknown; transportType?: unknown };
 }
@@ -34,11 +37,13 @@ export function deviceInventory(value: unknown): IosDevice[] {
         if (typeof id !== 'string' || !deviceId.test(id) || platform !== 'iOS' && platform !== 'iPadOS'
             || typeof properties?.name !== 'string' || !properties.name.trim()) return [];
         const version = properties.osVersionNumber;
+        const udid = device?.hardwareProperties?.udid;
         const status: IosDevice['status'] = connection?.pairingState !== 'paired' ? 'unpaired'
             : properties.developerModeStatus !== 'enabled' ? 'developerMode'
             : connection.tunnelState === 'connected' || connection.tunnelState === 'disconnected' && typeof connection.transportType === 'string'
                 ? 'ready' : 'unavailable';
-        return [{ id, name: properties.name, system: typeof version === 'string' ? `${platform} ${version}` : platform, status }];
+        return [{ id, name: properties.name, system: typeof version === 'string' ? `${platform} ${version}` : platform, status,
+            ...(typeof udid === 'string' && /^[A-F0-9-]{16,64}$/i.test(udid) ? { udid } : {}) }];
     });
 }
 
@@ -56,11 +61,22 @@ export class IosDeviceBridge {
     async install(device: IosDevice, app: IosAppProfile, signal: AbortSignal): Promise<void> {
         if (!app.bundlePath) return;
         const bundle = await signedBundle(app.bundlePath, app.bundleId, signal);
+        if ((await this.appProcesses(device, app.bundleId, signal)).length) {
+            throw new Error(`Quit the running ${app.label} app on the device before installing this bundle.`);
+        }
         try { await this.command(['device', 'install', 'app', '--device', device.id, bundle], 35_000, signal); }
         catch {
             signal.throwIfAborted();
             throw new Error(`Xcode could not install ${app.label} on ${device.name}. Check its development signature and provisioning profile.`);
         }
+    }
+
+    async appProcesses(device: IosDevice, bundleId: string, signal: AbortSignal): Promise<number[]> {
+        const destination = ['--device', device.id];
+        const apps = await this.command(['device', 'info', 'apps', ...destination, '--bundle-id', bundleId, '--include-default-apps'], 8_000, signal);
+        const bundle = installedDeviceBundle(apps, bundleId);
+        if (!bundle) return [];
+        return deviceAppProcesses(await this.command(['device', 'info', 'processes', ...destination], 8_000, signal), bundle);
     }
 
     private async command(args: string[], timeout: number, signal: AbortSignal): Promise<unknown> {
@@ -81,11 +97,12 @@ async function signedBundle(bundlePath: string, bundleId: string, signal: AbortS
         const bundle = await realpath(bundlePath);
         if (path.extname(bundle).toLowerCase() !== '.app' || !(await stat(bundle)).isDirectory()) throw new Error('Invalid app bundle');
         const info = path.join(bundle, 'Info.plist');
-        const property = async (name: string) => (await execute('/usr/bin/plutil', ['-extract', name, 'raw', '-o', '-', info],
-            { timeout: 5_000, maxBuffer: 4_096, signal })).stdout.trim();
-        const [identifier, platform] = await Promise.all([property('CFBundleIdentifier'), property('CFBundleSupportedPlatforms.0')]);
+        const [identifier, platform] = await Promise.all([
+            plistValue(info, 'CFBundleIdentifier', 'raw', signal),
+            plistValue(info, 'CFBundleSupportedPlatforms.0', 'raw', signal),
+        ]);
         if (identifier !== bundleId || platform !== 'iPhoneOS') throw new Error('Bundle identifier or platform mismatch');
-        await execute('/usr/bin/codesign', ['--verify', '--strict', bundle], { timeout: 10_000, maxBuffer: 8_192, signal });
+        await appleTool('/usr/bin/codesign', ['--verify', '--strict', bundle], signal, 10_000);
         return bundle;
     } catch {
         signal.throwIfAborted();

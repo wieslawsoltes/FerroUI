@@ -155,10 +155,10 @@ export async function androidCargoTarget(folder: vscode.WorkspaceFolder, target:
     return matches[0];
 }
 
-export async function simulatorCargoTarget(folder: vscode.WorkspaceFolder, target: Required<Pick<ConfiguredTarget, 'label' | 'manifestPath' | 'package' | 'binary' | 'features'>>,
+export async function iosCargoTarget(folder: vscode.WorkspaceFolder, target: Required<Pick<ConfiguredTarget, 'label' | 'manifestPath' | 'package' | 'binary' | 'features'>>,
     kind: 'example' | 'bin', signal: AbortSignal): Promise<DiscoveredCargoTarget> {
     const matches = await listTargets(folder, 'cargo', target, { kind, signal });
-    if (matches.length !== 1) throw new Error('Choose an iOS simulator example or binary in the selected Cargo workspace.');
+    if (matches.length !== 1) throw new Error('Choose an iOS example or binary in the selected Cargo workspace.');
     return matches[0];
 }
 
