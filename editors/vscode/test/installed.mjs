@@ -1,6 +1,6 @@
 import { runTests } from '@vscode/test-electron';
 import { constants } from 'node:fs';
-import { access, cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
+import { access, cp, mkdir, mkdtemp, readFile, realpath, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -25,7 +25,8 @@ if (debuggerPath) {
 const failedVersions = [];
 for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN], ['stable', process.env.FERROUI_TEST_VSCODE]]) {
     const executable = await testVSCodeExecutable(supplied, { version });
-    const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-installed-'));
+    // Cargo records canonical source paths in the test app's debug information.
+    const sandbox = await realpath(await mkdtemp(join(tmpdir(), 'ferroui-installed-')));
     const workspace = join(sandbox, 'workspace');
     const profile = join(sandbox, 'profile');
     const extensions = join(sandbox, 'extensions');

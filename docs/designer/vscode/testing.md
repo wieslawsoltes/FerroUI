@@ -56,6 +56,8 @@ The fixture opens Live App, types Unicode into a native field, checks Tab and Sh
 
 Set `FERROUI_TEST_INSTALLED_LLDB_DAP` to the host’s `lldb-dap` executable to run **Run and Debug with Hot Reload** in that test. The test hits an authored Rust breakpoint, verifies that failed candidates keep the original debugger, hits the breakpoint on the replacement process, and detaches while the app keeps running. On macOS, use the executable reported by `xcrun --find lldb-dap`. The installed-package CI matrix supplies LLDB on each host. [LLDB adapter setup](https://lldb.llvm.org/use/lldbdap.html)
 
+The runner uses a canonical temporary workspace path for the editor and Cargo. On Linux, the debugger fixture resolves symbols locally. If debugger startup fails, the runner starts a fresh app to verify native reload and reports the original debugger failure. [LLDB symbol settings](https://lldb.llvm.org/use/settings.html#symbols)
+
 Set `FERROUI_TEST_HOSTED_APP` to Todo Workbench built with `app-preview,hot-reload,mcp` to also exercise native App Preview through the bundled helper. Use `FERROUI_TEST_HOSTED_SOURCE` to point at its matching Todo Workbench source directory if the app was built from another checkout. FerroUI’s installed-package CI runs both native checks on macOS, Linux, and Windows. [Todo Workbench](../../../samples/TodoWorkbench/README.md)
 
 On Windows with MSVC 14.52, set `LIBCLANG_PATH` to the LLVM `bin` directory for Clang 22 or newer before building the native fixtures. ANGLE uses that library to generate its bindings. The hosted Windows job supplies its own LLVM toolchain. [MSVC compiler compatibility check](https://github.com/microsoft/STL/blob/main/stl/inc/yvals_core.h)

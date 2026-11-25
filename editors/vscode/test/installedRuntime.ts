@@ -17,7 +17,8 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
     const rust = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(fixture, 'main.rs'));
     const xaml = await vscode.workspace.openTextDocument(vscode.Uri.joinPath(fixture, 'Status.xaml'));
     const debugName = process.env.FERROUI_TEST_RUNTIME_DEBUG;
-    const debug = debugName ? installedRuntimeDebug(rust, debugName) : undefined;
+    let debug = debugName ? installedRuntimeDebug(rust, debugName) : undefined;
+    let attachFailure: unknown;
     let tabs: vscode.Disposable | undefined;
 
     const clients: RuntimeClient[] = [];
@@ -31,8 +32,19 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
     try {
         await vscode.commands.executeCommand('ferroui.showAppSessions');
         await vscode.commands.executeCommand(debug ? 'ferroui.hotReload.runAndDebug' : 'ferroui.hotReload.start');
-        const pid = await acceptedProcess();
-        await debug?.accept(pid);
+        let pid = await acceptedProcess();
+        if (debug) {
+            try { await debug.accept(pid); }
+            catch (error) {
+                attachFailure = error;
+                console.error('Initial debugger acceptance failed. Running the native reload checks in a fresh app session.', error);
+                await debug.close();
+                debug = undefined;
+                await vscode.commands.executeCommand('ferroui.hotReload.stopAll');
+                await vscode.commands.executeCommand('ferroui.hotReload.start');
+                pid = await acceptedProcess();
+            }
+        }
         const app = await inspector(pid);
         await expectText(app, 'RsxStatus', 'Initial RSX status');
         await expectText(app, 'XamlStatus', 'Initial XAML status');
@@ -104,6 +116,7 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         assert.ok(liveTab());
         assert.deepEqual(tabChanges, [], 'Live App stays open through the accepted replacement');
         console.log('Installed Live App passed in-place XAML and RSX saves, rejected edits, failed compilation and startup, and state restoration after rebuild.');
+        if (attachFailure !== undefined) throw attachFailure;
     } finally {
         tabs?.dispose();
         await debug?.close();

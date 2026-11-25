@@ -36,7 +36,10 @@ export async function prepareInstalledRuntime(workspace, sandbox, toolkit, debug
     };
     if (debuggerEnabled) {
         const configuration = { name: 'Debug Release Review', type: 'lldb-dap', request: 'attach',
-            pid: '${command:ferroui.hotReload.processId}', stopOnEntry: false };
+            pid: '${command:ferroui.hotReload.processId}', stopOnEntry: false,
+            // The fixture's own symbols are local. A Linux image may configure network lookup for system libraries.
+            ...(process.platform === 'linux' ? { initCommands: ['settings set symbols.enable-external-lookup false'] } : {}),
+        };
         settings.launch = { configurations: [configuration] };
         environment.FERROUI_TEST_RUNTIME_DEBUG = configuration.name;
     }

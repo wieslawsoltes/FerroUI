@@ -7,6 +7,7 @@ import { until } from './wait';
 interface AttachAttempt {
     detail: string;
     error?: string;
+    breakpoint?: string;
 }
 
 export async function waitForDebuggerAttachment({ invoke, content }: McpFixture, app: RuntimeSummary, attached: boolean): Promise<void> {
@@ -33,14 +34,23 @@ export function trackNativeDebugger(configuration: string) {
             return {
                 onWillReceiveMessage(message) {
                     if (message.type === 'request' && message.command === 'attach') attempt.detail = 'VS Code sent the attach request';
+                    if (message.type === 'request' && message.command === 'setBreakpoints') {
+                        const file = message.arguments?.source?.path;
+                        attempt.breakpoint = file ? `VS Code requested breakpoints in ${file}` : 'VS Code requested source breakpoints';
+                    }
                 },
                 onDidSendMessage(message) {
                     if (message.type === 'response' && message.command === 'attach') {
                         if (message.success) attached.add(session.id);
                         else attempt.error = message.message ?? 'LLDB rejected the attach request';
                     }
-                    if ((message.command === 'setBreakpoints' && message.body?.breakpoints?.some((point: { verified: boolean }) => point.verified))
-                        || (message.event === 'breakpoint' && message.body?.breakpoint?.verified)) verified.add(session.id);
+                    if (message.type === 'response' && message.command === 'setBreakpoints') {
+                        const points = message.body?.breakpoints as { verified: boolean; message?: string }[] | undefined;
+                        const detail = message.message || points?.[0]?.message;
+                        if (points?.some(point => point.verified)) verified.add(session.id);
+                        else if (detail) attempt.breakpoint = detail;
+                    }
+                    if (message.event === 'breakpoint' && message.body?.breakpoint?.verified) verified.add(session.id);
                     if (message.event === 'stopped' && message.body?.reason === 'breakpoint') hits.set(session.id, message.body.threadId);
                 },
                 onError(error) { if (!attached.has(session.id)) attempt.error ??= error.message; },
@@ -62,7 +72,11 @@ export function trackNativeDebugger(configuration: string) {
             }
             const session = find();
             assert.ok(session, `LLDB attach for ${configuration} failed. ${latest()?.error ?? 'The adapter exited.'}`);
-            await until(() => verified.has(session.id));
+            try { await until(() => verified.has(session.id)); }
+            catch (error) {
+                const detail = attempts.get(session.id)?.breakpoint ?? 'VS Code has no source breakpoint response';
+                throw new Error(`LLDB did not verify a source breakpoint for ${configuration}. ${detail}.`, { cause: error });
+            }
             return session;
         },
         async breakpoint(session: vscode.DebugSession) {
