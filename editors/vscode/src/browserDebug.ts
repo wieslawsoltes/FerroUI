@@ -1,7 +1,6 @@
 import * as vscode from 'vscode';
-import { trackBrowserPause } from './browserDebugTracker';
-import type { BrowserPause } from './browserPause';
 import type { BrowserApp } from './browserTargets';
+import type { DebuggerPause } from './debuggerPause';
 import { errorMessage } from './protocol';
 import { ReloadDebugger } from './reloadDebugger';
 import type { ProcessOutput } from './reloadLog';
@@ -12,7 +11,7 @@ interface BrowserDebugFrame {
     port: number;
     url: string;
     hostPage?: string;
-    pause: BrowserPause;
+    pause: DebuggerPause;
     onPause(paused: boolean): void;
     onAttachmentChanged(): void;
 }
@@ -20,7 +19,7 @@ interface BrowserDebugFrame {
 /** Attach JS Debug to accepted browser documents and follow their generation on reload. */
 export class BrowserDebugger {
     private readonly debug: ReloadDebugger;
-    private readonly tracker: vscode.Disposable;
+    private readonly pauseSource = Symbol();
     private frame?: BrowserDebugFrame;
     private stopWatching?: () => void;
     private startOnFirstFrame = true;
@@ -28,22 +27,20 @@ export class BrowserDebugger {
     constructor(private readonly app: BrowserApp, private readonly output: ProcessOutput) {
         this.debug = new ReloadDebugger(output, {
             attachError: 'VS Code JavaScript Debug could not attach to the browser app.',
-            onDetach: () => this.frame?.pause.clear(),
-            onDidChange: () => this.frame?.onAttachmentChanged(),
+            onDidChange: () => {
+                const frame = this.frame;
+                if (!frame) return;
+                frame.pause.set(this.pauseSource, this.debug.statusFor(frame.generation).paused);
+                frame.onAttachmentChanged();
+            },
         });
-        this.tracker = vscode.debug.registerDebugAdapterTrackerFactory('*', { createDebugAdapterTracker: session => {
-            const frame = this.frame;
-            const current = () => this.frame === frame && frame !== undefined && this.debug.owns(session, frame.generation);
-            return frame && current() ? trackBrowserPause(frame.pause, current) : undefined;
-        } });
     }
 
-    isAttachedTo(generation: number | undefined): boolean {
-        return generation !== undefined && this.debug.isAttachedTo(generation);
-    }
+    statusFor(generation: number | undefined) { return this.debug.statusFor(generation); }
 
     accepted(frame: BrowserDebugFrame): void {
         this.stopWatching?.();
+        this.frame?.pause.clear();
         this.frame = frame;
         this.stopWatching = frame.pause.onDidChange(frame.onPause);
         if (this.startOnFirstFrame) {
@@ -88,13 +85,13 @@ export class BrowserDebugger {
     retire(): void {
         this.stopWatching?.();
         this.stopWatching = undefined;
+        this.frame?.pause.clear();
         this.frame = undefined;
         this.debug.detach();
     }
 
     close(): Promise<void> {
         this.retire();
-        this.tracker.dispose();
         return this.debug.close();
     }
 }

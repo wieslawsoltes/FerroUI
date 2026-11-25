@@ -1,3 +1,4 @@
+import { continueAppMessage, withInspectorDeadline, type PauseState } from './debuggerPause';
 import { localMcpEndpoint, type RuntimeMcpEndpoint, type RuntimeProcessIdentity } from './runtimeMcp';
 import { sendRuntimeRequest } from './runtimeHttp';
 
@@ -22,14 +23,15 @@ export interface RuntimeToolResult {
 }
 
 export interface RuntimeInspectionChannel {
-    tools(signal: AbortSignal): Promise<RuntimeToolDefinition[]>;
-    invoke(name: string, args: object, signal: AbortSignal): Promise<RuntimeToolResult>;
+    tools(signal: AbortSignal, pause?: PauseState): Promise<RuntimeToolDefinition[]>;
+    invoke(name: string, args: object, signal: AbortSignal, pause?: PauseState): Promise<RuntimeToolResult>;
 }
 
 export type RuntimeEndpoint = RuntimeMcpEndpoint | { channel: RuntimeInspectionChannel };
 
 const protocol = '2025-11-25';
 const responseLimit = 24 * 1024 * 1024;
+const httpTimeout = 5_000;
 
 export class RuntimeClient {
     private readonly lifetime = new AbortController();
@@ -40,7 +42,7 @@ export class RuntimeClient {
     private next = 0;
     private process?: RuntimeProcessIdentity;
 
-    constructor(readonly endpoint: RuntimeEndpoint) {
+    constructor(readonly endpoint: RuntimeEndpoint, private readonly pause?: PauseState) {
         if ('channel' in endpoint) return;
         if (!localMcpEndpoint(endpoint.url) || !/^[0-9a-f]{64}$/i.test(endpoint.token)
             || endpoint.devicePort !== undefined && (!Number.isInteger(endpoint.devicePort) || endpoint.devicePort < 1 || endpoint.devicePort > 65_535)) {
@@ -56,9 +58,10 @@ export class RuntimeClient {
     }
 
     async invoke(name: string, args: object, signal?: AbortSignal): Promise<RuntimeToolResult> {
+        this.requireRunning();
         const { endpoint } = this;
         let result: RuntimeToolResult;
-        if ('channel' in endpoint) result = await endpoint.channel.invoke(name, args, this.active(signal));
+        if ('channel' in endpoint) result = await endpoint.channel.invoke(name, args, this.active(signal), this.pause);
         else {
             await this.ensureConnected(endpoint);
             result = await this.request<RuntimeToolResult>(endpoint, 'tools/call', { name, arguments: args }, signal);
@@ -75,10 +78,15 @@ export class RuntimeClient {
     get processIdentity(): RuntimeProcessIdentity | undefined { return this.process; }
 
     async tools(signal?: AbortSignal): Promise<RuntimeToolDefinition[]> {
+        this.requireRunning();
         const { endpoint } = this;
-        const load = () => 'channel' in endpoint ? endpoint.channel.tools(this.active(signal)) : this.ensureConnected(endpoint)
+        const load = () => 'channel' in endpoint ? endpoint.channel.tools(this.active(signal), this.pause) : this.ensureConnected(endpoint)
             .then(() => this.request<{ tools: RuntimeToolDefinition[] }>(endpoint, 'tools/list', {}, signal)).then(result => result.tools);
         return this.catalog ??= load().catch(error => { this.catalog = undefined; throw error; });
+    }
+
+    private requireRunning(): void {
+        if (this.pause?.paused) throw new Error(continueAppMessage);
     }
 
     private active(signal?: AbortSignal): AbortSignal {
@@ -111,23 +119,27 @@ export class RuntimeClient {
 
     private async request<T>(endpoint: RuntimeMcpEndpoint, method: string, params: object, signal?: AbortSignal, notify = false): Promise<T> {
         const id = ++this.next;
-        const active = AbortSignal.any([this.active(signal), AbortSignal.timeout(5000)]);
         const body = JSON.stringify({ jsonrpc: '2.0', method, params, ...(notify ? {} : { id }) });
-        const response = await sendRuntimeRequest(endpoint, 'POST', { ...this.headers(endpoint), 'Content-Type': 'application/json' }, active, body);
-        if (!response.ok) {
-            void response.body?.cancel();
-            throw new Error(`The runtime returned HTTP ${response.status}.`);
-        }
-        this.session = response.headers.get('Mcp-Session-Id') ?? this.session;
-        if (notify) {
-            void response.body?.cancel();
-            return undefined as T;
-        }
-        const packet = JSON.parse(await readResponse(response)) as { id?: number; result?: T; error?: { message: string } };
-        if (packet.id !== id) throw new Error('The runtime reply did not match its request.');
-        if (packet.error) throw new Error(packet.error.message);
-        if (packet.result === undefined) throw new Error('The runtime returned no result.');
-        return packet.result;
+        const send = async (active: AbortSignal) => {
+            const response = await sendRuntimeRequest(endpoint, 'POST', { ...this.headers(endpoint), 'Content-Type': 'application/json' }, active, body);
+            if (!response.ok) {
+                void response.body?.cancel();
+                throw new Error(`The runtime returned HTTP ${response.status}.`);
+            }
+            this.session = response.headers.get('Mcp-Session-Id') ?? this.session;
+            if (notify) {
+                void response.body?.cancel();
+                return undefined as T;
+            }
+            const packet = JSON.parse(await readResponse(response)) as { id?: number; result?: T; error?: { message: string } };
+            if (packet.id !== id) throw new Error('The runtime reply did not match its request.');
+            if (packet.error) throw new Error(packet.error.message);
+            if (packet.result === undefined) throw new Error('The runtime returned no result.');
+            return packet.result;
+        };
+        const active = this.active(signal);
+        return this.pause ? withInspectorDeadline(this.pause, active, httpTimeout, send)
+            : send(AbortSignal.any([active, AbortSignal.timeout(httpTimeout)]));
     }
 
     dispose(): void {

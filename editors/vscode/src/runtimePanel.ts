@@ -1,10 +1,10 @@
 import * as vscode from 'vscode';
 import { validate } from './agentSchema';
-import { continueBrowserMessage } from './browserPause';
+import { continueAppMessage } from './debuggerPause';
 import type { HotReload } from './hotReload';
 import { keyboardInputSchema, type KeyboardFocus } from './previewKeyboardProtocol';
 import { errorMessage } from './protocol';
-import { RuntimeClient } from './runtimeClient';
+import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
 import { readRuntimeInspection, showLivePropertyTrace, showLiveTemplates } from './runtimeInspection';
 import { runtimeViewChangeSchema } from './runtimeMcpCatalog';
@@ -45,6 +45,7 @@ export class RuntimePanel implements vscode.Disposable {
         private readonly pinned: AppRuntime | undefined, private readonly closed: () => void) {
         this.subscriptions = [
             connections.onDidChange(() => this.reset()),
+            connections.onDidChangeDebugger(() => this.postState()),
             reload.onDidChangeRuns(() => this.postState()),
         ];
     }
@@ -117,8 +118,7 @@ export class RuntimePanel implements vscode.Disposable {
         }
         this.invalidateFrame();
         this.client?.dispose();
-        const endpoint = target && this.connections.get(target);
-        this.client = endpoint ? new RuntimeClient(endpoint) : undefined;
+        this.client = target ? this.connections.client(target) : undefined;
         this.postState();
         this.schedule(0, reconnect);
     }
@@ -147,10 +147,11 @@ export class RuntimePanel implements vscode.Disposable {
         const options = targets.map(target => ({ runtime: target.runtime,
             label: targets.some(other => other !== target && other.label === target.label)
                 ? `${target.label} · ${target.pid ?? target.runtime.split(':')[1].slice(0, 8)}` : target.label }));
-        const paused = Boolean(summary?.browser?.paused);
+        const paused = summary?.debuggerPaused === true;
         if (paused !== this.debuggerPaused) {
             this.debuggerPaused = paused;
             this.inputVersion++;
+            this.touch();
             this.schedule(0);
         }
         const status = summary ? `${summary.status}${summary.pid && !summary.available ? ' · Inspector unavailable' : ''}`
@@ -179,7 +180,7 @@ export class RuntimePanel implements vscode.Disposable {
         try {
             if (!client) return;
             const windows = await client.call<RuntimeNode[]>('list_windows');
-            if (epoch !== this.epoch) return;
+            if (epoch !== this.epoch || this.debuggerPaused) return;
             if (windows.length !== this.windows.length || windows.some((window, i) => window.node_id !== this.windows[i]?.node_id
                 || window.name !== this.windows[i]?.name || window.type !== this.windows[i]?.type)) this.touch();
             this.windows = windows;
@@ -197,7 +198,7 @@ export class RuntimePanel implements vscode.Disposable {
                 client.call<string>('screenshot', { node_id: root.node_id }),
                 client.supports('window_keyboard').catch(() => false),
             ]);
-            if (epoch !== this.epoch) return;
+            if (epoch !== this.epoch || this.debuggerPaused) return;
             if (typeof png !== 'string' || !png.startsWith('iVBORw0KGgo')) throw new Error('The app inspector did not return a native PNG.');
             const keyboardScope = keyboard ? epoch : undefined;
             if (this.frame?.png === png && this.frame.keyboardScope === keyboardScope
@@ -218,9 +219,9 @@ export class RuntimePanel implements vscode.Disposable {
     }
 
     private async updateView(change: RuntimeViewChange, signal?: AbortSignal, echoFilters = true): Promise<void> {
+        if (this.debuggerPaused && change.action !== 'filter' && change.action !== 'mode') throw new Error(continueAppMessage);
         switch (change.action) {
             case 'refresh':
-                if (this.debuggerPaused) throw new Error(continueBrowserMessage);
                 this.reset(true);
                 return;
             case 'mode':
@@ -292,6 +293,7 @@ export class RuntimePanel implements vscode.Disposable {
         }
         if (message.type === 'keyboard') return this.keyboard(message);
         if (!('token' in message) || !this.client || !this.frame || this.frame.token !== message.token) return;
+        if (this.debuggerPaused) { this.post({ type: 'problem', message: continueAppMessage }); return; }
         const client = this.client;
         const epoch = this.epoch;
         const frame = this.frame;
@@ -407,7 +409,7 @@ export class RuntimePanel implements vscode.Disposable {
         const inspection = await readRuntimeInspection(client, this.authoredSource, this.target, selection, signal);
         signal?.throwIfAborted();
         const frame = this.frame;
-        if (!frame || epoch !== this.epoch || request !== this.inspectionRequest
+        if (!frame || this.debuggerPaused || epoch !== this.epoch || request !== this.inspectionRequest
             || frame.token !== token && !findNode(frame, selection.node)) return false;
         this.inspection = { ...inspection, revision: request };
         this.present({ inspection: inspection.view });

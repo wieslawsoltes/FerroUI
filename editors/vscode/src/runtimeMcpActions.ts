@@ -1,4 +1,4 @@
-import { RuntimeClient } from './runtimeClient';
+import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
 import type { AppRuntime } from './runtimeTargets';
 
@@ -47,7 +47,7 @@ export class RuntimeMcpActions {
         const subscription = this.connections.onDidChange(() => {
             if (!session.current()) cancellation.abort(retired);
         });
-        const client = new RuntimeClient(session.endpoint);
+        const client = session.createClient();
         try {
             const result = await action(client, session.generation, active);
             active.throwIfAborted();

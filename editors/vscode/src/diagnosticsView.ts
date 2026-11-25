@@ -5,7 +5,6 @@ import type { DesignerWorkbench } from './designerWorkbench';
 import { DiagnosticsProfile, type ProfileItem } from './diagnosticsProfile';
 import { errorMessage, type PreviewFinding } from './protocol';
 import type { ReloadHistory, ReloadRecord } from './reloadHistory';
-import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
 import { readRuntimeDiagnostics, runtimeLogText, type RuntimeFrameStats, type RuntimeLog } from './runtimeDiagnostics';
 import type { RuntimeSourceEditor } from './runtimeSource';
@@ -57,11 +56,10 @@ export class DiagnosticsView implements vscode.TreeDataProvider<Item>, vscode.Di
             return recent.length ? recent.map(record => ({ type: 'reload', record })) : [{ type: 'notice', label: 'Save a file while a managed app is running' }];
         }
         const runtime = this.runtimes.defaultRuntime();
-        const endpoint = runtime && this.runtimes.get(runtime);
-        if (!endpoint) return [{ type: 'notice', label: 'Start or attach a FerroUI application with MCP' }];
         try {
             if (!this.current) {
-                const client = new RuntimeClient(endpoint);
+                const client = runtime && this.runtimes.client(runtime);
+                if (!client) return [{ type: 'notice', label: 'Start or attach a FerroUI application with MCP' }];
                 this.current = readRuntimeDiagnostics(client).finally(() => client.dispose());
             }
             const request = this.current;

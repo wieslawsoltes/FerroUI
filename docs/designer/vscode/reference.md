@@ -291,7 +291,7 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 1. Use `ferroui_reload_targets` to find a target. Start it with `ferroui_reload_control` and `action: "start"`, or use `start_debug` with a Rust attach configuration. For an independent app or Studio, call `ferroui_runtime_attach` with its loopback `url`, bearer `token`, and optional `label`. Only share the token with an agent authorized to inspect that app.
 2. Read `ferroui_app_sessions`. Use the returned `app_session` for `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history`. Supply the exact ID for controls such as `select`, `attach_debug`, `rebuild`, or `stop` when several managed apps are running. Use `stop_all` to stop the managed apps together.
 3. Use the returned `runtime` to pin a Live App editor with `ferroui_runtime_open`, inspect a mapped property, or disconnect one attachment with `ferroui_runtime_detach`. Pass the same `runtime` and the current connection generation for checked source and profiler operations. A replacement process retains the session ID and issues a new generation. `managed` follows the selected app and `attached` follows the most recent attachment.
-4. Read `debuggerAttached` on the exact entry in `runtimes` to check its editor-owned debugger. A supported session reports `true` when its current process or page has a debugger, or `false` while it is detached or waiting to attach. Chromium breakpoint state is available in `browser.paused`. Reading these fields works with editor writes disabled.
+4. Read `debuggerAttached` and `debuggerPaused` on the exact entry in `runtimes` to check its editor-owned debugger. Use `debuggerPaused` to distinguish a breakpoint from an app that can answer inspector requests. Continue in VS Code before sending a new inspector request to that session. Reading these fields works with editor writes disabled.
 
 ### Detach a debugger with MCP
 
@@ -362,7 +362,7 @@ The debugger stops following future replacements after detach. Use `ferroui_app_
 ### Control the Live App editor with MCP
 
 1. Open a session from **App Sessions**, or call `ferroui_runtime_open` with an exact `runtime` from `ferroui_app_sessions`.
-2. Call `ferroui_live_app_view` with that runtime. It reports the current window list, hierarchy, filters, mode, inspection category, selection, and the accepted `frame`. A null frame means the editor is waiting for a window or rendering a new tree. For a managed Chromium debugger, `debuggerPaused` reports whether the app is paused on its retained frame. Continue in the debugger before sending more app input.
+2. Call `ferroui_live_app_view` with that runtime. It reports the current window list, hierarchy, filters, mode, inspection category, selection, and the accepted `frame`. A null frame means the editor is waiting for a window or rendering a new tree. When `debuggerPaused` is true, Live App retains the frame. Continue in VS Code before sending more app input, then read the updated view revision.
 3. With `ferroui.mcp.allowWrites` enabled, call `ferroui_live_app_control` with the same runtime, `expected_generation` and `expected_revision` from the view, and one `change` from the table. Each call returns the updated editor state. Agent commands can update a pinned editor while its tab is in the background.
 
 | Action | Fields in `change` |

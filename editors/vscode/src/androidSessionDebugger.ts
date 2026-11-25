@@ -13,7 +13,7 @@ export class AndroidSessionDebugger {
     constructor(private readonly bridge: AndroidBridge, private readonly packageId: string,
         private readonly output: Pick<vscode.OutputChannel, 'appendLine'>, private readonly changed: () => void) {}
 
-    isAttachedTo(receipt: AndroidReceipt): boolean { return this.attachment?.isAttachedTo(receipt) ?? false; }
+    statusFor(receipt: AndroidReceipt) { return this.attachment?.statusFor(receipt); }
 
     async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, receipt: AndroidReceipt,
         symbols: readonly string[], signal: AbortSignal): Promise<void> {

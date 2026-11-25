@@ -2,7 +2,7 @@ import * as vscode from 'vscode';
 import { BrowserDebugger } from './browserDebug';
 import { BrowserDevelopment } from './browserDevelopment';
 import { BrowserInspection } from './browserInspection';
-import { BrowserPause } from './browserPause';
+import { DebuggerPause } from './debuggerPause';
 import { attachBrowser, launchBrowser, type BrowserPage } from './browserProcess';
 import { browserProfiles, type BrowserApp, type BrowserMode, type BrowserRequest, type ServedBrowserApp } from './browserTargets';
 import type { ReloadHistory } from './reloadHistory';
@@ -100,14 +100,14 @@ export class BrowserSessions implements vscode.Disposable {
         try {
             const browser = await page;
             void browser.closed.then(() => this.retire(key, session));
-            const pause = appDebugger && new BrowserPause();
+            const pause = appDebugger && new DebuggerPause();
             const channel = await BrowserInspection.open(browser, app.url, active, message => output.appendLine(message), pause);
             await verifyRuntime({ channel }, active);
             active.throwIfAborted();
             const runtime = this.connections.addPlatform({ kind: 'browser', browser: {
                 folder: app.folder, profile: app.id, url: app.url, launched: mode !== 'attach',
                 ...(appDebugger ? { debuggable: true } : {}),
-            } }, app.label, { channel }, appDebugger && (generation => appDebugger.isAttachedTo(generation)));
+            } }, app.label, { channel }, appDebugger && (generation => appDebugger.statusFor(generation)));
             session.runtime = runtime.runtime;
             const generation = runtime.generation;
             if (browser.debugPort && pause && generation !== null) appDebugger?.accepted({

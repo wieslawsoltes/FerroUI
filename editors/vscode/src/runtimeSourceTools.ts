@@ -1,4 +1,4 @@
-import { RuntimeClient } from './runtimeClient';
+import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
 import type { AppRuntime } from './runtimeTargets';
 import type { RuntimeNode } from './runtimeProtocol';
@@ -45,8 +45,8 @@ export class RuntimeSourceTools {
     private async useRuntime<T>(target: RuntimeTarget, signal: AbortSignal,
         action: (client: RuntimeClient, generation: number, current: () => boolean, runtime: AppRuntime) => Promise<T>): Promise<T> {
         signal.throwIfAborted();
-        const { endpoint, generation, current, runtime } = this.runtimes.session(target);
-        const client = new RuntimeClient(endpoint);
+        const { createClient, generation, current, runtime } = this.runtimes.session(target);
+        const client = createClient();
         try { return await action(client, generation, current, runtime); }
         finally { client.dispose(); }
     }

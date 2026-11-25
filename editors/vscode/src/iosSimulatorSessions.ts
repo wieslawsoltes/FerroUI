@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { detachedDebugger } from './debuggerPause';
 import { buildIosBundle, type IosBundle } from './iosBuild';
 import { simulatorAppIsRunning, simulatorAppPid } from './iosSimulatorDebug';
 import { deploySimulatorApp, installSimulatorApp, iosSimulators, launchSimulatorApp, type ManagedSimulatorProcess } from './iosSimulatorProcess';
@@ -109,7 +110,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             workspaceFolders(app.folder);
             if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
             const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: this.target(launch) }, this.label(launch), endpoint,
-                () => launch.debugger?.attached ?? false);
+                () => launch.debugger?.status ?? detachedDebugger);
             launch.runtime = runtime.runtime;
             this.resumeDebugger(launch);
             return runtime;
@@ -193,7 +194,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
         const target = build.target ?? (process.arch === 'arm64' ? 'aarch64-apple-ios-sim' : 'x86_64-apple-ios');
         const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch), () => {
             const pid = launch.development?.current?.pid;
-            return pid !== undefined && launch.debugger?.isAttachedTo(pid) === true;
+            return launch.debugger?.statusFor(pid) ?? detachedDebugger;
         });
         const { runtime } = pending;
         launch.runtime = runtime;

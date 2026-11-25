@@ -3,6 +3,7 @@ import * as vscode from 'vscode';
 import type { AndroidBridge, AndroidReceipt } from './androidBridge';
 import { startAndroidDebugServer, type AndroidDebugServer } from './androidDebugServer';
 import { androidDebugSymbols } from './androidDebugSymbols';
+import { detachedDebugger } from './debuggerPause';
 import { ReloadDebugger } from './reloadDebugger';
 
 /** Own the device server, forwarding rule and editor debugger for one attachment. */
@@ -23,7 +24,9 @@ export class AndroidDebugger {
         });
     }
 
-    isAttachedTo(receipt: AndroidReceipt): boolean { return this.receipt === receipt && this.debugger.isAttachedTo(receipt.pid); }
+    statusFor(receipt: AndroidReceipt) {
+        return this.receipt === receipt ? this.debugger.statusFor(receipt.pid) : detachedDebugger;
+    }
 
     attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, signal: AbortSignal): Promise<void> {
         return this.starting = this.start(folder, configuration, AbortSignal.any([signal, this.stop.signal, AbortSignal.timeout(35_000)]));

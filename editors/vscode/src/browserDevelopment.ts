@@ -4,7 +4,7 @@ import { Uri } from 'vscode';
 import { buildBrowserSite, resolveBrowserBuild, type BrowserBuildTarget, type BuiltBrowserSite } from './browserBuild';
 import type { BrowserDebugger } from './browserDebug';
 import { BrowserInspection } from './browserInspection';
-import { BrowserPause } from './browserPause';
+import { DebuggerPause } from './debuggerPause';
 import { ManagedBrowser, type BrowserPage } from './browserProcess';
 import { BrowserSites, type PublishedBrowserSite } from './browserSites';
 import type { DevelopmentBrowserApp } from './browserTargets';
@@ -54,7 +54,7 @@ export class BrowserDevelopment {
         this.runtime = connections.beginBrowser({
             folder: app.folder, profile: app.id, launched: true, development: true,
             ...(appDebugger ? { debuggable: true } : {}),
-        }, app.label, appDebugger && (generation => appDebugger.isAttachedTo(generation))).runtime;
+        }, app.label, appDebugger && (generation => appDebugger.statusFor(generation))).runtime;
     }
 
     rebuild(delay = 0): void {
@@ -131,7 +131,7 @@ export class BrowserDevelopment {
             published = await this.sites!.publish(artifact.site, this.app.build.threads);
             page = await browser.openPage(published.url, this.app, active);
             this.status('Starting browser candidate');
-            const pause = this.appDebugger && new BrowserPause();
+            const pause = this.appDebugger && new DebuggerPause();
             const channel = await BrowserInspection.open(page, published.url, active, message => this.output.appendLine(message), pause);
             await verifyRuntime({ channel }, active);
             const presented = Date.now();

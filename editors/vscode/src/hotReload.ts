@@ -9,7 +9,7 @@ import { reloadWatchPattern } from './reloadScope';
 import { localFolders, workspaceFolders } from './workspacePaths';
 
 const stopped = { target: null, pid: null, status: 'Stopped', selection: null, mcpAvailable: false,
-    process_generation: null, debuggerAttached: false };
+    process_generation: null, debuggerAttached: false, debuggerPaused: false };
 
 interface ReloadRequest extends CargoSelection {
     action: string;

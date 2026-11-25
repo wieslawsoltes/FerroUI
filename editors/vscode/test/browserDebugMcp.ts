@@ -68,7 +68,9 @@ export async function verifyBrowserDebug(): Promise<void> {
         const initial = await accepted();
         const old = await breakpoint(0, initial);
         await until(async () => (await current())?.debuggerAttached === true);
-        assert.equal((await current())?.browser?.paused, true, 'The accepted Chromium page reports its debugger pause.');
+        const stopped = await current();
+        assert.equal(stopped?.browser?.paused, true, 'The accepted Chromium page reports its debugger pause.');
+        assert.equal(stopped?.debuggerPaused, true, 'The session exposes the same pause state as native apps.');
         const blocked = await invoke('ferroui_runtime_query', { runtime, expected_generation: initial.generation, tool: 'list_windows' });
         assert.ok(blocked.isError);
         assert.match(blocked.content[0]?.text ?? '', /paused in the debugger/);
@@ -134,7 +136,9 @@ export async function verifyBrowserDebug(): Promise<void> {
         await until(() => terminated.has(next.id));
         assert.equal((await current())?.generation, replacement.generation);
         assert.equal((await current())?.debuggerAttached, false);
-        assert.ok(!(await current())?.browser?.paused);
+        const resumed = await current();
+        assert.equal(resumed?.debuggerPaused, false);
+        assert.ok(!resumed?.browser?.paused);
         const live = runtimeApp(mcp, replacement);
         await live.click((await live.find('DispatchOrder')).node_id);
         assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 1');

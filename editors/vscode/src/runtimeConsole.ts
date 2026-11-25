@@ -1,4 +1,5 @@
 import type { Readable, Writable } from 'node:stream';
+import { withInspectorDeadline, type PauseState } from './debuggerPause';
 import type { RuntimeInspectionChannel, RuntimeToolDefinition, RuntimeToolResult } from './runtimeClient';
 import { mcpEndpointPrefix } from './runtimeMcp';
 
@@ -6,6 +7,7 @@ const receiptPrefix = 'FERROUI_MCP_DEVICE_V1=';
 const protocol = '2025-11-25';
 const requestLimit = 1024 * 1024;
 const lineLimit = 24 * requestLimit;
+const consoleTimeout = 12_000;
 
 interface Reply { id?: number; jsonrpc?: string; result?: unknown; error?: { message?: string } }
 
@@ -44,27 +46,27 @@ export class RuntimeConsole implements RuntimeInspectionChannel {
         });
     }
 
-    async tools(signal: AbortSignal): Promise<RuntimeToolDefinition[]> {
-        await this.connect(signal);
-        const { tools } = await this.request<{ tools: RuntimeToolDefinition[] }>('tools/list', {}, signal);
+    async tools(signal: AbortSignal, pause?: PauseState): Promise<RuntimeToolDefinition[]> {
+        await this.connect(signal, pause);
+        const { tools } = await this.request<{ tools: RuntimeToolDefinition[] }>('tools/list', {}, signal, pause);
         if (!Array.isArray(tools)) throw new Error('The device inspector did not return a tool catalog.');
         return tools;
     }
 
-    async invoke(name: string, args: object, signal: AbortSignal): Promise<RuntimeToolResult> {
-        await this.connect(signal);
-        return this.request('tools/call', { name, arguments: args }, signal);
+    async invoke(name: string, args: object, signal: AbortSignal, pause?: PauseState): Promise<RuntimeToolResult> {
+        await this.connect(signal, pause);
+        return this.request('tools/call', { name, arguments: args }, signal, pause);
     }
 
-    private connect(signal: AbortSignal): Promise<void> {
+    private connect(signal: AbortSignal, pause?: PauseState): Promise<void> {
         return this.connection ??= (async () => {
             if (this.pid === undefined) throw new Error('The device app has not acknowledged its launch.');
             const result = await this.request<{ protocolVersion: string }>('initialize', {
                 protocolVersion: protocol, capabilities: {}, clientInfo: { name: 'FerroUI Live App', version: '1' },
-            }, signal);
+            }, signal, pause);
             if (typeof result?.protocolVersion !== 'string') throw new Error('The device inspector could not initialize MCP.');
             await this.write({ jsonrpc: '2.0', method: 'notifications/initialized' });
-        })();
+        })().catch(error => { this.connection = undefined; throw error; });
     }
 
     close(reason = new Error('The app console closed.')): void {
@@ -74,8 +76,14 @@ export class RuntimeConsole implements RuntimeInspectionChannel {
         this.input.destroy();
     }
 
-    private request<T>(method: string, params: object, signal: AbortSignal): Promise<T> {
-        const active = AbortSignal.any([signal, this.lifetime.signal, AbortSignal.timeout(12_000)]);
+    private request<T>(method: string, params: object, signal: AbortSignal, pause: PauseState | undefined): Promise<T> {
+        const active = AbortSignal.any([signal, this.lifetime.signal]);
+        const send = (request: AbortSignal) => this.send<T>(method, params, request);
+        return pause ? withInspectorDeadline(pause, active, consoleTimeout, send)
+            : send(AbortSignal.any([active, AbortSignal.timeout(consoleTimeout)]));
+    }
+
+    private send<T>(method: string, params: object, active: AbortSignal): Promise<T> {
         active.throwIfAborted();
         const id = ++this.next;
         return new Promise((resolve, reject) => {

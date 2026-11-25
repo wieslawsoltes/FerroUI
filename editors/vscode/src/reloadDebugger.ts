@@ -1,6 +1,8 @@
 import { randomUUID } from 'node:crypto';
 import { isDeepStrictEqual } from 'node:util';
 import * as vscode from 'vscode';
+import { DebuggerPause, detachedDebugger, type DebuggerStatus } from './debuggerPause';
+import { trackDebuggerPause } from './debuggerPauseTracker';
 
 export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
 
@@ -16,13 +18,21 @@ export class ReloadDebugger implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
     private attachment?: Attachment;
     private active?: vscode.DebugSession;
+    private readonly pause = new DebuggerPause();
     private transition = Promise.resolve();
     private readonly instance = randomUUID();
     private closing?: Promise<void>;
 
     constructor(private readonly output: Pick<vscode.OutputChannel, 'appendLine'>,
         private readonly options: DebuggerOptions = {}) {
+        const stopWatching = this.pause.onDidChange(() => this.options.onDidChange?.());
         this.subscriptions = [
+            { dispose: stopWatching },
+            vscode.debug.registerDebugAdapterTrackerFactory('*', { createDebugAdapterTracker: session => {
+                const generation = this.attachment?.generation;
+                if (generation === undefined || !this.owns(session, generation)) return;
+                return trackDebuggerPause(this.pause, () => this.owns(session, generation));
+            } }),
             vscode.debug.onDidStartDebugSession(session => {
                 if (session.configuration.ferrouiManagedInstance !== this.instance) return;
                 if (session.parentSession?.configuration.ferrouiManagedInstance === this.instance) return;
@@ -33,7 +43,7 @@ export class ReloadDebugger implements vscode.Disposable {
             vscode.debug.onDidTerminateDebugSession(session => {
                 if (this.active?.id === session.id) {
                     this.attachment = undefined;
-                    this.setActive(undefined);
+                    this.clearActive();
                     this.options.onDetach?.();
                 }
             }),
@@ -63,9 +73,13 @@ export class ReloadDebugger implements vscode.Disposable {
 
     get attached(): boolean { return this.active !== undefined; }
 
-    isAttachedTo(generation: number): boolean { return this.attached && this.follows(generation); }
+    get status(): DebuggerStatus { return { attached: this.attached, paused: this.attached && this.pause.paused }; }
 
-    owns(session: vscode.DebugSession, generation: number): boolean {
+    statusFor(generation: number | undefined): DebuggerStatus {
+        return generation !== undefined && this.follows(generation) ? this.status : detachedDebugger;
+    }
+
+    private owns(session: vscode.DebugSession, generation: number): boolean {
         const attachment = this.attachment;
         if (attachment?.generation !== generation) return false;
         for (let owner: vscode.DebugSession | undefined = session; owner; owner = owner.parentSession) {
@@ -85,7 +99,7 @@ export class ReloadDebugger implements vscode.Disposable {
         const old = this.active;
         const replacement = { ...attached, id: randomUUID(), generation, configuration: configuration ?? attached.configuration };
         this.attachment = replacement;
-        this.setActive(undefined);
+        this.clearActive();
         const step = this.transition.then(async () => {
             if (old) await this.stop(old);
             if (this.attachment === replacement) await this.start(replacement, target);
@@ -109,7 +123,7 @@ export class ReloadDebugger implements vscode.Disposable {
             if (this.attachment === attachment) {
                 const active = this.active;
                 this.attachment = undefined;
-                this.setActive(undefined);
+                this.clearActive();
                 if (active) await this.stop(active);
             }
             throw error;
@@ -119,7 +133,7 @@ export class ReloadDebugger implements vscode.Disposable {
     detach(): Promise<void> {
         const active = this.active;
         this.attachment = undefined;
-        this.setActive(undefined);
+        this.clearActive();
         if (active) this.transition = this.transition.then(() => this.stop(active));
         return this.transition;
     }
@@ -131,10 +145,17 @@ export class ReloadDebugger implements vscode.Disposable {
         return this.transition;
     }
 
-    private setActive(session: vscode.DebugSession | undefined): void {
-        if (this.active?.id === session?.id) return;
+    private setActive(session: vscode.DebugSession): void {
+        if (this.active?.id === session.id) return;
         this.active = session;
         this.options.onDidChange?.();
+    }
+
+    private clearActive(): void {
+        const attached = this.attached;
+        this.active = undefined;
+        if (this.pause.paused) this.pause.clear();
+        else if (attached) this.options.onDidChange?.();
     }
 
     private async stop(session: vscode.DebugSession): Promise<void> {

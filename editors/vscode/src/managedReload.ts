@@ -52,15 +52,13 @@ export class ManagedReload {
 
     get pid(): number | undefined { return this.session?.pid ?? this.registered?.pid; }
     get processGeneration(): number | undefined { return this.session?.processGeneration ?? this.registered?.processGeneration; }
-    get debuggerAttached(): boolean {
-        const generation = this.processGeneration;
-        return generation !== undefined && this.debugger.isAttachedTo(generation);
-    }
+    get debuggerStatus() { return this.debugger.statusFor(this.processGeneration); }
 
     get state() {
+        const { attached, paused } = this.debuggerStatus;
         return { session: this.id, runtime: this.runtime, target: this.label, folder: this.folder.uri.toString(),
             kind: this.recipe.kind, pid: this.pid ?? null, status: this.message, problem: this.problem,
-            process_generation: this.processGeneration ?? null, debuggerAttached: this.debuggerAttached,
+            process_generation: this.processGeneration ?? null, debuggerAttached: attached, debuggerPaused: paused,
             selection: this.recipe.kind === 'cargo' ? { ...describeCargoTarget(this.recipe.target), features: this.recipe.target.features } : null,
             mcpAvailable: this.endpoint !== undefined };
     }

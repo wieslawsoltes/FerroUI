@@ -1,6 +1,6 @@
 import * as vscode from 'vscode';
 import { errorMessage } from './protocol';
-import { RuntimeClient } from './runtimeClient';
+import type { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections, RuntimeTarget } from './runtimeConnections';
 import type { RuntimeNode } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
@@ -137,9 +137,9 @@ export class RuntimeProfiles implements vscode.Disposable {
         action: (client: RuntimeClient, generation: number, active: AbortSignal, selected: AppRuntime) => Promise<T>): Promise<T> {
         const active = AbortSignal.any([signal, this.lifetime.signal]);
         active.throwIfAborted();
-        const { endpoint, generation, current, runtime: selected } = this.runtimes.session(runtime);
+        const { createClient, generation, current, runtime: selected } = this.runtimes.session(runtime);
         if (expected !== undefined && expected !== generation) throw new Error('The application connection changed. Choose its current window.');
-        const client = new RuntimeClient(endpoint);
+        const client = createClient();
         try {
             const result = await action(client, generation, active, selected);
             active.throwIfAborted();

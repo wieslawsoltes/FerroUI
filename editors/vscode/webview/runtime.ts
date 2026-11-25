@@ -1,3 +1,4 @@
+import { continueAppMessage } from '../src/debuggerPause';
 import { runtimeFilterLength, type FromRuntime, type RuntimeFrame, type RuntimeHierarchy, type RuntimeInspection,
     type RuntimeNode, type RuntimeProperty, type RuntimeViewChange, type ToRuntime } from '../src/runtimeProtocol';
 import type { AppRuntime } from '../src/runtimeTargets';
@@ -11,6 +12,7 @@ const target = element<HTMLSelectElement>('runtime-target');
 const windowChoice = element<HTMLSelectElement>('runtime-window');
 const hierarchy = element<HTMLSelectElement>('runtime-hierarchy');
 const detail = element<HTMLSelectElement>('runtime-detail');
+const refresh = element<HTMLButtonElement>('runtime-refresh');
 const tree = element('runtime-tree');
 const filter = element<HTMLInputElement>('runtime-filter');
 const propertyFilter = element<HTMLInputElement>('runtime-property-filter');
@@ -39,7 +41,10 @@ let currentGeneration: number | undefined;
 let currentWindow: number | undefined;
 let debuggerPaused = false;
 
-const send = (message: FromRuntime) => vscode.postMessage(message);
+const send = (message: FromRuntime) => {
+    if (debuggerPaused && 'token' in message) showProblem(continueAppMessage);
+    else vscode.postMessage(message);
+};
 const keyboard = new RuntimeKeyboard(surface, interactMode, send, showProblem);
 element('runtime-keyboard').append(keyboard.button);
 const changeView = (change: RuntimeViewChange) => {
@@ -201,8 +206,12 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
             windowChoice.replaceChildren(...windows);
         }
         windowChoice.value = String(message.root ?? '');
-        windowChoice.disabled = windows.length < 2;
+        if (debuggerPaused && !message.debuggerPaused && problem.textContent === continueAppMessage) problem.hidden = true;
         debuggerPaused = message.debuggerPaused;
+        surface.toggleAttribute('data-paused', debuggerPaused);
+        windowChoice.disabled = debuggerPaused || windows.length < 2;
+        refresh.disabled = hierarchy.disabled = debuggerPaused;
+        detail.disabled = debuggerPaused || !frame;
         element('runtime-status').textContent = message.status;
         if (currentTarget !== message.target || currentWindow !== message.root || currentGeneration !== message.generation) {
             if (currentTarget !== message.target) main.hidden = true;
@@ -252,7 +261,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         decoding = undefined;
         main.hidden = false;
         main.setAttribute('aria-busy', 'false');
-        detail.disabled = false;
+        detail.disabled = debuggerPaused;
         problem.hidden = true;
         if (changed) renderTree();
         if (pendingInspection?.token === frame.token) showInspection(pendingInspection);
@@ -266,7 +275,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
 
 element('runtime-start').onclick = () => send({ type: 'start' });
 element('runtime-attach').onclick = () => send({ type: 'attach' });
-element('runtime-refresh').onclick = () => changeView({ action: 'refresh' });
+refresh.onclick = () => changeView({ action: 'refresh' });
 reveal.onclick = () => { if (frame && selected !== undefined) send({ type: 'reveal', token: frame.token, node: selected }); };
 templates.onclick = () => { if (frame && selected !== undefined) send({ type: 'templates', token: frame.token, node: selected }); };
 target.onchange = () => send({ type: 'target', target: target.value as AppRuntime });
@@ -294,12 +303,13 @@ image.onclick = event => {
     if (interaction) keyboard.refreshFocus();
 };
 image.addEventListener('wheel', event => {
-    if (!interaction || !frame) return;
+    if (!interaction || !frame || debuggerPaused) return;
     event.preventDefault();
     send({ type: 'scroll', token: frame.token, node: selected ?? frame.root.node_id, x: -event.deltaX / 100, y: -event.deltaY / 100 });
 }, { passive: false });
 form.onsubmit = event => {
     event.preventDefault();
+    if (debuggerPaused) { showProblem(continueAppMessage); return; }
     if (!frame || selected === undefined || !input.value) return;
     const target = { token: frame.token, node: selected };
     send(element<HTMLSelectElement>('runtime-input-kind').value === 'key'

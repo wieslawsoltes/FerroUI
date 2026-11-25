@@ -1,4 +1,5 @@
 import * as vscode from 'vscode';
+import { detachedDebugger } from './debuggerPause';
 import type { IosAppRun } from './iosAppProfiles';
 import type { IosBundle } from './iosBuild';
 import { attachIosDeviceInspector, iosInspectorCredentials, watchIosDeviceInspector, type IosDeviceAttachment, type IosDeviceAttachRequest } from './iosDeviceAttachment';
@@ -160,14 +161,14 @@ export class IosDeviceSessions implements vscode.Disposable {
 
     private publish(launch: Launch, pid: number, endpoint: IosDeviceProcess['endpoint'], attached?: true): RuntimeSummary {
         const runtime = this.connections.addPlatform({ kind: 'ios-device', iosDevice: { ...this.target(launch), pid, attached } },
-            this.label(launch), endpoint, generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
+            this.label(launch), endpoint, generation => launch.debugger?.statusFor(generation) ?? detachedDebugger);
         launch.runtime = runtime.runtime;
         return runtime;
     }
 
     private startDevelopment(launch: Launch, label: string): RuntimeSummary {
         const pending = this.connections.beginIosDevice({ ...this.target(launch), development: true }, label,
-            generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
+            generation => launch.debugger?.statusFor(generation) ?? detachedDebugger);
         const runtime = launch.runtime = pending.runtime;
         launch.development = iosDeviceDevelopment({
             app: launch.app, device: launch.device, bridge: this.bridge, connections: this.connections, runtime,

@@ -1,5 +1,5 @@
 import type { DebugAdapterTracker } from 'vscode';
-import type { BrowserPause } from './browserPause';
+import type { DebuggerPause } from './debuggerPause';
 
 const resumeCommands = new Set(['continue', 'next', 'stepIn', 'stepOut', 'stepBack', 'reverseContinue', 'goto', 'restartFrame']);
 
@@ -17,7 +17,7 @@ interface AdapterMessage {
     body?: { threadId?: number; allThreadsContinued?: boolean; reason?: string };
 }
 
-export function trackBrowserPause(pause: BrowserPause, current: () => boolean): DebugAdapterTracker {
+export function trackDebuggerPause(pause: DebuggerPause, current: () => boolean): DebugAdapterTracker {
     const adapter = Symbol();
     const stopped: Stops = new Map();
     const resumes = new Map<number, Resume>();

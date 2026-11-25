@@ -161,11 +161,19 @@ The XAML app must register a `ReloadManifest` and a `HotReloadSession` and ackno
 
 ![App Sessions offers debugger detachment for Account Desk while both native apps are running](../images/vscode-app-session-detach.png)
 
-An attached debugger adds a debug icon and status to its app row. Hover or focus a supported session to read its attachment state. Chromium shows **Paused in debugger** at a breakpoint. **Stop Debugging** updates that session’s row while Live App stays connected. If a debugger follows a rebuild, the row reports the new attachment after the replacement connects.
+An attached debugger adds a debug icon to its app row. Hover or focus the row to read its attachment state. At a breakpoint, **App Sessions** and **Live App** show **Paused in debugger** for that session. **Stop Debugging** updates the row while Live App stays connected. If the debugger follows a rebuild, the row reports the new attachment after the replacement connects.
 
 A save can affect one app or several. The extension tracks each app’s Cargo package and local dependencies, along with XAML watched by that process. Builds sharing one Cargo output directory take turns through compilation and executable staging. Each running app keeps its own PID, reload outcomes, debugger, and window selection. [Target app sessions with MCP](reference.md#target-app-sessions-with-mcp)
 
 ![Account Desk reports an attached debugger after rebuilding. Routing Queue still displays its live frame in a separate editor group.](../images/vscode-app-session-debugger-status.png)
+
+### Inspect a paused app
+
+When a debugger opened by FerroUI stops at a breakpoint, Live App keeps its last frame and ends keyboard capture. Use the VS Code debug toolbar to inspect the callback and choose **Continue**. Live App resumes polling the same session. Other app sessions stay available throughout the pause.
+
+Continue before sending another inspector request through Live App or the editor MCP bridge. An input action that triggered the breakpoint can finish after Continue. If its request expires during a longer pause, check the app before repeating it. [Read debugger state through MCP](reference.md#target-app-sessions-with-mcp)
+
+![VS Code stopped in the Rust approval callback. Live App retains the native window, and App Sessions marks only Release Review as paused.](../images/vscode-native-debugger-pause.png)
 
 ### Run an app on an iOS simulator
 
@@ -545,7 +553,7 @@ For a separate app repository, set `build.toolchain` to the FerroUI checkout tha
 
 The same Run and Debug command can launch a served profile. It uses the workspace folder as the JavaScript source root. For an independently started Chromium profile, use VS Code's standard Chrome attach configuration. [VS Code browser debugging](https://code.visualstudio.com/docs/nodejs/browser-debugging) · [Browser debugger MCP tools](reference.md#debug-a-browser-app-with-mcp)
 
-When a browser app launched with **Run and Debug** pauses, Live App keeps its last frame and shows **Paused in debugger**. Use **Continue** or step through the callback in VS Code. Resume the app to send new inspector requests. An action that triggered the breakpoint can finish after you continue. If its request expires during a longer pause, check the app after continuing before you repeat the action.
+The Chromium session shares the Live App pause and Continue workflow. [Inspect a paused app](#inspect-a-paused-app)
 
 ![VS Code paused at a JavaScript breakpoint in the workspace while Live App shows the accepted Chromium replacement and its visual tree](../images/vscode-browser-debugger.png)
 

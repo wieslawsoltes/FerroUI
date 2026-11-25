@@ -1,7 +1,7 @@
 import { setTimeout as delay } from 'node:timers/promises';
-import type { BrowserEvent } from './browserCdp';
-import type { BrowserPause } from './browserPause';
+import { browserRequestTimeout, type BrowserEvent } from './browserCdp';
 import type { BrowserPage } from './browserProcess';
+import { withInspectorDeadline, type DebuggerPause } from './debuggerPause';
 import type { Bounds } from './protocol';
 import type { RuntimeInspectionChannel, RuntimeToolDefinition, RuntimeToolResult } from './runtimeClient';
 import type { RuntimeNode } from './runtimeProtocol';
@@ -33,13 +33,13 @@ export class BrowserInspection implements RuntimeInspectionChannel {
     private root?: number;
     private navigation = 0;
 
-    private constructor(private readonly page: BrowserPage, private readonly pause?: BrowserPause) {
+    private constructor(private readonly page: BrowserPage, private readonly pause?: DebuggerPause) {
         const unsubscribe = this.page.cdp.onEvent(event => this.onEvent(event));
         this.page.signal.addEventListener('abort', unsubscribe, { once: true });
     }
 
     static async open(page: BrowserPage, url: string, signal: AbortSignal, report?: (message: string) => void,
-        pause?: BrowserPause): Promise<BrowserInspection> {
+        pause?: DebuggerPause): Promise<BrowserInspection> {
         const inspection = new BrowserInspection(page, pause);
         const deadline = AbortSignal.any([signal, page.signal, AbortSignal.timeout(15_000)]);
         let pending: keyof typeof startupErrors = 'navigation';
@@ -141,7 +141,8 @@ export class BrowserInspection implements RuntimeInspectionChannel {
             objectId: this.objectId, functionDeclaration, arguments: args, returnByValue: true, silent: true,
         };
         const response = this.pause
-            ? await this.pause.inspect(signal, active => this.request<Evaluation>('Runtime.callFunctionOn', params, active, null))
+            ? await withInspectorDeadline(this.pause, signal, browserRequestTimeout,
+                active => this.request<Evaluation>('Runtime.callFunctionOn', params, active, null))
             : await this.request<Evaluation>('Runtime.callFunctionOn', params, signal);
         if (response.exceptionDetails) throw new Error('The browser could not run the FerroUI inspector.');
         return response.result?.value;

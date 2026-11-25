@@ -1,5 +1,6 @@
 import { randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
+import type { DebuggerStatus } from './debuggerPause';
 import type { HotReload } from './hotReload';
 import { RuntimeClient, type RuntimeEndpoint } from './runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
@@ -15,6 +16,7 @@ export interface RuntimeSummary {
     generation: number | null;
     available: boolean;
     debuggerAttached?: boolean;
+    debuggerPaused?: boolean;
     pid?: number;
     app_session?: string;
     simulator?: IosRuntimeTarget;
@@ -25,14 +27,14 @@ export interface RuntimeSummary {
 
 interface Connection { endpoint: RuntimeEndpoint; generation: number }
 type ExternalKind = PlatformRuntime | { kind: 'attached' };
-type ReadDebuggerAttachment = (generation: number | undefined) => boolean | undefined;
+type ReadDebuggerStatus = (generation: number | undefined) => DebuggerStatus | undefined;
 interface Attachment {
     runtime: AppRuntime;
     label: string;
     target: ExternalKind;
     connection?: Connection;
     status?: string;
-    readDebuggerAttachment?: ReadDebuggerAttachment;
+    readDebuggerStatus?: ReadDebuggerStatus;
 }
 
 /** Credentials stay in the workspace extension host. Public summaries use stable session IDs. */
@@ -58,17 +60,22 @@ export class RuntimeConnections implements vscode.Disposable {
 
     targets(): RuntimeSummary[] {
         if (!this.trusted()) return [];
-        const managed = this.reload.runs().map((run): RuntimeSummary => ({
-            runtime: run.runtime, kind: 'managed', label: run.label, status: run.state.status,
-            app_session: run.id, pid: run.pid, generation: this.revision(run.runtime) ?? null, available: this.managed.has(run.runtime),
-            debuggerAttached: run.debuggerAttached,
+        const managed = this.reload.runs().map((run): RuntimeSummary => {
+            const { status, debuggerAttached, debuggerPaused } = run.state;
+            return {
+                runtime: run.runtime, kind: 'managed', label: run.label, status, debuggerAttached, debuggerPaused,
+                app_session: run.id, pid: run.pid, generation: this.revision(run.runtime) ?? null, available: this.managed.has(run.runtime),
+            };
+        });
+        return managed.concat([...this.external.values()].map(({ runtime, label, connection, status, target, readDebuggerStatus }): RuntimeSummary => {
+            const debuggerStatus = readDebuggerStatus?.(connection?.generation);
+            return {
+                ...target, runtime, label, generation: connection?.generation ?? null, available: Boolean(connection),
+                status: status ?? externalStatus(target), debuggerAttached: debuggerStatus?.attached, debuggerPaused: debuggerStatus?.paused,
+                ...(target.kind === 'android' ? { pid: target.android.pid } : target.kind === 'browser' ? { pid: target.browser.pid }
+                    : target.kind === 'simulator' ? { pid: target.simulator.pid } : target.kind === 'ios-device' ? { pid: target.iosDevice.pid } : {}),
+            };
         }));
-        return managed.concat([...this.external.values()].map(({ runtime, label, connection, status, target, readDebuggerAttachment }): RuntimeSummary => ({
-            ...target, runtime, label, generation: connection?.generation ?? null, available: Boolean(connection),
-            status: status ?? externalStatus(target), debuggerAttached: readDebuggerAttachment?.(connection?.generation),
-            ...(target.kind === 'android' ? { pid: target.android.pid } : target.kind === 'browser' ? { pid: target.browser.pid }
-                : target.kind === 'simulator' ? { pid: target.simulator.pid } : target.kind === 'ios-device' ? { pid: target.iosDevice.pid } : {}),
-        })));
     }
 
     defaultRuntime(): AppRuntime | undefined {
@@ -93,6 +100,35 @@ export class RuntimeConnections implements vscode.Disposable {
     revision(target: RuntimeTarget): number | undefined { return this.connection(target)?.generation; }
     get(target: RuntimeTarget): RuntimeEndpoint | undefined { return this.connection(target)?.endpoint; }
 
+    client(target: RuntimeTarget): RuntimeClient | undefined {
+        const runtime = this.resolve(target);
+        const connection = runtime && this.connection(runtime);
+        if (runtime && connection) return this.clientFor(runtime, connection);
+    }
+
+    private clientFor(runtime: AppRuntime, connection: Connection): RuntimeClient {
+        const { endpoint } = connection;
+        // The Chromium channel gates its own requests against the current document.
+        if (runtime.startsWith('browser:') || runtime.startsWith('attached:')) return new RuntimeClient(endpoint);
+        const managed = runtime.startsWith('managed:');
+        const read = () => {
+            if (this.connection(runtime) !== connection) return false;
+            const status = managed ? this.reload.runs().find(run => run.runtime === runtime)?.debuggerStatus
+                : this.external.get(runtime)?.readDebuggerStatus?.(connection.generation);
+            return status?.paused === true;
+        };
+        const debuggerChanged = managed ? this.reload.onDidChangeRuns : this.onDidChangeDebugger;
+        return new RuntimeClient(endpoint, {
+            get paused() { return read(); },
+            onDidChange: listener => {
+                const notify = () => listener(read());
+                const connectionChange = this.onDidChange(notify);
+                const debuggerChange = debuggerChanged(notify);
+                return () => { connectionChange.dispose(); debuggerChange.dispose(); };
+            },
+        });
+    }
+
     session(target: RuntimeTarget) {
         const runtime = this.resolve(target);
         const connection = runtime && this.connection(runtime);
@@ -102,7 +138,8 @@ export class RuntimeConnections implements vscode.Disposable {
             throw new Error('This app inspector is unavailable. Read ferroui_app_sessions for the current sessions.');
         }
         const { endpoint, generation } = connection;
-        return { runtime, endpoint, generation, current: () => this.connection(runtime) === connection };
+        return { runtime, endpoint, generation, current: () => this.connection(runtime) === connection,
+            createClient: () => this.clientFor(runtime, connection) };
     }
 
     async attach(url: string, token: string, name?: string, signal?: AbortSignal): Promise<RuntimeSummary> {
@@ -150,24 +187,24 @@ export class RuntimeConnections implements vscode.Disposable {
         this.changed.fire();
     }
 
-    addPlatform(target: PlatformRuntime, label: string, endpoint: RuntimeEndpoint, readDebuggerAttachment?: ReadDebuggerAttachment): RuntimeSummary {
-        return this.addExternal(target, label, { endpoint, generation: ++this.nextGeneration }, undefined, readDebuggerAttachment);
+    addPlatform(target: PlatformRuntime, label: string, endpoint: RuntimeEndpoint, readDebuggerStatus?: ReadDebuggerStatus): RuntimeSummary {
+        return this.addExternal(target, label, { endpoint, generation: ++this.nextGeneration }, undefined, readDebuggerStatus);
     }
 
-    beginBrowser(target: BrowserRuntimeTarget, label: string, readDebuggerAttachment?: ReadDebuggerAttachment): RuntimeSummary {
-        return this.addExternal({ kind: 'browser', browser: target }, label, undefined, 'Browser build queued', readDebuggerAttachment);
+    beginBrowser(target: BrowserRuntimeTarget, label: string, readDebuggerStatus?: ReadDebuggerStatus): RuntimeSummary {
+        return this.addExternal({ kind: 'browser', browser: target }, label, undefined, 'Browser build queued', readDebuggerStatus);
     }
 
-    beginAndroid(target: AndroidRuntimeTarget, label: string, readDebuggerAttachment: ReadDebuggerAttachment): RuntimeSummary {
-        return this.addExternal({ kind: 'android', android: target }, label, undefined, 'Android build queued', readDebuggerAttachment);
+    beginAndroid(target: AndroidRuntimeTarget, label: string, readDebuggerStatus: ReadDebuggerStatus): RuntimeSummary {
+        return this.addExternal({ kind: 'android', android: target }, label, undefined, 'Android build queued', readDebuggerStatus);
     }
 
-    beginSimulator(target: IosRuntimeTarget, label: string, readDebuggerAttachment: ReadDebuggerAttachment): RuntimeSummary {
-        return this.addExternal({ kind: 'simulator', simulator: target }, label, undefined, 'iOS simulator build queued', readDebuggerAttachment);
+    beginSimulator(target: IosRuntimeTarget, label: string, readDebuggerStatus: ReadDebuggerStatus): RuntimeSummary {
+        return this.addExternal({ kind: 'simulator', simulator: target }, label, undefined, 'iOS simulator build queued', readDebuggerStatus);
     }
 
-    beginIosDevice(target: IosRuntimeTarget, label: string, readDebuggerAttachment: ReadDebuggerAttachment): RuntimeSummary {
-        return this.addExternal({ kind: 'ios-device', iosDevice: target }, label, undefined, 'iOS device build queued', readDebuggerAttachment);
+    beginIosDevice(target: IosRuntimeTarget, label: string, readDebuggerStatus: ReadDebuggerStatus): RuntimeSummary {
+        return this.addExternal({ kind: 'ios-device', iosDevice: target }, label, undefined, 'iOS device build queued', readDebuggerStatus);
     }
 
     updateIosDevice(runtime: AppRuntime, status: string, process?: { pid: number; endpoint: RuntimeEndpoint } | null): void {
@@ -228,10 +265,10 @@ export class RuntimeConnections implements vscode.Disposable {
     }
 
     private addExternal(target: PlatformRuntime, label: string, connection?: Connection, status?: string,
-        readDebuggerAttachment?: ReadDebuggerAttachment): RuntimeSummary {
+        readDebuggerStatus?: ReadDebuggerStatus): RuntimeSummary {
         if (!this.trusted()) throw new Error('Open a trusted workspace before connecting an app.');
         const runtime: AppRuntime = `${target.kind}:${randomUUID()}`;
-        this.external.set(runtime, { runtime, label, connection, target, status, readDebuggerAttachment });
+        this.external.set(runtime, { runtime, label, connection, target, status, readDebuggerStatus });
         this.changed.fire();
         return this.describe(runtime)!;
     }
