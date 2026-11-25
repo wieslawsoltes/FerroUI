@@ -18,6 +18,9 @@ mod output;
 mod platform;
 mod render;
 mod render_target;
+mod semantic_capture;
+mod semantic_xml;
+mod semantics;
 mod surface;
 mod xml;
 
@@ -31,11 +34,22 @@ pub use options::{
 pub use output::{SvgDiagnostic, SvgExportReport, SvgOutput};
 pub use platform::{SvgApplicationExtensions, SvgPlatform, SvgPlatformRenderInterface};
 pub use render_target::SvgRenderTarget;
+pub use semantic_capture::{
+    capture_visual_semantics, SvgSemanticAccessibilityMode, SvgSemanticCaptureOptions,
+    SvgSemanticCustomizer,
+};
+pub use semantics::{
+    SvgSemanticAccessibility, SvgSemanticExportMode, SvgSemanticExportOptions,
+    SvgSemanticGridPlacement, SvgSemanticLayout, SvgSemanticNode, SvgSemanticSource,
+    SvgSemanticState, SvgSemanticTree, SvgSemanticValue, SVG_SEMANTIC_NAMESPACE,
+};
 pub use surface::{SvgSurface, SvgSurfaceFrame};
 
 #[cfg(test)]
 mod cache_tests;
 #[cfg(test)]
 mod integration_tests;
+#[cfg(test)]
+mod semantic_tests;
 #[cfg(test)]
 mod tests;

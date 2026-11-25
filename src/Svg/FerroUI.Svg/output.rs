@@ -25,6 +25,10 @@ pub struct SvgExportReport {
     /// hits are a subset of `vector_cache_hits`; final document processing still runs.
     pub prepared_vector_cache_hits: usize,
     pub raster_cache_hits: usize,
+    /// Exported layers carrying a captured UI manifest. Excluded layers are not counted.
+    pub semantic_layers: usize,
+    /// Source UI nodes emitted in those manifests, independent of SVG path/image counts.
+    pub semantic_nodes: usize,
     pub unoptimized_bytes: usize,
     pub output_bytes: usize,
     pub definitions_deduplicated: usize,

@@ -1474,7 +1474,7 @@ fn inspect(
     }
 }
 
-fn escape(output: &mut String, value: &str, attribute: bool) {
+pub(crate) fn escape(output: &mut String, value: &str, attribute: bool) {
     let mut copied = 0;
     for (index, byte) in value.bytes().enumerate() {
         let replacement = match byte {

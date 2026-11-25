@@ -283,6 +283,19 @@ pub(crate) fn export(
             if raster { "raster" } else { "vector" }
         )
         .unwrap();
+        let semantic_tree = if options.semantics.mode != crate::SvgSemanticExportMode::None {
+            document.semantic_trees.get(&properties.id)
+        } else {
+            None
+        };
+        if let Some(tree) = semantic_tree {
+            crate::semantic_xml::write_layer_attributes(
+                &mut svg,
+                &properties.id,
+                tree,
+                &options.semantics,
+            );
+        }
         if options.designer_layers {
             write!(
                 svg,
@@ -307,6 +320,16 @@ pub(crate) fn export(
         write!(svg, "<title>{}</title>", escape(&properties.name)).unwrap();
         if let Some(description) = &properties.description {
             write!(svg, "<desc>{}</desc>", escape(description)).unwrap();
+        }
+        if let Some(tree) = semantic_tree {
+            crate::semantic_xml::write_layer_metadata(
+                &mut svg,
+                &properties.id,
+                tree,
+                &options.semantics,
+            );
+            report.semantic_layers += 1;
+            report.semantic_nodes += tree.len();
         }
         svg.push_str(body.as_ref());
         if options.view.show_bounds {

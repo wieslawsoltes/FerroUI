@@ -237,6 +237,8 @@ impl SvgLayer {
 pub struct SvgDocument {
     pub(crate) size: Size,
     pub(crate) layers: Vec<SvgLayer>,
+    // Semantic capture is opt-in and does not enlarge each hot SvgLayer record.
+    pub(crate) semantic_trees: BTreeMap<String, crate::SvgSemanticTree>,
 }
 
 impl SvgDocument {
@@ -252,6 +254,7 @@ impl SvgDocument {
         Ok(Self {
             size,
             layers: Vec::new(),
+            semantic_trees: BTreeMap::new(),
         })
     }
 
@@ -353,10 +356,55 @@ impl SvgDocument {
         })
     }
 
+    /// Capture a laid-out visual and its UI provenance as one isolated compositing layer.
+    /// Snapshot collection runs on the UI thread before drawing. The customization callback
+    /// can supply stable application keys and authored metadata; it must not mutate the UI.
+    /// Enable `SvgExportOptions::semantics` to include the snapshot in exported files.
+    pub fn record_visual_with_semantics(
+        &mut self,
+        options: SvgLayerOptions,
+        visual: &Ref<Visual>,
+        capture: &crate::SvgSemanticCaptureOptions,
+        customize: Option<&mut crate::SvgSemanticCustomizer<'_>>,
+    ) -> Result<SvgLayerId, SvgError> {
+        let tree = crate::capture_visual_semantics(visual, capture, customize)?;
+        let id = self.record_visual(options, visual)?;
+        self.semantic_trees.insert(id.0.clone(), tree);
+        Ok(id)
+    }
+
+    /// Attach an immutable snapshot to a recorded layer. Its local-to-layer mappings must use
+    /// that layer's recording coordinates. For compositor frames these are device pixels;
+    /// use `SvgSemanticTree::transformed` when attaching a logical-coordinate snapshot.
+    /// Replacing metadata does not invalidate prepared vector or raster caches.
+    pub fn set_layer_semantics(
+        &mut self,
+        layer_id: &str,
+        tree: crate::SvgSemanticTree,
+    ) -> Result<(), SvgError> {
+        if !self.layers.iter().any(|layer| layer.options.id == layer_id) {
+            return Err(SvgError::InvalidLayer(format!(
+                "unknown semantic layer '{layer_id}'"
+            )));
+        }
+        self.semantic_trees.insert(layer_id.to_owned(), tree);
+        Ok(())
+    }
+
+    pub fn layer_semantics(&self, layer_id: &str) -> Option<&crate::SvgSemanticTree> {
+        self.semantic_trees.get(layer_id)
+    }
+
+    /// Remove UI provenance while retaining recordings and their export caches.
+    pub fn clear_layer_semantics(&mut self, layer_id: &str) -> bool {
+        self.semantic_trees.remove(layer_id).is_some()
+    }
+
     /// Remove a semantic layer without changing the relative painter order of the others.
     pub fn remove_layer(&mut self, id: &SvgLayerId) -> bool {
         let count = self.layers.len();
         self.layers.retain(|layer| layer.options.id != id.0);
+        self.semantic_trees.remove(&id.0);
         count != self.layers.len()
     }
 

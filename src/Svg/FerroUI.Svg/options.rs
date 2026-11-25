@@ -197,6 +197,8 @@ pub struct SvgExportOptions {
     pub title: Option<String>,
     pub description: Option<String>,
     pub designer_layers: bool,
+    /// Opt-in projection of captured UI structure. Disabled exports preserve the original SVG.
+    pub semantics: crate::SvgSemanticExportOptions,
     pub view: SvgView,
 }
 
@@ -221,6 +223,7 @@ impl Default for SvgExportOptions {
             title: None,
             description: None,
             designer_layers: true,
+            semantics: crate::SvgSemanticExportOptions::default(),
             view: SvgView::default(),
         }
     }
