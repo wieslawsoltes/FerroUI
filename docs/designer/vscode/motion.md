@@ -804,6 +804,10 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 
 Each new card retains the base source, preview definition, layout policy, and settings outside the selected axes. A comparison adds ordinary cards that you can edit independently. Save the board as a `.ferrostages` file to reopen it in VS Code or Studio. [Studio comparison matrices](../xcode-previews.md#comparison-matrices) · [Plan a comparison with MCP](reference.md#plan-and-add-a-stage-comparison)
 
+![Four native previews show the Loading and Content states in Light and Dark themes](../images/vscode-stage-matrix.png)
+
+[Review the four configurations before adding the cards](../images/vscode-stage-matrix-review.png)
+
 ### Compare a high contrast stage
 
 Use the **Environment** icon on one card and choose **High contrast** under **Theme**. Keep another card in Light or Dark to compare how the same view looks and measures under the native contrast palette. The option appears when the preview host supplies a High Contrast variant. **Checks** uses the selected card’s measured layout and colors.
