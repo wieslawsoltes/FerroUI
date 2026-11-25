@@ -203,10 +203,12 @@ phone preview changes the intended logical dimensions. Resizing a stage does not
 its native controls or discard text entered in Live mode. It also leaves the source and
 undo history intact.
 
-Each card can display **Fit**, **25%**, **50%**, **75%**, **100%**, **150%** or **200%** zoom.
-Fit keeps the complete preview visible; fixed magnifications use native scrolling when
-the preview exceeds the card. This zoom is board presentation state. It does not change
-the application's layout constraint, saved stage manifest or screenshot density.
+Use the **View** picker on a card to choose **Fit**, **25%**, **50%**, **75%**, **100%**, **150%**
+or **200%**. Fit shows the entire preview. At a fixed magnification, use the scrollbars or
+trackpad to pan when a preview exceeds its viewport. Each card retains its zoom and pan
+position when source updates rebuild the card. The camera is local to the open board.
+The application's layout, shared stage set, and native PNG export use the configured stage
+size. [VS Code camera](vscode/motion.md#zoom-and-pan-a-stage)
 
 ## Comparison matrices
 
@@ -470,8 +472,8 @@ The MCP tools expose the same workspace board and native graphs:
 
 | Tool | Contract |
 | --- | --- |
-| `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. Reading does not rebuild a stage or apply source drafts. |
-| `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. |
+| `designer_preview_stages` | Read `model`, `epoch`, `visible`, stage configurations/statuses, measured sizes, `current_source`, `current_image_source`, `camera_zooms`, each mounted card’s `camera`, the manifest and active source URI. Optional `stage` and `tree: "visual"` or `"logical"` add native runtime rows. |
+| `designer_preview_stage` | Apply a local stage action against `expected_model` from the latest read. Returns the updated board, plus created IDs or per-stage refresh errors where applicable. For `action: "camera"`, also pass `stage`, `expected_epoch`, and `camera: { zoom_percent, x, y }`. Use a reported fixed zoom and nonnegative scroll offsets, or `null` with zero offsets for Fit. Camera changes require `allow_property_writes`. |
 | `designer_preview_stage_input` | Focus or send keyboard input to a visible Live stage. Supply `stage`, `expected_model` and `expected_epoch` from the latest board. Returns the focused control's accessible name and role, or `null`. |
 | `designer_preview_stage_pointer` | Send a native pointer contact to a visible Live stage. Supply `stage`, `expected_model`, `expected_epoch` and an `input` with a contact ID, phase, device, and normalized coordinates. Press inside the artboard and continue with the same ID. See [pointer contact arguments](vscode/reference.md#send-pointer-contacts-to-a-stage). |
 | `designer_preview_stage_checks` | Read layout, text clipping and contrast findings, the native accessibility tree, and Tab order. Supply `stage` and `expected_model`. Authored locations are byte spans. |

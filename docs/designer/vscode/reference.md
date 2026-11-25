@@ -108,6 +108,20 @@ Read `designer_stages` for the board epoch and the stage’s current ID and epoc
 
 The returned model includes the new card order and the remapped prototype references. The calls require `ferroui.mcp.allowWrites` and a preview helper that reports `stageArrangement`. Studio uses the same board operations through `designer_preview_stage`. [Stages guide](motion.md#arrange-stage-cards) · [Studio automation](../xcode-previews.md#automation)
 
+### Set a stage camera
+
+1. Read `designer_stages` for `cameraZooms`, the current board epoch, and the target stage’s ID, epoch, and `camera`.
+2. Call `designer_stage_change` with the board’s `expected_epoch`. Set `arguments` to `{ action: "camera", target: { id, epoch }, camera: { zoom_percent: 150, x: 80, y: 60 } }`. The offsets are measured from the viewport’s upper-left corner in editor pixels. The viewport clips the offsets to its scrollable area.
+3. Use `{ zoom_percent: null, x: 0, y: 0 }` for Fit. The camera action requires `ferroui.mcp.allowWrites` and updates the open card’s workspace view state.
+
+In Studio, read `camera_zooms` and the stage’s `camera` from `designer_preview_stages`. Use `designer_preview_stage` with `action: "camera"`, `stage`, `expected_model`, `expected_epoch`, and the same `camera` shape. The view uses the same fixed magnifications in both workbenches. [VS Code Stages guide](motion.md#zoom-and-pan-a-stage) · [Studio automation](../xcode-previews.md#automation)
+
+### Capture and restore a stage set
+
+Read `manifest` with `designer_stages`. This is the same versioned JSON that **Save Stage Set** writes, including card order, configurations, and prototype routes. To open a stored set in the current VS Code board, pass `{ action: "restore", manifest }` to `designer_stage_change` with the current board’s `expected_epoch`. The call requires `ferroui.mcp.allowWrites`. Referenced XAML and Rust files must be inside the workspace.
+
+An accepted restore creates new stage IDs at Fit. Read the returned board before issuing further stage-specific calls. In Studio, pass the same manifest to `designer_preview_stage` with `action: "restore"` and the current `expected_model`. [Studio stage sets](../xcode-previews.md#embedding-and-persistence)
+
 ### Send keyboard input to a stage
 
 1. Read the board with `designer_stages`. Use `designer_stage_change` to set the card's mode to `live`. Read the accepted stage ID and epoch from the returned board.

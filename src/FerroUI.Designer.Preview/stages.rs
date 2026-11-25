@@ -14,7 +14,7 @@ use ferroui_designer::{
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageLayout, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
     PreviewStagePointerInput, PreviewStagePointerOrigin, PreviewStagePointerPhase,
-    PreviewStageMatrixSize, PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
+    PREVIEW_STAGE_ZOOM_LEVELS, PreviewStageMatrixSize, PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
 use ferroui_designer_project::PreviewSourceBuffer;
@@ -107,6 +107,8 @@ pub(crate) struct Model {
     text_environment: bool,
     #[serde(rename = "comparisonSizes")]
     comparison_sizes: Vec<PreviewStageMatrixSize>,
+    #[serde(rename = "cameraZooms")]
+    camera_zooms: &'static [u16],
 }
 
 #[derive(Deserialize)]
@@ -482,6 +484,7 @@ impl Stages {
             available_themes: PreviewTheme::available(),
             text_environment: true,
             comparison_sizes: PreviewStageMatrixSize::presets(),
+            camera_zooms: &PREVIEW_STAGE_ZOOM_LEVELS,
         }
     }
 }

@@ -62,6 +62,12 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
 .stage-setting span:last-child { min-inline-size: 0; overflow: hidden; text-overflow: ellipsis; }
 .stage-setting .codicon { flex: none; font-size: 13px; }
 .stage-settings .tool { inline-size: 23px; block-size: 23px; min-block-size: 23px; }
+.stage-camera-tools {
+    display: flex;
+    align-items: center;
+    flex: none;
+    margin-inline-start: auto;
+}
 .stage-artboard, .prototype-thumbnail-board {
     display: grid;
     position: relative;
@@ -78,6 +84,26 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     box-shadow: 0 0 0 1px var(--line), 0 4px 16px #0003;
 }
 .stage-card[data-mode="select"][data-state="ready"] img { cursor: crosshair; }
+.stage-viewport {
+    display: grid;
+    min-inline-size: 0;
+    justify-self: stretch;
+    justify-items: center;
+}
+.stage-viewport[data-fixed-zoom] {
+    display: block;
+    align-self: start;
+    justify-items: start;
+    block-size: clamp(144px, 48vh, 360px);
+    overflow: auto;
+    overscroll-behavior: contain;
+    overflow-anchor: none;
+    direction: ltr;
+}
+.stage-viewport[data-fixed-zoom] img { max-inline-size: none; max-block-size: none; }
+.stage-viewport:focus-visible { outline: 1px solid var(--focus); outline-offset: 2px; }
+.stage-card .stage-viewport[data-pan] img { cursor: grab; touch-action: none; }
+.stage-card .stage-viewport[data-dragging], .stage-card .stage-viewport[data-dragging] img { cursor: grabbing; }
 .stage-contact-surface { touch-action: none; }
 .stage-card[data-keyboard] .stage-artboard img {
     outline: 2px solid var(--vscode-focusBorder);

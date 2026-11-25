@@ -45,6 +45,10 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
         cards.get(data.id)?.keyboardFocus(data.epoch, data.focus);
         return;
     }
+    if (data.type === 'stageCamera') {
+        cards.get(data.id)?.setCamera(data.epoch, data.camera, data.revision);
+        return;
+    }
     if (data.type === 'model') {
         model = data.model;
         menu.update(model);
@@ -52,7 +56,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
         vscode.setState({ uri: data.uri });
         const keep = new Set(model.stages.map(stage => stage.id));
         for (const [id, previous] of cards) {
-            if (!keep.has(id)) { previous.cancelContacts(); previous.element.remove(); cards.delete(id); menu.close(); }
+            if (!keep.has(id)) { previous.dispose(); previous.element.remove(); cards.delete(id); menu.close(); }
         }
         let previous: HTMLElement | undefined;
         for (const stage of model.stages) {

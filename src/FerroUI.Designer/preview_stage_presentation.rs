@@ -2,29 +2,21 @@
 //! not alter a stage configuration, accepted application graph or authored source.
 use super::resize::ResizeGrip;
 use crate::{
-    PreviewStageConfiguration, PreviewStageInfo, PreviewStageLayout, PreviewStageSize, PreviewTheme,
+    PREVIEW_STAGE_ZOOM_LEVELS, PreviewStageCamera, PreviewStageConfiguration, PreviewStageInfo,
+    PreviewStageLayout, PreviewStageSize, PreviewTheme,
 };
 use ferroui_base::interactivity::RoutedEventHandlerToken;
 use ferroui_base::layout::{HorizontalAlignment, VerticalAlignment};
 use ferroui_base::media::{SolidColorBrush, Stretch, StretchDirection};
+use ferroui_base::reactive::Subscription;
 use ferroui_base::{Point, Ref, Size, Thickness, Vector};
 use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::{
     Border, Canvas, ColumnDefinitions, ComboBox, Control, Grid, ScrollViewer, TextBlock, Viewbox,
 };
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
-
-const ZOOMS: [Option<f64>; 7] = [
-    None,
-    Some(0.25),
-    Some(0.5),
-    Some(0.75),
-    Some(1.0),
-    Some(1.5),
-    Some(2.0),
-];
 
 pub(super) struct CardPresentation {
     pub(super) frame: Ref<Grid>,
@@ -35,13 +27,15 @@ pub(super) struct CardPresentation {
     viewbox: Ref<Viewbox>,
     scroll: Ref<ScrollViewer>,
     zoom_picker: Ref<ComboBox>,
-    zoom: Rc<Cell<Option<f64>>>,
+    camera: Rc<Cell<PreviewStageCamera>>,
+    restore_offset: Cell<bool>,
     size: Cell<PreviewStageSize>,
     configuration: PreviewStageConfiguration,
     details: Ref<TextBlock>,
     draft_note: Ref<TextBlock>,
     ghost: Ref<Border>,
     size_subscription: Cell<Option<RoutedEventHandlerToken>>,
+    camera_layout: RefCell<Option<Subscription>>,
 }
 
 impl CardPresentation {
@@ -49,7 +43,7 @@ impl CardPresentation {
         info: &PreviewStageInfo,
         host: Ref<Control>,
         details: Ref<TextBlock>,
-        zoom: Rc<Cell<Option<f64>>>,
+        camera: Rc<Cell<PreviewStageCamera>>,
     ) -> Rc<Self> {
         let frame = Grid::new();
         frame.set_name(Some(format!("Stage{}PreviewFrame", info.id)));
@@ -90,15 +84,11 @@ impl CardPresentation {
         zoom_picker.set_name(Some(format!("Stage{}Zoom", info.id)));
         zoom_picker.set_horizontal_alignment(HorizontalAlignment::Stretch);
         AutomationProperties::set_name(&zoom_picker, Some("Preview presentation zoom"));
-        for label in ["Fit", "25%", "50%", "75%", "100%", "150%", "200%"] {
-            zoom_picker.items().add(Some(Rc::new(label.to_owned())));
+        zoom_picker.items().add(Some(Rc::new("Fit".to_owned())));
+        for zoom in PREVIEW_STAGE_ZOOM_LEVELS {
+            zoom_picker.items().add(Some(Rc::new(format!("{zoom}%"))));
         }
-        zoom_picker.set_selected_index(
-            ZOOMS
-                .iter()
-                .position(|value| *value == zoom.get())
-                .unwrap_or(0) as i32,
-        );
+        zoom_picker.set_selected_index(zoom_index(camera.get()));
         Grid::set_column(&zoom_picker, 1);
         toolbar
             .children()
@@ -125,13 +115,15 @@ impl CardPresentation {
             viewbox,
             scroll,
             zoom_picker,
-            zoom,
+            camera,
+            restore_offset: Cell::new(true),
             size: Cell::new(info.layout_size),
             configuration: info.configuration.clone(),
             details,
             draft_note,
             ghost,
             size_subscription: Cell::new(None),
+            camera_layout: RefCell::new(None),
         });
         presentation.apply_zoom();
         presentation.update_details();
@@ -140,17 +132,12 @@ impl CardPresentation {
             let Some(presentation) = weak.upgrade() else {
                 return;
             };
-            let Some(value) = usize::try_from(presentation.zoom_picker.selected_index())
-                .ok()
-                .and_then(|index| ZOOMS.get(index))
-                .copied()
-            else {
+            let Ok(index) = usize::try_from(presentation.zoom_picker.selected_index()) else {
                 return;
             };
-            if presentation.zoom.replace(value) != value {
-                presentation.cancel_interaction();
-                presentation.scroll.set_offset(Vector::default());
-                presentation.apply_zoom();
+            let zoom_percent = index.checked_sub(1).and_then(|index| PREVIEW_STAGE_ZOOM_LEVELS.get(index)).copied();
+            if zoom_percent != presentation.camera.get().zoom_percent {
+                presentation.set_camera(PreviewStageCamera { zoom_percent, ..Default::default() });
             }
         });
         let weak = Rc::downgrade(&presentation);
@@ -174,8 +161,17 @@ impl CardPresentation {
         presentation.scroll.scroll_changed(move |_, _| {
             if let Some(presentation) = weak.upgrade() {
                 presentation.cancel_interaction();
+                if !presentation.restore_offset.get() {
+                    presentation.remember_offset();
+                }
             }
         });
+        let weak = Rc::downgrade(&presentation);
+        *presentation.camera_layout.borrow_mut() = Some(presentation.frame.layout_updated(move || {
+            if let Some(presentation) = weak.upgrade() {
+                presentation.settle_offset();
+            }
+        }));
         let weak = Rc::downgrade(&presentation);
         presentation.grip.on_draft(move |draft| {
             if let Some(presentation) = weak.upgrade() {
@@ -200,8 +196,48 @@ impl CardPresentation {
         }
     }
 
+    pub(super) fn set_camera(&self, camera: PreviewStageCamera) {
+        let previous = self.camera.replace(camera);
+        if previous == camera {
+            return;
+        }
+        self.cancel_interaction();
+        self.restore_offset.set(true);
+        if previous.zoom_percent != camera.zoom_percent {
+            self.zoom_picker.set_selected_index(zoom_index(camera));
+            self.apply_zoom();
+        }
+        self.frame.update_layout();
+        self.settle_offset();
+    }
+
+    fn settle_offset(&self) {
+        if !self.restore_offset.get() {
+            return;
+        }
+        let camera = self.camera.get();
+        let viewport = self.scroll.viewport();
+        if viewport.width <= 0.0 || viewport.height <= 0.0 {
+            return;
+        }
+        self.scroll.set_offset(Vector::new(camera.x, camera.y));
+        self.restore_offset.set(false);
+        self.remember_offset();
+    }
+
+    fn remember_offset(&self) {
+        let mut camera = self.camera.get();
+        if camera.zoom_percent.is_some() {
+            let offset = self.scroll.offset();
+            camera.x = offset.x;
+            camera.y = offset.y;
+            self.camera.set(camera);
+        }
+    }
+
     fn apply_zoom(&self) {
-        if let Some(zoom) = self.zoom.get() {
+        if let Some(zoom_percent) = self.camera.get().zoom_percent {
+            let zoom = f64::from(zoom_percent) / 100.0;
             let size = self.size.get();
             self.scroll
                 .set_horizontal_scroll_bar_visibility(ScrollBarVisibility::Auto);
@@ -288,6 +324,7 @@ impl CardPresentation {
 
     pub(super) fn retire(&self) {
         self.detach_size_subscription();
+        self.camera_layout.borrow_mut().take();
         self.grip.retire();
         self.viewbox.set_child(None::<Ref<Control>>);
     }
@@ -304,6 +341,11 @@ impl Drop for CardPresentation {
     fn drop(&mut self) {
         self.detach_size_subscription();
     }
+}
+
+fn zoom_index(camera: PreviewStageCamera) -> i32 {
+    camera.zoom_percent.and_then(|zoom| PREVIEW_STAGE_ZOOM_LEVELS.iter().position(|level| *level == zoom))
+        .map_or(0, |index| index as i32 + 1)
 }
 
 fn number(value: f64) -> String {

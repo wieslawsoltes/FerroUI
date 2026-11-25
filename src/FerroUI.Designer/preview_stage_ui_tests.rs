@@ -857,9 +857,8 @@ fn native_resize_cancels_on_escape_capture_loss_zoom_reflow_and_card_retirement(
     assert!(!f.workspace.session.borrow().can_undo());
 }
 
-#[test]
 #[cfg(feature = "render-smoke")]
-fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_graph() {
+fn native_stage_theme() -> ferroui_controls::testing::UnitTestApplicationScope {
     use ferroui_base::animation::{IClock, IGlobalClock, PlayState, SignedDuration};
     use ferroui_base::reactive::{Disposable, IDisposable, IObservable, IObserver};
     struct ThemeClock;
@@ -882,8 +881,15 @@ fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_g
     native_services.theme = Some(Rc::new(|| {
         ferroui_themes_winui::WinUITheme::new().as_style()
     }));
-    let _app = UnitTestApplication::start(native_services);
+    let app = UnitTestApplication::start(native_services);
     ferroui_themes_winui::register_types();
+    app
+}
+
+#[cfg(feature = "render-smoke")]
+#[test]
+fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_graph() {
+    let _app = native_stage_theme();
     let f = Fixture::new();
     let id = f.first();
     let mut configuration = f.workspace.preview_stage(id).unwrap().configuration;
@@ -919,6 +925,10 @@ fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_g
     viewport.set_offset(Vector::new(50.0, 20.0));
     f.layout();
     assert!(viewport.offset().x > 0.0);
+    let offset = viewport.offset();
+    let camera = view.camera(id).unwrap();
+    assert_eq!((camera.x, camera.y), (offset.x, offset.y));
+    let stage_epoch = f.workspace.preview_stage(id).unwrap().epoch;
     let mut configuration = f.workspace.preview_stage(id).unwrap().configuration;
     configuration.name = "Same camera after card update".into();
     f.workspace.update_preview_stage(id, configuration).unwrap();
@@ -927,8 +937,59 @@ fn native_card_zoom_scrolls_at_actual_size_and_preserves_source_model_and_live_g
         named::<ComboBox>(&view.control(), &format!("Stage{id}Zoom")).selected_index(),
         4
     );
+    let viewport = named::<ferroui_controls::ScrollViewer>(&view.control(), &format!("Stage{id}Viewport"));
+    assert_eq!(viewport.offset(), offset);
+    assert_eq!(view.camera(id), Some(camera));
+    assert!(view.set_camera(id, stage_epoch, crate::PreviewStageCamera::default()).is_err());
     assert_eq!(input.text().as_deref(), Some("Camera state is independent"));
     assert_eq!(f.workspace.session.borrow().document().source(), SOURCE);
+}
+
+#[cfg(all(feature = "mcp", feature = "render-smoke"))]
+#[test]
+fn studio_camera_tool_uses_the_native_view_without_changing_the_stage_set() {
+    use crate::mcp::DesignerMcp;
+    use ferroui_inspect::Permissions;
+    use ferroui_mcp::UiToolProvider;
+    use serde_json::json;
+
+    let _app = native_stage_theme();
+    let f = Fixture::new();
+    let provider = DesignerMcp::with_workspace(&f.workspace);
+    let read = Permissions { allow_property_writes: false, allow_input: false };
+    let write = Permissions { allow_property_writes: true, allow_input: false };
+    let board = provider.call("designer_preview_stages", &json!({}), read).unwrap();
+    let stage = &board["stages"][0];
+    let camera = json!({"zoom_percent":150,"x":45.0,"y":36.0});
+    let mut command = json!({"action":"camera","expected_model":board["model"],"stage":stage["id"],
+        "expected_epoch":stage["epoch"],"camera":camera});
+    assert!(provider.call("designer_preview_stage", &command, read).is_err());
+    let updated = provider.call("designer_preview_stage", &command, write).unwrap();
+    let id = f.first();
+    let view = f.workspace.preview_stage_view().unwrap();
+    f.layout();
+    assert_eq!(updated["board"]["stages"][0]["camera"], camera);
+    assert_eq!(updated["board"]["manifest"], board["manifest"]);
+    assert_eq!(updated["board"]["model"], board["model"]);
+    let viewport = named::<ferroui_controls::ScrollViewer>(&view.control(), &format!("Stage{id}Viewport"));
+    assert_eq!(viewport.offset(), Vector::new(45.0, 36.0));
+    command["camera"]["zoom_percent"] = json!(42);
+    assert!(provider.call("designer_preview_stage", &command, write).is_err());
+    let mut configuration = f.workspace.preview_stage(id).unwrap().configuration;
+    configuration.name = "Recreated card".into();
+    f.workspace.update_preview_stage(id, configuration).unwrap();
+    f.layout();
+    command["camera"] = camera;
+    assert!(provider.call("designer_preview_stage", &command, write).is_err());
+    let viewport = named::<ferroui_controls::ScrollViewer>(&view.control(), &format!("Stage{id}Viewport"));
+    assert_eq!(viewport.offset(), Vector::new(45.0, 36.0));
+    let board = provider.call("designer_preview_stages", &json!({}), read).unwrap();
+    command["expected_model"] = board["model"].clone();
+    command["expected_epoch"] = board["stages"][0]["epoch"].clone();
+    command["camera"] = json!({"zoom_percent":null,"x":0.0,"y":0.0});
+    let updated = provider.call("designer_preview_stage", &command, write).unwrap();
+    assert_eq!(updated["board"]["stages"][0]["camera"], command["camera"]);
+    assert_eq!(viewport.offset(), Vector::default());
 }
 
 #[test]

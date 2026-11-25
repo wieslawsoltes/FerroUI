@@ -2,8 +2,8 @@
 use super::schema as s;
 use super::{decode, integer, text, Permissions};
 use crate::{
-    DesignerWorkspace, PreviewEnvironment, PreviewStageSpec, PreviewStageSet,
-    PreviewStageMode, PreviewTheme,
+    DesignerWorkspace, PREVIEW_STAGE_ZOOM_LEVELS, PreviewEnvironment, PreviewStageSpec,
+    PreviewStageSet, PreviewStageMode, PreviewTheme,
 };
 use base64::Engine;
 use ferroui_inspect::TreeKind;
@@ -135,7 +135,7 @@ fn action(name: &str, mut properties: Value, required: &[&str]) -> Value {
 pub(super) fn tools() -> Vec<Value> {
     let mut edit = s::actions(
         "designer_preview_stage",
-        "Configure workspace-local native preview stages using the model from designer_preview_stages. Changes never edit authored XAML or undo history. Sources must already be open; missing references retain a diagnostic. Live previews require allow_input as well as allow_property_writes. Focus/select activate the correct document and definition before changing the inspector. Restore accepts a versioned manifest; no filesystem paths are opened.",
+        "Configure workspace-local native preview stages using the model from designer_preview_stages. Sources must already be open. Live preview changes require allow_input as well as allow_property_writes. Focus and select activate the owning document and definition. Restore accepts a versioned manifest. Camera sets display zoom and scroll for a mounted stage using its current epoch and the reported zoom levels.",
         vec![
             action(
                 "add",
@@ -160,6 +160,10 @@ pub(super) fn tools() -> Vec<Value> {
                 &["stage", "paused"],
             ),
             action("refresh", json!({"stage":s::id()}), &["stage"]),
+            action("camera", json!({"stage":s::id(),"expected_epoch":s::id(),"camera":s::object(json!({
+                "zoom_percent":s::nullable(json!({"enum":PREVIEW_STAGE_ZOOM_LEVELS})),
+                "x":{"type":"number","minimum":0}, "y":{"type":"number","minimum":0}
+            }), &["zoom_percent", "x", "y"])}), &["stage", "expected_epoch", "camera"]),
             action("refresh_all", json!({}), &[]),
             action("focus", json!({"stage":s::id()}), &["stage"]),
             action(
@@ -243,6 +247,7 @@ pub(super) fn tools() -> Vec<Value> {
 }
 
 fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> {
+    let view = workspace.preview_stage_view();
     let stages = workspace
         .preview_stages()
         .into_iter()
@@ -256,12 +261,15 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
             value["current_source"] = json!(current);
             value["current_image_source"] =
                 json!(workspace.preview_stage_image_source_is_current(stage.id));
+            if let Some(camera) = view.as_ref().and_then(|view| view.camera(id)) {
+                value["camera"] = json!(camera);
+            }
             value
         })
         .collect::<Vec<_>>();
     let mut value = json!({"model":workspace.preview_stage_model(),"epoch":workspace.preview_stage_epoch(),
         "available_themes":PreviewTheme::available(),
-        "text_environment":true, "pointer_input":true,
+        "text_environment":true, "pointer_input":true, "camera_zooms":PREVIEW_STAGE_ZOOM_LEVELS,
         "visible":workspace.preview_stages_visible(),"stages":stages,"manifest":workspace.preview_stage_set(),
         "active_source_uri":workspace.session().borrow().document_uri()});
     if let Some(stage) = args["stage"].as_u64() {
@@ -282,6 +290,9 @@ fn report(workspace: &DesignerWorkspace, args: &Value) -> Result<Value, String> 
 }
 
 fn needs_input(workspace: &DesignerWorkspace, action: &str, args: &Value) -> Result<bool, String> {
+    if action == "camera" {
+        return Ok(false);
+    }
     if action == "show"
         && args["visible"] == true
         && workspace.preview_stages().is_empty()
@@ -415,6 +426,8 @@ pub(super) fn call(
         "pause" => workspace
             .set_preview_stage_paused(integer(args, "stage")?, args["paused"].as_bool().unwrap())?,
         "refresh" => workspace.refresh_preview_stage(integer(args, "stage")?)?,
+        "camera" => workspace.preview_stage_view().ok_or("Open the native Stages board first")?
+            .set_camera(integer(args, "stage")?, integer(args, "expected_epoch")?, decode(args, "camera")?)?,
         "refresh_all" => {
             result["refresh_errors"] = json!(workspace
                 .refresh_all_preview_stages()

@@ -6,7 +6,7 @@ import type { BuiltProjects } from './builtProjects';
 import { DesignerDependencies, dirtyPreviewSources, xamlPath } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, PrototypeInput, PrototypeScene, StageChange, StageComparisonRequest, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StagePointerInput, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import { fitStageCamera, type FromStages, type NativeStageChange, type PrototypeCommand, type PrototypeEdit, type PrototypeInput, type PrototypeScene, type StageCamera, type StageChange, type StageComparisonRequest, type StageDocument, type StageInfo, type StageKeyboard, type StageManifest, type StageModel, type StagePointerInput, type StageTarget, type StagesRequest, type ToStages } from './stagesProtocol';
 import { pickStageCheck } from './stageChecksPicker';
 import { chooseStageComparison } from './stageComparisonPicker';
 import { dimensions, editStageEnvironment } from './stageEnvironmentPicker';
@@ -14,6 +14,7 @@ import { StageFrames } from './stageFrames';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { sameStageSource, stageUsesSource, retargetStageManifest, type StageFileMove } from './stageSourceMoves';
+import { StageViewState, type SavedStageView } from './stageViewState';
 import { choose, editText } from './studioContext';
 import { asRange, languageOf, sourceOf } from './textDocument';
 import { stagesHtml, webviewOptions } from './view';
@@ -91,6 +92,7 @@ export class StagesPanel implements vscode.Disposable {
 
 class StageSession {
     private readonly dependencies = new DesignerDependencies(false, () => this.schedule());
+    private readonly viewState = new StageViewState();
     private readonly frames = new StageFrames(
         async target => (await this.getClient()).stageImage(target),
         (target, image) => this.post({ type: 'image', ...target, image }),
@@ -115,14 +117,16 @@ class StageSession {
     private disposed = false;
     private workbenchReducedMotion = false;
     private prototypeReducedMotion = false;
-    private manifest?: StageManifest;
+    private restore?: SavedStageView;
+    private cameraSave?: ReturnType<typeof setTimeout>;
 
     constructor(readonly panel: vscode.WebviewPanel, private document: vscode.TextDocument,
         private readonly caret: vscode.Position, private readonly context: vscode.ExtensionContext, private readonly output: vscode.OutputChannel,
         private readonly projects: BuiltProjects) {
         this.primary = document.uri;
         this.cacheKey = `ferroui.stages:${this.primary.toString()}`;
-        this.manifest = context.workspaceState.get<StageManifest>(this.cacheKey);
+        const saved = context.workspaceState.get<StageManifest | SavedStageView>(this.cacheKey);
+        this.restore = saved && ('manifest' in saved ? saved : { manifest: saved });
         this.subscriptions = [
             panel.onDidDispose(() => this.dispose()),
             panel.onDidChangeViewState(() => {
@@ -155,7 +159,7 @@ class StageSession {
     }
 
     private usesSource(uri: vscode.Uri): boolean {
-        return stageUsesSource(this.manifest ?? this.nativeManifest, uri, this.sourceMoves);
+        return stageUsesSource(this.restore?.manifest ?? this.nativeManifest, uri, this.sourceMoves);
     }
 
     fileChanged(uri: vscode.Uri): void {
@@ -260,16 +264,23 @@ class StageSession {
     async applyChange(change: StageChange, signal: AbortSignal): Promise<StageModel> {
         const before = await this.wait(signal);
         if (before.epoch !== change.epoch || this.busy) throw new Error('Read the current Stages board first.');
+        if (change.action === 'camera') {
+            signal.throwIfAborted();
+            this.setCamera(before, change.target, change.camera);
+            return before;
+        }
         const generation = this.generation;
         this.busy = true;
         this.dependencies.start();
         try {
             const client = await this.getClient();
-            const request = await this.nativeChange(change, client);
-            signal.throwIfAborted();
-            if (generation !== this.generation || this.disposed) throw new Error('The stage set changed. Repeat the change on its current board.');
-            const model = await client.editStages(request);
+            const check = () => {
+                signal.throwIfAborted();
+                if (generation !== this.generation || this.disposed) throw new Error('The stage set changed. Repeat the change on its current board.');
+            };
+            const model = await this.editStageSet(change, client, check);
             this.nativeManifest = model.manifest;
+            this.viewState.reconcile(model, change.action === 'restore' ? { manifest: change.manifest } : undefined);
             if (this.dependencies.accept(model.dependencies ?? [])) this.schedule();
             await this.publish(model, client, generation);
             return model;
@@ -280,7 +291,23 @@ class StageSession {
         }
     }
 
-    private async nativeChange(change: StageChange, client: NativePreview): Promise<NativeStageChange> {
+    private async editStageSet(change: Exclude<StageChange, { action: 'camera' }>, client: NativePreview, check: () => void) {
+        if (change.action === 'restore') {
+            const manifest = change.manifest;
+            if (!Array.isArray(manifest?.stages) || manifest.stages.length > 16
+                || manifest.stages.some(stage => typeof stage?.source_uri !== 'string')) {
+                throw new Error('Open a valid Studio stage set with up to 16 stages.');
+            }
+            const { active, additional, localSources } = await this.stageDocuments(this.document, client, manifest);
+            check();
+            return client.syncStages(active, manifest, additional, localSources);
+        }
+        const request = await this.nativeChange(change, client);
+        check();
+        return client.editStages(request);
+    }
+
+    private async nativeChange(change: Exclude<StageChange, { action: 'camera' | 'restore' }>, client: NativePreview): Promise<NativeStageChange> {
         if (change.action !== 'add') return change;
         const { action, epoch, name, width, height, dark, sourcePath } = change;
         if (sourcePath === undefined) return { action, epoch, name, width, height, dark };
@@ -427,25 +454,19 @@ class StageSession {
             const document = !retargeted && !this.document.isClosed
                 ? this.document : await vscode.workspace.openTextDocument(uri);
             if (generation !== this.generation || this.disposed) return;
-            const language = languageOf(document);
-            if (!language) throw new Error('Open a FerroUI XAML or Rust source for this Stages board.');
-            const pending = this.manifest;
+            const pending = this.restore;
             const moveCount = this.sourceMoves.length;
-            const { manifest, bindings } = retargetStageManifest(pending ?? this.nativeManifest, this.sourceMoves);
+            const { manifest, bindings } = retargetStageManifest(pending?.manifest ?? this.nativeManifest, this.sourceMoves);
             const replaceBoard = pending !== undefined || (bindings !== undefined && !client.capabilities.stageSourceMoves);
-            const source = await client.inProject(sourceOf(document, language, document.validatePosition(this.caret)),
-                this.projects.forDocument(uri));
-            const active = stageDocument(source, uri);
-            const additional = await this.stageSources(manifest, active.uri, client);
-            const localSources = client.capabilities.stageIncludes
-                ? dirtyPreviewSources([uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
+            const { active, additional, localSources } = await this.stageDocuments(document, client, manifest);
             if (generation !== this.generation || this.disposed) return;
             const model = await client.syncStages(active, replaceBoard ? manifest : undefined, additional, localSources,
                 replaceBoard ? undefined : bindings);
             this.document = document;
             this.nativeManifest = model.manifest;
+            this.viewState.reconcile(model, replaceBoard ? pending ?? (this.model && this.viewState.snapshot(this.model)) : undefined);
             this.sourceMoves.splice(0, moveCount);
-            if (pending === this.manifest) this.manifest = undefined;
+            if (pending === this.restore) this.restore = undefined;
             if (this.dependencies.accept(model.dependencies ?? [])) this.schedule();
             await this.publish(model, client, generation);
         } catch (error) { if (generation === this.generation) this.report(error); }
@@ -466,19 +487,57 @@ class StageSession {
         this.modelVersion = this.document.version;
         this.modelGeneration = generation;
         const key = `ferroui.stages:${this.document.uri.toString()}`;
-        await this.context.workspaceState.update(key, model.manifest);
-        if (this.cacheKey !== key) {
-            await this.context.workspaceState.update(this.cacheKey, undefined);
-            this.cacheKey = key;
-        }
+        const previousKey = this.cacheKey;
+        this.cacheKey = key;
+        await this.saveViewState(model);
+        if (previousKey !== key) await this.context.workspaceState.update(previousKey, undefined);
         if (generation !== this.generation || this.model !== model || this.disposed) return;
         this.post({ type: 'model', uri: this.document.uri.toString(), model });
         this.publishPrototype(client, model, model.prototype);
         this.frames.setStages(model.stages);
     }
 
+    private saveViewState(model: StageModel): Thenable<void> {
+        clearTimeout(this.cameraSave);
+        this.cameraSave = undefined;
+        return this.context.workspaceState.update(this.cacheKey, this.viewState.snapshot(model));
+    }
+
+    private setCamera(model: StageModel, target: StageTarget, camera: StageCamera, scrollRevision?: number): void {
+        if (this.disposed || this.model !== model) throw new Error('Read the current Stages board first.');
+        const state = this.viewState.setCamera(model, target, camera, scrollRevision);
+        if (!state) return;
+        if (scrollRevision === undefined) this.post({ type: 'stageCamera', id: target.id, epoch: target.epoch, ...state });
+        clearTimeout(this.cameraSave);
+        this.cameraSave = setTimeout(() => {
+            if (this.model) void Promise.resolve(this.saveViewState(this.model)).catch(error => this.report(error));
+        }, 180);
+    }
+
+    private async chooseZoom(model: StageModel, target: StageTarget): Promise<void> {
+        const stage = model.stages.find(stage => stage.id === target.id && stage.epoch === target.epoch);
+        if (!stage || !model.cameraZooms) return;
+        const choice = await choose(`Zoom ${stage.configuration.name}`, [
+            { label: 'Fit', description: 'Fit preview in the card', zoom: null },
+            ...model.cameraZooms.map(zoom => ({ label: `${zoom}%`, zoom })),
+        ]);
+        // A sibling can update during the picker. The selected card still has
+        // to exist with the exact epoch shown when the picker was opened.
+        if (choice && this.model) this.setCamera(this.model, target, { ...fitStageCamera, zoom_percent: choice.zoom });
+    }
+
     private async receive(message: StagesRequest): Promise<void> {
         if (message.type === 'ready') { this.ready = true; this.schedule(); return; }
+        if (message.type === 'stageScroll' || message.type === 'chooseStageZoom') {
+            const model = this.model;
+            if (!model || this.disposed) return;
+            try {
+                const target = { id: message.id, epoch: message.epoch };
+                if (message.type === 'stageScroll' && Number.isSafeInteger(message.revision)) this.setCamera(model, target, message.camera, message.revision);
+                else if (message.type === 'chooseStageZoom') await this.chooseZoom(model, target);
+            } catch (error) { if (message.type === 'chooseStageZoom') this.report(error); }
+            return;
+        }
         if (message.type === 'prototypeMotionPreference') {
             this.workbenchReducedMotion = message.reduced === true;
             const model = this.model;
@@ -568,11 +627,7 @@ class StageSession {
                 if (!uri) return;
                 if ((await vscode.workspace.fs.stat(uri)).size > 1024 * 1024) throw new Error('The stage set exceeds 1 MiB.');
                 const manifest = JSON.parse(Buffer.from(await vscode.workspace.fs.readFile(uri)).toString('utf8')) as StageManifest;
-                const language = languageOf(this.document);
-                if (!language || !Array.isArray(manifest.stages)) throw new Error('Open a valid Studio stage set.');
-                await this.stageSources(manifest, sourceOf(this.document, language, this.caret).uri);
-                this.manifest = manifest;
-                this.schedule();
+                await this.applyChange({ action: 'restore', epoch: model.epoch, manifest }, AbortSignal.timeout(15_000));
                 return;
             }
             const change = message.type === 'add' ? await this.add(model) : message.type === 'edit'
@@ -613,7 +668,19 @@ class StageSession {
         await this.revealStageSource(trigger.uri, trigger.range, generation);
     }
 
-    private async stageSources(manifest: StageManifest | undefined, active: string, client?: NativePreview) {
+    private async stageDocuments(document: vscode.TextDocument, client: NativePreview, manifest?: StageManifest) {
+        const language = languageOf(document);
+        if (!language) throw new Error('Open a FerroUI XAML or Rust source for this Stages board.');
+        const uri = document.uri;
+        const source = await client.inProject(sourceOf(document, language, document.validatePosition(this.caret)), this.projects.forDocument(uri));
+        const active = stageDocument(source, uri);
+        const additional = await this.stageSources(manifest, active.uri, client);
+        const localSources = client.capabilities.stageIncludes
+            ? dirtyPreviewSources([uri, ...additional.map(source => vscode.Uri.parse(source.uri, true))]) : undefined;
+        return { active, additional, localSources };
+    }
+
+    private async stageSources(manifest: StageManifest | undefined, active: string, client: NativePreview) {
         const paths = [...new Set((manifest?.stages ?? []).map(stage => stage.source_uri))].filter(uri => uri !== active);
         if (paths.length > 15) throw new Error('A Stages board supports up to 16 source documents.');
         return Promise.all(paths.map(async path => {
@@ -623,7 +690,7 @@ class StageSession {
             const language = languageOf(document);
             if (!language) throw new Error('A stage source must be a FerroUI XAML or Rust file.');
             const source = { ...sourceOf(document, language, new vscode.Position(0, 0)), uri: path };
-            return stageDocument(client ? await client.inProject(source, this.projects.forDocument(uri)) : source, uri);
+            return stageDocument(await client.inProject(source, this.projects.forDocument(uri)), uri);
         }));
     }
 
@@ -733,6 +800,7 @@ class StageSession {
     private post(message: ToStages): void { if (!this.disposed) void this.panel.webview.postMessage(message); }
     private dispose(): void {
         this.disposed = true;
+        if (this.cameraSave && this.model) void Promise.resolve(this.saveViewState(this.model)).catch(error => this.output.appendLine(errorMessage(error)));
         clearTimeout(this.timer);
         clearTimeout(this.prototypeFrameTimer);
         this.prototypeFrameRequest = undefined;

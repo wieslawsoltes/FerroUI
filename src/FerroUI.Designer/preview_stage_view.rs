@@ -1,6 +1,6 @@
 //! Native responsive stage cards. Editor chrome is confined to headers and toolbars;
 //! application preview roots retain their own styles, themes and input behavior.
-use crate::{PreviewStageComparison, PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStagePointerInput, PreviewStageStatus};
+use crate::{PreviewStageCamera, PreviewStageComparison, PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStagePointerInput, PreviewStageStatus};
 use ferroui_base::input::{
     IKeyboardNavigationHandler, InputElement, Key, KeyboardNavigation, KeyboardNavigationHandler,
     KeyboardNavigationMode,
@@ -131,18 +131,13 @@ impl StageCard {
     }
 }
 
-struct StageZoom {
-    host: WeakRef<Control>,
-    value: Rc<Cell<Option<f64>>>,
-}
-
 /// The view never owns document or runtime state. A host supplies stable native stage
 /// controls and immutable descriptions, then handles explicit guarded commands.
 pub struct PreviewStageView {
     root: Ref<Grid>,
     _keyboard_navigation: Rc<KeyboardNavigationHandler>,
     cards: RefCell<BTreeMap<PreviewStageId, StageCard>>,
-    zooms: RefCell<BTreeMap<PreviewStageId, StageZoom>>,
+    cameras: RefCell<BTreeMap<PreviewStageId, Rc<Cell<PreviewStageCamera>>>>,
     panel: Ref<WrapPanel>,
     empty: Ref<TextBlock>,
     summary: Ref<TextBlock>,
@@ -229,7 +224,7 @@ impl PreviewStageView {
             root,
             _keyboard_navigation: keyboard_navigation,
             cards: RefCell::new(BTreeMap::new()),
-            zooms: RefCell::new(BTreeMap::new()),
+            cameras: RefCell::new(BTreeMap::new()),
             panel,
             empty,
             summary,
@@ -348,6 +343,18 @@ impl PreviewStageView {
         self.scope.set_selected_index(i32::from(all));
     }
 
+    pub fn camera(&self, stage: PreviewStageId) -> Option<PreviewStageCamera> {
+        self.cameras.borrow().get(&stage).map(|camera| camera.get())
+    }
+
+    pub fn set_camera(&self, id: PreviewStageId, epoch: u64, camera: PreviewStageCamera) -> Result<(), String> {
+        camera.validate()?;
+        let presentation = self.cards.borrow().get(&id).filter(|card| card.epoch == epoch)
+            .map(|card| card.presentation.clone()).ok_or("Read the current stage ID and epoch")?;
+        presentation.set_camera(camera);
+        Ok(())
+    }
+
     pub fn visible_stage_ids(&self) -> Vec<PreviewStageId> {
         let cards = self.cards.borrow();
         self.descriptions
@@ -456,9 +463,7 @@ impl PreviewStageView {
         *self.descriptions.borrow_mut() = stages.to_vec();
         *self.current_uri.borrow_mut() = current_uri.to_owned();
         let desired = stages.iter().map(|info| info.id).collect::<BTreeSet<_>>();
-        self.zooms
-            .borrow_mut()
-            .retain(|_, state| state.host.upgrade().is_some());
+        self.cameras.borrow_mut().retain(|id, _| desired.contains(id));
         let mut cards = self.cards.borrow_mut();
         let mut restore_focus = None;
         let removed = cards
@@ -635,17 +640,8 @@ impl PreviewStageView {
         heading.children().add(commands.upcast::<Control>());
         body.children().add(heading.upcast::<Control>());
 
-        let zoom = self
-            .zooms
-            .borrow_mut()
-            .entry(info.id)
-            .or_insert_with(|| StageZoom {
-                host: host.downgrade(),
-                value: Rc::new(Cell::new(None)),
-            })
-            .value
-            .clone();
-        let presentation = CardPresentation::new(info, host.clone(), details, zoom);
+        let camera = self.cameras.borrow_mut().entry(info.id).or_default().clone();
+        let presentation = CardPresentation::new(info, host.clone(), details, camera);
         let frame = presentation.frame.clone();
         Grid::set_row(&frame, 1);
         let weak = Rc::downgrade(self);

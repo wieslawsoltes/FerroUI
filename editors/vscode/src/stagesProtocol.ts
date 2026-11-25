@@ -32,7 +32,11 @@ export interface StageInfo {
     status: { state: string; message?: string };
     layout_size: { width: number; height: number };
     rendered_revision: number | null;
+    camera?: StageCamera;
+    camera_revision?: number;
 }
+export interface StageCamera { zoom_percent: number | null; x: number; y: number }
+export const fitStageCamera: StageCamera = { zoom_percent: null, x: 0, y: 0 };
 export interface StageManifest {
     version: number;
     stages: StageConfiguration[];
@@ -83,6 +87,7 @@ export interface StageModel {
     prototypeTransitions?: boolean;
     comparisonSizes?: StageMatrixSize[];
     stageArrangement?: boolean;
+    cameraZooms?: number[];
 }
 export interface StageTarget { id: number; epoch: number }
 export interface StageMove { target: StageTarget; index: number }
@@ -144,13 +149,17 @@ type ExistingStageChange = (
     | ({ action: 'move' } & StageMove)
     | ({ action: 'compare' } & StageComparisonRequest)
     | { action: 'setPrototype'; graph: PrototypeGraph; transitions?: PrototypeLinkTransition[] }) & { epoch: number };
-export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string });
+export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string })
+    | { action: 'camera'; epoch: number; target: StageTarget; camera: StageCamera }
+    | { action: 'restore'; epoch: number; manifest: StageManifest };
 export type StageDocument = Source & { workspaceRoot?: string };
 export type NativeStageChange = ExistingStageChange | (AddStage & { source?: StageDocument; localSources?: PreviewSourceBuffer[] });
 export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifest' }
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
     | ({ type: 'keyboard' } & StageKeyboard)
     | ({ type: 'contact' } & StagePointerInput)
+    | ({ type: 'chooseStageZoom' } & StageTarget)
+    | ({ type: 'stageScroll'; camera: StageCamera; revision: number } & StageTarget)
     | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause'
         | 'refresh' | 'remove' | 'export' | 'designData' | 'state' | 'compare' | 'duplicate' | 'moveEarlier' | 'moveLater' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand; frame?: number }
@@ -162,6 +171,7 @@ export type StagesRequest = FromStages | { type: 'prototype'; command?: Prototyp
 export type ToStages = { type: 'model'; model: StageModel; uri: string }
     | ({ type: 'image'; image: StageImage } & StageTarget) | { type: 'status'; message: string }
     | ({ type: 'keyboardFocus'; focus: StageFocus | null } & StageTarget)
+    | ({ type: 'stageCamera'; camera: StageCamera; revision: number } & StageTarget)
     | { type: 'inputUnavailable' }
     | { type: 'prototype'; scene: PrototypeScene | null }
     | { type: 'prototypeImage'; frame: number; image: PrototypeImage }

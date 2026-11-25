@@ -792,7 +792,7 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 1. Open [PreviewStages.xaml](../samples/PreviewStages.xaml). Run **FerroUI: Show Design Data**. Add a named XAML fixture with typed JSON values, such as a string title and an array of items. Apply it once to store the design-only fixture in the view. Choose **Application values** to return to the regular bindings.
 2. Run **Open Preview Stages** and use **Add Stage** to add workspace XAML views or supported RSX invocations. Pick an environment, viewport dimensions or content-fit sizing, a state, and a design fixture as applicable. Use one card for a loading state and another for a populated state, or compare light and dark variants.
 3. Use **Select** to inspect a stage or **Interact** to operate its native controls. Pause a stage to hold its current image. Use **Checks** to review overflow, clipping, ineffective layout values, and accessibility in that stage. **More Actions** includes PNG export and stage settings. [Read Preview Checks](authoring.md#diagnose-a-design-time-issue)
-4. Save the stages as a `.ferrostages` file. Open it again in VS Code or Studio. Each stage retains its chosen view, environment, state, and design fixture. Source changes update affected stages after a valid render is ready. [Design-time data](../design-time-data.md) · [Preview environments](../xcode-previews.md)
+4. Save the stages as a `.ferrostages` file. Open it again in VS Code or Studio. Each stage retains its chosen view, environment, state, and design fixture. Source changes update affected stages after a valid render is ready. [Design-time data](../design-time-data.md) · [Preview environments](../xcode-previews.md) · [Capture and restore a stage set with MCP](reference.md#capture-and-restore-a-stage-set)
 
 ![The compact stage reports the edges clipped by its own viewport](../images/vscode-layout-stage-checks.jpg)
 
@@ -815,6 +815,16 @@ Open a card’s **More Actions** menu and choose **Duplicate Stage** to copy its
 Drag a card’s grip or heading over another card to move it to that position. With the keyboard, open **More Actions** and use **Move Earlier** or **Move Later**. The board saves the new reading order with the stage set. Prototype flows and links keep referring to their original views. [Arrange stages with MCP](reference.md#duplicate-and-move-stage-cards)
 
 ![The Compact card is outlined as the destination while dragging Desktop to its position](../images/vscode-stage-reorder.png)
+
+### Zoom and pan a stage
+
+1. Select **Fit** on a card to open its zoom picker. Choose a fixed magnification from **25%** to **200%**. At **100%**, a logical preview pixel occupies one editor pixel.
+2. Choose the **Pan** icon and drag the preview to inspect an area outside the card. Press **Escape** to return to the toolbar. You can also scroll with the trackpad or scrollbars, or Tab to the preview viewport and use the arrow keys.
+3. Choose **Fit** to see the entire preview again. Each card keeps its zoom and position when you reorder it or reopen Stages in the same workspace. Other cards keep their own views.
+
+Zoom and pan affect the editor viewport. The logical layout, preview checks, native PNG export, and shared `.ferrostages` file still use the stage’s configured dimensions. Pan mode reserves dragging for the editor viewport until you turn it off. [Studio zoom](../xcode-previews.md#resize-and-zoom) · [Control a stage camera with MCP](reference.md#set-a-stage-camera)
+
+![Desktop at 150 percent with Pan active beside Compact at Fit](../images/vscode-stage-camera.png)
 
 ### Compare a high contrast stage
 
