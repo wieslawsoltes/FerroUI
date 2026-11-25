@@ -1,0 +1,9 @@
+{
+  "metadata": "paired-final-metadata.json",
+  "preserved_exactly_as_recorded": true,
+  "csv_path_prefix_map": {
+    "baseline/": "baseline-paired/",
+    "optimized/": "optimized/"
+  },
+  "reason": "The original serial baseline remains in baseline/; final paired baseline files are stored separately."
+}

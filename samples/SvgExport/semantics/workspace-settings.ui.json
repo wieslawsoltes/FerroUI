@@ -1,0 +1,1983 @@
+{
+  "layers": [
+    {
+      "association": "layer",
+      "coordinate_space": "layer-local",
+      "hierarchy": "visual",
+      "id": "ferro-settings",
+      "node_count": 20,
+      "nodes": [
+        {
+          "accessibility": {
+            "automation_id": "WorkspaceSettings",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              0.0,
+              800.0,
+              540.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              800.0,
+              540.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-WorkspaceSettings",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "WorkspaceSettings",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              541.0,
+              490.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "name": "WorkspaceSettings",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "Border"
+        },
+        {
+          "accessibility": {
+            "automation_id": "SettingsContent",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              40.0,
+              40.0,
+              720.0,
+              460.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              460.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              40.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-SettingsContent",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "SettingsContent",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              461.0,
+              410.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-WorkspaceSettings",
+          "name": "SettingsContent",
+          "parent": "ferro-internal-ui-8-settings-WorkspaceSettings",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "StackPanel"
+        },
+        {
+          "accessibility": {
+            "automation_id": "Eyebrow",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "FERROUI / UI SEMANTICS",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              15.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              15.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              40.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-Eyebrow",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "Eyebrow",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              148.0,
+              15.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "name": "Eyebrow",
+          "parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "FERROUI / UI SEMANTICS",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "Heading",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Workspace settings",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              29.0,
+              720.0,
+              37.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              37.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              69.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-Heading",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "Heading",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              280.0,
+              37.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "name": "Heading",
+          "parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "Workspace settings",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "Introduction",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "One rendered scene. A preserved UI model.",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              80.0,
+              720.0,
+              19.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              19.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              120.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-Introduction",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "Introduction",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              310.0,
+              19.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "name": "Introduction",
+          "parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "One rendered scene. A preserved UI model.",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "ProjectCard",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              125.0,
+              720.0,
+              184.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              184.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              165.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-ProjectCard",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "ProjectCard",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              461.0,
+              200.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              12.0,
+              0.0,
+              4.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "name": "ProjectCard",
+          "parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "Border"
+        },
+        {
+          "accessibility": {
+            "automation_id": "ProjectFields",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              25.0,
+              25.0,
+              670.0,
+              134.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              670.0,
+              134.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              65.0,
+              190.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-ProjectFields",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "ProjectFields",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              411.0,
+              134.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-ProjectCard",
+          "name": "ProjectFields",
+          "parent": "ferro-internal-ui-8-settings-ProjectCard",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "StackPanel"
+        },
+        {
+          "accessibility": {
+            "automation_id": "ProjectLabel",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "PROJECT",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              0.0,
+              670.0,
+              15.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              670.0,
+              15.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              65.0,
+              190.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-ProjectLabel",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "ProjectLabel",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              55.0,
+              15.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "name": "ProjectLabel",
+          "parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "PROJECT",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "ProjectTitle",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Aeris control module",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              29.0,
+              670.0,
+              28.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              670.0,
+              28.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              65.0,
+              219.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-ProjectTitle",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "ProjectTitle",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              224.0,
+              28.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "name": "ProjectTitle",
+          "parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "Aeris control module",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "ProjectDescription",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Vector layers, outlined typography and explicit UI provenance.",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              71.0,
+              670.0,
+              17.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              670.0,
+              17.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              65.0,
+              261.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-ProjectDescription",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "ProjectDescription",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              411.0,
+              17.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "name": "ProjectDescription",
+          "parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "Vector layers, outlined typography and explicit UI provenance.",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "StatusBadge",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              102.0,
+              135.0,
+              32.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              135.0,
+              32.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              65.0,
+              292.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-StatusBadge",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "StatusBadge",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              135.0,
+              32.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Left",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "name": "StatusBadge",
+          "parent": "ferro-internal-ui-8-settings-ProjectFields",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "Border"
+        },
+        {
+          "accessibility": {
+            "automation_id": "StatusLabel",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "All changes saved",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              12.0,
+              8.0,
+              111.0,
+              16.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              111.0,
+              16.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              77.0,
+              300.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-StatusLabel",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "StatusLabel",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              111.0,
+              16.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-StatusBadge",
+          "name": "StatusLabel",
+          "parent": "ferro-internal-ui-8-settings-StatusBadge",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "All changes saved",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "Actions",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              327.0,
+              720.0,
+              44.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              44.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              367.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-Actions",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "Actions",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              348.0,
+              44.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "name": "Actions",
+          "parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "StackPanel"
+        },
+        {
+          "accessibility": {
+            "automation_id": "SaveButton",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Save changes",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Button",
+            "size_of_set": -1
+          },
+          "classes": [
+            ":empty"
+          ],
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              367.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-SaveButton",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "SaveButton",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              168.0,
+              44.0
+            ],
+            "height": 44.0,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": 168.0
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-Actions",
+          "name": "SaveButton",
+          "parent": "ferro-internal-ui-8-settings-Actions",
+          "properties": {
+            "command": {
+              "type": "string",
+              "value": "SaveWorkspace"
+            },
+            "design-token.background": {
+              "type": "string",
+              "value": "AccentPrimary"
+            },
+            "test-selector": {
+              "type": "string",
+              "value": "workspace.save"
+            }
+          },
+          "source": {
+            "uri": "source:///examples/semantic_export.rs#SaveButton"
+          },
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "Button"
+        },
+        {
+          "accessibility": {
+            "automation_id": "SaveButtonChrome",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              367.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-SaveButtonChrome",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "SaveButtonChrome",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              123.0,
+              43.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SaveButton",
+          "name": "SaveButtonChrome",
+          "parent": "ferro-internal-ui-8-settings-SaveButton",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "templated_parent": "ferro-internal-ui-8-settings-SaveButton",
+          "type": "Border"
+        },
+        {
+          "accessibility": {
+            "automation_id": "SaveButtonCaption",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Save changes",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              34.0,
+              12.0,
+              99.0,
+              19.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              99.0,
+              19.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              74.0,
+              379.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-SaveButtonCaption",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "SaveButtonCaption",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              99.0,
+              19.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Center",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Center",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SaveButtonChrome",
+          "name": "SaveButtonCaption",
+          "parent": "ferro-internal-ui-8-settings-SaveButtonChrome",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "templated_parent": "ferro-internal-ui-8-settings-SaveButton",
+          "text": "Save changes",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "CancelButton",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Cancel",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Button",
+            "size_of_set": -1
+          },
+          "classes": [
+            ":empty"
+          ],
+          "geometry": {
+            "layout_bounds": [
+              180.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              220.0,
+              367.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-CancelButton",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": true,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "CancelButton",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              168.0,
+              44.0
+            ],
+            "height": 44.0,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": 168.0
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-Actions",
+          "name": "CancelButton",
+          "parent": "ferro-internal-ui-8-settings-Actions",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "type": "Button"
+        },
+        {
+          "accessibility": {
+            "automation_id": "CancelButtonChrome",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "position_in_set": -1,
+            "required": false,
+            "role": "None",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              168.0,
+              44.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              220.0,
+              367.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-CancelButtonChrome",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "CancelButtonChrome",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              73.0,
+              43.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-CancelButton",
+          "name": "CancelButtonChrome",
+          "parent": "ferro-internal-ui-8-settings-CancelButton",
+          "state": {
+            "clip_to_bounds": false,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "templated_parent": "ferro-internal-ui-8-settings-CancelButton",
+          "type": "Border"
+        },
+        {
+          "accessibility": {
+            "automation_id": "CancelButtonCaption",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Cancel",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              60.0,
+              12.0,
+              49.0,
+              19.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              49.0,
+              19.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              280.0,
+              379.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-CancelButtonCaption",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "CancelButtonCaption",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              49.0,
+              19.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Center",
+            "margin": [
+              0.0,
+              0.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Center",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-CancelButtonChrome",
+          "name": "CancelButtonCaption",
+          "parent": "ferro-internal-ui-8-settings-CancelButtonChrome",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "templated_parent": "ferro-internal-ui-8-settings-CancelButton",
+          "text": "Cancel",
+          "type": "TextBlock"
+        },
+        {
+          "accessibility": {
+            "automation_id": "Footer",
+            "heading_level": 0,
+            "live_setting": "Off",
+            "name": "Control identity / layout / accessibility / design tokens",
+            "position_in_set": -1,
+            "required": false,
+            "role": "Text",
+            "size_of_set": -1
+          },
+          "geometry": {
+            "layout_bounds": [
+              0.0,
+              395.0,
+              720.0,
+              15.0
+            ],
+            "layout_space": "parent-layout",
+            "local_bounds": [
+              0.0,
+              0.0,
+              720.0,
+              15.0
+            ],
+            "local_to_layer": [
+              1.0,
+              0.0,
+              0.0,
+              0.0,
+              1.0,
+              0.0,
+              40.0,
+              435.0,
+              1.0
+            ],
+            "matrix_order": [
+              "m11",
+              "m12",
+              "m13",
+              "m21",
+              "m22",
+              "m23",
+              "m31",
+              "m32",
+              "m33"
+            ]
+          },
+          "id": "ferro-internal-ui-8-settings-Footer",
+          "input": {
+            "effectively_enabled": true,
+            "enabled": true,
+            "focusable": false,
+            "focused": false,
+            "hit_test_visible": true,
+            "tab_index": 2147483647,
+            "tab_stop": true
+          },
+          "key": "Footer",
+          "layout": {
+            "arrange_valid": true,
+            "desired_size": [
+              304.0,
+              25.0
+            ],
+            "height": null,
+            "horizontal_alignment": "Stretch",
+            "margin": [
+              0.0,
+              10.0,
+              0.0,
+              0.0
+            ],
+            "max_height": null,
+            "max_width": null,
+            "measure_valid": true,
+            "min_height": 0.0,
+            "min_width": 0.0,
+            "vertical_alignment": "Stretch",
+            "width": null
+          },
+          "logical_parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "name": "Footer",
+          "parent": "ferro-internal-ui-8-settings-SettingsContent",
+          "state": {
+            "clip_to_bounds": true,
+            "effectively_visible": true,
+            "has_clip": false,
+            "has_effect": false,
+            "has_opacity_mask": false,
+            "opacity": 1.0,
+            "render_suppressed": false,
+            "visible": true,
+            "z_index": 0
+          },
+          "text": "Control identity / layout / accessibility / design tokens",
+          "type": "TextBlock"
+        }
+      ],
+      "rendering": "#ferro-settings"
+    }
+  ],
+  "schema": "https://wieslawsoltes.github.io/FerroUI/svg/semantics/1",
+  "schema_version": 1
+}

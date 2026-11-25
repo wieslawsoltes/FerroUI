@@ -1,0 +1,8 @@
+workload,phase,samples,exports_per_operation,min_ms,median_ms,p95_ms,output_bytes,scene_layers,scene_draw_calls,exported_layers,images,definitions_deduplicated,vector_cache_hits,raster_cache_hits,recording_bytes,rss_kib,peak_rss_kib
+raster,record,8,0,0.298752,0.326266,0.515535,0,8,1024,0,0,0,0,0,164576,18148,18148
+raster,fresh_document,8,1,82.774381,84.703806,97.755656,26840,8,1024,8,1,7,0,0,164576,19916,19916
+raster,cold,8,1,81.398637,83.209632,89.219208,26840,8,1024,8,1,7,0,0,164576,19916,19916
+raster,warm,40,1,0.779389,0.846570,1.148778,26840,8,1024,8,1,7,0,8,164576,20044,20044
+raster,multi_view,40,5,3.702248,4.020405,4.669010,113582,8,1024,40,4,28,0,32,164576,19296,19956
+raster,no_dedup,40,1,1.020500,1.151549,1.583320,198354,8,1024,8,8,0,0,8,164576,19360,19956
+raster,gzip,40,0,0.143106,0.151468,0.221421,5662,8,1024,0,0,0,0,0,164576,19512,19956

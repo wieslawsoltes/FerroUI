@@ -1,0 +1,8 @@
+{
+  "base_revision": "447cef96e659fe5d579fd69d2d17afad2b631761",
+  "patch_sha256": "dfa8a5ff6d2acf53a2abb66eabd9d91108b887df39d678d19c5a48957a80f21c",
+  "binary_bytes": 20005392,
+  "binary_sha256": "1c295b86df4b19957116efe22b4346f3cdb8b2c381c5944dc19851a3fc12ba50",
+  "svg_layer_size_before": 512,
+  "svg_layer_size_after": 408
+}

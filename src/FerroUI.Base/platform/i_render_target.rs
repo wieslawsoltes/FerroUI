@@ -115,6 +115,22 @@ pub trait IRenderTarget {
     /// The properties of this render target.
     fn properties(&self) -> RenderTargetProperties;
 
+    /// Whether the compositor should draw a complete frame directly into this
+    /// target on every redraw, even when it does not retain previous contents.
+    /// Export and recording targets can opt in to receive the original drawing
+    /// commands instead of a bitmap of a retained intermediate layer.
+    ///
+    /// Direct rendering still requires
+    /// [`RenderTargetProperties::is_suitable_for_direct_rendering`], and debug
+    /// overlays that require a layer still use one. A context that does not
+    /// retain the previous frame must report that in
+    /// [`RenderTargetDrawingContextProperties::previous_frame_is_retained`];
+    /// the compositor then redraws the entire scene. Existing targets retain
+    /// their normal incremental rendering policy by default.
+    fn prefers_full_frame_rendering(&self) -> bool {
+        false
+    }
+
     /// Creates a drawing context for a rendering session.
     fn create_drawing_context(
         &self,

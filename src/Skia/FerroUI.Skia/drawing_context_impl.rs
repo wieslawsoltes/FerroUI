@@ -36,7 +36,7 @@ use skia_safe as sk;
 use skia_safe::canvas::SaveLayerRec;
 use std::any::{Any, TypeId};
 use std::cell::{Cell, RefCell};
-use std::rc::Rc;
+use std::rc::{Rc, Weak};
 
 /// What a drawing context draws to.
 pub enum CanvasSource {
@@ -172,13 +172,13 @@ impl ContextCanvas {
     }
 }
 
-/// The leases of the Skia API of a drawing context that records the frame of a surface as a
-/// picture (a frame layer that pipelines its frames, `gpu/graphite/pipelined_layer.rs`).
+/// The leases of the Skia API of a drawing context that records a picture, either for
+/// export or for a frame layer that pipelines its frames (`gpu/graphite/pipelined_layer.rs`).
 ///
 /// A lease hands out the canvas of the context, and the canvas of a picture recorder lives
 /// only as long as the borrow of the recorder, which a lease cannot hold. A lease of such a
 /// context therefore records what its client draws into a picture of its own, with the
-/// transform the canvas had when the feature was asked for, and the context draws that
+/// transform the context has when the lease begins, and the context draws that
 /// picture into the recording before its next use of the canvas: the clip and the layers of
 /// the canvas are still the ones of the lease then, because the context cannot be used
 /// while it is leased. The differences a client can see: the lease has no surface, the canvas
@@ -201,8 +201,6 @@ pub struct RecordedLeases {
 
 impl RecordedLeases {
     /// The leases of a recording with the given bounds.
-    // Only the surface of a pipelined frame layer makes these (Graphite on Metal).
-    #[cfg_attr(not(all(target_vendor = "apple", not(ferro_skia_apple_ganesh))), allow(dead_code))]
     pub(crate) fn new(bounds: sk::Rect) -> Self {
         Self { bounds, pending: RefCell::new(Vec::new()), has_pending: Cell::new(false), used: Cell::new(false) }
     }
@@ -278,16 +276,32 @@ fn leased_panic() -> ! {
     panic!("The underlying graphics API is currently leased")
 }
 
+/// Created only when a native API feature is requested. The drawing context owns this
+/// state; features and leases keep weak references so neither can outlive the context.
+/// Updating it never forces a pending transform onto the recording canvas.
+struct NativeLeaseState {
+    transform: Cell<Matrix>,
+    opacity: Cell<f64>,
+    disposed: Cell<bool>,
+}
+
+fn active_lease_state(state: &Weak<NativeLeaseState>) -> Rc<NativeLeaseState> {
+    let state = state.upgrade().unwrap_or_else(|| panic!("The drawing context has been dropped"));
+    assert!(!state.disposed.get(), "The drawing context has been disposed");
+    state
+}
+
 struct SkiaLeaseFeature {
     context_leased: Rc<Cell<bool>>,
+    state: Weak<NativeLeaseState>,
     surface: sk::Surface,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     gpu: Option<Rc<dyn ISkiaGpu>>,
-    current_opacity: f64,
 }
 
 impl ISkiaApiLeaseFeature for SkiaLeaseFeature {
     fn lease(&self) -> Rc<dyn ISkiaApiLease> {
+        let state = active_lease_state(&self.state);
         if self.context_leased.get() {
             leased_panic();
         }
@@ -301,10 +315,11 @@ impl ISkiaApiLeaseFeature for SkiaLeaseFeature {
 
         Rc::new(ApiLease {
             context_leased: self.context_leased.clone(),
+            state: self.state.clone(),
             surface: self.surface.clone(),
             gr_context: self.gr_context.clone(),
             gpu: self.gpu.clone(),
-            current_opacity: self.current_opacity,
+            current_opacity: state.opacity.get(),
             revert_transform,
             is_disposed: Cell::new(false),
             leased: Rc::new(Cell::new(false)),
@@ -314,6 +329,7 @@ impl ISkiaApiLeaseFeature for SkiaLeaseFeature {
 
 struct ApiLease {
     context_leased: Rc<Cell<bool>>,
+    state: Weak<NativeLeaseState>,
     surface: sk::Surface,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     gpu: Option<Rc<dyn ISkiaGpu>>,
@@ -326,9 +342,15 @@ struct ApiLease {
 
 impl ApiLease {
     fn check_lease(&self) {
+        self.check_active();
         if self.leased.get() {
             leased_panic();
         }
+    }
+
+    fn check_active(&self) {
+        assert!(!self.is_disposed.get(), "The Skia API lease has been disposed");
+        active_lease_state(&self.state);
     }
 }
 
@@ -339,6 +361,7 @@ impl ISkiaApiLease for ApiLease {
     }
 
     fn gr_context(&self) -> Option<Rc<dyn ISkiaGrContext>> {
+        self.check_active();
         self.gr_context.clone()
     }
 
@@ -362,12 +385,22 @@ impl ISkiaApiLease for ApiLease {
         }
         self.leased.set(true);
 
-        Some(Rc::new(PlatformApiLease { leased: self.leased.clone(), gr_context: self.gr_context.clone(), context }))
+        Some(Rc::new(PlatformApiLease {
+            leased: self.leased.clone(),
+            gr_context: self.gr_context.clone(),
+            context,
+            is_disposed: Cell::new(false),
+        }))
     }
 
     fn dispose(&self) {
         if !self.is_disposed.get() {
-            self.surface.clone().canvas().set_matrix(&self.revert_transform);
+            assert!(!self.leased.get(), "The platform graphics API is currently leased");
+            // A later drawing context may already be using the same surface.
+            // Cleanup of an orphaned lease must not restore an earlier frame's matrix.
+            if self.state.upgrade().is_some_and(|state| !state.disposed.get()) {
+                self.surface.clone().canvas().set_matrix(&self.revert_transform);
+            }
             self.context_leased.set(false);
             self.is_disposed.set(true);
         }
@@ -377,16 +410,15 @@ impl ISkiaApiLease for ApiLease {
 /// The lease feature of a drawing context that records a picture ([`RecordedLeases`]).
 struct RecordedLeaseFeature {
     context_leased: Rc<Cell<bool>>,
+    state: Weak<NativeLeaseState>,
     leases: Rc<RecordedLeases>,
-    /// The transform of the canvas when the feature was asked for.
-    transform: sk::M44,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     gpu: Option<Rc<dyn ISkiaGpu>>,
-    current_opacity: f64,
 }
 
 impl ISkiaApiLeaseFeature for RecordedLeaseFeature {
     fn lease(&self) -> Rc<dyn ISkiaApiLease> {
+        let state = active_lease_state(&self.state);
         if self.context_leased.get() {
             leased_panic();
         }
@@ -401,11 +433,12 @@ impl ISkiaApiLeaseFeature for RecordedLeaseFeature {
 
         Rc::new(RecordedApiLease {
             context_leased: self.context_leased.clone(),
+            state: self.state.clone(),
             leases: self.leases.clone(),
-            transform: self.transform.clone(),
+            transform: to_sk_matrix44(state.transform.get()),
             gr_context: self.gr_context.clone(),
             gpu: self.gpu.clone(),
-            current_opacity: self.current_opacity,
+            current_opacity: state.opacity.get(),
             is_disposed: Cell::new(false),
             leased: Rc::new(Cell::new(false)),
         })
@@ -415,6 +448,7 @@ impl ISkiaApiLeaseFeature for RecordedLeaseFeature {
 /// A lease of a drawing context that records a picture ([`RecordedLeases`]).
 struct RecordedApiLease {
     context_leased: Rc<Cell<bool>>,
+    state: Weak<NativeLeaseState>,
     leases: Rc<RecordedLeases>,
     transform: sk::M44,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
@@ -427,9 +461,15 @@ struct RecordedApiLease {
 
 impl RecordedApiLease {
     fn check_lease(&self) {
+        self.check_active();
         if self.leased.get() {
             leased_panic();
         }
+    }
+
+    fn check_active(&self) {
+        assert!(!self.is_disposed.get(), "The Skia API lease has been disposed");
+        active_lease_state(&self.state);
     }
 }
 
@@ -448,6 +488,7 @@ impl ISkiaApiLease for RecordedApiLease {
     }
 
     fn gr_context(&self) -> Option<Rc<dyn ISkiaGrContext>> {
+        self.check_active();
         self.gr_context.clone()
     }
 
@@ -471,11 +512,17 @@ impl ISkiaApiLease for RecordedApiLease {
         }
         self.leased.set(true);
 
-        Some(Rc::new(PlatformApiLease { leased: self.leased.clone(), gr_context: self.gr_context.clone(), context }))
+        Some(Rc::new(PlatformApiLease {
+            leased: self.leased.clone(),
+            gr_context: self.gr_context.clone(),
+            context,
+            is_disposed: Cell::new(false),
+        }))
     }
 
     fn dispose(&self) {
         if !self.is_disposed.get() {
+            assert!(!self.leased.get(), "The platform graphics API is currently leased");
             self.context_leased.set(false);
             self.is_disposed.set(true);
         }
@@ -486,14 +533,19 @@ struct PlatformApiLease {
     leased: Rc<Cell<bool>>,
     gr_context: Option<Rc<dyn ISkiaGrContext>>,
     context: Rc<dyn IPlatformGraphicsContext>,
+    is_disposed: Cell<bool>,
 }
 
 impl ISkiaPlatformGraphicsApiLease for PlatformApiLease {
     fn context(&self) -> Rc<dyn IPlatformGraphicsContext> {
+        assert!(!self.is_disposed.get(), "The platform graphics API lease has been disposed");
         self.context.clone()
     }
 
     fn dispose(&self) {
+        if self.is_disposed.replace(true) {
+            return;
+        }
         self.leased.set(false);
         if let Some(gr_context) = &self.gr_context {
             gr_context.reset_context();
@@ -596,6 +648,7 @@ pub struct DrawingContextImpl {
     box_shadow_paint: Option<sk::Paint>,
     session: Option<Rc<dyn ISkiaGpuRenderSession>>,
     leased: Rc<Cell<bool>>,
+    native_lease_state: Option<Rc<NativeLeaseState>>,
     use_opacity_save_layer: bool,
     canvas: ContextCanvas,
     surface: Option<sk::Surface>,
@@ -663,6 +716,7 @@ impl DrawingContextImpl {
             box_shadow_paint: Some(SkPaintCache::get()),
             session: create_info.current_session,
             leased: Rc::new(Cell::new(false)),
+            native_lease_state: None,
             use_opacity_save_layer,
             canvas: ContextCanvas::new(canvas, post_transform),
             surface: create_info.surface,
@@ -678,6 +732,11 @@ impl DrawingContextImpl {
     /// The GPU context the drawing context draws with, if any.
     pub fn gr_context(&self) -> Option<&Rc<dyn ISkiaGrContext>> {
         self.gr_context.as_ref()
+    }
+
+    /// The DPI used to size and sample intermediate image and scene-brush surfaces.
+    pub fn intermediate_surface_dpi(&self) -> Vector {
+        self.intermediate_surface_dpi
     }
 
     /// A layer with an image filter is about to be drawn: a filter reads around the pixels it
@@ -710,8 +769,32 @@ impl DrawingContextImpl {
     }
 
     fn check_lease(&self) {
+        assert!(!self.disposed, "The drawing context has been disposed");
         if self.leased.get() {
             leased_panic();
+        }
+    }
+
+    fn native_lease_state(&mut self) -> Weak<NativeLeaseState> {
+        if let Some(state) = &self.native_lease_state {
+            return Rc::downgrade(state);
+        }
+        let transform = matrix44_to_matrix(&self.canvas.get().local_to_device());
+        let state = Rc::new(NativeLeaseState {
+            transform: Cell::new(transform),
+            opacity: Cell::new(self.current_opacity),
+            disposed: Cell::new(false),
+        });
+        let weak = Rc::downgrade(&state);
+        self.native_lease_state = Some(state);
+        weak
+    }
+
+    #[inline]
+    fn set_current_opacity(&mut self, opacity: f64) {
+        self.current_opacity = opacity;
+        if let Some(state) = &self.native_lease_state {
+            state.opacity.set(opacity);
         }
     }
 
@@ -795,6 +878,9 @@ impl DrawingContextImpl {
         // more than 96 DPI) scaled the transforms pushed after a restore
         // twice. The transform of the context is the logical one.
         let total = matrix44_to_matrix(&canvas.local_to_device());
+        if let Some(state) = &self.native_lease_state {
+            state.transform.set(total);
+        }
         self.current_transform = Some(match self.post_transform {
             Some(post_transform) => total * post_transform.invert(),
             None => total,
@@ -1391,6 +1477,26 @@ impl DrawingContextImpl {
         None
     }
 
+    /// Attempts to push a custom effect with an explicit execution result.
+    ///
+    /// A successful push must be balanced with
+    /// [`IDrawingContextImplWithEffects::pop_effect`]. On failure no effect or
+    /// canvas state is pushed. This lets exporters reject missing, disabled or
+    /// invalid shader implementations instead of inheriting the normal
+    /// drawing contract's unchanged-content fallback.
+    pub fn try_push_custom_effect(
+        &mut self,
+        clip_rect: Option<Rect>,
+        effect: &ferroui_base::media::effects::ImmutableCustomEffect,
+    ) -> bool {
+        self.check_lease();
+        let Some(pushed) = self.try_push_shader_effect(clip_rect, effect) else {
+            return false;
+        };
+        self.effect_stack.push(pushed);
+        true
+    }
+
     /// Pushes the custom effect `effect` as its runtime shader (#455, E4),
     /// over `clip_rect` (the area of the effect; the clip of the canvas
     /// without one): a save of the canvas under the matrix of the layer of
@@ -1450,7 +1556,7 @@ impl DrawingContextImpl {
         // The content is drawn with its own transform.
         canvas.set_matrix(&matrix);
         SkPaintCache::return_reset(paint);
-        self.current_opacity = 1.0;
+        self.set_current_opacity(1.0);
         Some(pushed)
     }
 
@@ -1634,6 +1740,12 @@ impl IDrawingContextImpl for DrawingContextImpl {
         }
 
         self.current_transform = Some(value);
+        if let Some(state) = &self.native_lease_state {
+            state.transform.set(match self.post_transform {
+                Some(post_transform) => value * post_transform,
+                None => value,
+            });
+        }
 
         // The canvas takes the transform with its next use (9.28).
         self.canvas.set_transform(value);
@@ -2004,15 +2116,16 @@ impl IDrawingContextImpl for DrawingContextImpl {
         // as the allocation limit rather than trimming content to this hint.
         self.canvas.get().save_layer(&SaveLayerRec::default().paint(&paint));
         self.compositing_opacity_stack.push(inherited_opacity);
-        self.current_opacity = 1.0;
+        self.set_current_opacity(1.0);
         true
     }
 
     fn pop_compositing_layer(&mut self) {
         self.check_lease();
         self.restore_canvas();
-        self.current_opacity = self.compositing_opacity_stack.pop()
+        let opacity = self.compositing_opacity_stack.pop()
             .unwrap_or_else(|| panic!("The compositing opacity stack is empty"));
+        self.set_current_opacity(opacity);
     }
 
     fn push_opacity(&mut self, opacity: f64, bounds: Option<Rect>) {
@@ -2030,7 +2143,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
             let opacity = self.current_opacity * opacity;
 
             // Opacity is applied via layering.
-            self.current_opacity = 1.0;
+            self.set_current_opacity(1.0);
 
             let mut paint = sk::Paint::default();
             paint.set_color4f(sk::Color4f::new(0.0, 0.0, 0.0, opacity as f32), None);
@@ -2045,7 +2158,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
                 }
             }
         } else {
-            self.current_opacity *= opacity;
+            self.set_current_opacity(self.current_opacity * opacity);
         }
     }
 
@@ -2058,7 +2171,7 @@ impl IDrawingContextImpl for DrawingContextImpl {
             self.restore_canvas();
         }
 
-        self.current_opacity = opacity;
+        self.set_current_opacity(opacity);
     }
 
     fn push_opacity_mask(&mut self, mask: &dyn IBrush, bounds: Rect) {
@@ -2164,17 +2277,17 @@ impl IDrawingContextImpl for DrawingContextImpl {
     }
 
     fn get_feature(&mut self, feature_type: TypeId) -> Option<Rc<dyn Any>> {
+        self.check_lease();
         if feature_type == TypeId::of::<dyn ISkiaApiLeaseFeature>() {
             if let CanvasSource::Recorder { leases: Some(leases), .. } = &self.canvas.source {
                 let leases = leases.clone();
-                let transform = self.canvas.get().local_to_device();
+                let state = self.native_lease_state();
                 let feature: Rc<dyn ISkiaApiLeaseFeature> = Rc::new(RecordedLeaseFeature {
                     context_leased: self.leased.clone(),
+                    state,
                     leases,
-                    transform,
                     gr_context: self.gr_context.clone(),
                     gpu: self.gpu.clone(),
-                    current_opacity: self.current_opacity,
                 });
                 return Some(Rc::new(feature));
             }
@@ -2184,12 +2297,13 @@ impl IDrawingContextImpl for DrawingContextImpl {
             // it is taken: the canvas follows the transform of the context
             // without delay from here on.
             self.canvas.set_eager();
+            let state = self.native_lease_state();
             let feature: Rc<dyn ISkiaApiLeaseFeature> = Rc::new(SkiaLeaseFeature {
                 context_leased: self.leased.clone(),
+                state,
                 surface,
                 gr_context: self.gr_context.clone(),
                 gpu: self.gpu.clone(),
-                current_opacity: self.current_opacity,
             });
             return Some(Rc::new(feature));
         }
@@ -2207,6 +2321,9 @@ impl IDrawingContextImpl for DrawingContextImpl {
         }
         self.check_lease();
         self.disposed = true;
+        if let Some(state) = &self.native_lease_state {
+            state.disposed.set(true);
+        }
 
         // Before the disposables, which may read the surface.
         self.canvas.finish_transform();
@@ -2290,7 +2407,7 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
                 // the save of the matrix and the clip of the layer.
                 self.restore_canvas();
                 self.restore_canvas();
-                self.current_opacity = inherited_opacity;
+                self.set_current_opacity(inherited_opacity);
             }
             Some(PushedEffect::Overlay { shader, blender, to_device, bounds, inherited_opacity }) => {
                 // The overlay over the content, in the coordinates of the
@@ -2305,7 +2422,7 @@ impl IDrawingContextImplWithEffects for DrawingContextImpl {
                 SkPaintCache::return_reset(paint);
                 self.restore_canvas();
                 self.restore_canvas();
-                self.current_opacity = inherited_opacity;
+                self.set_current_opacity(inherited_opacity);
             }
             Some(PushedEffect::Layer) | None => self.restore_canvas(),
         }
@@ -2548,7 +2665,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         canvas.clip_rect(bounds, sk::ClipOp::Intersect, true);
         canvas.save_layer(&SaveLayerRec::default().bounds(&bounds).paint(&paint));
         SkPaintCache::return_reset(paint);
-        self.current_opacity = 1.0;
+        self.set_current_opacity(1.0);
         self.pixel_operation_stack.push(PixelOperationLayer { programs, bounds, source_open: false, inherited_opacity });
         true
     }
@@ -2575,7 +2692,7 @@ impl ferroui_base::platform::IDrawingContextImplWithLayerEffects for DrawingCont
         let Some(layer) = self.pixel_operation_stack.pop() else { panic!("The pixel operation stack is empty") };
         self.restore_canvas();
         self.restore_canvas();
-        self.current_opacity = layer.inherited_opacity;
+        self.set_current_opacity(layer.inherited_opacity);
     }
 }
 
@@ -2805,7 +2922,7 @@ impl DrawingContextImpl {
         self.canvas.get().clear(sk::Color::TRANSPARENT);
         // The transform of the context is read back from the canvas.
         self.restore_canvas();
-        self.current_opacity = saved_opacity;
+        self.set_current_opacity(saved_opacity);
     }
 
     /// Composes the layer of the latest next source of a pixel operation,

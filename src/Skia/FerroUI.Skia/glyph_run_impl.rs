@@ -10,7 +10,7 @@ use ferroui_base::{Point, Rect, Vector};
 use skia_safe::font::Edging;
 use skia_safe::{Font, FontHinting, TextBlob};
 use std::any::Any;
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 
 /// How the font of a text blob is configured: the options the blob is
 /// built for.
@@ -81,6 +81,8 @@ pub struct GlyphRunImpl {
     // A two level cache optimized for single-entry read, keyed by the font
     // configuration.
     text_blob_cache: Mutex<TwoLevelCache<TextOptions, Option<TextBlob>>>,
+    /// Whether export can retain every glyph as a monochrome outline.
+    vector_outlines: OnceLock<bool>,
     /// Whether the run has been drawn (`draw`).
     drawn: std::sync::atomic::AtomicBool,
     font_rendering_em_size: f64,
@@ -173,11 +175,33 @@ impl GlyphRunImpl {
             glyph_indices,
             glyph_positions,
             text_blob_cache: Mutex::new(TwoLevelCache::with_secondary_size(3)),
+            vector_outlines: OnceLock::new(),
             drawn: std::sync::atomic::AtomicBool::new(false),
             font_rendering_em_size,
             baseline_origin,
             bounds: run_bounds.translate(Vector::new(baseline_origin.x, baseline_origin.y)),
         }
+    }
+
+    /// Whether the complete run can be exported as monochrome vector outlines.
+    ///
+    /// The result is cached for this immutable run. Colour and bitmap font
+    /// tables conservatively return `false`, even when a particular glyph also
+    /// has a monochrome fallback outline: that outline would lose its intended
+    /// colour rendering. Available empty paths (whitespace) are valid outlines.
+    /// Exporters can retain the original Skia drawing as an image when this is
+    /// `false`, instead of silently omitting unavailable glyph paths.
+    pub fn has_vector_outlines(&self) -> bool {
+        *self.vector_outlines.get_or_init(|| {
+            if self.glyph_indices.is_empty() { return true; }
+            let typeface = self.font.typeface();
+            for tag in [*b"COLR", *b"CBDT", *b"CBLC", *b"sbix", *b"SVG ", *b"EBDT", *b"EBLC"] {
+                if typeface.get_table_size(u32::from_be_bytes(tag)).is_some_and(|size| size > 0) {
+                    return false;
+                }
+            }
+            self.glyph_indices.iter().all(|&glyph| self.font.get_path(glyph).is_some_and(|path| path.is_finite()))
+        })
     }
 
     /// The text blob of the run for the given text options. An unspecified

@@ -1,0 +1,38 @@
+{
+  "producer_revision": "553b2e75b930079c2c8535e6256c8c4263b05aaa",
+  "generator_binary_sha256": "f0c50d39608455dd8199a7180ac5d7a6c84e3da028d8ec390951c75063779d93",
+  "regenerated_against_optimized_source": true,
+  "all_bytes_match_committed_examples": true,
+  "files": [
+    {
+      "name": "aeris-cutaway.svg",
+      "bytes": 561764,
+      "sha256": "24c99f8769e9f3f1ec253ba39b3dfa2b6b74f759f8b9a8c1338bb23eec17b0eb"
+    },
+    {
+      "name": "aeris-exploded.svg",
+      "bytes": 617246,
+      "sha256": "dad7233e5f23bc0b99a1e178ef6570aa8abdd4744e49f5ee17ee26e1cf82f616"
+    },
+    {
+      "name": "aeris-normal.svg",
+      "bytes": 561105,
+      "sha256": "7a6b0956d7e27607e469e96dd57e6acb469729bf3abe7df93229296e18ac70c2"
+    },
+    {
+      "name": "aeris-normal.svgz",
+      "bytes": 140877,
+      "sha256": "dc465cac0d80c863ba5800179492420977c5c4690b0c513b1428ce7089b8c87c"
+    },
+    {
+      "name": "aeris-wireframe.svg",
+      "bytes": 575584,
+      "sha256": "f59a72b04c3167437d993b481ef0ed789fdeae02ee5c9ae0f8a7b6f289a374a2"
+    },
+    {
+      "name": "aeris-xray.svg",
+      "bytes": 580237,
+      "sha256": "8d9a7bd0bfa4d7c0bf5fa4910a01a46bf146fb6c2fe6e2f85c10ffd30c91eebb"
+    }
+  ]
+}

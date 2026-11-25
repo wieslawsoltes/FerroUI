@@ -76,6 +76,19 @@ pub trait IDrawingContextImpl {
         self.create_layer(size)
     }
 
+    /// Lets a drawing-context adapter handle a native layer blit before the
+    /// layer recovers its backend's concrete context type. A layer supporting
+    /// adapters calls this from its `blit` implementation before downcasting.
+    ///
+    /// `true` means the adapter consumed the operation, including reporting an
+    /// error through its own recording contract. `false` leaves the context
+    /// unchanged and asks the layer to use its normal backend path. An adapter
+    /// can validate a layer and delegate its blit to the wrapped context; it
+    /// must not delegate back to itself.
+    fn try_blit_layer(&mut self, _layer: &dyn IDrawingContextLayerImpl) -> bool {
+        false
+    }
+
     /// Whether the graph of an effect brush is evaluated in a scratch target of the size of the
     /// brush ([`create_temporary_layer`](Self::create_temporary_layer)) and drawn from it, rather
     /// than in layers pushed on this context. A backend whose pushed layers have the size of its
@@ -206,6 +219,9 @@ pub trait IDrawingContextImpl {
 /// drawing context.
 pub trait IDrawingContextLayerImpl: IBitmapImpl {
     /// Does optimized blit with source OVER overlay mode.
+    /// Implementations that downcast the destination should first offer the
+    /// operation to [`IDrawingContextImpl::try_blit_layer`], allowing recording
+    /// and validation adapters to inspect the source before a native escape.
     fn blit(&self, context: &mut dyn IDrawingContextImpl);
 
     /// Whether the layer can be blitted with [`blit`](Self::blit).

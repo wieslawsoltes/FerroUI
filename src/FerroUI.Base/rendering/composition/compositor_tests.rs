@@ -25,6 +25,9 @@ use std::cell::{Cell, RefCell};
 use std::rc::{Rc, Weak};
 use std::sync::Arc;
 
+#[path = "full_frame_render_tests.rs"]
+mod full_frame_render_tests;
+
 /// A visual that fills its bounds with its background, like a border.
 #[repr(C)]
 pub(crate) struct TestBorder {

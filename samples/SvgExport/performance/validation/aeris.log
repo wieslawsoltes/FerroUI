@@ -1,0 +1,6 @@
+Recorded layered scene in 15.45 ms
+aeris-normal.svg: 561105 bytes, 122.09 ms; 5 vector layers, 205 draw calls, 0 shared definitions
+aeris-xray.svg: 580237 bytes, 66.54 ms; 5 vector layers, 205 draw calls, 0 shared definitions
+aeris-cutaway.svg: 561764 bytes, 63.54 ms; 5 vector layers, 205 draw calls, 0 shared definitions
+aeris-exploded.svg: 617246 bytes, 63.05 ms; 5 vector layers, 205 draw calls, 0 shared definitions
+aeris-wireframe.svg: 575584 bytes, 66.76 ms; 5 vector layers, 205 draw calls, 0 shared definitions

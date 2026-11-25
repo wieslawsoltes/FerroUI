@@ -68,7 +68,7 @@ pub use geometry_group_impl::GeometryGroupImpl;
 pub use geometry_impl::{try_get_geometry_impl, GeometryImpl, GeometryImplBase};
 pub use glyph_run_impl::GlyphRunImpl;
 pub use graphite_metal_ownership::graphite_metal_ownership_fixed;
-pub use i_drawable_bitmap_impl::{try_get_drawable_bitmap, IDrawableBitmapImpl};
+pub use i_drawable_bitmap_impl::{is_bitmap_cpu_readable, try_get_drawable_bitmap, IDrawableBitmapImpl};
 pub use i_skia_api_lease_feature::{ISkiaApiLease, ISkiaApiLeaseFeature, ISkiaPlatformGraphicsApiLease};
 pub use immutable_bitmap::ImmutableBitmap;
 pub use pipeline_records::register_pipeline_record;
@@ -118,6 +118,8 @@ mod compositing_tests;
 mod text_tests;
 #[cfg(test)]
 mod text_rendering_tests;
+#[cfg(test)]
+mod native_lease_tests;
 #[cfg(test)]
 mod unit_tests;
 

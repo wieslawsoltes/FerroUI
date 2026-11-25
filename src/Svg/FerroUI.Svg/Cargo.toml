@@ -1,0 +1,36 @@
+[package]
+name = "ferroui-svg"
+description = "Layered, deterministic SVG export through FerroUI's Skia rendering backend"
+version.workspace = true
+edition.workspace = true
+rust-version.workspace = true
+license.workspace = true
+repository.workspace = true
+homepage.workspace = true
+readme = "README.md"
+keywords.workspace = true
+categories.workspace = true
+
+[lib]
+path = "lib.rs"
+
+[dependencies]
+ferroui-base.workspace = true
+ferroui-controls.workspace = true
+ferroui-skia.workspace = true
+skia-safe.workspace = true
+roxmltree.workspace = true
+flate2.workspace = true
+base64 = "0.22"
+
+[dev-dependencies]
+ferroui-controls = { workspace = true, features = ["testing"] }
+ferroui-harfbuzz.workspace = true
+ferroui-fonts-inter.workspace = true
+
+[features]
+default = []
+media3d = ["ferroui-skia/media3d"]
+
+[package.metadata.release]
+group = "rendering"

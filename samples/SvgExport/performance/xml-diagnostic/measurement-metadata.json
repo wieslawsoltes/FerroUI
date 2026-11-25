@@ -1,0 +1,94 @@
+{
+  "binary_sha256": "45ab54ae1103a850fe4a612df6c4e0e51a4b0db94172546861ad143fe4e0c1b1",
+  "command": "taskset -c 0 target/release/ferroui-svg-xml-diagnostic timings-run1.csv",
+  "timed_operation": "xml::optimize only; prepared input and XmlOptions; output destruction, alias/length checks and CSV bookkeeping after timer",
+  "order": "Per sample rotate first variant modulo four; 800 samples per case/variant, eight warmups per case/variant",
+  "checks": "Every variant exact byte equality before measurement; repeated_dedup reproduces the existing 26,840-byte raster-normal.svg exactly; repeated_no_dedup yields 198,354 bytes; 7/0 alias counts as expected",
+  "limitation": "This isolates intrinsic XML source transformations in a small same-process binary. It does not reproduce the full release export binary code layout, surrounding allocation history or Skia/render integration.",
+  "summary": [
+    {
+      "case": "repeated_dedup",
+      "variant": "baseline",
+      "samples": 800,
+      "median_ms": 0.807034,
+      "relative_to_baseline": 1.0
+    },
+    {
+      "case": "repeated_dedup",
+      "variant": "current",
+      "samples": 800,
+      "median_ms": 0.7644335,
+      "relative_to_baseline": 0.9472135002986244
+    },
+    {
+      "case": "repeated_dedup",
+      "variant": "old_escape",
+      "samples": 800,
+      "median_ms": 0.8093015,
+      "relative_to_baseline": 1.0028096709680137
+    },
+    {
+      "case": "repeated_dedup",
+      "variant": "old_rewrite",
+      "samples": 800,
+      "median_ms": 0.783241,
+      "relative_to_baseline": 0.9705179707422488
+    },
+    {
+      "case": "repeated_no_dedup",
+      "variant": "baseline",
+      "samples": 800,
+      "median_ms": 1.291024,
+      "relative_to_baseline": 1.0
+    },
+    {
+      "case": "repeated_no_dedup",
+      "variant": "current",
+      "samples": 800,
+      "median_ms": 0.828826,
+      "relative_to_baseline": 0.6419911636034652
+    },
+    {
+      "case": "repeated_no_dedup",
+      "variant": "old_escape",
+      "samples": 800,
+      "median_ms": 1.2227885,
+      "relative_to_baseline": 0.9471462188154519
+    },
+    {
+      "case": "repeated_no_dedup",
+      "variant": "old_rewrite",
+      "samples": 800,
+      "median_ms": 0.862159,
+      "relative_to_baseline": 0.6678102033734462
+    },
+    {
+      "case": "normalized_dedup",
+      "variant": "baseline",
+      "samples": 800,
+      "median_ms": 0.240518,
+      "relative_to_baseline": 1.0
+    },
+    {
+      "case": "normalized_dedup",
+      "variant": "current",
+      "samples": 800,
+      "median_ms": 0.191119,
+      "relative_to_baseline": 0.7946141245145893
+    },
+    {
+      "case": "normalized_dedup",
+      "variant": "old_escape",
+      "samples": 800,
+      "median_ms": 0.224785,
+      "relative_to_baseline": 0.9345870163563642
+    },
+    {
+      "case": "normalized_dedup",
+      "variant": "old_rewrite",
+      "samples": 800,
+      "median_ms": 0.198381,
+      "relative_to_baseline": 0.8248072909304085
+    }
+  ]
+}

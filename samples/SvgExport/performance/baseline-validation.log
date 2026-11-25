@@ -1,0 +1,42 @@
+Inkscape 1.4 (e7c3feb100, 2024-10-09)
+bitmap-cutaway.svg: 111,965 bytes; 273 IDs, 265 resolved references; 8 vector / 0 raster layers; 128 images; render OK
+bitmap-exploded.svg: 112,211 bytes; 272 IDs, 264 resolved references; 8 vector / 0 raster layers; 128 images; render OK
+bitmap-normal.svg: 111,230 bytes; 272 IDs, 264 resolved references; 8 vector / 0 raster layers; 128 images; render OK
+bitmap-raster-reference.svg: 8,792 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+bitmap-wireframe.svg: 129,670 bytes; 400 IDs, 264 resolved references; 8 vector / 0 raster layers; 128 images; render OK
+bitmap-xray.svg: 114,046 bytes; 272 IDs, 264 resolved references; 8 vector / 0 raster layers; 128 images; render OK
+definitions-cutaway.svg: 555,987 bytes; 1553 IDs, 1545 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+definitions-exploded.svg: 556,233 bytes; 1552 IDs, 1544 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+definitions-normal.svg: 555,252 bytes; 1552 IDs, 1544 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+definitions-raster-reference.svg: 21,789 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+definitions-wireframe.svg: 736,577 bytes; 1552 IDs, 520 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+definitions-xray.svg: 798,964 bytes; 1552 IDs, 1544 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+geometry-cutaway.svg: 2,788,283 bytes; 17 IDs, 9 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+geometry-exploded.svg: 2,788,529 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+geometry-normal.svg: 2,787,548 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+geometry-raster-reference.svg: 15,394 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+geometry-wireframe.svg: 2,930,908 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+geometry-xray.svg: 2,974,940 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+raster-cutaway.svg: 27,575 bytes; 10 IDs, 2 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+raster-exploded.svg: 27,821 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+raster-normal.svg: 26,840 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+raster-raster-reference.svg: 26,840 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+raster-wireframe.svg: 3,218 bytes; 8 IDs, 0 resolved references; 0 vector / 8 raster layers; 0 images; render OK
+raster-xray.svg: 28,128 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+text-cutaway.svg: 2,763,119 bytes; 17 IDs, 9 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+text-exploded.svg: 2,763,365 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+text-normal.svg: 2,762,384 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+text-raster-reference.svg: 45,670 bytes; 9 IDs, 1 resolved references; 0 vector / 8 raster layers; 1 images; render OK
+text-wireframe.svg: 2,770,544 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+text-xray.svg: 2,771,184 bytes; 16 IDs, 8 resolved references; 8 vector / 0 raster layers; 0 images; render OK
+bitmap vs Skia replay: mean absolute RGB error 0.2705/255, RMSE 1.3026/255, pixels with any channel >16: 0.5625%
+bitmap alpha vs Skia replay: mean absolute error 0.0000/255, RMSE 0.0000/255, pixels >16: 0.0000%
+definitions vs Skia replay: mean absolute RGB error 0.4968/255, RMSE 1.6457/255, pixels with any channel >16: 0.3750%
+definitions alpha vs Skia replay: mean absolute error 0.0000/255, RMSE 0.0000/255, pixels >16: 0.0000%
+geometry vs Skia replay: mean absolute RGB error 0.8964/255, RMSE 2.9274/255, pixels with any channel >16: 0.9167%
+geometry alpha vs Skia replay: mean absolute error 0.4671/255, RMSE 2.0471/255, pixels >16: 0.5000%
+raster vs Skia replay: mean absolute RGB error 0.0000/255, RMSE 0.0000/255, pixels with any channel >16: 0.0000%
+raster alpha vs Skia replay: mean absolute error 0.0000/255, RMSE 0.0000/255, pixels >16: 0.0000%
+text vs Skia replay: mean absolute RGB error 6.5707/255, RMSE 23.4803/255, pixels with any channel >16: 9.5859%
+text alpha vs Skia replay: mean absolute error 6.5707/255, RMSE 23.4803/255, pixels >16: 9.5859%
+Validated 30 SVGs; 5 pixel comparison(s).
