@@ -1,14 +1,14 @@
 import type { PrototypeImage, PrototypeInput, PrototypeScene, StageFocus, StagesRequest } from '../src/stagesProtocol';
 import { create } from './dom';
 import { StageContacts } from './stageContacts';
-import { StageKeyboard } from './stageKeyboard';
+import { PreviewKeyboard } from './previewKeyboard';
 
 /** The native player supplies one composited image and one accepted input target. */
 export class PrototypeArtboard {
     readonly element = create('section');
     private readonly image = create('img');
     private readonly placeholder = create('p', 'Rendering prototype…');
-    private readonly keyboard: StageKeyboard;
+    private readonly keyboard: PreviewKeyboard;
     private readonly contacts: StageContacts;
     private scene?: PrototypeScene;
     private current = true;
@@ -24,8 +24,8 @@ export class PrototypeArtboard {
         this.placeholder.setAttribute('role', 'status');
         this.placeholder.className = 'stage-placeholder';
         this.element.append(this.placeholder, this.image);
-        this.keyboard = new StageKeyboard(this.element, this.element, 0, returnTo,
-            input => this.input({ kind: 'keyboard', input }), true);
+        this.keyboard = new PreviewKeyboard(this.element, this.element, 0, returnTo,
+            input => this.input({ kind: 'keyboard', input }), { nativeEscape: true });
         this.contacts = new StageContacts(this.image, ({ epoch, input }) => this.input({ kind: 'pointer', input }, epoch), () => this.keyboard.enter());
     }
 

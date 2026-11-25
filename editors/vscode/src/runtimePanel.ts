@@ -2,12 +2,13 @@ import * as vscode from 'vscode';
 import { validate } from './agentSchema';
 import { continueBrowserMessage } from './browserPause';
 import type { HotReload } from './hotReload';
+import { keyboardInputSchema, type KeyboardFocus } from './previewKeyboardProtocol';
 import { errorMessage } from './protocol';
 import { RuntimeClient } from './runtimeClient';
 import type { RuntimeConnections } from './runtimeConnections';
 import { readRuntimeInspection, showLivePropertyTrace, showLiveTemplates } from './runtimeInspection';
 import { runtimeViewChangeSchema } from './runtimeMcpCatalog';
-import type { FromRuntime, RuntimeFrame, RuntimeInspectionResult, RuntimeNode, RuntimePresentation, RuntimeProperty,
+import type { FromRuntime, RuntimeFrame, RuntimeInspectionResult, RuntimeKeyboardRequest, RuntimeNode, RuntimePresentation, RuntimeProperty,
     RuntimeSelection, RuntimeViewChange, RuntimeViewSnapshot, ToRuntime } from './runtimeProtocol';
 import type { RuntimeSourceEditor } from './runtimeSource';
 import type { AppRuntime } from './runtimeTargets';
@@ -36,6 +37,8 @@ export class RuntimePanel implements vscode.Disposable {
     private pending = false;
     private ready = false;
     private debuggerPaused = false;
+    private inputVersion = 0;
+    private inputQueue = Promise.resolve();
 
     constructor(private readonly context: vscode.ExtensionContext, private readonly connections: RuntimeConnections,
         reload: HotReload, private readonly authoredSource: RuntimeSourceEditor,
@@ -56,8 +59,13 @@ export class RuntimePanel implements vscode.Disposable {
             panel.webview.onDidReceiveMessage((message: FromRuntime) => { void this.receive(message); });
             let visible = panel.visible;
             panel.onDidChangeViewState(() => {
-                if (panel.visible && !visible) this.postSnapshot();
-                visible = panel.visible;
+                if (panel.visible !== visible) {
+                    visible = panel.visible;
+                    if (visible) {
+                        this.post({ type: 'releaseKeyboard' });
+                        this.postSnapshot();
+                    } else this.inputVersion++;
+                }
                 this.schedule(0);
             });
             panel.onDidDispose(() => {
@@ -78,6 +86,7 @@ export class RuntimePanel implements vscode.Disposable {
         return {
             runtime: this.target, generation: this.generation, revision: this.revision, frame: this.frame?.token ?? null,
             debuggerPaused: this.debuggerPaused,
+            keyboardInput: this.frame?.keyboardScope !== undefined,
             window: this.windowId ?? null, windows: this.windows, ...this.presentation,
             selection: this.inspection ? { node: this.inspection.node, view: this.inspection.view } : null,
         };
@@ -117,6 +126,7 @@ export class RuntimePanel implements vscode.Disposable {
     private touch(): void { this.revision = ++nextViewRevision; }
 
     private present(presentation: Partial<RuntimePresentation>, echo = true): void {
+        if (presentation.mode !== undefined && presentation.mode !== this.presentation.mode) this.inputVersion++;
         this.presentation = { ...this.presentation, ...presentation };
         this.touch();
         if (echo) this.post({ type: 'presentation', presentation });
@@ -124,6 +134,7 @@ export class RuntimePanel implements vscode.Disposable {
 
     private invalidateFrame(): void {
         this.epoch++;
+        this.inputQueue = Promise.resolve();
         this.touch();
         this.frame = undefined;
         this.inspection = undefined;
@@ -139,12 +150,13 @@ export class RuntimePanel implements vscode.Disposable {
         const paused = Boolean(summary?.browser?.paused);
         if (paused !== this.debuggerPaused) {
             this.debuggerPaused = paused;
+            this.inputVersion++;
             this.schedule(0);
         }
         const status = summary ? `${summary.status}${summary.pid && !summary.available ? ' · Inspector unavailable' : ''}`
             : this.pinned ? 'App session ended.' : 'Run a FerroUI app with MCP enabled, or connect to a running app.';
         this.post({ type: 'state', target: summary?.runtime, targets: options, generation: summary?.generation ?? undefined,
-            windows: this.windows, root: this.windowId,
+            windows: this.windows, root: this.windowId, debuggerPaused: paused,
             status: paused ? `${status} · Paused in debugger` : status });
     }
 
@@ -180,14 +192,17 @@ export class RuntimePanel implements vscode.Disposable {
             }
             this.postState();
             if (!root) return;
-            const [tree, png] = await Promise.all([
+            const [tree, png, keyboard] = await Promise.all([
                 client.call<RuntimeNode[]>('get_tree', { node_id: root.node_id, tree: this.presentation.hierarchy, depth: 10 }),
                 client.call<string>('screenshot', { node_id: root.node_id }),
+                client.supports('window_keyboard').catch(() => false),
             ]);
             if (epoch !== this.epoch) return;
             if (typeof png !== 'string' || !png.startsWith('iVBORw0KGgo')) throw new Error('The app inspector did not return a native PNG.');
-            if (this.frame?.png === png && JSON.stringify(this.frame.tree) === JSON.stringify(tree)) return;
-            this.frame = { token: ++this.nextFrame, root, tree, png };
+            const keyboardScope = keyboard ? epoch : undefined;
+            if (this.frame?.png === png && this.frame.keyboardScope === keyboardScope
+                && JSON.stringify(this.frame.tree) === JSON.stringify(tree)) return;
+            this.frame = { token: ++this.nextFrame, root, tree, png, keyboardScope };
             if (this.inspection && !findNode(this.frame, this.inspection.node)) {
                 this.inspection = undefined;
                 this.touch();
@@ -275,6 +290,7 @@ export class RuntimePanel implements vscode.Disposable {
             }
             return;
         }
+        if (message.type === 'keyboard') return this.keyboard(message);
         if (!('token' in message) || !this.client || !this.frame || this.frame.token !== message.token) return;
         const client = this.client;
         const epoch = this.epoch;
@@ -291,7 +307,11 @@ export class RuntimePanel implements vscode.Disposable {
                 const x = message.x * bounds.width;
                 const y = message.y * bounds.height;
                 if (this.presentation.mode === 'interact') {
-                    await client.call('click', { node_id: frame.root.node_id, x, y });
+                    const version = this.inputVersion;
+                    await this.enqueueInput(async () => {
+                        if (!current() || version !== this.inputVersion || this.debuggerPaused) return;
+                        await client.call('click', { node_id: frame.root.node_id, x, y });
+                    });
                     this.schedule(0);
                     return;
                 }
@@ -350,6 +370,33 @@ export class RuntimePanel implements vscode.Disposable {
         } catch (error) {
             if (epoch === this.epoch) this.post({ type: 'problem', message: errorMessage(error) });
         }
+    }
+
+    private async keyboard({ scope, request, input }: RuntimeKeyboardRequest): Promise<void> {
+        const client = this.client;
+        const root = this.frame?.root.node_id;
+        const version = this.inputVersion;
+        const current = () => this.epoch === scope && this.frame?.keyboardScope === scope && this.panel?.visible
+            && this.presentation.mode === 'interact' && !this.debuggerPaused && this.inputVersion === version;
+        if (!client || root === undefined || !Number.isSafeInteger(request) || request < 1 || !current()) return;
+
+        try {
+            validate(keyboardInputSchema, input);
+            const focus = await this.enqueueInput(() => current()
+                ? client.call<KeyboardFocus | null>('window_keyboard', { node_id: root, input })
+                : Promise.resolve(null));
+            if (!current()) return;
+            this.post({ type: 'keyboardResult', scope, request, focus });
+            this.schedule(0);
+        } catch (error) {
+            if (current()) this.post({ type: 'keyboardResult', scope, request, error: errorMessage(error) });
+        }
+    }
+
+    private enqueueInput<T>(action: () => Promise<T>): Promise<T> {
+        const request = this.inputQueue.then(action);
+        this.inputQueue = request.then(() => {}, () => {});
+        return request;
     }
 
     private async inspect(client: RuntimeClient, token: number, selection: RuntimeSelection, signal?: AbortSignal): Promise<boolean> {

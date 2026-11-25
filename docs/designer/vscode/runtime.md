@@ -575,6 +575,16 @@ Managed debug builds record compiled RSX locations. Set `FERROUI_EDITOR_SOURCE=1
 
 Choose the layers icon beside a property to trace why that value is effective in the running app. The trace shows active and inactive contributors, a current value override, and the base value under an animation when available. Use a source arrow to open a matching location in the workspace. The layers icon appears when the app’s MCP server supports `get_property_trace`. [MCP value trace](reference.md#trace-property-values-with-mcp)
 
+### Use the keyboard in Live App
+
+1. Open a window whose app enabled inspector input. Switch to **Interact**, then choose the keyboard icon labeled **Keyboard input for** that window. The app’s current focus or first tab stop appears below the native frame.
+2. Use Tab and Shift+Tab to follow the app’s focus order. Type or paste into the focused field. Use Enter or Space to activate the focused control. You can click a control in the frame while keyboard input is active.
+3. Press Escape to return to the Live App toolbar. Leaving the editor, selecting another window, reconnecting, or replacing the app process also ends keyboard input. VoiceOver’s Control–Option shortcuts remain available during capture.
+
+The keyboard icon uses the running app’s `window_keyboard` inspector tool. To send text or an exact key gesture to one selected control, use the **Send input** form below the frame. [Drive the same window with MCP](reference.md#send-keyboard-input-to-a-running-window)
+
+![Live App in Interact mode with keyboard capture active. The native Review Draft field contains the entered note, and the focus badge shows how to exit.](../images/vscode-live-app-keyboard.png)
+
 ### Open an effective template in the running app
 
 1. Select a control or grid in the live window or its visual tree. Choose the **Live App Templates** icon next to **Reveal Source**.

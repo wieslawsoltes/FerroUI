@@ -155,6 +155,7 @@ Hot Reload output.
 | `click` | Raw pointer move/down/up at node center or local x/y; left, right or middle button |
 | `type_text` | Focus the control, then deliver raw text input |
 | `press_key` | Focus and deliver key down/up for a framework key gesture such as `Ctrl+A` or `Return` |
+| `window_keyboard` | Focus or type in a window from `list_windows`. Pass `input` with `kind` set to `focus`, `key`, or `text`. Each call returns the focused control’s name and role or `null`. |
 | `scroll` | Raw wheel event at the node center with horizontal/vertical deltas |
 | `invoke_pattern` | Invoke, Toggle, Expand/Collapse, SelectionItem, or Value provider actions |
 | `screenshot` | PNG of a visual at an optional scale; first window when no ID is supplied |

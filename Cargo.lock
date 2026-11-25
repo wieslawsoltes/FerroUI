@@ -2148,6 +2148,7 @@ dependencies = [
  "ferroui-markup-xaml",
  "ferroui-skia",
  "ferroui-themes-simple",
+ "serde",
  "serde_json",
 ]
 

@@ -1,8 +1,5 @@
 import { choice, integer, type Schema } from './agentSchema';
-
-export const stageKeyboardInput: Schema = { type: 'object', additionalProperties: false, required: ['kind'],
-    properties: { kind: choice('focus', 'key', 'text'), key: { type: 'string', maxLength: 64 },
-        text: { type: 'string', maxLength: 8192 } } };
+import { keyboardInputSchema } from './previewKeyboardProtocol';
 
 export const stageContactInput: Schema = { type: 'object', additionalProperties: false,
     required: ['contact', 'phase', 'device', 'x', 'y'], properties: {
@@ -15,7 +12,7 @@ export const stageContactInput: Schema = { type: 'object', additionalProperties:
 
 export const prototypeInput: Schema = { oneOf: [
     { type: 'object', additionalProperties: false, required: ['kind', 'input'],
-        properties: { kind: choice('keyboard'), input: stageKeyboardInput } },
+        properties: { kind: choice('keyboard'), input: keyboardInputSchema } },
     { type: 'object', additionalProperties: false, required: ['kind', 'input'],
         properties: { kind: choice('pointer'), input: stageContactInput } },
 ] };

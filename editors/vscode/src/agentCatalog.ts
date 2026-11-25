@@ -8,7 +8,8 @@ import { hostedPaletteCatalog } from './hostedPaletteCatalog';
 import { hostedStylesCatalog } from './hostedStylesCatalog';
 import { hostedTemplateCatalog } from './hostedTemplateCatalog';
 import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog } from './workspaceCatalog';
-import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageInputCatalog';
+import { prototypeInput, stageContactInput } from './stageInputCatalog';
+import { keyboardInputSchema } from './previewKeyboardProtocol';
 import { stageComparisonSchema } from './stageComparisonSchema';
 import { runtimeProfileCatalog } from './runtimeProfileCatalog';
 import { runtimeMcpCatalog } from './runtimeMcpCatalog';
@@ -403,7 +404,7 @@ export const agentCatalog = {
     designer_stage_fixtures: tool('Read the named fixtures of a current stage. Use designer_stage_change with design_time_data and design_fixture to choose one.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_input: tool('Focus an Interact stage or send it a key gesture or text. Pass its current ID and epoch. Returns the focused control’s accessible name and role.',
-        { ...session, stage: node, expected_epoch: integer(0), input: stageKeyboardInput }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
+        { ...session, stage: node, expected_epoch: integer(0), input: keyboardInputSchema }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
     designer_stage_pointer: tool('Send a primary pointer contact to an Interact stage. Start inside the artboard with normalized coordinates and its current epoch, then move, release, or cancel using the same contact and device. The stage’s explicit pointer profile takes precedence.',
         { ...session, stage: node, expected_epoch: integer(0), input: stageContactInput }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
     designer_stage_change: tool('Apply a board action. Use restore with a versioned manifest from designer_stages or Studio. Use compare with base {id, epoch} and the comparison reviewed by designer_stage_comparison. Use duplicate with target {id, epoch}, or move with that target and a zero-based destination index. Use camera with that target and camera {zoom_percent, x, y}, using a reported zoom or null for Fit with zero offsets. Use update with id and the complete configuration. Hosts with textEnvironment support text.locale and text.scale_percent. Hosts with pointerInput support pointer_input set to automatic, touch, or pen. Use add with name, width, height, dark and optional sourcePath, remove or refresh with id, or setPrototype with a graph using zero-based stage indices and optional transitions [{link, transition:{effect,duration_ms,easing}}] using zero-based link indices.',

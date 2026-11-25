@@ -2,17 +2,17 @@ import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
 import type { StageChecks, StageFocus, StageInput, StageModel } from '../src/stagesProtocol';
 import { asRange } from '../src/textDocument';
-import { stageInputKey } from '../webview/stageKeyboard';
+import { previewInputKey } from '../webview/previewKeyboard';
 import type { McpFixture } from './mcp';
 
 export async function verifyStageKeyboard({ invoke, content }: McpFixture): Promise<void> {
     const modifiers = { ctrlKey: false, altKey: false, shiftKey: false, metaKey: false };
-    assert.equal(stageInputKey({ ...modifiers, key: 'ArrowRight', ctrlKey: true, altKey: true }), undefined);
-    assert.equal(stageInputKey({ ...modifiers, key: 'Tab', metaKey: true }), undefined);
-    assert.equal(stageInputKey({ ...modifiers, key: 'Escape', shiftKey: true }), undefined);
-    assert.equal(stageInputKey({ ...modifiers, key: 'Tab', shiftKey: true }), 'Shift+Tab');
-    assert.equal(stageInputKey({ ...modifiers, key: 'Escape' }), 'Escape');
-    assert.equal(stageInputKey({ ...modifiers, key: 'a', ctrlKey: true }), 'Ctrl+A');
+    assert.equal(previewInputKey({ ...modifiers, key: 'ArrowRight', ctrlKey: true, altKey: true }), undefined);
+    assert.equal(previewInputKey({ ...modifiers, key: 'Tab', metaKey: true }), undefined);
+    assert.equal(previewInputKey({ ...modifiers, key: 'Escape', shiftKey: true }), undefined);
+    assert.equal(previewInputKey({ ...modifiers, key: 'Tab', shiftKey: true }), 'Shift+Tab');
+    assert.equal(previewInputKey({ ...modifiers, key: 'Escape' }), 'Escape');
+    assert.equal(previewInputKey({ ...modifiers, key: 'a', ctrlKey: true }), 'Ctrl+A');
     for (const [path, source] of [
         ['StageKeyboard.xaml', `<StackPanel xmlns="https://github.com/ferroui" Spacing="8">
   <Button Name="Apply" Content="Apply"/>

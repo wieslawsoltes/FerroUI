@@ -1,7 +1,7 @@
 import type { PrototypeScene, StageCamera, StageFocus, StageImage, StageInfo, StagesRequest } from '../src/stagesProtocol';
 import { stageDirectionLabels, stagePointerLabels, stageThemeLabels } from '../src/stagesProtocol';
 import { create, icon, iconButton, labelButton } from './dom';
-import { StageKeyboard } from './stageKeyboard';
+import { PreviewKeyboard } from './previewKeyboard';
 import { StageContacts } from './stageContacts';
 import type { StageField, StageMenu } from './stageMenu';
 import { StageViewport } from './stageViewport';
@@ -22,7 +22,7 @@ export class StageCard {
     private readonly pause = iconButton('debug-pause', 'Pause', () => this.edit('pause'));
     private readonly checks = iconButton('check-all', 'Preview checks', () => this.send({ type: 'checks', id: this.stage.id, epoch: this.stage.epoch }));
     private readonly more = iconButton('ellipsis', 'Stage actions', () => this.menu.prepare(this.more, this.stage, field => this.edit(field)));
-    private readonly keyboard: StageKeyboard;
+    private readonly keyboard: PreviewKeyboard;
     private readonly contacts: StageContacts;
     private readonly viewport: StageViewport;
     private displayedEpoch?: number;
@@ -72,7 +72,7 @@ export class StageCard {
         this.image.hidden = true;
         this.image.onclick = event => this.pointer(event);
         artboard.append(this.placeholder, this.viewport.element, this.status);
-        this.keyboard = new StageKeyboard(this.element, artboard, stage.id, this.mode, input =>
+        this.keyboard = new PreviewKeyboard(this.element, artboard, stage.id, this.mode, input =>
             this.send({ type: 'keyboard', id: this.stage.id, epoch: this.stage.epoch, input }));
         this.contacts = new StageContacts(this.image, input => this.send({ type: 'contact', ...input }), () => this.keyboard.enter());
         tools.append(this.mode, this.keyboard.button, this.pause, this.checks, this.more);

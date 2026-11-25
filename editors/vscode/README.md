@@ -201,6 +201,8 @@ The [Todo Workbench sample](../../samples/TodoWorkbench/README.md) demonstrates 
 
 Agents can read and change the window, hierarchy, selection, mode, and filters of a pinned Live App editor, and reconnect it through the same refresh action. The editor checks the live connection generation and view revision before each change. [Live App MCP controls](../../docs/designer/vscode/reference.md#control-the-live-app-editor-with-mcp)
 
+In **Interact**, choose the keyboard icon to follow the running window’s Tab order, type into focused fields, and activate controls. Escape returns focus to the toolbar. The updated inspector exposes the same focused-window input to MCP. [Live App keyboard input](../../docs/designer/vscode/runtime.md#use-the-keyboard-in-live-app)
+
 Choose **Open Mobile App** from **App Sessions** to run a configured iOS simulator or device app, attach an independently running iPhone or iPad app over USB, or run or attach an opted-in Android app through ADB. [iOS simulator](../../docs/designer/vscode/runtime.md#run-an-app-on-an-ios-simulator) · [iPhone and iPad](../../docs/designer/vscode/runtime.md#run-an-app-on-an-iphone-or-ipad) · [USB attachment](../../docs/designer/vscode/runtime.md#attach-to-an-independently-running-iphone-or-ipad-app) · [Android](../../docs/designer/vscode/runtime.md#run-or-attach-an-android-app)
 
 Use an iPhone or iPad source profile to build and sign its Cargo app from a development provisioning profile. **Rebuild This App** and save-triggered deployment keep the active session and its last accepted frame. [Build and redeploy from Cargo](../../docs/designer/vscode/runtime.md#build-and-redeploy-from-cargo-on-an-iphone-or-ipad)

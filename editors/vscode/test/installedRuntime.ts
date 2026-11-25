@@ -2,10 +2,11 @@ import { strict as assert } from 'node:assert';
 import { readFile } from 'node:fs/promises';
 import * as path from 'node:path';
 import * as vscode from 'vscode';
+import type { KeyboardFocus, KeyboardInput } from '../src/previewKeyboardProtocol';
 import { revision } from '../src/reloadProcess';
 import { RuntimeClient } from '../src/runtimeClient';
 import { localMcpEndpoint, type RuntimeMcpEndpoint } from '../src/runtimeMcp';
-import type { RuntimeNode, RuntimeSource } from '../src/runtimeProtocol';
+import type { RuntimeNode, RuntimeProperty, RuntimeSource } from '../src/runtimeProtocol';
 import { installedRuntimeDebug } from './installedRuntimeDebug';
 import { until } from './wait';
 
@@ -38,6 +39,7 @@ export async function verifyInstalledRuntime(workspace: vscode.WorkspaceFolder):
         const initialFrame = await screenshot(app);
         await vscode.commands.executeCommand('ferroui.openLiveApp');
         await until(() => Boolean(liveTab()));
+        await verifyWindowKeyboard(app);
         const tabChanges: string[] = [];
         tabs = vscode.window.tabGroups.onDidChangeTabs(({ opened, closed }) => {
             if (opened.some(isLiveTab)) tabChanges.push('opened');
@@ -156,6 +158,21 @@ async function save(document: vscode.TextDocument, text: string): Promise<void> 
 
 async function expectText(client: RuntimeClient, name: string, text: string): Promise<void> {
     await until(async () => (await client.call<RuntimeNode[]>('find_elements', { name }))[0]?.text === text);
+}
+
+async function verifyWindowKeyboard(client: RuntimeClient): Promise<void> {
+    const [window] = await client.call<RuntimeNode[]>('list_windows');
+    const [draft] = await client.call<RuntimeNode[]>('find_elements', { name: 'ReviewDraft' });
+    await client.call('click', { node_id: draft.node_id });
+    const input = (input: KeyboardInput) => client.call<KeyboardFocus>('window_keyboard', { node_id: window.node_id, input });
+    assert.equal((await input({ kind: 'focus' })).role, 'Edit');
+    await input({ kind: 'text', text: 'Release' });
+    await input({ kind: 'key', key: 'Space' });
+    await input({ kind: 'text', text: 'review 📝' });
+    await until(async () => (await client.call<RuntimeProperty[]>('get_properties',
+        { node_id: draft.node_id, properties: ['Text'] }))[0]?.value === 'Release review 📝');
+    assert.match((await input({ kind: 'key', key: 'Tab' })).role, /^Button$/);
+    assert.equal((await input({ kind: 'key', key: 'Shift+Tab' })).role, 'Edit');
 }
 
 async function screenshot(client: RuntimeClient): Promise<string> {

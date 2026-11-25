@@ -232,6 +232,57 @@ fn raw_click_keyboard_text_and_automation_drive_the_ui() {
         window.close();
     });
 }
+
+#[test]
+fn window_keyboard_follows_native_focus_and_requires_input_permission() {
+    run(|| {
+        let (window, button, text, mut inspector) = fixture();
+        let window_id = inspector.node_id(&window);
+        let button_id = inspector.node_id(&button);
+        let focus = json!({"node_id":window_id,"input":{"kind":"focus"}});
+        inspector.permissions.allow_input = false;
+        assert_eq!(
+            inspector.execute("window_keyboard", &focus).unwrap_err(),
+            "Input is disabled"
+        );
+        inspector.permissions.allow_input = true;
+        assert!(
+            inspector
+                .execute("window_keyboard", &json!({"node_id":button_id,"input":{"kind":"focus"}}))
+                .is_err()
+        );
+        assert!(
+            inspector
+                .execute(
+                    "window_keyboard",
+                    &json!({"node_id":window_id,"input":{"kind":"focus","text":"ignored"}}),
+                )
+                .is_err()
+        );
+        inspector.execute("click", &json!({"node_id":button_id})).unwrap();
+        assert_eq!(
+            inspector.execute("window_keyboard", &focus).unwrap()["role"],
+            "Button"
+        );
+        let key = |key| json!({"node_id":window_id,"input":{"kind":"key","key":key}});
+        assert_eq!(
+            inspector.execute("window_keyboard", &key("Tab")).unwrap()["role"],
+            "Edit"
+        );
+        let insert = |text| json!({"node_id":window_id,"input":{"kind":"text","text":text}});
+        inspector.execute("window_keyboard", &insert("Review")).unwrap();
+        inspector.execute("window_keyboard", &key("Space")).unwrap();
+        inspector.execute("window_keyboard", &insert("📝")).unwrap();
+        assert_eq!(text.text().as_deref(), Some("Review 📝"));
+        assert_eq!(
+            inspector.execute("window_keyboard", &key("Shift+Tab")).unwrap()["role"],
+            "Button"
+        );
+        window.close();
+        assert!(inspector.execute("window_keyboard", &focus).is_err());
+    });
+}
+
 #[test]
 fn resources_styles_screenshots_waits_and_stats() {
     run(|| {

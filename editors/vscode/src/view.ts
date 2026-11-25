@@ -310,6 +310,7 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
                 <button id="runtime-inspect" aria-pressed="true">${icon('inspect')}Inspect</button>
                 <button id="runtime-interact" aria-pressed="false">${icon('run')}Interact</button>
             </div>
+            <div id="runtime-keyboard" class="tool-group"></div>
         </div>
         <div class="runtime-canvas preview-surface"><canvas id="runtime-image" role="img" aria-label="Running FerroUI window"></canvas></div>
         <form id="runtime-input" aria-label="Send input to the selected control" hidden>
@@ -336,7 +337,7 @@ export function runtimeHtml(webview: vscode.Webview, root: vscode.Uri): string {
             <div id="runtime-details" aria-label="Runtime details"></div>
         </section>
     </aside>
-</main>`);
+</main>`, ['preview-keyboard']);
 }
 
 export function hostedHtml(webview: vscode.Webview, root: vscode.Uri): string {
@@ -494,7 +495,7 @@ export function stagesHtml(webview: vscode.Webview, root: vscode.Uri): string {
     <button type="button" data-stage-action="name">${icon('edit')}Rename…</button>
     <hr>
     <button type="button" data-stage-action="remove" class="danger">${icon('trash')}Remove stage</button>
-</div>`);
+</div>`, ['preview-keyboard']);
 }
 
 function keyframeEditorHtml(seek = true): string {

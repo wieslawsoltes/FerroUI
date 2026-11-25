@@ -7,6 +7,7 @@
 //! are left to protocols, such as CDP's document node).
 mod frames;
 mod input;
+mod keyboard;
 mod layout_overflow;
 mod layout_values;
 mod logs;
@@ -37,6 +38,7 @@ use ferroui_controls::automation::peers::{AutomationPeer, ControlAutomationPeer}
 use ferroui_controls::primitives::{AdornerLayer, TemplatedControl};
 use ferroui_controls::{Application, Border, Control, TopLevel};
 use ferroui_markup::markup::parsers::{SelectorGrammar, SelectorParser, SelectorSyntax};
+pub use keyboard::{KeyboardFocus, KeyboardInput, keyboard_focus, keyboard_input, tab_target};
 pub use layout_overflow::MeasuredOverflow;
 pub use layout_values::{LayoutValueFinding, check_layout_values};
 pub use logs::{LogCapture, LogEntry, LogGuard};
@@ -718,8 +720,7 @@ impl Inspector {
         catch(|| {
             if is_input(name) {
                 let object = self.prepare_input(args, permissions)?;
-                input::execute(name, &object, args, permissions)?;
-                return Ok(json!({"ok":true}));
+                return input_result(name, &object, args, permissions);
             }
             self.execute_inner(name, args, permissions)
         })
@@ -962,10 +963,7 @@ pub fn execute(name: &str, args: &Value, permissions: Permissions) -> InspectRes
                 .map_err(|_| "The inspector is busy".to_owned())?;
             inspector.prepare_input(args, permissions)?
         };
-        return catch(|| {
-            input::execute(name, &object, args, permissions)?;
-            Ok(json!({"ok":true}))
-        });
+        return catch(|| input_result(name, &object, args, permissions));
     }
     let mut inspector = shared
         .try_borrow_mut()
@@ -976,8 +974,21 @@ pub fn execute(name: &str, args: &Value, permissions: Permissions) -> InspectRes
 fn is_input(name: &str) -> bool {
     matches!(
         name,
-        "click" | "type_text" | "press_key" | "scroll" | "invoke_pattern"
+        "click" | "type_text" | "press_key" | "window_keyboard" | "scroll" | "invoke_pattern"
     )
+}
+
+fn input_result(
+    name: &str,
+    object: &Ref<FerroObject>,
+    args: &Value,
+    permissions: Permissions,
+) -> InspectResult {
+    if name == "window_keyboard" {
+        return keyboard::window_input(object, args);
+    }
+    input::execute(name, object, args, permissions)?;
+    Ok(json!({"ok":true}))
 }
 
 fn catch(f: impl FnOnce() -> InspectResult) -> InspectResult {

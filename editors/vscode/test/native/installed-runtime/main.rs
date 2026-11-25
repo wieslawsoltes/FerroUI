@@ -81,6 +81,7 @@ fn Review(content: Ref<ContentControl>, state: PathBuf) -> Element {
             TextBlock { name: "BuildStatus", text: BUILD_LABEL }
             { Element::Existing(content.clone().upcast()) }
             TextBlock { name: "SavedCount", text: format!("Reviews saved: {}", count.get()) }
+            TextBox { name: "ReviewDraft", placeholder_text: "Review notes" }
             Button { name: "ReviewRecord", on_click: move |_| {
                 let next = count.get_untracked() + 1;
                 save_review(&state, next);

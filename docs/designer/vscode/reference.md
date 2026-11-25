@@ -376,6 +376,14 @@ The debugger stops following future replacements after detach. Use `ferroui_app_
 
 Read the current view again after switching windows or hierarchies, refreshing, or receiving a stale-state error. Wait for a frame before selecting a node. Use `ferroui_runtime_query` to read node data or capture a PNG. Input and property overrides still require the app’s own permissions and go through the runtime tools. [Inspect the actual window](runtime.md#inspect-the-actual-window-in-live-app)
 
+### Send keyboard input to a running window
+
+1. Read `ferroui_app_sessions` for the exact `runtime` and current generation. Check `ferroui_runtime_tools` for `window_keyboard`. Read the window’s `node_id` from `list_windows`, or use `window` from `ferroui_live_app_view` when that view reports `keyboardInput`.
+2. Call `ferroui_runtime_call` with the same runtime, `expected_generation`, tool `window_keyboard`, and `arguments: { node_id, input: { kind: "focus" } }`. The tool returns the native focused control’s name and role, or `null` when the window has no tab stop.
+3. Send `input: { kind: "key", key: "Tab" }` or `"Shift+Tab"` to move focus. Send `input: { kind: "text", text: "Review notes" }` to type into the focused control. Read the new window ID and generation after an app replacement.
+
+The VS Code editor bridge requires `ferroui.mcp.allowWrites`. The app verifies its own `allow_input` permission. Direct app MCP connections use the same native tool. [Keyboard input in Live App](runtime.md#use-the-keyboard-in-live-app) · [Runtime inspector tools](../../mcp.md)
+
 ### Inspect Live App templates with MCP
 
 Read the application’s current tree to get a node ID. Call `ferroui_runtime_templates` with `node` and the app’s `runtime` from `ferroui_app_sessions`. The catalog lists effective templates, column headers where available, and verified source stamps. The native application tool `get_template_sources` exposes the same template evidence.

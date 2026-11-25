@@ -3,6 +3,7 @@ import { runtimeFilterLength, type FromRuntime, type RuntimeFrame, type RuntimeH
 import type { AppRuntime } from '../src/runtimeTargets';
 import { create, element, iconButton } from './dom';
 import { PreviewBitmap } from './previewBitmap';
+import { RuntimeKeyboard } from './runtimeKeyboard';
 
 declare function acquireVsCodeApi(): { postMessage(message: FromRuntime): void };
 const vscode = acquireVsCodeApi();
@@ -36,8 +37,11 @@ let interaction = false;
 let currentTarget: AppRuntime | undefined;
 let currentGeneration: number | undefined;
 let currentWindow: number | undefined;
+let debuggerPaused = false;
 
 const send = (message: FromRuntime) => vscode.postMessage(message);
+const keyboard = new RuntimeKeyboard(surface, interactMode, send, showProblem);
+element('runtime-keyboard').append(keyboard.button);
 const changeView = (change: RuntimeViewChange) => {
     if (currentGeneration !== undefined) send({ type: 'presentation', generation: currentGeneration, change });
 };
@@ -57,6 +61,17 @@ function setMode(interact: boolean) {
     selectMode.setAttribute('aria-pressed', String(!interact));
     interactMode.setAttribute('aria-pressed', String(interact));
     form.hidden = !interact || selected === undefined;
+    updateKeyboard();
+}
+
+function updateKeyboard(): void {
+    const scope = frame?.keyboardScope;
+    keyboard.follow(scope, frame?.root.name || 'the running app', scope !== undefined && interaction && !debuggerPaused);
+}
+
+function showProblem(message: string): void {
+    problem.textContent = message;
+    problem.hidden = false;
 }
 
 function renderTree() {
@@ -149,6 +164,7 @@ function invalidateFrame(): void {
     pending++;
     decoding = undefined;
     frame = undefined;
+    updateKeyboard();
     main.setAttribute('aria-busy', 'true');
     detail.disabled = true;
     tree.replaceChildren();
@@ -186,6 +202,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         }
         windowChoice.value = String(message.root ?? '');
         windowChoice.disabled = windows.length < 2;
+        debuggerPaused = message.debuggerPaused;
         element('runtime-status').textContent = message.status;
         if (currentTarget !== message.target || currentWindow !== message.root || currentGeneration !== message.generation) {
             if (currentTarget !== message.target) main.hidden = true;
@@ -194,6 +211,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
             currentWindow = message.root;
             invalidateFrame();
         }
+        updateKeyboard();
     } else if (message.type === 'presentation') {
         const { hierarchy: treeKind, inspection, mode, treeFilter, propertyFilter: propertyQuery } = message.presentation;
         if (treeKind !== undefined) hierarchy.value = treeKind;
@@ -211,6 +229,8 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         invalidateFrame();
     } else if (message.type === 'clearSelection') {
         clearSelection();
+    } else if (message.type === 'releaseKeyboard') {
+        keyboard.leave();
     } else if (message.type === 'frame') {
         if (frame?.token === message.frame.token || decoding === message.frame.token) return;
         const revision = ++pending;
@@ -228,6 +248,7 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
         const changed = JSON.stringify(frame?.tree) !== JSON.stringify(message.frame.tree);
         presenter.present(message.frame.png, bitmap);
         frame = message.frame;
+        updateKeyboard();
         decoding = undefined;
         main.hidden = false;
         main.setAttribute('aria-busy', 'false');
@@ -239,10 +260,8 @@ window.addEventListener('message', async (event: MessageEvent<ToRuntime>) => {
     } else if (message.type === 'inspection') {
         if (frame?.token === message.token) showInspection(message);
         else if (decoding === message.token) pendingInspection = message;
-    } else if (message.type === 'problem') {
-        problem.textContent = message.message;
-        problem.hidden = false;
-    }
+    } else if (message.type === 'keyboardResult') keyboard.receive(message);
+    else if (message.type === 'problem') showProblem(message.message);
 });
 
 element('runtime-start').onclick = () => send({ type: 'start' });
@@ -264,11 +283,15 @@ propertyFilter.oninput = () => {
 };
 selectMode.onclick = () => changeView({ action: 'mode', mode: 'inspect' });
 interactMode.onclick = () => changeView({ action: 'mode', mode: 'interact' });
+image.onpointerdown = event => {
+    if (event.button === 0 && keyboard.capturing) event.preventDefault();
+};
 image.onclick = event => {
     if (!frame) return;
     const bounds = image.getBoundingClientRect();
     send({ type: 'pointer', token: frame.token, x: (event.clientX - bounds.left) / bounds.width,
         y: (event.clientY - bounds.top) / bounds.height, interact: interaction, overlap: event.altKey });
+    if (interaction) keyboard.refreshFocus();
 };
 image.addEventListener('wheel', event => {
     if (!interaction || !frame) return;

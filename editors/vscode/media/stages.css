@@ -109,33 +109,7 @@ body { display: flex; flex-direction: column; block-size: 100vh; overflow: hidde
     outline: 2px solid var(--vscode-focusBorder);
     outline-offset: 1px;
 }
-.stage-keyboard-capture, .stage-keyboard-announcement {
-    position: absolute;
-    inline-size: 1px;
-    block-size: 1px;
-    padding: 0;
-    border: 0;
-    clip-path: inset(50%);
-    overflow: hidden;
-}
-.stage-keyboard-announcement { margin: 0; }
-.stage-keyboard-status { pointer-events: none; }
 .stage-placeholder { padding: 22px 6px; color: var(--muted); text-align: center; }
-.stage-frame-status {
-    position: absolute;
-    inset: auto 7px 7px;
-    justify-self: start;
-    max-block-size: 65%;
-    overflow: auto;
-    margin: 0;
-    padding: 4px 7px;
-    border: 1px solid var(--line);
-    border-radius: 4px;
-    background: var(--vscode-editorWidget-background, var(--vscode-editor-background));
-    color: var(--muted);
-    overflow-wrap: anywhere;
-    font-size: .92em;
-}
 .stage-card:is([data-state="invalid_source"], [data-state="failed"], [data-state="missing_document"]) .stage-frame-status {
     color: var(--vscode-editorWarning-foreground, var(--vscode-errorForeground));
 }

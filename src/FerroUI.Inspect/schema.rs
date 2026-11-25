@@ -77,6 +77,13 @@ pub fn tools() -> Vec<Value> {
         true,
     );
     add(
+        "window_keyboard",
+        "Focus or type in the specified window. Tab and Shift+Tab use its native tab order. Returns the focused control's name and role or null. Requires allow_input.",
+        json!({"node_id":id,"input":super::keyboard::keyboard_schema()}),
+        &["node_id", "input"],
+        true,
+    );
+    add(
         "scroll",
         "Inject a wheel event at the node center or local x/y. Deltas are wheel units. Requires allow_input.",
         json!({"node_id":id,"x":{"type":"number"},"y":{"type":"number"},"delta_x":{"type":"number"},"delta_y":{"type":"number"}}),

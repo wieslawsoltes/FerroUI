@@ -1,11 +1,11 @@
 //! Read the automation tree and a native Tab traversal from one accepted stage.
-use super::{keyboard, with_runtime_errors, PreviewStageBoard, PreviewStageId, RenderedStage};
+use super::{with_runtime_errors, PreviewStageBoard, PreviewStageId, RenderedStage};
 use ferroui_base::diagnostics::DesignTextEnvironment;
 use ferroui_base::input::InputElement;
 use ferroui_base::{FerroObject, Ref, Visual};
 use ferroui_designer_core::{Document, NodeId, SourceSpan};
 use ferroui_designer_rsx::RsxSourceMap;
-use ferroui_inspect::{Inspector, TreeKind};
+use ferroui_inspect::{Inspector, TreeKind, tab_target};
 use serde::Serialize;
 use std::collections::BTreeSet;
 
@@ -100,7 +100,7 @@ impl PreviewStageAccessibility {
         let mut visited = BTreeSet::new();
         let inspector = Inspector::shared();
         let mut previous = None;
-        while let Some(input) = keyboard::tab_target(&scope, previous.as_ref(), false) {
+        while let Some(input) = tab_target(&scope, previous.as_ref(), false) {
             if !visited.insert(inspector.borrow_mut().node_id(&input)) {
                 break;
             }

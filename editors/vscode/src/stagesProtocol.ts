@@ -1,4 +1,5 @@
 import { canvasThemeLabels, type PreviewFinding, type PreviewSourceBuffer, type Range, type Snapshot, type Source } from './protocol';
+import type { KeyboardFocus, KeyboardInput } from './previewKeyboardProtocol';
 
 export const stageThemeLabels = { ...canvasThemeLabels, inherit: 'Application theme' } as const;
 export type StageTheme = keyof typeof stageThemeLabels;
@@ -135,9 +136,9 @@ export interface StageContact {
     twist?: number;
 }
 export interface StagePointerInput extends StageTarget { input: StageContact }
-export type StageInput = { kind: 'focus' } | { kind: 'key'; key: string } | { kind: 'text'; text: string };
+export type StageInput = KeyboardInput;
 export interface StageKeyboard extends StageTarget { input: StageInput }
-export interface StageFocus { name: string; role: string }
+export type StageFocus = KeyboardFocus;
 export type PrototypeInput = { kind: 'keyboard'; input: StageInput } | { kind: 'pointer'; input: StageContact };
 export interface PrototypeInputResult { scene: PrototypeScene | null; focus: StageFocus | null }
 export interface StagePick { range?: Range; uri?: string; interacted?: boolean; prototype?: PrototypeScene }

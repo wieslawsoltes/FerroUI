@@ -16,6 +16,7 @@
 .runtime-controls { padding: 3px 4px; }
 .runtime-controls .segments button { padding-inline: 6px; }
 .runtime-canvas {
+    position: relative;
     flex: 1;
     display: grid;
     min-block-size: 126px;
@@ -32,6 +33,7 @@
     cursor: crosshair;
 }
 .runtime-canvas[data-mode=interact] #runtime-image { cursor: default; }
+.runtime-canvas[data-keyboard] #runtime-image { outline: 2px solid var(--focus); outline-offset: 1px; }
 #runtime-input { display: flex; align-items: center; flex-wrap: wrap; gap: 5px; padding: 5px; border-block-start: 1px solid var(--line); }
 #runtime-input-value { flex: 1 1 74px; }
 .runtime-main aside { display: grid; align-content: start; gap: 6px; min-inline-size: 0; }
