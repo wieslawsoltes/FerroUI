@@ -802,7 +802,7 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 2. Choose **Compare Matrix** to combine several axes. Select the sizes, themes, reading directions, data modes, and available authored states you want to test. **Add a Custom Size** adds named dimensions to the size axis. An unselected axis keeps the base card’s setting.
 3. Choose **Review Comparison** to see the card count and planned environments. Choose **Add Stages** to append the reviewed cards. The review checks the board’s 16-card limit and the base card’s current source before adding anything.
 
-Each new card retains the base source, preview definition, layout policy, and settings outside the selected axes. A comparison adds ordinary cards that you can edit independently. Save the board as a `.ferrostages` file to reopen it in VS Code or Studio. [Studio comparison matrices](../xcode-previews.md#comparison-matrices) · [Plan a comparison with MCP](reference.md#plan-and-add-a-stage-comparison)
+Each new card uses the base source, preview definition, layout policy, and settings outside the selected axes. Use the controls on a ready card while other cards render. A card displays its last accepted preview until its new frame is ready. Save the board as a `.ferrostages` file to reopen it in VS Code or Studio. [Studio comparison matrices](../xcode-previews.md#comparison-matrices) · [Plan a comparison with MCP](reference.md#plan-and-add-a-stage-comparison)
 
 ![Four native previews show the Loading and Content states in Light and Dark themes](../images/vscode-stage-matrix.png)
 

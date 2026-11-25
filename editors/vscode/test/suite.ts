@@ -28,6 +28,7 @@ import { verifyBrowserRustDebug } from './browserRustDebugMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
 import { verifyTimelineViewport } from './timelineViewport';
+import { verifyStageFrames } from './stageFrames';
 import { verifyNativePrototype } from './prototypeNative';
 import { until } from './wait';
 import type { DesignerWorkbench } from '../src/designerWorkbench';
@@ -78,6 +79,7 @@ export async function run(): Promise<void> {
     await verifyBrowserBuildTarget(workspace);
     await verifyRsxRecovery(workspace);
     verifyTimelineViewport();
+    await verifyStageFrames();
     await verifyProcessShutdown();
     verifyReloadHistory();
     await verifyReloadWatchBoundary(vscode.workspace.workspaceFolders![0]);

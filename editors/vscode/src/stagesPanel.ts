@@ -10,6 +10,7 @@ import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, Pr
 import { pickStageCheck } from './stageChecksPicker';
 import { chooseStageComparison } from './stageComparisonPicker';
 import { dimensions, editStageEnvironment } from './stageEnvironmentPicker';
+import { StageFrames } from './stageFrames';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
 import { sameStageSource, stageUsesSource, retargetStageManifest, type StageFileMove } from './stageSourceMoves';
@@ -90,7 +91,11 @@ export class StagesPanel implements vscode.Disposable {
 
 class StageSession {
     private readonly dependencies = new DesignerDependencies(false, () => this.schedule());
-    private readonly inputImages = new Map<number, { timer: ReturnType<typeof setTimeout>; followup?: () => void }>();
+    private readonly frames = new StageFrames(
+        async target => (await this.getClient()).stageImage(target),
+        (target, image) => this.post({ type: 'image', ...target, image }),
+        error => this.report(error),
+    );
     private prototypeFrameRequest?: { client: NativePreview; model: StageModel; frame: number };
     private prototypeFrameTimer?: ReturnType<typeof setTimeout>;
     private capturingPrototype = false;
@@ -211,53 +216,33 @@ class StageSession {
         // reject it if that specific card has changed.
         const accepted = automation ? model : this.model ?? model;
         const stage = this.currentInputStage(accepted, target, !automation);
+        const generation = this.generation;
         await client.stageContact(target, automation);
-        if (this.model === accepted && this.modelGeneration === this.generation && !this.disposed) {
-            this.scheduleInputImage(client, accepted, stage);
-        }
+        if (generation === this.generation) this.frames.request(stage);
     }
 
     private async applyKeyboard(client: NativePreview, model: StageModel, target: StageKeyboard, signal: AbortSignal,
-        allowPublishing = false) {
+        allowBoardChange = false) {
         signal.throwIfAborted();
-        const stage = this.currentInputStage(model, target, allowPublishing);
+        const stage = this.currentInputStage(model, target, allowBoardChange);
         // Pointer and keyboard requests enter the same native stdio queue. A
         // click sent just before a key can establish the native focus target.
         const focus = await client.stageKeyboard(target);
-        this.currentInputStage(model, target, allowPublishing);
+        this.currentInputStage(model, target, allowBoardChange);
         this.post({ type: 'keyboardFocus', id: stage.id, epoch: stage.epoch, focus });
-        this.scheduleInputImage(client, model, stage);
+        this.frames.request(stage);
         signal.throwIfAborted();
         return focus;
     }
 
-    private currentInputStage(model: StageModel, target: StageTarget, allowPublishing = false): StageInfo {
-        if ((this.busy && !allowPublishing) || this.timer || this.disposed || this.model !== model
+    private currentInputStage(model: StageModel, target: StageTarget, allowBoardChange = false): StageInfo {
+        if ((this.busy && !allowBoardChange) || this.timer || this.disposed || this.model !== model
             || this.modelGeneration !== this.generation || this.modelVersion !== this.document.version) {
             throw new Error('The stage changed. Use its current frame.');
         }
         const stage = model.stages.find(entry => entry.id === target.id && entry.epoch === target.epoch);
         if (!stage) throw new Error('Read the current stage ID and epoch.');
         return stage;
-    }
-
-    private scheduleInputImage(client: NativePreview, model: StageModel, stage: StageInfo): void {
-        if (this.disposed || this.model !== model || this.modelGeneration !== this.generation) return;
-        const existing = this.inputImages.get(stage.id);
-        if (existing) {
-            existing.followup = () => this.scheduleInputImage(client, model, stage);
-            return;
-        }
-        const request = { timer: setTimeout(async () => {
-            if (this.model === model && this.modelGeneration === this.generation && !this.disposed) {
-                request.followup = undefined;
-                try { await this.image(client, stage); }
-                catch (error) { if (this.model === model && this.modelGeneration === this.generation) this.report(error); }
-            }
-            this.inputImages.delete(stage.id);
-            request.followup?.();
-        }, 32), followup: undefined as (() => void) | undefined };
-        this.inputImages.set(stage.id, request);
     }
 
     private async readStage<T>(target: StageTarget, signal: AbortSignal, read: (client: NativePreview, target: StageTarget) => Promise<T>): Promise<T> {
@@ -422,6 +407,7 @@ class StageSession {
             if (this.model?.keyboardInput || this.model?.pointerInput) this.post({ type: 'inputUnavailable' });
             if (this.model?.pointerInput) void this.client?.then(client => client.cancelStageContacts()).catch(() => {});
         }
+        this.frames.clear();
         this.generation++;
         clearTimeout(this.timer);
         this.timer = undefined;
@@ -487,20 +473,7 @@ class StageSession {
         if (generation !== this.generation || this.model !== model || this.disposed) return;
         this.post({ type: 'model', uri: this.document.uri.toString(), model });
         this.publishPrototype(client, model, model.prototype);
-        for (const stage of model.stages) {
-            if (generation !== this.generation || this.disposed) break;
-            if (stage.rendered_revision === null) continue;
-            try { await this.image(client, stage); }
-            catch (error) { this.report(error); }
-        }
-    }
-
-    private async image(client: NativePreview, stage: StageInfo): Promise<void> {
-        const target = { id: stage.id, epoch: stage.epoch };
-        const image = await client.stageImage(target);
-        if (this.modelGeneration === this.generation && this.model?.stages.some(entry => entry.id === stage.id && entry.epoch === stage.epoch)) {
-            this.post({ type: 'image', ...target, image });
-        }
+        this.frames.setStages(model.stages);
     }
 
     private async receive(message: StagesRequest): Promise<void> {
@@ -566,7 +539,7 @@ class StageSession {
                 if (result.range && result.uri) {
                     await this.revealStageSource(result.uri, result.range, generation);
                 }
-                if (result.interacted) this.scheduleInputImage(client, model, stage);
+                if (result.interacted) this.frames.request(stage);
                 return;
             }
             if (message.type === 'checks') {
@@ -750,8 +723,7 @@ class StageSession {
         clearTimeout(this.timer);
         clearTimeout(this.prototypeFrameTimer);
         this.prototypeFrameRequest = undefined;
-        this.inputImages.forEach(({ timer }) => clearTimeout(timer));
-        this.inputImages.clear();
+        this.frames.clear();
         void this.client?.then(client => client.dispose(), () => {});
         this.dependencies.dispose();
         this.subscriptions.forEach(subscription => subscription.dispose());
