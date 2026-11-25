@@ -8,12 +8,12 @@ use serde::{Deserialize, Serialize};
 #[serde(deny_unknown_fields)]
 pub(crate) struct Request {
     base: StageTarget,
-    comparison: Comparison,
+    comparison: VariantChoice,
 }
 
 #[derive(Deserialize)]
 #[serde(tag = "kind", rename_all = "snake_case", deny_unknown_fields)]
-enum Comparison {
+enum VariantChoice {
     Preset { preset: PreviewStageComparison },
     Matrix { matrix: PreviewStageMatrix },
 }
@@ -39,10 +39,10 @@ impl Stages {
         }
         let available = MAX_PREVIEW_STAGES.saturating_sub(self.board.stages().len());
         let configurations = match request.comparison {
-            Comparison::Preset { preset } => self
+            VariantChoice::Preset { preset } => self
                 .board
                 .plan_variants(stage.id, preset.variants(&stage.configuration))?,
-            Comparison::Matrix { matrix } => {
+            VariantChoice::Matrix { matrix } => {
                 let spec = self
                     .board
                     .stage_spec(stage.id)
