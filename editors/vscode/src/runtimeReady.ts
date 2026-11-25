@@ -1,9 +1,10 @@
 import { setTimeout as delay } from 'node:timers/promises';
 import { RuntimeClient, type RuntimeEndpoint } from './runtimeClient';
+import type { RuntimeProcessIdentity } from './runtimeMcp';
 import type { RuntimeNode } from './runtimeProtocol';
 
 /** Authenticate and accept a native frame before publishing a device session. */
-export async function verifyRuntime(endpoint: RuntimeEndpoint, signal: AbortSignal): Promise<void> {
+export async function verifyRuntime(endpoint: RuntimeEndpoint, signal: AbortSignal): Promise<RuntimeProcessIdentity | undefined> {
     const deadline = AbortSignal.any([signal, AbortSignal.timeout(10_000)]);
     const client = new RuntimeClient(endpoint);
     const abort = () => client.dispose();
@@ -20,7 +21,7 @@ export async function verifyRuntime(endpoint: RuntimeEndpoint, signal: AbortSign
             if (ready) {
                 const frame = await client.call<string>('screenshot', { node_id: ready.node_id }, deadline);
                 if (typeof frame !== 'string' || !frame.startsWith('iVBORw0KGgo')) throw new Error('The app inspector did not return a native PNG.');
-                return;
+                return client.processIdentity;
             }
             await delay(150, undefined, { signal: deadline });
         }

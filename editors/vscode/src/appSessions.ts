@@ -131,7 +131,7 @@ export class AppSessions implements vscode.Disposable {
         const debuggerIcon = session.browser?.paused ? 'debug-pause' : session.debuggerAttached ? 'debug-alt' : undefined;
         const targetIcon = selected ? 'play-circle'
             : { attached: 'plug', simulator: 'device-mobile', 'ios-device': 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind];
-        item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : debuggerIcon ?? targetIcon);
+        item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : debuggerIcon ?? (session.iosDevice?.attached ? 'plug' : targetIcon));
         if (session.simulator?.development || session.iosDevice?.development) {
             item.contextValue = `app-session-${session.kind}-development${session.available ? '-debug' : ''}`;
         } else if (session.browser) {

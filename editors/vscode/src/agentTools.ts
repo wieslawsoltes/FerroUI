@@ -26,6 +26,7 @@ import type { SourceRenameAgentRequest } from './reviewedSources';
 import type { HotReload } from './hotReload';
 import type { IosSimulatorRun } from './iosSimulatorTargets';
 import type { IosAppRun } from './iosAppProfiles';
+import type { IosDeviceAttachRequest } from './iosDeviceAttachment';
 import type { AndroidRequest } from './androidTargets';
 import type { BrowserRequest } from './browserTargets';
 import type { HostedDesign } from './hostedDesign';
@@ -262,6 +263,7 @@ export class AgentTools {
         if (tool === 'ferroui_ios_device_targets') return this.appSessions.iosDevices.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_ios_device_run') return this.appSessions.iosDevices.open(input as IosAppRun, signal,
             args.debug ? { name: args.debug_configuration } : undefined);
+        if (tool === 'ferroui_ios_device_attach') return this.appSessions.iosDevices.attach(input as IosDeviceAttachRequest, signal);
         if (tool === 'ferroui_ios_device_debug') return this.appSessions.iosDevices.debug(args.runtime as AppRuntime,
             args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
         if (tool === 'ferroui_ios_device_output') return { output: this.appSessions.iosDevices.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };

@@ -323,6 +323,12 @@ The debugger stops following future replacements after detach. Use `ferroui_app_
 5. Call `ferroui_ios_device_stop` with the runtime to stop the launched app and close its inspector. [Configure an iOS device app](runtime.md#run-an-app-on-an-iphone-or-ipad)
 6. For a source-built profile, call `ferroui_ios_device_rebuild` to queue a build, development signature, and installation for that runtime. Use `ferroui_ios_device_output` for its log and pass the runtime as `app_session` to `ferroui_reload_history` for recorded saves. Read the next accepted generation before issuing runtime input or source edits. [Build a signed iOS device app](runtime.md#build-and-redeploy-from-cargo-on-an-iphone-or-ipad)
 
+### Attach to an iOS device app with MCP
+
+1. Call `ferroui_ios_device_targets` to find the device and a profile for the running bundle. Connect the device over USB and start its FerroUI HTTP inspector.
+2. With `ferroui.mcp.allowWrites` enabled, call `ferroui_ios_device_attach` with `device`, `profile`, `folder`, the inspector’s `port` on the device, and its bearer `token`. The returned runtime is marked `iosDevice.attached` and includes the accepted generation.
+3. Use `ferroui_runtime_open`, `ferroui_runtime_query`, and `ferroui_runtime_call` with that specific runtime. Call `ferroui_ios_device_debug` with its generation to attach or detach LLDB. Call `ferroui_ios_device_stop` to release the attachment and leave the app running. [Connect over USB](runtime.md#attach-to-an-independently-running-iphone-or-ipad-app)
+
 ### Run or attach an Android app with MCP
 
 1. Call `ferroui_android_targets` on the workspace host. Supply `folder` to select a workspace folder. Choose an authorized device with `status: "device"` and take a profile’s `id` and `folder`.
@@ -588,7 +594,7 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | Exchange tokens | **Import Design Tokens**, **Export Design Tokens** |
 | Resolve component mappings and transfer assets | **Review Design Handoff** |
 | Preview and inspect | **Open App-Hosted Design**, **Open Live App**, **Refresh Diagnostics** |
-| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run iOS Device App**, **Run and Debug iOS Device App**, **Run Android App**, **Run and Debug Android App**, **Attach to Android App** |
+| Run or debug | **Run with Hot Reload**, **Run with Registered Rust Patches**, **Run and Debug with Hot Reload**, **Rebuild Hot Reload Application**, **Attach Debugger to Managed App**, **Show Hot Reload Output**, **Stop Hot Reload Application**, **Open Mobile App**, **Run iOS Simulator App**, **Run and Debug iOS Simulator App**, **Run iOS Device App**, **Run and Debug iOS Device App**, **Attach to iOS Device App**, **Run Android App**, **Run and Debug Android App**, **Attach to Android App** |
 | Manage an external MCP connection | **Connect to Running MCP Server**, **Disconnect Running MCP Server** |
 
 ## Configure the workspace
@@ -603,7 +609,8 @@ Commands are under **FerroUI** in the Command Palette. Some actions also appear 
 | `ferroui.hostedPreview.assembly` | Empty | Name the application’s markup assembly when its name differs from the selected Cargo package. |
 | `ferroui.hotReload.targets` | `[]` | Offer chosen Cargo binaries and set their package, manifest, features, and arguments. An empty list discovers targets from Cargo. |
 | `ferroui.iosSimulator.apps` | `[]` | Set launch profiles for iOS simulator bundles with an opted-in app inspector. A profile can install the built app before launch. |
-| `ferroui.iosDevice.apps` | `[]` | Set launch profiles for iPhoneOS apps with a stdio inspector. Use `appPath` to install a signed bundle or `build` to compile, sign, and redeploy from Cargo. |
+| `ferroui.iosDevice.apps` | `[]` | Set iPhoneOS app profiles for launch and USB attachment. Use `appPath` to install a signed bundle or `build` to compile, sign, and redeploy from Cargo. |
+| `ferroui.iosDevice.inetcatPath` | `""` | Set the absolute path to the USB stream utility for attaching running iPhone or iPad apps. |
 | `ferroui.android.adbPath` | Empty | Select the Android Debug Bridge executable on the workspace host. |
 | `ferroui.android.apps` | `[]` | Set profiles for debuggable Android apps with an opted-in Live App inspector. A profile can install its APK before launching. |
 | `ferroui.browser.executablePath` | Empty | Select a custom Chrome or Chromium executable on the workspace host. |

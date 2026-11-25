@@ -194,6 +194,7 @@ mod tests {
         Client {
             dispatcher: None,
             extension: None,
+            inspector_instance: None,
             service: Some(ServiceCatalog::new(Arc::new(Counter(0.into()))).unwrap()),
             permissions: Permissions {
                 allow_property_writes: write,

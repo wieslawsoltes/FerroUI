@@ -1,4 +1,4 @@
-import { localMcpEndpoint, type RuntimeMcpEndpoint } from './runtimeMcp';
+import { localMcpEndpoint, type RuntimeMcpEndpoint, type RuntimeProcessIdentity } from './runtimeMcp';
 import { sendRuntimeRequest } from './runtimeHttp';
 
 interface Content {
@@ -38,6 +38,7 @@ export class RuntimeClient {
     private initialize?: Promise<void>;
     private catalog?: Promise<RuntimeToolDefinition[]>;
     private next = 0;
+    private process?: RuntimeProcessIdentity;
 
     constructor(readonly endpoint: RuntimeEndpoint) {
         if ('channel' in endpoint) return;
@@ -71,6 +72,8 @@ export class RuntimeClient {
         return (await this.tools()).some(tool => tool.name === name);
     }
 
+    get processIdentity(): RuntimeProcessIdentity | undefined { return this.process; }
+
     async tools(signal?: AbortSignal): Promise<RuntimeToolDefinition[]> {
         const { endpoint } = this;
         const load = () => 'channel' in endpoint ? endpoint.channel.tools(this.active(signal)) : this.ensureConnected(endpoint)
@@ -87,10 +90,16 @@ export class RuntimeClient {
     }
 
     private async connect(endpoint: RuntimeMcpEndpoint): Promise<void> {
-        const result = await this.request<{ protocolVersion: string }>(endpoint, 'initialize', {
+        const result = await this.request<{ protocolVersion: string; _meta?: Record<string, unknown> }>(endpoint, 'initialize', {
             protocolVersion: protocol, capabilities: {}, clientInfo: { name: 'FerroUI Live App', version: '1' },
         });
         if (!this.session || typeof result.protocolVersion !== 'string') throw new Error('The runtime did not establish an MCP session.');
+        const process = inspectorProcess(result._meta?.['org.ferroui/inspector']);
+        const expected = endpoint.expectedProcess;
+        if (expected && (!process || process.pid !== expected.pid || expected.instance !== undefined && process.instance !== expected.instance)) {
+            throw new Error('The inspector does not identify the selected app process. Use its current FerroUI inspector address and token.');
+        }
+        this.process = process;
         this.version = result.protocolVersion;
         await this.request(endpoint, 'notifications/initialized', {}, undefined, true);
     }
@@ -128,6 +137,12 @@ export class RuntimeClient {
         if (this.session && 'url' in endpoint) void sendRuntimeRequest(endpoint, 'DELETE', this.headers(endpoint), AbortSignal.timeout(1500))
             .then(response => response.body?.cancel()).catch(() => {});
     }
+}
+
+function inspectorProcess(value: unknown): RuntimeProcessIdentity | undefined {
+    const { pid, instance } = (value ?? {}) as { pid?: unknown; instance?: unknown };
+    if (typeof pid === 'number' && Number.isSafeInteger(pid) && pid > 0
+        && typeof instance === 'string' && /^[0-9a-f]{32}$/i.test(instance)) return { pid, instance };
 }
 
 async function readResponse(response: Response): Promise<string> {

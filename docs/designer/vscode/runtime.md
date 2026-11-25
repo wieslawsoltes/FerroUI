@@ -294,6 +294,17 @@ FerroUI installs the bundle on the chosen device when the profile includes `appP
 2. Pick a window, inspect the visual tree, or switch to **Interact** to send input when the app permits it. A session belongs to the chosen device and bundle. **Show App Output** opens that session’s console.
 3. Choose **Stop or Disconnect This App** to stop the app started by that session. To deploy a new build, stop the session, replace the signed bundle, and run the profile again.
 
+#### Attach to an independently running iPhone or iPad app
+
+Connect the paired development device to the workspace Mac over USB. Install the `inetcat` utility from libusbmuxd on that Mac. VS Code discovers it on the workspace host, or you can specify its absolute path in `ferroui.iosDevice.inetcatPath` in User Settings. [inetcat reference](https://github.com/libimobiledevice/libusbmuxd/blob/master/docs/inetcat.1)
+
+1. Start your development app with the current FerroUI HTTP inspector bound to `127.0.0.1` on the device. The Contact Review example enables it with `--mcp` and permits input with `--mcp-input`. For Rust source navigation, set `FERROUI_EDITOR_SOURCE=1` in the app’s launch environment and open its matching source in VS Code.
+2. Read the port and bearer token from the app’s **FerroUI MCP** console announcement. Add a `ferroui.iosDevice.apps` profile with the app’s `id` and `bundleId`. In **App Sessions**, choose **Open Mobile App → Attach to iOS Device App** and select the profile and device. Enter the port and paste the token into the masked prompt.
+3. Live App opens after the extension verifies the selected process and a native frame. Use **Show App Output** for the attachment status. To attach LLDB from VS Code, start the app with debugging disabled in the Xcode run scheme and use a matching executable and symbols in the VS Code attach configuration.
+4. Use **Stop or Disconnect This App** to release the USB connection and its VS Code debugger. The independently started app keeps running. If the device or process changes, attach again using its current inspector credentials.
+
+[Attach with editor MCP](reference.md#attach-to-an-ios-device-app-with-mcp)
+
 #### Build and redeploy from Cargo on an iPhone or iPad
 
 Install the `aarch64-apple-ios` Rust target on the workspace Mac. Use an Apple Development certificate with its private key and an iOS development provisioning profile that includes the bundle identifier and selected device. Run `security find-identity -v -p codesigning` to find the certificate fingerprint for `build.signing.identity`. [Apple provisioning profiles](https://developer.apple.com/documentation/technotes/tn3125-inside-code-signing-provisioning-profiles)

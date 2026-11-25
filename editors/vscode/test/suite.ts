@@ -15,6 +15,8 @@ import { verifyLiveApp } from './liveApp';
 import { verifyLiveRustTemplates } from './liveRustTemplates';
 import { verifyLiveXaml } from './liveXaml';
 import { verifyIosAppMcp } from './iosAppMcp';
+import { verifyIosAttachedAppMcp } from './iosAttachedAppMcp';
+import { verifyIosDeviceAttachment } from './iosDeviceAttachment';
 import { verifyIosDeviceDevelopment } from './iosDeviceDevelopment';
 import { verifyIosDeviceSigning } from './iosDeviceSigning';
 import { verifyIosDeviceTransport } from './iosDeviceTransport';
@@ -54,7 +56,9 @@ export async function run(): Promise<void> {
     }
     if (process.env.FERROUI_TEST_IOS_DEVICE) {
         const device = process.env.FERROUI_TEST_IOS_DEVICE;
-        if (process.env.FERROUI_TEST_IOS_DEVICE_MANAGED_NATIVE) await verifyNativeMobileDevelopment('ios_device', device);
+        const port = process.env.FERROUI_TEST_IOS_DEVICE_ATTACH_PORT;
+        if (port) await verifyIosAttachedAppMcp(device, Number(port), process.env.FERROUI_TEST_IOS_DEVICE_ATTACH_TOKEN!);
+        else if (process.env.FERROUI_TEST_IOS_DEVICE_MANAGED_NATIVE) await verifyNativeMobileDevelopment('ios_device', device);
         else await verifyIosAppMcp(device, 'ios-device');
         return;
     }
@@ -95,6 +99,7 @@ export async function run(): Promise<void> {
     await verifyCargoBuildSlots();
     await verifyRuntimeClient();
     await verifyIosDeviceTransport();
+    await verifyIosDeviceAttachment();
     verifyIosDeviceSigning();
     await verifyIosDeviceDevelopment();
     await vscode.commands.executeCommand('ferroui.openLiveApp');

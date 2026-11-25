@@ -165,6 +165,12 @@
         "icon": "$(debug-alt)"
       },
       {
+        "command": "ferroui.iosDevice.attach",
+        "title": "Attach to iOS Device App",
+        "category": "FerroUI",
+        "icon": "$(plug)"
+      },
+      {
         "command": "ferroui.appSessions.mobile",
         "title": "Open Mobile App",
         "category": "FerroUI",
@@ -916,6 +922,10 @@
         },
         {
           "command": "ferroui.iosDevice.debug",
+          "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
+        },
+        {
+          "command": "ferroui.iosDevice.attach",
           "when": "isWorkspaceTrusted && ferroui.iosDeviceHost"
         },
         {
@@ -1869,6 +1879,12 @@
               }
             }
           }
+        },
+        "ferroui.iosDevice.inetcatPath": {
+          "type": "string",
+          "default": "",
+          "scope": "machine",
+          "description": "Absolute inetcat executable path on the workspace Mac. The extension uses it to attach over USB to independently running iPhone or iPad apps."
         },
         "ferroui.mcp.enableDesigner": {
           "type": "boolean",

@@ -1,6 +1,14 @@
 import { isIPv4 } from 'node:net';
+import type { Duplex } from 'node:stream';
 
-export interface RuntimeMcpEndpoint { url: string; token: string; devicePort?: number }
+export interface RuntimeProcessIdentity { pid: number; instance: string }
+export interface RuntimeMcpEndpoint {
+    url: string;
+    token: string;
+    devicePort?: number;
+    openStream?(signal: AbortSignal): Duplex;
+    expectedProcess?: { pid: number; instance?: string };
+}
 
 export const mcpEndpointPrefix = 'FERROUI_MCP_V1=';
 

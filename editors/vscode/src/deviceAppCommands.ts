@@ -3,6 +3,7 @@ import type { AndroidSessions } from './androidSessions';
 import { hasAndroidProfiles, type AndroidMode, type AndroidRequest } from './androidTargets';
 import { connectApp } from './connectApp';
 import type { IosAppRun } from './iosAppProfiles';
+import { iosInspectorCredentials, type IosDeviceAttachRequest } from './iosDeviceAttachment';
 import type { IosDeviceSessions } from './iosDeviceSessions';
 import { hasIosDeviceProfiles } from './iosDeviceTargets';
 import type { IosSimulatorSessions } from './iosSimulatorSessions';
@@ -30,6 +31,9 @@ export class DeviceAppCommands implements vscode.Disposable {
             ...(['run', 'debug'] as const).map(mode => vscode.commands.registerCommand(`ferroui.iosDevice.${mode}`, (selection?: IosAppRun) =>
                 connectApp('Connecting to the iOS device app', () => selection ?? this.chooseIosDeviceApp(mode),
                     (request, signal) => this.devices.open(request, signal, mode === 'debug' ? { interactive: true } : undefined), open))),
+            vscode.commands.registerCommand('ferroui.iosDevice.attach', (selection?: IosDeviceAttachRequest) =>
+                connectApp('Connecting to the running iOS app', () => selection ?? this.chooseIosAttachment(),
+                    (request, signal) => this.devices.attach(request, signal), open)),
             ...(['run', 'debug', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
                 connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode),
                     (request, signal) => this.android.open(request, mode === 'attach' ? 'attach' : 'run', signal,
@@ -46,6 +50,7 @@ export class DeviceAppCommands implements vscode.Disposable {
         if (this.devices.supported && hasIosDeviceProfiles()) actions.push(
             { label: 'Run iOS Device App', command: 'ferroui.iosDevice.run' },
             { label: 'Run and Debug iOS Device App', command: 'ferroui.iosDevice.debug' },
+            { label: 'Attach to iOS Device App', command: 'ferroui.iosDevice.attach' },
         );
         if (hasAndroidProfiles()) actions.push(
             { label: 'Run Android App', command: 'ferroui.android.run' },
@@ -91,20 +96,39 @@ export class DeviceAppCommands implements vscode.Disposable {
         if (device) return { device: device.device.id, profile: app.app.id, folder: app.app.folder };
     }
 
-    private async chooseIosDeviceApp(mode: 'run' | 'debug'): Promise<IosAppRun | undefined> {
+    private async chooseIosDeviceApp(mode: 'run' | 'debug' | 'attach'): Promise<IosAppRun | undefined> {
         if (!hasIosDeviceProfiles()) throw new Error('Add a launch profile to ferroui.iosDevice.apps in Workspace Settings.');
         const { supported, devices, apps } = await this.devices.targets(undefined, AbortSignal.timeout(10_000));
         if (!supported) throw new Error('iOS device sessions require a macOS workspace host.');
         const available = devices.filter(device => device.status === 'ready');
         if (!available.length) throw new Error('Connect an iPhone or iPad with Developer Mode enabled in Xcode’s Devices and Simulators window.');
         const app = await vscode.window.showQuickPick(apps.map(app => ({
-            label: app.label, description: app.buildsBundle ? 'Build and sign from Cargo' : app.bundleId, detail: vscode.Uri.parse(app.folder).fsPath, app,
-        })), { title: mode === 'debug' ? 'Run and Debug iOS Device App' : 'Run iOS Device App', placeHolder: 'Choose the configured app' });
+            label: app.label, description: mode !== 'attach' && app.buildsBundle ? 'Build and sign from Cargo' : app.bundleId,
+            detail: vscode.Uri.parse(app.folder).fsPath, app,
+        })), { title: { run: 'Run iOS Device App', debug: 'Run and Debug iOS Device App', attach: 'Attach to iOS Device App' }[mode],
+            placeHolder: 'Choose the configured app' });
         if (!app) return;
         const device = await vscode.window.showQuickPick(available.map(device => ({
             label: device.name, description: device.system, detail: device.id, device,
         })), { title: 'Select an iOS Device', placeHolder: 'Choose the app’s device', matchOnDescription: true, matchOnDetail: true });
         if (device) return { device: device.device.id, profile: app.app.id, folder: app.app.folder };
+    }
+
+    private async chooseIosAttachment(): Promise<IosDeviceAttachRequest | undefined> {
+        const selection = await this.chooseIosDeviceApp('attach');
+        if (!selection) return;
+        const port = await vscode.window.showInputBox({
+            title: 'iOS Inspector Port', prompt: 'Enter the loopback port from the running app’s FerroUI MCP announcement',
+            ignoreFocusOut: true, validateInput: value => /^\d{1,5}$/.test(value.trim()) && Number(value) > 0 && Number(value) <= 65_535
+                ? undefined : 'Enter a port from 1 to 65535.',
+        });
+        if (port === undefined) return;
+        const token = await vscode.window.showInputBox({
+            title: 'iOS Inspector Bearer Token', prompt: 'Paste the running app’s FerroUI MCP bearer token',
+            password: true, ignoreFocusOut: true, validateInput: value => iosInspectorCredentials(Number(port), value.trim())
+                ? undefined : 'Enter the 64-digit hexadecimal bearer token.',
+        });
+        if (token !== undefined) return { ...selection, port: Number(port), token: token.trim() };
     }
 
     dispose(): void { this.subscriptions.forEach(subscription => subscription.dispose()); }

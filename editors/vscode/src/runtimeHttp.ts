@@ -1,15 +1,22 @@
-import { request } from 'node:http';
+import { Agent, request } from 'node:http';
 import { Readable } from 'node:stream';
 import type { RuntimeMcpEndpoint } from './runtimeMcp';
 
 export function sendRuntimeRequest(endpoint: RuntimeMcpEndpoint, method: 'POST' | 'DELETE', headers: Record<string, string>,
     signal: AbortSignal, body?: string): Promise<Response> {
-    if (endpoint.devicePort === undefined) return fetch(endpoint.url, { method, headers, signal, body, redirect: 'error' });
+    const { devicePort, openStream } = endpoint;
+    if (devicePort === undefined && !openStream) return fetch(endpoint.url, { method, headers, signal, body, redirect: 'error' });
 
-    // ADB changes the socket address. Authenticate to the device's original HTTP authority.
+    // A device connection can change how the socket opens while keeping the app's HTTP authority.
+    // VS Code's HTTP proxy wrapper delegates to the supplied agent for loopback requests.
+    const agent = openStream ? new Agent({ keepAlive: false }) : undefined;
+    if (agent && openStream) agent.createConnection = () => openStream(signal);
     return new Promise((resolve, reject) => {
         const connection = request(endpoint.url, {
-            method, signal, headers: { ...headers, Host: `127.0.0.1:${endpoint.devicePort}`,
+            method, signal, agent,
+            headers: { ...headers,
+                ...(devicePort === undefined ? {} : { Host: `127.0.0.1:${devicePort}` }),
+                ...(openStream ? { Connection: 'close' } : {}),
                 ...(body === undefined ? {} : { 'Content-Length': Buffer.byteLength(body) }) },
         }, incoming => {
             const status = incoming.statusCode ?? 500;

@@ -190,7 +190,7 @@ fn start(
     bearer: Option<String>,
     announce_endpoint: bool,
 ) -> io::Result<ServerHandle> {
-    let (http, address, token) = match &options.transport {
+    let (http, address, token, inspector_instance) = match &options.transport {
         Transport::Http(address) => {
             if !address.ip().is_loopback() {
                 return Err(io::Error::new(
@@ -200,13 +200,23 @@ fn start(
             }
             let server = std::net::TcpListener::bind(address)?;
             let address = server.local_addr()?;
-            let mut bytes = [0u8; 32];
+            let mut bytes = [0u8; 48];
             getrandom::fill(&mut bytes).map_err(|e| io::Error::other(e.to_string()))?;
-            let token = bearer
-                .unwrap_or_else(|| bytes.iter().map(|b| format!("{b:02x}")).collect::<String>());
-            (Some(server), Some(address), Some(token))
+            let token = bearer.unwrap_or_else(|| {
+                bytes[..32]
+                    .iter()
+                    .map(|b| format!("{b:02x}"))
+                    .collect::<String>()
+            });
+            let instance = service.is_none().then(|| {
+                bytes[32..]
+                    .iter()
+                    .map(|b| format!("{b:02x}"))
+                    .collect::<String>()
+            });
+            (Some(server), Some(address), Some(token), instance)
         }
-        Transport::Stdio => (None, None, None),
+        Transport::Stdio => (None, None, None, None),
     };
     let stdio_output = if http.is_none() {
         Some(match options.stdio_output {
@@ -221,6 +231,7 @@ fn start(
         dispatcher,
         extension,
         service,
+        inspector_instance,
         permissions: options.permissions,
         timeout: options.dispatch_timeout,
         stop: Arc::new(AtomicBool::new(false)),
@@ -258,6 +269,7 @@ pub(crate) struct Client {
     dispatcher: Option<Arc<Dispatcher>>,
     extension: Option<extensions::Catalog>,
     service: Option<services::ServiceCatalog>,
+    inspector_instance: Option<String>,
     permissions: Permissions,
     timeout: Duration,
     stop: Arc<AtomicBool>,

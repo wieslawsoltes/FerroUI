@@ -1,10 +1,12 @@
 import * as vscode from 'vscode';
 import type { IosAppRun } from './iosAppProfiles';
 import type { IosBundle } from './iosBuild';
+import { attachIosDeviceInspector, iosInspectorCredentials, watchIosDeviceInspector, type IosDeviceAttachment, type IosDeviceAttachRequest } from './iosDeviceAttachment';
 import { IosDeviceBridge, type IosDevice } from './iosDeviceBridge';
 import { iosDeviceDevelopment } from './iosDeviceDevelopment';
 import { launchIosDeviceApp, type IosDeviceProcess } from './iosDeviceProcess';
-import { iosDeviceApps, type IosDeviceApp } from './iosDeviceTargets';
+import { iosDeviceApp, iosDeviceApps, type IosDeviceApp } from './iosDeviceTargets';
+import { iosUsbTool } from './iosDeviceUsb';
 import type { MobileDevelopment } from './mobileDevelopment';
 import { iosDeviceAttachCommands, iosDeviceVariable, selectDebugConfiguration, type MobileLaunchDebug } from './reloadDebugConfiguration';
 import { ReloadDebugger } from './reloadDebugger';
@@ -21,6 +23,7 @@ interface Launch {
     output: ReloadLog;
     runtime?: AppRuntime;
     process?: IosDeviceProcess;
+    attachment?: IosDeviceAttachment;
     development?: MobileDevelopment<IosBundle, IosDeviceProcess>;
     debugger?: ReloadDebugger;
     attaching?: boolean;
@@ -60,19 +63,15 @@ export class IosDeviceSessions implements vscode.Disposable {
         this.requireWorkspace();
         const active = AbortSignal.any([signal, this.lifetime.signal]);
         active.throwIfAborted();
-        const matches = iosDeviceApps(request.folder).filter(app => app.id === request.profile);
-        if (matches.length !== 1) throw new Error('Choose an unambiguous iOS device launch profile.');
-        const [app] = matches;
+        const app = iosDeviceApp(request);
         const [folder] = workspaceFolders(app.folder);
         const configuration = debug && await selectDebugConfiguration(folder, { interactive: false, ...debug, target: 'iosDevice' });
-        const device = (await this.bridge.devices(active)).find(item => item.id.toLowerCase() === request.device.toLowerCase());
-        if (device?.status !== 'ready') throw new Error('Choose a connected, paired iPhone or iPad with Developer Mode enabled.');
-        active.throwIfAborted();
+        const device = await this.readyDevice(request.device, active);
         const key = `${device.id}:${app.bundleId}`;
         const existing = this.launches.get(key);
         if (existing) {
             const runtime = existing.runtime && this.connections.describe(existing.runtime);
-            if (!runtime || existing.closing || JSON.stringify(existing.app) !== JSON.stringify(app)) {
+            if (!runtime || existing.closing || existing.attachment || JSON.stringify(existing.app) !== JSON.stringify(app)) {
                 throw new Error('Close the current iOS session for this bundle and device before starting another.');
             }
             if (existing.development && (runtime.generation === null || existing.development.deploying)) {
@@ -82,16 +81,13 @@ export class IosDeviceSessions implements vscode.Disposable {
             if (configuration) await this.debug(runtime.runtime, runtime.generation!, { configuration, signal: active });
             return this.current(runtime.runtime, runtime.generation!);
         }
-        const label = `${app.label} · ${device.name}`;
-        const output = new ReloadLog(vscode.window.createOutputChannel(`FerroUI iOS Device · ${label}`));
-        const launch: Launch = { app, device, stop: new AbortController(), output };
-        this.launches.set(key, launch);
+        const launch = this.createLaunch(key, app, device);
         try {
             if (app.build) {
                 if (configuration) this.debuggerSession(launch).prepareIfIdle(folder, this.configuration(launch, configuration));
-                return this.startDevelopment(launch, label);
+                return this.startDevelopment(launch, this.label(launch));
             }
-            launch.starting = this.start(key, launch, label, AbortSignal.any([active, launch.stop.signal]));
+            launch.starting = this.start(key, launch, AbortSignal.any([active, launch.stop.signal]));
             const runtime = await launch.starting;
             if (configuration) await this.debug(runtime.runtime, runtime.generation!, { configuration, signal: active });
             return this.current(runtime.runtime, runtime.generation!);
@@ -101,19 +97,71 @@ export class IosDeviceSessions implements vscode.Disposable {
         }
     }
 
-    private async start(key: string, launch: Launch, label: string, signal: AbortSignal): Promise<RuntimeSummary> {
+    async attach(request: IosDeviceAttachRequest, signal: AbortSignal): Promise<RuntimeSummary> {
+        this.requireWorkspace();
+        if (!iosInspectorCredentials(request.port, request.token)) throw new Error('Enter the app’s MCP port and 64-digit hexadecimal bearer token.');
+        const active = AbortSignal.any([signal, this.lifetime.signal]);
+        const app = iosDeviceApp(request);
+        const device = await this.readyDevice(request.device, active);
+        const key = `${device.id}:${app.bundleId}`;
+        const existing = this.launches.get(key);
+        if (existing) {
+            const runtime = existing.runtime && this.connections.describe(existing.runtime);
+            if (!runtime?.generation || existing.closing || existing.app.folder !== app.folder || existing.app.id !== app.id
+                || !existing.attachment?.matches(request.port, request.token)) {
+                throw new Error('Close the current iOS session for this bundle and device before attaching another.');
+            }
+            const attached = AbortSignal.any([active, existing.stop.signal]);
+            await existing.attachment.verify(attached);
+            attached.throwIfAborted();
+            return this.current(runtime.runtime, runtime.generation);
+        }
+        const launch = this.createLaunch(key, app, device);
+        launch.starting = this.startAttachment(key, launch, request, AbortSignal.any([active, launch.stop.signal]));
+        try { return await launch.starting; }
+        catch (error) {
+            await this.close(key, launch).catch(problem => console.warn(problem));
+            throw error;
+        }
+    }
+
+    private async startAttachment(key: string, launch: Launch, request: IosDeviceAttachRequest, signal: AbortSignal): Promise<RuntimeSummary> {
+        const configured = vscode.workspace.getConfiguration('ferroui.iosDevice').get<string>('inetcatPath', '');
+        const executable = await iosUsbTool(configured, signal);
+        const attachment = launch.attachment = await attachIosDeviceInspector(this.bridge, launch.device, launch.app, request, executable, signal);
+        signal.throwIfAborted();
+        const runtime = this.publish(launch, attachment.pid, attachment.endpoint, true);
+        launch.output.appendLine(`${launch.app.label} · PID ${attachment.pid} · connected over USB`);
+        const active = launch.stop.signal;
+        void watchIosDeviceInspector(attachment, active).then(() => {
+            if (!active.aborted) this.retire(key, launch);
+        }, error => {
+            if (!active.aborted) {
+                launch.output.appendLine(String(error));
+                this.retire(key, launch);
+            }
+        });
+        return runtime;
+    }
+
+    private async start(key: string, launch: Launch, signal: AbortSignal): Promise<RuntimeSummary> {
         const { app, device, output } = launch;
         if (app.bundlePath) output.appendLine(`Installing ${app.label}`);
         await this.bridge.install(device, app, signal);
         output.appendLine(`Starting ${app.label}`);
         const process = launch.process = await launchIosDeviceApp(this.bridge.executable, device, app, output, signal);
         signal.throwIfAborted();
-        const runtime = this.connections.addPlatform({ kind: 'ios-device', iosDevice: { ...this.target(launch), pid: process.pid } },
-            label, process.endpoint, generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
-        launch.runtime = runtime.runtime;
+        const runtime = this.publish(launch, process.pid, process.endpoint);
         const ended = () => this.retire(key, launch);
         void process.console.closed.then(ended, ended);
         output.appendLine(`${app.label} · PID ${process.pid} · inspector ready`);
+        return runtime;
+    }
+
+    private publish(launch: Launch, pid: number, endpoint: IosDeviceProcess['endpoint'], attached?: true): RuntimeSummary {
+        const runtime = this.connections.addPlatform({ kind: 'ios-device', iosDevice: { ...this.target(launch), pid, attached } },
+            this.label(launch), endpoint, generation => generation !== undefined && launch.debugger?.isAttachedTo(generation) === true);
+        launch.runtime = runtime.runtime;
         return runtime;
     }
 
@@ -131,6 +179,22 @@ export class IosDeviceSessions implements vscode.Disposable {
 
     private target({ app, device }: Launch) {
         return { device: device.id, name: device.name, system: device.system, profile: app.id, bundleId: app.bundleId };
+    }
+
+    private label({ app, device }: Launch): string { return `${app.label} · ${device.name}`; }
+
+    private createLaunch(key: string, app: IosDeviceApp, device: IosDevice): Launch {
+        const output = new ReloadLog(vscode.window.createOutputChannel(`FerroUI iOS Device · ${app.label} · ${device.name}`));
+        const launch = { app, device, stop: new AbortController(), output };
+        this.launches.set(key, launch);
+        return launch;
+    }
+
+    private async readyDevice(id: string, signal: AbortSignal): Promise<IosDevice> {
+        const device = (await this.bridge.devices(signal)).find(item => item.id.toLowerCase() === id.toLowerCase());
+        signal.throwIfAborted();
+        if (device?.status !== 'ready') throw new Error('Choose a connected, paired iPhone or iPad with Developer Mode enabled.');
+        return device;
     }
 
     async debug(runtime: AppRuntime, generation: number, options: {
@@ -162,15 +226,21 @@ export class IosDeviceSessions implements vscode.Disposable {
     private async attachDebugger(launch: Launch, configuration: vscode.DebugConfiguration, generation: number, signal?: AbortSignal): Promise<void> {
         signal?.throwIfAborted();
         launch.stop.signal.throwIfAborted();
-        const { runtime, development } = launch;
+        const { runtime, development, attachment } = launch;
         const process = development?.current ?? launch.process;
-        if (!runtime || !process || process.console.hasExited || development?.deploying || this.connections.revision(runtime) !== generation) {
+        const pid = attachment?.pid ?? process?.pid;
+        if (!runtime || !pid || process?.console.hasExited || development?.deploying || this.connections.revision(runtime) !== generation) {
             throw new Error('Use the current accepted iOS device process.');
         }
         const [folder] = workspaceFolders(launch.app.folder);
         const debuggerSession = this.debuggerSession(launch);
         if (debuggerSession.follows(generation)) return;
-        await debuggerSession.attach(folder, this.configuration(launch, configuration), process.pid, generation);
+        if (attachment) {
+            await attachment.verify(signal ?? launch.stop.signal);
+            signal?.throwIfAborted();
+            this.current(runtime, generation);
+        }
+        await debuggerSession.attach(folder, this.configuration(launch, configuration), pid, generation);
         if (signal?.aborted || this.connections.revision(runtime) !== generation) {
             await debuggerSession.detach();
             signal?.throwIfAborted();
@@ -229,6 +299,7 @@ export class IosDeviceSessions implements vscode.Disposable {
             } finally {
                 try {
                     if (launch.development) await launch.development.close(true);
+                    else if (launch.attachment) await launch.attachment.close();
                     else await launch.process?.close();
                 }
                 finally {

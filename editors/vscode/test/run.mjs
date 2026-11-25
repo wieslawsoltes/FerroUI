@@ -21,6 +21,7 @@ const executable = name => join(bin, name + (process.platform === 'win32' ? '.ex
 const simulator = process.env.FERROUI_TEST_IOS_SIMULATOR;
 const iosDevice = process.env.FERROUI_TEST_IOS_DEVICE;
 const iosDeviceNative = process.env.FERROUI_TEST_IOS_DEVICE_MANAGED === 'native';
+const iosDeviceAttachPort = process.env.FERROUI_TEST_IOS_DEVICE_ATTACH_PORT;
 const iosDebugExtensions = process.env.FERROUI_TEST_IOS_DEBUG_EXTENSIONS;
 const simulatorManaged = process.env.FERROUI_TEST_IOS_MANAGED === '1';
 const simulatorNative = process.env.FERROUI_TEST_IOS_MANAGED === 'native';
@@ -42,6 +43,7 @@ try {
     if (iosDeviceNative && (!iosDevice || !iosDebugExtensions)) {
         throw new Error('Set FERROUI_TEST_IOS_DEVICE and FERROUI_TEST_IOS_DEBUG_EXTENSIONS for signed iOS source-build acceptance.');
     }
+    if (iosDeviceAttachPort && (!iosDevice || iosDeviceNative)) throw new Error('Choose a single physical iOS attach or build test.');
     if (androidDebugExtensions && !android) throw new Error('Set FERROUI_TEST_ANDROID_DEVICE for Android debugger acceptance.');
     if (androidNative && !androidDebugExtensions) throw new Error('Set FERROUI_TEST_ANDROID_DEBUG_EXTENSIONS for native Android source builds.');
     if ([simulator, iosDevice, android, androidManaged, browser, browserBuild, browserDebugSite, browserDwarfExtensions].filter(Boolean).length > 1) {
@@ -86,6 +88,19 @@ try {
             });
             targetEnv.FERROUI_TEST_IOS_DEVICE_MANAGED_NATIVE = '1';
             targetEnv.CARGO_TARGET_DIR = process.env.CARGO_TARGET_DIR ?? join(sandbox, 'cargo');
+        } else if (iosDeviceAttachPort) {
+            const port = Number(iosDeviceAttachPort);
+            const token = process.env.FERROUI_TEST_IOS_DEVICE_ATTACH_TOKEN;
+            const bundleId = process.env.FERROUI_TEST_IOS_DEVICE_BUNDLE_ID;
+            if (!Number.isInteger(port) || port < 1 || port > 65_535 || !/^[0-9a-f]{64}$/i.test(token ?? '') || !bundleId) {
+                throw new Error('Supply a port, bearer token and bundle identifier for the independently running iOS fixture.');
+            }
+            target = source;
+            targetSettings = { 'ferroui.iosDevice.apps': [{ id: 'contact-review', label: 'Contact Review', bundleId }] };
+            const inetcat = process.env.FERROUI_TEST_IOS_DEVICE_INETCAT;
+            if (inetcat) targetSettings['ferroui.iosDevice.inetcatPath'] = resolve(inetcat);
+            targetEnv.FERROUI_TEST_IOS_DEVICE_ATTACH_PORT = iosDeviceAttachPort;
+            targetEnv.FERROUI_TEST_IOS_DEVICE_ATTACH_TOKEN = token;
         } else {
             const app = process.env.FERROUI_TEST_IOS_DEVICE_APP;
             if (!app) throw new Error('Set FERROUI_TEST_IOS_DEVICE_APP to the development-signed Contact Review test bundle.');
