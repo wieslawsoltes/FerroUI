@@ -1,16 +1,13 @@
 import { strict as assert } from 'node:assert';
-import { readFile, realpath } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import * as vscode from 'vscode';
 import type { HostedFrame } from '../src/hostedProtocol';
 import type { HostedSourceLocation } from '../src/hostedSources';
 import type { HostedTemplateCatalog } from '../src/hostedTemplates';
 import type { NativePreview } from '../src/nativePreview';
 
-export async function verifyHostedRustTemplates(preview: NativePreview): Promise<void> {
-    const extension = vscode.extensions.getExtension('FerroUI.ferroui')!;
-    const root = await realpath(join(extension.extensionPath, '../../samples/TodoWorkbench'));
+export async function verifyHostedRustTemplates(preview: NativePreview, root: string): Promise<void> {
     const manifest = join(root, 'Cargo.toml');
     const viewPath = join(root, 'app_preview/template_review.rs');
     const rowsPath = join(root, 'app_preview/template_rows.rs');

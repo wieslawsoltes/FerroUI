@@ -12,6 +12,7 @@ import { asRange, sourceOf } from '../src/textDocument';
 import type { CurvePoint, TimelineProgram } from '../src/timelineProtocol';
 import { isInside } from '../src/workspacePaths';
 import { verifyHostedPreview } from './hostedPreview';
+import { verifyInstalledRuntime } from './installedRuntime';
 import { reviewStateSource } from './rsxStatesMcp';
 import { until } from './wait';
 import type { PaletteSheet, StyleCatalog } from '../src/stylesProtocol';
@@ -280,6 +281,7 @@ export async function run(): Promise<void> {
         assert.equal(capabilities.get('ferroui-design-keyframes'), '1', 'The installed relay negotiates project codec authoring');
         assert.equal(capabilities.get('ferroui-design-curve-channels'), '1', 'The installed relay opts in to geometry channels');
         await verifyHostedPreview(native, source.uri);
+        await verifyInstalledRuntime(workspace);
         console.log(`Installed FerroUI ${extension.packageJSON.version} passed on VS Code ${vscode.version} (${process.platform}-${process.arch}).`);
     } finally {
         native.dispose();

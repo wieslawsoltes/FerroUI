@@ -3,15 +3,18 @@ import { cp, mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
 import { join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
+import { prepareInstalledRuntime } from './installedRuntimeWorkspace.mjs';
 import { installVsix } from './vscodeCli.mjs';
 import { testVSCodeExecutable } from './vscodeDownload.mjs';
 
 const extension = fileURLToPath(new URL('../', import.meta.url));
+const toolkit = resolve(extension, '../..');
 const [vsixPath] = process.argv.slice(2);
 if (!vsixPath) throw new Error('Pass the VSIX built for the current workspace host.');
 const vsix = resolve(vsixPath);
 const manifest = JSON.parse(await readFile(join(extension, 'package.json'), 'utf8'));
 const minimum = manifest.engines.vscode.replace(/^\^/, '');
+const runtimeEnabled = process.env.FERROUI_TEST_INSTALLED_RUNTIME === '1';
 
 for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN], ['stable', process.env.FERROUI_TEST_VSCODE]]) {
     const executable = await testVSCodeExecutable(supplied, { version });
@@ -24,12 +27,19 @@ for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN
     try {
         await Promise.all([mkdir(join(profile, 'User'), { recursive: true }), mkdir(driver),
             cp(join(extension, 'test/fixtures'), workspace, { recursive: true })]);
+        const runtime = runtimeEnabled ? await prepareInstalledRuntime(workspace, sandbox, toolkit) : undefined;
         await writeFile(join(driver, 'package.json'), JSON.stringify({ name: 'ferroui-vsix-driver', publisher: 'ferroui-test',
             version: '0.0.0', engines: { vscode: manifest.engines.vscode } }));
-        await writeFile(join(profile, 'User/settings.json'), JSON.stringify({ 'workbench.startupEditor': 'none', 'telemetry.telemetryLevel': 'off' }));
+        await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
+            'workbench.startupEditor': 'none', 'telemetry.telemetryLevel': 'off', ...runtime?.settings,
+        }));
         await installVsix(executable, [...args, '--install-extension', vsix]);
         await runTests({ vscodeExecutablePath: executable, extensionDevelopmentPath: driver,
-            extensionTestsPath: join(extension, 'dist/installed-test.js'), extensionTestsEnv: { FERROUI_TEST_INSTALLED_ROOT: extensions },
+            extensionTestsPath: join(extension, 'dist/installed-test.js'),
+            extensionTestsEnv: {
+                FERROUI_TEST_INSTALLED_ROOT: extensions, ...runtime?.environment,
+                FERROUI_TEST_HOSTED_SOURCE: process.env.FERROUI_TEST_HOSTED_SOURCE ?? join(toolkit, 'samples/TodoWorkbench'),
+            },
             launchArgs: [workspace, ...args, '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'] });
     } finally { await rm(sandbox, { recursive: true, force: true, maxRetries: 3 }); }
 }

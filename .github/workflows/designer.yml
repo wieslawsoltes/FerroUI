@@ -167,6 +167,9 @@ jobs:
       fail-fast: false
       matrix:
         os: ${{ fromJSON(inputs.installed-vsix-os == 'all' && '["macos-15","ubuntu-24.04","windows-latest"]' || format('["{0}"]', inputs.installed-vsix-os)) }}
+    env:
+      FERROUI_TEST_INSTALLED_RUNTIME: '1'
+      FERROUI_TEST_HOSTED_APP: ${{ github.workspace }}/target/debug/${{ matrix.os == 'windows-latest' && 'todo-workbench.exe' || 'todo-workbench' }}
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4
       - uses: dtolnay/rust-toolchain@89b12181fb390509a0842a86cc55eeb8eb928c1d # stable
@@ -185,6 +188,8 @@ jobs:
             libgl1-mesa-dev libegl1-mesa-dev
       - name: Compile the release helpers for the workspace host
         run: cargo build --locked --profile dist-unwind -p ferroui-designer-language -p ferroui-designer-preview
+      - name: Build the native app-hosted design fixture
+        run: cargo build --locked -p todo-workbench --features app-preview,hot-reload,mcp
       - name: Package the native VSIX
         working-directory: editors/vscode
         run: |

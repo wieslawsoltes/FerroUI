@@ -130,6 +130,8 @@ npm run package:platform -- ../../target/dist-unwind
 
 The packaged README links to the user guides and examples at the source checkout’s Git revision. After building the extension, run `npm run test:vsix -- <package.vsix>` to install the package and smoke-test the minimum supported and current stable releases of VS Code. The Visual designer workflow provides a manual installed-package matrix for macOS, Linux, and Windows.
 
+Set `FERROUI_TEST_INSTALLED_RUNTIME=1` to run the native hot reload fixture through the installed extension. Set `FERROUI_TEST_HOSTED_APP` to a Todo Workbench executable built with `app-preview,hot-reload,mcp` to test App Preview with app-registered controls and bindings. The installed-package CI matrix enables both. [Installed runtime acceptance](../../docs/designer/vscode/testing.md#test-the-installed-extension-with-a-running-app)
+
 ## Preview and round-trip coverage
 
 - FerroUI XAML uses the designer's runtime loader, design-time projection, WinUI theme, and project-relative file URIs. Run **Build Project XAML Schema** to publish versioned `.xamlmeta` files for a Cargo package. Launch and app-hosted design builds also publish metadata, and `ferroui.types` overrides it. The XAML server supports folder-configured document and range formatting, linked tags, namespace imports, spelling fixes, and binding type inlay hints. [XAML language service](../../src/FerroUI.Designer.Language/README.md) · [Formatting guide](../../docs/designer/vscode/authoring.md#format-xaml)

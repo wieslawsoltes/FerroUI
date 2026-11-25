@@ -1,16 +1,13 @@
 import { strict as assert } from 'node:assert';
-import { readFile, realpath } from 'node:fs/promises';
+import { readFile } from 'node:fs/promises';
 import { join } from 'node:path';
 import { pathToFileURL } from 'node:url';
-import * as vscode from 'vscode';
 import type { HostedFrame } from '../src/hostedProtocol';
 import type { HostedSourceLocation } from '../src/hostedSources';
 import type { HostedTemplateCatalog } from '../src/hostedTemplates';
 import type { NativePreview } from '../src/nativePreview';
 
-export async function verifyHostedTreeTemplates(preview: NativePreview): Promise<void> {
-    const extension = vscode.extensions.getExtension('FerroUI.ferroui')!;
-    const root = await realpath(join(extension.extensionPath, '../../samples/TodoWorkbench'));
+export async function verifyHostedTreeTemplates(preview: NativePreview, root: string): Promise<void> {
     const manifest = join(root, 'Cargo.toml');
     const project = { workspaceRoot: root, metadata: { manifest, directories: [], package: 'todo-workbench' } };
     const rustProject = { manifest, targets: [join(root, 'main.rs')], features: ['app-preview', 'hot-reload', 'mcp'] };
