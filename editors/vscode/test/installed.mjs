@@ -22,6 +22,7 @@ if (debuggerPath) {
     await access(debuggerPath, constants.X_OK);
 }
 
+const failedVersions = [];
 for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN], ['stable', process.env.FERROUI_TEST_VSCODE]]) {
     const executable = await testVSCodeExecutable(supplied, { version });
     const sandbox = await mkdtemp(join(tmpdir(), 'ferroui-installed-'));
@@ -50,6 +51,11 @@ for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN
                 FERROUI_TEST_INSTALLED_ROOT: extensions, ...runtime?.environment,
                 FERROUI_TEST_HOSTED_SOURCE: process.env.FERROUI_TEST_HOSTED_SOURCE ?? join(toolkit, 'samples/TodoWorkbench'),
             },
-            launchArgs: [workspace, ...args, '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'] });
+            launchArgs: [workspace, ...args, '--skip-welcome', '--skip-release-notes', '--disable-workspace-trust'] })
+            .catch(error => {
+                failedVersions.push(version);
+                console.error(`The installed VS Code ${version} check failed.`, error);
+            });
     } finally { await rm(sandbox, { recursive: true, force: true, maxRetries: 3 }); }
 }
+if (failedVersions.length) throw new Error(`Installed package checks failed for VS Code ${failedVersions.join(', ')}.`);
