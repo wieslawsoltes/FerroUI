@@ -26,6 +26,9 @@ export async function verifyIosAttachedAppMcp(device: string, port: number, toke
         assert.equal(await owned(), undefined);
         const first = content<RuntimeSummary>(await invoke('ferroui_ios_device_attach', request));
         assert.ok(first.iosDevice?.attached && first.available && first.generation && first.pid);
+        const definitions = await vscode.commands.executeCommand<vscode.McpServerDefinition[]>('ferroui.test.mcpDefinitions');
+        assert.ok(!definitions.some(definition => definition instanceof vscode.McpHttpServerDefinition
+            && definition.headers.Authorization === `Bearer ${token}`), 'The USB inspector is available through editor MCP');
         assert.equal(content<RuntimeSummary>(await invoke('ferroui_ios_device_attach', request)).runtime, first.runtime);
         const [window] = await readWindows(first);
         assert.ok(window?.bounds?.width);
@@ -41,6 +44,9 @@ export async function verifyIosAttachedAppMcp(device: string, port: number, toke
         assert.equal(replacement.pid, first.pid, 'Disconnect leaves the independently running app process alive');
         assert.notEqual(replacement.generation, first.generation);
         assert.notEqual(replacement.runtime, first.runtime);
+        const stale = await invoke('ferroui_runtime_query', { runtime: replacement.runtime,
+            expected_generation: first.generation, tool: 'list_windows' });
+        assert.ok(stale.isError, 'An old agent request cannot use the replacement attachment');
         await until(() => vscode.window.tabGroups.all.some(group => group.tabs.some(tab => tab.label.includes(replacement.label))));
         assert.ok((await readWindows(replacement)).length);
         content(await invoke('ferroui_ios_device_stop', { runtime: replacement.runtime }));
