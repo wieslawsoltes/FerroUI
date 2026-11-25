@@ -247,7 +247,7 @@ Add an attach configuration to the app’s workspace folder in `.vscode/launch.j
 ```
 
 1. Choose **FerroUI: Run and Debug iOS Simulator App** from the Command Palette or **Open Mobile App**. Pick the app profile and booted simulator. For a running simulator session, use **Attach Debugger to This App** in its App Sessions context menu.
-2. If several attach configurations are available, choose the one for the app’s workspace folder. FerroUI waits for the app’s first frame and supplies the PID of the installed app that owns the session’s authenticated inspector.
+2. If several attach configurations are available, choose the one for the app’s workspace folder. FerroUI waits for the app’s first frame and supplies the PID of the installed app that owns the session’s authenticated inspector. Use **Show App Output** on the session row if attachment fails.
 3. Set a breakpoint in an event handler in your Rust source. In Contact Review, set it inside `review_next_contact` and choose **Review next contact** in Simulator or through **Live App → Interact**. Use **Continue** to resume the app and its inspector.
 4. Use **Stop Debugging** to detach and keep the simulator app running. To end both the debugger and the app, choose **Stop or Disconnect This App**. For a prebuilt bundle, stop the session before running the updated bundle. For a source profile, choose **Rebuild This App**.
 
@@ -342,7 +342,7 @@ Add an attach configuration to `.vscode/launch.json` in the app’s workspace fo
 ```
 
 1. Set a breakpoint inside `complete_review` in `android_inspector.rs`. Choose **FerroUI: Run and Debug Android App** and select your app profile and device. For an app already connected to Live App, choose **Attach Debugger to This App** in its App Sessions context menu.
-2. Choose the attach configuration if VS Code lists several. FerroUI uses the debugger installed with the app and a temporary ADB forward for the verified process. Once the breakpoint binds, click **Complete review** in the app or in **Live App → Interact**.
+2. Choose the attach configuration if VS Code lists several. FerroUI waits for the first native frame, then uses the debugger installed with the app and a temporary ADB forward for the verified process. Once the breakpoint binds, click **Complete review** in the app or in **Live App → Interact**.
 3. Use **Continue** to resume the app and its inspector. Use **Stop Debugging** to keep the app and Live App connected. **Stop or Disconnect This App** also closes the debugger. The session still follows the ownership rules for apps you ran or attached to independently.
 4. If attaching fails, open **Show App Output** on the App Sessions row for the Android debugger log. A library mismatch calls for the unstripped output of the exact installed build. If a matched breakpoint stays unbound, check the source paths recorded by the Rust compiler. LLDB DAP’s `sourceMap` can map a different build machine’s source paths to your workspace. [LLDB DAP configuration](https://lldb.llvm.org/use/lldbdap.html)
 

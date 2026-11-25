@@ -14,14 +14,6 @@ export class DeviceAppCommands implements vscode.Disposable {
         const context = () => {
             void vscode.commands.executeCommand('setContext', 'ferroui.mobileAppProfiles', this.ios.supported || hasAndroidProfiles());
         };
-        const present = async (runtime: AppRuntime, debug: boolean) => {
-            open(runtime);
-            if (debug) {
-                if (runtime.startsWith('android:')) await this.android.waitForDebuggerTarget(runtime);
-                else if (runtime.startsWith('simulator:')) await this.ios.waitForDebuggerTarget(runtime);
-                await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
-            }
-        };
         void vscode.commands.executeCommand('setContext', 'ferroui.iosSimulatorHost', ios.supported);
         context();
         this.subscriptions = [
@@ -30,11 +22,11 @@ export class DeviceAppCommands implements vscode.Disposable {
             vscode.commands.registerCommand('ferroui.appSessions.mobile', () => this.chooseAction()),
             ...(['run', 'debug'] as const).map(mode => vscode.commands.registerCommand(`ferroui.iosSimulator.${mode}`, (selection?: IosSimulatorRun) =>
                 connectApp('Starting the iOS simulator app', () => selection ?? this.chooseIosApp(mode),
-                    (request, signal) => this.ios.start(request, signal), runtime => present(runtime, mode === 'debug')))),
+                    (request, signal) => this.ios.start(request, signal, mode === 'debug' ? { interactive: true } : undefined), open))),
             ...(['run', 'debug', 'attach'] as const).map(mode => vscode.commands.registerCommand(`ferroui.android.${mode}`, (selection?: AndroidRequest) =>
                 connectApp('Connecting to the Android app', () => selection ?? this.chooseAndroidApp(mode),
-                    (request, signal) => this.android.open(request, mode === 'attach' ? 'attach' : 'run', signal),
-                    runtime => present(runtime, mode === 'debug')))),
+                    (request, signal) => this.android.open(request, mode === 'attach' ? 'attach' : 'run', signal,
+                        mode === 'debug' ? { interactive: true } : undefined), open))),
         ];
     }
 

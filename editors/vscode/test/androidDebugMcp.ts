@@ -63,7 +63,17 @@ export async function verifyAndroidDebug(mcp: McpFixture, app: RuntimeSummary, d
         await until(async () => (await forwards()).length === baseline.length);
         assert.deepEqual(await forwards(), baseline);
         assert.equal((await query('ReviewedCount')).text, 'Reviewed cases: 2');
-        console.log('Android native Rust breakpoint, MCP and workbench debugger detach, same-process reattach, and forwarding cleanup passed');
+        const requested = mcp.content<RuntimeSummary>(await mcp.invoke('ferroui_android_run', {
+            device: app.android.device, profile: app.android.profile, debug: true,
+        }));
+        assert.equal(requested.runtime, runtime);
+        assert.equal(requested.generation, generation);
+        const fromRun = await tracker.accept(reopened.id);
+        await verifyForward(fromRun);
+        await vscode.debug.stopDebugging(fromRun);
+        await until(async () => (await forwards()).length === baseline.length);
+        assert.deepEqual(await forwards(), baseline);
+        console.log('Android native Rust breakpoint, same-process MCP and VS Code Run and Debug, and forwarding cleanup passed');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         await tracker.close();

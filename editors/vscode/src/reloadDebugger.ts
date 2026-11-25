@@ -1,4 +1,5 @@
 import { randomUUID } from 'node:crypto';
+import { isDeepStrictEqual } from 'node:util';
 import * as vscode from 'vscode';
 
 export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
@@ -40,6 +41,15 @@ export class ReloadDebugger implements vscode.Disposable {
     prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
         this.detach();
         this.attachment = { id: randomUUID(), folder, configuration };
+    }
+
+    prepareIfIdle(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
+        if (!this.attachment) {
+            this.prepare(folder, configuration);
+        } else if (this.attachment.folder.uri.toString() !== folder.uri.toString()
+            || !isDeepStrictEqual(this.attachment.configuration, configuration)) {
+            throw new Error('Stop the current debugger before choosing another attach configuration.');
+        }
     }
 
     follows(target: number): boolean { return this.attachment?.target === target; }

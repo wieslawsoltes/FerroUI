@@ -47,8 +47,17 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         assert.equal(await readCount(), '2 contacts reviewed', 'Detaching preserves the original inspector generation.');
 
         await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
-        await acceptSession(debug.pid, session.id);
-        console.log('iOS simulator Rust breakpoint, debugger detach, and same-process VS Code reattach passed');
+        const reopened = await acceptSession(debug.pid, session.id);
+        await vscode.debug.stopDebugging(reopened);
+        await until(() => !tracker.sessions.has(reopened.id));
+        assert.ok(app.simulator);
+        const requested = mcp.content<RuntimeSummary>(await mcp.invoke('ferroui_ios_simulator_run', {
+            device: app.simulator.device, profile: app.simulator.profile, debug: true,
+        }));
+        assert.equal(requested.runtime, runtime);
+        assert.equal(requested.generation, generation);
+        await acceptSession(debug.pid, reopened.id);
+        console.log('iOS simulator Rust breakpoint, debugger detach, and same-process VS Code and MCP Run and Debug passed');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         await tracker.close();

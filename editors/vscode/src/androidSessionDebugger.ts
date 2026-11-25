@@ -1,3 +1,4 @@
+import { isDeepStrictEqual } from 'node:util';
 import type * as vscode from 'vscode';
 import type { AndroidBridge, AndroidReceipt } from './androidBridge';
 import { AndroidDebugger } from './androidDebugger';
@@ -16,8 +17,17 @@ export class AndroidSessionDebugger {
         symbols: readonly string[], signal: AbortSignal): Promise<void> {
         signal.throwIfAborted();
         if (this.launch || this.disconnecting) throw new Error('Stop the current Android debugger before attaching again.');
-        this.launch = { folder, configuration };
+        this.prepare(folder, configuration);
         await this.start(receipt, symbols, signal);
+    }
+
+    prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
+        if (!this.launch && !this.disconnecting) {
+            this.launch = { folder, configuration };
+        } else if (!this.launch || this.launch.folder.uri.toString() !== folder.uri.toString()
+            || !isDeepStrictEqual(this.launch.configuration, configuration)) {
+            throw new Error('Stop the current Android debugger before choosing another attach configuration.');
+        }
     }
 
     suspend(): Promise<void> {

@@ -9,12 +9,12 @@ import { trackNativeDebugger } from './nativeDebugFixture';
 
 const apps = {
     android: {
-        platform: 'Android', source: 'lib.rs', profile: 'service-review', debugger: 'Attach to Service Review',
+        platform: 'Android', source: 'lib.rs', profile: 'service-review', debugger: 'Attach to Service Review', command: 'ferroui.android.debug',
         statement: '*count += 1;', callback: 'complete_review', button: 'ReviewCase',
         heading: 'Service review', reviewed: 'Reviewed cases: 1',
     },
     ios_simulator: {
-        platform: 'iOS simulator', source: 'main.rs', profile: 'contact-review', debugger: 'Attach to Contact Review',
+        platform: 'iOS simulator', source: 'main.rs', profile: 'contact-review', debugger: 'Attach to Contact Review', command: 'ferroui.iosSimulator.debug',
         statement: '*reviewed += 1;', callback: 'review_next_contact', button: 'ReviewContact',
         heading: 'Contact review', reviewed: '1 contacts reviewed',
     },
@@ -32,8 +32,8 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
     const tracker = trackNativeDebugger(fixture.debugger);
     const { content, invoke, close } = await openEditorMcp(40_000);
     let runtime: string | undefined;
-    const current = async () => content<{ runtimes: RuntimeSummary[] }>(await invoke('ferroui_app_sessions')).runtimes
-        .find(item => item.runtime === runtime);
+    const sessions = async () => content<{ runtimes: RuntimeSummary[] }>(await invoke('ferroui_app_sessions')).runtimes;
+    const current = async () => (await sessions()).find(item => item.runtime === runtime);
     const output = async () => content<{ output: string }>(await invoke(tool('output'), { runtime })).output;
     const accept = (prior?: number) => waitFor(async () => {
         const session = await current();
@@ -78,25 +78,36 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
     try {
         await vscode.workspace.getConfiguration('ferroui.mcp').update('allowWrites', true, vscode.ConfigurationTarget.Global);
         await vscode.window.showTextDocument(rust);
-        const pending = content<RuntimeSummary>(await invoke(tool('run'), { device, profile: fixture.profile, folder: folder.toString() }));
+        const request = { device, profile: fixture.profile, folder: folder.toString() };
+        const runDebug = { ...request, debug: true, debug_configuration: fixture.debugger };
+        const invalid = await invoke(tool('run'), { ...runDebug, debug_configuration: 'Missing attach configuration' });
+        assert.ok(invalid.isError);
+        assert.match(invalid.content[0]?.text ?? '', /Choose one attach configuration/);
+        assert.deepEqual(await sessions(), [], 'An invalid debugger selection must leave the app stopped.');
+        vscode.debug.addBreakpoints([point]);
+        const pending = content<RuntimeSummary>(await invoke(tool('run'), runDebug));
         runtime = pending.runtime;
         assert.ok((pending.android ?? pending.simulator)?.development && !pending.available);
+        assert.equal(content<RuntimeSummary>(await invoke(tool('run'), runDebug)).runtime, runtime);
         content(await invoke('ferroui_runtime_open', { runtime }));
         const first = await accept();
         assert.ok(first.pid && first.generation);
         if (first.android) assert.ok(first.android.debuggable);
-        assert.ok(await find(first, { text: 'XAML inbox' }));
-        vscode.debug.addBreakpoints([point]);
-        content(await invoke(tool('debug'), { ...identity(first), debug_configuration: fixture.debugger }));
         const firstDebugger = await acceptDebugger(first);
+        assert.ok(await find(first, { text: 'XAML inbox' }));
         await callback(first, firstDebugger);
+        content(await invoke(tool('debug'), { ...identity(first), action: 'detach' }));
+        await waitFor(() => !tracker.sessions.has(firstDebugger.id) ? true : undefined, 'the first debugger to detach');
+        await vscode.commands.executeCommand(fixture.command, request);
+        const workbenchDebugger = await acceptDebugger(first, firstDebugger);
+        assert.equal((await current())?.generation, first.generation);
 
         const updatedHeading = `${fixture.heading} updated`;
         await save(rust.uri, `text: "${fixture.heading}"`, `text: "${updatedHeading}"`);
         const second = await accept(first.generation);
         assert.notEqual(second.pid, first.pid);
         assert.ok((await invoke('ferroui_runtime_query', { ...identity(first), tool: 'list_windows' })).isError);
-        const secondDebugger = await acceptDebugger(second, firstDebugger);
+        const secondDebugger = await acceptDebugger(second, workbenchDebugger);
         assert.ok(await find(second, { text: updatedHeading }));
         await callback(second, secondDebugger);
 
@@ -118,7 +129,7 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
         content(await invoke(tool('stop'), { runtime }));
         assert.equal(await current(), undefined);
         runtime = undefined;
-        console.log(`Managed ${fixture.platform} native Rust and XAML saves, debugger handoff, failed build retention, and detach passed`);
+        console.log(`Managed ${fixture.platform} Run and Debug via MCP and workbench, native Rust and XAML saves, debugger handoff, failed build retention, and detach passed`);
     } finally {
         if (runtime) await invoke(tool('stop'), { runtime }).catch(() => {});
         vscode.debug.removeBreakpoints([point]);

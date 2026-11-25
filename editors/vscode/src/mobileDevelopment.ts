@@ -38,7 +38,6 @@ export class MobileDevelopment<Bundle extends MobileBundle, Process extends Mobi
     private readonly stamps = new Map<string, string>();
     private readonly changes = new Map<string, { version: number; record: ReloadRecord }>();
     private generation?: number;
-    private failure?: string;
 
     constructor(private readonly deployment: Deployment<Bundle, Process>, readonly runtime: AppRuntime,
         private readonly history: ReloadHistory, private readonly output: ProcessOutput, private readonly signal: AbortSignal) {}
@@ -63,12 +62,6 @@ export class MobileDevelopment<Bundle extends MobileBundle, Process extends Mobi
         this.changes.set(key, { version: ++this.requested,
             record: this.history.observe(key, stamp, Date.now(), { session: this.runtime, target: this.deployment.label }) });
         this.schedule(250);
-    }
-
-    async ready(): Promise<void> {
-        if (!this.current || this.deploying) await this.operation;
-        this.signal.throwIfAborted();
-        if (!this.current) throw new Error(this.failure ?? `The ${this.platform} app is waiting for its first frame.`);
     }
 
     private schedule(delay: number): void {
@@ -98,7 +91,6 @@ export class MobileDevelopment<Bundle extends MobileBundle, Process extends Mobi
         let candidate: Bundle | undefined;
         let installed: Process | undefined;
         let attemptedDeploy = false;
-        this.failure = undefined;
         try {
             candidate = await this.deployment.build(this.signal, cargo => {
                 this.scope = new ReloadScope(cargo);
@@ -137,9 +129,9 @@ export class MobileDevelopment<Bundle extends MobileBundle, Process extends Mobi
             await preceding?.dispose().catch(problem => this.output.appendLine(errorMessage(problem)));
         } catch (error) {
             if (!this.signal.aborted) {
-                this.failure = errorMessage(error);
-                this.output.appendLine(this.failure);
-                this.finish(version, record => this.history.finish(record, 'buildFailed', this.current?.pid, this.failure));
+                const failure = errorMessage(error);
+                this.output.appendLine(failure);
+                this.finish(version, record => this.history.finish(record, 'buildFailed', this.current?.pid, failure));
                 if (attemptedDeploy) await this.recover();
                 else this.status(`${this.platform} build failed`);
             }

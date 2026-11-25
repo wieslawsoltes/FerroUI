@@ -12,6 +12,8 @@ const targets = {
 
 interface DebugSelection { interactive?: boolean; name?: string; target?: keyof typeof targets }
 
+export type MobileLaunchDebug = Pick<DebugSelection, 'interactive' | 'name'>;
+
 export async function selectDebugConfiguration(folder: vscode.WorkspaceFolder,
     { interactive = true, name, target = 'desktop' }: DebugSelection = {}): Promise<vscode.DebugConfiguration | undefined> {
     const configurations = vscode.workspace.getConfiguration('launch', folder.uri)

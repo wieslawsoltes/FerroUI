@@ -145,6 +145,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     expected_epoch?: number;
     expected_frame?: number;
     debug_configuration?: string;
+    debug?: boolean;
     input?: CanvasInteraction | PrototypeInput | StageContact | StageInput | HostedGesture;
     kind?: string;
     language?: 'xaml' | 'rsx';
@@ -245,7 +246,8 @@ export class AgentTools {
         }
         if (tool === 'ferroui_app_sessions') return this.appSessions.list();
         if (tool === 'ferroui_ios_simulator_targets') return this.appSessions.simulators.targets((input as { folder?: string }).folder, signal);
-        if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal);
+        if (tool === 'ferroui_ios_simulator_run') return this.appSessions.simulators.start(input as IosSimulatorRun, signal,
+            args.debug ? { name: args.debug_configuration } : undefined);
         if (tool === 'ferroui_ios_simulator_debug') return this.appSessions.simulators.debug(args.runtime as AppRuntime,
             args.expected_generation, { configuration: args.debug_configuration, detach: args.action === 'detach', signal });
         if (tool === 'ferroui_ios_simulator_stop') {
@@ -256,7 +258,9 @@ export class AgentTools {
         if (tool === 'ferroui_ios_simulator_output') return { output: this.appSessions.simulators.recentOutput(args.runtime as AppRuntime, args.lines ?? 60) };
         if (tool === 'ferroui_android_targets') return this.appSessions.android.targets((input as { folder?: string }).folder, signal);
         if (tool === 'ferroui_android_run' || tool === 'ferroui_android_attach') {
-            return this.appSessions.android.open(input as AndroidRequest, tool === 'ferroui_android_run' ? 'run' : 'attach', signal);
+            const run = tool === 'ferroui_android_run';
+            return this.appSessions.android.open(input as AndroidRequest, run ? 'run' : 'attach', signal,
+                run && args.debug ? { name: args.debug_configuration } : undefined);
         }
         if (tool === 'ferroui_android_debug') return this.appSessions.android.debug(args.runtime as AppRuntime, args.expected_generation,
             { configuration: args.debug_configuration, detach: args.action === 'detach', signal });

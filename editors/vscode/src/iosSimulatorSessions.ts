@@ -5,7 +5,8 @@ import { deploySimulatorApp, installSimulatorApp, iosSimulators, launchSimulator
 import { iosSimulatorApps, type IosSimulator, type IosSimulatorApp, type IosSimulatorRun } from './iosSimulatorTargets';
 import { MobileDevelopment } from './mobileDevelopment';
 import type { OwnedProcess } from './ownedProcess';
-import { selectDebugConfiguration } from './reloadDebugConfiguration';
+import { errorMessage } from './protocol';
+import { selectDebugConfiguration, type MobileLaunchDebug } from './reloadDebugConfiguration';
 import { ReloadDebugger } from './reloadDebugger';
 import type { ReloadHistory } from './reloadHistory';
 import { ReloadLog } from './reloadLog';
@@ -56,14 +57,17 @@ export class IosSimulatorSessions implements vscode.Disposable {
         })) };
     }
 
-    async start(request: IosSimulatorRun, signal: AbortSignal): Promise<RuntimeSummary> {
+    async start(request: IosSimulatorRun, signal: AbortSignal, debug?: MobileLaunchDebug): Promise<RuntimeSummary> {
         this.requireWorkspace();
-        const timeout = AbortSignal.timeout(30_000);
-        const active = AbortSignal.any([signal, this.lifetime.signal, timeout]);
-        active.throwIfAborted();
+        signal.throwIfAborted();
         const apps = iosSimulatorApps(request.folder).filter(app => app.id === request.profile);
         const [app] = apps;
         if (apps.length !== 1) throw new Error('Choose an unambiguous iOS simulator launch profile.');
+        const [folder] = workspaceFolders(app.folder);
+        const configuration = debug && await selectDebugConfiguration(folder, { interactive: false, ...debug, target: 'simulator' });
+        const timeout = AbortSignal.timeout(30_000);
+        const active = AbortSignal.any([signal, this.lifetime.signal, timeout]);
+        active.throwIfAborted();
         const device = (await iosSimulators(active)).find(device => device.id === request.device);
         if (!device?.booted) throw new Error('Choose an iOS simulator that is booted on the workspace Mac.');
         active.throwIfAborted();
@@ -77,7 +81,14 @@ export class IosSimulatorSessions implements vscode.Disposable {
                 throw new Error('Stop the current session for this bundle and simulator before launching it with another configuration.');
             }
             const ready = existing.runtime && this.connections.describe(existing.runtime);
-            if (!existing.cancellation.signal.aborted && !existing.process?.hasExited && ready) return ready;
+            if (!existing.cancellation.signal.aborted && !existing.process?.hasExited && ready) {
+                if (configuration) {
+                    if (existing.attaching) throw new Error('Wait for the current simulator debugger operation to finish.');
+                    this.debugger(existing).prepareIfIdle(folder, configuration);
+                    this.resumeDebugger(existing);
+                }
+                return ready;
+            }
             throw new Error('This simulator app is starting or stopping. Select its current App Sessions entry when ready.');
         }
 
@@ -85,6 +96,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
         this.launches.set(key, launch);
         const startup = AbortSignal.any([active, launch.cancellation.signal]);
         try {
+            if (configuration) this.debugger(launch).prepareIfIdle(folder, configuration);
             if (app.build) return this.startDevelopment(launch);
             await installSimulatorApp(device, app, startup);
             const started = launchSimulatorApp(device, app, startup);
@@ -98,6 +110,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
             const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: this.target(launch) }, this.label(launch), endpoint);
             launch.runtime = runtime.runtime;
+            this.resumeDebugger(launch);
             return runtime;
         } catch (error) {
             await this.stopLaunch(key, launch);
@@ -139,8 +152,7 @@ export class IosSimulatorSessions implements vscode.Disposable {
             requireCurrent();
             const pid = await simulatorAppPid(launch.device.id, launch.app.bundleId, endpoint, signal);
             requireCurrent();
-            const output = this.output(launch).log;
-            const debuggerSession = launch.debugger ??= new ReloadDebugger(output, 'The configured Rust debugger could not attach to this simulator app.');
+            const debuggerSession = this.debugger(launch);
             if (!debuggerSession.follows(pid)) await debuggerSession.attach(folder, configuration, pid);
             try { requireCurrent(); }
             catch (error) { debuggerSession.detach(); throw error; }
@@ -154,10 +166,6 @@ export class IosSimulatorSessions implements vscode.Disposable {
         if (!launch.development) throw new Error('Choose a source-built iOS simulator app session.');
         launch.development.rebuild();
         return this.connections.describe(runtime)!;
-    }
-
-    async waitForDebuggerTarget(runtime: AppRuntime): Promise<void> {
-        await this.launch(runtime).development?.ready();
     }
 
     recentOutput(runtime: AppRuntime, lines: number): string {
@@ -223,6 +231,28 @@ export class IosSimulatorSessions implements vscode.Disposable {
     }
 
     private label({ app, device }: Launch): string { return `${app.label} · ${device.name}`; }
+
+    private debugger(launch: Launch): ReloadDebugger {
+        return launch.debugger ??= new ReloadDebugger(this.output(launch).log, 'The configured Rust debugger could not attach to this simulator app.');
+    }
+
+    private resumeDebugger(launch: Launch): void {
+        const { debugger: debuggerSession, development, runtime, cancellation: { signal } } = launch;
+        if (!debuggerSession || !runtime || signal.aborted) return;
+        if (development) {
+            if (development.current && !development.deploying) debuggerSession.activated(development.current.pid);
+            return;
+        }
+        if (launch.attaching) return;
+        const { endpoint, current } = this.connections.session(runtime);
+        if (!('url' in endpoint)) return;
+        launch.attaching = true;
+        void simulatorAppPid(launch.device.id, launch.app.bundleId, endpoint, signal).then(pid => {
+            if (current() && !signal.aborted && !launch.process?.hasExited) debuggerSession.activated(pid);
+        }).catch(error => {
+            if (!signal.aborted) this.output(launch).log.appendLine(errorMessage(error));
+        }).finally(() => { launch.attaching = false; });
+    }
 
     private target({ app, device }: Launch): IosRuntimeTarget {
         return { device: device.id, name: device.name, system: device.system, profile: app.id, bundleId: app.bundleId };
