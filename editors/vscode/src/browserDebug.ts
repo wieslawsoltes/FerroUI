@@ -14,6 +14,7 @@ interface BrowserDebugFrame {
     hostPage?: string;
     pause: BrowserPause;
     onPause(paused: boolean): void;
+    onAttachmentChanged(): void;
 }
 
 /** Attach JS Debug to accepted browser documents and follow their generation on reload. */
@@ -25,8 +26,11 @@ export class BrowserDebugger {
     private startOnFirstFrame = true;
 
     constructor(private readonly app: BrowserApp, private readonly output: ProcessOutput) {
-        this.debug = new ReloadDebugger(output, 'VS Code JavaScript Debug could not attach to the browser app.',
-            () => this.frame?.pause.clear());
+        this.debug = new ReloadDebugger(output, {
+            attachError: 'VS Code JavaScript Debug could not attach to the browser app.',
+            onDetach: () => this.frame?.pause.clear(),
+            onDidChange: () => this.frame?.onAttachmentChanged(),
+        });
         this.tracker = vscode.debug.registerDebugAdapterTrackerFactory('*', { createDebugAdapterTracker: session => {
             const frame = this.frame;
             const current = () => this.frame === frame && frame !== undefined && this.debug.owns(session, frame.generation);
@@ -34,7 +38,9 @@ export class BrowserDebugger {
         } });
     }
 
-    get attached(): boolean { return this.debug.attached; }
+    isAttachedTo(generation: number | undefined): boolean {
+        return generation !== undefined && this.debug.isAttachedTo(generation);
+    }
 
     accepted(frame: BrowserDebugFrame): void {
         this.stopWatching?.();

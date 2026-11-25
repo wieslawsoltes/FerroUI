@@ -3,7 +3,7 @@ import * as vscode from 'vscode';
 import type { RuntimeSummary } from '../src/runtimeConnections';
 import { fileKey } from '../src/workspacePaths';
 import type { McpFixture } from './mcpFixture';
-import { trackNativeDebugger } from './nativeDebugFixture';
+import { trackNativeDebugger, waitForDebuggerAttachment } from './nativeDebugFixture';
 import { until } from './wait';
 
 export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSummary, document: vscode.TextDocument, button: number) {
@@ -24,6 +24,7 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         runtime, expected_generation: generation, tool: 'find_elements', arguments: { name: 'ReviewedCount' },
     })).result[0]?.text;
     try {
+        assert.equal(app.debuggerAttached, false);
         vscode.debug.addBreakpoints([point]);
         const debug = mcp.content<{ pid: number; generation: number; attached: boolean }>(await mcp.invoke('ferroui_ios_simulator_debug', {
             runtime, expected_generation: generation, debug_configuration: 'Attach to Contact Review',
@@ -31,6 +32,7 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         assert.ok(debug.attached && debug.pid > 0);
         assert.equal(debug.generation, generation);
         const session = await acceptSession(debug.pid);
+        await waitForDebuggerAttachment(mcp, app, true);
         const click = mcp.invoke('ferroui_runtime_call', { runtime, expected_generation: generation,
             tool: 'click', arguments: { node_id: button } }).then(response => { mcp.content(response); }).catch((error: unknown) => error);
         const threadId = await tracker.breakpoint(session);
@@ -44,12 +46,15 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         await until(async () => await readCount() === '2 contacts reviewed');
         await vscode.debug.stopDebugging(session);
         await until(() => !tracker.sessions.has(session.id));
+        await waitForDebuggerAttachment(mcp, app, false);
         assert.equal(await readCount(), '2 contacts reviewed', 'Detaching preserves the original inspector generation.');
 
         await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
         const reopened = await acceptSession(debug.pid, session.id);
+        await waitForDebuggerAttachment(mcp, app, true);
         await vscode.debug.stopDebugging(reopened);
         await until(() => !tracker.sessions.has(reopened.id));
+        await waitForDebuggerAttachment(mcp, app, false);
         assert.ok(app.simulator);
         const requested = mcp.content<RuntimeSummary>(await mcp.invoke('ferroui_ios_simulator_run', {
             device: app.simulator.device, profile: app.simulator.profile, debug: true,
@@ -57,7 +62,8 @@ export async function verifyIosSimulatorDebug(mcp: McpFixture, app: RuntimeSumma
         assert.equal(requested.runtime, runtime);
         assert.equal(requested.generation, generation);
         await acceptSession(debug.pid, reopened.id);
-        console.log('iOS simulator Rust breakpoint, debugger detach, and same-process VS Code and MCP Run and Debug passed');
+        await waitForDebuggerAttachment(mcp, app, true);
+        console.log('iOS simulator Rust breakpoint, exact debugger attachment state, and same-process VS Code and MCP Run and Debug passed');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         await tracker.close();

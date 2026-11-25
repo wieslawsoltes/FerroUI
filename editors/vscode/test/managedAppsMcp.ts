@@ -70,6 +70,11 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             const second = await status(right);
             assert.ok(first.pid && second.pid && first.pid !== second.pid);
             assert.ok(first.process_generation && second.process_generation && first.process_generation !== second.process_generation);
+            const readySessions = await list();
+            for (const run of [first, second]) {
+                assert.equal(run.debuggerAttached, false);
+                assert.equal(readySessions.runtimes.find(target => target.runtime === run.runtime)?.debuggerAttached, false);
+            }
             const detach = (run: Run, generation: number) => invoke('ferroui_reload_control', {
                 action: 'detach_debug', app_session: run.session, expected_process_generation: generation,
             });
@@ -102,6 +107,7 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
                 const endpoint = await endpointFor(label);
                 const attached = await tools<RuntimeSummary>('ferroui_runtime_attach', { ...endpoint, label: `Inspector ${index + 1}` });
                 assert.ok(!Object.hasOwn(attached, 'token'));
+                assert.equal(attached.debuggerAttached, undefined);
                 attachments.push(attached);
             }
             assert.notEqual(attachments[0].generation, attachments[1].generation);

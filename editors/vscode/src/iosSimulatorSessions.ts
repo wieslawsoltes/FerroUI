@@ -108,7 +108,8 @@ export class IosSimulatorSessions implements vscode.Disposable {
             startup.throwIfAborted();
             workspaceFolders(app.folder);
             if (started.process.hasExited) throw new Error('The simulator app exited before Live App connected.');
-            const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: this.target(launch) }, this.label(launch), endpoint);
+            const runtime = this.connections.addPlatform({ kind: 'simulator', simulator: this.target(launch) }, this.label(launch), endpoint,
+                () => launch.debugger?.attached ?? false);
             launch.runtime = runtime.runtime;
             this.resumeDebugger(launch);
             return runtime;
@@ -187,7 +188,10 @@ export class IosSimulatorSessions implements vscode.Disposable {
 
     private startDevelopment(launch: Launch): RuntimeSummary {
         const { app, device, cancellation } = launch;
-        const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch));
+        const pending = this.connections.beginSimulator({ ...this.target(launch), development: true }, this.label(launch), () => {
+            const pid = launch.development?.current?.pid;
+            return pid !== undefined && launch.debugger?.isAttachedTo(pid) === true;
+        });
         const { runtime } = pending;
         launch.runtime = runtime;
         const output = this.output(launch).log;
@@ -233,7 +237,10 @@ export class IosSimulatorSessions implements vscode.Disposable {
     private label({ app, device }: Launch): string { return `${app.label} · ${device.name}`; }
 
     private debugger(launch: Launch): ReloadDebugger {
-        return launch.debugger ??= new ReloadDebugger(this.output(launch).log, 'The configured Rust debugger could not attach to this simulator app.');
+        return launch.debugger ??= new ReloadDebugger(this.output(launch).log, {
+            attachError: 'The configured Rust debugger could not attach to this simulator app.',
+            onDidChange: () => this.connections.notifyDebuggerChanged(launch.runtime),
+        });
     }
 
     private resumeDebugger(launch: Launch): void {

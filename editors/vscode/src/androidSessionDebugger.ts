@@ -11,7 +11,9 @@ export class AndroidSessionDebugger {
     private disconnecting?: Promise<void>;
 
     constructor(private readonly bridge: AndroidBridge, private readonly packageId: string,
-        private readonly output: Pick<vscode.OutputChannel, 'appendLine'>) {}
+        private readonly output: Pick<vscode.OutputChannel, 'appendLine'>, private readonly changed: () => void) {}
+
+    isAttachedTo(receipt: AndroidReceipt): boolean { return this.attachment?.isAttachedTo(receipt) ?? false; }
 
     async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, receipt: AndroidReceipt,
         symbols: readonly string[], signal: AbortSignal): Promise<void> {
@@ -49,10 +51,13 @@ export class AndroidSessionDebugger {
     private async start(receipt: AndroidReceipt, symbols: readonly string[], signal: AbortSignal): Promise<void> {
         const launch = this.launch;
         if (!launch || this.attachment || signal.aborted) return;
-        const attachment = new AndroidDebugger(this.bridge, this.packageId, receipt, this.output, () => {
-            if (this.attachment !== attachment) return;
-            this.attachment = undefined;
-            this.launch = undefined;
+        const attachment = new AndroidDebugger(this.bridge, this.packageId, receipt, this.output, {
+            closed: () => {
+                if (this.attachment !== attachment) return;
+                this.attachment = undefined;
+                this.launch = undefined;
+            },
+            changed: this.changed,
         }, symbols);
         this.attachment = attachment;
         try { await attachment.attach(launch.folder, launch.configuration, signal); }

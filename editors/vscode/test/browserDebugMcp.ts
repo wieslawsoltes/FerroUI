@@ -64,8 +64,10 @@ export async function verifyBrowserDebug(): Promise<void> {
         const queued = content<RuntimeSummary>(await invoke('ferroui_browser_run', { profile: 'debug-dispatch', folder: workspace.toString(), debug: true }));
         runtime = queued.runtime;
         assert.equal(queued.browser?.debuggable, true);
+        assert.equal(queued.debuggerAttached, false);
         const initial = await accepted();
         const old = await breakpoint(0, initial);
+        await until(async () => (await current())?.debuggerAttached === true);
         assert.equal((await current())?.browser?.paused, true, 'The accepted Chromium page reports its debugger pause.');
         const blocked = await invoke('ferroui_runtime_query', { runtime, expected_generation: initial.generation, tool: 'list_windows' });
         assert.ok(blocked.isError);
@@ -81,6 +83,7 @@ export async function verifyBrowserDebug(): Promise<void> {
         const served = content<RuntimeSummary>(await invoke('ferroui_browser_run', { profile: servedProfile.id, folder: workspace.toString() }));
         servedRuntime = served.runtime;
         assert.notEqual(served.runtime, runtime);
+        assert.equal(served.debuggerAttached, undefined);
         assert.equal(await readOutput(served.runtime, 1), 'Review Desk · inspector ready');
         await config.update('allowWrites', false, vscode.ConfigurationTarget.Global);
         try { assert.match(await readOutput(runtime), /Building Dispatch Desk/); }
@@ -90,6 +93,7 @@ export async function verifyBrowserDebug(): Promise<void> {
         content(await invoke('ferroui_browser_rebuild', { runtime }));
         await until(async () => (await current())?.status === 'Browser update failed');
         assert.equal((await current())?.generation, initial.generation);
+        assert.equal((await current())?.debuggerAttached, true);
         assert.ok(!terminated.has(old.id));
         const diagnostics = await readOutput(runtime);
         assert.match(diagnostics, /Controlled build failure for the debugger fixture/);
@@ -122,12 +126,14 @@ export async function verifyBrowserDebug(): Promise<void> {
         try {
             assert.ok((await detach(replacement.generation)).isError);
             assert.ok(!terminated.has(next.id));
+            assert.equal((await current())?.debuggerAttached, true);
         } finally { await config.update('allowWrites', true, vscode.ConfigurationTarget.Global); }
 
-        const detached = content<RuntimeSummary & { debuggerAttached: boolean }>(await detach(replacement.generation));
+        const detached = content<RuntimeSummary>(await detach(replacement.generation));
         assert.equal(detached.debuggerAttached, false);
         await until(() => terminated.has(next.id));
         assert.equal((await current())?.generation, replacement.generation);
+        assert.equal((await current())?.debuggerAttached, false);
         assert.ok(!(await current())?.browser?.paused);
         const live = runtimeApp(mcp, replacement);
         await live.click((await live.find('DispatchOrder')).node_id);
@@ -136,16 +142,25 @@ export async function verifyBrowserDebug(): Promise<void> {
         const undebugged = await accepted(replacement.generation);
         assert.equal(undebugged.runtime, replacement.runtime);
         assert.equal(undebugged.pid, replacement.pid);
+        assert.equal(undebugged.debuggerAttached, false);
         await runtimeApp(mcp, undebugged).find('DispatchedCount');
         assert.equal(hits.length, 2, 'The retired debugger does not follow the replacement.');
         content(await invoke('ferroui_browser_debug', { runtime, expected_generation: undebugged.generation }));
         const reattached = await breakpoint(2, undebugged);
         assert.notEqual(reattached.id, next.id);
+        await until(async () => (await current())?.debuggerAttached === true);
         await vscode.commands.executeCommand('ferroui.appSessions.detachDebug', runtime);
         await until(() => terminated.has(reattached.id));
         assert.equal((await current())?.generation, undebugged.generation);
+        assert.equal((await current())?.debuggerAttached, false);
         content(await invoke('ferroui_browser_debug', { runtime, expected_generation: undebugged.generation }));
-        const finalDebugger = await breakpoint(3, undebugged);
+        const stoppedFromEditor = await breakpoint(3, undebugged);
+        await until(async () => (await current())?.debuggerAttached === true);
+        await vscode.debug.stopDebugging(stoppedFromEditor);
+        await until(async () => terminated.has(stoppedFromEditor.id) && (await current())?.debuggerAttached === false);
+        assert.equal((await current())?.generation, undebugged.generation);
+        content(await invoke('ferroui_browser_debug', { runtime, expected_generation: undebugged.generation }));
+        const finalDebugger = await breakpoint(4, undebugged);
         content(await invoke('ferroui_browser_stop', { runtime }));
         await until(() => terminated.has(finalDebugger.id));
         assert.equal(await current(), undefined);
@@ -158,7 +173,7 @@ export async function verifyBrowserDebug(): Promise<void> {
         assert.ok((await invoke('ferroui_browser_output', { runtime: served.runtime })).isError);
         servedRuntime = undefined;
         await verifyBrowserAttach(url, { profile: servedProfile.id, folder: workspace.toString() }, servedProfile.label, mcp, sessions);
-        console.log('Chromium verified scoped managed, served and attached output, debugger detach and reattach, reload without debugger follow, and independent cleanup');
+        console.log('Chromium verified exact debugger attachment state, VS Code Stop Debugging, debugger handoff, session output and independent cleanup');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         tracker.dispose();

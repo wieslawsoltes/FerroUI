@@ -1,6 +1,16 @@
 import { strict as assert } from 'node:assert';
 import * as vscode from 'vscode';
+import type { RuntimeSummary } from '../src/runtimeConnections';
+import type { McpFixture } from './mcpFixture';
 import { until } from './wait';
+
+export async function waitForDebuggerAttachment({ invoke, content }: McpFixture, app: RuntimeSummary, attached: boolean): Promise<void> {
+    await until(async () => {
+        const { runtimes } = content<{ runtimes: RuntimeSummary[] }>(await invoke('ferroui_app_sessions'));
+        const current = runtimes.find(item => item.runtime === app.runtime);
+        return current?.generation === app.generation && current?.debuggerAttached === attached;
+    });
+}
 
 export function trackNativeDebugger(configuration: string) {
     const sessions = new Map<string, vscode.DebugSession>();

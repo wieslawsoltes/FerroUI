@@ -14,9 +14,16 @@ export class AndroidDebugger {
     private closing?: Promise<void>;
 
     constructor(private readonly bridge: AndroidBridge, private readonly packageId: string, private readonly receipt: AndroidReceipt,
-        private readonly output: Pick<vscode.OutputChannel, 'appendLine'>, private readonly onClose: () => void, private readonly symbols: readonly string[] = []) {
-        this.debugger = new ReloadDebugger(output, 'LLDB DAP could not attach to the Android app.', () => this.retire());
+        private readonly output: Pick<vscode.OutputChannel, 'appendLine'>,
+        private readonly events: { closed(): void; changed(): void }, private readonly symbols: readonly string[] = []) {
+        this.debugger = new ReloadDebugger(output, {
+            attachError: 'LLDB DAP could not attach to the Android app.',
+            onDetach: () => this.retire(),
+            onDidChange: events.changed,
+        });
     }
+
+    isAttachedTo(receipt: AndroidReceipt): boolean { return this.receipt === receipt && this.debugger.isAttachedTo(receipt.pid); }
 
     attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, signal: AbortSignal): Promise<void> {
         return this.starting = this.start(folder, configuration, AbortSignal.any([signal, this.stop.signal, AbortSignal.timeout(35_000)]));
@@ -64,7 +71,7 @@ export class AndroidDebugger {
             finally {
                 await this.starting?.catch(() => {});
                 try { await this.server?.close(); }
-                finally { this.onClose(); }
+                finally { this.events.closed(); }
             }
         })();
     }

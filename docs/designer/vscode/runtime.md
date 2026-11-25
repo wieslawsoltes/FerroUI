@@ -161,9 +161,11 @@ The XAML app must register a `ReloadManifest` and a `HotReloadSession` and ackno
 
 ![App Sessions offers debugger detachment for Account Desk while both native apps are running](../images/vscode-app-session-detach.png)
 
+An attached debugger adds a debug icon and status to its app row. Hover or focus a supported session to read its attachment state. Chromium shows **Paused in debugger** at a breakpoint. **Stop Debugging** updates that session’s row while Live App stays connected. If a debugger follows a rebuild, the row reports the new attachment after the replacement connects.
+
 A save can affect one app or several. The extension tracks each app’s Cargo package and local dependencies, along with XAML watched by that process. Builds sharing one Cargo output directory take turns through compilation and executable staging. Each running app keeps its own PID, reload outcomes, debugger, and window selection. [Target app sessions with MCP](reference.md#target-app-sessions-with-mcp)
 
-![App Sessions lists Account Desk and Routing Queue with different PIDs. Each app has its own Live App canvas and visual tree in a separate editor group.](../images/vscode-app-sessions.png)
+![Account Desk reports an attached debugger after rebuilding. Routing Queue still displays its live frame in a separate editor group.](../images/vscode-app-session-debugger-status.png)
 
 ### Run an app on an iOS simulator
 

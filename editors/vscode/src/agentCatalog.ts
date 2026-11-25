@@ -414,7 +414,7 @@ export const agentCatalog = {
         { ...session, expected_frame: integer(1) }, ['session', 'expected_frame']),
     designer_stage_prototype_input: tool('Send a key, text, or pointer contact to the accepted native prototype. Only the active layer receives input. Pointer coordinates are fractions of the full composited artboard.',
         { ...session, expected_frame: integer(1), input: prototypeInput }, ['session', 'expected_frame', 'input'], true, false),
-    ferroui_app_sessions: tool('List managed, attached, mobile and browser FerroUI apps with their exact runtime IDs, status and inspector generation.'),
+    ferroui_app_sessions: tool('List managed, attached, mobile and browser FerroUI apps with their exact runtime IDs, status, inspector generation, and current debugger attachment state for supported sessions.'),
     ferroui_ios_simulator_targets: tool('List available iOS simulators and configured apps on the macOS workspace host. Choose a booted device and a profile.',
         { folder: text }),
     ferroui_ios_simulator_run: tool('Run an app on the selected booted iOS simulator. Set debug to attach after its first native frame. Source profiles return while building. Use debug_configuration to choose the launch.json attach configuration.',

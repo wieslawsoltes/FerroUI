@@ -93,7 +93,8 @@ export class AndroidSessions implements vscode.Disposable {
         try {
             if (configuration) this.debugger(session).prepare(folder, configuration);
             if (mode === 'run' && app.build) {
-                const runtime = this.connections.beginAndroid({ ...this.target(session), development: true }, this.label(session));
+                const runtime = this.connections.beginAndroid({ ...this.target(session), development: true }, this.label(session),
+                    () => this.debuggerAttachment(session));
                 session.runtime = runtime.runtime;
                 session.development = new AndroidDevelopment(app, session.bridge, this.connections, runtime.runtime,
                     this.history, this.output(session).log, session.stop.signal, this.debugger(session));
@@ -161,7 +162,8 @@ export class AndroidSessions implements vscode.Disposable {
     showOutput(runtime: AppRuntime): void { this.output(this.session(runtime)).channel.show(); }
 
     private debugger(session: Session): AndroidSessionDebugger {
-        return session.debugger ??= new AndroidSessionDebugger(session.bridge, session.app.packageId, this.output(session).log);
+        return session.debugger ??= new AndroidSessionDebugger(session.bridge, session.app.packageId, this.output(session).log,
+            () => this.connections.notifyDebuggerChanged(session.runtime));
     }
 
     private resumeDebugger(session: Session): void {
@@ -186,6 +188,12 @@ export class AndroidSessions implements vscode.Disposable {
     }
 
     private process(session: Session): AndroidProcess | undefined { return session.development?.current ?? session.process; }
+
+    private debuggerAttachment(session: Session): boolean | undefined {
+        const receipt = this.process(session)?.receipt;
+        if (receipt?.debuggerPath) return session.debugger?.isAttachedTo(receipt) ?? false;
+    }
+
     private label(session: Session): string { return `${session.app.label} · ${session.bridge.device.name}`; }
 
     private target(session: Session): AndroidRuntimeTarget {
@@ -200,7 +208,7 @@ export class AndroidSessions implements vscode.Disposable {
         workspaceFolders(session.app.folder);
         signal.throwIfAborted();
         const runtime = this.connections.addPlatform({ kind: 'android', android: this.target(session) },
-            this.label(session), process.forward.endpoint);
+            this.label(session), process.forward.endpoint, () => this.debuggerAttachment(session));
         session.runtime = runtime.runtime;
         return runtime;
     }

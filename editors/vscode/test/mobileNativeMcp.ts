@@ -5,7 +5,7 @@ import type { RuntimeNode } from '../src/runtimeProtocol';
 import { fileKey } from '../src/workspacePaths';
 import { waitFor } from './browserTestSupport';
 import { openEditorMcp } from './mcpFixture';
-import { trackNativeDebugger } from './nativeDebugFixture';
+import { trackNativeDebugger, waitForDebuggerAttachment } from './nativeDebugFixture';
 
 const apps = {
     android: {
@@ -57,6 +57,7 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
         const debuggerSession = await tracker.accept(prior?.id);
         if (prior) await waitFor(() => !tracker.sessions.has(prior.id) ? true : undefined, 'the retired debugger to detach');
         if (app.simulator) assert.equal(debuggerSession.configuration.pid, app.pid);
+        await waitForDebuggerAttachment({ invoke, content }, app, true);
         return debuggerSession;
     };
     const callback = async (app: RuntimeSummary, debug: vscode.DebugSession) => {
@@ -98,6 +99,7 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
         await callback(first, firstDebugger);
         content(await invoke(tool('debug'), { ...identity(first), action: 'detach' }));
         await waitFor(() => !tracker.sessions.has(firstDebugger.id) ? true : undefined, 'the first debugger to detach');
+        await waitForDebuggerAttachment({ invoke, content }, first, false);
         await vscode.commands.executeCommand(fixture.command, request);
         const workbenchDebugger = await acceptDebugger(first, firstDebugger);
         assert.equal((await current())?.generation, first.generation);
@@ -121,9 +123,11 @@ export async function verifyNativeMobileDevelopment(platform: keyof typeof apps,
         await save(rust.uri, fixture.statement, 'compile_error!("managed mobile source fixture");');
         await waitFor(async () => (await current())?.status === `${fixture.platform} build failed` ? true : undefined, 'a rejected Rust save', 120_000);
         assert.equal((await current())?.generation, third.generation);
+        assert.equal((await current())?.debuggerAttached, true);
         assert.ok(tracker.sessions.has(thirdDebugger.id));
         assert.match(await output(), /managed mobile source fixture/);
         content(await invoke(tool('debug'), { ...identity(third), action: 'detach' }));
+        await waitForDebuggerAttachment({ invoke, content }, third, false);
         assert.equal((await current())?.pid, third.pid);
         assert.ok(await find(third, { text: 'XAML inbox updated' }));
         content(await invoke(tool('stop'), { runtime }));

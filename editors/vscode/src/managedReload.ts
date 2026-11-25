@@ -47,16 +47,20 @@ export class ManagedReload {
         this.label = recipe.kind === 'cargo' ? recipe.target.label : `${recipe.folder.name} · Registered patches`;
         this.output = vscode.window.createOutputChannel(`FerroUI Hot Reload · ${this.label} (${this.id.slice(0, 8)})`);
         this.log = new ReloadLog(this.output);
-        this.debugger = new ReloadDebugger(this.output);
+        this.debugger = new ReloadDebugger(this.output, { onDidChange: changed });
     }
 
     get pid(): number | undefined { return this.session?.pid ?? this.registered?.pid; }
     get processGeneration(): number | undefined { return this.session?.processGeneration ?? this.registered?.processGeneration; }
+    get debuggerAttached(): boolean {
+        const generation = this.processGeneration;
+        return generation !== undefined && this.debugger.isAttachedTo(generation);
+    }
 
     get state() {
         return { session: this.id, runtime: this.runtime, target: this.label, folder: this.folder.uri.toString(),
             kind: this.recipe.kind, pid: this.pid ?? null, status: this.message, problem: this.problem,
-            process_generation: this.processGeneration ?? null, debuggerAttached: this.debugger.attached,
+            process_generation: this.processGeneration ?? null, debuggerAttached: this.debuggerAttached,
             selection: this.recipe.kind === 'cargo' ? { ...describeCargoTarget(this.recipe.target), features: this.recipe.target.features } : null,
             mcpAvailable: this.endpoint !== undefined };
     }
@@ -76,7 +80,8 @@ export class ManagedReload {
         if (this.stopping) throw new Error('The app session stopped.');
         if (generation !== undefined) this.requireProcess(generation);
         const pid = this.pid;
-        if (pid) await this.debugger.attach(this.folder, configuration, pid);
+        const currentGeneration = this.processGeneration;
+        if (pid && currentGeneration !== undefined) await this.debugger.attach(this.folder, configuration, pid, currentGeneration);
         else this.debugger.prepare(this.folder, configuration);
     }
 
@@ -95,9 +100,9 @@ export class ManagedReload {
         if (configuration) this.debugger.prepare(this.folder, configuration);
         if (this.recipe.kind === 'registered') {
             this.report('Starting registered target');
-            this.starting = RegisteredReload.start(this.folder, this.log, (message, pid, problem) => {
+            this.starting = RegisteredReload.start(this.folder, this.log, (message, process, problem) => {
                 this.report(message, problem);
-                if (!this.stopping && pid) this.debugger.activated(pid);
+                if (!this.stopping && process) this.debugger.activated(process.pid, undefined, process.generation);
             }).then(async registered => {
                 if (this.stopping) await registered.dispose();
                 else { this.registered = registered; this.changed(); }
@@ -111,7 +116,7 @@ export class ManagedReload {
                 this.endpoint = endpoint && { ...endpoint };
                 this.endpointProcess = processGeneration;
                 this.connectionChanged();
-            }, this.built, pid => this.debugger.activated(pid));
+            }, this.built, (pid, generation) => this.debugger.activated(pid, undefined, generation));
         this.session.build();
         return Promise.resolve();
     }

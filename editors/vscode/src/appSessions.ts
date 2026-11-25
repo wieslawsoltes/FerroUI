@@ -52,7 +52,7 @@ export class AppSessions implements vscode.Disposable {
         const managed = (name: string) => command(name, session => session.app_session
             && vscode.commands.executeCommand(`ferroui.hotReload.${name}`, session.app_session));
         this.subscriptions = [view, view.onDidChangeVisibility(({ visible }) => { if (visible) refresh(); }),
-            reload.onDidChangeRuns(refresh), connections.onDidChange(refresh),
+            reload.onDidChangeRuns(refresh), connections.onDidChange(refresh), connections.onDidChangeDebugger(() => this.changed.fire()),
             vscode.commands.registerCommand('ferroui.showAppSessions', () => vscode.commands.executeCommand('ferroui.appSessions.focus')),
             new DeviceAppCommands(simulators, android, runtime => this.open(runtime)),
             new BrowserAppCommands(browser, runtime => this.open(runtime)),
@@ -113,14 +113,19 @@ export class AppSessions implements vscode.Disposable {
         const run = session.app_session ? this.reload.stateFor(session.app_session) : undefined;
         const selected = session.app_session !== undefined && session.app_session === this.reload.active;
         item.id = session.runtime;
-        item.description = [session.pid ? `PID ${session.pid}` : undefined, session.status,
-            session.browser?.paused ? 'Paused in debugger' : undefined].filter(Boolean).join(' · ');
-        item.tooltip = `${session.label}\n${item.description}${selected ? '\nSelected managed app' : ''}`;
-        item.accessibilityInformation = { label: `${session.label}. ${item.description}${selected ? '. Selected managed app' : ''}` };
+        const debuggerStatus = session.browser?.paused ? 'Paused in debugger'
+            : session.debuggerAttached ? 'Debugger attached' : undefined;
+        item.description = [debuggerStatus, session.pid ? `PID ${session.pid}` : undefined, session.status].filter(Boolean).join(' · ');
+        const details = [session.label, item.description, session.debuggerAttached === false && !debuggerStatus ? 'Debugger detached' : undefined,
+            selected ? 'Selected managed app' : undefined].filter(Boolean);
+        item.tooltip = details.join('\n');
+        item.accessibilityInformation = { label: details.join('. ') };
         const problem = (run && 'problem' in run && run.problem)
             || ((session.browser?.development || session.android?.development || session.simulator?.development) && session.status.includes(' failed'));
-        item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : session.browser?.paused ? 'debug-pause' : selected ? 'play-circle'
-            : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind]);
+        const debuggerIcon = session.browser?.paused ? 'debug-pause' : session.debuggerAttached ? 'debug-alt' : undefined;
+        const targetIcon = selected ? 'play-circle'
+            : { attached: 'plug', simulator: 'device-mobile', android: 'device-mobile', browser: 'globe', managed: 'run' }[session.kind];
+        item.iconPath = new vscode.ThemeIcon(problem ? 'warning' : debuggerIcon ?? targetIcon);
         if (session.simulator?.development) {
             item.contextValue = session.available ? 'app-session-simulator-development-debug' : 'app-session-simulator-development';
         } else if (session.browser) {

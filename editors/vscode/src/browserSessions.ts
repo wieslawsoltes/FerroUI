@@ -107,12 +107,13 @@ export class BrowserSessions implements vscode.Disposable {
             const runtime = this.connections.addPlatform({ kind: 'browser', browser: {
                 folder: app.folder, profile: app.id, url: app.url, launched: mode !== 'attach',
                 ...(appDebugger ? { debuggable: true } : {}),
-            } }, app.label, { channel });
+            } }, app.label, { channel }, appDebugger && (generation => appDebugger.isAttachedTo(generation)));
             session.runtime = runtime.runtime;
             const generation = runtime.generation;
             if (browser.debugPort && pause && generation !== null) appDebugger?.accepted({
                 port: browser.debugPort, url: app.url, generation, pause,
                 onPause: paused => this.connections.setBrowserPaused(runtime.runtime, generation, paused),
+                onAttachmentChanged: () => this.connections.notifyDebuggerChanged(runtime.runtime),
             });
             output.appendLine(`${app.label} · inspector ready`);
             return runtime;
@@ -136,7 +137,7 @@ export class BrowserSessions implements vscode.Disposable {
         options.signal?.throwIfAborted();
         const current = this.connections.describe(runtime);
         if (current?.generation !== generation) throw new Error('The accepted browser generation changed during the debugger action.');
-        return { ...current, debuggerAttached: appDebugger.attached };
+        return current;
     }
 
     async stop(runtime: AppRuntime): Promise<void> {

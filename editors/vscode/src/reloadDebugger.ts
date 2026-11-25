@@ -4,7 +4,12 @@ import * as vscode from 'vscode';
 
 export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
 
-interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; target?: number }
+interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; generation?: number }
+interface DebuggerOptions {
+    attachError?: string;
+    onDetach?(): void;
+    onDidChange?(): void;
+}
 
 export class ReloadDebugger implements vscode.Disposable {
     private readonly subscriptions: vscode.Disposable[];
@@ -15,27 +20,28 @@ export class ReloadDebugger implements vscode.Disposable {
     private closing?: Promise<void>;
 
     constructor(private readonly output: Pick<vscode.OutputChannel, 'appendLine'>,
-        private readonly attachError = 'The configured Rust debugger did not attach.', onDetach?: () => void) {
+        private readonly options: DebuggerOptions = {}) {
         this.subscriptions = [
             vscode.debug.onDidStartDebugSession(session => {
                 if (session.configuration.ferrouiManagedInstance !== this.instance) return;
                 if (session.parentSession?.configuration.ferrouiManagedInstance === this.instance) return;
-                if (session.configuration.ferrouiManagedSession === this.attachment?.id) this.active = session;
+                const attachment = this.attachment;
+                if (attachment && session.configuration.ferrouiManagedSession === attachment.id) this.setActive(session);
                 else void this.stop(session);
             }),
             vscode.debug.onDidTerminateDebugSession(session => {
                 if (this.active?.id === session.id) {
-                    this.active = undefined;
                     this.attachment = undefined;
-                    onDetach?.();
+                    this.setActive(undefined);
+                    this.options.onDetach?.();
                 }
             }),
         ];
     }
 
-    async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, target: number): Promise<void> {
+    async attach(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration, target: number, generation = target): Promise<void> {
         this.prepare(folder, configuration);
-        await this.activate(target);
+        await this.activate(target, undefined, generation);
     }
 
     prepare(folder: vscode.WorkspaceFolder, configuration: vscode.DebugConfiguration): void {
@@ -52,13 +58,15 @@ export class ReloadDebugger implements vscode.Disposable {
         }
     }
 
-    follows(target: number): boolean { return this.attachment?.target === target; }
+    follows(generation: number): boolean { return this.attachment?.generation === generation; }
 
     get attached(): boolean { return this.active !== undefined; }
 
-    owns(session: vscode.DebugSession, target: number): boolean {
+    isAttachedTo(generation: number): boolean { return this.attached && this.follows(generation); }
+
+    owns(session: vscode.DebugSession, generation: number): boolean {
         const attachment = this.attachment;
-        if (attachment?.target !== target) return false;
+        if (attachment?.generation !== generation) return false;
         for (let owner: vscode.DebugSession | undefined = session; owner; owner = owner.parentSession) {
             if (owner.configuration.ferrouiManagedInstance === this.instance
                 && owner.configuration.ferrouiManagedSession === attachment.id) return true;
@@ -66,17 +74,17 @@ export class ReloadDebugger implements vscode.Disposable {
         return false;
     }
 
-    activated(target: number, configuration?: vscode.DebugConfiguration): void {
-        void this.activate(target, configuration).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
+    activated(target: number, configuration?: vscode.DebugConfiguration, generation = target): void {
+        void this.activate(target, configuration, generation).catch(error => this.output.appendLine(`FerroUI debugger: ${String(error)}`));
     }
 
-    private async activate(target: number, configuration?: vscode.DebugConfiguration): Promise<void> {
+    private async activate(target: number, configuration: vscode.DebugConfiguration | undefined, generation: number): Promise<void> {
         const attached = this.attachment;
-        if (!attached || this.follows(target)) return;
+        if (!attached || this.follows(generation)) return;
         const old = this.active;
-        this.active = undefined;
-        const replacement = { ...attached, id: randomUUID(), target, configuration: configuration ?? attached.configuration };
+        const replacement = { ...attached, id: randomUUID(), generation, configuration: configuration ?? attached.configuration };
         this.attachment = replacement;
+        this.setActive(undefined);
         const step = this.transition.then(async () => {
             if (old) await this.stop(old);
             if (this.attachment === replacement) await this.start(replacement, target);
@@ -91,9 +99,16 @@ export class ReloadDebugger implements vscode.Disposable {
         config.ferrouiManagedInstance = this.instance;
         config.ferrouiManagedSession = attachment.id;
         try {
-            if (!await vscode.debug.startDebugging(attachment.folder, config)) throw new Error(this.attachError);
+            if (!await vscode.debug.startDebugging(attachment.folder, config)) {
+                throw new Error(this.options.attachError ?? 'The configured Rust debugger did not attach.');
+            }
         } catch (error) {
-            if (this.attachment === attachment) this.attachment = undefined;
+            if (this.attachment === attachment) {
+                const active = this.active;
+                this.attachment = undefined;
+                this.setActive(undefined);
+                if (active) await this.stop(active);
+            }
             throw error;
         }
     }
@@ -101,7 +116,7 @@ export class ReloadDebugger implements vscode.Disposable {
     detach(): Promise<void> {
         const active = this.active;
         this.attachment = undefined;
-        this.active = undefined;
+        this.setActive(undefined);
         if (active) this.transition = this.transition.then(() => this.stop(active));
         return this.transition;
     }
@@ -109,8 +124,14 @@ export class ReloadDebugger implements vscode.Disposable {
     detachForReplacement(): Promise<void> {
         const attachment = this.attachment;
         this.detach();
-        if (attachment) this.attachment = { ...attachment, id: randomUUID(), target: undefined };
+        if (attachment) this.attachment = { ...attachment, id: randomUUID(), generation: undefined };
         return this.transition;
+    }
+
+    private setActive(session: vscode.DebugSession | undefined): void {
+        if (this.active?.id === session?.id) return;
+        this.active = session;
+        this.options.onDidChange?.();
     }
 
     private async stop(session: vscode.DebugSession): Promise<void> {

@@ -291,6 +291,7 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 1. Use `ferroui_reload_targets` to find a target. Start it with `ferroui_reload_control` and `action: "start"`, or use `start_debug` with a Rust attach configuration. For an independent app or Studio, call `ferroui_runtime_attach` with its loopback `url`, bearer `token`, and optional `label`. Only share the token with an agent authorized to inspect that app.
 2. Read `ferroui_app_sessions`. Use the returned `app_session` for `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history`. Supply the exact ID for controls such as `select`, `attach_debug`, `rebuild`, or `stop` when several managed apps are running. Use `stop_all` to stop the managed apps together.
 3. Use the returned `runtime` to pin a Live App editor with `ferroui_runtime_open`, inspect a mapped property, or disconnect one attachment with `ferroui_runtime_detach`. Pass the same `runtime` and the current connection generation for checked source and profiler operations. A replacement process retains the session ID and issues a new generation. `managed` follows the selected app and `attached` follows the most recent attachment.
+4. Read `debuggerAttached` on the exact entry in `runtimes` to check its editor-owned debugger. A supported session reports `true` when its current process or page has a debugger, or `false` while it is detached or waiting to attach. Chromium breakpoint state is available in `browser.paused`. Reading these fields works with editor writes disabled.
 
 ### Detach a debugger with MCP
 
@@ -302,7 +303,7 @@ Use the current session ID and generation for the target. These debugger actions
 | Chromium | Call `ferroui_browser_debug` with `action: "detach"`, the exact `runtime`, and the accepted `generation` as `expected_generation`. |
 | iOS simulator or Android | Use `action: "detach"` in `ferroui_ios_simulator_debug` or `ferroui_android_debug`, with the accepted device session and connection generation. |
 
-The debugger stops following future replacements after detach. Managed app status and the Chromium debugger response report `debuggerAttached`. Read a fresh process or connection generation before attaching again after a rebuild. A managed desktop `attach_debug` call also accepts `expected_process_generation` to constrain attachment to that process. [App Sessions](runtime.md#run-several-app-sessions)
+The debugger stops following future replacements after detach. Use `ferroui_app_sessions` to read the current `debuggerAttached` value. Read a fresh process or connection generation before attaching again after a rebuild. A managed desktop `attach_debug` call also accepts `expected_process_generation` to constrain attachment to that process. [App Sessions](runtime.md#run-several-app-sessions)
 
 ### Run an iOS simulator app with MCP
 

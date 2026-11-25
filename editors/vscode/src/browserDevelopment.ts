@@ -51,8 +51,10 @@ export class BrowserDevelopment {
         readonly output: ReloadLog, private readonly publishMetadata: (metadata: ProjectMetadata) => void,
         readonly appDebugger?: BrowserDebugger) {
         this.discoveryManifest = fileKey(path.resolve(Uri.parse(app.folder, true).fsPath, app.build.manifestPath));
-        this.runtime = connections.beginBrowser({ folder: app.folder, profile: app.id, launched: true, development: true,
-            ...(appDebugger ? { debuggable: true } : {}) }, app.label).runtime;
+        this.runtime = connections.beginBrowser({
+            folder: app.folder, profile: app.id, launched: true, development: true,
+            ...(appDebugger ? { debuggable: true } : {}),
+        }, app.label, appDebugger && (generation => appDebugger.isAttachedTo(generation))).runtime;
     }
 
     rebuild(delay = 0): void {
@@ -148,7 +150,9 @@ export class BrowserDevelopment {
             if (browser.debugPort && pause && acceptedGeneration !== undefined) {
                 this.appDebugger?.accepted({ generation: acceptedGeneration, port: browser.debugPort,
                     url: published.url, hostPage: this.target.hostPage, pause,
-                    onPause: paused => this.connections.setBrowserPaused(this.runtime, acceptedGeneration, paused) });
+                    onPause: paused => this.connections.setBrowserPaused(this.runtime, acceptedGeneration, paused),
+                    onAttachmentChanged: () => this.connections.notifyDebuggerChanged(this.runtime),
+                });
             }
             this.history.observeFrame(generation, { frame: 1, batch: 1, status: 'rendered', unixMs: presented, afterAcknowledgementMs: 0 });
             for (const record of this.changes.values()) {

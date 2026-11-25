@@ -50,7 +50,7 @@ export class ReloadSession implements vscode.Disposable {
         private readonly status: (message: string, problem?: boolean) => void,
         private readonly mcpChanged: (endpoint?: RuntimeMcpEndpoint, processGeneration?: number) => void,
         private readonly built: (metadata: ProjectMetadata) => void,
-        private readonly activated: (pid: number) => void) {
+        private readonly activated: (pid: number, generation: number) => void) {
         this.scope = new ReloadScope(target);
     }
 
@@ -252,7 +252,7 @@ export class ReloadSession implements vscode.Disposable {
             live = true;
             this.mcpChanged(endpoint, generation);
             for (const event of candidateEvents) this.accept(event);
-            if (this.live.pid) this.activated(this.live.pid);
+            if (this.live.pid) this.activated(this.live.pid, generation);
             const retired = previous?.stop();
             this.output.appendLine(`Running ${this.target.label} · PID ${this.live.pid}${previous ? ' · rebuilt and restarted' : ''}`);
             this.status(previous ? 'Rebuilt and restarted' : 'Watching saves');

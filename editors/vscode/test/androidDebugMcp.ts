@@ -4,7 +4,7 @@ import type { RuntimeSummary } from '../src/runtimeConnections';
 import type { RuntimeNode } from '../src/runtimeProtocol';
 import { fileKey } from '../src/workspacePaths';
 import type { McpFixture } from './mcpFixture';
-import { trackNativeDebugger } from './nativeDebugFixture';
+import { trackNativeDebugger, waitForDebuggerAttachment } from './nativeDebugFixture';
 import { until } from './wait';
 
 export async function verifyAndroidDebug(mcp: McpFixture, app: RuntimeSummary, document: vscode.TextDocument,
@@ -32,12 +32,14 @@ export async function verifyAndroidDebug(mcp: McpFixture, app: RuntimeSummary, d
         assert.ok(active.some(line => line.includes(`tcp:${port} tcp:`)), 'The accepted debugger owns one independent ADB forward.');
     };
     try {
+        assert.equal(app.debuggerAttached, false);
         vscode.debug.addBreakpoints([point]);
         const debug = mcp.content<{ pid: number; generation: number; attached: boolean }>(await mcp.invoke('ferroui_android_debug', {
             ...request, debug_configuration: name,
         }));
         assert.deepEqual({ pid: debug.pid, generation: debug.generation, attached: debug.attached }, { pid, generation, attached: true });
         const session = await tracker.accept();
+        await waitForDebuggerAttachment(mcp, app, true);
         await verifyForward(session);
         const button = await query('ReviewCase');
         const click = mcp.invoke('ferroui_runtime_call', { ...request, tool: 'click', arguments: { node_id: button.node_id } })
@@ -54,13 +56,16 @@ export async function verifyAndroidDebug(mcp: McpFixture, app: RuntimeSummary, d
 
         const detached = mcp.content<{ attached: boolean }>(await mcp.invoke('ferroui_android_debug', { ...request, action: 'detach' }));
         assert.equal(detached.attached, false);
+        await waitForDebuggerAttachment(mcp, app, false);
         assert.deepEqual(await forwards(), baseline);
         assert.equal((await query('ReviewedCount')).text, 'Reviewed cases: 2');
         await vscode.commands.executeCommand('ferroui.appSessions.debug', runtime);
         const reopened = await tracker.accept(session.id);
+        await waitForDebuggerAttachment(mcp, app, true);
         await verifyForward(reopened);
         await vscode.debug.stopDebugging(reopened);
         await until(async () => (await forwards()).length === baseline.length);
+        await waitForDebuggerAttachment(mcp, app, false);
         assert.deepEqual(await forwards(), baseline);
         assert.equal((await query('ReviewedCount')).text, 'Reviewed cases: 2');
         const requested = mcp.content<RuntimeSummary>(await mcp.invoke('ferroui_android_run', {
@@ -69,11 +74,13 @@ export async function verifyAndroidDebug(mcp: McpFixture, app: RuntimeSummary, d
         assert.equal(requested.runtime, runtime);
         assert.equal(requested.generation, generation);
         const fromRun = await tracker.accept(reopened.id);
+        await waitForDebuggerAttachment(mcp, app, true);
         await verifyForward(fromRun);
         await vscode.debug.stopDebugging(fromRun);
         await until(async () => (await forwards()).length === baseline.length);
+        await waitForDebuggerAttachment(mcp, app, false);
         assert.deepEqual(await forwards(), baseline);
-        console.log('Android native Rust breakpoint, same-process MCP and VS Code Run and Debug, and forwarding cleanup passed');
+        console.log('Android native Rust breakpoint, exact debugger attachment state, same-process MCP and VS Code Run and Debug, and forwarding cleanup passed');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         await tracker.close();

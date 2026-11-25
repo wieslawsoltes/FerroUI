@@ -22,7 +22,7 @@ export class RegisteredReload implements vscode.Disposable {
     get processGeneration(): number | undefined { return this.pid ? this.generation : undefined; }
 
     static async start(folder: vscode.WorkspaceFolder, output: ProcessOutput,
-        changed: (status: string, pid?: number, error?: boolean) => void): Promise<RegisteredReload> {
+        changed: (status: string, process?: { pid: number; generation: number }, error?: boolean) => void): Promise<RegisteredReload> {
         if (!vscode.workspace.isTrusted || folder.uri.scheme !== 'file') throw new Error('Open a trusted FerroUI workspace.');
         const settings = vscode.workspace.getConfiguration('ferroui.hotReload', folder.uri);
         const script = vscode.Uri.file(path.resolve(folder.uri.fsPath, settings.get('registeredSupervisor', 'scripts/hot-reload/supervisor.py')));
@@ -47,7 +47,7 @@ export class RegisteredReload implements vscode.Disposable {
                 const pid = Number.isSafeInteger(event.pid) && event.pid! > 0 ? event.pid! : undefined;
                 if (pid && (session.pid !== pid || event.status === 'ready' || event.status === 'restored')) session.generation++;
                 session.pid = pid;
-                changed(states[event.status], session.pid, event.status === 'rejected');
+                changed(states[event.status], pid ? { pid, generation: session.generation } : undefined, event.status === 'rejected');
             } catch { output.appendLine('The registered supervisor returned an invalid lifecycle event.'); }
         });
         child.stderr.on('data', data => output.append(String(data)));
