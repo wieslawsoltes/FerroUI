@@ -809,6 +809,15 @@ impl PreviewStageBoard {
         id: PreviewStageId,
         variants: Vec<(String, PreviewEnvironment)>,
     ) -> Result<Vec<PreviewStageId>, String> {
+        self.add_specs(self.plan_variants(id, variants)?)
+    }
+
+    /// Resolve the prospective cards without adding or rendering them.
+    pub fn plan_variants(
+        &self,
+        id: PreviewStageId,
+        variants: Vec<(String, PreviewEnvironment)>,
+    ) -> Result<Vec<PreviewStageSpec>, String> {
         let source = self.stages[self.index(id)?].spec.clone();
         if variants.is_empty() || self.stages.len() + variants.len() > MAX_PREVIEW_STAGES {
             return Err("Choose variants within the board's 16-stage capacity".into());
@@ -821,7 +830,7 @@ impl PreviewStageBoard {
             configuration.validate()?;
             configs.push(configuration);
         }
-        self.add_specs(configs)
+        Ok(configs)
     }
 
     /// Add a bounded comparison batch. Descriptor validation and capacity are

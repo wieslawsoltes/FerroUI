@@ -15,6 +15,7 @@ pub(crate) fn initialize() -> Value {
         "hostedPropertyTransitions",
         "rsxLanguage",
         "stages",
+        "stageComparisons",
         "stageKeyboard",
         "stagePointerInput",
         "prototypeNativePlayer",

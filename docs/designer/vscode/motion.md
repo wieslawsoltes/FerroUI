@@ -796,6 +796,14 @@ Agents read the catalog with `designer_hosted_animations`, then use `scrub_all` 
 
 ![The compact stage reports the edges clipped by its own viewport](../images/vscode-layout-stage-checks.jpg)
 
+### Build a comparison from one stage
+
+1. Open **More Actions** on a ready card and choose **Compare Variants**. Choose phone, tablet, and desktop sizes, light and dark themes, portrait and landscape orientations, or both reading directions.
+2. Choose **Compare Matrix** to combine several axes. Select the sizes, themes, reading directions, data modes, and available authored states you want to test. **Add a Custom Size** adds named dimensions to the size axis. An unselected axis keeps the base card’s setting.
+3. Choose **Review Comparison** to see the card count and planned environments. Choose **Add Stages** to append the reviewed cards. The review checks the board’s 16-card limit and the base card’s current source before adding anything.
+
+Each new card retains the base source, preview definition, layout policy, and settings outside the selected axes. A comparison adds ordinary cards that you can edit independently. Save the board as a `.ferrostages` file to reopen it in VS Code or Studio. [Studio comparison matrices](../xcode-previews.md#comparison-matrices) · [Plan a comparison with MCP](reference.md#plan-and-add-a-stage-comparison)
+
 ### Compare a high contrast stage
 
 Use the **Environment** icon on one card and choose **High contrast** under **Theme**. Keep another card in Light or Dark to compare how the same view looks and measures under the native contrast palette. The option appears when the preview host supplies a High Contrast variant. **Checks** uses the selected card’s measured layout and colors.

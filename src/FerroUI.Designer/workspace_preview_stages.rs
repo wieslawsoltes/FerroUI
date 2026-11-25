@@ -2,11 +2,11 @@
 //! global to the workspace; pinned source views remain visible across document tabs.
 use super::*;
 use crate::{
-    PreviewEnvironment, PreviewFlowDirection, PreviewStageAction, PreviewStageBoard,
+    PreviewEnvironment, PreviewStageAction, PreviewStageBoard,
     PreviewStageComparison, PreviewStageConfiguration, PreviewStageEditor, PreviewStageId, PreviewStageSpec, PreviewStageSet,
     PreviewStageInfo, PreviewStageManifest, PreviewStageMode, PreviewStagePointerInput,
     PreviewStagePointerOrigin, PreviewStagePointerPhase, PreviewStageStatus,
-    PreviewStageTarget, PreviewStageView, PreviewTheme,
+    PreviewStageTarget, PreviewStageView,
 };
 use ferroui_controls::Flyout;
 use std::collections::{BTreeMap, BTreeSet};
@@ -764,85 +764,7 @@ impl DesignerWorkspace {
         let stage = self
             .preview_stage(active)
             .ok_or("The active preview stage was removed")?;
-        let base = stage.configuration.environment;
-        let values = match comparison {
-            PreviewStageComparison::Sizes => vec![
-                (
-                    "Phone".into(),
-                    PreviewEnvironment {
-                        width: 390.0,
-                        height: 844.0,
-                        ..base
-                    },
-                ),
-                (
-                    "Tablet".into(),
-                    PreviewEnvironment {
-                        width: 768.0,
-                        height: 1024.0,
-                        ..base
-                    },
-                ),
-                (
-                    "Desktop".into(),
-                    PreviewEnvironment {
-                        width: 1280.0,
-                        height: 800.0,
-                        ..base
-                    },
-                ),
-            ],
-            PreviewStageComparison::Themes => vec![
-                (
-                    format!("{} · Light", stage.configuration.name),
-                    PreviewEnvironment {
-                        theme: PreviewTheme::Light,
-                        ..base
-                    },
-                ),
-                (
-                    format!("{} · Dark", stage.configuration.name),
-                    PreviewEnvironment {
-                        theme: PreviewTheme::Dark,
-                        ..base
-                    },
-                ),
-            ],
-            PreviewStageComparison::Orientations => vec![
-                (
-                    format!("{} · Portrait", stage.configuration.name),
-                    PreviewEnvironment {
-                        width: base.width.min(base.height),
-                        height: base.width.max(base.height),
-                        ..base
-                    },
-                ),
-                (
-                    format!("{} · Landscape", stage.configuration.name),
-                    PreviewEnvironment {
-                        width: base.width.max(base.height),
-                        height: base.width.min(base.height),
-                        ..base
-                    },
-                ),
-            ],
-            PreviewStageComparison::Directions => vec![
-                (
-                    format!("{} · LTR", stage.configuration.name),
-                    PreviewEnvironment {
-                        flow_direction: PreviewFlowDirection::LeftToRight,
-                        ..base
-                    },
-                ),
-                (
-                    format!("{} · RTL", stage.configuration.name),
-                    PreviewEnvironment {
-                        flow_direction: PreviewFlowDirection::RightToLeft,
-                        ..base
-                    },
-                ),
-            ],
-        };
+        let values = comparison.variants(&stage.configuration);
         self.compare_preview_stage(active, values).map(|_| ())
     }
 

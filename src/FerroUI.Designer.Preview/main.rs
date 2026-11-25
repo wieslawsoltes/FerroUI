@@ -223,6 +223,8 @@ fn respond(
             }),
         "stagesEdit" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.edit(request, projects))),
+        "stagesComparison" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|request| serialize(stages.plan_comparison(request))),
         "stagesImage" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|request| serialize(stages.image(request))),
         "stagesChecks" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

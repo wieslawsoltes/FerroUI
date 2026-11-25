@@ -49,6 +49,7 @@ import { verifyHighContrastPalette } from './highContrastPalette';
 import { verifyPreviewChecks } from './previewChecksMcp';
 import { verifyStageStates } from './stageStateMcp';
 import { verifyStageKeyboard } from './stageKeyboardMcp';
+import { verifyStageComparisons } from './stageComparisonMcp';
 import { verifyStagePointer } from './stagePointerMcp';
 import { verifyPrototypeMcp } from './prototypeMcp';
 import { verifyStageContrast } from './stageContrastMcp';
@@ -352,6 +353,7 @@ export async function verifyMcp(document: vscode.TextDocument): Promise<void> {
         await verifyPreviewChecks({ invoke, content });
         await verifyStageStates({ invoke, content });
         await verifyStageKeyboard({ invoke, content });
+        await verifyStageComparisons({ invoke, content });
         await verifyStagePointer({ invoke, content });
         await verifyPrototypeMcp({ invoke, content });
         await verifyStageContrast({ invoke, content });

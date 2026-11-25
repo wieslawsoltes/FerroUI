@@ -46,6 +46,7 @@ window.addEventListener('message', async ({ data }: MessageEvent<ToStages>) => {
     }
     if (data.type === 'model') {
         model = data.model;
+        menu.setComparisons(Boolean(model.comparisonSizes?.length));
         inputCurrent = true;
         vscode.setState({ uri: data.uri });
         const keep = new Set(model.stages.map(stage => stage.id));

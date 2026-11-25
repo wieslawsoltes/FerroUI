@@ -68,6 +68,22 @@ pub struct PreviewSizePreset {
     pub height: f64,
 }
 
+pub(super) const PHONE_SIZE: PreviewSizePreset = PreviewSizePreset {
+    name: "Phone · 390 × 844",
+    width: 390.0,
+    height: 844.0,
+};
+pub(super) const TABLET_SIZE: PreviewSizePreset = PreviewSizePreset {
+    name: "Tablet · 768 × 1024",
+    width: 768.0,
+    height: 1024.0,
+};
+pub(super) const DESKTOP_SIZE: PreviewSizePreset = PreviewSizePreset {
+    name: "Desktop · 1280 × 800",
+    width: 1280.0,
+    height: 800.0,
+};
+
 /// Generic logical sizes deliberately avoid claiming a particular device's scale factor.
 pub const PREVIEW_SIZE_PRESETS: &[PreviewSizePreset] = &[
     PreviewSizePreset {
@@ -75,21 +91,9 @@ pub const PREVIEW_SIZE_PRESETS: &[PreviewSizePreset] = &[
         width: 360.0,
         height: 640.0,
     },
-    PreviewSizePreset {
-        name: "Phone · 390 × 844",
-        width: 390.0,
-        height: 844.0,
-    },
-    PreviewSizePreset {
-        name: "Tablet · 768 × 1024",
-        width: 768.0,
-        height: 1024.0,
-    },
-    PreviewSizePreset {
-        name: "Desktop · 1280 × 800",
-        width: 1280.0,
-        height: 800.0,
-    },
+    PHONE_SIZE,
+    TABLET_SIZE,
+    DESKTOP_SIZE,
     PreviewSizePreset {
         name: "Wide desktop · 1920 × 1080",
         width: 1920.0,

@@ -14,7 +14,7 @@ use ferroui_designer::{
     PreviewStageBoard, PreviewStageConfiguration, PreviewStageId, PreviewStageDetails, PreviewStageInfo, PreviewStageSet, PreviewStageSpec,
     PreviewStageFocus, PreviewStageKeyboardInput, PreviewStageLayout, PreviewStageMode, PreviewStageSourceMoves, PreviewStageStateOptions,
     PreviewStagePointerInput, PreviewStagePointerOrigin, PreviewStagePointerPhase,
-    PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
+    PreviewStageMatrixSize, PreviewStageStatus, PreviewTheme, capture_preview_stage_png,
 };
 use ferroui_designer_language::Range;
 use ferroui_designer_project::PreviewSourceBuffer;
@@ -22,6 +22,9 @@ use ferroui_inspect::{Inspector, Permissions};
 use serde::{Deserialize, Serialize};
 use serde_json::{Value, json};
 use std::{collections::{BTreeMap, BTreeSet}, rc::Rc};
+
+#[path = "stages_comparison.rs"]
+mod comparison;
 
 #[derive(Default)]
 pub(crate) struct Stages {
@@ -55,6 +58,7 @@ pub(crate) struct Change {
 #[serde(tag = "action", rename_all = "camelCase")]
 enum Action {
     Add(Addition),
+    Compare(comparison::Request),
     Remove {
         id: PreviewStageId,
     },
@@ -94,6 +98,8 @@ pub(crate) struct Model {
     available_themes: Vec<PreviewTheme>,
     #[serde(rename = "textEnvironment")]
     text_environment: bool,
+    #[serde(rename = "comparisonSizes")]
+    comparison_sizes: Vec<PreviewStageMatrixSize>,
 }
 
 #[derive(Deserialize)]
@@ -200,6 +206,10 @@ impl Stages {
         let epoch = self.board.epoch();
         match request.action {
             Action::Add(addition) => self.add(addition, projects)?,
+            Action::Compare(request) => {
+                let plan = self.plan_comparison(request)?;
+                self.board.add_specs(plan.configurations)?;
+            }
             Action::Remove { id } => self.board.remove(id)?,
             Action::Update { id, configuration } => {
                 let previous = self.board.stage(id).ok_or("The stage was removed")?;
@@ -456,6 +466,7 @@ impl Stages {
             dependencies,
             available_themes: PreviewTheme::available(),
             text_environment: true,
+            comparison_sizes: PreviewStageMatrixSize::presets(),
         }
     }
 }

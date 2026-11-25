@@ -9,6 +9,7 @@ import { hostedStylesCatalog } from './hostedStylesCatalog';
 import { hostedTemplateCatalog } from './hostedTemplateCatalog';
 import { fileMoveCatalog, renameCatalog, resourceMoveCatalog, workspaceCatalog } from './workspaceCatalog';
 import { prototypeInput, stageContactInput, stageKeyboardInput } from './stageInputCatalog';
+import { stageComparisonSchema } from './stageComparisonSchema';
 import { runtimeProfileCatalog } from './runtimeProfileCatalog';
 import { runtimeMcpCatalog } from './runtimeMcpCatalog';
 import { projectSetupCatalog } from './projectSetupCatalog';
@@ -394,6 +395,9 @@ export const agentCatalog = {
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_checks: tool('Read source-linked layout, contrast and accessibility findings, the native accessibility tree, and Tab order from the current stage.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
+    designer_stage_comparison: tool('Plan a preset or matrix against the exact current base stage. Returns the board epoch, available slots, and every validated configuration. Empty matrix axes keep the base value. Use the returned board epoch with designer_stage_change to apply the same comparison.',
+        { ...session, stage: node, expected_epoch: integer(0), comparison: stageComparisonSchema },
+        ['session', 'stage', 'expected_epoch', 'comparison']),
     designer_stage_states: tool('Read authored state groups and owner anchors for the current stage configuration. Use designer_stage_change to apply choices or toggle design data.',
         { ...session, stage: node, expected_epoch: integer(0) }, ['session', 'stage', 'expected_epoch']),
     designer_stage_fixtures: tool('Read the named fixtures of a current stage. Use designer_stage_change with design_time_data and design_fixture to choose one.',
@@ -402,7 +406,7 @@ export const agentCatalog = {
         { ...session, stage: node, expected_epoch: integer(0), input: stageKeyboardInput }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
     designer_stage_pointer: tool('Send a primary pointer contact to an Interact stage. Start inside the artboard with normalized coordinates and its current epoch, then move, release, or cancel using the same contact and device. The stage’s explicit pointer profile takes precedence.',
         { ...session, stage: node, expected_epoch: integer(0), input: stageContactInput }, ['session', 'stage', 'expected_epoch', 'input'], true, false),
-    designer_stage_change: tool('Apply a board action. Use update with id and the complete configuration. Hosts with textEnvironment support text.locale and text.scale_percent. Hosts with pointerInput support pointer_input set to automatic, touch, or pen. Use add with name, width, height, dark and optional sourcePath, remove or refresh with id, or setPrototype with a graph using zero-based stage indices and optional transitions [{link, transition:{effect,duration_ms,easing}}] using zero-based link indices.',
+    designer_stage_change: tool('Apply a board action. Use compare with base {id, epoch} and the comparison reviewed by designer_stage_comparison. Use update with id and the complete configuration. Hosts with textEnvironment support text.locale and text.scale_percent. Hosts with pointerInput support pointer_input set to automatic, touch, or pen. Use add with name, width, height, dark and optional sourcePath, remove or refresh with id, or setPrototype with a graph using zero-based stage indices and optional transitions [{link, transition:{effect,duration_ms,easing}}] using zero-based link indices.',
         { ...session, expected_epoch: integer(0), arguments: object }, ['session', 'expected_epoch', 'arguments'], true, false),
     designer_stage_prototype: tool('Drive the stage-set prototype using start with flow and optional reducedMotion, activate with link index, back, closeOverlay, restart, setReducedMotion with reducedMotion, or stop. Use the returned frame for subsequent input and navigation.',
         { ...session, expected_epoch: integer(0), expected_frame: integer(1), arguments: object }, ['session', 'expected_epoch', 'arguments'], true, false),

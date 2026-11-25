@@ -1,7 +1,7 @@
 //! Prepare authored stages with the same bounded local include resolver as the canvas.
 use crate::{document::DesignDocument, projects::Projects, protocol::Source};
 use ferroui_designer::{
-    PreviewHostOptions, PreviewStageBoard, PreviewStageSource, PreviewStageSourceMoves,
+    PreviewHostOptions, PreviewStageBoard, PreviewStageId, PreviewStageSource, PreviewStageSourceMoves,
 };
 use ferroui_designer_project::{
     local_preview_sources_with_resources, LocalPreviewSources, PreviewSourceBuffer,
@@ -11,6 +11,8 @@ use std::{
     collections::{BTreeMap, BTreeSet},
     path::PathBuf,
 };
+
+const OPTIONS_EPOCH: u64 = 0;
 
 #[derive(Deserialize)]
 pub(crate) struct StageDocument {
@@ -27,6 +29,14 @@ pub(crate) struct StageSource {
 }
 
 impl StageSource {
+    pub(crate) fn document(&self) -> &ferroui_designer_core::Document {
+        &self.preview.document
+    }
+
+    pub(crate) fn frame_is_current(&self, board: &PreviewStageBoard, stage: PreviewStageId) -> bool {
+        board.frame_is_current(stage, &self.preview.uri, self.document(), self.preview.pending, OPTIONS_EPOCH)
+    }
+
     pub(crate) fn parse(
         input: StageDocument,
         existing: Option<&Self>,
@@ -77,7 +87,7 @@ pub(crate) fn sync_board<'a>(
         active,
         documents,
         PreviewHostOptions::default(),
-        0,
+        OPTIONS_EPOCH,
         &includes,
         moves,
     )

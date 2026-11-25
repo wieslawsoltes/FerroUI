@@ -18,7 +18,7 @@ import type { NativeStyleRequest } from './hostedStylesProtocol';
 import type { TransitionEdit, TransitionList, TransitionOwner } from './propertyTransitionProtocol';
 import type { NativeTemplateRequest } from './hostedTemplates';
 import type { StateGroupEdit } from './stateGroupProtocol';
-import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeImage, PrototypeInput, PrototypeInputResult, PrototypeScene, StageChecks, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StagePointerInput, StageStateOptions, StageTarget } from './stagesProtocol';
+import type { NativeStageChange, PrototypeCommand, PrototypeHotspot, PrototypeImage, PrototypeInput, PrototypeInputResult, PrototypeScene, StageChecks, StageComparisonPlan, StageComparisonRequest, StageDocument, StageFocus, StageImage, StageKeyboard, StageManifest, StageModel, StagePick, StagePointer, StagePointerInput, StageStateOptions, StageTarget } from './stagesProtocol';
 import { commandFor } from './tools';
 import type { RustModuleProject } from './cargoTarget';
 
@@ -49,6 +49,7 @@ export class NativePreview implements vscode.Disposable {
         hostedAnimationRestoration?: boolean; hostedPreviewRanges?: boolean; hostedClipAuthoring?: boolean; hostedStateAuthoring?: boolean;
         hostedPropertyTransitions?: boolean; rsxLanguage?: boolean;
         stages?: boolean; stageKeyboard?: boolean; stagePointerInput?: boolean; prototypeEditing?: boolean; prototypeNativePlayer?: boolean; prototypeTransitions?: boolean; stageIncludes?: boolean; stageSourceMoves?: boolean; projectCatalog?: boolean; publishedAssets?: boolean;
+        stageComparisons?: boolean;
         canvasInteraction?: boolean; canvasFocusOrder?: boolean; canvasHighContrast?: boolean; spacingHelpers?: boolean; selectionWrapping?: boolean;
         columnAuthoring?: boolean; rsxColumnAuthoring?: boolean; itemTemplateAuthoring?: boolean; rsxItemTemplateAuthoring?: boolean;
         behaviorAuthoring?: boolean;
@@ -264,6 +265,7 @@ export class NativePreview implements vscode.Disposable {
     }
 
     editStages(change: NativeStageChange): Promise<StageModel> {
+        if (change.action === 'compare' && !this.capabilities.stageComparisons) throw new Error('Update the FerroUI preview helper to compare stages.');
         if (!this.capabilities.prototypeEditing && (change.action === 'setPrototype' || (change.action === 'add' && change.source))) {
             throw new Error('Update the FerroUI preview helper to edit prototypes and add other documents.');
         }
@@ -274,6 +276,10 @@ export class NativePreview implements vscode.Disposable {
     }
     stageImage(target: StageTarget): Promise<StageImage> { return this.send('stagesImage', target); }
     stageChecks(target: StageTarget): Promise<StageChecks> { return this.send('stagesChecks', target); }
+    planStageComparison(request: StageComparisonRequest): Promise<StageComparisonPlan> {
+        if (!this.capabilities.stageComparisons) throw new Error('Update the FerroUI preview helper to compare stages.');
+        return this.send('stagesComparison', request);
+    }
     stageStateOptions(target: StageTarget): Promise<StageStateOptions[]> { return this.send('stagesStateOptions', target); }
     stageFixtureOptions(target: StageTarget): Promise<string[]> {
         if (!this.capabilities.designFixtures) throw new Error('Update the FerroUI preview helper to select named fixtures.');

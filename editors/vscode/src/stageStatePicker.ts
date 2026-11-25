@@ -27,7 +27,7 @@ export async function chooseStageState(groups: StageStateOptions[], selected: St
     return next;
 }
 
-function sameOwner(left: SourceAnchor, right: SourceAnchor): boolean {
+export function sameOwner(left: SourceAnchor, right: SourceAnchor): boolean {
     return left.path.length === right.path.length && left.path.every((segment, index) => {
         const other = right.path[index];
         return segment.namespace === other.namespace && segment.type_name === other.type_name

@@ -22,13 +22,19 @@ export class StageMenu {
         button.setAttribute('aria-expanded', 'false');
     }
 
+    setComparisons(available: boolean): void {
+        this.popup.querySelector<HTMLButtonElement>('button[data-stage-action="compare"]')!.hidden = !available;
+    }
+
     prepare(button: HTMLButtonElement, stage: StageInfo, edit: (field: StageField) => void): void {
         if (this.invoker !== button) this.invoker?.setAttribute('aria-expanded', 'false');
         this.invoker = button;
         const actions = this.popup.querySelectorAll<HTMLButtonElement>('button[data-stage-action]');
         for (const action of actions) {
             const field = action.dataset.stageAction as StageField;
-            action.disabled = field === 'export' && stage.rendered_revision === null;
+            const hasFrame = stage.rendered_revision !== null;
+            action.disabled = field === 'export' && !hasFrame
+                || field === 'compare' && (!hasFrame || !['ready', 'paused'].includes(stage.status.state));
             action.onclick = () => { this.popup.hidePopover(); edit(field); };
         }
     }

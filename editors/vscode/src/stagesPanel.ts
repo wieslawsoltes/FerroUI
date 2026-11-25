@@ -6,8 +6,9 @@ import type { BuiltProjects } from './builtProjects';
 import { DesignerDependencies, dirtyPreviewSources, xamlPath } from './designerDependencies';
 import { NativePreview } from './nativePreview';
 import { errorMessage, type Range, type Source } from './protocol';
-import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, PrototypeInput, PrototypeScene, StageChange, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StagePointerInput, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
+import type { FromStages, NativeStageChange, PrototypeCommand, PrototypeEdit, PrototypeInput, PrototypeScene, StageChange, StageComparisonRequest, StageDocument, StageInfo, StageKeyboard, StageManifest, StageModel, StagePointerInput, StageTarget, StagesRequest, ToStages } from './stagesProtocol';
 import { pickStageCheck } from './stageChecksPicker';
+import { chooseStageComparison } from './stageComparisonPicker';
 import { dimensions, editStageEnvironment } from './stageEnvironmentPicker';
 import { editPrototype } from './stagePrototypeEditor';
 import { chooseStageState } from './stageStatePicker';
@@ -177,6 +178,10 @@ class StageSession {
 
     checks(id: number, epoch: number, signal: AbortSignal) {
         return this.readStage({ id, epoch }, signal, (client, stage) => client.stageChecks(stage));
+    }
+
+    planComparison(request: StageComparisonRequest, signal: AbortSignal) {
+        return this.readStage(request.base, signal, client => client.planStageComparison(request));
     }
 
     stateOptions(id: number, epoch: number, signal: AbortSignal) {
@@ -670,6 +675,14 @@ class StageSession {
         const stage = model.stages.find(stage => stage.id === id && stage.epoch === epoch);
         if (!stage) throw new Error('The stage changed. Use its current controls.');
         if (field === 'remove' || field === 'refresh') return { id, epoch: model.epoch, action: field };
+        if (field === 'compare') {
+            const base = { id, epoch };
+            const reviewed = await chooseStageComparison(stage, model,
+                () => this.stateOptions(id, epoch, AbortSignal.timeout(15_000)),
+                comparison => this.planComparison({ base, comparison }, AbortSignal.timeout(15_000)));
+            if (reviewed) return { action: 'compare', base, ...reviewed };
+            return;
+        }
         if (field === 'export') {
             const image = await client.stageImage({ id, epoch });
             const uri = await vscode.window.showSaveDialog({ filters: { 'PNG image': ['png'] } });

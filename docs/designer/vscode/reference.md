@@ -93,6 +93,15 @@ Read the board with `designer_stages`. When it reports `textEnvironment`, update
 
 Studio reports the same support as `text_environment` in `designer_preview_stages`. Use the current Studio model and `designer_preview_stage` to apply the same configuration. Read the new stage epoch before requesting its image or checks. [Compare locale and text size](motion.md#compare-locale-and-text-size)
 
+### Plan and add a stage comparison
+
+1. Read the board with `designer_stages`. Choose a stage and keep its current ID and epoch.
+2. Call `designer_stage_comparison` with `session`, `stage`, `expected_epoch`, and a `comparison` value. A preset uses `{ "kind": "preset", "preset": "sizes" }`. The available presets are `sizes`, `themes`, `orientations`, and `directions`.
+3. For a matrix, pass `{ "kind": "matrix", "matrix": { "themes": ["light", "dark"], "directions": ["left_to_right", "right_to_left"] } }`. The matrix also accepts `sizes` with `name`, `width`, and `height`, `design_time_data` values, and `state_groups` with `owner`, `group`, and `states`. Read owner anchors and authored state names with `designer_stage_states`.
+4. Review the returned `configurations` and `available` capacity. Call `designer_stage_change` with the draft’s board `epoch` as `expected_epoch`. Set `arguments` to `{ action: "compare", base: { id, epoch }, comparison }`, with the original base card’s ID and epoch and the same comparison. A changed board or base card requires a fresh plan.
+
+Planning is read-only. Adding stages requires `ferroui.mcp.allowWrites`. Designer Studio exposes the same matrix planner through `designer_preview_matrix` and `compare_matrix` in `designer_preview_stage`. [VS Code workflow](motion.md#build-a-comparison-from-one-stage) · [Studio automation](../xcode-previews.md#automation)
+
 ### Send keyboard input to a stage
 
 1. Read the board with `designer_stages`. Use `designer_stage_change` to set the card's mode to `live`. Read the accepted stage ID and epoch from the returned board.

@@ -74,6 +74,7 @@ mod preview_prototype_view;
 mod preview_prototype_ui_tests;
 mod preview_stages;
 mod preview_stage_export;
+mod preview_stage_comparison;
 mod preview_stage_matrix;
 mod preview_stage_matrix_editor;
 #[cfg(test)]
@@ -209,9 +210,10 @@ pub use preview_stage_export::{
     capture_preview_stage_png, PreviewStageExportOptions, PreviewStageImage,
     MAX_PREVIEW_STAGE_EXPORT_BYTES, MAX_PREVIEW_STAGE_EXPORT_PIXELS,
 };
+pub use preview_stage_comparison::PreviewStageComparison;
 pub use preview_stage_matrix::{PreviewStageMatrix, PreviewStageMatrixSize, PreviewStageStateAxis};
 pub use preview_stage_matrix_editor::PreviewStageMatrixEditor;
-pub use preview_stage_view::{PreviewStageAction, PreviewStageComparison, PreviewStageView};
+pub use preview_stage_view::{PreviewStageAction, PreviewStageView};
 pub use property_color_editor::PropertyColorEditor;
 pub use property_controls::{
     PropertyComponentsEditor, PropertyComponentsKind, PropertyNumberOptions,

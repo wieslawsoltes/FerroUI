@@ -1,6 +1,6 @@
 //! Native responsive stage cards. Editor chrome is confined to headers and toolbars;
 //! application preview roots retain their own styles, themes and input behavior.
-use crate::{PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStagePointerInput, PreviewStageStatus};
+use crate::{PreviewStageComparison, PreviewStageId, PreviewStageInfo, PreviewStageMode, PreviewStagePointerInput, PreviewStageStatus};
 use ferroui_base::input::{
     IKeyboardNavigationHandler, InputElement, Key, KeyboardNavigation, KeyboardNavigationHandler,
     KeyboardNavigationMode,
@@ -27,14 +27,6 @@ mod resize;
 mod pointer_surface;
 use presentation::CardPresentation;
 use pointer_surface::StagePointerSurface;
-
-#[derive(Clone, Copy, Debug, PartialEq, Eq)]
-pub enum PreviewStageComparison {
-    Sizes,
-    Themes,
-    Orientations,
-    Directions,
-}
 
 /// Commands retain the card's accepted epoch. Hosts reject callbacks from a replaced
 /// graph or dismissed menu rather than applying them to a different preview scenario.

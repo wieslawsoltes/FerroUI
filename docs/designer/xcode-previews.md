@@ -232,6 +232,8 @@ choices. This lets a content-fitting component use the same comparison workflow 
 complete view. The resulting ordinary configurations are saved by **Save set**; restoring
 a set does not rerun an external generator or require a special matrix runtime.
 
+VS Code exposes the same matrix planner from a card’s **More Actions** menu. Its editor MCP tools can plan the configurations and apply them against the accepted stage and board epochs. [Compare stages in VS Code](vscode/motion.md#build-a-comparison-from-one-stage)
+
 ## Save a native preview image
 
 Choose a card's **… → Save preview image…** to capture its native frame at one pixel per

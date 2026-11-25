@@ -48,7 +48,7 @@ import type { ScenarioReview } from './scenarioReview';
 import { renameRsxControl } from './rsxRename';
 import type { AppRuntime, RuntimeTarget } from './runtimeTargets';
 import type { StagesPanel } from './stagesPanel';
-import type { PrototypeCommand, PrototypeInput, StageChange, StageContact, StageInput } from './stagesProtocol';
+import type { PrototypeCommand, PrototypeInput, StageChange, StageComparison, StageContact, StageInput } from './stagesProtocol';
 import type { PaletteEdit, StylesPage } from './stylesProtocol';
 import type { AnimationSourceIssue, TimelineControl, TimelineMarkerAction } from './timelineProtocol';
 import type { StateTransitionControl } from './stateTransitionProtocol';
@@ -138,6 +138,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     program: number;
     selection?: number[];
     stage?: number;
+    comparison?: StageComparison;
     window?: number;
     profile_id?: number;
     row?: number;
@@ -719,6 +720,9 @@ export class AgentTools {
             }
             case 'designer_stage_hotspots': return this.stages.board(document.uri).hotspots(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_checks': return this.stages.board(document.uri).checks(args.stage!, args.expected_epoch!, signal);
+            case 'designer_stage_comparison': return this.stages.board(document.uri).planComparison({
+                base: { id: args.stage!, epoch: args.expected_epoch! }, comparison: args.comparison!,
+            }, signal);
             case 'designer_stage_states': return this.stages.board(document.uri).stateOptions(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_fixtures': return this.stages.board(document.uri).fixtureOptions(args.stage!, args.expected_epoch!, signal);
             case 'designer_stage_input': return this.stages.board(document.uri).keyboard({

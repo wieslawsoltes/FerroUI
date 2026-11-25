@@ -70,7 +70,19 @@ export interface PrototypeScene {
 export type PrototypeCommand = { action: 'start'; flow: string; reducedMotion?: boolean } | { action: 'activate'; link: number }
     | { action: 'setReducedMotion'; reducedMotion: boolean }
     | { action: 'back' | 'closeOverlay' | 'restart' | 'stop' };
-export interface StageModel { epoch: number; manifest: StageManifest; stages: StageInfo[]; prototype: PrototypeScene | null; dependencies?: string[]; keyboardInput?: boolean; pointerInput?: boolean; availableThemes?: StageTheme[]; textEnvironment?: boolean; prototypeTransitions?: boolean }
+export interface StageModel {
+    epoch: number;
+    manifest: StageManifest;
+    stages: StageInfo[];
+    prototype: PrototypeScene | null;
+    dependencies?: string[];
+    keyboardInput?: boolean;
+    pointerInput?: boolean;
+    availableThemes?: StageTheme[];
+    textEnvironment?: boolean;
+    prototypeTransitions?: boolean;
+    comparisonSizes?: StageMatrixSize[];
+}
 export interface StageTarget { id: number; epoch: number }
 export interface StageAccessibleNode {
     runtime_id: number;
@@ -91,6 +103,18 @@ export interface StageChecks {
 export interface SourceAnchor { path: { namespace: string; type_name: string; name: string | null; key: string | null }[] }
 export interface StageState { owner: SourceAnchor; group: string; state: string }
 export interface StageStateOptions { owner: SourceAnchor; owner_name: string; group: string; states: string[] }
+export interface StageMatrixSize { name: string; width: number; height: number }
+export interface StageMatrix {
+    sizes?: StageMatrixSize[];
+    themes?: StageTheme[];
+    directions?: Array<keyof typeof stageDirectionLabels>;
+    design_time_data?: boolean[];
+    state_groups?: Array<{ owner: SourceAnchor; group: string; states: string[] }>;
+}
+export type StageComparison = { kind: 'preset'; preset: 'sizes' | 'themes' | 'orientations' | 'directions' }
+    | { kind: 'matrix'; matrix: StageMatrix };
+export interface StageComparisonRequest { base: StageTarget; comparison: StageComparison }
+export interface StageComparisonPlan { epoch: number; available: number; configurations: StageConfiguration[] }
 export interface StagePointer extends StageTarget { x: number; y: number }
 export interface StageContact {
     contact: number;
@@ -114,6 +138,7 @@ interface AddStage { action: 'add'; name: string; width: number; height: number;
 type ExistingStageChange = (
     { action: 'remove' | 'refresh'; id: number }
     | { action: 'update'; id: number; configuration: StageConfiguration }
+    | ({ action: 'compare' } & StageComparisonRequest)
     | { action: 'setPrototype'; graph: PrototypeGraph; transitions?: PrototypeLinkTransition[] }) & { epoch: number };
 export type StageChange = ExistingStageChange | (AddStage & { sourcePath?: string });
 export type StageDocument = Source & { workspaceRoot?: string };
@@ -122,7 +147,7 @@ export type FromStages = { type: 'ready' | 'add' | 'saveManifest' | 'loadManifes
     | ({ type: 'pointer' } & StagePointer) | ({ type: 'checks' } & StageTarget)
     | ({ type: 'keyboard' } & StageKeyboard)
     | ({ type: 'contact' } & StagePointerInput)
-    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' };
+    | { type: 'edit'; epoch: number; id: number; field: 'name' | 'environment' | 'mode' | 'layout' | 'pause' | 'refresh' | 'remove' | 'export' | 'designData' | 'state' | 'compare' };
 export type StagesRequest = FromStages | { type: 'prototype'; command?: PrototypeCommand; frame?: number }
     | { type: 'prototypeMotionPreference'; reduced: boolean }
     | { type: 'prototypeInput'; frame: number; input: PrototypeInput }
