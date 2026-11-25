@@ -51,10 +51,12 @@ export class ManagedReload {
     }
 
     get pid(): number | undefined { return this.session?.pid ?? this.registered?.pid; }
+    get processGeneration(): number | undefined { return this.session?.processGeneration ?? this.registered?.processGeneration; }
 
     get state() {
         return { session: this.id, runtime: this.runtime, target: this.label, folder: this.folder.uri.toString(),
             kind: this.recipe.kind, pid: this.pid ?? null, status: this.message, problem: this.problem,
+            process_generation: this.processGeneration ?? null, debuggerAttached: this.debugger.attached,
             selection: this.recipe.kind === 'cargo' ? { ...describeCargoTarget(this.recipe.target), features: this.recipe.target.features } : null,
             mcpAvailable: this.endpoint !== undefined };
     }
@@ -70,11 +72,23 @@ export class ManagedReload {
         this.session.build();
     }
 
-    async attach(configuration: vscode.DebugConfiguration): Promise<void> {
+    async attach(configuration: vscode.DebugConfiguration, generation?: number): Promise<void> {
         if (this.stopping) throw new Error('The app session stopped.');
+        if (generation !== undefined) this.requireProcess(generation);
         const pid = this.pid;
         if (pid) await this.debugger.attach(this.folder, configuration, pid);
         else this.debugger.prepare(this.folder, configuration);
+    }
+
+    async detachDebugger(generation: number | undefined): Promise<void> {
+        this.requireProcess(generation);
+        await this.debugger.detach();
+    }
+
+    private requireProcess(generation: number | undefined): void {
+        if (this.stopping || generation === undefined || generation !== this.processGeneration) {
+            throw new Error('Read the current accepted process generation with ferroui_reload_status.');
+        }
     }
 
     start(configuration?: vscode.DebugConfiguration): Promise<void> {

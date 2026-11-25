@@ -55,6 +55,7 @@ export class ReloadSession implements vscode.Disposable {
     }
 
     get pid(): number | undefined { return this.live?.pid; }
+    get processGeneration(): number | undefined { return this.liveGeneration; }
 
     xamlRevision(file: string): string | undefined {
         return this.live ? this.acceptedXaml.get(fileKey(file)) : undefined;

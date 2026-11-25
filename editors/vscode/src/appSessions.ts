@@ -59,6 +59,7 @@ export class AppSessions implements vscode.Disposable {
             command('preview', session => this.open(session.runtime)),
             managed('select'),
             command('debug', session => this.debug(session)),
+            command('detachDebug', session => this.debug(session, true)),
             command('rebuild', session => {
                 if (session.simulator?.development) return this.simulators.rebuild(session.runtime);
                 if (session.android?.development) return this.android.rebuild(session.runtime);
@@ -85,12 +86,17 @@ export class AppSessions implements vscode.Disposable {
         return this.panels.control(runtime, generation, revision, change, signal);
     }
 
-    private async debug(session: RuntimeSummary): Promise<void> {
+    private async debug(session: RuntimeSummary, detach = false): Promise<void> {
         try {
-            if (session.app_session) await vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session);
-            else if (session.browser && session.generation !== null) await this.browser.debug(session.runtime, session.generation);
-            else if (session.simulator && session.generation !== null) await this.simulators.debug(session.runtime, session.generation, { interactive: true });
-            else if (session.android && session.generation !== null) await this.android.debug(session.runtime, session.generation, { interactive: true });
+            if (session.app_session) {
+                if (detach) await this.reload.detachDebugger(session.app_session);
+                else await vscode.commands.executeCommand('ferroui.hotReload.debug', session.app_session);
+            } else if (session.generation !== null) {
+                const options = { interactive: !detach, detach };
+                if (session.browser) await this.browser.debug(session.runtime, session.generation, options);
+                else if (session.simulator) await this.simulators.debug(session.runtime, session.generation, options);
+                else if (session.android) await this.android.debug(session.runtime, session.generation, options);
+            }
         } catch (error) { void vscode.window.showErrorMessage(errorMessage(error)); }
     }
 

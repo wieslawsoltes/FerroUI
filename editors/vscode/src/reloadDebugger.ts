@@ -54,6 +54,8 @@ export class ReloadDebugger implements vscode.Disposable {
 
     follows(target: number): boolean { return this.attachment?.target === target; }
 
+    get attached(): boolean { return this.active !== undefined; }
+
     owns(session: vscode.DebugSession, target: number): boolean {
         const attachment = this.attachment;
         if (attachment?.target !== target) return false;
@@ -96,11 +98,12 @@ export class ReloadDebugger implements vscode.Disposable {
         }
     }
 
-    detach(): void {
+    detach(): Promise<void> {
         const active = this.active;
         this.attachment = undefined;
         this.active = undefined;
         if (active) this.transition = this.transition.then(() => this.stop(active));
+        return this.transition;
     }
 
     detachForReplacement(): Promise<void> {

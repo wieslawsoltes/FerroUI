@@ -83,23 +83,45 @@ export async function verifyBrowserDebug(): Promise<void> {
         assert.equal(next.configuration.port, old.configuration.port);
         assert.match((await invoke('ferroui_browser_debug', { runtime, expected_generation: initial.generation }))
             .content[0]?.text ?? '', /accepted browser generation/);
+        const detach = (generation: RuntimeSummary['generation']) => invoke('ferroui_browser_debug', {
+            runtime, expected_generation: generation, action: 'detach',
+        });
+        assert.match((await detach(initial.generation)).content[0]?.text ?? '', /accepted browser generation/);
+        assert.ok(!terminated.has(next.id));
+        await config.update('allowWrites', false, vscode.ConfigurationTarget.Global);
+        try {
+            assert.ok((await detach(replacement.generation)).isError);
+            assert.ok(!terminated.has(next.id));
+        } finally { await config.update('allowWrites', true, vscode.ConfigurationTarget.Global); }
 
-        await vscode.debug.stopDebugging(next);
+        const detached = content<RuntimeSummary & { debuggerAttached: boolean }>(await detach(replacement.generation));
+        assert.equal(detached.debuggerAttached, false);
         await until(() => terminated.has(next.id));
         assert.equal((await current())?.generation, replacement.generation);
         assert.ok(!(await current())?.browser?.paused);
         const live = runtimeApp(mcp, replacement);
         await live.click((await live.find('DispatchOrder')).node_id);
         assert.equal((await live.find('DispatchedCount')).text, 'Dispatched orders: 1');
-        content(await invoke('ferroui_browser_debug', { runtime, expected_generation: replacement.generation }));
-        const reattached = await breakpoint(2, replacement);
+        content(await invoke('ferroui_browser_rebuild', { runtime }));
+        const undebugged = await accepted(replacement.generation);
+        assert.equal(undebugged.runtime, replacement.runtime);
+        assert.equal(undebugged.pid, replacement.pid);
+        await runtimeApp(mcp, undebugged).find('DispatchedCount');
+        assert.equal(hits.length, 2, 'The retired debugger does not follow the replacement.');
+        content(await invoke('ferroui_browser_debug', { runtime, expected_generation: undebugged.generation }));
+        const reattached = await breakpoint(2, undebugged);
         assert.notEqual(reattached.id, next.id);
-        content(await invoke('ferroui_browser_stop', { runtime }));
+        await vscode.commands.executeCommand('ferroui.appSessions.detachDebug', runtime);
         await until(() => terminated.has(reattached.id));
+        assert.equal((await current())?.generation, undebugged.generation);
+        content(await invoke('ferroui_browser_debug', { runtime, expected_generation: undebugged.generation }));
+        const finalDebugger = await breakpoint(3, undebugged);
+        content(await invoke('ferroui_browser_stop', { runtime }));
+        await until(() => terminated.has(finalDebugger.id));
         assert.equal(await current(), undefined);
-        await assert.rejects(fetch(`http://127.0.0.1:${reattached.configuration.port}/json/version`, { signal: AbortSignal.timeout(2_000) }));
+        await assert.rejects(fetch(`http://127.0.0.1:${finalDebugger.configuration.port}/json/version`, { signal: AbortSignal.timeout(2_000) }));
         runtime = undefined;
-        console.log('Managed Chromium JavaScript breakpoints, failed build retention, reattachment, generation guards and cleanup passed');
+        console.log('Managed Chromium verified debugger detach through MCP and App Sessions, generation guards, reload without debugger follow, and scoped cleanup');
     } finally {
         vscode.debug.removeBreakpoints([point]);
         tracker.dispose();

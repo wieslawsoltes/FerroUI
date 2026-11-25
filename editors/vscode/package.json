@@ -123,6 +123,12 @@
         "icon": "$(debug-alt)"
       },
       {
+        "command": "ferroui.appSessions.detachDebug",
+        "title": "Detach Debugger from This App",
+        "category": "FerroUI",
+        "icon": "$(debug-disconnect)"
+      },
+      {
         "command": "ferroui.appSessions.showOutput",
         "title": "Show App Output",
         "category": "FerroUI",
@@ -873,6 +879,10 @@
           "when": "false"
         },
         {
+          "command": "ferroui.appSessions.detachDebug",
+          "when": "false"
+        },
+        {
           "command": "ferroui.appSessions.showOutput",
           "when": "false"
         },
@@ -1434,9 +1444,14 @@
           "group": "1_apps@2"
         },
         {
+          "command": "ferroui.appSessions.detachDebug",
+          "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|simulator|(simulator|android|browser)(-development)?-debug)$/",
+          "group": "1_apps@3"
+        },
+        {
           "command": "ferroui.appSessions.showOutput",
           "when": "view == ferroui.appSessions && viewItem =~ /^app-session-(managed|registered|(simulator|android)(-development)?(-debug)?|browser-development(-debug)?|browser-debug)$/",
-          "group": "1_apps@3"
+          "group": "1_apps@4"
         },
         {
           "command": "ferroui.collaboration.review",

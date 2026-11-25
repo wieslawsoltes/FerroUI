@@ -292,6 +292,18 @@ When `canCopy` is true, call `designer_hosted_template_copy_draft` with the same
 2. Read `ferroui_app_sessions`. Use the returned `app_session` for `ferroui_reload_control`, `ferroui_reload_status`, `ferroui_reload_output`, and `ferroui_reload_history`. Supply the exact ID for controls such as `select`, `attach_debug`, `rebuild`, or `stop` when several managed apps are running. Use `stop_all` to stop the managed apps together.
 3. Use the returned `runtime` to pin a Live App editor with `ferroui_runtime_open`, inspect a mapped property, or disconnect one attachment with `ferroui_runtime_detach`. Pass the same `runtime` and the current connection generation for checked source and profiler operations. A replacement process retains the session ID and issues a new generation. `managed` follows the selected app and `attached` follows the most recent attachment.
 
+### Detach a debugger with MCP
+
+Use the current session ID and generation for the target. These debugger actions require `ferroui.mcp.allowWrites` and leave the running app and its inspector available. Choose **Detach Debugger from This App** in App Sessions for the same action from the workbench.
+
+| App | Detach action |
+| --- | --- |
+| Managed Cargo or registered Rust patches | Read `ferroui_reload_status` with `app_session`. Call `ferroui_reload_control` with `action: "detach_debug"`, that `app_session`, and its `process_generation` as `expected_process_generation`. Use the process generation even for an app without an inspector. |
+| Chromium | Call `ferroui_browser_debug` with `action: "detach"`, the exact `runtime`, and the accepted `generation` as `expected_generation`. |
+| iOS simulator or Android | Use `action: "detach"` in `ferroui_ios_simulator_debug` or `ferroui_android_debug`, with the accepted device session and connection generation. |
+
+The debugger stops following future replacements after detach. Managed app status and the Chromium debugger response report `debuggerAttached`. Read a fresh process or connection generation before attaching again after a rebuild. A managed desktop `attach_debug` call also accepts `expected_process_generation` to constrain attachment to that process. [App Sessions](runtime.md#run-several-app-sessions)
+
 ### Run an iOS simulator app with MCP
 
 1. Call `ferroui_ios_simulator_targets` on the workspace Mac. Supply `folder` if you want profiles from a particular workspace folder. Choose a device with `booted: true` and take a profile’s `id` and `folder`.

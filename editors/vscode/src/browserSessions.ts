@@ -116,17 +116,20 @@ export class BrowserSessions implements vscode.Disposable {
         }
     }
 
-    async debug(runtime: AppRuntime, generation: number): Promise<RuntimeSummary> {
+    async debug(runtime: AppRuntime, generation: number, options: { detach?: boolean; signal?: AbortSignal } = {}) {
         this.requireWorkspace();
+        options.signal?.throwIfAborted();
         const session = this.connections.describe(runtime);
         if (session?.kind !== 'browser' || session.generation !== generation) throw new Error('Use the current accepted browser generation.');
         const appDebugger = this.developmentFor(runtime)?.[1].appDebugger
             ?? [...this.sessions.values()].find(item => item.runtime === runtime)?.appDebugger;
         if (!appDebugger) throw new Error('Start this profile with Run and Debug Browser App.');
-        await appDebugger.attach(generation);
+        if (options.detach) await appDebugger.detach(generation);
+        else await appDebugger.attach(generation);
+        options.signal?.throwIfAborted();
         const current = this.connections.describe(runtime);
-        if (!current) throw new Error('The browser session closed while attaching the debugger.');
-        return current;
+        if (current?.generation !== generation) throw new Error('The accepted browser generation changed during the debugger action.');
+        return { ...current, debuggerAttached: appDebugger.attached };
     }
 
     async stop(runtime: AppRuntime): Promise<void> {

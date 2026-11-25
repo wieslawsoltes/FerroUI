@@ -156,8 +156,10 @@ The XAML app must register a `ReloadManifest` and a `HotReloadSession` and ackno
 
 1. Open **FerroUI → App Sessions** and choose the run icon. Pick a Cargo target. Repeat to launch another package, binary, or configuration. Running the same Cargo target with the same features and arguments selects its existing session and retries it if startup previously failed.
 2. Choose a session in the tree to open its own Live App editor. Move the editors into separate groups to work with two native windows at once. The session stays pinned through in-place reloads and successful rebuilds. Choose **Open Live App** from the Command Palette for an editor with a session picker.
-3. Use a row’s rebuild or stop icon to act on that app. The row’s context menu opens its build output, attaches a configured Rust debugger, or makes it the managed app used by the status bar and Diagnostics. **Stop All Hot Reload Applications** stops every managed session.
+3. Use a row’s rebuild or stop icon to act on that app. The row’s context menu opens its build output, attaches a configured debugger, or makes it the managed app used by the status bar and Diagnostics. **Detach Debugger from This App** ends that app’s debugger connection and stops following future replacements. The app and its Live App editor stay connected. **Stop All Hot Reload Applications** stops every managed session. [Debugger controls for agents](reference.md#detach-a-debugger-with-mcp)
 4. To attach an independently launched app or Designer Studio, choose the connection icon in **App Sessions** and enter its loopback MCP address and bearer token. A successful connection adds a row. Disconnect from that row to close the inspector connection. The independently launched process keeps running. The Live App editor requires a server with native window inspection.
+
+![App Sessions offers debugger detachment for Account Desk while both native apps are running](../images/vscode-app-session-detach.png)
 
 A save can affect one app or several. The extension tracks each app’s Cargo package and local dependencies, along with XAML watched by that process. Builds sharing one Cargo output directory take turns through compilation and executable staging. Each running app keeps its own PID, reload outcomes, debugger, and window selection. [Target app sessions with MCP](reference.md#target-app-sessions-with-mcp)
 

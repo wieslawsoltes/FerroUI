@@ -8,7 +8,15 @@ import type { ProjectMetadata } from './reloadProcess';
 import { reloadWatchPattern } from './reloadScope';
 import { localFolders, workspaceFolders } from './workspacePaths';
 
-const stopped = { target: null, pid: null, status: 'Stopped', selection: null, mcpAvailable: false };
+const stopped = { target: null, pid: null, status: 'Stopped', selection: null, mcpAvailable: false,
+    process_generation: null, debuggerAttached: false };
+
+interface ReloadRequest extends CargoSelection {
+    action: string;
+    app_session?: string;
+    debug_configuration?: string;
+    expected_process_generation?: number;
+}
 
 export class HotReload implements vscode.Disposable {
     readonly history = new ReloadHistory();
@@ -94,24 +102,29 @@ export class HotReload implements vscode.Disposable {
         return { targets: targets.map(target => ({ ...describeCargoTarget(target), features: target.features })) };
     }
 
-    async agentControl(action: string, selection: CargoSelection, signal: AbortSignal, debugConfiguration?: string, session?: string): Promise<object> {
+    async agentControl(request: ReloadRequest, signal: AbortSignal): Promise<object> {
+        const { action, app_session: session, debug_configuration: debugConfiguration,
+            expected_process_generation: expectedProcessGeneration } = request;
         const epoch = this.selectionEpoch;
         signal.throwIfAborted();
         if (action === 'start' || action === 'start_debug') {
-            const targets = await discoverCargoTargets(selection);
+            const targets = await discoverCargoTargets(request);
             if (targets.length !== 1) throw new Error('Choose a single Cargo target from ferroui_reload_targets.');
             const target = targets[0];
             const configuration = action === 'start_debug' ? await selectDebugConfiguration(target.folder, { interactive: false, name: debugConfiguration }) : undefined;
             return (await this.launch({ kind: 'cargo', target }, epoch, configuration, signal)).state;
         }
         if (action === 'start_registered') {
-            const folders = workspaceFolders(selection.folder);
+            const folders = workspaceFolders(request.folder);
             if (folders.length !== 1) throw new Error('Choose a single workspace folder for the registered supervisor.');
             return (await this.launch({ kind: 'registered', folder: folders[0] }, epoch, undefined, signal)).state;
         }
         if (action === 'stop_all') { await this.stop(); return this.state; }
         if (action === 'stop' && !session && !this.live.size) return stopped;
         if (action === 'show_output' && !session && !this.live.size) { this.output.show(true); return stopped; }
+        if (action === 'detach_debug' && (!session || expectedProcessGeneration === undefined)) {
+            throw new Error('Pass app_session and expected_process_generation from ferroui_reload_status.');
+        }
         if (!session && this.live.size > 1) throw new Error('Pass app_session from ferroui_app_sessions to address a running app.');
         const run = this.require(session);
         switch (action) {
@@ -119,14 +132,20 @@ export class HotReload implements vscode.Disposable {
             case 'stop': await this.stopOne(run); return { ...stopped, session: run.id };
             case 'rebuild': run.rebuild(); break;
             case 'show_output': run.showOutput(); break;
+            case 'detach_debug': await run.detachDebugger(expectedProcessGeneration); break;
             case 'attach_debug': {
                 const configuration = await selectDebugConfiguration(run.folder, { interactive: false, name: debugConfiguration });
                 signal.throwIfAborted();
-                if (configuration) await run.attach(configuration);
+                if (configuration) await run.attach(configuration, expectedProcessGeneration);
                 break;
             }
         }
         return run.state;
+    }
+
+    detachDebugger(session: string): Promise<void> {
+        const run = this.require(session);
+        return run.detachDebugger(run.processGeneration);
     }
 
     private find(id?: string): ManagedReload | undefined {

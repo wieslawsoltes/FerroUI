@@ -34,6 +34,8 @@ export class BrowserDebugger {
         } });
     }
 
+    get attached(): boolean { return this.debug.attached; }
+
     accepted(frame: BrowserDebugFrame): void {
         this.stopWatching?.();
         this.frame = frame;
@@ -47,12 +49,23 @@ export class BrowserDebugger {
     }
 
     async attach(generation: number): Promise<void> {
-        const frame = this.frame;
-        if (frame?.generation !== generation) throw new Error('Select the accepted browser frame before attaching the debugger.');
+        const frame = this.acceptedFrame(generation);
         if (this.debug.follows(generation)) return;
         const folder = vscode.workspace.getWorkspaceFolder(vscode.Uri.parse(this.app.folder, true));
         if (!folder) throw new Error('Open the workspace that owns this browser app.');
         await this.debug.attach(folder, this.configuration(frame), generation);
+    }
+
+    async detach(generation: number): Promise<void> {
+        const frame = this.acceptedFrame(generation);
+        await this.debug.detach();
+        frame.pause.clear();
+    }
+
+    private acceptedFrame(generation: number): BrowserDebugFrame {
+        const frame = this.frame;
+        if (frame?.generation !== generation) throw new Error('Use the current accepted browser generation.');
+        return frame;
     }
 
     private configuration(frame: BrowserDebugFrame): vscode.DebugConfiguration {

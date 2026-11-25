@@ -122,7 +122,9 @@ export class ProjectView implements vscode.TreeDataProvider<Item>, vscode.Dispos
     }
 
     private async runTarget(item: Item): Promise<void> {
-        if (item?.type === 'target') await this.reload.agentControl('start', { ...describeCargoTarget(item.target), features: item.target.features }, AbortSignal.timeout(25_000));
+        if (item?.type === 'target') {
+            await this.reload.agentControl({ action: 'start', ...describeCargoTarget(item.target), features: item.target.features }, AbortSignal.timeout(25_000));
+        }
     }
 
     private async command(action: () => Promise<void>): Promise<void> {

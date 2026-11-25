@@ -15,8 +15,11 @@ const states = {
 
 export class RegisteredReload implements vscode.Disposable {
     pid?: number;
+    private generation = 0;
     private disposed = false;
     private constructor(readonly folder: vscode.WorkspaceFolder, private readonly process: ReloadProcess) {}
+
+    get processGeneration(): number | undefined { return this.pid ? this.generation : undefined; }
 
     static async start(folder: vscode.WorkspaceFolder, output: ProcessOutput,
         changed: (status: string, pid?: number, error?: boolean) => void): Promise<RegisteredReload> {
@@ -41,7 +44,9 @@ export class RegisteredReload implements vscode.Disposable {
             try {
                 const event = JSON.parse(line.slice(prefix.length)) as { status: keyof typeof states; pid?: number | null };
                 if (!Object.hasOwn(states, event.status)) return;
-                session.pid = Number.isSafeInteger(event.pid) && event.pid! > 0 ? event.pid! : undefined;
+                const pid = Number.isSafeInteger(event.pid) && event.pid! > 0 ? event.pid! : undefined;
+                if (pid && (session.pid !== pid || event.status === 'ready' || event.status === 'restored')) session.generation++;
+                session.pid = pid;
                 changed(states[event.status], session.pid, event.status === 'rejected');
             } catch { output.appendLine('The registered supervisor returned an invalid lifecycle event.'); }
         });

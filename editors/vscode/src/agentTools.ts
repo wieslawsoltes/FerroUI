@@ -73,6 +73,7 @@ interface Arguments extends CanvasAction, CargoSelection {
     change?: CommandBindingEdit;
     expected_rust_version: number;
     expected_generation: number;
+    expected_process_generation?: number;
     expected_sequence: number;
     runtime?: RuntimeTarget;
     app_session?: string;
@@ -282,7 +283,8 @@ export class AgentTools {
             return { closed: true };
         }
         if (tool === 'ferroui_browser_rebuild') return this.appSessions.browser.rebuild(args.runtime as AppRuntime);
-        if (tool === 'ferroui_browser_debug') return this.appSessions.browser.debug(args.runtime as AppRuntime, args.expected_generation);
+        if (tool === 'ferroui_browser_debug') return this.appSessions.browser.debug(args.runtime as AppRuntime, args.expected_generation,
+            { detach: args.action === 'detach', signal });
         if (tool === 'ferroui_browser_output') return this.appSessions.browser.recentOutput(args.runtime as AppRuntime, args.lines ?? 60);
         if (tool === 'ferroui_runtime_attach') return this.appSessions.attach(args.url!, args.token!, args.label, signal);
         if (tool === 'ferroui_runtime_detach') { this.appSessions.detach(args.runtime as AppRuntime); return { detached: true }; }
@@ -301,7 +303,7 @@ export class AgentTools {
         if (tool === 'ferroui_reload_targets') return this.reload.targets(args);
         if (tool === 'ferroui_reload_output') return this.reload.recentOutput(args.lines ?? 60, args.app_session);
         if (tool === 'ferroui_reload_history') return { records: this.reload.history.recent(args.limit ?? 50, args.app_session) };
-        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args.action, args, signal, args.debug_configuration, args.app_session);
+        if (tool === 'ferroui_reload_control') return this.reload.agentControl(args, signal);
         if (tool === 'ferroui_runtime_profile_windows') return this.runtimeProfiles.windows(signal, args.runtime);
         if (tool === 'ferroui_runtime_profile_read') {
             if (args.profile_id !== undefined && (args.runtime === undefined || args.expected_generation === undefined)) {

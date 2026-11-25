@@ -250,7 +250,7 @@ runner uses settled frames for focus and baseline comparisons. Play the stage se
 
 ## Hot reload a running application
 
-Use **App Sessions** to run multiple Cargo targets or connect several authenticated local inspectors. Each row opens a pinned Live App editor and offers controls for the individual session. Select a managed app to follow it in the status bar and Diagnostics. Shared project changes can update multiple apps. [Run several app sessions](../../docs/designer/vscode/runtime.md#run-several-app-sessions)
+Use **App Sessions** to run multiple Cargo targets or connect several authenticated local inspectors. Each row opens a pinned Live App editor and offers controls for the individual session. Select a managed app to follow it in the status bar and Diagnostics. Use the row’s **Detach Debugger from This App** command to keep the app and Live App running. Shared project changes can update multiple apps. [Run several app sessions](../../docs/designer/vscode/runtime.md#run-several-app-sessions) · [MCP debugger controls](../../docs/designer/vscode/reference.md#detach-a-debugger-with-mcp)
 
 Run **FerroUI: Run with Hot Reload** from a local Cargo workspace and select a development binary. Try `hot-reload-demo` for XAML or `view-gallery` for Rust. The extension uses Cargo metadata and enables a package’s `hot-reload` feature when defined. Save your changes in the editor or save a design edit to update the application. The status bar and **FerroUI: Show Hot Reload Output** report in-place updates, rejected edits, and rebuilds.
 

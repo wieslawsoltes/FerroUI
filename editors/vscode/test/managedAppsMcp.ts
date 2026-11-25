@@ -12,7 +12,15 @@ import { liveAppControl, liveAppView, verifyLiveAppPresentation } from './liveAp
 import type { McpFixture } from './mcp';
 import { until } from './wait';
 
-interface Run { session: string; runtime: RuntimeSummary['runtime']; pid: number | null; status: string; mcpAvailable: boolean }
+interface Run {
+    session: string;
+    runtime: RuntimeSummary['runtime'];
+    pid: number | null;
+    process_generation: number | null;
+    debuggerAttached: boolean;
+    status: string;
+    mcpAvailable: boolean;
+}
 
 export async function verifyManagedApps({ invoke, content }: McpFixture): Promise<void> {
     const executable = process.env.FERROUI_TEST_HOSTED_APP;
@@ -61,6 +69,15 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             const first = await status(left);
             const second = await status(right);
             assert.ok(first.pid && second.pid && first.pid !== second.pid);
+            assert.ok(first.process_generation && second.process_generation && first.process_generation !== second.process_generation);
+            const detach = (run: Run, generation: number) => invoke('ferroui_reload_control', {
+                action: 'detach_debug', app_session: run.session, expected_process_generation: generation,
+            });
+            assert.ok((await control('detach_debug', left)).isError);
+            assert.ok((await detach(left, second.process_generation)).isError);
+            const detached = content<Run>(await detach(left, first.process_generation));
+            assert.equal(detached.debuggerAttached, false);
+            assert.equal(detached.pid, first.pid);
             assert.equal(second.pid, independent.pid);
             assert.ok((await control('stop')).isError, 'Stopping one of several runtimes needs an exact app session');
             const reopened = await tools<Run>('ferroui_reload_control', { action: 'start', ...targets[0] });
@@ -115,6 +132,8 @@ export async function verifyManagedApps({ invoke, content }: McpFixture): Promis
             await unlink(rejection);
             content(await control('rebuild', left));
             await until(async () => { const current = await status(left); return Boolean(current.mcpAvailable && current.pid !== first.pid); });
+            assert.notEqual((await status(left)).process_generation, first.process_generation);
+            assert.ok((await detach(left, first.process_generation)).isError);
             const [rebuilt] = (await list()).runtimes.filter(target => target.runtime === left.runtime);
             assert.notEqual(rebuilt.generation, sources[0].generation);
             const retired = await invoke('ferroui_runtime_query', {
