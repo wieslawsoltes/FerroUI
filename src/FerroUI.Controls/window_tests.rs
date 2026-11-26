@@ -246,6 +246,20 @@ fn setting_title_should_set_impl_title() {
 }
 
 #[test]
+fn setting_title_with_an_embedded_null_should_strip_it() {
+    let window_impl = MockWindowImpl::bare(MockImplKind::Window);
+    window_impl.render_scaling.set(1.0);
+    let windowing_platform = windowing_platform(&window_impl);
+
+    let _app = UnitTestApplication::start(TestServices::new().with_windowing_platform(windowing_platform));
+    let target = Window::new();
+
+    target.set_title(Some("Hello\0World".to_string()));
+
+    assert_eq!(1, window_impl.count_of(&MockCall::SetTitle(Some("HelloWorld".to_string()))));
+}
+
+#[test]
 fn is_visible_should_initially_be_false() {
     let _app = UnitTestApplication::start(TestServices::mock_windowing_platform());
     let window = Window::new();

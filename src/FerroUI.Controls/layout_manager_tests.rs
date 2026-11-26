@@ -543,6 +543,51 @@ fn child_can_invalidate_parent_measure_during_arrange() {
 }
 
 #[test]
+fn control_can_move_to_another_root_while_its_arrange_is_deferred() {
+    // Upstream issue 22476.
+    let _scope = test_scope();
+    let child = LayoutTestControl::new();
+    let parent = LayoutTestControl::new();
+    parent.set_child(&child);
+    let grandparent = LayoutTestControl::new();
+    grandparent.set_child(&parent);
+    let mover = LayoutTestControl::new();
+    let panel = StackPanel::new();
+    panel.children().add(&grandparent);
+    panel.children().add(&mover);
+    let root = LayoutTestRoot::new();
+    root.set_child(&panel);
+    let other_root = LayoutTestRoot::new();
+
+    root.layout_manager().execute_initial_layout_pass();
+    other_root.layout_manager().execute_initial_layout_pass();
+
+    grandparent.set_do_arrange_override(Some({
+        let parent = parent.downgrade();
+        Rc::new(move |_: &Layoutable, s: Size| {
+            parent.upgrade().unwrap().invalidate_measure();
+            s
+        })
+    }));
+    mover.set_do_arrange_override(Some({
+        let (parent, child, other_root) = (parent.downgrade(), child.clone(), other_root.clone());
+        Rc::new(move |_: &Layoutable, s: Size| {
+            parent.upgrade().unwrap().set_child(None::<Ref<crate::Control>>);
+            other_root.set_child(&child);
+            s
+        })
+    }));
+
+    child.invalidate_arrange();
+    grandparent.invalidate_arrange();
+    mover.invalidate_arrange();
+
+    root.layout_manager().execute_layout_pass();
+
+    assert!(child.is_attached_to_visual_tree());
+}
+
+#[test]
 fn grandparent_can_invalidate_root_measure_during_arrange() {
     // Issue #11161.
     let _scope = test_scope();

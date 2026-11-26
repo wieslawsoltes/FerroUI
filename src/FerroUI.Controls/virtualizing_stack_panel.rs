@@ -1301,7 +1301,7 @@ impl VirtualizingStackPanel {
 
         // If the anchor element is at the beginning of, or before, the start
         // of the viewport then we can recycle all elements before it.
-        if u <= viewport.anchor_u {
+        if u <= viewport.viewport_u_start {
             // The element before an anchor with the focus is the focus trail.
             let keep_from = viewport.anchor_index - i32::from(focused == Some(viewport.anchor_index));
             realized_elements.recycle_elements_before(keep_from, |element, index| self.recycle_element(element, index));

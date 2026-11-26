@@ -34,7 +34,7 @@ impl FilePickerFileType {
         &self.name
     }
 
-    /// List of extensions in GLOB format. I.e. "*.png" or "*.*".
+    /// List of extensions in GLOB format. I.e. `*.png` or `*.*`.
     ///
     /// Used on Windows, Linux and Browser platforms.
     pub fn patterns(&self) -> Option<Rc<[String]>> {

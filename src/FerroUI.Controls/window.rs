@@ -698,7 +698,11 @@ impl Window {
             }
         }).detach();
 
-        self.bind_impl(Self::title_property(), |_, platform_impl, title| platform_impl.set_title(title.as_deref()));
+        self.bind_impl(Self::title_property(), |_, platform_impl, title| match title.as_deref() {
+            // A native title ends at an embedded NUL.
+            Some(title) if title.contains('\0') => platform_impl.set_title(Some(&title.replace('\0', ""))),
+            title => platform_impl.set_title(title),
+        });
         self.bind_impl(Self::icon_property(), |this, _, icon| this.set_effective_icon(icon));
         self.bind_impl(Self::can_resize_property(), |_, platform_impl, can_resize| platform_impl.can_resize(can_resize));
         self.bind_impl(Self::can_minimize_property(), |_, platform_impl, can_minimize| {

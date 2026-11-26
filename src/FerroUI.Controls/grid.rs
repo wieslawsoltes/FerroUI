@@ -1760,7 +1760,7 @@ impl Grid {
                 }
 
                 //  Sanity check: the requested size must all be distributed.
-                debug_assert!(MathUtilities::is_zero(size_to_distribute));
+                debug_assert!(MathUtilities::are_close(requested_size - size_to_distribute, requested_size));
             } else if requested_size <= range_max_size {
                 //
                 //  The requested size is bigger than the preferred size, but
@@ -1810,7 +1810,7 @@ impl Grid {
                 }
 
                 //  Sanity check: the requested size must all be distributed.
-                debug_assert!(MathUtilities::is_zero(size_to_distribute));
+                debug_assert!(MathUtilities::are_close(requested_size - size_to_distribute, requested_size));
             } else {
                 //
                 //  The requested size is bigger than the max size of the range.
