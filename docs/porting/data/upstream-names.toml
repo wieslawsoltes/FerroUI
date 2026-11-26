@@ -164,7 +164,6 @@ rust = "ferroui_controls::automation::ElementNotEnabledError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_controls::automation::ElementNotEnabledException"
 behaviour = "same"
 
 [[name]]
@@ -173,7 +172,6 @@ rust = "ferroui_dynamic_data::list::SortError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_dynamic_data::list::SortException"
 behaviour = "same"
 
 [[name]]
@@ -182,7 +180,6 @@ rust = "ferroui_headless_vnc::remote_viewing::vnc::VncError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_headless_vnc::remote_viewing::vnc::VncException"
 behaviour = "same"
 
 [[name]]
@@ -191,7 +188,6 @@ rust = "ferroui_markup_xaml::XamlLoadError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_markup_xaml::XamlLoadException"
 behaviour = "same"
 notes = "The code the markup compiler generates names the new type."
 
@@ -201,7 +197,6 @@ rust = "ferroui_opengl::OpenGlError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_opengl::OpenGlException"
 behaviour = "same"
 
 [[name]]
@@ -210,7 +205,6 @@ rust = "ferroui_reactive::linq::InvalidCastError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_reactive::linq::InvalidCastException"
 behaviour = "same"
 notes = "The error of Cast in the Rx port; the markup runtime reports the .NET name as a type name of XamlError."
 
@@ -220,7 +214,6 @@ rust = "ferroui_reactive::linq::TimeoutError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_reactive::linq::TimeoutException"
 behaviour = "same"
 notes = "The error of Timeout in the Rx port; a unit struct, the old name is also a deprecated constant of the value."
 
@@ -230,7 +223,6 @@ rust = "ferroui_reactiveui::binding::bindings::TargetInvocationError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_reactiveui::binding::bindings::TargetInvocationException"
 behaviour = "same"
 notes = "The error a ReactiveUI binding raises; the markup runtime reports the .NET name as a type name of XamlError."
 
@@ -240,7 +232,6 @@ rust = "ferroui_reactiveui::UnhandledError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_reactiveui::UnhandledErrorException"
 behaviour = "same"
 notes = "Not UnhandledErrorError: the name already says error."
 
@@ -250,7 +241,6 @@ rust = "ferroui_reactiveui::binding::interactions::UnhandledInteractionError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_reactiveui::binding::interactions::UnhandledInteractionException"
 behaviour = "same"
 notes = "The default message of empty() keeps the old type name."
 
@@ -260,7 +250,6 @@ rust = "ferroui_reactiveui::binding::view::ViewLocatorNotFoundError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_reactiveui::binding::view::ViewLocatorNotFoundException"
 behaviour = "same"
 
 [[name]]
@@ -269,7 +258,6 @@ rust = "ferroui_remote_protocol::metsys_bson::BsonError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_remote_protocol::metsys_bson::BsonException"
 behaviour = "same"
 
 [[name]]
@@ -278,7 +266,6 @@ rust = "ferroui_splat::LoggingError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_splat::LoggingException"
 behaviour = "same"
 
 [[name]]
@@ -287,7 +274,6 @@ rust = "ferroui_vulkan::VulkanError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_vulkan::VulkanException"
 behaviour = "same"
 
 [[name]]
@@ -296,7 +282,6 @@ rust = "ferroui_wayland::FerroWaylandError"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_wayland::FerroWaylandException"
 behaviour = "same"
 notes = "Its kind is ferroui_wayland::ferro_wayland_exception::FerroWaylandErrorKind (was FerroWaylandExceptionKind). The derived classes are its constructors poll, network, flush and flush_errno, read and read_errno, protocol_error and protocol_error_with_code (0.5.1); the factories FerroWaylandPollException and the others are deprecated since 0.5.1."
 
@@ -306,7 +291,6 @@ rust = "ferroui_x11::x11_exception::X11Error"
 kind = "type"
 phase = "C3"
 pull = 466
-deprecated = "ferroui_x11::x11_exception::X11Exception"
 behaviour = "same"
 
 # C4: `Task`, `TaskCompletionSource` and `SynchronizationContext` become futures on the executor of
@@ -351,7 +335,6 @@ rust = "ferroui_system::task::oneshot"
 kind = "type"
 phase = "C4"
 pull = 508
-deprecated = "ferroui_x11::selections::selection_helper::TaskCompletionSource"
 behaviour = "deviation"
 notes = "Step A3. `oneshot::channel()` gives a Sender (SetResult and TrySetResult are send, which gives the value back when the receiver is gone; SetCanceled is dropping the sender) and a Receiver (the task: a future of Result<T, Canceled>, try_recv, blocking_recv, recv_timeout, shared() for several waiters). A dropped sender cancels its receiver, where a dropped TaskCompletionSource leaves its task pending (F6; DEVIATIONS rows of the X11, remote protocol, iOS, Android and WinUI code). Also deprecated: ferroui_x11::selections::selection_helper::TaskCompletionFuture, ferroui_ios::completion::{Completion, CompletionFuture}. ferroui_system::threading::tasks::TaskCompletionSource keeps its behaviour until the steps that replace its uses (section 4)."
 
@@ -597,7 +580,6 @@ rust = "uuid::Uuid"
 kind = "type"
 phase = "C5"
 pull = 528
-deprecated = "ferroui_remote_protocol::Guid"
 behaviour = "test"
 notes = "Step G1 (section 3.6). The remote protocol takes and returns Uuid (re-exported as ferroui_remote_protocol::Uuid): IMessageTypeResolver.GetByGuid and GetGuid, the identifier attribute and the GUID of each message, the BSON Guid values; the wire layout is Guid.ToByteArray, which is Uuid::to_bytes_le (tested in metsys_bson_tests). Splat's feature usage tracking references and the Guid converters of ReactiveUI take Uuid too. Also deprecated: ferroui_splat::Guid. The Guid of ferroui-microcom stays, the COM GUID layout."
 
@@ -673,7 +655,6 @@ rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTran
 kind = "type"
 phase = "C3"
 pull = 896
-deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlBindingsTransformException"
 behaviour = "same"
 notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::Bindings, whose type name selects the diagnostic code as before."
 
@@ -683,7 +664,6 @@ rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTran
 kind = "type"
 phase = "C3"
 pull = 896
-deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlDataContextException"
 behaviour = "same"
 notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::DataContext, whose type name selects the diagnostic code as before."
 
@@ -693,7 +673,6 @@ rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTran
 kind = "type"
 phase = "C3"
 pull = 896
-deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlPropertyPathException"
 behaviour = "same"
 notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::PropertyPath, whose type name selects the diagnostic code as before."
 
@@ -703,7 +682,6 @@ rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTran
 kind = "type"
 phase = "C3"
 pull = 896
-deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlSelectorsTransformException"
 behaviour = "same"
 notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::Selectors, whose type name selects the diagnostic code as before."
 
@@ -713,6 +691,5 @@ rust = "ferroui_markup_xaml_loader::compiler_extensions::transformers::FerroTran
 kind = "type"
 phase = "C3"
 pull = 896
-deprecated = "ferroui_markup_xaml_loader::compiler_extensions::transformers::XamlStyleTransformException"
 behaviour = "same"
 notes = "An error of the xamlx XamlError; its kind is FerroTransformErrorKind::Style, whose type name selects the diagnostic code as before."
