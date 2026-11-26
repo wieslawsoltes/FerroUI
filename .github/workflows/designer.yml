@@ -31,12 +31,13 @@ on:
         type: boolean
         default: false
       installed-vsix-os:
-        description: Select hosts for installed VSIX smoke tests
+        description: Select all desktop operating systems or a specific runner
         type: choice
         default: all
         options:
           - all
           - ubuntu-24.04
+          - ubuntu-24.04-arm
           - macos-15
           - windows-latest
 

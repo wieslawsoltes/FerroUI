@@ -63,3 +63,9 @@ The fixture repeats **Attach Debugger to This App** and checks that the existing
 Set `FERROUI_TEST_HOSTED_APP` to Todo Workbench built with `app-preview,hot-reload,mcp` to also exercise native App Preview through the bundled helper. Use `FERROUI_TEST_HOSTED_SOURCE` to point at its matching Todo Workbench source directory if the app was built from another checkout. FerroUI’s installed-package CI runs both native checks on macOS, Linux, and Windows. [Todo Workbench](../../../samples/TodoWorkbench/README.md)
 
 On Windows with MSVC 14.52, set `LIBCLANG_PATH` to the LLVM `bin` directory for Clang 22 or newer before building the native fixtures. ANGLE uses that library to generate its bindings. The hosted Windows job supplies its own LLVM toolchain. [MSVC compiler compatibility check](https://github.com/microsoft/STL/blob/main/stl/inc/yvals_core.h)
+
+### Validate a Linux ARM64 workspace package
+
+In the **Visual designer** workflow, enable **Run installed VSIX smoke tests** and select `ubuntu-24.04-arm`. The runner builds the `linux-arm64` VSIX and checks it under both VS Code versions. Download the `ferroui-vsix-Linux-ARM64` artifact from that run. [Visual designer workflow](../../../.github/workflows/designer.yml) · [GitHub-hosted ARM64 runners](https://docs.github.com/en/actions/reference/runners/github-hosted-runners)
+
+Install the artifact in a **Remote–SSH** window connected to an ARM64 Linux workspace. Open XAML and RSX files, check symbols and native preview frames, and make and undo a source edit through editor MCP. Launch a Cargo app from **App Sessions**, open its **Live App** editor, and verify that its inspector stays associated with the remote application. [Open a remote workspace](README.md#open-a-remote-workspace)
