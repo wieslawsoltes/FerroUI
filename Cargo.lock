@@ -1882,6 +1882,7 @@ dependencies = [
  "ferroui-controls",
  "ferroui-designer-animation",
  "ferroui-designer-core",
+ "ferroui-inspect",
  "ferroui-markup-xaml",
  "ferroui-markup-xaml-loader",
  "ferroui-remote-protocol",

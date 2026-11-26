@@ -154,6 +154,7 @@ fn respond(
                 DESIGN_STATE_ROUTES_QUERY, DESIGN_KEYFRAME_SELECTION_QUERY, DESIGN_CLIP_AUTHORING_QUERY,
                 DESIGN_STATE_AUTHORING_QUERY, DESIGN_KEYFRAME_SAMPLING_QUERY, DESIGN_KEYFRAME_COMPONENTS_QUERY,
                 DESIGN_PROPERTY_TRANSITIONS_QUERY,
+                DESIGN_KEYBOARD_QUERY, DESIGN_KEYBOARD_VERSION,
                 DESIGN_PALETTE_QUERY, DESIGN_PALETTE_VERSION,
                 DESIGN_SOURCE_SNAPSHOT_QUERY, DESIGN_SOURCE_SNAPSHOT_VERSION,
                 DESIGN_TEMPLATES_QUERY, DESIGN_TEMPLATES_VERSION,
@@ -182,7 +183,7 @@ fn respond(
             ]
             .map(|key| format!("{key}={DESIGN_ANIMATION_VERSION}"))
             .join("&");
-            let query = format!("{animation}&{DESIGN_SOURCE_SNAPSHOT_QUERY}={DESIGN_SOURCE_SNAPSHOT_VERSION}&{DESIGN_PALETTE_QUERY}={DESIGN_PALETTE_VERSION}&{DESIGN_TEMPLATES_QUERY}={DESIGN_TEMPLATES_VERSION}");
+            let query = format!("{animation}&{DESIGN_SOURCE_SNAPSHOT_QUERY}={DESIGN_SOURCE_SNAPSHOT_VERSION}&{DESIGN_PALETTE_QUERY}={DESIGN_PALETTE_VERSION}&{DESIGN_TEMPLATES_QUERY}={DESIGN_TEMPLATES_VERSION}&{DESIGN_KEYBOARD_QUERY}={DESIGN_KEYBOARD_VERSION}");
             json!({"port": port, "animationQuery": query})
         }),
         "hostedRender" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
@@ -198,6 +199,8 @@ fn respond(
             .and_then(|request| hosted.as_ref().ok_or("Start an app-hosted session")?.templates(request)),
         "hostedInput" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|input| serialize(hosted.as_ref().ok_or("Start an app-hosted session")?.input(input))),
+        "hostedKeyboard" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
+            .and_then(|input| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.keyboard(input))),
         "hostedAnimate" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())
             .and_then(|command| serialize(hosted.as_mut().ok_or("Start an app-hosted session")?.animate(command))),
         "hostedKeyframe" => serde_json::from_value(message["params"].clone()).map_err(|error| error.to_string())

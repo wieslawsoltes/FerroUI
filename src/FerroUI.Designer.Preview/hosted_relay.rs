@@ -14,6 +14,7 @@ use ferroui_remote_protocol::designer::{
     DesignPropertyTransitionsResult,
     DesignAnimationAuthoringResult, DesignAnimationCatalogMessage, DesignAnimationCurveResult, DesignAnimationResultMessage,
     DesignFrameMessage, DesignFrameReceivedMessage, StartDesignSourceSessionMessage, StartDesignerSessionMessage,
+    DesignKeyboardResult,
     UpdateDesignMessage, UpdateDesignResultMessage, UpdateXamlMessage,
 };
 use ferroui_remote_protocol::input::{
@@ -40,6 +41,7 @@ use std::time::Duration;
 mod animation;
 pub(crate) mod authored;
 pub(crate) mod palette;
+mod keyboard;
 mod sources;
 pub(crate) mod styles;
 mod rust_styles;
@@ -47,6 +49,13 @@ mod rust_templates;
 pub(crate) mod templates;
 
 type Connection = Arc<dyn IFerroRemoteTransportConnection>;
+
+struct ApplicationConnection {
+    transport: Connection,
+    source_snapshots: bool,
+    keyboard: bool,
+}
+
 const STARTUP_TIMEOUT: Duration = Duration::from_secs(24);
 const FRAME_TIMEOUT: Duration = Duration::from_secs(8);
 
@@ -71,6 +80,8 @@ struct Events {
     component_keys: bool,
     component_key_batch: bool,
     curve_result: Option<DesignAnimationCurveResult>,
+    keyboard_request: Option<i64>,
+    keyboard_result: Option<DesignKeyboardResult>,
     authorable: BTreeSet<i64>,
     sampleable_keys: BTreeSet<(i64, i64, String)>,
     curve_programs: BTreeSet<i64>,
@@ -79,12 +90,14 @@ struct Events {
 
 pub(crate) struct Relay {
     server: Option<DisposableServer>,
-    incoming: mpsc::Receiver<(Connection, bool)>,
+    incoming: mpsc::Receiver<ApplicationConnection>,
     connection: Option<Connection>,
     source_snapshots: bool,
+    keyboard_available: bool,
     events: Arc<(Mutex<Events>, Condvar)>,
     sent: Option<(i64, i64)>,
     next_animation: i64,
+    next_keyboard: i64,
     animation_sources: SourceMaps,
     authored_rsx: Option<AuthoredRsxFrame>,
     authored: Option<authored::AuthoredPreview>,
@@ -143,6 +156,8 @@ pub(crate) struct Frame {
     styles_available: bool,
     #[serde(rename = "templatesAvailable")]
     templates_available: bool,
+    #[serde(rename = "keyboardAvailable")]
+    keyboard_available: bool,
     #[serde(rename = "rustScope", skip_serializing_if = "Option::is_none")]
     rust_scope: Option<crate::rsx_animation::AuthoredRustScope>,
     #[serde(skip_serializing_if = "Option::is_none")]
@@ -177,9 +192,11 @@ impl Relay {
             incoming,
             connection: None,
             source_snapshots: false,
+            keyboard_available: false,
             events,
             sent: None,
             next_animation: 0,
+            next_keyboard: 0,
             animation_sources: SourceMaps::default(),
             authored_rsx: None,
             authored: None,
@@ -195,7 +212,7 @@ impl Relay {
     fn accept(
         connection: Connection,
         nonce: Arc<str>,
-        ready: mpsc::SyncSender<(Connection, bool)>,
+        ready: mpsc::SyncSender<ApplicationConnection>,
         events: Arc<(Mutex<Events>, Condvar)>,
         claimed: Arc<AtomicBool>,
     ) {
@@ -225,7 +242,11 @@ impl Relay {
                     return;
                 }
                 admitted.store(true, Ordering::Release);
-                let _ = authorized.try_send(ready.try_send((connection.clone(), start.is_some())).is_ok());
+                let _ = authorized.try_send(ready.try_send(ApplicationConnection {
+                    transport: connection,
+                    source_snapshots: start.is_some(),
+                    keyboard: start.and_then(|message| message.keyboard_input) == Some(true),
+                }).is_ok());
                 return;
             }
             let mut state = result.0.lock().unwrap();
@@ -268,6 +289,11 @@ impl Relay {
             } else if let Some(outcome) = message.downcast_ref::<DesignPropertyTransitionsResult>() {
                 if state.requested == Some(outcome.revision) && state.animation_request == Some(outcome.request) {
                     state.property_transition_result = Some(outcome.clone());
+                    result.1.notify_all();
+                }
+            } else if let Some(outcome) = message.downcast_ref::<DesignKeyboardResult>() {
+                if state.requested == Some(outcome.revision) && state.keyboard_request == Some(outcome.request) {
+                    state.keyboard_result = Some(outcome.clone());
                     result.1.notify_all();
                 }
             } else if let Some(context) = message.downcast_ref::<DesignPaletteContextMessage>() {
@@ -318,7 +344,7 @@ impl Relay {
         if let Some(connection) = &self.connection {
             return Ok(connection.clone());
         }
-        let (connection, source_snapshots) = self.incoming.recv_timeout(STARTUP_TIMEOUT)
+        let ApplicationConnection { transport: connection, source_snapshots, keyboard } = self.incoming.recv_timeout(STARTUP_TIMEOUT)
             .map_err(|_| "The Cargo binary did not start a FerroUI design session. Check its preview arguments and output.")?;
         if let Some(server) = self.server.take() {
             server.dispose();
@@ -338,6 +364,7 @@ impl Relay {
         )?;
         self.connection = Some(connection.clone());
         self.source_snapshots = source_snapshots;
+        self.keyboard_available = keyboard;
         Ok(connection)
     }
 
@@ -551,6 +578,7 @@ impl Relay {
             palette_available: self.authored.is_some(),
             styles_available: self.authored.is_some() || self.authored_rsx.is_some(),
             templates_available: self.templates.is_some(),
+            keyboard_available: self.keyboard_available,
             rust_scope: self.authored_rsx.as_ref().map(|source| source.scope.clone()),
             animations: animations.map(hosted_animation::catalog),
             animation_presentation: None,
@@ -558,19 +586,7 @@ impl Relay {
     }
 
     pub(crate) fn input(&self, input: Input) -> Result<(), String> {
-        let connection = self
-            .connection
-            .as_ref()
-            .ok_or("The hosted application is starting")?;
-        let state = self.events.0.lock().unwrap();
-        if self.sent != Some((input.revision, input.sequence))
-            || state.requested != Some(input.revision)
-            || state.disconnected
-            || !matches!(state.outcome, Some(Ok(())))
-        {
-            return Err("The hosted frame changed. Wait for the current frame.".into());
-        }
-        drop(state);
+        let connection = self.input_connection(input.revision, input.sequence)?;
         if !(0.0..=1.0).contains(&input.x) || !(0.0..=1.0).contains(&input.y) {
             return Err("Interact inside the current preview frame".into());
         }
@@ -617,6 +633,19 @@ impl Relay {
             ),
             _ => Err("The hosted input is outside the allowed range".into()),
         }
+    }
+
+    fn input_connection(&self, revision: i64, sequence: i64) -> Result<&Connection, String> {
+        let connection = self.connection.as_ref().ok_or("The hosted application is starting")?;
+        let state = self.events.0.lock().unwrap();
+        if self.sent != Some((revision, sequence))
+            || state.requested != Some(revision)
+            || state.disconnected
+            || !matches!(state.outcome, Some(Ok(())))
+        {
+            return Err("The hosted frame changed. Wait for the current frame.".into());
+        }
+        Ok(connection)
     }
 }
 

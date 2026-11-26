@@ -24,11 +24,13 @@ pub const DESIGN_SOURCE_SNAPSHOT_VERSION: &str = "1";
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct StartDesignSourceSessionMessage {
     pub session_id: Option<String>,
+    pub keyboard_input: Option<bool>,
 }
 
 ferro_remote_message_guid!(StartDesignSourceSessionMessage, "7D76A249-3594-4C51-956D-6E4E8C1CF1F6");
 bson_class!(StartDesignSourceSessionMessage as "StartDesignSourceSessionMessage" {
     "SessionId" => session_id: Option<String>,
+    "KeyboardInput" => keyboard_input: Option<bool>,
 });
 
 #[derive(Clone, Debug, Default, PartialEq)]

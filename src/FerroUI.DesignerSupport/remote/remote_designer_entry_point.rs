@@ -1,5 +1,6 @@
 use crate::design_window_loader::{DesignLoad, DesignWindowLoader};
 use crate::remote::hosted_animation;
+use crate::remote::hosted_keyboard;
 use crate::remote::hosted_palette;
 use crate::remote::hosted_sources;
 use crate::remote::hosted_templates;
@@ -13,6 +14,7 @@ use ferroui_controls::{AppBuilder, Design, Window};
 use ferroui_markup_xaml::xaml_error_scope::with_xaml_errors;
 use ferroui_markup_xaml::XamlLoadError;
 use ferroui_remote_protocol::designer::{
+    DesignKeyboardRequest,
     DesignKeyframeSelectionRequest,
     DesignPropertyTransitionsRequest,
     DesignAnimationAuthoringRequest, DesignAnimationCurveRequest, DesignAnimationRequestMessage, ExceptionDetails, StartDesignSourceSessionMessage, StartDesignerSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage,
@@ -325,6 +327,8 @@ impl RemoteDesignerEntryPoint {
         hosted_animation::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         hosted_palette::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
         hosted_templates::configure(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
+        let source_snapshots = hosted_sources::requested(args.transport.as_ref(), args.method == methods::FERRO_REMOTE);
+        let keyboard_input = hosted_keyboard::configure(args.transport.as_ref(), source_snapshots);
         Self::attach_transport(transport.clone());
         transport.on_exception(exception_handler(|_, e| {
             die(Some(&e.to_string()));
@@ -332,8 +336,8 @@ impl RemoteDesignerEntryPoint {
         transport.start();
         log("Sending preview session identity");
         let session_id = Some(args.session_id);
-        if hosted_sources::requested(args.transport.as_ref(), args.method == methods::FERRO_REMOTE) {
-            transport.send(Arc::new(StartDesignSourceSessionMessage { session_id }));
+        if source_snapshots {
+            transport.send(Arc::new(StartDesignSourceSessionMessage { session_id, keyboard_input }));
         } else {
             transport.send(Arc::new(StartDesignerSessionMessage { session_id }));
         }
@@ -367,6 +371,13 @@ impl RemoteDesignerEntryPoint {
 
     /// The part of `OnTransportMessage` that runs on the UI thread.
     fn on_transport_message(arg: &Message) {
+        if let Some(request) = arg.downcast_ref::<DesignKeyboardRequest>() {
+            if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
+                let window = CURRENT_WINDOW.with(|slot| slot.borrow().clone());
+                transport.send(Arc::new(hosted_keyboard::deliver(request, window)));
+            }
+            return;
+        }
         if let Some(request) = arg.downcast_ref::<DesignPropertyTransitionsRequest>() {
             if let Some(transport) = TRANSPORT.with(|slot| slot.borrow().clone()) {
                 transport.send(Arc::new(hosted_animation::property_transition_request(request)));
@@ -459,8 +470,11 @@ impl RemoteDesignerEntryPoint {
                             base_uri,
                         });
                         match snapshot {
-                            Some((base, sources)) => sources.run(|| load(Some(base))),
-                            None => load(None),
+                            Some((base, sources)) => {
+                                let design = sources.run(|| load(Some(base)))?;
+                                Ok((design, Some(sources)))
+                            }
+                            None => load(None).map(|design| (design, None)),
                         }
                     })
                 })
@@ -476,7 +490,7 @@ impl RemoteDesignerEntryPoint {
                     }),
                     ..UpdateXamlResultMessage::default()
                 },
-                Ok(Ok(Ok(design))) => {
+                Ok(Ok(Ok((design, sources)))) => {
                     let catalog = hosted_animation::accept(revision, animations, &design);
                     let palette = snapshot.and_then(|snapshot| hosted_palette::capture(snapshot.update.revision));
                     let templates = snapshot.and_then(|snapshot| hosted_templates::capture(snapshot.update.revision, &design));
@@ -492,6 +506,7 @@ impl RemoteDesignerEntryPoint {
                     let handle = window.platform_impl().and_then(|platform_impl| platform_impl.handle());
                     CURRENT_WINDOW.with(|slot| *slot.borrow_mut() = Some(window));
                     pending.accept();
+                    hosted_keyboard::accept(revision, sources);
                     if let Some(catalog) = catalog {
                         transport.send(Arc::new(catalog));
                     }

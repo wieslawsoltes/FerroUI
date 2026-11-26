@@ -8,6 +8,7 @@
 use crate::design_animation_authoring::{DesignAnimationAuthoringRequest, DesignAnimationAuthoringResult};
 use crate::design_animation_curve::{DesignAnimationCurveRequest, DesignAnimationCurveResult};
 use crate::design_animation_messages::{DesignAnimationCatalogMessage, DesignAnimationRequestMessage, DesignAnimationResultMessage};
+use crate::design_keyboard::{DesignKeyboardRequest, DesignKeyboardResult};
 use crate::design_keyframe_selection::{DesignKeyframeSelectionRequest, DesignKeyframeSelectionResult};
 use crate::design_messages::{DesignFrameMessage, DesignFrameReceivedMessage, StartDesignerSessionMessage, StartDesignSourceSessionMessage, UpdateDesignMessage, UpdateDesignResultMessage, UpdateDesignSourcesMessage, UpdateXamlMessage, UpdateXamlResultMessage};
 use crate::design_palette_context::DesignPaletteContextMessage;
@@ -75,6 +76,8 @@ pub static ASSEMBLY: Assembly = Assembly {
         ExportedType::of::<DesignTemplateCatalogMessage>(),
         ExportedType::of::<DesignFrameMessage>(),
         ExportedType::of::<DesignFrameReceivedMessage>(),
+        ExportedType::of::<DesignKeyboardRequest>(),
+        ExportedType::of::<DesignKeyboardResult>(),
         ExportedType::of::<DesignAnimationCatalogMessage>(),
         ExportedType::of::<DesignAnimationRequestMessage>(),
         ExportedType::of::<DesignAnimationResultMessage>(),
@@ -142,6 +145,8 @@ mod tests {
         ("DesignTemplateCatalogMessage", "5817D3A7-7AC8-47C0-A5A0-76DF2207C5F6"),
         ("DesignFrameMessage", "F7176EE5-1A68-4ECB-A986-8F461D21C13C"),
         ("DesignFrameReceivedMessage", "1E9E50A0-F95D-48C0-AB8B-B2C800ACC09C"),
+        ("DesignKeyboardRequest", "D6765277-60C0-4B62-AA66-DABE6DDEBCA4"),
+        ("DesignKeyboardResult", "18F7941E-FF77-4FC8-8DC5-D8DDA76C8AB1"),
         ("DesignAnimationCatalogMessage", "C094EFD2-D7FC-467D-AC22-8FA047C4B54B"),
         ("DesignAnimationRequestMessage", "BCDB99F8-61E0-4E92-A837-F8D18045ABB1"),
         ("DesignAnimationResultMessage", "2E7AC05A-D953-4211-BC9E-F400AEF993CF"),
