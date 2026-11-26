@@ -70,18 +70,6 @@ impl PageType {
         Self { form: Form::Reflective(type_) }
     }
 
-    /// The page type of the runtime type `type_`. A page of it is created through the default
-    /// constructor of its [`TypeInfo`], which builds without the type tables do not keep unless
-    /// code that names the class registers it ([`TypeInfo::register_constructor`]); a type that is
-    /// not a page fails when the frame navigates to it ([`NavigationError::NotAPage`]).
-    #[deprecated(
-        since = "0.5.0",
-        note = "use `PageType::of::<T>()`, which reaches the constructor of the page statically"
-    )]
-    pub const fn from_type_info(type_: &'static TypeInfo) -> Self {
-        Self::reflective(type_)
-    }
-
     /// The identity of the class ([`TypeIdentity`]); `None` for a runtime type that is not a class
     /// (the conversion from a `&'static TypeInfo` of a static type).
     #[inline]

@@ -13,8 +13,6 @@ use ferroui_base::media::{Brushes, IBrush};
 use ferroui_base::reactive::{CompositeDisposable, Disposable, IDisposable, ObservableExt, Subscription};
 use ferroui_base::styling::ControlTheme;
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
-#[allow(deprecated)]
-use ferroui_base::threading::DispatcherTask;
 use ferroui_system::task::JoinHandle;
 use ferroui_base::utilities::{HandlerList, MathUtilities};
 use ferroui_base::{
@@ -1626,29 +1624,6 @@ impl Window {
             },
             DispatcherPriority::DEFAULT,
         )
-    }
-
-    /// The deprecated form of [`show_dialog`](Self::show_dialog): a
-    /// `DispatcherTask`, which raises a failure again when it is observed.
-    ///
-    /// # Panics
-    /// See [`show_dialog`](Self::show_dialog).
-    #[deprecated(since = "0.5.0", note = "use `show_dialog`, which gives a `JoinHandle`")]
-    #[allow(deprecated)]
-    pub fn show_dialog_task(&self, owner: &Window) -> DispatcherTask<Option<BoxedValue>> {
-        self.show_dialog(owner).into()
-    }
-
-    /// The deprecated form of [`show_dialog_typed`](Self::show_dialog_typed):
-    /// a `DispatcherTask`, which raises the failure to cast the dialog result
-    /// again when it is observed.
-    ///
-    /// # Panics
-    /// See [`show_dialog`](Self::show_dialog).
-    #[deprecated(since = "0.5.0", note = "use `show_dialog_typed`, which gives a `JoinHandle`")]
-    #[allow(deprecated)]
-    pub fn show_dialog_typed_task<TResult: Clone + Default + 'static>(&self, owner: &Window) -> DispatcherTask<TResult> {
-        self.show_dialog_typed(owner).into()
     }
 
     /// Sorts the windows ascending by their Z order - the topmost window
