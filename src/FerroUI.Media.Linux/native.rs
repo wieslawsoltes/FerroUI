@@ -76,6 +76,12 @@ pub struct FrameInfo {
     pub sequence: u64,
     pub epoch: u64,
 }
+impl FrameInfo {
+    /// The file descriptor, row pitch and byte offset of a plane.
+    pub(crate) fn plane(&self, plane: usize) -> (i32, u32, u32) {
+        (self.fds[plane], self.strides[plane], self.offsets[plane])
+    }
+}
 extern "C" {
     fn ferro_linux_open(
         source: *const c_char,
@@ -96,6 +102,7 @@ extern "C" {
     fn ferro_linux_take(s: *mut c_void) -> *mut c_void;
     fn ferro_linux_frame_info(f: *mut c_void, info: *mut FrameInfo);
     fn ferro_linux_frame_release(f: *mut c_void);
+    fn ferro_linux_frame_ready(f: *mut c_void) -> i32;
     fn ferro_linux_alias(f: *mut c_void, display: isize, texture: *mut u32) -> *mut c_void;
     fn ferro_linux_alias_release(alias: *mut c_void, alive: i32);
     fn ferro_linux_convert(f: *mut c_void, display: isize, output: u32) -> i32;
@@ -291,6 +298,11 @@ impl Drop for Frame {
 #[derive(Clone)]
 pub struct NativeFrame(Arc<Frame>);
 impl NativeFrame {
+    /// Whether the implicit fences of the frame's buffers have signalled, so that a reader that
+    /// does not take part in implicit synchronization (Vulkan) sees the whole frame.
+    pub(crate) fn is_ready(&self) -> bool {
+        unsafe { ferro_linux_frame_ready(self.0 .0.as_ptr()) != 0 }
+    }
     pub fn info(&self) -> FrameInfo {
         let mut v = FrameInfo::default();
         unsafe { ferro_linux_frame_info(self.0 .0.as_ptr(), &mut v) }

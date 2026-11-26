@@ -244,6 +244,11 @@ The route, in pull requests stacked on the Skia ones:
      GPU with `blitFramebuffer` into a texture of the pool, and drawn like an image. The lease of
      a frame of the context is held by a WebGL2 fence until the copy is done. **Not done:** a video
      frame on a 3D mesh on this route is drawn with the colour of its layer.
+   - *Written, off by default: DMA-BUF frames on Vello's own Vulkan device on Linux* (#575,
+     `gpu/dma_buf_external_objects.rs`, `ferroui-media-linux/dma_buf.rs`). It needs both
+     `FERROUI_MEDIA_DMA_BUF=1` and `FERROUI_VELLO_DMA_BUF_IMPORT=1`, and has not run yet. The GL route
+     stays the default wherever the renderer has a context of OpenGL. **Not done:** NV12 frames
+     on this route, which is what hardware decoders usually produce.
    - *Next*, in the same way: the page transitions (the shader effects with images) and the shader
      effects of an application, which keep their CPU references; the lighting fill of a scene
      lighting effect (`draw_lighting`). Until each lands, WebGL2 draws it with the CPU path.

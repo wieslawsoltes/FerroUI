@@ -26,6 +26,8 @@ mod window_frame;
 pub mod gl_context_gpu;
 #[cfg(any(target_os = "linux", windows))]
 pub mod gl_external_objects;
+#[cfg(target_os = "linux")]
+pub mod dma_buf_external_objects;
 #[cfg(any(target_os = "linux", windows))]
 pub mod window_surface;
 

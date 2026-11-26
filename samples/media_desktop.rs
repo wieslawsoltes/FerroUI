@@ -54,7 +54,7 @@ pub fn video(
     {
         Ok((
             Rc::new(ferroui_media_video_linux::LinuxVideoProvider {
-                frames: ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)?,
+                frames: ferroui_media_linux::LinuxFrameSource::from_interop(interop, budget)?,
             }),
             Rc::new(ferroui_media_linux::NativeGlTextureImporter),
         ))
@@ -105,7 +105,7 @@ pub fn camera(
     {
         Ok((
             Rc::new(ferroui_media_camera_linux::LinuxCameraProvider::new(
-                ferroui_media_opengl::NativeGlFrameProducer::from_interop(interop, budget)
+                ferroui_media_linux::LinuxFrameSource::from_interop(interop, budget)
                     .map_err(camera_error)?,
                 ferroui_media_camera_linux::LinuxCameraProfile::Portal,
             )),
