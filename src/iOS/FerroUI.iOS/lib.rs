@@ -58,6 +58,8 @@ pub mod ios_launcher;
 pub mod metal;
 #[cfg(target_os = "ios")]
 pub mod single_view_lifetime;
+#[cfg(target_os = "ios")]
+mod spell_checker;
 
 pub use ferro_app_delegate::{FerroApplicationDelegate, IFerroAppDelegate};
 pub use platform::{IosPlatformOptions, IosRenderingMode};
@@ -71,5 +73,7 @@ pub use ferro_view::FerroView;
 pub use native_control_host_impl::UIViewControlHandle;
 #[cfg(target_os = "ios")]
 pub use platform::{IosApplicationExtensions, Platform};
+#[cfg(target_os = "ios")]
+pub use spell_checker::IosSpellChecker;
 #[cfg(target_os = "ios")]
 pub use view_controller::DefaultFerroViewController;

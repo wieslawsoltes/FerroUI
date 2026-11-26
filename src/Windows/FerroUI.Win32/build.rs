@@ -21,6 +21,7 @@ const COMPILED: &[(&str, &str)] = &[
     ("d_composition/dcomp.idl", "dcomp.rs"),
     ("win_rt/winrt.idl", "winrt.rs"),
     ("win32_com/win32.idl", "win32.rs"),
+    ("win32_com/spellcheck.idl", "spellcheck.rs"),
     ("automation/interop/uia.idl", "uia.rs"),
     ("automation/testing/uia_client.idl", "uia_client.rs"),
 ];

@@ -28,9 +28,9 @@
       "xml:space": 8
     },
     "page_statuses": {
-      "partial": 16,
+      "partial": 15,
       "pending": 31,
-      "ported": 79,
+      "ported": 80,
       "verified": 0
     },
     "pages": 126,
@@ -205,8 +205,8 @@
       "verified": 0
     },
     "member_candidates": {
-      "missing-source-candidate": 4636,
-      "source-candidate": 2826
+      "missing-source-candidate": 4635,
+      "source-candidate": 2827
     },
     "members_behavior": {
       "partial": 0,

@@ -1,7 +1,8 @@
 <!-- Ported from the four pinned TextBox examples of WinUI Gallery (14061eea); see ../NOTICE.md.
      The page has no code-behind upstream. FerroUI's TextBox has no Header (composed above the box,
-     whose automation name it is) and no IsSpellCheckEnabled (the multi-line box does not check
-     spelling). WinUI's CharacterSpacing is in thousandths of an em: 200 at a font size of 24 is a
+     whose automation name it is). The multi-line box checks its spelling through the spell checker
+     of the platform the gallery registers (use_platform_spell_checker; none on Linux and in the
+     browser, where it is not available). WinUI's CharacterSpacing is in thousandths of an em: 200 at a font size of 24 is a
      LetterSpacing of 4.8. SelectionHighlightColor is SelectionBrush. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
@@ -38,6 +39,7 @@
              MinWidth="400"
              AcceptsReturn="True"
              AutomationProperties.Name="multi-line TextBox"
+             IsSpellCheckEnabled="True"
              SelectionBrush="Green"
              TextWrapping="Wrap" />
   </StackPanel>

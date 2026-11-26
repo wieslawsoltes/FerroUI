@@ -51,6 +51,9 @@ use std::rc::Rc;
 mod text_box_history;
 use text_box_history::UndoRedoState;
 
+#[path = "text_box_spell_check.rs"]
+pub(crate) mod text_box_spell_check;
+
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 enum TextMutationKind {
     ExternalReplacement,
@@ -116,6 +119,8 @@ pub struct TextBox {
     has_touch_selection: Cell<bool>,
     /// The subscription of `presenter_property_changed` to the presenter.
     presenter_property_changed: RefCell<Option<Subscription>>,
+    /// The state of spell checking while the box checks its spelling (#1261).
+    spell_check: RefCell<Option<Box<text_box_spell_check::SpellCheckState>>>,
 }
 
 ferro_class! {
@@ -233,6 +238,7 @@ impl FerroObjectImpl for TextBox {
 
             let (old_text, new_text) = change.get_old_and_new_value::<Option<String>>();
             this.raise_text_change_events(old_text.as_deref().unwrap_or_default(), new_text.as_deref().unwrap_or_default());
+            this.on_spell_check_text_changed(old_text.as_deref().unwrap_or_default(), new_text.as_deref().unwrap_or_default());
 
             this.update_pseudoclasses();
             this.update_command_states();
@@ -244,7 +250,12 @@ impl FerroObjectImpl for TextBox {
                 this.update_password_input_privacy();
                 ferroui_base::input::text_input::TextInputMethodClient::request_reset(&*this.im_client);
             }
+            if property != Self::reveal_password_property().as_property() {
+                this.update_spell_check();
+            }
             this.update_command_states();
+        } else if property == Self::is_spell_check_enabled_property().as_property() {
+            this.update_spell_check();
         } else if property == Self::caret_index_property().as_property() {
             this.on_caret_index_changed(change);
         } else if property == Self::selection_start_property().as_property() {
@@ -280,6 +291,7 @@ impl VisualImpl for TextBox {
             }
         }
         this.subscribe_presenter_property_changes(this.presenter().as_ref());
+        this.update_spell_check();
     }
 
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
@@ -289,6 +301,7 @@ impl VisualImpl for TextBox {
             presenter.hide_caret();
         }
         this.subscribe_presenter_property_changes(None);
+        this.update_spell_check();
 
         this.im_client.set_presenter(None, None);
     }
@@ -1091,6 +1104,7 @@ impl TemplatedControlImpl for TextBox {
         if this.is_focused() {
             presenter.show_caret();
         }
+        this.update_spell_check();
     }
 }
 
@@ -1202,6 +1216,7 @@ ferroui_base::ferro_properties! { impl TextBox, also [
     TextBox::can_copy_property,
     TextBox::can_paste_property,
     TextBox::is_undo_enabled_property,
+    TextBox::is_spell_check_enabled_property,
     TextBox::undo_limit_property,
     TextBox::can_undo_property,
     TextBox::can_redo_property,
@@ -1488,6 +1503,15 @@ impl TextBox {
     );
 
     ferro_property!(for TextBox;
+        /// Defines the `IsSpellCheckEnabled` property (WinUI's default: `true`). The spelling
+        /// is checked only through the spell checker the application registered
+        /// ([`ferroui_base::platform::register_spell_checker`]).
+        pub fn is_spell_check_enabled_property() -> StyledProperty<bool> {
+            FerroProperty::register::<TextBox, _>("IsSpellCheckEnabled", true)
+        }
+    );
+
+    ferro_property!(for TextBox;
         /// Defines the `UndoLimit` property.
         pub fn undo_limit_property() -> StyledProperty<i32> {
             FerroProperty::register::<TextBox, _>("UndoLimit", UndoRedoHelper::<UndoRedoState>::DEFAULT_UNDO_LIMIT)
@@ -1554,6 +1578,10 @@ impl TextBox {
                 e.set_client(Some(tb.im_client.clone()));
             }
         }).detach();
+        // Before the handler of the context flyout opens it (class handlers run first).
+        InputElement::context_requested_event()
+            .add_class_handler::<TextBox>(|tb, e| tb.on_spell_check_context_requested(e))
+            .detach();
     }
 
     // A visual mask must also make the native input context private. Preserve
@@ -1614,6 +1642,7 @@ impl TextBox {
             is_in_touch_caret_mode: Cell::new(false),
             has_touch_selection: Cell::new(false),
             presenter_property_changed: RefCell::new(None),
+            spell_check: RefCell::new(None),
         }
     }
 
@@ -2091,6 +2120,21 @@ impl TextBox {
 
     pub fn set_is_undo_enabled(&self, value: bool) {
         self.set_value(Self::is_undo_enabled_property(), value)
+    }
+
+    /// Whether the text box checks its spelling and underlines the misspelled words (#1261).
+    ///
+    /// The spelling is checked through the spell checker of the platform the application
+    /// registered ([`ferroui_base::platform::register_spell_checker`]; the desktop platforms do
+    /// it with `use_platform_spell_checker`), never for a password box or a read-only box. A
+    /// right click on an underlined word puts its suggestions, "Add to dictionary" and "Ignore"
+    /// at the top of the context menu flyout.
+    pub fn is_spell_check_enabled(&self) -> bool {
+        self.get_value(Self::is_spell_check_enabled_property())
+    }
+
+    pub fn set_is_spell_check_enabled(&self, value: bool) {
+        self.set_value(Self::is_spell_check_enabled_property(), value)
     }
 
     /// The maximum number of items that can reside in the undo stack.

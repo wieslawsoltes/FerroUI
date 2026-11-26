@@ -88,6 +88,7 @@ fn text_box_examples_keep_the_source_properties() {
     assert_eq!(multi_line.text_wrapping(), TextWrapping::Wrap);
     assert_eq!(multi_line.min_width(), 400.0);
     assert_eq!(color(multi_line.selection_brush()), Some(Colors::GREEN));
+    assert!(multi_line.is_spell_check_enabled());
 }
 
 #[test]

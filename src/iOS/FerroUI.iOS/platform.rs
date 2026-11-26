@@ -136,6 +136,11 @@ mod uikit {
         /// Uses the iOS platform with the application delegate whose
         /// activations the activatable lifetime of the application reports.
         fn use_ios_with_delegate(&self, app_delegate: Rc<dyn IFerroAppDelegate>) -> AppBuilder;
+
+        /// Registers UIKit's `UITextChecker` as the spell checker of the application once the
+        /// platform services are set up, so that a `TextBox` with `IsSpellCheckEnabled`
+        /// underlines its misspelled words (#1261).
+        fn use_platform_spell_checker(&self) -> AppBuilder;
     }
 
     fn use_ios(builder: &AppBuilder, app_delegate: Option<Rc<dyn IFerroAppDelegate>>) -> AppBuilder {
@@ -161,6 +166,12 @@ mod uikit {
 
         fn use_ios_with_delegate(&self, app_delegate: Rc<dyn IFerroAppDelegate>) -> AppBuilder {
             use_ios(self, Some(app_delegate))
+        }
+
+        fn use_platform_spell_checker(&self) -> AppBuilder {
+            self.after_platform_services_setup(|_| {
+                crate::IosSpellChecker::register();
+            })
         }
     }
 

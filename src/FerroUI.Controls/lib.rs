@@ -642,6 +642,8 @@ pub use text_box::*;
 pub use text_box_text_input_method_client::TextBoxTextInputMethodClient;
 #[cfg(test)]
 mod text_box_tests;
+#[cfg(test)]
+mod text_box_spell_check_tests;
 
 mod masked_text_box;
 pub use masked_text_box::MaskedTextBox;

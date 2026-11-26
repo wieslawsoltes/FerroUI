@@ -25776,6 +25776,16 @@
         ],
         "attached": false
       },
+      "IsSpellCheckEnabled": {
+        "name": "IsSpellCheckEnabled",
+        "type_name": "bool",
+        "documentation": "TextBox.IsSpellCheckEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "UndoLimit": {
         "name": "UndoLimit",
         "type_name": "i32",

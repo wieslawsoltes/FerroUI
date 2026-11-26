@@ -18,6 +18,13 @@ pub trait AppBuilderDesktopExtensions {
     /// Panics on an operating system whose windowing backend is not
     /// supported yet (everything but macOS, Windows and Linux).
     fn use_platform_detect(&self) -> AppBuilder;
+
+    /// Registers the spell checker of the operating system once the platform services are set
+    /// up, so that a `TextBox` with `IsSpellCheckEnabled` underlines its misspelled words
+    /// (#1261): `NSSpellChecker` on macOS, the spell checking API of Windows (Windows 8 and
+    /// later). Linux has no spell checker of the platform: spell checking is not available
+    /// there (`ferroui_base::platform::spell_checker()` is `None`), as without this call.
+    fn use_platform_spell_checker(&self) -> AppBuilder;
 }
 
 impl AppBuilderDesktopExtensions for AppBuilder {
@@ -69,7 +76,24 @@ impl AppBuilderDesktopExtensions for AppBuilder {
         #[cfg(any(target_os = "macos", windows, target_os = "linux"))]
         self.clone()
     }
+
+    fn use_platform_spell_checker(&self) -> AppBuilder {
+        self.after_platform_services_setup(|_| register_spell_checker())
+    }
 }
+
+#[cfg(target_os = "macos")]
+fn register_spell_checker() {
+    ferroui_native::MacOSSpellChecker::register();
+}
+
+#[cfg(windows)]
+fn register_spell_checker() {
+    ferroui_win32::Win32SpellChecker::register();
+}
+
+#[cfg(not(any(target_os = "macos", windows)))]
+fn register_spell_checker() {}
 
 #[cfg(target_os = "macos")]
 fn load_ferro_native(builder: &AppBuilder) {

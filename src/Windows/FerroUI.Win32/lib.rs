@@ -85,6 +85,8 @@ mod screen_impl;
 #[cfg(windows)]
 mod simple_window;
 #[cfg(windows)]
+mod spell_checker;
+#[cfg(windows)]
 mod win32_native_to_managed_menu_exporter;
 #[cfg(windows)]
 mod win32_platform;
@@ -103,6 +105,8 @@ pub use swap_chain_top_level_impl::SwapChainTopLevelImpl;
 
 #[cfg(windows)]
 pub use clipboard_impl::ClipboardImpl;
+#[cfg(windows)]
+pub use spell_checker::Win32SpellChecker;
 #[cfg(windows)]
 pub use cursor_factory::{CursorFactory, CursorImpl};
 #[cfg(windows)]
