@@ -1722,6 +1722,52 @@ the code of the reader; and the time of theme construction and first templates. 
 lines can move with the amount of static data alone (#1069), so a change of this kind needs its
 timing read against a base measured in the same batch.
 
+### 4.33 The platform support of the code editor is linked with the editor (PR 1057)
+
+The first part of the code editor stack extends the macOS backend for the editor: VoiceOver reads
+and selects the characters, lines and styles of the editor's text, and the clipboard exchanges the
+editor's application formats with browsers through Chromium's web custom format map. Both were
+compiled into every application. The vtable of `IFrnAutomationPeer` keeps the 18
+`TextProvider_*` methods whatever the application uses, and the Objective-C classes of
+`ferro_native_osx` are linked whole (`+whole-archive`), so a provider hook alone could not drop
+them.
+
+- **The `text-editor` feature of `ferroui-native`.** With it, `build.rs` defines `FRN_TEXT_EDITOR`
+  for the Objective-C sources, which compiles the text range methods of `FrnAccessibilityElement`
+  (`accessibilityStringForRange:` and the others, the text area role of a multi-line editor, the
+  value of a text with ranges and the selected text notification), and `frn_automation_peer.rs`
+  compiles the `TextProvider_*` methods behind them, with their span arrays and styled runs.
+  Without it the element answers as it did before PR 1057 (no text ranges), and the
+  `TextProvider_*` methods of the peer answer with nothing; native code never calls them. The IDL,
+  the vtable order and the C ABI header are the same in both modes. `ferroui-edit` depends on
+  `ferroui-native` (macOS) with the feature, so cargo turns it on for every application that links
+  the editor; `ferroui-desktop` forwards it as `text-editor` for an application with span
+  operations of its own.
+- **The Chromium map on macOS.** The native clipboard tests `MAP_ENABLED` of `ferroui-base` (the
+  feature `chromium-clipboard-map`, which `ferroui-edit` turns on) before the code that publishes
+  and reads the map, so that without the feature that code is not linked.
+- **`IStorageFile::write_with_async`** is a method of `dyn IStorageFile`, not a default method of
+  the trait: the default body was in the vtable of every storage file. A provider that commits a
+  write itself (the browser) implements `write_committed_async`.
+- **Routed events.** The out-of-line construction of a routed event (`create_inner_core`, an
+  `#[inline(never)]` registration) made the `dist` hello world 9.8 kB larger and is not kept; the
+  registration is the one of main.
+
+Measured on macOS (arm64), hello world, `__text` in bytes, against the base of PR 1057:
+
+| Build | Base (`336498e69`) | PR 1057 before (`abe39736e`) | PR 1057 with these changes |
+|---|---:|---:|---:|
+| `release` | 12,929,012 | 12,966,476 (+37,464) | 12,942,008 (+12,996) |
+| `dist` | 11,754,192 | +34,624 in the size run of CI | 11,757,772 (+3,580) |
+
+In `dist` the rest is code PR 1057 adds to paths every application runs: the value of a value
+provider as bytes and a length, the bounds checks of the pasteboard, the tag of input method
+commits and the rounded labels of the text drawing sink. In `release` (thin link-time
+optimisation over 16 code generation units) most of the remaining difference is in functions
+whose source PR 1057 does not change (`simplify_dirty_rects`, the pixel loops of the effect
+brush, the generic sort and hash helpers): the partition of the code moved, which `dist` (one
+unit, fat link-time optimisation) does not show.
+
 ## 5. What an executable is made of
 
 ### 5.1 Sections (macOS, release, unstripped)

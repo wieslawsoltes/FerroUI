@@ -6,6 +6,9 @@
 #include "FrnView.h"
 #include "WindowInterfaces.h"
 
+// The text ranges of an editor's text provider (the `text-editor` feature of ferroui-native,
+// FRN_TEXT_EDITOR): without it the element has the accessibility of main's text fields.
+#if FRN_TEXT_EDITOR
 static NSRange ToNSRange(FrnTextSpan span)
 {
     if (span.Start < 0 || span.End < span.Start || span.End >= NSNotFound)
@@ -92,6 +95,7 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
     if (style.Script != 0)
         [text addAttribute:NSAccessibilitySuperscriptTextAttribute value:@(style.Script) range:range];
 }
+#endif // FRN_TEXT_EDITOR
 
 @implementation FrnAccessibilityElement
 {
@@ -180,9 +184,13 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
         case AutomationCheckBox: return NSAccessibilityCheckBoxRole;
         case AutomationComboBox: return NSAccessibilityPopUpButtonRole;
         case AutomationComboBoxItem: return NSAccessibilityMenuItemRole;
+#if FRN_TEXT_EDITOR
         case AutomationEdit:
             return _peer->TextProvider_HasRanges() && _peer->TextProvider_IsMultiline()
                 ? NSAccessibilityTextAreaRole : NSAccessibilityTextFieldRole;
+#else
+        case AutomationEdit: return NSAccessibilityTextFieldRole;
+#endif
         case AutomationHyperlink: return NSAccessibilityLinkRole;
         case AutomationImage: return NSAccessibilityImageRole;
         case AutomationListItem: return NSAccessibilityRowRole;
@@ -333,11 +341,13 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
     }
     else if (_peer->IsValueProvider())
     {
+#if FRN_TEXT_EDITOR
         if (_peer->TextProvider_HasRanges())
         {
             const auto span = _peer->TextProvider_GetDocumentSpan();
             return [self accessibilityStringForRange:ToNSRange(span)];
         }
+#endif
         return GetNSStringAndRelease(_peer->ValueProvider_GetValue());
     }
     else if (_peer->GetAutomationControlType() == AutomationText)
@@ -375,6 +385,7 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
     }
 }
 
+#if FRN_TEXT_EDITOR
 - (NSInteger)accessibilityNumberOfCharacters
 {
     return ToNSRange(_peer->TextProvider_GetDocumentSpan()).length;
@@ -499,6 +510,7 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
     const auto line = _peer->TextProvider_GetInsertionPointLine();
     return line < 0 ? NSNotFound : line;
 }
+#endif // FRN_TEXT_EDITOR
 
 - (BOOL)accessibilityIsAttributeSettable:(NSAccessibilityAttributeName)attribute
 {
@@ -511,9 +523,11 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
         return NO;
     }
 
+#if FRN_TEXT_EDITOR
     if ([attribute isEqualToString:NSAccessibilitySelectedTextRangeAttribute])
         return _peer->IsEnabled() && _peer->TextProvider_HasRanges() && _peer->TextProvider_CanSelect();
 
+#endif
     return [super accessibilityIsAttributeSettable:attribute];
 }
 
@@ -720,6 +734,7 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
 
 - (BOOL)isAccessibilitySelectorAllowed:(SEL)selector
 {
+#if FRN_TEXT_EDITOR
     if (selector == @selector(setAccessibilitySelectedTextRange:))
         return _peer->IsEnabled() && _peer->TextProvider_HasRanges() && _peer->TextProvider_CanSelect();
 
@@ -743,6 +758,7 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
         selector == @selector(accessibilityStyleRangeForIndex:))
         return _peer->TextProvider_HasStyles();
 
+#endif
     if (selector == @selector(setAccessibilityValue:))
     {
         return (_peer->IsValueProvider() && !_peer->ValueProvider_IsReadOnly()) ||
@@ -858,9 +874,11 @@ static void AddAccessibleTextStyle(NSMutableAttributedString* text, NSRange rang
         case SelectionProvider_Selection:
             NSAccessibilityPostNotification(self, NSAccessibilitySelectedChildrenChangedNotification);
             break;
+#if FRN_TEXT_EDITOR
         case TextProvider_Selection:
             NSAccessibilityPostNotification(self, NSAccessibilitySelectedTextChangedNotification);
             break;
+#endif
         case ToggleProvider_ToggleState:
             NSAccessibilityPostNotification(self, NSAccessibilityValueChangedNotification);
             break;

@@ -3,7 +3,7 @@ use crate::clipboard_read_session::ClipboardReadSession;
 use crate::frn_string::{frn_string_bytes, frn_string_to_string};
 use crate::storage_provider_api::{NativeStorageItem, StorageProviderApi};
 use ferroui_base::input::platform::chromium_clipboard::{
-    ChromiumClipboard, FormatAlias, MAX_MAP_BYTES,
+    ChromiumClipboard, FormatAlias, MAP_ENABLED, MAX_MAP_BYTES,
 };
 use ferroui_base::input::platform::{
     ClipboardError, PlatformDataTransferItem, PlatformDataTransferItemImpl,
@@ -61,7 +61,7 @@ impl ClipboardDataTransferItem {
         PlatformDataTransferItem::new(ClipboardDataTransferItem {
             session,
             item_index,
-            web_formats: read_web_formats.then(OnceCell::new),
+            web_formats: (MAP_ENABLED && read_web_formats).then(OnceCell::new),
         })
     }
 
@@ -130,7 +130,7 @@ impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
         let mut formats = to_data_formats(formats.as_deref(), &|format| {
             self.session.is_text_format(format)
         });
-        if let Some(aliases) = &self.web_formats {
+        if let Some(aliases) = self.web_formats.as_ref().filter(|_| MAP_ENABLED) {
             let aliases = aliases.get_or_init(|| self.read_web_formats(&formats));
             formats.extend(aliases.iter().map(|alias| alias.application.clone()));
         }
@@ -150,6 +150,7 @@ impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
         if let Some(alias) = self
             .web_formats
             .as_ref()
+            .filter(|_| MAP_ENABLED)
             .and_then(OnceCell::get)
             .and_then(|aliases| aliases.iter().find(|alias| alias.application == *format))
         {
@@ -171,7 +172,8 @@ impl PlatformDataTransferItemImpl for ClipboardDataTransferItem {
             return Ok(self.try_get_bitmap(&native_format)?.map(|value| Rc::new(value) as Rc<dyn Any>));
         }
 
-        let application_text = self.web_formats.is_some()
+        let application_text = MAP_ENABLED
+            && self.web_formats.is_some()
             && format.kind() == DataFormatKind::Application
             && format.data_type() == Some(TypeId::of::<String>());
         if application_text || self.session.is_text_format(&native_format) {

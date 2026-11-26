@@ -10,6 +10,7 @@ use ferroui_base::platform::storage::{
     FilePickerFileType, FilePickerFileTypes, FilePickerOpenOptions, FilePickerSaveOptions, FolderPickerOpenOptions,
     IStorageBookmarkFile, IStorageBookmarkFolder, IStorageBookmarkItem, IStorageFile, IStorageFolder, IStorageItem,
     IStorageProvider, OpenFilePickerResult, SaveFilePickerResult, StorageItemProperties as ItemProperties,
+    StorageWriteCallback,
     WellKnownFolder,
 };
 use ferroui_base::reactive::IDisposable;
@@ -594,12 +595,12 @@ impl IStorageFile for JsStorageFile {
         })
     }
 
-    fn write_with_async(
+    fn write_committed_async(
         &self,
-        write: Box<dyn FnOnce(&mut dyn Write) -> io::Result<()>>,
-    ) -> LocalBoxFuture<io::Result<()>> {
+        write: StorageWriteCallback,
+    ) -> Result<LocalBoxFuture<io::Result<()>>, StorageWriteCallback> {
         let handle = self.base.file_handle();
-        Box::pin(async move {
+        Ok(Box::pin(async move {
             let file = JsStorageFile::detached(handle)?;
             let mut target = file.open_write_stream_async().await?;
             match write(&mut target) {
@@ -609,7 +610,7 @@ impl IStorageFile for JsStorageFile {
                     Err(error)
                 }
             }
-        })
+        }))
     }
 }
 
