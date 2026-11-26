@@ -550,6 +550,7 @@ FerroUI.Controls.NavigationView.IsPaneOpen: bool = True; OneWay
 FerroUI.Controls.NavigationView.IsPaneToggleButtonVisible: bool = True; OneWay
 FerroUI.Controls.NavigationView.IsPaneVisible: bool = True; OneWay
 FerroUI.Controls.NavigationView.IsSettingsVisible: bool = True; OneWay
+FerroUI.Controls.NavigationView.IsTitleBarAutoPaddingEnabled: bool = True; OneWay
 FerroUI.Controls.NavigationView.MenuItemContainerStyle: Option<Ref<ControlTheme>> = (null); OneWay
 FerroUI.Controls.NavigationView.MenuItemTemplate: Option<Rc<dyn IDataTemplate>> = (null); OneWay
 FerroUI.Controls.NavigationView.MenuItemsSource: Option<ItemsSource> = (null); OneWay

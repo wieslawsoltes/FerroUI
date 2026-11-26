@@ -14349,6 +14349,16 @@
         ],
         "attached": false
       },
+      "IsTitleBarAutoPaddingEnabled": {
+        "name": "IsTitleBarAutoPaddingEnabled",
+        "type_name": "bool",
+        "documentation": "NavigationView.IsTitleBarAutoPaddingEnabled: bool",
+        "values": [
+          "True",
+          "False"
+        ],
+        "attached": false
+      },
       "PaneTitle": {
         "name": "PaneTitle",
         "type_name": "String",
