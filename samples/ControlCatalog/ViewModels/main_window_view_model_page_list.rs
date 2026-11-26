@@ -128,6 +128,8 @@ pub(super) fn page_sections() -> (Vec<Rc<HomeSection>>, Vec<UnavailablePage>) {
             s.add("/Pages/MenuPage.xaml", "Menu", Icons::MENU, "Menu bars with nested menu items");
         }),
         section("Navigation & Pages", Icons::HAMBURGER_UNREAD, &mut unavailable, |s| {
+            // Not from upstream: BreadcrumbBar of WinUI (docs/porting/winui-controls.md, section 10.11).
+            s.add("/Pages/BreadcrumbBarPage.xaml", "BreadcrumbBar", Icons::NAVIGATION, "The path to the current location as clickable crumbs");
             s.add("/Pages/CarouselDemoPage.xaml", "CarouselPage", Icons::SLIDES, "Swipeable page-based navigation");
             s.add("/Pages/ContentDemoPage.xaml", "ContentPage", Icons::DOCUMENT, "A page that hosts a single content view");
             s.add("/Pages/DrawerDemoPage.xaml", "DrawerPage", Icons::DRAWER, "A page with a sliding navigation drawer");
