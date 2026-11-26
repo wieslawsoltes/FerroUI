@@ -17,6 +17,7 @@ mod inline_ui_container;
 mod italic;
 mod line_break;
 mod line_spacing_rule;
+mod list_marker;
 mod paragraph;
 mod rich_text_document;
 mod run;
@@ -52,6 +53,8 @@ pub use inline_ui_container::InlineUIContainer;
 pub use italic::Italic;
 pub use line_break::LineBreak;
 pub use line_spacing_rule::LineSpacingRule;
+pub(crate) use list_marker::{ListNumbering, MAX_LIST_LEVEL};
+pub use list_marker::{MarkerAlignment, MarkerStyle, MarkerType};
 pub use paragraph::Paragraph;
 pub use rich_text_document::{
     DocumentChangeKind, DocumentChangedEventArgs, DocumentEditBatch, DocumentError,
@@ -78,6 +81,9 @@ pub(crate) const MARKUP_TYPES: &[&MarkupType] = &[
     <RichTextDocument as MarkupTyped>::MARKUP,
     <LineStackingStrategy as MarkupTyped>::MARKUP,
     <LineSpacingRule as MarkupTyped>::MARKUP,
+    <MarkerType as MarkupTyped>::MARKUP,
+    <MarkerStyle as MarkupTyped>::MARKUP,
+    <MarkerAlignment as MarkupTyped>::MARKUP,
     <TextGravity as MarkupTyped>::MARKUP,
     <UnderlineStyle as MarkupTyped>::MARKUP,
     <HyperlinkClickEventArgs as MarkupTyped>::MARKUP,
@@ -104,6 +110,9 @@ pub(crate) fn register_value_type_table() {
     ValueTypes::register_used::<RichTextDocument>();
     ValueTypes::register_used::<LineStackingStrategy>();
     ValueTypes::register_used::<LineSpacingRule>();
+    ValueTypes::register_used::<MarkerType>();
+    ValueTypes::register_used::<MarkerStyle>();
+    ValueTypes::register_used::<MarkerAlignment>();
     ValueTypes::register_used::<TextGravity>();
     ValueTypes::register_used::<UnderlineStyle>();
     ValueTypes::register_used::<TextHighlightRange>();
@@ -136,6 +145,27 @@ impl ferroui_base::data::core::ValueTypeRegistration for LineSpacingRule {
     fn register_value_conversions() {
         use ferroui_base::data::core::ValueTypes;
         ValueTypes::register_nullable::<LineSpacingRule>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for MarkerType {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<MarkerType>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for MarkerStyle {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<MarkerStyle>();
+    }
+}
+
+impl ferroui_base::data::core::ValueTypeRegistration for MarkerAlignment {
+    fn register_value_conversions() {
+        use ferroui_base::data::core::ValueTypes;
+        ValueTypes::register_nullable::<MarkerAlignment>();
     }
 }
 
@@ -191,3 +221,6 @@ mod text_highlighter_tests;
 
 #[cfg(test)]
 mod rich_paragraph_tabs_tests;
+
+#[cfg(test)]
+mod rich_paragraph_list_tests;

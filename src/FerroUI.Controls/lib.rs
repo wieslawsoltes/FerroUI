@@ -585,6 +585,8 @@ pub use rich_edit_box_text_presenter::RichEditBoxTextPresenter;
 #[cfg(test)]
 mod rich_edit_box_tests;
 #[cfg(test)]
+mod rich_edit_box_list_tests;
+#[cfg(test)]
 mod rich_edit_context_menu_tests;
 pub use context_menu_event_args::{ContextMenuEventArgs, ContextMenuOpeningRoutedEvent};
 pub use rich_text_block::{

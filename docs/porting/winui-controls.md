@@ -450,7 +450,7 @@ Phase G4 completes the pages that had native examples for a reviewed subset only
 | ToggleButton | 1 of 1 | ported | `button_samples.rs` | `button_samples_tests.rs` |
 | DropDownButton | 2 of 2 | ported | `Pages/DropDownButton.xaml` (no code-behind upstream) | `button_samples_tests.rs` |
 | SplitButton | 2 of 2 | ported | `button_samples.rs` | `button_samples_tests.rs` |
-| ToggleSplitButton | 1 partial: RichEditBox has no paragraph list type | partial | `button_samples.rs` | `button_samples_tests.rs` |
+| ToggleSplitButton | 1 ported: the bullet buttons and the checked state set and remove the list type of the RichEditBox paragraphs (#1257) | ported | `button_samples.rs` | `button_samples_tests.rs` |
 | CheckBox | 3 of 3 | ported | `input_samples.rs` | `tests.rs` |
 | RadioButton | 2 of 2 | ported | `examples.rs` | `tests.rs` |
 | ScratchPad | the page and its code behind; unindent keeps non-whitespace text | ported | `scratch_pad_samples.rs` | `scratch_pad_samples_tests.rs` |

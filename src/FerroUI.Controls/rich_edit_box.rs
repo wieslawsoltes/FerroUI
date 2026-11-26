@@ -699,7 +699,7 @@ impl InputElementImpl for RichEditBox {
             match event.key {
                 Key::Back => {
                     if !this.is_read_only() {
-                        this.handle_edit(this.delete_backward(whole_word));
+                        this.handle_edit(this.delete_backward_or_end_list(whole_word));
                     }
                 }
                 Key::Delete => {
@@ -714,13 +714,14 @@ impl InputElementImpl for RichEditBox {
                         if event.key_modifiers.contains(KeyModifiers::SHIFT) {
                             this.handle_edit(this.insert_line_break());
                         } else {
-                            this.handle_edit(this.insert_text("\n"));
+                            this.handle_edit(this.insert_paragraph_break());
                         }
                     }
                 }
                 Key::Tab if this.accepts_tab() => {
                     if !this.is_read_only() {
-                        this.handle_edit(this.insert_text("\t"));
+                        let outdent = event.key_modifiers.contains(KeyModifiers::SHIFT);
+                        this.handle_edit(this.insert_tab_or_change_list_level(outdent));
                     }
                 }
                 _ => {
@@ -1988,6 +1989,42 @@ impl RichEditBox {
         let editor = self.editor();
         self.synchronize_editor_selection(&editor)?;
         editor.insert_fragment(fragment, EditKind::Paste)
+    }
+    /// Enter: a paragraph break, or the end of the list in an empty list paragraph (#1257).
+    pub(crate) fn insert_paragraph_break(&self) -> Result<bool, EditError> {
+        let editor = self.editor();
+        self.synchronize_editor_selection(&editor)?;
+        if editor.end_list_on_enter()? {
+            return Ok(true);
+        }
+        self.insert_text("\n")
+    }
+    /// Backspace: at the start of a list paragraph it removes the paragraph's marker (#1257).
+    pub(crate) fn delete_backward_or_end_list(&self, whole_word: bool) -> Result<bool, EditError> {
+        let editor = self.editor();
+        self.synchronize_editor_selection(&editor)?;
+        if !whole_word && editor.remove_list_on_backspace()? {
+            return Ok(true);
+        }
+        editor.delete_backward(whole_word)
+    }
+    /// Moves the list paragraphs of the selection `delta` levels deeper or shallower, between
+    /// level 1 and 9, as one undo unit (a FerroUI addition: what Tab and Shift+Tab do in a list,
+    /// #1257). Returns whether a level changed.
+    pub fn change_list_level(&self, delta: i32) -> Result<bool, EditError> {
+        let editor = self.editor();
+        self.synchronize_editor_selection(&editor)?;
+        editor.change_list_level(delta)
+    }
+    /// Tab and Shift+Tab: one list level deeper or shallower at the start of a list paragraph
+    /// or over several paragraphs of a list (#1257), a tab otherwise.
+    pub(crate) fn insert_tab_or_change_list_level(&self, outdent: bool) -> Result<bool, EditError> {
+        let editor = self.editor();
+        self.synchronize_editor_selection(&editor)?;
+        if editor.tab_changes_list_level() {
+            return editor.change_list_level(if outdent { -1 } else { 1 });
+        }
+        self.insert_text("\t")
     }
     pub fn delete_backward(&self, whole_word: bool) -> Result<bool, EditError> {
         let editor = self.editor();

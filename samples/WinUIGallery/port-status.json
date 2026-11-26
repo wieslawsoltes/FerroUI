@@ -1688,7 +1688,7 @@
       "examples": []
     },
     "ToggleSplitButton": {
-      "status": "partial",
+      "status": "ported",
       "implementation": [
         "samples/WinUIGallery/Pages/ToggleSplitButton.xaml",
         "samples/WinUIGallery/examples.rs",
@@ -1701,10 +1701,10 @@
         },
         {
           "path": "samples/WinUIGallery/button_samples_tests.rs",
-          "name": "toggle_split_button_bullets_set_the_symbol_the_name_and_the_checked_state"
+          "name": "toggle_split_button_bullets_set_the_symbol_the_name_the_checked_state_and_the_list"
         }
       ],
-      "notes": "The source example uses native ToggleSplitButton with BulletButton_Click of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button sets the symbol (List or Bullets) and the automation name (Bullets or Roman Numerals), checks the button, closes the flyout and focuses the RichEditBox. Missing: FerroUI's RichEditBox has no paragraph list type (ITextParagraphFormat.ListType, MarkerType), so neither BulletButton_Click nor MyListButton_IsCheckedChanged sets or removes the list of the text; the page stays partial until RichEditBox has it.",
+      "notes": "The source example uses native ToggleSplitButton with BulletButton_Click and MyListButton_IsCheckedChanged of ToggleSplitButtonPage.xaml.cs in Rust: the clicked bullet button picks the list type (MarkerType.Bullet or UppercaseRoman), sets the symbol (List or Bullets) and the automation name (Bullets or Roman Numerals), sets the list type of the selection's paragraphs (Selection.ParagraphFormat.ListType), checks the button, closes the flyout and focuses the RichEditBox; checking the button applies the list type, unchecking it removes the list (MarkerType.None). The editor continues a list on Enter, ends it in an empty item and on Backspace at the start of an item, and changes the level with Tab and Shift+Tab where it accepts tabs (#1257).",
       "examples": []
     },
     "ToggleSwitch": {

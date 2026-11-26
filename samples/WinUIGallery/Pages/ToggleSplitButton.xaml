@@ -1,8 +1,8 @@
 <!-- Adapted from the pinned ToggleSplitButton example of WinUI Gallery (14061eea) and the handlers
      of ToggleSplitButtonPage.xaml.cs (button_samples.rs); see ../NOTICE.md. The bullet buttons
-     change the symbol, the automation name and the checked state, and close the flyout, as in the
-     source. FerroUI's RichEditBox has no paragraph list type (ParagraphFormat.ListType,
-     MarkerType), so the list of the text is not set: the page stays partial. -->
+     pick the list type, change the symbol, the automation name and the checked state, set the list
+     type of the selected paragraphs (ParagraphFormat.ListType) and close the flyout, as in the
+     source; checking the button applies the list, unchecking it removes the list. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="ToggleSplitButtonExample1" Spacing="8">

@@ -2,15 +2,16 @@
 //! Source/dependency mapping and validation: docs/porting/winui-rich-text.
 
 use crate::documents::{
-    Block, EmbeddedControlRun, Inline, LineSpacingRule, LineStackingStrategy, Paragraph,
-    RichTextDocument, TextHighlightRegion, Typography,
+    Block, EmbeddedControlRun, Inline, LineSpacingRule, LineStackingStrategy, ListNumbering,
+    MarkerAlignment, MarkerType, Paragraph, RichTextDocument, TextHighlightRegion, Typography,
 };
 use crate::text_block::InlinesTextSource;
 use ferroui_base::media::text_formatting::TextRun;
 use ferroui_base::media::text_formatting::{
     FontFamilyLineMetrics, GenericTextParagraphProperties, GenericTextRunProperties,
-    ITextDrawingSink, InterWordJustification, LogicalTextRunEnumerator, TextCollapsingProperties,
-    TextEndOfParagraph, TextFormatter, TextFormatterImpl, TextLine, TextLineBreak, TextLineImpl,
+    ITextDrawingSink, InterWordJustification, LogicalTextRunEnumerator, TextCharacters,
+    TextCollapsingProperties, TextEndOfParagraph, TextFormatter, TextFormatterImpl, TextLine,
+    TextLineBreak, TextLineImpl,
     TextLineMetricsMode, TextParagraphProperties, TextRunCache, TextRunProperties, TextTabStops,
 };
 use ferroui_base::media::{
@@ -42,7 +43,167 @@ pub(crate) struct RichParagraphSource {
     /// paragraph properties takes them instead (F1).
     lines: Rc<RefCell<Option<ParagraphLines>>>,
     has_embedded_controls: bool,
+    /// The marker of a list paragraph (#1257), shared with the next source while it is the same.
+    marker: Option<Rc<ParagraphListMarker>>,
 }
+
+/// The shaped marker of a list paragraph: drawn before its first line, in the space its
+/// `ListTab` and level take before the text of all its lines (docs/porting/winui-rich-text.md
+/// 11.10). The marker is not text of the document: positions, selection and hit testing do not
+/// see it.
+pub(crate) struct ParagraphListMarker {
+    text: String,
+    level: i32,
+    tab: f64,
+    gap: f64,
+    alignment: MarkerAlignment,
+    properties: Rc<dyn TextRunProperties>,
+    flow_direction: ferroui_base::media::FlowDirection,
+    /// None for an empty marker (`MarkerStyle::NoNumber`).
+    line: Option<Rc<dyn TextLine>>,
+}
+
+impl ParagraphListMarker {
+    fn new(
+        text: String,
+        level: i32,
+        tab: f64,
+        alignment: MarkerAlignment,
+        properties: Rc<dyn TextRunProperties>,
+        flow_direction: ferroui_base::media::FlowDirection,
+        text_line_bounds: TextLineBounds,
+    ) -> Self {
+        let em = properties.font_rendering_em_size();
+        let line = (!text.is_empty()).then(|| {
+            let runs: Vec<Rc<dyn TextRun>> = vec![Rc::new(TextCharacters::from_str(&text, properties.clone()))];
+            let source = InlinesTextSource::new(Rc::new(runs), None);
+            let paragraph = GenericTextParagraphProperties::with_all(
+                flow_direction,
+                TextAlignment::Left,
+                true,
+                false,
+                properties.clone(),
+                TextWrapping::NoWrap,
+                f64::NAN,
+                0.0,
+                0.0,
+            );
+            paragraph.set_text_line_bounds(text_line_bounds);
+            paragraph.set_line_metrics_mode(TextLineMetricsMode::FontFamily);
+            let paragraph: Rc<dyn TextParagraphProperties> = Rc::new(paragraph);
+            <dyn TextFormatter>::current().format_line(&source, 0, MARKER_LINE_WIDTH, &paragraph, None)
+        });
+        Self {
+            text,
+            level,
+            tab: if tab > 0.0 { tab } else { 2.0 * em },
+            gap: 0.25 * em,
+            alignment,
+            properties,
+            flow_direction,
+            line: line.flatten(),
+        }
+    }
+
+    fn width(&self) -> f64 {
+        self.line.as_ref().map_or(0.0, |line| line.width_including_trailing_whitespace())
+    }
+
+    /// The marker's own space: its tab, or the marker and a quarter em where it is wider.
+    fn space(&self) -> f64 {
+        self.tab.max(self.width() + self.gap)
+    }
+
+    /// The indent of every line of the paragraph: the levels above it and the marker's space.
+    fn indent(&self) -> f64 {
+        f64::from(self.level - 1) * self.tab + self.space()
+    }
+
+    /// Where the marker starts after the indent of the levels above it.
+    fn offset_in_space(&self) -> f64 {
+        let free = (self.space() - self.gap - self.width()).max(0.0);
+        match self.alignment {
+            MarkerAlignment::Left => 0.0,
+            MarkerAlignment::Center => free / 2.0,
+            MarkerAlignment::Right => free,
+        }
+    }
+
+    /// Whether this marker is the one `new` would shape, so it can serve again.
+    fn is_same(
+        &self,
+        text: &str,
+        level: i32,
+        tab: f64,
+        alignment: MarkerAlignment,
+        properties: &Rc<dyn TextRunProperties>,
+        flow_direction: ferroui_base::media::FlowDirection,
+    ) -> bool {
+        let tab = if tab > 0.0 { tab } else { 2.0 * properties.font_rendering_em_size() };
+        self.text == text
+            && self.level == level
+            && self.tab.to_bits() == tab.to_bits()
+            && self.alignment == alignment
+            && self.flow_direction == flow_direction
+            && **properties == *self.properties
+    }
+
+    /// The marker's line and origin for the first line of its paragraph: on its baseline, at
+    /// the start of its space (`base_left`/`base_right`: the paragraph's margins and indents).
+    fn place(
+        &self,
+        first: &RichTextLine,
+        base_left: f64,
+        base_right: f64,
+        width: f64,
+        rtl: bool,
+    ) -> Option<PlacedListMarker> {
+        let line = self.line.clone()?;
+        let levels = f64::from(self.level - 1) * self.tab;
+        let x = if rtl {
+            let right = if width.is_finite() {
+                width - base_right
+            } else {
+                first.origin.x + first.line.start() + first.line.width_including_trailing_whitespace() + self.indent()
+            };
+            right - levels - self.offset_in_space() - self.width()
+        } else {
+            base_left + levels + self.offset_in_space()
+        };
+        let origin = Point::new(
+            x - line.start(),
+            first.origin.y + first.line.baseline() - line.baseline(),
+        );
+        Some(PlacedListMarker { line, origin })
+    }
+}
+
+impl Drop for ParagraphListMarker {
+    fn drop(&mut self) {
+        if let Some(line) = &self.line {
+            if Rc::strong_count(line) == 1 {
+                line.dispose();
+            }
+        }
+    }
+}
+
+/// A marker line where a layout draws it.
+pub(crate) struct PlacedListMarker {
+    line: Rc<dyn TextLine>,
+    origin: Point,
+}
+
+impl Drop for PlacedListMarker {
+    fn drop(&mut self) {
+        if Rc::strong_count(&self.line) == 1 {
+            self.line.dispose();
+        }
+    }
+}
+
+/// The formatting width of a marker line: markers never wrap.
+const MARKER_LINE_WIDTH: f64 = 1.0e6;
 
 /// What a paragraph's lines were formatted with, apart from the runs (shared with the source).
 #[derive(Clone, PartialEq)]
@@ -171,6 +332,8 @@ impl RichTextSource {
         let mut offset = 0;
         let highlights = view.highlight_regions();
         let mut paragraphs = Vec::with_capacity(blocks.len());
+        let mut numbering = ListNumbering::default();
+        let text_line_bounds = view.text_line_bounds();
         for block in blocks {
             let mut runs = Vec::new();
             block.build_text_runs(&mut runs);
@@ -227,9 +390,12 @@ impl RichTextSource {
                 );
             let modifiers = formatting_overrides(&runs, offset, &highlights);
             let has_embedded_controls = runs.iter().any(|run| run.is::<EmbeddedControlRun>());
-            let unchanged = (!empty && !has_embedded_controls)
+            let previous_paragraph = (!empty)
                 .then(|| previous_paragraphs.get(&(&*block as *const Block as *const () as usize)))
-                .flatten()
+                .flatten();
+            let marker = list_marker(&block, &mut numbering, previous_paragraph.copied(), text_line_bounds);
+            let unchanged = previous_paragraph
+                .filter(|_| !has_embedded_controls)
                 .filter(|old| old.formats_as(&runs, &properties, default_tab_stop, &modifiers));
             if let Some(old) = unchanged {
                 paragraphs.push(RichParagraphSource {
@@ -243,6 +409,7 @@ impl RichTextSource {
                     modifiers: old.modifiers.clone(),
                     lines: old.lines.clone(),
                     has_embedded_controls,
+                    marker,
                 });
             } else {
                 paragraphs.push(RichParagraphSource {
@@ -256,6 +423,7 @@ impl RichTextSource {
                     modifiers,
                     lines: Rc::new(RefCell::new(None)),
                     has_embedded_controls,
+                    marker,
                 });
             }
             offset += length + 1;
@@ -273,6 +441,59 @@ impl RichTextSource {
             has_embedded_controls,
         })
     }
+}
+
+/// The marker of a block that is a list paragraph, numbered in the document's sequence
+/// (`numbering`); the previous source's marker of the paragraph serves again while it is the
+/// same. A block that is not a list paragraph ends every sequence.
+fn list_marker(
+    block: &Ref<Block>,
+    numbering: &mut ListNumbering,
+    previous: Option<&RichParagraphSource>,
+    text_line_bounds: TextLineBounds,
+) -> Option<Rc<ParagraphListMarker>> {
+    let Some(paragraph) = block.to_ref().cast::<Paragraph>() else {
+        numbering.next(MarkerType::None, Default::default(), 0, 0);
+        return None;
+    };
+    let (level, text) = numbering.next(
+        paragraph.list_type(),
+        paragraph.list_style(),
+        paragraph.list_start(),
+        paragraph.list_level_index(),
+    )?;
+    let font_size = block.font_size();
+    if !(font_size > 0.0 && font_size.is_finite()) {
+        return None;
+    }
+    // The marker takes the paragraph's font and foreground, never its runs' decorations or
+    // background.
+    let properties: Rc<dyn TextRunProperties> = Rc::new(GenericTextRunProperties::with_all(
+        Typeface::with_style(block.font_family(), block.font_style(), block.font_weight(), block.font_stretch()),
+        font_size,
+        None,
+        block.foreground(),
+        None,
+        BaselineAlignment::Baseline,
+        Some(block.resolved_language()),
+        Typography::effective_font_features(block),
+    ));
+    let (tab, alignment) = (paragraph.list_tab(), paragraph.list_alignment());
+    if let Some(old) = previous
+        .and_then(|old| old.marker.as_ref())
+        .filter(|old| old.is_same(&text, level, tab, alignment, &properties, block.flow_direction()))
+    {
+        return Some(old.clone());
+    }
+    Some(Rc::new(ParagraphListMarker::new(
+        text,
+        level,
+        tab,
+        alignment,
+        properties,
+        block.flow_direction(),
+        text_line_bounds,
+    )))
 }
 
 /// The highlighters of a paragraph as formatting overrides of its runs: the foreground of the
@@ -536,6 +757,8 @@ pub(crate) struct RichTextLayout {
     pub has_overflow: bool,
     pub is_trimmed: bool,
     hosted_objects_measured: bool,
+    /// The markers of the list paragraphs whose first line is on this page (#1257).
+    markers: Vec<PlacedListMarker>,
 }
 
 /// Object runs are snapshots of one paragraph fragment's host. They cannot
@@ -671,6 +894,7 @@ impl RichTextLayout {
             has_overflow: false,
             is_trimmed: false,
             hosted_objects_measured: host.is_some(),
+            markers: Vec::new(),
         };
         let width = if constraint.width.is_nan() {
             f64::INFINITY
@@ -694,6 +918,16 @@ impl RichTextLayout {
             if let Some(paragraph) = block.to_ref().cast::<Paragraph>() {
                 margin.left += paragraph.left_indent();
                 margin.right += paragraph.right_indent();
+            }
+            // A list paragraph's lines start after its marker's space (#1257).
+            let (base_left, base_right) = (margin.left, margin.right);
+            let paragraph_rtl = block.flow_direction() == ferroui_base::media::FlowDirection::RightToLeft;
+            if let Some(marker) = &paragraph.marker {
+                if paragraph_rtl {
+                    margin.right += marker.indent();
+                } else {
+                    margin.left += marker.indent();
+                }
             }
             let mut local = if paragraph_index == start.paragraph {
                 start.local_position
@@ -790,6 +1024,7 @@ impl RichTextLayout {
                             <= height + 1e-8
                 };
                 if let Some(cached) = cached.as_ref().filter(|cached| &cached.key == key).filter(fits) {
+                    let first_index = result.lines.len();
                     for entry in &cached.lines {
                         widest = widest.max(entry.extent);
                         result.lines.push(RichTextLine {
@@ -804,6 +1039,9 @@ impl RichTextLayout {
                             source_spans: None,
                         });
                         y += entry.advance;
+                    }
+                    if let (Some(marker), Some(first)) = (&paragraph.marker, result.lines.get(first_index)) {
+                        result.markers.extend(marker.place(first, base_left, base_right, width, paragraph_rtl));
                     }
                     y += margin.bottom;
                     preceding_bottom_margin = block_margin.bottom;
@@ -1013,6 +1251,11 @@ impl RichTextLayout {
                     right_margin: line_right_margin,
                     source_spans,
                 });
+                if let (true, 0, Some(marker)) = (first_line, local, &paragraph.marker) {
+                    if let Some(first) = result.lines.last() {
+                        result.markers.extend(marker.place(first, base_left, base_right, width, paragraph_rtl));
+                    }
+                }
                 y += advance;
                 first_line = false;
                 local = local.saturating_add(consumed).min(paragraph.length);
@@ -1088,6 +1331,7 @@ impl RichTextLayout {
     }
 
     pub fn draw(&self, sink: &mut dyn ITextDrawingSink, origin: Point) {
+        self.draw_markers(sink, origin);
         for entry in &self.lines {
             entry.line.draw(
                 sink,
@@ -1115,6 +1359,7 @@ impl RichTextLayout {
             self.draw(context, origin);
             return;
         };
+        self.draw_markers(&mut *context, origin);
         let mut rects = Vec::new();
         let mut spans = Vec::new();
         for entry in &self.lines {
@@ -1145,6 +1390,33 @@ impl RichTextLayout {
             let mut sink = SelectionDrawingSink::new(&mut *context, &spans, selection);
             entry.line.draw(&mut sink, line_origin);
         }
+    }
+
+    /// Draws the list markers through the same text drawing sink as the lines (#1257).
+    fn draw_markers(&self, sink: &mut dyn ITextDrawingSink, origin: Point) {
+        for marker in &self.markers {
+            marker
+                .line
+                .draw(sink, Point::new(origin.x + marker.origin.x, origin.y + marker.origin.y));
+        }
+    }
+
+    /// The text and origin of each list marker of the page, in view-local pixels (tests).
+    #[cfg(test)]
+    pub(crate) fn list_markers(&self, origin: Point) -> Vec<(String, Point)> {
+        self.source
+            .paragraphs
+            .iter()
+            .filter_map(|paragraph| paragraph.marker.as_ref())
+            .filter_map(|marker| {
+                let line = marker.line.as_ref()?;
+                let placed = self.markers.iter().find(|placed| Rc::ptr_eq(&placed.line, line))?;
+                Some((
+                    marker.text.clone(),
+                    Point::new(origin.x + placed.origin.x + line.start(), origin.y + placed.origin.y),
+                ))
+            })
+            .collect()
     }
 
     pub fn metrics(&self, origin: Point) -> Vec<RichTextLineMetrics> {

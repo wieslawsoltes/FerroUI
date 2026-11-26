@@ -9,7 +9,7 @@ use ferroui_base::media::FontFamily;
 use ferroui_base::media::{Color, Colors, IBrush};
 use ferroui_base::{BoxedValue, Ref};
 use ferroui_controls::automation::AutomationProperties;
-use ferroui_controls::documents::CharacterFormat;
+use ferroui_controls::documents::{CharacterFormat, MarkerType, ParagraphFormat};
 use ferroui_controls::primitives::{SelectingItemsControl, ToggleButton};
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::{
@@ -256,19 +256,28 @@ fn wire_split_button(root: &Ref<Control>) {
     }
 }
 
-/// `BulletButton_Click` of `ToggleSplitButtonPage.xaml.cs`: the symbol of the clicked button
-/// becomes the symbol and the automation name of the toggle split button, which is checked and
-/// closes its flyout, and the editor takes the focus. The source also sets the list type of the
-/// paragraph (`ParagraphFormat.ListType`) here and in `MyListButton_IsCheckedChanged`; FerroUI's
-/// RichEditBox has no list type, so the page is partial.
+/// `BulletButton_Click` and `MyListButton_IsCheckedChanged` of `ToggleSplitButtonPage.xaml.cs`:
+/// the symbol of the clicked button becomes the symbol and the automation name of the toggle
+/// split button and picks the list type (bullets or uppercase Roman numerals), which the
+/// selection's paragraphs take; the button is checked, closes its flyout and the editor takes the
+/// focus. Checking the button applies the list type, unchecking it removes the list.
 fn wire_toggle_split_button(root: &Ref<Control>) {
     let list_button = root.get_control::<ToggleSplitButton>("myListButton");
     let symbol_icon = root.get_control::<SymbolIcon>("mySymbolIcon");
     let editor = root.get_control::<RichEditBox>("myRichEditBox");
+    let list_type = Rc::new(Cell::new(MarkerType::Bullet));
+    let set_list_type = |editor: &RichEditBox, value: MarkerType| {
+        // The source assigns Selection.ParagraphFormat.ListType; a read-only editor ignores it.
+        let _ = editor.document().selection().set_paragraph_format(&ParagraphFormat {
+            list_type: Some(value),
+            ..Default::default()
+        });
+    };
     for name in ["BulletedListButton", "RomanNumeralsListButton"] {
         let weak_list_button = list_button.downgrade();
         let weak_symbol_icon = symbol_icon.downgrade();
         let weak_editor = editor.downgrade();
+        let list_type = list_type.clone();
         root.get_control::<Button>(name).click(move |sender, _| {
             let (Some(list_button), Some(symbol_icon), Some(editor)) = (
                 weak_list_button.upgrade(),
@@ -286,20 +295,33 @@ fn wire_toggle_split_button(root: &Ref<Control>) {
                 .map(|icon| icon.symbol());
             match symbol {
                 Some(Symbol::List) => {
+                    list_type.set(MarkerType::Bullet);
                     symbol_icon.set_symbol(Symbol::List);
                     AutomationProperties::set_name(&list_button, Some("Bullets"));
                 }
                 Some(Symbol::Bullets) => {
+                    list_type.set(MarkerType::UppercaseRoman);
                     symbol_icon.set_symbol(Symbol::Bullets);
                     AutomationProperties::set_name(&list_button, Some("Roman Numerals"));
                 }
                 _ => {}
             }
+            set_list_type(&editor, list_type.get());
             list_button.set_is_checked(true);
             list_button.close_flyout();
             editor.focus();
         });
     }
+    let weak_list_button = list_button.downgrade();
+    let weak_editor = editor.downgrade();
+    list_button.is_checked_changed(move |_, _| {
+        let (Some(list_button), Some(editor)) = (weak_list_button.upgrade(), weak_editor.upgrade()) else {
+            return;
+        };
+        // Add the list of the current type, or remove the list.
+        let value = if list_button.is_checked() { list_type.get() } else { MarkerType::None };
+        set_list_type(&editor, value);
+    });
 }
 
 /// `SnapsToRadioButtons_SelectionChanged` of `SliderPage.xaml.cs`, and the range example's value.
