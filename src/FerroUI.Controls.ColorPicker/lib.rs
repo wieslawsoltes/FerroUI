@@ -63,7 +63,7 @@ pub use color_palettes::{
     FlatColor, FlatColorPalette, FlatHalfColorPalette, FluentColorPalette, IColorPalette, MaterialColor,
     MaterialColorPalette, MaterialHalfColorPalette, SixteenColorPalette,
 };
-pub use color_picker::ColorPicker;
+pub use color_picker::{ColorPicker, ColorPickerDisplayMode};
 pub use color_spectrum::{ColorSpectrumComponents, ColorSpectrumShape};
 pub use color_view::{ColorView, ColorViewImpl, ColorViewTab};
 pub use hsv_component::HsvComponent;

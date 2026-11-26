@@ -459,7 +459,7 @@ fn contrast_calculation_matches_original_endpoints_symmetry_and_thresholds() {
 fn contrast_pickers_update_the_ratio_the_checks_and_the_preview() {
     use crate::accessibility_samples::{hex, picker_color, ratio_text};
     use ferroui_base::media::{Color, Colors};
-    use ferroui_controls_color_picker::ColorView;
+    use ferroui_controls_color_picker::ColorPicker;
     assert_eq!(ratio_text(21.0), "21:1");
     assert_eq!(ratio_text(4.4776), "4.48:1");
     assert_eq!(hex(Color::from_rgb(0x12, 0xab, 0x00)), "#12AB00");
@@ -485,8 +485,15 @@ fn contrast_pickers_update_the_ratio_the_checks_and_the_preview() {
     );
     input.set_text(Some("invalid"));
     assert_eq!(ratio.text().as_deref(), Some("4.48:1"));
+    // The flyouts hold WinUI's inline ColorPicker without the hex and channel inputs (#1266).
+    for name in ["TextColorView", "BackgroundColorView"] {
+        let picker = root.get_control::<ColorPicker>(name);
+        assert_eq!(picker.display_mode(), ferroui_controls_color_picker::ColorPickerDisplayMode::Inline);
+        assert!(!picker.is_more_button_visible() && !picker.is_hex_input_visible());
+        assert!(!picker.is_component_text_input_visible() && !picker.is_alpha_visible());
+    }
     // Picker_ColorChanged: the picker's color writes the hex and the ratio.
-    root.get_control::<ColorView>("BackgroundColorView")
+    root.get_control::<ColorPicker>("BackgroundColorView")
         .set_color(Color::from_rgb(0x77, 0x77, 0x77));
     assert_eq!(root.get_control::<TextBox>("BackgroundColorHex").text().as_deref(), Some("#777777"));
     assert_eq!(ratio.text().as_deref(), Some("1:1"));

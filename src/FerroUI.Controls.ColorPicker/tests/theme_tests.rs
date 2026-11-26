@@ -162,6 +162,119 @@ fn check_controls(theme: Theme) {
     let _ = present(ColorPreviewer::new().upcast(), ColorPreviewer::TYPE);
 }
 
+/// The inline presentation (#1266): the parts of WinUI's layout, the More button that shows
+/// and hides the text inputs, the automation names the control sets, and editing by the
+/// channel inputs, the hex input and the keyboard on the spectrum.
+fn check_inline_color_picker(theme: Theme) {
+    use crate::ColorPickerDisplayMode;
+    use ferroui_base::input::{InputElement, Key, KeyEventArgs, KeyModifiers};
+    use ferroui_base::media::{Color, Colors};
+    use ferroui_base::utilities::Decimal;
+    use ferroui_controls::automation::AutomationProperties;
+    use ferroui_controls::primitives::ToggleButton;
+    use ferroui_controls::{NumericUpDown, TextBlock};
+
+    let _app = start_application(theme);
+    let picker = ColorPicker::new();
+    picker.set_display_mode(ColorPickerDisplayMode::Inline);
+    picker.set_color(Colors::RED);
+    let (_window, parts) = present(picker.clone().upcast(), ColorPicker::TYPE);
+    let find = |name: &str| parts.find(name).unwrap_or_else(|| panic!("the inline part {name}"));
+    for name in ["ColorSpectrum", "AlphaSlider", "PART_ThirdDimensionSlider", "ColorPreviewRectangle"] {
+        find(name);
+    }
+    assert!(parts.find("PART_TabControl").is_none(), "the inline template has no tabs");
+
+    let hex = find("PART_HexTextBox").cast::<TextBox>().expect("the hex text box");
+    assert_eq!(Some("FF0000FF".to_string()), hex.text());
+    let grid = find("PART_TextEntryGrid").cast::<Control>().expect("the text entry grid");
+    let more = find("PART_MoreButton").cast::<ToggleButton>().expect("the More button");
+    let label = find("PART_MoreButtonLabel").cast::<TextBlock>().expect("the More label");
+    // The More button is hidden by default and the text inputs are shown.
+    assert!(!more.is_visible());
+    assert!(grid.is_visible());
+    picker.set_is_more_button_visible(true);
+    assert!(more.is_visible());
+    assert!(!grid.is_visible(), "the More button hides the text inputs until it is checked");
+    assert_eq!(Some("More".to_string()), label.text());
+    more.set_is_checked(Some(true));
+    assert!(grid.is_visible());
+    assert_eq!(Some("Less".to_string()), label.text());
+    assert_eq!(Some("Less".to_string()), AutomationProperties::get_name(&more));
+    more.set_is_checked(Some(false));
+    assert!(!grid.is_visible());
+    picker.set_is_more_button_visible(false);
+    assert!(grid.is_visible());
+
+    // The channel inputs are named by the color model and edit the color.
+    let red = find("PART_Component1TextInput").cast::<NumericUpDown>().expect("the first channel input");
+    assert_eq!(Some("Red".to_string()), AutomationProperties::get_name(&red));
+    assert_eq!(Some(Decimal::from(255)), red.value());
+    let green = find("PART_Component2TextInput").cast::<NumericUpDown>().expect("the second channel input");
+    green.set_numeric_value(Some(Decimal::from(128)));
+    assert_eq!(Color::from_rgb(255, 128, 0), picker.color());
+    assert_eq!(Some("FF8000FF".to_string()), hex.text());
+    let third = find("PART_ThirdDimensionSlider").cast::<Control>().expect("the third dimension slider");
+    picker.set_color_model(crate::ColorModel::Hsva);
+    assert_eq!(Some("Hue".to_string()), AutomationProperties::get_name(&red));
+    assert_eq!(Some("Value (Brightness)".to_string()), AutomationProperties::get_name(&third));
+    picker.set_color_spectrum_components(crate::ColorSpectrumComponents::SaturationValue);
+    assert_eq!(Some("Hue".to_string()), AutomationProperties::get_name(&third));
+    picker.set_color_spectrum_components(crate::ColorSpectrumComponents::HueSaturation);
+
+    // Alpha: the slider and the text input follow IsAlphaEnabled and their own visibility.
+    let alpha_slider = find("AlphaSlider").cast::<Control>().expect("the alpha slider");
+    let alpha_input = find("AlphaTextInput").cast::<Control>().expect("the alpha input");
+    assert!(alpha_slider.is_visible() && alpha_input.is_visible());
+    picker.set_is_alpha_slider_visible(false);
+    assert!(!alpha_slider.is_visible() && alpha_input.is_visible());
+    picker.set_is_alpha_text_input_visible(false);
+    assert!(!alpha_input.is_visible());
+    picker.set_is_alpha_slider_visible(true);
+    picker.set_is_alpha_text_input_visible(true);
+    picker.set_is_alpha_enabled(false);
+    assert!(!alpha_slider.is_visible() && !alpha_input.is_visible());
+    picker.set_is_alpha_enabled(true);
+
+    // The hex input edits the color on Enter.
+    hex.set_text(Some("#0000FF"));
+    let mut enter = KeyEventArgs::new();
+    enter.set_routed_event(Some(InputElement::key_down_event()));
+    enter.key = Key::Enter;
+    hex.raise_event(&enter);
+    assert_eq!(Colors::BLUE, picker.color());
+    // The hex text is formatted again when the alpha component is hidden or moved.
+    picker.set_is_alpha_visible(false);
+    assert_eq!(Some("0000FF".to_string()), hex.text());
+    picker.set_is_alpha_visible(true);
+    picker.set_hex_input_alpha_position(crate::AlphaComponentPosition::Leading);
+    assert_eq!(Some("FF0000FF".to_string()), hex.text());
+
+    // The keyboard moves the selection on the spectrum (the hue on the horizontal axis).
+    let spectrum = find("ColorSpectrum").cast::<ColorSpectrum>().expect("the spectrum");
+    let before = picker.hsv_color();
+    let mut right = KeyEventArgs::new();
+    right.set_routed_event(Some(InputElement::key_down_event()));
+    right.key = Key::Right;
+    right.key_modifiers = KeyModifiers::NONE;
+    spectrum.raise_event(&right);
+    assert_ne!(before.h, picker.hsv_color().h, "the spectrum's key handling edits the picker");
+
+    // The drop down presentation is restored with the display mode.
+    picker.set_display_mode(ColorPickerDisplayMode::DropDown);
+    ferroui_base::threading::Dispatcher::current_dispatcher().run_jobs(None);
+}
+
+#[test]
+fn fluent_inline_color_picker() {
+    check_inline_color_picker(Theme::Fluent);
+}
+
+#[test]
+fn simple_inline_color_picker() {
+    check_inline_color_picker(Theme::Simple);
+}
+
 #[test]
 fn fluent_styles_present_every_control() {
     check_controls(Theme::Fluent);

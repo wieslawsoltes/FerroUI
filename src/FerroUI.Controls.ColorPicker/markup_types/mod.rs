@@ -14,7 +14,13 @@ mod enums;
 mod palettes;
 
 /// The lists of the types declared in this module, by area.
-const TYPE_LISTS: &[&[&MarkupType]] = &[enums::TYPES, classes::TYPES, converters::TYPES, palettes::TYPES];
+const TYPE_LISTS: &[&[&MarkupType]] = &[
+    enums::TYPES,
+    crate::color_picker::color_picker_display_mode::TYPES,
+    classes::TYPES,
+    converters::TYPES,
+    palettes::TYPES,
+];
 
 /// Adds the types declared in this module to the process-wide table of
 /// types with markup metadata. Called once by `register_types()`.
@@ -24,6 +30,7 @@ pub(crate) fn register() {
     }
     ValueTypes::register_global(register_value_types);
     ValueTypes::register_table(enums::register_value_type_table);
+    ValueTypes::register_table(crate::color_picker::color_picker_display_mode::register_value_type_table);
     palettes::PaletteColorList::register();
 }
 

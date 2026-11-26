@@ -11,7 +11,7 @@ use ferroui_base::media::{Color, Colors, IBrush};
 use ferroui_base::Ref;
 use ferroui_controls::shapes::{Ellipse, Rectangle};
 use ferroui_controls::{Button, Control, FontIcon, Image, SplitButton, TextBlock, TextBox};
-use ferroui_controls_color_picker::ColorView;
+use ferroui_controls_color_picker::ColorPicker;
 use std::rc::Rc;
 
 pub(crate) fn wire(page_id: &str, root: &Ref<Control>) {
@@ -122,7 +122,7 @@ fn recalculate_contrast_ratio(root: &Ref<Control>) {
 fn wire_inline_color_picker(root: &Ref<Control>, prefix: &'static str, initial: Color) {
     let preview = root.get_control::<Rectangle>(&format!("{prefix}ColorPreview"));
     let hex_box = root.get_control::<TextBox>(&format!("{prefix}ColorHex"));
-    let view = root.get_control::<ColorView>(&format!("{prefix}ColorView"));
+    let view = root.get_control::<ColorPicker>(&format!("{prefix}ColorView"));
     preview.set_fill(Some(solid(initial)));
     view.set_color(initial);
     let weak_root = root.downgrade();
@@ -140,7 +140,7 @@ fn wire_inline_color_picker(root: &Ref<Control>, prefix: &'static str, initial: 
             .opened(move || {
                 if let Some(root) = weak_root.upgrade() {
                     if let Some(color) = picker_color(&root, prefix) {
-                        root.get_control::<ColorView>(&format!("{prefix}ColorView")).set_color(color);
+                        root.get_control::<ColorPicker>(&format!("{prefix}ColorView")).set_color(color);
                     }
                 }
             })

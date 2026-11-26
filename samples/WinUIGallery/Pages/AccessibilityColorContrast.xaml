@@ -2,8 +2,8 @@
      behind AccessibilityColorContrastPage.xaml.cs and the gallery's InlineColorPicker
      (accessibility_samples.rs, contrast.rs); see ../NOTICE.md. The catalog has no sample
      definition for the page: this is the page itself. Each InlineColorPicker is its composition:
-     the header, a SplitButton with the color preview whose flyout is the color picker (FerroUI's
-     ColorView: WinUI's inline ColorPicker is not a FerroUI control, see the ColorPicker page), and
+     the header, a SplitButton with the color preview whose flyout is the color picker (WinUI's
+     inline ColorPicker is ColorPicker with DisplayMode="Inline", #1266), and
      the hex box, wired in Rust with its ColorChanged. The x:Bind of the pickers' ColorBrush to the
      preview is the code behind in Rust. The page's implicit TextBlock style (WrapWholeWords) is
      each TextBlock's WrapWithOverflow; ThemeResource is DynamicResource; StackPanels with padding
@@ -11,6 +11,10 @@
      (the example's own theme) is the page's theme. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="12">
+  <!-- The library's Fluent templates of the flyouts' pickers, scoped as on the ColorPicker page. -->
+  <StackPanel.Styles>
+    <StyleInclude Source="ferres://FerroUI.Controls.ColorPicker/Themes/Fluent/Fluent.xaml" />
+  </StackPanel.Styles>
   <RichTextBlock TextWrapping="Wrap">
     <Paragraph><Run Text="Accessibility is about building experiences that make your Windows application usable by people of all abilities. For more information about designing accessible apps: " /><Hyperlink NavigateUri="https://learn.microsoft.com/windows/apps/design/accessibility/accessibility-overview"><Run Text="Accessibility overview" /></Hyperlink><Run Text="." /></Paragraph>
     <Paragraph><Run Text="To ensure optimal accessibility and usability, apps should strive to use high-contrast and easy-to-read color combinations for text and its background. Not only will this benefit users with lower visual acuity, but this will also ensure visibility and legibility under a wide range of lighting conditions, screens, and device settings." /></Paragraph>
@@ -24,7 +28,7 @@
           BorderBrush="{DynamicResource CardStrokeColorDefaultBrush}" BorderThickness="1" CornerRadius="8">
     <Grid ColumnDefinitions="Auto,Auto,Auto,*" RowDefinitions="Auto,Auto,Auto" ColumnSpacing="8" RowSpacing="8">
         <!-- The gallery's InlineColorPicker: its header, the SplitButton with the color preview and
-             the ColorPicker of its flyout (a ColorView), and the hex box. -->
+             the inline ColorPicker of its flyout, and the hex box. -->
         <Grid x:Name="TextColorPicker" Grid.RowSpan="2" Margin="12,12,0,12" ColumnDefinitions="Auto,*"
               RowDefinitions="Auto,Auto" ColumnSpacing="2" AutomationProperties.Name="TextColorPicker">
           <TextBlock x:Name="TextColorHeader" Grid.ColumnSpan="2" Margin="0,0,0,12" VerticalAlignment="Bottom"
@@ -34,8 +38,9 @@
             <Rectangle x:Name="TextColorPreview" Width="40" MinHeight="30" VerticalAlignment="Stretch" />
             <SplitButton.Flyout>
               <Flyout>
-                <ColorView x:Name="TextColorView" IsAlphaVisible="False" IsHexInputVisible="False"
-                           IsComponentTextInputVisible="False" />
+                <ColorPicker x:Name="TextColorView" DisplayMode="Inline" IsAlphaVisible="False"
+                             IsMoreButtonVisible="False" IsHexInputVisible="False"
+                             IsComponentTextInputVisible="False" />
               </Flyout>
             </SplitButton.Flyout>
           </SplitButton>
@@ -44,7 +49,7 @@
                    AutomationProperties.LabeledBy="{Binding ElementName=TextColorHeader}" />
         </Grid>
         <!-- The gallery's InlineColorPicker: its header, the SplitButton with the color preview and
-             the ColorPicker of its flyout (a ColorView), and the hex box. -->
+             the inline ColorPicker of its flyout, and the hex box. -->
         <Grid x:Name="BackgroundColorPicker" Grid.RowSpan="2" Grid.Column="1" Margin="12,12,0,12" ColumnDefinitions="Auto,*"
               RowDefinitions="Auto,Auto" ColumnSpacing="2" AutomationProperties.Name="BackgroundColorPicker">
           <TextBlock x:Name="BackgroundColorHeader" Grid.ColumnSpan="2" Margin="0,0,0,12" VerticalAlignment="Bottom"
@@ -54,8 +59,9 @@
             <Rectangle x:Name="BackgroundColorPreview" Width="40" MinHeight="30" VerticalAlignment="Stretch" />
             <SplitButton.Flyout>
               <Flyout>
-                <ColorView x:Name="BackgroundColorView" IsAlphaVisible="False" IsHexInputVisible="False"
-                           IsComponentTextInputVisible="False" />
+                <ColorPicker x:Name="BackgroundColorView" DisplayMode="Inline" IsAlphaVisible="False"
+                             IsMoreButtonVisible="False" IsHexInputVisible="False"
+                             IsComponentTextInputVisible="False" />
               </Flyout>
             </SplitButton.Flyout>
           </SplitButton>
