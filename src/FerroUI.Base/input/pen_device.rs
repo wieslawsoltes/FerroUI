@@ -17,6 +17,7 @@ pub struct PenDevice {
     click_count: Cell<i32>,
     last_click_rect: Cell<Rect>,
     last_click_time: Cell<u64>,
+    last_click_button: Cell<MouseButton>,
     last_mouse_down_button: Cell<MouseButton>,
     disposed: Cell<bool>,
 }
@@ -31,6 +32,7 @@ impl PenDevice {
             click_count: Cell::new(0),
             last_click_rect: Cell::new(Rect::default()),
             last_click_time: Cell::new(0),
+            last_click_button: Cell::new(MouseButton::None),
             last_mouse_down_button: Cell::new(MouseButton::None),
             disposed: Cell::new(false),
         })
@@ -156,17 +158,21 @@ impl PenDevice {
 
         pointer.capture_with_source(Some(&source), CaptureSource::Implicit);
 
+        let button = properties.pointer_update_kind.get_mouse_button();
+
         if let Some(settings) = source.get_platform_settings() {
             let double_click_time = settings.get_double_tap_time(PointerType::Pen).as_secs_f64() * 1000.0;
             let double_click_size = settings.get_double_tap_size(PointerType::Pen);
 
             if !self.last_click_rect.get().contains(p)
                 || timestamp.wrapping_sub(self.last_click_time.get()) as f64 > double_click_time
+                || button != self.last_click_button.get()
             {
                 self.click_count.set(0);
             }
 
             self.click_count.set(self.click_count.get() + 1);
+            self.last_click_button.set(button);
             self.last_click_time.set(timestamp);
             self.last_click_rect.set(
                 Rect::from_position_size(p, Size::default())
@@ -174,7 +180,7 @@ impl PenDevice {
             );
         }
 
-        self.last_mouse_down_button.set(properties.pointer_update_kind.get_mouse_button());
+        self.last_mouse_down_button.set(button);
 
         let e = PointerPressedEventArgs::new(
             &source,

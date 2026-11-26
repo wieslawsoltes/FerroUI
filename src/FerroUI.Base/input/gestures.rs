@@ -38,6 +38,8 @@ struct GesturesData {
     gesture_state: RefCell<Option<GestureState>>,
     last_press: RefCell<Option<WeakRef<FerroObject>>>,
     last_press_point: Cell<Point>,
+    /// The press relative to the root, which stays valid when the target moves under the pointer.
+    last_press_root_point: Cell<Point>,
     hold_cancellation_token: RefCell<Option<Rc<Cell<bool>>>>,
     hold_timer: RefCell<Option<Subscription>>,
 }
@@ -51,6 +53,7 @@ crate::ferro_thread_local! {
         gesture_state: RefCell::new(None),
         last_press: RefCell::new(None),
         last_press_point: Cell::new(Point::new(0.0, 0.0)),
+        last_press_root_point: Cell::new(Point::new(0.0, 0.0)),
         hold_cancellation_token: RefCell::new(None),
         hold_timer: RefCell::new(None),
     }));
@@ -179,6 +182,7 @@ impl Gestures {
             Self::set_gesture_state(Some(GestureState { type_: GestureStateType::Pending, pointer: e.pointer().clone() }));
             drop(data.last_press.replace(Some(source.downgrade())));
             data.last_press_point.set(e.get_position(Some(&visual)));
+            data.last_press_root_point.set(e.get_position(None));
 
             let token = Rc::new(Cell::new(false));
             drop(data.hold_cancellation_token.replace(Some(token.clone())));
@@ -263,9 +267,9 @@ impl Gestures {
                         .get_platform_settings()
                         .map(|settings| settings.get_tap_size(point.pointer.type_()))
                         .unwrap_or(Size::new(4.0, 4.0));
-                    let tap_rect = Self::rect_around(data.last_press_point.get(), tap_size);
+                    let tap_rect = Self::rect_around(data.last_press_root_point.get(), tap_size);
 
-                    if tap_rect.contains_exclusive(point.position) {
+                    if tap_rect.contains_exclusive(e.get_position(None)) {
                         let state = Self::gesture_state();
 
                         if let Some(holding) = state.as_ref().filter(|s| s.type_ == GestureStateType::Holding) {
@@ -326,13 +330,11 @@ impl Gestures {
         }
 
         let Some(i) = source.and_then(|source| source.downcast::<Interactive>().ok()) else { return };
-        let Some(target_visual) = target.cast::<Visual>() else { return };
 
-        let point = e.get_current_point(Some(&target_visual));
         let last_press_point = data().last_press_point.get();
-        let hold_rect = Self::rect_around(last_press_point, Size::new(4.0, 4.0));
+        let hold_rect = Self::rect_around(data().last_press_root_point.get(), Size::new(4.0, 4.0));
 
-        if hold_rect.contains_exclusive(point.position) {
+        if hold_rect.contains_exclusive(e.get_position(None)) {
             return;
         }
 
