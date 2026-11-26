@@ -11,6 +11,7 @@ use ferroui_controls::automation::AutomationProperties;
 use ferroui_controls::primitives::{RangeBase, SelectingItemsControl, ToggleButton};
 use ferroui_controls::{
     Border, Control, Image, RadioButton, RadioButtons, Slider, StackPanel, Viewbox, WrapPanel,
+    WrapPanelItemsStretch,
 };
 use std::rc::Rc;
 
@@ -233,8 +234,8 @@ fn on_value<T: ferroui_base::ObjectType>(
 /// Orientation from the Tag of the selected option and the host's Height (360 for Vertical, 200
 /// otherwise); `ItemSpacingSlider_ValueChanged` and `LineSpacingSlider_ValueChanged` set the
 /// spacings; `PaddingSlider_ValueChanged` sets a uniform padding, which is the Padding of the host
-/// Border because FerroUI's WrapPanel has none. `StretchLastItemToggle_Toggled` sets
-/// `ItemsStretch`, which FerroUI's WrapPanel does not have: the switch is not wired.
+/// Border because FerroUI's WrapPanel has none. `StretchLastItemToggle_Toggled` sets the
+/// `ItemsStretch` of the second panel.
 fn wire_wrap_panel(root: &Ref<Control>) {
     let panel = root.get_control::<WrapPanel>("Control1");
     let host = root.get_control::<Border>("LayoutHost");
@@ -280,4 +281,20 @@ fn wire_wrap_panel(root: &Ref<Control>) {
         &host,
         |host, value| host.set_padding(Thickness::new(value, value, value, value)),
     );
+    let second = root.get_control::<WrapPanel>("Control2");
+    let toggle = root.get_control::<ToggleButton>("StretchLastItemToggle");
+    let weak_toggle = toggle.downgrade();
+    let weak_second = second.downgrade();
+    toggle.property_changed(move |change| {
+        if change.property() != ToggleButton::is_checked_property().as_property() {
+            return;
+        }
+        if let (Some(toggle), Some(second)) = (weak_toggle.upgrade(), weak_second.upgrade()) {
+            second.set_items_stretch(if toggle.is_checked() == Some(true) {
+                WrapPanelItemsStretch::Last
+            } else {
+                WrapPanelItemsStretch::None
+            });
+        }
+    });
 }

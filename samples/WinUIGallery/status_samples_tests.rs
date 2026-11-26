@@ -7,7 +7,7 @@ use ferroui_base::layout::{Orientation, VerticalAlignment};
 use ferroui_base::Ref;
 use ferroui_controls::{
     Carousel, ComboBox, Control, ExpandDirection, Expander, NumberBox, PipsPager, ProgressBar,
-    TextBlock,
+    RadioButton, TextBlock,
 };
 
 fn page(id: &str) -> Ref<Control> {
@@ -32,6 +32,26 @@ fn progress_value_sets_the_determinate_bar_and_an_empty_box_goes_back_to_zero() 
     assert_eq!(bar.value(), 40.0);
     number_box.set_numeric_value(10.0);
     assert_eq!(bar.value(), 10.0);
+}
+
+#[test]
+fn progress_state_options_show_the_paused_and_the_error_state() {
+    let _application = start();
+    let root = page("ProgressBar");
+    let bar = root.get_control::<ProgressBar>("ProgressBar1");
+    assert!(!bar.show_paused() && !bar.show_error());
+
+    root.get_control::<RadioButton>("PausedRB").set_is_checked(Some(true));
+    assert!(bar.show_paused() && !bar.show_error());
+    assert!(bar.classes().contains(":paused"));
+
+    root.get_control::<RadioButton>("ErrorRB").set_is_checked(Some(true));
+    assert!(!bar.show_paused() && bar.show_error());
+    assert!(bar.classes().contains(":error") && !bar.classes().contains(":paused"));
+
+    root.get_control::<RadioButton>("RunningRB").set_is_checked(Some(true));
+    assert!(!bar.show_paused() && !bar.show_error());
+    assert!(!bar.classes().contains(":error"));
 }
 
 #[test]

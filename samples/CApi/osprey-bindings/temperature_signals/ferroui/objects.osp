@@ -874,124 +874,124 @@ fn getShowActivated(object) = ferro_get_bool_or(object: object, property: 781, f
 // showInTaskbar(object: int, value: bool) -> int: sets ShowInTaskbar (Window). Enables or
 // disables the taskbar icon.
 fn showInTaskbar(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 785, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 786, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getShowInTaskbar(object: int) -> bool: reads ShowInTaskbar (Window); the fallback of its
 // kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getShowInTaskbar(object) = ferro_get_bool_or(object: object, property: 785, fallback: toInt8(0)) != toInt8(0)
+fn getShowInTaskbar(object) = ferro_get_bool_or(object: object, property: 786, fallback: toInt8(0)) != toInt8(0)
 // sizeToContent(object: int, value: string) -> int: sets SizeToContent (Window). Defines the
 // `SizeToContent` property.
 fn sizeToContent(object, value) = {
-    let _ = ferro_set_str(object: object, property: 793, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 795, text: value, length: -1)
     object
 }
 // getSizeToContent(object: int) -> string: reads SizeToContent (Window); the fallback of its
 // kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getSizeToContent(object) = "${ferro_get_cstr_or(object: object, property: 793, fallback: "")}"
+fn getSizeToContent(object) = "${ferro_get_cstr_or(object: object, property: 795, fallback: "")}"
 // spacing(object: int, value: float) -> int: sets Spacing (StackPanel). Defines the `Spacing`
 // property.
 fn spacing(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 802, value: value)
+    let _ = ferro_set_f64(object: object, property: 804, value: value)
     object
 }
 // getSpacing(object: int) -> float: reads Spacing (StackPanel); the fallback of its kind when
 // the read fails (`failure()` tells): a plain value, no Result.
-fn getSpacing(object) = ferro_get_f64_or(object: object, property: 802, fallback: 0.0)
+fn getSpacing(object) = ferro_get_f64_or(object: object, property: 804, fallback: 0.0)
 // tabIndex(object: int, value: int) -> int: sets TabIndex (Hyperlink, InputElement). Defines
 // the `TabIndex` property.
 fn tabIndex(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 830, value: value)
+    let _ = ferro_set_i64(object: object, property: 832, value: value)
     object
 }
 // getTabIndex(object: int) -> int: reads TabIndex (Hyperlink, InputElement); the fallback of
 // its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTabIndex(object) = ferro_get_i64_or(object: object, property: 830, fallback: 0)
+fn getTabIndex(object) = ferro_get_i64_or(object: object, property: 832, fallback: 0)
 // tag(object: int, value: string) -> int: sets Tag (Control). Defines the `Tag` property.
 fn tag(object, value) = {
-    let _ = ferro_set_str(object: object, property: 836, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 838, text: value, length: -1)
     object
 }
 // tagObject(object: int, value: int) -> int: sets Tag (Control) to an object; 0 is null.
 fn tagObject(object, value) = {
-    let _ = ferro_set_handle(object: object, property: 836, value: value)
+    let _ = ferro_set_handle(object: object, property: 838, value: value)
     object
 }
 // getTag(object: int) -> string: reads Tag (Control); the fallback of its kind when the read
 // fails (`failure()` tells): a plain value, no Result.
-fn getTag(object) = "${ferro_get_cstr_or(object: object, property: 836, fallback: "")}"
+fn getTag(object) = "${ferro_get_cstr_or(object: object, property: 838, fallback: "")}"
 // templatedControlIsTemplateFocusTarget(object: int, value: bool) -> int: sets
 // TemplatedControl.IsTemplateFocusTarget (TemplatedControl). Defines the
 // `IsTemplateFocusTarget` attached property.
 fn templatedControlIsTemplateFocusTarget(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 842, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 844, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getTemplatedControlIsTemplateFocusTarget(object: int) -> bool: reads
 // TemplatedControl.IsTemplateFocusTarget (TemplatedControl); the fallback of its kind when the
 // read fails (`failure()` tells): a plain value, no Result.
-fn getTemplatedControlIsTemplateFocusTarget(object) = ferro_get_bool_or(object: object, property: 842, fallback: toInt8(0)) != toInt8(0)
+fn getTemplatedControlIsTemplateFocusTarget(object) = ferro_get_bool_or(object: object, property: 844, fallback: toInt8(0)) != toInt8(0)
 // text(object: int, value: string) -> int: sets Text (AutoCompleteBox, AutoSuggestBox,
 // CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
 // TextBlock, TextBox, TextPresenter). Identifies the `Text` property.
 fn text(object, value) = {
-    let _ = ferro_set_str(object: object, property: 844, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 846, text: value, length: -1)
     object
 }
 // getText(object: int) -> string: reads Text (AutoCompleteBox, AutoSuggestBox,
 // CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
 // TextBlock, TextBox, TextPresenter); the fallback of its kind when the read fails
 // (`failure()` tells): a plain value, no Result.
-fn getText(object) = "${ferro_get_cstr_or(object: object, property: 844, fallback: "")}"
+fn getText(object) = "${ferro_get_cstr_or(object: object, property: 846, fallback: "")}"
 // textBlockBaselineOffset(object: int, value: float) -> int: sets TextBlock.BaselineOffset
 // (TextBlock). Defines the `BaselineOffset` attached property.
 fn textBlockBaselineOffset(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 846, value: value)
+    let _ = ferro_set_f64(object: object, property: 848, value: value)
     object
 }
 // getTextBlockBaselineOffset(object: int) -> float: reads TextBlock.BaselineOffset
 // (TextBlock); the fallback of its kind when the read fails (`failure()` tells): a plain
 // value, no Result.
-fn getTextBlockBaselineOffset(object) = ferro_get_f64_or(object: object, property: 846, fallback: 0.0)
+fn getTextBlockBaselineOffset(object) = ferro_get_f64_or(object: object, property: 848, fallback: 0.0)
 // textBlockLayoutRoundingPlacement(object: int, value: TextLayoutRoundingPlacement) -> int:
 // sets TextBlock.LayoutRoundingPlacement (TextBlock). Defines the `LayoutRoundingPlacement`
 // attached property: where a text block puts the height layout rounding adds to it (a FerroUI
 // addition). Inherited, so that a theme sets it once on the top-level.
 fn textBlockLayoutRoundingPlacement(object, value) = {
-    let _ = ferro_set_str(object: object, property: 847, text: textLayoutRoundingPlacementName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 849, text: textLayoutRoundingPlacementName(value: value), length: -1)
     object
 }
 // textBlockLineHeight(object: int, value: float) -> int: sets TextBlock.LineHeight
 // (TextBlock). Defines the `LineHeight` property.
 fn textBlockLineHeight(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 848, value: value)
+    let _ = ferro_set_f64(object: object, property: 850, value: value)
     object
 }
 // getTextBlockLineHeight(object: int) -> float: reads TextBlock.LineHeight (TextBlock); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTextBlockLineHeight(object) = ferro_get_f64_or(object: object, property: 848, fallback: 0.0)
+fn getTextBlockLineHeight(object) = ferro_get_f64_or(object: object, property: 850, fallback: 0.0)
 // textBlockLineSpacing(object: int, value: float) -> int: sets TextBlock.LineSpacing
 // (TextBlock). Defines the `LineSpacing` property.
 fn textBlockLineSpacing(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 849, value: value)
+    let _ = ferro_set_f64(object: object, property: 851, value: value)
     object
 }
 // getTextBlockLineSpacing(object: int) -> float: reads TextBlock.LineSpacing (TextBlock); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTextBlockLineSpacing(object) = ferro_get_f64_or(object: object, property: 849, fallback: 0.0)
+fn getTextBlockLineSpacing(object) = ferro_get_f64_or(object: object, property: 851, fallback: 0.0)
 // textBlockMaxLines(object: int, value: int) -> int: sets TextBlock.MaxLines (TextBlock).
 // Defines the `MaxLines` property.
 fn textBlockMaxLines(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 850, value: value)
+    let _ = ferro_set_i64(object: object, property: 852, value: value)
     object
 }
 // getTextBlockMaxLines(object: int) -> int: reads TextBlock.MaxLines (TextBlock); the fallback
 // of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTextBlockMaxLines(object) = ferro_get_i64_or(object: object, property: 850, fallback: 0)
+fn getTextBlockMaxLines(object) = ferro_get_i64_or(object: object, property: 852, fallback: 0)
 // textBlockTextAlignment(object: int, value: TextAlignment) -> int: sets
 // TextBlock.TextAlignment (TextBlock). Defines the `TextAlignment` property.
 fn textBlockTextAlignment(object, value) = {
-    let _ = ferro_set_str(object: object, property: 851, text: textAlignmentName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 853, text: textAlignmentName(value: value), length: -1)
     object
 }
 // textBlockTextLineBounds(object: int, value: TextLineBounds) -> int: sets
@@ -1000,176 +1000,176 @@ fn textBlockTextAlignment(object, value) = {
 // `TextBlock.TextLineBounds`, DEVIATIONS.md, Text block). Inherited, as the other attached
 // text properties, so that a content presenter sets it for the text of its content.
 fn textBlockTextLineBounds(object, value) = {
-    let _ = ferro_set_str(object: object, property: 852, text: textLineBoundsName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 854, text: textLineBoundsName(value: value), length: -1)
     object
 }
 // textBlockTextWrapping(object: int, value: TextWrapping) -> int: sets TextBlock.TextWrapping
 // (TextBlock). Defines the `TextWrapping` property.
 fn textBlockTextWrapping(object, value) = {
-    let _ = ferro_set_str(object: object, property: 854, text: textWrappingName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 856, text: textWrappingName(value: value), length: -1)
     object
 }
 // textBoxLineHeight(object: int, value: float) -> int: sets TextBox.LineHeight (TextBox).
 // Defines the `LineHeight` property.
 fn textBoxLineHeight(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 855, value: value)
+    let _ = ferro_set_f64(object: object, property: 857, value: value)
     object
 }
 // getTextBoxLineHeight(object: int) -> float: reads TextBox.LineHeight (TextBox); the fallback
 // of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTextBoxLineHeight(object) = ferro_get_f64_or(object: object, property: 855, fallback: 0.0)
+fn getTextBoxLineHeight(object) = ferro_get_f64_or(object: object, property: 857, fallback: 0.0)
 // textBoxTextAlignment(object: int, value: TextAlignment) -> int: sets TextBox.TextAlignment
 // (TextBox). Defines the `TextAlignment` property.
 fn textBoxTextAlignment(object, value) = {
-    let _ = ferro_set_str(object: object, property: 856, text: textAlignmentName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 858, text: textAlignmentName(value: value), length: -1)
     object
 }
 // textBoxTextWrapping(object: int, value: TextWrapping) -> int: sets TextBox.TextWrapping
 // (TextBox). Defines the `TextWrapping` property.
 fn textBoxTextWrapping(object, value) = {
-    let _ = ferro_set_str(object: object, property: 857, text: textWrappingName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 859, text: textWrappingName(value: value), length: -1)
     object
 }
 // textDecorations(object: int, value: string) -> int: sets TextDecorations (RichEditBox,
 // RichTextBlock, TextBlock). Defines the `TextDecorations` property.
 fn textDecorations(object, value) = {
-    let _ = ferro_set_str(object: object, property: 859, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 861, text: value, length: -1)
     object
 }
 // getTextDecorations(object: int) -> string: reads TextDecorations (RichEditBox,
 // RichTextBlock, TextBlock); the fallback of its kind when the read fails (`failure()` tells):
 // a plain value, no Result.
-fn getTextDecorations(object) = "${ferro_get_cstr_or(object: object, property: 859, fallback: "")}"
+fn getTextDecorations(object) = "${ferro_get_cstr_or(object: object, property: 861, fallback: "")}"
 // textParagraphStyles(object: int, value: string) -> int: sets TextParagraphStyles (TextBox,
 // TextPresenter). Defines immutable UTF-16 paragraph formatting. Templates bind this to
 // TextPresenter, keeping rendering, IME and caret geometry shared.
 fn textParagraphStyles(object, value) = {
-    let _ = ferro_set_str(object: object, property: 883, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 885, text: value, length: -1)
     object
 }
 // getTextParagraphStyles(object: int) -> string: reads TextParagraphStyles (TextBox,
 // TextPresenter); the fallback of its kind when the read fails (`failure()` tells): a plain
 // value, no Result.
-fn getTextParagraphStyles(object) = "${ferro_get_cstr_or(object: object, property: 883, fallback: "")}"
+fn getTextParagraphStyles(object) = "${ferro_get_cstr_or(object: object, property: 885, fallback: "")}"
 // textStyleOverrides(object: int, value: string) -> int: sets TextStyleOverrides (TextBox,
 // TextPresenter). Defines the `TextStyleOverrides` property. Control templates bind this to
 // the presenter's property, just like `Text` and `TextWrapping`.
 fn textStyleOverrides(object, value) = {
-    let _ = ferro_set_str(object: object, property: 891, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 893, text: value, length: -1)
     object
 }
 // getTextStyleOverrides(object: int) -> string: reads TextStyleOverrides (TextBox,
 // TextPresenter); the fallback of its kind when the read fails (`failure()` tells): a plain
 // value, no Result.
-fn getTextStyleOverrides(object) = "${ferro_get_cstr_or(object: object, property: 891, fallback: "")}"
+fn getTextStyleOverrides(object) = "${ferro_get_cstr_or(object: object, property: 893, fallback: "")}"
 // themeObject(object: int, value: int) -> int: sets Theme (StyledElement) to an object; 0 is
 // null.
 fn themeObject(object, value) = {
-    let _ = ferro_set_handle(object: object, property: 894, value: value)
+    let _ = ferro_set_handle(object: object, property: 896, value: value)
     object
 }
 // title(object: int, value: string) -> int: sets Title (InfoBar, Pivot, TitleBar, Window,
 // WindowDrawnDecorations). Defines the `Title` property: the title of the message.
 fn title(object, value) = {
-    let _ = ferro_set_str(object: object, property: 908, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 910, text: value, length: -1)
     object
 }
 // titleObject(object: int, value: int) -> int: sets Title (InfoBar, Pivot, TitleBar, Window,
 // WindowDrawnDecorations) to an object; 0 is null.
 fn titleObject(object, value) = {
-    let _ = ferro_set_handle(object: object, property: 908, value: value)
+    let _ = ferro_set_handle(object: object, property: 910, value: value)
     object
 }
 // getTitle(object: int) -> string: reads Title (InfoBar, Pivot, TitleBar, Window,
 // WindowDrawnDecorations); the fallback of its kind when the read fails (`failure()` tells): a
 // plain value, no Result.
-fn getTitle(object) = "${ferro_get_cstr_or(object: object, property: 908, fallback: "")}"
+fn getTitle(object) = "${ferro_get_cstr_or(object: object, property: 910, fallback: "")}"
 // topLevelAutoSafeAreaPadding(object: int, value: bool) -> int: sets
 // TopLevel.AutoSafeAreaPadding (TopLevel). Defines the AutoSafeAreaPadding attached property.
 fn topLevelAutoSafeAreaPadding(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 930, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 932, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getTopLevelAutoSafeAreaPadding(object: int) -> bool: reads TopLevel.AutoSafeAreaPadding
 // (TopLevel); the fallback of its kind when the read fails (`failure()` tells): a plain value,
 // no Result.
-fn getTopLevelAutoSafeAreaPadding(object) = ferro_get_bool_or(object: object, property: 930, fallback: toInt8(0)) != toInt8(0)
+fn getTopLevelAutoSafeAreaPadding(object) = ferro_get_bool_or(object: object, property: 932, fallback: toInt8(0)) != toInt8(0)
 // topLevelSystemBarColorObject(object: int, value: int) -> int: sets TopLevel.SystemBarColor
 // (TopLevel) to an object; 0 is null.
 fn topLevelSystemBarColorObject(object, value) = {
-    let _ = ferro_set_handle(object: object, property: 931, value: value)
+    let _ = ferro_set_handle(object: object, property: 933, value: value)
     object
 }
 // topmost(object: int, value: bool) -> int: sets Topmost (Popup, WindowBase). Defines the
 // `Topmost` property.
 fn topmost(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 934, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 936, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getTopmost(object: int) -> bool: reads Topmost (Popup, WindowBase); the fallback of its kind
 // when the read fails (`failure()` tells): a plain value, no Result.
-fn getTopmost(object) = ferro_get_bool_or(object: object, property: 934, fallback: toInt8(0)) != toInt8(0)
+fn getTopmost(object) = ferro_get_bool_or(object: object, property: 936, fallback: toInt8(0)) != toInt8(0)
 // transitions(object: int, value: string) -> int: sets Transitions (Animatable). Defines the
 // `Transitions` property.
 fn transitions(object, value) = {
-    let _ = ferro_set_str(object: object, property: 937, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 939, text: value, length: -1)
     object
 }
 // getTransitions(object: int) -> string: reads Transitions (Animatable); the fallback of its
 // kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTransitions(object) = "${ferro_get_cstr_or(object: object, property: 937, fallback: "")}"
+fn getTransitions(object) = "${ferro_get_cstr_or(object: object, property: 939, fallback: "")}"
 // transparencyBackgroundFallback(object: int, value: string) -> int: sets
 // TransparencyBackgroundFallback (TopLevel). Defines the `TransparencyBackgroundFallback`
 // property.
 fn transparencyBackgroundFallback(object, value) = {
-    let _ = ferro_set_str(object: object, property: 939, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 941, text: value, length: -1)
     object
 }
 // getTransparencyBackgroundFallback(object: int) -> string: reads
 // TransparencyBackgroundFallback (TopLevel); the fallback of its kind when the read fails
 // (`failure()` tells): a plain value, no Result.
-fn getTransparencyBackgroundFallback(object) = "${ferro_get_cstr_or(object: object, property: 939, fallback: "")}"
+fn getTransparencyBackgroundFallback(object) = "${ferro_get_cstr_or(object: object, property: 941, fallback: "")}"
 // transparencyLevelHint(object: int, value: string) -> int: sets TransparencyLevelHint
 // (TopLevel). Defines the `TransparencyLevelHint` property.
 fn transparencyLevelHint(object, value) = {
-    let _ = ferro_set_str(object: object, property: 940, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 942, text: value, length: -1)
     object
 }
 // getTransparencyLevelHint(object: int) -> string: reads TransparencyLevelHint (TopLevel); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getTransparencyLevelHint(object) = "${ferro_get_cstr_or(object: object, property: 940, fallback: "")}"
+fn getTransparencyLevelHint(object) = "${ferro_get_cstr_or(object: object, property: 942, fallback: "")}"
 // undoLimit(object: int, value: int) -> int: sets UndoLimit (RichEditBox, TextBox). Defines
 // the `UndoLimit` property.
 fn undoLimit(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 987, value: value)
+    let _ = ferro_set_i64(object: object, property: 989, value: value)
     object
 }
 // getUndoLimit(object: int) -> int: reads UndoLimit (RichEditBox, TextBox); the fallback of
 // its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getUndoLimit(object) = ferro_get_i64_or(object: object, property: 987, fallback: 0)
+fn getUndoLimit(object) = ferro_get_i64_or(object: object, property: 989, fallback: 0)
 // useFloatingPlaceholder(object: int, value: bool) -> int: sets UseFloatingPlaceholder
 // (CalendarDatePicker, TextBox). Defines the `UseFloatingPlaceholder` property.
 fn useFloatingPlaceholder(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 991, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 993, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getUseFloatingPlaceholder(object: int) -> bool: reads UseFloatingPlaceholder
 // (CalendarDatePicker, TextBox); the fallback of its kind when the read fails (`failure()`
 // tells): a plain value, no Result.
-fn getUseFloatingPlaceholder(object) = ferro_get_bool_or(object: object, property: 991, fallback: toInt8(0)) != toInt8(0)
+fn getUseFloatingPlaceholder(object) = ferro_get_bool_or(object: object, property: 993, fallback: toInt8(0)) != toInt8(0)
 // useLayoutRounding(object: int, value: bool) -> int: sets UseLayoutRounding (Layoutable).
 // Defines the `UseLayoutRounding` property.
 fn useLayoutRounding(object, value) = {
-    let _ = ferro_set_bool(object: object, property: 992, value: value ? toInt8(1) : toInt8(0))
+    let _ = ferro_set_bool(object: object, property: 994, value: value ? toInt8(1) : toInt8(0))
     object
 }
 // getUseLayoutRounding(object: int) -> bool: reads UseLayoutRounding (Layoutable); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getUseLayoutRounding(object) = ferro_get_bool_or(object: object, property: 992, fallback: toInt8(0)) != toInt8(0)
+fn getUseLayoutRounding(object) = ferro_get_bool_or(object: object, property: 994, fallback: toInt8(0)) != toInt8(0)
 // verticalAlignment(object: int, value: VerticalAlignment) -> int: sets VerticalAlignment
 // (Layoutable). Defines the `VerticalAlignment` property.
 fn verticalAlignment(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1000, text: verticalAlignmentName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1002, text: verticalAlignmentName(value: value), length: -1)
     object
 }
 // verticalContentAlignment(object: int, value: VerticalAlignment) -> int: sets
@@ -1177,65 +1177,65 @@ fn verticalAlignment(object, value) = {
 // ContentPresenter, DatePicker, DrawerPage, NumericUpDown, TabControl, TextBox, TimePicker).
 // Defines the `VerticalContentAlignment` property.
 fn verticalContentAlignment(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1001, text: verticalAlignmentName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1003, text: verticalAlignmentName(value: value), length: -1)
     object
 }
 // visualFlowDirection(object: int, value: FlowDirection) -> int: sets Visual.FlowDirection
 // (Visual). Defines the `FlowDirection` attached property.
 fn visualFlowDirection(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1011, text: flowDirectionName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1013, text: flowDirectionName(value: value), length: -1)
     object
 }
 // width(object: int, value: float) -> int: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn). Defines the `Width` property.
 fn width(object, value) = {
-    let _ = ferro_set_f64(object: object, property: 1018, value: value)
+    let _ = ferro_set_f64(object: object, property: 1020, value: value)
     object
 }
 // widthText(object: int, value: string) -> int: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn). Defines the `Width` property.
 fn widthText(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1018, text: value, length: -1)
+    let _ = ferro_set_str(object: object, property: 1020, text: value, length: -1)
     object
 }
 // getWidth(object: int) -> float: reads Width (ColumnDefinition, Layoutable, TableViewColumn);
 // the fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getWidth(object) = ferro_get_f64_or(object: object, property: 1018, fallback: 0.0)
+fn getWidth(object) = ferro_get_f64_or(object: object, property: 1020, fallback: 0.0)
 // getWindowDecorationMargin(object: int) -> string: reads WindowDecorationMargin (Window); the
 // fallback of its kind when the read fails (`failure()` tells): a plain value, no Result.
-fn getWindowDecorationMargin(object) = "${ferro_get_cstr_or(object: object, property: 1021, fallback: "")}"
+fn getWindowDecorationMargin(object) = "${ferro_get_cstr_or(object: object, property: 1023, fallback: "")}"
 // windowDecorations(object: int, value: WindowDecorations) -> int: sets WindowDecorations
 // (Window). Defines the `WindowDecorations` property.
 fn windowDecorations(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1023, text: windowDecorationsName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1025, text: windowDecorationsName(value: value), length: -1)
     object
 }
 // windowDecorationsThemeObject(object: int, value: int) -> int: sets WindowDecorationsTheme
 // (Window) to an object; 0 is null.
 fn windowDecorationsThemeObject(object, value) = {
-    let _ = ferro_set_handle(object: object, property: 1024, value: value)
+    let _ = ferro_set_handle(object: object, property: 1026, value: value)
     object
 }
 // windowStartupLocation(object: int, value: WindowStartupLocation) -> int: sets
 // WindowStartupLocation (Window). Defines the `WindowStartupLocation` property.
 fn windowStartupLocation(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1027, text: windowStartupLocationName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1029, text: windowStartupLocationName(value: value), length: -1)
     object
 }
 // windowState(object: int, value: WindowState) -> int: sets WindowState (Window). Represents
 // the currently effective window state (normal, minimized, maximized).
 fn windowState(object, value) = {
-    let _ = ferro_set_str(object: object, property: 1028, text: windowStateName(value: value), length: -1)
+    let _ = ferro_set_str(object: object, property: 1030, text: windowStateName(value: value), length: -1)
     object
 }
 // zIndex(object: int, value: int) -> int: sets ZIndex (Visual). Defines the `ZIndex` property.
 fn zIndex(object, value) = {
-    let _ = ferro_set_i64(object: object, property: 1040, value: value)
+    let _ = ferro_set_i64(object: object, property: 1042, value: value)
     object
 }
 // getZIndex(object: int) -> int: reads ZIndex (Visual); the fallback of its kind when the read
 // fails (`failure()` tells): a plain value, no Result.
-fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1040, fallback: 0)
+fn getZIndex(object) = ferro_get_i64_or(object: object, property: 1042, fallback: 0)
 
 // ---- events --------------------------------------------------------------------------------
 

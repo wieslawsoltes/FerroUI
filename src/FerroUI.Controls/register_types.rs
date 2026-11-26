@@ -241,6 +241,7 @@ pub(crate) const TYPES: &[&TypeInfo] = types![
     crate::media::RevealBrush,
     crate::media::RevealHoverLight,
     crate::media::SystemBackdrop,
+    crate::system_backdrop_element::SystemBackdropElement,
     crate::media::XamlAmbientLight,
     crate::grid::Grid,
     crate::grid::GridLinesRenderer,
