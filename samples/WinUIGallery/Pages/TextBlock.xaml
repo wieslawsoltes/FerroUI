@@ -1,10 +1,9 @@
 <!-- Ported from the five pinned TextBlock examples of WinUI Gallery (14061eea); see ../NOTICE.md.
      The page has no code-behind upstream. The source's keyed Style is a keyed ControlTheme set
      with Theme. WinUI's CharacterSpacing is in thousandths of an em: 200 at a font size of 24 is
-     a LetterSpacing of 4.8. WinUI's WrapWholeWords is WrapWithOverflow. FerroUI's TextBlock has
-     no IsTextSelectionEnabled or SelectionHighlightColor (its selectable text is
-     SelectableTextBlock, whose selection cannot be switched off): the selectable text is a
-     RichTextBlock, which has both, with the source's OneWay x:Bind of the switch. -->
+     a LetterSpacing of 4.8. WinUI's WrapWholeWords is WrapWithOverflow. The selectable text is a
+     SelectableTextBlock, FerroUI's TextBlock with selection, with the source's OneWay x:Bind of
+     IsTextSelectionEnabled; SelectionHighlightColor is its SelectionBrush. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel.Resources>
@@ -50,11 +49,11 @@
   <StackPanel x:Name="TextBlockExample5" Spacing="8">
     <TextBlock Text="A selectable TextBlock" FontSize="18" />
     <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
-      <RichTextBlock x:Name="SelectableTextBlock"
-                     IsTextSelectionEnabled="{x:Bind SelectionEnabledSwitch.IsChecked, Mode=OneWay}"
-                     SelectionHighlightColor="DarkOrange">
-        <Paragraph><Run Text="I am a selectable TextBlock with custom SelectionHighlightColor." /></Paragraph>
-      </RichTextBlock>
+      <SelectableTextBlock x:Name="SelectableTextBlock"
+                           Text="I am a selectable TextBlock with custom SelectionHighlightColor."
+                           TextWrapping="Wrap"
+                           IsTextSelectionEnabled="{x:Bind SelectionEnabledSwitch.IsChecked, Mode=OneWay}"
+                           SelectionBrush="DarkOrange" />
       <ToggleSwitch x:Name="SelectionEnabledSwitch" Grid.Column="1" Content="IsTextSelectionEnabled" />
     </Grid>
   </StackPanel>

@@ -1,0 +1,218 @@
+<!--
+  Ported from microsoft-ui-xaml (https://github.com/microsoft/microsoft-ui-xaml),
+  commit 7e4b0c2096be402f51cc8f7d203ebf67cff183d0:
+    controls/dev/ItemContainer/ItemContainer.xaml
+    controls/dev/ItemContainer/ItemContainer_themeresources.xaml
+  Copyright (c) Microsoft Corporation. Licensed under the MIT License (see NOTICE.md of the crate).
+
+  Translation notes:
+  - The visual state groups, their states and storyboards are WinUI's. ThemeResource is
+    DynamicResource, and ControlFastAnimationDuration is its value, 83 ms.
+  - PART_CommonVisual is a Border where WinUI has a Rectangle, so that it takes the four corner
+    radii of the control without converters: Fill is Background and Stroke is BorderBrush.
+  - FerroUI's Grid has no corner radius or border. PART_SelectionVisual is a Border, and the
+    rounded background of the root is PART_ContainerBackground, under the child of the item.
+  - The Visibility of a state is IsVisible.
+  - PART_SelectionCheckbox uses the CheckBox theme of the application; WinUI's own style of it
+    needs AnimatedIcon, which FerroUI does not have yet.
+-->
+<ResourceDictionary xmlns="https://github.com/ferroui"
+                    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+                    x:ClassModifier="internal">
+  <ResourceDictionary.ThemeDictionaries>
+    <ResourceDictionary x:Key="Default">
+        <StaticResource x:Key="ItemContainerBackground" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPointerOverBackground" ResourceKey="SubtleFillColorSecondaryBrush" />
+        <StaticResource x:Key="ItemContainerPressedBackground" ResourceKey="SubtleFillColorTertiaryBrush" />
+        <StaticResource x:Key="ItemContainerBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPointerOverBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPressedBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedBackground" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedPointerOverBackground" ResourceKey="SubtleFillColorSecondaryBrush" />
+        <StaticResource x:Key="ItemContainerSelectedPressedBackground" ResourceKey="SubtleFillColorTertiaryBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualBackground" ResourceKey="AccentFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualPointerOverBackground" ResourceKey="AccentFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualPressedBackground" ResourceKey="AccentFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerSelectedInnerBorderBrush" ResourceKey="ControlSolidFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerCheckboxBackgroundUnchecked" ResourceKey="ControlOnImageFillColorDefaultBrush" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="{x:Static ItemsViewThemeKeys.HighContrast}">
+        <StaticResource x:Key="ItemContainerBackground" ResourceKey="SystemControlTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPointerOverBackground" ResourceKey="SystemControlTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPressedBackground" ResourceKey="SystemControlTransparentBrush" />
+        <StaticResource x:Key="ItemContainerBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPointerOverBorderBrush" ResourceKey="SystemColorHighlightColorBrush" />
+        <StaticResource x:Key="ItemContainerPressedBorderBrush" ResourceKey="SystemColorHighlightColorBrush" />
+        <StaticResource x:Key="ItemContainerSelectedBackground" ResourceKey="SystemControlTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedPointerOverBackground" ResourceKey="SystemControlTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedPressedBackground" ResourceKey="SystemControlTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualBackground" ResourceKey="SystemControlHighlightListAccentLowBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualPointerOverBackground" ResourceKey="SystemControlForegroundAccentBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualPressedBackground" ResourceKey="SystemControlForegroundAccentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedInnerBorderBrush" ResourceKey="SystemColorHighlightTextColorBrush" />
+        <StaticResource x:Key="ItemContainerCheckboxBackgroundUnchecked" ResourceKey="SystemColorButtonFaceColor" />
+    </ResourceDictionary>
+    <ResourceDictionary x:Key="Light">
+        <StaticResource x:Key="ItemContainerBackground" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPointerOverBackground" ResourceKey="SubtleFillColorSecondaryBrush" />
+        <StaticResource x:Key="ItemContainerPressedBackground" ResourceKey="SubtleFillColorTertiaryBrush" />
+        <StaticResource x:Key="ItemContainerBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPointerOverBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerPressedBorderBrush" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedBackground" ResourceKey="SubtleFillColorTransparentBrush" />
+        <StaticResource x:Key="ItemContainerSelectedPointerOverBackground" ResourceKey="SubtleFillColorSecondaryBrush" />
+        <StaticResource x:Key="ItemContainerSelectedPressedBackground" ResourceKey="SubtleFillColorTertiaryBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualBackground" ResourceKey="AccentFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualPointerOverBackground" ResourceKey="AccentFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerSelectionVisualPressedBackground" ResourceKey="AccentFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerSelectedInnerBorderBrush" ResourceKey="ControlSolidFillColorDefaultBrush" />
+        <StaticResource x:Key="ItemContainerCheckboxBackgroundUnchecked" ResourceKey="ControlOnImageFillColorDefaultBrush" />
+    </ResourceDictionary>
+    </ResourceDictionary.ThemeDictionaries>
+  <HorizontalAlignment x:Key="ItemContainerCheckboxHorizontalAlignment">Right</HorizontalAlignment>
+  <VerticalAlignment x:Key="ItemContainerCheckboxVerticalAlignment">Top</VerticalAlignment>
+  <x:Double x:Key="ItemContainerDisabledOpacity">0.3</x:Double>
+  <x:Double x:Key="ItemContainerCheckboxMinWidth">0</x:Double>
+  <Thickness x:Key="ItemContainerCheckboxMargin">4,-2</Thickness>
+  <Thickness x:Key="ItemContainerSelectedInnerMargin">2</Thickness>
+  <Thickness x:Key="ItemContainerSelectedInnerThickness">1</Thickness>
+
+  <ControlTheme x:Key="{x:Type ItemContainer}" TargetType="ItemContainer">
+    <Setter Property="Background" Value="{DynamicResource ItemContainerBackground}" />
+    <Setter Property="CornerRadius" Value="{DynamicResource ControlCornerRadius}" />
+    <Setter Property="Focusable" Value="True" />
+    <Setter Property="Template">
+      <ControlTemplate TargetType="ItemContainer">
+        <Grid x:Name="PART_ContainerRoot">
+<VisualStateManager.VisualStateGroups>
+              <VisualStateGroup x:Name="CombinedStates">
+                <VisualState x:Name="UnselectedNormal" />
+                <VisualState x:Name="UnselectedPointerOver">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerPointerOverBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerPointerOverBorderBrush}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+                <VisualState x:Name="UnselectedPressed">
+                  <Storyboard>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerPressedBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerPressedBorderBrush}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+                <VisualState x:Name="SelectedNormal">
+                  <Storyboard>
+                    <DoubleAnimation Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="Opacity" Duration="0" To="1" />
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectionVisualBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Background">
+                        <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedInnerBorderBrush}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Margin">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedInnerMargin}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+                <VisualState x:Name="SelectedPointerOver">
+                  <Storyboard>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="Opacity">
+                      <SplineDoubleKeyFrame KeyTime="0:0:0.083" Value="1" KeySpline="0,0,0,1" />
+                    </DoubleAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedPointerOverBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectionVisualPointerOverBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedInnerBorderBrush}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Margin">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedInnerMargin}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+                <VisualState x:Name="SelectedPressed">
+                  <Storyboard>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="Opacity">
+                      <SplineDoubleKeyFrame KeyTime="0:0:0.083" Value="1" KeySpline="0,0,0,1" />
+                    </DoubleAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Background">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedPressedBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectionVisualPressedBackground}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="BorderBrush">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedInnerBorderBrush}" />
+                    </ObjectAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_CommonVisual" Storyboard.TargetProperty="Margin">
+                      <DiscreteObjectKeyFrame KeyTime="0" Value="{DynamicResource ItemContainerSelectedInnerMargin}" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+              </VisualStateGroup>
+              <VisualStateGroup x:Name="MultiSelectStates">
+                <VisualState x:Name="Single" />
+                <VisualState x:Name="Multiple">
+                  <Storyboard>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionCheckbox" Storyboard.TargetProperty="Opacity">
+                      <SplineDoubleKeyFrame KeyTime="0:0:0.083" Value="1" KeySpline="0,0,0,1" />
+                    </DoubleAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+              </VisualStateGroup>
+              <VisualStateGroup x:Name="DisabledStates">
+                <VisualState x:Name="Enabled" />
+                <VisualState x:Name="Disabled">
+                  <Storyboard>
+                    <DoubleAnimationUsingKeyFrames Storyboard.TargetName="PART_ContainerRoot" Storyboard.TargetProperty="Opacity">
+                      <SplineDoubleKeyFrame KeyTime="0:0:0.083" Value="0.3" KeySpline="0,0,0,1" />
+                    </DoubleAnimationUsingKeyFrames>
+                    <ObjectAnimationUsingKeyFrames Storyboard.TargetName="PART_SelectionVisual" Storyboard.TargetProperty="IsVisible">
+                        <DiscreteObjectKeyFrame KeyTime="0" Value="False" />
+                    </ObjectAnimationUsingKeyFrames>
+                  </Storyboard>
+                </VisualState>
+              </VisualStateGroup>
+            </VisualStateManager.VisualStateGroups>
+          <Border x:Name="PART_ContainerBackground"
+                  Background="{TemplateBinding Background}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False" />
+          <Border x:Name="PART_SelectionVisual"
+                  BorderBrush="Transparent"
+                  BorderThickness="3"
+                  Background="Transparent"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False"
+                  Opacity="0" />
+          <Border x:Name="PART_CommonVisual"
+                  BorderBrush="{DynamicResource ItemContainerBorderBrush}"
+                  BorderThickness="{DynamicResource ItemContainerSelectedInnerThickness}"
+                  CornerRadius="{TemplateBinding CornerRadius}"
+                  IsHitTestVisible="False" />
+          <CheckBox x:Name="PART_SelectionCheckbox"
+                    HorizontalAlignment="{DynamicResource ItemContainerCheckboxHorizontalAlignment}"
+                    VerticalAlignment="{DynamicResource ItemContainerCheckboxVerticalAlignment}"
+                    Margin="{DynamicResource ItemContainerCheckboxMargin}"
+                    MinWidth="{DynamicResource ItemContainerCheckboxMinWidth}"
+                    Focusable="False"
+                    IsHitTestVisible="False"
+                    Opacity="0" />
+        </Grid>
+      </ControlTemplate>
+    </Setter>
+  </ControlTheme>
+</ResourceDictionary>
