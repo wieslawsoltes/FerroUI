@@ -33,7 +33,7 @@ impl ScrollViewPage {
         let lines = self.get_control::<StackPanel>("Lines");
         for line in 1..=30 {
             let text = TextBlock::new();
-            text.set_text(Some(format!("Line {line}")));
+            text.set_text(Some(&format!("Line {line}")));
             lines.children().add(text.upcast::<Control>());
         }
         let both = self.get_control::<ScrollView>("Both");
@@ -59,7 +59,7 @@ impl ScrollViewPage {
         let text = self.get_control::<TextBlock>("View").downgrade();
         both.view_changed(move |view| {
             if let Some(text) = text.upgrade() {
-                text.set_text(Some(format!(
+                text.set_text(Some(&format!(
                     "HorizontalOffset {:.0}, VerticalOffset {:.0}, ZoomFactor {:.2}",
                     view.horizontal_offset(),
                     view.vertical_offset(),
