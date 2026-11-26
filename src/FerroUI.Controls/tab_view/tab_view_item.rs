@@ -225,7 +225,11 @@ impl FerroObjectImpl for TabViewItem {
         } else if property == Self::icon_source_property().as_property() {
             this.on_icon_source_changed();
         } else if property == ferroui_base::Visual::bounds_property().as_property() {
-            this.update_tab_geometry();
+            // WinUI updates the geometry on SizeChanged: a tab that only moves keeps its outline.
+            let (old, new) = change.get_old_and_new_value::<ferroui_base::Rect>();
+            if old.size() != new.size() {
+                this.update_tab_geometry();
+            }
         }
     }
 }

@@ -4,7 +4,6 @@
 
 use super::{TabView, TabViewItem};
 use crate::generators::RecycleKey;
-use crate::presenters::ContentPresenter;
 use crate::list_view::ListView;
 use crate::primitives::{SelectingItemsControl, SelectingItemsControlImpl, TemplatedControlImpl};
 use crate::{
@@ -133,18 +132,19 @@ impl TabViewListView {
         classes.set(PC_RIGHT_BOTTOM_BORDER_LINE_SHORT, selected >= 0 && selected == last);
     }
 
-    /// The width of the header of the strip (`ItemsPresenter.Header` in WinUI's template).
+    /// The width of the header of the strip (`ItemsPresenter.Header` in WinUI's template; the
+    /// element `TabsItemsPresenterHeader` beside the items presenter in the port's template).
     pub(super) fn header_width(&self) -> f64 {
-        self.presenter_width("TabStripHeaderPresenter")
+        self.presenter_width("TabsItemsPresenterHeader")
     }
 
-    /// The width of the footer of the strip.
+    /// The width of the footer of the strip (`ItemsPresenter.Footer`, `TabsItemsPresenterFooter`).
     pub(super) fn footer_width(&self) -> f64 {
-        self.presenter_width("TabStripFooterPresenter")
+        self.presenter_width("TabsItemsPresenterFooter")
     }
 
     fn presenter_width(&self, name: &str) -> f64 {
-        super::tab_view::find_named::<ContentPresenter>(self, name).map_or(0.0, |presenter| presenter.bounds().width)
+        super::tab_view::find_named::<Control>(self, name).map_or(0.0, |element| element.bounds().width)
     }
 
     /// The width of the tabs (`TabsItemsPresenter`).

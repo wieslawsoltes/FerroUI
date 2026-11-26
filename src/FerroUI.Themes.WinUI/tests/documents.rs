@@ -122,6 +122,7 @@ document_tests! {
     controls_list_box => "/Controls/ListBox.xaml";
     controls_list_box_item => "/Controls/ListBoxItem.xaml";
     controls_list_view => "/Controls/ListView.xaml";
+    controls_tab_view => "/Controls/TabView.xaml";
     controls_grid_view => "/Controls/GridView.xaml";
     controls_menu => "/Controls/Menu.xaml";
     controls_menu_flyout_presenter => "/Controls/MenuFlyoutPresenter.xaml";

@@ -103,10 +103,8 @@ fn tab_view(headers: &[&str]) -> (Ref<TabView>, Ref<TestRoot>) {
 }
 
 fn shown_content(view: &TabView) -> Option<String> {
-    let presenter = view.get_template_children().into_iter().find_map(|child| {
-        child.get_self_and_visual_descendants().find_map(|visual| {
-            visual.cast::<ContentPresenter>().filter(|presenter| presenter.name().as_deref() == Some("TabContentPresenter"))
-        })
+    let presenter = view.get_template_descendants().into_iter().find_map(|visual| {
+        visual.cast::<ContentPresenter>().filter(|presenter| presenter.name().as_deref() == Some("TabContentPresenter"))
     })?;
     presenter.content().as_ref().and_then(string_of)
 }
@@ -253,13 +251,9 @@ fn the_add_button_raises_add_tab_button_click() {
     let counter = clicks.clone();
     view.add_tab_button_click(move |_| *counter.borrow_mut() += 1).detach();
     let add = view
-        .get_template_children()
+        .get_template_descendants()
         .into_iter()
-        .find_map(|child| {
-            child
-                .get_self_and_visual_descendants()
-                .find_map(|visual| visual.cast::<Button>().filter(|button| button.name().as_deref() == Some("AddButton")))
-        })
+        .find_map(|visual| visual.cast::<Button>().filter(|button| button.name().as_deref() == Some("AddButton")))
         .expect("the add button");
     click(&add);
     assert_eq!(*clicks.borrow(), 1);
