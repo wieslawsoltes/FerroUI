@@ -166,7 +166,7 @@ fn text_items<'a>(texts: impl IntoIterator<Item = &'a str>) -> ItemsSource {
 /// `CalendarViewPage.xaml.cs`: `SelectionMode_SelectionChanged` (the selected name is the
 /// selection mode of the calendar), the calendar identifiers of the constructor (bound to
 /// `CalendarIdentifier`), `calendarLanguages_SelectionChanged` (the selected language is the
-/// `Language` of the calendar) and the `IsOutOfScopeEnabled` check box.
+/// `Language` of the calendar) and the `IsGroupLabelVisible` and `IsOutOfScopeEnabled` check boxes.
 fn wire_calendar_view(root: &Ref<Control>) {
     let calendar = root.get_control::<Calendar>("Control1");
     let identifiers = root.get_control::<ComboBox>("calendarIdentifier");
@@ -204,6 +204,18 @@ fn wire_calendar_view(root: &Ref<Control>) {
         }
     });
     languages.set_selected_index(0);
+
+    let group_label = root.get_control::<CheckBox>("isGroupLabelVisible");
+    let weak_check_box = group_label.downgrade();
+    let weak = calendar.downgrade();
+    group_label.property_changed(move |change| {
+        if change.property() != ToggleButton::is_checked_property().as_property() {
+            return;
+        }
+        if let (Some(check_box), Some(calendar)) = (weak_check_box.upgrade(), weak.upgrade()) {
+            calendar.set_is_group_label_visible(check_box.is_checked() == Some(true));
+        }
+    });
 
     let out_of_scope = root.get_control::<CheckBox>("isOutOfScopeEnabled");
     let weak_check_box = out_of_scope.downgrade();

@@ -219,7 +219,7 @@
           "keys": [],
           "type_keys": ["CalendarDayButton"],
           "references": ["CalendarButtonBorderThickness", "CalendarButtonMinHeight", "CalendarButtonMinWidth", "CalendarViewBlackoutForeground", "CalendarViewCalendarItemForeground", "CalendarViewCalendarItemRevealBackground", "CalendarViewCalendarItemRevealBorderBrush", "CalendarViewHoverBorderBrush", "CalendarViewOutOfScopeBackground", "CalendarViewOutOfScopeForeground", "CalendarViewPressedBorderBrush", "CalendarViewSelectedBorderBrush", "CalendarViewSelectedHoverBorderBrush", "CalendarViewSelectedPressedBorderBrush", "CalendarViewTodayForeground", "CalendarViewWeekDayForegroundDisabled", "SystemAccentColor", "SystemAccentColorDark1", "SystemAccentColorDark2"],
-          "types": ["Border", "CalendarDayButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "ResourceDictionary", "Setter", "Style"]
+          "types": ["Border", "CalendarDayButton", "ContentPresenter", "ControlTemplate", "ControlTheme", "Panel", "ResourceDictionary", "Setter", "Style", "TextBlock"]
         },
         {
           "name": "Controls/CalendarItem.xaml",

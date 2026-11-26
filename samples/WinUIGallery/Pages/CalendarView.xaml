@@ -2,17 +2,17 @@
      CalendarViewPage.xaml.cs (date_samples.rs); see ../NOTICE.md. WinUI's CalendarView is
      FerroUI's Calendar; its SelectionMode Single is SingleDate and Multiple is MultipleRange.
      The calendar identifiers and the languages of the code-behind fill the two last combo
-     boxes; the x:Bind of the options are the handlers of date_samples.rs. FerroUI's Calendar has
-     no IsGroupLabelVisible: that check box is left out. The Headers of the combo boxes are
-     composed above them. -->
+     boxes; the x:Bind of the options are the handlers of date_samples.rs. The Headers of the
+     combo boxes are composed above them. -->
 <StackPanel xmlns="https://github.com/ferroui"
             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml" Spacing="24">
   <StackPanel x:Name="CalendarViewExample1" Spacing="8">
     <TextBlock Text="A basic calendar view." FontSize="18" />
     <Grid ColumnDefinitions="*,220" ColumnSpacing="24">
       <Calendar x:Name="Control1" HorizontalAlignment="Left" VerticalAlignment="Top"
-                SelectionMode="SingleDate" />
+                IsGroupLabelVisible="True" SelectionMode="SingleDate" />
       <StackPanel Grid.Column="1" Spacing="4">
+        <CheckBox x:Name="isGroupLabelVisible" Content="IsGroupLabelVisible" IsChecked="True" />
         <CheckBox x:Name="isOutOfScopeEnabled" Content="IsOutOfScopeEnabled" IsChecked="True" />
         <TextBlock Text="SelectionMode" Margin="0,10,0,0" />
         <ComboBox x:Name="selectionMode" HorizontalAlignment="Stretch" SelectedIndex="1"

@@ -8,7 +8,7 @@
 
 use super::{Calendar, DateTimeHelper};
 use crate::primitives::{TemplateAppliedEventArgs, TemplatedControlImpl};
-use crate::{Button, ButtonImpl, ContentControl, ContentControlImpl, ControlImpl};
+use crate::{Button, ButtonImpl, ContentControl, ContentControlImpl, ControlImpl, TextBlock};
 use ferroui_base::input::{
     InputElementImpl, InputElementImplExt, MouseButton, PointerPressedEventArgs, PointerReleasedEventArgs,
 };
@@ -26,6 +26,9 @@ use std::rc::Rc;
 /// Default content for the CalendarDayButton.
 const DEFAULT_CONTENT: i32 = 1;
 
+/// The text block of the group label in the template the themes give the `:grouplabel` state.
+const PART_GROUP_LABEL: &str = "PART_GroupLabel";
+
 /// Represents a day on a [`Calendar`].
 #[repr(C)]
 pub struct CalendarDayButton {
@@ -42,6 +45,12 @@ pub struct CalendarDayButton {
     owner: RefCell<Option<WeakRef<Calendar>>>,
     index: Cell<i32>,
 
+    /// The group label (`Calendar::is_group_label_visible`): the abbreviated name of the month
+    /// on its first day; `None` on every other day and while the labels are off.
+    group_label: RefCell<Option<String>>,
+    /// `PART_GroupLabel` of the applied template (only the `:grouplabel` template has one).
+    group_label_part: RefCell<Option<Ref<TextBlock>>>,
+
     calendar_day_button_mouse_down: HandlerList<dyn Fn(&CalendarDayButton, &PointerPressedEventArgs)>,
     calendar_day_button_mouse_up: HandlerList<dyn Fn(&CalendarDayButton, &PointerReleasedEventArgs)>,
 }
@@ -51,7 +60,9 @@ ferro_class!(CalendarDayButton: Button);
 ferro_class_info!(CalendarDayButton {
     new: CalendarDayButton::new,
     markup: {
-        attributes: [PseudoClasses(":pressed", ":disabled", ":selected", ":inactive", ":today", ":blackout", ":dayfocused")],
+        attributes: [PseudoClasses(
+            ":pressed", ":disabled", ":selected", ":inactive", ":today", ":blackout", ":dayfocused", ":grouplabel"
+        )],
     },
 });
 
@@ -114,7 +125,12 @@ impl InputElementImpl for CalendarDayButton {
 impl TemplatedControlImpl for CalendarDayButton {
     /// Builds the visual tree for the [`CalendarDayButton`] when a new
     /// template is applied.
-    fn on_apply_template(this: &Self, _e: &TemplateAppliedEventArgs) {
+    fn on_apply_template(this: &Self, e: &TemplateAppliedEventArgs) {
+        let part = e.name_scope().find_as::<TextBlock>(PART_GROUP_LABEL);
+        if let Some(part) = &part {
+            part.set_text(this.group_label.borrow().as_deref());
+        }
+        *this.group_label_part.borrow_mut() = part;
         this.set_pseudo_classes();
     }
 }
@@ -138,6 +154,8 @@ impl CalendarDayButton {
             is_selected: Cell::new(false),
             owner: RefCell::new(None),
             index: Cell::new(0),
+            group_label: RefCell::new(None),
+            group_label_part: RefCell::new(None),
             calendar_day_button_mouse_down: HandlerList::new(),
             calendar_day_button_mouse_up: HandlerList::new(),
         }
@@ -203,6 +221,26 @@ impl CalendarDayButton {
             self.ignoring_mouse_over_state.set(true);
             self.set_pseudo_classes();
         }
+    }
+
+    /// The group label of the day: the abbreviated name of its month on the first day of a month
+    /// while `Calendar::is_group_label_visible` is true, otherwise `None`.
+    pub(crate) fn group_label(&self) -> Option<String> {
+        self.group_label.borrow().clone()
+    }
+
+    /// Sets the group label. A label puts the button in the `:grouplabel` state, whose template
+    /// (the themes') has the text block `PART_GroupLabel`; without one nothing else is created.
+    pub(crate) fn set_group_label(&self, value: Option<String>) {
+        if *self.group_label.borrow() == value {
+            return;
+        }
+        let has_label = value.is_some();
+        if let Some(part) = self.group_label_part.borrow().as_ref() {
+            part.set_text(value.as_deref());
+        }
+        *self.group_label.borrow_mut() = value;
+        self.pseudo_classes().set(":grouplabel", has_label);
     }
 
     /// Gets a value indicating whether this is a blackout date.

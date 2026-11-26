@@ -670,6 +670,13 @@ impl CalendarItem {
 
         let count = Calendar::ROWS_PER_MONTH * Calendar::COLUMNS_PER_MONTH;
 
+        // IsGroupLabelVisible: the abbreviated name of the month on its first day
+        // (CalendarViewGeneratorMonthViewHost::UpdateLabel); nothing is formatted without it.
+        let label_format = owner
+            .as_ref()
+            .is_some_and(|owner| owner.is_group_label_visible())
+            .then(DateTimeHelper::get_current_date_format);
+
         let mut child_index = Calendar::COLUMNS_PER_MONTH;
         while child_index < count {
             let child_button = Self::day_button_at(&month_view, child_index);
@@ -691,6 +698,10 @@ impl CalendarItem {
             }
 
             child_button.set_content(boxed_text(system.day_text(date_to_add)));
+            child_button.set_group_label(match &label_format {
+                Some(format) if system.day(date_to_add) == 1 => Some(system.month_abbreviation(date_to_add, format)),
+                _ => None,
+            });
             child_button.set_data_context(boxed_date(date_to_add));
 
             if DateTime::compare(DateTimeHelper::discard_time(DateTime::MAX_VALUE), date_to_add) > 0 {
@@ -706,6 +717,7 @@ impl CalendarItem {
                     // button needs a content to occupy the necessary space
                     // for the content presenter
                     child_button.set_content(boxed_text(DateTimeHelper::format_number(i)));
+                    child_button.set_group_label(None);
                     child_button.set_is_enabled(false);
                     child_button.set_opacity(0.0);
                 }

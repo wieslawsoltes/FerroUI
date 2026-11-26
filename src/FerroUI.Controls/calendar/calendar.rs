@@ -488,6 +488,13 @@ ferro_properties! {
         pub fn is_out_of_scope_enabled_property() -> StyledProperty<bool> {
             FerroProperty::register::<Calendar, _>("IsOutOfScopeEnabled", true)
         }
+
+        /// Defines the `IsGroupLabelVisible` property: whether the first day of each month in the
+        /// month view shows the abbreviated name of its month above the day (WinUI's
+        /// `CalendarView.IsGroupLabelVisible`). The default is false.
+        pub fn is_group_label_visible_property() -> StyledProperty<bool> {
+            FerroProperty::register::<Calendar, _>("IsGroupLabelVisible", false)
+        }
     }
 }
 
@@ -519,6 +526,10 @@ impl Calendar {
             .add_class_handler::<Calendar>(|x, _| x.on_calendar_system_changed())
             .detach();
         Self::is_out_of_scope_enabled_property()
+            .changed()
+            .add_class_handler::<Calendar>(|x, _| x.update_months())
+            .detach();
+        Self::is_group_label_visible_property()
             .changed()
             .add_class_handler::<Calendar>(|x, _| x.update_months())
             .detach();
@@ -697,6 +708,16 @@ impl Calendar {
 
     pub fn set_is_out_of_scope_enabled(&self, value: bool) {
         self.set_value(Self::is_out_of_scope_enabled_property(), value)
+    }
+
+    /// Gets or sets whether the first day of each month shows the abbreviated name of its month.
+    /// The default is false.
+    pub fn is_group_label_visible(&self) -> bool {
+        self.get_value(Self::is_group_label_visible_property())
+    }
+
+    pub fn set_is_group_label_visible(&self, value: bool) {
+        self.set_value(Self::is_group_label_visible_property(), value)
     }
 
     /// The arithmetic and names of the calendar system of the views.

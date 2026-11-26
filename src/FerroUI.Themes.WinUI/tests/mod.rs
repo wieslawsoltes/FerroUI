@@ -1,3 +1,4 @@
+mod calendar_group_label_tests;
 mod compiled_xaml_tests;
 mod control_templates;
 mod control_theme_tests;

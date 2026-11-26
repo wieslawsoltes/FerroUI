@@ -54,8 +54,8 @@ A verified enum does not verify its consuming controls, installed fonts, inherit
 | Page state | Count |
 |---|---:|
 | pending | 31 |
-| partial | 16 |
-| ported | 79 |
+| partial | 15 |
+| ported | 80 |
 | verified | 0 |
 
 Partial pages exercise reviewed native subsets; a ported page has a native adaptation, or a recorded reason why it cannot have one, for every catalog example (`samples/WinUIGallery/port-status.json`). Neither state claims rendering parity.
@@ -82,7 +82,7 @@ Partial pages exercise reviewed native subsets; a ported page has a native adapt
 | BreadcrumbBar | Navigation | pending | 2 |
 | Button | Basic input | ported | 4 |
 | CalendarDatePicker | Date & time | ported | 1 |
-| CalendarView | Date & time | partial | 1 |
+| CalendarView | Date & time | ported | 1 |
 | Canvas | Layout | ported | 1 |
 | CaptureElementPreview | Media | ported | 1 |
 | Chart | Media | ported | 7 |

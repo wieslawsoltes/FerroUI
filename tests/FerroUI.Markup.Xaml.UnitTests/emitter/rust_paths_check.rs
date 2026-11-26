@@ -1499,6 +1499,7 @@ pub fn property_accessors() -> Vec<(&'static ::ferroui_base::FerroProperty, &'st
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::display_mode_property()), "ferroui_controls::Calendar::display_mode_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::first_day_of_week_property()), "ferroui_controls::Calendar::first_day_of_week_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::header_background_property()), "ferroui_controls::Calendar::header_background_property"),
+        (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::is_group_label_visible_property()), "ferroui_controls::Calendar::is_group_label_visible_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::is_out_of_scope_enabled_property()), "ferroui_controls::Calendar::is_out_of_scope_enabled_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::is_today_highlighted_property()), "ferroui_controls::Calendar::is_today_highlighted_property"),
         (::ferroui_base::Registrable::as_registered_property(::ferroui_controls::Calendar::is_week_number_visible_property()), "ferroui_controls::Calendar::is_week_number_visible_property"),

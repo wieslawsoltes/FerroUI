@@ -32,6 +32,26 @@
         </Panel>
       </ControlTemplate>
     </Setter>
+    <!-- Calendar.IsGroupLabelVisible: the first day of a month shows the abbreviated name of its month at the top of the
+         day (the WinUI theme's PART_GroupLabel). Only those days use this template, so a calendar without labels
+         creates nothing more. -->
+    <Style Selector="^:grouplabel">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel Background="Transparent">
+            <Border x:Name="OuterBorder" Width="40" Height="40" CornerRadius="20" HorizontalAlignment="Center" VerticalAlignment="Center" Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}" BorderThickness="{TemplateBinding BorderThickness}">
+              <Panel>
+                <Border x:Name="StateLayer" Background="Transparent" CornerRadius="20" IsHitTestVisible="False"/>
+                <material:MaterialRipple x:Name="Ripple" Fill="{TemplateBinding Foreground}" CornerRadius="20" ReducedMotion="{DynamicResource MaterialReducedMotion}"/>
+                <ContentPresenter x:Name="PART_ContentPresenter" Content="{TemplateBinding Content}" ContentTemplate="{TemplateBinding ContentTemplate}" Foreground="{TemplateBinding Foreground}" HorizontalContentAlignment="Center" VerticalContentAlignment="Center"/>
+                <TextBlock x:Name="PART_GroupLabel" FontSize="{DynamicResource CalendarViewFirstOfMonthLabelFontSize}" FontWeight="Normal" Margin="{DynamicResource CalendarViewFirstOfMonthLabelMargin}" HorizontalAlignment="Center" VerticalAlignment="Top" Foreground="{Binding #PART_ContentPresenter.Foreground}"/>
+              </Panel>
+            </Border>
+            <Border x:Name="FocusVisual" Width="46" Height="46" CornerRadius="23" BorderThickness="3" BorderBrush="{DynamicResource MaterialSecondaryBrush}" HorizontalAlignment="Center" VerticalAlignment="Center" IsVisible="False" IsHitTestVisible="False"/>
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
     <Style Selector="^:pointerover /template/ Border#StateLayer">
       <Setter Property="Background" Value="{DynamicResource MaterialOnSurfaceHoverBrush}"/>
     </Style>

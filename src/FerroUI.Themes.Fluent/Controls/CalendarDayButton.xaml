@@ -53,6 +53,41 @@
       </ControlTemplate>
     </Setter>
 
+    <!-- Calendar.IsGroupLabelVisible: the first day of a month shows the abbreviated name of its
+         month at the top (the label text block of WinUI's CalendarViewBaseItemChrome: 8 px,
+         centred, 2 px below the edge, in the foreground of the day and the Normal weight). Only
+         those days use this template, so a calendar without labels creates nothing more. -->
+    <Style Selector="^:grouplabel">
+      <Setter Property="Template">
+        <ControlTemplate>
+          <Panel>
+            <Border Name="Root" Background="{TemplateBinding Background}"
+                    BorderThickness="0" ClipToBounds="True">
+              <Panel>
+                <ContentPresenter Name="PART_ContentPresenter"
+                                  ContentTemplate="{TemplateBinding ContentTemplate}"
+                                  Content="{TemplateBinding Content}"
+                                  HorizontalAlignment="{TemplateBinding HorizontalContentAlignment}"
+                                  VerticalAlignment="{TemplateBinding VerticalContentAlignment}"
+                                  Margin="{TemplateBinding Padding}" />
+                <TextBlock Name="PART_GroupLabel"
+                           FontSize="8"
+                           FontWeight="Normal"
+                           Margin="0,2,0,0"
+                           HorizontalAlignment="Center"
+                           VerticalAlignment="Top"
+                           Foreground="{Binding #PART_ContentPresenter.Foreground}" />
+              </Panel>
+            </Border>
+
+            <Border Name="Border"
+                    BorderThickness="2"
+                    BorderBrush="{TemplateBinding BorderBrush}" />
+          </Panel>
+        </ControlTemplate>
+      </Setter>
+    </Style>
+
     <Style Selector="^:pointerover /template/ Border#Border">
       <Setter Property="BorderBrush" Value="{DynamicResource CalendarViewHoverBorderBrush}" />
     </Style>
