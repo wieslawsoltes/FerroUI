@@ -259,6 +259,8 @@ control_tests! {
     rich_edit_box => "RichEditBox";
     number_box => "NumberBox";
     auto_suggest_box => "AutoSuggestBox";
+    breadcrumb_bar => "BreadcrumbBar";
+    breadcrumb_bar_item => "BreadcrumbBarItem";
     radio_buttons => "RadioButtons";
     rating_control => "RatingControl";
     managed_file_chooser => "ManagedFileChooser";
@@ -1235,5 +1237,82 @@ fn the_back_and_toggle_buttons_of_a_minimal_pane_are_adjacent() {
     assert!(back.2 && toggle.2, "both buttons are shown: back {back:?}, toggle {toggle:?}, close {close:?}");
     let gap = toggle.0 - (back.0 + back.1);
     assert!((0.0..=8.0).contains(&gap), "the toggle button starts beside the back button: back {back:?}, toggle {toggle:?}, close {close:?}");
+    window.close();
+}
+
+/// WinUI's BreadcrumbBar (`Controls/BreadcrumbBar.xaml`; docs/porting/winui-controls.md, section
+/// 10.11) gets its panel from the theme, and its items the parts their code looks up: the ellipsis
+/// item shows its glyph, the last item shows its content without the button and the chevron, and a
+/// bar too narrow for its items shows the ellipsis, whose flyout lists the hidden items as drop-down
+/// items.
+#[test]
+fn the_breadcrumb_bar_gets_its_parts_and_states_from_the_theme() {
+    use ferroui_controls::primitives::{BreadcrumbBarPanel, Popup};
+    use ferroui_controls::{BreadcrumbBar, BreadcrumbBarItem, Button, ItemsSource, Panel, ScrollViewer, TextBlock};
+
+    let _app = start_themed_application();
+    let bar = BreadcrumbBar::new();
+    bar.set_items_source(Some(ItemsSource::from_strs(["Home", "Documents", "Design", "Northwind", "Images"])));
+    let window = Window::new();
+    window.set_content(Some(Control::boxed(&bar)));
+    window.show();
+    window.update_layout();
+
+    let part = |control: &TemplatedControl, name: &str| {
+        control
+            .get_template_descendants()
+            .into_iter()
+            .find(|element| element.name().as_deref() == Some(name))
+            .unwrap_or_else(|| panic!("the part {name} of {}", control.get_type().name()))
+    };
+    let panel = part(&bar, "PART_ItemsRepeater").cast::<BreadcrumbBarPanel>().expect("a breadcrumb bar panel");
+    let items: Vec<Ref<BreadcrumbBarItem>> =
+        panel.children().snapshot().iter().map(|child| child.cast::<BreadcrumbBarItem>().expect("an item")).collect();
+    assert_eq!(6, items.len());
+    assert!(!panel.ellipsis_is_rendered());
+    let ellipsis = &items[0];
+    assert!(part(ellipsis, "PART_EllipsisTextBlock").is_visible());
+    assert!(!part(ellipsis, "PART_ItemContentPresenter").is_visible());
+    assert!(part(ellipsis, "PART_ItemButton").cast::<Button>().is_some());
+    assert!(part(ellipsis, "PART_EllipsisFlyout").cast::<Popup>().is_some());
+    let first = &items[1];
+    assert!(part(first, "PART_ItemButton").is_visible());
+    assert!(part(first, "PART_ChevronTextBlock").is_visible());
+    let chevron = part(first, "PART_ChevronTextBlock").cast::<TextBlock>().expect("a text block");
+    // BreadcrumbBarChevronLeftToRight of the theme resources.
+    assert_eq!(Some("\u{E974}".to_string()), chevron.text());
+    let last = &items[5];
+    assert!(!part(last, "PART_ItemButton").is_visible());
+    assert!(!part(last, "PART_ChevronTextBlock").is_visible());
+    assert!(part(last, "PART_LastItemContentPresenter").is_visible());
+    assert!(last.focusable());
+
+    bar.set_width(200.0);
+    window.update_layout();
+    assert!(panel.ellipsis_is_rendered());
+    assert!(ellipsis.bounds().width > 0.0);
+    assert_eq!(0.0, first.bounds().width);
+    // The Enter key on the ellipsis item opens its flyout with the hidden items.
+    let mut args = ferroui_base::input::KeyEventArgs::new();
+    args.key = ferroui_base::input::Key::Enter;
+    args.set_routed_event(Some(ferroui_base::input::InputElement::key_down_event()));
+    ellipsis.raise_event(&args);
+    let flyout = part(ellipsis, "PART_EllipsisFlyout").cast::<Popup>().expect("a popup");
+    assert!(flyout.is_open());
+    // The popup, its border, its scroll viewer and the panel PART_EllipsisItemsRepeater.
+    let border = flyout.child().and_then(|child| child.cast::<Border>()).expect("the border of the flyout");
+    let scroll_viewer = border.child().and_then(|child| child.cast::<ScrollViewer>()).expect("a scroll viewer");
+    let drop_down = scroll_viewer
+        .content()
+        .as_ref()
+        .and_then(Control::from_boxed)
+        .and_then(|content| content.cast::<Panel>())
+        .expect("the panel of the flyout");
+    assert_eq!(Some("PART_EllipsisItemsRepeater".to_string()), drop_down.name());
+    let first_drop_down = drop_down.children().snapshot()[0].cast::<BreadcrumbBarItem>().expect("an item");
+    first_drop_down.apply_template();
+    assert!(part(&first_drop_down, "PART_EllipsisDropDownItemContentPresenter").is_visible());
+    assert!(!part(&first_drop_down, "PART_ItemButton").is_visible());
+    flyout.set_is_open(false);
     window.close();
 }

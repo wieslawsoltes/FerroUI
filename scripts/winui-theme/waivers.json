@@ -92,16 +92,6 @@
       "reason": "ItemContainer (the container of ItemsView): no FerroUI control."
     },
     {
-      "document": "controls/dev/Breadcrumb/BreadcrumbBar.xaml",
-      "key": "*",
-      "reason": "BreadcrumbBar: no FerroUI control."
-    },
-    {
-      "document": "controls/dev/Breadcrumb/BreadcrumbBar_themeresources.xaml",
-      "key": "*",
-      "reason": "BreadcrumbBar: no FerroUI control."
-    },
-    {
       "document": "controls/dev/ColorPicker/ColorPicker.xaml",
       "key": "*",
       "reason": "ColorPicker: the colour picker library of FerroUI (ferroui-controls-color-picker) carries its own control themes; a WinUI variant of them belongs to that crate, not to the theme of the control set."
