@@ -105,7 +105,7 @@ fn defaults_are_winui_s() {
     assert!(bar.label_template().is_none());
     assert!(bar.detail_label_template().is_none());
     // The same controller each time; it cannot scroll until a presenter says the axis scrolls.
-    assert!(Rc::ptr_eq(&bar.scroll_controller(), &bar.scroll_controller()));
+    assert_eq!(Rc::as_ptr(&bar.scroll_controller()) as *const (), Rc::as_ptr(&bar.scroll_controller()) as *const ());
     assert!(!bar.scroll_controller().can_scroll());
     bar.scroll_controller().set_is_scrollable(true);
     assert!(bar.scroll_controller().can_scroll());
