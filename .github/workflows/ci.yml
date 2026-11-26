@@ -1006,6 +1006,11 @@ jobs:
         env:
           FERROUI_VULKAN_TEST_REQUIRE: 1
         run: cargo test --locked -p ferroui-vulkan --no-fail-fast -- --nocapture --test-threads=1
+      - name: The Vulkan executor of 3D scenes against lavapipe
+        if: ${{ !cancelled() }}
+        env:
+          FERROUI_VULKAN_TEST_REQUIRE: 1
+        run: cargo test --locked -p ferroui-vulkan --features scene3d --lib scene3d -- --nocapture --test-threads=1
       - name: The Vulkan GPU of the Skia backend against lavapipe
         if: ${{ !cancelled() }}
         env:
