@@ -1,15 +1,16 @@
 import type { TimelineProgram } from '../src/timelineProtocol';
 import { element } from './dom';
+import { TimeScrubber } from './timeScrubber';
 
 export class TimelineNativePreview {
     private readonly section = element('timeline-native-source');
     private readonly note = element('timeline-preview-note');
     private readonly targets = element<HTMLButtonElement>('timeline-preview-targets');
     private readonly source = element<HTMLButtonElement>('timeline-source');
-    private readonly slider = element<HTMLInputElement>('timeline-native-seek');
+    private readonly scrubber: TimeScrubber;
 
     constructor(seek: (seconds: number) => void, chooseTargets: () => void, reveal: () => void) {
-        this.slider.addEventListener('input', () => seek(this.slider.valueAsNumber));
+        this.scrubber = new TimeScrubber(element('timeline-native-seek'), seek);
         this.targets.addEventListener('click', chooseTargets);
         this.source.addEventListener('click', reveal);
     }
@@ -32,13 +33,13 @@ export class TimelineNativePreview {
         this.targets.hidden = !program || (program.style != null && !missingTargets && !preview?.explicit_targets);
         this.source.hidden = !showSource;
         this.source.disabled = this.targets.disabled = !enabled || pending;
-        this.slider.hidden = !native || missingTargets;
-        this.slider.disabled = !enabled;
+        const slider = this.scrubber.input;
+        slider.hidden = !native || missingTargets;
+        slider.disabled = !enabled;
         if (preview?.native && preview.available) {
             const maximum = preview.total_duration ?? Math.max(preview.duration, seconds);
-            this.slider.max = String(maximum);
-            this.slider.value = String(seconds);
-            this.slider.setAttribute('aria-valuetext', `${seconds.toFixed(3)} seconds elapsed`);
+            this.scrubber.show(seconds, maximum);
+            slider.setAttribute('aria-valuetext', `${seconds.toFixed(3)} seconds elapsed`);
         }
     }
 }

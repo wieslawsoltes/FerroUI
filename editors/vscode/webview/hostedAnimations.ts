@@ -8,6 +8,7 @@ import { element, labelButton } from './dom';
 import { HostedCurves } from './hostedCurves';
 import { HostedKeyframeEditor } from './hostedKeyframes';
 import { HostedKeyLanes } from './hostedKeyLanes';
+import { TimeScrubber } from './timeScrubber';
 import { clipRulerExtent, TimelineClips } from './timelineClips';
 import { TimelineMarkerView } from './timelineMarkerView';
 import { fitTimeline } from './timelineViewport';
@@ -26,7 +27,7 @@ export class HostedAnimationView {
     private readonly edit = element<HTMLButtonElement>('hosted-animation-keyframe');
     private readonly play = element<HTMLButtonElement>('hosted-animation-play');
     private readonly stop = element<HTMLButtonElement>('hosted-animation-stop');
-    private readonly seek = element<HTMLInputElement>('hosted-animation-seek');
+    private readonly scrubber = new TimeScrubber(element('hosted-animation-seek'), seconds => this.queueSeek(seconds));
     private readonly time = element<HTMLOutputElement>('hosted-animation-time');
     private readonly number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
     private state: HostedAnimationState = { programs: [], targets: [], overrides: {}, busy: false };
@@ -59,7 +60,7 @@ export class HostedAnimationView {
         this.keyLanes = new HostedKeyLanes(send, () => { this.flush(); this.paint(); },
             (track, key) => this.openLaneKey(track, key));
         this.workArea = new TimelineWorkArea('hosted', element('hosted-animation-clock'),
-            () => fitTimeline(Number(this.seek.max)), () => this.seek.valueAsNumber, () => this.paint());
+            () => fitTimeline(this.scrubber.maximum), () => this.scrubber.seconds, () => this.paint());
         this.clipRange = new TimelineWorkArea('clip', element('timeline-clips'),
             () => this.clips.viewport, () => this.clips.elapsed, () => this.paint());
         this.clips = new TimelineClips<HostedAnimationFrame>(layout, {
@@ -86,8 +87,8 @@ export class HostedAnimationView {
             },
             layout: () => { this.clipRange.layout(); this.clipMarkers.layout(); },
         });
-        this.programMarkers = new TimelineMarkerView('hosted', this.seek,
-            () => fitTimeline(Number(this.seek.max)), () => this.seek.valueAsNumber,
+        this.programMarkers = new TimelineMarkerView('hosted', this.scrubber.input,
+            () => fitTimeline(this.scrubber.maximum), () => this.scrubber.seconds,
             marker => this.control({ action: 'marker', program: Number(this.programs.value), marker }));
         this.clipMarkers = new TimelineMarkerView('clip', element('clip-seek'), () => this.clips.viewport,
             () => this.clips.elapsed, (marker, time) => {
@@ -115,7 +116,6 @@ export class HostedAnimationView {
             else this.control({ action: 'play', program: Number(this.programs.value) });
         };
         this.stop.onclick = () => this.control({ action: 'stop' }, true);
-        this.seek.oninput = () => this.queueSeek(this.seek.valueAsNumber);
         this.section.addEventListener('keydown', event => {
             if (event.key === 'Escape' && this.state.position && this.canUse(true)
                 && !(event.target instanceof HTMLElement && event.target.closest('#hosted-key-lanes'))
@@ -336,7 +336,7 @@ export class HostedAnimationView {
         this.play.disabled = playing ? !this.canUse(true) : !usable || !available;
         this.stop.disabled = !position || !this.canUse(true);
         // Keep the slider focused while the next sample is decoded. Retain only the latest seek.
-        this.seek.disabled = endpoint || !this.state.frame || !available || playing;
+        this.scrubber.input.disabled = endpoint || !this.state.frame || !available || playing;
         element('hosted-animation-clock').hidden = endpoint;
         const elapsed = this.queued ?? this.submitted ?? current?.elapsed ?? 0;
         const programMarkers = program ? this.state.markers?.programs[program.id] ?? [] : [];
@@ -346,15 +346,14 @@ export class HostedAnimationView {
             this.rangeProgram !== rangeProgram, horizon);
         this.rangeProgram = rangeProgram;
         this.workArea.adopt(current?.previewRange, current?.playing === true);
-        this.seek.max = String(program?.totalDuration ?? Math.max(horizon, this.workArea.range?.end ?? 0));
+        this.scrubber.show(elapsed, program?.totalDuration ?? Math.max(horizon, this.workArea.range?.end ?? 0));
         this.workArea.show(!usable, playing ? current?.previewRange : undefined);
         const playLabel = this.workArea.range ? 'Play preview range'
             : current && !current.completed ? 'Resume application animation' : 'Play application animation';
         labelButton(this.play, endpoint ? 'Preview state' : playing ? current?.previewRange ? 'Pause preview range' : 'Pause application animation' : playLabel,
             endpoint ? 'preview' : playing ? 'debug-pause' : 'play');
-        this.seek.value = String(elapsed);
         this.programMarkers.show(programMarkers, !usable || !available, Boolean(this.state.markers));
-        this.seek.setAttribute('aria-valuetext', `${this.number.format(elapsed)} seconds elapsed`);
+        this.scrubber.input.setAttribute('aria-valuetext', `${this.number.format(elapsed)} seconds elapsed`);
         const limit = program?.totalDuration;
         this.time.value = limit == null || elapsed > limit ? `${this.number.format(elapsed)} s elapsed`
             : `${this.number.format(elapsed)} / ${this.number.format(limit)} s`;

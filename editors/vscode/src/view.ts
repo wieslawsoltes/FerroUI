@@ -630,7 +630,7 @@ export function timelineHtml(webview: vscode.Webview, root: vscode.Uri): string 
                     <div class="timeline-scrub">
                         <input id="timeline-seek" type="range" min="0" value="0" step="any" aria-label="Animation playhead"
                             aria-keyshortcuts="[ ] , . Home End + - 0 PageUp PageDown I O"
-                            title="[ and ] jump to keys. , and . step frames. I and O set the preview range. + and − zoom.">
+                            title="Arrow keys adjust the playhead. [ and ] jump to keys. , and . step frames. I and O set the preview range. + and − zoom.">
                     </div>
                     <div id="timeline-ruler" class="timeline-ruler" aria-hidden="true"></div>
                     ${previewRangeBand('timeline')}

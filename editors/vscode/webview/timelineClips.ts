@@ -2,6 +2,7 @@ import type { TimelineClipTiming } from '../src/timelineProtocol';
 import type { TimelineLayout } from '../src/timelineLayout';
 import type { ClipFrame } from './clipFrame';
 import { create, element, labelButton } from './dom';
+import { TimeScrubber } from './timeScrubber';
 import { bindClipDrag } from './timelineClipDrag';
 import { TimelineClipPlacement } from './timelineClipPlacement';
 import { clamp, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline, type TimelineViewport } from './timelineViewport';
@@ -48,7 +49,7 @@ export class TimelineClips<Frame extends ClipFrame> {
     private readonly pane = element('timeline-clips');
     private readonly tools = element('timeline-clip-tools');
     private readonly rows = element('clip-rows');
-    private readonly seek = element<HTMLInputElement>('clip-seek');
+    private readonly scrubber = new TimeScrubber(element('clip-seek'), time => this.actions.seek(time));
     private readonly time = element<HTMLInputElement>('clip-time');
     private readonly play = element<HTMLButtonElement>('clip-play');
     private readonly stop = element<HTMLButtonElement>('clip-stop');
@@ -76,7 +77,6 @@ export class TimelineClips<Frame extends ClipFrame> {
             this.applyLayout(layout);
             this.actions.changed(layout);
         };
-        this.seek.oninput = () => this.actions.seek(this.seek.valueAsNumber);
         this.time.oninput = () => { this.drafting = true; };
         this.time.onblur = () => { this.drafting = false; this.showTime(); };
         element<HTMLFormElement>('clip-clock').onsubmit = event => {
@@ -173,7 +173,7 @@ export class TimelineClips<Frame extends ClipFrame> {
         const playLabel = state.rangeEnabled ? 'Play preview range' : elapsed && !state.position?.completed ? 'Resume clips' : 'Play all clips';
         labelButton(this.play, playing ? state.position?.previewRange ? 'Pause preview range' : 'Pause clips' : playLabel,
             playing ? 'debug-pause' : 'run-all');
-        this.seek.disabled = this.time.disabled = !state.frame || editing || playing || this.reference === undefined;
+        this.scrubber.input.disabled = this.time.disabled = !state.frame || editing || playing || this.reference === undefined;
         this.showTime();
         this.showSelection();
     }
@@ -247,8 +247,9 @@ export class TimelineClips<Frame extends ClipFrame> {
 
     private showTime(): void {
         if (!this.drafting || this.time.disabled) this.time.value = String(Number(this.seconds.toFixed(6)));
-        this.seek.value = String(this.seconds);
-        this.seek.setAttribute('aria-valuetext', `${number.format(this.seconds)} seconds elapsed`);
+        const { start, span } = this.view;
+        this.scrubber.show(this.seconds, start + span, start);
+        this.scrubber.input.setAttribute('aria-valuetext', `${number.format(this.seconds)} seconds elapsed`);
         const head = visibleTime(this.view, this.seconds) ? `${timelinePercent(this.view, this.seconds)}%` : '-2px';
         this.pane.style.setProperty('--clip-head', head);
     }
@@ -267,8 +268,6 @@ export class TimelineClips<Frame extends ClipFrame> {
         const { start, span, duration } = this.view;
         this.zoomIn.disabled = span <= minimumTimelineSpan;
         this.zoomOut.disabled = this.fit.disabled = span >= duration;
-        this.seek.min = String(start);
-        this.seek.max = String(start + span);
         this.pan.max = String(duration - span);
         this.pan.value = String(start);
         element('clip-pan-row').hidden = span >= duration;

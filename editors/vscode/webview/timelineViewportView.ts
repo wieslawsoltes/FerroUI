@@ -1,4 +1,5 @@
 import { create, element } from './dom';
+import type { TimeScrubber } from './timeScrubber';
 import type { RenderedKeyframe } from './timelineKeyDrag';
 import { clamp, fitKeyTimes, fitTimeline, minimumTimelineSpan, panTimeline, timelinePercent, visibleTime, zoomTimeline, type TimelineViewport } from './timelineViewport';
 
@@ -13,7 +14,7 @@ export class TimelineViewportView {
     private readonly panRow = element('timeline-pan-row');
     private viewport = fitTimeline(0);
 
-    constructor(private readonly slider: HTMLInputElement, private readonly keys: () => readonly RenderedKeyframe[],
+    constructor(private readonly playhead: TimeScrubber, private readonly keys: () => readonly RenderedKeyframe[],
         private readonly afterLayout: () => void) {
         this.zoomIn.onclick = () => this.zoom(1.25);
         this.zoomOut.onclick = () => this.zoom(.8);
@@ -51,7 +52,7 @@ export class TimelineViewportView {
         this.pan.value = String(start);
         if ((!zoomed && focused === this.pan)
             || (focused instanceof HTMLButtonElement && focused.disabled && this.controls.contains(focused))) {
-            this.slider.focus({ preventScroll: true });
+            this.playhead.input.focus({ preventScroll: true });
         }
 
         const precision = span > 0 ? clamp(Math.ceil(-Math.log10(span / 4)) + 1, 0, 7) : 0;
@@ -65,11 +66,11 @@ export class TimelineViewportView {
         }));
         for (const { button, key } of this.keys()) {
             const visible = visibleTime(this.range, key.time);
-            if (!visible && document.activeElement === button) this.slider.focus({ preventScroll: true });
+            if (!visible && document.activeElement === button) this.playhead.input.focus({ preventScroll: true });
             button.hidden = !visible;
             if (visible) button.style.left = `${clamp(timelinePercent(this.range, key.time), 0, 100)}%`;
         }
-        this.position(this.slider.valueAsNumber);
+        this.position(this.playhead.seconds);
         this.afterLayout();
     }
 
@@ -84,7 +85,7 @@ export class TimelineViewportView {
         this.layout();
     }
 
-    private zoom(factor: number, time = this.slider.valueAsNumber): void {
+    private zoom(factor: number, time = this.playhead.seconds): void {
         const pivot = visibleTime(this.range, time) ? time : this.range.start + this.range.span / 2;
         this.apply(zoomTimeline(this.range, factor, pivot));
     }

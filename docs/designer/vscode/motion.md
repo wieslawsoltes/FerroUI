@@ -75,6 +75,8 @@ The picker follows the open source document and uses the running app's registry.
 
 Escape dismisses the filter popup when it has focus.
 
+Focus the playhead and use Right or Up to advance by one frame interval, or Left or Down to go back. The keyframe ruler uses the selected snap rate, or 30 frames per second when snapping is off. Native animation, clip comparison, state transitions, and App Preview use 30 frames per second for these adjustments. Screen reader increment and decrement actions use the same interval. The playhead reports its position in seconds. Drag the ruler or enter a time for positions between frames.
+
 When a source edit refreshes the tracks, keyboard focus stays on the same target, curve component picker, or keyframe if it is still visible. If the keyframe was removed, focus returns to its target. Named targets keep their expanded and locked states when the preview rebuilds. VoiceOver’s Control–Option shortcuts remain available while a keyframe has focus.
 
 ### Control Timeline tracks from an agent

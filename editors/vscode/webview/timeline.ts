@@ -7,6 +7,7 @@ import { clipRulerExtent, TimelineClips } from './timelineClips';
 import { canPreviewProgram, canPreviewRange, combinedRangeLimit, previewClock } from '../src/timelinePrograms';
 import { AnimationGraphMenu } from './animationGraphMenu';
 import { anchorPopover, element, labelButton } from './dom';
+import { defaultAnimationFrameRate, TimeScrubber } from './timeScrubber';
 import { TimelineChannels } from './timelineChannels';
 import { curveChannels, TimelineCurves } from './timelineCurves';
 import { curveEditValue, dragKeyframe, renderKeyframe, type RenderedKeyframe } from './timelineKeyDrag';
@@ -51,7 +52,8 @@ const record = element<HTMLButtonElement>('timeline-record');
 const actions = element<HTMLButtonElement>('timeline-actions');
 const keyActions = element<HTMLButtonElement>('timeline-key-actions');
 const fitKeys = element<HTMLButtonElement>('timeline-fit-keys');
-const slider = element<HTMLInputElement>('timeline-seek');
+const playhead = new TimeScrubber(element('timeline-seek'), queueSeek);
+const slider = playhead.input;
 const time = element<HTMLOutputElement>('timeline-time');
 const tracks = element<HTMLOListElement>('timeline-tracks');
 const trackFocusFallbacks = [slider, programs];
@@ -76,14 +78,14 @@ let renderedKeys: RenderedKeyframe[] = [];
 let visibleKeys: RenderedKeyframe[] = [];
 let editableKeys: RenderedKeyframe[] = [];
 const channels = new TimelineChannels(updateTrackVisibility);
-const viewport = new TimelineViewportView(slider, () => visibleKeys, () => {
+const viewport = new TimelineViewportView(playhead, () => visibleKeys, () => {
     channels.layout(viewport.range);
     workArea.layout();
     markerView.layout();
     showCurves();
 });
-const workArea = new TimelineWorkArea('timeline', viewport.grid, () => viewport.range, () => slider.valueAsNumber, showPosition);
-const markerView = new TimelineMarkerView('timeline', slider, () => viewport.range, () => slider.valueAsNumber, (edit, time) => {
+const workArea = new TimelineWorkArea('timeline', viewport.grid, () => viewport.range, () => playhead.seconds, showPosition);
+const markerView = new TimelineMarkerView('timeline', slider, () => viewport.range, () => playhead.seconds, (edit, time) => {
     const frame = gestureFrame();
     if (!frame || program === undefined) return;
     if (time !== undefined) viewport.reveal(time);
@@ -195,11 +197,11 @@ playAll.addEventListener('click', () => {
 recordMode.addEventListener('click', () => {
     const selected = current();
     if (model.frame && selected?.timeline && model.canRecord && !pending && !keyEdit) {
-        send(model.frame, { action: 'record', program: selected.id, enabled: !model.recording, time: slider.valueAsNumber });
+        send(model.frame, { action: 'record', program: selected.id, enabled: !model.recording, time: playhead.seconds });
     }
 });
 record.addEventListener('click', () => {
-    recordAt(slider.valueAsNumber);
+    recordAt(playhead.seconds);
 });
 actions.addEventListener('click', () => {
     if (model.frame && !pending && !keyEdit) vscode.postMessage({ type: 'programActions', frame: model.frame, program });
@@ -208,7 +210,6 @@ sourceIssues.onclick = () => {
     if (model.frame && !pending && !keyEdit) vscode.postMessage({ type: 'sourceIssues', frame: model.frame });
 };
 keyActions.addEventListener('click', () => editKeys(selection.keys, model.frame));
-slider.addEventListener('input', () => queueSeek(slider.valueAsNumber));
 const pasteControls: HTMLElement[] = [slider, keyActions];
 for (const control of pasteControls) control.addEventListener('keydown', event => { clipboardShortcut(event, selection.keys); });
 function queueSeek(seconds: number): void {
@@ -377,7 +378,6 @@ function renderTracks(): void {
         lastContent = content;
         renderedKeys = [];
         curves.clear();
-        slider.max = String(timeline.duration);
         const curveTracks = new Map<string, number>();
         channels.render(timeline.tracks, model.names, model.namedTargets, newProgram, (track, index, target, targetKey) => {
             const row = document.createElement('li');
@@ -564,6 +564,7 @@ function setFrameRate(rate: number): void {
     frameRate = rate;
     snap.value = String(rate);
     saveTimeline();
+    showPosition();
 }
 
 function showCurves(): void {
@@ -650,7 +651,7 @@ function showPosition(): void {
     const seconds = queued ?? submitted ?? (position?.program === selected?.id ? position?.time : undefined) ?? 0;
     nativePreview.show(selected, model.names, seconds, Boolean(model.frame && !playing && !editing), pending);
     if (timeline) {
-        slider.value = String(seconds);
+        playhead.show(seconds, timeline.duration, 0, frameRate || defaultAnimationFrameRate);
         slider.setAttribute('aria-valuetext', `${number.format(seconds)} of ${number.format(timeline.duration)} seconds`);
         viewport.position(seconds);
         time.value = `${number.format(seconds)} / ${number.format(timeline.duration)} s`;

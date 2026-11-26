@@ -1,4 +1,5 @@
 import { element } from './dom';
+import { defaultAnimationFrameRate } from './timeScrubber';
 import { clamp, stepTimelineFrame } from './timelineViewport';
 
 const number = new Intl.NumberFormat(undefined, { maximumFractionDigits: 3 });
@@ -71,7 +72,7 @@ export class TimelineNavigation {
             case '<':
             case '>': {
                 const frames = (event.key === ',' || event.key === '<' ? -1 : 1) * (event.shiftKey ? 10 : 1);
-                time = stepTimelineFrame(this.time, frames, frameRate || 30, this.duration);
+                time = stepTimelineFrame(this.time, frames, frameRate || defaultAnimationFrameRate, this.duration);
                 break;
             }
             default: return;
