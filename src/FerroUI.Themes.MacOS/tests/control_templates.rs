@@ -313,6 +313,9 @@ control_tests! {
     pivot_header_item => "PivotHeaderItem";
     pivot_item => "PivotItem";
     swipe_control => "SwipeControl";
+    tab_view => "TabView";
+    tab_view_item => "TabViewItem";
+    tab_view_list_view => "TabViewListView";
 }
 
 /// The window itself is themed: its template is applied when it is shown
