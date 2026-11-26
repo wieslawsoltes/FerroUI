@@ -1,6 +1,7 @@
 import { randomUUID } from 'node:crypto';
 import * as vscode from 'vscode';
 import { describeCargoTarget, type CargoTarget } from './cargoTarget';
+import { configureDesktopLldb } from './desktopLldb';
 import { RegisteredReload } from './registeredReload';
 import { ReloadDebugger } from './reloadDebugger';
 import type { ReloadHistory } from './reloadHistory';
@@ -47,7 +48,11 @@ export class ManagedReload {
         this.label = recipe.kind === 'cargo' ? recipe.target.label : `${recipe.folder.name} · Registered patches`;
         this.output = vscode.window.createOutputChannel(`FerroUI Hot Reload · ${this.label} (${this.id.slice(0, 8)})`);
         this.log = new ReloadLog(this.output);
-        this.debugger = new ReloadDebugger(this.output, { onDidChange: changed });
+        this.debugger = new ReloadDebugger(this.output, {
+            onDidChange: changed,
+            configureAdapter: (configuration, folder) => configureDesktopLldb(configuration, () =>
+                vscode.workspace.getConfiguration('lldb-dap', vscode.workspace.workspaceFile ? undefined : folder).get('environment')),
+        });
     }
 
     get pid(): number | undefined { return this.session?.pid ?? this.registered?.pid; }

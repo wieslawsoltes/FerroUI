@@ -44,8 +44,10 @@ for (const [version, supplied] of [[minimum, process.env.FERROUI_TEST_VSCODE_MIN
             breakpoints: [{ language: 'rust' }],
             debuggers: [{ type: 'lldb-dap', label: 'LLDB', program: debuggerPath }],
         } : undefined;
+        const activation = debuggerPath ? { main: './adapter.cjs', activationEvents: ['onDebugResolve:lldb-dap'] } : {};
+        if (debuggerPath) await cp(join(extension, 'test/installedAdapter.cjs'), join(driver, 'adapter.cjs'));
         await writeFile(join(driver, 'package.json'), JSON.stringify({ name: 'ferroui-vsix-driver', publisher: 'ferroui-test',
-            version: '0.0.0', engines: { vscode: manifest.engines.vscode }, contributes }));
+            version: '0.0.0', engines: { vscode: manifest.engines.vscode }, contributes, ...activation }));
         await writeFile(join(profile, 'User/settings.json'), JSON.stringify({
             'workbench.startupEditor': 'none', 'telemetry.telemetryLevel': 'off', ...runtime?.settings,
         }));

@@ -29,6 +29,7 @@ import { verifyBrowserReload } from './browserReloadMcp';
 import { verifyBrowserBuildTarget } from './browserBuildTarget';
 import { verifyBrowserDebug } from './browserDebugMcp';
 import { verifyDebuggerPause } from './debuggerPause';
+import { verifyDesktopLldbConfiguration } from './desktopLldb';
 import { verifyBrowserRustDebug } from './browserRustDebugMcp';
 import { verifyCargoBuildSlots, verifyProcessShutdown, verifyReloadHistory, verifyReloadWatchBoundary } from './reloadProcess';
 import { verifyRsxRecovery } from './rsxRecovery';
@@ -89,6 +90,7 @@ export async function run(): Promise<void> {
         return;
     }
     await verifyDebuggerPause();
+    verifyDesktopLldbConfiguration();
     await verifyBrowserBuildTarget(workspace);
     await verifyRsxRecovery(workspace);
     verifyTimelineViewport();

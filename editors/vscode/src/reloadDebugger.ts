@@ -9,6 +9,7 @@ export const managedProcessVariable = '${command:ferroui.hotReload.processId}';
 interface Attachment { id: string; folder: vscode.WorkspaceFolder; configuration: vscode.DebugConfiguration; generation?: number }
 interface DebuggerOptions {
     attachError?: string;
+    configureAdapter?(configuration: vscode.DebugConfiguration, folder: vscode.WorkspaceFolder): void;
     onDetach?(): void;
     onDidChange?(): void;
     programForGeneration?(generation: number): string | undefined;
@@ -144,6 +145,7 @@ export class ReloadDebugger implements vscode.Disposable {
         config.ferrouiManagedInstance = this.instance;
         config.ferrouiManagedSession = attachment.id;
         try {
+            this.options.configureAdapter?.(config, attachment.folder);
             if (!await vscode.debug.startDebugging(attachment.folder, config)) {
                 throw new Error(this.options.attachError ?? 'The configured Rust debugger did not attach.');
             }

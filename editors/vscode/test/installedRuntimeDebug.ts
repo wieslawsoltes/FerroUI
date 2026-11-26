@@ -23,6 +23,10 @@ export function installedRuntimeDebug(source: vscode.TextDocument, configuration
         const previous = session;
         const replacement = await tracker.accept(previous?.id);
         assert.equal(replacement.configuration.pid, pid, 'LLDB follows the accepted app PID');
+        if (process.platform === 'win32') {
+            assert.equal(replacement.configuration.debugAdapterEnv?.LLDB_USE_LLDB_SERVER, '0',
+                'The Windows desktop attach uses the local LLDB process backend');
+        }
         if (previous) await until(() => !tracker.sessions.has(previous.id));
         session = replacement;
     };
