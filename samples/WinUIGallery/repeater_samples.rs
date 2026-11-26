@@ -19,6 +19,7 @@ use ferroui_base::layout::{HorizontalAlignment, Orientation};
 use ferroui_base::media::{Brush, FontWeight, IBrush, ScaleTransform};
 use ferroui_base::metadata::{MarkupType, MarkupTyped};
 use ferroui_base::threading::{Dispatcher, DispatcherPriority};
+use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_impl_classes, ferro_markup_type, instantiate, BoxedValue, FerroObjectImpl,
     ObjectType, Rect, Ref, RelativePoint, Size, Thickness, Vector, WeakRef,
@@ -28,7 +29,8 @@ use ferroui_controls::primitives::ScrollBarVisibility;
 use ferroui_controls::shapes::Rectangle;
 use ferroui_controls::templates::{FuncDataTemplate, IDataTemplate};
 use ferroui_controls::{
-    Button, ComboBox, Control, ItemsChangedEventArgs, ItemsSource, RadioButtons, ScrollViewer,
+    Button, ComboBox, Control, IItemsList, IKeyIndexMapping, ItemsChangedEventArgs, ItemsChangedHandler,
+    ItemsSource, RadioButtons, ScrollViewer,
     Slider, StackPanel, TextBlock, TextBox,
 };
 use ferroui_controls_repeater::{
@@ -145,6 +147,74 @@ ferro_markup_type!(class Recipe {
         NumIngredients: i32 { get: |this: &Rc<Recipe>| this.ing_list.len() as i32 },
     ],
 });
+
+/// `MyItemsSource`: the recipes of the content-heavy example under stable keys, so that a filter
+/// or a sort keeps the elements of the recipes that stay.
+pub(crate) struct RecipeItemsSource {
+    inner: RefCell<Vec<Rc<Recipe>>>,
+    changes: HandlerList<ItemsChangedHandler>,
+}
+
+impl RecipeItemsSource {
+    pub(crate) fn new(collection: Vec<Rc<Recipe>>) -> Rc<Self> {
+        Rc::new(Self { inner: RefCell::new(collection), changes: HandlerList::new() })
+    }
+
+    /// `InitializeCollection`: the new items, announced as a reset.
+    pub(crate) fn initialize_collection(&self, collection: Vec<Rc<Recipe>>) {
+        *self.inner.borrow_mut() = collection;
+        for (_, handler) in self.changes.snapshot().iter() {
+            handler(&ItemsChangedEventArgs::RESET);
+        }
+    }
+}
+
+impl IItemsList for RecipeItemsSource {
+    fn count(&self) -> usize {
+        self.inner.borrow().len()
+    }
+
+    fn get_at(&self, index: usize) -> Option<BoxedValue> {
+        self.inner.borrow().get(index).map(|recipe| Rc::new(recipe.clone()) as BoxedValue)
+    }
+
+    fn key_index_mapping(&self) -> Option<&dyn IKeyIndexMapping> {
+        Some(self)
+    }
+
+    fn is_notifying(&self) -> bool {
+        true
+    }
+
+    fn add_collection_changed(&self, handler: Rc<ItemsChangedHandler>) -> Option<u64> {
+        Some(self.changes.add(handler))
+    }
+
+    fn remove_collection_changed(&self, token: u64) {
+        self.changes.remove(token);
+    }
+
+    fn as_any(&self) -> &dyn std::any::Any {
+        self
+    }
+}
+
+impl IKeyIndexMapping for RecipeItemsSource {
+    fn key_from_index(&self, index: i32) -> String {
+        usize::try_from(index)
+            .ok()
+            .and_then(|index| self.inner.borrow().get(index).map(|recipe| recipe.num.to_string()))
+            .unwrap_or_default()
+    }
+
+    fn index_from_key(&self, key: &str) -> i32 {
+        self.inner
+            .borrow()
+            .iter()
+            .position(|recipe| recipe.num.to_string() == key)
+            .map_or(-1, |index| index as i32)
+    }
+}
 
 /// `NestedCategory`: a category of the nested repeaters, with its items.
 pub(crate) struct NestedCategory {
@@ -1052,6 +1122,7 @@ fn wire_animated(root: &Ref<Control>) {
     let weak_repeater = repeater.downgrade();
     let weak_viewer = viewer.downgrade();
     let weak_rectangle = rectangle.downgrade();
+    let weak_announcement = root.get_control::<TextBlock>("AnimatedAnnouncement").downgrade();
     let template = {
         let previous_index = previous_index.clone();
         let weak_repeater = weak_repeater.clone();
@@ -1086,6 +1157,7 @@ fn wire_animated(root: &Ref<Control>) {
                 // the selection.
                 let weak_button = button.downgrade();
                 let weak_rectangle = weak_rectangle.clone();
+                let weak_announcement = weak_announcement.clone();
                 let last_selected = last_selected.clone();
                 button.click(move |_, _| {
                     let (Some(button), Some(rectangle)) = (weak_button.upgrade(), weak_rectangle.upgrade()) else {
@@ -1101,6 +1173,10 @@ fn wire_animated(root: &Ref<Control>) {
                         }
                     }
                     let name = content(&*button).unwrap_or_default();
+                    // `UIHelper.AnnounceActionForAccessibility`.
+                    if let Some(announcement) = weak_announcement.upgrade() {
+                        announcement.set_text(Some(&format!("Rectangle color set to {name}")));
+                    }
                     AutomationProperties::set_name(&button, Some(&format!("{name} , selected")));
                     *last_selected.borrow_mut() = Some(button.downgrade());
                 });
@@ -1250,21 +1326,24 @@ fn wire_recipes(root: &Ref<Control>) {
     layout.set_width(200.0);
     repeater.set_layout(Some(layout.upcast()));
     let all = Rc::new(recipes(&SampleRandom::new(0x5EED_1000)));
-    let filtered = Rc::new(FerroList::<BoxedValue>::new());
-    filtered.add_range(all.iter().map(|recipe| Rc::new(recipe.clone()) as BoxedValue));
-    repeater.set_items_source(Some(filtered.clone().into()));
+    let filtered = RecipeItemsSource::new((*all).clone());
+    repeater.set_items_source(Some(ItemsSource::new(filtered.clone())));
+    let announcement = root.get_control::<TextBlock>("RecipesAnnouncement");
     let descending = Rc::new(Cell::new(false));
     let filter = root.get_control::<TextBox>("FilterRecipes");
     let update = {
         let weak_filter = filter.downgrade();
+        let weak_announcement = announcement.downgrade();
         let descending = descending.clone();
         Rc::new(move || {
             let text = weak_filter.upgrade().and_then(|filter| filter.text()).unwrap_or_default();
             let sorted = filter_and_sort(&all, &text, descending.get());
-            // `InitializeCollection`: the items are replaced. The automation notification of
-            // the count is not raised (no notification events on the peers of FerroUI).
-            filtered.clear();
-            filtered.add_range(sorted.into_iter().map(|recipe| Rc::new(recipe) as BoxedValue));
+            let count = sorted.len();
+            filtered.initialize_collection(sorted);
+            // The source's notification event of the count, as a polite live region.
+            if let Some(announcement) = weak_announcement.upgrade() {
+                announcement.set_text(Some(&format!("Filtered recipes, {count} results.")));
+            }
         })
     };
     {
