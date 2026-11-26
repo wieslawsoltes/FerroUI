@@ -17,16 +17,16 @@ import ferroui::*
 fn button(attrs, children) = Element { elementType: 28, elementAttrs: attrs, elementChildren: children }
 // stackPanel(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of
 // the class StackPanel. A panel which lays out its children horizontally or vertically.
-fn stackPanel(attrs, children) = Element { elementType: 387, elementAttrs: attrs, elementChildren: children }
+fn stackPanel(attrs, children) = Element { elementType: 390, elementAttrs: attrs, elementChildren: children }
 // textBox(attrs: List<Attr<M>>) -> Element<M>: an element of the class TextBox. Represents a
 // control that can be used to display or edit unformatted text. Template parts:
 // `PART_TextPresenter` (a [`TextPresenter`], required) and `PART_ScrollViewer` (a
 // [`ScrollViewer`]). Pseudo-classes: `:empty`, `:touch-mode`. Every text position
 // (`CaretIndex`, `SelectionStart`, `SelectionEnd`, `MaxLength`) is a UTF-16 code unit index.
-fn textBox(attrs) = Element { elementType: 437, elementAttrs: attrs, elementChildren: [] }
+fn textBox(attrs) = Element { elementType: 440, elementAttrs: attrs, elementChildren: [] }
 // window(attrs: List<Attr<M>>, children: List<Element<M>>) -> Element<M>: an element of the
 // class Window. A top-level window.
-fn window(attrs, children) = Element { elementType: 503, elementAttrs: attrs, elementChildren: children }
+fn window(attrs, children) = Element { elementType: 506, elementAttrs: attrs, elementChildren: children }
 
 // ---- attributes of properties ----------------------------------------------------------------
 
@@ -84,237 +84,238 @@ fn clickMode(value) = AttrText { attrTextProperty: 140, attrTextValue: clickMode
 // clipToBounds(value: bool) -> Attr<M>: sets ClipToBounds (Visual).
 fn clipToBounds(value) = AttrBool { attrBoolProperty: 144, attrBoolValue: value }
 // closingBehavior(value: WindowClosingBehavior) -> Attr<M>: sets ClosingBehavior (Window).
-fn closingBehavior(value) = AttrText { attrTextProperty: 155, attrTextValue: windowClosingBehaviorName(value: value) }
+fn closingBehavior(value) = AttrText { attrTextProperty: 156, attrTextValue: windowClosingBehaviorName(value: value) }
 // commandParameter(value: string) -> Attr<M>: sets CommandParameter (Button, KeyBinding,
 // MenuItem, NativeMenuItem, SplitButton, SwipeItem, TrayIcon).
-fn commandParameter(value) = AttrText { attrTextProperty: 161, attrTextValue: value }
+fn commandParameter(value) = AttrText { attrTextProperty: 162, attrTextValue: value }
 // content(value: string) -> Attr<M>: sets Content (CommandBar, ContentControl, ContentPage,
 // ContentPresenter, DrawerPage, Flyout, NavigationPage, TitleBar).
-fn content(value) = AttrText { attrTextProperty: 174, attrTextValue: value }
+fn content(value) = AttrText { attrTextProperty: 175, attrTextValue: value }
 // cornerRadius(value: string) -> Attr<M>: sets CornerRadius (Border, ContentPresenter,
 // ExperimentalAcrylicBorder, TemplatedControl).
-fn cornerRadius(value) = AttrText { attrTextProperty: 181, attrTextValue: value }
+fn cornerRadius(value) = AttrText { attrTextProperty: 182, attrTextValue: value }
 // dataContext(value: string) -> Attr<M>: sets DataContext (Application, StyledElement).
-fn dataContext(value) = AttrText { attrTextProperty: 191, attrTextValue: value }
+fn dataContext(value) = AttrText { attrTextProperty: 192, attrTextValue: value }
 // effectOf(value: string) -> Attr<M>: sets Effect (DrawingGroup, Visual).
-fn effectOf(value) = AttrText { attrTextProperty: 259, attrTextValue: value }
+fn effectOf(value) = AttrText { attrTextProperty: 261, attrTextValue: value }
 // extendClientAreaTitleBarHeightHint(value: float) -> Attr<M>: sets
 // ExtendClientAreaTitleBarHeightHint (Window).
-fn extendClientAreaTitleBarHeightHint(value) = AttrNumber { attrNumberProperty: 271, attrNumberValue: value }
+fn extendClientAreaTitleBarHeightHint(value) = AttrNumber { attrNumberProperty: 273, attrNumberValue: value }
 // extendClientAreaToDecorationsHint(value: bool) -> Attr<M>: sets
 // ExtendClientAreaToDecorationsHint (Window).
-fn extendClientAreaToDecorationsHint(value) = AttrBool { attrBoolProperty: 272, attrBoolValue: value }
+fn extendClientAreaToDecorationsHint(value) = AttrBool { attrBoolProperty: 274, attrBoolValue: value }
 // focusable(value: bool) -> Attr<M>: sets Focusable (InputElement).
-fn focusable(value) = AttrBool { attrBoolProperty: 296, attrBoolValue: value }
+fn focusable(value) = AttrBool { attrBoolProperty: 298, attrBoolValue: value }
 // fontFamily(value: string) -> Attr<M>: sets FontFamily (ContentPresenter, FontIconSource,
 // RichTextBlock, TemplatedControl, TextBlock).
-fn fontFamily(value) = AttrText { attrTextProperty: 297, attrTextValue: value }
+fn fontFamily(value) = AttrText { attrTextProperty: 299, attrTextValue: value }
 // fontFeatures(value: string) -> Attr<M>: sets FontFeatures (RichTextBlock, TemplatedControl,
 // TextBlock).
-fn fontFeatures(value) = AttrText { attrTextProperty: 298, attrTextValue: value }
+fn fontFeatures(value) = AttrText { attrTextProperty: 300, attrTextValue: value }
 // fontSize(value: float) -> Attr<M>: sets FontSize (ContentPresenter, FontIconSource,
 // RichTextBlock, TemplatedControl, TextBlock).
-fn fontSize(value) = AttrNumber { attrNumberProperty: 299, attrNumberValue: value }
+fn fontSize(value) = AttrNumber { attrNumberProperty: 301, attrNumberValue: value }
 // fontStretch(value: FontStretch) -> Attr<M>: sets FontStretch (ContentPresenter,
 // RichTextBlock, TemplatedControl, TextBlock).
-fn fontStretch(value) = AttrText { attrTextProperty: 300, attrTextValue: fontStretchName(value: value) }
+fn fontStretch(value) = AttrText { attrTextProperty: 302, attrTextValue: fontStretchName(value: value) }
 // fontStyle(value: FontStyle) -> Attr<M>: sets FontStyle (ContentPresenter, FontIconSource,
 // RichTextBlock, TemplatedControl, TextBlock).
-fn fontStyle(value) = AttrText { attrTextProperty: 301, attrTextValue: fontStyleName(value: value) }
+fn fontStyle(value) = AttrText { attrTextProperty: 303, attrTextValue: fontStyleName(value: value) }
 // fontWeight(value: string) -> Attr<M>: sets FontWeight (ContentPresenter, FontIconSource,
 // RichTextBlock, TemplatedControl, TextBlock).
-fn fontWeight(value) = AttrText { attrTextProperty: 302, attrTextValue: value }
+fn fontWeight(value) = AttrText { attrTextProperty: 304, attrTextValue: value }
 // foreground(value: string) -> Attr<M>: sets Foreground (ContentPresenter, GlyphRunDrawing,
 // IconSource, RichTextBlock, SwipeItem, TemplatedControl, TextBlock, TextHighlighter).
-fn foreground(value) = AttrText { attrTextProperty: 308, attrTextValue: value }
+fn foreground(value) = AttrText { attrTextProperty: 310, attrTextValue: value }
 // height(value: float) -> Attr<M>: sets Height (Layoutable, RowDefinition).
-fn height(value) = AttrNumber { attrNumberProperty: 343, attrNumberValue: value }
+fn height(value) = AttrNumber { attrNumberProperty: 346, attrNumberValue: value }
 // heightText(value: string) -> Attr<M>: sets Height (Layoutable, RowDefinition).
-fn heightText(value) = AttrText { attrTextProperty: 343, attrTextValue: value }
+fn heightText(value) = AttrText { attrTextProperty: 346, attrTextValue: value }
 // horizontalAlignment(value: HorizontalAlignment) -> Attr<M>: sets HorizontalAlignment
 // (Layoutable).
-fn horizontalAlignment(value) = AttrText { attrTextProperty: 346, attrTextValue: horizontalAlignmentName(value: value) }
+fn horizontalAlignment(value) = AttrText { attrTextProperty: 349, attrTextValue: horizontalAlignmentName(value: value) }
 // horizontalContentAlignment(value: HorizontalAlignment) -> Attr<M>: sets
 // HorizontalContentAlignment (CalendarDatePicker, ComboBox, ContentControl, ContentPage,
 // ContentPresenter, DrawerPage, NumericUpDown, TabControl, TableViewColumn, TextBox).
-fn horizontalContentAlignment(value) = AttrText { attrTextProperty: 347, attrTextValue: horizontalAlignmentName(value: value) }
+fn horizontalContentAlignment(value) = AttrText { attrTextProperty: 350, attrTextValue: horizontalAlignmentName(value: value) }
 // hotKey(value: string) -> Attr<M>: sets HotKey (Button, MenuItem, SplitButton).
-fn hotKey(value) = AttrText { attrTextProperty: 351, attrTextValue: value }
+fn hotKey(value) = AttrText { attrTextProperty: 354, attrTextValue: value }
 // icon(value: string) -> Attr<M>: sets Icon (CommandBarButton, CommandBarToggleButton,
-// MenuItem, NativeMenuItem, NavigationViewItem, Page, TabItem, TrayIcon, Window).
-fn icon(value) = AttrText { attrTextProperty: 353, attrTextValue: value }
+// MenuItem, NativeMenuItem, NavigationViewItem, Page, SelectorBarItem, TabItem, TrayIcon,
+// Window).
+fn icon(value) = AttrText { attrTextProperty: 356, attrTextValue: value }
 // innerLeftContent(value: string) -> Attr<M>: sets InnerLeftContent (AutoCompleteBox,
 // NumericUpDown, TextBox).
-fn innerLeftContent(value) = AttrText { attrTextProperty: 377, attrTextValue: value }
+fn innerLeftContent(value) = AttrText { attrTextProperty: 380, attrTextValue: value }
 // innerRightContent(value: string) -> Attr<M>: sets InnerRightContent (AutoCompleteBox,
 // NumericUpDown, TextBox).
-fn innerRightContent(value) = AttrText { attrTextProperty: 378, attrTextValue: value }
+fn innerRightContent(value) = AttrText { attrTextProperty: 381, attrTextValue: value }
 // isActive(value: bool) -> Attr<M>: sets IsActive (ProgressRing, StateTrigger, WindowBase).
-fn isActive(value) = AttrBool { attrBoolProperty: 384, attrBoolValue: value }
+fn isActive(value) = AttrBool { attrBoolProperty: 387, attrBoolValue: value }
 // isCancel(value: bool) -> Attr<M>: sets IsCancel (Button).
-fn isCancel(value) = AttrBool { attrBoolProperty: 391, attrBoolValue: value }
+fn isCancel(value) = AttrBool { attrBoolProperty: 394, attrBoolValue: value }
 // isDefault(value: bool) -> Attr<M>: sets IsDefault (Button).
-fn isDefault(value) = AttrBool { attrBoolProperty: 399, attrBoolValue: value }
+fn isDefault(value) = AttrBool { attrBoolProperty: 402, attrBoolValue: value }
 // isEnabled(value: bool) -> Attr<M>: sets IsEnabled (Hyperlink, InputElement, NativeMenuItem,
 // SwipeGestureRecognizer).
-fn isEnabled(value) = AttrBool { attrBoolProperty: 405, attrBoolValue: value }
+fn isEnabled(value) = AttrBool { attrBoolProperty: 408, attrBoolValue: value }
 // isHitTestVisible(value: bool) -> Attr<M>: sets IsHitTestVisible (InputElement).
-fn isHitTestVisible(value) = AttrBool { attrBoolProperty: 413, attrBoolValue: value }
+fn isHitTestVisible(value) = AttrBool { attrBoolProperty: 416, attrBoolValue: value }
 // isInactiveSelectionHighlightEnabled(value: bool) -> Attr<M>: sets
 // IsInactiveSelectionHighlightEnabled (TextBox).
-fn isInactiveSelectionHighlightEnabled(value) = AttrBool { attrBoolProperty: 417, attrBoolValue: value }
+fn isInactiveSelectionHighlightEnabled(value) = AttrBool { attrBoolProperty: 420, attrBoolValue: value }
 // isReadOnly(value: bool) -> Attr<M>: sets IsReadOnly (NumericUpDown, RatingControl,
 // RichEditBox, TextBox).
-fn isReadOnly(value) = AttrBool { attrBoolProperty: 440, attrBoolValue: value }
+fn isReadOnly(value) = AttrBool { attrBoolProperty: 444, attrBoolValue: value }
 // isTabStop(value: bool) -> Attr<M>: sets IsTabStop (Hyperlink, InputElement).
-fn isTabStop(value) = AttrBool { attrBoolProperty: 451, attrBoolValue: value }
+fn isTabStop(value) = AttrBool { attrBoolProperty: 456, attrBoolValue: value }
 // isUndoEnabled(value: bool) -> Attr<M>: sets IsUndoEnabled (RichEditBox, TextBox).
-fn isUndoEnabled(value) = AttrBool { attrBoolProperty: 461, attrBoolValue: value }
+fn isUndoEnabled(value) = AttrBool { attrBoolProperty: 466, attrBoolValue: value }
 // isVisible(value: bool) -> Attr<M>: sets IsVisible (NativeMenuItem, TableViewColumn,
 // TrayIcon, Visual).
-fn isVisible(value) = AttrBool { attrBoolProperty: 463, attrBoolValue: value }
+fn isVisible(value) = AttrBool { attrBoolProperty: 468, attrBoolValue: value }
 // letterSpacing(value: float) -> Attr<M>: sets LetterSpacing (ContentPresenter, RichEditBox,
 // RichTextBlock, TemplatedControl, TextBlock).
-fn letterSpacing(value) = AttrNumber { attrNumberProperty: 511, attrNumberValue: value }
+fn letterSpacing(value) = AttrNumber { attrNumberProperty: 516, attrNumberValue: value }
 // margin(value: string) -> Attr<M>: sets Margin (Block, Layoutable).
-fn margin(value) = AttrText { attrTextProperty: 521, attrTextValue: value }
+fn margin(value) = AttrText { attrTextProperty: 526, attrTextValue: value }
 // maxHeight(value: float) -> Attr<M>: sets MaxHeight (Layoutable, RowDefinition).
-fn maxHeight(value) = AttrNumber { attrNumberProperty: 530, attrNumberValue: value }
+fn maxHeight(value) = AttrNumber { attrNumberProperty: 535, attrNumberValue: value }
 // maxLength(value: int) -> Attr<M>: sets MaxLength (AutoCompleteBox, RichEditBox, TextBox).
-fn maxLength(value) = AttrInteger { attrIntegerProperty: 532, attrIntegerValue: value }
+fn maxLength(value) = AttrInteger { attrIntegerProperty: 537, attrIntegerValue: value }
 // maxLines(value: int) -> Attr<M>: sets MaxLines (ContentPresenter, RichTextBlock, TextBox).
-fn maxLines(value) = AttrInteger { attrIntegerProperty: 533, attrIntegerValue: value }
+fn maxLines(value) = AttrInteger { attrIntegerProperty: 538, attrIntegerValue: value }
 // maxWidth(value: float) -> Attr<M>: sets MaxWidth (ColumnDefinition, Layoutable).
-fn maxWidth(value) = AttrNumber { attrNumberProperty: 538, attrNumberValue: value }
+fn maxWidth(value) = AttrNumber { attrNumberProperty: 543, attrNumberValue: value }
 // minHeight(value: float) -> Attr<M>: sets MinHeight (Layoutable, RowDefinition).
-fn minHeight(value) = AttrNumber { attrNumberProperty: 549, attrNumberValue: value }
+fn minHeight(value) = AttrNumber { attrNumberProperty: 554, attrNumberValue: value }
 // minLines(value: int) -> Attr<M>: sets MinLines (TextBox).
-fn minLines(value) = AttrInteger { attrIntegerProperty: 550, attrIntegerValue: value }
+fn minLines(value) = AttrInteger { attrIntegerProperty: 555, attrIntegerValue: value }
 // minWidth(value: float) -> Attr<M>: sets MinWidth (ColumnDefinition, Layoutable).
-fn minWidth(value) = AttrNumber { attrNumberProperty: 551, attrNumberValue: value }
+fn minWidth(value) = AttrNumber { attrNumberProperty: 556, attrNumberValue: value }
 // name(value: string) -> Attr<M>: sets Name (Application, StyledElement).
-fn name(value) = AttrText { attrTextProperty: 566, attrTextValue: value }
+fn name(value) = AttrText { attrTextProperty: 571, attrTextValue: value }
 // newLine(value: string) -> Attr<M>: sets NewLine (TextBox).
-fn newLine(value) = AttrText { attrTextProperty: 583, attrTextValue: value }
+fn newLine(value) = AttrText { attrTextProperty: 588, attrTextValue: value }
 // opacity(value: float) -> Attr<M>: sets Opacity (Brush, DrawingGroup, DropShadowEffectBase,
 // Visual).
-fn opacity(value) = AttrNumber { attrNumberProperty: 603, attrNumberValue: value }
+fn opacity(value) = AttrNumber { attrNumberProperty: 608, attrNumberValue: value }
 // opacityMask(value: string) -> Attr<M>: sets OpacityMask (DrawingGroup, Visual).
-fn opacityMask(value) = AttrText { attrTextProperty: 604, attrTextValue: value }
+fn opacityMask(value) = AttrText { attrTextProperty: 609, attrTextValue: value }
 // orientation(value: Orientation) -> Attr<M>: sets Orientation (PipsPager, ProgressBar,
 // RefreshVisualizer, ScrollBar, Slider, StackPanel, TickBar, Track, VirtualizingStackPanel,
 // WrapPanel).
-fn orientation(value) = AttrText { attrTextProperty: 606, attrTextValue: orientationName(value: value) }
+fn orientation(value) = AttrText { attrTextProperty: 611, attrTextValue: orientationName(value: value) }
 // orientationRefreshVisualizerOrientation(value: RefreshVisualizerOrientation) -> Attr<M>:
 // sets Orientation (PipsPager, ProgressBar, RefreshVisualizer, ScrollBar, Slider, StackPanel,
 // TickBar, Track, VirtualizingStackPanel, WrapPanel).
-fn orientationRefreshVisualizerOrientation(value) = AttrText { attrTextProperty: 606, attrTextValue: refreshVisualizerOrientationName(value: value) }
+fn orientationRefreshVisualizerOrientation(value) = AttrText { attrTextProperty: 611, attrTextValue: refreshVisualizerOrientationName(value: value) }
 // padding(value: string) -> Attr<M>: sets Padding (ContentPresenter, Decorator, RichTextBlock,
 // TemplatedControl, TextBlock).
-fn padding(value) = AttrText { attrTextProperty: 613, attrTextValue: value }
+fn padding(value) = AttrText { attrTextProperty: 618, attrTextValue: value }
 // placeholderForeground(value: string) -> Attr<M>: sets PlaceholderForeground
 // (AutoCompleteBox, CalendarDatePicker, ComboBox, NumericUpDown, RichEditBox, TextBox).
-fn placeholderForeground(value) = AttrText { attrTextProperty: 641, attrTextValue: value }
+fn placeholderForeground(value) = AttrText { attrTextProperty: 646, attrTextValue: value }
 // placeholderText(value: string) -> Attr<M>: sets PlaceholderText (AutoCompleteBox,
 // AutoSuggestBox, CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox,
 // TextBox).
-fn placeholderText(value) = AttrText { attrTextProperty: 644, attrTextValue: value }
+fn placeholderText(value) = AttrText { attrTextProperty: 649, attrTextValue: value }
 // renderTransform(value: string) -> Attr<M>: sets RenderTransform (Visual).
-fn renderTransform(value) = AttrText { attrTextProperty: 708, attrTextValue: value }
+fn renderTransform(value) = AttrText { attrTextProperty: 716, attrTextValue: value }
 // renderTransformOrigin(value: string) -> Attr<M>: sets RenderTransformOrigin (Visual).
-fn renderTransformOrigin(value) = AttrText { attrTextProperty: 709, attrTextValue: value }
+fn renderTransformOrigin(value) = AttrText { attrTextProperty: 717, attrTextValue: value }
 // requestedThemeVariant(value: string) -> Attr<M>: sets RequestedThemeVariant (Application,
 // StyledElement).
-fn requestedThemeVariant(value) = AttrText { attrTextProperty: 712, attrTextValue: value }
+fn requestedThemeVariant(value) = AttrText { attrTextProperty: 720, attrTextValue: value }
 // revealPassword(value: bool) -> Attr<M>: sets RevealPassword (TextBox, TextPresenter).
-fn revealPassword(value) = AttrBool { attrBoolProperty: 720, attrBoolValue: value }
+fn revealPassword(value) = AttrBool { attrBoolProperty: 728, attrBoolValue: value }
 // selectionBrush(value: string) -> Attr<M>: sets SelectionBrush (SelectableTextBlock, TextBox,
 // TextPresenter).
-fn selectionBrush(value) = AttrText { attrTextProperty: 773, attrTextValue: value }
+fn selectionBrush(value) = AttrText { attrTextProperty: 784, attrTextValue: value }
 // selectionEnd(value: int) -> Attr<M>: sets SelectionEnd (RichEditBox, RichTextBlock,
 // SelectableTextBlock, TextBox, TextPresenter).
-fn selectionEnd(value) = AttrInteger { attrIntegerProperty: 774, attrIntegerValue: value }
+fn selectionEnd(value) = AttrInteger { attrIntegerProperty: 785, attrIntegerValue: value }
 // selectionForegroundBrush(value: string) -> Attr<M>: sets SelectionForegroundBrush
 // (RichEditBox, RichTextBlock, SelectableTextBlock, TextBox, TextPresenter).
-fn selectionForegroundBrush(value) = AttrText { attrTextProperty: 776, attrTextValue: value }
+fn selectionForegroundBrush(value) = AttrText { attrTextProperty: 787, attrTextValue: value }
 // selectionStart(value: int) -> Attr<M>: sets SelectionStart (RichEditBox, RichTextBlock,
 // SelectableTextBlock, TextBox, TextPresenter).
-fn selectionStart(value) = AttrInteger { attrIntegerProperty: 780, attrIntegerValue: value }
+fn selectionStart(value) = AttrInteger { attrIntegerProperty: 791, attrIntegerValue: value }
 // showActivated(value: bool) -> Attr<M>: sets ShowActivated (Window).
-fn showActivated(value) = AttrBool { attrBoolProperty: 789, attrBoolValue: value }
+fn showActivated(value) = AttrBool { attrBoolProperty: 800, attrBoolValue: value }
 // showInTaskbar(value: bool) -> Attr<M>: sets ShowInTaskbar (Window).
-fn showInTaskbar(value) = AttrBool { attrBoolProperty: 793, attrBoolValue: value }
+fn showInTaskbar(value) = AttrBool { attrBoolProperty: 804, attrBoolValue: value }
 // sizeToContent(value: string) -> Attr<M>: sets SizeToContent (Window).
-fn sizeToContent(value) = AttrText { attrTextProperty: 801, attrTextValue: value }
+fn sizeToContent(value) = AttrText { attrTextProperty: 812, attrTextValue: value }
 // spacing(value: float) -> Attr<M>: sets Spacing (StackPanel).
-fn spacing(value) = AttrNumber { attrNumberProperty: 810, attrNumberValue: value }
+fn spacing(value) = AttrNumber { attrNumberProperty: 822, attrNumberValue: value }
 // tabIndex(value: int) -> Attr<M>: sets TabIndex (Hyperlink, InputElement).
-fn tabIndex(value) = AttrInteger { attrIntegerProperty: 839, attrIntegerValue: value }
+fn tabIndex(value) = AttrInteger { attrIntegerProperty: 852, attrIntegerValue: value }
 // tag(value: string) -> Attr<M>: sets Tag (Control).
-fn tag(value) = AttrText { attrTextProperty: 854, attrTextValue: value }
+fn tag(value) = AttrText { attrTextProperty: 867, attrTextValue: value }
 // templatedControlIsTemplateFocusTarget(value: bool) -> Attr<M>: sets
 // TemplatedControl.IsTemplateFocusTarget (TemplatedControl).
-fn templatedControlIsTemplateFocusTarget(value) = AttrBool { attrBoolProperty: 860, attrBoolValue: value }
+fn templatedControlIsTemplateFocusTarget(value) = AttrBool { attrBoolProperty: 873, attrBoolValue: value }
 // text(value: string) -> Attr<M>: sets Text (AutoCompleteBox, AutoSuggestBox,
-// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SwipeItem,
-// TextBlock, TextBox, TextPresenter).
-fn text(value) = AttrText { attrTextProperty: 862, attrTextValue: value }
+// CalendarDatePicker, ComboBox, NumberBox, NumericUpDown, RichEditBox, Run, SelectorBarItem,
+// SwipeItem, TextBlock, TextBox, TextPresenter).
+fn text(value) = AttrText { attrTextProperty: 875, attrTextValue: value }
 // textBoxLineHeight(value: float) -> Attr<M>: sets TextBox.LineHeight (TextBox).
-fn textBoxLineHeight(value) = AttrNumber { attrNumberProperty: 873, attrNumberValue: value }
+fn textBoxLineHeight(value) = AttrNumber { attrNumberProperty: 886, attrNumberValue: value }
 // textBoxTextAlignment(value: TextAlignment) -> Attr<M>: sets TextBox.TextAlignment (TextBox).
-fn textBoxTextAlignment(value) = AttrText { attrTextProperty: 874, attrTextValue: textAlignmentName(value: value) }
+fn textBoxTextAlignment(value) = AttrText { attrTextProperty: 887, attrTextValue: textAlignmentName(value: value) }
 // textBoxTextWrapping(value: TextWrapping) -> Attr<M>: sets TextBox.TextWrapping (TextBox).
-fn textBoxTextWrapping(value) = AttrText { attrTextProperty: 875, attrTextValue: textWrappingName(value: value) }
+fn textBoxTextWrapping(value) = AttrText { attrTextProperty: 888, attrTextValue: textWrappingName(value: value) }
 // textParagraphStyles(value: string) -> Attr<M>: sets TextParagraphStyles (TextBox,
 // TextPresenter).
-fn textParagraphStyles(value) = AttrText { attrTextProperty: 901, attrTextValue: value }
+fn textParagraphStyles(value) = AttrText { attrTextProperty: 914, attrTextValue: value }
 // textStyleOverrides(value: string) -> Attr<M>: sets TextStyleOverrides (TextBox,
 // TextPresenter).
-fn textStyleOverrides(value) = AttrText { attrTextProperty: 909, attrTextValue: value }
-// title(value: string) -> Attr<M>: sets Title (InfoBar, Pivot, TitleBar, Window,
-// WindowDrawnDecorations).
-fn title(value) = AttrText { attrTextProperty: 926, attrTextValue: value }
+fn textStyleOverrides(value) = AttrText { attrTextProperty: 922, attrTextValue: value }
+// title(value: string) -> Attr<M>: sets Title (ContentDialog, InfoBar, Pivot, TitleBar,
+// Window, WindowDrawnDecorations).
+fn title(value) = AttrText { attrTextProperty: 939, attrTextValue: value }
 // topLevelAutoSafeAreaPadding(value: bool) -> Attr<M>: sets TopLevel.AutoSafeAreaPadding
 // (TopLevel).
-fn topLevelAutoSafeAreaPadding(value) = AttrBool { attrBoolProperty: 948, attrBoolValue: value }
+fn topLevelAutoSafeAreaPadding(value) = AttrBool { attrBoolProperty: 961, attrBoolValue: value }
 // topmost(value: bool) -> Attr<M>: sets Topmost (Popup, WindowBase).
-fn topmost(value) = AttrBool { attrBoolProperty: 952, attrBoolValue: value }
+fn topmost(value) = AttrBool { attrBoolProperty: 965, attrBoolValue: value }
 // transitions(value: string) -> Attr<M>: sets Transitions (Animatable).
-fn transitions(value) = AttrText { attrTextProperty: 955, attrTextValue: value }
+fn transitions(value) = AttrText { attrTextProperty: 968, attrTextValue: value }
 // transparencyBackgroundFallback(value: string) -> Attr<M>: sets
 // TransparencyBackgroundFallback (TopLevel).
-fn transparencyBackgroundFallback(value) = AttrText { attrTextProperty: 957, attrTextValue: value }
+fn transparencyBackgroundFallback(value) = AttrText { attrTextProperty: 970, attrTextValue: value }
 // transparencyLevelHint(value: string) -> Attr<M>: sets TransparencyLevelHint (TopLevel).
-fn transparencyLevelHint(value) = AttrText { attrTextProperty: 958, attrTextValue: value }
+fn transparencyLevelHint(value) = AttrText { attrTextProperty: 971, attrTextValue: value }
 // undoLimit(value: int) -> Attr<M>: sets UndoLimit (RichEditBox, TextBox).
-fn undoLimit(value) = AttrInteger { attrIntegerProperty: 1005, attrIntegerValue: value }
+fn undoLimit(value) = AttrInteger { attrIntegerProperty: 1018, attrIntegerValue: value }
 // useFloatingPlaceholder(value: bool) -> Attr<M>: sets UseFloatingPlaceholder
 // (CalendarDatePicker, TextBox).
-fn useFloatingPlaceholder(value) = AttrBool { attrBoolProperty: 1009, attrBoolValue: value }
+fn useFloatingPlaceholder(value) = AttrBool { attrBoolProperty: 1022, attrBoolValue: value }
 // useLayoutRounding(value: bool) -> Attr<M>: sets UseLayoutRounding (Layoutable).
-fn useLayoutRounding(value) = AttrBool { attrBoolProperty: 1010, attrBoolValue: value }
+fn useLayoutRounding(value) = AttrBool { attrBoolProperty: 1023, attrBoolValue: value }
 // verticalAlignment(value: VerticalAlignment) -> Attr<M>: sets VerticalAlignment (Layoutable).
-fn verticalAlignment(value) = AttrText { attrTextProperty: 1018, attrTextValue: verticalAlignmentName(value: value) }
+fn verticalAlignment(value) = AttrText { attrTextProperty: 1031, attrTextValue: verticalAlignmentName(value: value) }
 // verticalContentAlignment(value: VerticalAlignment) -> Attr<M>: sets VerticalContentAlignment
 // (CalendarDatePicker, ComboBox, ContentControl, ContentPage, ContentPresenter, DatePicker,
 // DrawerPage, NumericUpDown, TabControl, TextBox, TimePicker).
-fn verticalContentAlignment(value) = AttrText { attrTextProperty: 1019, attrTextValue: verticalAlignmentName(value: value) }
+fn verticalContentAlignment(value) = AttrText { attrTextProperty: 1032, attrTextValue: verticalAlignmentName(value: value) }
 // visualFlowDirection(value: FlowDirection) -> Attr<M>: sets Visual.FlowDirection (Visual).
-fn visualFlowDirection(value) = AttrText { attrTextProperty: 1029, attrTextValue: flowDirectionName(value: value) }
+fn visualFlowDirection(value) = AttrText { attrTextProperty: 1042, attrTextValue: flowDirectionName(value: value) }
 // width(value: float) -> Attr<M>: sets Width (ColumnDefinition, Layoutable, TableViewColumn).
-fn width(value) = AttrNumber { attrNumberProperty: 1036, attrNumberValue: value }
+fn width(value) = AttrNumber { attrNumberProperty: 1049, attrNumberValue: value }
 // widthText(value: string) -> Attr<M>: sets Width (ColumnDefinition, Layoutable,
 // TableViewColumn).
-fn widthText(value) = AttrText { attrTextProperty: 1036, attrTextValue: value }
+fn widthText(value) = AttrText { attrTextProperty: 1049, attrTextValue: value }
 // windowDecorations(value: WindowDecorations) -> Attr<M>: sets WindowDecorations (Window).
-fn windowDecorations(value) = AttrText { attrTextProperty: 1041, attrTextValue: windowDecorationsName(value: value) }
+fn windowDecorations(value) = AttrText { attrTextProperty: 1054, attrTextValue: windowDecorationsName(value: value) }
 // windowStartupLocation(value: WindowStartupLocation) -> Attr<M>: sets WindowStartupLocation
 // (Window).
-fn windowStartupLocation(value) = AttrText { attrTextProperty: 1045, attrTextValue: windowStartupLocationName(value: value) }
+fn windowStartupLocation(value) = AttrText { attrTextProperty: 1058, attrTextValue: windowStartupLocationName(value: value) }
 // windowState(value: WindowState) -> Attr<M>: sets WindowState (Window).
-fn windowState(value) = AttrText { attrTextProperty: 1046, attrTextValue: windowStateName(value: value) }
+fn windowState(value) = AttrText { attrTextProperty: 1059, attrTextValue: windowStateName(value: value) }
 // zIndex(value: int) -> Attr<M>: sets ZIndex (Visual).
-fn zIndex(value) = AttrInteger { attrIntegerProperty: 1058, attrIntegerValue: value }
+fn zIndex(value) = AttrInteger { attrIntegerProperty: 1072, attrIntegerValue: value }
 
 // ---- attributes of events ------------------------------------------------------------------
 
@@ -433,10 +434,10 @@ fn onTemplateApplied(message) = AttrOn { attrOnEvent: 81, attrOnMessage: message
 // onTextChanged(message: M) -> Attr<M>: sends the message on every TextChanged
 // (AutoCompleteBox, RichEditBox, TextBox); `eventText()` is the Text of the sender while
 // `update` runs.
-fn onTextChanged(message) = AttrOnValue { attrValueEvent: 82, attrValueProperty: 862, attrValueMessage: message }
+fn onTextChanged(message) = AttrOnValue { attrValueEvent: 82, attrValueProperty: 875, attrValueMessage: message }
 // onTextChanging(message: M) -> Attr<M>: sends the message on every TextChanging (RichEditBox,
 // TextBox); `eventText()` is the Text of the sender while `update` runs.
-fn onTextChanging(message) = AttrOnValue { attrValueEvent: 83, attrValueProperty: 862, attrValueMessage: message }
+fn onTextChanging(message) = AttrOnValue { attrValueEvent: 83, attrValueProperty: 875, attrValueMessage: message }
 // onTextInput(message: M) -> Attr<M>: sends the message on every TextInput (InputElement).
 fn onTextInput(message) = AttrOn { attrOnEvent: 87, attrOnMessage: message }
 // onTextInputMethodClientRequested(message: M) -> Attr<M>: sends the message on every

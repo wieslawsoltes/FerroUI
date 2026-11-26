@@ -1628,7 +1628,7 @@
         },
         {
           "name": "Controls/TabView.xaml",
-          "index": 176,
+          "index": 177,
           "documents": ["Controls/TabView.xaml"],
           "keys": ["TabViewScrollViewerStyle"],
           "type_keys": ["TabView", "TabViewItem", "TabViewListView"],
