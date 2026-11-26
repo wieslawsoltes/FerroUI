@@ -30,13 +30,14 @@ let key = '';
 let structureKey = '';
 let renderedRows: typeof shown | undefined;
 let drag: DragGesture | undefined;
+let dropPoint: { x: number; y: number } | undefined;
 let marker: HTMLLIElement | undefined;
 let expansion: ReturnType<typeof setTimeout> | undefined;
 let hoverScroll = 0;
 let error: string | undefined;
 
 const dragSource = new DragSource(tree, event => {
-    const item = rowAt(event);
+    const item = rowAt(event.target);
     if (item?.row.canMove && item.row.source !== undefined && state.frame && !(event.target as Element).closest('.twisty')) {
         return { frame: state.frame, origin: originOf(item.row) };
     }
@@ -50,14 +51,15 @@ tree.addEventListener('pointerdown', () => {
     if (drag) {
         vscode.postMessage({ type: 'endDrag', id: drag.id, reason: 'cancel' });
         drag = undefined;
-        clearMarker();
+        clearDrop();
     }
 }, true);
 
 window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
     if (data.type === 'drag') {
+        if (drag?.id !== data.gesture?.id) clearDrop();
         drag = data.gesture;
-        if (!drag) { dragSource.clear(); clearMarker(); }
+        if (!drag) dragSource.clear();
         return;
     }
     if (data.type === 'state') {
@@ -82,13 +84,14 @@ window.addEventListener('message', ({ data }: MessageEvent<ToOutline>) => {
         if (picked) expandTo(state.selected);
         renderStructure();
         syncRows();
+        updateDropMarker();
         if (picked && state.selected !== undefined && !drag) elements.get(state.selected)?.scrollIntoView({ block: 'nearest' });
     } else error = data.error;
     updateStatus();
 });
 
 tree.addEventListener('click', event => {
-    const item = rowAt(event);
+    const item = rowAt(event.target);
     if (!item) return;
     if ((event.target as Element).closest('.twisty') && shown.has(item.row.id)) {
         toggle(item.row.id);
@@ -97,11 +100,11 @@ tree.addEventListener('click', event => {
     select(item.row.id, false, event.ctrlKey || event.metaKey || event.shiftKey);
 });
 tree.addEventListener('dblclick', event => {
-    const item = rowAt(event);
+    const item = rowAt(event.target);
     if (item && !(event.target as Element).closest('.twisty')) select(item.row.id, true);
 });
 tree.addEventListener('keydown', event => {
-    const item = rowAt(event);
+    const item = rowAt(event.target);
     if (!item) return;
     const { id, parent, canMove, source } = item.row;
     const frame = state.frame;
@@ -138,28 +141,23 @@ tree.addEventListener('keydown', event => {
 tree.addEventListener('pointermove', event => {
     if (!(event.buttons & 1)) {
         if (drag) vscode.postMessage({ type: 'endDrag', id: drag.id, reason: 'release' });
-        clearMarker();
+        clearDrop();
         return;
     }
-    const target = dropTarget(event);
-    if (!drag || !target) { clearMarker(); return; }
-    if (marker !== target.item || marker.dataset.drop !== target.position) {
-        clearMarker();
-        marker = target.item;
-        marker.dataset.drop = target.position;
-        if (target.position === 'inside' && collapsedRows().has(target.id)) {
-            expansion = setTimeout(() => { collapsedRows().delete(target.id); renderStructure(); }, 480);
-        }
-    }
+    if (!drag) return;
+    dropPoint = { x: event.clientX, y: event.clientY };
+    if (!updateDropMarker()) return;
     cancelAnimationFrame(hoverScroll);
     const step = event.clientY < header.getBoundingClientRect().bottom + 24 ? -18 : event.clientY > innerHeight - 24 ? 18 : 0;
     if (step) hoverScroll = requestAnimationFrame(() => window.scrollBy(0, step));
 });
-tree.addEventListener('pointerleave', clearMarker);
+window.addEventListener('scroll', updateDropMarker);
+window.addEventListener('resize', updateDropMarker);
+tree.addEventListener('pointerleave', clearDrop);
 tree.addEventListener('pointerup', event => {
-    const target = dropTarget(event);
+    const target = dropTarget({ x: event.clientX, y: event.clientY });
     if (target && event.button === 0) finishDrop(state.frame, drag, { type: 'outline', node: target.node, position: target.position }, vscode.postMessage);
-    clearMarker();
+    clearDrop();
 });
 mode.addEventListener('change', () => {
     const value = mode.value as OutlineMode;
@@ -190,7 +188,7 @@ function filterChanged(): void {
     if (next === query) return;
     query = next;
     collapsedMatches.clear();
-    clearMarker();
+    clearDrop();
     refreshFilter();
     renderStructure();
     updateStatus();
@@ -283,8 +281,8 @@ function glyph(name: string, variant = ''): HTMLSpanElement {
     return span;
 }
 
-function rowAt(event: Event) {
-    const item = (event.target as HTMLElement).closest<HTMLLIElement>('[data-node]');
+function rowAt(target: EventTarget | null) {
+    const item = target instanceof Element ? target.closest<HTMLLIElement>('[data-node]') : undefined;
     const row = item && rows.get(item.dataset.node ?? '');
     return item && row ? { item, row } : undefined;
 }
@@ -318,9 +316,9 @@ function originOf(row: OutlineRow): Extract<DragGesture['origin'], { type: 'node
     return { type: 'node', node: row.source! };
 }
 
-function dropTarget(event: PointerEvent) {
+function dropTarget({ x, y }: { x: number; y: number }) {
     if (!matchDrag(state.frame, drag)) return undefined;
-    const found = rowAt(event);
+    const found = rowAt(document.elementFromPoint(x, y));
     if (!found) return undefined;
     const { row, item } = found;
     if (row.source === undefined || state.mode !== 'source') return undefined;
@@ -331,11 +329,34 @@ function dropTarget(event: PointerEvent) {
         }
     }
     const rect = item.getBoundingClientRect();
-    const fraction = (event.clientY - rect.top) / rect.height;
+    const fraction = (y - rect.top) / rect.height;
     const position: OutlinePosition = row.canInsert && (row.parent === null || fraction >= .25 && fraction <= .75)
         ? 'inside' : fraction < .5 ? 'before' : 'after';
     if (position !== 'inside' && !row.canMove) return undefined;
     return { id: row.id, node: row.source, position, item };
+}
+
+function updateDropMarker(): boolean {
+    if (!dropPoint) return false;
+    const target = dropTarget(dropPoint);
+    if (!target) { clearMarker(); return false; }
+    if (marker === target.item && marker.dataset.drop === target.position) return true;
+    clearMarker();
+    marker = target.item;
+    marker.dataset.drop = target.position;
+    if (target.position === 'inside' && collapsedRows().has(target.id)) {
+        expansion = setTimeout(() => {
+            collapsedRows().delete(target.id);
+            renderStructure();
+            updateDropMarker();
+        }, 480);
+    }
+    return true;
+}
+
+function clearDrop(): void {
+    dropPoint = undefined;
+    clearMarker();
 }
 
 function clearMarker(): void {
