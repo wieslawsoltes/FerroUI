@@ -288,3 +288,47 @@ fn a_mesh_is_written_interleaved_with_the_triangles_the_cpu_reference_draws() {
     assert_eq!(&[1.0, 0.0, 0.0, 0.0, 0.0, 1.0, 0.0, 0.0], &floats[8..16]);
     assert_eq!(&[0.0, 1.0, 0.0, 0.0, 0.0, 0.0, 0.0, 0.0], &floats[16..24]);
 }
+
+/// The Metal Shading Language of the build (feature `msl`, step D5): every entry point a
+/// function of its stage, the clip position invariant, the resources at the slots of the
+/// argument tables the Metal executor binds, the sampler inlined.
+#[cfg(feature = "msl")]
+#[test]
+fn scene3d_wgsl_is_written_in_the_metal_shading_language() {
+    let source = msl::SOURCE;
+    assert!(source.contains("#include <metal_stdlib>"), "{source}");
+    for (stage, function) in [
+        ("vertex", msl::VERTEX_FUNCTION),
+        ("fragment", msl::FRAGMENT_FUNCTION),
+        ("fragment", msl::GRADIENT_FRAGMENT_FUNCTION),
+        ("fragment", msl::GRADIENT_TEXTURE_FRAGMENT_FUNCTION),
+        ("fragment", msl::IMAGE_FRAGMENT_FUNCTION),
+        ("vertex", msl::RESOLVE_VERTEX_FUNCTION),
+        ("fragment", msl::RESOLVE_FRAGMENT_FUNCTION),
+    ] {
+        let declared = source.lines().any(|line| line.starts_with(stage) && line.contains(&format!(" {function}(")));
+        assert!(declared, "{function} is a {stage} function: {source}");
+    }
+    // The layers of a material have the same depth in every draw.
+    assert!(source.contains("invariant"), "{source}");
+    for slot in [msl::FRAME_BUFFER_INDEX, msl::DRAW_BUFFER_INDEX, msl::BRUSH_BUFFER_INDEX] {
+        assert!(source.contains(&format!("[[buffer({slot})]]")), "buffer {slot}: {source}");
+    }
+    // The vertices come through the vertex descriptor (stage_in), not a buffer of the source.
+    assert!(!source.contains(&format!("[[buffer({})]]", msl::VERTEX_BUFFER_INDEX)), "{source}");
+    assert!(source.contains("[[stage_in]]"), "{source}");
+    assert!(source.contains(&format!("[[texture({})]]", msl::BRUSH_TEXTURE_INDEX)), "{source}");
+    assert!(source.contains(&format!("[[texture({})]]", msl::RESOLVED_TEXTURE_INDEX)), "{source}");
+    // The sampler is inlined: no sampler is bound.
+    assert!(source.contains("constexpr metal::sampler"), "{source}");
+    assert!(!source.contains("[[sampler("), "{source}");
+    assert!(source.contains("front_facing"), "{source}");
+    for (shader, function) in [
+        (BrushShader::Solid, msl::FRAGMENT_FUNCTION),
+        (BrushShader::Gradient, msl::GRADIENT_FRAGMENT_FUNCTION),
+        (BrushShader::GradientTexture, msl::GRADIENT_TEXTURE_FRAGMENT_FUNCTION),
+        (BrushShader::Image, msl::IMAGE_FRAGMENT_FUNCTION),
+    ] {
+        assert_eq!(function, msl::fragment_function(shader));
+    }
+}
