@@ -7,9 +7,11 @@ use crate::materials_samples::{
 use crate::{examples, tests::start};
 use ferroui_base::controls::ResourceKey;
 use ferroui_base::media::{AcrylicBrush, Color};
-use ferroui_base::Ref;
+use ferroui_base::rendering::composition::system_backdrops::MicaKind;
+use ferroui_base::{CornerRadius, Ref};
+use ferroui_controls::media::{DesktopAcrylicBackdrop, MicaBackdrop};
 use ferroui_controls::shapes::Rectangle;
-use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, StackPanel, TextBlock};
+use ferroui_controls::{Border, ComboBox, Control, Grid, Slider, StackPanel, SystemBackdropElement, TextBlock};
 
 fn page(id: &str) -> Ref<Control> {
     examples::create(examples::find(id).unwrap()).unwrap()
@@ -122,4 +124,26 @@ fn acrylic_options_change_tint_fallback_and_luminosity_of_their_own_brush() {
     root.get_control::<Slider>("LuminositySlider").set_range_value(0.3);
     assert_close(lumin.tint_luminosity_opacity().expect("a luminosity opacity"), 0.3);
     assert_eq!(in_app.tint_luminosity_opacity(), None);
+}
+
+#[test]
+fn system_backdrop_element_follows_the_backdrop_type_and_the_corner_radius() {
+    let _application = start();
+    let root = page("SystemBackdropElement");
+    let host = root.get_control::<SystemBackdropElement>("DynamicBackdropHost");
+    let kind = || host.system_backdrop().and_then(|backdrop| backdrop.cast::<MicaBackdrop>()).map(|mica| mica.kind());
+    assert!(host.system_backdrop().is_some_and(|backdrop| backdrop.cast::<DesktopAcrylicBackdrop>().is_some()));
+    assert_eq!(host.corner_radius(), CornerRadius::uniform(8.0));
+
+    let combo = root.get_control::<ComboBox>("BackdropTypeComboBox");
+    combo.set_selected_index(1);
+    assert_eq!(kind(), Some(MicaKind::Base));
+    combo.set_selected_index(2);
+    assert_eq!(kind(), Some(MicaKind::BaseAlt));
+    combo.set_selected_index(0);
+    assert!(host.system_backdrop().is_some_and(|backdrop| backdrop.cast::<DesktopAcrylicBackdrop>().is_some()));
+
+    root.get_control::<Slider>("CornerRadiusSlider")
+        .set_value(ferroui_controls::primitives::RangeBase::value_property(), 20.0);
+    assert_eq!(host.corner_radius(), CornerRadius::uniform(20.0));
 }

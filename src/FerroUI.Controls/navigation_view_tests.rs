@@ -10,6 +10,7 @@
 use crate::automation::peers::ControlAutomationPeer;
 use crate::automation::provider::ISelectionProvider;
 use crate::navigation_test_support::{has_class, has_no_template_of_its_own, part, show, start, start_with_focus, Scene};
+use crate::navigation::NavigationTransitionInfo;
 use crate::presenters::ContentPresenter;
 use crate::primitives::{Popup, TemplatedControl};
 use crate::templates::{FuncControlTemplate, FuncDataTemplate};
@@ -148,6 +149,133 @@ fn auto_layout_preserves_exact_threshold_edges_and_user_forced_close() {
     nav.invalidate_measure();
     layout(&nav, 900.0);
     assert!(nav.is_pane_open(), "ordinary remeasure must not undo a user opening");
+}
+
+/// A top pane with four items of 100 pixels, in a window of `width`. The tests then measure the
+/// navigation view itself at the width they need (`layout`).
+fn top_pane(width: f64) -> (Ref<NavigationView>, Vec<Ref<NavigationViewItem>>, Scene) {
+    let nav = NavigationView::new();
+    nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Top);
+    nav.set_is_settings_visible(false);
+    let items: Vec<_> = ["A", "B", "C", "D"].into_iter().map(item).collect();
+    for item in &items {
+        item.set_width(100.0);
+        nav.menu_items().add(boxed(item));
+    }
+    let scene = attach(&nav, width);
+    nav.update_layout();
+    (nav, items, scene)
+}
+
+fn in_overflow(nav: &NavigationView, item: &NavigationViewItem) -> bool {
+    nav.is_in_top_overflow(&item.to_ref().upcast())
+}
+
+/// `HandleTopNavigationMeasureOverride`: the items that do not fit move, in their order, to the
+/// overflow menu of `TopNavOverflowButton`, and come back when the pane is wide enough.
+#[test]
+fn top_pane_moves_the_items_that_do_not_fit_to_the_overflow_menu() {
+    let _app = start();
+    let (nav, items, _scene) = top_pane(1000.0);
+    assert!(items.iter().all(|item| !in_overflow(&nav, item)));
+    assert!(!nav.template_settings().overflow_button_visibility());
+    assert_eq!(host(&nav, "TopNavMenuItemsOverflowHost").children().count(), 0);
+
+    // 300 pixels: two items beside the overflow button.
+    layout(&nav, 300.0);
+    let overflow: Vec<bool> = items.iter().map(|item| in_overflow(&nav, item)).collect();
+    assert_eq!(overflow, [false, false, true, true]);
+    assert!(nav.template_settings().overflow_button_visibility());
+    assert!(part::<Button>(&nav, "TopNavOverflowButton").is_visible());
+    let top = host(&nav, "TopNavMenuItemsHost");
+    let menu = host(&nav, "TopNavMenuItemsOverflowHost");
+    assert_eq!(top.children().count(), 2);
+    assert_eq!(menu.children().get(0), items[2].clone().upcast::<Control>());
+    assert_eq!(menu.children().get(1), items[3].clone().upcast::<Control>());
+    // The items of the menu look like menu items, not like items of the top pane.
+    assert!(items[0].is_top_navigation());
+    assert!(!items[2].is_top_navigation());
+
+    // Wide again: every item is back in the pane, in its order.
+    layout(&nav, 1000.0);
+    assert!(items.iter().all(|item| !in_overflow(&nav, item)));
+    assert!(!nav.template_settings().overflow_button_visibility());
+    assert_eq!(top.children().count(), 4);
+    assert_eq!(top.children().get(2), items[2].clone().upcast::<Control>());
+    assert!(items[2].is_top_navigation());
+}
+
+/// `SelectOverflowItem`: the overflow button opens the menu, an item selected there moves into the
+/// pane and closes the menu, and the selected item is the one that stays when the pane shrinks.
+#[test]
+fn top_pane_overflow_menu_selects_an_item_into_the_pane() {
+    let _app = start();
+    let (nav, items, _scene) = top_pane(1000.0);
+    layout(&nav, 300.0);
+    let popup = part::<Popup>(&nav, "TopNavOverflowFlyout");
+    let button = part::<Button>(&nav, "TopNavOverflowButton");
+    button.raise_event(&ferroui_base::interactivity::RoutedEventArgs::with_event(Button::click_event()));
+    assert!(popup.is_open());
+
+    invoke(&items[3]);
+    assert!(reference_equals(&nav.selected_item(), &boxed(&items[3])));
+    assert!(!popup.is_open(), "an item invoked in the menu closes it");
+    layout(&nav, 300.0);
+    let overflow: Vec<bool> = items.iter().map(|item| in_overflow(&nav, item)).collect();
+    assert_eq!(overflow, [false, true, true, false], "the selected item and the first one fit");
+    let top = host(&nav, "TopNavMenuItemsHost");
+    assert_eq!(top.children().get(1), items[3].clone().upcast::<Control>(), "the items keep their order");
+
+    // Narrower still: the selected item stays, alone, beside the overflow button.
+    layout(&nav, 150.0);
+    let overflow: Vec<bool> = items.iter().map(|item| in_overflow(&nav, item)).collect();
+    assert_eq!(overflow, [true, true, true, false]);
+
+    // A left pane has no overflow menu.
+    nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    nav.update_layout();
+    assert_eq!(host(&nav, "TopNavMenuItemsOverflowHost").children().count(), 0);
+    assert_eq!(host(&nav, "MenuItemsHost").children().count(), 4);
+    assert!(!nav.template_settings().overflow_button_visibility());
+}
+
+/// `CreateNavigationTransitionInfo`: the arguments recommend a slide from the side of the new item
+/// in the top pane, from the right for an item of the overflow menu, and `Entrance` elsewhere.
+#[test]
+fn selection_and_invocation_recommend_the_transition_of_the_pane() {
+    let _app = start();
+    let (nav, items, _scene) = top_pane(1000.0);
+    let selected = Rc::new(RefCell::new(Vec::new()));
+    let invoked = Rc::new(RefCell::new(Vec::new()));
+    {
+        let selected = selected.clone();
+        nav.selection_changed(move |args| selected.borrow_mut().push(args.recommended_navigation_transition_info()))
+            .detach();
+        let invoked = invoked.clone();
+        nav.item_invoked(move |args| invoked.borrow_mut().push(args.recommended_navigation_transition_info()))
+            .detach();
+    }
+    invoke(&items[0]);
+    invoke(&items[2]);
+    invoke(&items[1]);
+    assert_eq!(
+        *selected.borrow(),
+        [NavigationTransitionInfo::Entrance, NavigationTransitionInfo::SlideFromRight, NavigationTransitionInfo::SlideFromLeft]
+    );
+    assert_eq!(*invoked.borrow(), *selected.borrow());
+
+    // An item of the overflow menu comes from the right, even before the selected item.
+    nav.set_selected_item(boxed(&items[3]));
+    layout(&nav, 300.0);
+    assert!(in_overflow(&nav, &items[1]));
+    invoke(&items[1]);
+    assert_eq!(selected.borrow().last(), Some(&NavigationTransitionInfo::SlideFromRight));
+
+    // The left pane recommends Entrance, for an item after the selected one too.
+    nav.set_pane_display_mode(NavigationViewPaneDisplayMode::Left);
+    invoke(&items[2]);
+    assert_eq!(selected.borrow().last(), Some(&NavigationTransitionInfo::Entrance));
+    assert_eq!(invoked.borrow().last(), Some(&NavigationTransitionInfo::Entrance));
 }
 
 /// The display modes drive the split view (`UpdateVisualStateForDisplayModeGroup`), and the top
