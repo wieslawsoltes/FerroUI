@@ -1739,6 +1739,19 @@ pub fn symbol_icon() -> El<ferroui_controls::SymbolIcon> {
     El::new()
 }
 
+pub use ferroui_controls::SystemBackdropElement;
+
+impl ViewClass for ferroui_controls::SystemBackdropElement {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::SystemBackdropElement>::new()
+    }
+}
+
+/// Starts an element of [`SystemBackdropElement`](ferroui_controls::SystemBackdropElement).
+pub fn system_backdrop_element() -> El<ferroui_controls::SystemBackdropElement> {
+    El::new()
+}
+
 pub use ferroui_controls::TabControl;
 
 impl ViewClass for ferroui_controls::TabControl {
@@ -7159,6 +7172,16 @@ pub trait ProgressBarProps: ElementBuilder {
         self.prop(<ferroui_controls::ProgressBar>::show_progress_text_property(), value)
     }
 
+    /// Sets [`ProgressBar::show_paused_property`](ferroui_controls::ProgressBar::show_paused_property).
+    fn show_paused<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressBar>::show_paused_property(), value)
+    }
+
+    /// Sets [`ProgressBar::show_error_property`](ferroui_controls::ProgressBar::show_error_property).
+    fn show_error<M>(self, value: impl IntoProp<bool, M>) -> Self {
+        self.prop(<ferroui_controls::ProgressBar>::show_error_property(), value)
+    }
+
     /// Sets [`ProgressBar::progress_text_format_property`](ferroui_controls::ProgressBar::progress_text_format_property).
     fn progress_text_format<M>(self, value: impl IntoProp<String, M>) -> Self {
         self.prop(<ferroui_controls::ProgressBar>::progress_text_format_property(), value)
@@ -8983,6 +9006,20 @@ pub trait SymbolIconSourceProps: ElementBuilder {
 }
 impl<T: ObjectType + Upcast<ferroui_controls::SymbolIconSource>> SymbolIconSourceProps for El<T> {}
 
+/// The properties and routed events of [`SystemBackdropElement`](ferroui_controls::SystemBackdropElement).
+pub trait SystemBackdropElementProps: ElementBuilder {
+    /// Sets [`SystemBackdropElement::system_backdrop_property`](ferroui_controls::SystemBackdropElement::system_backdrop_property).
+    fn system_backdrop<M>(self, value: impl IntoProp<Option<ferroui_base::Ref<ferroui_controls::media::SystemBackdrop>>, M>) -> Self {
+        self.prop(<ferroui_controls::SystemBackdropElement>::system_backdrop_property(), value)
+    }
+
+    /// Sets [`SystemBackdropElement::corner_radius_property`](ferroui_controls::SystemBackdropElement::corner_radius_property).
+    fn corner_radius<M>(self, value: impl IntoProp<ferroui_base::CornerRadius, M>) -> Self {
+        self.prop(<ferroui_controls::SystemBackdropElement>::corner_radius_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::SystemBackdropElement>> SystemBackdropElementProps for El<T> {}
+
 /// The properties and routed events of [`TabControl`](ferroui_controls::TabControl).
 pub trait TabControlProps: ElementBuilder {
     /// Sets [`TabControl::tab_strip_placement_property`](ferroui_controls::TabControl::tab_strip_placement_property).
@@ -10657,6 +10694,11 @@ pub trait WrapPanelProps: ElementBuilder {
     /// Sets [`WrapPanel::items_alignment_property`](ferroui_controls::WrapPanel::items_alignment_property).
     fn items_alignment<M>(self, value: impl IntoProp<ferroui_controls::WrapPanelItemsAlignment, M>) -> Self {
         self.prop(<ferroui_controls::WrapPanel>::items_alignment_property(), value)
+    }
+
+    /// Sets [`WrapPanel::items_stretch_property`](ferroui_controls::WrapPanel::items_stretch_property).
+    fn items_stretch<M>(self, value: impl IntoProp<ferroui_controls::WrapPanelItemsStretch, M>) -> Self {
+        self.prop(<ferroui_controls::WrapPanel>::items_stretch_property(), value)
     }
 
     /// Sets [`WrapPanel::item_width_property`](ferroui_controls::WrapPanel::item_width_property).

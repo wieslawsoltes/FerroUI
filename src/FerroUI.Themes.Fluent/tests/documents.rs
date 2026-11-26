@@ -124,10 +124,12 @@ document_tests! {
     controls_expander => "/Controls/Expander.xaml";
     controls_fluent_controls => "/Controls/FluentControls.xaml";
     controls_flyout_presenter => "/Controls/FlyoutPresenter.xaml";
+    controls_font_icon => "/Controls/FontIcon.xaml";
     controls_grid_splitter => "/Controls/GridSplitter.xaml";
     controls_group_box => "/Controls/GroupBox.xaml";
     controls_headered_content_control => "/Controls/HeaderedContentControl.xaml";
     controls_hyperlink_button => "/Controls/HyperlinkButton.xaml";
+    controls_icon_resources => "/Controls/IconResources.xaml";
     controls_items_control => "/Controls/ItemsControl.xaml";
     controls_label => "/Controls/Label.xaml";
     controls_list_box => "/Controls/ListBox.xaml";
@@ -156,6 +158,7 @@ document_tests! {
     controls_slider => "/Controls/Slider.xaml";
     controls_split_button => "/Controls/SplitButton.xaml";
     controls_split_view => "/Controls/SplitView.xaml";
+    controls_symbol_icon => "/Controls/SymbolIcon.xaml";
     controls_tab_control => "/Controls/TabControl.xaml";
     controls_tab_item => "/Controls/TabItem.xaml";
     controls_tab_strip => "/Controls/TabStrip.xaml";

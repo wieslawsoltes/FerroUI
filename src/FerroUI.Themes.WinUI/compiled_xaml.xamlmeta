@@ -595,10 +595,10 @@
           "name": "Resources/ProgressBar_themeresources.xaml",
           "index": 62,
           "documents": ["Resources/ProgressBar_themeresources.xaml"],
-          "keys": ["ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundColor", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundColor", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight"],
+          "keys": ["ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundBrush", "ProgressBarErrorForegroundColor", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundBrush", "ProgressBarPausedForegroundColor", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight"],
           "type_keys": [],
           "references": ["AccentFillColorDefaultBrush", "ControlStrokeColorDefaultBrush", "ControlStrongStrokeColorDefault", "SystemColorHighlightColor", "SystemColorHotlightColor", "SystemColorWindowColor", "SystemColorWindowTextColor", "SystemFillColorCaution", "SystemFillColorCritical"],
-          "types": ["CornerRadius", "ResourceDictionary", "StaticResource", "Thickness"]
+          "types": ["CornerRadius", "ResourceDictionary", "SolidColorBrush", "StaticResource", "Thickness"]
         },
         {
           "name": "Resources/ProgressRing_themeresources.xaml",
@@ -867,7 +867,7 @@
           "documents": ["Controls/ProgressBar.xaml"],
           "keys": ["DefaultProgressBarStyle", "ProgressBarTextFormatConverter"],
           "type_keys": ["ProgressBar"],
-          "references": ["DefaultProgressBarStyle", "ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarTextFormatConverter", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight", "TextFillColorPrimaryBrush"],
+          "references": ["DefaultProgressBarStyle", "ProgressBarBackground", "ProgressBarBorderBrush", "ProgressBarBorderThemeThickness", "ProgressBarCornerRadius", "ProgressBarErrorForegroundBrush", "ProgressBarForeground", "ProgressBarMinHeight", "ProgressBarPausedForegroundBrush", "ProgressBarTextFormatConverter", "ProgressBarTrackCornerRadius", "ProgressBarTrackHeight", "TextFillColorPrimaryBrush"],
           "types": ["Animation", "Binding", "Border", "ControlTemplate", "ControlTheme", "Grid", "KeyFrame", "LayoutTransformControl", "MultiBinding", "ProgressBar", "ResourceDictionary", "Setter", "StringFormatConverter", "Style", "TemplateBinding", "TextBlock"]
         },
         {

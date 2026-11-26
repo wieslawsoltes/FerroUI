@@ -1689,6 +1689,31 @@ dependencies = [
 ]
 
 [[package]]
+name = "ferroui-controls-items-view"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-repeater",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+ "ferroui-themes-winui",
+]
+
+[[package]]
+name = "ferroui-controls-itemsview-default-namespace-tests"
+version = "0.6.0-preview.1"
+dependencies = [
+ "ferroui-base",
+ "ferroui-build",
+ "ferroui-controls",
+ "ferroui-controls-items-view",
+ "ferroui-markup-xaml",
+ "ferroui-markup-xaml-loader",
+]
+
+[[package]]
 name = "ferroui-controls-livecharts"
 version = "0.6.0-preview.1"
 dependencies = [
@@ -8044,11 +8069,12 @@ version = "0.6.0-preview.1"
 dependencies = [
  "ferroui-base",
  "ferroui-controls",
+ "ferroui-controls-charts",
  "ferroui-controls-color-picker",
  "ferroui-controls-flip-view",
  "ferroui-controls-icons",
  "ferroui-controls-inking",
- "ferroui-controls-livecharts",
+ "ferroui-controls-items-view",
  "ferroui-controls-password-box",
  "ferroui-controls-repeater",
  "ferroui-controls-split-menu",
