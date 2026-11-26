@@ -43,6 +43,10 @@ pub fn try_get_drawable_bitmap(bitmap: &dyn IBitmapImpl) -> Option<&dyn IDrawabl
     if let Some(bitmap) = any.downcast_ref::<crate::gpu::VelloSharedFrameBitmap>() {
         return Some(bitmap);
     }
+    #[cfg(feature = "hybrid-webgl")]
+    if let Some(bitmap) = any.downcast_ref::<crate::web_gl::VelloWebGlFrameBitmap>() {
+        return Some(bitmap);
+    }
 
     None
 }
