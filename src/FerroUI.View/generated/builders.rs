@@ -23,6 +23,19 @@ pub fn access_text() -> El<ferroui_controls::primitives::AccessText> {
     El::new()
 }
 
+pub use ferroui_controls::AnnotatedScrollBar;
+
+impl ViewClass for ferroui_controls::AnnotatedScrollBar {
+    fn create() -> ferroui_base::Ref<Self> {
+        <ferroui_controls::AnnotatedScrollBar>::new()
+    }
+}
+
+/// Starts an element of [`AnnotatedScrollBar`](ferroui_controls::AnnotatedScrollBar).
+pub fn annotated_scroll_bar() -> El<ferroui_controls::AnnotatedScrollBar> {
+    El::new()
+}
+
 pub use ferroui_controls::shapes::Arc;
 
 impl ViewClass for ferroui_controls::shapes::Arc {
@@ -2371,6 +2384,30 @@ pub trait AnimatorKeyFrameProps: ElementBuilder {
     }
 }
 impl<T: ObjectType + Upcast<ferroui_base::animation::AnimatorKeyFrame>> AnimatorKeyFrameProps for El<T> {}
+
+/// The properties and routed events of [`AnnotatedScrollBar`](ferroui_controls::AnnotatedScrollBar).
+pub trait AnnotatedScrollBarProps: ElementBuilder {
+    /// Sets [`AnnotatedScrollBar::labels_property`](ferroui_controls::AnnotatedScrollBar::labels_property).
+    fn labels<M>(self, value: impl IntoProp<Option<ferroui_base::collections::FerroList<ferroui_controls::AnnotatedScrollBarLabel>>, M>) -> Self {
+        self.prop(<ferroui_controls::AnnotatedScrollBar>::labels_property(), value)
+    }
+
+    /// Sets [`AnnotatedScrollBar::label_template_property`](ferroui_controls::AnnotatedScrollBar::label_template_property).
+    fn label_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::AnnotatedScrollBar>::label_template_property(), value)
+    }
+
+    /// Sets [`AnnotatedScrollBar::detail_label_template_property`](ferroui_controls::AnnotatedScrollBar::detail_label_template_property).
+    fn detail_label_template<M>(self, value: impl IntoProp<Option<std::rc::Rc<dyn ferroui_controls::templates::IDataTemplate>>, M>) -> Self {
+        self.prop(<ferroui_controls::AnnotatedScrollBar>::detail_label_template_property(), value)
+    }
+
+    /// Sets [`AnnotatedScrollBar::small_change_property`](ferroui_controls::AnnotatedScrollBar::small_change_property).
+    fn small_change<M>(self, value: impl IntoProp<f64, M>) -> Self {
+        self.prop(<ferroui_controls::AnnotatedScrollBar>::small_change_property(), value)
+    }
+}
+impl<T: ObjectType + Upcast<ferroui_controls::AnnotatedScrollBar>> AnnotatedScrollBarProps for El<T> {}
 
 /// The properties and routed events of [`Application`](ferroui_controls::Application).
 pub trait ApplicationProps: ElementBuilder {

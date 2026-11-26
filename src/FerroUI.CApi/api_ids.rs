@@ -5,10 +5,10 @@
 
 /// The fingerprint of the tables below ([`ferro_api_fingerprint`](crate::ferro_api_fingerprint)):
 /// a binding generated from the same model has the same one.
-pub(crate) const API_FINGERPRINT: i64 = -1904887529557804552;
+pub(crate) const API_FINGERPRINT: i64 = -5936562141264820810;
 
 /// The classes, by type ID.
-pub(crate) static TYPE_NAMES: [&str; 509] = [
+pub(crate) static TYPE_NAMES: [&str; 510] = [
     "AccessText",
     "AcrylicBrush",
     "AdaptiveTrigger",
@@ -18,6 +18,7 @@ pub(crate) static TYPE_NAMES: [&str; 509] = [
     "Animatable",
     "Animation",
     "AnimatorKeyFrame",
+    "AnnotatedScrollBar",
     "Application",
     "Arc",
     "ArcSegment",
@@ -521,7 +522,7 @@ pub(crate) static TYPE_NAMES: [&str; 509] = [
 ];
 
 /// The properties, by property ID (`Owner.Name` for an attached one).
-pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
+pub(crate) static PROPERTY_NAMES: [&str; 1062] = [
     "AcceptsExpression",
     "AcceptsReturn",
     "AcceptsTab",
@@ -738,6 +739,7 @@ pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
     "Design.Width",
     "DesiredSize",
     "DestinationRect",
+    "DetailLabelTemplate",
     "Direct",
     "Direction",
     "DisabledFormattingAccelerators",
@@ -1021,6 +1023,8 @@ pub(crate) static PROPERTY_NAMES: [&str; 1059] = [
     "KnobTransitions",
     "Label",
     "LabelPosition",
+    "LabelTemplate",
+    "Labels",
     "Language",
     "LargeChange",
     "LargeDisplayPicture",
