@@ -137,8 +137,10 @@ manifest. Cargo applies a patch only in the workspace that declares it:
   to the application (`FerroUI/external/rust-skia-bindings`). Nothing else is needed.
 - **An application built from the published crates** has to declare the patch itself, until a
   released `skia-bindings` carries the fix. The binding of the FerroUI release the application
-  uses is the one to take: copy `external/rust-skia-bindings` of that release into the application
-  (for example as `third_party/skia-bindings`) and name it in the root manifest:
+  uses is the one to take. Each release has it as a file of its GitHub release,
+  `skia-bindings-0.153.3-ferroui-<version>.tar.gz`, with a `.sha256` file beside it: check the
+  SHA-256, unpack it into `third_party/` (it unpacks as `skia-bindings/`), and name it in the root
+  manifest:
 
   ```toml
   [patch.crates-io]

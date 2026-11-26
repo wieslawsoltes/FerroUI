@@ -31,6 +31,9 @@ ferroui-headless-vnc = { path = "../../src/Headless/FerroUI.Headless.Vnc", defau
 control-catalog = { path = "../ControlCatalog" }
 ferroui-diagnostics = { workspace = true, optional = true }
 ferroui-vello = { workspace = true, optional = true, features = ["hybrid", "gpu"] }
+# Named only to turn on its 3D scenes (`media3d`) for the pages of the section "3D" of the catalog;
+# the backend itself comes with `ferroui-desktop/skia`.
+ferroui-skia = { workspace = true, optional = true }
 
 # The options of a smoke run on Windows (`FERROUI_SMOKE_RENDERING`).
 [target.'cfg(windows)'.dependencies]
@@ -67,7 +70,9 @@ ferroui-linuxframebuffer = { workspace = true }
 animation-probe = []
 startup-probe-allocations = ["animation-probe"]
 default = ["skia"]
-skia = ["ferroui-desktop/skia", "ferroui-headless-vnc/harfbuzz"]
+# With the 3D scenes of the pages of the section "3D" (`media3d`: the CPU reference of the scene
+# drawn as an image until the GPU executors of the Skia backend, docs/porting/media3d.md).
+skia = ["ferroui-desktop/skia", "ferroui-headless-vnc/harfbuzz", "dep:ferroui-skia", "ferroui-skia/media3d"]
 direct2d = ["ferroui-desktop/direct2d", "dep:ferroui-direct2d", "ferroui-media-windows/direct2d"]
 direct2d-media-test-fixtures = ["direct2d", "synthetic-camera"]
 direct2d-runtime-shaders = ["direct2d", "ferroui-direct2d/runtime-shaders"]
@@ -88,7 +93,9 @@ mcp = ["dep:ferroui-mcp", "dep:ferroui-headless"]
 cdp = ["dep:ferroui-devtools"]
 # The Vello render backend beside Skia: `FERROUI_RENDERER=vello` (the default order of its modes),
 # `vello-hybrid`, `vello-gpu` or `vello-cpu` then chooses it at start.
-vello = ["dep:ferroui-vello"]
+# With the 3D scenes of the pages of the section "3D", drawn on the GPU by its wgpu executor
+# (`media3d`).
+vello = ["dep:ferroui-vello", "ferroui-vello/media3d"]
 # The Vulkan rendering mode on Windows (`FERROUI_SMOKE_RENDERING=vulkan`): the feature `vulkan` of
 # the Windows backend, with which Skia is compiled from source (docs/porting/vulkan.md, section 2).
 # Elsewhere it changes nothing.

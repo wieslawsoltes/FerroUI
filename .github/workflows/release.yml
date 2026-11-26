@@ -169,3 +169,12 @@ jobs:
           # A version with a pre-release identifier is a preview.
           case "$VERSION" in *-*) options+=(--prerelease) ;; esac
           gh release create "v$VERSION" "${options[@]}"
+      # The patched Skia binding of this release, for applications built from the published crates
+      # (#622, docs/apps.md): the same bytes for the same commit, with its SHA-256.
+      - name: The patched Skia binding as a file of the release
+        env:
+          GH_TOKEN: ${{ github.token }}
+          VERSION: ${{ needs.verify.outputs.version }}
+        run: |
+          python3 scripts/release/skia_bindings_archive.py --write "$RUNNER_TEMP/skia-bindings"
+          gh release upload "v$VERSION" "$RUNNER_TEMP"/skia-bindings/* --repo "$GITHUB_REPOSITORY" --clobber
