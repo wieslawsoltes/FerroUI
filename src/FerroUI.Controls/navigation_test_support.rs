@@ -10,7 +10,10 @@
 use crate::presenters::ContentPresenter;
 use crate::primitives::{Popup, TemplatedControl};
 use crate::templates::{FuncControlTemplate, FuncTemplateNameScopeExtensions, IControlTemplate};
-use crate::testing::{add_template_theme, create_test_theme, TestServices, UnitTestApplication, UnitTestApplicationScope};
+use crate::testing::{
+    add_template_theme, create_test_theme, MockWindowImpl, MockWindowingPlatform, TestServices, UnitTestApplication,
+    UnitTestApplicationScope,
+};
 use crate::{
     Border, Button, ContentControl, Control, Grid, NavigationView, NavigationViewItem, NavigationViewItemHeader,
     NavigationViewItemSeparator, Panel, ScrollViewer, SplitView, StackPanel, TextBlock, Window,
@@ -18,7 +21,7 @@ use crate::{
 use ferroui_base::animation::{ClockBase, IClock, IGlobalClock, PlayState, SignedDuration};
 use ferroui_base::controls::NameScopeRef;
 use ferroui_base::data::{ReflectionBinding, RelativeSource, RelativeSourceMode, TemplateBinding};
-use ferroui_base::layout::Orientation;
+use ferroui_base::layout::{HorizontalAlignment, Layoutable, Orientation};
 use ferroui_base::media::{Geometry, GeometryHitTestResult};
 use ferroui_base::rendering::IHitTester;
 use ferroui_base::reactive::{IDisposable, IObservable, IObserver};
@@ -69,6 +72,15 @@ fn services() -> TestServices {
 pub(crate) fn start() -> UnitTestApplicationScope {
     crate::register_types();
     UnitTestApplication::start(services())
+}
+
+/// [`start`] with the windows of `window_impl` (the tests of the title bar).
+pub(crate) fn start_with_window_impl(window_impl: &Rc<MockWindowImpl>) -> UnitTestApplicationScope {
+    crate::register_types();
+    let window_impl = window_impl.clone();
+    UnitTestApplication::start(
+        services().with_windowing_platform(MockWindowingPlatform::with_window_impl(move || window_impl.clone())),
+    )
 }
 
 /// [`start`] with real keyboard focus.
@@ -342,6 +354,15 @@ pub(crate) fn navigation_view_template() -> Rc<dyn IControlTemplate> {
         content_grid.children().add(&content);
         split.set_content(Some(Control::boxed(content_grid)));
         root.children().add(&split);
+        // ShadowCaster, as wide as the open pane.
+        let caster = named(Grid::new(), "ShadowCaster").register_in_name_scope(&**scope);
+        Grid::set_row_span(&caster, 2);
+        caster.set_horizontal_alignment(HorizontalAlignment::Left);
+        caster.bind_binding(
+            Layoutable::width_property().as_property(),
+            &*templated_parent_binding("TemplateSettings.OpenPaneLength"),
+        );
+        root.children().add(&caster);
         root.children().add(&buttons);
         root.upcast::<Control>()
     })

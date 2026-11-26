@@ -7,6 +7,7 @@ use crate::automation::{AutomationProperties, SelectionPatternIdentifiers};
 use crate::items_source::{reference_equals, ItemsSource};
 use crate::navigation::NavigationTransitionInfo;
 use crate::navigation_view_events::*;
+use crate::navigation_view_pane_shadow::{PaneShadow, PANE_OVERLAY_SHADOW_DEPTH};
 use crate::navigation_view_top_overflow::primary_top_items;
 use crate::selection_indicator_animation::SelectionIndicatorAnimation;
 use crate::primitives::{
@@ -17,8 +18,10 @@ use crate::templates::{IControlTemplate, IDataTemplate};
 use crate::{
     AutoSuggestBox, Button, ContentControl, ContentControlImpl, Control, ControlImpl, ItemCollection, ItemsSourceView,
     NavigationViewItem, NavigationViewItemBase, SplitView, SplitViewDisplayMode, StackPanel, Symbol, SymbolIcon,
-    ToolTip,
+    ToolTip, TopLevel, Window, WindowState,
 };
+use ferroui_base::controls::ResourceKey;
+use ferroui_base::data::core::{ValueType, ValueTypes};
 use ferroui_base::data::BindingPriority;
 use ferroui_base::input::{
     InputElement, InputElementImpl, InputElementImplExt, Key, KeyEventArgs, KeyModifiers, NavigationMethod,
@@ -33,7 +36,7 @@ use ferroui_base::threading::{Dispatcher, DispatcherPriority};
 use ferroui_base::utilities::HandlerList;
 use ferroui_base::{
     ferro_class, ferro_class_info, ferro_impl_classes, ferro_properties, instantiate, BoxedValue, DirectProperty,
-    FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Ref, Size,
+    FerroObject, FerroObjectImpl, FerroObjectImplExt, FerroProperty, FerroPropertyChangedEventArgs, Point, Ref, Size,
     StyledElement, StyledElementImpl, StyledProperty, StyledPropertyOptions, Thickness, VisualImpl, VisualImplExt, VisualTreeAttachmentEventArgs, WeakRef,
 };
 use std::cell::{Cell, RefCell};
@@ -91,6 +94,7 @@ struct Parts {
     left_search: Option<Ref<ContentControl>>,
     top_search: Option<Ref<ContentControl>>,
     content_left_padding: Option<Ref<Control>>,
+    shadow_caster: Option<Ref<Control>>,
     buttons: Vec<(WeakRef<Button>, RoutedEventHandlerToken)>,
     subscriptions: Vec<Rc<dyn IDisposable>>,
 }
@@ -161,9 +165,11 @@ impl Parts {
 /// the selected item stays in the pane, and an item selected in the menu moves into the pane.
 ///
 /// The menu items are realized in stack panels, not in `ItemsRepeater`s with a hierarchical
-/// `SelectionModel` (follow-up F1). Missing (docs/porting/winui-controls.md, section 10.4): the
-/// animations of the pane, the
-/// shadow of the pane, the padding of the title bar, the shoulder navigation and the selectors of
+/// `SelectionModel` (follow-up F1). While the pane overlays the content, `ShadowCaster` casts its
+/// theme shadow and moves and fades with the pane by composition animations (`SetDropShadow`,
+/// `PaneOverlayGroup`); `TemplateSettings.TopPadding` keeps the panes clear of the title bar of a
+/// window extended into its decorations (`IsTitleBarAutoPaddingEnabled`). Missing
+/// (docs/porting/winui-controls.md, section 10.4): the shoulder navigation and the selectors of
 /// templates and styles.
 #[repr(C)]
 pub struct NavigationView {
@@ -187,6 +193,9 @@ pub struct NavigationView {
     syncing_selection: Cell<bool>,
     indicator_animation: SelectionIndicatorAnimation,
     indicator_layout: RefCell<Option<Subscription>>,
+    pane_shadow: PaneShadow,
+    /// The changes of the window's title bar (`OnTitleBarMetricsChanged`, `OnTitleBarIsVisibleChanged`).
+    title_bar: RefCell<Option<Rc<dyn IDisposable>>>,
     pending_invocation: RefCell<Option<Ref<NavigationViewItemBase>>>,
     pending_selection: Cell<bool>,
     pending_selection_revision: Cell<u64>,
@@ -255,6 +264,7 @@ ferro_class_info!(NavigationView {
             TemplatePart("PaneAutoSuggestBoxPresenter", type(Ref<ContentControl>)),
             TemplatePart("TopPaneAutoSuggestBoxPresenter", type(Ref<ContentControl>)),
             TemplatePart("ContentLeftPadding", type(Ref<Control>)),
+            TemplatePart("ShadowCaster", type(Ref<Control>)),
             PseudoClasses(":compact", ":expanded", ":minimal", ":top-navigation-minimal", ":minimal-with-back-button",
                 ":toggle-pane-button-visible", ":header-collapsed", ":auto-suggest-box-collapsed", ":closed-compact",
                 ":list-size-compact", ":pane-not-overlaying", ":back-button-collapsed", ":pane-collapsed",
@@ -393,6 +403,12 @@ ferro_properties! { impl NavigationView {
     pub fn selection_follows_focus_property() -> StyledProperty<NavigationViewSelectionFollowsFocus> {
         FerroProperty::register::<NavigationView, _>("SelectionFollowsFocus", NavigationViewSelectionFollowsFocus::Disabled)
     }
+    /// Defines the `IsTitleBarAutoPaddingEnabled` property: whether the panes keep clear of the
+    /// title bar of a window extended into its decorations (`TemplateSettings.TopPadding`). `true`
+    /// by default.
+    pub fn is_title_bar_auto_padding_enabled_property() -> StyledProperty<bool> {
+        FerroProperty::register::<NavigationView, _>("IsTitleBarAutoPaddingEnabled", true)
+    }
     /// Defines the `PaneTitle` property: the title of the pane.
     pub fn pane_title_property() -> StyledProperty<String> {
         FerroProperty::register::<NavigationView, _>("PaneTitle", String::new())
@@ -503,6 +519,8 @@ impl NavigationView {
             syncing_selection: Cell::new(false),
             indicator_animation: SelectionIndicatorAnimation::default(),
             indicator_layout: RefCell::new(None),
+            pane_shadow: PaneShadow::default(),
+            title_bar: RefCell::new(None),
             pending_invocation: RefCell::new(None),
             pending_selection: Cell::new(false),
             pending_selection_revision: Cell::new(0),
@@ -642,6 +660,12 @@ impl NavigationView {
     }
     pub fn set_selection_follows_focus(&self, value: NavigationViewSelectionFollowsFocus) {
         self.set_value(Self::selection_follows_focus_property(), value);
+    }
+    pub fn is_title_bar_auto_padding_enabled(&self) -> bool {
+        self.get_value(Self::is_title_bar_auto_padding_enabled_property())
+    }
+    pub fn set_is_title_bar_auto_padding_enabled(&self, value: bool) {
+        self.set_value(Self::is_title_bar_auto_padding_enabled_property(), value);
     }
     pub fn pane_title(&self) -> String {
         self.get_value(Self::pane_title_property())
@@ -909,6 +933,7 @@ impl FerroObjectImpl for NavigationView {
             || property == Self::compact_pane_length_property().as_property()
             || property == Self::menu_item_container_style_property().as_property()
             || property == Self::selection_follows_focus_property().as_property()
+            || property == Self::is_title_bar_auto_padding_enabled_property().as_property()
         {
             this.update_parts();
         }
@@ -930,6 +955,7 @@ impl LayoutableImpl for NavigationView {
             // for no template: the old parts are revoked first, so that a retained button or split
             // view cannot act on the control afterwards.
             this.indicator_animation.clear();
+            this.pane_shadow.set_caster(None);
             this.parts.take().detach();
             Self::parent_apply_template(this);
             *this.applied_template.borrow_mut() = template;
@@ -1007,8 +1033,10 @@ impl TemplatedControlImpl for NavigationView {
             left_search: scope.find_as("PaneAutoSuggestBoxPresenter"),
             top_search: scope.find_as("TopPaneAutoSuggestBoxPresenter"),
             content_left_padding: scope.find_as("ContentLeftPadding"),
+            shadow_caster: scope.find_as("ShadowCaster"),
             ..Parts::default()
         };
+        this.pane_shadow.set_caster(parts.shadow_caster.clone());
         // OnPaneToggleButtonClick, also of the close button.
         for button in [&parts.toggle, &parts.close].into_iter().flatten() {
             let weak = this.to_ref().downgrade();
@@ -1151,6 +1179,17 @@ impl NavigationView {
             self.list_size_compact.set(true);
         }
         self.update_parts();
+        // OnIsPaneOpenChanged: SetDropShadow or UnsetDropShadow, with a split view.
+        if self.parts.borrow().split.is_some() {
+            if open {
+                let mode = self.display_mode();
+                if matches!(mode, NavigationViewDisplayMode::Compact | NavigationViewDisplayMode::Minimal) {
+                    self.pane_shadow.set_drop_shadow(self.pane_overlay_shadow_depth());
+                }
+            } else {
+                self.pane_shadow.unset_drop_shadow();
+            }
+        }
         let handlers = if open { &self.pane_opened } else { &self.pane_closed };
         for (_, handler) in handlers.snapshot().iter() {
             handler();
@@ -1630,8 +1669,9 @@ impl NavigationView {
             header.set_margin(Thickness::new(offset, old.top, old.right, old.bottom));
         }
 
-        // UpdateTitleBarPadding: the toggle button (or the pane title holder) below the back button,
-        // or beside it in the overlay mode.
+        // UpdateTitleBarPadding: TopPadding, then the toggle button (or the pane title holder) below
+        // the back button, or beside it in the overlay mode.
+        self.update_title_bar_padding();
         let title_holder_visible = !self.update_pane_title_parents(&parts, top);
         // In the overlay mode the themes of the port place the toggle button (and the pane title
         // holder) in the second column of ButtonHolderGrid, beside the back or close button whatever
@@ -1689,6 +1729,13 @@ impl NavigationView {
         let overlaying = self.is_pane_open()
             && matches!(self.split_display_mode(), SplitViewDisplayMode::CompactOverlay | SplitViewDisplayMode::Overlay);
         classes.set(":pane-not-overlaying", !overlaying);
+        // The transitions of PaneOverlayGroup: ShadowCaster slides by the split view's
+        // NegativeOpenPaneLengthMinusCompactLength and fades.
+        let (open_length, closed_length) = match &parts.split {
+            Some(split) => (split.open_pane_length(), split.compact_pane_length()),
+            None => (settings.open_pane_length(), compact_length),
+        };
+        self.pane_shadow.update(overlaying, -(open_length - closed_length), self.is_loaded());
         classes.set(":back-button-collapsed", !show_back);
         classes.set(":pane-collapsed", !pane_visible);
         // The row of the back button of PaneContentGrid (c_backButtonRowDefinition): its height when
@@ -2403,18 +2450,91 @@ impl VisualImpl for NavigationView {
         *this.indicator_layout.borrow_mut() = Some(this.layout_updated(move || {
             if let Some(owner) = weak.upgrade() {
                 owner.update_selection_indicator();
+                // OnSizeChanged's UpdateTitleBarPadding: the padding depends on the position.
+                owner.update_title_bar_padding();
             }
         }));
+        // OnTitleBarMetricsChanged and OnTitleBarIsVisibleChanged: the title bar of the window.
+        if let Some(window) = TopLevel::get_top_level(Some(this)).and_then(|top| top.cast::<Window>()) {
+            let weak = this.to_ref().downgrade();
+            let subscription = window.property_changed(move |change| {
+                let property = change.property();
+                if property == Window::is_extended_into_window_decorations_property().as_property()
+                    || property == Window::window_decoration_margin_property().as_property()
+                    || property == Window::window_state_property().as_property()
+                {
+                    if let Some(owner) = weak.upgrade() {
+                        owner.update_title_bar_padding();
+                    }
+                }
+            });
+            if let Some(old) = this.title_bar.replace(Some(subscription)) {
+                old.dispose();
+            }
+        }
     }
 
     fn on_detached_from_visual_tree(this: &Self, e: &VisualTreeAttachmentEventArgs) {
         this.indicator_layout.take();
         this.indicator_animation.clear();
+        this.pane_shadow.clear();
+        if let Some(title_bar) = this.title_bar.take() {
+            title_bar.dispose();
+        }
         Self::parent_on_detached_from_visual_tree(this, e);
     }
 }
 
 impl NavigationView {
+    #[cfg(test)]
+    pub(crate) fn pane_shadow_is_running(&self) -> bool {
+        self.pane_shadow.is_running()
+    }
+
+    /// `UpdateTitleBarPadding`'s `TemplateSettings.TopPadding`: the height of the title bar of a
+    /// window extended into its decorations (`ExtendViewIntoTitleBar` and a visible title bar),
+    /// not in full screen, when the navigation view is at the top of the window and
+    /// `IsTitleBarAutoPaddingEnabled` is set; 0 otherwise. Changes below 0.1 are ignored, as in
+    /// WinUI.
+    fn update_title_bar_padding(&self) {
+        let padding = self.title_bar_top_padding();
+        let settings = &self.template_settings;
+        if (settings.top_padding() - padding).abs() > 0.1 {
+            settings.set(NavigationViewTemplateSettings::top_padding_property(), padding);
+        }
+    }
+
+    fn title_bar_top_padding(&self) -> f64 {
+        if !self.is_title_bar_auto_padding_enabled() {
+            return 0.0;
+        }
+        let Some(window) = TopLevel::get_top_level(Some(self)).and_then(|top| top.cast::<Window>()) else {
+            return 0.0;
+        };
+        if !window.is_extended_into_window_decorations() || window.window_state() == WindowState::FullScreen {
+            return 0.0;
+        }
+        let at_top = self
+            .transform_to_visual(&window)
+            .is_some_and(|transform| transform.transform(Point::new(0.0, 0.0)).y.abs() < 0.001);
+        if at_top {
+            window.window_decoration_margin().top.max(0.0)
+        } else {
+            0.0
+        }
+    }
+
+    /// `PaneOverlayShadowDepth` of the resources, `c_paneOverlayShadowDepth` without it.
+    fn pane_overlay_shadow_depth(&self) -> f64 {
+        let key = ResourceKey::from("PaneOverlayShadowDepth");
+        self.try_find_resource(&key, self.actual_theme_variant().as_ref())
+            .flatten()
+            .and_then(|value| ValueTypes::try_cast(&value, ValueType::of::<f64>()))
+            .and_then(|value| value.downcast_ref::<f64>().copied())
+            .filter(|depth| depth.is_finite())
+            .unwrap_or(PANE_OVERLAY_SHADOW_DEPTH)
+    }
+
     fn update_selection_indicator(&self) {
         let selected = self.container_from_menu_item(&self.selected_item());
         let entry = self.entries().into_iter().find(|entry| Some(&entry.container) == selected.as_ref());

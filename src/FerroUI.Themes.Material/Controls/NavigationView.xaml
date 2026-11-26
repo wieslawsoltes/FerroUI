@@ -36,9 +36,11 @@
     click and moves the items that do not fit into TopNavMenuItemsOverflowHost. OverflowLabelGroup
     is left out: the control has no OverflowLabelMode, and its NoLabel style differs only in the
     vertical alignment of the button.
-  - ShadowCaster and the transitions of PaneOverlayGroup (the shadow of the overlaying pane) are
-    left out (ThemeShadow, follow-up F3), as is the shadow of the flyout of the children of an
-    item. TitleBarVisibilityGroup (the title bar of an extended window) and PaneSeparatorStates (the
+  - ShadowCaster is a Grid without its CompositeTransform: the control sets its ThemeShadow and
+    elevation (SetDropShadow, UnsetDropShadow) and plays the transitions of PaneOverlayGroup and
+    ShadowCasterEaseOutStoryboard as composition animations of its offset and opacity, which also
+    give it the opacity 0 of PaneNotOverlaying. The shadow of the flyout of the children of an item
+    is left out. TitleBarVisibilityGroup (the title bar of an extended window) and PaneSeparatorStates (the
     separator of overflowing menu items) are left out: the controls never go to their states.
   - Grids with a BorderBrush and no BorderThickness (TopNavGrid, PaneContentGrid) draw nothing:
     the brush is left out. The ContentGrid of the content (border, background, corner radius) is a
@@ -470,6 +472,13 @@
                 </Grid>
               </Border>
             </SplitView>
+            <!-- The caster of the shadow of the overlaying pane (SetDropShadow): the control gives it
+                 its ThemeShadow and moves and fades it with the pane (PaneOverlayGroup). -->
+            <Grid x:Name="ShadowCaster"
+                  Grid.RowSpan="2"
+                  Width="{Binding TemplateSettings.OpenPaneLength, RelativeSource={RelativeSource TemplatedParent}}"
+                  HorizontalAlignment="Left"
+                  Opacity="0" />
           </Grid>
         </Grid>
       </ControlTemplate>
@@ -543,6 +552,9 @@
         <Setter Property="Width" Value="{Binding CompactPaneLength, RelativeSource={RelativeSource TemplatedParent}}" />
         <Setter Property="HorizontalAlignment" Value="Left" />
       </Style>
+      <Style Selector="^ /template/ Grid#ShadowCaster">
+        <Setter Property="Width" Value="{Binding CompactPaneLength, RelativeSource={RelativeSource TemplatedParent}}" />
+      </Style>
       <Style Selector="^ /template/ TextBlock#PaneTitleTextBlock">
         <Setter Property="IsVisible" Value="False" />
       </Style>
@@ -557,7 +569,9 @@
       </Style>
     </Style>
 
-    <!-- PaneOverlayGroup: PaneNotOverlaying (PaneOverlaying is the base; ShadowCaster is left out). -->
+    <!-- PaneOverlayGroup: PaneNotOverlaying (PaneOverlaying is the base). The opacity 0 of
+         ShadowCaster and the transitions of the group are set by the control, which animates them
+         on the compositor. -->
     <Style Selector="^:pane-not-overlaying /template/ SplitView#RootSplitView">
       <Setter Property="BorderBrush" Value="Transparent" />
       <Setter Property="PaneBackground" Value="{DynamicResource NavigationViewExpandedPaneBackground}" />
@@ -575,6 +589,9 @@
       </Style>
       <Style Selector="^ /template/ Grid#PaneToggleButtonGrid">
         <Setter Property="IsVisible" Value="False" />
+      </Style>
+      <Style Selector="^ /template/ Grid#ShadowCaster">
+        <Setter Property="Width" Value="0" />
       </Style>
     </Style>
 

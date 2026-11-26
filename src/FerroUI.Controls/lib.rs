@@ -401,6 +401,7 @@ pub use frame_page::{FramePage, FramePageImpl, FramePageImplExt, FramePageVTable
 mod navigation_view;
 mod navigation_view_events;
 mod navigation_view_item;
+mod navigation_view_pane_shadow;
 mod navigation_view_top_overflow;
 pub use navigation_view::NavigationView;
 pub use navigation_view_events::{
@@ -418,6 +419,8 @@ mod frame_tests;
 mod navigation_test_support;
 #[cfg(test)]
 mod navigation_view_item_tests;
+#[cfg(test)]
+mod navigation_view_pane_tests;
 #[cfg(test)]
 mod navigation_view_tests;
 #[cfg(test)]
