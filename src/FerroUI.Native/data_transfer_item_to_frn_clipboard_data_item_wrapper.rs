@@ -1,7 +1,7 @@
 use crate::clipboard_data_format_helper::to_native_format;
 use crate::frn_string::{FrnString, FrnStringArray};
 use crate::interop::*;
-use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, ClipboardMap};
+use ferroui_base::input::platform::chromium_clipboard::{ChromiumClipboard, ClipboardMap, MAP_ENABLED};
 use ferroui_base::input::{
     DataFormat, DataFormatKind, DataTransferItemExtensions, IDataTransferItem,
 };
@@ -37,7 +37,7 @@ impl DataTransferItemToFrnClipboardDataItemWrapper {
     /// the type of the stored value: a string is handed over as a string,
     /// bytes as bytes and a bitmap as its PNG encoding.
     fn get_value_core(&self, format: &str) -> Option<ComPtr<IFrnClipboardDataValue>> {
-        if let Some(map) = &self.web_map {
+        if let Some(map) = self.web_map.as_ref().filter(|_| MAP_ENABLED) {
             if format == ChromiumClipboard::MacOs.map_format().identifier() {
                 return Some(IFrnClipboardDataValue::from_impl(BytesValue(
                     map.bytes.clone(),
@@ -101,7 +101,7 @@ impl IFrnClipboardDataItemImpl for DataTransferItemToFrnClipboardDataItemWrapper
                 .filter(|f| f.kind() != DataFormatKind::InProcess)
                 .map(to_native_format)
                 .collect();
-            if let Some(map) = &self.web_map {
+            if let Some(map) = self.web_map.as_ref().filter(|_| MAP_ENABLED) {
                 native_formats.push(
                     ChromiumClipboard::MacOs
                         .map_format()
