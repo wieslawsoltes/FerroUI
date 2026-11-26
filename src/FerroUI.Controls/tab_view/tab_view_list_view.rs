@@ -94,6 +94,9 @@ impl ItemsControlImpl for TabViewListView {
         // OnContainerContentChanging: the content of the selected tab is shown again.
         if let Some(tab_view) = this.tab_view() {
             tab_view.update_tab_widths(true, true);
+            if let Some(tab) = container.cast::<TabViewItem>() {
+                tab_view.apply_tab_width(&tab);
+            }
             tab_view.update_tab_content();
         }
     }

@@ -166,6 +166,8 @@ pub struct TabView {
     tab_items: FerroList<Option<BoxedValue>>,
     parts: RefCell<TabViewParts>,
     previous_available_width: Cell<f64>,
+    /// The width `update_tab_widths` gave the tabs last, for a container prepared after it ran.
+    tab_width: Cell<f64>,
     pointer_in_tab_strip: Cell<bool>,
     update_tab_width_on_pointer_leave: Cell<bool>,
     /// Set while the selection of the list is copied to the properties, so that the copy does not
@@ -489,6 +491,7 @@ impl TabView {
             tab_items: FerroList::new(),
             parts: RefCell::new(TabViewParts::default()),
             previous_available_width: Cell::new(f64::NAN),
+            tab_width: Cell::new(f64::NAN),
             pointer_in_tab_strip: Cell::new(false),
             update_tab_width_on_pointer_leave: Cell::new(false),
             syncing_selection: Cell::new(false),
@@ -1151,12 +1154,20 @@ impl TabView {
             drop(parts);
         }
         if should_update_widths || self.tab_width_mode() != TabViewWidthMode::Equal {
+            self.tab_width.set(tab_width);
             for index in 0..self.get_item_count() {
                 if let Some(tab) = self.tab_at(index) {
                     tab.set_width(tab_width);
                 }
             }
         }
+    }
+
+    /// Gives a container that is being prepared the width of the tabs: the list registers it as
+    /// the container of its index only after it is prepared, so `update_tab_widths` cannot reach
+    /// it yet (WinUI sets it through the same call, where the container is already in the list).
+    pub(super) fn apply_tab_width(&self, tab: &TabViewItem) {
+        tab.set_width(self.tab_width.get());
     }
 
     // --- containers ---------------------------------------------------------------------------
