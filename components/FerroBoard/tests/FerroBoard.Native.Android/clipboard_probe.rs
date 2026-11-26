@@ -8,7 +8,10 @@ use ferroboard_core::{
     keys::KeyIcon,
 };
 use ferroui_android::log::{self, LogPriority};
-use ferroui_base::{Ref, threading::Dispatcher};
+use ferroui_base::{
+    Ref,
+    threading::{Dispatcher, DispatcherPriority},
+};
 use ferroui_controls::TextBox;
 use std::{cell::Cell, rc::Rc, sync::Arc};
 type ProbeResult<T> = Result<T, Box<dyn std::error::Error>>;
@@ -45,8 +48,8 @@ pub fn install(keyboard: &Ref<OnScreenKeyboard>, field: &Ref<TextBox>) {
                     let keyboard = keyboard.upgrade().expect("live probe keyboard");
                     let field = field.upgrade().expect("live probe field");
                     let busy = busy.clone();
-                    drop(Dispatcher::current_dispatcher().invoke_async_task_local(
-                        move || async move {
+                    drop(Dispatcher::current_dispatcher().spawn_local_with_priority(
+                        async move {
                             let result = if denied {
                                 denial(&keyboard).await
                             } else {
@@ -66,6 +69,7 @@ pub fn install(keyboard: &Ref<OnScreenKeyboard>, field: &Ref<TextBox>) {
                             }
                             busy.set(false);
                         },
+                        DispatcherPriority::DEFAULT,
                     ));
                     Ok(())
                 })),

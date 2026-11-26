@@ -19,7 +19,7 @@ use ferroui_base::{
         InputElement, InputMethod,
         text_input::{TextInputMethodClientRequestedEventArgs, TextSelection},
     },
-    threading::Dispatcher,
+    threading::{Dispatcher, DispatcherPriority},
 };
 use ferroui_controls::{Control, StackPanel, TextBlock, TextBox};
 use std::{cell::Cell, rc::Rc};
@@ -98,8 +98,8 @@ pub fn view() -> Ref<Control> {
                     let status = status.upgrade().expect("live test status");
                     let fields = fields.upgrade().expect("live test container");
                     let busy = busy.clone();
-                    drop(Dispatcher::current_dispatcher().invoke_async_task_local(
-                        move || async move {
+                    drop(Dispatcher::current_dispatcher().spawn_local_with_priority(
+                        async move {
                             let result = match name {
                                 "Verify" => verify(&keyboard, &password, &pin, &public).await,
                                 "Reveal" => reveal(&keyboard, &password),
@@ -116,6 +116,7 @@ pub fn view() -> Ref<Control> {
                             }
                             busy.set(false);
                         },
+                        DispatcherPriority::DEFAULT,
                     ));
                     Ok(())
                 })),
